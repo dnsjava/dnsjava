@@ -24,19 +24,25 @@ Command line programs:
 	A basic authoritative only (non-caching, non-recursive) server.  It's
 	not very good, but it's also a whole lot better than it used to be.
 
-	The config file (jnamed.conf by default) specifies
-	"primary zone file", "secondary zone address,
-	"cache file", "key name data", and "port number".
-	Where a file is specified, it is a DNS zone file.
+	The config file (jnamed.conf by default) supports the following
+	directives:
+		primary <zonename> <masterfile>
+		secondary <zonename> <IP address>
+		cache <hintfile>
+		key <name> <base 64 encoded secret>
+		address <IP address>
+		port <port number>
 
-	A config file looks like:
-	--
-	primary internal /etc/namedb/internal.db
-	secondary xbill.org 127.0.0.1
-	cache /etc/namedb/cache.db
-	port 12345
-	--
-	jnamed [config_file]
+	The following is an example:
+		primary internal /etc/namedb/internal.db
+		secondary xbill.org 127.0.0.1
+		cache /etc/namedb/cache.db
+		key xbill.org 1234
+		address 127.0.0.1
+		port 12345
+
+	To run:
+		jnamed [config_file]
 
 - lookup:
 	A simple program that looks up the address associated with a name.

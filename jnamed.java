@@ -19,7 +19,8 @@ Hashtable TSIGs;
 public
 jnamed(String conffile) throws IOException {
 	FileInputStream fs;
-	boolean started = false;
+	Vector ports = new Vector();
+	Vector addresses = new Vector();
 	try {
 		fs = new FileInputStream(conffile);
 	}
@@ -55,22 +56,33 @@ jnamed(String conffile) throws IOException {
 		}
 		else if (keyword.equals("key"))
 			addTSIG(st.nextToken(), st.nextToken());
-		else if (keyword.equals("port")) {
-			short port = Short.parseShort(st.nextToken());
-			addUDP(port);
-			addTCP(port);
-			started = true;
-		}
-		else {
+		else if (keyword.equals("port"))
+			ports.addElement(Short.valueOf(st.nextToken()));
+		else if (keyword.equals("address")) {
+			String addr = st.nextToken();
+			addresses.addElement(InetAddress.getByName(addr));
+		} else {
 			System.out.println("ignoring invalid keyword: " +
 					   keyword);
 		}
 
 	}
 
-	if (!started) {
-		addUDP((short) 53);
-		addTCP((short) 53);
+	if (ports.size() == 0)
+		ports.addElement(new Short((short)53));
+
+	if (addresses.size() == 0)
+		addresses.addElement(null);
+
+	Enumeration eaddr = addresses.elements();
+	while (eaddr.hasMoreElements()) {
+		InetAddress addr = (InetAddress) eaddr.nextElement();
+		Enumeration eport = ports.elements();
+		while (eport.hasMoreElements()) {
+			short port = ((Short)eport.nextElement()).shortValue();
+			addUDP(addr, port);
+			addTCP(addr, port);
+		}
 	}
 	System.out.println("running");
 }
@@ -537,9 +549,9 @@ errorMessage(Message query, short rcode) {
 }
 
 public void
-serveTCP(short port) {
+serveTCP(InetAddress addr, short port) {
 	try {
-		ServerSocket sock = new ServerSocket(port);
+		ServerSocket sock = new ServerSocket(port, 128, addr);
 		while (true) {
 			Socket s = sock.accept();
 			int inLength;
@@ -581,9 +593,9 @@ serveTCP(short port) {
 }
 
 public void
-serveUDP(short port) {
+serveUDP(InetAddress addr, short port) {
 	try {
-		DatagramSocket sock = new DatagramSocket(port);
+		DatagramSocket sock = new DatagramSocket(port, addr);
 		while (true) {
 			short udpLength = 512;
 			byte [] in = new byte[udpLength];
@@ -617,16 +629,18 @@ serveUDP(short port) {
 }
 
 public void
-addTCP(final short port) {
+addTCP(final InetAddress addr, final short port) {
 	Thread t;
-	t = new Thread(new Runnable() {public void run() {serveTCP(port);}});
+	t = new Thread(new Runnable() {
+			public void run() {serveTCP(addr, port);}});
 	t.start();
 }
 
 public void
-addUDP(final short port) {
+addUDP(final InetAddress addr, final short port) {
 	Thread t;
-	t = new Thread(new Runnable() {public void run() {serveUDP(port);}});
+	t = new Thread(new Runnable() {
+			public void run() {serveUDP(addr, port);}});
 	t.start();
 }
 
