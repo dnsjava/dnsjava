@@ -237,14 +237,14 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 		if (c == -1 || delimiters.indexOf(c) != -1) {
 			if (c == -1) {
 				if (quoting)
-					throw exception("newline in " +
+					throw exception("EOF in " +
 							"quoted string");
 				else if (sb.length() == 0)
 					return current.set(EOF, null);
 				else
 					return current.set(type, sb);
 			}
-			if (sb.length() == 0) {
+			if (sb.length() == 0 && type != QUOTED_STRING) {
 				if (c == '(') {
 					multiline++;
 					skipWhitespace();
@@ -280,7 +280,9 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 					if (wantComment) {
 						ungetChar(c);
 						return current.set(COMMENT, sb);
-					} else if (c == -1) {
+					} else if (c == -1 &&
+						   type != QUOTED_STRING)
+					{
 						checkUnbalancedParens();
 						return current.set(EOF, null);
 					} else if (multiline > 0) {
@@ -299,10 +301,12 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 			if (c == -1)
 				throw exception("unterminated escape sequence");
 			sb.append('\\');
+		} else if (quoting && c == '\n') {
+			throw exception("newline in quoted string");
 		}
 		sb.append((char)c);
 	}
-	if (sb.length() == 0) {
+	if (sb.length() == 0 && type != QUOTED_STRING) {
 		checkUnbalancedParens();
 		return current.set(EOF, null);
 	}
