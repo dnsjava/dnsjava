@@ -26,6 +26,7 @@ private static final int EXT_LABEL_BITSTRING = 1;
 private Object [] name;
 private byte labels;
 private boolean qualified;
+private int hashcode;
 
 /** The root name */
 public static final Name root = Name.fromConstantString(".");
@@ -423,7 +424,7 @@ isQualified() {
 /**
  * Appends the specified name to the end of the current Name
  */
-public void
+private void
 append(Name d) {
 	if (labels + d.labels > name.length)
 		grow(labels + d.labels);
@@ -624,6 +625,8 @@ equals(Object arg) {
  */
 public int
 hashCode() {
+	if (hashcode != 0)
+		return (hashcode);
 	int code = labels;
 	for (int i = 0; i < labels; i++) {
 		if (name[i] instanceof BitString) {
@@ -637,9 +640,19 @@ hashCode() {
 				code += ((code << 3) + lowercase[b[j]]);
 		}
 	}
-	return code;
+	hashcode = code;
+	return hashcode;
 }
 
+/**
+ * Compares this Name to another Object.
+ * @param The Object to be compared.
+ * @return The value 0 if the argument is a name equivalent to this name;
+ * a value less than 0 if the argument is less than this name in the canonical 
+ * ordering, and a value greater than 0 if the argument is greater than this
+ * name in the canonical ordering.
+ * @throws ClassCastException if the argument is not a String.
+ */
 public int
 compareTo(Object o) {
 	Name arg = (Name) o;
