@@ -30,6 +30,17 @@ RRset() {
 	securityStatus = DNSSEC.Insecure;
 }
 
+/** Creates an RRset with the contents of an existing RRset */
+public
+RRset(RRset rrset) {
+	synchronized (rrset) {
+		rrs = (List) ((ArrayList)rrset.rrs).clone();
+		if (rrset.sigs != null)
+			sigs = (List) ((ArrayList)rrset.sigs).clone();
+		securityStatus = rrset.securityStatus;
+	}
+}
+
 /** Adds a Record to an RRset */
 public synchronized void
 addRR(Record r) {
