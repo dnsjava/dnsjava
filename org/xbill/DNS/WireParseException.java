@@ -6,7 +6,7 @@ package org.xbill.DNS;
 import java.io.*;
 
 /**
- * Constants and functions relating to DNS message sections
+ * An exception thrown when a DNS message is invalid.
  *
  * @author Brian Wellington
  */
