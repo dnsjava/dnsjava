@@ -6,8 +6,9 @@ import java.util.*;
 
 /**
  * A set of Records with the same name, type, and class.  Also included
- * are all RRSIG records signing the data records.
+ * are all SIG/RRSIG records signing the data records.
  * @see Record
+ * @see SIGRecord 
  * @see RRSIGRecord 
  *
  * @author Brian Wellington
@@ -32,7 +33,7 @@ RRset() {
 /** Adds a Record to an RRset */
 public void
 addRR(Record r) {
-	if (r.getType() != Type.RRSIG) {
+	if (!(r instanceof SIGBase)) {
 		synchronized (rrs) {
 			if (!rrs.contains(r))
 				rrs.add(r);
@@ -50,7 +51,7 @@ addRR(Record r) {
 /** Deletes a Record from an RRset */
 public void
 deleteRR(Record r) {
-	if (r.getType() != Type.RRSIG) {
+	if (!(r instanceof SIGBase)) {
 		synchronized (rrs) {
 			rrs.remove(r);
 			start = 0;
