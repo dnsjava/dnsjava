@@ -2,7 +2,11 @@
     <property name="build_dir" value="${basedir}"/>
     <property name="src_dir" value="${basedir}"/>
     <property name="doc_dir" value="${basedir}/doc"/>
+    <property name="dist_dir" value="${basedir}"/>
     <property name="version" value="1.3.3"/>
+    <property jarname="version" value="dnsjava-${version}.jar"/>
+    <property zipname="version" value="dnsjava-${version}.zip"/>
+    <property targzname="version" value="dnsjava-${version}.tar.gz"/>
 
     <target name="all" description="Compile and Jar" depends="jar">
     </target>
@@ -22,8 +26,8 @@
     </target>
 
     <target name="jar" description="Makes dnsjava.jar" depends="compile">
-        <jar jarfile="${build_dir}/dnsjava-${version}.jar"
-             basedir="${build_dir}" includes="**/*.class"/>
+        <jar jarfile="${dist_dir}/${jarname}"
+             basedir="${dist_dir}" includes="**/*.class"/>
     </target>
 
     <target name="clean" description="Remove old class files">
