@@ -32,7 +32,7 @@ toArray(String s) {
 	numDigits = 0;
 	for (int i = 0; i < length; i++) {
 		char c = s.charAt(i);
-		if(c >= '0' && c <= '9') {
+		if (c >= '0' && c <= '9') {
 			/* Can't have more than 3 digits per octet. */
 			if (numDigits == 3)
 				return null;
