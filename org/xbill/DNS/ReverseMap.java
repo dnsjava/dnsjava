@@ -62,8 +62,8 @@ public static Name
 fromAddress(InetAddress addr) {
 	byte [] bytes = addr.getAddress();
 	int [] array = new int[4];
-	for (int i = 0; i < 3; i ++) {
-		array[i] = bytes[3 - i] & 0xFF;
+	for (int i = 0; i < 4; i ++) {
+		array[i] = bytes[i] & 0xFF;
 	}
 	return fromAddress(array);
 }
