@@ -127,9 +127,12 @@ update(InputStream in) throws IOException {
 				origin = Name.fromString(st.nextToken(),
 							 Name.root);
 
-			else if (operation.equals("zone"))
+			else if (operation.equals("zone")) {
 				zone = Name.fromString(st.nextToken(),
 						       Name.root);
+				if (origin == null)
+					origin = zone;
+			}
 
 			else if (operation.equals("require"))
 				doRequire(st);
