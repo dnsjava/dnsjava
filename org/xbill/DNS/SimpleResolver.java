@@ -270,7 +270,6 @@ send(Message query) throws IOException {
 		response.TSIGverified = ok;
 	}
 
-	s.close();
 	if (response.getHeader().getFlag(Flags.TC) && !ignoreTruncation)
 		return sendTCP(query, out);
 	else
