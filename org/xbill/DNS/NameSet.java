@@ -90,13 +90,11 @@ findSets(Name name, short type) {
 				return o;
 		}
 
-		/* Look for a CNAME */
-		o = nameInfo.get(Type.CNAME);
-		if (o != null) {
-			if (labels == tlabels)
+		/* If this is the name, look for a CNAME */
+		if (tlabels == labels) {
+			o = nameInfo.get(Type.CNAME);
+			if (o != null)
 				return o;
-			else
-				return null;
 		}
 
 		/* Look for a DNAME, unless this is the actual name */

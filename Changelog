@@ -1,3 +1,8 @@
+9/5/2002
+	- When looking for an rdataset in a zone or cache, seeing a CNAME
+	  above the name is not an error.
+	  (reported by Andrew Houghton <aah@volunteermatch.org>)
+
 8/31/2002
 	- Changed the code that dynamically loads record types; hopefully
 	  this will solve some of the mysterious problems that I think
