@@ -32,7 +32,7 @@ public class ByteArrayComparator implements Comparator {
 		byte [] b2 = (byte []) o2;
 		for (int i = 0; i < b1.length && i < b2.length; i++)
 			if (b1[i] != b2[i])
-				return b1[i] - b2[i];
+				return (b1[i] & 0xFF) - (b2[i] & 0xFF);
 		return b1.length - b2.length;
 	}
 }
