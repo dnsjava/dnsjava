@@ -25,6 +25,12 @@ write(byte b[]) throws IOException {
 }
 
 public void
+write(byte b[], int offset, int length) throws IOException {
+	out.write(b, offset, length);
+	counter += length;
+}
+
+public void
 writeByte(int i) throws IOException {
 	counter += 1;
 	out.writeByte((byte)i);

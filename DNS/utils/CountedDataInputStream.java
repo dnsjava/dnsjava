@@ -6,6 +6,7 @@ package DNS.utils;
 import java.io.InputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 
 public class CountedDataInputStream {
 
@@ -70,6 +71,14 @@ readString() throws IOException {
 	in.readFully(b);
 	counter+=len;
 	return new String(b);
+}
+
+public BigInteger
+readBigInteger(int len) throws IOException {
+	byte [] b = new byte[len + 1];
+	in.read(b, 1, len);
+	counter += len;
+	return new BigInteger(b);
 }
 
 public int
