@@ -130,7 +130,8 @@ maybeAddRecord(Record record, Cache cache, Object source) throws IOException {
 
 /**
  * Creates a Zone from the records in the specified master file.  All
- * records that do not belong in the Zone are added to the specified Cache.
+ * records that do not belong in the Zone are added to the specified Cache,
+ * if the Cache is not null.
  * @see Cache
  * @see Master
  */
@@ -150,7 +151,7 @@ Zone(String file, Cache cache, Name initialOrigin) throws IOException {
 
 /**
  * Creates a Zone from an array of records.  All records that do not belong
- * in the Zone are added to the specified Cache.
+ * in the Zone are added to the specified Cache, if the Cache is not null.
  * @see Cache
  * @see Master
  */
@@ -169,7 +170,8 @@ Zone(Record [] records, Cache cache, Name initialOrigin) throws IOException {
 
 /**
  * Creates a Zone from the records in the specified master file.  All
- * records that do not belong in the Zone are added to the specified Cache.
+ * records that do not belong in the Zone are added to the specified Cache,
+ * if the Cache is not null.
  * @see Cache
  * @see Master
  */
