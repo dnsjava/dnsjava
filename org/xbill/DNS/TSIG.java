@@ -65,21 +65,13 @@ apply(Message m, byte error, TSIGRecord old) {
 		timeSigned = new Date();
 	else
 		timeSigned = old.getTimeSigned();
-	short fudge;
+	int fudge;
 	hmacSigner h = null;
 	if (error == Rcode.NOERROR || error == Rcode.BADTIME)
 		h = new hmacSigner(key);
 
-	if (Options.check("tsigfudge")) {
-		String s = Options.value("tsigfudge");
-		try {
-			fudge = Short.parseShort(s);
-		}
-		catch (NumberFormatException e) {
-			fudge = FUDGE;
-		}
-	}
-	else
+	fudge = Options.intValue("tsigfudge");
+	if (fudge < 0 || fudge > 0x7FFF)
 		fudge = FUDGE;
 
 	if (old != null) {
@@ -105,7 +97,7 @@ apply(Message m, byte error, TSIGRecord old) {
 	int timeLow = (int) (time);
 	out.writeShort(timeHigh);
 	out.writeInt(timeLow);
-	out.writeShort(fudge);
+	out.writeShort((short)fudge);
 
 	out.writeShort(error);
 	out.writeShort(0); /* No other data */
@@ -130,9 +122,9 @@ apply(Message m, byte error, TSIGRecord old) {
 		other = out.toByteArray();
 	}
 
-	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
-				  signature, m.getHeader().getID(),
-				  error, other);
+	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned,
+				  (short)fudge, signature,
+				  m.getHeader().getID(), error, other);
 	m.addRecord(r, Section.ADDITIONAL);
 }
 
@@ -158,19 +150,11 @@ applyAXFR(Message m, TSIGRecord old, boolean first) {
 		return;
 	}
 	Date timeSigned = new Date();
-	short fudge;
+	int fudge;
 	hmacSigner h = new hmacSigner(key);
 
-	if (Options.check("tsigfudge")) {
-		String s = Options.value("tsigfudge");
-		try {
-			fudge = Short.parseShort(s);
-		}
-		catch (NumberFormatException e) {
-			fudge = FUDGE;
-		}
-	}
-	else
+	fudge = Options.intValue("tsigfudge");
+	if (fudge < 0 || fudge > 0x7FFF)
 		fudge = FUDGE;
 
 	DataByteOutputStream dbs = new DataByteOutputStream();
@@ -187,16 +171,16 @@ applyAXFR(Message m, TSIGRecord old, boolean first) {
 	int timeLow = (int) (time);
 	out.writeShort(timeHigh);
 	out.writeInt(timeLow);
-	out.writeShort(fudge);
+	out.writeShort((short)fudge);
 
 	h.addData(out.toByteArray());
 
 	byte [] signature = h.sign();
 	byte [] other = null;
 
-	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
-				  signature, m.getHeader().getID(),
-				  Rcode.NOERROR, other);
+	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned,
+				  (short)fudge, signature,
+				  m.getHeader().getID(), Rcode.NOERROR, other);
 	m.addRecord(r, Section.ADDITIONAL);
 }
 

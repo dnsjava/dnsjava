@@ -76,16 +76,10 @@ throws IOException, SignatureException, InvalidKeyException,
        NoSuchAlgorithmException
 {
 	
-	int validity = VALIDITY;
-	if (Options.check("sig0validity")) {
-		String s = Options.value("sig0validity");
-		try {
-			validity = Short.parseShort(s);
-		}
-		catch (NumberFormatException e) {
-		}
-	}
-	
+	int validity = Options.intValue("sig0validity");
+	if (validity < 0)
+		validity = VALIDITY;
+
 	long now = System.currentTimeMillis();
 	Date timeSigned = new Date(now);
 	Date timeExpires = new Date(now + validity * 1000);
