@@ -385,7 +385,22 @@ void
 doQuery(MyStringTokenizer st) throws IOException {
 	Record rec;
 
-	rec = parseSet(st, defaultClass);
+	Name name = null;
+	short type = Type.A, dclass = defaultClass;
+
+	name = new Name(st.nextToken());
+	if (st.hasMoreTokens()) {
+		type = Type.value(st.nextToken());
+		if (type < 0)
+			throw new IOException("Invalid type");
+		if (st.hasMoreTokens()) {
+			dclass = DClass.value(st.nextToken());
+			if (dclass < 0)
+				throw new IOException("Invalid class");
+		}
+	}
+
+	rec = Record.newRecord(name, type, dclass);
 	Message newQuery = Message.newQuery(rec);
 	if (res == null)
 		res = new SimpleResolver(server);
@@ -439,11 +454,28 @@ doAssert(MyStringTokenizer st) {
 	boolean flag = true;
 	int section;
 
+	if (response == null) {
+		print("No response has been received");
+		return true;
+	}
 	if (field.equalsIgnoreCase("rcode")) {
 		short rcode = response.getHeader().getRcode();
 		if (rcode != Rcode.value(expected)) {
 			value = Rcode.string(rcode);
 			flag = false;
+		}
+	}
+	else if (field.equalsIgnoreCase("serial")) {
+		Record [] answers = response.getSectionArray(Section.ANSWER);
+		if (answers.length < 1 || !(answers[0] instanceof SOARecord))
+			print("Invalid response (no SOA)");
+		else {
+			SOARecord soa = (SOARecord) answers[0];
+			int serial = soa.getSerial();
+			if (serial != new Integer(expected).intValue()) {
+				value = new Integer(serial).toString();
+				flag = false;
+			}
 		}
 	}
 	else if ((section = Section.value(field)) >= 0) {
@@ -542,8 +574,8 @@ helpOperations() {
 	  "    send\t\t" +
 	  "sends the update and resets the current query\n" +
 
-	  "    query <name> <type>\t" +
-	  "issues a query for this name and type\n" +
+	  "    query <name> <type> <class> \t" +
+	  "issues a query for this name, type, and class\n" +
 
 	  "    quit\t\t" +
 	  "quits the program\n" +
