@@ -333,10 +333,11 @@ fromConstantString(String s) {
  */
 public
 Name(DataByteInputStream in) throws IOException {
-	int len, pos, savedpos;
+	int len, pos, currentpos;
 	Name name2;
 	boolean done = false;
 	byte [] label = new byte[MAXLABEL + 1];
+	int savedpos = -1;
 
 	while (!done) {
 		len = in.readUnsignedByte();
@@ -359,24 +360,21 @@ Name(DataByteInputStream in) throws IOException {
 			if (Options.check("verbosecompression"))
 				System.err.println("currently " + in.getPos() +
 						   ", pointer to " + pos);
-			savedpos = in.getPos();
-			if (pos >= savedpos)
+
+			currentpos = in.getPos();
+			if (pos >= currentpos)
 				throw new WireParseException("bad compression");
+			if (savedpos == -1)
+				savedpos = currentpos;
 			in.setPos(pos);
 			if (Options.check("verbosecompression"))
 				System.err.println("current name '" + this +
 						   "', seeking to " + pos);
-			try {
-				name2 = new Name(in);
-			}
-			finally {
-				in.setPos(savedpos);
-			}
-			append(name2.name, 0, name2.labels());
-			done = true;
-			break;
+			continue;
 		}
 	}
+	if (savedpos != -1)
+		in.setPos(savedpos);
 }
 
 /**
