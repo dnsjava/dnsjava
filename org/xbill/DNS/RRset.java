@@ -10,24 +10,28 @@ public class RRset {
 
 private Vector rrs;
 private Vector sigs;
-private Name name;
-private short type;
 
-public RRset(Name _name, short _type) {
+public RRset() {
 	rrs = new Vector();
 	sigs = new Vector();
-	name = _name;
-	type = _type;
 }
 
 public void
 addRR(Record r) {
-	rrs.addElement(r);
+	if (r.getType() != Type.SIG) {
+		if (!rrs.contains(r))
+			rrs.addElement(r);
+	}
+	else {
+		if (!sigs.contains(r))
+			sigs.addElement(r);
+	}
 }
 
 public void
-addSIG(SIGRecord r) {
-	sigs.addElement(r);
+clear() {
+	rrs.setSize(0);
+	sigs.setSize(0);
 }
 
 public Enumeration
@@ -38,6 +42,18 @@ rrs() {
 public Enumeration
 sigs() {
 	return sigs.elements();
+}
+
+public Name
+getName() {
+	Record r =  (Record) rrs.elementAt(0);
+	return r.getName();
+}
+
+public short
+getType() {
+	Record r =  (Record) rrs.elementAt(0);
+	return r.getType();
 }
 
 public String
