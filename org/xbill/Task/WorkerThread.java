@@ -109,31 +109,39 @@ assignThread(Runnable task, String name) {
 }
 
 /** Performs the task */
-public synchronized void
+public void
 run() {
 	while (true) {
-		setName(name);
+		Runnable runnable;
+		synchronized (this) {
+			setName(name);
+			runnable = task;
+		}
 		try {
-			task.run();
+			runnable.run();
 		}
 		catch (Throwable t) {
 			System.err.println(t);
 		}
-		setName("idle thread");
-		synchronized (list) {
-			list.add(this);
-			list.notify();
-			nactive--;
-		}
-		task = null;
-		try {
-			wait(lifetime);
-		}
-		catch (InterruptedException e) {
-		}
-		if (task == null) {
-			list.remove(this);
-			return;
+		synchronized (this) {
+			setName("idle thread");
+			synchronized (list) {
+				list.add(this);
+				list.notify();
+				nactive--;
+			}
+			task = null;
+			try {
+				wait(lifetime);
+			}
+			catch (InterruptedException e) {
+			}
+			if (task == null) {
+				synchronized (list) {
+					list.remove(this);
+				}
+				return;
+			}
 		}
 	}
 }

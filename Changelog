@@ -1,3 +1,7 @@
+11/28/2002
+	- Fix a potential deadlock in the WorkerThread class.
+	  (found by Serge Sozonoff <serge@globalbeach.com>)
+
 11/26/2002
 	- Fix a bug where looking up names without trailing dots
 	  would fail if there was no searchlist.
