@@ -194,6 +194,9 @@ Zone(Name zone, short dclass, String remote, Cache cache) throws IOException {
 	Record rec = Record.newRecord(zone, Type.AXFR, dclass);
 	Message query = Message.newQuery(rec);
 	Message response = res.send(query);
+	short rcode = response.getHeader().getRcode();
+	if (rcode != Rcode.NOERROR)
+		throw new IOException("AXFR failed: " + Rcode.string(rcode));
 	Record [] recs = response.getSectionArray(Section.ANSWER);
 	for (int i = 0; i < recs.length; i++) {
 		if (!recs[i].getName().subdomain(origin)) {
