@@ -30,13 +30,13 @@ class QElement {
 }
 
 class Receiver implements ResolverListener {
-	Vector queue;
-	Hashtable idMap;
+	LinkedList queue;
+	Map idMap;
 
 	public
-	Receiver(Vector _queue, Hashtable _idMap) {
-		queue = _queue;
-		idMap = _idMap;
+	Receiver(LinkedList queue, Map idMap) {
+		this.queue = queue;
+		this.idMap = idMap;
 	}
 
 	public void
@@ -52,7 +52,7 @@ class Receiver implements ResolverListener {
 		}
 		synchronized (queue) {
 			QElement qe = new QElement(obj, r);
-			queue.addElement(qe);
+			queue.add(qe);
 			queue.notify();
 		}
 	}
@@ -79,14 +79,14 @@ private static final int quantum = 20;
 private static int uniqueID = 0;
 private static final Random random = new Random();
 
-private Vector resolvers;
+private List resolvers;
 private boolean loadBalance = false;
 private int lbStart = 0;
 private int retries = 3;
 
 private void
 init() {
-	resolvers = new Vector();
+	resolvers = new ArrayList();
 }
 
 /**
@@ -104,11 +104,11 @@ ExtendedResolver() throws UnknownHostException {
 		for (int i = 0; i < servers.length; i++) {
 			Resolver r = new SimpleResolver(servers[i]);
 			r.setTimeout(quantum);
-			resolvers.addElement(r);
+			resolvers.add(r);
 		}
 	}
 	else
-		resolvers.addElement(new SimpleResolver());
+		resolvers.add(new SimpleResolver());
 }
 
 /**
@@ -124,7 +124,7 @@ ExtendedResolver(String [] servers) throws UnknownHostException {
 	for (int i = 0; i < servers.length; i++) {
 		Resolver r = new SimpleResolver(servers[i]);
 		r.setTimeout(quantum);
-		resolvers.addElement(r);
+		resolvers.add(r);
 	}
 }
 
@@ -138,12 +138,12 @@ public
 ExtendedResolver(Resolver [] res) throws UnknownHostException {
 	init();
 	for (int i = 0; i < res.length; i++)
-		resolvers.addElement(res[i]);
+		resolvers.add(res[i]);
 }
 
 private void
-sendTo(Message query, Receiver receiver, Hashtable idMap, int r) {
-	Resolver res = (Resolver) resolvers.elementAt(r);
+sendTo(Message query, Receiver receiver, Map idMap, int r) {
+	Resolver res = (Resolver) resolvers.get(r);
 	synchronized (idMap) {
 		Object id = res.sendAsync(query, receiver);
 		if (Options.check("verbose"))
@@ -157,42 +157,42 @@ sendTo(Message query, Receiver receiver, Hashtable idMap, int r) {
 public void
 setPort(int port) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setPort(port);
+		((Resolver)resolvers.get(i)).setPort(port);
 }
 
 /** Sets whether TCP connections will be sent by default */
 public void
 setTCP(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setTCP(flag);
+		((Resolver)resolvers.get(i)).setTCP(flag);
 }
 
 /** Sets whether truncated responses will be returned */
 public void
 setIgnoreTruncation(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setIgnoreTruncation(flag);
+		((Resolver)resolvers.get(i)).setIgnoreTruncation(flag);
 }
 
 /** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
 public void
 setEDNS(int level) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setEDNS(level);
+		((Resolver)resolvers.get(i)).setEDNS(level);
 }
 
 /** Specifies the TSIG key that messages will be signed with */
 public void
 setTSIGKey(Name name, byte [] key) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setTSIGKey(name, key);
+		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
 }
 
 /** Specifies the TSIG key that messages will be signed with */
 public void
 setTSIGKey(String name, String key) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setTSIGKey(name, key);
+		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
 }
 
 /**
@@ -202,14 +202,14 @@ setTSIGKey(String name, String key) {
 public void
 setTSIGKey(String key) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setTSIGKey(key);
+		((Resolver)resolvers.get(i)).setTSIGKey(key);
 }
 
 /** Sets the amount of time to wait for a response before giving up */
 public void
 setTimeout(int secs) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.elementAt(i)).setTimeout(secs);
+		((Resolver)resolvers.get(i)).setTimeout(secs);
 }
 
 /**
@@ -226,8 +226,8 @@ send(Message query) throws IOException {
 	boolean [] invalid = new boolean[resolvers.size()];
 	byte [] sent = new byte[resolvers.size()];
 	byte [] recvd = new byte[resolvers.size()];
-	Vector queue = new Vector();
-	Hashtable idMap = new Hashtable();
+	LinkedList queue = new LinkedList();
+	Map idMap = new HashMap();
 	Receiver receiver = new Receiver(queue, idMap);
 
 	while (true) {
@@ -269,8 +269,8 @@ send(Message query) throws IOException {
 			}
 			if (queue.size() == 0)
 				continue;
-			qe = (QElement) queue.firstElement();
-			queue.removeElement(qe);
+			qe = (QElement) queue.getFirst();
+			queue.remove(qe);
 			if (qe.obj instanceof Message)
 				m = (Message) qe.obj;
 			else
@@ -329,29 +329,26 @@ sendAsync(final Message query, final ResolverListener listener) {
 public Resolver
 getResolver(int i) {
 	if (i < resolvers.size())
-		return (Resolver)resolvers.elementAt(i);
+		return (Resolver)resolvers.get(i);
 	return null;
 }
 
 /** Returns all resolvers used by this ExtendedResolver */
 public Resolver []
 getResolvers() {
-	Resolver [] res = new Resolver[resolvers.size()];
-	for (int i = 0; i < resolvers.size(); i++)
-		res[i] = (Resolver) resolvers.elementAt(i);
-	return res;
+	return (Resolver []) resolvers.toArray(new Resolver[resolvers.size()]);
 }
 
 /** Adds a new resolver to be used by this ExtendedResolver */
 public void
 addResolver(Resolver r) {
-	resolvers.addElement(r);
+	resolvers.add(r);
 }
 
 /** Deletes a resolver used by this ExtendedResolver */
 public void
 deleteResolver(Resolver r) {
-	resolvers.removeElement(r);
+	resolvers.remove(r);
 }
 
 /** Sets whether the servers should be load balanced.
