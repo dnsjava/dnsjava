@@ -11,7 +11,6 @@ import java.util.*;
  * noprintin - Don't print the class of a record if it's IN<BR>
  * pqdn - Allow partially qualified domain names<BR>
  * verbose - Turn on general debugging statements<BR>
- * verbosehmac - Print all data digested by the HMAC routines<BR>
  * verbosemsg - Print all messages sent or received by SimpleResolver<BR>
  * verbosecompression - Print messages related to name compression<BR>
  * verbosebitstring - Print messages related to bitstring labels<BR>

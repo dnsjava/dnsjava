@@ -31,11 +31,6 @@ public static final short FUDGE		= 300;
 private Name name, alg;
 private byte [] key;
 
-static {
-	if (Options.check("verbosehmac"))
-		hmacSigner.verbose = true;
-}
-
 /**
  * Creates a new TSIG object, which can be used to sign or verify a message.
  * @param name The name of the shared key
