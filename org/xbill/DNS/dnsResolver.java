@@ -7,6 +7,7 @@ public class dnsResolver {
 InetAddress addr;
 int port = dns.PORT;
 dnsTSIG TSIG;
+int timeoutValue = 60 * 1000;
 
 public dnsResolver(String hostname) {
 	try {
@@ -63,11 +64,19 @@ sendTCP(dnsMessage query, byte [] out) throws IOException {
 
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
+	s.setSoTimeout(timeoutValue);
 
-	dataIn = new DataInputStream(s.getInputStream());
-	inLength = dataIn.readUnsignedShort();
-	in = new byte[inLength];
-	dataIn.readFully(in);
+	try {
+		dataIn = new DataInputStream(s.getInputStream());
+		inLength = dataIn.readUnsignedShort();
+		in = new byte[inLength];
+		dataIn.readFully(in);
+	}
+	catch (InterruptedIOException e) {
+		s.close();
+		System.out.println(";; No response");
+		return null;
+	}
 
 	s.close();
 	dnsMessage response = new dnsMessage(in);
@@ -100,13 +109,21 @@ send(dnsMessage query) throws IOException {
 	s.send(new DatagramPacket(out, out.length, addr, port));
 
 	dp = new DatagramPacket(new byte[512], 512);
-	s.receive(dp);
+	s.setSoTimeout(timeoutValue);
+	try {
+		s.receive(dp);
+	}
+	catch (InterruptedIOException e) {
+		s.close();
+		System.out.println(";; No response");
+		return null;
+	}
 	in = new byte [dp.getLength()];
 	System.arraycopy(dp.getData(), 0, in, 0, in.length);
 	response = new dnsMessage(in);
 	if (TSIG != null) {
 		boolean ok = TSIG.verify(response, in, query.getTSIG());
-		System.out.println("TSIG verify: " + ok);
+		System.out.println(";; TSIG verify: " + ok);
 	}
 
 	s.close();
@@ -140,16 +157,24 @@ sendAXFR(dnsMessage query) throws IOException {
 	out = query.toBytes();
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
+	s.setSoTimeout(timeoutValue);
 
 	response = new dnsMessage();
 	response.getHeader().setID(query.getHeader().getID());
 	if (TSIG != null)
 		TSIG.verifyAXFRStart();
 	while (soacount < 2) {
-		dataIn = new DataInputStream(s.getInputStream());
-		inLength = dataIn.readUnsignedShort();
-		in = new byte[inLength];
-		dataIn.readFully(in);
+		try {
+			dataIn = new DataInputStream(s.getInputStream());
+			inLength = dataIn.readUnsignedShort();
+			in = new byte[inLength];
+			dataIn.readFully(in);
+		}
+		catch (InterruptedIOException e) {
+			s.close();
+			System.out.println(";; No response");
+			return null;
+		}
 		dnsMessage m = new dnsMessage(in);
 		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
 		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
@@ -168,6 +193,7 @@ sendAXFR(dnsMessage query) throws IOException {
 				System.out.println();
 			}
 			System.out.println(sb.toString());
+			s.close();
 			return null;
 		}
 		for (int i = 1; i < 4; i++) {

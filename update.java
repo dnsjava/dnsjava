@@ -21,6 +21,8 @@ static void doUpdate(dnsMessage query, dnsResolver res) throws IOException {
 	dnsMessage response;
 
 	response = res.send(query);
+	if (response == null)
+		return;
 
 	System.out.print(";; ->>HEADER<<- ");
 	System.out.print("opcode: ");

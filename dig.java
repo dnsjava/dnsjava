@@ -17,6 +17,8 @@ static void doQuery(dnsMessage query, dnsResolver res) throws IOException {
 	System.out.println("; java dig 0.0");
 
 	response = res.send(query);
+	if (response == null)
+		return;
 
 	System.out.print(";; ->>HEADER<<- ");
 	System.out.print("opcode: ");
@@ -72,7 +74,6 @@ static void doAXFR(dnsMessage query, dnsResolver res) throws IOException {
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
 
 	response = res.sendAXFR(query);
-
 	if (response == null)
 		return;
 
