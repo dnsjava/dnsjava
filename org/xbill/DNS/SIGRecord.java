@@ -45,8 +45,9 @@ void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
 	expire = new Date (1000 * (long)in.readInt());
 	timeSigned = new Date (1000 * (long)in.readInt());
 	footprint = (short) in.readUnsignedShort();
+	int pos = in.pos();
 	signer = new dnsName(in, c);
-	signature = new byte[rlength - 18 - signer.length()];
+	signature = new byte[rlength - 18 - (in.pos() - pos)];
 	in.read(signature);
 }
 

@@ -10,7 +10,7 @@ public dnsNXTRecord(dnsName rname, short rclass) {
 	super(rname, dns.NXT, rclass);
 }
 
-public dnsNXTRecord(dnsName rname, short rclass, dnsName next,
+public dnsNXTRecord(dnsName rname, short rclass, dnsName nextName,
 		    boolean [] typeBitmap)
 {
 	this(rname, rclass);
@@ -21,8 +21,9 @@ public dnsNXTRecord(dnsName rname, short rclass, dnsName next,
 }
 
 void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
+	int pos = in.pos();
 	nextName = new dnsName(in, c);
-	int bitmapLength = rlength - nextName.length();
+	int bitmapLength = rlength - (in.pos() - pos);
 	typeBitmap = new boolean[bitmapLength * 8];
 	for (int i = 0; i < bitmapLength; i++) {
 		int t = in.readUnsignedByte();
@@ -57,6 +58,8 @@ String rrToString() {
 	if (rlength == 0)
 		return null;
 	StringBuffer sb = new StringBuffer();
+	sb.append(nextName.toString());
+	sb.append(" ");
 	for (int i = 0; i < typeBitmap.length; i++)
 		if (typeBitmap[i]) {
 			sb.append(dns.typeString(i));
