@@ -46,12 +46,16 @@ private static void
 addServer(String server, List list) {
 	if (list.contains(server))
 		return;
+	if (Options.check("verbose"))
+		System.out.println("adding server " + server);
 	list.add(server);
 }
 
 private static void
 addSearch(String search, List list) {
 	Name name;
+	if (Options.check("verbose"))
+		System.out.println("adding search " + search);
 	try {
 		name = Name.fromString(search, Name.root);
 	}
@@ -168,17 +172,22 @@ findWin(InputStream in) {
 	BufferedReader br = new BufferedReader(new InputStreamReader(in));
 	try {
 		List lserver = new ArrayList();
+		List lsearch = new ArrayList();
 		String line = null;
 		boolean readingServers = false;
+		boolean readingSearches = false;
 		while ((line = br.readLine()) != null) {
 			StringTokenizer st = new StringTokenizer(line);
 			if (!st.hasMoreTokens()) {
 				readingServers = false;
+				readingSearches = false;
 				continue;
 			}
 			String s = st.nextToken();
-			if (line.indexOf(":") != -1)
+			if (line.indexOf(":") != -1) {
 				readingServers = false;
+				readingSearches = false;
+			}
 			
 			if (line.indexOf("Host Name") != -1) {
 				while (st.hasMoreTokens())
@@ -192,13 +201,23 @@ findWin(InputStream in) {
 				}
 				if (name.labels() == 1)
 					continue;
-				name = Name.concatenate(new Name(name, 1),
-							Name.root);
-				if (searchlist == null)
-					searchlist = new Name[] {name};
-			}
-			else if (readingServers ||
-				 line.indexOf("DNS Servers") != -1)
+				addSearch(s, lsearch);
+			} else if (line.indexOf("Primary Dns Suffix") != -1) {
+				while (st.hasMoreTokens())
+					s = st.nextToken();
+				if (s.equals(":"))
+					continue;
+				addSearch(s, lsearch);
+			} else if (readingSearches ||
+				   line.indexOf("DNS Suffix") != -1)
+			{
+				while (st.hasMoreTokens())
+					s = st.nextToken();
+				if (s.equals(":"))
+					continue;
+				addSearch(s, lsearch);
+			} else if (readingServers ||
+				   line.indexOf("DNS Servers") != -1)
 			{
 				while (st.hasMoreTokens())
 					s = st.nextToken();
