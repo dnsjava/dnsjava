@@ -1,3 +1,8 @@
+7/14/2003
+	- Fix a long-existing bug where empty records (in update messages)
+	  were incorrectly handled
+	  (reported by Kevin C Miller <kevinm@andrew.cmu.edu>
+
 6/22/2003
 	- DNS types and classes are now represented as ints, not shorts.
 	  This is an API change, but allows the full type/class range

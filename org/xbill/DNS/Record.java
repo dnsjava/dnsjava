@@ -21,6 +21,7 @@ public abstract class Record implements Cloneable, Comparable {
 protected Name name;
 protected int type, dclass;
 protected int ttl;
+private boolean empty;
 
 private static final Record [] knownRecords = new Record[256];
 private static final Class [] emptyClassArray = new Class[0];
@@ -96,13 +97,16 @@ newRecord(Name name, int type, int dclass, int ttl, int length,
 {
 	Record rec;
 	int recstart;
+	rec = getTypedObject(type);
 	if (in == null)
 		recstart = 0;
 	else
 		recstart = in.getPos();
 
-	rec = getTypedObject(type);
 	rec = rec.rrFromWire(name, type, dclass, ttl, length, in);
+	if (in == null) {
+		rec.empty = true;
+	}
 	if (in != null && in.getPos() - recstart != length)
 		throw new IOException("Invalid record length");
 	return rec;
@@ -225,7 +229,8 @@ toWire(DataByteOutputStream out, int section, Compression c) {
 	out.writeInt(ttl);
 	int lengthPosition = out.getPos();
 	out.writeShort(0); /* until we know better */
-	rrToWire(out, c, false);
+	if (!empty)
+		rrToWire(out, c, false);
 	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
 }
 
@@ -297,8 +302,10 @@ toString() {
 		sb.append("\t");
 	}
 	sb.append(Type.string(type));
-	sb.append("\t");
-	sb.append(rdataToString());
+	if (!empty) {
+		sb.append("\t");
+		sb.append(rdataToString());
+	}
 	return sb.toString();
 }
 
