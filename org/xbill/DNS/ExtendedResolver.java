@@ -205,8 +205,12 @@ private static class Resolution implements ResolverListener {
 				 */
 				thrown = e;
 			}
+			if (done)
+				return;
 			if (startnext)
 				send(n + 1);
+			if (done)
+				return;
 			if (outstanding == 0) {
 				/*
 				 * If we're done and this is synchronous,
