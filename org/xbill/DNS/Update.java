@@ -219,7 +219,7 @@ delete(Name name, int type, Tokenizer tokenizer) throws IOException {
  */
 public void
 delete(Record record) {
-	newUpdate(record.withDClass(DClass.NONE));
+	newUpdate(record.withDClass(DClass.NONE, 0));
 }
 
 /**

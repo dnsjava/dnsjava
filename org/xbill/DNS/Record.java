@@ -583,12 +583,13 @@ withName(Name name) {
 
 /**
  * Creates a new record identical to the current record, but with a different
- * class.  This is most useful for dynamic update.
+ * class and ttl.  This is most useful for dynamic update.
  */
 Record
-withDClass(int dclass) {
+withDClass(int dclass, int ttl) {
 	Record rec = cloneRecord();
 	rec.dclass = dclass;
+	rec.ttl = 0;
 	return rec;
 }
 
