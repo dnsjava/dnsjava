@@ -80,6 +80,15 @@ setResolver(Resolver _res) {
 }
 
 /**
+ * Obtains the Resolver used by functions in the dns class.  This can be used
+ * to set Resolver properties.
+ */
+public static Resolver
+getResolver() {
+	return res;
+}
+
+/**
  * Specifies the domains which will be appended to unqualified names before
  * beginning the lookup process.  If this is not set, FindServer will be used.
  * @see FindServer
@@ -95,6 +104,16 @@ setSearchPath(String [] domains) {
 	}
 	searchPathSet = true;
 }
+
+/**
+ * Obtains the Cache used by functions in the dns class.  This can be used
+ * to perform more specific queries and/or remove elements.
+ */
+public static Cache
+getCache() {
+	return cache;
+}
+
 
 private static Record []
 lookup(Name name, short type, short dclass, byte cred) {
