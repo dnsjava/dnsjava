@@ -114,7 +114,12 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 
 /**
  * Creates a new record, with the given parameters.
- * @return An object of a type extending Record
+ * @param name The owner name of the record.
+ * @param type The record's type.
+ * @param dclass The record's class.
+ * @param ttl The record's time to live.
+ * @param length The length of the record's data.
+ * @param data The rdata of the record, in uncompressed DNS wire format.
  */
 public static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
