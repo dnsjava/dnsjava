@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.util.*;
 
 /**
  * A DNS master file parser.  This incrementally parses the file, returning
@@ -25,6 +26,8 @@ private int currentDClass;
 private long currentTTL;
 
 private Generator generator;
+private List generators;
+private boolean noExpandGenerate;
 
 Master(File file, Name initialOrigin, long initialTTL) throws IOException {
 	if (origin != null && !origin.isAbsolute()) {
@@ -228,6 +231,9 @@ startGenerate() throws IOException {
 	generator = new Generator(start, end, step, nameSpec,
 				  currentType, currentDClass, currentTTL,
 				  rdataSpec, origin);
+	if (generators == null)
+		generators = new ArrayList(1);
+	generators.add(generator);
 }
 
 private void
@@ -329,6 +335,10 @@ _nextRecord() throws IOException {
 					throw new IllegalStateException
 						("cannot nest $GENERATE");
 				startGenerate();
+				if (noExpandGenerate) {
+					endGenerate();
+					continue;
+				}
 				return nextGenerated();
 			} else {
 				throw st.exception("Invalid directive: " + s);
@@ -367,6 +377,30 @@ nextRecord() throws IOException {
 		}
 	}
 	return rec;
+}
+
+/**
+ * Specifies whether $GENERATE statements should be expanded.  Whether
+ * expanded or not, the specifications for generated records are available
+ * by calling {@link #iterator}.  This must be called before a $GENERATE
+ * statement is seen during iteration to have an effect.
+ */
+public void
+expandGenerate(boolean wantExpand) {
+	noExpandGenerate = !wantExpand;
+}
+
+/**
+ * Returns an iterator over the generators specified in the master file; that
+ * is, the parsed contents of $GENERATE statements.
+ * @see Generator.
+ */
+public Iterator
+generators() {
+	if (generators != null)
+		return Collections.unmodifiableList(generators).iterator();
+	else
+		return Collections.EMPTY_LIST.iterator();
 }
 
 protected void
