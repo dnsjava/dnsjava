@@ -1,3 +1,6 @@
+10/6/2002
+	- Fix minor bugs in Name code (Bob Halley <bob.halley@nominum.com>)
+	  
 10/1/2002
 	- Memory usage and speed improvements to the TypeMap class.
 

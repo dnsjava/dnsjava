@@ -251,8 +251,11 @@ fromString(String s, Name origin) throws TextParseException {
 		if (escaped) {
 			if (b >= '0' && b <= '9' && digits < 3) {
 				digits++;
-				intval *= 10 + (b - '0');
+				intval *= 10;
 				intval += (b - '0');
+				if (intval > 255)
+					throw new TextParseException
+								("bad escape");
 				if (digits < 3)
 					continue;
 				b = (byte) intval;
