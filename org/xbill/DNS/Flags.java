@@ -59,7 +59,7 @@ string(int i) {
 	if ((i >= 1 && i <= 4) || (i >= 12 && i <= 15))
 		return null;
 	String s = flags.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /** Converts a String representation of an Flag into its numeric value */

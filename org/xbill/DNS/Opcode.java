@@ -47,7 +47,7 @@ Opcode() {}
 public static String
 string(int i) {
 	String s = opcodes.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /** Converts a String representation of an Opcode into its numeric value */

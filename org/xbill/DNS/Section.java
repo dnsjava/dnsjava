@@ -65,14 +65,14 @@ Section() {}
 public static String
 string(int i) {
 	String s = sections.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /** Converts a numeric Section into a full description String */
 public static String
 longString(int i) {
 	String s = longSections.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /**
@@ -82,7 +82,7 @@ longString(int i) {
 public static String
 updString(int i) {
 	String s = updSections.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /** Converts a String representation of a Section into its numeric value */

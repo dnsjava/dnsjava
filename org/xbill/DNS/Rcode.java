@@ -93,7 +93,7 @@ Rcode() {}
 public static String
 string(int i) {
 	String s = rcodes.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /** Converts a numeric TSIG extended Rcode into a String */
@@ -103,7 +103,7 @@ TSIGstring(int i) {
 	if (s != null)
 		return s;
 	s = rcodes.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : Integer.toString(i);
 }
 
 /** Converts a String representation of an Rcode into its numeric value */
