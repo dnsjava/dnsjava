@@ -203,8 +203,20 @@ findRecords(Name name, short type) {
 	if (findName(name) == null) {
 		if (name.isWild())
 			return new SetResponse(SetResponse.NXDOMAIN);
-		else
-			return findRecords(name.wild(1), type);
+		else {
+			int labels = name.labels() - origin.labels();
+			if (labels == 0)
+				return new SetResponse(SetResponse.NXDOMAIN);
+			SetResponse sr;
+			Name tname = name;
+			do {
+				sr = findRecords(tname.wild(1), type);
+				if (sr.isSuccessful())
+					return sr;
+				tname = new Name(tname, 1);
+			} while (labels-- >= 1);
+			return sr;
+		}
 	}
 	Object [] objects = findSets(name, type, dclass);
 	if (objects == null)
