@@ -41,7 +41,7 @@ initialize() {
 			setResolver(new ExtendedResolver());
 		}
 		catch (UnknownHostException uhe) {
-			System.out.println("Failed to initialize resolver");
+			System.err.println("Failed to initialize resolver");
 			System.exit(-1);
 		}
 	}
@@ -142,9 +142,11 @@ lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
 	int answerCount = 0, n = 0;
 	Enumeration e;
 
-/*System.out.println("lookup of " + name + " " + Type.string(type));*/
+	if (Options.check("verboselookup"))
+		System.err.println("lookup " + name + " " + Type.string(type));
 	SetResponse cached = cache.lookupRecords(name, type, dclass, cred);
-/*System.out.println(cached);*/
+	if (Options.check("verboselookup"))
+		System.err.println(cached);
 	if (cached.isSuccessful()) {
 		RRset [] rrsets = cached.answers();
 		answerCount = 0;

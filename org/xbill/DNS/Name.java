@@ -127,14 +127,13 @@ Name(String s, Name origin) {
 	}
 	catch (ArrayIndexOutOfBoundsException e) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("String ");
 		sb.append(s);
 		if (origin != null) {
 			sb.append(".");
 			sb.append(origin);
 		}
 		sb.append(" has too many labels");
-		System.out.println(sb.toString());
+		System.err.println(sb.toString());
 		name = null;
 		labels = 0;
 	}
@@ -173,7 +172,9 @@ loop:
 			int pos = in.readUnsignedByte();
 			pos += ((len & ~LABEL_MASK) << 8);
 			Name name2 = (c == null) ? null : c.get(pos);
-/*System.out.println("Looking for name at " + pos + ", found " + name2);*/
+			if (Options.check("verbosecompression"))
+				System.err.println("Looking at " + pos +
+						   ", found " + name2);
 			if (name2 == null)
 				throw new WireParseException("bad compression");
 			else {
@@ -190,7 +191,10 @@ loop:
 			case EXT_LABEL_COMPRESSION:
 				int pos = in.readUnsignedShort();
 				Name name2 = (c == null) ? null : c.get(pos);
-/*System.out.println("Looking for name at " + pos + ", found " + name2);*/
+				if (Options.check("verbosecompression"))
+					System.err.println("Looking at " +
+							   pos + ", found " +
+							   name2);
 				if (name2 == null)
 					throw new WireParseException(
 							"bad compression");
@@ -228,7 +232,9 @@ loop:
 		for (int i = 0, pos = start; i < count; i++) {
 			Name tname = new Name(this, i);
 			c.add(pos, tname);
-/*System.out.println("(D) Adding " + tname + " at " + pos);*/
+			if (Options.check("verbosecompression"))
+				System.err.println("Adding " + tname +
+						   " at " + pos);
 			if (name[i] instanceof String)
 				pos += (((String)name[i]).length() + 1);
 			else
@@ -353,7 +359,9 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 			pos = c.get(tname);
 		else
 			pos = -1;
-/*System.out.println("Looking for compressed " + tname + ", found " + pos);*/
+		if (Options.check("verbosecompression"))
+			System.err.println("Looking for " + tname +
+					   ", found " + pos);
 		if (pos >= 0) {
 			pos |= (LABEL_MASK << 8);
 			out.writeShort(pos);
@@ -362,7 +370,9 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 		else {
 			if (c != null)
 				c.add(out.getPos(), tname);
-/*System.out.println("(C) Adding " + tname + " at " + out.getPos());*/
+			if (Options.check("verbosecompression"))
+				System.err.println("Adding " + tname +
+						   " at " + out.getPos());
 			if (name[i] instanceof String)
 				out.writeString((String)name[i]);
 			else {

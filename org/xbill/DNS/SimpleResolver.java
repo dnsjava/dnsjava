@@ -96,7 +96,7 @@ public void
 setTSIGKey(String name, String key) {
 	byte [] keyArray = base64.fromString(key);
 	if (keyArray == null) {
-		System.out.println("Invalid TSIG key string");
+		System.err.println("Invalid TSIG key string");
 		return;
 	}
 	tsig = new TSIG(name, keyArray);
@@ -113,7 +113,7 @@ setTSIGKey(String key) {
 		name = InetAddress.getLocalHost().getHostName();
 	}
 	catch (UnknownHostException e) {
-		System.out.println("getLocalHost failed");
+		System.err.println("getLocalHost failed");
 		return;
 	}
 	setTSIGKey(name, key);
@@ -151,7 +151,8 @@ sendTCP(Message query, byte [] out) throws IOException {
 				System.err.println(hexdump.dump("in", in));
 		}
 		catch (IOException e) {
-			System.out.println(";; No response");
+			if (Options.check("verboseexceptions"))
+				System.err.println(";; No response");
 			throw e;
 		}
 	}
@@ -212,7 +213,8 @@ send(Message query) throws IOException {
 			s.receive(dp);
 		}
 		catch (IOException e) {
-			System.out.println(";; No response");
+			if (Options.check("verboseexceptions"))
+				System.err.println(";; No response");
 			throw e;
 		}
 	}
@@ -300,7 +302,8 @@ sendAXFR(Message query) throws IOException {
 				dataIn.readFully(in);
 			}
 			catch (IOException e) {
-				System.out.println(";; No response");
+				if (Options.check("verboseexceptions"))
+					System.err.println(";; No response");
 				throw e;
 			}
 			if (Options.check("verbosemsg"))
@@ -316,8 +319,10 @@ sendAXFR(Message query) throws IOException {
 			    m.getHeader().getCount(Section.ANSWER) <= 0 ||
 			    m.getHeader().getCount(Section.AUTHORITY) != 0)
 			{
-				System.out.println("Invalid AXFR packet: ");
-				System.out.println(m);
+				if (Options.check("verbosemsg")) {
+					System.err.println("Invalid AXFR packet: ");
+					System.err.println(m);
+				}
 				throw new WireParseException
 						("Invalid AXFR message");
 			}

@@ -127,7 +127,6 @@ verify(Message m, byte [] b, TSIGRecord old) {
 	hmacSigner h = new hmacSigner(key);
 	if (tsig == null)
 		return false;
-/*System.out.println("found TSIG");*/
 
 	try {
 		if (old != null && tsig.getError() != Rcode.BADKEY &&
@@ -137,7 +136,6 @@ verify(Message m, byte [] b, TSIGRecord old) {
 			dbs.writeShort((short)old.getSignature().length);
 			h.addData(dbs.toByteArray());
 			h.addData(old.getSignature());
-/*System.out.println("digested query TSIG");*/
 		}
 		m.getHeader().decCount(Section.ADDITIONAL);
 		byte [] header = m.getHeader().toWire();
@@ -147,7 +145,6 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		int len = b.length - header.length;	
 		len -= tsig.wireLength;
 		h.addData(b, header.length, len);
-/*System.out.println("digested message");*/
 
 		DataByteOutputStream out = new DataByteOutputStream();
 		tsig.getName().toWireCanonical(out);
@@ -169,7 +166,6 @@ verify(Message m, byte [] b, TSIGRecord old) {
 			out.writeShort(0);
 
 		h.addData(out.toByteArray());
-/*System.out.println("digested variables");*/
 	}
 	catch (IOException e) {
 		return false;

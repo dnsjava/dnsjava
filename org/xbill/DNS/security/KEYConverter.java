@@ -90,7 +90,8 @@ parseRecord(KEYRecord r) {
 		}
 	}
 	catch (IOException e) {
-		System.out.println(e);
+		if (Options.check("verboseexceptions"))
+			System.err.println(e);
 		return null;
 	}
 }

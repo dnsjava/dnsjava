@@ -47,12 +47,7 @@ ARecord(Name _name, short _dclass, int _ttl, int length,
 	String s;
 	s = (data[0] & 0xFF) + "." + (data[1] & 0xFF) + "." +
 	    (data[2] & 0xFF)  + "." + (data[3] & 0xFF);
-	try {
-		address = InetAddress.getByName(s);
-	}
-	catch (UnknownHostException e) {
-		System.out.println("Invalid IP address " + s);
-	}
+	address = InetAddress.getByName(s);
 }
 
 ARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
@@ -65,7 +60,7 @@ throws IOException
 			address = InetAddress.getLocalHost();
 			if (address.equals(InetAddress.getByName("127.0.0.1")))
 			{
-				System.out.println("InetAddress.getLocalHost() is broken.  For now, don't use @me@");
+				System.err.println("InetAddress.getLocalHost() is broken.  For now, don't use @me@");
 				System.exit(-1);
 			}
 		}

@@ -150,7 +150,8 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 		return s.verify(sig) ? DNSSEC.Secure : DNSSEC.Failed;
 	}
 	catch (GeneralSecurityException e) {
-		System.out.println(e);
+		if (Options.check("verboseexceptions"))
+			System.err.println("Signing data: " + e);
 		return DNSSEC.Failed;
 	}
 }

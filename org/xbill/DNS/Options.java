@@ -16,6 +16,10 @@ import java.util.*;
  * tsigfudge=n - Sets the default TSIG fudge value
  * verbosehmac - Print all data digested by the HMAC routines
  * verbosemsg - Print all messages sent or received by SimpleResolver
+ * verbosecompression - Print messages related to name compression
+ * verboseexceptions - Print messages when certain exceptions are received
+ *	and handled
+ * verboselookup - Print lookups and cache responses from the dns class
  * @author Brian Wellington
  */
 

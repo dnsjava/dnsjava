@@ -44,7 +44,8 @@ parseRecord(CERTRecord r) {
 		return cert;
 	}
 	catch (CertificateException e) {
-		System.out.println("Cert parse exception:" + e);
+		if (Options.check("verboseexceptions"))
+			System.err.println("Cert parse exception:" + e);
 		return null;
 	}
 }
@@ -68,7 +69,8 @@ buildRecord(Name name, short dclass, int ttl, Certificate cert, int tag,
 		return new CERTRecord(name, dclass, ttl, type, tag, alg, data);
 	}
 	catch (CertificateException e) {
-		System.out.println("Cert build exception:" + e);
+		if (Options.check("verboseexceptions"))
+			System.err.println("Cert build exception:" + e);
 		return null;
 	}
 }

@@ -65,7 +65,6 @@ class Receiver implements ResolverListener {
 
 	public void
 	handleException(Object id, Exception e) {
-		System.out.println("got an exception: " + e);
 		enqueueInfo(id, e);
 	}
 }

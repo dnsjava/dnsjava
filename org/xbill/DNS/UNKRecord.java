@@ -39,7 +39,7 @@ UNKRecord(Name _name, short _type, short _dclass, int _ttl,
 	  MyStringTokenizer st, Name origin) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
-	System.out.println("Unknown type: " + type);
+	System.err.println("Unknown type: " + type);
 	System.exit(-1);
 }
 
