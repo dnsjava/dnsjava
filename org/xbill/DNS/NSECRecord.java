@@ -142,25 +142,25 @@ hasType(int type) {
 }
 
 static void
-mapToWire(DataByteOutputStream out, int [] array, int mapbase,
+mapToWire(DNSOutput out, int [] array, int mapbase,
 	  int mapstart, int mapend)
 {
 	int mapmax = array[mapend - 1] & 0xFF;
 	int maplength = (mapmax / 8) + 1;
 	int [] map = new int[maplength];
-	out.writeByte(mapbase);
-	out.writeByte(maplength);
+	out.writeU8(mapbase);
+	out.writeU8(maplength);
 	for (int j = mapstart; j < mapend; j++) {
 		int typecode = array[j];
 		map[(typecode & 0xFF) / 8] |= (1 << ( 7 - typecode % 8));
 	}
 	for (int j = 0; j < maplength; j++) {
-		out.writeByte(map[j]);
+		out.writeU8(map[j]);
 	}
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (next == null)
 		return;
 	next.toWire(out, null, canonical);

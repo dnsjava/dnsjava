@@ -37,6 +37,21 @@ readBigInteger(DataInputStream in, int len) throws IOException {
 	return new BigInteger(1, b);
 }
 
+static void
+writeBigInteger(ByteArrayOutputStream out, BigInteger val) {
+	byte [] b = val.toByteArray();
+	if (b[0] == 0)
+		out.write(b, 1, b.length - 1);
+	else
+		out.write(b, 0, b.length);
+}
+
+static void
+writeShort(ByteArrayOutputStream out, int i) {
+	out.write((i >> 8) & 0xFF);
+	out.write(i & 0xFF);
+}
+
 static RSAPublicKey
 parseRSA(DataInputStream in) throws IOException {
 	int exponentLength = in.readUnsignedByte();
@@ -146,26 +161,26 @@ parseRecord(KEYRecord r) {
 
 static byte []
 buildRSA(RSAPublicKey key) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	BigInteger exponent = key.getPublicExponent();
 	BigInteger modulus = key.getModulus();
 	int exponentLength = BigIntegerLength(exponent);
 
 	if (exponentLength < 256)
-		out.writeByte(exponentLength);
+		out.write(exponentLength);
 	else {
-		out.writeByte(0);
-		out.writeShort(exponentLength);
+		out.write(0);
+		writeShort(out, exponentLength);
 	}
-	out.writeBigInteger(exponent);
-	out.writeBigInteger(modulus);
+	writeBigInteger(out, exponent);
+	writeBigInteger(out, modulus);
 
 	return out.toByteArray();
 }
 
 static byte []
 buildDH(DHPublicKey key) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	BigInteger p = key.getParams().getP();
 	BigInteger g = key.getParams().getG();
 	BigInteger y = key.getY();
@@ -181,38 +196,38 @@ buildDH(DHPublicKey key) {
 	}
 	yLength = BigIntegerLength(y);
 
-	out.writeShort(pLength);
+	writeShort(out, pLength);
 	if (pLength == 1) {
 		if (p.bitLength() == 768)
-			out.writeByte((byte)1);
+			out.write(1);
 		else
-			out.writeByte((byte)2);
+			out.write(2);
 	}
 	else
-		out.writeBigInteger(p);
-	out.writeShort(gLength);
+		writeBigInteger(out, p);
+	writeShort(out, gLength);
 	if (gLength > 0)
-		out.writeBigInteger(g);
-	out.writeShort(yLength);
-	out.writeBigInteger(y);
+		writeBigInteger(out, g);
+	writeShort(out, yLength);
+	writeBigInteger(out, y);
 
 	return out.toByteArray();
 }
 
 static byte []
 buildDSA(DSAPublicKey key) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	BigInteger q = key.getParams().getQ();
 	BigInteger p = key.getParams().getP();
 	BigInteger g = key.getParams().getG();
 	BigInteger y = key.getY();
 	int t = (p.toByteArray().length - 64) / 8;
 
-	out.writeByte(t);
-	out.writeBigInteger(q);
-	out.writeBigInteger(p);
-	out.writeBigInteger(g);
-	out.writeBigInteger(y);
+	out.write(t);
+	writeBigInteger(out, q);
+	writeBigInteger(out, p);
+	writeBigInteger(out, g);
+	writeBigInteger(out, y);
 
 	return out.toByteArray();
 }

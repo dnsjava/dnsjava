@@ -174,19 +174,19 @@ getSignature() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (signature == null)
 		return;
 
-	out.writeUnsignedShort(covered);
-	out.writeByte(alg);
-	out.writeByte(labels);
-	out.writeUnsignedInt(origttl);
-	out.writeUnsignedInt(expire.getTime() / 1000);
-	out.writeUnsignedInt(timeSigned.getTime() / 1000);
-	out.writeShort(footprint);
+	out.writeU16(covered);
+	out.writeU8(alg);
+	out.writeU8(labels);
+	out.writeU32(origttl);
+	out.writeU32(expire.getTime() / 1000);
+	out.writeU32(timeSigned.getTime() / 1000);
+	out.writeU16(footprint);
 	signer.toWire(out, null, canonical);
-	out.writeArray(signature);
+	out.writeByteArray(signature);
 }
 
 }

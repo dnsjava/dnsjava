@@ -120,14 +120,14 @@ getStringsAsByteArrays() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (strings == null)
 		return;
 
 	Iterator it = strings.iterator();
 	while (it.hasNext()) {
 		byte [] b = (byte []) it.next();
-		out.writeArray(b, true);
+		out.writeCountedString(b);
 	}
 }
 

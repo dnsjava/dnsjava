@@ -77,7 +77,7 @@ getTextDomain() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (mailbox == null || textDomain == null)
 		return;
 

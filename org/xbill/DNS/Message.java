@@ -380,7 +380,7 @@ getSectionRRsets(int section) {
 }
 
 void
-toWire(DataByteOutputStream out) {
+toWire(DNSOutput out) {
 	header.toWire(out);
 	Compression c = new Compression();
 	for (int i = 0; i < 4; i++) {
@@ -395,24 +395,24 @@ toWire(DataByteOutputStream out) {
 
 /* Returns the number of records not successfully rendered. */
 private int
-sectionToWire(DataByteOutputStream out, int section, Compression c,
+sectionToWire(DNSOutput out, int section, Compression c,
 	      int maxLength)
 {
 	int n = sections[section].size();
-	int pos = out.getPos();
+	int pos = out.current();
 	int rendered = 0;
 	Record lastrec = null;
 
 	for (int i = 0; i < n; i++) {
 		Record rec = (Record)sections[section].get(i);
 		if (lastrec != null && !sameSet(rec, lastrec)) {
-			pos = out.getPos();
+			pos = out.current();
 			rendered = i;
 		}
 		lastrec = rec;
 		rec.toWire(out, section, c);
-		if (out.getPos() > maxLength) {
-			out.setPos(pos);
+		if (out.current() > maxLength) {
+			out.jump(pos);
 			return n - rendered;
 		}
 	}
@@ -421,7 +421,7 @@ sectionToWire(DataByteOutputStream out, int section, Compression c,
 
 /* Returns true if the message could be rendered. */
 private boolean
-toWire(DataByteOutputStream out, int maxLength) {
+toWire(DNSOutput out, int maxLength) {
 	if (maxLength < Header.LENGTH)
 		return false;
 
@@ -431,7 +431,7 @@ toWire(DataByteOutputStream out, int maxLength) {
 	if (tsigkey != null)
 		tempMaxLength -= tsigkey.recordLength();
 
-	int startpos = out.getPos();
+	int startpos = out.current();
 	header.toWire(out);
 	Compression c = new Compression();
 	for (int i = 0; i < 4; i++) {
@@ -449,10 +449,10 @@ toWire(DataByteOutputStream out, int maxLength) {
 				for (int j = i + 1; j < 4; j++)
 					newheader.setCount(j, 0);
 
-				int pos = out.getPos();
-				out.setPos(startpos);
+				out.save();
+				out.jump(startpos);
 				newheader.toWire(out);
-				out.setPos(pos);
+				out.restore();
 			}
 			break;
 		}
@@ -467,10 +467,10 @@ toWire(DataByteOutputStream out, int maxLength) {
 		tsigrec.toWire(out, Section.ADDITIONAL, c);
 		newheader.incCount(Section.ADDITIONAL);
 
-		int pos = out.getPos();
-		out.setPos(startpos);
+		out.save();
+		out.jump(startpos);
 		newheader.toWire(out);
-		out.setPos(pos);
+		out.restore();
 	}
 
 	return true;
@@ -481,9 +481,9 @@ toWire(DataByteOutputStream out, int maxLength) {
  */
 public byte []
 toWire() {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	toWire(out);
-	size = out.getPos();
+	size = out.current();
 	return out.toByteArray();
 }
 
@@ -502,9 +502,9 @@ toWire() {
  */
 public byte []
 toWire(int maxLength) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	toWire(out, maxLength);
-	size = out.getPos();
+	size = out.current();
 	return out.toByteArray();
 }
 

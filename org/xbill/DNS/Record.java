@@ -234,19 +234,23 @@ fromWire(byte [] b, int section) throws IOException {
 }
 
 void
-toWire(DataByteOutputStream out, int section, Compression c) {
-	int start = out.getPos();
+toWire(DNSOutput out, int section, Compression c) {
+	int start = out.current();
 	name.toWire(out, c);
-	out.writeShort(type);
-	out.writeShort(dclass);
+	out.writeU16(type);
+	out.writeU16(dclass);
 	if (section == Section.QUESTION)
 		return;
-	out.writeUnsignedInt(ttl);
-	int lengthPosition = out.getPos();
-	out.writeShort(0); /* until we know better */
+	out.writeU32(ttl);
+	int lengthPosition = out.current();
+	out.writeU16(0); /* until we know better */
 	if (!empty)
 		rrToWire(out, c, false);
-	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
+	int rrlength = out.current() - lengthPosition - 2;
+	out.save();
+	out.jump(lengthPosition);
+	out.writeU16(rrlength);
+	out.restore();
 }
 
 /**
@@ -254,26 +258,30 @@ toWire(DataByteOutputStream out, int section, Compression c) {
  */
 public byte []
 toWire(int section) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	toWire(out, section, null);
 	return out.toByteArray();
 }
 
 private void
-toWireCanonical(DataByteOutputStream out, boolean noTTL) {
+toWireCanonical(DNSOutput out, boolean noTTL) {
 	name.toWireCanonical(out);
-	out.writeShort(type);
-	out.writeShort(dclass);
+	out.writeU16(type);
+	out.writeU16(dclass);
 	if (noTTL) {
-		out.writeUnsignedInt(0);
+		out.writeU32(0);
 	} else {
-		out.writeUnsignedInt(ttl);
+		out.writeU32(ttl);
 	}
-	int lengthPosition = out.getPos();
-	out.writeShort(0); /* until we know better */
+	int lengthPosition = out.current();
+	out.writeU16(0); /* until we know better */
 	if (!empty)
 		rrToWire(out, null, true);
-	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
+	int rrlength = out.current() - lengthPosition - 2;
+	out.save();
+	out.jump(lengthPosition);
+	out.writeU16(rrlength);
+	out.restore();
 }
 
 /*
@@ -282,7 +290,7 @@ toWireCanonical(DataByteOutputStream out, boolean noTTL) {
  */
 private byte []
 toWireCanonical(boolean noTTL) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	toWireCanonical(out, noTTL);
 	return out.toByteArray();
 }
@@ -302,7 +310,7 @@ toWireCanonical() {
  */
 public byte []
 rdataToWireCanonical() {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	rrToWire(out, null, true);
 	return out.toByteArray();
 }
@@ -561,7 +569,7 @@ getTTL() {
  * Converts the type-specific RR to wire format - must be overriden
  */
 abstract void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical);
+rrToWire(DNSOutput out, Compression c, boolean canonical);
 
 /**
  * Determines if two Records are identical.  This compares the name, type,

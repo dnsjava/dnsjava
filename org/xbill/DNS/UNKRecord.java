@@ -45,9 +45,9 @@ rrToString() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (data != null)
-		out.writeArray(data);
+		out.writeByteArray(data);
 }
 
 }

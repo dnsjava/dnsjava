@@ -125,16 +125,16 @@ getFlags() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (options == null)
 		return;
 	Iterator it = options.keySet().iterator();
 	while (it.hasNext()) {
 		Integer i = (Integer) it.next();
-		out.writeShort(i.intValue());
+		out.writeU16(i.intValue());
 		byte [] data = (byte []) options.get(i);
-		out.writeShort(data.length);
-		out.writeArray(data);
+		out.writeU16(data.length);
+		out.writeByteArray(data);
 	}
 }
 

@@ -200,31 +200,31 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (alg == null)
 		return;
 
 	alg.toWire(out, null, canonical);
 
-	out.writeInt((int)(timeInception.getTime() / 1000));
-	out.writeInt((int)(timeExpire.getTime() / 1000));
+	out.writeU32(timeInception.getTime() / 1000);
+	out.writeU32(timeExpire.getTime() / 1000);
 
-	out.writeShort(mode);
-	out.writeShort(error);
+	out.writeU16(mode);
+	out.writeU16(error);
 
 	if (key != null) {
-		out.writeUnsignedShort(key.length);
-		out.writeArray(key);
+		out.writeU16(key.length);
+		out.writeByteArray(key);
 	}
 	else
-		out.writeShort(0);
+		out.writeU16(0);
 
 	if (other != null) {
-		out.writeUnsignedShort(other.length);
-		out.writeArray(other);
+		out.writeU16(other.length);
+		out.writeByteArray(other);
 	}
 	else
-		out.writeShort(0);
+		out.writeU16(0);
 }
 
 }

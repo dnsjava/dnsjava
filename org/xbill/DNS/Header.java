@@ -65,16 +65,16 @@ Header(byte [] b) throws IOException {
 }
 
 void
-toWire(DataByteOutputStream out) {
-	out.writeShort(getID());
+toWire(DNSOutput out) {
+	out.writeU16(getID());
 	writeFlags(out);
 	for (int i = 0; i < counts.length; i++)
-		out.writeShort(counts[i]);
+		out.writeU16(counts[i]);
 }
 
 public byte []
 toWire() {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	toWire(out);
 	return out.toByteArray();
 }
@@ -209,16 +209,15 @@ getCount(int field) {
 }
 
 private void
-writeFlags(DataByteOutputStream out) {
-	int flags1 = 0, flags2 = 0;
-	for (int i = 0; i < 8; i++) {
-		if (flags[i])	flags1 |= (1 << (7-i));
-		if (flags[i+8])	flags2 |= (1 << (7-i));
+writeFlags(DNSOutput out) {
+	int flagsval = 0;
+	for (int i = 0; i < 16; i++) {
+		if (flags[i])
+			flagsval |= (1 << (15-i));
 	}
-	flags1 |= (opcode << 3);
-	flags2 |= (rcode);
-	out.writeByte(flags1);
-	out.writeByte(flags2);
+	flagsval |= (opcode << 11);
+	flagsval |= (rcode);
+	out.writeU16(flagsval);
 }
 
 private void

@@ -157,17 +157,17 @@ getMinimum() {
 }       
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (host == null)
 		return;
 
 	host.toWire(out, c, canonical);
 	admin.toWire(out, c, canonical);
-	out.writeUnsignedInt(serial);
-	out.writeUnsignedInt(refresh);
-	out.writeUnsignedInt(retry);
-	out.writeUnsignedInt(expire);
-	out.writeUnsignedInt(minimum);
+	out.writeU32(serial);
+	out.writeU32(refresh);
+	out.writeU32(retry);
+	out.writeU32(expire);
+	out.writeU32(minimum);
 }
 
 }

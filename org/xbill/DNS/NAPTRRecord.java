@@ -140,14 +140,14 @@ getReplacement() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (replacement == null && regexp == null)
 		return;
-	out.writeShort(order);
-	out.writeShort(preference);
-	out.writeArray(flags, true);
-	out.writeArray(service, true);
-	out.writeArray(regexp, true);
+	out.writeU16(order);
+	out.writeU16(preference);
+	out.writeCountedString(flags);
+	out.writeCountedString(service);
+	out.writeCountedString(regexp);
 	replacement.toWire(out, null, canonical);
 }
 

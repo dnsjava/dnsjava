@@ -103,10 +103,10 @@ generate(Message m, byte [] b, int error, TSIGRecord old) {
 		fudge = FUDGE;
 
 	if (old != null) {
-		DataByteOutputStream dbs = new DataByteOutputStream();
-		dbs.writeUnsignedShort(old.getSignature().length);
+		DNSOutput out = new DNSOutput();
+		out.writeU16(old.getSignature().length);
 		if (h != null) {
-			h.addData(dbs.toByteArray());
+			h.addData(out.toByteArray());
 			h.addData(old.getSignature());
 		}
 	}
@@ -115,20 +115,20 @@ generate(Message m, byte [] b, int error, TSIGRecord old) {
 	if (h != null)
 		h.addData(b);
 
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	name.toWireCanonical(out);
-	out.writeShort(DClass.ANY);	/* class */
-	out.writeInt(0);		/* ttl */
+	out.writeU16(DClass.ANY);	/* class */
+	out.writeU32(0);		/* ttl */
 	alg.toWireCanonical(out);
 	long time = timeSigned.getTime() / 1000;
 	int timeHigh = (int) (time >> 32);
 	long timeLow = (time & 0xFFFFFFFFL);
-	out.writeUnsignedShort(timeHigh);
-	out.writeUnsignedInt(timeLow);
-	out.writeUnsignedShort(fudge);
+	out.writeU16(timeHigh);
+	out.writeU32(timeLow);
+	out.writeU16(fudge);
 
-	out.writeShort(error);
-	out.writeShort(0); /* No other data */
+	out.writeU16(error);
+	out.writeU16(0); /* No other data */
 
 	if (h != null)
 		h.addData(out.toByteArray());
@@ -141,12 +141,12 @@ generate(Message m, byte [] b, int error, TSIGRecord old) {
 
 	byte [] other = null;
 	if (error == Rcode.BADTIME) {
-		out = new DataByteOutputStream();
+		out = new DNSOutput();
 		time = new Date().getTime() / 1000;
 		timeHigh = (int) (time >> 32);
 		timeLow = (time & 0xFFFFFFFFL);
-		out.writeUnsignedShort(timeHigh);
-		out.writeUnsignedInt(timeLow);
+		out.writeU16(timeHigh);
+		out.writeU32(timeLow);
 		other = out.toByteArray();
 	}
 
@@ -197,21 +197,21 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 	if (fudge < 0 || fudge > 0x7FFF)
 		fudge = FUDGE;
 
-	DataByteOutputStream dbs = new DataByteOutputStream();
-	dbs.writeUnsignedShort(old.getSignature().length);
-	h.addData(dbs.toByteArray());
+	DNSOutput out = new DNSOutput();
+	out.writeU16(old.getSignature().length);
+	h.addData(out.toByteArray());
 	h.addData(old.getSignature());
 
 	/* Digest the message */
 	h.addData(m.toWire());
 
-	DataByteOutputStream out = new DataByteOutputStream();
+	out = new DNSOutput();
 	long time = timeSigned.getTime() / 1000;
 	int timeHigh = (int) (time >> 32);
 	long timeLow = (time & 0xFFFFFFFFL);
-	out.writeUnsignedShort(timeHigh);
-	out.writeUnsignedInt(timeLow);
-	out.writeUnsignedShort(fudge);
+	out.writeU16(timeHigh);
+	out.writeU32(timeLow);
+	out.writeU16(fudge);
 
 	h.addData(out.toByteArray());
 
@@ -259,47 +259,42 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		return Rcode.BADTIME;
 	}
 
-	try {
-		if (old != null && tsig.getError() != Rcode.BADKEY &&
-		    tsig.getError() != Rcode.BADSIG)
-		{
-			DataByteOutputStream dbs = new DataByteOutputStream();
-			dbs.writeUnsignedShort(old.getSignature().length);
-			h.addData(dbs.toByteArray());
-			h.addData(old.getSignature());
-		}
-		m.getHeader().decCount(Section.ADDITIONAL);
-		byte [] header = m.getHeader().toWire();
-		m.getHeader().incCount(Section.ADDITIONAL);
-		h.addData(header);
-
-		int len = m.tsigstart - header.length;	
-		h.addData(b, header.length, len);
-
-		DataByteOutputStream out = new DataByteOutputStream();
-		tsig.getName().toWireCanonical(out);
-		out.writeShort(tsig.dclass);
-		out.writeUnsignedInt(tsig.ttl);
-		tsig.getAlgorithm().toWireCanonical(out);
-		long time = tsig.getTimeSigned().getTime() / 1000;
-		int timeHigh = (int) (time >> 32);
-		long timeLow = (time & 0xFFFFFFFFL);
-		out.writeUnsignedShort(timeHigh);
-		out.writeUnsignedInt(timeLow);
-		out.writeShort(tsig.getFudge());
-		out.writeShort(tsig.getError());
-		if (tsig.getOther() != null) {
-			out.writeShort(tsig.getOther().length);
-			out.write(tsig.getOther());
-		}
-		else
-			out.writeShort(0);
-
+	if (old != null && tsig.getError() != Rcode.BADKEY &&
+	    tsig.getError() != Rcode.BADSIG)
+	{
+		DNSOutput out = new DNSOutput();
+		out.writeU16(old.getSignature().length);
 		h.addData(out.toByteArray());
+		h.addData(old.getSignature());
 	}
-	catch (IOException e) {
-		return Rcode.SERVFAIL;
+	m.getHeader().decCount(Section.ADDITIONAL);
+	byte [] header = m.getHeader().toWire();
+	m.getHeader().incCount(Section.ADDITIONAL);
+	h.addData(header);
+
+	int len = m.tsigstart - header.length;	
+	h.addData(b, header.length, len);
+
+	DNSOutput out = new DNSOutput();
+	tsig.getName().toWireCanonical(out);
+	out.writeU16(tsig.dclass);
+	out.writeU32(tsig.ttl);
+	tsig.getAlgorithm().toWireCanonical(out);
+	long time = tsig.getTimeSigned().getTime() / 1000;
+	int timeHigh = (int) (time >> 32);
+	long timeLow = (time & 0xFFFFFFFFL);
+	out.writeU16(timeHigh);
+	out.writeU32(timeLow);
+	out.writeU16(tsig.getFudge());
+	out.writeU16(tsig.getError());
+	if (tsig.getOther() != null) {
+		out.writeU16(tsig.getOther().length);
+		out.writeByteArray(tsig.getOther());
+	} else {
+		out.writeU16(0);
 	}
+
+	h.addData(out.toByteArray());
 
 	if (h.verify(tsig.getSignature()))
 		return Rcode.NOERROR;
@@ -380,13 +375,10 @@ public static class StreamVerifier {
 		if (nresponses == 1) {
 			int result = key.verify(m, b, lastTSIG);
 			if (result == Rcode.NOERROR) {
-				DataByteOutputStream dbs;
-				byte [] signature;
-
-				signature = tsig.getSignature();
-				dbs = new DataByteOutputStream();
-				dbs.writeUnsignedShort(signature.length);
-				verifier.addData(dbs.toByteArray());
+				byte [] signature = tsig.getSignature();
+				DNSOutput out = new DNSOutput();
+				out.writeU16(signature.length);
+				verifier.addData(out.toByteArray());
 				verifier.addData(signature);
 			}
 			lastTSIG = tsig;
@@ -427,13 +419,13 @@ public static class StreamVerifier {
 			return Rcode.BADKEY;
 		}
 
-		DataByteOutputStream out = new DataByteOutputStream();
+		DNSOutput out = new DNSOutput();
 		long time = tsig.getTimeSigned().getTime() / 1000;
 		int timeHigh = (int) (time >> 32);
 		long timeLow = (time & 0xFFFFFFFFL);
-		out.writeUnsignedShort(timeHigh);
-		out.writeUnsignedInt(timeLow);
-		out.writeShort(tsig.getFudge());
+		out.writeU16(timeHigh);
+		out.writeU32(timeLow);
+		out.writeU16(tsig.getFudge());
 		verifier.addData(out.toByteArray());
 
 		if (verifier.verify(tsig.getSignature()) == false) {
@@ -443,9 +435,9 @@ public static class StreamVerifier {
 		}
 
 		verifier.clear();
-		DataByteOutputStream dbs = new DataByteOutputStream();
-		dbs.writeUnsignedShort(tsig.getSignature().length);
-		verifier.addData(dbs.toByteArray());
+		out = new DNSOutput();
+		out.writeU16(tsig.getSignature().length);
+		verifier.addData(out.toByteArray());
 		verifier.addData(tsig.getSignature());
 
 		return Rcode.NOERROR;

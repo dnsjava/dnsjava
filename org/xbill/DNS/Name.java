@@ -637,7 +637,7 @@ getLabelString(int n) {
  * @throws IllegalArgumentException The name is not absolute.
  */
 void
-toWire(DataByteOutputStream out, Compression c) {
+toWire(DNSOutput out, Compression c) {
 	if (!isAbsolute())
 		throw new IllegalArgumentException("toWire() called on " +
 						   "non-absolute name");
@@ -654,15 +654,16 @@ toWire(DataByteOutputStream out, Compression c) {
 			pos = c.get(tname);
 		if (pos >= 0) {
 			pos |= (LABEL_MASK << 8);
-			out.writeShort(pos);
+			out.writeU16(pos);
 			return;
 		} else {
 			if (c != null)
-				c.add(out.getPos(), tname);
-			out.writeString(name, offset(i));
+				c.add(out.current(), tname);
+			int off = offset(i);
+			out.writeByteArray(name, off, name[off] + 1);
 		}
 	}
-	out.writeByte(0);
+	out.writeU8(0);
 }
 
 /**
@@ -671,7 +672,7 @@ toWire(DataByteOutputStream out, Compression c) {
  */
 public byte []
 toWire() {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	toWire(out, null);
 	return out.toByteArray();
 }
@@ -681,9 +682,9 @@ toWire() {
  * @param out The output stream to which the message is written.
  */
 void
-toWireCanonical(DataByteOutputStream out) {
+toWireCanonical(DNSOutput out) {
 	byte [] b = toWireCanonical();
-	out.writeArray(b);
+	out.writeByteArray(b);
 }
 
 /**
@@ -713,7 +714,7 @@ toWireCanonical() {
  * @throws IllegalArgumentException The name is not absolute.
  */
 void
-toWire(DataByteOutputStream out, Compression c, boolean canonical) {
+toWire(DNSOutput out, Compression c, boolean canonical) {
 	if (canonical)
 		toWireCanonical(out);
 	else

@@ -120,12 +120,12 @@ getFootprint() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
-	out.writeShort(footprint);
-	out.writeByte(alg);
-	out.writeByte(digestid);
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
+	out.writeU16(footprint);
+	out.writeU8(alg);
+	out.writeU8(digestid);
 	if (digest != null)
-		out.writeArray(digest);
+		out.writeByteArray(digest);
 }
 
 }

@@ -54,7 +54,7 @@ getTarget() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (target == null)
 		return;
 

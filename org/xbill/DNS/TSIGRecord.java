@@ -192,7 +192,7 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (alg == null)
 		return;
 
@@ -201,22 +201,22 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	long time = timeSigned.getTime() / 1000;
 	int timeHigh = (int) (time >> 32);
 	long timeLow = (time & 0xFFFFFFFFL);
-	out.writeUnsignedShort(timeHigh);
-	out.writeUnsignedInt(timeLow);
-	out.writeUnsignedShort(fudge);
+	out.writeU16(timeHigh);
+	out.writeU32(timeLow);
+	out.writeU16(fudge);
 
-	out.writeUnsignedShort(signature.length);
-	out.writeArray(signature);
+	out.writeU16(signature.length);
+	out.writeByteArray(signature);
 
-	out.writeShort(originalID);
-	out.writeShort(error);
+	out.writeU16(originalID);
+	out.writeU16(error);
 
 	if (other != null) {
-		out.writeUnsignedShort(other.length);
-		out.writeArray(other);
+		out.writeU16(other.length);
+		out.writeByteArray(other);
 	}
 	else
-		out.writeShort(0);
+		out.writeU16(0);
 }
 
 }

@@ -74,12 +74,12 @@ getOS() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (cpu == null || os == null)
 		return;
 
-	out.writeArray(cpu, true);
-	out.writeArray(os, true);
+	out.writeCountedString(cpu);
+	out.writeCountedString(os);
 }
 
 /**

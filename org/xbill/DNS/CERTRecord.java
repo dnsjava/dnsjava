@@ -195,14 +195,14 @@ getCert() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (cert == null)
 		return;
 
-	out.writeShort(certType);
-	out.writeShort(keyTag);
-	out.writeByte(alg);
-	out.writeArray(cert);
+	out.writeU16(certType);
+	out.writeU16(keyTag);
+	out.writeU8(alg);
+	out.writeByteArray(cert);
 }
 
 }

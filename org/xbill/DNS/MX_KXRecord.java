@@ -71,11 +71,11 @@ getPriority() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (target == null)
 		return;
 
-	out.writeShort(priority);
+	out.writeU16(priority);
 	if (type == Type.MX)
 		target.toWire(out, c, canonical);
 	else

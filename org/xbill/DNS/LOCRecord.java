@@ -285,17 +285,17 @@ getVPrecision() {
 }       
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (latitude == 0 && longitude == 0 && altitude == 0)
 		return;
 
-	out.writeByte(0); /* version */
-	out.writeByte(toLOCformat(size));
-	out.writeByte(toLOCformat(hPrecision));
-	out.writeByte(toLOCformat(vPrecision));
-	out.writeUnsignedInt(latitude);
-	out.writeUnsignedInt(longitude);
-	out.writeUnsignedInt(altitude);
+	out.writeU8(0); /* version */
+	out.writeU8(toLOCformat(size));
+	out.writeU8(toLOCformat(hPrecision));
+	out.writeU8(toLOCformat(vPrecision));
+	out.writeU32(latitude);
+	out.writeU32(longitude);
+	out.writeU32(altitude);
 }
 
 private static long

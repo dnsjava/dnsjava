@@ -97,7 +97,7 @@ getBitmap() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (next == null)
 		return;
 
@@ -106,7 +106,7 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	for (int i = 0, t = 0; i < length; i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
 		if (i % 8 == 7 || i == length - 1) {
-			out.writeByte(t);
+			out.writeU8(t);
 			t = 0;
 		}
 	}

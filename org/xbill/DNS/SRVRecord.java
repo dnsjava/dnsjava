@@ -102,13 +102,13 @@ getTarget() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (target == null)
 		return;
 
-	out.writeShort(priority);
-	out.writeShort(weight);
-	out.writeShort(port);
+	out.writeU16(priority);
+	out.writeU16(weight);
+	out.writeU16(port);
 	target.toWire(out, null, canonical);
 }
 

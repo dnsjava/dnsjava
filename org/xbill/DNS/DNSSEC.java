@@ -101,14 +101,14 @@ private
 DNSSEC() { }
 
 private static void
-digestSIG(DataByteOutputStream out, SIGRecord sig) {
-	out.writeShort(sig.getTypeCovered());
-	out.writeByte(sig.getAlgorithm());
-	out.writeByte(sig.getLabels());
-	out.writeUnsignedInt(sig.getOrigTTL());
-	out.writeInt((int) (sig.getExpire().getTime() / 1000));
-	out.writeInt((int) (sig.getTimeSigned().getTime() / 1000));
-	out.writeShort(sig.getFootprint());
+digestSIG(DNSOutput out, SIGRecord sig) {
+	out.writeU16(sig.getTypeCovered());
+	out.writeU8(sig.getAlgorithm());
+	out.writeU8(sig.getLabels());
+	out.writeU32(sig.getOrigTTL());
+	out.writeU32(sig.getExpire().getTime() / 1000);
+	out.writeU32(sig.getTimeSigned().getTime() / 1000);
+	out.writeU16(sig.getFootprint());
 	sig.getSigner().toWireCanonical(out);
 }
 
@@ -121,7 +121,7 @@ digestSIG(DataByteOutputStream out, SIGRecord sig) {
  */
 public static byte []
 digestRRset(SIGRecord sig, RRset rrset) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	digestSIG(out, sig);
 
 	int size = rrset.size();
@@ -140,7 +140,7 @@ digestRRset(SIGRecord sig, RRset rrset) {
 	}
 	Arrays.sort(records);
 	for (int i = 0; i < records.length; i++)
-		out.writeArray(records[i]);
+		out.writeByteArray(records[i]);
 	return out.toByteArray();
 }
 
@@ -154,11 +154,11 @@ digestRRset(SIGRecord sig, RRset rrset) {
  */
 public static byte []
 digestMessage(SIGRecord sig, Message msg, byte [] previous) {
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	digestSIG(out, sig);
 
 	if (previous != null)
-		out.writeArray(previous);
+		out.writeByteArray(previous);
 	
 	msg.toWire(out);
 	return out.toByteArray();

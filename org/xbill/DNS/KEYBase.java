@@ -127,7 +127,7 @@ getFootprint() {
 
 	int foot = 0;
 
-	DataByteOutputStream out = new DataByteOutputStream();
+	DNSOutput out = new DNSOutput();
 	rrToWire(out, null, false);
 	byte [] rdata = out.toByteArray();
 
@@ -154,15 +154,15 @@ getFootprint() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (key == null && !isNullKEY())
 		return;
 
-	out.writeShort(flags);
-	out.writeByte(proto);
-	out.writeByte(alg);
+	out.writeU16(flags);
+	out.writeU8(proto);
+	out.writeU8(alg);
 	if (key != null)
-		out.writeArray(key);
+		out.writeByteArray(key);
 }
 
 }

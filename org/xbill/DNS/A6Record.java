@@ -100,14 +100,14 @@ getPrefix() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (suffix == null)
 		return;
-	out.write(prefixBits);
+	out.writeU8(prefixBits);
 	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
 	byte [] data = suffix.toBytes();
-	out.write(data, 16 - suffixbytes, suffixbytes);
+	out.writeByteArray(data, 16 - suffixbytes, suffixbytes);
 	if (prefix != null)
 		prefix.toWire(out, null, canonical);
 }
