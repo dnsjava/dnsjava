@@ -10,7 +10,7 @@ public class update {
 
 Message query, response;
 Resolver res;
-String server = "localhost";
+String server = null;
 Name origin;
 int defaultTTL;
 short defaultClass = DClass.IN;
@@ -453,7 +453,7 @@ helpResolver() {
 	System.out.println("Resolver options:\n" +
 
 	  "    server <name>" +
-	  "\tserver that receives the updates (default: localhost)\n" +
+	  "\tserver that receives the updates\n" +
 
 	  "    key <name> <data>" +
 	  "\tTSIG key used to sign the messages\n" +
