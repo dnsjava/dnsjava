@@ -1,0 +1,26 @@
+// Copyright (c) 2002 Brian Wellington (bwelling@xbill.org)
+
+package org.xbill.DNS;
+
+import java.io.*;
+
+/**
+ * An exception thrown when a name is longer than the maximum length of a DNS
+ * name.
+ *
+ * @author Brian Wellington
+ */
+
+public class NameTooLongException extends IOException {
+
+public
+NameTooLongException() {
+	super();
+}
+
+public
+NameTooLongException(String s) {
+	super(s);
+}
+
+}

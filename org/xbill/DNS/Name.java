@@ -311,14 +311,15 @@ Name(Name src, int n) {
  * @param prefix The prefix name.
  * @param suffix The suffix name.
  * @return The concatenated name.
+ * @throws NameTooLongException The name is too long.
  */
 public static Name
-concatenate(Name prefix, Name suffix) {
+concatenate(Name prefix, Name suffix) throws NameTooLongException {
 	if (prefix.isAbsolute())
 		return (prefix);
 	int nlabels = prefix.labels + suffix.labels;
 	if (nlabels > MAXLABELS)
-		return null;
+		throw new NameTooLongException();
 	Name newname = new Name();
 	newname.labels = (byte)nlabels;
 	newname.name = new Object[nlabels];
@@ -335,7 +336,16 @@ concatenate(Name prefix, Name suffix) {
  */
 public Name
 wild(int n) {
-	return concatenate(wildName, new Name(this, n));
+	if (n < 1)
+		throw new IllegalArgumentException("must replace 1 or more " +
+						   "labels");
+	try {
+		return concatenate(wildName, new Name(this, n));
+	}
+	catch (NameTooLongException e) {
+		throw new IllegalStateException
+					("Name.wild: concatenate failed");
+	}
 }
 
 /**
