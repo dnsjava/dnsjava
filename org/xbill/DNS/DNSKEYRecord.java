@@ -54,4 +54,15 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	flags = st.getUInt16();
+	proto = st.getUInt8();
+	String algString = st.getString();
+	alg = DNSSEC.Algorithm.value(algString);
+	if (alg < 0)
+		throw st.exception("Invalid algorithm: " + algString);
+	key = st.getBase64();
+}
+
 }

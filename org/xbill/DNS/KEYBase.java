@@ -41,27 +41,6 @@ rrFromWire(DNSInput in) throws IOException {
 		key = in.readByteArray();
 }
 
-private boolean
-isNullKEY() {
-	return (type == Type.KEY &&
-		(flags & KEYRecord.FLAG_NOKEY) == KEYRecord.FLAG_NOKEY);
-}
-
-void
-rdataFromString(Tokenizer st, Name origin) throws IOException {
-	flags = st.getUInt16();
-	proto = st.getUInt8();
-	String algString = st.getString();
-	alg = DNSSEC.Algorithm.value(algString);
-	if (alg < 0)
-		throw st.exception("Invalid algorithm: " + algString);
-	/* If this is a null KEY, there's no key data */
-	if (isNullKEY())
-		key = null;
-	else
-		key = st.getBase64();
-}
-
 /** Converts the DNSKEY/KEY Record to a String */
 String
 rrToString() {
