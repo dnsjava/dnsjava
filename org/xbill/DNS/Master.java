@@ -173,7 +173,7 @@ throws IOException
 		
 
 	if ((type = Type.value(s)) < 0)
-		throw new IOException("Parse error");
+		throw new IOException("Parse error: invalid type '" + s + "'");
 
 	return Record.fromString(name, type, dclass, ttl, st, origin);
 }
