@@ -92,7 +92,7 @@ throws IOException
 	SOARecord rec = new SOARecord(name, dclass, ttl);
 	rec.host = st.getName(origin);
 	rec.admin = st.getName(origin);
-	rec.serial = (int) st.getUInt32();
+	rec.serial = st.getUInt32();
 	rec.refresh = st.getTTL();
 	rec.retry = st.getTTL();
 	rec.expire = st.getTTL();
