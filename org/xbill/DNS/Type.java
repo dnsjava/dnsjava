@@ -66,7 +66,7 @@ public static final int RP		= 17;
 /** AFS cell database */
 public static final int AFSDB		= 18;
 
-/** X_25 calling address */
+/** X.25 calling address */
 public static final int X25		= 19;
 
 /** ISDN calling address */
