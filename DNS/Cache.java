@@ -118,35 +118,51 @@ addNegative(Name name, short type, int ttl, byte cred, Object o) {
 		addSet(name, type, new CacheElement(ttl, cred, src));
 }
 
-private RRset
-findRecords(Name name, short type, byte minCred) {
+public CacheResponse
+lookupRecords(Name name, short type, byte minCred) {
 	CacheElement element = (CacheElement) findSet(name, type);
 	if (element == null)
-		return null;
+		return new CacheResponse(CacheResponse.UNKNOWN);
 	if (element.expiredTTL()) {
 		removeSet(name, type);
-		return null;
+		return new CacheResponse(CacheResponse.UNKNOWN);
 	}
 	if (element.credibility >= minCred) {
 		RRset rrset = element.rrset;
-		/* Negative cached response */
 		if (rrset == null)
-			return null;
+			return new CacheResponse(CacheResponse.NEGATIVE);
 		if (type != Type.CNAME && rrset.getType() == Type.CNAME) {
 			CNAMERecord cname;
 			cname = (CNAMERecord) rrset.rrs().nextElement();
-			return findRecords(cname.getTarget(), type, minCred);
+			CacheResponse cr;
+			cr = lookupRecords(cname.getTarget(), type, minCred);
+			if (!cr.isUnknown())
+				return cr;
+			else
+				return new CacheResponse(CacheResponse.PARTIAL,
+							 cname.getTarget());
 		}
 		else
-			return rrset;
+			return new CacheResponse(CacheResponse.SUCCESSFUL,
+						 rrset);
 	}
 	else
+		return new CacheResponse(CacheResponse.UNKNOWN);
+}
+
+RRset
+findRecords(Name name, short type, byte minCred) {
+	CacheResponse cr;
+	cr = lookupRecords(name, type, minCred);
+	if (cr.isSuccessful())
+		return cr.answer();
+	else
 		return null;
-}	
+}
 
 public RRset
 findRecords(Name name, short type) {
-	return findRecords(name, type, Credibility.NONAUTH_ANSWER);
+	return findRecords(name, type, Credibility.NONAUTH_ADDITIONAL);
 }
 
 public RRset
