@@ -397,10 +397,7 @@ lookup(Name name, int type) {
 						       rrset);
 		}
 
-		/*
-		 * If this is the name and we haven't matched anything,
-		 * return the special NXRRSET object.
-		 */
+		/* We found the name, but not the type. */
 		if (isExact)
 			return SetResponse.ofType(SetResponse.NXRRSET);
 	}
