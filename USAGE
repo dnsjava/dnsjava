@@ -48,6 +48,10 @@ Command line programs:
 	To run:
 		jnamed [config_file]
 
+	jnamed should not be used for production, and should probably
+	not be used for testing.  If the above documentation is not enough,
+	please do not ask for more, because it should not be used.
+
 - lookup:
 	A simple program that looks up records associated with names.
 	If no type is specified, address lookups are done.
