@@ -5,10 +5,35 @@ package DNS;
 
 import java.io.*;
 import java.net.*;
+import DNS.utils.*;
 
 /** A simple clone of the java.net.InetAddress class, using dnsjava routines */
 
 public final class Address {
+
+private static boolean
+isDottedQuad(String s) {
+	MyStringTokenizer st = new MyStringTokenizer(s, ".");
+	int labels = 0;
+	int i;
+	int [] values = new int[4];
+	for (i = 0; i < 4; i++) {
+		if (st.hasMoreTokens() == false)
+			break;
+		try {
+			values[i] = Integer.parseInt(st.nextToken());
+		}
+		catch (NumberFormatException e) {
+			break;
+		}
+		if (values[i] < 0 || values[i] > 255)
+			break;
+	}
+	if (i == 4)
+		return true;
+	else
+		return false;
+}
 
 /**
  * Determines the IP address of a host
@@ -18,6 +43,8 @@ public final class Address {
  */
 public static InetAddress
 getByName(String name) throws UnknownHostException {
+	if (isDottedQuad(name))
+		return InetAddress.getByName(name);
 	Record [] records = dns.getRecords(name, Type.A);
 	if (records == null)
 		throw new UnknownHostException("unknown host");
@@ -33,6 +60,8 @@ getByName(String name) throws UnknownHostException {
  */
 public static InetAddress []
 getAllByName(String name) throws UnknownHostException {
+	if (isDottedQuad(name))
+		return InetAddress.getAllByName(name);
 	Record [] records = dns.getRecords(name, Type.A);
 	if (records == null)
 		throw new UnknownHostException("unknown host");
