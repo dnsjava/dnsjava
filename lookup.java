@@ -1,4 +1,8 @@
+// Copyright (c) 1999-2003 Brian Wellington (bwelling@xbill.org)
+
 import org.xbill.DNS.*;
+
+/** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
 
 public class lookup {
 
