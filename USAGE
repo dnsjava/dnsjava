@@ -3,7 +3,9 @@ dnsjava can be used in several ways:
 Command line programs:
 
 - dig: A clone of dig (as distributed with BIND)
-	dig @server name type [class] [-p port] [-k keyname/secret] [-t] [-i]
+	dig @server [-x] name type [class] [-p port] [-k name/secret] [-t] [-i]
+		-x : reverse lookup, name must be a dotted quad
+		-k : use TSIG transaction security
 		-t : use TCP by default
 		-i : ignore truncation errors
 
@@ -20,9 +22,9 @@ Command line programs:
 	"cache file", and "key name data".
 	jnamed config_file
 
-Function calls:
+DNS and DNS.utils packages:
 
-- All classes are defined in the DNS and DNS.utils packages.
+- See the Javadoc documentation in doc/ for details
 
 - All constants are defined in appropriate classes.  These include Type,
 	Dclass, Flags, Rcode, Opcode, Section, Credibility, and Security.
@@ -31,31 +33,8 @@ Function calls:
 
 - High Level API:
 
-	These are static methods in the dns class.  All routines that
-	return data return 'Record []'.
- 
-	The main function is:
-		getRecords(String namestr, short type, short dclass, byte cred)
-	This returns any records in the cache that satisfy the requirements.
-	If none exist, it uses DNS queries to determine the answers, and
-	caches them for further use.
-
-	The other functions (wrappers around the above function) are:
-		getRecords(String namestr, short type, short dclass)
-		getAnyRecords(String namestr, short type, short dclass)
-		getRecords(String name, short type)
-		getAnyRecords(String name, short type)
-		getRecordsByAddress(String addr, short type)
-		getAnyRecordsByAddress(String addr, short type)
-	The getRecords* functions will not return cached data below a certain
-	credibility level.  The getAnyRecords* functions ignore credibility,
-	and are useful for returning information that present in the
-	additional section of earlier queries (addresses of NS and MX records,
-	for example).  If dclass is unspecified, IN is assumed.
-
-	To set resolver properties, create a Resolver and call:
-		setResolver(Resolver res)
-	
+	A number of static methods in DNS.dns and DNS.Address that
+	provide cached DNS lookups.
 
 - Lower Level API
 
@@ -64,42 +43,24 @@ Function calls:
 		can be created from Strings.
 
 	Record:
-		Each record type is represented by a subclass of dnsRecord.
+		Each record type is represented by a subclass of Record.
 		Each class has accessor functions which extract the data.
-		For example, an A record is an instance of ARecord:
-			ARecord.getName()
-			ARecord.getType()
-			ARecord.getDClass()
-			ARecord.getAddress()
-			(not all of the accessor functions are complete yet)
-		Each class defines a constructor that takes all fields as
-		parameters, and Record provides Record.newRecord()
-		to create records in a non-type specific way.
+
+		To create new Records, each class defines a constructor that
+		takes all fields as parameters, and Record provides
+		Record.newRecord() to create records in a general way.
 
 	RRset:
-		A collection of records.  The important function is:
-			rrs()
-		which returns an Enumeration of Records.
+		A collection of records.  The important function is rrs().
 
 	Messages:
-		To extract the message header, use Message.getHeader().
-		The header object supports:
-			Header.getID() / Header.setID(id)
-			Header.getFlag(flag)
-			Header.setFlag(flag) / Header.unsetFlag(flag)
-			Header.getRcode() / Header.setRcode(rcode)
-			Header.getOpcode() / Header.setOpcode(opcode)
-			Header.getCount()
-		The message object supports:
-			Message.addRecord(section, record)
-			Message.removeRecord(section, record)
-			Message.getSection(section)
+		A Header and a collection of records comprising the message.
 
 	Resolver:
 		An interface implemented by SimpleResolver and ExtendedResolver.
 		SimpleResolver only communicates with one server, and does
 		no retries.  ExtendedResolver communicates with multiple
-		servers sends retries if queries fail.
+		servers and sends retries if queries fail.
 
 		Resolver.send(message) is used to send/receive messages.
 
@@ -143,18 +104,4 @@ Function calls:
 		which returns a CacheResponse, or
 			findRecords(Name name, short type)
 			findAnyRecords(Name name, short type)
-		which return RRsets.
-
-	CacheResponse:
-		One of the following will be true:
-			isUnknown()
-			isNegative()
-			isPartial()
-			isSuccessful()
-		If the response is unknown or negative, no additional data
-		is available.  If successful,
-			answer()
-		returns the answer as an RRset.  If partial resolution
-		was possible (a CNAME was found, but the target was unknown),
-			partial()
-		will return the Name used to continue the lookup.
+		which return an array of RRsets.
