@@ -267,6 +267,8 @@ Name(String s, Name origin) throws TextParseException {
 	}
 	if (digits > 0 && digits < 3)
 		throw parseException(s, "bad escape");
+	if (escaped)
+		throw parseException(s, "bad escape");
 	if (labelstart == -1) {
 		appendFromString(s, emptyLabel, 0, 1);
 		absolute = true;
