@@ -1,6 +1,5 @@
-dnsjava can be used in several ways:
-
-Command line programs:
+dnsjava provides several command line programs, which are documented here.
+For examples of API usage, see examples.html.
 
 - dig:
 	A clone of dig (as distributed with BIND)
@@ -50,111 +49,10 @@ Command line programs:
 
 	jnamed should not be used for production, and should probably
 	not be used for testing.  If the above documentation is not enough,
-	please do not ask for more, because it should not be used.
+	please do not ask for more, because it really should not be used.
 
 - lookup:
 	A simple program that looks up records associated with names.
 	If no type is specified, address lookups are done.
 
 	lookup [-t type] name ...
-
-
-DNS and DNS.utils packages:
-
-- See the Javadoc documentation in doc/ for details
-
-- All constants are defined in appropriate classes.  These include Type,
-	Dclass, Flags, Rcode, Opcode, Section, Credibility, and Security.
-	In many cases, there are functions to convert between numeric and
-	string representations (Type.string(value) and Type.value(string)).
-
-- High Level API:
-
-	A number of static methods in dns and Address that perform DNS lookups
-	and cache the results.
-
-- Low Level API
-
-	Name:
-		Names are normally represented by Name objects, which
-		can be created from Strings.
-
-	Record:
-		Each record type is represented by a subclass of Record.
-		Each class has accessor functions which extract the data.
-
-		To create new Records, each class defines a constructor that
-		takes all fields as parameters, and Record provides
-		Record.newRecord() to create records in a general way.
-
-	RRset:
-		A set of records with the same Name and type.  The important
-		function is rrs(), which creates an Iterator.
-
-	Messages:
-		A Header and a collection of records comprising the message.
-
-	Resolver:
-		An interface implemented by SimpleResolver and ExtendedResolver.
-		SimpleResolver only communicates with one server, and does
-		no retries.  ExtendedResolver communicates with multiple
-		servers and sends retries if queries fail.
-
-		Resolver.send(message) is used to send/receive messages.
-
-		Resolver.sendAsync(message, ResolverListener) sends a message
-		whose answer will be delivered asynchronously.  The
-		ResolverListener interface defines:
-			receiveMessage(int id, Message m)
-		where 'id' is returned by sendAsync.
-
-		Resolver options can also be set:
-			Resolver.setPort(port)
-			Resolver.useTCP(flag)
-			Resolver.setTSIGKey(name, key)
-			Resolver.setTimeout(secs)
-			Resolver.setIgnoreTruncation(flag)
-		See the dig client for a sample use of the resolver.
-
-		SimpleResolver can be initialized by SimpleResolver() to use
-		a default server or SimpleResolver(String) to specify the
-		server.
-
-		ExtendedResolver can be initialized by ExtendedResolver() to
-		use default servers, or ExtendedResolver(String []) or
-		ExtendedResolver(resolver []) to specify servers or resolvers.
-
-		ExtendedResolver.addResolver(resolver) and
-		ExtendedResolver.deleteResolver(resolver) modify the set
-		of Resolvers used by an Extended Resolver.
-
-		ExtendedResolver.getResolvers() and
-		ExtendedResolver.getResolver(i) are used to obtain its
-		resolver(s).
-
-	Cache:
-		Records (as RRsets) are added with:
-			addRRset(RRset r, byte cred)
-		Records are looked up with:
-			lookupRecords(Name name, short type, byte minCred)
-		which returns a CacheResponse, or
-			findRecords(Name name, short type)
-			findAnyRecords(Name name, short type)
-		which return an array of RRsets.
-
-	DNSSEC:
-		Use of DNSSEC is slightly complicated, to avoid creating
-		dependencies in the mainline code.  An implementation of a
-		Verifier must be created and assigned to a Cache.  The
-		Verifier must be seeded with trusted keys, or else no
-		data will ever be considered secure.  Finally, if only
-		secure data is desired, the cache must be instructed to
-		use this policy:
-
-		DNSSECVerifier v = new DNSSECVerifier();
-		cache.setVerifier(v);
-		v.addTrustedKey(key);
-		cache.setSecurePolicy();
-
-		From this point on, all data will be checked for DNSSEC
-		validity before entering the cache.
