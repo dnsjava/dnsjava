@@ -25,6 +25,18 @@ import org.xbill.DNS.utils.*;
 
 public class DNSSECVerifier implements Verifier {
 
+public class ByteArrayComparator implements Comparator {
+	public int
+	compare(Object o1, Object o2) throws ClassCastException {
+		byte [] b1 = (byte []) o1;
+		byte [] b2 = (byte []) o2;
+		for (int i = 0; i < b1.length && i < b2.length; i++)
+			if (b1[i] != b2[i])
+				return b1[i] - b2[i];
+		return b1.length - b2.length;
+	}
+}
+
 private Hashtable trustedKeys;
 
 /** Creates a new DNSSECVerifier */
@@ -117,6 +129,8 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 		out.writeShort(sigrec.getFootprint());
 		sigrec.getSigner().toWireCanonical(out);
 		Enumeration e = set.rrs();
+		int size = set.size();
+		byte [][] records = new byte[size][];
 		while (e.hasMoreElements()) {
 			Record rec = (Record) e.nextElement();
 			if (rec.getName().labels() > sigrec.getLabels()) {
@@ -125,9 +139,11 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 						      sigrec.getLabels());
 				rec = rec.withName(wild);
 			}
-			byte [] data = rec.toWireCanonical();
-			out.write(data);
+			records[--size] = rec.toWireCanonical();
 		}
+		Arrays.sort(records, new ByteArrayComparator());
+		for (int i = 0; i < records.length; i++)
+			out.write(records[i]);
 	}
 	catch (IOException ioe) {
 	}
