@@ -48,7 +48,7 @@ readInt() throws IOException {
 	int c2 = read();
 	int c3 = read();
 	int c4 = read();
-	return (short)((c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
+	return ((c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
 }
 
 public long
@@ -83,11 +83,6 @@ readBigInteger(int len) throws IOException {
 public void
 skipBytes(int n) throws IOException {
 	skip(n);
-}
-
-public int
-available() {
-	return available();
 }
 
 public int
