@@ -105,6 +105,7 @@ save() {
 	saved_pos = pos;
 	saved_end = end;
 }
+
 /**
  * Restores the input stream to its state before the call to {@link #save}.
  */
