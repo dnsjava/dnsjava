@@ -13,8 +13,9 @@ short flags;
 byte proto, alg;
 byte [] key;
 
-static int NOCONF = 0x8000;
-static int NOAUTH = 0x4000;
+/* flags */
+public static final int NOCONF = 0x8000;
+public static final int NOAUTH = 0x4000;
 
 public
 KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
@@ -88,6 +89,11 @@ getProtocol() {
 public byte
 getAlgorithm() {
 	return alg;
+}
+
+public byte []
+getKey() {
+	return key;
 }
 
 byte []
