@@ -607,6 +607,16 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
 }
 
 /**
+ * Convert Name to canonical DNS wire format (all lowercase)
+ */
+public byte []
+toWireCanonical() throws IOException {
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWireCanonical(out);
+	return out.toByteArray();
+}
+
+/**
  * Are these two Names equivalent?
  */
 public boolean
