@@ -53,15 +53,18 @@ public static final byte NOTZONE	= 10;
 /** Unsupported EDNS level */
 public static final byte BADVERS	= 16;
 
-/* TSIG only rcodes */
-/** The signature is invalid (TSIG extended error) */
+/* TSIG/TKEY only rcodes */
+/** The signature is invalid (TSIG/TKEY extended error) */
 public static final byte BADSIG		= 16;
 
-/** The key is invalid (TSIG extended error) */
+/** The key is invalid (TSIG/TKEY extended error) */
 public static final byte BADKEY		= 17;
 
-/** The time is out of range (TSIG extended error) */
+/** The time is out of range (TSIG/TKEY extended error) */
 public static final byte BADTIME	= 18;
+
+/** The mode is invalid (TKEY extended error) */
+public static final byte BADMODE	= 18;
 
 static {
 	rcodes.put2(NOERROR, "NOERROR");
@@ -80,6 +83,7 @@ static {
 	tsigrcodes.put2(BADSIG, "BADSIG");
 	tsigrcodes.put2(BADKEY, "BADKEY");
 	tsigrcodes.put2(BADTIME, "BADTIME");
+	tsigrcodes.put2(BADMODE, "BADMODE");
 }
 
 private
