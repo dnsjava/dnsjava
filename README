@@ -13,3 +13,7 @@ happen.
 There are other things I'd like to do at some point.  A GUI for the dynamic
 update program would be nice, since dynamic update can be pretty complex.
 A basic (primary, caching, non-recursive) server wouldn't be too hard.
+
+*** This software will be freely redistributable.  Right now, it is not
+complete enough to warrant release.  It is being made available for
+DNSSEC research purposes only.
