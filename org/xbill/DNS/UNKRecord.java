@@ -36,12 +36,13 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /** Converts this Record to the String "unknown format" */
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
-	sb.append("\\# ");
-	sb.append(data.length);
-	sb.append(" ");
-	sb.append(base16.toString(data));
-	return sb.toString();
+	return unknownToString(data);
+}
+
+/** Returns the contents of this record. */
+public byte []
+getData() { 
+	return data;
 }
 
 void

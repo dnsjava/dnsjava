@@ -453,6 +453,19 @@ byteArrayToString(byte [] array, boolean quote) {
 }
 
 /**
+ * Converts a byte array into the unknown RR format.
+ */
+protected static String
+unknownToString(byte [] data) {
+	StringBuffer sb = new StringBuffer();
+	sb.append("\\# ");
+	sb.append(data.length);
+	sb.append(" ");
+	sb.append(base16.toString(data));
+	return sb.toString();
+}
+
+/**
  * Builds a new Record from its textual representation
  * @param name The owner name of the record.
  * @param type The record's type.
