@@ -209,7 +209,7 @@ static {
 	types.add(ISDN, "ISDN");
 	types.add(RT, "RT");
 	types.add(NSAP, "NSAP");
-	types.add(NSAP_PTR, "NSAP_PTR");
+	types.add(NSAP_PTR, "NSAP-PTR");
 	types.add(SIG, "SIG");
 	types.add(KEY, "KEY");
 	types.add(PX, "PX");
