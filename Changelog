@@ -1,6 +1,7 @@
 6/20/2002
 	- Add Zone.removeRecord() (based on code from Adam Cassar
 	  <adam.cassar@netregistry.com.au>)
+	- Add Zone.toMasterFile() (based on code from Adam Cassar)
 
 6/16/2002
 	- Update lots of code to use Collections instead of JDK 1.1

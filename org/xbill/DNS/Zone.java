@@ -367,4 +367,28 @@ AXFR() {
 	return new AXFREnumeration();
 }
 
+/**
+ * Returns the contents of a Zone in master file format.
+ */
+public String
+toMasterFile() {
+	Iterator znames = names();
+	StringBuffer sb = new StringBuffer();
+	while (znames.hasNext()) {
+		Name name = (Name) znames.next();
+		TypeMap tm = findName(name);
+		Object [] sets = tm.getAll();
+		for (int i = 0; i < sets.length; i++) {
+			RRset rrset = (RRset) sets[i];
+			Iterator it = rrset.rrs();
+			while (it.hasNext())
+				sb.append(it.next() + "\n");
+			it = rrset.sigs();
+			while (it.hasNext())
+				sb.append(it.next() + "\n");
+		}
+	}
+	return sb.toString();
+}
+
 }
