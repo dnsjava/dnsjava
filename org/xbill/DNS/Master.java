@@ -24,6 +24,7 @@ private Tokenizer st;
 private int currentType;
 private int currentDClass;
 private long currentTTL;
+private boolean needSOATTL;
 
 private Generator generator;
 private List generators;
@@ -136,16 +137,15 @@ parseTTLClassAndType() throws IOException {
 		seen_class = true;
 	}
 
+	currentTTL = -1;
 	try {
 		currentTTL = TTL.parseTTL(s);
 		s = st.getString();
 	}
 	catch (NumberFormatException e) {
-		if (last == null && defaultTTL < 0)
-			throw st.exception("missing TTL");
-		else if (defaultTTL >= 0)
+		if (defaultTTL >= 0)
 			currentTTL = defaultTTL;
-		else
+		else if (last != null)
 			currentTTL = last.getTTL();
 	}
 
@@ -159,6 +159,16 @@ parseTTLClassAndType() throws IOException {
 
 	if ((currentType = Type.value(s)) < 0)
 		throw st.exception("Invalid type '" + s + "'");
+
+	// BIND allows a missing TTL for the initial SOA record, and uses
+	// the SOA minimum value.  If the SOA is not the first record,
+	// this is an error.
+	if (currentTTL < 0) {
+		if (currentType != Type.SOA)
+			throw st.exception("missing TTL");
+		needSOATTL = true;
+		currentTTL = 0;
+	}
 }
 
 private long
@@ -349,6 +359,10 @@ _nextRecord() throws IOException {
 		parseTTLClassAndType();
 		last = Record.fromString(name, currentType, currentDClass,
 					 currentTTL, st, origin);
+		if (needSOATTL) {
+			last.setTTL(((SOARecord)last).getMinimum());
+			needSOATTL = false;
+		}
 		return last;
 	}
 }

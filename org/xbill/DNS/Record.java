@@ -663,6 +663,12 @@ withDClass(int dclass, long ttl) {
 	return rec;
 }
 
+/* Sets the TTL to the specified value.  This is intentionally not public. */
+void
+setTTL(long ttl) {
+	this.ttl = ttl;
+}
+
 /**
  * Compares this Record to another Object.
  * @param o The Object to be compared.
