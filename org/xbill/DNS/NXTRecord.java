@@ -81,7 +81,7 @@ throws IOException
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
 			break;
-		int type = Type.value(t.value);
+		int type = Type.value(t.value, true);
 		if (type <= 0 || type > 128)
 			throw st.exception("Invalid type: " + t.value);
 		rec.bitmap.set(type);
