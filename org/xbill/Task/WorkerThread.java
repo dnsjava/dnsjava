@@ -1,26 +1,19 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.Task;
 
 import java.util.*;
-import java.io.*;
-import java.net.*;
-import DNS.utils.*;
 
 /**
- * A special-purpose thread used by Resolvers (both SimpleResolver and
- * ExtendedResolver) to perform asynchronous queries.  Once started, a
- * WorkerThread never exits.  After completing a task, it blocks until
- * another task is assigned.
+ * An extension of a Thread that uses threads from a pool, rather than
+ * allocating a new thread for each assigned task.
  */
 
-class WorkerThread extends Thread {
+public class WorkerThread extends Thread {
 
-private Message query;
-private int id;
-private ResolverListener listener;
-private Resolver res;
+private Runnable task;
+private String name;
 
 private static int nactive = 0;
 private static Vector list = new Vector();
@@ -69,20 +62,14 @@ getThread() {
 
 /**
  * Assigns a task to a WorkerThread
- * @param res The resolver using the WorkerThread
- * @param query The query to send
- * @param id The id of the query
- * @param listener The object registered to receive a callback
+ * @param task The task to be run
+ * @param name The name of the task
  */
 public static void
-assignThread(Resolver _res, Message _query, int _id,
-	     ResolverListener _listener)
-{
+assignThread(Runnable task, String name) {
 	WorkerThread t = getThread();
-	t.res = _res;
-	t.query = _query;
-	t.id = _id;
-	t.listener = _listener;
+	t.task = task;
+	t.name = name;
 	synchronized (t) {
 		if (!t.isAlive())
 			t.start();
@@ -91,13 +78,13 @@ assignThread(Resolver _res, Message _query, int _id,
 	}
 }
 
-/** Performs the task and executes the callback */
+/** Performs the task */
 public void
 run() {
 	while (true) {
-		setName(res.getClass() + ": " + query.getQuestion().getName());
-		Message response = res.send(query);
-		listener.receiveMessage(id, response);
+		
+		setName(name);
+		task.run();
 		setName("idle thread");
 		synchronized (list) {
 			list.addElement(this);
@@ -105,14 +92,14 @@ run() {
 				list.notify();
 			nactive--;
 		}
-		res = null;
+		task = null;
 		synchronized (this) {
 			try {
 				wait(lifetime);
 			}
 			catch (InterruptedException e) {
 			}
-			if (res == null) {
+			if (task == null) {
 				list.removeElement(this);
 				return;
 			}

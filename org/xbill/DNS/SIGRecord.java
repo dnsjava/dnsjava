@@ -1,12 +1,12 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 import java.io.*;
 import java.text.*;
 import java.util.*;
-import DNS.utils.*;
+import org.xbill.DNS.utils.*;
 
 /**
  * Signature - A SIG provides the digital signature of an RRset, so that

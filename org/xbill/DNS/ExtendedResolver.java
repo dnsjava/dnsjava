@@ -1,11 +1,12 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 import java.util.*;
 import java.io.*;
 import java.net.*;
+import org.xbill.Task.*;
 
 /**
  * An implementation of Resolver that can send queries to multiple servers,
@@ -262,7 +263,9 @@ uniqueID(Message m) {
 public int
 sendAsync(final Message query, final ResolverListener listener) {
 	final int id = uniqueID(query);
-	WorkerThread.assignThread(this, query, id, listener);
+	String name = this.getClass() + ": " + query.getQuestion().getName();
+	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
+				  name);
 	return id;
 }
 

@@ -1,12 +1,12 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
-import DNS.utils.*;
+import org.xbill.DNS.utils.*;
 
 /**
  * The base class that all records are derived from.

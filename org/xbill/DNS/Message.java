@@ -1,11 +1,11 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 import java.util.*;
 import java.io.*;
-import DNS.utils.*;
+import org.xbill.DNS.utils.*;
 
 /**
  * A DNS Message.  A message is the basic unit of communication between

@@ -4,8 +4,8 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
-import DNS.*;
-import DNS.utils.*;
+import org.xbill.DNS.*;
+import org.xbill.DNS.utils.*;
 
 public class update {
 

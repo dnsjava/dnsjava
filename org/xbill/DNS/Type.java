@@ -1,9 +1,9 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
-import DNS.utils.*;
+import org.xbill.DNS.utils.*;
 
 /** Constants and functions relating to DNS Types */
 

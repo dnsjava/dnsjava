@@ -1,7 +1,7 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 /**
  * Constants and functions relating to DNSSEC (algorithm constants).

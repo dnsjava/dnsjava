@@ -3,7 +3,7 @@
 
 /* High level API */
 
-package DNS;
+package org.xbill.DNS;
 
 import java.util.*;
 import java.io.*;

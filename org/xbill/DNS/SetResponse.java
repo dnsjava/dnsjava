@@ -1,10 +1,10 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 import java.util.*;
-import DNS.utils.*;
+import org.xbill.DNS.utils.*;
 
 /**
  * The Response from a query to Cache.lookupRecords() or Zone.findRecords()

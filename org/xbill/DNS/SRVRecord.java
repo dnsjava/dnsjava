@@ -1,11 +1,11 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package org.xbill.DNS;
 
 import java.io.*;
 import java.util.*;
-import DNS.utils.*;
+import org.xbill.DNS.utils.*;
 
 /** Server Selection Record  - finds hosts running services in a domain.  An
  * SRV record will normally be named <service>.<protocol>.domain - an
