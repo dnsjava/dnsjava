@@ -96,7 +96,7 @@ public static final short PX		= 26;
 /** Geographical position (withdrawn) */
 public static final short GPOS		= 27;
 
-/** IPv6 address */
+/** IPv6 address (old) */
 public static final short AAAA		= 28;
 
 /** Location */
@@ -120,8 +120,17 @@ public static final short ATMA		= 34;
 /** Naming authority pointer */
 public static final short NAPTR		= 35;
 
+/** Key exchange */
+public static final short KX		= 36;
+
 /** Certificate */
 public static final short CERT		= 37;
+
+/** IPv6 address */
+public static final short A6		= 38;
+
+/** Non-terminal name redirection */
+public static final short DNAME		= 39;
 
 /** Options - contains EDNS metadata */
 public static final short OPT		= 249;
