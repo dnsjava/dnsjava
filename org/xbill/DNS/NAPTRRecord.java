@@ -14,22 +14,15 @@ import org.xbill.DNS.utils.*;
 
 public class NAPTRRecord extends Record {
 
-private static NAPTRRecord member = new NAPTRRecord();
-
 private int order, preference;
 private byte [] flags, service, regexp;
 private Name replacement;
 
-private NAPTRRecord() {}
+NAPTRRecord() {}
 
-private
-NAPTRRecord(Name name, int dclass, long ttl) {
-	super(name, Type.NAPTR, dclass, ttl);
-}
-
-static NAPTRRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new NAPTRRecord();
 }
 
 /**
@@ -49,7 +42,7 @@ public
 NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	    String flags, String service, String regexp, Name replacement)
 {
-	this(name, dclass, ttl);
+	super(name, Type.NAPTR, dclass, ttl);
 	checkU16("order", order);
 	checkU16("preference", preference);
 	this.order = order;
@@ -67,39 +60,32 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	this.replacement = replacement;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.order = in.readU16();
-	rec.preference = in.readU16();
-	rec.flags = in.readCountedString();
-	rec.service = in.readCountedString();
-	rec.regexp = in.readCountedString();
-	rec.replacement = new Name(in);
-	return rec;
+		return;
+
+	order = in.readU16();
+	preference = in.readU16();
+	flags = in.readCountedString();
+	service = in.readCountedString();
+	regexp = in.readCountedString();
+	replacement = new Name(in);
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
-	rec.order = st.getUInt16();
-	rec.preference = st.getUInt16();
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	order = st.getUInt16();
+	preference = st.getUInt16();
 	try {
-		rec.flags = byteArrayFromString(st.getString());
-		rec.service = byteArrayFromString(st.getString());
-		rec.regexp = byteArrayFromString(st.getString());
+		flags = byteArrayFromString(st.getString());
+		service = byteArrayFromString(st.getString());
+		regexp = byteArrayFromString(st.getString());
 	}
 	catch (TextParseException e) {
 		throw st.exception(e.getMessage());
 	}
-	rec.replacement = st.getName(origin);
-	return rec;
+	replacement = st.getName(origin);
 }
 
 /** Converts rdata to a String */

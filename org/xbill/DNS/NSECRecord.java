@@ -20,19 +20,14 @@ import org.xbill.DNS.utils.*;
 
 public class NSECRecord extends Record {
 
-private static NSECRecord member = new NSECRecord();
-
 private Name next;
 private int types[];
 
-private NSECRecord() {}
+NSECRecord() {}
 
-private NSECRecord(Name name, int dclass, long ttl) {
-	super(name, Type.NSEC, dclass, ttl);
-}
-
-static NSECRecord getMember() {
-	return member;
+Record
+getObject() {
+	return new NSECRecord();
 }
 
 /**
@@ -42,7 +37,7 @@ static NSECRecord getMember() {
  */
 public
 NSECRecord(Name name, int dclass, long ttl, Name next, int [] types) {
-	this(name, dclass, ttl);
+	super(name, Type.NSEC, dclass, ttl);
 	if (!next.isAbsolute())
 		throw new RelativeNameException(next);
 	for (int i = 0; i < types.length; i++) {
@@ -64,14 +59,12 @@ listToArray(List list) {
 	return array;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	NSECRecord rec = new NSECRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.next = new Name(in);
+		return;
+
+	next = new Name(in);
 
 	int lastbase = -1;
 	List list = new ArrayList();
@@ -97,16 +90,12 @@ throws IOException
 			}
 		}
 	}
-	rec.types = listToArray(list);
-	return rec;
+	types = listToArray(list);
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	NSECRecord rec = new NSECRecord(name, dclass, ttl);
-	rec.next = st.getName(origin);
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	next = st.getName(origin);
 	List list = new ArrayList();
 	while (true) {
 		Tokenizer.Token t = st.get();
@@ -118,9 +107,8 @@ throws IOException
 		}
 		list.add(Mnemonic.toInteger(type));
 	}
-	rec.types = listToArray(list);
-	Arrays.sort(rec.types);
-	return rec;
+	types = listToArray(list);
+	Arrays.sort(types);
 }
 
 /** Converts rdata to a String */

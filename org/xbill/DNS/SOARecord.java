@@ -13,22 +13,14 @@ import org.xbill.DNS.utils.*;
 
 public class SOARecord extends Record {
 
-private static SOARecord member = new SOARecord();
-
 private Name host, admin;
 private long serial, refresh, retry, expire, minimum;
 
-private
 SOARecord() {}
 
-private
-SOARecord(Name name, int dclass, long ttl) {
-	super(name, Type.SOA, dclass, ttl);
-}
-
-static SOARecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new SOARecord();
 }
 
 /**
@@ -47,7 +39,7 @@ public
 SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 	  long serial, long refresh, long retry, long expire, long minimum)
 {
-	this(name, dclass, ttl);
+	super(name, Type.SOA, dclass, ttl);
 	if (!host.isAbsolute())
 		throw new RelativeNameException(host);
 	this.host = host;
@@ -66,36 +58,29 @@ SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 	this.minimum = minimum;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	SOARecord rec = new SOARecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.host = new Name(in);
-	rec.admin = new Name(in);
-	rec.serial = in.readU32();
-	rec.refresh = in.readU32();
-	rec.retry = in.readU32();
-	rec.expire = in.readU32();
-	rec.minimum = in.readU32();
-	return rec;
+		return;
+
+	host = new Name(in);
+	admin = new Name(in);
+	serial = in.readU32();
+	refresh = in.readU32();
+	retry = in.readU32();
+	expire = in.readU32();
+	minimum = in.readU32();
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	SOARecord rec = new SOARecord(name, dclass, ttl);
-	rec.host = st.getName(origin);
-	rec.admin = st.getName(origin);
-	rec.serial = st.getUInt32();
-	rec.refresh = st.getTTL();
-	rec.retry = st.getTTL();
-	rec.expire = st.getTTL();
-	rec.minimum = st.getTTL();
-	return rec;
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	host = st.getName(origin);
+	admin = st.getName(origin);
+	serial = st.getUInt32();
+	refresh = st.getTTL();
+	retry = st.getTTL();
+	expire = st.getTTL();
+	minimum = st.getTTL();
 }
 
 /** Convert to a String */

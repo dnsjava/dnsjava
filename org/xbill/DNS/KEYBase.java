@@ -37,18 +37,15 @@ KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
 	this.key = key;
 }
 
-protected static Record
-rrFromWire(KEYBase rec, DNSInput in)
-throws IOException
-{
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.flags = in.readU16();
-	rec.proto = in.readU8();
-	rec.alg = in.readU8();
+		return;
+	flags = in.readU16();
+	proto = in.readU8();
+	alg = in.readU8();
 	if (in.remaining() > 0)
-		rec.key = in.readByteArray();
-	return rec;
+		key = in.readByteArray();
 }
 
 private boolean
@@ -57,23 +54,19 @@ isNullKEY() {
 		(flags & KEYRecord.FLAG_NOKEY) == KEYRecord.FLAG_NOKEY);
 }
 
-protected static Record
-rdataFromString(KEYBase rec, Tokenizer st, Name origin)
-throws IOException
-{
-	rec.flags = st.getUInt16();
-	rec.proto = st.getUInt8();
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	flags = st.getUInt16();
+	proto = st.getUInt8();
 	String algString = st.getString();
-	int alg = DNSSEC.Algorithm.value(algString);
+	alg = DNSSEC.Algorithm.value(algString);
 	if (alg < 0)
 		throw st.exception("Invalid algorithm: " + algString);
-	rec.alg = alg;
 	/* If this is a null KEY, there's no key data */
-	if (rec.isNullKEY())
-		rec.key = null;
+	if (isNullKEY())
+		key = null;
 	else
-		rec.key = st.getBase64();
-	return rec;
+		key = st.getBase64();
 }
 
 /** Converts the DNSKEY/KEY Record to a String */

@@ -16,8 +16,6 @@ import org.xbill.DNS.utils.*;
 
 public class DNSKEYRecord extends KEYBase {
 
-private static DNSKEYRecord member = new DNSKEYRecord();
-
 public static class Protocol {
 	private Protocol() {}
 
@@ -35,17 +33,11 @@ public static class Flags {
 	public static final int SEP_KEY = 0x1;
 }
 
-private
 DNSKEYRecord() {}
 
-private
-DNSKEYRecord(Name name, int dclass, long ttl) {
-	super(name, Type.KEY, dclass, ttl);
-}
-
-static DNSKEYRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new DNSKEYRecord();
 }
 
 /**
@@ -60,20 +52,6 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	     byte [] key)
 {
 	super(name, Type.KEY, dclass, ttl, flags, proto, alg, key);
-}
-
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	return rrFromWire(new DNSKEYRecord(name, dclass, ttl), in);
-}
-
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	return rdataFromString(new DNSKEYRecord(name, dclass, ttl), st, origin);
 }
 
 }

@@ -13,21 +13,13 @@ import org.xbill.DNS.utils.*;
 
 public class AAAARecord extends Record {
 
-private static AAAARecord member = new AAAARecord();
-
 private Inet6Address address;
 
-private
 AAAARecord() {}
 
-private
-AAAARecord(Name name, int dclass, long ttl) {
-	super(name, Type.AAAA, dclass, ttl);
-}
-
-static AAAARecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new AAAARecord();
 }
 
 /**
@@ -36,35 +28,26 @@ getMember() {
  */
 public
 AAAARecord(Name name, int dclass, long ttl, Inet6Address address) {
-	this(name, dclass, ttl);
+	super(name, Type.AAAA, dclass, ttl);
 	this.address = address;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	AAAARecord rec = new AAAARecord(name, dclass, ttl);
-
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
+		return;
 
-	rec.address = new Inet6Address(in.readByteArray(16));
-	return rec;
+	address = new Inet6Address(in.readByteArray(16));
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	AAAARecord rec = new AAAARecord(name, dclass, ttl);
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	try {
-		rec.address = new Inet6Address(st.getString());
+		address = new Inet6Address(st.getString());
 	}
 	catch (TextParseException e) {
 		throw st.exception(e.getMessage());
 	}
-	return rec;
 }
 
 /** Converts rdata to a String */

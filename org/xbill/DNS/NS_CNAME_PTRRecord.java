@@ -31,22 +31,16 @@ NS_CNAME_PTRRecord(Name name, int type, int dclass, long ttl, Name target) {
 	this.target = target;
 }
 
-protected static Record
-rrFromWire(NS_CNAME_PTRRecord rec, DNSInput in)
-throws IOException
-{
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.target = new Name(in);
-	return rec;
+		return;
+	target = new Name(in);
 }
 
-protected static Record
-rdataFromString(NS_CNAME_PTRRecord rec, Tokenizer st, Name origin)
-throws IOException
-{
-	rec.target = st.getName(origin);
-	return rec;
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	target = st.getName(origin);
 }
 
 /** Converts the NS, CNAME, or PTR Record to a String */

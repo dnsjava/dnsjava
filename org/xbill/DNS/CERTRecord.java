@@ -84,23 +84,15 @@ public static final int URI = CertificateType.URI;
 /** Certificate format defined by IOD */
 public static final int OID = CertificateType.OID;
 
-private static CERTRecord member = new CERTRecord();
-
 private int certType, keyTag;
 private int alg;
 private byte [] cert;
 
-private
 CERTRecord() {}
 
-private
-CERTRecord(Name name, int dclass, long ttl) {
-	super(name, Type.CERT, dclass, ttl);
-}
-
-static CERTRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new CERTRecord();
 }
 
 /**
@@ -114,7 +106,7 @@ public
 CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 	   int alg, byte []  cert)
 {
-	this(name, dclass, ttl);
+	super(name, Type.CERT, dclass, ttl);
 	checkU16("certType", certType);
 	checkU16("keyTag", keyTag);
 	checkU8("alg", alg);
@@ -124,39 +116,29 @@ CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 	this.cert = cert;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	CERTRecord rec = new CERTRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.certType = in.readU16();
-	rec.keyTag = in.readU16();
-	rec.alg = in.readU8();
-	rec.cert = in.readByteArray();
-	return rec;
+		return;
+	certType = in.readU16();
+	keyTag = in.readU16();
+	alg = in.readU8();
+	cert = in.readByteArray();
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	CERTRecord rec = new CERTRecord(name, dclass, ttl);
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String certTypeString = st.getString();
-	int certType = CertificateType.value(certTypeString);
+	certType = CertificateType.value(certTypeString);
 	if (certType < 0)
 		throw st.exception("Invalid certificate type: " +
 				   certTypeString);
-	rec.certType = certType;
-	rec.keyTag = st.getUInt16();
+	keyTag = st.getUInt16();
 	String algString = st.getString();
-	int alg = DNSSEC.Algorithm.value(algString);
+	alg = DNSSEC.Algorithm.value(algString);
 	if (alg < 0)
 		throw st.exception("Invalid algorithm: " + algString);
-	rec.alg = alg;
-	rec.cert = st.getBase64();
-	return rec;
+	cert = st.getBase64();
 }
 
 /**

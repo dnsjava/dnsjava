@@ -18,23 +18,16 @@ public class DSRecord extends Record {
 
 public static final byte SHA1_DIGEST_ID = 1;
 
-private static DSRecord member = new DSRecord();
-
 private int footprint;
 private int alg;
 private int digestid;
 private byte [] digest;
 
-private DSRecord() {}
+DSRecord() {}
 
-private
-DSRecord(Name name, int dclass, long ttl) {
-	super(name, Type.DS, dclass, ttl);
-}
-
-static DSRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new DSRecord();
 }
 
 /**
@@ -48,7 +41,7 @@ public
 DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 	 int digestid, byte []  digest)
 {
-	this(name, dclass, ttl);
+	super(name, Type.DS, dclass, ttl);
 	checkU16("footprint", footprint);
 	checkU8("alg", alg);
 	checkU8("digestid", digestid);
@@ -58,31 +51,23 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 	this.digest = digest;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	DSRecord rec = new DSRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
+		return;
 
-	rec.footprint = in.readU16();
-	rec.alg = in.readU8();
-	rec.digestid = in.readU8();
-	rec.digest = in.readByteArray();
-	return rec;
+	footprint = in.readU16();
+	alg = in.readU8();
+	digestid = in.readU8();
+	digest = in.readByteArray();
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	DSRecord rec = new DSRecord(name, dclass, ttl);
-	rec.footprint = st.getUInt16();
-	rec.alg = st.getUInt8();
-	rec.digestid = st.getUInt8();
-	rec.digest = st.getHex();
-	return rec;
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	footprint = st.getUInt16();
+	alg = st.getUInt8();
+	digestid = st.getUInt8();
+	digest = st.getHex();
 }
 
 /**

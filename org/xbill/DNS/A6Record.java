@@ -13,23 +13,15 @@ import org.xbill.DNS.utils.*;
 
 public class A6Record extends Record {
 
-private static A6Record member = new A6Record();
-
 private int prefixBits;
 private Inet6Address suffix;
 private Name prefix;
 
-private
 A6Record() {}
 
-private
-A6Record(Name name, int dclass, long ttl) {
-	super(name, Type.A6, dclass, ttl);
-}
-
-static A6Record
-getMember() {
-	return member;
+Record
+getObject() {
+	return new A6Record();
 }
 
 /**
@@ -42,7 +34,7 @@ public
 A6Record(Name name, int dclass, long ttl, int prefixBits,
 	 Inet6Address suffix, Name prefix)
 {
-	this(name, dclass, ttl);
+	super(name, Type.A6, dclass, ttl);
 	checkU8("prefixBits", prefixBits);
 	this.prefixBits = prefixBits;
 	this.suffix = suffix;
@@ -51,40 +43,31 @@ A6Record(Name name, int dclass, long ttl, int prefixBits,
 	this.prefix = prefix;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	A6Record rec = new A6Record(name, dclass, ttl);
-
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
+		return;
 
-	rec.prefixBits = in.readU8();
-	int suffixbits = 128 - rec.prefixBits;
+	prefixBits = in.readU8();
+	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
-	rec.suffix = new Inet6Address(128 - rec.prefixBits,
-				      in.readByteArray(suffixbytes));
-	if (rec.prefixBits > 0)
-		rec.prefix = new Name(in);
-	return rec;
+	suffix = new Inet6Address(128 - prefixBits,
+				  in.readByteArray(suffixbytes));
+	if (prefixBits > 0)
+		prefix = new Name(in);
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	A6Record rec = new A6Record(name, dclass, ttl);
-	rec.prefixBits = st.getUInt8();
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	prefixBits = st.getUInt8();
 	try {
-		rec.suffix = new Inet6Address(st.getString());
+		suffix = new Inet6Address(st.getString());
 	}
 	catch (TextParseException e) {
 		throw st.exception(e.getMessage());
 	}
-	if (rec.prefixBits > 0)
-		rec.prefix = st.getName(origin);
-	return rec;
+	if (prefixBits > 0)
+		prefix = st.getName(origin);
 }
 
 /** Converts rdata to a String */

@@ -18,8 +18,6 @@ import org.xbill.DNS.utils.*;
 
 public class TSIGRecord extends Record {
 
-private static TSIGRecord member = new TSIGRecord();
-
 private Name alg;
 private Date timeSigned;
 private int fudge;
@@ -28,17 +26,11 @@ private int originalID;
 private int error;
 private byte [] other;
 
-private
 TSIGRecord() {} 
 
-private
-TSIGRecord(Name name, int dclass, long ttl) {
-	super(name, Type.TSIG, dclass, ttl);
-}
-
-static TSIGRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new TSIGRecord();
 }
 
 /**
@@ -61,7 +53,7 @@ TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 	   int fudge, byte [] signature, int originalID, int error,
 	   byte other[])
 {
-	this(name, dclass, ttl);
+	super(name, Type.TSIG, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
 	checkU16("fudge", fudge);
@@ -75,39 +67,34 @@ TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 	this.other = other;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	TSIGRecord rec = new TSIGRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.alg = new Name(in);
+		return;
+
+	alg = new Name(in);
 
 	long timeHigh = in.readU16();
 	long timeLow = in.readU32();
 	long time = (timeHigh << 32) + timeLow;
-	rec.timeSigned = new Date(time * 1000);
-	rec.fudge = in.readU16();
+	timeSigned = new Date(time * 1000);
+	fudge = in.readU16();
 
 	int sigLen = in.readU16();
-	rec.signature = in.readByteArray(sigLen);
+	signature = in.readByteArray(sigLen);
 
-	rec.originalID = in.readU16();
-	rec.error = in.readU16();
+	originalID = in.readU16();
+	error = in.readU16();
 
 	int otherLen = in.readU16();
 	if (otherLen > 0)
-		rec.other = in.readByteArray(otherLen);
+		other = in.readByteArray(otherLen);
 	else
-		rec.other = null;
-	return rec;
+		other = null;
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("no text format defined for TSIG");
 }
 

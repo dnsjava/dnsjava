@@ -14,38 +14,24 @@ import org.xbill.DNS.utils.*;
 
 public class UNKRecord extends Record {
 
-private static UNKRecord member = new UNKRecord();
-
 private byte [] data;
 
-private
 UNKRecord() {}
 
-private
-UNKRecord(Name name, int type, int dclass, long ttl) {
-	super(name, type, dclass, ttl);
-}
-
-static UNKRecord
-getMember() {
-	return member;
-}
-
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	UNKRecord rec = new UNKRecord(name, type, dclass, ttl);
+getObject() {
+	return new UNKRecord();
+}
+
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.data = in.readByteArray();
-	return rec;
+		return;
+	data = in.readByteArray();
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("invalid unknown RR encoding");
 }
 

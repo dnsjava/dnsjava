@@ -54,46 +54,38 @@ SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 	this.signature = signature;
 }
 
-protected static Record
-rrFromWire(SIGBase rec, DNSInput in)
-throws IOException
-{
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.covered = in.readU16();
-	rec.alg = in.readU8();
-	rec.labels = in.readU8();
-	rec.origttl = in.readU32();
-	rec.expire = new Date(1000 * in.readU32());
-	rec.timeSigned = new Date(1000 * in.readU32());
-	rec.footprint = in.readU16();
-	rec.signer = new Name(in);
-	rec.signature = in.readByteArray();
-	return rec;
+		return;
+	covered = in.readU16();
+	alg = in.readU8();
+	labels = in.readU8();
+	origttl = in.readU32();
+	expire = new Date(1000 * in.readU32());
+	timeSigned = new Date(1000 * in.readU32());
+	footprint = in.readU16();
+	signer = new Name(in);
+	signature = in.readByteArray();
 }
 
-protected static Record
-rdataFromString(SIGBase rec, Tokenizer st, Name origin)
-throws IOException
-{
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String typeString = st.getString();
-	int covered = Type.value(typeString);
+	covered = Type.value(typeString);
 	if (covered < 0)
 		throw st.exception("Invalid type: " + typeString);
-	rec.covered = covered;
 	String algString = st.getString();
-	int alg = DNSSEC.Algorithm.value(algString);
+	alg = DNSSEC.Algorithm.value(algString);
 	if (alg < 0)
 		throw st.exception("Invalid algorithm: " + algString);
-	rec.alg = alg;
-	rec.labels = st.getUInt8();
-	rec.origttl = st.getTTL();
-	rec.expire = FormattedTime.parse(st.getString());
-	rec.timeSigned = FormattedTime.parse(st.getString());
-	rec.footprint = st.getUInt16();
-	rec.signer = st.getName(origin);
-	rec.signature = st.getBase64();
-	return rec;
+	labels = st.getUInt8();
+	origttl = st.getTTL();
+	expire = FormattedTime.parse(st.getString());
+	timeSigned = FormattedTime.parse(st.getString());
+	footprint = st.getUInt16();
+	signer = st.getName(origin);
+	signature = st.getBase64();
 }
 
 /** Converts the RRSIG/SIG Record to a String */

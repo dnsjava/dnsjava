@@ -20,19 +20,11 @@ import org.xbill.DNS.utils.*;
 
 public class SIGRecord extends SIGBase {
 
-private static SIGRecord member = new SIGRecord();
-
-private
 SIGRecord() {}
 
-private
-SIGRecord(Name name, int dclass, long ttl) {
-	super(name, Type.SIG, dclass, ttl);
-}
-
-static SIGRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new SIGRecord();
 }
 
 /**
@@ -54,20 +46,6 @@ SIGRecord(Name name, int dclass, long ttl, int covered, int alg, long origttl,
 {
 	super(name, Type.SIG, dclass, ttl, covered, alg, origttl, expire,
 	      timeSigned, footprint, signer, signature);
-}
-
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	return rrFromWire(new SIGRecord(name, dclass, ttl), in);
-}
-
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	return rdataFromString(new SIGRecord(name, dclass, ttl), st, origin);
 }
 
 }

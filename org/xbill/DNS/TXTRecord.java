@@ -14,21 +14,13 @@ import org.xbill.DNS.utils.*;
 
 public class TXTRecord extends Record {
 
-private static TXTRecord member = new TXTRecord();
-
 private List strings;
 
-private
 TXTRecord() {}
 
-private
-TXTRecord(Name name, int dclass, long ttl) {
-	super(name, Type.TXT, dclass, ttl);
-}
-
-static TXTRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new TXTRecord();
 }
 
 /**
@@ -38,7 +30,7 @@ getMember() {
  */
 public
 TXTRecord(Name name, int dclass, long ttl, List strings) {
-	this(name, dclass, ttl);
+	super(name, Type.TXT, dclass, ttl);
 	if (strings == null)
 		throw new IllegalArgumentException
 				("TXTRecord: strings must not be null");
@@ -65,33 +57,27 @@ TXTRecord(Name name, int dclass, long ttl, String string) {
 	this(name, dclass, ttl, Collections.nCopies(1, string));
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	TXTRecord rec = new TXTRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.strings = new ArrayList(2);
+		return;
+
+	strings = new ArrayList(2);
 	while (in.remaining() > 0) {
 		byte [] b = in.readCountedString();
-		rec.strings.add(b);
+		strings.add(b);
 	}
-	return rec;
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	TXTRecord rec = new TXTRecord(name, dclass, ttl);
-	rec.strings = new ArrayList(2);
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	strings = new ArrayList(2);
 	while (true) {
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
 			break;
 		try {
-			rec.strings.add(byteArrayFromString(t.value));
+			strings.add(byteArrayFromString(t.value));
 		}
 		catch (TextParseException e) { 
 			throw st.exception(e.getMessage());
@@ -99,7 +85,6 @@ throws IOException
 
 	}
 	st.unget();
-	return rec;
 }
 
 /** converts to a String */

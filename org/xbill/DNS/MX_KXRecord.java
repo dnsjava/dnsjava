@@ -36,24 +36,18 @@ MX_KXRecord(Name name, int type, int dclass, long ttl, int priority,
 	this.target = target;
 }
 
-protected static Record
-rrFromWire(MX_KXRecord rec, DNSInput in)
-throws IOException
-{
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.priority = in.readU16();
-	rec.target = new Name(in);
-	return rec;
+		return;
+	priority = in.readU16();
+	target = new Name(in);
 }
 
-protected static Record
-rdataFromString(MX_KXRecord rec, Tokenizer st, Name origin)
-throws IOException
-{
-	rec.priority = st.getUInt16();
-	rec.target = st.getName(origin);
-	return rec;
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	priority = st.getUInt16();
+	target = st.getName(origin);
 }
 
 /** Converts rdata to a String */

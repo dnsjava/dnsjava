@@ -15,22 +15,14 @@ import org.xbill.DNS.utils.*;
 
 public class SRVRecord extends Record {
 
-private static SRVRecord member = new SRVRecord();
-
 private int priority, weight, port;
 private Name target;
 
-private
 SRVRecord() {}
 
-private
-SRVRecord(Name name, int dclass, long ttl) {
-	super(name, Type.SRV, dclass, ttl);
-}
-
-static SRVRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new SRVRecord();
 }
 
 /**
@@ -46,7 +38,7 @@ public
 SRVRecord(Name name, int dclass, long ttl, int priority,
 	  int weight, int port, Name target)
 {
-	this(name, dclass, ttl);
+	super(name, Type.SRV, dclass, ttl);
 	checkU16("priority", priority);
 	checkU16("weight", weight);
 	checkU16("port", port);
@@ -58,30 +50,22 @@ SRVRecord(Name name, int dclass, long ttl, int priority,
 	this.target = target;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	SRVRecord rec = new SRVRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.priority = in.readU16();
-	rec.weight = in.readU16();
-	rec.port = in.readU16();
-	rec.target = new Name(in);
-	return rec;
+		return;
+	priority = in.readU16();
+	weight = in.readU16();
+	port = in.readU16();
+	target = new Name(in);
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	SRVRecord rec = new SRVRecord(name, dclass, ttl);
-	rec.priority = st.getUInt16();
-	rec.weight = st.getUInt16();
-	rec.port = st.getUInt16();
-	rec.target = st.getName(origin);
-	return rec;
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	priority = st.getUInt16();
+	weight = st.getUInt16();
+	port = st.getUInt16();
+	target = st.getName(origin);
 }
 
 /** Converts rdata to a String */

@@ -15,22 +15,14 @@ import org.xbill.DNS.utils.*;
 
 public class RPRecord extends Record {
 
-private static RPRecord member = new RPRecord();
-
 private Name mailbox;
 private Name textDomain;
 
-private
 RPRecord() {}
 
-private
-RPRecord(Name name, int dclass, long ttl) {
-	super(name, Type.RP, dclass, ttl);
-}
-
-static RPRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new RPRecord();
 }
 
 /**
@@ -40,7 +32,8 @@ getMember() {
  */
 public
 RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
-	this(name, dclass, ttl);
+	super(name, Type.RP, dclass, ttl);
+
 	if (!mailbox.isAbsolute())
 		throw new RelativeNameException(mailbox);
 	this.mailbox = mailbox;
@@ -49,26 +42,18 @@ RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
 	this.textDomain = textDomain;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	RPRecord rec = new RPRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.mailbox = new Name(in);
-	rec.textDomain = new Name(in);
-	return rec;
+		return;
+	mailbox = new Name(in);
+	textDomain = new Name(in);
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	RPRecord rec = new RPRecord(name, dclass, ttl);
-	rec.mailbox = st.getName(origin);
-	rec.textDomain = st.getName(origin);
-	return rec;
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
+	mailbox = st.getName(origin);
+	textDomain = st.getName(origin);
 }
 
 /** Converts the RP Record to a String */

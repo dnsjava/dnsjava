@@ -15,8 +15,6 @@ import org.xbill.DNS.utils.*;
 
 public class KEYRecord extends KEYBase {
 
-private static KEYRecord member = new KEYRecord();
-
 /* flags */
 /** This key cannot be used for confidentiality (encryption) */
 public static final int FLAG_NOCONF = 0x8000;
@@ -52,17 +50,11 @@ public static final int PROTOCOL_IPSEC = 4;
 /** Key was created for use with any protocol */
 public static final int PROTOCOL_ANY = 255;
 
-private
 KEYRecord() {}
 
-private
-KEYRecord(Name name, int dclass, long ttl) {
-	super(name, Type.KEY, dclass, ttl);
-}
-
-static KEYRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new KEYRecord();
 }
 
 /**
@@ -77,20 +69,6 @@ KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	  byte [] key)
 {
 	super(name, Type.KEY, dclass, ttl, flags, proto, alg, key);
-}
-
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	return rrFromWire(new KEYRecord(name, dclass, ttl), in);
-}
-
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	return rdataFromString(new KEYRecord(name, dclass, ttl), st, origin);
 }
 
 }

@@ -14,22 +14,14 @@ import org.xbill.DNS.utils.*;
 
 public class LOCRecord extends Record {
 
-private static LOCRecord member = new LOCRecord();
-
 private long size, hPrecision, vPrecision;
 private long latitude, longitude, altitude;
 
-private
 LOCRecord() {}
 
-private
-LOCRecord(Name name, int dclass, long ttl) {
-	super(name, Type.LOC, dclass, ttl);
-}
-
-static LOCRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new LOCRecord();
 }
 
 /**
@@ -45,7 +37,7 @@ public
 LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
 	  double altitude, double size, double hPrecision, double vPrecision)
 {
-	this(name, dclass, ttl);
+	super(name, Type.LOC, dclass, ttl);
 	this.latitude = (int)(latitude * 3600 * 1000 + (1 << 31));
 	this.longitude = (int)(longitude * 3600 * 1000 + (1 << 31));
 	this.altitude = (int)((altitude + 100000) * 100);
@@ -54,34 +46,27 @@ LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
 	this.vPrecision = (long)(vPrecision * 100);
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	LOCRecord rec = new LOCRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	int version, temp;
+		return;
+
+	int version;
 
 	version = in.readU8();
 	if (version != 0)
 		throw new WireParseException("Invalid LOC version");
 
-	rec.size = parseLOCformat(in.readU8());
-	rec.hPrecision = parseLOCformat(in.readU8());
-	rec.vPrecision = parseLOCformat(in.readU8());
-	rec.latitude = in.readU32();
-	rec.longitude = in.readU32();
-	rec.altitude = in.readU32();
-	return rec;
+	size = parseLOCformat(in.readU8());
+	hPrecision = parseLOCformat(in.readU8());
+	vPrecision = parseLOCformat(in.readU8());
+	latitude = in.readU32();
+	longitude = in.readU32();
+	altitude = in.readU32();
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	LOCRecord rec = new LOCRecord(name, dclass, ttl);
-
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = null;
 	int deg, min;
 	double sec;
@@ -100,10 +85,10 @@ throws IOException
 	s = st.getString();
 	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
 		throw st.exception("Invalid LOC latitude");
-	rec.latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
+	latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("S"))
-		rec.latitude = -rec.latitude;
-	rec.latitude += (1 << 31);
+		latitude = -latitude;
+	latitude += (1 << 31);
 	
 	/* Longitude */
 	deg = min = 0;
@@ -119,23 +104,22 @@ throws IOException
 	s = st.getString();
 	if (!s.equalsIgnoreCase("W") && !s.equalsIgnoreCase("E"))
 		throw st.exception("Invalid LOC longitude");
-	rec.longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
+	longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("W"))
-		rec.longitude = -rec.longitude;
-	rec.longitude += (1 << 31);
+		longitude = -longitude;
+	longitude += (1 << 31);
 
 	/* Altitude */
 	Tokenizer.Token token = st.get();
 	if (token.isEOL()) {
 		st.unget();
-		return rec;
+		return;
 	}
 	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		rec.altitude = (int)((new Double(s).doubleValue() + 100000) *
-				     100);
+		altitude = (int)((new Double(s).doubleValue() + 100000) * 100);
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC altitude");
@@ -145,13 +129,13 @@ throws IOException
 	token = st.get();
 	if (token.isEOL()) {
 		st.unget();
-		return rec;
+		return;
 	}
 	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		rec.size = (int) (100 * new Double(s).doubleValue());
+		size = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC size");
@@ -161,13 +145,13 @@ throws IOException
 	token = st.get();
 	if (token.isEOL()) {
 		st.unget();
-		return rec;
+		return;
 	}
 	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		rec.hPrecision = (int) (100 * new Double(s).doubleValue());
+		hPrecision = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC horizontal precision");
@@ -177,18 +161,17 @@ throws IOException
 	token = st.get();
 	if (token.isEOL()) {
 		st.unget();
-		return rec;
+		return;
 	}
 	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		rec.vPrecision = (int) (100 * new Double(s).doubleValue());
+		vPrecision = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC vertical precision");
 	}
-	return rec;
 }
 
 /** Convert to a String */

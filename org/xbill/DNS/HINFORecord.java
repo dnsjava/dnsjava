@@ -13,21 +13,13 @@ import org.xbill.DNS.utils.*;
 
 public class HINFORecord extends Record {
 
-private static HINFORecord member = new HINFORecord();
-
 private byte [] cpu, os;
 
-private
 HINFORecord() {}
 
-private
-HINFORecord(Name name, int dclass, long ttl) {
-	super(name, Type.HINFO, dclass, ttl);
-}
-
-static HINFORecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new HINFORecord();
 }
 
 /**
@@ -38,7 +30,7 @@ getMember() {
  */
 public
 HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
-	this(name, dclass, ttl);
+	super(name, Type.HINFO, dclass, ttl);
 	try {
 		this.cpu = byteArrayFromString(cpu);
 		this.os = byteArrayFromString(os);
@@ -48,31 +40,23 @@ HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
 	}
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	HINFORecord rec = new HINFORecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.cpu = in.readCountedString();
-	rec.os = in.readCountedString();
-	return rec;
+		return;
+	cpu = in.readCountedString();
+	os = in.readCountedString();
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	HINFORecord rec = new HINFORecord(name, dclass, ttl);
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	try {
-		rec.cpu = byteArrayFromString(st.getString());
-		rec.os = byteArrayFromString(st.getString());
+		cpu = byteArrayFromString(st.getString());
+		os = byteArrayFromString(st.getString());
 	}
 	catch (TextParseException e) {
 		throw st.exception(e.getMessage());
 	}
-	return rec;
 }
 
 /**

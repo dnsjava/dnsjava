@@ -23,21 +23,13 @@ import org.xbill.DNS.utils.*;
 
 public class OPTRecord extends Record {
 
-private static OPTRecord member = new OPTRecord();
-
 private Map options;
 
-private
 OPTRecord() {}
 
-private
-OPTRecord(Name name, int dclass, long ttl) {
-	super(name, Type.OPT, dclass, ttl);
-}
-
-static OPTRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new OPTRecord();
 }
 
 /**
@@ -46,7 +38,7 @@ getMember() {
  */
 public
 OPTRecord(int payloadSize, int xrcode, int version, int flags) {
-	this(Name.root, payloadSize, 0);
+	super(Name.root, Type.OPT, payloadSize, 0);
 	checkU16("payloadSize", payloadSize);
 	checkU8("xrcode", xrcode);
 	checkU8("version", version);
@@ -64,27 +56,22 @@ OPTRecord(int payloadSize, int xrcode, int version) {
 	this(payloadSize, xrcode, version, 0);
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	OPTRecord rec = new OPTRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
+		return;
+
 	if (in.remaining() > 0)
-		rec.options = new HashMap();
+		options = new HashMap();
 	while (in.remaining() > 0) {
 		int code = in.readU16();
 		int len = in.readU16();
-		rec.options.put(new Integer(code), in.readByteArray(len));
+		options.put(new Integer(code), in.readByteArray(len));
 	}
-	return rec;
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("no text format defined for OPT");
 }
 

@@ -14,21 +14,13 @@ import org.xbill.DNS.utils.*;
 
 public class ARecord extends Record {
 
-private static ARecord member = new ARecord();
-
 private int addr;
 
-private
 ARecord() {}
 
-private
-ARecord(Name name, int dclass, long ttl) {
-	super(name, Type.A, dclass, ttl);
-}
-
-static ARecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new ARecord();
 }
 
 private static final int
@@ -63,27 +55,19 @@ toDottedQuad(int addr) {
  */
 public
 ARecord(Name name, int dclass, long ttl, InetAddress address) {
-	this(name, dclass, ttl);
+	super(name, Type.A, dclass, ttl);
 	addr = fromArray(address.getAddress());
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	ARecord rec = new ARecord(name, dclass, ttl);
-
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.addr = fromArray(in.readByteArray(4));
-	return rec;
+		return;
+	addr = fromArray(in.readByteArray(4));
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	ARecord rec = new ARecord(name, dclass, ttl);
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = st.getString();
 	try {
 		InetAddress address;
@@ -95,19 +79,18 @@ throws IOException
 					     "broken.  Don't use @me@.";
 				throw new RuntimeException(msg);
 			}
-			rec.addr = fromArray(address.getAddress());
+			addr = fromArray(address.getAddress());
 		}
 	}
 	catch (UnknownHostException e) {
 		throw st.exception("invalid address");
 	}
 
-	int [] addr = Address.toArray(s);
-	if (addr == null)
+	int [] array = Address.toArray(s);
+	if (array == null)
 		throw st.exception("invalid dotted quad");
-	rec.addr = fromBytes((byte)addr[0], (byte)addr[1], (byte)addr[2],
-			     (byte)addr[3]);
-	return rec;
+	addr = fromBytes((byte)array[0], (byte)array[1], (byte)array[2],
+			 (byte)array[3]);
 }
 
 /** Converts rdata to a String */

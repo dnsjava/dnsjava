@@ -23,6 +23,7 @@ protected long ttl;
 private boolean empty;
 
 private static final Record [] knownRecords = new Record[256];
+private static final Record unknownRecord = new UNKRecord();
 private static final Class [] emptyClassArray = new Class[0];
 private static final Object [] emptyObjectArray = new Object[0];
 
@@ -47,10 +48,16 @@ Record(Name name, int type, int dclass, long ttl) {
 	this.ttl = ttl;
 }
 
+/**
+ * Creates an empty record of the correct type; must be overriden
+ */
+abstract Record
+getObject();
+
 private static final Record
 getTypedObject(int type) {
 	if (type < 0 || type > knownRecords.length)
-		return UNKRecord.getMember();
+		return unknownRecord.getObject();
 	if (knownRecords[type] != null)
 		return knownRecords[type];
 
@@ -61,35 +68,37 @@ getTypedObject(int type) {
 
 	try {
 		Class c = Class.forName(sb.toString());
-		Method m = c.getDeclaredMethod("getMember", emptyClassArray);
-		knownRecords[type] = (Record) m.invoke(null, emptyObjectArray);
+		Constructor m = c.getDeclaredConstructor(emptyClassArray);
+		knownRecords[type] = (Record) m.newInstance(emptyObjectArray);
 	}
 	catch (ClassNotFoundException e) {
 		/* This is normal; do nothing */
 	}
-	catch (InvocationTargetException e) {
-		if (Options.check("verbose"))
-			System.err.println(e);
-	}
-	catch (NoSuchMethodException e) {
-		if (Options.check("verbose"))
-			System.err.println(e);
-	}
-	catch (IllegalAccessException e) {
+	catch (Exception e) {
 		if (Options.check("verbose"))
 			System.err.println(e);
 	}
 	if (knownRecords[type] == null)
-		knownRecords[type] = UNKRecord.getMember();
+		knownRecords[type] = unknownRecord.getObject();
 	return knownRecords[type];
+}
+
+private static final Record
+getEmptyRecord(Name name, int type, int dclass, long ttl) {
+	Record rec = getTypedObject(type);
+	rec = rec.getObject();
+	rec.name = name;
+	rec.type = type;
+	rec.dclass = dclass;
+	rec.ttl = ttl;
+	return rec;
 }
 
 /**
  * Converts the type-specific RR to wire format - must be overriden
  */
-abstract Record rrFromWire(Name name, int type, int dclass, long ttl,
-			   DNSInput in)
-throws IOException;
+abstract void
+rrFromWire(DNSInput in) throws IOException;
 
 private static Record
 newRecord(Name name, int type, int dclass, long ttl, int length, DNSInput in)
@@ -97,13 +106,13 @@ throws IOException
 {
 	Record rec;
 	int recstart;
-	rec = getTypedObject(type);
+	rec = getEmptyRecord(name, type, dclass, ttl);
 	if (in != null)
 		in.setActive(length);
 	else
 		rec.empty = true;
 
-	rec = rec.rrFromWire(name, type, dclass, ttl, in);
+	rec.rrFromWire(in);
 
 	if (in != null) {
 		if (in.remaining() > 0)
@@ -324,9 +333,8 @@ toString() {
 /**
  * Converts the text format of an RR to the internal format - must be overriden
  */
-abstract Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException;
+abstract void
+rdataFromString(Tokenizer st, Name origin) throws IOException;
 
 /**
  * Converts a String into a byte array.
@@ -449,8 +457,8 @@ throws IOException
 		return newRecord(name, type, dclass, ttl, length, in);
 	}
 	st.unget();
-	rec = getTypedObject(type);
-	rec = rec.rdataFromString(name, dclass, ttl, st, origin);
+	rec = getEmptyRecord(name, type, dclass, ttl);
+	rec.rdataFromString(st, origin);
 	t = st.get();
 	if (t.type != Tokenizer.EOL && t.type != Tokenizer.EOF) {
 		throw st.exception("unexpected tokens at end of record");

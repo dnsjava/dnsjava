@@ -16,8 +16,6 @@ import org.xbill.DNS.utils.*;
 
 public class TKEYRecord extends Record {
 
-private static TKEYRecord member = new TKEYRecord();
-
 private Name alg;
 private Date timeInception;
 private Date timeExpire;
@@ -40,17 +38,11 @@ public static final int RESOLVERASSIGNED	= 4;
 /** The key should be deleted */
 public static final int DELETE			= 5;
 
-private
 TKEYRecord() {}
 
-private
-TKEYRecord(Name name, int dclass, long ttl) {
-	super(name, Type.TKEY, dclass, ttl);
-}
-
-static TKEYRecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new TKEYRecord();
 }
 
 /**
@@ -71,7 +63,7 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	   Date timeInception, Date timeExpire, int mode, int error,
 	   byte [] key, byte other[])
 {
-	this(name, dclass, ttl);
+	super(name, Type.TKEY, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
 	checkU16("mode", mode);
@@ -85,37 +77,32 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	this.other = other;
 }
 
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	TKEYRecord rec = new TKEYRecord(name, dclass, ttl);
+void
+rrFromWire(DNSInput in) throws IOException {
 	if (in == null)
-		return rec;
-	rec.alg = new Name(in);
-	rec.timeInception = new Date(1000 * in.readU32());
-	rec.timeExpire = new Date(1000 * in.readU32());
-	rec.mode = in.readU16();
-	rec.error = in.readU16();
+		return;
+
+	alg = new Name(in);
+	timeInception = new Date(1000 * in.readU32());
+	timeExpire = new Date(1000 * in.readU32());
+	mode = in.readU16();
+	error = in.readU16();
 
 	int keylen = in.readU16();
 	if (keylen > 0)
-		rec.key = in.readByteArray(keylen);
+		key = in.readByteArray(keylen);
 	else
-		rec.key = null;
+		key = null;
 
 	int otherlen = in.readU16();
 	if (otherlen > 0)
-		rec.other = in.readByteArray(otherlen);
+		other = in.readByteArray(otherlen);
 	else
-		rec.other = null;
-	return rec;
+		other = null;
 }
 
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
+void
+rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("no text format defined for TKEY");
 }
 

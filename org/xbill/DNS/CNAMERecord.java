@@ -13,19 +13,11 @@ import org.xbill.DNS.utils.*;
 
 public class CNAMERecord extends NS_CNAME_PTRRecord {
 
-private static CNAMERecord member = new CNAMERecord();
-
-private
 CNAMERecord() {}
 
-private
-CNAMERecord(Name name, int dclass, long ttl) {
-	super(name, Type.CNAME, dclass, ttl);
-}
-
-static CNAMERecord
-getMember() {
-	return member;
+Record
+getObject() {
+	return new CNAMERecord();
 }
 
 /**
@@ -35,20 +27,6 @@ getMember() {
 public
 CNAMERecord(Name name, int dclass, long ttl, Name target) {
 	super(name, Type.CNAME, dclass, ttl, target);
-}
-
-Record
-rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
-throws IOException
-{
-	return rrFromWire(new CNAMERecord(name, dclass, ttl), in);
-}
-
-Record
-rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
-throws IOException
-{
-	return rdataFromString(new CNAMERecord(name, dclass, ttl), st, origin);
 }
 
 }
