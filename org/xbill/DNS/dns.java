@@ -5,6 +5,7 @@
 
 import java.util.*;
 import java.io.*;
+import java.net.*;
 
 public final class dns {
 
@@ -308,6 +309,11 @@ longSectionString(int i) {
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+static boolean
+matchType(short type1, short type2) {
+	return (type1 == dns.ANY || type2 == dns.ANY || type1 == type2);
+}
+
 static dnsRecord []
 getRecords(dnsResolver res, String name, short type, short dclass) {
 	dnsMessage query = new dnsMessage();
@@ -335,7 +341,7 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 	e = response.getSection(dns.ANSWER).elements();
 	while (e.hasMoreElements()) {
 		dnsRecord r = (dnsRecord)e.nextElement();
-		if (r.getType() == type)
+		if (matchType(r.getType(), type))
 			answerCount++;
 	}
 
@@ -347,7 +353,7 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 	e = response.getSection(dns.ANSWER).elements();
 	while (e.hasMoreElements()) {
 		dnsRecord r = (dnsRecord)e.nextElement();
-		if (r.getType() == type)
+		if (matchType(r.getType(), type))
 			answers[i++] = r;
 	}
 
@@ -369,5 +375,29 @@ getRecords(String name, short type) {
 	return getRecords(_res, name, type, dns.IN);
 }
 
+
+static dnsRecord []
+getRecordsByAddress(dnsResolver res, String addr, short type) {
+	byte [] address;
+	try {
+		address = InetAddress.getByName(addr).getAddress();
+	}
+	catch (UnknownHostException e) {
+		return null;
+	}
+	StringBuffer sb = new StringBuffer();
+	for (int i = 3; i >= 0; i--) {
+		sb.append(address[i] & 0xFF);
+		sb.append(".");
+	}
+	sb.append(".IN-ADDR.ARPA.");
+	String name = sb.toString();
+	return getRecords(res, name, type, dns.IN);
+}
+
+static dnsRecord []
+getRecordsByAddress(String addr, short type) {
+	return getRecordsByAddress(_res, addr, type);
+}
 
 }
