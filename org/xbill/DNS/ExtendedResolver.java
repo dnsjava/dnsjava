@@ -75,7 +75,7 @@ class Receiver implements ResolverListener {
 	}
 }
 
-private static final int quantum = 30;
+private static final int quantum = 20;
 private static final byte retries = 3;
 private static int uniqueID = 0;
 private Vector resolvers;
