@@ -81,11 +81,13 @@ findBestZone(Name name) {
 }
 
 public RRset
-findExactMatch(Name name, short type, short dclass) {
+findExactMatch(Name name, short type, short dclass, boolean glue) {
 	Zone zone = findBestZone(name);
 	if (zone != null)
 		return zone.findRecords(name, type);
-	else
+	else if (glue)
+		return cache.findAnyRecords(name, type);
+	else 
 		return cache.findRecords(name, type);
 	
 }
@@ -104,7 +106,8 @@ void
 addAuthority(Message response, Name name, Zone zone) {
 	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == null)
 	{
-		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN);
+		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN,
+						 false);
 		if (nsRecords == null) {
 			if (zone != null)
 				nsRecords = zone.getNS();
@@ -127,7 +130,7 @@ addAuthority(Message response, Name name, Zone zone) {
 
 private void
 addGlue(Message response, Name name) {
-	RRset a = findExactMatch(name, Type.A, DClass.IN);
+	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
 	Enumeration e = a.rrs();
 	while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
