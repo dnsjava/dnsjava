@@ -1,4 +1,4 @@
-dnsjava v1.5
+dnsjava v1.6
 
 http://www.xbill.org/dnsjava
 http://www.dnsjava.org/
@@ -6,13 +6,13 @@ http://www.dnsjava.org/
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-December 9, 2003
+March 12, 2004
 
 Overview:
 
-dnsjava is an implementation of DNS in Java.  It supports all of the common
-record types, the DNSSEC types, and unknown types.  It can be used for queries,
-zone transfers, and dynamic updates.  It includes a cache which can be used by
+dnsjava is an implementation of DNS in Java.  It supports all defined record
+types, the DNSSEC types, and unknown types.  It can be used for queries, zone
+transfers, and dynamic updates.  It includes a cache which can be used by
 clients, and an authoritative only server.  It supports TSIG authenticated
 messages, partial DNSSEC verification, and EDNS0.  It is fully thread safe.
 
@@ -55,11 +55,6 @@ undocumented) feature that the @me@ variable can be used in the textual form
 of an A record to indicate the local address.  If InetAddress.getLocalHost()
 doesn't work, a RuntimeException will be thrown.  This should be fixable
 if/when dnsjava requires Java 1.4.
-
-Not all of the record types are supported.  Most types that are not supported
-are either deprecated or rarely used.  Adding support for a new type is not
-difficult, and usually requires no changes to any existing files.  If you want
-to see a new type supported, send a patch or just ask.
 
 The underlying platform must use an ASCII encoding of characters.  This means
 that dnsjava will not work on OS/390, for example.
