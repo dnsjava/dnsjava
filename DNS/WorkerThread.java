@@ -13,7 +13,7 @@ class WorkerThread extends Thread {
 private Message query;
 private int id;
 private ResolverListener listener;
-private Resolver resolver;
+private Resolver res;
 
 private static Vector list = new Vector();
 
@@ -40,7 +40,7 @@ assignThread(Resolver _res, Message _query, int _id,
 	     ResolverListener _listener)
 {
 	WorkerThread t = getThread();
-	t.resolver = _res;
+	t.res = _res;
 	t.query = _query;
 	t.id = _id;
 	t.listener = _listener;
@@ -54,10 +54,10 @@ assignThread(Resolver _res, Message _query, int _id,
 public void
 run() {
 	while (true) {
-		setName("resolving " + query.getQuestion().getName());
-		Message response = resolver.send(query);
+		setName(res.getClass() + ": " + query.getQuestion().getName());
+		Message response = res.send(query);
 		listener.receiveMessage(id, response);
-		setName("idle resolver thread");
+		setName("idle thread");
 		synchronized (list) {
 			list.addElement(this);
 		}
