@@ -25,7 +25,7 @@
         </javac>
     </target>
 
-    <target name="jar" description="Makes dnsjava.jar" depends="compile, docs">
+    <target name="jar" description="Makes dnsjava.jar" depends="compile">
         <jar jarfile="${dist_dir}/${jarname}"
              basedir="${build_dir}" includes="**/*.class"/>
     </target>
@@ -52,7 +52,7 @@
     </target>
 
     <target name="sourcedist" description="Builds source distributions"
-            depends="compile">
+            depends="compile, docs">
         <zip destfile="${src_dir}/${zipname}" basedir="${build_dir}"
              excludes="**/*.class,${jarname},${zipname},${targzname},"/>
         <tar destfile="${src_dir}/${targzname}" basedir="${build_dir}"
