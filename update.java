@@ -14,7 +14,7 @@ public class update {
 Message query, response;
 Resolver res;
 String server = null;
-Name zone;
+Name zone = Name.root;
 int defaultTTL;
 short defaultClass = DClass.IN;
 PrintStream log = null;
