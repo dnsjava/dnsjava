@@ -221,7 +221,7 @@ rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	out.write(signature);
 }
 
-private String
+static String
 formatDate(Date d) {
 	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 	StringBuffer sb = new StringBuffer();
@@ -241,7 +241,7 @@ formatDate(Date d) {
 	return sb.toString();
 }
 
-private Date
+static Date
 parseDate(String s) {
 	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 
