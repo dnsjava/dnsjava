@@ -25,52 +25,7 @@ doQuery(dnsMessage query, dnsResolver res) throws IOException {
 	if (response == null)
 		return;
 
-	System.out.print(";; ->>HEADER<<- ");
-	System.out.print("opcode: ");
-	System.out.print(dns.opcodeString(response.getHeader().getOpcode()));
-	System.out.print(", status: ");
-	System.out.print(dns.rcodeString(response.getHeader().getRcode()));
-	System.out.println(", id: " + response.getHeader().getID());
-
-	
-	System.out.print(";; flags: " + response.getHeader().printFlags());
-	System.out.print("; ");
-	for (int i = 0; i < 4; i++) {
-		System.out.print(dns.sectionString(i));
-		System.out.print(": ");
-		System.out.print(response.getHeader().getCount(i));
-		System.out.print(" ");
-	}
-	System.out.println();
-
-	if (response.getHeader().getCount(dns.QUESTION) > 0) {
-		int i = dns.QUESTION;
-		System.out.println(";; " + dns.longSectionString(i) + ":");
-		Enumeration e = response.getSection(i).elements();
-		while (e.hasMoreElements()) {
-			dnsRecord rec = (dnsRecord) e.nextElement();
-			System.out.print(";;\t");
-			System.out.print(rec.name);
-			System.out.print(", type = ");
-			System.out.print(dns.typeString(rec.type));
-			System.out.print(", class = ");
-			System.out.println(dns.classString(rec.dclass));
-		}
-		System.out.println();
-	}
-
-	for (int i = 1; i < 4; i++) {
-		if (response.getHeader().getCount(i) == 0)
-			continue;
-
-		System.out.println(";; " + dns.longSectionString(i) + ":");
-		Enumeration e = response.getSection(i).elements();
-		while (e.hasMoreElements()) {
-			System.out.println(e.nextElement());
-		}
-		System.out.println();
-	}
-	System.out.println(";; done (" + response.numBytes() + " bytes)");
+	System.out.println(response);
 }
 
 static void

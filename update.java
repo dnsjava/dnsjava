@@ -37,7 +37,10 @@ update(String _server) throws IOException {
 			continue;
 		String operation = st.nextToken();
 
-		if (operation.equals("server")) {
+		if (operation.equals("#"))
+			continue;
+
+		else if (operation.equals("server")) {
 			server = st.nextToken();
 			res = new dnsResolver(server);
 		}
@@ -107,6 +110,9 @@ update(String _server) throws IOException {
 			query.getHeader().setOpcode(dns.UPDATE);
 		}
 
+		else if (operation.equals("query"))
+			doQuery(st);
+
 		else if (operation.equals("quit"))
 			System.exit(0);
 
@@ -153,24 +159,7 @@ sendUpdate() throws IOException {
 		return;
 
 	lastRcode = response.getHeader().getRcode();
-
-	System.out.print(";; ->>HEADER<<- ");
-	System.out.print("opcode: ");
-	System.out.print(dns.opcodeString(response.getHeader().getOpcode()));
-	System.out.print(", status: ");
-	System.out.print(dns.rcodeString(response.getHeader().getRcode()));
-	System.out.println(", id: " + response.getHeader().getID());
-
-	
-	System.out.print(";; flags: " + response.getHeader().printFlags());
-	System.out.print("; ");
-	for (int i = 0; i < 4; i++) {
-		System.out.print(dns.sectionString(i));
-		System.out.print(": ");
-		System.out.print(response.getHeader().getCount(i));
-		System.out.print(" ");
-	}
-	System.out.println();
+	System.out.println(response.getHeader());
 
 	System.out.println(";; done");
 }
@@ -210,7 +199,7 @@ throws IOException
  * <name> <type>
  */
 dnsRecord
-parseRRExistence(MyStringTokenizer st, short classValue) throws IOException {
+parseSet(MyStringTokenizer st, short classValue) throws IOException {
 	dnsName name = new dnsName(st.nextToken(), origin);
 	short type;
 
@@ -240,7 +229,7 @@ doRequire(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r")) 
 		rec = parseRR(st, defaultClass, 0);
 	else if (qualifier.equals("-s"))
-		rec = parseRRExistence(st, dns.ANY);
+		rec = parseSet(st, dns.ANY);
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, dns.ANY);
 	else {
@@ -261,7 +250,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r")) 
 		rec = parseRR(st, defaultClass, 0);
 	else if (qualifier.equals("-s"))
-		rec = parseRRExistence(st, dns.NONE);
+		rec = parseSet(st, dns.NONE);
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, dns.NONE);
 	else {
@@ -303,7 +292,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r"))
 		rec = parseRR(st, dns.NONE, 0);
 	else if (qualifier.equals("-s"))
-		rec = parseRRExistence(st, dns.ANY);
+		rec = parseSet(st, dns.ANY);
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, dns.ANY);
 	else {
@@ -335,6 +324,22 @@ doGlue(MyStringTokenizer st) throws IOException {
 		query.addRecord(ADDITIONAL, rec);
 		System.out.println(rec);
 	}
+}
+
+void
+doQuery(MyStringTokenizer st) throws IOException {
+	dnsRecord rec;
+	dnsMessage newQuery = new dnsMessage();
+
+	rec = parseSet(st, defaultClass);
+	newQuery.getHeader().setFlag(dns.RD);
+	newQuery.getHeader().setOpcode(dns.QUERY);
+	newQuery.addRecord(dns.QUESTION, rec);
+	if (res == null)
+		res = new dnsResolver(server);
+	dnsMessage newResponse = res.send(newQuery);
+	System.out.println(newResponse);
+	lastRcode = newResponse.getHeader().getRcode();
 }
 
 static void
@@ -406,7 +411,12 @@ helpOperations() {
 	  "sends the update and resets the current query\n" +
 
 	  "    quit\t\t" +
-	  "quits the program\n"
+	  "quits the program\n" +
+
+	  "    assert <val> [msg]\t" +
+	  "asserts that the rcode of the last operation matches\n" +
+	  "\t\t\tthe value specified.  If not, the message is printed\n" +
+	  "\t\t\t(if present) and the program exits.\n"
 	);
 }
 

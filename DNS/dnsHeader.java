@@ -152,4 +152,21 @@ printFlags() {
 	return sb.toString();
 }
 
+public String
+toString() {
+	StringBuffer sb = new StringBuffer();
+
+	sb.append(";; ->>HEADER<<- "); 
+	sb.append("opcode: " + dns.opcodeString(getOpcode()));
+	sb.append(", status: " + dns.rcodeString(getRcode()));
+	sb.append(", id: " + getID());
+	sb.append("\n");
+
+	sb.append(";; flags: " + printFlags());
+	sb.append("; ");
+	for (int i = 0; i < 4; i++)
+		sb.append(dns.sectionString(i) + ": " + getCount(i) + " ");
+	return sb.toString();
+}
+
 }

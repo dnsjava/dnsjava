@@ -114,6 +114,8 @@ labels() {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
+	if (labels == 0)
+		sb.append(".");
 	for (int i=0; i<labels; i++)
 		sb.append(name[i] + ".");
 	return sb.toString();

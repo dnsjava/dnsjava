@@ -9,28 +9,28 @@ public class dnsTXTRecord extends dnsRecord {
 Vector strings;
 
 public
-dnsTXTRecord(dnsName _name, short _type, short _dclass, int _ttl,
-	     Vector _strings) throws IOException
+dnsTXTRecord(dnsName _name, short _dclass, int _ttl, Vector _strings)
+throws IOException
 {
-	super(_name, _type, _dclass, _ttl);
+	super(_name, dns.TXT, _dclass, _ttl);
 	strings = _strings;
 }
 
 public
-dnsTXTRecord(dnsName _name, short _type, short _dclass, int _ttl,
-	     String _string) throws IOException
+dnsTXTRecord(dnsName _name, short _dclass, int _ttl, String _string)
+throws IOException
 {
-	super(_name, _type, _dclass, _ttl);
+	super(_name, dns.TXT, _dclass, _ttl);
 	strings = new Vector();
 	strings.addElement(_string);
 }
 
 public
-dnsTXTRecord(dnsName _name, short _type, short _dclass, int _ttl,
+dnsTXTRecord(dnsName _name, short _dclass, int _ttl,
 	     int length, CountedDataInputStream in, dnsCompression c)
 throws IOException
 {
-	super(_name, _type, _dclass, _ttl);
+	super(_name, dns.TXT, _dclass, _ttl);
 	if (in == null)
 		return;
 	int count = 0;

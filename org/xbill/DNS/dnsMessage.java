@@ -1,7 +1,7 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-import java.util.Vector;
+import java.util.*;
 import java.io.*;
 
 public class dnsMessage {
@@ -122,6 +122,39 @@ toWireCanonical(CountedDataOutputStream out) throws IOException {
 int
 numBytes() {
 	return size;
+}
+
+public String
+sectionToString(int i) {
+	if (i > 3)
+		return null;
+
+	Enumeration e = getSection(i).elements();
+	StringBuffer sb = new StringBuffer();
+	sb.append(";; " + dns.longSectionString(i) + ":\n");
+
+	while (e.hasMoreElements()) {
+		dnsRecord rec = (dnsRecord) e.nextElement();
+		if (i == dns.QUESTION) {
+			sb.append(";;\t" + rec.name);
+			sb.append(", type = " + dns.typeString(rec.type));
+			sb.append(", class = " + dns.classString(rec.dclass));
+		}
+		else
+			sb.append(rec);
+		sb.append("\n");
+	}
+	return sb.toString();
+}
+
+public String
+toString() {
+	StringBuffer sb = new StringBuffer();
+	sb.append(getHeader());
+	for (int i = 0; i < 4; i++)
+		sb.append(sectionToString(i) + "\n");
+	sb.append(";; done (" + numBytes() + " bytes)");
+	return sb.toString();
 }
 
 }
