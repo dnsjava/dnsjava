@@ -123,17 +123,18 @@ nextToken() {
 			sb.append('\\');
 			sb.append(string[current]);
 			escaped = false;
-		} else if (quoted) {
-			if (string[current] == '"') {
+		} else if (string[current] == '\\')
+			escaped = true;
+		else if (string[current] == '"') {
+			if (quoted) {
 				current++;
 				break;
-			}
-			else
-				sb.append(string[current]);
-		} else if (string[current] == '"') 
+			} else
+				quoted = true;
+		} else if (quoted)
+			sb.append(string[current]);
+		else if (string[current] == '"') 
 			quoted = true;
-		else if (string[current] == '\\')
-			escaped = true;
 		else if (isDelim(current))
 			break;
 		else

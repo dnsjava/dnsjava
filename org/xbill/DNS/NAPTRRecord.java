@@ -18,7 +18,7 @@ public class NAPTRRecord extends Record {
 private static NAPTRRecord member = new NAPTRRecord();
 
 private short order, preference;
-private String flags, service, regexp;
+private byte [] flags, service, regexp;
 private Name replacement;
 
 private NAPTRRecord() {}
@@ -52,9 +52,9 @@ NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
 	this(name, dclass, ttl);
 	this.order = (short) order;
 	this.preference = (short) preference;
-	this.flags = flags;
-	this.service = service;
-	this.regexp = regexp;
+	this.flags = byteArrayFromString(flags);
+	this.service = byteArrayFromString(service);
+	this.regexp = byteArrayFromString(regexp);
 	this.replacement = replacement;
 }
 
@@ -68,9 +68,9 @@ throws IOException
 		return rec;
 	rec.order = (short) in.readUnsignedShort();
 	rec.preference = (short) in.readUnsignedShort();
-	rec.flags = in.readString();
-	rec.service = in.readString();
-	rec.regexp = in.readString();
+	rec.flags = in.readStringIntoArray();
+	rec.service = in.readStringIntoArray();
+	rec.regexp = in.readStringIntoArray();
 	rec.replacement = new Name(in);
 	return rec;
 }
@@ -83,9 +83,9 @@ throws TextParseException
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
 	rec.order = Short.parseShort(nextString(st));
 	rec.preference = Short.parseShort(nextString(st));
-	rec.flags = nextString(st);
-	rec.service = nextString(st);
-	rec.regexp = nextString(st);
+	rec.flags = byteArrayFromString(nextString(st));
+	rec.service = byteArrayFromString(nextString(st));
+	rec.regexp = byteArrayFromString(nextString(st));
 	rec.replacement = Name.fromString(nextString(st), origin);
 	rec.replacement.checkAbsolute("read a NAPTR record");
 	return rec;
@@ -100,11 +100,11 @@ rdataToString() {
 		sb.append(" ");
 		sb.append(preference);
 		sb.append(" ");
-		sb.append(flags);
+		sb.append(byteArrayToString(flags));
 		sb.append(" ");
-		sb.append(service);
+		sb.append(byteArrayToString(service));
 		sb.append(" ");
-		sb.append(regexp);
+		sb.append(byteArrayToString(regexp));
 		sb.append(" ");
 		sb.append(replacement);
 	}
@@ -126,19 +126,19 @@ getPreference() {
 /** Returns flags */
 public String
 getFlags() {
-	return flags;
+	return byteArrayToString(flags);
 }
 
 /** Returns service */
 public String
 getService() {
-	return service;
+	return byteArrayToString(service);
 }
 
 /** Returns regexp */
 public String
 getRegexp() {
-	return regexp;
+	return byteArrayToString(regexp);
 }
 
 /** Returns the replacement domain-name */
@@ -153,9 +153,9 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 		return;
 	out.writeShort(order);
 	out.writeShort(preference);
-	out.writeString(flags);
-	out.writeString(service);
-	out.writeString(regexp);
+	out.writeArray(flags, true);
+	out.writeArray(service, true);
+	out.writeArray(regexp, true);
 	replacement.toWire(out, null, canonical);
 }
 

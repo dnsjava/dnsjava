@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.text.*;
 import java.lang.reflect.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
@@ -23,6 +24,12 @@ protected int ttl;
 private static final Record [] knownRecords = new Record[256];
 private static final Class [] emptyClassArray = new Class[0];
 private static final Object [] emptyObjectArray = new Object[0];
+
+private static final DecimalFormat byteFormat = new DecimalFormat();
+
+static {
+	byteFormat.setMinimumIntegerDigits(3);
+}
 
 protected
 Record() {}
@@ -314,6 +321,64 @@ remainingStrings(MyStringTokenizer st) throws TextParseException {
 	if (s == null)
 		throw new TextParseException("incomplete record");
 	return s;
+}
+
+/**
+ * Converts a String into a byte array.
+ */
+protected static byte []
+byteArrayFromString(String s) {
+	byte [] b = s.getBytes();
+	boolean escaped = false;
+	int escapes = 0;
+
+	for (int i = 0; i < b.length; i++) {
+		if (escaped)
+			escaped = false;
+		else if (b[i] == '\\') {
+			escaped = true;
+			escapes++;
+		}
+	}
+	if (escapes > 0) {
+		byte [] compact = new byte[b.length - escapes];
+		escaped = false;
+		for (int i = 0, j = 0; i < b.length; i++) {
+			if (escaped)
+				escaped = false;
+			else if (b[i] == '\\') {
+				escaped = true;
+				continue;
+			}
+			compact[j++] = b[i];
+		}
+		b = compact;
+	}
+	return b;
+}
+
+/**
+ * Converts a byte array into a String.
+ */
+protected static String
+byteArrayToString(byte [] array) {
+	StringBuffer sb = new StringBuffer();
+	for (int i = 0; i < array.length; i++) {
+		short b = (short)(array[i] & 0xFF);
+		if (b <= 0x20 || b >= 0x7f) {
+			sb.append('\\');
+			sb.append(byteFormat.format(b));
+		}
+		else if (b == '"' || b == '(' || b == ')' || b == ';' ||
+			 b == '\\')
+		{
+			sb.append('\\');
+			sb.append((char)b);
+		} 
+		else
+			sb.append((char)b);
+	}
+	return sb.toString();
 }
 
 /**

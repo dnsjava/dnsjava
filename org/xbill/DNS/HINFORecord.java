@@ -17,7 +17,7 @@ public class HINFORecord extends Record {
 
 private static HINFORecord member = new HINFORecord();
 
-private String cpu, os;
+private byte [] cpu, os;
 
 private
 HINFORecord() {}
@@ -40,8 +40,8 @@ getMember() {
 public
 HINFORecord(Name name, short dclass, int ttl, String cpu, String os) {
 	this(name, dclass, ttl);
-	this.cpu = cpu;
-	this.os = os;
+	this.cpu = byteArrayFromString(cpu);
+	this.os = byteArrayFromString(os);
 }
 
 Record
@@ -52,8 +52,8 @@ throws IOException
 	HINFORecord rec = new HINFORecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.cpu = in.readString();
-	rec.os = in.readString();
+	rec.cpu = in.readStringIntoArray();
+	rec.os = in.readStringIntoArray();
 	return rec;
 }
 
@@ -63,8 +63,8 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	HINFORecord rec = new HINFORecord(name, dclass, ttl);
-	rec.cpu = nextString(st);
-	rec.os = nextString(st);
+	rec.cpu = byteArrayFromString(nextString(st));
+	rec.os = byteArrayFromString(nextString(st));
 	return rec;
 }
 
@@ -73,7 +73,7 @@ throws TextParseException
  */
 public String
 getCPU() {
-	return cpu;
+	return byteArrayToString(cpu);
 }
 
 /**
@@ -81,7 +81,7 @@ getCPU() {
  */
 public String
 getOS() {
-	return os;
+	return byteArrayToString(os);
 }
 
 void
@@ -89,8 +89,8 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (cpu == null || os == null)
 		return;
 
-	out.writeString(cpu);
-	out.writeString(os);
+	out.writeArray(cpu, true);
+	out.writeArray(os, true);
 }
 
 /**
@@ -101,9 +101,9 @@ rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (cpu != null && os != null) {
 		sb.append("\"");
-		sb.append(cpu);
+		sb.append(byteArrayToString(cpu));
 		sb.append("\" \"");
-		sb.append(os);
+		sb.append(byteArrayToString(os));
 		sb.append("\"");
 	}
 	return sb.toString();

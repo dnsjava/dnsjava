@@ -140,11 +140,12 @@ readLong() throws IOException {
 }
 
 /**
- * Read a String from the stream, represented as a length byte followed by data
- * @return The String
+ * Read a String from the stream, represented as a length byte followed by data,
+ * and encode it in a byte array.
+ * @return The array
  */
-public String
-readString() throws IOException {
+public byte []
+readStringIntoArray() throws IOException {
 	int len = read();
 	if (len == -1)
 		throw new IOException("end of input");
@@ -152,8 +153,19 @@ readString() throws IOException {
 	int n = read(b);
 	if (n < len)
 		throw new IOException("end of input");
+	return b;
+}
+
+/**
+ * Read a String from the stream, represented as a length byte followed by data
+ * @return The String
+ */
+public String
+readString() throws IOException {
+	byte [] b = readStringIntoArray();
 	return new String(b);
 }
+
 
 /**
  * Read a BigInteger from the stream, encoded as binary data.  A 0 byte is

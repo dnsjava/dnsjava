@@ -42,7 +42,10 @@ TXTRecord(Name name, short dclass, int ttl, List strings) {
 	if (strings == null)
 		throw new IllegalArgumentException
 				("TXTRecord: strings must not be null");
-	this.strings = strings;
+	this.strings = new ArrayList();
+	Iterator it = strings.iterator();
+	while (it.hasNext())
+		this.strings.add(byteArrayFromString((String)it.next()));
 }
 
 /**
@@ -53,7 +56,7 @@ public
 TXTRecord(Name name, short dclass, int ttl, String string) {
 	this(name, dclass, ttl);
 	this.strings = new ArrayList();
-	this.strings.add(string);
+	this.strings.add(byteArrayFromString(string));
 }
 
 Record
@@ -67,11 +70,9 @@ throws IOException
 	int count = 0;
 	rec.strings = new ArrayList();
 	while (count < length) {
-		int len = in.readByte();
-		byte [] b = new byte[len];
-		in.read(b);
-		count += (len + 1);
-		rec.strings.add(new String(b));
+		byte [] b = in.readStringIntoArray();
+		count += (b.length + 1);
+		rec.strings.add(b);
 	}
 	return rec;
 }
@@ -84,7 +85,7 @@ throws TextParseException
 	TXTRecord rec = new TXTRecord(name, dclass, ttl);
 	rec.strings = new ArrayList();
 	while (st.hasMoreTokens())
-		rec.strings.add(nextString(st));
+		rec.strings.add(byteArrayFromString(nextString(st)));
 	return rec;
 }
 
@@ -95,7 +96,7 @@ rdataToString() {
 	if (strings != null) {
 		Iterator it = strings.iterator();
 		while (it.hasNext()) {
-			String s = (String) it.next();
+			String s = byteArrayToString((byte []) it.next());
 			sb.append("\"");
 			sb.append(s);
 			sb.append("\"");
@@ -119,8 +120,8 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 
 	Iterator it = strings.iterator();
 	while (it.hasNext()) {
-		String s = (String) it.next();
-		out.writeString(s);
+		byte [] b = (byte []) it.next();
+		out.writeArray(b, true);
 	}
 }
 

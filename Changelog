@@ -1,6 +1,7 @@
 3/30/2003
 	- Add the ZoneTransferIn class, which performs incoming AXFR/IXFR
 	- Make TSIG verification of multiple-message responses reentrant.
+	- Fix incorrect string quoting.
 
 3/17/2003
 	- Make the routine that converts an IP address from a string

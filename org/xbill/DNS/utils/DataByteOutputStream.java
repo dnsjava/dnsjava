@@ -108,6 +108,17 @@ writeString(byte [] s, int start) {
  * @param b The byte array to be written.
  */
 public void
+writeArray(byte [] b, boolean writeLength) {
+	if (writeLength)
+		writeByte(b.length);
+	write(b, 0, b.length);
+}
+
+/**
+ * Writes a full byte array to the stream.
+ * @param b The byte array to be written.
+ */
+public void
 writeArray(byte [] b) {
 	write(b, 0, b.length);
 }
