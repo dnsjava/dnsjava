@@ -16,7 +16,7 @@ Resolver res;
 String server = null;
 Name zone = Name.root;
 int defaultTTL;
-short defaultClass = DClass.IN;
+int defaultClass = DClass.IN;
 PrintStream log = null;
 
 void
@@ -115,7 +115,7 @@ update(InputStream in) throws IOException {
 			}
 
 			else if (operation.equals("class")) {
-				short newClass = DClass.value(st.getString());
+				int newClass = DClass.value(st.getString());
 				if (newClass > 0)
 					defaultClass = newClass;
 				else
@@ -251,7 +251,7 @@ sendUpdate() throws IOException {
 	if (query.getHeader().getCount(Section.ZONE) == 0) {
 		Name updzone;
 		updzone = zone;
-		short dclass = defaultClass;
+		int dclass = defaultClass;
 		if (updzone == null) {
 			Record [] recs = query.getSectionArray(Section.UPDATE);
 			for (int i = 0; i < recs.length; i++) {
@@ -266,7 +266,8 @@ sendUpdate() throws IOException {
 				}
 			}
 		}
-		Record soa = Record.newRecord(updzone, Type.SOA, dclass);
+		Record soa = Record.newRecord(updzone, Type.SOA,
+					      (short) dclass);
 		query.addRecord(soa, Section.ZONE);
 	}
 
@@ -281,12 +282,12 @@ sendUpdate() throws IOException {
  * Ignore the class, if present.
  */
 Record
-parseRR(Tokenizer st, short classValue, int TTLValue)
+parseRR(Tokenizer st, int classValue, int TTLValue)
 throws IOException
 {
 	Name name = st.getName(zone);
 	int ttl;
-	short type;
+	int type;
 	Record record;
 
 	String s = st.getString();
@@ -307,7 +308,8 @@ throws IOException
 	if ((type = Type.value(s)) < 0)
 		throw new IOException("Invalid type: " + s);
 
-	record = Record.fromString(name, type, classValue, ttl, st, zone);
+	record = Record.fromString(name, (short) type, (short) classValue, ttl,
+				   st, zone);
 	if (record != null)
 		return (record);
 	else
@@ -319,8 +321,7 @@ doRequire(Tokenizer st) throws IOException {
 	Tokenizer.Token token;
 	Name name;
 	Record record;
-	short type;
-	short dclass;
+	int type;
 
 	name = st.getName(zone);
 	token = st.get();
@@ -331,10 +332,12 @@ doRequire(Tokenizer st) throws IOException {
 		boolean iseol = token.isEOL();
 		st.unget();
 		if (!iseol) {
-			record = Record.fromString(name, type, defaultClass,
+			record = Record.fromString(name, (short) type,
+						   (short) defaultClass,
 						   0, st, zone);
 		} else
-			record = Record.newRecord(name, type, DClass.ANY, 0);
+			record = Record.newRecord(name, (short) type,
+						  DClass.ANY, 0);
 	} else
 		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
 
@@ -348,7 +351,7 @@ doProhibit(Tokenizer st) throws IOException {
 	String s;
 	Name name;
 	Record record;
-	short type;
+	int type;
 
 	name = st.getName(zone);
 	token = st.get();
@@ -357,7 +360,7 @@ doProhibit(Tokenizer st) throws IOException {
 			throw new IOException("Invalid type: " + token.value);
 	} else
 		type = Type.ANY;
-	record = Record.newRecord(name, type, DClass.NONE, 0);
+	record = Record.newRecord(name, (short) type, DClass.NONE, 0);
 	query.addRecord(record, Section.PREREQ);
 	print(record);
 }
@@ -375,8 +378,8 @@ doDelete(Tokenizer st) throws IOException {
 	String s;
 	Name name;
 	Record record;
-	short type;
-	short dclass;
+	int type;
+	int dclass;
 
 	name = st.getName(zone);
 	token = st.get();
@@ -391,10 +394,12 @@ doDelete(Tokenizer st) throws IOException {
 		boolean iseol = token.isEOL();
 		st.unget();
 		if (!iseol) {
-			record = Record.fromString(name, type, DClass.NONE,
+			record = Record.fromString(name, (short) type,
+						   DClass.NONE,
 						   0, st, zone);
 		} else
-			record = Record.newRecord(name, type, DClass.ANY, 0);
+			record = Record.newRecord(name, (short) type,
+						  DClass.ANY, 0);
 	}
 	else
 		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
@@ -416,7 +421,8 @@ doQuery(Tokenizer st) throws IOException {
 	Tokenizer.Token token;
 
 	Name name = null;
-	short type = Type.A, dclass = defaultClass;
+	int type = Type.A;
+	int dclass = defaultClass;
 
 	name = st.getName(zone);
 	token = st.get();
@@ -432,7 +438,7 @@ doQuery(Tokenizer st) throws IOException {
 		}
 	}
 
-	rec = Record.newRecord(name, type, dclass);
+	rec = Record.newRecord(name, (short) type, (short) dclass);
 	Message newQuery = Message.newQuery(rec);
 	if (res == null)
 		res = new SimpleResolver(server);

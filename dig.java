@@ -10,7 +10,7 @@ import org.xbill.DNS.*;
 public class dig {
 
 static Name name = null;
-static short type = Type.A, _class = DClass.IN;
+static int type = Type.A, dclass = DClass.IN;
 
 static void
 usage() {
@@ -82,7 +82,7 @@ main(String argv[]) throws IOException {
 			name = Name.fromString(dns.inaddrString(argv[arg++]),
 					       Name.root);
 			type = Type.PTR;
-			_class = DClass.IN;
+			dclass = DClass.IN;
 		}
 		else {
 			name = Name.fromString(nameString, Name.root);
@@ -92,9 +92,9 @@ main(String argv[]) throws IOException {
 			else
 				arg++;
 
-			_class = DClass.value(argv[arg]);
-			if (_class < 0)
-				_class = DClass.IN;
+			dclass = DClass.value(argv[arg]);
+			if (dclass < 0)
+				dclass = DClass.IN;
 			else
 				arg++;
 		}
@@ -177,7 +177,7 @@ main(String argv[]) throws IOException {
 			usage();
 	}
 
-	rec = Record.newRecord(name, type, _class);
+	rec = Record.newRecord(name, (short) type, (short) dclass);
 	query = Message.newQuery(rec);
 	if (opt != null)
 		query.addRecord(opt, Section.ADDITIONAL);

@@ -102,7 +102,11 @@ rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SIGRecord rec = new SIGRecord(name, dclass, ttl);
-	rec.covered = Type.value(st.getString());
+	String typeString = st.getString();
+	int covered = Type.value(typeString);
+	if (covered < 0)
+		throw st.exception("Invalid type: " + typeString);
+	rec.covered = (short) covered;
 	rec.alg = (byte) st.getUInt8();
 	rec.labels = (byte) st.getUInt8();
 	rec.origttl = st.getTTL();

@@ -7,7 +7,7 @@ import org.xbill.DNS.utils.*;
 
 /**
  * Constants and functions relating to DNS classes.  This is called DClass
- * since Class was already taken.
+ * to avoid confusion with Class.
  *
  * @author Brian Wellington
  */
@@ -57,21 +57,28 @@ string(int i) {
 	return (s != null) ? s : ("CLASS" + i);
 }
 
-/** Converts a String representation of an Class into its numeric value */
-public static short
+/**
+ * Converts a String representation of a DClass into its numeric value
+ * @return The class code, or -1 on error.
+ */
+public static int
 value(String s) {
-	short i = (short) classes.getValue(s.toUpperCase());
+	s = s.toUpperCase();
+	int i = classes.getValue(s);
 	if (i >= 0)
 		return i;
-	try {
-		if (s.toUpperCase().startsWith("CLASS"))
-			return (Short.parseShort(s.substring(5)));
-		else
-			return Short.parseShort(s);
+	if (s.startsWith("CLASS")) {
+		try {
+			int dclass = Integer.parseInt(s.substring(5));
+			if (dclass < 0 || dclass > 0xFFFF)
+				return -1;
+			return dclass;
+		}
+		catch (NumberFormatException e) {
+			return -1;
+		}
 	}
-	catch (Exception e) {
-		return (-1);
-	}
+	return -1;
 }
 
 /* Converts a class into a Short, for use in Hashmaps, etc. */

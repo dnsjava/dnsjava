@@ -256,21 +256,28 @@ string(short i) {
 	return (s != null) ? s : ("TYPE" + i);
 }
 
-/** Converts a String representation of an Type into its numeric value */
-public static short
+/**
+ * Converts a String representation of an Type into its numeric value
+ * @return The type code, or -1 on error.
+ */
+public static int
 value(String s) {
-	Short val = types.getValue(s.toUpperCase());
+	s = s.toUpperCase();
+	Short val = types.getValue(s);
 	if (val != null)
 		return val.shortValue();
-	try {
-		if (s.toUpperCase().startsWith("TYPE"))
-			return (Short.parseShort(s.substring(4)));
-		else
-			return Short.parseShort(s);
+	if (s.startsWith("TYPE")) {
+		try {
+			int type = Integer.parseInt(s.substring(4));
+			if (type < 0 || type > 0xFFFF)
+				return -1;
+			return type;
+		}
+		catch (NumberFormatException e) {
+			return -1;
+		}
 	}
-	catch (Exception e) {
-		return (-1);
-	}
+	return -1;
 }
 
 /** Is this type valid for a record (a non-meta type)? */

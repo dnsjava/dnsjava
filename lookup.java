@@ -29,7 +29,7 @@ printAnswer(String name, Lookup lookup) {
 
 public static void
 main(String [] args) throws Exception {
-	short type = Type.A;
+	int type = Type.A;
 	int start = 0;
 	if (args.length > 2 && args[0].equals("-t")) {
 		type = Type.value(args[1]);
@@ -38,7 +38,7 @@ main(String [] args) throws Exception {
 		start = 2;
 	}
 	for (int i = start; i < args.length; i++) {
-		Lookup l = new Lookup(args[i], type);
+		Lookup l = new Lookup(args[i], (short) type);
 		l.run();
 		printAnswer(args[i], l);
 	}

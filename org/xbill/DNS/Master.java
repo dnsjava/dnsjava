@@ -81,7 +81,7 @@ nextRecord() throws IOException {
 	while (true) {
 		Name name;
 		int ttl;
-		short type, dclass;
+		int type, dclass;
 
 		token = st.get(true, false);
 		if (token.type == Tokenizer.WHITESPACE) {
@@ -151,7 +151,8 @@ nextRecord() throws IOException {
 		if ((type = Type.value(s)) < 0)
 			throw st.exception("Invalid type '" + s + "'");
 
-		last = Record.fromString(name, type, dclass, ttl, st, origin);
+		last = Record.fromString(name, (short) type, (short) dclass,
+					 ttl, st, origin);
 		st.getEOL();
 		return last;
 	}
