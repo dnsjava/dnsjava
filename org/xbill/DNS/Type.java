@@ -203,6 +203,7 @@ static {
 	types.put2(DNAME, "DNAME");
 	types.put2(SINK, "SINK");
 	types.put2(OPT, "OPT");
+	types.put2(TKEY, "TKEY");
 	types.put2(TSIG, "TSIG");
 	types.put2(IXFR, "IXFR");
 	types.put2(AXFR, "AXFR");
