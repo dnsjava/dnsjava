@@ -150,7 +150,7 @@ sectionToString(int i) {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append(getHeader());
+	sb.append(getHeader() + "\n");
 	for (int i = 0; i < 4; i++)
 		sb.append(sectionToString(i) + "\n");
 	sb.append(";; done (" + numBytes() + " bytes)");

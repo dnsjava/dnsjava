@@ -14,24 +14,41 @@ static final int ADDITIONAL = dns.ADDITIONAL;
 
 dnsMessage query;
 dnsResolver res;
-String server;
+String server = "localhost";
 dnsName origin;
 int defaultTTL;
 short defaultClass = dns.IN;
 short lastRcode;
 
 public
-update(String _server) throws IOException {
+update(InputStream in) throws IOException {
+	Vector inputs = new Vector();
+
 	query = new dnsMessage();
 	query.getHeader().setOpcode(dns.UPDATE);
 
-	InputStreamReader isr = new InputStreamReader(System.in);
+	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
+	BufferedReader brOrig = br;
+
+	inputs.addElement(br);
 
 	while (true) {
-		System.out.print("> ");
+		String line = null;
+		do {
+			br = (BufferedReader)inputs.lastElement();
 
-		String line = dnsIO.readExtendedLine(br);
+			if (in == System.in && brOrig == br)
+				System.out.print("> ");
+
+			line = dnsIO.readExtendedLine(br);
+			if (line == null) {
+				inputs.removeElement(br);
+				if (inputs.isEmpty())
+					return;
+			}
+		} while (line == null);
+
 		MyStringTokenizer st = new MyStringTokenizer(line);
 		if (!st.hasMoreTokens())
 			continue;
@@ -113,7 +130,8 @@ update(String _server) throws IOException {
 		else if (operation.equals("query"))
 			doQuery(st);
 
-		else if (operation.equals("quit"))
+		else if (operation.equals("quit") ||
+			 operation.equals("q"))
 			System.exit(0);
 
 		else if (operation.equals("assert")) {
@@ -129,6 +147,9 @@ update(String _server) throws IOException {
 				System.exit(-1);
 			}
 		}
+
+		else if (operation.equals("file"))
+			doFile(st, inputs);
 
 		else
 			System.out.println("invalid keyword: " + operation);
@@ -342,6 +363,22 @@ doQuery(MyStringTokenizer st) throws IOException {
 	lastRcode = newResponse.getHeader().getRcode();
 }
 
+void
+doFile(MyStringTokenizer st, Vector inputs) {
+	String s = st.nextToken();
+	try {
+		FileInputStream fis = new FileInputStream(s);
+		InputStreamReader isr2 = new InputStreamReader(fis);
+		BufferedReader br2 = new BufferedReader(isr2);
+		inputs.addElement(br2);
+	}
+	catch (Exception e) {
+		System.out.println(s + "not found");
+		return;
+	}
+	
+}
+
 static void
 helpResolver() {
 	System.out.println("Resolver options:\n" +
@@ -410,13 +447,20 @@ helpOperations() {
 	  "    send\t\t" +
 	  "sends the update and resets the current query\n" +
 
+	  "    query <name> <type>\t" +
+	  "issues a query for this name and type\n" +
+
 	  "    quit\t\t" +
 	  "quits the program\n" +
 
 	  "    assert <val> [msg]\t" +
 	  "asserts that the rcode of the last operation matches\n" +
 	  "\t\t\tthe value specified.  If not, the message is printed\n" +
-	  "\t\t\t(if present) and the program exits.\n"
+	  "\t\t\t(if present) and the program exits.\n" +
+
+	  "    file <file>\t\t" +
+	  "opens the specified file and uses it as the new input\n" +
+	  "\t\t\tsource\n"
 	);
 }
 
@@ -451,24 +495,10 @@ help(String topic) {
 	);
 }
 
-static void
-usage() {
-	System.out.println("Usage: update [@server]");
-	System.exit(0);
-}
-
 public static void
 main(String argv[]) throws IOException {
-	String server = null;
 
-	if (argv.length == 0)
-		server = "localhost";
-	else if (argv.length == 1 &&  argv[0].startsWith("@"))
-		server = argv[0].substring(1);
-	else
-		usage();
-
-	update u = new update(server);
+	update u = new update(System.in);
 }
 
 }

@@ -9,11 +9,15 @@ public class dnsIO {
 static String
 readExtendedLine(BufferedReader br) throws IOException {
 	String s = br.readLine();
+	if (s == null)
+		return null;
 	if (!s.endsWith("("))
 		return s;
 	StringBuffer sb = new StringBuffer(s.substring(0, s.length() - 1));
 	while (true) {
 		s = br.readLine();
+		if (s == null)
+			return sb.toString();
 		if (s.endsWith(")")) {
 			sb.append(s.substring(0, s.length() - 1));
 			break;
