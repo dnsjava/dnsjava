@@ -299,7 +299,7 @@ toString() {
  * TSIG and OPT records, for example.
  * @see Resolver
  * @see TSIGRecord
- * @see OPTGRecord
+ * @see OPTRecord
  */
 public Object
 clone() {

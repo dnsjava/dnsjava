@@ -67,7 +67,7 @@ toWire() throws IOException {
 
 /**
  * Sets a flag to the supplied value
- * @see Flag
+ * @see Flags
  */
 public void
 setFlag(int bit) {
@@ -76,7 +76,7 @@ setFlag(int bit) {
 
 /**
  * Sets a flag to the supplied value
- * @see Flag
+ * @see Flags
  */
 public void
 unsetFlag(int bit) {
@@ -85,7 +85,7 @@ unsetFlag(int bit) {
 
 /**
  * Retrieves a flag
- * @see Flag
+ * @see Flags
  */
 public boolean
 getFlag(int bit) {

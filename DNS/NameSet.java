@@ -4,19 +4,27 @@
 package DNS;
 
 import java.util.*;
-import java.io.*;
-import java.net.*;
 import DNS.utils.*;
+
+/**
+ * The shared superclass of Zone and Cache.  All names are stored in a
+ * hashtable.  Each name contains a hashtable indexed on type and class.
+ */
 
 class NameSet {
 
 private Hashtable data;
 
+/** Creates an empty NameSet */
 protected
 NameSet() {
 	data = new Hashtable();
 }
 
+/**
+ * Finds all matching sets.  This traverses CNAMEs, and has provisions for 
+ * Type ANY.
+ */
 protected Object []
 findSets(Name name, short type, short dclass) {
 	Object [] array;
@@ -54,6 +62,10 @@ findSets(Name name, short type, short dclass) {
 	return null;
 }
 
+/**
+ * Finds all sets that exactly match.  This does not traverse CNAMEs or handle
+ * Type ANY queries.
+ */
 protected Object
 findExactSet(Name name, short type, short dclass) {
 	Hashtable nameInfo = findName(name);
@@ -62,11 +74,18 @@ findExactSet(Name name, short type, short dclass) {
 	return nameInfo.get(new TypeClass(type, dclass));
 }
 
+/**
+ * Finds all records for a given name, if the name exists.
+ */
 protected Hashtable
 findName(Name name) {
 	return (Hashtable) data.get(name);
 }
 
+/**
+ * Adds a set associated with a name/type/class.  The data contained in the
+ * set is abstract.
+ */
 protected void
 addSet(Name name, short type, short dclass, Object set) {
 	Hashtable nameInfo = findName(name);
@@ -77,6 +96,10 @@ addSet(Name name, short type, short dclass, Object set) {
 	}
 }
 
+/**
+ * Removes the given set from the name/type/class.  The data contained in the
+ * set is abstract.
+ */
 protected void
 removeSet(Name name, short type, short dclass, Object set) {
 	Hashtable nameInfo = findName(name);
@@ -96,6 +119,7 @@ removeSet(Name name, short type, short dclass, Object set) {
 	}
 }
 
+/** Converts the NameSet to a String */
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();

@@ -3,19 +3,32 @@
 
 package DNS;
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
+
+/**
+ * A DNS Zone.  This encapsulates all data related to a Zone, and provides
+ * convienient lookup methods.
+ */
 
 public class Zone extends NameSet {
 
-public static final int CACHE = 1;
-public static final int PRIMARY = 2;
-public static final int SECONDARY = 3;
+/** A primary zone */
+public static final int PRIMARY = 1;
+
+/** A secondary zone (unimplemented) */
+public static final int SECONDARY = 2;
 
 private int type;
 private Name origin;
 private short dclass = DClass.IN;
 
+/**
+ * Creates a Zone from the records in the specified master file.  All
+ * records that do not belong in the Zone are added to the specified Cache.
+ * @see Cache
+ * @see Master
+ */
 public
 Zone(String file, Cache cache) throws IOException {
 	super();
@@ -26,7 +39,7 @@ Zone(String file, Cache cache) throws IOException {
 
 	while ((record = m.nextRecord()) != null) {
 		if (origin == null || record.getName().subdomain(origin)) {
-			addRR(record);
+			addRecord(record);
 			if (origin == null && record.getType() == Type.SOA)
 				origin = record.getName();
 		}
@@ -35,16 +48,19 @@ Zone(String file, Cache cache) throws IOException {
 	}
 }
 
+/** Returns the Zone's origin */
 public Name
 getOrigin() {
 	return origin;
 }
 
+/** Returns the Zone origin's NS records */
 public RRset
 getNS() {
 	return (RRset) findExactSet(origin, Type.NS, dclass);
 }
 
+/** Returns the Zone's SOA record */
 public SOARecord
 getSOA() {
 	RRset rrset = (RRset) findExactSet(origin, Type.SOA, dclass);
@@ -54,11 +70,19 @@ getSOA() {
 	return (SOARecord) e.nextElement();
 }
 
+/** Returns the Zone's class */
 public short
 getDClass() {
 	return dclass;
 }
 
+/**     
+ * Looks up Records in the Zone.  This follows CNAMEs.
+ * @param name The name to look up
+ * @param type The type to look up
+ * @return A ZoneResponse object
+ * @see ZoneResponse
+ */ 
 public ZoneResponse
 findRecords(Name name, short type) {
 	ZoneResponse zr = null;
@@ -95,19 +119,31 @@ findRecords(Name name, short type) {
 	return zr;
 }
 
+/**
+ * Looks up Records in the zone, finding exact matches only.
+ * @param name The name to look up
+ * @param type The type to look up
+ * @return The matching RRset
+ * @see RRset
+ */ 
 public RRset
 findExactMatch(Name name, short type) {
 	return (RRset) findExactSet(name, type, dclass);
 }
 
+/**
+ * Adds a record to the Zone
+ * @param r The record to be added
+ * @see Record
+ */
 public void
-addRR(Record record) {
-	Name name = record.getName();
-	short type = record.getType();
+addRecord(Record r) {
+	Name name = r.getName();
+	short type = r.getType();
 	RRset rrset = (RRset) findExactSet (name, type, dclass);
 	if (rrset == null)
 		addSet(name, type, dclass, rrset = new RRset());
-	rrset.addRR(record);
+	rrset.addRR(r);
 }
 
 }

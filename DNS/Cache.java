@@ -3,10 +3,19 @@
 
 package DNS;
 
-import java.util.*;
 import java.io.*;
-import java.net.*;
+import java.util.*;
 import DNS.utils.*;
+
+/**
+ * A cache of DNS records.  The cache obeys TTLs, so items are purged after
+ * their validity period is complete.  Negative answers are cached, to
+ * avoid repeated failed DNS queries.  The credibility of each RRset is
+ * maintained, so that more credible records replace less credible records,
+ * and lookups can specify the minimum credibility of data they are requesting.
+ * @see RRset
+ * @see Credibility
+ */
 
 public class Cache extends NameSet {
 
@@ -67,11 +76,15 @@ private class Element {
 	}
 }
 
+/** Creates an empty Cache */
 public
 Cache() {
 	super();
 }
 
+/**
+ * Creates a Cache which initially contains all records in the specified file
+ */
 public
 Cache(String file) throws IOException {
 	Master m = new Master(file);
@@ -81,6 +94,13 @@ Cache(String file) throws IOException {
 	}
 }
 
+/**
+ * Adds a record to the Cache
+ * @param r The record to be added
+ * @param cred The credibility of the record
+ * @param o The source of the record (this could be a Message, for example)
+ @ @see Record
+ */
 public void
 addRecord(Record r, byte cred, Object o) {
 	Name name = r.getName();
@@ -102,6 +122,13 @@ addRecord(Record r, byte cred, Object o) {
 	}
 }
 
+/**
+ * Adds an RRset to the Cache
+ * @param r The RRset to be added
+ * @param cred The credibility of these records
+ * @param o The source of this RRset (this could be a Message, for example)
+ * @see RRset
+ */
 public void
 addRRset(RRset rrset, byte cred, Object o) {
 	Name name = rrset.getName();
@@ -115,6 +142,15 @@ addRRset(RRset rrset, byte cred, Object o) {
 		addSet(name, type, dclass, new Element(rrset, cred, src));
 }
 
+/**
+ * Adds a negative entry to the Cache
+ * @param name The name of the negative entry
+ * @param type The type of the negative entry
+ * @param dclass The class of the negative entry
+ * @param ttl The ttl of the negative entry
+ * @param cred The credibility of the negative entry
+ * @param o The source of this data
+ */
 public void
 addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
@@ -123,6 +159,17 @@ addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
 		addSet(name, type, dclass, new Element(ttl, cred, src));
 }
 
+/**
+ * Looks up Records in the Cache.  This follows CNAMEs and handles negatively
+ * cached data.
+ * @param name The name to look up
+ * @param type The type to look up
+ * @param dclass The class to look up
+ * @param minCred The minimum acceptable credibility
+ * @return A CacheResponse object
+ * @see CacheResponse
+ * @see Credibility
+ */
 public CacheResponse
 lookupRecords(Name name, short type, short dclass, byte minCred) {
 	CacheResponse cr = null;
@@ -182,7 +229,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 	return cr;
 }
 
-RRset []
+private RRset []
 findRecords(Name name, short type, short dclass, byte minCred) {
 	CacheResponse cr = lookupRecords(name, type, dclass, minCred);
 	if (cr.isSuccessful())
@@ -191,16 +238,40 @@ findRecords(Name name, short type, short dclass, byte minCred) {
 		return null;
 }
 
+/**
+ * Looks up credible Records in the Cache (a wrapper around lookupRecords).
+ * Unlike lookupRecords, this given no indication of why failure occurred.
+ * @param name The name to look up
+ * @param type The type to look up
+ * @param dclass The class to look up
+ * @return An array of RRsets, or null
+ * @see Credibility
+ */
 public RRset []
 findRecords(Name name, short type, short dclass) {
 	return findRecords(name, type, dclass, Credibility.NONAUTH_ANSWER);
 }
 
+/**
+ * Looks up Records in the Cache (a wrapper around lookupRecords).  Unlike
+ * lookupRecords, this given no indication of why failure occurred.
+ * @param name The name to look up
+ * @param type The type to look up
+ * @param dclass The class to look up
+ * @return An array of RRsets, or null
+ * @see Credibility
+ */
 public RRset []
 findAnyRecords(Name name, short type, short dclass) {
 	return findRecords(name, type, dclass, Credibility.NONAUTH_ADDITIONAL);
 }
 
+/**
+ * Adds all data from a Message into the Cache.  Each record is added with
+ * the appropriate credibility, and negative answers are cached as such.
+ * @param in The Message to be added
+ * @see Message
+ */
 public void
 addMessage(Message in) {
 	Enumeration e;
