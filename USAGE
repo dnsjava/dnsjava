@@ -20,9 +20,15 @@ Command line programs:
 
 - jnamed:
 	A basic non-caching, non-recursive server.  Not very good, or useful
-	at all, but it runs.  The config file (jnamed.conf by default)
-	specifies "primary file", "secondary zone address, "cache file",
-	"key name data", and "port number".  For example:
+	at all, but it runs.  This is purely a proof of concept - I strongly
+	recommend that no one use this for anything other than testing
+	or informational purposes.
+
+	The config file (jnamed.conf by default) specifies "primary file",
+	"secondary zone address, "cache file", "key name data", and
+	"port number".  Where a file is specified, it is a DNS zone file.
+
+	A config file looks like:
 	--
 	primary /etc/namedb/internal.db
 	secondary xbill.org 127.0.0.1
