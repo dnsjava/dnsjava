@@ -527,15 +527,6 @@ isWild() {
 }
 
 /**
- * Is this name fully qualified (that is, absolute)?
- * @deprecated As of dnsjava 1.3.0, replaced by <code>isAbsolute</code>.
- */
-public boolean
-isQualified() {
-	return (isAbsolute());
-}
-
-/**
  * Is this name absolute?
  */
 public boolean
