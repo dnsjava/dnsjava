@@ -18,15 +18,23 @@ public dnsResolver(String hostname) {
 	}
 }
 
-public void setPort(int port) {
+public void
+setPort(int port) {
 	this.port = port;
 }
 
-public void setTSIGKey(String key) {
-	TSIG = new dnsTSIG(base64.fromString(key));
+public void
+setTSIGKey(String key) {
+	byte [] keyArray = base64.fromString(key);
+	if (keyArray == null) {
+		System.out.println("Invalid TSIG key string");
+		return;
+	}
+	TSIG = new dnsTSIG(keyArray);
 }
 
-dnsMessage sendTCP(dnsMessage query, byte [] out) throws IOException {
+dnsMessage
+sendTCP(dnsMessage query, byte [] out) throws IOException {
 	byte [] in;
 	Socket s;
 	int inLength;
@@ -57,7 +65,8 @@ dnsMessage sendTCP(dnsMessage query, byte [] out) throws IOException {
 	return response;
 }
 
-public dnsMessage send(dnsMessage query) throws IOException {
+public dnsMessage
+send(dnsMessage query) throws IOException {
 	byte [] out, in;
 	dnsMessage response;
 	DatagramSocket s;
@@ -94,7 +103,8 @@ public dnsMessage send(dnsMessage query) throws IOException {
 		return response;
 }
 
-public dnsMessage sendAXFR(dnsMessage query) throws IOException {
+public dnsMessage
+sendAXFR(dnsMessage query) throws IOException {
 	byte [] out, in;
 	Socket s;
 	int inLength;
@@ -168,6 +178,5 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 	s.close();
 	return response;
 }
-
 
 }

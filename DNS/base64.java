@@ -41,6 +41,9 @@ toString(byte [] b) {
 
 public static byte []
 fromString(String str) {
+	if (str.length() % 4 != 0) {
+		return null;
+	}
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	DataOutputStream ds = new DataOutputStream(bs);
 
