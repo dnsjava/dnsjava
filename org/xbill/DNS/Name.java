@@ -164,6 +164,8 @@ fromString(String s, Name origin) throws TextParseException {
 	if (s.equals("@")) {
 		if (origin != null)
 			return origin;
+		else
+			return name;
 	} else if (s.equals(".")) {
 		name.qualified = true;
 		return name;
