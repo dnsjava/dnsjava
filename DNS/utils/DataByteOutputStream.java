@@ -6,29 +6,56 @@ package DNS.utils;
 import java.io.*;
 import java.math.*;
 
+/**
+ * An extension of ByteArrayOutputStream to support directly writing types
+ * used by DNS routines.
+ * @see DataByteInputStream
+ */
+
+
 public class DataByteOutputStream extends ByteArrayOutputStream {
 
+/**
+ * Create a new DataByteOutputStream with a specified initial size
+ * @param size The initial size
+ */
 public
 DataByteOutputStream(int size) {
 	super(size);
 }
 
+/**
+ * Create a new DataByteOutputStream with the default initial size
+ * @param size The initial size
+ */
 public
 DataByteOutputStream() {
 	super();
 }
 
+/**
+ * Writes a byte to the stream
+ * @param i The byte to be written
+ */
 public void
 writeByte(int i) {
 	write(i);
 }
 
+/**
+ * Writes a short to the stream
+ * @param i The short to be written
+ */
 public void
 writeShort(int i) {
 	write((i >>> 8) & 0xFF);
 	write(i & 0xFF);
 }
 
+/**
+ * Writes an int to the stream
+ * @param i The int to be written
+ */
 public void
 writeInt(int i) {
 	write((i >>> 24) & 0xFF);
@@ -37,6 +64,10 @@ writeInt(int i) {
 	write(i & 0xFF);
 }
 
+/**
+ * Writes a long to the stream
+ * @param l The long to be written
+ */
 public void
 writeLong(long l) {
 	write((int)(l >>> 56) & 0xFF);
@@ -49,6 +80,10 @@ writeLong(long l) {
 	write((int)l & 0xFF);
 }
 
+/**
+ * Writes a String to the stream, encoded as a length byte followed by data
+ * @param s The String to be written
+ */
 public void
 writeString(String s) {
 	try {
@@ -60,6 +95,11 @@ writeString(String s) {
 	}
 }
 
+/**
+ * Writes a BigInteger to the stream, encoded as binary data.  If present,
+ * the leading 0 byte is removed.
+ * @param i The BigInteger to be written
+ */
 public void
 writeBigInteger(BigInteger i) {
 	byte [] b = i.toByteArray();
@@ -73,6 +113,11 @@ writeBigInteger(BigInteger i) {
 	}
 }
 
+/**
+ * Writes a short to the stream at a specific location
+ * @param i The short to be written
+ * @param pos The position at which the write occurs
+ */
 public void
 writeShortAt(int i, int pos) throws IllegalArgumentException {
 	if (pos < 0 || pos > count)
@@ -83,6 +128,10 @@ writeShortAt(int i, int pos) throws IllegalArgumentException {
 	count = oldcount;
 }
 
+/**
+ * Get the current position in the stream
+ * @return The current position
+ */
 public int
 getPos() {
 	return count;

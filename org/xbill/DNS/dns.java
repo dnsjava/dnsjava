@@ -9,17 +9,33 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
+/**
+ * High level API for mapping queries to DNS Records.  Caching is used
+ * when possible to reduce the number of DNS requests, and a Resolver
+ * is used to perform the queries.
+ *
+ * @see Resolver
+ */
+
 public final class dns {
 
 private static Resolver res;
-private static ExtendedResolver eres;
 private static Cache cache;
+
+/* Otherwise the class could be instantiated */
+private
+dns() {}
 
 static boolean
 matchType(short type1, short type2) {
 	return (type1 == Type.ANY || type2 == Type.ANY || type1 == type2);
 }
 
+/**
+ * Converts an InetAddress into the corresponding domain name
+ * (127.0.0.1 -> 1.0.0.127.IN-ADDR.ARPA.)
+ * @return A String containing the domain name.
+ */
 public static String
 inaddrString(InetAddress addr) {
 	byte [] address = addr.getAddress();
@@ -32,6 +48,12 @@ inaddrString(InetAddress addr) {
 	return sb.toString();
 }
 
+/**
+ * Converts an String containing an IP address in dotted quad form into the
+ * corresponding domain name.
+ * ex. 127.0.0.1 -> 1.0.0.127.IN-ADDR.ARPA.
+ * @return A String containing the domain name.
+ */
 public static String
 inaddrString(String s) {
 	InetAddress address;
@@ -44,11 +66,23 @@ inaddrString(String s) {
 	return inaddrString(address);
 }
 
+/**
+ * Sets the Resolver to be used by functions in the dns class
+ */
 public static void
 setResolver(Resolver _res) {
 	res = _res;
 }
 
+/**
+ * Finds records with the given name, type, and class with a certain credibility
+ * @param namestr  The name of the desired records
+ * @param type  The type of the desired records
+ * @param dclass  The class of the desired records
+ * @param cred  The minimum credibility of the desired records
+ * @see Credibility
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getRecords(String namestr, short type, short dclass, byte cred) {
 	Message query;
@@ -65,7 +99,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 
 	if (res == null) {
 		try {
-			eres = new ExtendedResolver();
+			res = new ExtendedResolver();
 		}
 		catch (UnknownHostException uhe) {
 			System.out.println("Failed to initialize resolver");
@@ -90,10 +124,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 		question = Record.newRecord(name, type, dclass);
 		query = Message.newQuery(question);
 
-		if (res != null)
-			response = res.send(query);
-		else
-			response = eres.send(query);
+		response = res.send(query);
 
 		short rcode = response.getHeader().getRcode();
 		if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)
@@ -127,32 +158,70 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	return answers;
 }
 
+/**
+ * Finds credible records with the given name, type, and class with
+ * @param namestr  The name of the desired records
+ * @param type  The type of the desired records
+ * @param dclass  The class of the desired records
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getRecords(String namestr, short type, short dclass) {
 	return getRecords(namestr, type, dclass, Credibility.NONAUTH_ANSWER);
 }
 
+/**
+ * Finds any records with the given name, type, and class
+ * @param namestr  The name of the desired records
+ * @param type  The type of the desired records
+ * @param dclass  The class of the desired records
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getAnyRecords(String namestr, short type, short dclass) {
 	return getRecords(namestr, type, dclass, Credibility.AUTH_ADDITIONAL);
 }
 
+/**
+ * Finds credible records with the given name and type in class IN
+ * @param namestr  The name of the desired records
+ * @param type  The type of the desired records
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getRecords(String name, short type) {
 	return getRecords(name, type, DClass.IN, Credibility.NONAUTH_ANSWER);
 }
 
+/**
+ * Finds any records with the given name and type in class IN
+ * @param namestr  The name of the desired records
+ * @param type  The type of the desired records
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getAnyRecords(String name, short type) {
 	return getRecords(name, type, DClass.IN, Credibility.AUTH_ADDITIONAL);
 }
 
+/**
+ * Finds credible records for the given dotted quad address and type in class IN
+ * @param addr  The dotted quad address of the desired records
+ * @param type  The type of the desired records
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getRecordsByAddress(String addr, short type) {
 	String name = inaddrString(addr);
 	return getRecords(name, type, DClass.IN, Credibility.NONAUTH_ANSWER);
 }
 
+/**
+ * Finds any records for the given dotted quad address and type in class IN
+ * @param addr  The dotted quad address of the desired records
+ * @param type  The type of the desired records
+ * @return The matching records, or null if none are found
+ */
 public static Record []
 getAnyRecordsByAddress(String addr, short type) {
 	String name = inaddrString(addr);

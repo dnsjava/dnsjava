@@ -6,10 +6,23 @@ package DNS.utils;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Routines for converting between Strings of base64-encoded data and arrays of
+ * binary data.
+ */
+
 public class base64 {
 
 static private final String Base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
+private
+base64() {}
+
+/**
+ * Convert binary data to a base64-encoded String
+ * @param b An array containing binary data
+ * @return A String containing the encoded data
+ */
 public static String
 toString(byte [] b) {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -45,6 +58,11 @@ toString(byte [] b) {
 	return new String(os.toByteArray());
 }
 
+/**
+ * Convert a base64-encoded String to binary data
+ * @param b A String containing the encoded data
+ * @return An array containing the binary data, or null if the string is invalid
+ */
 public static byte []
 fromString(String str) {
 	if (str.length() % 4 != 0) {

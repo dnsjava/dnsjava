@@ -5,79 +5,86 @@ package DNS.utils;
 
 import java.io.*;
 
-public class md5 {
+/**
+ * A pure java implementation of the MD5 digest algorithm
+ */
 
-static final int S11 = 7;
-static final int S12 = 12;
-static final int S13 = 17;
-static final int S14 = 22;
-static final int S21 = 5;
-static final int S22 = 9;
-static final int S23 = 14;
-static final int S24 = 20;
-static final int S31 = 4;
-static final int S32 = 11;
-static final int S33 = 16;
-static final int S34 = 23;
-static final int S41 = 6;
-static final int S42 = 10;
-static final int S43 = 15;
-static final int S44 = 21;
+public final class md5 {
 
-static int
+private
+md5() {}
+
+private static final int S11 = 7;
+private static final int S12 = 12;
+private static final int S13 = 17;
+private static final int S14 = 22;
+private static final int S21 = 5;
+private static final int S22 = 9;
+private static final int S23 = 14;
+private static final int S24 = 20;
+private static final int S31 = 4;
+private static final int S32 = 11;
+private static final int S33 = 16;
+private static final int S34 = 23;
+private static final int S41 = 6;
+private static final int S42 = 10;
+private static final int S43 = 15;
+private static final int S44 = 21;
+
+private static int
 F(int x, int y, int z) {
 	return (((x & y)) | (~x & z));
 }
 
-static int
+private static int
 G(int x, int y, int z) {
 	return (((x & z)) | (y & ~z));
 }
 
-static int
+private static int
 H(int x, int y, int z) {
 	return (x ^ y ^ z);
 }
 
-static int
+private static int
 I(int x, int y, int z) {
 	return (y ^ (x | ~z));
 }
 
-static int
+private static int
 ROTATE_LEFT(int x, int n) {
 	return ((x << n) | (x >>> (32 - n)));
 }
 
-static int
+private static int
 FF(int a, int b, int c, int d, int x, int s, int ac) {
 	a += F(b, c, d) + x + ac;
 	a = ROTATE_LEFT(a, s);
 	return a + b;
 }
 
-static int
+private static int
 GG(int a, int b, int c, int d, int x, int s, int ac) {
 	a += G(b, c, d) + x + ac;
 	a = ROTATE_LEFT(a, s);
 	return a + b;
 }
 
-static int
+private static int
 HH(int a, int b, int c, int d, int x, int s, int ac) {
 	a += H(b, c, d) + x + ac;
 	a = ROTATE_LEFT(a, s);
 	return a + b;
 }
 
-static int
+private static int
 II(int a, int b, int c, int d, int x, int s, int ac) {
 	a += I(b, c, d) + x + ac;
 	a = ROTATE_LEFT(a, s);
 	return a + b;
 }
 
-static int [] 
+private static int [] 
 decode(byte [] input, int start, int len) {
 	int [] output = new int[len/4];
 	for (int i = 0, j = start; j < start + len; i++, j+=4)
@@ -88,7 +95,7 @@ decode(byte [] input, int start, int len) {
 	return output;
 }
 
-static byte []
+private static byte []
 encode(int [] input) {
 	byte [] output = new byte[input.length * 4];
 	for (int i = 0, j = 0; i < input.length; i++, j+=4) {
@@ -100,7 +107,7 @@ encode(int [] input) {
 	return output;
 }
 
-static void
+private static void
 digest(byte [] data, int start, int len, int [] s) {
 	int [] x = decode(data, start, len);
 	int a = s[0], b = s[1], c = s[2], d = s[3];
@@ -179,7 +186,7 @@ digest(byte [] data, int start, int len, int [] s) {
 	s[3] += d;
 }
 
-static byte []
+private static byte []
 pad(byte [] data, int start, int len) {
 	int size = (len + 8 + 64) & (~63);
 	byte [] newdata = new byte[size];
@@ -197,7 +204,14 @@ pad(byte [] data, int start, int len) {
 	return newdata;
 }
 
-static byte []
+/**
+ *  Compute the MD5 digest of a block of data.
+ *  @param data The data
+ *  @param start The index at which to start digesting
+ *  @param len The number of bytes to digest
+ *  @return The MD5 digest (a 16 byte array)
+ */
+public static byte []
 compute(byte [] data, int start, int len) {
 	int [] s = new int[4];
 
@@ -212,7 +226,12 @@ compute(byte [] data, int start, int len) {
 	return encode(s);
 }
 
-static byte []
+/**
+ *  Compute the MD5 digest of a block of data.
+ *  @param data The data
+ *  @return The MD5 digest (a 16 byte array)
+ */
+public static byte []
 compute(byte [] data) {
 	return compute(data, 0, data.length);
 }

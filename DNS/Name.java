@@ -7,15 +7,27 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * A representation of a domain name.
+ */
+
+
 public class Name {
 
 private String [] name;
 private byte labels;
 
+/** The root name */
 public static Name root = new Name("");
 
+/** The maximum number of labels in a Name */
 static final int MAXLABELS = 64;
 
+/**
+ * Create a new name from a string and an origin
+ * @param s  The string to be converted
+ * @param origin  If the name is unqalified, the origin to be appended
+ */
 public
 Name(String s, Name origin) {
 	labels = 0;
@@ -50,6 +62,10 @@ Name(String s, Name origin) {
 	
 }
 
+/**
+ * Create a new name from a string
+ * @param s  The string to be converted
+ */
 public
 Name(String s) {
 	this (s, null);
@@ -91,6 +107,11 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 		}
 }
 
+/**
+ * Create a new name by removing labels from the beginning of an existing Name
+ * @param d  An existing Name
+ * @param n  The number of labels to remove from the beginning in the copy
+ */
 /* Skips n labels and creates a new name */
 public
 Name(Name d, int n) {
@@ -100,6 +121,10 @@ Name(Name d, int n) {
 	System.arraycopy(d.name, n, name, 0, labels);
 }
 
+/**
+ * Generates a new Name with the first label replaced by a wildcard 
+ * @return The wildcard name
+ */
 public Name
 wild() {
 	Name wild = new Name(this, 0);
@@ -107,17 +132,26 @@ wild() {
 	return wild;
 }
 
+/**
+ * Is this name a wildcard?
+ */
 public boolean
 isWild() {
 	return name[0].equals("*");
 }
 
+/**
+ * Appends the specified name to the end of the current Name
+ */
 public void
 append(Name d) {
 	System.arraycopy(d.name, 0, name, labels, d.labels);
 	labels += d.labels;
 }
 
+/**
+ * The length
+ */
 public short
 length() {
 	short total = 0;
@@ -126,11 +160,17 @@ length() {
 	return ++total;
 }
 
+/**
+ * The number of labels
+ */
 public byte
 labels() {
 	return labels;
 }
 
+/**
+ * Is the current Name a subdomain of the specified name?
+ */
 public boolean
 subdomain(Name domain) {
 	if (domain == null || domain.labels > labels)
@@ -142,6 +182,9 @@ subdomain(Name domain) {
 	return true;
 }
 
+/**
+ * Convert Name to a String
+ */
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
@@ -152,6 +195,9 @@ toString() {
 	return sb.toString();
 }
 
+/**
+ * Convert Name to DNS wire format
+ */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
 	for (int i=0; i<labels; i++) {
@@ -177,6 +223,9 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeByte(0);
 }
 
+/**
+ * Convert Name to canonical DNS wire format (all lowercase)
+ */
 public void
 toWireCanonical(DataByteOutputStream out) throws IOException {
 	for (int i=0; i<labels; i++) {
@@ -187,6 +236,9 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
 	out.writeByte(0);
 }
 
+/**
+ * Are these two Names equivalent?
+ */
 public boolean
 equals(Object arg) {
 	if (arg == null || !(arg instanceof Name))
@@ -201,6 +253,9 @@ equals(Object arg) {
 	return true;
 }
 
+/**
+ * Computes a hashcode based on the value
+ */
 public int
 hashCode() {
 	int code = labels;

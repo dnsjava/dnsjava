@@ -6,28 +6,55 @@ package DNS.utils;
 import java.io.*;
 import java.math.BigInteger;
 
+/**
+ * An extension of ByteArrayInputStream to support directly reading types
+ * used by DNS routines.
+ * @see DataByteOutputStream
+ */
+
 public class DataByteInputStream extends ByteArrayInputStream {
 
+/**
+ * Creates a new DataByteInputStream
+ * @param b The byte array to read from
+ */
 public
 DataByteInputStream(byte [] b) {
 	super(b);
 }
 
+/**
+ * Read data from the stream.
+ * @param b The array to read into
+ * @return The number of bytes read
+ */
 public int
 read(byte b[]) throws IOException {
 	return read(b, 0, b.length);
 }
 
+/**
+ * Read a byte from the stream
+ * @return The byte
+ */
 public byte
 readByte() throws IOException {
 	return (byte) read();
 }
 
+/**
+ * Read an unsigned byte from the stream
+ * @return The unsigned byte as an int
+ */
 public int
 readUnsignedByte() throws IOException {
 	return read();
 }
 
+/**
+ * Read a short from the stream
+ * @return The short
+ */
 public short
 readShort() throws IOException {
 	int c1 = read();
@@ -35,6 +62,10 @@ readShort() throws IOException {
 	return (short)((c1 << 8) + c2);
 }
 
+/**
+ * Read an unsigned short from the stream
+ * @return The unsigned short as an int
+ */
 public int
 readUnsignedShort() throws IOException {
 	int c1 = read();
@@ -42,6 +73,10 @@ readUnsignedShort() throws IOException {
 	return ((c1 << 8) + c2);
 }
 
+/**
+ * Read an int from the stream
+ * @return The int
+ */
 public int
 readInt() throws IOException {
 	int c1 = read();
@@ -51,6 +86,10 @@ readInt() throws IOException {
 	return ((c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
 }
 
+/**
+ * Read a long from the stream
+ * @return The long
+ */
 public long
 readLong() throws IOException {
 	int c1 = read();
@@ -65,6 +104,10 @@ readLong() throws IOException {
 		(c5 << 24) + (c6 << 16) + (c7 << 8) + c8);
 }
 
+/**
+ * Read a String from the stream, represented as a length byte followed by data
+ * @return The String
+ */
 public String
 readString() throws IOException {
 	int len = read();
@@ -73,6 +116,12 @@ readString() throws IOException {
 	return new String(b);
 }
 
+/**
+ * Read a BigInteger from the stream, encoded as binary data.  A 0 byte is
+ * prepended so that the value is always positive.
+ * @param len The number of bytes to read
+ * @return The BigInteger
+ */
 public BigInteger
 readBigInteger(int len) throws IOException {
 	byte [] b = new byte[len + 1];
@@ -80,11 +129,19 @@ readBigInteger(int len) throws IOException {
 	return new BigInteger(b);
 }
 
+/**
+ * Read and ignore bytes from the stream
+ * @param n The number of bytes to skip
+ */
 public void
 skipBytes(int n) throws IOException {
 	skip(n);
 }
 
+/**
+ * Get the current position in the stream
+ * @return The current position
+ */
 public int
 getPos() {
 	return pos;
