@@ -1,3 +1,6 @@
+8/28/2002
+	- Remove support for bitstring labels, since they're now deprecated.
+
 8/16/2002
 	- Address.isDottedQuad didn't check to see if the input String
 	  contained characters after an IP address.

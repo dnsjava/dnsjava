@@ -27,7 +27,6 @@ private Object [] name;
 private byte offset;
 private byte labels;
 private boolean qualified;
-private boolean hasBitString;
 private int hashcode;
 
 /** The root name */
@@ -75,25 +74,6 @@ grow(int n) {
 private final void
 grow() {
 	grow(labels * 2);
-}
-
-private final void
-compact() {
-	for (int i = labels - 1 + offset; i > offset; i--) {
-		if (!(name[i] instanceof BitString) ||
-		    !(name[i - 1] instanceof BitString))
-		    	continue;
-		BitString bs = (BitString) name[i];
-		BitString bs2 = (BitString) name[i - 1];
-		if (bs.nbits == 256)
-			continue;
-		int nbits = bs.nbits + bs2.nbits;
-		bs.join(bs2);
-		if (nbits <= 256) {
-			System.arraycopy(name, i, name, i - 1, labels - i);
-			labels--;
-		}
-	}
 }
 
 /**
@@ -176,12 +156,9 @@ fromString(String s, Name origin) throws TextParseException {
 	boolean escaped = false;
 	int digits = 0;
 	int intval = 0;
-	boolean bitstring = false;
 	for (int i = 0; i < s.length(); i++) {
 		byte b = (byte) s.charAt(i);
 		if (escaped) {
-			if (pos == 0 && b == '[')
-				bitstring = true;
 			if (b >= '0' && b <= '9' && digits < 3) {
 				digits++;
 				intval *= 10 + (b - '0');
@@ -210,14 +187,7 @@ fromString(String s, Name origin) throws TextParseException {
 				throw new TextParseException("too many labels");
 			if (name.labels == name.name.length)
 				name.grow();
-			if (bitstring) {
-				bitstring = false;
-				name.name[name.labels++] =
-						new BitString(newlabel);
-				name.hasBitString = true;
-			}
-			else
-				name.name[name.labels++] = newlabel;
+			name.name[name.labels++] = newlabel;
 			labelstart = -1;
 			pos = 0;
 		} else {
@@ -237,16 +207,8 @@ fromString(String s, Name origin) throws TextParseException {
 			throw new TextParseException("too many labels");
 		if (name.labels == name.name.length)
 			name.grow();
-		if (bitstring) {
-			bitstring = false;
-			name.name[name.labels++] = new BitString(newlabel);
-			name.hasBitString = true;
-		}
-		else
-			name.name[name.labels++] = newlabel;
+		name.name[name.labels++] = newlabel;
 	}
-	if (name.hasBitString)
-		name.compact();
 	if (origin != null)
 		return concatenate(name, origin);
 	return (name);
@@ -328,32 +290,9 @@ loop:
 					 name2.labels);
 			labels += name2.labels;
 			break loop;
-		case LABEL_EXTENDED:
-			int type = len & ~LABEL_MASK;
-			switch (type) {
-			case EXT_LABEL_BITSTRING:
-				int bits = in.readUnsignedByte();
-				if (bits == 0)
-					bits = 256;
-				int bytes = (bits + 7) / 8;
-				byte [] data = new byte[bytes];
-				in.read(data);
-				if (labels == name.length)
-					grow();
-				name[labels++] = new BitString(bits, data);
-				hasBitString = true;
-				break;
-			default:
-				throw new WireParseException(
-						"Unknown name format");
-			} /* switch */
-			break;
 		} /* switch */
 	}
 	qualified = true;
-
-	if (hasBitString)
-		compact();
 }
 
 /**
@@ -367,13 +306,6 @@ Name(Name src, int n) {
 	offset = (byte)(src.offset + n);
 	labels = (byte)(src.labels - n);
 	qualified = src.qualified;
-	if (!src.hasBitString)
-		hasBitString = false;
-	else {
-		for (int i = 0; i < labels; i++)
-			if (name[i + offset] instanceof BitString)
-				hasBitString = true;
-	}
 }
 
 /**
@@ -397,9 +329,6 @@ concatenate(Name prefix, Name suffix) {
 	System.arraycopy(suffix.name, suffix.offset, newname.name,
 			 prefix.labels, suffix.labels);
 	newname.qualified = suffix.qualified;
-	newname.hasBitString = (prefix.hasBitString || suffix.hasBitString);
-	if (newname.hasBitString)
-		newname.compact();
 	return newname;
 }
 
@@ -435,11 +364,6 @@ fromDNAME(DNAMERecord dname) {
 	System.arraycopy(dnametarget.name, 0, newname.name, saved,
 			 dnametarget.labels);
 	newname.qualified = true;
-	for (int i = 0; i < newname.labels; i++)
-		if (newname.name[i] instanceof BitString)
-			newname.hasBitString = true;
-	if (newname.hasBitString)
-		newname.compact();
 	return newname;
 }
 
@@ -448,7 +372,7 @@ fromDNAME(DNAMERecord dname) {
  */
 public boolean
 isWild() {
-	if (labels == 0 || (name[0] instanceof BitString))
+	if (labels == 0)
 		return false;
 	if (name[0] == wildcardLabel)
 		return true;
@@ -471,10 +395,7 @@ public short
 length() {
 	short total = 0;
 	for (int i = offset; i < labels + offset; i++) {
-		if (name[i] instanceof BitString)
-			total += (((BitString)name[i]).bytes() + 2);
-		else
-			total += (((byte [])name[i]).length + 1);
+		total += (((byte [])name[i]).length + 1);
 	}
 	return ++total;
 }
@@ -529,10 +450,7 @@ toString() {
 	if (labels == 0)
 		sb.append(".");
 	for (int i = offset; i < labels + offset; i++) {
-		if (name[i] instanceof BitString)
-			sb.append(name[i]);
-		else
-			sb.append(byteString((byte [])name[i]));
+		sb.append(byteString((byte [])name[i]));
 		if (qualified || i < labels)
 			sb.append(".");
 	}
@@ -546,10 +464,7 @@ toString() {
 public String
 getLabelString(int n) {
 	n += offset;
-	if (name[n] instanceof BitString)
-		return name[n].toString();
-	else
-		return byteString((byte [])name[n]);
+	return byteString((byte [])name[n]);
 }
 
 /**
@@ -574,14 +489,7 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 		else {
 			if (c != null)
 				c.add(out.getPos(), tname);
-			if (name[i] instanceof BitString) {
-				out.writeByte(LABEL_EXTENDED |
-					      EXT_LABEL_BITSTRING);
-				out.writeByte(((BitString)name[i]).wireBits());
-				out.write(((BitString)name[i]).data);
-			}
-			else
-				out.writeString((byte []) name[i]);
+			out.writeString((byte []) name[i]);
 		}
 	}
 	out.writeByte(0);
@@ -593,18 +501,11 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 public void
 toWireCanonical(DataByteOutputStream out) throws IOException {
 	for (int i = offset; i < labels + offset; i++) {
-		if (name[i] instanceof BitString) {
-			out.writeByte(LABEL_EXTENDED | EXT_LABEL_BITSTRING);
-			out.writeByte(((BitString)name[i]).wireBits());
-			out.write(((BitString)name[i]).data);
-		}
-		else {
-			byte [] b = (byte []) name[i];
-			byte [] bc = new byte[b.length];
-			for (int j = 0; j < b.length; j++)
-				bc[j] = lowercase[b[j]];
-			out.writeString(bc);
-		}
+		byte [] b = (byte []) name[i];
+		byte [] bc = new byte[b.length];
+		for (int j = 0; j < b.length; j++)
+			bc[j] = lowercase[b[j]];
+		out.writeString(bc);
 	}
 	out.writeByte(0);
 }
@@ -634,20 +535,13 @@ equals(Object arg) {
 	for (int i = 0; i < labels; i++) {
 		Object nobj = name[offset + i];
 		Object dnobj = d.name[d.offset + i];
-		if (nobj.getClass() != dnobj.getClass())
+		byte [] b1 = (byte []) nobj;
+		byte [] b2 = (byte []) dnobj;
+		if (b1.length != b2.length)
 			return false;
-		if (nobj instanceof BitString) {
-			if (!nobj.equals(dnobj))
+		for (int j = 0; j < b1.length; j++) {
+			if (lowercase[b1[j]] != lowercase[b2[j]])
 				return false;
-		} else {
-			byte [] b1 = (byte []) nobj;
-			byte [] b2 = (byte []) dnobj;
-			if (b1.length != b2.length)
-				return false;
-			for (int j = 0; j < b1.length; j++) {
-				if (lowercase[b1[j]] != lowercase[b2[j]])
-					return false;
-			}
 		}
 	}
 	return true;
@@ -662,16 +556,9 @@ hashCode() {
 		return (hashcode);
 	int code = labels;
 	for (int i = offset; i < labels + offset; i++) {
-		if (name[i] instanceof BitString) {
-			BitString b = (BitString) name[i];
-			for (int j = 0; j < b.bytes(); j++)
-				code += ((code << 3) + b.data[j]);
-		}
-		else {
-			byte [] b = (byte []) name[i];
-			for (int j = 0; j < b.length; j++)
-				code += ((code << 3) + lowercase[b[j]]);
-		}
+		byte [] b = (byte []) name[i];
+		for (int j = 0; j < b.length; j++)
+			code += ((code << 3) + lowercase[b[j]]);
 	}
 	hashcode = code;
 	return hashcode;
@@ -699,43 +586,15 @@ compareTo(Object o) {
 		Object label = name[labels - i + offset];
 		Object alabel = arg.name[arg.labels - i + arg.offset];
 
-		if (label.getClass() != alabel.getClass()) {
-			if (label instanceof BitString)
-				return (-1);
-			else
-				return (1);
-		}
-		if (label instanceof BitString) {
-			BitString bs = (BitString)label;
-			BitString abs = (BitString)alabel;
-			int bits = bs.nbits > abs.nbits ? abs.nbits : bs.nbits;
-			int n = bs.compareBits(abs, bits);
+		byte [] b = (byte []) label;
+		byte [] ab = (byte []) alabel;
+		for (int j = 0; j < b.length && j < ab.length; j++) {
+			int n = lowercase[b[j]] - lowercase[ab[j]];
 			if (n != 0)
 				return (n);
-			if (bs.nbits == abs.nbits)
-				continue;
-
-			/*
-			 * If label X has more bits than label Y, then the
-			 * name with X is greater if Y is the first label
-			 * of its name.  Otherwise, the name with Y is greater.
-			 */
-			if (bs.nbits > abs.nbits)
-				return (i == arg.labels ? 1 : -1);
-			else
-				return (i == labels ? -1 : 1);
 		}
-		else {
-			byte [] b = (byte []) label;
-			byte [] ab = (byte []) alabel;
-			for (int j = 0; j < b.length && j < ab.length; j++) {
-				int n = lowercase[b[j]] - lowercase[ab[j]];
-				if (n != 0)
-					return (n);
-			}
-			if (b.length != ab.length)
-				return (b.length - ab.length);
-		}
+		if (b.length != ab.length)
+			return (b.length - ab.length);
 	}
 	return (labels - arg.labels);
 }
