@@ -100,7 +100,6 @@ public dnsMessage send(dnsMessage query) throws IOException {
 					      (short)300, h.sign(),
 					      dns.NOERROR, null);
 			query.addRecord(dns.ADDITIONAL, r);
-			System.out.println(r);
 		}
 		catch (UnknownHostException e) {
 		}
