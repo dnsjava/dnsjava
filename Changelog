@@ -1,3 +1,6 @@
+3/22/2002
+	- Record.equals() did not properly canonicalize names.
+
 3/19/2002
 	- When a compressed name is parsed, it should be added to the
 	  compression table, so that future pointers to that name work.

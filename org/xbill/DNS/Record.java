@@ -426,8 +426,8 @@ equals(Object arg) {
 		return false;
 	Record r = (Record) arg;
 	try {
-		byte [] array1 = toWire(Section.ANSWER);
-		byte [] array2 = r.toWire(Section.ANSWER);
+		byte [] array1 = toWireCanonical();
+		byte [] array2 = r.toWireCanonical();
 		if (array1.length != array2.length)
 			return false;
 		for (int i = 0; i < array1.length; i++)
