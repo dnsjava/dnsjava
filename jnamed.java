@@ -378,8 +378,10 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 			header.setFlag(Flags.AA);
 			addRRset(rrset.getName(), response, rrset,
 				 Section.ANSWER, FLAG_DNSSECOK);
-			tsig.applyAXFR(response, qtsig, first);
-			qtsig = response.getTSIG();
+			if (tsig != null) {
+				tsig.applyAXFR(response, qtsig, first);
+				qtsig = response.getTSIG();
+			}
 			first = false;
 			byte [] out = response.toWire();
 			dataOut.writeShort(out.length);
