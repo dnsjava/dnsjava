@@ -20,6 +20,9 @@ import org.xbill.DNS.utils.*;
 
 public class Message implements Cloneable {
 
+/** The maximum length of a message in wire format. */
+public static int MAXLENGTH = 65535;
+
 private Header header;
 private List [] sections;
 private int size;
