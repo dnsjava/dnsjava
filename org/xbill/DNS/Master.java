@@ -144,18 +144,18 @@ nextRecord() throws IOException {
 			continue;
 		else if (token.type == Tokenizer.EOF)
 			return null;
-		else {
+		else if (((String) token.value).charAt(0) == '$') {
 			s = token.value;
 
-			if (s.equals("$ORIGIN")) {
+			if (s.equalsIgnoreCase("$ORIGIN")) {
 				origin = st.getName(Name.root);
 				st.getEOL();
 				continue;
-			} else if (s.equals("$TTL")) {
+			} else if (s.equalsIgnoreCase("$TTL")) {
 				defaultTTL = st.getTTL();
 				st.getEOL();
 				continue;
-			} else  if (s.equals("$INCLUDE")) {
+			} else  if (s.equalsIgnoreCase("$INCLUDE")) {
 				String filename = st.getString();
 				String parent = file.getParent();
 				File newfile = new File(file.getParent(),
@@ -174,11 +174,12 @@ nextRecord() throws IOException {
 				 * the new file.  Recursing works better.
 				 */
 				return nextRecord();
-			} else if (s.charAt(0) == '$') {
-				throw st.exception("Invalid directive: " + s);
 			} else {
-				name = parseName(s, origin);
+				throw st.exception("Invalid directive: " + s);
 			}
+		} else {
+			s = token.value;
+			name = parseName(s, origin);
 		}
 
 		s = st.getString();
