@@ -1,3 +1,7 @@
+6/22/2002
+	- Significant speed improvements in the Record class and its
+	  subclasses.
+
 6/20/2002
 	- Add Zone.removeRecord() (based on code from Adam Cassar
 	  <adam.cassar@netregistry.com.au>)
