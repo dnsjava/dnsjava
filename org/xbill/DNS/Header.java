@@ -59,7 +59,7 @@ getFlag(int bit) {
 
 public int
 getID() {
-	return id;
+	return id & 0xFFFF;
 }
 
 public void
