@@ -12,6 +12,7 @@ public final class Section {
 
 private static StringValueTable sections = new StringValueTable();
 private static StringValueTable longSections = new StringValueTable();
+private static StringValueTable updSections = new StringValueTable();
 
 /** The question (first) section */
 public static final byte QUESTION	= 0;
@@ -46,23 +47,38 @@ static {
 	longSections.put2(AUTHORITY, "AUTHORITY RECORDS");
 	longSections.put2(ADDITIONAL, "ADDITIONAL RECORDS");
 
+	updSections.put2(ZONE, "ZONE");
+	updSections.put2(PREREQ, "PREREQUISITES");
+	updSections.put2(UPDATE, "UPDATE RECORDS");
+	updSections.put2(ADDITIONAL, "ADDITIONAL RECORDS");
+
 }
 
 private
 Section() {}
 
 
-/** Converts a numeric Opcode into an abbreviation String */
+/** Converts a numeric Section into an abbreviation String */
 public static String
 string(int i) {
 	String s = sections.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-/** Converts a numeric Opcode into a full description String */
+/** Converts a numeric Section into a full description String */
 public static String
 longString(int i) {
 	String s = longSections.getString(i);
+	return (s != null) ? s : new Integer(i).toString();
+}
+
+/**
+ * Converts a numeric Section into a full description String for an update
+ * Message.
+ */
+public static String
+updString(int i) {
+	String s = updSections.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 

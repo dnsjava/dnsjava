@@ -177,7 +177,6 @@ sectionToString(int i) {
 
 	Enumeration e = getSection(i);
 	StringBuffer sb = new StringBuffer();
-	sb.append(";; " + Section.longString(i) + ":\n");
 
 	while (e.hasMoreElements()) {
 		Record rec = (Record) e.nextElement();
@@ -197,8 +196,22 @@ public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(getHeader() + "\n");
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++) {
+		sb.append(";; " + Section.longString(i) + ":\n");
 		sb.append(sectionToString(i) + "\n");
+	}
+	sb.append(";; done (" + numBytes() + " bytes)");
+	return sb.toString();
+}
+
+public String
+toStringAsUpdate() {
+	StringBuffer sb = new StringBuffer();
+	sb.append(getHeader() + "\n");
+	for (int i = 0; i < 4; i++) {
+		sb.append(";; " + Section.updString(i) + ":\n");
+		sb.append(sectionToString(i) + "\n");
+	}
 	sb.append(";; done (" + numBytes() + " bytes)");
 	return sb.toString();
 }
