@@ -121,8 +121,27 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 	}
 }
 
+public RRset
+findDelegation(Name name, short dclass) {
+	Zone zone = findBestZone(name);
+	if (zone == null)
+		return null;
+	byte zlabels = zone.getOrigin().labels();
+	int labels = name.labels() - zlabels;
+	for (int i = 0; i < labels; i++) {
+		Name tname = new Name(name, i);
+		RRset rrset = findExactMatch(tname, Type.NS, dclass, false);
+		if (rrset != null)
+			return rrset;
+	}
+	return null;
+}
+
+
 void
-addRRset(Name name, Message response, RRset rrset, boolean sigonly) {
+addRRset(Name name, Message response, RRset rrset, byte section,
+	 boolean sigonly)
+{
 	Enumeration e;
 	if (!sigonly) {
 		e = rrset.rrs();
@@ -130,7 +149,10 @@ addRRset(Name name, Message response, RRset rrset, boolean sigonly) {
 			Record r = (Record) e.nextElement();
 			if (!name.isWild() && r.getName().isWild())
 				r = r.withName(name);
-			response.addRecord(r, Section.ANSWER);
+			for (byte s = 1; s < section; s++)
+				if (response.findRecord(r, s))
+					continue;
+			response.addRecord(r, section);
 		}
 	}
 	e = rrset.sigs();
@@ -138,7 +160,10 @@ addRRset(Name name, Message response, RRset rrset, boolean sigonly) {
 		Record r = (Record) e.nextElement();
 		if (!name.isWild() && r.getName().isWild())
 			r = r.withName(name);
-		response.addRecord(r, Section.ANSWER);
+		for (byte s = 1; s < section; s++)
+			if (response.findRecord(r, s))
+				continue;
+		response.addRecord(r, section);
 	}
 }
 
@@ -163,22 +188,19 @@ addAuthority(Message response, Name name, Zone zone) {
 		}
 		if (nsRecords == null)
 			return;
-		Enumeration e = nsRecords.rrs();
-		while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
-			if (response.findRecord(r, Section.ANSWER) == false)
-				response.addRecord(r, Section.AUTHORITY);
-		}
-		e = nsRecords.sigs();
-		while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
-			if (response.findRecord(r, Section.ANSWER) == false)
-				response.addRecord(r, Section.AUTHORITY);
-		}
+		addRRset(nsRecords.getName(), response, nsRecords,
+			 Section.AUTHORITY, false);
 	}
 	else {
-		SOARecord soa = (SOARecord) zone.getSOA();
-		response.addRecord(soa, Section.AUTHORITY);
+		RRset nsRecords = findDelegation(name, DClass.IN);
+		if (nsRecords != null) {
+			addRRset(nsRecords.getName(), response, nsRecords,
+				 Section.AUTHORITY, false);
+		}
+		else {
+			SOARecord soa = (SOARecord) zone.getSOA();
+			response.addRecord(soa, Section.AUTHORITY);
+		}
 	}
 }
 
@@ -244,7 +266,8 @@ doAXFR(Name name, Message query, Socket s) {
 		while (e.hasMoreElements()) {
 			RRset rrset = (RRset) e.nextElement();
 			Message response = new Message();
-			addRRset(rrset.getName(), response, rrset, false);
+			addRRset(rrset.getName(), response, rrset,
+				 Section.ANSWER, false);
 			byte [] out = response.toWire();
 			dataOut.writeShort(out.length);
 			dataOut.write(out);
@@ -331,7 +354,8 @@ generateReply(Message query, byte [] in, Socket s) {
 		if (zr.isSuccessful()) {
 			RRset [] rrsets = zr.answers();
 			for (int i = 0; i < rrsets.length; i++)
-				addRRset(name, response, rrsets[i], sigonly);
+				addRRset(name, response, rrsets[i],
+					 Section.ANSWER, sigonly);
 		}
 	}
 	else {
@@ -352,7 +376,8 @@ generateReply(Message query, byte [] in, Socket s) {
 		if (cr.isSuccessful()) {
 			RRset [] rrsets = cr.answers();
 			for (int i = 0; i < rrsets.length; i++)
-				addRRset(name, response, rrsets[i], sigonly);
+				addRRset(name, response, rrsets[i],
+					 Section.ANSWER, sigonly);
 		}
 	}
 	addAuthority(response, name, zone);

@@ -1,5 +1,7 @@
+2/27/2001
+	- Referrals weren't returned correctly from jnamed.
+
 1/15/2001
-	- 1.1.7 released.
 	- Fix some signed/unsigned printing issues for KEY records
 	  (Pasi Eronen <pe@iki.fi>)
 	- Add routines to generate SIG(0) message signatures
