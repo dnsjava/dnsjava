@@ -128,6 +128,8 @@ toString() {
 		if (key != null) {
 			sb.append(" (\n");
 			sb.append(base64.formatString(key, 64, "\t", true));
+			sb.append(" ; key_tag= ");
+			sb.append(getFootprint());
 		}
 	}
 	return sb.toString();
