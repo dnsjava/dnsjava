@@ -35,7 +35,9 @@ SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 	TTL.check(origttl);
 	this.covered = covered;
 	this.alg = checkU8("alg", alg);
-	this.labels = name.labels();
+	this.labels = name.labels() - 1;
+	if (name.isWild())
+		this.labels--;
 	this.origttl = origttl;
 	this.expire = expire;
 	this.timeSigned = timeSigned;

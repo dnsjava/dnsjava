@@ -146,8 +146,9 @@ digestRRset(SIGRecord sig, RRset rrset) {
 	Iterator it = rrset.rrs();
 	Name name = rrset.getName();
 	Name wild = null;
-	if (name.labels() > sig.getLabels())
-		wild = name.wild(name.labels() - sig.getLabels());
+	int sigLabels = sig.getLabels() + 1; // Add the root label back.
+	if (name.labels() > sigLabels)
+		wild = name.wild(name.labels() - sigLabels);
 	while (it.hasNext()) {
 		Record rec = (Record) it.next();
 		if (wild != null)

@@ -1,6 +1,8 @@
 6/22/2004
 	- The DNSSEC digesting code shouldn't throw ClassCastExceptions.
 	  (reported by Mike StJohns <Mike.StJohns@nominum.com>)
+	- The label count in a generated SIG/RRSIG record was off by one.
+	  (Mike StJohns <Mike.StJohns@nominum.com>)
 
 6/8/2004
 	- Rcode 4 is NOTIMP, not NOTIMPL.
