@@ -123,8 +123,12 @@ main(String argv[]) throws IOException {
 					res.setTCP(true);
 					break;
 
+			    case 'i':
+					res.setIgnoreTruncation(true);
+					break;
+
 			    case 'e':
-					res.setEDNS(true);
+					res.setEDNS(0);
 					break;
 
 			    default:

@@ -14,7 +14,8 @@ public static final int PORT		= 53;
 
 InetAddress addr;
 int port = PORT;
-boolean useTCP, useEDNS;
+boolean useTCP, ignoreTruncation;
+int EDNSlevel = -1;
 TSIG tsig;
 int timeoutValue = 60 * 1000;
 
@@ -48,8 +49,13 @@ setTCP(boolean flag) {
 }
 
 public void
-setEDNS(boolean flag) {
-	this.useEDNS = flag;
+setIgnoreTruncation(boolean flag) {
+	this.ignoreTruncation = flag;
+}
+
+public void
+setEDNS(int level) {
+	this.EDNSlevel = level;
 }
 
 public void
@@ -121,6 +127,7 @@ send(Message query) throws IOException {
 	Message response;
 	DatagramSocket s;
 	DatagramPacket dp;
+	int udpLength = 512;
 
 	try {
 		s = new DatagramSocket();
@@ -130,11 +137,13 @@ send(Message query) throws IOException {
 		return null;
 	}
 
-	if (useEDNS)
-		query.addRecord(Section.ADDITIONAL, EDNS.newOPT(1280));
+	if (EDNSlevel >= 0) {
+		udpLength = 1280;
+		query.addRecord(Section.ADDITIONAL, EDNS.newOPT(udpLength));
+	}
 
 	if (tsig != null)
-		tsig.apply(query);
+		tsig.apply(query, null);
 
 
 	out = query.toWire();
@@ -144,7 +153,7 @@ send(Message query) throws IOException {
 
 	s.send(new DatagramPacket(out, out.length, addr, port));
 
-	dp = new DatagramPacket(new byte[512], 512);
+	dp = new DatagramPacket(new byte[udpLength], udpLength);
 	s.setSoTimeout(timeoutValue);
 	try {
 		s.receive(dp);
@@ -163,7 +172,7 @@ send(Message query) throws IOException {
 	}
 
 	s.close();
-	if (response.getHeader().getFlag(Flags.TC))
+	if (response.getHeader().getFlag(Flags.TC) && !ignoreTruncation)
 		return sendTCP(query, out);
 	else
 		return response;
@@ -188,7 +197,7 @@ sendAXFR(Message query) throws IOException {
 	}
 
 	if (tsig != null)
-		tsig.apply(query);
+		tsig.apply(query, null);
 
 	out = query.toWire();
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
