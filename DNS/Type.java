@@ -118,4 +118,9 @@ value(String s) {
 	}
 }
 
+public static boolean
+isRR(int type) {
+	return (type > 0 && type < 128);
+}
+
 }
