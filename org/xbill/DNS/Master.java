@@ -30,13 +30,13 @@ private Generator generator;
 private List generators;
 private boolean noExpandGenerate;
 
-Master(File file, Name initialOrigin, long initialTTL) throws IOException {
+Master(File file, Name origin, long initialTTL) throws IOException {
 	if (origin != null && !origin.isAbsolute()) {
 		throw new RelativeNameException(origin);
 	}
 	this.file = file;
 	st = new Tokenizer(file);
-	origin = initialOrigin;
+	this.origin = origin;
 	defaultTTL = initialTTL;
 }
 
