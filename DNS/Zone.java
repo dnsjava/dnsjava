@@ -30,7 +30,7 @@ Zone(String file, Cache cache) throws IOException {
 				origin = record.getName();
 		}
 		else
-			cache.addRecord(record, Credibility.ZONE_GLUE);
+			cache.addRecord(record, Credibility.ZONE_GLUE, m);
 	}
 }
 
