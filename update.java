@@ -19,36 +19,50 @@ String server = "localhost";
 Name origin;
 int defaultTTL;
 short defaultClass = DClass.IN;
+PrintStream log = null;
+
+void
+print(Object o) {
+	System.out.println(o);
+	if (log != null)
+		log.println(o);
+}
 
 public
 update(InputStream in) throws IOException {
 	Vector inputs = new Vector();
+	Vector istreams = new Vector();
 
 	query = new Message();
 	query.getHeader().setOpcode(Opcode.UPDATE);
 
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
-	BufferedReader brOrig = br;
 
 	inputs.addElement(br);
+	istreams.addElement(in);
 
 	while (true) {
 		String line = null;
 		do {
+			InputStream is = (InputStream) istreams.lastElement();
 			br = (BufferedReader)inputs.lastElement();
 
-			if (in == System.in && brOrig == br)
+			if (is == System.in)
 				System.out.print("> ");
 
 			line = IO.readExtendedLine(br);
 			if (line == null) {
 				br.close();
 				inputs.removeElement(br);
+				istreams.removeElement(is);
 				if (inputs.isEmpty())
 					return;
 			}
 		} while (line == null);
+
+		if (log != null)
+			log.println("> " + line);
 
 		MyStringTokenizer st = new MyStringTokenizer(line);
 		if (!st.hasMoreTokens())
@@ -89,7 +103,7 @@ update(InputStream in) throws IOException {
 			if (newClass > 0)
 				defaultClass = newClass;
 			else
-				System.out.println("Invalid class " + newClass);
+				print("Invalid class " + newClass);
 		}
 
 		else if (operation.equals("ttl"))
@@ -120,6 +134,9 @@ update(InputStream in) throws IOException {
 				help(null);
 		}
 
+		else if (operation.equals("echo"))
+			print(line.substring(5));
+
 		else if (operation.equals("send")) {
 			if (res == null)
 				res = new Resolver(server);
@@ -133,10 +150,23 @@ update(InputStream in) throws IOException {
 
 		else if (operation.equals("quit") ||
 			 operation.equals("q"))
+		{
+			if (log != null)
+				log.close();
+			Enumeration e = inputs.elements();
+			while (e.hasMoreElements()) {
+				BufferedReader tbr;
+				tbr = (BufferedReader) e.nextElement();
+				tbr.close();
+			}
 			System.exit(0);
+		}
 
 		else if (operation.equals("file"))
-			doFile(st, inputs);
+			doFile(st, inputs, istreams);
+
+		else if (operation.equals("log"))
+			doLog(st);
 
 		else if (operation.equals("assert")) {
 			if (doAssert(st) == false)
@@ -144,7 +174,7 @@ update(InputStream in) throws IOException {
 		}
 
 		else
-			System.out.println("invalid keyword: " + operation);
+			print("invalid keyword: " + operation);
 	}
 }
 
@@ -156,7 +186,7 @@ sendUpdate() throws IOException {
 		if (zone == null) {
 			Enumeration updates = query.getSection(UPDATE);
 			if (updates == null) {
-				System.out.println("Invalid update");
+				print("Invalid update");
 				return;
 			}
 			Record r = (Record) updates.nextElement();
@@ -171,10 +201,7 @@ sendUpdate() throws IOException {
 	if (response == null)
 		return;
 
-	System.out.println(response);
-	// System.out.println(response.getHeader());
-
-	// System.out.println(";; done");
+	print(response);
 }
 
 /* 
@@ -246,12 +273,12 @@ doRequire(MyStringTokenizer st) throws IOException {
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, DClass.ANY);
 	else {
-		System.out.println("qualifier " + qualifier + " not supported");
+		print("qualifier " + qualifier + " not supported");
 		return;
 	}
 	if (rec != null) {
 		query.addRecord(PREREQ, rec);
-		System.out.println(rec);
+		print(rec);
 	}
 }
 
@@ -267,12 +294,12 @@ doProhibit(MyStringTokenizer st) throws IOException {
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, DClass.NONE);
 	else {
-		System.out.println("qualifier " + qualifier + " not supported");
+		print("qualifier " + qualifier + " not supported");
 		return;
 	}
 	if (rec != null) {
 		query.addRecord(PREREQ, rec);
-		System.out.println(rec);
+		print(rec);
 	}
 }
 
@@ -288,12 +315,12 @@ doAdd(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r"))
 		rec = parseRR(st, defaultClass, defaultTTL);
 	else {
-		System.out.println("qualifier " + qualifier + " not supported");
+		print("qualifier " + qualifier + " not supported");
 		return;
 	}
 	if (rec != null) {
 		query.addRecord(UPDATE, rec);
-		System.out.println(rec);
+		print(rec);
 	}
 }
 
@@ -309,12 +336,12 @@ doDelete(MyStringTokenizer st) throws IOException {
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, DClass.ANY);
 	else {
-		System.out.println("qualifier " + qualifier + " not supported");
+		print("qualifier " + qualifier + " not supported");
 		return;
 	}
 	if (rec != null) {
 		query.addRecord(UPDATE, rec);
-		System.out.println(rec);
+		print(rec);
 	}
 }
 
@@ -330,12 +357,12 @@ doGlue(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r"))
 		rec = parseRR(st, defaultClass, defaultTTL);
 	else {
-		System.out.println("qualifier " + qualifier + " not supported");
+		print("qualifier " + qualifier + " not supported");
 		return;
 	}
 	if (rec != null) {
 		query.addRecord(ADDITIONAL, rec);
-		System.out.println(rec);
+		print(rec);
 	}
 }
 
@@ -354,23 +381,42 @@ doQuery(MyStringTokenizer st) throws IOException {
 		response = res.sendAXFR(newQuery);
 	else
 		response = res.send(newQuery);
-	System.out.println(response);
+	print(response);
 }
 
 void
-doFile(MyStringTokenizer st, Vector inputs) {
+doFile(MyStringTokenizer st, Vector inputs, Vector istreams) {
 	String s = st.nextToken();
 	try {
-		FileInputStream fis = new FileInputStream(s);
-		InputStreamReader isr2 = new InputStreamReader(fis);
+		InputStreamReader isr2;
+		if (!s.equals("-")) {
+			FileInputStream fis = new FileInputStream(s);
+			isr2 = new InputStreamReader(fis);
+			istreams.addElement(fis);
+		}
+		else {
+			isr2 = new InputStreamReader(System.in);
+			istreams.addElement(System.in);
+		}
 		BufferedReader br2 = new BufferedReader(isr2);
 		inputs.addElement(br2);
 	}
 	catch (FileNotFoundException e) {
-		System.out.println(s + "not found");
-		return;
+		print(s + "not found");
 	}
 	
+}
+
+void
+doLog(MyStringTokenizer st) {
+	String s = st.nextToken();
+	try {
+		FileOutputStream fos = new FileOutputStream(s);
+		log = new PrintStream(fos);
+	}
+	catch (FileNotFoundException e) {
+		print("Error opening " + s);
+	}
 }
 
 boolean
@@ -396,13 +442,13 @@ doAssert(MyStringTokenizer st) {
 		}
 	}
 	else
-		System.out.println("Invalid assertion keyword: " + field);
+		print("Invalid assertion keyword: " + field);
 
 	if (flag == false) {
-		System.out.println("Expected " + field + " " + expected + 
-				   ", received " + value);
+		print("Expected " + field + " " + expected + 
+		      ", received " + value);
 		if (st.hasMoreTokens())
-			System.out.println(st.nextToken());
+			print(st.nextToken());
 	}
 	return flag;
 }
@@ -475,6 +521,9 @@ helpOperations() {
 	  "    help [topic]\t" +
 	  "this information\n" +
 
+	  "    echo <text>\t\t" +
+	  "echoes the line\n" +
+
 	  "    send\t\t" +
 	  "sends the update and resets the current query\n" +
 
@@ -485,8 +534,10 @@ helpOperations() {
 	  "quits the program\n" +
 
 	  "    file <file>\t\t" +
-	  "opens the specified file and uses it as the new input\n" +
-	  "\t\t\tsource\n" +
+	  "opens the specified file as the new input source\n" +
+
+	  "    log <file>\t\t" +
+	  "opens the specified file and uses it to log output\n" +
 
 	  "    assert <field> <value> [msg]\n" +
 	  "\t\t\tasserts that the value of the field in the last response\n" +
