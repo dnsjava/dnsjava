@@ -38,9 +38,9 @@ LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
 	  double altitude, double size, double hPrecision, double vPrecision)
 {
 	super(name, Type.LOC, dclass, ttl);
-	this.latitude = (int)(latitude * 3600 * 1000 + (1 << 31));
-	this.longitude = (int)(longitude * 3600 * 1000 + (1 << 31));
-	this.altitude = (int)((altitude + 100000) * 100);
+	this.latitude = (long)(latitude * 3600 * 1000 + (1L << 31));
+	this.longitude = (long)(longitude * 3600 * 1000 + (1L << 31));
+	this.altitude = (long)((altitude + 100000) * 100);
 	this.size = (long)(size * 100);
 	this.hPrecision = (long)(hPrecision * 100);
 	this.vPrecision = (long)(vPrecision * 100);
@@ -82,10 +82,10 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	s = st.getString();
 	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
 		throw st.exception("Invalid LOC latitude");
-	latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
+	latitude = (long) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("S"))
 		latitude = -latitude;
-	latitude += (1 << 31);
+	latitude += (1L << 31);
 	
 	/* Longitude */
 	deg = min = 0;
@@ -101,10 +101,10 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	s = st.getString();
 	if (!s.equalsIgnoreCase("W") && !s.equalsIgnoreCase("E"))
 		throw st.exception("Invalid LOC longitude");
-	longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
+	longitude = (long) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("W"))
 		longitude = -longitude;
-	longitude += (1 << 31);
+	longitude += (1L << 31);
 
 	/* Altitude */
 	Tokenizer.Token token = st.get();
@@ -116,7 +116,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		altitude = (int)((new Double(s).doubleValue() + 100000) * 100);
+		altitude = (long)((new Double(s).doubleValue() + 100000) * 100);
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC altitude");
@@ -132,7 +132,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		size = (int) (100 * new Double(s).doubleValue());
+		size = (long) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC size");
@@ -148,7 +148,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		hPrecision = (int) (100 * new Double(s).doubleValue());
+		hPrecision = (long) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC horizontal precision");
@@ -164,7 +164,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		vPrecision = (int) (100 * new Double(s).doubleValue());
+		vPrecision = (long) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
 		throw st.exception("Invalid LOC vertical precision");
@@ -182,7 +182,7 @@ rrToString() {
 	nf.setGroupingUsed(false);
 
 	/* Latitude */
-	temp = (latitude & 0xFFFFFFFF) - (1 << 31);
+	temp = latitude - (1L << 31);
 	if (temp < 0) {
 		temp = -temp;
 		direction = 'S';
@@ -205,7 +205,7 @@ rrToString() {
 	sb.append(" ");
 
 	/* Latitude */
-	temp = (longitude & 0xFFFFFFFF) - (1 << 31);
+	temp = longitude - (1L << 31);
 	if (temp < 0) {
 		temp = -temp;
 		direction = 'W';
