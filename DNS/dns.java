@@ -47,7 +47,7 @@ inaddrString(InetAddress addr) {
 		sb.append(address[i] & 0xFF);
 		sb.append(".");
 	}
-	sb.append(".IN-ADDR.ARPA.");
+	sb.append("IN-ADDR.ARPA.");
 	return sb.toString();
 }
 

@@ -1,7 +1,7 @@
-JAVAC=javac
+JAVAC=jikes
 JFLAGS=-g
 
-JAVADOC=javadoc -d doc
+JAVADOC=/usr/local/jdk1.2/bin/javadoc -d doc
 
 all:
 	${JAVAC} ${JFLAGS} *.java DNS/*.java DNS/utils/*.java
