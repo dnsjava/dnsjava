@@ -96,7 +96,7 @@ throws IOException
 	expire = parseDate(st.nextToken());
 	timeSigned = parseDate(st.nextToken());
 	footprint = (short) Integer.parseInt(st.nextToken());
-	signer = new Name(st.nextToken(), origin);
+	signer = Name.fromString(st.nextToken(), origin);
 	if (st.hasMoreTokens())
 		signature = base64.fromString(st.remainingTokens());
 }

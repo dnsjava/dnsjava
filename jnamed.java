@@ -99,7 +99,7 @@ addPrimaryZone(String zname, String zonefile) throws IOException {
 	Name origin = null;
 	Cache cache = getCache(DClass.IN);
 	if (zname != null)
-		origin = new Name(zname, Name.root);
+		origin = Name.fromString(zname, Name.root);
 	Zone newzone = new Zone(zonefile, cache, origin);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
@@ -108,15 +108,16 @@ addPrimaryZone(String zname, String zonefile) throws IOException {
 public void
 addSecondaryZone(String zone, String remote) throws IOException {
 	Cache cache = getCache(DClass.IN);
-	Name zname = new Name(zone);
+	Name zname = Name.fromString(zone, Name.root);
 	Zone newzone = new Zone(zname, DClass.IN, remote, cache);
 	znames.put(zname, newzone);
 /*System.out.println("Adding zone named <" + zname + ">");*/
 }
 
 public void
-addTSIG(String name, String key) {
-	TSIGs.put(new Name(name), base64.fromString(key));
+addTSIG(String namestr, String key) throws IOException {
+	Name name = Name.fromString(namestr, Name.root);
+	TSIGs.put(name, base64.fromString(key));
 }
 
 public Cache

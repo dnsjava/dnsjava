@@ -51,8 +51,8 @@ RPRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 throws IOException
 {
         super(_name, Type.RP, _dclass, _ttl);
-        mailbox = new Name(st.nextToken(), origin);
-        textDomain = new Name(st.nextToken(), origin);
+        mailbox = Name.fromString(st.nextToken(), origin);
+        textDomain = Name.fromString(st.nextToken(), origin);
 }
 
 /** Converts the RP Record to a String */

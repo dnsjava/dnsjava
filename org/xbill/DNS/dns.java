@@ -259,7 +259,13 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 public static Record []
 getRecords(String namestr, short type, short dclass, byte cred) {
 	Record [] answers = null;
-	Name name = new Name(namestr);
+	Name name;
+
+	try {
+		name = Name.fromString(namestr, null);
+	} catch (TextParseException e) {
+		return null;
+	}
 
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
@@ -268,8 +274,13 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 		answers = lookup(name, type, dclass, cred, 0, false);
 	else {
 		for (int i = 0; i < searchPath.length; i++) {
-			answers = lookup(new Name(namestr, searchPath[i]),
-					 type, dclass, cred, 0, false);
+			try {
+				name = Name.fromString(namestr, searchPath[i]);
+			}
+			catch (TextParseException e) {
+				continue;
+			}
+			answers = lookup(name, type, dclass, cred, 0, false);
 			if (answers != null)
 				break;
 		}

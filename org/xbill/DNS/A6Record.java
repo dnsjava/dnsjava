@@ -66,7 +66,7 @@ throws IOException
 	prefixBits = Short.parseShort(st.nextToken());
 	suffix = new Inet6Address(st.nextToken());
 	if (prefixBits > 0)
-		prefix = new Name(st.nextToken(), origin);
+		prefix = Name.fromString(st.nextToken(), origin);
 }
 
 /** Converts rdata to a String */

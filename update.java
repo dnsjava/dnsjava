@@ -124,10 +124,12 @@ update(InputStream in) throws IOException {
 				defaultTTL = TTL.parseTTL(st.nextToken());
 
 			else if (operation.equals("origin"))
-				origin = new Name(st.nextToken());
+				origin = Name.fromString(st.nextToken(),
+							 Name.root);
 
 			else if (operation.equals("zone"))
-				zone = new Name(st.nextToken());
+				zone = Name.fromString(st.nextToken(),
+						       Name.root);
 
 			else if (operation.equals("require"))
 				doRequire(st);
@@ -288,7 +290,7 @@ Record
 parseRR(MyStringTokenizer st, short classValue, int TTLValue)
 throws IOException
 {
-	Name name = new Name(st.nextToken(), origin);
+	Name name = Name.fromString(st.nextToken(), origin);
 	int ttl;
 	short type;
 	Record record;
@@ -331,7 +333,7 @@ doRequire(MyStringTokenizer st) throws IOException {
 		print("qualifiers are now ignored");
 		s = st.nextToken();
 	}
-	name = new Name(s, origin);
+	name = Name.fromString(s, origin);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
 		if ((type = Type.value(s)) < 0)
@@ -362,7 +364,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 		print("qualifiers are now ignored");
 		s = st.nextToken();
 	}
-	name = new Name(s, origin);
+	name = Name.fromString(s, origin);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
 		if ((type = Type.value(s)) < 0)
@@ -405,7 +407,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 		print("qualifiers are now ignored");
 		s = st.nextToken();
 	}
-	name = new Name(s, origin);
+	name = Name.fromString(s, origin);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
 		if ((dclass = DClass.value(s)) >= 0) {
@@ -451,7 +453,7 @@ doQuery(MyStringTokenizer st) throws IOException {
 	Name name = null;
 	short type = Type.A, dclass = defaultClass;
 
-	name = new Name(st.nextToken(), origin);
+	name = Name.fromString(st.nextToken(), origin);
 	if (st.hasMoreTokens()) {
 		type = Type.value(st.nextToken());
 		if (type < 0)

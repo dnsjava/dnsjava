@@ -77,12 +77,13 @@ main(String argv[]) throws IOException {
 
 		String nameString = argv[arg++];
 		if (nameString.equals("-x")) {
-			name = new Name(dns.inaddrString(argv[arg++]));
+			name = Name.fromString(dns.inaddrString(argv[arg++]),
+					       Name.root);
 			type = Type.PTR;
 			_class = DClass.IN;
 		}
 		else {
-			name = new Name(nameString);
+			name = Name.fromString(nameString, Name.root);
 			type = Type.value(argv[arg]);
 			if (type < 0)
 				type = Type.A;

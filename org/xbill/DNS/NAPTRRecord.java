@@ -73,7 +73,7 @@ throws IOException
 	flags = st.nextToken();
 	service = st.nextToken();
 	regexp = st.nextToken();
-	replacement = new Name(st.nextToken(), origin);
+	replacement = Name.fromString(st.nextToken(), origin);
 	if (Options.check("verbose"))
 		System.err.println(" NAPTR MyStringTokenizer Constructor: " +
 				   this.toString());

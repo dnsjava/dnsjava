@@ -49,7 +49,7 @@ throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
-	target = new Name(st.nextToken(), origin);
+	target = Name.fromString(st.nextToken(), origin);
 }
 
 /** Converts rdata to a String */

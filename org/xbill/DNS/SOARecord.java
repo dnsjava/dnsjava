@@ -68,8 +68,8 @@ SOARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 throws IOException
 {
 	super(_name, Type.SOA, _dclass, _ttl);
-	host = new Name(st.nextToken(), origin);
-	admin = new Name(st.nextToken(), origin);
+	host = Name.fromString(st.nextToken(), origin);
+	admin = Name.fromString(st.nextToken(), origin);
 	serial = Integer.parseInt(st.nextToken());
 	refresh = TTL.parseTTL(st.nextToken());
 	retry = TTL.parseTTL(st.nextToken());

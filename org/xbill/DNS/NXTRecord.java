@@ -61,7 +61,7 @@ throws IOException
 {
 	super(_name, Type.NXT, _dclass, _ttl);
 	Vector types = new Vector();
-	next = new Name(st.nextToken(), origin);
+	next = Name.fromString(st.nextToken(), origin);
 	bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
 		short t = Type.value(st.nextToken());

@@ -112,7 +112,7 @@ private Name
 parseOrigin(MyStringTokenizer st) throws IOException {
 	if (!st.hasMoreTokens())
 		throw new IOException ("Missing ORIGIN");
-	return new Name(st.nextToken());
+	return Name.fromString(st.nextToken(), Name.root);
 }
 
 private int
@@ -133,7 +133,9 @@ parseInclude(MyStringTokenizer st) throws IOException {
 	else
 		newfile = new File(file.getParent(), filename);
 	if (st.hasMoreTokens())
-		included = new Master(newfile, new Name(st.nextToken()));
+		included = new Master(newfile,
+				      Name.fromString(st.nextToken(),
+				      		      Name.root));
 	else
 		included = new Master(newfile, origin);
 }
@@ -147,7 +149,7 @@ throws IOException
 	short type, dclass;
 
 	if (!useLast)
-		name = new Name(st.nextToken(), origin);
+		name = Name.fromString(st.nextToken(), origin);
 	else
 		name = last.getName();
 
