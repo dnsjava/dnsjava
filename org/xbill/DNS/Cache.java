@@ -218,6 +218,16 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			 */
 			if (type == Type.ANY)
 				continue;
+			/*
+			 * If not, and we're not looking for a wildcard,
+			 * try that instead.
+			 */
+			if (!name.isWild()) {
+				cr = lookupRecords(name.wild(), type, dclass,
+						   minCred);
+				if (cr.isSuccessful())
+					return cr;
+			}
 			return new SetResponse(SetResponse.NEGATIVE);
 		}
 
