@@ -622,12 +622,14 @@ public void
 serveUDP(InetAddress addr, short port) {
 	try {
 		DatagramSocket sock = new DatagramSocket(port, addr);
+		final short udpLength = 512;
+		byte [] in = new byte[udpLength];
+		DatagramPacket indp = new DatagramPacket(in, in.length);
+		DatagramPacket outdp;
 		while (true) {
-			short udpLength = 512;
-			byte [] in = new byte[udpLength];
-			DatagramPacket dp = new DatagramPacket(in, in.length);
+			indp.setLength(in.length);
 			try {
-				sock.receive(dp);
+				sock.receive(indp);
 			}
 			catch (InterruptedIOException e) {
 				continue;
@@ -644,9 +646,10 @@ serveUDP(InetAddress addr, short port) {
 			}
 			byte [] out = response.toWire();
 
-			dp = new DatagramPacket(out, out.length,
-						dp.getAddress(), dp.getPort());
-			sock.send(dp);
+			outdp = new DatagramPacket(out, out.length,
+						   indp.getAddress(),
+						   indp.getPort());
+			sock.send(outdp);
 		}
 	}
 	catch (IOException e) {
