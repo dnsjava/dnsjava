@@ -25,12 +25,12 @@ static {
 	if (servers == null || searchlist == null) {
 		String OS = System.getProperty("os.name");
 		if (OS.indexOf("Windows") != -1) {
-			if (OS.indexOf("NT") != -1 ||
-			    OS.indexOf("2000") != -1 ||
-			    OS.indexOf("XP") != -1)
-				findNT();
-			else
+			if (OS.indexOf("95") != -1 ||
+			    OS.indexOf("98") != -1 ||
+			    OS.indexOf("ME") != -1)
 				find95();
+			else
+				findNT();
 		} else if (OS.indexOf("NetWare") != -1)
 			findNetware();
 		else
