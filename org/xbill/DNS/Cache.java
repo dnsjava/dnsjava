@@ -13,17 +13,36 @@ public class Cache extends NameSet {
 private class CacheElement {
 	RRset rrset;
 	byte credibility;
+	long timeIn;
+	int ttl;
 
 	public
 	CacheElement(Record r, byte cred) {
 		rrset = new RRset();
-		rrset.addRR(r);
 		credibility = cred;
+		ttl = -1;
+		update(r);
+	}
+	public
+	CacheElement(RRset r, byte cred) {
+		rrset = r;
+		credibility = cred;
+		ttl = -1;
+		timeIn = System.currentTimeMillis();
+		ttl = r.getTTL();
 	}
 
 	public void
 	update(Record r) {
 		rrset.addRR(r);
+		timeIn = System.currentTimeMillis();
+		if (ttl < 0)
+			ttl = r.getTTL();
+	}
+
+	public boolean
+	expiredTTL() {
+		return (System.currentTimeMillis() > timeIn + ttl);
 	}
 
 	public String
@@ -34,6 +53,11 @@ private class CacheElement {
 		sb.append(credibility);
 		return sb.toString();
 	}
+}
+
+public
+Cache() {
+	super();
 }
 
 public
@@ -49,6 +73,8 @@ public void
 addRecord(Record r, byte cred) {
 	Name name = r.getName();
 	short type = r.getRRsetType();
+	if (r.getTTL() == 0)
+		return;
 	CacheElement element = (CacheElement) findSet(name, type);
 	if (element == null || cred > element.credibility)
 		addSet(name, type, element = new CacheElement(r, cred));
@@ -56,11 +82,36 @@ addRecord(Record r, byte cred) {
 		element.update(r);
 }
 
+public void
+addRRset(RRset rrset, byte cred) {
+	Name name = rrset.getName();
+	short type = rrset.getType();
+	if (rrset.getTTL() == 0)
+		return;
+	CacheElement element = (CacheElement) findSet(name, type);
+	if (element == null || cred > element.credibility)
+		addSet(name, type, new CacheElement(rrset, cred));
+}
+
 private RRset
 findRecords(Name name, short type, byte minCred) {
 	CacheElement element = (CacheElement) findSet(name, type);
-	if (element.credibility >= minCred)
-		return element.rrset;
+	if (element == null)
+		return null;
+	if (element.expiredTTL()) {
+		removeSet(name, type);
+		return null;
+	}
+	if (element.credibility >= minCred) {
+		RRset rrset = element.rrset;
+		if (type != Type.CNAME && rrset.getType() == Type.CNAME) {
+			CNAMERecord cname;
+			cname = (CNAMERecord) rrset.rrs().nextElement();
+			return findRecords(cname.getTarget(), type, minCred);
+		}
+		else
+			return rrset;
+	}
 	else
 		return null;
 }	
