@@ -121,9 +121,6 @@ getStringsAsByteArrays() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (strings == null)
-		return;
-
 	Iterator it = strings.iterator();
 	while (it.hasNext()) {
 		byte [] b = (byte []) it.next();

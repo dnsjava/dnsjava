@@ -101,8 +101,6 @@ getPrefix() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (suffix == null)
-		return;
 	out.writeU8(prefixBits);
 	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;

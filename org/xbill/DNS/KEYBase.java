@@ -155,9 +155,6 @@ getFootprint() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (key == null && !isNullKEY())
-		return;
-
 	out.writeU16(flags);
 	out.writeU8(proto);
 	out.writeU8(alg);

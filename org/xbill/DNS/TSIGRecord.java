@@ -193,9 +193,6 @@ getOther() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (alg == null)
-		return;
-
 	alg.toWire(out, null, canonical);
 
 	long time = timeSigned.getTime() / 1000;

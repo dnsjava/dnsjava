@@ -201,9 +201,6 @@ getOther() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (alg == null)
-		return;
-
 	alg.toWire(out, null, canonical);
 
 	out.writeU32(timeInception.getTime() / 1000);

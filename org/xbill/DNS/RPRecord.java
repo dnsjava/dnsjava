@@ -78,9 +78,6 @@ getTextDomain() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (mailbox == null || textDomain == null)
-		return;
-
 	mailbox.toWire(out, null, canonical);
 	textDomain.toWire(out, null, canonical);
 }

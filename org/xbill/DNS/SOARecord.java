@@ -158,9 +158,6 @@ getMinimum() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (host == null)
-		return;
-
 	host.toWire(out, c, canonical);
 	admin.toWire(out, c, canonical);
 	out.writeU32(serial);

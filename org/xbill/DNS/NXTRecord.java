@@ -98,9 +98,6 @@ getBitmap() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (next == null)
-		return;
-
 	next.toWire(out, null, canonical);
 	int length = bitmap.length();
 	for (int i = 0, t = 0; i < length; i++) {

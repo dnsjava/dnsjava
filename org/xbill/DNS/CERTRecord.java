@@ -196,9 +196,6 @@ getCert() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (cert == null)
-		return;
-
 	out.writeU16(certType);
 	out.writeU16(keyTag);
 	out.writeU8(alg);

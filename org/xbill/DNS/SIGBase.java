@@ -175,9 +175,6 @@ getSignature() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (signature == null)
-		return;
-
 	out.writeU16(covered);
 	out.writeU8(alg);
 	out.writeU8(labels);

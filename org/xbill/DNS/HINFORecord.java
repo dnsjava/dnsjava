@@ -75,9 +75,6 @@ getOS() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (cpu == null || os == null)
-		return;
-
 	out.writeCountedString(cpu);
 	out.writeCountedString(os);
 }

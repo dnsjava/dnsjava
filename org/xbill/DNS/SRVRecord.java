@@ -103,9 +103,6 @@ getTarget() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (target == null)
-		return;
-
 	out.writeU16(priority);
 	out.writeU16(weight);
 	out.writeU16(port);

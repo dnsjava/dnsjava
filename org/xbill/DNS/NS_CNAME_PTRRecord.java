@@ -55,9 +55,6 @@ getTarget() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (target == null)
-		return;
-
 	if (type == Type.DNAME)
 		target.toWire(out, null, canonical);
 	else

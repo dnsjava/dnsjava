@@ -286,9 +286,6 @@ getVPrecision() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (latitude == 0 && longitude == 0 && altitude == 0)
-		return;
-
 	out.writeU8(0); /* version */
 	out.writeU8(toLOCformat(size));
 	out.writeU8(toLOCformat(hPrecision));

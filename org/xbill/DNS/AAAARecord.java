@@ -61,8 +61,6 @@ getAddress() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (address == null)
-		return;
 	byte [] b = address.toBytes();
 	out.writeByteArray(b);
 }

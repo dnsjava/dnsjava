@@ -161,8 +161,6 @@ mapToWire(DNSOutput out, int [] array, int mapbase,
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (next == null)
-		return;
 	next.toWire(out, null, canonical);
 
 	if (types.length == 0)

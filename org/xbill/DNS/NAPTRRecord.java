@@ -141,8 +141,6 @@ getReplacement() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	if (replacement == null && regexp == null)
-		return;
 	out.writeU16(order);
 	out.writeU16(preference);
 	out.writeCountedString(flags);
