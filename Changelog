@@ -1,3 +1,7 @@
+5/9/2004
+	- Add support for options within an OPTRecord (loosely based on
+	  a patch from Madhu Siddalingaiah <madhu@madhu.com>)
+
 4/18/2004
 	- Add support for the SSHFP record type.
 	- Fix a bug in the zone code which would cause record lookups to fail.

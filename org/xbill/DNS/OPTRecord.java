@@ -23,7 +23,27 @@ import org.xbill.DNS.utils.*;
 
 public class OPTRecord extends Record {
 
-private Map options;
+public static class Option {
+	public final int code;
+	public final byte [] data;
+
+	/**
+	 * Creates an option with the given option code and data.
+	 */
+	public
+	Option(int code, byte [] data) {
+		this.code = checkU8("option code", code);
+		this.data = data;
+	}
+
+	public String
+	toString() {
+		return "{" + code + " <" + base16.toString(data) + ">}";
+	}
+}
+
+private List options;
+private static List emptyList = Collections.unmodifiableList(new ArrayList());
 
 OPTRecord() {}
 
@@ -33,18 +53,47 @@ getObject() {
 }
 
 /**
- * Creates an OPT Record with no data.  This is normally called by
- * SimpleResolver, but can also be called by a server.
+ * Creates an OPT Record.  This is normally called by SimpleResolver, but can
+ * also be called by a server.
+ * @param payloadSize The size of a packet that can be reassembled on the 
+ * sending host.
+ * @param xrcode The value of the extended rcode field.  This is the upper
+ * 16 bits of the full rcode.
+ * @param flags Additional message flags.
+ * @param version The EDNS version that this DNS implementation supports.
+ * This should be 0 for dnsjava.
+ * @param options The list of options that comprise the data field.  There
+ * are currently no defined options.
+ * @see ExtendedFlags
  */
 public
-OPTRecord(int payloadSize, int xrcode, int version, int flags) {
+OPTRecord(int payloadSize, int xrcode, int version, int flags, List options) {
 	super(Name.root, Type.OPT, payloadSize, 0);
 	checkU16("payloadSize", payloadSize);
 	checkU8("xrcode", xrcode);
 	checkU8("version", version);
 	checkU16("flags", flags);
 	ttl = ((long)xrcode << 24) + ((long)version << 16) + flags;
-	options = null;
+	if (options != null) {
+		this.options = new ArrayList(options);
+	}
+}
+
+/**
+ * Creates an OPT Record with no data.  This is normally called by
+ * SimpleResolver, but can also be called by a server.
+ * @param payloadSize The size of a packet that can be reassembled on the 
+ * sending host.
+ * @param xrcode The value of the extended rcode field.  This is the upper
+ * 16 bits of the full rcode.
+ * @param flags Additional message flags.
+ * @param version The EDNS version that this DNS implementation supports.
+ * This should be 0 for dnsjava.
+ * @see ExtendedFlags
+ */
+public
+OPTRecord(int payloadSize, int xrcode, int version, int flags) {
+	this(payloadSize, xrcode, version, flags, null);
 }
 
 /**
@@ -53,17 +102,18 @@ OPTRecord(int payloadSize, int xrcode, int version, int flags) {
  */
 public
 OPTRecord(int payloadSize, int xrcode, int version) {
-	this(payloadSize, xrcode, version, 0);
+	this(payloadSize, xrcode, version, 0, null);
 }
 
 void
 rrFromWire(DNSInput in) throws IOException {
 	if (in.remaining() > 0)
-		options = new HashMap();
+		options = new ArrayList();
 	while (in.remaining() > 0) {
 		int code = in.readU16();
 		int len = in.readU16();
-		options.put(new Integer(code), in.readByteArray(len));
+		byte [] data = in.readByteArray(len);
+		options.add(new Option(code, data));
 	}
 }
 
@@ -76,15 +126,9 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append(getName());
-	sb.append("\t");
-	sb.append(Type.string(getType()));
 	if (options != null) {
-		Iterator it = options.keySet().iterator();
-		while (it.hasNext()) {
-			Integer i = (Integer) it.next();
-			sb.append(i + " ");
-		}
+		sb.append(options);
+		sb.append(" ");
 	}
 	sb.append(" ; payload ");
 	sb.append(getPayloadSize());
@@ -128,14 +172,45 @@ void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (options == null)
 		return;
-	Iterator it = options.keySet().iterator();
+	Iterator it = options.iterator();
 	while (it.hasNext()) {
-		Integer i = (Integer) it.next();
-		out.writeU16(i.intValue());
-		byte [] data = (byte []) options.get(i);
-		out.writeU16(data.length);
-		out.writeByteArray(data);
+		Option opt = (Option) it.next();
+		out.writeU16(opt.code);
+		out.writeU16(opt.data.length);
+		out.writeByteArray(opt.data);
 	}
+}
+
+/**
+ * Gets all options in the OPTRecord.  This returns a list of Options.
+ */
+public List
+getOptions() {
+	if (options == null)
+		return emptyList;
+	return Collections.unmodifiableList(options);
+}
+
+/**
+ * Gets all options in the OPTRecord with a specific code.  This returns a
+ * list of byte arrays.
+ */
+public List
+getOptions(int code) {
+	if (options == null)
+		return emptyList;
+	List list = null;
+	for (Iterator it = options.iterator(); it.hasNext(); ) {
+		Option opt = (Option) it.next();
+		if (opt.code == code) {
+			if (list == null)
+				list = new ArrayList();
+			list.add(opt.data);
+		}
+	}
+	if (list == null)
+		list = emptyList;
+	return list;
 }
 
 }
