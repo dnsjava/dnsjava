@@ -382,7 +382,7 @@ nextRecord() throws IOException {
 /**
  * Specifies whether $GENERATE statements should be expanded.  Whether
  * expanded or not, the specifications for generated records are available
- * by calling {@link #iterator}.  This must be called before a $GENERATE
+ * by calling {@link #generators}.  This must be called before a $GENERATE
  * statement is seen during iteration to have an effect.
  */
 public void
@@ -393,7 +393,7 @@ expandGenerate(boolean wantExpand) {
 /**
  * Returns an iterator over the generators specified in the master file; that
  * is, the parsed contents of $GENERATE statements.
- * @see Generator.
+ * @see Generator
  */
 public Iterator
 generators() {
