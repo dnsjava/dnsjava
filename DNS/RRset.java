@@ -56,6 +56,18 @@ getType() {
 	return r.getType();
 }
 
+public int
+getTTL() {
+	int ttl = Integer.MAX_VALUE;
+	Enumeration e = rrs();
+	while (e.hasMoreElements()) {
+		Record r = (Record) e.nextElement();
+		if (r.getTTL() < ttl)
+			ttl = r.getTTL();
+	}
+	return ttl;
+}
+
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
