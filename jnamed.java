@@ -16,6 +16,7 @@ Hashtable TSIGs;
 public
 jnamed(String conffile) throws IOException {
 	FileInputStream fs;
+	boolean started = false;
 	try {
 		fs = new FileInputStream(conffile);
 	}
@@ -45,6 +46,12 @@ jnamed(String conffile) throws IOException {
 			cache = new Cache(st.nextToken());
 		else if (keyword.equals("key"))
 			addTSIG(st.nextToken(), st.nextToken());
+		else if (keyword.equals("port")) {
+			short port = Short.parseShort(st.nextToken());
+			addUDP(port);
+			addTCP(port);
+			started = true;
+		}
 
 	}
 
@@ -52,8 +59,10 @@ jnamed(String conffile) throws IOException {
 		System.out.println("no cache specified");
 		System.exit(-1);
 	}
-	addUDP((short)12345);
-	addTCP((short)12345);
+	if (!started) {
+		addUDP((short) 53);
+		addTCP((short) 53);
+	}
 };
 
 public void
@@ -71,14 +80,12 @@ addTSIG(String name, String key) {
 public Zone
 findBestZone(Name name) {
 	Zone foundzone = null;
+	foundzone = (Zone) znames.get(name);
+	if (foundzone != null)
+		return foundzone;
 	Name tname = name;
-	do {
-/*System.out.println("Looking for zone named <" + tname + ">");*/
-		foundzone = (Zone) znames.get(tname);
-		if (foundzone != null)
-			return foundzone;
+	while (!tname.equals(Name.root))
 		tname = new Name(tname, 1);
-	} while (!tname.equals(Name.root));
 	return null;
 }
 
