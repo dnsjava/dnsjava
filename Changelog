@@ -1,4 +1,8 @@
 12/9/2002
+	- Add the Lookup class, which is what the dns class should have been,
+	  and make the lookup sample program use it.
+
+12/9/2002
 	- When caching a message, a response object can be constructed
 	  immediately.
 
