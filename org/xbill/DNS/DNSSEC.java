@@ -42,7 +42,7 @@ digestSIG(DataByteOutputStream out, SIGRecord sig) {
 	out.writeShort(sig.getTypeCovered());
 	out.writeByte(sig.getAlgorithm());
 	out.writeByte(sig.getLabels());
-	out.writeInt(sig.getOrigTTL());
+	out.writeUnsignedInt(sig.getOrigTTL());
 	out.writeInt((int) (sig.getExpire().getTime() / 1000));
 	out.writeInt((int) (sig.getTimeSigned().getTime() / 1000));
 	out.writeShort(sig.getFootprint());

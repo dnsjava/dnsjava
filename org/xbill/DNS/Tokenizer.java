@@ -460,7 +460,7 @@ getDouble() throws IOException {
  * @throws IOException An I/O error occurred.
  * @see TTL
  */
-public int
+public long
 getTTL() throws IOException {
 	String next = getIdentifier();
 	try {

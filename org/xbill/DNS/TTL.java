@@ -27,11 +27,12 @@ check(long i) {
  * @return The TTL as a number of seconds
  * @throws NumberFormatException The TTL was not a valid number
  */
-public static int
+public static long
 parseTTL(String s) {
 	if (s == null || !Character.isDigit(s.charAt(0)))
 		throw new NumberFormatException();
-	int value = 0, ttl = 0;
+	int value = 0;
+	long ttl = 0;
 	for (int i = 0; i < s.length(); i++) {
 		char c = s.charAt(i);
 		if (Character.isDigit(c))

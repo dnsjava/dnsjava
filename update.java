@@ -15,7 +15,7 @@ Message query, response;
 Resolver res;
 String server = null;
 Name zone = Name.root;
-int defaultTTL;
+long defaultTTL;
 int defaultClass = DClass.IN;
 PrintStream log = null;
 
@@ -281,11 +281,11 @@ sendUpdate() throws IOException {
  * Ignore the class, if present.
  */
 Record
-parseRR(Tokenizer st, int classValue, int TTLValue)
+parseRR(Tokenizer st, int classValue, long TTLValue)
 throws IOException
 {
 	Name name = st.getName(zone);
-	int ttl;
+	long ttl;
 	int type;
 	Record record;
 

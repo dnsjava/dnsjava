@@ -25,7 +25,7 @@ private static SIGRecord member = new SIGRecord();
 
 private int covered;
 private int alg, labels;
-private int origttl;
+private long origttl;
 private Date expire, timeSigned;
 private short footprint;
 private Name signer;
@@ -92,7 +92,7 @@ throws IOException
 	rec.covered = in.readUnsignedShort();
 	rec.alg = in.readByte();
 	rec.labels = in.readByte();
-	rec.origttl = in.readInt();
+	rec.origttl = in.readUnsignedInt();
 	rec.expire = new Date(1000 * (long)in.readInt());
 	rec.timeSigned = new Date(1000 * (long)in.readInt());
 	rec.footprint = in.readShort();
@@ -182,7 +182,7 @@ getLabels() {
 }
 
 /** Returns the original TTL of the RRset */
-public int
+public long
 getOrigTTL() {
 	return origttl;
 }
@@ -225,7 +225,7 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	out.writeShort((short)covered);
 	out.writeByte(alg);
 	out.writeByte(labels);
-	out.writeInt(origttl);
+	out.writeUnsignedInt(origttl);
 	out.writeInt((int)(expire.getTime() / 1000));
 	out.writeInt((int)(timeSigned.getTime() / 1000));
 	out.writeShort(footprint);
