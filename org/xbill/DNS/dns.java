@@ -28,6 +28,10 @@ private static Name [] searchPath;
 private static boolean searchPathSet;
 private static boolean initialized;
 
+static {
+	initialize();
+}
+
 /* Otherwise the class could be instantiated */
 private
 dns() {}
@@ -119,7 +123,6 @@ setResolver(Resolver _res) {
  */
 public static synchronized Resolver
 getResolver() {
-	initialize();
 	return res;
 }
 
@@ -148,7 +151,6 @@ setSearchPath(String [] domains) {
  */
 public static synchronized Cache
 getCache(short dclass) {
-	initialize();
 	Cache c = (Cache) caches.get(new Short(dclass));
 	if (c == null) {
 		c = new Cache(dclass);
@@ -262,7 +264,6 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
 
-	initialize();
 	if (searchPath == null || name.isQualified())
 		answers = lookup(name, type, dclass, cred, 0, false);
 	else {
