@@ -52,6 +52,11 @@ throws IOException
 	if (s.equals("@me@")) {
 		try {
 			address = InetAddress.getLocalHost();
+			if (address.equals(InetAddress.getByName("127.0.0.1")))
+			{
+				System.out.println("InetAddress.getLocalHost() is broken.  For now, don't use @me@");
+				System.exit(-1);
+			}
 		}
 		catch (UnknownHostException e) {
 			address = null;
