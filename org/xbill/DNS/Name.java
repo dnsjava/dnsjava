@@ -278,7 +278,7 @@ fromString(String s, Name origin) throws TextParseException {
 			}
 			else if (digits > 0 && digits < 3)
 				throw parseException(s, "bad escape");
-			if (pos >= MAXLABEL)
+			if (pos > MAXLABEL)
 				throw parseException(s, "label too long");
 			labelstart = pos;
 			label[pos++] = b;
@@ -297,7 +297,7 @@ fromString(String s, Name origin) throws TextParseException {
 		} else {
 			if (labelstart == -1)
 				labelstart = i;
-			if (pos >= MAXLABEL)
+			if (pos > MAXLABEL)
 				throw parseException(s, "label too long");
 			label[pos++] = b;
 		}

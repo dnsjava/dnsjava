@@ -1,3 +1,7 @@
+9/17/2003
+	- Fix an off-by-one error in the Name code; labels of length 63
+	  were not accepted (patch from David Blacka <davidb@verisignlabs.com>)
+
 9/2/2003
 	- 1.4.1 released.
 
