@@ -15,6 +15,11 @@ package org.xbill.DNS;
 
 public interface Verifier {
 
-public byte verify(RRset set, Cache cache);
+/**
+ * Verifies this RRset, using secure keys found in this Cache if necessary.
+ * @see RRset
+ * @see Cache
+ */
+byte verify(RRset set, Cache cache);
 
 }

@@ -15,34 +15,34 @@ import java.net.*;
 public interface Resolver {
 
 /** Sets the port to communicate with on the server */
-public void setPort(int port);
+void setPort(int port);
 
 /** Sets whether TCP connections will be sent by default */
-public void setTCP(boolean flag);
+void setTCP(boolean flag);
 
 /** Sets whether truncated responses will be returned */
-public void setIgnoreTruncation(boolean flag);
+void setIgnoreTruncation(boolean flag);
 
 /** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
-public void setEDNS(int level);
+void setEDNS(int level);
 
 /** Specifies the TSIG key that messages will be signed with */
-public void setTSIGKey(String name, String key);
+void setTSIGKey(String name, String key);
 
 /**
  * Specifies the TSIG key (with the same name as the local host) that messages
  * will be signed with
  */
-public void setTSIGKey(String key);
+void setTSIGKey(String key);
 
 /** Sets the amount of time to wait for a response before giving up */
-public void setTimeout(int secs);
+void setTimeout(int secs);
 
 /**
  * Sends a message, and waits for a response
  * @return The response
  */
-public Message send(Message query) throws IOException;
+Message send(Message query) throws IOException;
 
 /**
  * Asynchronously sends a message, registering a listener to receive a callback.
@@ -51,6 +51,6 @@ public Message send(Message query) throws IOException;
  * synchronization is necessary.
  * @return An identifier, which is also a parameter in the callback
  */
-public Object sendAsync(final Message query, final ResolverListener listener);
+Object sendAsync(final Message query, final ResolverListener listener);
 
 }

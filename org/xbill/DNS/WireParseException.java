@@ -21,6 +21,6 @@ WireParseException() {
 public
 WireParseException(String s) {
 	super(s);
-};
+}
 
 }

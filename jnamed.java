@@ -67,14 +67,14 @@ jnamed(String conffile) throws IOException {
 		addUDP((short) 53);
 		addTCP((short) 53);
 	}
-};
+}
 
 public void
 addPrimaryZone(String zonefile) throws IOException {
 	Zone newzone = new Zone(zonefile, cache);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
-};
+}
 
 public void
 addSecondaryZone(String zone, String remote) throws IOException {
@@ -82,7 +82,7 @@ addSecondaryZone(String zone, String remote) throws IOException {
 	Zone newzone = new Zone(zname, DClass.IN, remote, cache);
 	znames.put(zname, newzone);
 /*System.out.println("Adding zone named <" + zname + ">");*/
-};
+}
 
 public void
 addTSIG(String name, String key) {
