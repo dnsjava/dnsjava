@@ -76,7 +76,7 @@ rdataToString() {
 	if (next != null) {
 		sb.append(next);
 		int length = BitSetLength(bitmap);
-		for (int i = 0; i < length; i++)
+		for (short i = 0; i < length; i++)
 			if (bitmap.get(i)) {
 				sb.append(" ");
 				sb.append(Type.string(i));
