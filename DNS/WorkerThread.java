@@ -15,7 +15,9 @@ private int id;
 private ResolverListener listener;
 private Resolver res;
 
+private static int nactive = 0;
 private static Vector list = new Vector();
+private static final int max = 10;
 
 WorkerThread() {
 	setDaemon(true);
@@ -29,8 +31,25 @@ getThread() {
 			t = (WorkerThread) list.firstElement();
 			list.removeElement(t);
 		}
+		else if (nactive == max) {
+			while (true) {
+System.out.println("waiting for thread");
+				try {
+					list.wait();
+				}
+				catch (InterruptedException e) {
+				}
+				if (list.size() == 0)
+					continue;
+				t = (WorkerThread) list.firstElement();
+System.out.println("got a thread");
+				list.removeElement(t);
+				break;
+			}
+		}
 		else
 			t = new WorkerThread();
+		nactive++;
 	}
 	return t;
 }
@@ -60,6 +79,9 @@ run() {
 		setName("idle thread");
 		synchronized (list) {
 			list.addElement(this);
+			if (nactive == max)
+				list.notify();
+			nactive--;
 		}
 		synchronized (this) {
 			try {
