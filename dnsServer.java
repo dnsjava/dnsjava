@@ -73,55 +73,81 @@ generateReply(dnsMessage query) {
 }
 
 public void
-serveTCP(short port) throws IOException {
-	ServerSocket sock = new ServerSocket(port);
-	while (true) {
-		Socket s = sock.accept();
-		int inLength;
-		DataInputStream dataIn;
-		DataOutputStream dataOut;
-		byte [] in;
+serveTCP(short port) {
+	try {
+		ServerSocket sock = new ServerSocket(port);
+		while (true) {
+			Socket s = sock.accept();
+			int inLength;
+			DataInputStream dataIn;
+			DataOutputStream dataOut;
+			byte [] in;
 
-		try {
-			dataIn = new DataInputStream(s.getInputStream());
-			inLength = dataIn.readUnsignedShort();
-			in = new byte[inLength];
-			dataIn.readFully(in);
-		}
-		catch (InterruptedIOException e) {
+			try {
+				InputStream is = s.getInputStream();
+				dataIn = new DataInputStream(is);
+				inLength = dataIn.readUnsignedShort();
+				in = new byte[inLength];
+				dataIn.readFully(in);
+			}
+			catch (InterruptedIOException e) {
+				s.close();
+				continue;
+			}
+			dnsMessage query = new dnsMessage(in);
+			dnsMessage response = generateReply(query);
+			byte [] out = response.toWire();
+			dataOut = new DataOutputStream(s.getOutputStream());
+			dataOut.writeShort(out.length);
+			dataOut.write(out);
 			s.close();
-			continue;
 		}
-		dnsMessage query = new dnsMessage(in);
-		dnsMessage response = generateReply(query);
-		byte [] out = response.toWire();
-		dataOut = new DataOutputStream(s.getOutputStream());
-		dataOut.writeShort(out.length);
-		dataOut.write(out);
-		s.close();
+	}
+	catch (IOException e) {
+		System.out.println("serveTCP: " + e);
 	}
 }
 
 public void
-serveUDP(short port) throws IOException {
-	DatagramSocket sock = new DatagramSocket(port);
-	while (true) {
-		DatagramPacket dp = new DatagramPacket(new byte[512], 512);
-		try {
-			sock.receive(dp);
+serveUDP(short port) {
+	try {
+		DatagramSocket sock = new DatagramSocket(port);
+		while (true) {
+			DatagramPacket dp = new DatagramPacket(new byte[512],
+							       512);
+			try {
+				sock.receive(dp);
+			}
+			catch (InterruptedIOException e) {
+				continue;
+			}
+			byte [] in = new byte[dp.getLength()];
+			System.arraycopy(dp.getData(), 0, in, 0, in.length);
+			dnsMessage query = new dnsMessage(in);
+			dnsMessage response = generateReply(query);
+			byte [] out = response.toWire();
+			dp = new DatagramPacket(out, out.length,
+						dp.getAddress(), dp.getPort());
+			sock.send(dp);
 		}
-		catch (InterruptedIOException e) {
-			continue;
-		}
-		byte [] in = new byte[dp.getLength()];
-		System.arraycopy(dp.getData(), 0, in, 0, in.length);
-		dnsMessage query = new dnsMessage(in);
-		dnsMessage response = generateReply(query);
-		byte [] out = response.toWire();
-		dp = new DatagramPacket(out, out.length,
-					dp.getAddress(), dp.getPort());
-		sock.send(dp);
 	}
+	catch (IOException e) {
+		System.out.println("serveUDP: " + e);
+	}
+}
+
+public void
+addTCP(final short port) {
+	Thread t;
+	t = new Thread(new Runnable() {public void run() {serveUDP(port);}});
+	t.start();
+}
+
+public void
+addUDP(final short port) {
+	Thread t;
+	t = new Thread(new Runnable() {public void run() {serveTCP(port);}});
+	t.start();
 }
 
 public static void main(String [] args) {
@@ -134,7 +160,17 @@ public static void main(String [] args) {
 		s = new dnsServer();
 		for (int i = 0; i < args.length; i++)
 			s.addZone(args[i]);
-		s.serveUDP((short)12345);
+		s.addUDP((short)12345);
+		s.addTCP((short)12345);
+/*
+		while (true) {
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e) {
+			}
+		}
+*/
 	}
 	catch (IOException e) {
 		System.out.println(e);
