@@ -24,10 +24,10 @@ import org.xbill.Task.*;
 public class SimpleResolver implements Resolver {
 
 /** The default port to send queries to */
-public static final int PORT = 53;
+public static final int DEFAULT_PORT = 53;
 
 private InetAddress addr;
-private int port = PORT;
+private int port = DEFAULT_PORT;
 private boolean useTCP, ignoreTruncation;
 private byte EDNSlevel = -1;
 private TSIG tsig;
