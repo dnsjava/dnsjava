@@ -70,7 +70,11 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	  DataByteInputStream in, Compression c) throws IOException
 {
 	Record rec;
-	int recstart = in.getPos();
+	int recstart;
+	if (in == null)
+		recstart = 0;
+	else
+		recstart = in.getPos();
 
 	try {
 		Class rrclass;
@@ -103,7 +107,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 			System.err.println("new record: " + e);
 		return null;
 	}
-	if (in.getPos() - recstart != length)
+	if (in != null && in.getPos() - recstart != length)
 		throw new IOException("Invalid record length");
 	rec.wireLength = length;
 	return rec;
