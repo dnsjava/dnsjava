@@ -1,3 +1,8 @@
+3/19/2002
+	- When a compressed name is parsed, it should be added to the
+	  compression table, so that future pointers to that name work.
+	  (reported by Blake Ramsdell <blake@brutesquadlabs.com>)
+
 3/14/2002
 	- In jnamed, AXFR responses didn't have the message ID or flags
 	  set correctly.

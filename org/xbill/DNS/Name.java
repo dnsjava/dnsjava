@@ -177,6 +177,7 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 	start = in.getPos();
 loop:
 	while ((len = in.readUnsignedByte()) != 0) {
+		count++;
 		switch(len & LABEL_MASK) {
 		case LABEL_NORMAL:
 			byte [] b = new byte[len];
@@ -184,7 +185,6 @@ loop:
 			if (labels == name.length)
 				grow();
 			name[labels++] = b;
-			count++;
 			break;
 		case LABEL_COMPRESSION:
 			pos = in.readUnsignedByte();
@@ -216,7 +216,6 @@ loop:
 				if (labels == name.length)
 					grow();
 				name[labels++] = new BitString(bits, data);
-				count++;
 				seenBitString = true;
 				break;
 			default:
