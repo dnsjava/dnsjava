@@ -98,6 +98,21 @@ writeString(String s) {
 }
 
 /**
+ * Writes a string represented by a byte array to the stream, encoded as a
+ * length byte followed by data
+ * @param s The string to be written
+ */
+public void
+writeString(byte [] s) {
+	try {
+		write(s.length);
+		write(s);
+	}
+	catch (IOException e) {
+	}
+}
+
+/**
  * Writes a canonical String to the stream, encoded as a length byte followed
  * by data
  * @param s The String to be written

@@ -60,7 +60,7 @@ Name(String s, Name origin) {
 			if (token.charAt(0) == '[')
 				name[labels++] = new BitString(token);
 			else
-				name[labels++] = token;
+				name[labels++] = token.getBytes();
 		}
 
 		if (st.hasMoreDelimiters())
@@ -130,7 +130,7 @@ loop:
 		case LABEL_NORMAL:
 			byte [] b = new byte[len];
 			in.read(b);
-			name[labels++] = new String(b);
+			name[labels++] = b;
 			count++;
 			break;
 		case LABEL_COMPRESSION:
@@ -195,10 +195,10 @@ loop:
 			if (Options.check("verbosecompression"))
 				System.err.println("Adding " + tname +
 						   " at " + pos);
-			if (name[i] instanceof String)
-				pos += (((String)name[i]).length() + 1);
-			else
+			if (name[i] instanceof BitString)
 				pos += (((BitString)name[i]).bytes() + 2);
+			else
+				pos += (((byte [])name[i]).length + 1);
 		}
 	}
 	qualified = true;
@@ -226,7 +226,7 @@ Name(Name d, int n) {
 public Name
 wild(int n) {
 	Name wild = new Name(this, n - 1);
-	wild.name[0] = "*";
+	wild.name[0] = new byte[] {(byte)'*'};
 	return wild;
 }
 
@@ -261,7 +261,10 @@ fromDNAME(DNAMERecord dname) {
  */
 public boolean
 isWild() {
-	return (labels > 0 && name[0].equals("*"));
+	if (labels == 0 || (name[0] instanceof BitString))
+		return false;
+	byte [] b = (byte []) name[0];
+	return (b.length == 1 && b[0] == '*');
 }
 
 /**
@@ -288,10 +291,10 @@ public short
 length() {
 	short total = 0;
 	for (int i = 0; i < labels; i++) {
-		if (name[i] instanceof String)
-			total += (((String)name[i]).length() + 1);
-		else
+		if (name[i] instanceof BitString)
 			total += (((BitString)name[i]).bytes() + 2);
+		else
+			total += (((byte [])name[i]).length + 1);
 	}
 	return ++total;
 }
@@ -311,11 +314,8 @@ public boolean
 subdomain(Name domain) {
 	if (domain == null || domain.labels > labels)
 		return false;
-	int i = labels, j = domain.labels;
-	while (j > 0)
-		if (!name[--i].equals(domain.name[--j]))
-			return false;
-	return true;
+	Name tname = new Name(this, labels - domain.labels);
+	return (tname.equals(domain));
 }
 
 /**
@@ -361,14 +361,14 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 							   " at " +
 							   out.getPos());
 			}
-			if (name[i] instanceof String)
-				out.writeString((String)name[i]);
-			else {
+			if (name[i] instanceof BitString) {
 				out.writeByte(LABEL_EXTENDED |
 					      EXT_LABEL_BITSTRING);
 				out.writeByte(((BitString)name[i]).wireBits());
 				out.write(((BitString)name[i]).data);
 			}
+			else
+				out.writeString((byte []) name[i]);
 		}
 	}
 	out.writeByte(0);
@@ -380,15 +380,23 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 public void
 toWireCanonical(DataByteOutputStream out) throws IOException {
 	for (int i = 0; i < labels; i++) {
-		if (name[i] instanceof String)
-			out.writeStringCanonical((String)name[i]);
-		else {
+		if (name[i] instanceof BitString) {
 			out.writeByte(LABEL_EXTENDED | EXT_LABEL_BITSTRING);
 			out.writeByte(((BitString)name[i]).wireBits());
 			out.write(((BitString)name[i]).data);
 		}
+		else
+			out.writeStringCanonical(new String((byte []) name[i]));
 	}
 	out.writeByte(0);
+}
+
+private static final byte
+toLower(byte b) {
+	if (b < 'A' || b > 'Z')
+		return b;
+	else
+		return (byte)(b - 'A' + 'a');
 }
 
 /**
@@ -406,16 +414,19 @@ equals(Object arg) {
 	for (int i = 0; i < labels; i++) {
 		if (name[i].getClass() != d.name[i].getClass())
 			return false;
-		if (name[i] instanceof String) {
-			String s1 = (String) name[i];
-			String s2 = (String) d.name[i];
-			if (!s1.equalsIgnoreCase(s2))
+		if (name[i] instanceof BitString) {
+			if (!name[i].equals(d.name[i]))
 				return false;
 		}
 		else {
-			/* BitString */
-			if (!name[i].equals(d.name[i]))
+			byte [] b1 = (byte []) name[i];
+			byte [] b2 = (byte []) d.name[i];
+			if (b1.length != b2.length)
 				return false;
+			for (int j = 0; j < b1.length; j++) {
+				if (toLower(b1[j]) != toLower(b2[j]))
+					return false;
+			}
 		}
 	}
 	return true;
@@ -428,15 +439,15 @@ public int
 hashCode() {
 	int code = labels;
 	for (int i = 0; i < labels; i++) {
-		if (name[i] instanceof String) {
-			String s = (String) name[i];
-			for (int j = 0; j < s.length(); j++)
-				code += ((code << 3) + Character.toLowerCase(s.charAt(j)));
-		}
-		else {
+		if (name[i] instanceof BitString) {
 			BitString b = (BitString) name[i];
 			for (int j = 0; j < b.bytes(); j++)
 				code += ((code << 3) + b.data[i]);
+		}
+		else {
+			byte [] b = (byte []) name[i];
+			for (int j = 0; j < b.length; j++)
+				code += ((code << 3) + toLower(b[j]));
 		}
 	}
 	return code;
