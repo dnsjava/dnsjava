@@ -1,3 +1,11 @@
+4/25/1999	
+	- Cache round-robins RRsets before handing them out
+	- changed the way ExtendedResolver decides when to send queries
+	- various reflection changes
+
+4/21/1999	
+	- minor WorkerThread fixes
+
 4/19/1999	
 	- 0.9.1 released
 	- WorkerThreads should die after 15 minutes of idle time

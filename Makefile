@@ -1,7 +1,7 @@
-JAVAC=javac
+JAVAC=jikes
 JFLAGS=-g
 
-JAVADOC=javadoc -d doc
+JAVADOC=/usr/local/jdk1.2/bin/javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.2/docs/api
 
 all:
 	${JAVAC} ${JFLAGS} *.java DNS/*.java DNS/utils/*.java
