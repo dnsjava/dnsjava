@@ -112,7 +112,6 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 		name[labels++] = new String(b);
 		count++;
 	}
-	/* XXX - this appears to only be storing pointers to the whole name? */
 	if (c != null) 
 		for (int i = 0, pos = start; i < count; i++) {
 			Name tname = new Name(this, i);
