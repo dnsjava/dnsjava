@@ -116,7 +116,7 @@ sendTCP(Message query, byte [] out) throws IOException {
 	Message response = new Message(in);
 	if (tsig != null) {
 		boolean ok = tsig.verify(response, in, query.getTSIG());
-		System.out.println("TSIG verify: " + ok);
+		System.out.println(";; TSIG verify: " + ok);
 	}
 	return response;
 }
