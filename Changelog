@@ -1,3 +1,24 @@
+7/5/1999
+	- 1.01 released
+	- fixed a hang with ExtendedResolver and Exceptions
+
+6/30/1999
+	- dns search path should always include a . at the end.  The only
+	  time this bug would show up is when querying for an unqualified
+	  top level name.
+
+6/29/1999
+	- update now ignores '>' at the beginning of a line, to allow
+	  easier cut and paste from other update sessions.
+
+6/24/1999
+	- Use an int instead of a short for the message section count.
+	  It would be nice if java had unsigned types, but since messages
+	  are also constructed from zone transfers, a larger value is useful.
+
+6/23/1999
+	- AXFR TSIG bug fix
+
 6/18/1999
 	- 1.0 released.  Yay!
 	- documentation updates
