@@ -82,7 +82,10 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 		return;
 
 	out.writeShort(priority);
-	target.toWire(out, null);
+	if (type == Type.MX)
+		target.toWire(out, c);
+	else
+		target.toWire(out, null);
 }
 
 void
