@@ -74,19 +74,26 @@ main(String argv[]) throws IOException {
 		else
 			res = new Resolver();
 
-		name = new Name(argv[arg++]);
-
-		type = Type.value(argv[arg]);
-		if (type < 0)
-			type = Type.A;
-		else
-			arg++;
-
-		_class = DClass.value(argv[arg]);
-		if (_class < 0)
+		String nameString = argv[arg++];
+		if (nameString.equals("-x")) {
+			name = new Name(dns.inaddrString(argv[arg++]));
+			type = Type.PTR;
 			_class = DClass.IN;
-		else
-			arg++;
+		}
+		else {
+			name = new Name(nameString);
+			type = Type.value(argv[arg]);
+			if (type < 0)
+				type = Type.A;
+			else
+				arg++;
+
+			_class = DClass.value(argv[arg]);
+			if (_class < 0)
+				_class = DClass.IN;
+			else
+				arg++;
+		}
 
 		while (argv[arg].startsWith("-") && argv[arg].length() > 1) {
 			switch (argv[arg].charAt(1)) {
