@@ -64,8 +64,11 @@ ExtendedResolver() throws UnknownHostException {
 	init();
 	String [] servers = FindServer.servers();
 	if (servers != null) {
-		for (int i = 0; i < servers.length; i++)
-			resolvers.addElement(new SimpleResolver(servers[i]));
+		for (int i = 0; i < servers.length; i++) {
+			Resolver r = new SimpleResolver(servers[i]);
+			r.setTimeout(quantum);
+			resolvers.addElement(r);
+		}
 	}
 	else
 		resolvers.addElement(new SimpleResolver());
@@ -74,8 +77,11 @@ ExtendedResolver() throws UnknownHostException {
 public
 ExtendedResolver(String [] servers) throws UnknownHostException {
 	init();
-	for (int i = 0; i < servers.length; i++)
-		resolvers.addElement(new SimpleResolver(servers[i]));
+	for (int i = 0; i < servers.length; i++) {
+		Resolver r = new SimpleResolver(servers[i]);
+		r.setTimeout(quantum);
+		resolvers.addElement(r);
+	}
 }
 
 public
@@ -92,7 +98,6 @@ sendTo(Message query, Receiver receiver, Hashtable idMap, int r, int q) {
 	/* Three retries */
 	if (q >= 0 && q < 3) {
 		synchronized (idMap) {
-			res.setTimeout(2 * quantum * (q + 1));
 			int id = res.sendAsync(query, receiver);
 			idMap.put(new Integer(id), new Integer(r));
 		}
@@ -148,7 +153,6 @@ public Message
 send(Message query) {
 	int q, r;
 	Message best = null;
-	byte rcode;
 	boolean [] invalid = new boolean[resolvers.size()];
 	Vector queue = new Vector();
 	Hashtable idMap = new Hashtable();
@@ -162,39 +166,36 @@ send(Message query) {
 				ok |= sendTo(query, receiver, idMap, r, q);
 		if (!ok)
 			break;
-		long start = System.currentTimeMillis();
-		long now = start;
-		while (true) {
-			now = System.currentTimeMillis();
-			if (now - start > quantum * 1000)
-				break;
-			synchronized (queue) {
-				try {
-					long left;
-					left = (quantum * 1000) + start - now;
-					if (left > 0)
-						queue.wait(left);
-				}
-				catch (InterruptedException e) {
-				}
-				if (queue.size() == 0)
-					continue;
-				QElement qe = (QElement) queue.firstElement();
-				queue.removeElement(qe);
-				m = qe.m;
-				r = qe.res;
+		synchronized (queue) {
+			try {
+				queue.wait(quantum * 1000);
 			}
-			if (m == null)
-				invalid[r] = true;
+			catch (InterruptedException e) {
+			}
+			if (queue.size() == 0)
+				continue;
+			QElement qe = (QElement) queue.firstElement();
+			queue.removeElement(qe);
+			m = qe.m;
+			r = qe.res;
+		}
+		if (m == null)
+			invalid[r] = true;
+		else {
+			byte rcode = m.getHeader().getRcode();
+			if (rcode == Rcode.NOERROR)
+				return m;
 			else {
-				rcode = m.getHeader().getRcode();
-				if (rcode == Rcode.NOERROR)
-					return m;
+				if (best == null)
+					best = m;
 				else {
-					if (best == null)
+					byte bestrcode;
+					bestrcode = best.getHeader().getRcode();
+					if (rcode == Rcode.NXDOMAIN &&
+					    bestrcode != Rcode.NXDOMAIN)
 						best = m;
-					invalid[r] = true;
 				}
+				invalid[r] = true;
 			}
 		}
 	}
