@@ -23,6 +23,7 @@ public static final int SECONDARY = 2;
 private Map data;
 private int type;
 private Name origin;
+private Object originNode;
 private int dclass = DClass.IN;
 private RRset NS;
 private SOARecord SOA;
@@ -30,7 +31,6 @@ private boolean hasWild;
 
 class ZoneIterator implements Iterator {
 	private Iterator zentries;
-	private Object originNode;
 	private RRset [] current;
 	int count;
 	boolean wantLastSOA;
@@ -38,7 +38,6 @@ class ZoneIterator implements Iterator {
 	ZoneIterator(boolean axfr) {
 		zentries = data.entrySet().iterator();
 		wantLastSOA = axfr;
-		originNode = exactName(origin);
 		RRset [] sets = allRRsets(originNode);
 		current = new RRset[sets.length];
 		for (int i = 0, j = 2; i < sets.length; i++) {
@@ -92,7 +91,7 @@ class ZoneIterator implements Iterator {
 
 private void
 validate() throws IOException {
-	Object originNode = exactName(origin);
+	originNode = exactName(origin);
 	if (originNode == null)
 		throw new IOException(origin + ": no data specified");
 
@@ -517,6 +516,20 @@ AXFR() {
 	return new ZoneIterator(true);
 }
 
+private void
+nodeToString(StringBuffer sb, Object node) {
+	RRset [] sets = allRRsets(node);
+	for (int i = 0; i < sets.length; i++) {
+		RRset rrset = sets[i];
+		Iterator it = rrset.rrs();
+		while (it.hasNext())
+			sb.append(it.next() + "\n");
+		it = rrset.sigs();
+		while (it.hasNext())
+			sb.append(it.next() + "\n");
+	}
+}
+
 /**
  * Returns the contents of the Zone in master file format.
  */
@@ -524,18 +537,11 @@ public String
 toMasterFile() {
 	Iterator zentries = data.entrySet().iterator();
 	StringBuffer sb = new StringBuffer();
+	nodeToString(sb, originNode);
 	while (zentries.hasNext()) {
 		Map.Entry entry = (Map.Entry) zentries.next();
-		RRset [] sets = allRRsets(entry.getValue());
-		for (int i = 0; i < sets.length; i++) {
-			RRset rrset = sets[i];
-			Iterator it = rrset.rrs();
-			while (it.hasNext())
-				sb.append(it.next() + "\n");
-			it = rrset.sigs();
-			while (it.hasNext())
-				sb.append(it.next() + "\n");
-		}
+		if (!origin.equals(entry.getKey()))
+			nodeToString(sb, entry.getValue());
 	}
 	return sb.toString();
 }
