@@ -13,7 +13,7 @@ static dnsName name = null;
 static short type = dns.A, _class = dns.IN;
 
 static void usage() {
-	System.out.println("Usage: update @server name address [ttl]");
+	System.out.println("Usage: update @server name [-t ttl] [-p port]");
 	System.exit(0);
 }
 
@@ -47,7 +47,7 @@ public static void main(String argv[]) throws IOException {
 	String server;
 	dnsName name, domain;
 	InetAddress addr;
-	int ttl;
+	int ttl = 3600;
 	dnsMessage query = new dnsMessage();
 	dnsRecord soa, a;
 	dnsResolver res = null;
@@ -55,7 +55,7 @@ public static void main(String argv[]) throws IOException {
 	query.getHeader().setRandomID();
 	query.getHeader().setOpcode(dns.UPDATE);
 
-	if (argv.length < 3) {
+	if (argv.length < 2) {
 		usage();
 	}
 
@@ -63,16 +63,46 @@ public static void main(String argv[]) throws IOException {
 		usage();
 	}
 	server = argv[0].substring(1);
+	res = new dnsResolver(server);
 	name = new dnsName(argv[1]);
+
+	for (int arg = 2; arg < argv.length; arg++) {
+		if (!argv[arg].startsWith("-") || argv[arg].length() < 2)
+			continue;
+		switch (argv[arg].charAt(1)) {
+		    case 'p':
+			String portStr;
+			int port;
+			if (argv[arg].length() > 2)
+				portStr = argv[arg].substring(2);
+			else
+				portStr = argv[++arg];
+			port = Integer.parseInt(portStr);
+			if (port < 0 || port > 65536) {
+				System.out.println("Invalid port");
+				return;
+			}
+			res.setPort(port);
+			break;
+
+		    case 't':
+			ttl = Integer.parseInt(argv[arg]);
+			if (ttl <= 0)
+				ttl = 3600;
+			break;
+
+		    default:
+			System.out.print("Invalid option" + argv[arg]);
+		}
+	}
+
 	try {
-		addr = InetAddress.getByName(argv[2]);
+		addr = InetAddress.getLocalHost();
 	}
 	catch (UnknownHostException e) {
 		System.out.println(e);
 		return;
 	}
-	if (argv.length < 4 || (ttl = Integer.parseInt(argv[4])) <= 0)
-		ttl = 3600;
 
 	domain = new dnsName(name, 1);
 	soa = new dnsSOARecord(domain, dns.IN);
@@ -81,7 +111,6 @@ public static void main(String argv[]) throws IOException {
 	query.addRecord(ZONE, soa);
 	query.addRecord(UPDATE, a);
 
-	res = new dnsResolver(server);
 	doUpdate(query, res);
 }
 
