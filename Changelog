@@ -1,3 +1,7 @@
+5/11/2004
+	- Don't store the number of labels in a Name in a byte, as the maximum
+	  value (128) cannot be stored in a byte.
+
 5/9/2004
 	- Add support for options within an OPTRecord (loosely based on
 	  a patch from Madhu Siddalingaiah <madhu@madhu.com>)
