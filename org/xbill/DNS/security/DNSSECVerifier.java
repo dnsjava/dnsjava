@@ -92,8 +92,6 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 	if (key == null)
 		return DNSSEC.Insecure;
 
-	DataByteOutputStream out = new DataByteOutputStream();
-
 	Date now = new Date();
 	if (now.compareTo(sigrec.getExpire()) > 0 ||
 	    now.compareTo(sigrec.getTimeSigned()) < 0)
