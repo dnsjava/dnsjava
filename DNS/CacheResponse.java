@@ -76,7 +76,7 @@ void
 addCNAME(CNAMERecord cname) {
 	if (backtrace == null)
 		backtrace = new Vector();
-	backtrace.addElement(cname);
+	backtrace.insertElementAt(cname, 0);
 }
 
 /** Is the answer to the query unknown? */
