@@ -177,7 +177,7 @@ main(String argv[]) throws IOException {
 			usage();
 	}
 
-	rec = Record.newRecord(name, (short) type, (short) dclass);
+	rec = Record.newRecord(name, type, dclass);
 	query = Message.newQuery(rec);
 	if (opt != null)
 		query.addRecord(opt, Section.ADDITIONAL);

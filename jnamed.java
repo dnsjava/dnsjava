@@ -79,7 +79,7 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 		InetAddress addr = (InetAddress) iaddr.next();
 		Iterator iport = ports.iterator();
 		while (iport.hasNext()) {
-			int port = ((Integer)iport.next()).shortValue();
+			int port = ((Integer)iport.next()).intValue();
 			String addrString;
 			addUDP(addr, port);
 			addTCP(addr, port);

@@ -266,8 +266,7 @@ sendUpdate() throws IOException {
 				}
 			}
 		}
-		Record soa = Record.newRecord(updzone, Type.SOA,
-					      (short) dclass);
+		Record soa = Record.newRecord(updzone, Type.SOA, dclass);
 		query.addRecord(soa, Section.ZONE);
 	}
 
@@ -308,8 +307,7 @@ throws IOException
 	if ((type = Type.value(s)) < 0)
 		throw new IOException("Invalid type: " + s);
 
-	record = Record.fromString(name, (short) type, (short) classValue, ttl,
-				   st, zone);
+	record = Record.fromString(name, type, classValue, ttl, st, zone);
 	if (record != null)
 		return (record);
 	else
@@ -332,11 +330,10 @@ doRequire(Tokenizer st) throws IOException {
 		boolean iseol = token.isEOL();
 		st.unget();
 		if (!iseol) {
-			record = Record.fromString(name, (short) type,
-						   (short) defaultClass,
+			record = Record.fromString(name, type, defaultClass,
 						   0, st, zone);
 		} else
-			record = Record.newRecord(name, (short) type,
+			record = Record.newRecord(name, type,
 						  DClass.ANY, 0);
 	} else
 		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
@@ -360,7 +357,7 @@ doProhibit(Tokenizer st) throws IOException {
 			throw new IOException("Invalid type: " + token.value);
 	} else
 		type = Type.ANY;
-	record = Record.newRecord(name, (short) type, DClass.NONE, 0);
+	record = Record.newRecord(name, type, DClass.NONE, 0);
 	query.addRecord(record, Section.PREREQ);
 	print(record);
 }
@@ -394,12 +391,10 @@ doDelete(Tokenizer st) throws IOException {
 		boolean iseol = token.isEOL();
 		st.unget();
 		if (!iseol) {
-			record = Record.fromString(name, (short) type,
-						   DClass.NONE,
+			record = Record.fromString(name, type, DClass.NONE,
 						   0, st, zone);
 		} else
-			record = Record.newRecord(name, (short) type,
-						  DClass.ANY, 0);
+			record = Record.newRecord(name, type, DClass.ANY, 0);
 	}
 	else
 		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
@@ -438,7 +433,7 @@ doQuery(Tokenizer st) throws IOException {
 		}
 	}
 
-	rec = Record.newRecord(name, (short) type, (short) dclass);
+	rec = Record.newRecord(name, type, dclass);
 	Message newQuery = Message.newQuery(rec);
 	if (res == null)
 		res = new SimpleResolver(server);
