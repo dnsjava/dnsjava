@@ -24,13 +24,7 @@ private int currentType;
 private int currentDClass;
 private long currentTTL;
 
-private boolean generating;
-private String genNameSpec;
-private String genRdataSpec;
-private long genStart;
-private long genEnd;
-private long genStep;
-private long genCurrent;
+private Generator generator;
 
 Master(File file, Name initialOrigin, long initialTTL) throws IOException {
 	if (origin != null && !origin.isAbsolute()) {
@@ -198,18 +192,18 @@ startGenerate() throws IOException {
 		stepstr = endstr.substring(n + 1);
 		endstr = endstr.substring(0, n);
 	}
-	genStart = parseUInt32(startstr);
-	genCurrent = genStart;
-	genEnd = parseUInt32(endstr);
+	long start = parseUInt32(startstr);
+	long end = parseUInt32(endstr);
+	long step;
 	if (stepstr != null)
-		genStep = parseUInt32(stepstr);
+		step = parseUInt32(stepstr);
 	else
-		genStep = 1;
-	if (genStart < 0 || genEnd < 0 || genStart > genEnd || genStep <= 0)
+		step = 1;
+	if (start < 0 || end < 0 || start > end || step <= 0)
 		throw st.exception("Invalid $GENERATE range specifier: " + s);
 
 	// The next field is the name specification.
-	genNameSpec = st.getIdentifier();
+	String nameSpec = st.getIdentifier();
 
 	// Then the ttl/class/type, in the same form as a normal record.
 	// Only some types are supported.
@@ -224,14 +218,16 @@ startGenerate() throws IOException {
 				   Type.string(currentType) + " records");
 
 	// Next comes the rdata specification.
-	genRdataSpec = st.getIdentifier();
+	String rdataSpec = st.getIdentifier();
 
 	// That should be the end.  However, we don't want to move past the
 	// line yet, so put back the EOL after reading it.
 	st.getEOL();
 	st.unget();
 
-	generating = true;
+	generator = new Generator(start, end, step, nameSpec,
+				  currentType, currentDClass, currentTTL,
+				  rdataSpec, origin);
 }
 
 private void
@@ -239,123 +235,13 @@ endGenerate() throws IOException {
 	// Read the EOL that we put back before.
 	st.getEOL();
 
-	generating = false;
-}
-
-private String
-substitute(String spec, long n) throws IOException {
-	boolean escaped = false;
-	byte [] str = spec.getBytes();
-	StringBuffer sb = new StringBuffer();
-
-	for (int i = 0; i < str.length; i++) {
-		char c = (char)(str[i] & 0xFF);
-		if (escaped) {
-			sb.append(c);
-			escaped = false;
-		} else if (c == '\\') {
-			if (i + 1 == str.length)
-				throw st.exception("Invalid escape character");
-			escaped = true;
-		} else if (c == '$') {
-			boolean negative = false;
-			long offset = 0;
-			long width = 0;
-			long base = 10;
-			if (i + 1 < str.length && str[i + 1] == '$') {
-				// '$$' == literal '$' for backwards
-				// compatibility with old versions of BIND.
-				c = (char)(str[++i] & 0xFF);
-				sb.append(c);
-				continue;
-			} else if (i + 1 < str.length && str[i + 1] == '{') {
-				// It's a substitution with modifiers.
-				i++;
-				if (i + 1 < str.length && str[i + 1] == '-') {
-					negative = true;
-					i++;
-				}
-				while (i + 1 < str.length) {
-					c = (char)(str[++i] & 0xFF);
-					if (c == ',' || c == '}')
-						break;
-					if (c < '0' || c > '9')
-						throw st.exception(
-							"invalid offset");
-					c -= '0';
-					offset *= 10;
-					offset += c;
-				}
-				if (negative)
-					offset = -offset;
-
-				if (c == ',') {
-					while (i + 1 < str.length) {
-						c = (char)(str[++i] & 0xFF);
-						if (c == ',' || c == '}')
-							break;
-						if (c < '0' || c > '9')
-							throw st.exception(
-							   "invalid width");
-						c -= '0';
-						width *= 10;
-						width += c;
-					}
-				}
-
-				if (c == ',') {
-					if  (i + 1 == str.length)
-						throw st.exception(
-							   "invalid base");
-					c = (char)(str[++i] & 0xFF);
-					if (c == 'o')
-						base = 8;
-					else if (c == 'x')
-						base = 16;
-					else if (c != 'd')
-						throw st.exception(
-							   "invalid base");
-				}
-
-				if (i + 1 == str.length || str[i + 1] != '}')
-					throw st.exception("invalid modifiers");
-				i++;
-			}
-			long v = n + offset;
-			if (v < 0)
-				throw st.exception("invalid offset expansion");
-			String number;
-			if (base == 8)
-				number = Long.toOctalString(v);
-			else if (base == 16)
-				number = Long.toHexString(v);
-			else
-				number = Long.toString(v);
-			if (width != 0 && width > number.length()) {
-				int zeros = (int)width - number.length();
-				while (zeros-- > 0)
-					sb.append('0');
-			}
-			sb.append(number);
-		} else {
-			sb.append(c);
-		}
-	}
-	return sb.toString();
+	generator = null;
 }
 
 private Record
 nextGenerated() throws IOException {
-	if (genCurrent > genEnd)
-		return null;
-	String namestr = substitute(genNameSpec, genCurrent);
-	Name name = Name.fromString(namestr, origin);
-	String rdata = substitute(genRdataSpec, genCurrent);
 	try {
-		Record rec = Record.fromString(name, currentType, currentDClass,
-					       currentTTL, rdata, origin);
-		genCurrent += genStep;
-		return rec;
+		return generator.nextRecord();
 	}
 	catch (Tokenizer.TokenizerException e) {
 		throw st.exception("Parsing $GENERATE: " + e.getBaseMessage());
@@ -383,7 +269,7 @@ _nextRecord() throws IOException {
 			return rec;
 		included = null;
 	}
-	if (generating) {
+	if (generator != null) {
 		Record rec = nextGenerated();
 		if (rec != null)
 			return rec;
@@ -439,7 +325,7 @@ _nextRecord() throws IOException {
 				 */
 				return nextRecord();
 			} else  if (s.equalsIgnoreCase("$GENERATE")) {
-				if (generating)
+				if (generator != null)
 					throw new IllegalStateException
 						("cannot nest $GENERATE");
 				startGenerate();
