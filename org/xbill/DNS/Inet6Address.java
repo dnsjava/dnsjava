@@ -160,7 +160,22 @@ toString() {
 		length = tlength;
 	}
 
-	if (start == -1) {
+	if (labels[0] == 0 && labels[1] == 0 && labels[2] == 0 &&
+	    labels[3] == 0 && labels[4] == 0 && labels[6] != 0 &&
+	    (labels[5] == 0 || labels[5] == 0xFFFF))
+	{
+		sb.append("::");
+		if (labels[5] == 0xFFFF)
+			sb.append("FFFF:");
+		sb.append(labels[6] >> 8);
+		sb.append(".");
+		sb.append(labels[6] & 0xFF);
+		sb.append(".");
+		sb.append(labels[7] >> 8);
+		sb.append(".");
+		sb.append(labels[7] & 0xFF);
+	}
+	else if (start == -1) {
 		for (int i = 0; i < 8; i++) {
 			sb.append(Integer.toHexString(labels[i]).toUpperCase());
 			if (i != 7)
