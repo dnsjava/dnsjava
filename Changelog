@@ -1,3 +1,6 @@
+1/21/2003
+	- 1.3.2 released.
+
 1/20/2003
 	- Certain responses with CNAMEs weren't being properly cached.
 	  (reported by Sean O'Neil <SeanO@telemate.net>)
