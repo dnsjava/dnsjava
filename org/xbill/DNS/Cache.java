@@ -168,6 +168,7 @@ private int dclass;
  */
 public
 Cache(int dclass) {
+	this.dclass = dclass;
 	data = new CacheMap(maxEntries);
 }
 
