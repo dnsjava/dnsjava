@@ -87,6 +87,20 @@ public static class Algorithm {
 	}
 }
 
+private static class ByteArrayComparator implements Comparator {
+	public int compare(Object o1, Object o2) {
+		byte [] b1 = (byte []) o1;
+		byte [] b2 = (byte []) o2;
+		int len = Math.min(b1.length, b2.length);
+		for (int i = 0; i < len; i++) {
+			int diff = (b1[i] & 0xFF) - (b2[i] & 0xFF);
+			if (diff != 0)
+				return diff;
+		}
+		return b1.length - b2.length;
+	}
+}
+
 public static final int RSAMD5 = Algorithm.RSAMD5;
 public static final int RSA = Algorithm.RSAMD5;
 public static final int DH = Algorithm.DH;
@@ -96,6 +110,8 @@ public static final int RSASHA1 = Algorithm.RSASHA1;
 public static final int Failed = -1;
 public static final int Insecure = 0;
 public static final int Secure = 1;
+
+private static Comparator byteArrayComparator = new ByteArrayComparator();
 
 private
 DNSSEC() { }
@@ -138,7 +154,7 @@ digestRRset(SIGRecord sig, RRset rrset) {
 			rec = rec.withName(wild);
 		records[--size] = rec.toWireCanonical();
 	}
-	Arrays.sort(records);
+	Arrays.sort(records, byteArrayComparator);
 	for (int i = 0; i < records.length; i++)
 		out.writeByteArray(records[i]);
 	return out.toByteArray();
