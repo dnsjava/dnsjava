@@ -28,7 +28,7 @@ private byte labels;
 private boolean qualified;
 
 /** The root name */
-public static final Name root = Name.fromStringNoValidate(".", null);
+public static final Name root = Name.fromStringNoException(".");
 
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 128;
@@ -132,7 +132,9 @@ Name(String s) {
 }
 
 /**
- * Create a new name from a string and an origin
+ * Create a new name from a string and an origin.  This does not automatically
+ * make the name absolute; it will be absolute if it has a trailing dot or an
+ * absolute origin is appended.
  * @param s  The string to be converted
  * @param origin  If the name is unqualified, the origin to be appended.
  * @throws TextParseException The name is invalid.
@@ -233,7 +235,8 @@ fromString(String s, Name origin) throws TextParseException {
 }
 
 /**
- * Create a new name from a string.
+ * Create a new name from a string.  This does not automatically make the name
+ * absolute; it will be absolute if it has a trailing dot.
  * @param s  The string to be converted
  * @throws TextParseException The name is invalid.
  */
@@ -243,29 +246,20 @@ fromString(String s) throws TextParseException {
 }
 
 /**
- * Create a new name from a string and an origin
+ * Create a new name from a string, returning null if the name is invalid.
+ * This should only be used when the name is known to be good - that is,
+ * when it is constant.
  * @param s  The string to be converted
  * @param origin  If the name is unqualified, the origin to be appended.
- * @throws TextParseException The name is invalid.
  */
 public static Name
-fromStringNoValidate(String s, Name origin) {
+fromStringNoException(String s) {
 	try {
-		return fromString(s, origin);
+		return fromString(s, null);
 	}
 	catch (TextParseException e) {
 		return null;
 	}
-}
-
-/**
- * Create a new name from a string.
- * @param s  The string to be converted
- * @throws TextParseException The name is invalid.
- */
-public static Name
-fromStringNoValidate(String s) {
-	return fromStringNoValidate(s, null);
 }
 
 /**
