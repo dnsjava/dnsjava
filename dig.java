@@ -1,5 +1,4 @@
 // Copyright (c) 1999-2003 Brian Wellington (bwelling@xbill.org)
-// Portions Copyright (c) 1999 Network Associates, Inc.
 
 import java.io.*;
 import org.xbill.DNS.*;

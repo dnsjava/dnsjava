@@ -1,3 +1,5 @@
+// Copyright (c) 2001-2003 Brian Wellington (bwelling@xbill.org)
+
 package org.xbill.DNS.security;
 
 import java.io.IOException;
