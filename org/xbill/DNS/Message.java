@@ -142,8 +142,8 @@ removeRecord(Record r, int section) {
  */
 public void
 removeAllRecords(int section) {
-		sections[section].setSize(0);
-		header.setCount(section, (short)0);
+	sections[section].setSize(0);
+	header.setCount(section, (short)0);
 }
 
 /**
@@ -205,9 +205,9 @@ findRRset(Name name, short type) {
 public Record
 getQuestion() {
 	try {
-		return getSectionArray(Section.QUESTION)[0];
+		return (Record) sections[Section.QUESTION].firstElement();
 	}
-	catch (Exception e) {
+	catch (NoSuchElementException e) {
 		return null;
 	}
 }
@@ -303,10 +303,10 @@ void
 toWire(DataByteOutputStream out) throws IOException {
 	header.toWire(out);
 	Compression c = new Compression();
-	for (int i=0; i<4; i++) {
+	for (int i = 0; i < 4; i++) {
 		if (sections[i].size() == 0)
 			continue;
-		for (int j=0; j<sections[i].size(); j++) {
+		for (int j = 0; j < sections[i].size(); j++) {
 			Record rec = (Record)sections[i].elementAt(j);
 			rec.toWire(out, i, c);
 		}
@@ -350,7 +350,6 @@ thaw() {
 	frozen = false;
 	wireFormat = null;
 }
-
 
 /**
  * Returns the size of the message.  Only valid if the message has been

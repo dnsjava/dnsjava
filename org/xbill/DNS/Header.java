@@ -49,7 +49,7 @@ public
 Header(DataByteInputStream in) throws IOException {
 	this(in.readUnsignedShort());
 	readFlags(in);
-	for (int i = 0; i<counts.length; i++)
+	for (int i = 0; i < counts.length; i++)
 		counts[i] = in.readUnsignedShort();
 }
 
@@ -57,7 +57,7 @@ void
 toWire(DataByteOutputStream out) throws IOException {
 	out.writeShort(getID());
 	writeFlags(out);
-	for (int i = 0; i<counts.length; i++)
+	for (int i = 0; i < counts.length; i++)
 		out.writeShort((short)counts[i]);
 }
 
