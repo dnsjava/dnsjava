@@ -84,6 +84,11 @@ setTSIGKey(String key) {
 	setTSIGKey(name, key);
 }
 
+public void
+setTimeout(int secs) {
+	timeoutValue = secs * 1000;
+}
+
 Message
 sendTCP(Message query, byte [] out) throws IOException {
 	byte [] in;
