@@ -90,9 +90,14 @@ throws IOException
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
 	rec.order = (short) st.getUInt16();
 	rec.preference = (short) st.getUInt16();
-	rec.flags = byteArrayFromString(st.getString());
-	rec.service = byteArrayFromString(st.getString());
-	rec.regexp = byteArrayFromString(st.getString());
+	try {
+		rec.flags = byteArrayFromString(st.getString());
+		rec.service = byteArrayFromString(st.getString());
+		rec.regexp = byteArrayFromString(st.getString());
+	}
+	catch (TextParseException e) {
+		throw st.exception(e.getMessage());
+	}
 	rec.replacement = st.getName(origin);
 	return rec;
 }

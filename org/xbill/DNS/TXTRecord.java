@@ -94,7 +94,13 @@ throws IOException
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
 			break;
-		rec.strings.add(byteArrayFromString(t.value));
+		try {
+			rec.strings.add(byteArrayFromString(t.value));
+		}
+		catch (TextParseException e) { 
+			throw st.exception(e.getMessage());
+		}
+
 	}
 	st.unget();
 	return rec;
