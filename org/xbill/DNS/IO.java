@@ -8,16 +8,33 @@ import java.util.*;
 
 public class IO {
 
+static String
+stripTrailing(String s) {
+	if (s == null)
+		return null;
+	int lastChar;
+	int semi;
+	if ((semi = s.lastIndexOf(';')) < 0)
+		lastChar = s.length() - 1;
+	else
+		lastChar = semi - 1;
+	for (int i = lastChar; i >= 0; i--) {
+		if (!Character.isWhitespace(s.charAt(i)))
+			return s.substring(0, i+1);
+	}
+	return "";
+}
+
 public static String
 readExtendedLine(BufferedReader br) throws IOException {
-	String s = br.readLine();
+	String s = stripTrailing(br.readLine());
 	if (s == null)
 		return null;
 	if (!s.endsWith("("))
 		return s;
 	StringBuffer sb = new StringBuffer(s.substring(0, s.length() - 1));
 	while (true) {
-		s = br.readLine();
+		s = stripTrailing(br.readLine());
 		if (s == null)
 			return sb.toString();
 		if (s.endsWith(")")) {
