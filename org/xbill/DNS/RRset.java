@@ -203,6 +203,7 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append("{ ");
 	sb.append(getName() + " ");
+	sb.append(getTTL() + " ");
 	sb.append(DClass.string(getDClass()) + " ");
 	sb.append(Type.string(getType()) + " ");
 	sb.append(iteratorToString(rrs.iterator()));
