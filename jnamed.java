@@ -172,7 +172,7 @@ addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
 		Iterator it = rrset.rrs();
 		while (it.hasNext()) {
 			Record r = (Record) it.next();
-			if (!name.isWild() && r.getName().isWild())
+			if (r.getName().isWild() && !name.isWild())
 				r = r.withName(name);
 			response.addRecord(r, section);
 		}
@@ -181,26 +181,26 @@ addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
 		Iterator it = rrset.sigs();
 		while (it.hasNext()) {
 			Record r = (Record) it.next();
-			if (!name.isWild() && r.getName().isWild())
+			if (r.getName().isWild() && !name.isWild())
 				r = r.withName(name);
 			response.addRecord(r, section);
 		}
 	}
 }
 
-private void
+private final void
 addSOA(Message response, Zone zone) {
 	response.addRecord(zone.getSOA(), Section.AUTHORITY);
 }
 
-private void
+private final void
 addNS(Message response, Zone zone, int flags) {
 	RRset nsRecords = zone.getNS();
 	addRRset(nsRecords.getName(), response, nsRecords,
 		 Section.AUTHORITY, flags);
 }
 
-private void
+private final void
 addCacheNS(Message response, Cache cache, Name name) {
 	SetResponse sr = cache.lookupRecords(name, Type.NS, Credibility.HINT);
 	if (!sr.isDelegation())
@@ -251,7 +251,7 @@ addAdditional2(Message response, int section, int flags) {
 	}
 }
 
-void
+private final void
 addAdditional(Message response, int flags) {
 	addAdditional2(response, Section.ANSWER, flags);
 	addAdditional2(response, Section.AUTHORITY, flags);
@@ -363,10 +363,8 @@ Message
 doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 	Zone zone = (Zone) znames.get(name);
 	boolean first = true;
-	if (zone == null) {
-/*		System.out.println("no zone " + name + " to AXFR");*/
+	if (zone == null)
 		return errorMessage(query, Rcode.REFUSED);
-	}
 	Enumeration e = zone.AXFR();
 	try {
 		DataOutputStream dataOut;
