@@ -1,3 +1,6 @@
+12/6/2003
+	- Make the J2SE javadoc link a property in build.xml.  (Ville Skyttä)
+
 11/24/2003
 	- Lookup should check that the name, type, and class in the question
 	  section of a response match that of the query.

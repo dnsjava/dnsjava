@@ -8,6 +8,9 @@
     <property name="zipname" value="dnsjava-${version}.zip"/>
     <property name="targzname" value="dnsjava-${version}.tar.gz"/>
 
+    <property name="j2se.javadoc"
+      value="http://java.sun.com/j2se/1.4/docs/api/"/>
+
     <target name="all" description="Compile and Jar" depends="jar">
     </target>
 
@@ -43,7 +46,7 @@
                  packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security"
                  windowtitle="dnsjava documentation">
 
-            <link href="http://java.sun.com/products/jdk/1.4/docs/api"/>
+            <link href="${j2se.javadoc}"/>
         </javadoc>
     </target>
 
