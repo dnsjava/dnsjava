@@ -8,8 +8,19 @@ import java.io.*;
 import java.net.*;
 import DNS.utils.*;
 
+/**
+ * An implementation of Resolver that sends one query to one server.
+ * SimpleResolver handles TCP retries, transaction security (TSIG), and
+ * a limited subset of EDNS0.
+ * @see Resolver
+ * @see TSIG
+ * @see EDNS
+ */
+
+
 public class SimpleResolver implements Resolver {
 
+/** The default port to send queries to */
 public static final int PORT = 53;
 
 private InetAddress addr;
@@ -19,8 +30,12 @@ private int EDNSlevel = -1;
 private TSIG tsig;
 private int timeoutValue = 60 * 1000;
 
-static String defaultResolver = "localhost";
+private static String defaultResolver = "localhost";
 
+/**
+ * Creates a SimpleResolver that will query the specified host 
+ * @exception UnknownHostException Failure occurred while finding the host
+ */
 public
 SimpleResolver(String hostname) throws UnknownHostException {
 	if (hostname == null) {
@@ -31,36 +46,48 @@ SimpleResolver(String hostname) throws UnknownHostException {
 	addr = InetAddress.getByName(hostname);
 }
 
+/**
+ * Creates a SimpleResolver.  The host to query is either found by
+ * FindServer, or the default host is used.
+ * @see FindServer
+ * @exception UnknownHostException Failure occurred while finding the host
+ */
 public
 SimpleResolver() throws UnknownHostException {
 	this(null);
 }
 
+/** Sets the default host (initially localhost) to query */
 public static void
 setDefaultResolver(String hostname) {
 	defaultResolver = hostname;
 }
 
+/** Sets the port to communicate with on the server */
 public void
 setPort(int port) {
 	this.port = port;
 }
 
+/** Sets whether TCP connections will be sent by default */
 public void
 setTCP(boolean flag) {
 	this.useTCP = flag;
 }
 
+/** Sets whether truncated responses will be returned */
 public void
 setIgnoreTruncation(boolean flag) {
 	this.ignoreTruncation = flag;
 }
 
+/** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
 public void
 setEDNS(int level) {
 	this.EDNSlevel = level;
 }
 
+/** Specifies the TSIG key that messages will be signed with */
 public void
 setTSIGKey(String name, String key) {
 	byte [] keyArray = base64.fromString(key);
@@ -71,6 +98,10 @@ setTSIGKey(String name, String key) {
 	tsig = new TSIG(name, keyArray);
 }
 
+/**
+ * Specifies the TSIG key (with the same name as the local host) that messages
+ * will be signed with
+ */
 public void
 setTSIGKey(String key) {
 	String name;
@@ -84,12 +115,13 @@ setTSIGKey(String key) {
 	setTSIGKey(name, key);
 }
 
+/** Sets the amount of time to wait for a response before giving up */
 public void
 setTimeout(int secs) {
 	timeoutValue = secs * 1000;
 }
 
-Message
+private Message
 sendTCP(Message query, byte [] out) throws IOException {
 	byte [] in;
 	Socket s;
@@ -129,6 +161,11 @@ sendTCP(Message query, byte [] out) throws IOException {
 	return response;
 }
 
+/**
+ * Sends a message, and waits for a response.  The exact behavior depends
+ * on the options that have been set.
+ * @return The response
+ */
 public Message
 send(Message query) {
 	byte [] out, in;
@@ -201,6 +238,11 @@ uniqueID(Message m) {
 		(hashCode() & 0xFF));
 }
 
+/**
+ * Asynchronously sends a message, registering a listener to receive a callback.
+ * Multiple asynchronous lookups can be performed in parallel.
+ * @return An identifier, which is also a parameter in the callback
+ */
 public int
 sendAsync(final Message query, final ResolverListener listener) {
 	final int id = uniqueID(query);
@@ -208,6 +250,10 @@ sendAsync(final Message query, final ResolverListener listener) {
 	return id;
 }
 
+/**
+ * Sends a zone transfer message, and waits for a response
+ * @return The response
+ */
 public Message
 sendAXFR(Message query) {
 	byte [] out, in;
