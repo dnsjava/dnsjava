@@ -32,7 +32,7 @@ required.  If using JDK 1.1, ignore the deprecation warning.
 
 To compile dnssec support (org.xbill.DNS.security), JDK 1.2 or higher and the
 Java Cryptography Extensions are required.  Run 'make dnssec' to compile this
-package.
+package.  This does not include TSIG support, which does not require 1.2.
 
 Limitations:
 
