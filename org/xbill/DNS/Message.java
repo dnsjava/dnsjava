@@ -582,7 +582,7 @@ toString() {
 			sb.append(";; " + Section.updString(i) + ":\n");
 		sb.append(sectionToString(i) + "\n");
 	}
-	sb.append(";; done (" + numBytes() + " bytes)");
+	sb.append(";; Message size: " + numBytes() + " bytes");
 	return sb.toString();
 }
 
