@@ -41,7 +41,7 @@ isDottedQuad(String s) {
 		if (values[i] < 0 || values[i] > 255)
 			break;
 	}
-	if (i == 4)
+	if (i == 4 && !st.hasMoreDelimiters())
 		return true;
 	else
 		return false;
