@@ -73,7 +73,7 @@ getAddress() {
 }
 
 byte []
-rrToWire() {
+rrToWire(dnsCompression c) {
 	if (address == null)
 		return null;
 	else

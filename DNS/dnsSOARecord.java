@@ -63,15 +63,15 @@ toString() {
 		sb.append(host);
 		sb.append(" ");
 		sb.append(admin);
-		sb.append(" (\n\t\t\t");
+		sb.append(" (\n\t\t\t\t\t");
 		sb.append(serial);
-		sb.append("\t; serial\n\t\t\t");
+		sb.append("\t; serial\n\t\t\t\t\t");
 		sb.append(refresh);
-		sb.append("\t; refresh\n\t\t\t");
+		sb.append("\t; refresh\n\t\t\t\t\t");
 		sb.append(retry);
-		sb.append("\t; retry\n\t\t\t");
+		sb.append("\t; retry\n\t\t\t\t\t");
 		sb.append(refresh);
-		sb.append("\t; refresh\n\t\t\t");
+		sb.append("\t; refresh\n\t\t\t\t\t");
 		sb.append(minimum);
 		sb.append(")\t; minimum");
 	}
@@ -79,12 +79,12 @@ toString() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
-	host.toWire(ds);
-	admin.toWire(ds);
+	host.toWire(ds, c);
+	admin.toWire(ds, c);
 	ds.writeInt(serial);
 	ds.writeInt(refresh);
 	ds.writeInt(retry);

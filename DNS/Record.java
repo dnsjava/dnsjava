@@ -128,14 +128,16 @@ throws IOException
 }
 
 public void
-toWire(DataOutputStream out, int section) throws IOException {
-	name.toWire(out);
+toWire(CountedDataOutputStream out, int section, dnsCompression c)
+throws IOException
+{
+	name.toWire(out, c);
 	out.writeShort(type);
 	out.writeShort(dclass);
 	if (section == dns.QUESTION)
 		return;
 	out.writeInt(ttl);
-	byte [] data = rrToWire();
+	byte [] data = rrToWire(c);
 	if (data == null)
 		out.writeShort(0);
 	else {
@@ -148,20 +150,20 @@ toWire(DataOutputStream out, int section) throws IOException {
 public byte []
 toWire(int section) throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	DataOutputStream dout = new DataOutputStream(out);
-	toWire(dout, section);
+	CountedDataOutputStream dout = new CountedDataOutputStream(out);
+	toWire(dout, section, null);
 	return out.toByteArray();
 }
 
 void
-toWireCanonical(DataOutputStream out, int section) throws IOException {
+toWireCanonical(CountedDataOutputStream out, int section) throws IOException {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
 	if (section == dns.QUESTION)
 		return;
 	out.writeInt(ttl);
-	byte [] data = rrToWire();
+	byte [] data = rrToWireCanonical();
 	if (data == null)
 		out.writeShort(0);
 	else {
@@ -241,10 +243,10 @@ getName() {
 	return name;
 }
 
-abstract byte [] rrToWire() throws IOException;
+abstract byte [] rrToWire(dnsCompression c) throws IOException;
 
 byte [] rrToWireCanonical() throws IOException {
-	return rrToWire();
+	return rrToWire(null);
 }
 
 

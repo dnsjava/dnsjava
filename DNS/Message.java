@@ -85,14 +85,15 @@ getSection(int section) {
 }
 
 void
-toWire(DataOutputStream out) throws IOException {
+toWire(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
+	dnsCompression c = new dnsCompression();
 	for (int i=0; i<4; i++) {
 		if (sections[i].size() == 0)
 			continue;
 		for (int j=0; j<sections[i].size(); j++) {
 			dnsRecord rec = (dnsRecord)sections[i].elementAt(j);
-			rec.toWire(out, i);
+			rec.toWire(out, i, c);
 		}
 	}
 }
@@ -100,13 +101,13 @@ toWire(DataOutputStream out) throws IOException {
 byte []
 toWire() throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	DataOutputStream dout = new DataOutputStream(out);
+	CountedDataOutputStream dout = new CountedDataOutputStream(out);
 	toWire(dout);
 	return out.toByteArray();
 }
 
 void
-toWireCanonical(DataOutputStream out) throws IOException {
+toWireCanonical(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
 	for (int i=0; i<4; i++) {
 		if (sections[i].size() == 0)

@@ -79,14 +79,14 @@ getBitmap() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (next == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
-	next.toWire(ds);
+	next.toWire(ds, null);
 	for (int i = 0, t = 0; i < bitmap.size(); i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
 		if (i % 8 == 7 || i == bitmap.size() - 1) {

@@ -87,12 +87,12 @@ getAlgorithm() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (cert == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
 	ds.writeShort(certType);
 	ds.writeByte(keyTag);

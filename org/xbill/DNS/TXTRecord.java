@@ -76,18 +76,17 @@ getStrings() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (strings == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
 	Enumeration e = strings.elements();
 	while (e.hasMoreElements()) {
 		String s = (String) e.nextElement();
-		ds.writeByte(s.getBytes().length);
-		ds.write(s.getBytes());
+		ds.writeString(s);
 	}
 	return bs.toByteArray();
 }

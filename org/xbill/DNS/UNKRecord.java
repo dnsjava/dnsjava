@@ -13,7 +13,10 @@ dnsUNKRecord(dnsName _name, short _type, short _dclass, int _ttl, int length,
 	     CountedDataInputStream in, dnsCompression c) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
-	wireToData(length, in, c);
+	if (in == null)
+		return;
+	data = new byte[length];
+	in.read(data);
 }
 
 public 
@@ -33,18 +36,8 @@ toString() {
 	return sb.toString();
 }
 
-void
-wireToData(int length, CountedDataInputStream in, dnsCompression c)
-throws IOException
-{
-	if (in == null)
-		return;
-	data = new byte[length];
-	in.read(data);
-}
-
 byte []
-rrToWire() {
+rrToWire(dnsCompression c) {
 	return data;
 }
 

@@ -35,7 +35,31 @@ dnsTSIGRecord(dnsName _name, short _dclass, int _ttl, int length,
 	      CountedDataInputStream in, dnsCompression c) throws IOException
 {
 	super(_name, dns.TSIG, _dclass, _ttl);
-	wireToData(in, c);
+	if (in == null)
+		return;
+	alg = new dnsName(in, c);
+
+	short timeHigh = in.readShort();
+	int timeLow = in.readInt();
+	long time = ((long)timeHigh & 0xFFFF) << 32;
+	time += (long)timeLow & 0xFFFFFFFF;
+	timeSigned = new Date(time * 1000);
+	fudge = in.readShort();
+
+	int sigLen = in.readUnsignedShort();
+	signature = new byte[sigLen];
+	in.read(signature);
+
+	originalID = in.readUnsignedShort();
+	error = in.readShort();
+
+	int otherLen = in.readUnsignedShort();
+	if (otherLen > 0) {
+		other = new byte[otherLen];
+		in.read(other);
+	}
+	else
+		other = null;
 }
 
 public String
@@ -113,42 +137,12 @@ getOther() {
 	return other;
 }
 
-void
-wireToData(CountedDataInputStream in, dnsCompression c) throws IOException {
-	if (in == null)
-		return;
-	alg = new dnsName(in, c);
-
-	short timeHigh = in.readShort();
-	int timeLow = in.readInt();
-	long time = ((long)timeHigh & 0xFFFF) << 32;
-	time += (long)timeLow & 0xFFFFFFFF;
-	timeSigned = new Date(time * 1000);
-	fudge = in.readShort();
-
-	int sigLen = in.readUnsignedShort();
-	signature = new byte[sigLen];
-	in.read(signature);
-
-	originalID = in.readUnsignedShort();
-	error = in.readShort();
-
-	int otherLen = in.readUnsignedShort();
-	if (otherLen > 0) {
-		other = new byte[otherLen];
-		in.read(other);
-	}
-	else
-		other = null;
-
-}
-
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
-	alg.toWire(ds);
+	alg.toWire(ds, null);
 
 	long time = timeSigned.getTime() / 1000;
 	short timeHigh = (short) (time >> 32);

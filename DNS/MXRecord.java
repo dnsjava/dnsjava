@@ -62,15 +62,15 @@ getPriority() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (target == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
 	ds.writeShort(priority);
-	target.toWire(ds);
+	target.toWire(ds, null);
 	return bs.toByteArray();
 }
 

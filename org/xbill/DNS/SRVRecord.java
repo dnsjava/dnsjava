@@ -82,17 +82,17 @@ getTarget() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (target == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
 	ds.writeShort(priority);
 	ds.writeShort(weight);
 	ds.writeShort(port);
-	target.toWire(ds);
+	target.toWire(ds, null);
 	return bs.toByteArray();
 }
 

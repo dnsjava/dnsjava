@@ -49,17 +49,15 @@ getOS() {
 	return os;
 }
 
-byte[] rrToWire() throws IOException {
+byte[] rrToWire(dnsCompression c) throws IOException {
 	if (cpu == null || os == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
-	ds.write(cpu.getBytes().length);
-	ds.write(cpu.getBytes());
-	ds.write(os.getBytes().length);
-	ds.write(os.getBytes());
+	ds.writeString(cpu);
+	ds.writeString(os);
 
 	return bs.toByteArray();
 }

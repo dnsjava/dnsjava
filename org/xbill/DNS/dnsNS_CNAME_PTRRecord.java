@@ -22,7 +22,9 @@ dnsNS_CNAME_PTRRecord(dnsName _name, short _type, short _dclass, int _ttl,
 throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
-	wireToData(in, c);
+	if (in == null)
+		return;
+	target = new dnsName(in, c);
 }
 
 public
@@ -48,22 +50,15 @@ getTarget() {
 	return target;
 }
 
-void
-wireToData(CountedDataInputStream in, dnsCompression c) throws IOException {
-	if (in == null)
-		return;
-	target = new dnsName(in, c);
-}
-
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (target == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
-	target.toWire(ds);
+	target.toWire(ds, c);
 	return bs.toByteArray();
 }
 

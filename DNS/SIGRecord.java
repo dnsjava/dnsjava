@@ -96,12 +96,12 @@ toString() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (signature == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
 	ds.writeShort(covered);
 	ds.writeByte(alg);
@@ -110,7 +110,7 @@ rrToWire() throws IOException {
 	ds.writeInt((int)expire.getTime() / 1000);
 	ds.writeInt((int)timeSigned.getTime() / 1000);
 	ds.writeShort(footprint);
-	signer.toWire(ds);
+	signer.toWire(ds, null);
 	ds.write(signature);
 
 	return bs.toByteArray();

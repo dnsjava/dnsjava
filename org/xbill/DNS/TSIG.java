@@ -28,7 +28,7 @@ void apply(dnsMessage m) throws IOException {
 		h.addData(m.toWire());
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		DataOutputStream dout = new DataOutputStream(out);
+		CountedDataOutputStream dout = new CountedDataOutputStream(out);
 		name.toWireCanonical(dout);
 		dout.writeShort(dns.ANY);	/* class */
 		dout.writeInt(0);		/* ttl */
@@ -70,7 +70,8 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 	try {
 		if (old != null && tsig.getError() == dns.NOERROR) {
 			ByteArrayOutputStream bs = new ByteArrayOutputStream();
-			DataOutputStream d = new DataOutputStream(bs);
+			CountedDataOutputStream d =
+						new CountedDataOutputStream(bs);
 			d.writeShort((short)old.getSignature().length);
 			h.addData(bs.toByteArray());
 			h.addData(old.getSignature());
@@ -87,7 +88,7 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 /*System.out.println("digested message");*/
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		DataOutputStream dout = new DataOutputStream(out);
+		CountedDataOutputStream dout = new CountedDataOutputStream(out);
 		tsig.getName().toWireCanonical(dout);
 		dout.writeShort(tsig.dclass);
 		dout.writeInt(tsig.ttl);
@@ -116,7 +117,8 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 	if (axfrSigner != null) {
 		try {
 			ByteArrayOutputStream bs = new ByteArrayOutputStream();
-			DataOutputStream d = new DataOutputStream(bs);
+			CountedDataOutputStream d =
+						new CountedDataOutputStream(bs);
 			d.writeShort((short)tsig.getSignature().length);
 			axfrSigner.addData(bs.toByteArray());
 			axfrSigner.addData(tsig.getSignature());
@@ -163,7 +165,7 @@ boolean verifyAXFR(dnsMessage m, byte [] b, dnsTSIGRecord old,
 		}
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		DataOutputStream dout = new DataOutputStream(out);
+		CountedDataOutputStream dout = new CountedDataOutputStream(out);
 		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);

@@ -20,8 +20,7 @@ int
 read(byte b[]) throws IOException {
 	in.readFully(b);
 	int out = b.length;
-	if (out >= 0)
-		counter += out;
+	counter += out;
 	return out;
 }
 

@@ -27,7 +27,7 @@ dnsHeader(CountedDataInputStream in) throws IOException {
 }
 
 public void
-toWire(DataOutputStream out) throws IOException {
+toWire(CountedDataOutputStream out) throws IOException {
 	out.writeShort(id);
 	writeFlags(out);
 	for (int i=0; i<counts.length; i++)
@@ -37,7 +37,7 @@ toWire(DataOutputStream out) throws IOException {
 public byte []
 toWire() throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	DataOutputStream dout = new DataOutputStream(out);
+	CountedDataOutputStream dout = new CountedDataOutputStream(out);
 	toWire(dout);
 	return out.toByteArray();
 }
@@ -115,7 +115,7 @@ getCount(int field) {
 }
 
 private void
-writeFlags(DataOutputStream out) throws IOException {
+writeFlags(CountedDataOutputStream out) throws IOException {
 	short flags1 = 0, flags2 = 0;
 	for (int i = 0; i < 8; i++) {
 		if (flags[i])	flags1 |= (1 << (7-i));

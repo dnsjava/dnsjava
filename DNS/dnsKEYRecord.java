@@ -88,12 +88,12 @@ getAlgorithm() {
 }
 
 byte []
-rrToWire() throws IOException {
+rrToWire(dnsCompression c) throws IOException {
 	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	DataOutputStream ds = new DataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 
 	ds.writeShort(flags);
 	ds.writeByte(proto);

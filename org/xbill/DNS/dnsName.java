@@ -60,7 +60,7 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 			int pos = in.readUnsignedByte();
 			pos += ((len & ~0xC0) << 8);
 			dnsName name2 = (c == null) ? null : c.get(pos);
-/*System.out.println("Looking for compressed name at " + pos + ", found " + name2);*/
+/*System.out.println("Looking for name at " + pos + ", found " + name2);*/
 			if (name2 == null)
 				name[labels++] = new String("<compressed>");
 			else {
@@ -79,7 +79,7 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 		for (int i = 0, pos = start; i < count; i++) {
 			dnsName tname = new dnsName(this, i);
 			c.add(pos, tname);
-/*System.out.println("Adding " + tname + " at " + pos);*/
+/*System.out.println("(D) Adding " + tname + " at " + pos);*/
 			pos += (name[i].length() + 1);
 		}
 }
@@ -120,17 +120,27 @@ toString() {
 }
 
 public void
-toWire(DataOutputStream out) throws IOException {
+toWire(CountedDataOutputStream out, dnsCompression c) throws IOException {
 	for (int i=0; i<labels; i++) {
-		out.writeByte(name[i].length());
-		for (int j=0; j<name[i].length(); j++)
-			out.writeByte(name[i].charAt(j));
+		dnsName tname = new dnsName(this, i);
+		int pos = c.get(tname);
+/*System.out.println("Looking for compressed " + tname + ", found " + pos);*/
+		if (pos >= 0) {
+			pos |= (0xC0 << 8);
+			out.writeShort(pos);
+			return;
+		}
+		else {
+			c.add(out.getPos(), tname);
+/*System.out.println("(C) Adding " + tname + " at " + out.getPos());*/
+			out.writeString(name[i]);
+		}
 	}
 	out.writeByte(0);
 }
 
 public void
-toWireCanonical(DataOutputStream out) throws IOException {
+toWireCanonical(CountedDataOutputStream out) throws IOException {
 	for (int i=0; i<labels; i++) {
 		out.writeByte(name[i].length());
 		for (int j=0; j<name[i].length(); j++)
@@ -151,6 +161,16 @@ equals(Object arg) {
 			return false;
 	}
 	return true;
+}
+
+public int
+hashCode() {
+	int code = labels;
+	for (int i = 0; i < labels; i++) {
+		for (int j = 0; j < name[i].length(); j++)
+			code += name[i].charAt(j);
+	}
+	return code;
 }
 
 }
