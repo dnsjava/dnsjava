@@ -257,7 +257,7 @@ addAnswer(Message response, Name name, int type, int dclass,
 	if (iterations > 6)
 		return Rcode.NOERROR;
 
-	if (type == Type.SIG) {
+	if (type == Type.SIG || type == Type.RRSIG) {
 		type = Type.ANY;
 		flags |= FLAG_SIGONLY;
 	}
