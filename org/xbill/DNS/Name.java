@@ -20,7 +20,6 @@ private static final int LABEL_COMPRESSION = 0xC0;
 private static final int LABEL_EXTENDED = 0x40;
 private static final int LABEL_MASK = 0xC0;
 
-private static final int EXT_LABEL_COMPRESSION = 0;
 private static final int EXT_LABEL_BITSTRING = 1;
 
 private Object [] name;
@@ -151,22 +150,6 @@ loop:
 		case LABEL_EXTENDED:
 			int type = len & ~LABEL_MASK;
 			switch (type) {
-			case EXT_LABEL_COMPRESSION:
-				pos = in.readUnsignedShort();
-				name2 = (c == null) ? null : c.get(pos);
-				if (Options.check("verbosecompression"))
-					System.err.println("Looking at " +
-							   pos + ", found " +
-							   name2);
-				if (name2 == null)
-					throw new WireParseException(
-							"bad compression");
-				else {
-					System.arraycopy(name2.name, 0, name,
-							 labels, name2.labels);
-					labels += name2.labels;
-				}
-				break loop;
 			case EXT_LABEL_BITSTRING:
 				int bits = in.readUnsignedByte();
 				if (bits == 0)
@@ -282,6 +265,7 @@ public void
 append(Name d) {
 	System.arraycopy(d.name, 0, name, labels, d.labels);
 	labels += d.labels;
+	qualified = d.qualified;
 }
 
 /**
