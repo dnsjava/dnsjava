@@ -28,7 +28,7 @@ getObject() {
 }
 
 /**
- * Creates an SIG Record from the given data
+ * Creates an RRSIG Record from the given data
  * @param covered The RRset type covered by this signature
  * @param alg The cryptographic algorithm of the key that generated the
  * signature
