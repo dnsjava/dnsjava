@@ -61,14 +61,6 @@ Otherwise, or if these attempts fail, the default nameserver is
 determine the nameserver for any other OSes.  Contributions of code
 are welcome (see org/xbill/DNS/ResolverConfig.java for the basic structure).
 
-On some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
-usually caused by a bug in the JVM, and often happens when the machine has
-a dynamic address and its hostname is not in DNS.  This breaks the (mostly
-undocumented) feature that the @me@ variable can be used in the textual form
-of an A record to indicate the local address.  If InetAddress.getLocalHost()
-doesn't work, a RuntimeException will be thrown.  This should be fixable
-if/when dnsjava requires Java 1.4.
-
 The underlying platform must use an ASCII encoding of characters.  This means
 that dnsjava will not work on OS/390, for example.
 

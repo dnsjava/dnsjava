@@ -24,16 +24,11 @@ getObject() {
 }
 
 private static final int
-fromBytes(byte b1, byte b2, byte b3, byte b4) {
-	return (((b1 & 0xFF) << 24) |
-		((b2 & 0xFF) << 16) |
-		((b3 & 0xFF) << 8) |
-		(b4 & 0xFF));
-}
-
-private static final int
 fromArray(byte [] array) {
-	return (fromBytes(array[0], array[1], array[2], array[3]));
+	return (((array[0] & 0xFF) << 24) |
+		((array[1] & 0xFF) << 16) |
+		((array[2] & 0xFF) << 8) |
+		(array[3] & 0xFF));
 }
 
 private static final byte []
@@ -66,28 +61,10 @@ rrFromWire(DNSInput in) throws IOException {
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = st.getString();
-	try {
-		InetAddress address;
-		if (s.equals("@me@")) {
-			address = InetAddress.getLocalHost();
-			if (address.equals(InetAddress.getByName("127.0.0.1")))
-			{
-				String msg = "InetAddress.getLocalHost() is " +
-					     "broken.  Don't use @me@.";
-				throw new RuntimeException(msg);
-			}
-			addr = fromArray(address.getAddress());
-		}
-	}
-	catch (UnknownHostException e) {
-		throw st.exception("invalid address");
-	}
-
-	int [] array = Address.toArray(s);
+	byte [] array = Address.toByteArray(s, Address.IPv4);
 	if (array == null)
 		throw st.exception("invalid dotted quad");
-	addr = fromBytes((byte)array[0], (byte)array[1], (byte)array[2],
-			 (byte)array[3]);
+	addr = fromArray(array);
 }
 
 /** Converts rdata to a String */
