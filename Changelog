@@ -1,5 +1,8 @@
 1/27/2004
 	- Change the representation of a TSIG error from a byte to an int.
+	- Improve error messages from failed Lookups; treat SERVFAIL
+	  as a temporary failure, not an unrecoverable error.
+	  (Joseph Shraibman <jks@iname.com>)
 
 1/16/2004
 	- The master file reader should propagate TTLs through $INCLUDE

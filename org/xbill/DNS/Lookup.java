@@ -44,6 +44,7 @@ private int result;
 private String error;
 private boolean nxdomain;
 private boolean badresponse;
+private String badresponse_error;
 private boolean networkerror;
 private boolean timedout;
 private boolean nametoolong;
@@ -335,6 +336,7 @@ follow(Name name, Name oldname) {
 	if (iterations >= 6 || name.equals(oldname)) {
 		result = UNRECOVERABLE;
 		error = "CNAME loop";
+		done = true;
 		return;
 	}
 	aliases.add(name);
@@ -384,6 +386,7 @@ processResponse(Name name, SetResponse response) {
 	} else if (response.isDelegation()) {
 		// We shouldn't get a referral.  Ignore it.
 		badresponse = true;
+		badresponse_error = "referral";
 	}
 }
 
@@ -418,12 +421,14 @@ lookup(Name current) {
 		// The server we contacted is broken or otherwise unhelpful.
 		// Press on.
 		badresponse = true;
+		badresponse_error = Rcode.string(rcode);
 		return;
 	}
 
 	if (!query.getQuestion().equals(response.getQuestion())) {
 		// The answer doesn't match the question.  That's not good.
 		badresponse = true;
+		badresponse_error = "response does not match query";
 		return;
 	}
 
@@ -481,8 +486,8 @@ run() {
 	}
 	if (!done) {
 		if (badresponse) {
-			result = UNRECOVERABLE;
-			error = "bad response";
+			result = TRY_AGAIN;
+			error = badresponse_error;
 			done = true;
 		} else if (timedout) {
 			result = TRY_AGAIN;
