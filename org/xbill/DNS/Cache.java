@@ -44,31 +44,21 @@ private class Element {
 	}
 
 	public
-	Element(Name name, long ttl, byte cred, int src, short type) {
-		setValues(name, null, type, cred, ttl, src);
+	Element(Name name, long ttl, byte cred, short type) {
+		setValues(name, null, type, cred, ttl, 0);
 	}
 
 	public
 	Element(Record r, byte cred, int src) {
 		RRset set = new RRset();
 		set.addRR(r);
-		setValues(r.getName(), set, set.getType(), cred, r.getTTL(),
+		setValues(r.getName(), set, r.getRRsetType(), cred, r.getTTL(),
 			  src);
 	}
 
 	public
 	Element(RRset r, byte cred, int src) {
 		setValues(r.getName(), r, r.getType(), cred, r.getTTL(), src);
-	}
-
-	public final void
-	update(Record r) {
-		rrset.addRR(r);
-	}
-
-	public void
-	deleteRecord(Record r) {
-		rrset.deleteRR(r);
 	}
 
 	public final boolean
@@ -93,10 +83,13 @@ private class Element {
 }
 
 private class CacheCleaner extends Thread {
+	public boolean done;
+
 	public
 	CacheCleaner() {
 		setDaemon(true);
 		setName("CacheCleaner");
+		start();
 	}
 
 	public void
@@ -129,8 +122,10 @@ private class CacheCleaner extends Thread {
 					Thread.sleep(next - now);
 				}
 				catch (InterruptedException e) {
-					now = System.currentTimeMillis();
+					if (done)
+						return;
 				}
+				now = System.currentTimeMillis();
 			}
 			clean();
 		}
@@ -141,7 +136,7 @@ private Verifier verifier;
 private boolean secure;
 private int maxncache = -1;
 private long cleanInterval = 30;
-private Thread cleaner;
+private CacheCleaner cleaner;
 private short dclass;
 
 /**
@@ -204,10 +199,11 @@ addRecord(Record r, byte cred, Object o) {
 		addSet(name, type, element = new Element(r, cred, src));
 	else if (cred == element.credibility) {
 		if (element.srcid != src) {
-			element.rrset.clear();
-			element.srcid = src;
-		}
-		element.update(r);
+			RRset rrset = new RRset();
+			rrset.addRR(r);
+			addRRset(rrset, cred, o);
+		} else if (element.rrset != null)
+			element.rrset.addRR(r);
 	}
 }
 
@@ -238,16 +234,12 @@ addRRset(RRset rrset, byte cred, Object o) {
  * @param type The type of the negative entry
  * @param ttl The ttl of the negative entry
  * @param cred The credibility of the negative entry
- * @param o The source of this data
  */
 public void
-addNegative(short rcode, Name name, short type, int ttl, byte cred, Object o) {
-	if (rcode == Rcode.NXDOMAIN)
-		type = 0;
-	int src = (o != null) ? o.hashCode() : 0;
+addNegative(Name name, short type, long ttl, byte cred) {
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, new Element(name, ttl, cred, src, type));
+		addSet(name, type, new Element(name, ttl, cred, type));
 }
 
 private void
@@ -612,20 +604,16 @@ addMessage(Message in) {
 			}
 		}
 		if (soa != null) {
-			/* This is a negative response. */
-			long soattl = (long)soa.getTTL() & 0xFFFFFFFFL;
-			long soamin = (long)soa.getMinimum() & 0xFFFFFFFFL;
-			long ttl = Math.min(soattl, soamin);
+			/* This is a cacheable negative response. */
+			long ttl = (long)soa.getMinimum() & 0xFFFFFFFFL;
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
 			cred = getCred(soa.getName(), queryName,
 				       Section.AUTHORITY, isAuth);
 			if (rcode == Rcode.NXDOMAIN)
-				addNegative(rcode, lookupName, (short)0,
-					    (int)ttl, cred, in);
+				addNegative(lookupName, (short)0, ttl, cred);
 			else
-				addNegative(rcode, lookupName, queryType,
-					    (int)ttl, cred, in);
+				addNegative(lookupName, queryType, ttl, cred);
 		}
 	}
 
@@ -715,9 +703,11 @@ setMaxNCache(int seconds) {
 public void
 setCleanInterval(int minutes) {
 	cleanInterval = minutes;
-	if (cleanInterval <= 0)
-		cleaner = null;
-	else if (cleaner == null)
+	if (cleaner != null) {
+		cleaner.done = true;
+		cleaner.interrupt();
+	}
+	if (cleanInterval > 0)
 		cleaner = new CacheCleaner();
 }
 
