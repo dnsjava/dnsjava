@@ -18,7 +18,7 @@ import java.lang.ref.*;
  * @author Brian Wellington
  */
 
-public class Cache extends NameSet {
+public class Cache {
 
 private abstract static class Element implements TypedObject {
 	int credibility;
@@ -83,8 +83,8 @@ private static class NegativeElement extends Element {
 		long cttl = 0;
 		if (soa != null) {
 			cttl = soa.getMinimum();
-			if (maxttl >= 0)
-				cttl = Math.min(cttl, maxttl);
+			if (maxttl >= 0 && maxttl < cttl)
+				cttl = maxttl;
 		}
 		setValues(cred, cttl);
 	}
@@ -122,21 +122,22 @@ private static class CacheCleaner extends Thread {
 
 	private boolean
 	clean(Cache cache) {
-		Iterator it = cache.names();
+		Iterator it = cache.data.entrySet().iterator();
 		while (it.hasNext()) {
-			Name name;
+			Map.Entry entry;
 			try {
-				name = (Name) it.next();
+				entry = (Map.Entry) it.next();
 			} catch (ConcurrentModificationException e) {
 				return false;
 			}
-			Object [] elements = cache.findExactSets(name);
+			Name name = (Name) entry.getKey();
+			Element [] elements =
+				cache.allElements(entry.getValue());
 			for (int i = 0; i < elements.length; i++) {
-				Element element = (Element) elements[i];
+				Element element = elements[i];
 				if (element.expired())
-					cache.removeSet(name,
-							element.getType(),
-							element);
+					cache.removeElement(name,
+							    element.getType());
 			}
 		}
 		return true;
@@ -169,6 +170,7 @@ private static class CacheCleaner extends Thread {
 
 private static final int defaultCleanInterval = 30;
 
+private Map data;
 private int maxncache = -1;
 private int maxcache = -1;
 private CacheCleaner cleaner;
@@ -183,7 +185,7 @@ private int dclass;
  */
 public
 Cache(int dclass, int cleanInterval) {
-	super(true);
+	data = new HashMap();
 	this.dclass = dclass;
 	setCleanInterval(cleanInterval);
 }
@@ -208,23 +210,144 @@ Cache() {
 	this(DClass.IN, defaultCleanInterval);
 }
 
-/** Empties the Cache. */
-public void
-clearCache() {
-	clear();
-}
-
 /**
  * Creates a Cache which initially contains all records in the specified file.
  */
 public
 Cache(String file) throws IOException {
-	super(true);
+	data = new HashMap();
 	cleaner = new CacheCleaner(this, defaultCleanInterval);
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null)
 		addRecord(record, Credibility.HINT, m);
+}
+
+private synchronized Object
+exactName(Name name) {
+	return data.get(name);
+}
+
+private synchronized void
+removeName(Name name) {
+	data.remove(name);
+}
+
+private synchronized Element []
+allElements(Object types) {
+	if (types instanceof List) {
+		List typelist = (List) types;
+		int size = typelist.size();
+		return (Element []) typelist.toArray(new Element[size]);
+	} else {
+		Element set = (Element) types;
+		return new Element[] {set};
+	}
+}
+
+private synchronized Element
+oneElement(Object types, int type) {
+	if (type == Type.ANY)
+		throw new IllegalArgumentException("oneElement(ANY)");
+	if (types instanceof List) {
+		List list = (List) types;
+		for (int i = 0; i < list.size(); i++) {
+			Element set = (Element) list.get(i);
+			if (set.getType() == type)
+				return set;
+		}
+	} else {
+		Element set = (Element) types;
+		if (set.getType() == type)
+			return set;
+	}
+	return null;
+}
+
+private synchronized Element
+oneElementWithCheck(Name name, Object types, int type, int minCred) {
+	Element element = oneElement(types, type);
+	if (element == null)
+		return null;
+	if (element.expired()) {
+		removeElement(name, type);
+		return null;
+	}
+	if (element.credibility < minCred)
+		return null;
+	return element;
+}
+
+private synchronized Element
+findElement(Name name, int type) {
+	Object types = exactName(name);
+	if (types == null)
+		return null;
+	return oneElement(types, type);
+}
+
+private synchronized void
+addElement(Name name, Element element) {
+	Object types = data.get(name);
+	if (types == null) {
+		data.put(name, element);
+		return;
+	}
+	int type = element.getType();
+	if (types instanceof List) {
+		List list = (List) types;
+		for (int i = 0; i < list.size(); i++) {
+			Element elt = (Element) list.get(i);
+			if (elt.getType() == type) {
+				list.set(i, element);
+				return;
+			}
+		}
+		list.add(element);
+	} else {
+		Element elt = (Element) types;
+		if (elt.getType() == type)
+			data.put(name, element);
+		else {
+			LinkedList list = new LinkedList();
+			list.add(elt);
+			list.add(element);
+			data.put(name, list);
+		}
+	}
+}
+
+private synchronized void
+removeElement(Name name, int type) {
+	Object types = data.get(name);
+	if (types == null) {
+		return;
+	}
+	if (types instanceof List) {
+		List list = (List) types;
+		for (int i = 0; i < list.size(); i++) {
+			Element elt = (Element) list.get(i);
+			if (elt.getType() == type) {
+				list.remove(i);
+				if (list.size() == 0)
+					data.remove(name);
+				return;
+			}
+		}
+	} else {
+		Element elt = (Element) types;
+		if (elt.getType() != type)
+			return;
+		data.remove(name);
+	}
+}
+
+/** Empties the Cache. */
+public void
+clearCache() {
+	synchronized (this) {
+		data.clear();
+	}
 }
 
 /**
@@ -240,8 +363,7 @@ addRecord(Record r, int cred, Object o) {
 	int type = r.getRRsetType();
 	if (!Type.isRR(type))
 		return;
-	boolean addrrset = false;
-	Element element = (Element) findExactSet(name, type);
+	Element element = findElement(name, type);
 	if (element == null || cred > element.credibility) {
 		RRset rrset = new RRset();
 		rrset.addRR(r);
@@ -266,14 +388,14 @@ addRRset(RRset rrset, int cred) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
-	Element element = (Element) findExactSet(name, type);
+	Element element = findElement(name, type);
 	if (ttl == 0) {
 		if (element != null && cred >= element.credibility)
-			removeSet(name, type, element);
+			removeElement(name, type);
 	} else {
 		if (element == null || cred >= element.credibility)
-			addSet(name, type,
-				new PositiveElement(rrset, cred, maxcache));
+			addElement(name,
+				   new PositiveElement(rrset, cred, maxcache));
 	}
 }
 
@@ -287,20 +409,133 @@ addRRset(RRset rrset, int cred) {
  */
 public void
 addNegative(Name name, int type, SOARecord soa, int cred) {
-	Element element = (Element) findExactSet(name, type);
+	Element element = findElement(name, type);
 	if (soa == null || soa.getTTL() == 0) {
 		if (element != null && cred >= element.credibility)
-			removeSet(name, type, element);
+			removeElement(name, type);
 	}
 	if (element == null || cred >= element.credibility)
-		addSet(name, type,
-		       new NegativeElement(name, type, soa, cred, maxncache));
+		addElement(name, new NegativeElement(name, type, soa, cred,
+						     maxncache));
 }
 
 private void
 logLookup(Name name, int type, String msg) {
 	System.err.println("lookupRecords(" + name + " " +
 			   Type.string(type) + "): " + msg);
+}
+
+/**
+ * Finds all matching sets or something that causes the lookup to stop.
+ */
+protected synchronized SetResponse
+lookup(Name name, int type, int minCred) {
+	int labels;
+	int tlabels;
+	Element element;
+	PositiveElement pe;
+	Name tname;
+	Object types;
+	SetResponse sr;
+
+	labels = name.labels();
+
+	for (tlabels = labels; tlabels >= 1; tlabels--) {
+		boolean isRoot = (tlabels == 1);
+		boolean isExact = (tlabels == labels);
+
+		if (isRoot)
+			tname = Name.root;
+		else if (isExact)
+			tname = name;
+		else
+			tname = new Name(name, labels - tlabels);
+
+		types = data.get(tname);
+		if (types == null)
+			continue;
+
+		/* If this is an ANY lookup, return everything. */
+		if (isExact && type == Type.ANY) {
+			sr = new SetResponse(SetResponse.SUCCESSFUL);
+			Element [] elements = allElements(types);
+			int added = 0;
+			for (int i = 0; i < elements.length; i++) {
+				element = elements[i];
+				if (element.expired()) {
+					removeElement(tname, element.getType());
+					continue;
+				}
+				if (element instanceof NegativeElement)
+					continue;
+				if (element.credibility < minCred)
+					continue;
+				pe = (PositiveElement) element;
+				sr.addRRset(pe.rrset);
+				added++;
+			}
+			/* There were positive entries */
+			if (added > 0)
+				return sr;
+		}
+
+		/* Look for an NS */
+		element = oneElementWithCheck(tname, types, Type.NS, minCred);
+		if (element != null && element instanceof PositiveElement) {
+			pe = (PositiveElement) element;
+			return new SetResponse(SetResponse.DELEGATION,
+					       pe.rrset);
+		}
+
+		/*
+		 * If this is the name, look for the actual type or a CNAME.
+		 * Otherwise, look for a DNAME.
+		 */
+		if (isExact) {
+			element = oneElementWithCheck(tname, types, type,
+						      minCred);
+			if (element != null &&
+			    element instanceof PositiveElement)
+			{
+				pe = (PositiveElement) element;
+				sr = new SetResponse(SetResponse.SUCCESSFUL);
+				sr.addRRset(pe.rrset);
+				return sr;
+			} else if (element != null) {
+				sr = new SetResponse(SetResponse.NXRRSET);
+				return sr;
+			}
+
+			element = oneElementWithCheck(tname, types, Type.CNAME,
+						      minCred);
+			if (element != null &&
+			    element instanceof PositiveElement)
+			{
+				pe = (PositiveElement) element;
+				return new SetResponse(SetResponse.CNAME,
+						       pe.rrset);
+			}
+		} else {
+			element = oneElementWithCheck(tname, types, Type.DNAME,
+						      minCred);
+			if (element != null &&
+			    element instanceof PositiveElement)
+			{
+				pe = (PositiveElement) element;
+				return new SetResponse(SetResponse.DNAME,
+						       pe.rrset);
+			}
+		}
+
+		/* Check for the special NXDOMAIN element. */
+		if (isExact) {
+			element = oneElementWithCheck(tname, types, 0, minCred);
+			if (element != null)
+				return SetResponse.ofType(SetResponse.NXDOMAIN);
+		}
+
+	}
+	return SetResponse.ofType(SetResponse.UNKNOWN);
 }
 
 /**
@@ -315,171 +550,7 @@ logLookup(Name name, int type, String msg) {
  */
 public SetResponse
 lookupRecords(Name name, int type, int minCred) {
-	SetResponse cr = null;
-	boolean verbose = Options.check("verbosecache");
-	Object o = lookup(name, type);
-
-	if (verbose)
-		logLookup(name, type, "Starting");
-
- 	if (o == null || o == NXRRSET) {
-		/*
-		 * The name exists, but the type was not found.  Or, the
-		 * name does not exist and no parent does either.  Punt.
-		 */
-		if (verbose)
-			logLookup(name, type, "no information found");
-		return SetResponse.ofType(SetResponse.UNKNOWN);
-	}
-
-	Object [] objects;
-	if (o instanceof Element)
-		objects = new Object[] {o};
-	else
-		objects = (Object[]) o;
-		
-	int nelements = 0;
-	for (int i = 0; i < objects.length; i++) {
-		Element element = (Element) objects[i];
-		if (element.expired()) {
-			if (verbose) {
-				logLookup(name, type, element.toString());
-				logLookup(name, type, "expired: ignoring");
-			}
-			removeSet(name, type, element);
-			objects[i] = null;
-		}
-		else if (element.credibility < minCred) {
-			if (verbose) {
-				logLookup(name, type, element.toString());
-				logLookup(name, type, "not credible: ignoring");
-			}
-			objects[i] = null;
-		}
-		else {
-			nelements++;
-		}
-	}
-	if (nelements == 0) {
-		/* We have data, but can't use it.  Punt. */
-		if (verbose)
-			logLookup(name, type, "no useful data found");
-		return SetResponse.ofType(SetResponse.UNKNOWN);
-	}
-
-	/*
-	 * We have something at the name.  It could be the answer,
-	 * a CNAME, DNAME, or NS, or a negative cache entry.
-	 * 
-	 * Ignore wildcards, since it's pretty unlikely that any will be
-	 * cached.  The occasional extra query is easily balanced by the
-	 * reduced number of lookups.
-	 */
-
-	for (int i = 0; i < objects.length; i++) {
-		if (objects[i] == null)
-			continue;
-		Element element = (Element) objects[i];
-		if (verbose)
-			logLookup(name, type, element.toString());
-		RRset rrset = null;
-		if (element instanceof PositiveElement)
-			rrset = ((PositiveElement) element).rrset;
-
-		/* Is this a negatively cached entry? */
-		if (rrset == null) {
-			/*
-			 * If this is an NXDOMAIN entry, return NXDOMAIN.
-			 */
-			if (element.getType() == 0) {
-				if (verbose)
-					logLookup(name, type, "NXDOMAIN");
-				return SetResponse.ofType(SetResponse.NXDOMAIN);
-			}
-
-			/*
-			 * If we're not looking for type ANY, return NXRRSET.
-			 * Otherwise ignore this.
-			 */
-			if (type != Type.ANY) {
-				if (verbose)
-					logLookup(name, type, "NXRRSET");
-				return SetResponse.ofType(SetResponse.NXRRSET);
-			} else {
-				if (verbose)
-					logLookup(name, type,
-						  "ANY query; " +
-						  "ignoring NXRRSET");
-				continue;
-			}
-		}
-
-		int rtype = rrset.getType();
-		Name rname = rrset.getName();
-		if (name.equals(rname)) {
-			if (type != Type.CNAME && type != Type.ANY &&
-			    rtype == Type.CNAME)
-			{
-				if (verbose)
-					logLookup(name, type, "cname");
-				return new SetResponse(SetResponse.CNAME,
-						       rrset);
-			} else if (type != Type.NS && type != Type.ANY &&
-				   rtype == Type.NS)
-			{
-				if (verbose)
-					logLookup(name, type,
-						  "exact delegation");
-				return new SetResponse(SetResponse.DELEGATION,
-						       rrset);
-			} else {
-				if (verbose)
-					logLookup(name, type, "exact match");
-				if (cr == null)
-					cr = new SetResponse
-						(SetResponse.SUCCESSFUL);
-				cr.addRRset(rrset);
-			}
-		}
-		else if (name.subdomain(rname)) {
-			if (rtype == Type.DNAME) {
-				if (verbose)
-					logLookup(name, type, "dname");
-				return new SetResponse(SetResponse.DNAME,
-						       rrset);
-			} else if (rtype == Type.NS) {
-				if (verbose)
-					logLookup(name, type,
-						  "parent delegation");
-				return new SetResponse(SetResponse.DELEGATION,
-						       rrset);
-			} else {
-				if (verbose)
-					logLookup(name, type,
-						  "ignoring rrset (" +
-						  rname + " " +
-						  Type.string(rtype) + ")");
-			}
-		} else {
-			if (verbose)
-				logLookup(name, type,
-					  "ignoring rrset (" + rname + " " +
-					  Type.string(rtype) + ")");
-		}
-	}
-
-	/*
-	 * As far as I can tell, the only legitimate time cr will be null is
-	 * if we queried for ANY and only saw negative responses, but not an
-	 * NXDOMAIN.  Return UNKNOWN.
-	 */
-	if (cr == null && type == Type.ANY)
-		return SetResponse.ofType(SetResponse.UNKNOWN);
-	else if (cr == null)
-		throw new IllegalStateException("looking up (" + name + " " +
-						Type.string(type) + "): " +
-						"cr == null.");
-	return cr;
+	return lookup(name, type, minCred);
 }
 
 private RRset []
@@ -703,10 +774,7 @@ addMessage(Message in) {
  */
 public void
 flushSet(Name name, int type) {
-	Element element = (Element) findExactSet(name, type);
-	if (element == null)
-		return;
-	removeSet(name, type, element);
+	removeElement(name, type);
 }
 
 /**
