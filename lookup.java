@@ -34,6 +34,9 @@ public static void
 main(String [] args) throws Exception {
 	int type = Type.A;
 	int start = 0;
+	Resolver res = new SimpleResolver("127.0.0.1");
+	res.setPort(12345);
+	Lookup.setDefaultResolver(res);
 	if (args.length > 2 && args[0].equals("-t")) {
 		type = Type.value(args[1]);
 		if (type < 0)

@@ -1,4 +1,5 @@
 3/20/2004
+	- 1.6.2 released.
 	- Lookups could return "referral" instead of "host not found" in some
 	  cases.
 
