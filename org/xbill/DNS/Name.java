@@ -194,6 +194,7 @@ fromString(String s, Name origin) throws TextParseException {
 				throw new TextParseException("bad escape");
 			if (pos >= label.length)
 				throw new TextParseException("label too long");
+			labelstart = pos;
 			label[pos++] = b;
 			escaped = false;
 		} else if (b == '\\') {
