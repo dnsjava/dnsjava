@@ -22,7 +22,13 @@ Command line programs:
 	A basic non-caching, non-recursive server.  Not very good, or useful
 	at all, but it runs.  The config file (jnamed.conf by default)
 	specifies "primary file", "secondary zone address, "cache file",
-	"key name data", and "port number".
+	"key name data", and "port number".  For example:
+	--
+	primary /etc/namedb/internal.db
+	secondary xbill.org 127.0.0.1
+	cache /etc/namedb/cache.db
+	port 12345
+	--
 	jnamed [config_file]
 
 - lookup:
