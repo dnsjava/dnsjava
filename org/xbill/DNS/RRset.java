@@ -24,7 +24,10 @@ class Enumerator implements Enumeration {
 		size = rrs.size();
 		if (start >= size)
 			start -= size;
-		first = count = ++start;
+		if (size == 1)
+			first = count = 0;
+		else
+			first = count = ++start;
 		records = new Record[size];
 		for (int i = 0; i < size; i++)
 			records[i] = (Record) rrs.elementAt(i);
