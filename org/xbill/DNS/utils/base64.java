@@ -117,7 +117,7 @@ fromString(String str) {
 		else if (s[3] == 64) {
 			t[1] = (short) (((s[1] << 4) + (s[2] >> 2)) & 0xFF);
 			t[2] = (short) (-1);
-			if ((s[2] & 0xF) != 0)
+			if ((s[2] & 0x3) != 0)
 				return null;
 		}
 		else {
