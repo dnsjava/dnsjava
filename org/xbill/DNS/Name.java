@@ -502,7 +502,7 @@ hashCode() {
 		if (name[i] instanceof BitString) {
 			BitString b = (BitString) name[i];
 			for (int j = 0; j < b.bytes(); j++)
-				code += ((code << 3) + b.data[i]);
+				code += ((code << 3) + b.data[j]);
 		}
 		else {
 			byte [] b = (byte []) name[i];
