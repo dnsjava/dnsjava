@@ -107,16 +107,18 @@ throws IOException
 	Record rec;
 	int recstart;
 	rec = getEmptyRecord(name, type, dclass, ttl);
-	if (in != null)
+	if (in != null) {
+		if (in.remaining() < length)
+			throw new WireParseException("truncated record");
 		in.setActive(length);
-	else
+	} else
 		rec.empty = true;
 
 	rec.rrFromWire(in);
 
 	if (in != null) {
 		if (in.remaining() > 0)
-			throw new IOException("Invalid record length");
+			throw new WireParseException("invalid record length");
 		in.clearActive();
 	}
 	return rec;

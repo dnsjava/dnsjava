@@ -112,10 +112,7 @@ Message(DNSInput in) throws IOException {
 					tsigstart = pos;
 			}
 		}
-	} catch (IOException e) {
-		if (!truncated)
-			throw e;
-	} catch (RuntimeException e) {
+	} catch (WireParseException e) {
 		if (!truncated)
 			throw e;
 	}
