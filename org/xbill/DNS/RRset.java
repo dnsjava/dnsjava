@@ -31,14 +31,12 @@ RRset() {
 }
 
 /** Adds a Record to an RRset */
-public void
+public synchronized void
 addRR(Record r) {
 	if (!(r instanceof SIGBase)) {
-		synchronized (rrs) {
-			if (!rrs.contains(r))
-				rrs.add(r);
-			start = 0;
-		}
+		if (!rrs.contains(r))
+			rrs.add(r);
+		start = 0;
 	}
 	else {
 		if (sigs == null)
@@ -49,25 +47,21 @@ addRR(Record r) {
 }
 
 /** Deletes a Record from an RRset */
-public void
+public synchronized void
 deleteRR(Record r) {
 	if (!(r instanceof SIGBase)) {
-		synchronized (rrs) {
-			rrs.remove(r);
-			start = 0;
-		}
+		rrs.remove(r);
+		start = 0;
 	}
 	else if (sigs != null)
 		sigs.remove(r);
 }
 
 /** Deletes all Records from an RRset */
-public void
+public synchronized void
 clear() {
-	synchronized (rrs) {
-		rrs.clear();
-		start = 0;
-	}
+	rrs.clear();
+	start = 0;
 	sigs = null;
 }
 
@@ -90,7 +84,7 @@ rrs() {
 }
 
 /** Returns an Iterator listing all signature records */
-public Iterator
+public synchronized Iterator
 sigs() {
 	if (sigs == null)
 		return Collections.EMPTY_LIST.iterator();
@@ -141,20 +135,18 @@ getDClass() {
 }
 
 /** Returns the ttl of the records */
-public long
+public synchronized long
 getTTL() {
-	synchronized (rrs) {
-		if (rrs.size() == 0)
-			return 0;
-		long ttl = 0xFFFFFFFFL;
-		Iterator it = rrs.iterator();
-		while (it.hasNext()) {
-			Record r = (Record)it.next();
-			if (r.getTTL() < ttl)
-				ttl = r.getTTL();
-		}
-		return ttl;
+	if (rrs.size() == 0)
+		return 0;
+	long ttl = 0xFFFFFFFFL;
+	Iterator it = rrs.iterator();
+	while (it.hasNext()) {
+		Record r = (Record)it.next();
+		if (r.getTTL() < ttl)
+			ttl = r.getTTL();
 	}
+	return ttl;
 }
 
 /** Returns the first record */

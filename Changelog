@@ -1,3 +1,7 @@
+3/15/2005
+	- Clean up the synchronization in the RRset class
+	  (reported by Daniel Jensen <daniel.jensen@savvis.net>)
+
 3/8/2005
 	- Support the BIND misfeature of loading zones with no explicit
 	  TTL by using the SOA minimum field.
