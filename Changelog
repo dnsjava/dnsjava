@@ -1,2 +1,10 @@
+3/25/1999
+	- 0.2 released
+	- conversion from base64 sometimes added extra zeroes.
+	- original record length was computed wrong, so tsigs didn't verify.
+	- master file parser didn't deal with ; delimited comments
+	- server now stores data in RRsets instead of individual RRs.
+	- various server bug fixes.  Still doesn't work too well.
+
 3/23/1999:
 	- 0.1 released
