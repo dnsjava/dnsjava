@@ -79,7 +79,7 @@ toString() {
 	sb.append(" ; payload ");
 	sb.append(getPayloadSize());
 	sb.append(", xrcode ");
-	sb.append(Rcode.string(getExtendedRcode()));
+	sb.append(getExtendedRcode());
 	sb.append(", version ");
 	sb.append(getVersion());
 	return sb.toString();

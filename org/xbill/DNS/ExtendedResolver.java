@@ -261,15 +261,15 @@ send(Message query) throws IOException {
 				bestException = e;
 		}
 		else {
-			byte rcode = m.getHeader().getRcode();
+			short rcode = m.getRcode();
 			if (rcode == Rcode.NOERROR)
 				return m;
 			else {
 				if (best == null)
 					best = m;
 				else {
-					byte bestrcode;
-					bestrcode = best.getHeader().getRcode();
+					short bestrcode;
+					bestrcode = best.getRcode();
 					if (rcode == Rcode.NXDOMAIN &&
 					    bestrcode != Rcode.NXDOMAIN)
 						best = m;

@@ -231,6 +231,20 @@ getOPT() {
 }
 
 /**
+ * Returns the message's rcode (error code).  This incorporates the EDNS
+ * extended rcode.
+ * @see EDNS
+ */
+public short
+getRcode() {
+	short rcode = header.getRcode();
+	OPTRecord opt = getOPT();
+	if (opt != null)
+		rcode += (short)(opt.getExtendedRcode() << 4);
+	return rcode;
+}
+
+/**
  * Returns an Enumeration listing all records in the given section
  * @see Record
  * @see Section
@@ -317,7 +331,15 @@ sectionToString(int i) {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append(getHeader() + "\n");
+	OPTRecord opt = getOPT();
+	if (opt != null) {
+		short rcode = header.getRcode();
+		header.setRcode(getRcode());
+		sb.append(header + "\n");
+		header.setRcode(rcode);
+	}
+	else
+		sb.append(header + "\n");
 	if (isSigned()) {
 		sb.append(";; TSIG ");
 		if (isVerified())
