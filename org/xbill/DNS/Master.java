@@ -180,6 +180,9 @@ nextRecord() throws IOException {
 		} else {
 			s = token.value;
 			name = parseName(s, origin);
+			if (last != null && name.equals(last.getName())) {
+				name = last.getName();
+			}
 		}
 
 		s = st.getString();
