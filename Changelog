@@ -1,4 +1,5 @@
 3/27/1999
+	- 0.3 released
 	- _res was set wrong, so the high level functions wouldn't work.
 	- Minor additions to CountedData(Input|Output)Stream
 	- Lots of DNSSEC stuff
