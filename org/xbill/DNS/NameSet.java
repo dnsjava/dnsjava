@@ -42,11 +42,8 @@ findSets(Name name, short type) {
 	if (nameInfo == null) 
 		return null;
 	while (true) {
-		if (type == Type.ANY) {
-			array = nameInfo.getMultiple(type);
-			if (array != null)
-				return array;
-		}
+		if (type == Type.ANY)
+			return nameInfo.getMultiple(type);
 		else {
 			o = nameInfo.get(type);
 			if (o != null)
