@@ -32,7 +32,7 @@ class AXFRIterator implements Iterator {
 
 	public Object
 	next() {
-		if (sentLastSOA) {
+		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
 		if (!sentFirstSOA) {
@@ -71,9 +71,7 @@ class AXFRIterator implements Iterator {
 				return current[count++];
 		}
 		sentLastSOA = true;
-		RRset rrset = new RRset();
-		rrset.addRR(getSOA());
-		return rrset;
+		return (RRset) findExactSet(origin, Type.SOA);
 	}
 
 	public void
