@@ -174,6 +174,8 @@ getChar() throws IOException {
 
 private void
 ungetChar(int c) throws IOException {
+	if (c == -1)
+		return;
 	is.unread(c);
 	if (c == '\n')
 		line--;
