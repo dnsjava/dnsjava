@@ -19,8 +19,16 @@ private static final int LABEL_NORMAL = 0;
 private static final int LABEL_COMPRESSION = 0xC0;
 private static final int LABEL_MASK = 0xC0;
 
+/* The name data */
 private byte [] name;
+
+/*
+ * Effectively an 8 byte array, where the low order byte stores the number
+ * of labels and the 7 higher order bytes store per-label offsets.
+ */
 private long offsets;
+
+/* Precomputed hashcode. */
 private int hashcode;
 
 private static final byte [] emptyLabel = new byte[] {(byte)0};
