@@ -1,7 +1,4 @@
-// Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
-// Portions Copyright (c) 1999 Network Associates, Inc.
-
-/* High level API */
+// Copyright (c) 1999-2003 Brian Wellington (bwelling@xbill.org)
 
 package org.xbill.DNS;
 
@@ -22,12 +19,6 @@ import java.net.*;
  */
 
 public final class dns {
-
-private static Resolver res;
-private static Map caches;
-private static Name [] searchPath;
-private static boolean searchPathSet;
-private static boolean initialized;
 
 /* Otherwise the class could be instantiated */
 private
@@ -98,7 +89,7 @@ setSearchPath(String [] domains) {
 		catch (TextParseException e) {
 		}
 	}
-	searchPath = (Name [])l.toArray(new Name[l.size()]);
+	Name [] searchPath = (Name [])l.toArray(new Name[l.size()]);
 	Lookup.setDefaultSearchPath(searchPath);
 }
 
