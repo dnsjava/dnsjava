@@ -59,6 +59,7 @@ private boolean quoting;
 private String delimiters;
 private Token current;
 private StringBuffer sb;
+private boolean wantClose;
 
 private String filename;
 private int line;
@@ -157,6 +158,7 @@ Tokenizer(String s) {
 public
 Tokenizer(File f) throws FileNotFoundException {
 	this(new FileInputStream(f));
+	wantClose = true;
 	filename = f.getName();
 }
 
@@ -575,6 +577,25 @@ getHex() throws IOException {
 public TextParseException
 exception(String s) {
 	return new TextParseException(filename + ":" + line + ": " + s);
+}
+
+/**
+ * Closes any files opened by this tokenizer.
+ */
+public void
+close() {
+	if (wantClose) {
+		try {
+			is.close();
+		}
+		catch (IOException e) {
+		}
+	}
+}
+
+protected void
+finalize() {
+	close();
 }
 
 }
