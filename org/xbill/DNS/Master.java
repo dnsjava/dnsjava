@@ -37,6 +37,12 @@ Master(File _file, Name defaultOrigin) throws IOException {
 	origin = defaultOrigin;
 }
 
+/** Begins parsing the specified file with an initial origin*/
+public
+Master(String filename, Name origin) throws IOException {
+	this(new File(filename), origin);
+}
+
 /** Begins parsing the specified file */
 public
 Master(String filename) throws IOException {

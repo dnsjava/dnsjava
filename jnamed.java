@@ -43,7 +43,7 @@ jnamed(String conffile) throws IOException {
 		if (keyword.charAt(0) == '#')
 			continue;
 		if (keyword.equals("primary"))
-			addPrimaryZone(st.nextToken());
+			addPrimaryZone(st.nextToken(), st.nextToken());
 		if (keyword.equals("secondary"))
 			addSecondaryZone(st.nextToken(), st.nextToken());
 		else if (keyword.equals("cache")) {
@@ -69,9 +69,12 @@ jnamed(String conffile) throws IOException {
 }
 
 public void
-addPrimaryZone(String zonefile) throws IOException {
+addPrimaryZone(String zname, String zonefile) throws IOException {
+	Name origin = null;
 	Cache cache = getCache(DClass.IN);
-	Zone newzone = new Zone(zonefile, cache);
+	if (zname != null)
+		origin = new Name(zname, Name.root);
+	Zone newzone = new Zone(zonefile, cache, origin);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
 }

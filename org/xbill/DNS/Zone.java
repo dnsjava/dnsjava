@@ -111,27 +111,34 @@ validate() throws IOException {
  * @see Master
  */
 public
-Zone(String file, Cache cache) throws IOException {
+Zone(String file, Cache cache, Name initialOrigin) throws IOException {
 	super(false);
-	type = PRIMARY;
-	Master m = new Master(file);
-	
+	Master m = new Master(file, initialOrigin);
+	boolean seenSOA = false;
 	Record record;
+	String str;
 
+	origin = initialOrigin;
 	while ((record = m.nextRecord()) != null) {
-		if (origin == null || record.getName().subdomain(origin)) {
-			addRecord(record);
-			if (origin == null) {
-				if (record.getType() == Type.SOA) {
+		if (!seenSOA) {
+			if (record.getType() == Type.SOA) {
+				if (origin == null) {
 					origin = record.getName();
 					setOrigin(origin);
 				}
-				else {
-					String str = "No SOA at the top of the zone in file " + file;
+				else if (!origin.equals(record.getName())) {
+					str = "SOA owner " + record.getName() + " does not match zone origin " + origin;
 					throw new IOException(str);
 				}
+				seenSOA = true;
+			}
+			else {
+				str = "No SOA at the top of the zone in file " + file;
+				throw new IOException(str);
 			}
 		}
+		if (record.getName().subdomain(origin))
+			addRecord(record);
 		else if (cache != null)
 			cache.addRecord(record, Credibility.ZONE_GLUE, m);
 	}
@@ -140,6 +147,17 @@ Zone(String file, Cache cache) throws IOException {
 
 /**
  * Creates a Zone from the records in the specified master file.  All
+ * records that do not belong in the Zone are added to the specified Cache.
+ * @see Cache
+ * @see Master
+ */
+public
+Zone(String file, Cache cache) throws IOException {
+	this(file, cache, null);
+}
+
+/**
+ * Creates a Zone by performing a zone transfer to the specified host.  All
  * records that do not belong in the Zone are added to the specified Cache.
  * @see Cache
  * @see Master
