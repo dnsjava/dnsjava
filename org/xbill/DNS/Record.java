@@ -523,21 +523,37 @@ hashCode() {
 	return array.hashCode();
 }
 
+private Record
+cloneRecord() {
+	try {
+		return (Record) clone();
+	}
+	catch (CloneNotSupportedException e) {
+		throw new IllegalStateException();
+	}
+}
+
 /**
  * Creates a new record identical to the current record, but with a different
  * name.  This is most useful for replacing the name of a wildcard record.
  */
 public Record
 withName(Name name) {
-	Record rec = null;
 	if (!name.isAbsolute())
 		throw new RelativeNameException(name);
-	try {
-		rec = (Record) clone();
-	}
-	catch (CloneNotSupportedException e) {
-	}
+	Record rec = cloneRecord();
 	rec.name = name;
+	return rec;
+}
+
+/**
+ * Creates a new record identical to the current record, but with a different
+ * class.  This is most useful for dynamic update.
+ */
+Record
+withDClass(short dclass) {
+	Record rec = cloneRecord();
+	rec.dclass = dclass;
 	return rec;
 }
 
