@@ -604,7 +604,7 @@ getLabelString(int n) {
  * @param c The compression context, or null of no compression is desired.
  * @throws IllegalArgumentException The name is not absolute.
  */
-void
+public void
 toWire(DataByteOutputStream out, Compression c) {
 	if (!isAbsolute())
 		throw new IllegalArgumentException("toWire() called on " +
@@ -648,7 +648,7 @@ toWire() {
  * Convert Name to canonical DNS wire format (all lowercase)
  * @param out The output stream to which the message is written.
  */
-void
+public void
 toWireCanonical(DataByteOutputStream out) {
 	byte [] b = toWireCanonical();
 	out.writeArray(b);
