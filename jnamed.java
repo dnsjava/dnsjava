@@ -9,6 +9,9 @@ import org.xbill.DNS.utils.*;
 
 public class jnamed {
 
+static final int FLAG_DNSSECOK = 1;
+static final int FLAG_SIGONLY = 2;
+
 Hashtable caches;
 Hashtable znames;
 Hashtable TSIGs;
@@ -143,14 +146,12 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 }
 
 void
-addRRset(Name name, Message response, RRset rrset, byte section,
-	 boolean sigonly)
-{
+addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
 	Enumeration e;
 	for (byte s = 1; s <= section; s++)
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
-	if (!sigonly) {
+	if ((flags & FLAG_SIGONLY) == 0) {
 		e = rrset.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
@@ -159,12 +160,14 @@ addRRset(Name name, Message response, RRset rrset, byte section,
 			response.addRecord(r, section);
 		}
 	}
-	e = rrset.sigs();
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		if (!name.isWild() && r.getName().isWild())
-			r = r.withName(name);
-		response.addRecord(r, section);
+	if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
+		e = rrset.sigs();
+		while (e.hasMoreElements()) {
+			Record r = (Record) e.nextElement();
+			if (!name.isWild() && r.getName().isWild())
+				r = r.withName(name);
+			response.addRecord(r, section);
+		}
 	}
 }
 
@@ -174,10 +177,10 @@ addSOA(Message response, Zone zone) {
 }
 
 private void
-addNS(Message response, Zone zone) {
+addNS(Message response, Zone zone, int flags) {
 	RRset nsRecords = zone.getNS();
 	addRRset(nsRecords.getName(), response, nsRecords,
-		 Section.AUTHORITY, false);
+		 Section.AUTHORITY, flags);
 }
 
 private void
@@ -194,26 +197,15 @@ addCacheNS(Message response, Cache cache, Name name) {
 }
 
 private void
-addGlue(Message response, Name name) {
+addGlue(Message response, Name name, int flags) {
 	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
 	if (a == null)
 		return;
-	if (response.findRRset(name, Type.A))
-		return;
-	Enumeration e = a.rrs();
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		response.addRecord(r, Section.ADDITIONAL);
-	}
-	e = a.sigs();
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		response.addRecord(r, Section.ADDITIONAL);
-	}
+	addRRset(name, response, a, Section.ADDITIONAL, flags);
 }
 
 private void
-addAdditional2(Message response, int section) {
+addAdditional2(Message response, int section, int flags) {
 	Enumeration e = response.getSection(section);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
@@ -238,21 +230,21 @@ addAdditional2(Message response, int section) {
 				break;
 		}
 		if (glueName != null)
-			addGlue(response, glueName);
+			addGlue(response, glueName, flags);
 	}
 }
 
 void
-addAdditional(Message response) {
-	addAdditional2(response, Section.ANSWER);
-	addAdditional2(response, Section.AUTHORITY);
+addAdditional(Message response, int flags) {
+	addAdditional2(response, Section.ANSWER, flags);
+	addAdditional2(response, Section.AUTHORITY, flags);
 }
 
 byte
-addAnswer(Message response, Name name, short type, short dclass, int iterations)
+addAnswer(Message response, Name name, short type, short dclass,
+	  int iterations, int flags)
 {
 	SetResponse sr;
-	boolean sigonly;
 	byte rcode = Rcode.NOERROR;
 
 	if (iterations > 6)
@@ -260,10 +252,8 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 
 	if (type == Type.SIG) {
 		type = Type.ANY;
-		sigonly = true;
+		flags |= FLAG_SIGONLY;
 	}
-	else
-		sigonly = false;
 
 	Zone zone = findBestZone(name);
 	if (zone != null)
@@ -296,44 +286,44 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 	else if (sr.isDelegation()) {
 		RRset nsRecords = sr.getNS();
 		addRRset(nsRecords.getName(), response, nsRecords,
-			 Section.AUTHORITY, false);
+			 Section.AUTHORITY, flags);
 	}
 	else if (sr.isCNAME()) {
 		RRset rrset = new RRset();
 		CNAMERecord cname = sr.getCNAME();
 		rrset.addRR(cname);
-		addRRset(name, response, rrset, Section.ANSWER, false);
+		addRRset(name, response, rrset, Section.ANSWER, flags);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
 		rcode = addAnswer(response, cname.getTarget(),
-				  type, dclass, iterations + 1);
+				  type, dclass, iterations + 1, flags);
 	}
 	else if (sr.isDNAME()) {
 		RRset rrset = new RRset();
 		DNAMERecord dname = sr.getDNAME();
 		rrset.addRR(dname);
-		addRRset(name, response, rrset, Section.ANSWER, false);
+		addRRset(name, response, rrset, Section.ANSWER, flags);
 		Name newname = name.fromDNAME(dname);
 		if (newname == null)
 			return Rcode.SERVFAIL;
 		try {
 			rrset = new RRset();
 			rrset.addRR(new CNAMERecord(name, dclass, 0, newname));
-			addRRset(name, response, rrset, Section.ANSWER, false);
+			addRRset(name, response, rrset, Section.ANSWER, flags);
 		}
 		catch (IOException e) {}
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
 		rcode = addAnswer(response, newname, type, dclass,
-				  iterations + 1);
+				  iterations + 1, flags);
 	}
 	else if (sr.isSuccessful()) {
 		RRset [] rrsets = sr.answers();
 		for (int i = 0; i < rrsets.length; i++)
 			addRRset(name, response, rrsets[i],
-				 Section.ANSWER, sigonly);
+				 Section.ANSWER, flags);
 		if (zone != null) {
-			addNS(response, zone);
+			addNS(response, zone, flags);
 			if (iterations == 0)
 				response.getHeader().setFlag(Flags.AA);
 		}
@@ -367,7 +357,7 @@ doAXFR(Name name, Message query, Socket s) {
 			RRset rrset = (RRset) e.nextElement();
 			Message response = new Message();
 			addRRset(rrset.getName(), response, rrset,
-				 Section.ANSWER, false);
+				 Section.ANSWER, FLAG_DNSSECOK);
 			byte [] out = response.toWire();
 			dataOut.writeShort(out.length);
 			dataOut.write(out);
@@ -395,6 +385,7 @@ generateReply(Message query, byte [] in, Socket s) {
 	int maxLength;
 	boolean sigonly;
 	SetResponse sr;
+	int flags = 0;
 
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
 		return errorMessage(query, Rcode.NOTIMPL);
@@ -419,6 +410,9 @@ generateReply(Message query, byte [] in, Socket s) {
 	else
 		maxLength = 512;
 
+	if (queryOPT != null && (queryOPT.getFlags() & Flags.DO) != 0)
+		flags = FLAG_DNSSECOK;
+
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(Flags.QR);
@@ -434,11 +428,11 @@ generateReply(Message query, byte [] in, Socket s) {
 	if (!Type.isRR(type) && type != Type.ANY)
 		return errorMessage(query, Rcode.NOTIMPL);
 
-	byte rcode = addAnswer(response, name, type, dclass, 0);
+	byte rcode = addAnswer(response, name, type, dclass, 0, flags);
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return errorMessage(query, rcode);
 
-	addAdditional(response);
+	addAdditional(response, flags);
 	if (queryTSIG != null) {
 		try {
 			if (tsig != null)
