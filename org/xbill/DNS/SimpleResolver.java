@@ -8,7 +8,7 @@ import java.io.*;
 import java.net.*;
 import DNS.utils.*;
 
-public class Resolver {
+public class SimpleResolver implements Resolver {
 
 class WorkerThread extends Thread {
 	private Message query;
@@ -47,7 +47,7 @@ class WorkerThread extends Thread {
 	}
 }
 
-public static final int PORT		= 53;
+public static final int PORT = 53;
 
 InetAddress addr;
 int port = PORT;
@@ -60,7 +60,7 @@ Vector workerthreads;
 static String defaultResolver = "localhost";
 
 public
-Resolver(String hostname) throws UnknownHostException {
+SimpleResolver(String hostname) throws UnknownHostException {
 	if (hostname == null) {
 		hostname = FindServer.find1();
 		if (hostname == null)
@@ -70,7 +70,7 @@ Resolver(String hostname) throws UnknownHostException {
 }
 
 public
-Resolver() throws UnknownHostException {
+SimpleResolver() throws UnknownHostException {
 	this(null);
 }
 
@@ -183,6 +183,7 @@ send(Message query) throws IOException {
 		return null;
 	}
 
+	query = (Message) query.clone();
 	if (EDNSlevel >= 0) {
 		udpLength = 1280;
 		query.addRecord(Section.ADDITIONAL, EDNS.newOPT(udpLength));
@@ -274,6 +275,7 @@ sendAXFR(Message query) throws IOException {
 		return null;
 	}
 
+	query = (Message) query.clone();
 	if (tsig != null)
 		tsig.apply(query, null);
 

@@ -7,7 +7,7 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-public class ExtendedResolver {
+public class ExtendedResolver implements Resolver {
 
 public class Receiver implements ResolverListener {
 	public void
@@ -28,7 +28,7 @@ public class Receiver implements ResolverListener {
 
 static final int quantum = 15;
 
-Resolver [] resolvers;
+SimpleResolver [] resolvers;
 boolean [] invalid;
 Receiver receiver;
 Vector queue;
@@ -38,13 +38,13 @@ public
 ExtendedResolver() throws UnknownHostException {
 	String [] servers = FindServer.find();
 	if (servers != null) {
-		resolvers = new Resolver[servers.length];
+		resolvers = new SimpleResolver[servers.length];
 		for (int i = 0; i < servers.length; i++)
-			resolvers[i] = new Resolver(servers[i]);
+			resolvers[i] = new SimpleResolver(servers[i]);
 	}
 	else {
-		resolvers = new Resolver[1];
-		resolvers[0] = new Resolver();
+		resolvers = new SimpleResolver[1];
+		resolvers[0] = new SimpleResolver();
 	}
 	invalid = new boolean[resolvers.length];
 	receiver = new Receiver();
@@ -77,6 +77,48 @@ sendTo(Message query, int r, int q) {
 		idMap.put(new Integer(id), new Integer(r));
 	}
 	return true;
+}
+
+public void
+setPort(int port) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setPort(port);
+}
+
+public void
+setTCP(boolean flag) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setTCP(flag);
+}
+
+public void
+setIgnoreTruncation(boolean flag) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setIgnoreTruncation(flag);
+}
+
+public void
+setEDNS(int level) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setEDNS(level);
+}
+
+public void
+setTSIGKey(String name, String key) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setTSIGKey(name, key);
+}
+
+public void
+setTSIGKey(String key) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setTSIGKey(key);
+}
+
+public void
+setTimeout(int secs) {
+	for (int i = 0; i < resolvers.length; i++)
+		resolvers[i].setTimeout(secs);
 }
 
 public Message
@@ -121,6 +163,16 @@ send(Message query) {
 		}
 	}
 	return best;
+}
+
+public int
+sendAsync(final Message query, final ResolverListener listener) {
+	return 0;
+}
+
+public
+Message sendAXFR(Message query) throws IOException {
+	return resolvers[0].sendAXFR(query);
 }
 
 public Resolver
