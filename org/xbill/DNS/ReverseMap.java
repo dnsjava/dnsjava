@@ -24,35 +24,28 @@ ReverseMap() {}
 
 /**
  * Creates a reverse map name corresponding to an address contained in
- * an array of 4 integers between 0 and 255 (for an IPv4 address) or 16
- * integers between 0 and 255 (for an IPv6 address).
+ * an array of 4 bytes (for an IPv4 address) or 16 bytes (for an IPv6 address).
  * @param addr The address from which to build a name.
  * @return The name corresponding to the address in the reverse map.
  */
 public static Name
-fromAddress(int [] addr) {
+fromAddress(byte [] addr) {
 	if (addr.length != 4 && addr.length != 16)
 		throw new IllegalArgumentException("array must contain " +
 						   "4 or 16 elements");
-	for (int i = 0; i < addr.length; i++) {
-		if (addr[i] < 0 || addr[i] > 0xFF)
-			throw new IllegalArgumentException("array must " +
-							   "contain values " +
-							   "between 0 and 255");
-	}
 
 	StringBuffer sb = new StringBuffer();
 	if (addr.length == 4) {
 		for (int i = addr.length - 1; i >= 0; i--) {
-			sb.append(addr[i]);
+			sb.append(addr[i] & 0xFF);
 			if (i > 0)
 				sb.append(".");
 		}
 	} else {
 		int [] nibbles = new int[2];
 		for (int i = addr.length - 1; i >= 0; i--) {
-			nibbles[0] = addr[i] >> 4;
-			nibbles[1] = addr[i] &= 0xF;
+			nibbles[0] = (addr[i] & 0xFF) >> 4;
+			nibbles[1] = (addr[i] & 0xFF) &= 0xF;
 			for (int j = nibbles.length - 1; j >= 0; j--) {
 				sb.append(nibbles[j]);
 				if (i > 0 || j > 0)
@@ -71,18 +64,33 @@ fromAddress(int [] addr) {
 
 /**
  * Creates a reverse map name corresponding to an address contained in
+ * an array of 4 integers between 0 and 255 (for an IPv4 address) or 16
+ * integers between 0 and 255 (for an IPv6 address).
+ * @param addr The address from which to build a name.
+ * @return The name corresponding to the address in the reverse map.
+ */
+public static Name
+fromAddress(int [] addr) {
+	byte [] bytes = new byte[addr.length];
+	for (int i = 0; i < addr.length; i++) {
+		if (addr[i] < 0 || addr[i] > 0xFF)
+			throw new IllegalArgumentException("array must " +
+							   "contain values " +
+							   "between 0 and 255");
+		bytes[i] = (byte) addr[i];
+	}
+	return fromAddress(bytes);
+}
+
+/**
+ * Creates a reverse map name corresponding to an address contained in
  * an InetAddress.
  * @param addr The address from which to build a name.
  * @return The name corresponding to the address in the reverse map.
  */
 public static Name
 fromAddress(InetAddress addr) {
-	byte [] bytes = addr.getAddress();
-	int [] array = new int[bytes.length];
-	for (int i = 0; i < bytes.length; i++) {
-		array[i] = bytes[i] & 0xFF;
-	}
-	return fromAddress(array);
+	return fromAddress(addr.getAddress());
 }
 
 /**
@@ -94,7 +102,7 @@ fromAddress(InetAddress addr) {
  */
 public static Name
 fromAddress(String addr) throws UnknownHostException {
-	int [] array = Address.toArray(addr);
+	byte [] array = Address.toByteArray(addr);
 	if (array == null)
 		throw new UnknownHostException("Invalid IP address");
 	return fromAddress(array);
