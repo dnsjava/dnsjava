@@ -37,9 +37,7 @@ class AXFREnumeration implements Enumeration {
 			return null;
 		if (!sentFirstSOA) {
 			sentFirstSOA = true;
-			RRset rrset = new RRset();
-			rrset.addRR(getSOA());
-			return rrset;
+			return (RRset) findExactSet(origin, Type.SOA, dclass);
 		}
 		if (!sentNS) {
 			sentNS = true;
