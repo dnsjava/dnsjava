@@ -26,6 +26,15 @@ Message() {
 	this(Header.randomID());
 }
 
+public static Message
+newQuery(Record r) {
+	Message m = new Message();
+	m.header.setOpcode(Opcode.QUERY);
+	m.header.setFlag(Flags.RD);
+	m.addRecord(Section.QUESTION, r);
+	return m;
+}
+
 public
 Message(DataByteInputStream in) throws IOException {
 	this();

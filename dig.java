@@ -54,12 +54,9 @@ public static void
 main(String argv[]) throws IOException {
 	String server;
 	int arg;
-	Message query = new Message();
+	Message query;
 	Record rec;
 	Resolver res = null;
-
-	query.getHeader().setFlag(Flags.RD);
-	query.getHeader().setOpcode(Opcode.QUERY);
 
 	if (argv.length < 1) {
 		usage();
@@ -152,7 +149,7 @@ main(String argv[]) throws IOException {
 	}
 
 	rec = Record.newRecord(name, type, _class);
-	query.addRecord(Section.QUESTION, rec);
+	query = Message.newQuery(rec);
 
 	if (type == Type.AXFR)
 		doAXFR(query, res);

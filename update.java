@@ -364,12 +364,9 @@ doGlue(MyStringTokenizer st) throws IOException {
 void
 doQuery(MyStringTokenizer st) throws IOException {
 	Record rec;
-	Message newQuery = new Message();
 
 	rec = parseSet(st, defaultClass);
-	newQuery.getHeader().setOpcode(Opcode.QUERY);
-	newQuery.getHeader().setFlag(Flags.RD);
-	newQuery.addRecord(Section.QUESTION, rec);
+	Message newQuery = Message.newQuery(rec);
 	if (res == null)
 		res = new Resolver(server);
 	if (rec.getType() == Type.AXFR)

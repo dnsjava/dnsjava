@@ -91,11 +91,8 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 		e = null;
 	}
 	else {
-		query = new Message();
-		query.getHeader().setOpcode(Opcode.QUERY);
-		query.getHeader().setFlag(Flags.RD);
 		question = Record.newRecord(name, type, dclass);
-		query.addRecord(Section.QUESTION, question);
+		query = Message.newQuery(question);
 
 		try {
 			response = res.send(query);
