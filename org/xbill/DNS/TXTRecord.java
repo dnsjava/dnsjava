@@ -122,9 +122,24 @@ rdataToString() {
 	return sb.toString();
 }
 
-/** Returns the text strings */
+/**
+ * Returns the text strings
+ * @return A list of Strings corresponding to the text strings.
+ */
 public List
 getStrings() {
+	List list = new ArrayList(strings.size());
+	for (int i = 0; i < strings.size(); i++)
+		list.add(byteArrayToString((byte []) strings.get(i), false));
+	return list;
+}
+
+/**
+ * Returns the text strings
+ * @return A list of byte arrays corresponding to the text strings.
+ */
+public List
+getStringsAsByteArrays() {
 	return strings;
 }
 
