@@ -36,7 +36,7 @@ private int type;
 private int dclass;
 private boolean verbose;
 private int iterations;
-private boolean found;
+private boolean foundAlias;
 private boolean done;
 private List aliases;
 private Record [] answers;
@@ -326,7 +326,7 @@ setCredibility(byte credibility) {
 
 private void
 follow(Name name, Name oldname) {
-	found = true;
+	foundAlias = true;
 	badresponse = false;
 	networkerror = false;
 	timedout = false;
@@ -447,8 +447,6 @@ resolve(Name current, Name suffix) {
 		}
 	}
 	lookup(tname);
-	if (found)
-		done = true;
 }
 
 /**
@@ -471,6 +469,8 @@ run() {
 			resolve(name, searchPath[i]);
 			if (done)
 				return answers;
+			else if (foundAlias)
+				break;
 		}
 	}
 	if (!done) {
@@ -498,6 +498,17 @@ run() {
 	return answers;
 }
 
+private void
+checkDone() {
+	if (done && result != -1)
+		return;
+	StringBuffer sb = new StringBuffer("Lookup of " + name + " ");
+	if (dclass != DClass.IN)
+		sb.append(DClass.string(dclass) + " ");
+	sb.append(Type.string(type) + " isn't done");
+	throw new IllegalStateException(sb.toString());
+}
+
 /**
  * Returns the answers from the lookup.
  * @return The answers, or null if none are found.
@@ -505,8 +516,7 @@ run() {
  */
 public Record []
 getAnswers() {
-	if (!done || result == -1)
-		throw new IllegalStateException("Lookup isn't done");
+	checkDone();
 	return answers;
 }
 
@@ -518,8 +528,7 @@ getAnswers() {
  */
 public Name []
 getAliases() {
-	if (!done || result == -1)
-		throw new IllegalStateException("Lookup isn't done");
+	checkDone();
 	return (Name []) aliases.toArray(new Name[aliases.size()]);
 }
 
@@ -531,8 +540,7 @@ getAliases() {
  */
 public int
 getResult() {
-	if (!done || result == -1)
-		throw new IllegalStateException("Lookup isn't done");
+	checkDone();
 	return result;
 }
 
@@ -544,8 +552,7 @@ getResult() {
  */
 public String
 getErrorString() {
-	if (!done || result == -1)
-		throw new IllegalStateException("Lookup isn't done");
+	checkDone();
 	if (error != null)
 		return error;
 	switch (result) {
@@ -555,7 +562,7 @@ getErrorString() {
 		case HOST_NOT_FOUND:	return "host not found";
 		case TYPE_NOT_FOUND:	return "type not found";
 	}
-	return null;
+	throw new IllegalStateException("unknown result");
 }
 
 }
