@@ -38,7 +38,7 @@ main(String [] args) throws Exception {
 		start = 2;
 	}
 	for (int i = start; i < args.length; i++) {
-		Lookup l = new Lookup(args[i], (short) type);
+		Lookup l = new Lookup(args[i], type);
 		l.run();
 		printAnswer(args[i], l);
 	}
