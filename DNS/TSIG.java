@@ -16,12 +16,14 @@ private Name name;
 private byte [] key;
 private hmacSigner axfrSigner = null;
 
+public
 TSIG(String name, byte [] key) {
 	this.name = new Name(name);
 	this.key = key;
 }
 
-void apply(Message m) throws IOException {
+public void
+apply(Message m, TSIGRecord old) throws IOException {
 	Date timeSigned = new Date();
 	short fudge = 300;
 	hmacSigner h = new hmacSigner(key);
@@ -29,6 +31,13 @@ void apply(Message m) throws IOException {
 	Name alg = new Name(HMAC);
 
 	try {
+		if (old != null) {
+			DataByteOutputStream dbs = new DataByteOutputStream();
+			dbs.writeShort((short)old.getSignature().length);
+			h.addData(dbs.toByteArray());
+			h.addData(old.getSignature());
+		}
+
 		/* Digest the message */
 		h.addData(m.toWire());
 
@@ -64,7 +73,8 @@ void apply(Message m) throws IOException {
  * as input, since we can't recreate the wire format exactly (with the same
  * name compression).
  */
-boolean verify(Message m, byte [] b, TSIGRecord old) {
+public boolean
+verify(Message m, byte [] b, TSIGRecord old) {
 	TSIGRecord tsig = m.getTSIG();
 	hmacSigner h = new hmacSigner(key);
 	if (tsig == null)
@@ -127,12 +137,14 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 		return false;
 }
 
-void verifyAXFRStart() {
+public void
+verifyAXFRStart() {
 	axfrSigner = new hmacSigner(key);
 }
 
-boolean verifyAXFR(Message m, byte [] b, TSIGRecord old,
-		   boolean required, boolean first)
+public boolean
+verifyAXFR(Message m, byte [] b, TSIGRecord old,
+	   boolean required, boolean first)
 {
 	TSIGRecord tsig = m.getTSIG();
 	hmacSigner h = axfrSigner;
