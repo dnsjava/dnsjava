@@ -1,3 +1,6 @@
+9/23/2001
+	- 1.2.3 released
+
 9/14/2001
 	- Creating an Enumeration of an empty RRset caused an infinite loop.
 	  (David Blacka <davidb@research.netsol.com>)
