@@ -28,44 +28,58 @@ public class Receiver implements ResolverListener {
 
 static final int quantum = 15;
 
-SimpleResolver [] resolvers;
-boolean [] invalid;
+Vector resolvers;
 Receiver receiver;
 Vector queue;
 Hashtable idMap;
 
-public
-ExtendedResolver() throws UnknownHostException {
-	String [] servers = FindServer.find();
-	if (servers != null) {
-		resolvers = new SimpleResolver[servers.length];
-		for (int i = 0; i < servers.length; i++)
-			resolvers[i] = new SimpleResolver(servers[i]);
-	}
-	else {
-		resolvers = new SimpleResolver[1];
-		resolvers[0] = new SimpleResolver();
-	}
-	invalid = new boolean[resolvers.length];
+private void
+init() {
+	resolvers = new Vector();
 	receiver = new Receiver();
 	queue = new Vector();
 	idMap = new Hashtable();
 }
 
+public
+ExtendedResolver() throws UnknownHostException {
+	init();
+	String [] servers = FindServer.find();
+	if (servers != null) {
+		for (int i = 0; i < servers.length; i++)
+			resolvers.addElement(new SimpleResolver(servers[i]));
+	}
+	else
+		resolvers.addElement(new SimpleResolver());
+}
+
+public
+ExtendedResolver(String [] servers) throws UnknownHostException {
+	init();
+	for (int i = 0; i < servers.length; i++)
+		resolvers.addElement(new SimpleResolver(servers[i]));
+}
+
+public
+ExtendedResolver(Resolver [] res) throws UnknownHostException {
+	init();
+	for (int i = 0; i < res.length; i++)
+		resolvers.addElement(res[i]);
+}
+
 boolean
 sendTo(Message query, int r, int q) {
-	if (invalid[r])
-		return false;
 	q -= r;
+	Resolver res = (Resolver) resolvers.elementAt(r);
 	switch (q) {
 		case 0:
-			resolvers[r].setTimeout(quantum);
+			res.setTimeout(quantum);
 			break;
 		case 1:
-			resolvers[r].setTimeout(2 * quantum);
+			res.setTimeout(2 * quantum);
 			break;
 		case 3:
-			resolvers[r].setTimeout(3 * quantum);
+			res.setTimeout(3 * quantum);
 			break;
 		default:
 			if (q < 6)
@@ -73,7 +87,7 @@ sendTo(Message query, int r, int q) {
 			return false;
 	}
 	synchronized (idMap) {
-		int id = resolvers[r].sendAsync(query, receiver);
+		int id = res.sendAsync(query, receiver);
 		idMap.put(new Integer(id), new Integer(r));
 	}
 	return true;
@@ -81,44 +95,44 @@ sendTo(Message query, int r, int q) {
 
 public void
 setPort(int port) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setPort(port);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setPort(port);
 }
 
 public void
 setTCP(boolean flag) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setTCP(flag);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setTCP(flag);
 }
 
 public void
 setIgnoreTruncation(boolean flag) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setIgnoreTruncation(flag);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setIgnoreTruncation(flag);
 }
 
 public void
 setEDNS(int level) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setEDNS(level);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setEDNS(level);
 }
 
 public void
 setTSIGKey(String name, String key) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setTSIGKey(name, key);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setTSIGKey(name, key);
 }
 
 public void
 setTSIGKey(String key) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setTSIGKey(key);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setTSIGKey(key);
 }
 
 public void
 setTimeout(int secs) {
-	for (int i = 0; i < resolvers.length; i++)
-		resolvers[i].setTimeout(secs);
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setTimeout(secs);
 }
 
 public Message
@@ -126,13 +140,15 @@ send(Message query) {
 	int q, r;
 	Message best = null;
 	byte rcode;
+	boolean [] invalid = new boolean[resolvers.size()];
 
 	for (q = 0; q < 20; q++) {
 		Message m;
 		synchronized (queue) {
 			boolean ok = false;
-			for (r = 0; r < resolvers.length; r++)
-				ok |= sendTo(query, r, q);
+			for (r = 0; r < resolvers.size(); r++)
+				if (!invalid[r])
+					ok |= sendTo(query, r, q);
 			if (!ok)
 				break;
 			try {
@@ -182,19 +198,32 @@ sendAsync(final Message query, final ResolverListener listener) {
 
 public
 Message sendAXFR(Message query) {
-	return resolvers[0].sendAXFR(query);
+	return ((Resolver)resolvers.elementAt(0)).sendAXFR(query);
 }
 
 public Resolver
 getResolver(int i) {
-	if (i < resolvers.length)
-		return resolvers[i];
+	if (i < resolvers.size())
+		return (Resolver)resolvers.elementAt(i);
 	return null;
 }
 
 public Resolver []
 getResolvers() {
-	return resolvers;
+	Resolver [] res = new Resolver[resolvers.size()];
+	for (int i = 0; i < resolvers.size(); i++)
+		res[i] = (Resolver) resolvers.elementAt(i);
+	return res;
+}
+
+public void
+addResolver(Resolver r) {
+	resolvers.addElement(r);
+}
+
+public void
+deleteResolver(Resolver r) {
+	resolvers.removeElement(r);
 }
 
 }
