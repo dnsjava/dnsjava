@@ -322,7 +322,6 @@ fallback() throws ZoneTransferException {
 	logxfr("falling back to AXFR");
 	qtype = Type.AXFR;
 	state = INITIALSOA;
-	closeConnection();
 }
 
 private void
@@ -482,7 +481,7 @@ doxfr() throws IOException, ZoneTransferException {
 				    rcode == Rcode.NOTIMP)
 				{
 					fallback();
-					run();
+					doxfr();
 					return;
 				}
 				fail(Rcode.string(rcode));
@@ -495,7 +494,7 @@ doxfr() throws IOException, ZoneTransferException {
 
 			if (answers.length == 0 && qtype == Type.IXFR) {
 				fallback();
-				run();
+				doxfr();
 				return;
 			}
 		}
