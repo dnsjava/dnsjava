@@ -25,7 +25,7 @@ NameSet() {
 
 /**
  * Finds all matching sets.  This traverses CNAMEs, and has provisions for 
- * Type ANY.
+ * type/class ANY.
  */
 protected Object []
 findSets(Name name, short type, short dclass) {
