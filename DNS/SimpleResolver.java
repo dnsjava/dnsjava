@@ -24,7 +24,7 @@ static String defaultResolver = "localhost";
 public
 SimpleResolver(String hostname) throws UnknownHostException {
 	if (hostname == null) {
-		hostname = FindServer.find1();
+		hostname = FindServer.server();
 		if (hostname == null)
 			hostname = defaultResolver;
 	}

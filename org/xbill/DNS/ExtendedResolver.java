@@ -59,7 +59,7 @@ init() {
 public
 ExtendedResolver() throws UnknownHostException {
 	init();
-	String [] servers = FindServer.find();
+	String [] servers = FindServer.servers();
 	if (servers != null) {
 		for (int i = 0; i < servers.length; i++)
 			resolvers.addElement(new SimpleResolver(servers[i]));
