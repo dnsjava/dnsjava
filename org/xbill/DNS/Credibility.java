@@ -16,9 +16,6 @@ public final class Credibility {
 private
 Credibility() {}
 
-/** A hint or cache file on disk.  Credibility 0. */
-public static final byte HINT			= 0;
-
 /** The additional section of a nonauthoritative response.  Credibility 1. */
 public static final byte NONAUTH_ADDITIONAL	= 1;
 
@@ -54,5 +51,8 @@ public static final byte ZONE_TRANSFER		= 6;
 
 /** A zone file.  Credibility 7. */
 public static final byte ZONE			= 7;
+
+/** A hint or cache file on disk.  Credibility ??. */
+public static final byte HINT			= ZONE_GLUE;
 
 }
