@@ -88,7 +88,8 @@ writeLong(long l) {
  */
 public void
 writeString(String s) {
-	writeString(s.getBytes(), 0);
+	writeByte(s.length());
+	writeArray(s.getBytes());
 }
 
 /**
