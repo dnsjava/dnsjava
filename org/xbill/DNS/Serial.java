@@ -44,7 +44,7 @@ compare(long serial1, long serial2) {
  * Increments a serial number.  The number is assumed to be a 32 bit unsigned
  * integer stored in a long.  This basically adds 1 and resets the value to
  * 0 if it is 2^32.
- * @param val The serial number
+ * @param serial The serial number
  * @return The incremented serial number
  * @throws IllegalArgumentException serial is out of range
  */
