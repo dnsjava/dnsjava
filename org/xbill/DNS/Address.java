@@ -4,6 +4,7 @@ package org.xbill.DNS;
 
 import java.net.*;
 import java.net.Inet6Address;
+import java.util.*;
 
 /**
  * Routines dealing with IP addresses.  Includes functions similar to
@@ -20,13 +21,8 @@ public static final int IPv6 = 2;
 private
 Address() {}
 
-/**
- * Convert a string containing an IP address to an array of 4 integers.
- * @param s The string
- * @return The address
- */
-public static int []
-toArray(String s) {
+private static int []
+parseV4(String s) {
 	int numDigits;
 	int currentOctet;
 	int [] values = new int[4];
@@ -70,14 +66,112 @@ toArray(String s) {
 	return values;
 }
 
+private static int []
+parseV6(String s) {
+	boolean parsev4 = false;
+	List l = new ArrayList();
+	int range = -1;
+
+	int [] data = new int[16];
+
+	StringTokenizer st = new StringTokenizer(s, ":", true);
+	while (st.hasMoreTokens())
+		l.add(st.nextToken());
+	l.add("");
+	l.add("");
+
+	String [] tokens = (String []) l.toArray(new String[l.size()]);
+
+	int i = 0, j = 0;
+	while (i < tokens.length - 2) {
+		if (tokens[i].equals(":")) {
+			if (tokens[i+1].equals(":")) {
+				if (tokens[i+2].equals(":") || range >= 0)
+					return null;
+				range = j;
+				if (tokens[i+2].equals(""))
+					break;
+				i++;
+			}
+			i++;
+		}
+
+		if (tokens[i].indexOf('.') >= 0) {
+			parsev4 = true;
+			if (!tokens[i+1].equals(""))
+				return null;
+			break;
+		}
+
+		try {
+			int x = Integer.parseInt(tokens[i], 16);
+			if (x > 0xFFFF || x < 0)
+				return null;
+			if (j > 16 - 2)
+				return null;
+			data[j++] = (x >>> 8);
+			data[j++] = (x & 0xFF);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+		i++;
+	}
+
+	if (parsev4) {
+		int [] v4addr = Address.toArray(tokens[i]);
+		if (v4addr == null)
+			return null;
+		for (int k = 0; k < 4; k++)
+			data[j++] = v4addr[k];
+	}
+	if (range >= 0) {
+		int left = 16 - j;
+		for (int k = 15; k >= 0; k--) {
+			if (k >= range + left)
+				data[k] = data[k - left];
+			else if (k >= range)
+				data[k] = 0;
+		}
+	} else if (j < 16)
+		return null;
+	return data;
+}
+
 /**
- * Convert a string containing an IP address to an array of 4 integers.
- * @param s The string
+ * Convert a string containing an IP address to an array of 4 or 16 integers.
+ * @param s The address, in text format.
+ * @param family The address family.
+ * @return The address
+ */
+public static int []
+toArray(String s, int family) {
+	if (family == IPv4)
+		return parseV4(s);
+	if (family == IPv6)
+		return parseV6(s);
+	throw new IllegalArgumentException("unknown address family");
+}
+
+/**
+ * Convert a string containing an IPv4 address to an array of 4 integers.
+ * @param s The address, in text format.
+ * @return The address
+ */
+public static int []
+toArray(String s) {
+	return parseV4(s);
+}
+
+/**
+ * Convert a string containing an IP address to an array of 4 or 16 bytes.
+ * @param s The address, in text format.
+ * @param family The address family.
  * @return The address
  */
 public static byte []
-toByteArray(String s) {
-	int [] intArray = toArray(s);
+toByteArray(String s, int family) {
+	int [] intArray = toArray(s, family);
 	if (intArray == null)
 		return null;
 	byte [] byteArray = new byte[intArray.length];
