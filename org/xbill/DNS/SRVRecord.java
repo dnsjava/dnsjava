@@ -92,6 +92,7 @@ throws TextParseException
 	if (rec.port < 0 || rec.port > 0xFFFF)
 		throw new TextParseException("port is out of range");
 	rec.target = Name.fromString(st.nextToken(), origin);
+	rec.target.checkAbsolute("read an SRV record");
 	return rec;
 }
 

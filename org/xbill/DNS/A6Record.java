@@ -80,8 +80,10 @@ throws TextParseException
 	A6Record rec = new A6Record(name, dclass, ttl);
 	rec.prefixBits = Short.parseShort(st.nextToken());
 	rec.suffix = new Inet6Address(st.nextToken());
-	if (rec.prefixBits > 0)
+	if (rec.prefixBits > 0) {
 		rec.prefix = Name.fromString(st.nextToken(), origin);
+		rec.prefix.checkAbsolute("read an A6 record");
+	}
 	return rec;
 }
 

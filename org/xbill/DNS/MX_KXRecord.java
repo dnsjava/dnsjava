@@ -52,6 +52,7 @@ throws TextParseException
 {
 	rec.priority = Short.parseShort(st.nextToken());
 	rec.target = Name.fromString(st.nextToken(), origin);
+	rec.target.checkAbsolute("read an MX or KX record");
 	return rec;
 }
 

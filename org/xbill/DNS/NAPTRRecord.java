@@ -87,6 +87,7 @@ throws TextParseException
 	rec.service = st.nextToken();
 	rec.regexp = st.nextToken();
 	rec.replacement = Name.fromString(st.nextToken(), origin);
+	rec.replacement.checkAbsolute("read a NAPTR record");
 	return rec;
 }
 

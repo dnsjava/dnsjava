@@ -109,6 +109,7 @@ throws TextParseException
 	rec.timeSigned = parseDate(st.nextToken());
 	rec.footprint = (short) Integer.parseInt(st.nextToken());
 	rec.signer = Name.fromString(st.nextToken(), origin);
+	rec.signer.checkAbsolute("read an SIG record");
 	if (st.hasMoreTokens())
 		rec.signature = base64.fromString(st.remainingTokens());
 	return rec;

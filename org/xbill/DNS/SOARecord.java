@@ -84,7 +84,9 @@ throws TextParseException
 {
 	SOARecord rec = new SOARecord(name, dclass, ttl);
 	rec.host = Name.fromString(st.nextToken(), origin);
+	rec.host.checkAbsolute("read an SOA record");
 	rec.admin = Name.fromString(st.nextToken(), origin);
+	rec.admin.checkAbsolute("read an SOA record");
 	long tserial = Long.parseLong(st.nextToken());
 	if (tserial > 0xFFFFFFFFL)
 		throw new TextParseException("Invalid serial number");

@@ -110,6 +110,7 @@ public static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
 	  byte [] data)
 {
+	name.checkAbsolute("create a Record");
 	DataByteInputStream dbs;
 	if (data != null)
 		dbs = new DataByteInputStream(data);
@@ -309,6 +310,8 @@ throws IOException
 {
 	Record rec;
 
+	name.checkAbsolute("create a Record");
+
 	String s = st.nextToken();
 	/* the string tokenizer loses the \\. */
 	if (s.equals("#")) {
@@ -442,6 +445,7 @@ hashCode() {
 public Record
 withName(Name name) {
 	Record rec = null;
+	name.checkAbsolute("create a Record");
 	try {
 		rec = (Record) clone();
 	}
