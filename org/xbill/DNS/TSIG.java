@@ -32,7 +32,7 @@ public static final short FUDGE		= 300;
 
 private Name name, alg;
 private byte [] key;
-private hmacSigner axfrSigner = null;
+private hmacSigner streamSigner = null;
 
 static {
 	if (Options.check("verbosehmac"))
@@ -303,11 +303,11 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		return Rcode.SERVFAIL;
 	}
 
-	if (axfrSigner != null) {
+	if (streamSigner != null) {
 		DataByteOutputStream dbs = new DataByteOutputStream();
 		dbs.writeShort((short)tsig.getSignature().length);
-		axfrSigner.addData(dbs.toByteArray());
-		axfrSigner.addData(tsig.getSignature());
+		streamSigner.addData(dbs.toByteArray());
+		streamSigner.addData(tsig.getSignature());
 	}
 	if (h.verify(tsig.getSignature()))
 		return Rcode.NOERROR;
@@ -335,16 +335,18 @@ verify(Message m, byte [] b, TSIGRecord old) {
 	return verify(m, b, b.length, old);
 }
 
-/** Prepares the TSIG object to verify an AXFR */
+/** Prepares the TSIG object to verify an multiple message response */
 public void
-verifyAXFRStart() {
-	axfrSigner = new hmacSigner(key);
+verifyStreamStart() {
+	streamSigner = new hmacSigner(key);
 }
 
 /**
- * Verifies a TSIG record on an incoming message that is part of an AXFR.
+ * Verifies a TSIG record on an incoming message that is part of a multiple
+ * message response.
  * TSIG records must be present on the first and last messages, and
- * at least every 100 records in between (the last rule is not enforced).
+ * at least every 100 records in between (the last rule should be enforced by
+ * the caller).
  * @param m The message
  * @param b The message in unparsed form
  * @param old The TSIG from the AXFR request
@@ -354,11 +356,11 @@ verifyAXFRStart() {
  * @see Rcode
  */
 public byte
-verifyAXFR(Message m, byte [] b, TSIGRecord old,
-	   boolean required, boolean first)
+verifyStream(Message m, byte [] b, TSIGRecord old,
+	     boolean required, boolean first)
 {
 	TSIGRecord tsig = m.getTSIG();
-	hmacSigner h = axfrSigner;
+	hmacSigner h = streamSigner;
 	
 	if (first)
 		return verify(m, b, old);
