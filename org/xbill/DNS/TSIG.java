@@ -52,14 +52,16 @@ TSIG(Name name, byte [] key) {
 }
 
 /**
- * Generates a TSIG record with a specific error for a message and adds it
- * to the message.
+ * Generates a TSIG record with a specific error for a message that has
+ * been rendered.
  * @param m The message
+ * @param b The rendered message
  * @param error The error
  * @param old If this message is a response, the TSIG from the request
+ * @return The TSIG record to be added to the message
  */
-public void
-apply(Message m, byte error, TSIGRecord old) {
+public TSIGRecord
+generate(Message m, byte [] b, byte error, TSIGRecord old) {
 	Date timeSigned;
 	if (error != Rcode.BADTIME)
 		timeSigned = new Date();
@@ -85,7 +87,7 @@ apply(Message m, byte error, TSIGRecord old) {
 
 	/* Digest the message */
 	if (h != null)
-		h.addData(m.toWire());
+		h.addData(b);
 
 	DataByteOutputStream out = new DataByteOutputStream();
 	name.toWireCanonical(out);
@@ -122,9 +124,21 @@ apply(Message m, byte error, TSIGRecord old) {
 		other = out.toByteArray();
 	}
 
-	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned,
-				  (short)fudge, signature,
-				  m.getHeader().getID(), error, other);
+	return (new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned,
+			       (short)fudge, signature,
+			       m.getHeader().getID(), error, other));
+}
+
+/**
+ * Generates a TSIG record with a specific error for a message and adds it
+ * to the message.
+ * @param m The message
+ * @param error The error
+ * @param old If this message is a response, the TSIG from the request
+ */
+public void
+apply(Message m, byte error, TSIGRecord old) {
+	Record r = generate(m, m.toWire(), error, old);
 	m.addRecord(r, Section.ADDITIONAL);
 }
 
