@@ -4,6 +4,9 @@
 	- Fix potential race condition in the WorkerThread class when two
 	  threads complete their run methods nearly simultaneously.
 	  (David Esposito)
+	- Add a new factory method for creating a Record, where the length
+	  of the rdata is not explicitly specified, but inferred from
+	  data.length.
 
 4/22/2002
 	- Improve name decompression by not requiring a decompression context.
