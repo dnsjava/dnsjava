@@ -13,7 +13,8 @@ printAnswer(String name, Record [] answer) {
 			System.out.println(answer[i]);
 }
 
-public static void main(String [] args) throws Exception {
+public static void
+main(String [] args) throws Exception {
 	for (int i = 0; i < args.length; i++)
 		printAnswer(args[i], dns.getRecords(args[i], Type.A));
 }
