@@ -137,8 +137,19 @@ getlabels() {
 
 private static final void
 copy(Name src, Name dst) {
-	dst.name = src.name;
-	dst.offsets = src.offsets;
+	if (src.offset(0) == 0) {
+		dst.name = src.name;
+		dst.offsets = src.offsets;
+	} else {
+		int offset0 = src.offset(0);
+		int namelen = src.name.length - offset0;
+		int labels = src.labels();
+		dst.name = new byte[namelen];
+		System.arraycopy(src.name, offset0, dst.name, 0, namelen);
+		for (int i = 0; i < labels && i < MAXOFFSETS; i++)
+			dst.setoffset(i, src.offset(i) - offset0);
+		dst.setlabels(labels);
+	}
 }
 
 private final void
