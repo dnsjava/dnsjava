@@ -72,9 +72,9 @@ Inet6Address(String s) throws IOException
 					throw new IOException
 						("Invalid IPv6 address");
 				range = j;
-				i++;
 				if (tokens[i+2].equals(""))
 					break;
+				i++;
 			}
 			i++;
 		}
@@ -89,6 +89,8 @@ Inet6Address(String s) throws IOException
 		try {
 			int x = Integer.parseInt(tokens[i], 16);
 			if (x > 0xFFFF)
+				throw new IOException("Invalid IPv6 address");
+			if (j > 16 - 2)
 				throw new IOException("Invalid IPv6 address");
 			data[j++] = (byte) (x >>> 8);
 			data[j++] = (byte) (x & 0xFF);
@@ -121,7 +123,8 @@ Inet6Address(String s) throws IOException
 		}
 		for (int k = range; k < range + left; k++)
 			data[k] = 0;
-	}
+	} else if (j < 16)
+		throw new IOException("Invalid IPv6 address");
 }
 
 public byte[]

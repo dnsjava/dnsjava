@@ -1,6 +1,9 @@
 7/14/2001
 	- Converting a AAAA record to wire format was broken.
 	  (David Blacka)
+	- Inet6Address did not properly reject addresses that are too
+	  long or too short, and also didn't properly handle addresses
+	  with one number after a double colon.
 
 7/13/2001
 	- KEY flags were incorrect (David Blacka <davidb@research.netsol.com>)
