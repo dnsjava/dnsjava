@@ -85,7 +85,7 @@ findKey(Cache cache, Name name, int algorithm, int footprint) {
 	return key;
 }
 
-private byte
+private int
 verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 	PublicKey key = findKey(cache, sigrec.getSigner(),
 				sigrec.getAlgorithm(), sigrec.getFootprint());
@@ -143,7 +143,7 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
  * @return The new security status of the set
  * @see RRset
  */
-public byte
+public int
 verify(RRset set, Cache cache) {
 	Iterator sigs = set.sigs();
 	if (Options.check("verbosesec"))

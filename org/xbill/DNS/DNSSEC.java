@@ -26,15 +26,16 @@ public class DNSSEC {
 private
 DNSSEC() { }
 
-public static final byte RSAMD5 = 1;
-public static final byte RSA = RSAMD5;
-public static final byte DH = 2;
-public static final byte DSA = 3;
-public static final byte RSASHA1 = 5;
+public static final int RSAMD5 = 1;
+public static final int RSA = RSAMD5;
+public static final int DH = 2;
+public static final int DSA = 3;
+public static final int ECC = 4;
+public static final int RSASHA1 = 5;
 
-public static final byte Failed = -1;
-public static final byte Insecure = 0;
-public static final byte Secure = 1;
+public static final int Failed = -1;
+public static final int Insecure = 0;
+public static final int Secure = 1;
 
 private static void
 digestSIG(DataByteOutputStream out, SIGRecord sig) {

@@ -19,6 +19,6 @@ public interface Verifier {
  * @see RRset
  * @see Cache
  */
-byte verify(RRset set, Cache cache);
+int verify(RRset set, Cache cache);
 
 }
