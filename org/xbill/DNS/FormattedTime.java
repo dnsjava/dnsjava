@@ -51,7 +51,7 @@ format(Date date) {
  * Parses a formatted time string into a Date.
  * @param s The string, in the form YYYYMMDDHHMMSS.
  * @return The Date object.
- * @throws 
+ * @throws 
  */
 public static Date
 parse(String s) throws TextParseException {
