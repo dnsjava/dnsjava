@@ -133,10 +133,12 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	Enumeration e = data.elements();
 	while (e.hasMoreElements()) {
-		Hashtable nameInfo = (Hashtable) e.nextElement();
-		Enumeration e2 = nameInfo.elements();
-		while (e2.hasMoreElements())
-			sb.append(e2.nextElement());
+		TypeClassMap nameInfo = (TypeClassMap) e.nextElement();
+		Object [] elements = nameInfo.getMultiple(Type.ANY, DClass.ANY);
+		if (elements == null)
+			continue;
+		for (int i = 0; i < elements.length; i++)
+			sb.append(elements[i]);
 	}
 	return sb.toString();
 }
