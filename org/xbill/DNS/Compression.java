@@ -14,20 +14,33 @@ import java.util.*;
 
 class Compression {
 
-private Map h;
+private class Entry {
+	Name name;
+	int pos;
+	Entry next;
+}
+
+private static final int TABLE_SIZE = 17;
+
+private Entry [] table;
 
 /**
  * Creates a new Compression object.
  */
 public
 Compression() {
-	h = new HashMap();
+	table = new Entry[TABLE_SIZE];
 }
 
 /** Adds a compression entry mapping a name to a position.  */
 public void
 add(int pos, Name name) {
-	h.put (name, new Integer(pos));
+	int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;
+	Entry entry = new Entry();
+	entry.name = name;
+	entry.pos = pos;
+	entry.next = table[row];
+	table[row] = entry;
 }
 
 /**
@@ -36,8 +49,12 @@ add(int pos, Name name) {
  */
 public int
 get(Name name) {
-	Integer I = (Integer) h.get(name);
-	return (I == null) ? (-1) : I.intValue();
+	int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;
+	for (Entry entry = table[row]; entry != null; entry = entry.next) {
+		if (entry.name.equals(name))
+			return (entry.pos);
+	}
+	return (-1);
 }
 
 }
