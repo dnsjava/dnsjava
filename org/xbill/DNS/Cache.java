@@ -131,7 +131,6 @@ private class CacheCleaner extends Thread {
 				}
 				catch (InterruptedException e) {
 					now = System.currentTimeMillis();
-					continue;
 				}
 			}
 
