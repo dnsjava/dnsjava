@@ -115,11 +115,6 @@ setTSIGKey(String name, String key) {
 	tsig = new TSIG(name, key);
 }
 
-public void
-setTSIGKey(String key) throws UnknownHostException {
-	setTSIGKey(InetAddress.getLocalHost().getHostName(), key);
-}
-
 TSIG
 getTSIGKey() {
 	return tsig;

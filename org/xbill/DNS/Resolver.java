@@ -50,28 +50,19 @@ void setTSIGKey(TSIG key);
  * Specifies the TSIG key that messages will be signed with
  * @param name The key name
  * @param key The key data
+ * @deprecated Use setTSIGKey(TSIG)
  */
 void setTSIGKey(Name name, byte [] key);
 
 /**
  * Specifies the TSIG key that messages will be signed with
  * @param name The key name
- * @param key The key data, represented as either a base64 encoded string
- * or (if the first character is ':') a hex encoded string
+ * @param key The key data, represented as a base64 encoded string.
  * @throws IllegalArgumentException The key name is an invalid name
  * @throws IllegalArgumentException The key data is improperly encoded
+ * @deprecated Use setTSIGKey(TSIG)
  */
 void setTSIGKey(String name, String key);
-
-/**
- * Specifies the TSIG key (with the same name as the local host) that
- * messages will be signed with.
- * @param key The key data, represented as either a base64 encoded string
- * or (if the first character is ':') a hex encoded string
- * @throws IllegalArgumentException The key data is improperly encoded
- * @throws UnknownHostException The local host name could not be determined
- */
-void setTSIGKey(String key) throws UnknownHostException;
 
 /**
  * Sets the amount of time to wait for a response before giving up.

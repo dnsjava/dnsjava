@@ -328,20 +328,12 @@ setTSIGKey(TSIG key) {
 
 public void
 setTSIGKey(Name name, byte [] key) {
-	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
+	setTSIGKey(new TSIG(name, key));
 }
 
 public void
 setTSIGKey(String name, String key) {
-	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
-}
-
-public void
-setTSIGKey(String key) throws UnknownHostException {
-	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTSIGKey(key);
+	setTSIGKey(new TSIG(name, key));
 }
 
 public void
