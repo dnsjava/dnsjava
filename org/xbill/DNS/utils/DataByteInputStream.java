@@ -41,7 +41,10 @@ read(byte b[]) throws IOException {
  */
 public byte
 readByte() throws IOException {
-	return (byte) read();
+	int i = read();
+	if (i == -1)
+		throw new IOException("no bytes left to read");
+	return (byte) i;
 }
 
 /**
@@ -50,7 +53,10 @@ readByte() throws IOException {
  */
 public int
 readUnsignedByte() throws IOException {
-	return read();
+	int i = read();
+	if (i == -1)
+		throw new IOException("no bytes left to read");
+	return i;
 }
 
 /**
@@ -61,6 +67,8 @@ public short
 readShort() throws IOException {
 	int c1 = read();
 	int c2 = read();
+	if (c1 == -1 || c2 == -1)
+		throw new IOException("no bytes left to read");
 	return (short)((c1 << 8) + c2);
 }
 
@@ -72,6 +80,8 @@ public int
 readUnsignedShort() throws IOException {
 	int c1 = read();
 	int c2 = read();
+	if (c1 == -1 || c2 == -1)
+		throw new IOException("no bytes left to read");
 	return ((c1 << 8) + c2);
 }
 
@@ -85,6 +95,8 @@ readInt() throws IOException {
 	int c2 = read();
 	int c3 = read();
 	int c4 = read();
+	if (c1 == -1 || c2 == -1 || c3 == -1 || c4 == -1)
+		throw new IOException("no bytes left to read");
 	return ((c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
 }
 
@@ -102,6 +114,9 @@ readLong() throws IOException {
 	int c6 = read();
 	int c7 = read();
 	int c8 = read();
+	if (c1 == -1 || c2 == -1 || c3 == -1 || c4 == -1 ||
+	    c5 == -1 || c6 == -1 || c7 == -1 || c8 == -1)
+		throw new IOException("no bytes left to read");
 	return ((c1 << 56) + (c2 << 48) + (c3 << 40) + (c4 << 32) +
 		(c5 << 24) + (c6 << 16) + (c7 << 8) + c8);
 }
@@ -113,6 +128,8 @@ readLong() throws IOException {
 public String
 readString() throws IOException {
 	int len = read();
+	if (len == -1)
+		throw new IOException("no bytes left to read");
 	byte [] b = new byte[len];
 	read(b);
 	return new String(b);
