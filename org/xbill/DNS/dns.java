@@ -36,6 +36,7 @@ synchronized private static void
 initialize() {
 	if (initialized)
 		return;
+	initialized = true;
 	if (res == null) {
 		try {
 			setResolver(new ExtendedResolver());
