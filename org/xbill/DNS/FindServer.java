@@ -28,7 +28,7 @@ FindServer() {}
 /**
  * Looks in the system properties to find servers and a search path.
  * Properties of the form dns.server1, dns.server2, etc. define servers.
- * Properties of the form dns.search1, dns.seearch, etc. define the search path.
+ * Properties of the form dns.search1, dns.search2, etc. define the search path.
  */
 private static void
 findProperty() {
