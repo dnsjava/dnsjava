@@ -18,11 +18,8 @@ static void printByteString(String s, byte [] b, int offset, int length) {
 
 public hmacSigner(byte [] key) {
 	int i;
-	if (key.length > PADLEN) {
-		md5 mdc = new md5(key);
-		mdc.calc();
-		key = mdc.toBytes();
-	}
+	if (key.length > PADLEN)
+		key = md5.compute(key);
 	ipad = new byte[PADLEN];
 	opad = new byte[PADLEN];
 	for (i = 0; i < key.length; i++) {
@@ -59,9 +56,7 @@ void addData(byte [] b) {
 }
 
 byte [] sign() {
-	md5 mdc = new md5(bytes.toByteArray());
-	mdc.calc();
-	byte [] output = mdc.toBytes();
+	byte [] output = md5.compute(bytes.toByteArray());
 	bytes = new ByteArrayOutputStream();
 	try {
 		bytes.write(opad);
@@ -69,9 +64,7 @@ byte [] sign() {
 	}
 	catch (IOException e) {
 	}
-	mdc = new md5(bytes.toByteArray());
-	mdc.calc();
-	byte [] b = mdc.toBytes();
+	byte [] b = md5.compute(bytes.toByteArray());
 /*	printByteString("sig", b, 0, b.length);*/
 	return b;
 }
