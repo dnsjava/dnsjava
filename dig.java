@@ -29,6 +29,11 @@ static void
 doAXFR(Message response) throws IOException {
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
 
+	if (response.getRcode() != Rcode.NOERROR) {
+		System.out.println(response);
+		return;
+	}
+
 	Enumeration e = response.getSection(Section.ANSWER);
 	while (e.hasMoreElements())
 		System.out.println(e.nextElement());
