@@ -158,6 +158,10 @@ update(InputStream in) throws IOException {
 				query.getHeader().setOpcode(Opcode.UPDATE);
 			}
 
+			else if (operation.equals("show")) {
+				print(query);
+			}
+
 			else if (operation.equals("query"))
 				doQuery(st);
 
@@ -195,11 +199,18 @@ update(InputStream in) throws IOException {
 		catch (InterruptedIOException iioe) {
 			System.out.println("Operation timed out");
 		}
+		catch (SocketException se) {
+			System.out.println("Socket error");
+		}
 	}
 }
 
 void
 sendUpdate() throws IOException {
+	if (query.getHeader().getCount(Section.UPDATE) == 0) {
+		print("Empty update message.  Ignoring.");
+		return;
+	}
 	if (query.getHeader().getCount(Section.ZONE) == 0) {
 		Name updzone;
 		if (zone != null)
@@ -512,7 +523,7 @@ help(String topic) {
 		      "add      assert   class    delete   echo     file\n" +
 		      "glue     help     log      key      edns     origin\n" +
 		      "port     prohibit query    quit     require  send\n" +
-		      "server   tcp      ttl      zone     #\n");
+		      "server   show     tcp      ttl      zone     #\n");
 
 	else if (topic.equalsIgnoreCase("add"))
 		System.out.println(
@@ -605,6 +616,10 @@ help(String topic) {
 		System.out.println(
 			"server <name>\n\n" +
 			"server that receives send updates/queries\n");
+	else if (topic.equalsIgnoreCase("show"))
+		System.out.println(
+			"show\n\n" +
+			"shows the current update packet\n");
 	else if (topic.equalsIgnoreCase("tcp"))
 		System.out.println(
 			"tcp\n\n" +
