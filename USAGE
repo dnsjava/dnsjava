@@ -25,6 +25,9 @@ Command line programs:
 	"key name data", and "port number".
 	jnamed [config_file]
 
+- lookup:
+	A simple program that looks up the address associated with a name.
+
 DNS and DNS.utils packages:
 
 - See the Javadoc documentation in doc/ for details
