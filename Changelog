@@ -4,6 +4,9 @@
 	- Remove deprecated dns class.
 	- Simplify TSIG initialization; remove functions that should
 	  have never existed.
+	- Remove Cache.setVerifier() and Cache.setSecurePolicy().  There
+	  should be a way of enabling DNSSEC, but the existing code doesn't
+	  work.
 
 3/29/2005
 	- Use java.net.InetAddress for IPv6 addresses rather than a custom

@@ -169,8 +169,6 @@ private static class CacheCleaner extends Thread {
 
 private static final int defaultCleanInterval = 30;
 
-private Verifier verifier;
-private boolean secure;
 private int maxncache = -1;
 private int maxcache = -1;
 private CacheCleaner cleaner;
@@ -268,10 +266,6 @@ addRRset(RRset rrset, int cred) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
-	if (verifier != null)
-		rrset.setSecurity(verifier.verify(rrset, this));
-	if (secure && rrset.getSecurity() < DNSSEC.Secure)
-		return;
 	Element element = (Element) findExactSet(name, type);
 	if (ttl == 0) {
 		if (element != null && cred >= element.credibility)
@@ -293,8 +287,6 @@ addRRset(RRset rrset, int cred) {
  */
 public void
 addNegative(Name name, int type, SOARecord soa, int cred) {
-	if (verifier != null && secure)
-		return;
 	Element element = (Element) findExactSet(name, type);
 	if (soa == null || soa.getTTL() == 0) {
 		if (element != null && cred >= element.credibility)
@@ -525,32 +517,6 @@ findAnyRecords(Name name, int type) {
 	return findRecords(name, type, Credibility.GLUE);
 }
 
-private void
-verifyRecords(Cache tcache) {
-	Iterator it;
-
-	it = tcache.names();
-	while (it.hasNext()) {
-		Name name = (Name) it.next();
-		Object [] elements = findExactSets(name);
-		for (int i = 0; i < elements.length; i++) {
-			Element element = (Element) elements[i];
-			if (element instanceof PositiveElement)
-				continue;
-			RRset rrset = ((PositiveElement) element).rrset;
-
-			/* for now, ignore negative cache entries */
-			if (rrset == null)
-				continue;
-			if (verifier != null)
-				rrset.setSecurity(verifier.verify(rrset, this));
-			if (rrset.getSecurity() < DNSSEC.Secure)
-				continue;
-			addSet(name, rrset.getType(), element);
-		}
-	}
-}
-
 private final int
 getCred(int section, boolean isAuth) {
 	if (section == Section.ANSWER) {
@@ -751,25 +717,6 @@ flushSet(Name name, int type) {
 public void
 flushName(Name name) {
 	removeName(name);
-}
-
-/**
- * Defines a module to be used for data verification (DNSSEC).  An
- * implementation is found in org.xbill.DNSSEC.security.DNSSECVerifier,
- * which requires Java 2 or above and the Java Cryptography Extensions.
- */
-public void
-setVerifier(Verifier v) {
-	verifier = v;
-}
-
-/**
- * Mandates that all data stored in this Cache must be verified and proven
- * to be secure, using a verifier (as defined in setVerifier).
- */
-public void
-setSecurePolicy() {
-	secure = true;
 }
 
 /**
