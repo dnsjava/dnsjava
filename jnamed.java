@@ -241,8 +241,10 @@ addAdditional2(Message response, int section) {
 		Record r = (Record) e.nextElement();
 		try {
 			Method m = r.getClass().getMethod("getTarget", null);
-			Name glueName = (Name) m.invoke(r, null);
-			addGlue(response, glueName);
+			if (m != null && r.getType() != Type.CNAME) {
+				Name glueName = (Name) m.invoke(r, null);
+				addGlue(response, glueName);
+			}
 		}
 		catch (Exception ex) {
 		}
@@ -307,6 +309,7 @@ generateReply(Message query, byte [] in, Socket s) {
 	boolean badversion;
 	int maxLength;
 	boolean sigonly;
+	boolean partial = false;
 
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
 		return errorMessage(query, Rcode.NOTIMPL);
@@ -370,6 +373,8 @@ generateReply(Message query, byte [] in, Socket s) {
 				addRRset(name, response, rrsets[i],
 					 Section.ANSWER, sigonly);
 		}
+		if (zr.isPartial())
+			partial = true;
 	}
 	else {
 		SetResponse cr;
@@ -393,8 +398,11 @@ generateReply(Message query, byte [] in, Socket s) {
 				addRRset(name, response, rrsets[i],
 					 Section.ANSWER, sigonly);
 		}
+		if (cr.isPartial())
+			partial = true;
 	}
-	addAuthority(response, name, zone);
+	if (!partial)
+		addAuthority(response, name, zone);
 	addAdditional(response);
 	if (queryTSIG != null) {
 		try {
