@@ -435,7 +435,7 @@ append(Name d) {
 }
 
 /**
- * The length
+ * The length of the name.
  */
 public short
 length() {
@@ -450,7 +450,7 @@ length() {
 }
 
 /**
- * The number of labels
+ * The number of labels in the name.
  */
 public byte
 labels() {
