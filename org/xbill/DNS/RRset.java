@@ -23,10 +23,12 @@ class Enumerator implements Enumeration {
 	boolean cycled;
 
 	Enumerator() {
-		size = rrs.size();
-		records = new Record[size];
-		for (int i = 0; i < size; i++)
-			records[i] = (Record) rrs.elementAt(i);
+		synchronized (rrs) {
+			size = rrs.size();
+			records = new Record[size];
+			for (int i = 0; i < size; i++)
+				records[i] = (Record) rrs.elementAt(i);
+		}
 		if (++start >= size)
 			start -= size;
 		first = count = start;
@@ -66,8 +68,10 @@ RRset() {
 public void
 addRR(Record r) {
 	if (r.getType() != Type.SIG) {
-		if (!rrs.contains(r))
-			rrs.addElement(r);
+		synchronized (rrs) {
+			if (!rrs.contains(r))
+				rrs.addElement(r);
+		}
 	}
 	else {
 		if (!sigs.contains(r))
@@ -75,10 +79,24 @@ addRR(Record r) {
 	}
 }
 
+/** Deletes a Record from an RRset */
+public void
+deleteRR(Record r) {
+	if (r.getType() != Type.SIG) {
+		synchronized (rrs) {
+			rrs.removeElement(r);
+		}
+	}
+	else
+		sigs.removeElement(r);
+}
+
 /** Deletes all Records from an RRset */
 public void
 clear() {
-	rrs.setSize(0);
+	synchronized (rrs) {
+		rrs.setSize(0);
+	}
 	sigs.setSize(0);
 	start = 0;
 }
@@ -168,7 +186,7 @@ public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append("{ [");
-	Enumeration e = rrs();
+	Enumeration e = new Enumerator();
 	while (e.hasMoreElements()) {
 		Record rr = (Record) e.nextElement();
 		sb.append(rr);
