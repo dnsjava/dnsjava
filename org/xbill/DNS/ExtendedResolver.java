@@ -23,9 +23,9 @@ class QElement {
 	int res;
 
 	public
-	QElement(Object _obj, int _res) {
-		obj = _obj;
-		res = _res;
+	QElement(Object obj, int res) {
+		this.obj = obj;
+		this.res = res;
 	}
 }
 

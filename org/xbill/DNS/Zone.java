@@ -186,12 +186,12 @@ Zone(String file, Cache cache) throws IOException {
  * @see Master
  */
 public
-Zone(Name zone, short _dclass, String remote, Cache cache)
+Zone(Name zone, short dclass, String remote, Cache cache)
 throws IOException
 {
 	super(false);
 	origin = zone;
-	dclass = _dclass;
+	this.dclass = dclass;
 	type = SECONDARY;
 	Resolver res = new SimpleResolver(remote);
 	Record rec = Record.newRecord(zone, Type.AXFR, dclass);

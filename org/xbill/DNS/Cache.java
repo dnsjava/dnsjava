@@ -32,12 +32,12 @@ private class Element {
 	Thread tid;
 
 	public
-	Element(Name _name, long _ttl, byte cred, int src, short _type) {
-		name = _name;
+	Element(Name name, long ttl, byte cred, int src, short type) {
+		this.name = name;
 		rrset = null;
-		type = _type;
+		this.type = type;
 		credibility = cred;
-		ttl = (long)_ttl & 0xFFFFFFFFL;
+		this.ttl = (long)ttl & 0xFFFFFFFFL;
 		srcid = src;
 		timeIn = System.currentTimeMillis();
 		tid = Thread.currentThread();

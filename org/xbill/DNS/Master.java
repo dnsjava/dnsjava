@@ -24,9 +24,9 @@ private Record last = null;
 private int defaultTTL = 3600;
 private Master included = null;
 
-Master(File _file, Name defaultOrigin) throws IOException {
+Master(File file, Name defaultOrigin) throws IOException {
 	FileInputStream fis;
-	file = _file;
+	this.file = file;
 	try {
 		fis = new FileInputStream(file);
 	}

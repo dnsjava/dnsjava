@@ -38,7 +38,7 @@ public
 DNAMERecord(Name name, short dclass, int ttl, Name target)
 throws IOException
 {
-        super(_name, Type.DNAME, dclass, ttl, target);
+        super(name, Type.DNAME, dclass, ttl, target);
 }
 
 Record

@@ -32,11 +32,11 @@ private boolean noescape;
  * in the same token.
  */
 public
-MyStringTokenizer(String _s, String _delim, boolean _returnTokens) {
-	string = new char[_s.length()];
-	_s.getChars(0, _s.length(), string, 0);
-	delim = _delim;
-	returnTokens = _returnTokens;
+MyStringTokenizer(String s, String delim, boolean returnTokens) {
+	string = new char[s.length()];
+	s.getChars(0, s.length(), string, 0);
+	this.delim = delim;
+	this.returnTokens = returnTokens;
 	current = 0;
 }
 
@@ -45,8 +45,8 @@ MyStringTokenizer(String _s, String _delim, boolean _returnTokens) {
  * @param delim A string containing all delimiters
  */
 public
-MyStringTokenizer(String _s, String _delim) {
-	this(_s, _delim, false);
+MyStringTokenizer(String s, String delim) {
+	this(s, delim, false);
 }
 
 /** Creates a new instance of MyStringTokenizer, with whitespace delimiters
@@ -54,8 +54,8 @@ MyStringTokenizer(String _s, String _delim) {
  * @param s The string to be tokenized
  */
 public
-MyStringTokenizer(String _s) {
-	this(_s, " \t\n\r", false);
+MyStringTokenizer(String s) {
+	this(s, " \t\n\r", false);
 }
 
 /**

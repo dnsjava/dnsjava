@@ -23,13 +23,13 @@ private Resolver res;
 
 /** Creates a new ResolveThread */
 public
-ResolveThread(Resolver _res, Message _query, Object _id,
-	      ResolverListener _listener)
+ResolveThread(Resolver res, Message query, Object id,
+	      ResolverListener listener)
 {
-	res = _res;
-	query = _query;
-	id = _id;
-	listener = _listener;
+	this.res = res;
+	this.query = query;
+	this.id = id;
+	this.listener = listener;
 }
 
 

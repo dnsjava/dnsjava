@@ -28,11 +28,11 @@ private static final Object [] emptyObjectArray = new Object[0];
 protected
 Record() {}
 
-Record(Name _name, short _type, short _dclass, int _ttl) {
-	name = _name;
-	type = _type;
-	dclass = _dclass;
-	ttl = _ttl;
+Record(Name name, short type, short dclass, int ttl) {
+	this.name = name;
+	this.type = type;
+	this.dclass = dclass;
+	this.ttl = ttl;
 }
 
 private static final Record

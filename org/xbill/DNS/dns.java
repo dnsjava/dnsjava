@@ -112,9 +112,9 @@ inaddrString(String s) {
  * Sets the Resolver to be used by functions in the dns class
  */
 public static synchronized void
-setResolver(Resolver _res) {
+setResolver(Resolver res) {
 	initialize();
-	res = _res;
+	dns.res = res;
 }
 
 /**

@@ -139,9 +139,9 @@ BitString(byte [] b) throws TextParseException {
 	this(new String(b));
 }
 
-BitString(int _nbits, byte [] _data) {
-	nbits = _nbits;
-	data = _data;
+BitString(int nbits, byte [] data) {
+	this.nbits = nbits;
+	this.data = data;
 }
 
 int

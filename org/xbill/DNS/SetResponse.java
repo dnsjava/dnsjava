@@ -63,20 +63,20 @@ private Object data;
 private
 SetResponse() {}
 
-SetResponse(byte _type, Object _data) {
-	type = _type;
-	data = _data;
+SetResponse(byte type, Object data) {
+	this.type = type;
+	this.data = data;
 }
 
-SetResponse(byte _type) {
-	this(_type, null);
+SetResponse(byte type) {
+	this(type, null);
 }
 
 /** Changes the value of a SetResponse */
 void
-set(byte _type, Object _data) {
-	type = _type;
-	data = _data;
+set(byte type, Object data) {
+	this.type = type;
+	this.data = data;
 }
 
 void
