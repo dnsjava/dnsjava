@@ -178,41 +178,55 @@ Zone(String file, Cache cache) throws IOException {
 	this(file, cache, null);
 }
 
+public void
+fromXFR(Name zone, short dclass, String remote)
+throws IOException, ZoneTransferException
+{
+	origin = zone;
+	this.dclass = dclass;
+	type = SECONDARY;
+	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(zone, remote, null);
+	List records = xfrin.run();
+	for (Iterator it = records.iterator(); it.hasNext(); ) {
+		Record rec = (Record) it.next();
+		if (!rec.getName().subdomain(origin)) {
+			if (Options.check("verbose"))
+				System.err.println(rec.getName() +
+						   "is not in zone " + origin);
+			continue;
+		}
+		addRecord(rec);
+	}
+	validate();
+}
+
 /**
- * Creates a Zone by performing a zone transfer to the specified host.  All
- * records that do not belong in the Zone are added to the specified Cache.
+ * Creates a Zone by performing a zone transfer to the specified host.
  * @see Cache
+ * @see Master
+ */
+public
+Zone(Name zone, short dclass, String remote)
+throws IOException, ZoneTransferException
+{
+	super(false);
+	fromXFR(zone, dclass, remote);
+}
+
+/**
+ * Creates a Zone by performing a zone transfer to the specified host.
+ * The cache is unused.
  * @see Master
  */
 public
 Zone(Name zone, short dclass, String remote, Cache cache) throws IOException {
 	super(false);
-	origin = zone;
-	this.dclass = dclass;
-	type = SECONDARY;
-	Resolver res = new SimpleResolver(remote);
-	Record rec = Record.newRecord(zone, Type.AXFR, dclass);
-	Message query = Message.newQuery(rec);
-	Message response = res.send(query);
-	short rcode = response.getHeader().getRcode();
-	if (rcode != Rcode.NOERROR)
-		throw new IOException("AXFR failed: " + Rcode.string(rcode));
-	Record [] recs = response.getSectionArray(Section.ANSWER);
-	for (int i = 0; i < recs.length; i++) {
-		if (!recs[i].getName().subdomain(origin)) {
-			if (Options.check("verbose"))
-				System.err.println(recs[i].getName() +
-						   "is not in zone " + origin);
-			continue;
-		}
-		addRecord(recs[i]);
+	try {
+		fromXFR(zone, dclass, remote);
 	}
-	if (cache != null) {
-		recs = response.getSectionArray(Section.ADDITIONAL);
-		for (int i = 0; i < recs.length; i++)
-			cache.addRecord(recs[i], Credibility.GLUE, recs);
+	catch (ZoneTransferException e) {
+		throw new IOException(e.getMessage());
 	}
-	validate();
 }
 
 /** Returns the Zone's origin */
