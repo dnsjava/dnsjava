@@ -304,68 +304,84 @@ sendAXFR(Message query) throws IOException {
 	Socket s = new Socket(addr, port);
 	s.setSoTimeout(timeoutValue);
 
+	Name qname = query.getQuestion().getName();
+	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, this);
 	try {
-		query = (Message) query.clone();
+		xfrin.run();
+	}
+	catch (ZoneTransferException e) {
+		throw new WireParseException(e.getMessage());
+	}
+	List records = xfrin.getAXFR();
+	Message response = new Message(query.getHeader().getID());
+	response.getHeader().setFlag(Flags.AA);
+	response.getHeader().setFlag(Flags.QR);
+	response.addRecord(query.getQuestion(), Section.QUESTION);
+	Iterator it = records.iterator();
+	while (it.hasNext())
+		response.addRecord((Record)it.next(), Section.ANSWER);
+	return response;
+}
+
+static class Stream {
+	SimpleResolver res;
+	Socket sock;
+	int nresponses;
+	TSIG tsig;
+	Message lastResponse;
+	TSIGRecord lastTSIG;
+
+	Stream(SimpleResolver res) throws IOException {
+		this.res = res;
+		sock = new Socket(res.addr, res.port);
+		sock.setSoTimeout(res.timeoutValue);
+		tsig = res.tsig;
+		if (tsig != null)
+			tsig.verifyStreamStart();
+	}
+
+	void
+	send(Message query) throws IOException {
 		if (tsig != null)
 			tsig.apply(query, null);
-		query.getHeader().unsetFlag(Flags.RD);
 
 		byte [] out = query.toWire(Message.MAXLENGTH);
-		writeTCP(s, out);
-		byte [] in = readTCP(s);
-		Message response = parseMessage(in);
+		res.writeTCP(sock, out);
+	}
+
+	Message
+	next() throws IOException {
+		byte [] in = res.readTCP(sock);
+		Message response =  res.parseMessage(in);
+		lastResponse = response;
+		nresponses++;
 		if (response.getHeader().getRcode() != Rcode.NOERROR)
 			return response;
 		if (tsig != null) {
-			tsig.verifyAXFRStart();
-			verifyTSIG(query, response, in, tsig);
-		}
-		int soacount = 0;
-		Record [] records = response.getSectionArray(Section.ANSWER);
-		for (int i = 0; i < records.length; i++)
-			if (records[i] instanceof SOARecord)
-				soacount++;
+			boolean first = (nresponses == 1);
+			boolean required = (nresponses % 100 == 0);
 
-		while (soacount < 2) {
-			in = readTCP(s);
-			Message m = parseMessage(in);
-			short rcode = m.getHeader().getRcode();
-			if (rcode != Rcode.NOERROR)
-				throw new WireParseException
-					("AXFR: rcode " + Rcode.string(rcode));
-			Header header = m.getHeader();
-			if (header.getCount(Section.QUESTION) > 1 ||
-			    header.getCount(Section.ANSWER) <= 0 ||
-			    header.getCount(Section.AUTHORITY) != 0)
-			{
-				if (Options.check("verbosemsg"))
-					System.err.println(m);
-			    	throw new WireParseException
-					("AXFR: invalid record counts");
-			}
-			records = m.getSectionArray(Section.ANSWER);
-			for (int i = 0; i < records.length; i++) {
-				response.addRecord(records[i], Section.ANSWER);
-				if (records[i] instanceof SOARecord)
-					soacount++;
-			}
-			if (soacount > 2)
-				throw new WireParseException
-					("AXFR: too many SOAs");
-			if (tsig == null)
-				continue;
-			byte error = tsig.verifyAXFR(m, in, null,
-						     (soacount > 1), false);
-			if (error != Rcode.NOERROR)
-				response.TSIGverified = false;
-			if (Options.check("verbose"))
-				System.err.println("TSIG verify: " +
-						   Rcode.string(error));
+			TSIGRecord tsigrec = response.getTSIG();
+			if (tsigrec != null) {
+				lastTSIG = tsigrec;
+				response.TSIGsigned = true;
+			} else
+				response.TSIGsigned = false;
+
+			byte error = tsig.verifyStream(response, in, lastTSIG,
+						       required, first);
+			if (error == Rcode.NOERROR && response.TSIGsigned)
+				response.TSIGverified = true;
 		}
 		return response;
 	}
-	finally {
-		s.close();
+
+	void
+	close() {
+		try {
+			sock.close();
+		}
+		catch (IOException e) {}
 	}
 }
 
