@@ -18,8 +18,12 @@ UNKRecord(Name _name, short _type, short _dclass, int _ttl, int length,
 	super(_name, _type, _dclass, _ttl);
 	if (in == null)
 		return;
-	data = new byte[length];
-	in.read(data);
+	if (length > 0) {
+		data = new byte[length];
+		in.read(data);
+	}
+	else
+		data = null;
 }
 
 public 
@@ -41,7 +45,8 @@ toString() {
 
 void
 rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
-	dbs.write(data);
+	if (data != null)
+		dbs.write(data);
 }
 
 }
