@@ -111,19 +111,6 @@ toWire() throws IOException {
 	return out.toByteArray();
 }
 
-public void
-toWireCanonical(CountedDataOutputStream out) throws IOException {
-	header.toWire(out);
-	for (int i=0; i<4; i++) {
-		if (sections[i].size() == 0)
-			continue;
-		for (int j=0; j<sections[j].size(); j++) {
-			Record rec = (Record)sections[i].elementAt(j);
-			rec.toWireCanonical(out, i);
-		}
-	}
-}
-
 public int
 numBytes() {
 	return size;
