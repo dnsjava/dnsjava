@@ -6,7 +6,6 @@ package org.xbill.DNS;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import org.xbill.Task.*;
 
 /**
  * An implementation of Resolver that can send queries to multiple servers,
