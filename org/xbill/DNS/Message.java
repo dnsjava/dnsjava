@@ -1,6 +1,8 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
+package DNS;
+
 import java.util.*;
 import java.io.*;
 
@@ -23,6 +25,7 @@ dnsMessage() {
 	this(dnsHeader.randomID());
 }
 
+public
 dnsMessage(CountedDataInputStream in) throws IOException {
 	this();
 	int startpos = in.getPos();
@@ -37,27 +40,28 @@ dnsMessage(CountedDataInputStream in) throws IOException {
 	size = in.getPos() - startpos;
 }
 
+public
 dnsMessage(byte [] b) throws IOException {
 	this(new CountedDataInputStream(new ByteArrayInputStream(b)));
 }
 
-void
+public void
 setHeader(dnsHeader h) {
 	header = h;
 }
 
-dnsHeader
+public dnsHeader
 getHeader() {
 	return header;
 }
 
-void
+public void
 addRecord(int section, dnsRecord r) {
 	sections[section].addElement(r);
 	header.incCount(section);
 }
 
-boolean
+public boolean
 removeRecord(int section, dnsRecord r) {
 	if (sections[section].removeElement(r)) {
 		header.decCount(section);
@@ -67,7 +71,7 @@ removeRecord(int section, dnsRecord r) {
 		return false;
 }
 
-dnsTSIGRecord
+public dnsTSIGRecord
 getTSIG() {
 	int count = header.getCount(dns.ADDITIONAL);
 	if (count == 0)
@@ -79,12 +83,12 @@ getTSIG() {
 	return (dnsTSIGRecord) rec;
 }
 
-Enumeration
+public Enumeration
 getSection(int section) {
 	return sections[section].elements();
 }
 
-void
+public void
 toWire(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
 	dnsCompression c = new dnsCompression();
@@ -98,7 +102,7 @@ toWire(CountedDataOutputStream out) throws IOException {
 	}
 }
 
-byte []
+public byte []
 toWire() throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	CountedDataOutputStream dout = new CountedDataOutputStream(out);
@@ -106,7 +110,7 @@ toWire() throws IOException {
 	return out.toByteArray();
 }
 
-void
+public void
 toWireCanonical(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
 	for (int i=0; i<4; i++) {
@@ -119,7 +123,7 @@ toWireCanonical(CountedDataOutputStream out) throws IOException {
 	}
 }
 
-int
+public int
 numBytes() {
 	return size;
 }

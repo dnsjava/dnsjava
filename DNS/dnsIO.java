@@ -1,12 +1,14 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
+package DNS;
+
 import java.io.*;
 import java.util.*;
 
 public class dnsIO {
 
-static String
+public static String
 readExtendedLine(BufferedReader br) throws IOException {
 	String s = br.readLine();
 	if (s == null)
@@ -28,7 +30,7 @@ readExtendedLine(BufferedReader br) throws IOException {
 	return sb.toString();
 }
 
-static String
+public static String
 formatBase64String(String s, int lineLength, String prefix, boolean addClose) {
 	StringBuffer sb = new StringBuffer();
 	for (int i = 0; i < s.length(); i += lineLength) {

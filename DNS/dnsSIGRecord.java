@@ -1,6 +1,8 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
+package DNS;
+
 import java.io.*;
 import java.text.*;
 import java.util.*;

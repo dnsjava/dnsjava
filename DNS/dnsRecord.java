@@ -10,6 +10,8 @@
 // and should provide
 //	accessor functions
 
+package DNS;
+
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -74,7 +76,7 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 }
 
 
-static dnsRecord
+public static dnsRecord
 newRecord(dnsName name, short type, short dclass, int ttl, int length,
 	  byte [] data)
 {
@@ -93,12 +95,12 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 	}
 }
 
-static dnsRecord
+public static dnsRecord
 newRecord(dnsName name, short type, short dclass, int ttl) {
 	return newRecord(name, type, dclass, ttl, 0, null);
 }
 
-static dnsRecord
+public static dnsRecord
 newRecord(dnsName name, short type, short dclass) {
 	return newRecord(name, type, dclass, 0, 0, null);
 }
@@ -246,6 +248,11 @@ getName() {
 public short
 getType() {
 	return type;
+}
+
+public short
+getDClass() {
+	return dclass;
 }
 
 abstract byte [] rrToWire(dnsCompression c) throws IOException;

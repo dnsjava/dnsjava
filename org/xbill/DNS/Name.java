@@ -1,6 +1,8 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
+package DNS;
+
 import java.io.*;
 import java.util.*;
 
@@ -9,10 +11,11 @@ public class dnsName {
 private String [] name;
 private byte labels;
 
-static dnsName root = new dnsName("");
+public static dnsName root = new dnsName("");
 
 static final int MAXLABELS = 64;
 
+public
 dnsName(String s, dnsName origin) {
 	labels = 0;
 	name = new String[MAXLABELS];
@@ -46,6 +49,7 @@ dnsName(String s, dnsName origin) {
 	
 }
 
+public
 dnsName(String s) {
 	this (s, null);
 }
@@ -87,6 +91,7 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 }
 
 /* Skips n labels and creates a new name */
+public
 dnsName(dnsName d, int n) {
 	name = new String[MAXLABELS];
 
