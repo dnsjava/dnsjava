@@ -21,14 +21,16 @@ public static final int IPv6 = 2;
 private
 Address() {}
 
-private static int []
+private static byte []
 parseV4(String s) {
 	int numDigits;
 	int currentOctet;
-	int [] values = new int[4];
+	byte [] values = new byte[4];
+	int currentValue;
 	int length = s.length();
 
 	currentOctet = 0;
+	currentValue = 0;
 	numDigits = 0;
 	for (int i = 0; i < length; i++) {
 		char c = s.charAt(i);
@@ -37,13 +39,13 @@ parseV4(String s) {
 			if (numDigits == 3)
 				return null;
 			/* Octets shouldn't start with 0, unless they are 0. */
-			if (numDigits > 0 && values[currentOctet] == 0)
+			if (numDigits > 0 && currentValue == 0)
 				return null;
 			numDigits++;
-			values[currentOctet] *= 10;
-			values[currentOctet] += (c - '0');
+			currentValue *= 10;
+			currentValue += (c - '0');
 			/* 255 is the maximum value for an octet. */
-			if (values[currentOctet] > 255)
+			if (currentValue > 255)
 				return null;
 		} else if (c == '.') {
 			/* Can't have more than 3 dots. */
@@ -52,7 +54,8 @@ parseV4(String s) {
 			/* Two consecutive dots are bad. */
 			if (numDigits == 0)
 				return null;
-			currentOctet++;
+			values[currentOctet++] = (byte) currentValue;
+			currentValue = 0;
 			numDigits = 0;
 		} else
 			return null;
@@ -66,13 +69,13 @@ parseV4(String s) {
 	return values;
 }
 
-private static int []
+private static byte []
 parseV6(String s) {
 	boolean parsev4 = false;
 	List l = new ArrayList();
 	int range = -1;
 
-	int [] data = new int[16];
+	byte [] data = new byte[16];
 
 	StringTokenizer st = new StringTokenizer(s, ":", true);
 	while (st.hasMoreTokens())
@@ -109,8 +112,8 @@ parseV6(String s) {
 				return null;
 			if (j > 16 - 2)
 				return null;
-			data[j++] = (x >>> 8);
-			data[j++] = (x & 0xFF);
+			data[j++] = (byte)(x >>> 8);
+			data[j++] = (byte)(x & 0xFF);
 		}
 		catch (NumberFormatException e) {
 			return null;
@@ -123,7 +126,7 @@ parseV6(String s) {
 		if (v4addr == null)
 			return null;
 		for (int k = 0; k < 4; k++)
-			data[j++] = v4addr[k];
+			data[j++] = (byte)v4addr[k];
 	}
 	if (range >= 0) {
 		int left = 16 - j;
@@ -146,11 +149,11 @@ parseV6(String s) {
  */
 public static int []
 toArray(String s, int family) {
-	if (family == IPv4)
-		return parseV4(s);
-	if (family == IPv6)
-		return parseV6(s);
-	throw new IllegalArgumentException("unknown address family");
+	byte [] byteArray = toByteArray(s, family);
+	int [] intArray = new int[byteArray.length];
+	for (int i = 0; i < byteArray.length; i++)
+		intArray[i] = byteArray[i] & 0xFF;
+	return intArray;
 }
 
 /**
@@ -160,7 +163,7 @@ toArray(String s, int family) {
  */
 public static int []
 toArray(String s) {
-	return parseV4(s);
+	return toArray(s, IPv4);
 }
 
 /**
@@ -171,13 +174,12 @@ toArray(String s) {
  */
 public static byte []
 toByteArray(String s, int family) {
-	int [] intArray = toArray(s, family);
-	if (intArray == null)
-		return null;
-	byte [] byteArray = new byte[intArray.length];
-	for (int i = 0; i < intArray.length; i++)
-		byteArray[i] = (byte) intArray[i];
-	return byteArray;
+	if (family == IPv4)
+		return parseV4(s);
+	else if (family == IPv6)
+		return parseV6(s);
+	else
+		throw new IllegalArgumentException("unknown address family");
 }
 
 /**
