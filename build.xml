@@ -3,7 +3,7 @@
     <property name="src_dir" value="${basedir}"/>
     <property name="doc_dir" value="${basedir}/doc"/>
     <property name="dist_dir" value="${basedir}"/>
-    <property name="version" value="1.6.3"/>
+    <property name="version" value="1.6.4"/>
     <property name="jarname" value="dnsjava-${version}.jar"/>
     <property name="zipname" value="dnsjava-${version}.zip"/>
     <property name="targzname" value="dnsjava-${version}.tar.gz"/>
