@@ -31,41 +31,36 @@ private class Element {
 	int srcid;
 	Thread tid;
 
+	private void
+	setValues(Name name, RRset rrset, short type, byte credibility,
+		  long ttl, int srcid)
+	{
+		this.name = name;
+		this.rrset = rrset;
+		this.type = type;
+		this.credibility = credibility;
+		this.timeIn = System.currentTimeMillis();
+		this.ttl = ttl;
+		this.srcid = srcid;
+		this.tid = Thread.currentThread();
+	}
+
 	public
 	Element(Name name, long ttl, byte cred, int src, short type) {
-		this.name = name;
-		rrset = null;
-		this.type = type;
-		credibility = cred;
-		this.ttl = (long)ttl & 0xFFFFFFFFL;
-		srcid = src;
-		timeIn = System.currentTimeMillis();
-		tid = Thread.currentThread();
+		setValues(name, null, type, cred, ttl, src);
 	}
 
 	public
 	Element(Record r, byte cred, int src) {
-		name = r.getName();
-		rrset = new RRset();
-		type = rrset.getType();
-		credibility = cred;
-		timeIn = System.currentTimeMillis();
-		ttl = -1;
-		srcid = src;
-		update(r);
-		tid = Thread.currentThread();
+		RRset set = new RRset();
+		set.addRR(r);
+		setValues(r.getName(), set, set.getType(), cred, r.getTTL(),
+			  src);
 	}
 
 	public
 	Element(RRset r, byte cred, int src) {
-		name = r.getName();
-		rrset = r;
-		type = r.getType();
-		credibility = cred;
-		timeIn = System.currentTimeMillis();
-		ttl = (long)r.getTTL() & 0xFFFFFFFFL;
-		srcid = src;
-		tid = Thread.currentThread();
+		setValues(r.getName(), r, r.getType(), cred, r.getTTL(), src);
 	}
 
 	public final void
