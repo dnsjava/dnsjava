@@ -1,3 +1,12 @@
+3/10/2001
+	- Performance and memory imrpovements to the Name object.
+
+3/7/2001
+	- Performance improvements to TypeMap (used by Zone and Cache).
+
+3/6/2001
+	- Lots of standards compliance related fixes.
+
 3/4/2001
 	- Improved class handling.
 	- A few minor CNAME related fixes.
