@@ -22,6 +22,7 @@ public final class dns {
 private static Resolver res;
 private static Cache cache;
 private static Name [] searchPath;
+private static boolean searchPathSet;
 
 /* Otherwise the class could be instantiated */
 private
@@ -75,47 +76,27 @@ setResolver(Resolver _res) {
 	res = _res;
 }
 
-public void
+/**
+ * Specifies the domains which will be appended to unqualified names before
+ * beginning the lookup process
+ */
+public static void
 setSearchPath(String [] domains) {
-	searchPath = new Name[domains.length];
-	for (int i = 0; i < domains.length; i++)
-		searchPath[i] = new Name(domains[i]);
+	if (domains == null || domains.length == 0)
+		searchPath = null;
+	else {
+		searchPath = new Name[domains.length];
+		for (int i = 0; i < domains.length; i++)
+			searchPath[i] = new Name(domains[i]);
+	}
+	searchPathSet = true;
 }
 
-
-/**
- * Finds records with the given name, type, and class with a certain credibility
- * @param namestr  The name of the desired records
- * @param type  The type of the desired records
- * @param dclass  The class of the desired records
- * @param cred  The minimum credibility of the desired records
- * @see Credibility
- * @return The matching records, or null if none are found
- */
-public static Record []
-getRecords(String namestr, short type, short dclass, byte cred) {
-	Message query;
-	Message response;
-	Record question;
+private static Record []
+lookup(Name name, short type, short dclass, byte cred) {
 	Record [] answers;
-	int answerCount = 0, i = 0;
+	int answerCount = 0, n = 0;
 	Enumeration e;
-	Name name = new Name(namestr);
-
-	if (!Type.isRR(type) && type != Type.ANY)
-		return null;
-
-	if (res == null) {
-		try {
-			setResolver(new ExtendedResolver());
-		}
-		catch (UnknownHostException uhe) {
-			System.out.println("Failed to initialize resolver");
-			System.exit(-1);
-		}
-	}
-	if (cache == null)
-		cache = new Cache();
 
 /*System.out.println("lookup of " + name + " " + Type.string(type));*/
 	CacheResponse cached = cache.lookupRecords(name, type, dclass, cred);
@@ -130,10 +111,10 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 		e = null;
 	}
 	else {
-		question = Record.newRecord(name, type, dclass);
-		query = Message.newQuery(question);
+		Record question = Record.newRecord(name, type, dclass);
+		Message query = Message.newQuery(question);
 
-		response = res.send(query);
+		Message response = res.send(query);
 
 		short rcode = response.getHeader().getRcode();
 		if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)
@@ -161,7 +142,53 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	while (e.hasMoreElements()) {
 		Record r = (Record)e.nextElement();
 		if (matchType(r.getType(), type))
-			answers[i++] = r;
+			answers[n++] = r;
+	}
+
+	return answers;
+}
+
+
+/**
+ * Finds records with the given name, type, and class with a certain credibility
+ * @param namestr  The name of the desired records
+ * @param type  The type of the desired records
+ * @param dclass  The class of the desired records
+ * @param cred  The minimum credibility of the desired records
+ * @see Credibility
+ * @return The matching records, or null if none are found
+ */
+public static Record []
+getRecords(String namestr, short type, short dclass, byte cred) {
+	Record [] answers = null;
+	Name name = new Name(namestr);
+
+	if (!Type.isRR(type) && type != Type.ANY)
+		return null;
+
+	if (res == null) {
+		try {
+			setResolver(new ExtendedResolver());
+		}
+		catch (UnknownHostException uhe) {
+			System.out.println("Failed to initialize resolver");
+			System.exit(-1);
+		}
+	}
+	if (!searchPathSet)
+		searchPath = FindServer.searchPath();
+	if (cache == null)
+		cache = new Cache();
+
+	if (searchPath == null || name.isQualified())
+		answers = lookup(name, type, dclass, cred);
+	else {
+		for (int i = 0; i < searchPath.length; i++) {
+			answers = lookup(new Name(namestr, searchPath[i]),
+					 type, dclass, cred);
+			if (answers != null)
+				break;
+		}
 	}
 
 	return answers;
