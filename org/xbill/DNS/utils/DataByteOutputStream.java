@@ -143,7 +143,7 @@ writeBigInteger(BigInteger i) {
  * @param pos The position at which the write occurs
  */
 public void
-writeShortAt(int i, int pos) throws IllegalArgumentException {
+writeShortAt(int i, int pos) {
 	if (pos < 0 || pos > count)
 		throw new IllegalArgumentException(pos + " out of range");
 	int oldcount = count;
