@@ -41,6 +41,9 @@ TypeClassMap() {
 	data = new Hashtable();
 }
 
+/**
+ * Finds the object corresponding to the given type and class.
+ */
 Object
 get(short type, short dclass) {
 	Object [] out = getMultiple(type, dclass);
@@ -53,45 +56,53 @@ get(short type, short dclass) {
 }
 
 private int
-fill(Object [] array, Enumeration e, short dclass) {
-	int n = 0;
+fill(Object [] array, int start, Enumeration e, short dclass) {
 	while (e.hasMoreElements()) {
 		Wrapper w = (Wrapper) e.nextElement();
 		if (dclass == DClass.ANY || w.dclass == dclass)
-			array[n++] = w.object;
+			array[start++] = w.object;
 	}
-	return n;
+	return start;
 }
 
+/**
+ * Finds the objects corresponding to the given type and class, which may
+ * be ANY.
+ */
 Object []
 getMultiple(short type, short dclass) {
 	Object [] out;
-	Enumeration e;
+	Vector v;
 	int n;
 
 	if (type != Type.ANY) {
-		Vector v = (Vector) data.get(new Short(type));
+		v = (Vector) data.get(new Short(type));
 		if (v == null)
 			return null;
 		synchronized (v) {
 			out = new Object[v.size()];
-			e = v.elements();
-			n = fill(out, e, dclass);
+			n = fill(out, 0, v.elements(), dclass);
 		}
 	}
 	else {
 		synchronized (data) {
-			Vector all = new Vector();
-			out = new Object[data.size()];
-			e = data.elements();
-			while (e.hasMoreElements()) {
-				Vector v = (Vector) e.nextElement();
-				Enumeration e2 = v.elements();
-				while (e2.hasMoreElements())
-					all.addElement(e2.nextElement());
+			int size = data.size();
+			while (true) {
+				try {
+					out = new Object[size];
+					Enumeration e = data.elements();
+					n = 0;
+					while (e.hasMoreElements()) {
+						v = (Vector) e.nextElement();
+						n = fill(out, n, v.elements(),
+							 dclass);
+					}
+					break;
+				}
+				catch (ArrayIndexOutOfBoundsException e) {
+					size *= 2;
+				}
 			}
-			e = all.elements();
-			n = fill(out, e, dclass);
 		}
 	}
 	if (n != out.length) {
@@ -102,6 +113,9 @@ getMultiple(short type, short dclass) {
 	return out;
 }
 
+/**
+ * Associates an object with a type and class.
+ */
 void
 put(short type, short dclass, Object value) {
 	Short T = new Short(type);
@@ -118,6 +132,9 @@ put(short type, short dclass, Object value) {
 	}
 }
 
+/**
+ * Removes the object with the given type and class.
+ */
 void
 remove(short type, short dclass) {
 	Short T = new Short(type);
@@ -132,6 +149,9 @@ remove(short type, short dclass) {
 	}
 }
 
+/**
+ * Is this map empty?
+ */
 boolean
 isEmpty() {
 	return data.isEmpty();
