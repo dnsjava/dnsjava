@@ -27,13 +27,30 @@ private byte labels;
 private boolean qualified;
 
 /** The root name */
-public static Name root = new Name(".");
+public static final Name root = new Name(".");
 
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 128;
 
+/* The number of labels initially allocated. */
+private static final int STARTLABELS = 4;
+
 private
 Name() {
+}
+
+private final void
+grow(int n) {
+	if (n > MAXLABELS)
+		throw new ArrayIndexOutOfBoundsException("name too long");
+	Object [] newarray = new Object[n];
+	System.arraycopy(name, 0, newarray, 0, labels);
+	name = newarray;
+}
+
+private final void
+grow() {
+	grow(labels * 2);
 }
 
 /**
@@ -44,7 +61,7 @@ Name() {
 public
 Name(String s, Name origin) {
 	labels = 0;
-	name = new Object[MAXLABELS];
+	name = new Object[STARTLABELS];
 
 	if (s.equals("@") && origin != null) {
 		append(origin);
@@ -56,6 +73,8 @@ Name(String s, Name origin) {
 
 		while (st.hasMoreTokens()) {
 			String token = st.nextToken();
+			if (labels == name.length)
+				grow();
 			if (token.charAt(0) == '[')
 				name[labels++] = new BitString(token);
 			else
@@ -120,7 +139,7 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 	Name name2;
 
 	labels = 0;
-	name = new Object[MAXLABELS];
+	name = new Object[STARTLABELS];
 
 	start = in.getPos();
 loop:
@@ -129,6 +148,8 @@ loop:
 		case LABEL_NORMAL:
 			byte [] b = new byte[len];
 			in.read(b);
+			if (labels == name.length)
+				grow();
 			name[labels++] = b;
 			count++;
 			break;
@@ -142,6 +163,8 @@ loop:
 			if (name2 == null)
 				throw new WireParseException("bad compression");
 			else {
+				if (labels + name2.labels > name.length)
+					grow(labels + name2.labels);
 				System.arraycopy(name2.name, 0, name, labels,
 						 name2.labels);
 				labels += name2.labels;
@@ -157,6 +180,8 @@ loop:
 				int bytes = (bits + 7) / 8;
 				byte [] data = new byte[bytes];
 				in.read(data);
+				if (labels == name.length)
+					grow();
 				name[labels++] = new BitString(bits, data);
 				count++;
 				break;
@@ -195,7 +220,7 @@ loop:
 /* Skips n labels and creates a new name */
 public
 Name(Name d, int n) {
-	name = new Object[MAXLABELS];
+	name = new Object[d.labels - n];
 
 	labels = (byte) (d.labels - n);
 	System.arraycopy(d.name, n, name, 0, labels);
@@ -263,6 +288,8 @@ isQualified() {
  */
 public void
 append(Name d) {
+	if (labels + d.labels > name.length)
+		grow(labels + d.labels);
 	System.arraycopy(d.name, 0, name, labels, d.labels);
 	labels += d.labels;
 	qualified = d.qualified;
