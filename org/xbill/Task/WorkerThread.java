@@ -86,7 +86,8 @@ assignThread(Resolver _res, Message _query, int _id,
 	synchronized (t) {
 		if (!t.isAlive())
 			t.start();
-		t.notify();
+		else
+			t.notify();
 	}
 }
 
@@ -111,8 +112,10 @@ run() {
 			}
 			catch (InterruptedException e) {
 			}
-			if (res == null)
+			if (res == null) {
+				list.removeElement(this);
 				return;
+			}
 		}
 	}
 }
