@@ -1,9 +1,13 @@
-2/8/2004
+3/1/2005
+	- Add support for HMAC-SHA1 and HMAC-SHA256 TSIG algorithms.
+	  (suggested by Olafur Gudmundsson <ogud@ogud.com>)
+
+2/8/2005
 	- Add infrastructure for parsing the output of ipconfig on
 	  non-English version of windows, and add support for German
 	  and Polish. (based on a patch by Piotr Kochanski)
 
-2/7/2004
+2/7/2005
 	- Add Options.refresh() (based on a patch from Th Kuhne)
 	- Add the ResolverConfig class, which is largely based on the
 	  FindServer class, except that it's not all static methods.
@@ -15,14 +19,14 @@
 	- Work around a TCP bug in whatever broken nameserver Enom is using.
 	  (reported by Caleb Richardson <caleb@everyone.net>)
 
-2/4/2004
+2/4/2005
 	- 1.6.5 released.
 	- Records of an unknown type and length 0 weren't handled properly.
 	  (reported by Olafur Gudmundsson <ogud@ogud.com>)
 	- Fixed a bug in $INCLUDE handling.
 	  (Christian Sepulveda <christian.sepulveda@nominum.com>)
 
-2/3/2004
+2/3/2005
 	- The Lookup.run() method should be usable more than once on a Lookup
 	  object.
 	  (reported by Joseph Shraibman <jks@iname.com>)
