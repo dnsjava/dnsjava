@@ -185,7 +185,7 @@ getFootprint() {
 	catch (IOException e) {}
 	byte [] rdata = out.toByteArray();
 
-	if (alg == DNSSEC.RSA) {
+	if (alg == DNSSEC.RSAMD5) {
 		int d1 = rdata[rdata.length - 3] & 0xFF;
 		int d2 = rdata[rdata.length - 2] & 0xFF;
 		foot = (d1 << 8) + d2;

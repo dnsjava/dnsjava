@@ -153,13 +153,17 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 	String algString;
 
 	switch (sigrec.getAlgorithm()) {
-		case DNSSEC.RSA:
+		case DNSSEC.RSAMD5:
 			sig = sigrec.getSignature();
 			algString = "MD5withRSA";
 			break;
 		case DNSSEC.DSA:
 			sig = DSASignature.create(sigrec);
 			algString = "SHA1withDSA";
+			break;
+		case DNSSEC.RSASHA1:
+			sig = sigrec.getSignature();
+			algString = "SHA1withRSA";
 			break;
 		default:
 			return DNSSEC.Failed;

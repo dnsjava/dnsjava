@@ -34,7 +34,7 @@ private int footprint;
 
 /** 
  * Creates a new SIG(0) signer object.
- * @param algorithm usually DNSSEC.RSA or DNSSEC.DSA
+ * @param algorithm usually DNSSEC.RSAMD5, DNSSEC.DSA, or DNSSEC.RSASHA1
  * @param privateKey signing key (must match algorithm)
  * @param name the name of the key
  * @param keyFootprint the key tag
@@ -93,8 +93,10 @@ throws IOException, SignatureException, InvalidKeyException,
 	String algorithmName;
 	if (algorithm == DNSSEC.DSA) {
 		algorithmName = "SHA1withDSA";
-	} else if (algorithm == DNSSEC.RSA) {
+	} else if (algorithm == DNSSEC.RSAMD5) {
 		algorithmName = "MD5withRSA";
+	} else if (algorithm == DNSSEC.RSASHA1) {
+		algorithmName = "SHA1withRSA";
 	} else {
 		throw new NoSuchAlgorithmException("Unknown algorithm");
 	}

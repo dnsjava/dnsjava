@@ -106,7 +106,8 @@ parseRecord(KEYRecord r) {
 	DataByteInputStream dbs = new DataByteInputStream(data); 
 	try {
 		switch (alg) {
-			case DNSSEC.RSA:
+			case DNSSEC.RSAMD5:
+			case DNSSEC.RSASHA1:
 				return parseRSA(dbs);
 			case DNSSEC.DH:
 				return parseDH(dbs);
@@ -205,7 +206,7 @@ buildRecord(Name name, short dclass, int ttl, int flags, int proto,
 	byte alg;
 
 	if (key instanceof RSAPublicKey) {
-		alg = DNSSEC.RSA;
+		alg = DNSSEC.RSAMD5;
 		data = buildRSA((RSAPublicKey) key);
 	}
 	else if (key instanceof DHPublicKey) {

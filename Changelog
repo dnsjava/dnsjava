@@ -1,3 +1,6 @@
+10/14/2001
+	- Add support for the DNSSEC RSA-SHA1 algorithm (David Blacka)
+
 9/27/2001
 	- jnamed can now listen on specific addresses, with the "address"
 	  keyword in the config file.

@@ -21,9 +21,11 @@ package org.xbill.DNS;
 
 public class DNSSEC {
 
-public static final byte RSA = 1;
+public static final byte RSAMD5 = 1;
+public static final byte RSA = RSAMD5;
 public static final byte DH = 2;
 public static final byte DSA = 3;
+public static final byte RSASHA1 = 5;
 
 public static final byte Failed = -1;
 public static final byte Insecure = 0;
