@@ -1,3 +1,6 @@
+10/8/2002
+	- Cleanups to Cache.addMessage() and the Credibility code.
+
 10/7/2002
 	- Fix problems with search path handling in the dns class.
 	- Possible race condition fixes to the Cache code.

@@ -277,8 +277,7 @@ addAnswer(Message response, Name name, short type, short dclass,
 		sr = zone.findRecords(name, type);
 	else {
 		Cache cache = getCache(dclass);
-		sr = cache.lookupRecords(name, type,
-					 Credibility.NONAUTH_ANSWER);
+		sr = cache.lookupRecords(name, type, Credibility.NORMAL);
 	}
 
 	if (sr.isUnknown()) {

@@ -37,11 +37,6 @@ static {
 		else
 			findUnix();
 	}
-	List l = new ArrayList();
-	if (searchlist != null)
-		l.addAll(Arrays.asList(searchlist));
-	addSearch(".", l);
-	searchlist = (Name []) l.toArray(new Name[l.size()]);
 }
 
 private

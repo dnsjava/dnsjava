@@ -320,7 +320,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
  */
 public static Record []
 getRecords(String namestr, short type, short dclass) {
-	return getRecords(namestr, type, dclass, Credibility.NONAUTH_ANSWER);
+	return getRecords(namestr, type, dclass, Credibility.NORMAL);
 }
 
 /**
@@ -332,7 +332,7 @@ getRecords(String namestr, short type, short dclass) {
  */
 public static Record []
 getAnyRecords(String namestr, short type, short dclass) {
-	return getRecords(namestr, type, dclass, Credibility.AUTH_ADDITIONAL);
+	return getRecords(namestr, type, dclass, Credibility.ANY);
 }
 
 /**
@@ -343,7 +343,7 @@ getAnyRecords(String namestr, short type, short dclass) {
  */
 public static Record []
 getRecords(String name, short type) {
-	return getRecords(name, type, DClass.IN, Credibility.NONAUTH_ANSWER);
+	return getRecords(name, type, DClass.IN, Credibility.NORMAL);
 }
 
 /**
@@ -354,7 +354,7 @@ getRecords(String name, short type) {
  */
 public static Record []
 getAnyRecords(String name, short type) {
-	return getRecords(name, type, DClass.IN, Credibility.AUTH_ADDITIONAL);
+	return getRecords(name, type, DClass.IN, Credibility.ANY);
 }
 
 /**
@@ -366,7 +366,7 @@ getAnyRecords(String name, short type) {
 public static Record []
 getRecordsByAddress(String addr, short type) {
 	String name = inaddrString(addr);
-	return getRecords(name, type, DClass.IN, Credibility.NONAUTH_ANSWER);
+	return getRecords(name, type, DClass.IN, Credibility.NORMAL);
 }
 
 /**
@@ -378,7 +378,7 @@ getRecordsByAddress(String addr, short type) {
 public static Record []
 getAnyRecordsByAddress(String addr, short type) {
 	String name = inaddrString(addr);
-	return getRecords(name, type, DClass.IN, Credibility.AUTH_ADDITIONAL);
+	return getRecords(name, type, DClass.IN, Credibility.ANY);
 }
 
 }

@@ -131,7 +131,7 @@ maybeAddRecord(Record record, Cache cache, Object source) throws IOException {
 	if (name.subdomain(origin))
 		addRecord(record);
 	else if (cache != null)
-		cache.addRecord(record, Credibility.ZONE_GLUE, source);
+		cache.addRecord(record, Credibility.GLUE, source);
 }
 
 /**
@@ -211,7 +211,7 @@ throws IOException
 	if (cache != null) {
 		recs = response.getSectionArray(Section.ADDITIONAL);
 		for (int i = 0; i < recs.length; i++)
-			cache.addRecord(recs[i], Credibility.ZONE_GLUE, recs);
+			cache.addRecord(recs[i], Credibility.GLUE, recs);
 	}
 	validate();
 }

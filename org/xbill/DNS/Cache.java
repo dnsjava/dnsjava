@@ -69,12 +69,20 @@ private static class PositiveElement extends Element {
 private class NegativeElement extends Element {
 	short type;
 	Name name;
+	SOARecord soa;
 
 	public
-	NegativeElement(Name name, long ttl, byte cred, short type) {
+	NegativeElement(Name name, short type, SOARecord soa, byte cred) {
 		this.name = name;
 		this.type = type;
-		setValues(cred, ttl);
+		this.soa = soa;
+		long cttl = 0;
+		if (soa != null) {
+			cttl = soa.getMinimum() & 0xFFFFFFFFL;
+			if (maxncache >= 0)
+				cttl = Math.min(cttl, maxncache);
+		}
+		setValues(cred, cttl);
 	}
 
 	public short
@@ -246,14 +254,15 @@ addRRset(RRset rrset, byte cred) {
  * Adds a negative entry to the Cache.
  * @param name The name of the negative entry
  * @param type The type of the negative entry
- * @param ttl The ttl of the negative entry
+ * @param soa The SOA record to add to the negative cache entry, or null.
+ * The negative cache ttl is derived from the SOA.
  * @param cred The credibility of the negative entry
  */
 public void
-addNegative(Name name, short type, long ttl, byte cred) {
+addNegative(Name name, short type, SOARecord soa, byte cred) {
 	Element element = (Element) findExactSet(name, type);
-	if (element == null || cred > element.credibility)
-		addSet(name, type, new NegativeElement(name, ttl, cred, type));
+	if (element == null || cred >= element.credibility)
+		addSet(name, type, new NegativeElement(name, type, soa, cred));
 }
 
 private void
@@ -460,7 +469,7 @@ findRecords(Name name, short type, byte minCred) {
  */
 public RRset []
 findRecords(Name name, short type) {
-	return findRecords(name, type, Credibility.NONAUTH_ANSWER);
+	return findRecords(name, type, Credibility.NORMAL);
 }
 
 /**
@@ -473,7 +482,7 @@ findRecords(Name name, short type) {
  */
 public RRset []
 findAnyRecords(Name name, short type) {
-	return findRecords(name, type, Credibility.NONAUTH_ADDITIONAL);
+	return findRecords(name, type, Credibility.GLUE);
 }
 
 private void
@@ -509,29 +518,21 @@ verifyRecords(Cache tcache) {
 }
 
 private final byte
-getCred(Name recordName, Name queryName, short section, boolean isAuth) {
-	byte cred;
-
+getCred(short section, boolean isAuth) {
 	if (section == Section.ANSWER) {
-		if (isAuth && recordName.equals(queryName))
-			cred = Credibility.AUTH_ANSWER;
-		else if (isAuth)
-			cred = Credibility.AUTH_NONAUTH_ANSWER;
+		if (isAuth)
+			return Credibility.AUTH_ANSWER;
 		else
-			cred = Credibility.NONAUTH_ANSWER;
+			return Credibility.NONAUTH_ANSWER;
 	} else if (section == Section.AUTHORITY) {
 		if (isAuth)
-			cred = Credibility.AUTH_AUTHORITY;
+			return Credibility.AUTH_AUTHORITY;
 		else
-			cred = Credibility.NONAUTH_AUTHORITY;
+			return Credibility.NONAUTH_AUTHORITY;
 	} else if (section == Section.ADDITIONAL) {
-		if (isAuth)
-			cred = Credibility.AUTH_ADDITIONAL;
-		else
-			cred = Credibility.NONAUTH_ADDITIONAL;
+		return Credibility.ADDITIONAL;
 	} else
 		throw new IllegalArgumentException("getCred: invalid section");
-	return cred;
 }
 
 /**
@@ -543,14 +544,19 @@ getCred(Name recordName, Name queryName, short section, boolean isAuth) {
 public void
 addMessage(Message in) {
 	boolean isAuth = in.getHeader().getFlag(Flags.AA);
-	Name queryName = in.getQuestion().getName();
-	Name lookupName = queryName;
-	short queryType = in.getQuestion().getType();
-	short queryClass = in.getQuestion().getDClass();
+	Name qname = in.getQuestion().getName();
+	Name curname = qname;
+	short qtype = in.getQuestion().getType();
+	short qclass = in.getQuestion().getDClass();
 	byte cred;
 	short rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
+	boolean completed = false;
+	boolean restart = false;
 	RRset [] answers, auth, addl;
+
+	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
+		return;
 
 	if (secure) {
 		Cache c = new Cache(dclass);
@@ -559,95 +565,71 @@ addMessage(Message in) {
 		return;
 	}
 
-	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
-		return;
-
 	answers = in.getSectionRRsets(Section.ANSWER);
-	while (!haveAnswer || queryType == Type.ANY) {
-		boolean restart = false;
-		for (int i = 0; i < answers.length; i++) {
-			short type = answers[i].getType();
-			short rrtype = answers[i].getType();
-			Name name = answers[i].getName();
-			cred = getCred(name, queryName, Section.ANSWER, isAuth);
-			if (type == Type.CNAME && name.equals(lookupName)) {
-				CNAMERecord cname;
-				addRRset(answers[i], cred);
-				cname = (CNAMERecord) answers[i].first();
-				lookupName = cname.getTarget();
-				restart = true;
-			} else if (rrtype == Type.CNAME &&
-				   name.equals(lookupName))
-			{
-				addRRset(answers[i], cred);
-			} else if (type == Type.DNAME &&
-				   lookupName.subdomain(name))
-			{
-				DNAMERecord dname;
-				addRRset(answers[i], cred);
-				dname = (DNAMERecord) answers[i].first();
-				try {
-					lookupName =
-						lookupName.fromDNAME(dname);
-				}
-				catch (NameTooLongException e) {
-					break;
-				}
-				restart = true;
-			} else if (rrtype == Type.DNAME &&
-				   lookupName.subdomain(name))
-			{
-				addRRset(answers[i], cred);
-			} else if ((rrtype == queryType ||
-				  queryType == Type.ANY) &&
-				 name.equals(lookupName))
-			{
-				addRRset(answers[i], cred);
-				haveAnswer = true;
+	for (int i = 0; i < answers.length; i++) {
+		if (answers[i].getDClass() != qclass)
+			continue;
+		short type = answers[i].getType();
+		Name name = answers[i].getName();
+		cred = getCred(Section.ANSWER, isAuth);
+		if (type == Type.CNAME && name.equals(curname)) {
+			CNAMERecord cname;
+			addRRset(answers[i], cred);
+			cname = (CNAMERecord) answers[i].first();
+			curname = cname.getTarget();
+			restart = true;
+			haveAnswer = true;
+		} else if (type == Type.DNAME && curname.subdomain(name)) {
+			DNAMERecord dname;
+			addRRset(answers[i], cred);
+			dname = (DNAMERecord) answers[i].first();
+			try {
+				curname = curname.fromDNAME(dname);
 			}
+			catch (NameTooLongException e) {
+				break;
+			}
+			restart = true;
+			haveAnswer = true;
+		} else if ((type == qtype || qtype == Type.ANY) &&
+			   name.equals(curname))
+		{
+			addRRset(answers[i], cred);
+			completed = true;
+			haveAnswer = true;
 		}
-		if (!restart)
-			break;
+		if (restart) {
+			restart = false;
+			i = 0;
+		}
 	}
 
 	auth = in.getSectionRRsets(Section.AUTHORITY);
-
-	if (!haveAnswer) {
-		/* This is a negative response */
-		SOARecord soa = null;
+	if (!completed) {
+		/* This is a negative response or a referral. */
+		RRset soa = null, ns = null;
 		for (int i = 0; i < auth.length; i++) {
 			if (auth[i].getType() == Type.SOA &&
-			    lookupName.subdomain(auth[i].getName()))
-			{
-				soa = (SOARecord) auth[i].first();
-				break;
-			}
+			    curname.subdomain(auth[i].getName()))
+				soa = auth[i];
+			else if (auth[i].getType() == Type.NS &&
+				 curname.subdomain(auth[i].getName()))
+				ns = auth[i];
 		}
-		if (soa != null) {
-			/* This is a cacheable negative response. */
-			long ttl = (long)soa.getMinimum() & 0xFFFFFFFFL;
-			if (maxncache >= 0)
-				ttl = Math.min(ttl, maxncache);
-			cred = getCred(soa.getName(), queryName,
-				       Section.AUTHORITY, isAuth);
-			if (rcode == Rcode.NXDOMAIN)
-				addNegative(lookupName, (short)0, ttl, cred);
-			else
-				addNegative(lookupName, queryType, ttl, cred);
+		short cachetype = (rcode == Rcode.NXDOMAIN) ? (short)0 : qtype;
+		if (soa != null || ns == null) {
+			/* Negative response */
+			cred = getCred(Section.AUTHORITY, isAuth);
+			SOARecord soarec = null;
+			if (soa != null)
+				soarec = (SOARecord) soa.first();
+			addNegative(curname, cachetype, soarec, cred);
+			/* NXT records are not cached yet. */
+		} else {
+			/* Referral response */
+			cred = getCred(Section.AUTHORITY, isAuth);
+			addRRset(ns, cred);
 		}
-	}
-
-	for (int i = 0; i < auth.length; i++) {
-		short type = auth[i].getType();
-		Name name = auth[i].getName();
-		if ((type == Type.NS || type == Type.SOA) &&
-		    lookupName.subdomain(name))
-		{
-			cred = getCred(name, queryName, Section.AUTHORITY,
-				       isAuth);
-			addRRset(auth[i], cred);
-		}
-		/* NXT records are not cached yet. */
 	}
 
 	addl = in.getSectionRRsets(Section.ADDITIONAL);
@@ -657,7 +639,7 @@ addMessage(Message in) {
 			continue;
 		/* XXX check the name */
 		Name name = addl[i].getName();
-		cred = getCred(name, queryName, Section.ADDITIONAL, isAuth);
+		cred = getCred(Section.ADDITIONAL, isAuth);
 		addRRset(addl[i], cred);
 	}
 }
