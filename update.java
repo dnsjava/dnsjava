@@ -228,8 +228,10 @@ doRequire(MyStringTokenizer st) throws IOException {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
 	}
-	query.addRecord(PREREQ, rec);
-	System.out.println(rec);
+	if (rec != null) {
+		query.addRecord(PREREQ, rec);
+		System.out.println(rec);
+	}
 }
 
 void
@@ -247,8 +249,10 @@ doProhibit(MyStringTokenizer st) throws IOException {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
 	}
-	query.addRecord(PREREQ, rec);
-	System.out.println(rec);
+	if (rec != null) {
+		query.addRecord(PREREQ, rec);
+		System.out.println(rec);
+	}
 }
 
 void
@@ -266,8 +270,10 @@ doAdd(MyStringTokenizer st) throws IOException {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
 	}
-	query.addRecord(UPDATE, rec);
-	System.out.println(rec);
+	if (rec != null) {
+		query.addRecord(UPDATE, rec);
+		System.out.println(rec);
+	}
 }
 
 void
@@ -287,8 +293,10 @@ doDelete(MyStringTokenizer st) throws IOException {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
 	}
-	query.addRecord(UPDATE, rec);
-	System.out.println(rec);
+	if (rec != null) {
+		query.addRecord(UPDATE, rec);
+		System.out.println(rec);
+	}
 }
 
 void
@@ -306,8 +314,10 @@ doGlue(MyStringTokenizer st) throws IOException {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
 	}
-	query.addRecord(ADDITIONAL, rec);
-	System.out.println(rec);
+	if (rec != null) {
+		query.addRecord(ADDITIONAL, rec);
+		System.out.println(rec);
+	}
 }
 
 static void
