@@ -32,6 +32,9 @@ DataByteInputStream(byte [] b) {
  */
 public int
 read(byte [] b) throws IOException {
+	if (b.length == 0) {
+		return 0;
+	}
 	int n = read(b, 0, b.length);
 	if (n < b.length)
 		throw new IOException("end of input");
@@ -47,6 +50,9 @@ read(byte [] b) throws IOException {
  */
 public int
 readArray(byte [] b, int pos, int len) throws IOException {
+	if (len == 0) {
+		return 0;
+	}
 	int n = read(b, pos, len);
 	if (n < len)
 		throw new IOException("end of input");
