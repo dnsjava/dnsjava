@@ -15,14 +15,14 @@ import org.xbill.DNS.utils.*;
 
 public class TXTRecord extends Record {
 
-private Vector strings;
+private List strings;
 
 /**
  * Creates a TXT Record from the given data
  * @param strings The text strings
  */
 public
-TXTRecord(Name _name, short _dclass, int _ttl, Vector _strings)
+TXTRecord(Name _name, short _dclass, int _ttl, List _strings)
 throws IOException
 {
 	super(_name, Type.TXT, _dclass, _ttl);
@@ -38,8 +38,8 @@ TXTRecord(Name _name, short _dclass, int _ttl, String _string)
 throws IOException
 {
 	super(_name, Type.TXT, _dclass, _ttl);
-	strings = new Vector();
-	strings.addElement(_string);
+	strings = new ArrayList();
+	strings.add(_string);
 }
 
 TXTRecord(Name _name, short _dclass, int _ttl, int length,
@@ -50,13 +50,13 @@ throws IOException
 	if (in == null)
 		return;
 	int count = 0;
-	strings = new Vector();
+	strings = new ArrayList();
         while (count < length) {
                 int len = in.readByte();
                 byte [] b = new byte[len];
                 in.read(b);
                 count += (len + 1);
-                strings.addElement(new String(b));
+                strings.add(new String(b));
         }
 }
 
@@ -65,9 +65,9 @@ TXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 throws IOException
 {
 	super(_name, Type.TXT, _dclass, _ttl);
-	strings = new Vector();
+	strings = new ArrayList();
 	while (st.hasMoreTokens())
-		strings.addElement(st.nextToken());
+		strings.add(st.nextToken());
 }
 
 /** converts to a String */
@@ -75,12 +75,12 @@ public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (strings != null) {
-		Enumeration e = strings.elements();
-		while (e.hasMoreElements()) {
-			String s = (String) e.nextElement();
+		Iterator it = strings.iterator();
+		while (it.hasNext()) {
+			String s = (String) it.next();
 			sb.append("\"");
 			sb.append(s);
-			if (e.hasMoreElements())
+			if (it.hasNext())
 				sb.append("\" ");
 		}
 	}
@@ -88,7 +88,7 @@ rdataToString() {
 }
 
 /** Returns the text strings */
-public Vector
+public List
 getStrings() {
 	return strings;
 }
@@ -98,9 +98,9 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (strings == null)
 		return;
 
-	Enumeration e = strings.elements();
-	while (e.hasMoreElements()) {
-		String s = (String) e.nextElement();
+	Iterator it = strings.iterator();
+	while (it.hasNext()) {
+		String s = (String) it.next();
 		out.writeString(s);
 	}
 }

@@ -24,7 +24,7 @@ import org.xbill.DNS.utils.*;
 
 public class OPTRecord extends Record {
 
-private Hashtable options;
+private Map options;
 
 private
 OPTRecord() {}
@@ -58,7 +58,7 @@ throws IOException
 		return;
 	int count = 0;
 	if (count < length)
-		options = new Hashtable();
+		options = new HashMap();
 	while (count < length) {
 		int code = in.readUnsignedShort();
 		int len = in.readUnsignedShort();
@@ -77,9 +77,9 @@ rdataToString() {
 	sb.append("\t");
 	sb.append(Type.string(getType()));
 	if (options != null) {
-		Enumeration e = options.keys();
-		while (e.hasMoreElements()) {
-			Integer i = (Integer) e.nextElement();
+		Iterator it = options.keySet().iterator();
+		while (it.hasNext()) {
+			Integer i = (Integer) it.next();
 			sb.append(i + " ");
 		}
 	}
@@ -125,9 +125,9 @@ void
 rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (options == null)
 		return;
-	Enumeration e = options.keys();
-	while (e.hasMoreElements()) {
-		Integer i = (Integer) e.nextElement();
+	Iterator it = options.keySet().iterator();
+	while (it.hasNext()) {
+		Integer i = (Integer) it.next();
 		short key = i.shortValue();
 		out.writeShort(key);
 		byte [] data = (byte []) options.get(i);

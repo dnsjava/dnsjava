@@ -49,20 +49,18 @@ public
 Inet6Address(String s) throws IOException
 {
 	boolean parsev4 = false;
-	Vector v = new Vector();
+	List l = new ArrayList();
 	int range = -1;
 
 	data = new byte[16];
 
 	StringTokenizer st = new StringTokenizer(s, ":", true);
 	while (st.hasMoreTokens())
-		v.addElement(st.nextToken());
-	v.addElement("");
-	v.addElement("");
+		l.add(st.nextToken());
+	l.add("");
+	l.add("");
 
-	String [] tokens = new String[v.size()];
-	for (int i = 0; i < v.size(); i++)
-		tokens[i] = (String) v.elementAt(i);
+	String [] tokens = (String []) l.toArray(new String[l.size()]);
 
 	int i = 0, j = 0;
 	while (i < tokens.length - 2) {
