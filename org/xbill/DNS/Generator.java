@@ -90,7 +90,7 @@ Generator(long start, long end, long step, String namePattern,
 	this.ttl = ttl;
 	this.rdataPattern = rdataPattern;
 	this.origin = origin;
-	this.current = 0;
+	this.current = start;
 }
 
 private String

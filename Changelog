@@ -1,3 +1,6 @@
+3/6/2005
+	- $GENERATE statements should obey the start field.
+
 3/1/2005
 	- Add support for HMAC-SHA1 and HMAC-SHA256 TSIG algorithms.
 	  (suggested by Olafur Gudmundsson <ogud@ogud.com>)
