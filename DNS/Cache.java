@@ -85,6 +85,8 @@ public void
 addRecord(Record r, byte cred, Object o) {
 	Name name = r.getName();
 	short type = r.getRRsetType();
+	if (!Type.isRR(type))
+		return;
 	int src = (o != null) ? o.hashCode() : 0;
 	if (r.getTTL() == 0)
 		return;
