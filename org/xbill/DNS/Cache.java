@@ -462,11 +462,11 @@ verifyRecords(Cache tcache) {
 }
 
 private final byte
-getCred(Record r, Name queryName, short section, boolean isAuth) {
+getCred(Name recordName, Name queryName, short section, boolean isAuth) {
 	byte cred;
 
 	if (section == Section.ANSWER) {
-		if (isAuth && r.getName() == queryName)
+		if (isAuth && recordName.equals(queryName))
 			cred = Credibility.AUTH_ANSWER;
 		else if (isAuth)
 			cred = Credibility.AUTH_NONAUTH_ANSWER;
@@ -490,7 +490,6 @@ getCred(Record r, Name queryName, short section, boolean isAuth) {
 	return cred;
 }
 
-
 /**
  * Adds all data from a Message into the Cache.  Each record is added with
  * the appropriate credibility, and negative answers are cached as such.
@@ -502,11 +501,13 @@ addMessage(Message in) {
 	Enumeration e;
 	boolean isAuth = in.getHeader().getFlag(Flags.AA);
 	Name queryName = in.getQuestion().getName();
+	Name lookupName = queryName;
 	short queryType = in.getQuestion().getType();
 	short queryClass = in.getQuestion().getDClass();
 	byte cred;
 	short rcode = in.getHeader().getRcode();
-	int ancount = in.getHeader().getCount(Section.ANSWER);
+	boolean haveAnswer = false;
+	Record [] answers;
 
 	if (secure) {
 		Cache c = new Cache(dclass);
@@ -518,57 +519,89 @@ addMessage(Message in) {
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return;
 
-	e = in.getSection(Section.ANSWER);
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		cred = getCred(r, queryName, Section.ANSWER, isAuth);
-		addRecord(r, cred, in);
+	answers = in.getSectionArray(Section.ANSWER);
+	while (!haveAnswer) {
+ loop:
+		for (int i = 0; i < answers.length; i++) {
+			short answerType = answers[i].getType();
+			Name answerName = answers[i].getName();
+			if (answerType == Type.CNAME &&
+			    answerName.equals(lookupName))
+			{
+				cred = getCred(answerName, queryName,
+					       Section.ANSWER, isAuth);
+				addRecord(answers[i], cred, in);
+				CNAMERecord cname = (CNAMERecord) answers[i];
+				lookupName = cname.getTarget();
+				break loop;
+			}
+			else if (answerType == Type.DNAME &&
+				 lookupName.subdomain(answerName))
+			{
+				cred = getCred(answerName, queryName,
+					       Section.ANSWER, isAuth);
+				addRecord(answers[i], cred, in);
+				DNAMERecord dname = (DNAMERecord) answers[i];
+				lookupName = lookupName.fromDNAME(dname);
+				break loop;
+			}
+			else if ((answerType == queryType ||
+				  answerType == Type.ANY) &&
+				 answerName.equals(lookupName))
+			{
+				haveAnswer = true;
+				cred = getCred(answerName, queryName,
+					       Section.ANSWER, isAuth);
+				addRecord(answers[i], cred, in);
+			}
+		}
+		break;
 	}
 
-	if (ancount == 0 || rcode == Rcode.NXDOMAIN) {
+	if (!haveAnswer) {
 		/* This is a negative response */
 		SOARecord soa = null;
 		e = in.getSection(Section.AUTHORITY);
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
-			if (r.getType() == Type.SOA) {
+			if (r.getType() == Type.SOA &&
+			    queryName.subdomain(r.getName()))
+			{
 				soa = (SOARecord) r;
 				break;
 			}
 		}
-		cred = getCred(r, queryName, Section.AUTHORITY, isAuth);
+		cred = getCred(soa.getName(), queryName, Section.AUTHORITY,
+			       isAuth);
 		if (soa != null) {
+			/* This is a negative response. */
 			long soattl = (long)soa.getTTL() & 0xFFFFFFFFL;
 			long soamin = (long)soa.getMinimum() & 0xFFFFFFFFL;
 			long ttl = Math.min(soattl, soamin);
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
-			if (ancount == 0)
-				addNegative(rcode, queryName, queryType,
+			if (rcode == Rcode.NXDOMAIN)
+				addNegative(rcode, lookupName, (short)0,
 					    ttl, cred, in);
-			else {
-				Record [] cnames;
-				cnames = in.getSectionArray(Section.ANSWER);
-				int last = cnames.length - 1;
-				Name cname;
-				cname = ((CNAMERecord)cnames[last]).getTarget();
-				addNegative(rcode, cname, queryType,
+			else
+				addNegative(rcode, lookupName, queryType,
 					    ttl, cred, in);
-			}
 		}
 	}
 
 	e = in.getSection(Section.AUTHORITY);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		cred = getCred(r, queryName, Section.AUTHORITY, isAuth);
+		cred = getCred(r.getName(), queryName, Section.AUTHORITY,
+			       isAuth);
 		addRecord(r, cred, in);
 	}
 
 	e = in.getSection(Section.ADDITIONAL);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		cred = getCred(r, queryName, Section.ADDITIONAL, isAuth);
+		cred = getCred(r.getName(), queryName, Section.ADDITIONAL,
+			       isAuth);
 		addRecord(r, cred, in);
 	}
 }
