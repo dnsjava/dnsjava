@@ -1,3 +1,7 @@
+4/12/1999
+	- Messages weren't being cloned properly
+	- Resolver didn't handle a query to nowhere correctly
+
 4/11/1999
 	- 0.8 released
 	- Resolver is now an interface, implemented by SimpleResolver

@@ -22,6 +22,11 @@ Header(int _id) {
 }
 
 public
+Header() {
+	this(-1);
+}
+
+public
 Header(DataByteInputStream in) throws IOException {
 	this(in.readUnsignedShort());
 	readFlags(in);
@@ -183,6 +188,20 @@ toString() {
 	for (int i = 0; i < 4; i++)
 		sb.append(Section.string(i) + ": " + getCount(i) + " ");
 	return sb.toString();
+}
+
+public Object
+clone() {
+	Header h = new Header();
+	for (int i = 0; i < counts.length; i++)
+		h.counts[i] = counts[i];	
+	for (int i = 0; i < flags.length; i++)
+		h.flags[i] = flags[i];	
+	h.id = id;
+	h.rcode = rcode;
+	h.rcode = rcode;
+	h.opcode = opcode;
+	return h;
 }
 
 }
