@@ -88,27 +88,28 @@ getTypedObject(int type) {
  * Converts the type-specific RR to wire format - must be overriden
  */
 abstract Record rrFromWire(Name name, int type, int dclass, long ttl,
-			   int length, DataByteInputStream in)
+			   DNSInput in)
 throws IOException;
 
 private static Record
-newRecord(Name name, int type, int dclass, long ttl, int length,
-	  DataByteInputStream in) throws IOException
+newRecord(Name name, int type, int dclass, long ttl, int length, DNSInput in)
+throws IOException
 {
 	Record rec;
 	int recstart;
 	rec = getTypedObject(type);
-	if (in == null)
-		recstart = 0;
+	if (in != null)
+		in.setActive(length);
 	else
-		recstart = in.getPos();
-
-	rec = rec.rrFromWire(name, type, dclass, ttl, length, in);
-	if (in == null) {
 		rec.empty = true;
+
+	rec = rec.rrFromWire(name, type, dclass, ttl, in);
+
+	if (in != null) {
+		if (in.remaining() > 0)
+			throw new IOException("Invalid record length");
+		in.clearActive();
 	}
-	if (in != null && in.getPos() - recstart != length)
-		throw new IOException("Invalid record length");
 	return rec;
 }
 
@@ -130,13 +131,13 @@ newRecord(Name name, int type, int dclass, long ttl, int length, byte [] data) {
 	DClass.check(dclass);
 	TTL.check(ttl);
 
-	DataByteInputStream dbs;
+	DNSInput in;
 	if (data != null)
-		dbs = new DataByteInputStream(data);
+		in = new DNSInput(data);
 	else
-		dbs = null;
+		in = null;
 	try {
-		return newRecord(name, type, dclass, ttl, length, dbs);
+		return newRecord(name, type, dclass, ttl, length, in);
 	}
 	catch (IOException e) {
 		return null;
@@ -185,25 +186,22 @@ newRecord(Name name, int type, int dclass) {
 }
 
 static Record
-fromWire(DataByteInputStream in, int section) throws IOException {
+fromWire(DNSInput in, int section) throws IOException {
 	int type, dclass;
 	long ttl;
 	int length;
 	Name name;
 	Record rec;
-	int start;
-
-	start = in.getPos();
 
 	name = new Name(in);
-	type = in.readUnsignedShort();
-	dclass = in.readUnsignedShort();
+	type = in.readU16();
+	dclass = in.readU16();
 
 	if (section == Section.QUESTION)
 		return newRecord(name, type, dclass);
 
-	ttl = in.readUnsignedInt();
-	length = in.readUnsignedShort();
+	ttl = in.readU32();
+	length = in.readU16();
 	if (length == 0)
 		return newRecord(name, type, dclass, ttl);
 	rec = newRecord(name, type, dclass, ttl, length, in);
@@ -215,8 +213,7 @@ fromWire(DataByteInputStream in, int section) throws IOException {
  */
 public static Record
 fromWire(byte [] b, int section) throws IOException {
-	DataByteInputStream in = new DataByteInputStream(b);
-	return fromWire(in, section);
+	return fromWire(new DNSInput(b), section);
 }
 
 void
@@ -448,7 +445,7 @@ throws IOException
 		if (length != data.length)
 			throw st.exception("invalid unknown RR encoding: " +
 					   "length mismatch");
-		DataByteInputStream in = new DataByteInputStream(data);
+		DNSInput in = new DNSInput(data);
 		return newRecord(name, type, dclass, ttl, length, in);
 	}
 	st.unget();

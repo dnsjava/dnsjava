@@ -38,18 +38,16 @@ KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
 }
 
 protected static Record
-rrFromWire(KEYBase rec, int length, DataByteInputStream in)
+rrFromWire(KEYBase rec, DNSInput in)
 throws IOException
 {
 	if (in == null)
 		return rec;
-	rec.flags = in.readUnsignedShort();
-	rec.proto = in.readUnsignedByte();
-	rec.alg = in.readUnsignedByte();
-	if (length > 4) {
-		rec.key = new byte[length - 4];
-		in.read(rec.key);
-	}
+	rec.flags = in.readU16();
+	rec.proto = in.readU8();
+	rec.alg = in.readU8();
+	if (in.remaining() > 0)
+		rec.key = in.readByteArray();
 	return rec;
 }
 

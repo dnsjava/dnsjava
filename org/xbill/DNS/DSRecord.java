@@ -59,22 +59,17 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	DSRecord rec = new DSRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
 
-	rec.footprint = in.readUnsignedShort();
-	rec.alg = in.readUnsignedByte();
-	rec.digestid = in.readUnsignedByte();
-
-	if (length > 4) {
-		rec.digest = new byte[length - 4];
-		in.read(rec.digest);
-	}
+	rec.footprint = in.readU16();
+	rec.alg = in.readU8();
+	rec.digestid = in.readU8();
+	rec.digest = in.readByteArray();
 	return rec;
 }
 

@@ -95,21 +95,21 @@ newUpdate(Name zone) {
 	return new Update(zone);
 }
 
-Message(DataByteInputStream in) throws IOException {
+Message(DNSInput in) throws IOException {
 	this(new Header(in));
 	for (int i = 0; i < 4; i++) {
 		int count = header.getCount(i);
 		if (count > 0)
 			sections[i] = new ArrayList(count);
 		for (int j = 0; j < count; j++) {
-			int pos = in.getPos();
+			int pos = in.current();
 			Record rec = Record.fromWire(in, i);
 			sections[i].add(rec);
 			if (rec.getType() == Type.TSIG)
 				tsigstart = pos;
 		}
 	}
-	size = in.getPos();
+	size = in.current();
 }
 
 /**
@@ -118,7 +118,7 @@ Message(DataByteInputStream in) throws IOException {
  */
 public
 Message(byte [] b) throws IOException {
-	this(new DataByteInputStream(b));
+	this(new DNSInput(b));
 }
 
 /**

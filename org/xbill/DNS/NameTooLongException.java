@@ -11,7 +11,7 @@ import java.io.*;
  * @author Brian Wellington
  */
 
-public class NameTooLongException extends IOException {
+public class NameTooLongException extends WireParseException {
 
 public
 NameTooLongException() {

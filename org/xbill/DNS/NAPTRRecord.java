@@ -68,18 +68,17 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.order = in.readUnsignedShort();
-	rec.preference = in.readUnsignedShort();
-	rec.flags = in.readStringIntoArray();
-	rec.service = in.readStringIntoArray();
-	rec.regexp = in.readStringIntoArray();
+	rec.order = in.readU16();
+	rec.preference = in.readU16();
+	rec.flags = in.readCountedString();
+	rec.service = in.readCountedString();
+	rec.regexp = in.readCountedString();
 	rec.replacement = new Name(in);
 	return rec;
 }

@@ -80,11 +80,10 @@ KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
-	return rrFromWire(new KEYRecord(name, dclass, ttl), length, in);
+	return rrFromWire(new KEYRecord(name, dclass, ttl), in);
 }
 
 Record

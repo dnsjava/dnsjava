@@ -67,8 +67,7 @@ SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	SOARecord rec = new SOARecord(name, dclass, ttl);
@@ -76,11 +75,11 @@ throws IOException
 		return rec;
 	rec.host = new Name(in);
 	rec.admin = new Name(in);
-	rec.serial = in.readUnsignedInt();
-	rec.refresh = in.readUnsignedInt();
-	rec.retry = in.readUnsignedInt();
-	rec.expire = in.readUnsignedInt();
-	rec.minimum = in.readUnsignedInt();
+	rec.serial = in.readU32();
+	rec.refresh = in.readU32();
+	rec.retry = in.readU32();
+	rec.expire = in.readU32();
+	rec.minimum = in.readU32();
 	return rec;
 }
 

@@ -32,7 +32,7 @@ NS_CNAME_PTRRecord(Name name, int type, int dclass, long ttl, Name target) {
 }
 
 protected static Record
-rrFromWire(NS_CNAME_PTRRecord rec, DataByteInputStream in)
+rrFromWire(NS_CNAME_PTRRecord rec, DNSInput in)
 throws IOException
 {
 	if (in == null)

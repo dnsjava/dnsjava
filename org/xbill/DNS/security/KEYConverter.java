@@ -28,22 +28,31 @@ BigIntegerLength(BigInteger i) {
 	return (b[0] == 0 ? b.length - 1 : b.length);
 }
 
+static BigInteger
+readBigInteger(DataInputStream in, int len) throws IOException {
+	byte [] b = new byte[len];
+	int n = in.read(b);
+	if (n < len)
+		throw new IOException("end of input");
+	return new BigInteger(1, b);
+}
+
 static RSAPublicKey
-parseRSA(DataByteInputStream in) throws IOException {
+parseRSA(DataInputStream in) throws IOException {
 	int exponentLength = in.readUnsignedByte();
 	if (exponentLength == 0)
 		exponentLength = in.readUnsignedShort();
-	BigInteger exponent = in.readBigInteger(exponentLength);
+	BigInteger exponent = readBigInteger(in, exponentLength);
 
 	int modulusLength = in.available();
-	BigInteger modulus = in.readBigInteger(modulusLength);
+	BigInteger modulus = readBigInteger(in, modulusLength);
 
 	RSAPublicKey rsa = new RSAPubKey(modulus, exponent);
 	return rsa;
 }
 
 static DHPublicKey
-parseDH(DataByteInputStream in) throws IOException {
+parseDH(DataInputStream in) throws IOException {
 	int special = 0;
 	int pLength = in.readUnsignedShort();
 	if (pLength < 16 && pLength != 1 && pLength != 2)
@@ -62,7 +71,7 @@ parseDH(DataByteInputStream in) throws IOException {
 			p = DHPRIME1024;
 	}
 	else
-		p = in.readBigInteger(pLength);
+		p = readBigInteger(in, pLength);
 
 	int gLength = in.readUnsignedShort();
 	BigInteger g;
@@ -73,22 +82,22 @@ parseDH(DataByteInputStream in) throws IOException {
 			return null;
 	}
 	else
-		g = in.readBigInteger(gLength);
+		g = readBigInteger(in, gLength);
 
 	int yLength = in.readUnsignedShort();
-	BigInteger y = in.readBigInteger(yLength);
+	BigInteger y = readBigInteger(in, yLength);
 
 	return new DHPubKey(p, g, y);
 }
 
 static DSAPublicKey
-parseDSA(DataByteInputStream in) throws IOException {
+parseDSA(DataInputStream in) throws IOException {
 	byte t = in.readByte();
 
-	BigInteger q = in.readBigInteger(20);
-	BigInteger p = in.readBigInteger(64 + t*8);
-	BigInteger g = in.readBigInteger(64 + t*8);
-	BigInteger y = in.readBigInteger(64 + t*8);
+	BigInteger q = readBigInteger(in, 20);
+	BigInteger p = readBigInteger(in, 64 + t*8);
+	BigInteger g = readBigInteger(in, 64 + t*8);
+	BigInteger y = readBigInteger(in, 64 + t*8);
 
 	DSAPublicKey dsa = new DSAPubKey(p, q, g, y);
 	return dsa;
@@ -97,16 +106,17 @@ parseDSA(DataByteInputStream in) throws IOException {
 /** Converts a KEY/DNSKEY record into a PublicKey */
 static PublicKey
 parseRecord(int alg, byte [] data) {
-	DataByteInputStream dbs = new DataByteInputStream(data); 
+	ByteArrayInputStream bytes = new ByteArrayInputStream(data); 
+	DataInputStream in = new DataInputStream(bytes);
 	try {
 		switch (alg) {
 			case DNSSEC.RSAMD5:
 			case DNSSEC.RSASHA1:
-				return parseRSA(dbs);
+				return parseRSA(in);
 			case DNSSEC.DH:
-				return parseDH(dbs);
+				return parseDH(in);
 			case DNSSEC.DSA:
-				return parseDSA(dbs);
+				return parseDSA(in);
 			default:
 				return null;
 		}

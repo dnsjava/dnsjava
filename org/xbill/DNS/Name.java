@@ -341,15 +341,15 @@ fromConstantString(String s) {
  * Create a new name from DNS wire format
  * @param in A stream containing the wire format of the Name.
  */
-Name(DataByteInputStream in) throws IOException {
+Name(DNSInput in) throws WireParseException {
 	int len, pos, currentpos;
 	Name name2;
 	boolean done = false;
 	byte [] label = new byte[MAXLABEL + 1];
-	int savedpos = -1;
+	boolean savedState = false;
 
 	while (!done) {
-		len = in.readUnsignedByte();
+		len = in.readU8();
 		switch (len & LABEL_MASK) {
 		case LABEL_NORMAL:
 			if (getlabels() >= MAXLABELS)
@@ -359,31 +359,33 @@ Name(DataByteInputStream in) throws IOException {
 				done = true;
 			} else {
 				label[0] = (byte)len;
-				in.readArray(label, 1, len);
+				in.readByteArray(label, 1, len);
 				append(label, 0, 1);
 			}
 			break;
 		case LABEL_COMPRESSION:
-			pos = in.readUnsignedByte();
+			pos = in.readU8();
 			pos += ((len & ~LABEL_MASK) << 8);
 			if (Options.check("verbosecompression"))
-				System.err.println("currently " + in.getPos() +
+				System.err.println("currently " + in.current() +
 						   ", pointer to " + pos);
 
-			currentpos = in.getPos();
-			if (pos >= currentpos)
+			if (pos >= in.current())
 				throw new WireParseException("bad compression");
-			if (savedpos == -1)
-				savedpos = currentpos;
-			in.setPos(pos);
+			if (!savedState) {
+				in.save();
+				savedState = true;
+			}
+			in.jump(pos);
 			if (Options.check("verbosecompression"))
 				System.err.println("current name '" + this +
 						   "', seeking to " + pos);
 			continue;
 		}
 	}
-	if (savedpos != -1)
-		in.setPos(savedpos);
+	if (savedState) {
+		in.restore();
+	}
 }
 
 /**
@@ -392,7 +394,7 @@ Name(DataByteInputStream in) throws IOException {
  */
 public
 Name(byte [] b) throws IOException {
-	this(new DataByteInputStream(b));
+	this(new DNSInput(b));
 }
 
 /**

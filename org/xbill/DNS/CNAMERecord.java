@@ -38,8 +38,7 @@ CNAMERecord(Name name, int dclass, long ttl, Name target) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	return rrFromWire(new CNAMERecord(name, dclass, ttl), in);

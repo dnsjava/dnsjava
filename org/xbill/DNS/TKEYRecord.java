@@ -86,32 +86,27 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	TKEYRecord rec = new TKEYRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
 	rec.alg = new Name(in);
-	rec.timeInception = new Date(1000 * (long)in.readInt());
-	rec.timeExpire = new Date(1000 * (long)in.readInt());
-	rec.mode = in.readUnsignedShort();
-	rec.error = in.readUnsignedShort();
+	rec.timeInception = new Date(1000 * in.readU32());
+	rec.timeExpire = new Date(1000 * in.readU32());
+	rec.mode = in.readU16();
+	rec.error = in.readU16();
 
-	int keylen = in.readUnsignedShort();
-	if (keylen > 0) {
-		rec.key = new byte[keylen];
-		in.read(rec.key);
-	}
+	int keylen = in.readU16();
+	if (keylen > 0)
+		rec.key = in.readByteArray(keylen);
 	else
 		rec.key = null;
 
-	int otherlen = in.readUnsignedShort();
-	if (otherlen > 0) {
-		rec.other = new byte[otherlen];
-		in.read(rec.other);
-	}
+	int otherlen = in.readU16();
+	if (otherlen > 0)
+		rec.other = in.readByteArray(otherlen);
 	else
 		rec.other = null;
 	return rec;

@@ -32,19 +32,13 @@ getMember() {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	UNKRecord rec = new UNKRecord(name, type, dclass, ttl);
 	if (in == null)
 		return rec;
-	if (length > 0) {
-		rec.data = new byte[length];
-		in.read(rec.data);
-	}
-	else
-		rec.data = null;
+	rec.data = in.readByteArray();
 	return rec;
 }
 

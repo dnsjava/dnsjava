@@ -41,8 +41,7 @@ AAAARecord(Name name, int dclass, long ttl, Inet6Address address) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	AAAARecord rec = new AAAARecord(name, dclass, ttl);
@@ -50,9 +49,7 @@ throws IOException
 	if (in == null)
 		return rec;
 
-	byte [] data = new byte[16];
-	in.read(data);
-	rec.address = new Inet6Address(data);
+	rec.address = new Inet6Address(in.readByteArray(16));
 	return rec;
 }
 

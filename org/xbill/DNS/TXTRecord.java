@@ -66,18 +66,15 @@ TXTRecord(Name name, int dclass, long ttl, String string) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	TXTRecord rec = new TXTRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	int count = 0;
 	rec.strings = new ArrayList(2);
-	while (count < length) {
-		byte [] b = in.readStringIntoArray();
-		count += (b.length + 1);
+	while (in.remaining() > 0) {
+		byte [] b = in.readCountedString();
 		rec.strings.add(b);
 	}
 	return rec;

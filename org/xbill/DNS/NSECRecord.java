@@ -65,32 +65,28 @@ listToArray(List list) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	NSECRecord rec = new NSECRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	int start = in.getPos();
 	rec.next = new Name(in);
 
-	length -= (in.getPos() - start);
 	int lastbase = -1;
 	List list = new ArrayList();
-	while (length > 0) {
-		if (length < 2)
+	while (in.remaining() > 0) {
+		if (in.remaining() < 2)
 			throw new WireParseException
 						("invalid bitmap descriptor");
-		int mapbase = in.readUnsignedByte();
+		int mapbase = in.readU8();
 		if (mapbase < lastbase)
 			throw new WireParseException("invalid ordering");
-		int maplength = in.readUnsignedByte();
-		length -= 2;
-		if (maplength > length)
+		int maplength = in.readU8();
+		if (maplength > in.remaining())
 			throw new WireParseException("invalid bitmap");
 		for (int i = 0; i < maplength; i++) {
-			int current = in.readUnsignedByte();
+			int current = in.readU8();
 			if (current == 0)
 				continue;
 			for (int j = 0; j < 8; j++) {
@@ -100,7 +96,6 @@ throws IOException
 				list.add(Mnemonic.toInteger(typecode));
 			}
 		}
-		length -= maplength;
 	}
 	rec.types = listToArray(list);
 	return rec;

@@ -52,8 +52,7 @@ A6Record(Name name, int dclass, long ttl, int prefixBits,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	A6Record rec = new A6Record(name, dclass, ttl);
@@ -61,12 +60,11 @@ throws IOException
 	if (in == null)
 		return rec;
 
-	rec.prefixBits = in.readUnsignedByte();
+	rec.prefixBits = in.readU8();
 	int suffixbits = 128 - rec.prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
-	byte [] data = new byte[suffixbytes];
-	in.read(data);
-	rec.suffix = new Inet6Address(128 - rec.prefixBits, data);
+	rec.suffix = new Inet6Address(128 - rec.prefixBits,
+				      in.readByteArray(suffixbytes));
 	if (rec.prefixBits > 0)
 		rec.prefix = new Name(in);
 	return rec;

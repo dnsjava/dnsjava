@@ -48,11 +48,11 @@ Header() {
 /**
  * Parses a Header from a stream containing DNS wire format.
  */
-Header(DataByteInputStream in) throws IOException {
-	this(in.readUnsignedShort());
+Header(DNSInput in) throws IOException {
+	this(in.readU16());
 	readFlags(in);
 	for (int i = 0; i < counts.length; i++)
-		counts[i] = in.readUnsignedShort();
+		counts[i] = in.readU16();
 }
 
 /**
@@ -61,7 +61,7 @@ Header(DataByteInputStream in) throws IOException {
  */
 public
 Header(byte [] b) throws IOException {
-	this(new DataByteInputStream(b));
+	this(new DNSInput(b));
 }
 
 void
@@ -222,15 +222,13 @@ writeFlags(DataByteOutputStream out) {
 }
 
 private void
-readFlags(DataByteInputStream in) throws IOException {
-	int flags1 = in.readUnsignedByte();
-	int flags2 = in.readUnsignedByte();
-	for (int i = 0; i < 8; i++) {
-		flags[i] =	((flags1 & (1 << (7-i))) != 0);
-		flags[i+8] =	((flags2 & (1 << (7-i))) != 0);
+readFlags(DNSInput in) throws IOException {
+	int flagsval = in.readU16();
+	for (int i = 0; i < 16; i++) {
+		flags[i] = ((flagsval & (1 << (15 - i))) != 0);
 	}
-	opcode = (byte) ((flags1 >> 3) & 0xF);
-	rcode = (byte) (flags2 & 0xF);
+	opcode = (byte) ((flagsval >> 3) & 0xF);
+	rcode = (byte) (flagsval & 0xF);
 }
 
 /** Converts the header's flags into a String */

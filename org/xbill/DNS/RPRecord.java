@@ -50,8 +50,7 @@ RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	RPRecord rec = new RPRecord(name, dclass, ttl);

@@ -50,19 +50,17 @@ NXTRecord(Name name, int dclass, long ttl, Name next, BitSet bitmap) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	NXTRecord rec = new NXTRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	int start = in.getPos();
 	rec.next = new Name(in);
 	rec.bitmap = new BitSet();
-	int bitmapLength = length - (in.getPos() - start);
+	int bitmapLength = in.remaining();
 	for (int i = 0; i < bitmapLength; i++) {
-		int t = in.readUnsignedByte();
+		int t = in.readU8();
 		for (int j = 0; j < 8; j++)
 			if ((t & (1 << (7 - j))) != 0)
 				rec.bitmap.set(i * 8 + j);

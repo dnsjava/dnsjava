@@ -55,22 +55,20 @@ SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 }
 
 protected static Record
-rrFromWire(SIGBase rec, int length, DataByteInputStream in)
+rrFromWire(SIGBase rec, DNSInput in)
 throws IOException
 {
 	if (in == null)
 		return rec;
-	int start = in.getPos();
-	rec.covered = in.readUnsignedShort();
-	rec.alg = in.readByte();
-	rec.labels = in.readByte();
-	rec.origttl = in.readUnsignedInt();
-	rec.expire = new Date(1000 * (long)in.readInt());
-	rec.timeSigned = new Date(1000 * (long)in.readInt());
-	rec.footprint = in.readShort();
+	rec.covered = in.readU16();
+	rec.alg = in.readU8();
+	rec.labels = in.readU8();
+	rec.origttl = in.readU32();
+	rec.expire = new Date(1000 * in.readU32());
+	rec.timeSigned = new Date(1000 * in.readU32());
+	rec.footprint = in.readU16();
 	rec.signer = new Name(in);
-	rec.signature = new byte[length - (in.getPos() - start)];
-	in.read(rec.signature);
+	rec.signature = in.readByteArray();
 	return rec;
 }
 

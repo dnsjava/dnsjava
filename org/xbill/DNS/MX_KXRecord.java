@@ -37,12 +37,12 @@ MX_KXRecord(Name name, int type, int dclass, long ttl, int priority,
 }
 
 protected static Record
-rrFromWire(MX_KXRecord rec, DataByteInputStream in)
+rrFromWire(MX_KXRecord rec, DNSInput in)
 throws IOException
 {
 	if (in == null)
 		return rec;
-	rec.priority = in.readUnsignedShort();
+	rec.priority = in.readU16();
 	rec.target = new Name(in);
 	return rec;
 }

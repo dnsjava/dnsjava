@@ -17,7 +17,7 @@ public class LOCRecord extends Record {
 private static LOCRecord member = new LOCRecord();
 
 private long size, hPrecision, vPrecision;
-private int latitude, longitude, altitude;
+private long latitude, longitude, altitude;
 
 private
 LOCRecord() {}
@@ -55,8 +55,7 @@ LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	LOCRecord rec = new LOCRecord(name, dclass, ttl);
@@ -64,16 +63,16 @@ throws IOException
 		return rec;
 	int version, temp;
 
-	version = in.readByte();
+	version = in.readU8();
 	if (version != 0)
 		throw new WireParseException("Invalid LOC version");
 
-	rec.size = parseLOCformat(in.readUnsignedByte());
-	rec.hPrecision = parseLOCformat(in.readUnsignedByte());
-	rec.vPrecision = parseLOCformat(in.readUnsignedByte());
-	rec.latitude = in.readInt();
-	rec.longitude = in.readInt();
-	rec.altitude = in.readInt();
+	rec.size = parseLOCformat(in.readU8());
+	rec.hPrecision = parseLOCformat(in.readU8());
+	rec.vPrecision = parseLOCformat(in.readU8());
+	rec.latitude = in.readU32();
+	rec.longitude = in.readU32();
+	rec.altitude = in.readU32();
 	return rec;
 }
 
@@ -315,9 +314,9 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	out.writeByte(toLOCformat(size));
 	out.writeByte(toLOCformat(hPrecision));
 	out.writeByte(toLOCformat(vPrecision));
-	out.writeInt(latitude);
-	out.writeInt(longitude);
-	out.writeInt(altitude);
+	out.writeUnsignedInt(latitude);
+	out.writeUnsignedInt(longitude);
+	out.writeUnsignedInt(altitude);
 }
 
 private static long

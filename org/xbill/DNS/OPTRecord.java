@@ -65,23 +65,18 @@ OPTRecord(int payloadSize, int xrcode, int version) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	OPTRecord rec = new OPTRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	int count = 0;
-	if (count < length)
+	if (in.remaining() > 0)
 		rec.options = new HashMap();
-	while (count < length) {
-		int code = in.readUnsignedShort();
-		int len = in.readUnsignedShort();
-		byte [] data = new byte[len];
-		in.read(data);
-		count += (4 + len);
-		rec.options.put(new Integer(code), data);
+	while (in.remaining() > 0) {
+		int code = in.readU16();
+		int len = in.readU16();
+		rec.options.put(new Integer(code), in.readByteArray(len));
 	}
 	return rec;
 }

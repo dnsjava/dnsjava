@@ -76,8 +76,7 @@ TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	TSIGRecord rec = new TSIGRecord(name, dclass, ttl);
@@ -85,24 +84,21 @@ throws IOException
 		return rec;
 	rec.alg = new Name(in);
 
-	long timeHigh = in.readUnsignedShort();
-	long timeLow = in.readUnsignedInt();
+	long timeHigh = in.readU16();
+	long timeLow = in.readU32();
 	long time = (timeHigh << 32) + timeLow;
 	rec.timeSigned = new Date(time * 1000);
-	rec.fudge = in.readUnsignedShort();
+	rec.fudge = in.readU16();
 
-	int sigLen = in.readUnsignedShort();
-	rec.signature = new byte[sigLen];
-	in.read(rec.signature);
+	int sigLen = in.readU16();
+	rec.signature = in.readByteArray(sigLen);
 
-	rec.originalID = in.readUnsignedShort();
-	rec.error = in.readShort();
+	rec.originalID = in.readU16();
+	rec.error = in.readU16();
 
-	int otherLen = in.readUnsignedShort();
-	if (otherLen > 0) {
-		rec.other = new byte[otherLen];
-		in.read(rec.other);
-	}
+	int otherLen = in.readU16();
+	if (otherLen > 0)
+		rec.other = in.readByteArray(otherLen);
 	else
 		rec.other = null;
 	return rec;

@@ -49,15 +49,14 @@ HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	HINFORecord rec = new HINFORecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.cpu = in.readStringIntoArray();
-	rec.os = in.readStringIntoArray();
+	rec.cpu = in.readCountedString();
+	rec.os = in.readCountedString();
 	return rec;
 }
 

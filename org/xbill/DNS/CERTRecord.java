@@ -125,20 +125,16 @@ CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.certType = in.readShort();
-	rec.keyTag = in.readUnsignedShort();
-	rec.alg = in.readByte();
-	if (length > 5) {
-		rec.cert = new byte[length - 5];
-		in.read(rec.cert);
-	}
+	rec.certType = in.readU16();
+	rec.keyTag = in.readU16();
+	rec.alg = in.readU8();
+	rec.cert = in.readByteArray();
 	return rec;
 }
 

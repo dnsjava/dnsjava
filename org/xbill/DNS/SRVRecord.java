@@ -59,16 +59,15 @@ SRVRecord(Name name, int dclass, long ttl, int priority,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	SRVRecord rec = new SRVRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.priority = in.readUnsignedShort();
-	rec.weight = in.readUnsignedShort();
-	rec.port = in.readUnsignedShort();
+	rec.priority = in.readU16();
+	rec.weight = in.readU16();
+	rec.port = in.readU16();
 	rec.target = new Name(in);
 	return rec;
 }

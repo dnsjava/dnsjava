@@ -68,20 +68,14 @@ ARecord(Name name, int dclass, long ttl, InetAddress address) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, long ttl, int length,
-	   DataByteInputStream in)
+rrFromWire(Name name, int type, int dclass, long ttl, DNSInput in)
 throws IOException
 {
 	ARecord rec = new ARecord(name, dclass, ttl);
 
 	if (in == null)
 		return rec;
-
-	byte b1 = in.readByte();
-	byte b2 = in.readByte();
-	byte b3 = in.readByte();
-	byte b4 = in.readByte();
-	rec.addr = fromBytes(b1, b2, b3, b4);
+	rec.addr = fromArray(in.readByteArray(4));
 	return rec;
 }
 
