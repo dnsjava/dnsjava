@@ -30,7 +30,7 @@ Header(CountedDataInputStream in) throws IOException {
 }
 
 public void
-toWire(CountedDataOutputStream out) throws IOException {
+toWire(DataByteOutputStream out) throws IOException {
 	out.writeShort(id);
 	writeFlags(out);
 	for (int i=0; i<counts.length; i++)
@@ -39,9 +39,8 @@ toWire(CountedDataOutputStream out) throws IOException {
 
 public byte []
 toWire() throws IOException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	CountedDataOutputStream dout = new CountedDataOutputStream(out);
-	toWire(dout);
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWire(out);
 	return out.toByteArray();
 }
 
@@ -118,7 +117,7 @@ getCount(int field) {
 }
 
 private void
-writeFlags(CountedDataOutputStream out) throws IOException {
+writeFlags(DataByteOutputStream out) throws IOException {
 	short flags1 = 0, flags2 = 0;
 	for (int i = 0; i < 8; i++) {
 		if (flags[i])	flags1 |= (1 << (7-i));

@@ -138,7 +138,7 @@ throws IOException
 }
 
 public void
-toWire(CountedDataOutputStream out, int section, Compression c)
+toWire(DataByteOutputStream out, int section, Compression c)
 throws IOException
 {
 	int start = out.getPos();
@@ -148,27 +148,22 @@ throws IOException
 	if (section == Section.QUESTION)
 		return;
 	out.writeInt(ttl);
-	byte [] data = rrToWire(c, out.getPos() + 2);
-	if (data == null)
-		out.writeShort(0);
-	else {
-		out.writeShort(data.length);
-		out.write(data);
-	}
+	int lengthPosition = out.getPos();
+	out.writeShort(0); /* until we know better */
+	rrToWire(out, c);
+	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
 	wireLength = out.getPos() - start;
-
 }
 
 public byte []
 toWire(int section) throws IOException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	CountedDataOutputStream dout = new CountedDataOutputStream(out);
-	toWire(dout, section, null);
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWire(out, section, null);
 	return out.toByteArray();
 }
 
 public void /* XXX - shouldn't be public */
-toWireCanonical(CountedDataOutputStream out) throws IOException {
+toWireCanonical(DataByteOutputStream out) throws IOException {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
@@ -267,10 +262,13 @@ getWireLength() {
 	return (short) wireLength;
 }
 
-abstract byte [] rrToWire(Compression c, int index) throws IOException;
+abstract void rrToWire(DataByteOutputStream out, Compression c) throws IOException;
 
-byte [] rrToWireCanonical() throws IOException {
-	return rrToWire(null, 0);
+byte []
+rrToWireCanonical() throws IOException {
+	DataByteOutputStream dbs = new DataByteOutputStream();
+	rrToWire(dbs, null);
+	return dbs.toByteArray();
 }
 
 public boolean

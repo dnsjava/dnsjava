@@ -89,19 +89,15 @@ getAlgorithm() {
 	return alg;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (cert == null)
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
-	ds.writeShort(certType);
-	ds.writeByte(keyTag);
-	ds.writeByte(alg);
-	ds.write(cert);
-	return bs.toByteArray();
+	dbs.writeShort(certType);
+	dbs.writeByte(keyTag);
+	dbs.writeByte(alg);
+	dbs.write(cert);
 }
 
 }

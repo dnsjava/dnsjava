@@ -53,16 +53,12 @@ getTarget() {
 	return target;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (target == null)
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs, index);
-
-	target.toWire(ds, c);
-	return bs.toByteArray();
+	target.toWire(dbs, c);
 }
 
 }

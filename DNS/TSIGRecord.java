@@ -140,33 +140,32 @@ getOther() {
 	return other;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+	if (alg == null)
+		return;
 
-	alg.toWire(ds, null);
+	alg.toWire(dbs, null);
 
 	long time = timeSigned.getTime() / 1000;
 	short timeHigh = (short) (time >> 32);
 	int timeLow = (int) (time);
-	ds.writeShort(timeHigh);
-	ds.writeInt(timeLow);
-	ds.writeShort(fudge);
+	dbs.writeShort(timeHigh);
+	dbs.writeInt(timeLow);
+	dbs.writeShort(fudge);
 
-	ds.writeShort((short)signature.length);
-	ds.write(signature);
+	dbs.writeShort((short)signature.length);
+	dbs.write(signature);
 
-	ds.writeShort(originalID);
-	ds.writeShort(error);
+	dbs.writeShort(originalID);
+	dbs.writeShort(error);
 
 	if (other != null) {
-		ds.writeShort((short)other.length);
-		ds.write(other);
+		dbs.writeShort((short)other.length);
+		dbs.write(other);
 	}
 	else
-		ds.writeShort(0);
-	return bs.toByteArray();
+		dbs.writeShort(0);
 }
 
 }

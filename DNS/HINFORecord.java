@@ -52,17 +52,13 @@ getOS() {
 	return os;
 }
 
-byte[] rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) {
 	if (cpu == null || os == null)
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
-	ds.writeString(cpu);
-	ds.writeString(os);
-
-	return bs.toByteArray();
+	dbs.writeString(cpu);
+	dbs.writeString(os);
 }
 
 public String

@@ -29,7 +29,6 @@ Message() {
 public
 Message(CountedDataInputStream in) throws IOException {
 	this();
-	int startpos = in.getPos();
 	Compression c = new Compression();
 	header = new Header(in);
 	for (int i = 0; i < 4; i++) {
@@ -38,7 +37,7 @@ Message(CountedDataInputStream in) throws IOException {
 			sections[i].addElement(rec);
 		}
 	}
-	size = in.getPos() - startpos;
+	size = in.getPos();
 }
 
 public
@@ -117,7 +116,7 @@ getSectionArray(int section) {
 }
 
 void
-toWire(CountedDataOutputStream out) throws IOException {
+toWire(DataByteOutputStream out) throws IOException {
 	header.toWire(out);
 	Compression c = new Compression();
 	for (int i=0; i<4; i++) {
@@ -132,9 +131,8 @@ toWire(CountedDataOutputStream out) throws IOException {
 
 public byte []
 toWire() throws IOException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	CountedDataOutputStream dout = new CountedDataOutputStream(out);
-	toWire(dout);
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWire(out);
 	return out.toByteArray();
 }
 

@@ -32,21 +32,20 @@ void apply(Message m) throws IOException {
 		/* Digest the message */
 		h.addData(m.toWire());
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		CountedDataOutputStream dout = new CountedDataOutputStream(out);
-		name.toWireCanonical(dout);
-		dout.writeShort(DClass.ANY);	/* class */
-		dout.writeInt(0);		/* ttl */
-		alg.toWireCanonical(dout);
+		DataByteOutputStream out = new DataByteOutputStream();
+		name.toWireCanonical(out);
+		out.writeShort(DClass.ANY);	/* class */
+		out.writeInt(0);		/* ttl */
+		alg.toWireCanonical(out);
 		long time = timeSigned.getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
-		dout.writeShort(timeHigh);
-		dout.writeInt(timeLow);
-		dout.writeShort(fudge);
+		out.writeShort(timeHigh);
+		out.writeInt(timeLow);
+		out.writeShort(fudge);
 
-		dout.writeShort(0); /* No error */
-		dout.writeShort(0); /* No other data */
+		out.writeShort(0); /* No error */
+		out.writeShort(0); /* No other data */
 
 		h.addData(out.toByteArray());
 	}
@@ -74,11 +73,9 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 
 	try {
 		if (old != null && tsig.getError() == Rcode.NOERROR) {
-			ByteArrayOutputStream bs = new ByteArrayOutputStream();
-			CountedDataOutputStream d =
-						new CountedDataOutputStream(bs);
-			d.writeShort((short)old.getSignature().length);
-			h.addData(bs.toByteArray());
+			DataByteOutputStream dbs = new DataByteOutputStream();
+			dbs.writeShort((short)old.getSignature().length);
+			h.addData(dbs.toByteArray());
 			h.addData(old.getSignature());
 /*System.out.println("digested query TSIG");*/
 		}
@@ -92,25 +89,24 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 		h.addData(b, header.length, len);
 /*System.out.println("digested message");*/
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		CountedDataOutputStream dout = new CountedDataOutputStream(out);
-		tsig.getName().toWireCanonical(dout);
-		dout.writeShort(tsig.dclass);
-		dout.writeInt(tsig.ttl);
-		tsig.getAlg().toWireCanonical(dout);
+		DataByteOutputStream out = new DataByteOutputStream();
+		tsig.getName().toWireCanonical(out);
+		out.writeShort(tsig.dclass);
+		out.writeInt(tsig.ttl);
+		tsig.getAlg().toWireCanonical(out);
 		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
-		dout.writeShort(timeHigh);
-		dout.writeInt(timeLow);
-		dout.writeShort(tsig.getFudge());
-		dout.writeShort(tsig.getError());
+		out.writeShort(timeHigh);
+		out.writeInt(timeLow);
+		out.writeShort(tsig.getFudge());
+		out.writeShort(tsig.getError());
 		if (tsig.getOther() != null) {
-			dout.writeShort(tsig.getOther().length);
-			dout.write(tsig.getOther());
+			out.writeShort(tsig.getOther().length);
+			out.write(tsig.getOther());
 		}
 		else
-			dout.writeShort(0);
+			out.writeShort(0);
 
 		h.addData(out.toByteArray());
 /*System.out.println("digested variables");*/
@@ -120,16 +116,10 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 	}
 
 	if (axfrSigner != null) {
-		try {
-			ByteArrayOutputStream bs = new ByteArrayOutputStream();
-			CountedDataOutputStream d =
-						new CountedDataOutputStream(bs);
-			d.writeShort((short)tsig.getSignature().length);
-			axfrSigner.addData(bs.toByteArray());
-			axfrSigner.addData(tsig.getSignature());
-		}
-		catch (IOException e) {
-		}
+		DataByteOutputStream dbs = new DataByteOutputStream();
+		dbs.writeShort((short)tsig.getSignature().length);
+		axfrSigner.addData(dbs.toByteArray());
+		axfrSigner.addData(tsig.getSignature());
 	}
 	if (h.verify(tsig.getSignature()))
 		return true;
@@ -169,14 +159,13 @@ boolean verifyAXFR(Message m, byte [] b, TSIGRecord old,
 				return true;
 		}
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		CountedDataOutputStream dout = new CountedDataOutputStream(out);
+		DataByteOutputStream out = new DataByteOutputStream();
 		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
-		dout.writeShort(timeHigh);
-		dout.writeInt(timeLow);
-		dout.writeShort(tsig.getFudge());
+		out.writeShort(timeHigh);
+		out.writeInt(timeLow);
+		out.writeShort(tsig.getFudge());
 		h.addData(out.toByteArray());
 	}
 	catch (IOException e) {

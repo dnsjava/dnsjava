@@ -79,12 +79,12 @@ getAddress() {
 	return address;
 }
 
-byte []
-rrToWire(Compression c, int index) {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (address == null)
-		return null;
-	else
-		return address.getAddress();
+		return;
+
+	dbs.write(address.getAddress());
 }
 
 }

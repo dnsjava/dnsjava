@@ -78,20 +78,16 @@ getStrings() {
 	return strings;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (strings == null)
-		return null;
-
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
+		return;
 
 	Enumeration e = strings.elements();
 	while (e.hasMoreElements()) {
 		String s = (String) e.nextElement();
-		ds.writeString(s);
+		dbs.writeString(s);
 	}
-	return bs.toByteArray();
 }
 
 }

@@ -39,9 +39,9 @@ toString() {
 	return sb.toString();
 }
 
-byte []
-rrToWire(Compression c, int index) {
-	return data;
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+	dbs.write(data);
 }
 
 }

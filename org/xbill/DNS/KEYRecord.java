@@ -96,20 +96,16 @@ getKey() {
 	return key;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
-	ds.writeShort(flags);
-	ds.writeByte(proto);
-	ds.writeByte(alg);
+	dbs.writeShort(flags);
+	dbs.writeByte(proto);
+	dbs.writeByte(alg);
 	if (key != null)
-		ds.write(key);
-	return bs.toByteArray();
+		dbs.write(key);
 }
 
 }

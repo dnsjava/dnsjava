@@ -141,7 +141,7 @@ toString() {
 }
 
 public void
-toWire(CountedDataOutputStream out, Compression c) throws IOException {
+toWire(DataByteOutputStream out, Compression c) throws IOException {
 	for (int i=0; i<labels; i++) {
 		Name tname = new Name(this, i);
 		int pos;
@@ -166,7 +166,7 @@ toWire(CountedDataOutputStream out, Compression c) throws IOException {
 }
 
 public void
-toWireCanonical(CountedDataOutputStream out) throws IOException {
+toWireCanonical(DataByteOutputStream out) throws IOException {
 	for (int i=0; i<labels; i++) {
 		out.writeByte(name[i].length());
 		for (int j=0; j<name[i].length(); j++)

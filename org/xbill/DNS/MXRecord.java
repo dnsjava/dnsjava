@@ -62,17 +62,13 @@ getPriority() {
 	return priority;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (target == null)
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
-	ds.writeShort(priority);
-	target.toWire(ds, null);
-	return bs.toByteArray();
+	dbs.writeShort(priority);
+	target.toWire(dbs, null);
 }
 
 }

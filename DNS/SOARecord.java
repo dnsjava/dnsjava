@@ -116,20 +116,18 @@ getMinimum() {
 	return minimum;
 }       
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs, index);
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+	if (host == null)
+		return;
 
-	host.toWire(ds, c);
-	admin.toWire(ds, c);
-	ds.writeInt(serial);
-	ds.writeInt(refresh);
-	ds.writeInt(retry);
-	ds.writeInt(expire);
-        ds.writeInt(minimum);
-
-	return bs.toByteArray();
+	host.toWire(dbs, c);
+	admin.toWire(dbs, c);
+	dbs.writeInt(serial);
+	dbs.writeInt(refresh);
+	dbs.writeInt(retry);
+	dbs.writeInt(expire);
+        dbs.writeInt(minimum);
 }
 
 }

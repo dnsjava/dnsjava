@@ -46,13 +46,9 @@ getVersion() {
 	return (short) ((ttl >>> 16) & 0xFF);
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	/* probably should dump bytes in here */
-	return bs.toByteArray();
 }
 
 }

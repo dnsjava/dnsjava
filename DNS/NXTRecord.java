@@ -79,23 +79,19 @@ getBitmap() {
 	return bitmap;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (next == null)
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
-	next.toWire(ds, null);
+	next.toWire(dbs, null);
 	for (int i = 0, t = 0; i < bitmap.size(); i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
 		if (i % 8 == 7 || i == bitmap.size() - 1) {
-			ds.writeByte(t);
+			dbs.writeByte(t);
 			t = 0;
 		}
 	}
-	return bs.toByteArray();
 }
 
 }

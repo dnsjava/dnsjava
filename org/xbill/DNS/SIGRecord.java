@@ -143,25 +143,20 @@ getSignature() {
 	return signature;
 }
 
-byte []
-rrToWire(Compression c, int index) throws IOException {
+void
+rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	if (signature == null)
-		return null;
+		return;
 
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
-
-	ds.writeShort(covered);
-	ds.writeByte(alg);
-	ds.writeByte(labels);
-	ds.writeInt(origttl);
-	ds.writeInt((int)expire.getTime() / 1000);
-	ds.writeInt((int)timeSigned.getTime() / 1000);
-	ds.writeShort(footprint);
-	signer.toWire(ds, null);
-	ds.write(signature);
-
-	return bs.toByteArray();
+	dbs.writeShort(covered);
+	dbs.writeByte(alg);
+	dbs.writeByte(labels);
+	dbs.writeInt(origttl);
+	dbs.writeInt((int)expire.getTime() / 1000);
+	dbs.writeInt((int)timeSigned.getTime() / 1000);
+	dbs.writeShort(footprint);
+	signer.toWire(dbs, null);
+	dbs.write(signature);
 }
 
 private String
