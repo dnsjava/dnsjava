@@ -47,7 +47,7 @@ getDigest() {
 	if (alg.equals(HMAC_MD5))
 		digest = "md5";
 	else if (alg.equals(HMAC_SHA1))
-		digest = "sha";
+		digest = "sha-1";
 	else if (alg.equals(HMAC_SHA256))
 		digest = "sha-256";
 	else
