@@ -456,7 +456,8 @@ getWireLength() {
 /**
  * Converts the type-specific RR to wire format - must be overriden
  */
-abstract void rrToWire(DataByteOutputStream out, Compression c) throws IOException;
+abstract void rrToWire(DataByteOutputStream out, Compression c)
+throws IOException;
 
 /**
  * Converts the type-specific RR to canonical wire format - must be overriden
@@ -482,12 +483,7 @@ equals(Object arg) {
 			return false;
 		byte [] array1 = rdataToWireCanonical();
 		byte [] array2 = r.rdataToWireCanonical();
-		if (array1.length != array2.length)
-			return false;
-		for (int i = 0; i < array1.length; i++)
-			if (array1[i] != array2[i])
-				return false;
-		return true;
+		return Arrays.equals(array1, array2);
 	}
 	catch (IOException e) {
 		return false;
@@ -500,8 +496,8 @@ equals(Object arg) {
 public int
 hashCode() {
 	try {
-		byte [] array1 = toWire(Section.ANSWER);
-		return array1.hashCode();
+		byte [] array = toWireCanonical();
+		return array.hashCode();
 	}
 	catch (IOException e) {
 		return 0;
