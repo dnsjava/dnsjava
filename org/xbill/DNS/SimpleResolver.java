@@ -225,7 +225,8 @@ maxUDPSize(Message query) {
 }
 
 /**
- * Sends a message to a single server and waits for a response.
+ * Sends a message to a single server and waits for a response.  No checking
+ * is done to ensure that the response is associated with the query.
  * @param query The query to send.
  * @return The response.
  * @throws IOException An error occurred while sending or receiving.
