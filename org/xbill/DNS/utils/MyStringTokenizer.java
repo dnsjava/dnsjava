@@ -6,27 +6,27 @@ package org.xbill.DNS.utils;
 import java.io.*;
 import java.util.*;
 
-/* This should be compatible with StringTokenizer, with the following
- * exceptions:
- *   - \ is an escape character.  This allows escaping delimiters and \xxx
- *     decimal values.
- *   - quoted strings are treated as one token ("one token")
- *   - no support for changing delimiters on the fly
- *
- * These should probably be optional.
- *
- * This could do multiline handling, but I think I should leave that in
- *    IO.readExtendedLine.
+/** A class similar to StringTokenizer, with a few differences making it more
+ * suitable.  The \ character is used as an escape character, allowing
+ * delimiters to be escaped and \xxx decimal value to be used.  Quoted
+ * strings (delimited by double quotes) are treated as one token.
  */
 
 public class MyStringTokenizer implements Enumeration {
 
-char [] string;
-String delim;
-boolean returnTokens;
-int current;
-String putBack;
+private char [] string;
+private String delim;
+private boolean returnTokens;
+private int current;
+private String putBack;
 
+/** Creates a new instance of MyStringTokenizer.
+ * @param s The string to be tokenized
+ * @param delim A string containing all delimiters
+ * @param returnTokens If true, return delimiters as tokens.  This
+ * differs from StringTokenizer in that adjacent delimiters are returned
+ * in the same token.
+ */
 public
 MyStringTokenizer(String _s, String _delim, boolean _returnTokens) {
 	string = new char[_s.length()];
@@ -36,11 +36,19 @@ MyStringTokenizer(String _s, String _delim, boolean _returnTokens) {
 	current = 0;
 }
 
+/** Creates a new instance of MyStringTokenizer.
+ * @param s The string to be tokenized
+ * @param delim A string containing all delimiters
+ */
 public
 MyStringTokenizer(String _s, String _delim) {
 	this(_s, _delim, false);
 }
 
+/** Creates a new instance of MyStringTokenizer, with whitespace delimiters
+ * (space, tab, newline).
+ * @param s The string to be tokenized
+ */
 public
 MyStringTokenizer(String _s) {
 	this(_s, " \t\n\r", false);
@@ -51,6 +59,7 @@ isDelim(int i) {
 	return (delim.indexOf(string[i]) >= 0);
 }
 
+/** Are there any more tokens in the string */
 public boolean
 hasMoreTokens() {
 	if (current >= string.length)
@@ -63,17 +72,23 @@ hasMoreTokens() {
 	return (t < string.length);
 }
 
+/** Are there any more tokens in the string */
 public boolean
 hasMoreElements() {
 	return hasMoreTokens();
 }
 
-/* This should _only_ be called if hasMoreTokens == false */
+/**
+ * Are there any more delimiters in the string?  This should only be called
+ * if hasMoreTokens is false, to determine if the string contains trailing
+ * delimiters.
+ */
 public boolean
 hasMoreDelimiters() {
 	return (current < string.length);
 }
 
+/** Returns the next token */
 public String
 nextToken() {
 	if (putBack != null) {
@@ -134,11 +149,16 @@ nextToken() {
 	return sb.toString();
 }
 
+/** Returns the next token */
 public Object
 nextElement() {
 	return nextToken();
 }
 
+/**
+ * Specifies a string to be added to the MyStringTokenizer object.  The next
+ * call to nextToken() will return this string.
+ */
 public void
 putBackToken(String s) {
 	putBack = s;
