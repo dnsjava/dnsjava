@@ -56,6 +56,8 @@ toDottedQuad(int addr) {
 public
 ARecord(Name name, int dclass, long ttl, InetAddress address) {
 	super(name, Type.A, dclass, ttl);
+	if (Address.familyOf(address) != Address.IPv4)
+		throw new IllegalArgumentException("invalid IPv4 address");
 	addr = fromArray(address.getAddress());
 }
 
