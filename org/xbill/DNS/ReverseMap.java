@@ -45,7 +45,7 @@ fromAddress(byte [] addr) {
 		int [] nibbles = new int[2];
 		for (int i = addr.length - 1; i >= 0; i--) {
 			nibbles[0] = (addr[i] & 0xFF) >> 4;
-			nibbles[1] = (addr[i] & 0xFF) &= 0xF;
+			nibbles[1] = (addr[i] & 0xFF) & 0xF;
 			for (int j = nibbles.length - 1; j >= 0; j--) {
 				sb.append(nibbles[j]);
 				if (i > 0 || j > 0)
@@ -101,11 +101,23 @@ fromAddress(InetAddress addr) {
  * @throws UnknownHostException The string does not contain a valid address.
  */
 public static Name
-fromAddress(String addr) throws UnknownHostException {
-	byte [] array = Address.toByteArray(addr);
+fromAddress(String addr, int family) throws UnknownHostException {
+	byte [] array = Address.toByteArray(addr, family);
 	if (array == null)
 		throw new UnknownHostException("Invalid IP address");
 	return fromAddress(array);
+}
+
+/**
+ * Creates a reverse map name corresponding to an address contained in
+ * a String.
+ * @param addr The address from which to build a name.
+ * @return The name corresponding to the address in the reverse map.
+ * @throws UnknownHostException The string does not contain a valid address.
+ */
+public static Name
+fromAddress(String addr) throws UnknownHostException {
+	return fromAddress(addr, Address.IPv4);
 }
 
 }
