@@ -22,9 +22,9 @@ public static final byte SHA1_DIGEST_ID = 1;
 
 private static DSRecord member = new DSRecord();
 
-private int footprint = -1;
-private byte alg;
-private byte digestid = SHA1_DIGEST_ID;
+private int footprint;
+private int alg;
+private int digestid;
 private byte [] digest;
 
 private DSRecord() {}
@@ -51,9 +51,18 @@ DSRecord(Name name, int dclass, int ttl, int footprint, int alg,
 	 int digestid, byte []  digest)
 {
 	this(name, dclass, ttl);
+	if (footprint < 0 || footprint > 0xFFFF)
+		throw new IllegalArgumentException("invalid footprint: " +
+						   footprint);
+	if (alg < 0 || alg > 0xFF)
+		throw new IllegalArgumentException("invalid algorithm: " +
+						   alg);
+	if (digestid < 0 || digestid > 0xFF)
+		throw new IllegalArgumentException("invalid digest id: " +
+						   digestid);
 	this.footprint = footprint;
-	this.alg = (byte) alg;
-	this.digestid = (byte) digestid;
+	this.alg = alg;
+	this.digestid = digestid;
 	this.digest = digest;
 }
 
@@ -66,9 +75,9 @@ throws IOException
 	if (in == null)
 		return rec;
 
-	rec.footprint = in.readShort() & 0xFFFF;
-	rec.alg = in.readByte();
-	rec.digestid = in.readByte();
+	rec.footprint = in.readUnsignedShort();
+	rec.alg = in.readUnsignedByte();
+	rec.digestid = in.readUnsignedByte();
 
 	if (length > 4) {
 		rec.digest = new byte[length - 4];
@@ -98,11 +107,11 @@ throws IOException
 public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append(footprint & 0xFFFF);
+	sb.append(footprint);
 	sb.append(" ");
-	sb.append(alg & 0xFF);
+	sb.append(alg);
 	sb.append(" ");
-	sb.append(digestid & 0xFF);
+	sb.append(digestid);
 	if (digest != null) {
 		sb.append(" ");
 		sb.append(base16.toString(digest));
@@ -114,7 +123,7 @@ rdataToString() {
 /**
  * Returns the key's algorithm.
  */
-public byte
+public int
 getAlgorithm() {
 	return alg;
 }
@@ -122,7 +131,7 @@ getAlgorithm() {
 /**
  *  Returns the key's Digest ID.
  */
-public byte
+public int
 getDigestID()
 {
 	return digestid;
@@ -139,9 +148,9 @@ getDigest() {
 /**
  * Returns the key's footprint.
  */
-public short
+public int
 getFootprint() {
-	return (short) footprint;
+	return footprint;
 }
 
 void
