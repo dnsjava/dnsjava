@@ -122,12 +122,7 @@ main(String argv[]) throws IOException {
 					key = argv[arg].substring(2);
 				else
 					key = argv[++arg];
-				int index = key.indexOf('/');
-				if (index < 0)
-					res.setTSIGKey(key);
-				else
-					res.setTSIGKey(key.substring(0, index),
-						       key.substring(index+1));
+				res.setTSIGKey(TSIG.fromString(key));
 				break;
 
 			    case 't':
