@@ -27,7 +27,7 @@
 
     <target name="jar" description="Makes dnsjava.jar" depends="compile, docs">
         <jar jarfile="${dist_dir}/${jarname}"
-             basedir="${dist_dir}" includes="**/*.class"/>
+             basedir="${build_dir}" includes="**/*.class"/>
     </target>
 
     <target name="clean" description="Remove old class files">
@@ -53,10 +53,11 @@
 
     <target name="sourcedist" description="Builds source distributions"
             depends="compile">
-        <zip destfile="${zipname}" basedir="${build_dir}"
-             excludes="**/*.class"/>
-        <tar destfile="${targzname}" basedir="${build_dir}"
-             compression="gzip" excludes="**/*.class"/>
+        <zip destfile="${src_dir}/${zipname}" basedir="${build_dir}"
+             excludes="**/*.class,${jarname},${zipname},${targzname},"/>
+        <tar destfile="${src_dir}/${targzname}" basedir="${build_dir}"
+             compression="gzip"
+             excludes="**/*.class,${jarname},${zipname},${targzname},"/>
     </target>
 
 </project>
