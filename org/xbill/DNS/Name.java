@@ -18,19 +18,18 @@ public class Name implements Comparable {
 
 private static final int LABEL_NORMAL = 0;
 private static final int LABEL_COMPRESSION = 0xC0;
-private static final int LABEL_EXTENDED = 0x40;
 private static final int LABEL_MASK = 0xC0;
-
-private static final int EXT_LABEL_BITSTRING = 1;
 
 private Object [] name;
 private byte offset;
 private byte labels;
-private boolean qualified;
 private int hashcode;
 
+private static final byte [] emptyLabel = new byte[0];
+private static final byte [] wildLabel = new byte[] {(byte)'*'};
+
 /** The root name */
-public static final Name root = Name.fromConstantString(".");
+public static final Name root;
 
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 128;
@@ -45,8 +44,7 @@ private static final DecimalFormat byteFormat = new DecimalFormat();
 private static final byte lowercase[] = new byte[256];
 
 /* Used in wildcard names. */
-private static final Name wildcardName = Name.fromConstantString("*");
-private static final byte wildcardLabel[] = (byte []) wildcardName.name[0];
+private static final Name wildName;
 
 static {
 	byteFormat.setMinimumIntegerDigits(3);
@@ -56,6 +54,10 @@ static {
 		else
 			lowercase[i] = (byte)(i - 'A' + 'a');
 	}
+	root = new Name();
+	root.append(emptyLabel);
+	wildName = new Name();
+	wildName.append(wildLabel);
 }
 
 private
@@ -67,13 +69,28 @@ grow(int n) {
 	if (n > MAXLABELS)
 		throw new ArrayIndexOutOfBoundsException("name too long");
 	Object [] newarray = new Object[n];
-	System.arraycopy(name, 0, newarray, 0, labels);
+	if (labels > 0)
+		System.arraycopy(name, 0, newarray, 0, labels);
 	name = newarray;
 }
 
 private final void
 grow() {
-	grow(labels * 2);
+	if (labels >= MAXLABELS)
+		throw new ArrayIndexOutOfBoundsException("name too long");
+	else if (labels * 2 > MAXLABELS)
+		grow(MAXLABELS);
+	else if (labels > 0)
+		grow(labels * 2);
+	else
+		grow(1);
+}
+
+private final void
+append(Object label) {
+	if (labels == name.length)
+		grow(labels + 1);
+	name[labels++] = label;
 }
 
 /**
@@ -89,31 +106,22 @@ Name(String s, Name origin) {
 		n = Name.fromString(s, origin);
 	}
 	catch (TextParseException e) {
-		StringBuffer sb = new StringBuffer();
-		sb.append(s);
-		if (origin != null) {
-			sb.append(".");
-			sb.append(origin);
-		}
-		sb.append(": ");
-		sb.append(e.getMessage());
+		StringBuffer sb = new StringBuffer(s);
+		if (origin != null)
+			sb.append("." + origin);
+		sb.append(": "+ e.getMessage());
 		System.err.println(sb.toString());
-		name = null;
-		labels = 0;
 		return;
 	}
 	labels = n.labels;
 	name = n.name;
-	qualified = n.qualified;
-	if (!qualified) {
+	if (!isQualified()) {
 		/*
 		 * This isn't exactly right, but it's close.
 		 * Partially qualified names are evil.
 		 */
-		if (Options.check("pqdn"))
-			qualified = false;
-		else
-			qualified = (labels > 1);
+		if (Options.check("pqdn") && labels > 1)
+			append(emptyLabel);
 	}
 }
 
@@ -146,10 +154,8 @@ fromString(String s, Name origin) throws TextParseException {
 			return origin;
 		else
 			return name;
-	} else if (s.equals(".")) {
-		name.qualified = true;
-		return name;
-	}
+	} else if (s.equals("."))
+		return (root);
 	int labelstart = -1;
 	int pos = 0;
 	byte [] label = new byte[64];
@@ -199,17 +205,15 @@ fromString(String s, Name origin) throws TextParseException {
 		}
 	}
 	if (labelstart == -1)
-		name.qualified = true;
+		name.append(emptyLabel);
 	else {
 		byte [] newlabel = new byte[pos];
 		System.arraycopy(label, 0, newlabel, 0, pos);
 		if (name.labels == MAXLABELS)
 			throw new TextParseException("too many labels");
-		if (name.labels == name.name.length)
-			name.grow();
-		name.name[name.labels++] = newlabel;
+		name.append(newlabel);
 	}
-	if (origin != null)
+	if (origin != null && !name.isQualified())
 		return concatenate(name, origin);
 	return (name);
 }
@@ -292,7 +296,6 @@ loop:
 			break loop;
 		} /* switch */
 	}
-	qualified = true;
 }
 
 /**
@@ -305,7 +308,6 @@ Name(Name src, int n) {
 	name = src.name;
 	offset = (byte)(src.offset + n);
 	labels = (byte)(src.labels - n);
-	qualified = src.qualified;
 }
 
 /**
@@ -316,7 +318,7 @@ Name(Name src, int n) {
  */
 public static Name
 concatenate(Name prefix, Name suffix) {
-	if (prefix.qualified)
+	if (prefix.isQualified())
 		return (prefix);
 	int nlabels = prefix.labels + suffix.labels;
 	if (nlabels > MAXLABELS)
@@ -328,7 +330,6 @@ concatenate(Name prefix, Name suffix) {
 			 0, prefix.labels);
 	System.arraycopy(suffix.name, suffix.offset, newname.name,
 			 prefix.labels, suffix.labels);
-	newname.qualified = suffix.qualified;
 	return newname;
 }
 
@@ -338,7 +339,7 @@ concatenate(Name prefix, Name suffix) {
  */
 public Name
 wild(int n) {
-	return concatenate(wildcardName, new Name(this, n));
+	return concatenate(wildName, new Name(this, n));
 }
 
 /**
@@ -363,7 +364,6 @@ fromDNAME(DNAMERecord dname) {
 	System.arraycopy(this.name, 0, newname.name, 0, saved);
 	System.arraycopy(dnametarget.name, 0, newname.name, saved,
 			 dnametarget.labels);
-	newname.qualified = true;
 	return newname;
 }
 
@@ -374,10 +374,8 @@ public boolean
 isWild() {
 	if (labels == 0)
 		return false;
-	if (name[0] == wildcardLabel)
-		return true;
-	byte [] b = (byte []) name[0];
-	return (b.length == 1 && b[0] == '*');
+	return (name[0] == wildLabel ||
+		Arrays.equals((byte[])name[0], wildLabel));
 }
 
 /**
@@ -385,7 +383,9 @@ isWild() {
  */
 public boolean
 isQualified() {
-	return qualified;
+	if (labels == 0)
+		return false;
+	return (name[offset + labels - 1] == emptyLabel);
 }
 
 /**
@@ -397,7 +397,7 @@ length() {
 	for (int i = offset; i < labels + offset; i++) {
 		total += (((byte [])name[i]).length + 1);
 	}
-	return ++total;
+	return total;
 }
 
 /**
@@ -431,12 +431,8 @@ byteString(byte [] array) {
 		}
 		else if (b == '"' || b == '(' || b == ')' || b == '.' ||
 			 b == ';' || b == '\\' || b == '@' || b == '$')
-		{
 			sb.append('\\');
-			sb.append((char)b);
-		}
-		else
-			sb.append((char)b);
+		sb.append((char)b);
 	}
 	return sb.toString();
 }
@@ -447,11 +443,9 @@ byteString(byte [] array) {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	if (labels == 0)
-		sb.append(".");
 	for (int i = offset; i < labels + offset; i++) {
 		sb.append(byteString((byte [])name[i]));
-		if (qualified || i < labels)
+		if (i < labels + offset - 1)
 			sb.append(".");
 	}
 	return sb.toString();
@@ -472,6 +466,9 @@ getLabelString(int n) {
  */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
+	if (!isQualified())
+		throw new IllegalArgumentException("toWire() called on " +
+						   "non-absolute name");
 	for (int i = offset; i < labels + offset; i++) {
 		Name tname;
 		if (i == offset)
@@ -485,8 +482,7 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 			pos |= (LABEL_MASK << 8);
 			out.writeShort(pos);
 			return;
-		}
-		else {
+		} else {
 			if (c != null)
 				c.add(out.getPos(), tname);
 			out.writeString((byte []) name[i]);
