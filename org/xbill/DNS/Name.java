@@ -13,8 +13,17 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-
 public class Name {
+
+private static final int LABEL_NORMAL = 0;
+private static final int LABEL_COMPRESSION = 0xC0;
+private static final int LABEL_EXTENDED = 0x40;
+private static final int LABEL_LOCAL_COMPRESSION = 0x80;
+private static final int LABEL_MASK = 0xC0;
+
+private static final int EXT_LABEL_COMPRESSION = 0;
+private static final int EXT_LABEL_BITSTRING = 1;
+private static final int EXT_LABEL_LOCAL_COMPRESSION = 2;
 
 class BitString {
 	int nbits;
@@ -30,18 +39,40 @@ class BitString {
 		return (nbits + 7) & ~7;
 	}
 
+	int
+	wireBits() {
+		return (nbits == 256 ? 0 : nbits);
+	}
+
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\\[x");
+		int count = nbits;
 		for (int i = 0; i < bytes(); i++) {
 			int high = data[i] >>> 4;
-			int low = data[i];
+			int low = data[i] & 0xf;
 			sb.append(Integer.toHexString(high));
-			sb.append(Integer.toHexString(low));
+			if (low > 0 || i < bytes() - 1)
+				sb.append(Integer.toHexString(low));
 		}
+		sb.append("/");
+		sb.append(count);
 		sb.append("]");
 		return sb.toString();
+	}
+
+	public boolean
+	equals(Object o) {
+		if (!(o instanceof BitString))
+			return false;
+		BitString b = (BitString) o;
+		if (nbits != b.nbits)
+			return false;
+		for (int i = 0; i < bytes(); i++)
+			if (data[i] != b.data[i])
+				return false;
+		return true;
 	}
 }
 
@@ -128,8 +159,8 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 	start = in.getPos();
 loop:
 	while ((len = in.readUnsignedByte()) != 0) {
-		switch(len & 0xC0) {
-		case 0:
+		switch(len & LABEL_MASK) {
+		case LABEL_NORMAL:
 		{
 			byte [] b = new byte[len];
 			in.read(b);
@@ -137,10 +168,10 @@ loop:
 			count++;
 			break;
 		}
-		case 0xC0:
+		case LABEL_COMPRESSION:
 		{
 			int pos = in.readUnsignedByte();
-			pos += ((len & ~0xC0) << 8);
+			pos += ((len & ~LABEL_MASK) << 8);
 			Name name2 = (c == null) ? null : c.get(pos);
 /*System.out.println("Looking for name at " + pos + ", found " + name2);*/
 			if (name2 == null)
@@ -152,11 +183,11 @@ loop:
 			}
 			break loop;
 		}
-		case 0x40:
+		case LABEL_EXTENDED:
 		{
-			int type = len & 0x3F;
+			int type = len & ~LABEL_MASK;
 			switch (type) {
-			case 0:
+			case EXT_LABEL_COMPRESSION:
 				int pos = in.readUnsignedShort();
 				Name name2 = (c == null) ? null : c.get(pos);
 /*System.out.println("Looking for name at " + pos + ", found " + name2);*/
@@ -169,9 +200,11 @@ loop:
 					labels += name2.labels;
 				}
 				break loop;
-			case 1:
+			case EXT_LABEL_BITSTRING:
 			{
 				int bits = in.readUnsignedByte();
+				if (bits == 0)
+					bits = 256;
 				int bytes = (bits + 7) & ~7;
 				byte [] data = new byte[bytes];
 				in.read(data);
@@ -179,7 +212,7 @@ loop:
 				count++;
 				break;
 			}
-			case 2:
+			case EXT_LABEL_LOCAL_COMPRESSION:
 				throw new WireParseException(
 						"Long local compression");
 			default:
@@ -187,7 +220,7 @@ loop:
 						"Unknown name format");
 			} /* switch */
 		}
-		case 0x80:
+		case LABEL_LOCAL_COMPRESSION:
 			throw new WireParseException("Local compression");
 		} /* switch */
 	}
@@ -199,7 +232,7 @@ loop:
 			if (name[i] instanceof String)
 				pos += (((String)name[i]).length() + 1);
 			else
-				pos += (((BitString)name[i]).nbits + 2);
+				pos += (((BitString)name[i]).bytes() + 2);
 		}
 	qualified = true;
 }
@@ -322,7 +355,7 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 			pos = -1;
 /*System.out.println("Looking for compressed " + tname + ", found " + pos);*/
 		if (pos >= 0) {
-			pos |= (0xC0 << 8);
+			pos |= (LABEL_MASK << 8);
 			out.writeShort(pos);
 			return;
 		}
@@ -333,8 +366,9 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 			if (name[i] instanceof String)
 				out.writeString((String)name[i]);
 			else {
-				out.writeByte(0xC0 | 1);
-				out.writeByte(((BitString)name[i]).nbits);
+				out.writeByte(LABEL_EXTENDED |
+					      EXT_LABEL_BITSTRING);
+				out.writeByte(((BitString)name[i]).wireBits());
 				out.write(((BitString)name[i]).data);
 			}
 		}
@@ -351,8 +385,8 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
 		if (name[i] instanceof String)
 			out.writeStringCanonical((String)name[i]);
 		else {
-			out.writeByte(0xC0 | 1);
-			out.writeByte(((BitString)name[i]).nbits);
+			out.writeByte(LABEL_EXTENDED | EXT_LABEL_BITSTRING);
+			out.writeByte(((BitString)name[i]).wireBits());
 			out.write(((BitString)name[i]).data);
 		}
 	}
@@ -379,13 +413,9 @@ equals(Object arg) {
 				return false;
 		}
 		else {
-			BitString b1 = (BitString) name[i];
-			BitString b2 = (BitString) d.name[i];
-			if (b1.nbits != b2.nbits)
+			/* BitString */
+			if (!name[i].equals(d.name[i]))
 				return false;
-			for (int j = 0; j < b1.bytes(); j++)
-				if (b1.data[j] != b2.data[j])
-					return false;
 		}
 	}
 	return true;
