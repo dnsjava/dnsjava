@@ -62,114 +62,118 @@ rrFromWire(DNSInput in) throws IOException {
 	altitude = in.readU32();
 }
 
+private long
+parsePosition(Tokenizer st, String type) throws IOException {
+	boolean isLatitude = type.equals("latitude");
+	int deg = 0, min = 0;
+	double sec = 0;
+	long value;
+	String s;
+
+	deg = st.getUInt16();
+	if (deg > 180 || (deg > 90 && isLatitude))
+		throw st.exception("Invalid LOC " + type + " degrees");
+
+	s = st.getString();
+	try {
+		min = Integer.parseInt(s);
+		if (min < 0 || min > 59)
+			throw st.exception("Invalid LOC " + type + " minutes");
+		s = st.getString();
+		sec = Double.parseDouble(s);
+		if (sec < 0 || sec >= 60)
+			throw st.exception("Invalid LOC " + type + " seconds");
+		s = st.getString();
+	} catch (NumberFormatException e) {
+	}
+
+	if (s.length() != 1)
+		throw st.exception("Invalid LOC " + type);
+
+	value = (long) (1000 * (sec + 60L * (min + 60L * deg)));
+
+	char c = Character.toUpperCase(s.charAt(0));
+	if ((isLatitude && c == 'S') || (!isLatitude && c == 'W'))
+		value = -value;
+	else if ((isLatitude && c != 'N') || (!isLatitude && c != 'E'))
+		throw st.exception("Invalid LOC " + type);
+
+	value += (1L << 31);
+
+	return value;
+}
+
+private long
+parseDouble(Tokenizer st, String type, boolean required, long min, long max,
+	    long defaultValue)
+throws IOException
+{
+	Tokenizer.Token token = st.get();
+	if (token.isEOL()) {
+		if (required)
+			throw st.exception("Invalid LOC " + type);
+		st.unget();
+		return defaultValue;
+	}
+	String s = token.value;
+	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
+		s = s.substring(0, s.length() - 1);
+	try {
+		long value = (long)(100 * new Double(s).doubleValue());
+		if (value < min || value > max)
+			throw st.exception("Invalid LOC " + type);
+		return value;
+	}
+	catch (NumberFormatException e) {
+		throw st.exception("Invalid LOC " + type);
+	}
+}
+
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = null;
 	int deg, min;
 	double sec;
 
-	/* Latitude */
-	deg = min = 0;
-	sec = 0.0;
-	try {
-		deg = st.getUInt16();
-		min = st.getUInt16();
-		sec = st.getDouble();
-	}
-	catch (NumberFormatException e) {
-		st.unget();
-	}
-	s = st.getString();
-	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
-		throw st.exception("Invalid LOC latitude");
-	latitude = (long) (1000 * (sec + 60 * (min + 60 * deg)));
-	if (s.equalsIgnoreCase("S"))
-		latitude = -latitude;
-	latitude += (1L << 31);
-	
-	/* Longitude */
-	deg = min = 0;
-	sec = 0.0;
-	try {
-		deg = st.getUInt16();
-		min = st.getUInt16();
-		sec = st.getDouble();
-	}
-	catch (NumberFormatException e) {
-		st.unget();
-	}
-	s = st.getString();
-	if (!s.equalsIgnoreCase("W") && !s.equalsIgnoreCase("E"))
-		throw st.exception("Invalid LOC longitude");
-	longitude = (long) (1000 * (sec + 60 * (min + 60 * deg)));
-	if (s.equalsIgnoreCase("W"))
-		longitude = -longitude;
-	longitude += (1L << 31);
-
-	/* Altitude */
-	Tokenizer.Token token = st.get();
-	if (token.isEOL()) {
-		st.unget();
-		return;
-	}
-	s = token.value;
-	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
-		s = s.substring(0, s.length() - 1);
-	try {
-		altitude = (long)((new Double(s).doubleValue() + 100000) * 100);
-	}
-	catch (NumberFormatException e) {
-		throw st.exception("Invalid LOC altitude");
-	}
-	
-	/* Size */
-	token = st.get();
-	if (token.isEOL()) {
-		st.unget();
-		return;
-	}
-	s = token.value;
-	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
-		s = s.substring(0, s.length() - 1);
-	try {
-		size = (long) (100 * new Double(s).doubleValue());
-	}
-	catch (NumberFormatException e) {
-		throw st.exception("Invalid LOC size");
-	}
-	
-	/* Horizontal precision */
-	token = st.get();
-	if (token.isEOL()) {
-		st.unget();
-		return;
-	}
-	s = token.value;
-	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
-		s = s.substring(0, s.length() - 1);
-	try {
-		hPrecision = (long) (100 * new Double(s).doubleValue());
-	}
-	catch (NumberFormatException e) {
-		throw st.exception("Invalid LOC horizontal precision");
-	}
-	
-	/* Vertical precision */
-	token = st.get();
-	if (token.isEOL()) {
-		st.unget();
-		return;
-	}
-	s = token.value;
-	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
-		s = s.substring(0, s.length() - 1);
-	try {
-		vPrecision = (long) (100 * new Double(s).doubleValue());
-	}
-	catch (NumberFormatException e) {
-		throw st.exception("Invalid LOC vertical precision");
-	}
+	latitude = parsePosition(st, "latitude");
+	longitude = parsePosition(st, "longitude");
+	altitude = parseDouble(st, "altitude", true,
+			       -10000000, 4284967295L, 0) + 10000000;
+	size = parseDouble(st, "size", false, 0, 9000000000L, 100);
+	hPrecision = parseDouble(st, "horizontal precision", false,
+				 0, 9000000000L, 1000000);
+	vPrecision = parseDouble(st, "vertical precision", false,
+				 0, 9000000000L, 1000);
 }
+
+private String
+positionToString(NumberFormat nf, long value, char pos, char neg) {
+	StringBuffer sb = new StringBuffer();
+	char direction;
+
+	long temp = value - (1L << 31);
+	if (temp < 0) {
+		temp = -temp;
+		direction = neg;
+	} else
+		direction = pos;
+
+	sb.append(temp / (3600 * 1000)); /* degrees */
+	temp = temp % (3600 * 1000);
+	sb.append(" ");
+
+	sb.append(temp / (60 * 1000)); /* minutes */
+	temp = temp % (60 * 1000);
+	sb.append(" ");
+
+	sb.append(nf.format(((double)temp) / 1000)); /* seconds */
+	sb.append(" ");
+
+	sb.append(direction);
+
+	return sb.toString();
+}
+
 
 /** Convert to a String */
 String
@@ -182,49 +186,11 @@ rrToString() {
 	nf.setGroupingUsed(false);
 
 	/* Latitude */
-	temp = latitude - (1L << 31);
-	if (temp < 0) {
-		temp = -temp;
-		direction = 'S';
-	}
-	else
-		direction = 'N';
-
-	sb.append(temp / (3600 * 1000)); /* degrees */
-	temp = temp % (3600 * 1000);
-	sb.append(" ");
-
-	sb.append(temp / (60 * 1000)); /* minutes */
-	temp = temp % (60 * 1000);
-	sb.append(" ");
-
-	sb.append(nf.format((double)temp / 1000)); /* seconds */
-	sb.append(" ");
-
-	sb.append(direction);
+	sb.append(positionToString(nf, latitude, 'N', 'S'));
 	sb.append(" ");
 
 	/* Latitude */
-	temp = longitude - (1L << 31);
-	if (temp < 0) {
-		temp = -temp;
-		direction = 'W';
-	}
-	else
-		direction = 'E';
-
-	sb.append(temp / (3600 * 1000)); /* degrees */
-	temp = temp % (3600 * 1000);
-	sb.append(" ");
-
-	sb.append(temp / (60 * 1000)); /* minutes */
-	temp = temp % (60 * 1000);
-	sb.append(" ");
-
-	sb.append(nf.format((double)temp / 1000)); /* seconds */
-	sb.append(" ");
-
-	sb.append(direction);
+	sb.append(positionToString(nf, longitude, 'E', 'W'));
 	sb.append(" ");
 
 	nf.setMaximumFractionDigits(2);
@@ -251,37 +217,37 @@ rrToString() {
 /** Returns the latitude */
 public double
 getLatitude() {  
-	return (double)(latitude - (1<<31)) / (3600 * 1000);
+	return ((double)(latitude - (1<<31))) / (3600 * 1000);
 }       
 
 /** Returns the longitude */
 public double
 getLongitude() {  
-	return (double)(longitude - (1<<31)) / (3600 * 1000);
+	return ((double)(longitude - (1<<31))) / (3600 * 1000);
 }       
 
 /** Returns the altitude */
 public double
 getAltitude() {  
-	return (double)(altitude - 10000000)/100;
+	return ((double)(altitude - 10000000)) / 100;
 }       
 
 /** Returns the diameter of the enclosing sphere */
 public double
 getSize() {  
-	return (double)size / 100;
+	return ((double)size) / 100;
 }       
 
 /** Returns the horizontal precision */
 public double
 getHPrecision() {  
-	return (double)hPrecision / 100;
+	return ((double)hPrecision) / 100;
 }       
 
 /** Returns the horizontal precision */
 public double
 getVPrecision() {  
-	return (double)vPrecision / 100;
+	return ((double)vPrecision) / 100;
 }       
 
 void
