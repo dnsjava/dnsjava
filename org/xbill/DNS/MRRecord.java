@@ -6,7 +6,7 @@ import java.io.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * Mailbox Renam Record  - specifies a rename of a mailbox.
+ * Mailbox Rename Record  - specifies a rename of a mailbox.
  *
  * @author Brian Wellington
  */
