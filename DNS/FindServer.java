@@ -53,11 +53,9 @@ findUnix() {
 	BufferedReader br = new BufferedReader(isr);
 	Vector v = null;
 	try {
-		while (true) {
-			String line = br.readLine();
-			if (line == null)
-				break;
-			if (!line.startsWith("nameserver "))
+		String line;
+		while ((line = br.readLine()) != null) {
+			if (!line.startsWith("nameserver"))
 				continue;
 			if (v == null)
 				v = new Vector();
