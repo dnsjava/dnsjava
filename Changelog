@@ -1,3 +1,6 @@
+5/18/2004
+	- 1.6.3 released.
+
 5/11/2004
 	- Don't store the number of labels in a Name in a byte, as the maximum
 	  value (128) cannot be stored in a byte.
