@@ -25,4 +25,8 @@ public static final byte RSA = 1;
 public static final byte DH = 2;
 public static final byte DSA = 3;
 
+public static final byte Failed = -1;
+public static final byte Insecure = 0;
+public static final byte Secure = 1;
+
 }
