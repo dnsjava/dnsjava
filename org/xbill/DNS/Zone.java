@@ -8,7 +8,7 @@ import java.util.*;
 
 /**
  * A DNS Zone.  This encapsulates all data related to a Zone, and provides
- * convienient lookup methods.
+ * convenient lookup methods.
  *
  * @author Brian Wellington
  */
@@ -104,6 +104,30 @@ validate() throws IOException {
 		throw new IOException(origin + ": no NS set specified");
 }
 
+private final void
+maybeAddRecord(Record record, Cache cache, Object source) throws IOException {
+	int type = record.getType();
+	Name name = record.getName();
+
+	if (type == Type.SOA) {
+		if (!name.equals(origin))
+			throw new IOException("SOA owner " + name +
+					      " does not match zone origin " +
+					      origin);
+		else {
+			setOrigin(origin);
+			dclass = record.getDClass();
+		}
+	}
+	if (origin == null && type != Type.SOA)
+		throw new IOException("non-SOA record seen at " +
+				      name + " with no origin set");
+	if (name.subdomain(origin))
+		addRecord(record);
+	else if (cache != null)
+		cache.addRecord(record, Credibility.ZONE_GLUE, source);
+}
+
 /**
  * Creates a Zone from the records in the specified master file.  All
  * records that do not belong in the Zone are added to the specified Cache.
@@ -114,32 +138,27 @@ public
 Zone(String file, Cache cache, Name initialOrigin) throws IOException {
 	super(false);
 	Master m = new Master(file, initialOrigin);
-	boolean seenSOA = false;
 	Record record;
-	String str;
 
 	origin = initialOrigin;
-	while ((record = m.nextRecord()) != null) {
-		if (!seenSOA) {
-			if (record.getType() == Type.SOA) {
-				if (origin == null)
-					origin = record.getName();
-				else if (!origin.equals(record.getName())) {
-					str = "SOA owner " + record.getName() + " does not match zone origin " + origin;
-					throw new IOException(str);
-				}
-				seenSOA = true;
-				setOrigin(origin);
-			}
-			else {
-				str = "No SOA at the top of the zone in file " + file;
-				throw new IOException(str);
-			}
-		}
-		if (record.getName().subdomain(origin))
-			addRecord(record);
-		else if (cache != null)
-			cache.addRecord(record, Credibility.ZONE_GLUE, m);
+	while ((record = m.nextRecord()) != null)
+		maybeAddRecord(record, cache, file);
+	validate();
+}
+
+/**
+ * Creates a Zone from an array of records.  All records that do not belong
+ * in the Zone are added to the specified Cache.
+ * @see Cache
+ * @see Master
+ */
+public
+Zone(Record [] records, Cache cache, Name initialOrigin) throws IOException {
+	super(false);
+
+	origin = initialOrigin;
+	for (int i = 0; i < records.length; i++) {
+		maybeAddRecord(records[i], cache, records);
 	}
 	validate();
 }

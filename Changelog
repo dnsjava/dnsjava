@@ -1,3 +1,7 @@
+4/25/2002
+	- Add a constructor for building a zone from an array of records.
+	  (based on code from Adam Cassar <adam.cassar@netregistry.com.au>)
+
 4/24/2002
 	- Reduce the memory usage of the RRset class.
 	- Add a new factory method for creating a Record from a
