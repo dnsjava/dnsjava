@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import DNS.*;
 
 public class dnsServer {
 
@@ -45,7 +46,7 @@ generateReply(dnsMessage query) {
 	response.getHeader().setFlag(dns.AA);
 	response.addRecord(dns.QUESTION, queryRecord);
 
-	dnsName name = queryRecord.name;
+	dnsName name = queryRecord.getName();
 	dnsZone zone = findBestZone(name);
 	if (zone == null) {
 		response.getHeader().setRcode(dns.SERVFAIL);
@@ -60,8 +61,8 @@ generateReply(dnsMessage query) {
 			Enumeration e = responseRecords.elements();
 			while (e.hasMoreElements()) {
 				dnsRecord r = (dnsRecord) e.nextElement();
-				if (r.type == queryRecord.type &&
-				    r.dclass == queryRecord.dclass)
+				if (r.getType() == queryRecord.getType() &&
+				    r.getDClass() == queryRecord.getDClass())
 				{
 					response.addRecord(dns.ANSWER, r);
 					added++;

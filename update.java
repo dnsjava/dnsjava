@@ -4,6 +4,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import DNS.*;
 
 public class update {
 
@@ -159,7 +160,7 @@ sendUpdate() throws IOException {
 			}
 			dnsRecord r = (dnsRecord) updates.nextElement();
 			zone = new dnsName(r.getName(), 1);
-			dclass = r.dclass;
+			dclass = r.getDClass();
 		}
 		dnsRecord soa = dnsRecord.newRecord(zone, dns.SOA, dclass);
 		query.addRecord(ZONE, soa);
@@ -348,7 +349,7 @@ doQuery(MyStringTokenizer st) throws IOException {
 	newQuery.addRecord(dns.QUESTION, rec);
 	if (res == null)
 		res = new dnsResolver(server);
-	if (rec.type == dns.AXFR)
+	if (rec.getType() == dns.AXFR)
 		response = res.sendAXFR(newQuery);
 	else
 		response = res.send(newQuery);

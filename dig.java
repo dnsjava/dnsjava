@@ -3,6 +3,7 @@
 
 import java.io.*;
 import java.util.*;
+import DNS.*;
 
 public class dig {
 
