@@ -100,6 +100,18 @@ Name(Name d, int n) {
 	System.arraycopy(d.name, n, name, 0, labels);
 }
 
+public Name
+wild() {
+	Name wild = new Name(this, 0);
+	wild.name[0] = "*";
+	return wild;
+}
+
+public boolean
+isWild() {
+	return name[0].equals("*");
+}
+
 public void
 append(Name d) {
 	System.arraycopy(d.name, 0, name, labels, d.labels);
