@@ -19,8 +19,8 @@ Map TSIGs;
 public
 jnamed(String conffile) throws IOException {
 	FileInputStream fs;
-	Vector ports = new Vector();
-	Vector addresses = new Vector();
+	List ports = new ArrayList();
+	List addresses = new ArrayList();
 	try {
 		fs = new FileInputStream(conffile);
 	}
@@ -57,10 +57,10 @@ jnamed(String conffile) throws IOException {
 		else if (keyword.equals("key"))
 			addTSIG(st.nextToken(), st.nextToken());
 		else if (keyword.equals("port"))
-			ports.addElement(Short.valueOf(st.nextToken()));
+			ports.add(Short.valueOf(st.nextToken()));
 		else if (keyword.equals("address")) {
 			String addr = st.nextToken();
-			addresses.addElement(InetAddress.getByName(addr));
+			addresses.add(InetAddress.getByName(addr));
 		} else {
 			System.out.println("ignoring invalid keyword: " +
 					   keyword);
@@ -69,17 +69,17 @@ jnamed(String conffile) throws IOException {
 	}
 
 	if (ports.size() == 0)
-		ports.addElement(new Short((short)53));
+		ports.add(new Short((short)53));
 
 	if (addresses.size() == 0)
-		addresses.addElement(null);
+		addresses.add(null);
 
-	Enumeration eaddr = addresses.elements();
-	while (eaddr.hasMoreElements()) {
-		InetAddress addr = (InetAddress) eaddr.nextElement();
-		Enumeration eport = ports.elements();
-		while (eport.hasMoreElements()) {
-			short port = ((Short)eport.nextElement()).shortValue();
+	Iterator iaddr = addresses.iterator();
+	while (iaddr.hasNext()) {
+		InetAddress addr = (InetAddress) iaddr.next();
+		Iterator iport = ports.iterator();
+		while (iport.hasNext()) {
+			short port = ((Short)iport.next()).shortValue();
 			String addrString;
 			addUDP(addr, port);
 			addTCP(addr, port);
@@ -102,7 +102,6 @@ addPrimaryZone(String zname, String zonefile) throws IOException {
 		origin = Name.fromString(zname, Name.root);
 	Zone newzone = new Zone(zonefile, cache, origin);
 	znames.put(newzone.getOrigin(), newzone);
-/*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
 }
 
 public void
@@ -111,7 +110,6 @@ addSecondaryZone(String zone, String remote) throws IOException {
 	Name zname = Name.fromString(zone, Name.root);
 	Zone newzone = new Zone(zname, DClass.IN, remote, cache);
 	znames.put(zname, newzone);
-/*System.out.println("Adding zone named <" + zname + ">");*/
 }
 
 public void
@@ -167,12 +165,11 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 
 void
 addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
-	Enumeration e;
 	for (byte s = 1; s <= section; s++)
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
 	if ((flags & FLAG_SIGONLY) == 0) {
-		e = rrset.rrs();
+		Enumeration e = rrset.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
 			if (!name.isWild() && r.getName().isWild())
@@ -181,7 +178,7 @@ addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
 		}
 	}
 	if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
-		e = rrset.sigs();
+		Enumeration e = rrset.sigs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
 			if (!name.isWild() && r.getName().isWild())
@@ -226,9 +223,9 @@ addGlue(Message response, Name name, int flags) {
 
 private void
 addAdditional2(Message response, int section, int flags) {
-	Enumeration e = response.getSection(section);
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
+	Record [] records = response.getSectionArray(section);
+	for (int i = 0; i < records.length; i++) {
+		Record r = records[i];
 		Name glueName = null;
 		switch (r.getType()) {
 			case Type.MX:
@@ -613,8 +610,13 @@ serveTCP(InetAddress addr, short port) {
 		}
 	}
 	catch (IOException e) {
-		System.out.println("serveTCP(" + addr.getHostAddress() + ", " +
-				   port + "): " + e);
+		String addrString;
+		if (addr == null)
+			addrString = "0.0.0.0";
+		else
+			addrString = addr.getHostAddress();
+		System.out.println("serveTCP(" + addrString + "#" + port +
+				   "): " + e);
 	}
 }
 
@@ -650,8 +652,13 @@ serveUDP(InetAddress addr, short port) {
 		}
 	}
 	catch (IOException e) {
-		System.out.println("serveUDP(" + addr.getHostAddress() + ", " +
-				   port + "): " + e);
+		String addrString;
+		if (addr == null)
+			addrString = "0.0.0.0";
+		else
+			addrString = addr.getHostAddress();
+		System.out.println("serveUDP(" + addrString + "#" + port +
+				   "): " + e);
 	}
 }
 
