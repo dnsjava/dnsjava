@@ -41,7 +41,9 @@ jnamed(String conffile) throws IOException {
 			continue;
 		}
 		if (keyword.equals("primary"))
-			addZone(st.nextToken());
+			addPrimaryZone(st.nextToken());
+		if (keyword.equals("secondary"))
+			addSecondaryZone(st.nextToken(), st.nextToken());
 		else if (keyword.equals("cache"))
 			cache = new Cache(st.nextToken());
 		else if (keyword.equals("key"))
@@ -66,10 +68,18 @@ jnamed(String conffile) throws IOException {
 };
 
 public void
-addZone(String zonefile) throws IOException {
+addPrimaryZone(String zonefile) throws IOException {
 	Zone newzone = new Zone(zonefile, cache);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
+};
+
+public void
+addSecondaryZone(String zone, String remote) throws IOException {
+	Name zname = new Name(zone);
+	Zone newzone = new Zone(zname, DClass.IN, remote, cache);
+	znames.put(zname, newzone);
+/*System.out.println("Adding zone named <" + zname + ">");*/
 };
 
 public void
@@ -84,8 +94,12 @@ findBestZone(Name name) {
 	if (foundzone != null)
 		return foundzone;
 	Name tname = name;
-	while (!tname.equals(Name.root))
+	while (!tname.equals(Name.root)) {
 		tname = new Name(tname, 1);
+		foundzone = (Zone) znames.get(tname);
+		if (foundzone != null)
+			return foundzone;
+	}
 	return null;
 }
 

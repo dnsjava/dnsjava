@@ -19,10 +19,11 @@ Command line programs:
 	
 
 - jnamed:
-	A basic primary, non-caching, non-recursive server.  Not very good,
-	or useful at all, but it runs.  The config file specifies
-	"primary file", "cache file", "key name data", and "port number".
-	jnamed config_file
+	A basic non-caching, non-recursive server.  Not very good, or useful
+	at all, but it runs.  The config file (jnamed.conf by default)
+	specifies "primary file", "secondary zone address, "cache file",
+	"key name data", and "port number".
+	jnamed [config_file]
 
 DNS and DNS.utils packages:
 
