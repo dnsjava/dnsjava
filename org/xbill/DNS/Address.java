@@ -15,6 +15,9 @@ import org.xbill.DNS.utils.*;
 
 public final class Address {
 
+private
+Address() {}
+
 /**
  * Determines if a string contains a valid IP address.
  * @param s The string

@@ -21,6 +21,9 @@ package org.xbill.DNS;
 
 public class DNSSEC {
 
+private
+DNSSEC() { }
+
 public static final byte RSAMD5 = 1;
 public static final byte RSA = RSAMD5;
 public static final byte DH = 2;
