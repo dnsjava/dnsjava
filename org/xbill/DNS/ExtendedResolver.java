@@ -181,14 +181,25 @@ setEDNS(int level) {
 		((Resolver)resolvers.get(i)).setEDNS(level);
 }
 
-/** Specifies the TSIG key that messages will be signed with */
+/**
+ * Specifies the TSIG key that messages will be signed with
+ * @param name The key name
+ * @param key The key data
+ */
 public void
 setTSIGKey(Name name, byte [] key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
 }
 
-/** Specifies the TSIG key that messages will be signed with */
+/**
+ * Specifies the TSIG key that messages will be signed with
+ * @param name The key name
+ * @param key The key data, represented as either a base64 encoded string
+ * or (if the first character is ':') a hex encoded string
+ * @throws IllegalArgumentException The key name is an invalid name
+ * @throws IllegalArgumentException The key data is improperly encoded
+ */
 public void
 setTSIGKey(String name, String key) {
 	for (int i = 0; i < resolvers.size(); i++)
@@ -196,16 +207,23 @@ setTSIGKey(String name, String key) {
 }
 
 /**
- * Specifies the TSIG key (with the same name as the local host) that messages
- * will be signed with
+ * Specifies the TSIG key (with the same name as the local host) that
+ * messages will be signed with.
+ * @param key The key data, represented as either a base64 encoded string
+ * or (if the first character is ':') a hex encoded string
+ * @throws IllegalArgumentException The key data is improperly encoded
+ * @throws UnknownHostException The local host name could not be determined
  */
 public void
-setTSIGKey(String key) {
+setTSIGKey(String key) throws UnknownHostException {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(key);
 }
 
-/** Sets the amount of time to wait for a response before giving up */
+/**
+ * Sets the amount of time to wait for a response before giving up.
+ * @param secs The number of seconds to wait.
+ */
 public void
 setTimeout(int secs) {
 	for (int i = 0; i < resolvers.size(); i++)

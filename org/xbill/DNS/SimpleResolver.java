@@ -94,13 +94,24 @@ setEDNS(int level) {
 	this.EDNSlevel = (byte) level;
 }
 
-/** Specifies the TSIG key that messages will be signed with */
+/**
+ * Specifies the TSIG key that messages will be signed with
+ * @param name The key name
+ * @param key The key data
+ */
 public void
 setTSIGKey(Name name, byte [] key) {
 	tsig = new TSIG(name, key);
 }
 
-/** Specifies the TSIG key that messages will be signed with */
+/**
+ * Specifies the TSIG key that messages will be signed with
+ * @param name The key name
+ * @param key The key data, represented as either a base64 encoded string
+ * or (if the first character is ':') a hex encoded string
+ * @throws IllegalArgumentException The key name is an invalid name
+ * @throws IllegalArgumentException The key data is improperly encoded
+ */
 public void
 setTSIGKey(String name, String key) {
 	byte [] keyArray;
@@ -109,38 +120,34 @@ setTSIGKey(String name, String key) {
 		keyArray = base16.fromString(key.substring(1));
 	else
 		keyArray = base64.fromString(key);
-	if (keyArray == null) {
-		System.err.println("Invalid TSIG key string");
-		return;
-	}
+	if (keyArray == null)
+		throw new IllegalArgumentException("Invalid TSIG key string");
 	try {
 		keyname = Name.fromString(name, Name.root);
 	}
 	catch (TextParseException e) {
-		System.err.println("Invalid TSIG key name");
-		return;
+		throw new IllegalArgumentException("Invalid TSIG key name");
 	}
-	tsig = new TSIG(keyname, keyArray);
+	setTSIGKey(keyname, keyArray);
 }
 
 /**
- * Specifies the TSIG key (with the same name as the local host) that messages
- * will be signed with
+ * Specifies the TSIG key (with the same name as the local host) that
+ * messages will be signed with.
+ * @param key The key data, represented as either a base64 encoded string
+ * or (if the first character is ':') a hex encoded string
+ * @throws IllegalArgumentException The key data is improperly encoded
+ * @throws UnknownHostException The local host name could not be determined
  */
 public void
-setTSIGKey(String key) {
-	String name;
-	try {
-		name = InetAddress.getLocalHost().getHostName();
-	}
-	catch (UnknownHostException e) {
-		System.err.println("getLocalHost failed");
-		return;
-	}
-	setTSIGKey(name, key);
+setTSIGKey(String key) throws UnknownHostException {
+	setTSIGKey(InetAddress.getLocalHost().getHostName(), key);
 }
 
-/** Sets the amount of time to wait for a response before giving up */
+/**
+ * Sets the amount of time to wait for a response before giving up.
+ * @param secs The number of seconds to wait.
+ */
 public void
 setTimeout(int secs) {
 	timeoutValue = secs * 1000;
