@@ -30,12 +30,19 @@ public final class Options {
 private static Map table;
 
 static {
-	String s = null;
 	try {
-		s = System.getProperty("dnsjava.options");
+		refresh();
 	}
 	catch (SecurityException e) {
 	}
+}
+
+private
+Options() {}
+
+public static void
+refresh() {
+	String s = System.getProperty("dnsjava.options");
 	if (s != null) {
 		StringTokenizer st = new StringTokenizer(s, ",");
 		while (st.hasMoreTokens()) {
@@ -51,9 +58,6 @@ static {
 		}
 	}
 }
-
-private
-Options() {}
 
 /** Sets an option to "true" */
 public static void

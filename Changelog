@@ -1,3 +1,6 @@
+2/7/2004
+	- Add Options.refresh() (based on a patch from Th Kuhne)
+
 2/4/2004
 	- 1.6.5 released.
 	- Records of an unknown type and length 0 weren't handled properly.
