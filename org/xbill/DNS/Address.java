@@ -291,7 +291,7 @@ familyOf(InetAddress address) {
 
 /**
  * Returns the family of an InetAddress.
- * @param address The address family, either IPv4 or IPv6.
+ * @param family The address family, either IPv4 or IPv6.
  * @return The length of addresses in that family.
  */
 public static int

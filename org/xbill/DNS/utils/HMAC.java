@@ -43,6 +43,7 @@ init(byte [] key) {
 
 /**
  * Creates a new HMAC instance
+ * @param digest The message digest object.
  * @param key The secret key
  */
 public
@@ -51,6 +52,11 @@ HMAC(MessageDigest digest, byte [] key) {
 	init(key);
 }
 
+/**
+ * Creates a new HMAC instance
+ * @param digestName The name of the message digest function.
+ * @param key The secret key.
+ */
 public
 HMAC(String digestName, byte [] key) {
 	try {
