@@ -95,18 +95,26 @@ formatString(byte [] b, int lineLength, String prefix, boolean addClose) {
  */
 public static byte []
 fromString(String str) {
-	if (str.length() % 4 != 0) {
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	byte [] raw = str.getBytes();
+	for (int i = 0; i < raw.length; i++) {
+		if (!Character.isWhitespace((char)raw[i]))
+			bs.write(raw[i]);
+	}
+	byte [] in = bs.toByteArray();
+	if (in.length % 4 != 0) {
 		return null;
 	}
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+
+	bs.reset();
 	DataOutputStream ds = new DataOutputStream(bs);
 
-	for (int i = 0; i < (str.length() + 3) / 4; i++) {
+	for (int i = 0; i < (in.length + 3) / 4; i++) {
 		short [] s = new short[4];
 		short [] t = new short[3];
 
 		for (int j = 0; j < 4; j++)
-			s[j] = (short) Base64.indexOf(str.charAt(i*4+j));
+			s[j] = (short) Base64.indexOf(in[i*4+j]);
 
 		t[0] = (short) ((s[0] << 2) + (s[1] >> 4));
 		if (s[2] == 64) {

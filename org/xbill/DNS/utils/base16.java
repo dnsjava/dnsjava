@@ -46,15 +46,23 @@ toString(byte [] b) {
  */
 public static byte []
 fromString(String str) {
-	if (str.length() % 2 != 0) {
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	byte [] raw = str.getBytes();
+	for (int i = 0; i < raw.length; i++) {
+		if (!Character.isWhitespace((char)raw[i]))
+			bs.write(raw[i]);
+	}
+	byte [] in = bs.toByteArray();
+	if (in.length % 2 != 0) {
 		return null;
 	}
-	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+
+	bs.reset();
 	DataOutputStream ds = new DataOutputStream(bs);
 
-	for (int i = 0; i < str.length(); i+=2) {
-		byte high = (byte) Base16.indexOf(Character.toUpperCase(str.charAt(i)));
-		byte low = (byte) Base16.indexOf(Character.toUpperCase(str.charAt(i+1)));
+	for (int i = 0; i < in.length; i += 2) {
+		byte high = (byte) Base16.indexOf(Character.toUpperCase((char)in[i]));
+		byte low = (byte) Base16.indexOf(Character.toUpperCase((char)in[i+1]));
 		try {
 			ds.writeByte((high << 4) + low);
 		}
