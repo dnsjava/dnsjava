@@ -88,7 +88,7 @@ grow() {
 
 private final void
 append(Object label) {
-	if (labels == name.length)
+	if (name == null || labels == name.length)
 		grow(labels + 1);
 	name[labels++] = label;
 }
@@ -296,6 +296,8 @@ loop:
 			break loop;
 		} /* switch */
 	}
+	if (!isQualified())
+		append(emptyLabel);
 }
 
 /**
