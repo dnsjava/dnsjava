@@ -19,13 +19,12 @@ byte type;
 Object data;
 
 CacheResponse(byte _type, Object _data) {
-	type = type;
+	type = _type;
 	data = _data;
 }
 
 CacheResponse(byte _type) {
-	type = type;
-	data = null;
+	this(_type, null);
 }
 
 public boolean
@@ -60,6 +59,17 @@ partial() {
 	if (type != SUCCESSFUL)
 		return null;
 	return (Name) data;
+}
+
+public String
+toString() {
+	switch (type) {
+		case UNKNOWN:	return "unknown";
+		case NEGATIVE:	return "negative";
+		case PARTIAL:	return "partial: reached " + data;
+		case SUCCESSFUL:return "successful";
+		default:	return null;
+	}
 }
 
 }
