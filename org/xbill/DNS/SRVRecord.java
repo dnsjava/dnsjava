@@ -38,8 +38,8 @@ SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 {
 	super(_name, Type.SRV, _dclass, _ttl);
 	priority = (short) _priority;
-	weight = (short) _priority;
-	port = (short) _priority;
+	weight = (short) _weight;
+	port = (short) _port;
 	target = _target;
 }
 
