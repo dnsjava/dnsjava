@@ -237,7 +237,8 @@ send(Message query) throws IOException {
 		System.err.println("Sending to " + addr.getHostAddress() +
 				   ":" + port);
 
-	if (query.getQuestion().getType() == Type.AXFR)
+	Record question = query.getQuestion();
+	if (question != null && question.getType() == Type.AXFR)
 		return sendAXFR(query);
 
 	query = (Message) query.clone();
@@ -298,7 +299,13 @@ sendAsync(final Message query, final ResolverListener listener) {
 	synchronized (this) {
 		id = new Integer(uniqueID++);
 	}
-	String name = this.getClass() + ": " + query.getQuestion().getName();
+	Record question = query.getQuestion();
+	String qname;
+	if (question != null)
+		qname = question.getName().toString();
+	else
+		qname = "(none)";
+	String name = this.getClass() + ": " + qname;
 	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
 				  name);
 	return id;

@@ -313,6 +313,12 @@ sendAsync(final Message query, final ResolverListener listener) {
 	synchronized (this) {
 		id = new Integer(uniqueID++);
 	}
+	Record question = query.getQuestion();
+	String qname;
+	if (question != null)
+		qname = question.getName().toString();
+	else
+		qname = "(none)";
 	String name = getClass() + ": " + query.getQuestion().getName();
 	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
 				  name);
