@@ -32,7 +32,9 @@ static {
 				findNT();
 			else
 				find95();
-		} else
+		} else if (OS.indexOf("NetWare") != -1)
+			findNetware();
+		else
 			findUnix();
 	}
 	List l = new ArrayList();
@@ -104,10 +106,10 @@ findProperty() {
  * define the search path.
  */
 private static void
-findUnix() {
+findResolvConf(String file) {
 	InputStream in = null;
 	try {
-		in = new FileInputStream("/etc/resolv.conf");
+		in = new FileInputStream(file);
 	}
 	catch (FileNotFoundException e) {
 		return;
@@ -151,6 +153,16 @@ findUnix() {
 	if (searchlist == null && lsearch.size() > 0)
 		searchlist =
 			(Name [])lsearch.toArray(new Name[lsearch.size()]);
+}
+
+private static void
+findUnix() {
+	findResolvConf("/etc/resolv.conf");
+}
+
+private static void
+findNetware() {
+	findResolvConf("sys:/etc/resolv.cfg");
 }
 
 /**

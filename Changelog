@@ -1,3 +1,7 @@
+9/16/2002
+	- Support for NetWare's sys:/etc/resolv.cfg file.
+	  (Scott Villinski <scott@villinski.com>)
+
 9/5/2002
 	- When looking for an rdataset in a zone or cache, seeing a CNAME
 	  above the name is not an error.
