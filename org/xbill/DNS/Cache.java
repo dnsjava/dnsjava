@@ -20,7 +20,7 @@ import java.lang.ref.*;
 
 public class Cache {
 
-private abstract static interface Element extends TypedObject {
+private interface Element extends TypedObject {
 	public boolean expired();
 	public int compareCredibility(int cred);
 	public int getType();
