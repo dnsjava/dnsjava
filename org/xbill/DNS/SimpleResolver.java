@@ -147,6 +147,7 @@ send(Message query) {
 		}
 
 		query = (Message) query.clone();
+		query.getHeader().setID(Header.randomID());
 		if (EDNSlevel >= 0) {
 			udpLength = 1280;
 			query.addRecord(Section.ADDITIONAL,
@@ -228,6 +229,7 @@ sendAXFR(Message query) {
 		}
 
 		query = (Message) query.clone();
+		query.getHeader().setID(Header.randomID());
 		if (tsig != null)
 			tsig.apply(query, null);
 
