@@ -29,8 +29,9 @@ getThread() {
 			t = (WorkerThread) list.firstElement();
 			list.removeElement(t);
 		}
+		else
+			t = new WorkerThread();
 	}
-	t = new WorkerThread();
 	return t;
 }
 
@@ -53,8 +54,10 @@ assignThread(Resolver _res, Message _query, int _id,
 public void
 run() {
 	while (true) {
+		setName("resolving " + query.getQuestion().getName());
 		Message response = resolver.send(query);
 		listener.receiveMessage(id, response);
+		setName("idle resolver thread");
 		synchronized (list) {
 			list.addElement(this);
 		}
