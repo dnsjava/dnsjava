@@ -371,7 +371,7 @@ doAXFR(Name name, Message query, Socket s) {
 			Message response = new Message();
 			Header header = response.getHeader();
 			header.setID(id);
-			header.setFlag(Flags.QR);
+/*			header.setFlag(Flags.QR);*/
 			header.setFlag(Flags.AA);
 			addRRset(rrset.getName(), response, rrset,
 				 Section.ANSWER, FLAG_DNSSECOK);
@@ -419,7 +419,8 @@ generateReply(Message query, byte [] in, Socket s) {
 	TSIG tsig = null;
 	if (queryTSIG != null) {
 		tsig = findTSIG(queryTSIG.getName());
-		if (tsig.verify(query, in, null) != Rcode.NOERROR)
+		if (tsig == null ||
+		    tsig.verify(query, in, null) != Rcode.NOERROR)
 			return formerrMessage(in);
 	}
 

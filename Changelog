@@ -1,6 +1,7 @@
 3/14/2002
 	- In jnamed, AXFR responses didn't have the message ID or flags
 	  set correctly.
+	- jnamed failed to respond to messages signed with unknown keys.
 
 1/21/2002
 	- Handle empty domain statements in /etc/resolv.conf. (reported
