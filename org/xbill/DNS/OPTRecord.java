@@ -43,7 +43,6 @@ public static class Option {
 }
 
 private List options;
-private static List emptyList = Collections.unmodifiableList(new ArrayList());
 
 OPTRecord() {}
 
@@ -187,7 +186,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 public List
 getOptions() {
 	if (options == null)
-		return emptyList;
+		return Collections.EMPTY_LIST;
 	return Collections.unmodifiableList(options);
 }
 
@@ -198,7 +197,7 @@ getOptions() {
 public List
 getOptions(int code) {
 	if (options == null)
-		return emptyList;
+		return Collections.EMPTY_LIST;
 	List list = null;
 	for (Iterator it = options.iterator(); it.hasNext(); ) {
 		Option opt = (Option) it.next();
@@ -209,7 +208,7 @@ getOptions(int code) {
 		}
 	}
 	if (list == null)
-		list = emptyList;
+		return Collections.EMPTY_LIST;
 	return list;
 }
 
