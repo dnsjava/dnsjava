@@ -88,35 +88,14 @@ writeLong(long l) {
  */
 public void
 writeString(String s) {
-	try {
-		byte [] b = s.getBytes();
-		write(b.length);
-		write(b);
-	}
-	catch (IOException e) {
-	}
-}
-
-/**
- * Writes a string represented by a byte array to the stream, encoded as a
- * length byte followed by data
- * @param s The string to be written
- */
-public void
-writeString(byte [] s) {
-	try {
-		write(s.length);
-		write(s);
-	}
-	catch (IOException e) {
-	}
+	writeString(s.getBytes(), 0);
 }
 
 /**
  * Writes a string represented by a byte array to the stream, encoded as a
  * length byte followed by data
  * @param s The byte array containing the string to be written
- * @param start The start of the string.
+ * @param start The start of the string withing the byte array.
  */
 public void
 writeString(byte [] s, int start) {
@@ -140,14 +119,10 @@ writeArray(byte [] b) {
 public void
 writeBigInteger(BigInteger i) {
 	byte [] b = i.toByteArray();
-	try {
-		if (b[0] == 0)
-			write(b, 1, b.length - 1);
-		else
-			write(b);
-	}
-	catch (IOException e) {
-	}
+	if (b[0] == 0)
+		write(b, 1, b.length - 1);
+	else
+		write(b, 0, b.length);
 }
 
 /**
