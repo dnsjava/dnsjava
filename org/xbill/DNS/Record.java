@@ -165,13 +165,11 @@ toWire(int section) throws IOException {
 	return out.toByteArray();
 }
 
-void
-toWireCanonical(CountedDataOutputStream out, int section) throws IOException {
+public void /* XXX - shouldn't be public */
+toWireCanonical(CountedDataOutputStream out) throws IOException {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
-	if (section == Section.QUESTION)
-		return;
 	out.writeInt(ttl);
 	byte [] data = rrToWireCanonical();
 	if (data == null)
