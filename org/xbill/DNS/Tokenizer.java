@@ -50,14 +50,16 @@ public static final int QUOTED_STRING	= 4;
 /** A comment; only returned when wantComment is set */
 public static final int COMMENT		= 5;
 
-private InputStream is;
-private int ungottenChar;
+private PushbackInputStream is;
 private boolean ungottenToken;
 private int multiline;
 private boolean quoting;
 private String delimiters;
 private Token current;
 private StringBuffer sb;
+
+private String filename = null;
+private int line = 1;
 
 public static class Token {
 	/** The type of token. */
@@ -124,17 +126,16 @@ public static class Token {
  */
 public
 Tokenizer(InputStream is) {
-	if (is instanceof BufferedInputStream)
-		this.is = is;
-	else
-		this.is = new BufferedInputStream(is);
-	ungottenChar = -1;
+	if (!(is instanceof BufferedInputStream))
+		is = new BufferedInputStream(is);
+	this.is = new PushbackInputStream(is, 2);
 	ungottenToken = false;
 	multiline = 0;
 	quoting = false;
 	delimiters = delim;
 	current = new Token();
 	sb = new StringBuffer();
+	filename = "<none>";
 }
 
 /**
@@ -153,32 +154,28 @@ Tokenizer(String s) {
 public
 Tokenizer(File f) throws FileNotFoundException {
 	this(new FileInputStream(f));
+	filename = f.getName();
 }
 
 private int
 getChar() throws IOException {
-	int c;
-	if (ungottenChar != -1) {
-		c = ungottenChar;
-		ungottenChar = -1;
-	} else {
-		c = is.read();
-		if (c == '\r') {
-			int next = is.read();
-			if (next != '\n')
-				ungetChar(next);
-			c = '\n';
-		}
+	int c = is.read();
+	if (c == '\r') {
+		int next = is.read();
+		if (next != '\n')
+			is.unread(next);
+		c = '\n';
 	}
+	if (c == '\n')
+		line++;
 	return c;
 }
 
 private void
-ungetChar(int c) {
-	if (ungottenChar != -1)
-		throw new IllegalStateException
-				("Cannot unget multiple characters");
-	ungottenChar = c;
+ungetChar(int c) throws IOException {
+	is.unread(c);
+	if (c == '\n')
+		line--;
 }
 
 private int
@@ -198,7 +195,7 @@ skipWhitespace() throws IOException {
 
 private void
 fail(String s) throws TextParseException {
-	throw new TextParseException(s);
+	throw new TextParseException(filename + ":" + line + ": " + s);
 }
 
 private void
@@ -484,10 +481,16 @@ getTTL() throws IOException {
  */
 public Name
 getName(Name origin) throws IOException {
-	Name name = Name.fromString(getIdentifier(), origin);
-	if (!name.isAbsolute())
-		throw new RelativeNameException(name);
-	return name;
+	try {
+		Name name = Name.fromString(getIdentifier(), origin);
+		if (!name.isAbsolute())
+			throw new RelativeNameException(name);
+		return name;
+	}
+	catch (TextParseException e) {
+		fail(e.getMessage());
+		return null;
+	}
 }
 
 /**
