@@ -71,7 +71,7 @@ SIG0Signer(int algorithm, PrivateKey privateKey, Name name,
  * @param m the message
  * @param old if this message is a response, the original message
  */
-public void apply(Message m, byte old[])
+public void apply(Message m, byte [] old)
 throws IOException, SignatureException, InvalidKeyException,
        NoSuchAlgorithmException
 {
@@ -100,28 +100,17 @@ throws IOException, SignatureException, InvalidKeyException,
 	} else {
 		throw new NoSuchAlgorithmException("Unknown algorithm");
 	}
+
+	SIGRecord tmpsig = new SIGRecord(Name.root, DClass.ANY, 0, 0,
+					 algorithm, 0, timeExpires, timeSigned,
+					 footprint, name, null);
 	
-	DataByteOutputStream out = new DataByteOutputStream();
-	
-	out.writeShort(0); // type covered
-	out.writeByte(algorithm); // algorithm
-	out.writeByte(0); // labels
-	out.writeInt(0); // original TTL
-	out.writeInt((int)(timeExpires.getTime() / 1000));
-	out.writeInt((int)(timeSigned.getTime() / 1000));
-	out.writeShort(footprint); // key tag
-	name.toWireCanonical(out); // name
-	
-	if (old != null)
-		out.write(old);
-	out.write(m.toWire());
-	
-	byte[] outBytes = out.toByteArray();
+	byte [] outBytes = DNSSEC.digestMessage(tmpsig, m, old);
 	
 	Signature signer = Signature.getInstance(algorithmName);
 	signer.initSign(privateKey);
 	signer.update(outBytes);
-	byte[] signature = signer.sign();
+	byte [] signature = signer.sign();
 
 	/*
 	 * RSA signatures are already in correct format, but Java DSA
@@ -132,13 +121,10 @@ throws IOException, SignatureException, InvalidKeyException,
 		signature = DSASignature.create(dsakey.getParams(), signature);
 	}
 	
-	SIGRecord r = new SIGRecord(Name.root, DClass.ANY, 0,
-				    0, algorithm,
-				    0, timeExpires, timeSigned,
-				    footprint,
-				    name,
-				    signature);
-	m.addRecord(r, Section.ADDITIONAL);
+	SIGRecord sig = new SIGRecord(Name.root, DClass.ANY, 0, 0, algorithm,
+				      0, timeExpires, timeSigned, footprint,
+				      name, signature);
+	m.addRecord(sig, Section.ADDITIONAL);
 }
 
 }
