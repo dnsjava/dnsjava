@@ -10,6 +10,7 @@ clean:
 	rm -f *.class DNS/*.class DNS/utils/*.class
 
 docs:
+	if test ! -d doc ; then mkdir doc ; fi
 	${JAVADOC} DNS DNS.utils
 
 docsclean:	
