@@ -210,7 +210,7 @@ rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	out.writeInt((int)(expire.getTime() / 1000));
 	out.writeInt((int)(timeSigned.getTime() / 1000));
 	out.writeShort(footprint);
-	signer.toWireCanonical(out, null);
+	signer.toWireCanonical(out);
 	out.write(signature);
 }
 

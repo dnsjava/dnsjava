@@ -125,7 +125,7 @@ rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	out.writeShort(priority);
 	out.writeShort(weight);
 	out.writeShort(port);
-	target.toWireCanonical(out, null);
+	target.toWireCanonical(out);
 }
 
 }

@@ -344,7 +344,7 @@ abstract void rrToWire(DataByteOutputStream out, Compression c) throws IOExcepti
  * if the type-specific RR data includes a Name
  * @see Name
  */
-byte []
+void
 rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	rrToWire(out, null);
 }
