@@ -95,9 +95,9 @@ public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (target != null) {
-		sb.append((priority & 0xFF) + " ");
-		sb.append((weight & 0xFF) + " ");
-		sb.append((port & 0xFF) + " ");
+		sb.append(priority + " ");
+		sb.append(weight + " ");
+		sb.append(port + " ");
 		sb.append(target);
 	}
 	return sb.toString();
