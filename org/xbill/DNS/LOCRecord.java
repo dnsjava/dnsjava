@@ -85,7 +85,7 @@ throws IOException
 		s = st.nextToken();
 		min = Integer.parseInt(s);
 		s = st.nextToken();
-		sec = Double.parseDouble(s);
+		sec = new Double(s).doubleValue();
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {
@@ -106,7 +106,7 @@ throws IOException
 		s = st.nextToken();
 		min = Integer.parseInt(s);
 		s = st.nextToken();
-		sec = Double.parseDouble(s);
+		sec = new Double(s).doubleValue();
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {
