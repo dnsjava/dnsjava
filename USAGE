@@ -9,6 +9,10 @@ Command line programs:
 	A dynamic update client with some extra functionality.  Rather than
 	describing it all here, run 'help' from the command line.
 
+- jnamed:
+	A basic primary, non-caching, non-recursive server.  Not very good,
+	but it runs now.
+	jnamed cachefile zone1 zone2 ...
 
 Function calls:
 

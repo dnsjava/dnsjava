@@ -44,8 +44,6 @@ ways to improve this behavior without using JNI.
 Future:
 
 - A GUI for the dynamic update program would be nice
-- A basic (primary, caching, non-recursive) server wouldn't be too hard.
-  dnsServer.java contains part of a server, but it's not done yet.
 - javadoc documentation
 
 
