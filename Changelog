@@ -1,3 +1,14 @@
+3/29/1999
+	- 0.5 released
+	- update client: added "echo" and "log" keywords, "file" can now
+		specify "-" for standard input (at the end of a config file,
+		for example).
+	- added support for BIND TTL format
+	- switched from CountedDataOutputStream to DataByteOutputStream,
+		which extends ByteArrayOutputStream.  Same for Input.
+		Should help performance and allow more flexibility.
+	- minor server fix to authority section
+
 3/28/1999
 	- 0.4 released
 	- fixed compression bug where all pointers into rdata were 0
