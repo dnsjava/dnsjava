@@ -161,7 +161,7 @@ findRecords(Name name, short type, byte minCred) {
 
 public RRset
 findRecords(Name name, short type) {
-	return findRecords(name, type, Credibility.NONAUTH_ADDITIONAL);
+	return findRecords(name, type, Credibility.NONAUTH_ANSWER);
 }
 
 public RRset
