@@ -22,8 +22,8 @@ public void setPort(int port) {
 	this.port = port;
 }
 
-public void setTSIGKey(byte [] key) {
-	TSIG = new dnsTSIG(key);
+public void setTSIGKey(String key) {
+	TSIG = new dnsTSIG(base64.fromString(key));
 }
 
 dnsMessage sendTCP(dnsMessage query, byte [] out) throws IOException {

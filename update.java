@@ -86,12 +86,11 @@ public static void main(String argv[]) throws IOException {
 			break;
 
 		    case 'k':
-			String keyStr;
+			String key;
 			if (argv[arg].length() > 2)
-				keyStr = argv[arg].substring(2);
+				key = argv[arg].substring(2);
 			else
-				keyStr = argv[++arg];
-			byte [] key = keyStr.getBytes();
+				key = argv[++arg];
 			res.setTSIGKey(key);
 			break;
 
