@@ -494,6 +494,9 @@ throws IOException
 	if (t.type == Tokenizer.IDENTIFIER && t.value.equals("\\#")) {
 		int length = st.getUInt16();
 		byte [] data = st.getHex();
+		if (data == null) {
+			data = new byte[0];
+		}
 		if (length != data.length)
 			throw st.exception("invalid unknown RR encoding: " +
 					   "length mismatch");
