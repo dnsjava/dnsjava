@@ -79,14 +79,23 @@ isDottedQuad(String s) {
 
 /**
  * Converts a byte array containing an IPv4 address into a dotted quad string.
- * @param addr The byte array
+ * @param addr The array
  * @return The string representation
  */
 public static String
 toDottedQuad(byte [] addr) {
 	return ((addr[0] & 0xFF) + "." + (addr[1] & 0xFF) + "." +
 		(addr[2] & 0xFF) + "." + (addr[3] & 0xFF));
+}
 
+/**
+ * Converts an int array containing an IPv4 address into a dotted quad string.
+ * @param addr The array
+ * @return The string representation
+ */
+public static String
+toDottedQuad(int [] addr) {
+	return (addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3]);
 }
 
 private static Record []
