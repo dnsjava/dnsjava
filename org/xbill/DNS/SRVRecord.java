@@ -19,7 +19,7 @@ public class SRVRecord extends Record {
 
 private static SRVRecord member = new SRVRecord();
 
-private short priority, weight, port;
+private int priority, weight, port;
 private Name target;
 
 private
@@ -49,9 +49,18 @@ SRVRecord(Name name, short dclass, int ttl, int priority,
 	  int weight, int port, Name target)
 {
 	this(name, dclass, ttl);
-	this.priority = (short) priority;
-	this.weight = (short) weight;
-	this.port = (short) port;
+	checkRange(priority, "priority");
+	checkRange(weight, "weight");
+	checkRange(port, "port");
+	if (priority < 0 || priority > 0xFFFF)
+		throw new IllegalArgumentException("priority is out of range");
+	if (weight < 0 || weight > 0xFFFF)
+		throw new IllegalArgumentException("weight is out of range");
+	if (port < 0 || port > 0xFFFF)
+		throw new IllegalArgumentException("port is out of range");
+	this.priority = priority;
+	this.weight = weight;
+	this.port = port;
 	this.target = target;
 }
 
@@ -63,9 +72,9 @@ throws IOException
 	SRVRecord rec = new SRVRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.priority = (short) in.readUnsignedShort();
-	rec.weight = (short) in.readUnsignedShort();
-	rec.port = (short) in.readUnsignedShort();
+	rec.priority = in.readUnsignedShort();
+	rec.weight = in.readUnsignedShort();
+	rec.port = in.readUnsignedShort();
 	rec.target = new Name(in);
 	return rec;
 }
@@ -76,9 +85,15 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	SRVRecord rec = new SRVRecord(name, dclass, ttl);
-	rec.priority = Short.parseShort(st.nextToken());
-	rec.weight = Short.parseShort(st.nextToken());
-	rec.port = Short.parseShort(st.nextToken());
+	rec.priority = Integer.parseInt(st.nextToken());
+	rec.weight = Integer.parseInt(st.nextToken());
+	rec.port = Integer.parseInt(st.nextToken());
+	if (rec.priority < 0 || rec.priority > 0xFFFF)
+		throw new TextParseException("priority is out of range");
+	if (rec.weight < 0 || rec.weight > 0xFFFF)
+		throw new TextParseException("weight is out of range");
+	if (rec.port < 0 || rec.port > 0xFFFF)
+		throw new TextParseException("port is out of range");
 	rec.target = Name.fromString(st.nextToken(), origin);
 	return rec;
 }
@@ -88,31 +103,28 @@ public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (target != null) {
-		sb.append(priority);
-		sb.append(" ");
-		sb.append(weight);
-		sb.append(" ");
-		sb.append(port);
-		sb.append(" ");
+		sb.append((priority & 0xFF) + " ");
+		sb.append((weight & 0xFF) + " ");
+		sb.append((port & 0xFF) + " ");
 		sb.append(target);
 	}
 	return sb.toString();
 }
 
 /** Returns the priority */
-public short
+public int
 getPriority() {
 	return priority;
 }
 
 /** Returns the weight */
-public short
+public int
 getWeight() {
 	return weight;
 }
 
 /** Returns the port that the service runs on */
-public short
+public int
 getPort() {
 	return port;
 }
