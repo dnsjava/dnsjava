@@ -208,8 +208,7 @@ generateReply(Message query, byte [] in, int maxLength) {
 			}
 		}
 		else {
-			Short Type = new Short(type);
-			RRset rrset = (RRset) nameRecords.get(Type);
+			RRset rrset = zone.findRecords(name, type);
 			if (rrset != null)
 				addRRset(response, rrset);
 		}
