@@ -107,6 +107,15 @@ getSection(int section) {
 	return sections[section].elements();
 }
 
+public Record []
+getSectionArray(int section) {
+	int size = sections[section].size();
+	Record [] records = new Record[size];
+	for (int i = 0; i < size; i++)
+		records[i] = (Record) sections[section].elementAt(i);
+	return records;
+}
+
 void
 toWire(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
