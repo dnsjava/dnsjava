@@ -1,3 +1,19 @@
+1/15/2001
+	- 1.1.7 released.
+	- Fix some signed/unsigned printing issues for KEY records
+	  (Pasi Eronen <pe@iki.fi>)
+	- Add routines to generate SIG(0) message signatures
+	  (Pasi Eronen <pe@iki.fi>)
+
+1/8/2001
+	- Add support for unknown RR types & classes.
+
+12/3/2000
+	- The target in an MX record can be compressed.
+
+11/18/2000
+	- Add jnamed.conf example to USAGE
+
 8/27/2000
 	- 1.1.6 released
 	- The high level api wasn't properly initialized.
