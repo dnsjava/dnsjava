@@ -1,5 +1,5 @@
 7/7/2004
-	- Implement the $GENERATE directive.
+	- Implement the $GENERATE master file directive.
 
 6/28/2004
 	- Canonicalizing a name created with the Name(Name src, int n)
