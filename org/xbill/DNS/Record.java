@@ -53,16 +53,19 @@ getTypedObject(short type) {
 		knownRecords[type] = (Record) m.invoke(null, emptyObjectArray);
 	}
 	catch (ClassNotFoundException e) {
-		System.out.println(e);
+		/* This is normal; do nothing */
 	}
 	catch (InvocationTargetException e) {
-		System.out.println(e);
+		if (Options.check("verbose"))
+			System.err.println(e);
 	}
 	catch (NoSuchMethodException e) {
-		System.out.println(e);
+		if (Options.check("verbose"))
+			System.err.println(e);
 	}
 	catch (IllegalAccessException e) {
-		System.out.println(e);
+		if (Options.check("verbose"))
+			System.err.println(e);
 	}
 	if (knownRecords[type] == null)
 		knownRecords[type] = UNKRecord.getMember();
