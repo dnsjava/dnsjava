@@ -46,8 +46,10 @@ rrFromWire(DNSInput in) throws IOException {
 	prefixBits = in.readU8();
 	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
-	suffix = new Inet6Address(128 - prefixBits,
-				  in.readByteArray(suffixbytes));
+	if (prefixBits < 128) {
+		suffix = new Inet6Address(128 - prefixBits,
+					  in.readByteArray(suffixbytes));
+	}
 	if (prefixBits > 0)
 		prefix = new Name(in);
 }
@@ -55,11 +57,15 @@ rrFromWire(DNSInput in) throws IOException {
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	prefixBits = st.getUInt8();
-	try {
-		suffix = new Inet6Address(st.getString());
-	}
-	catch (TextParseException e) {
-		throw st.exception(e.getMessage());
+	if (prefixBits > 128) {
+		throw st.exception("prefix bits must be [0..128]");
+	} else if (prefixBits < 128) {
+		try {
+			suffix = new Inet6Address(st.getString());
+		}
+		catch (TextParseException e) {
+			throw st.exception(e.getMessage());
+		}
 	}
 	if (prefixBits > 0)
 		prefix = st.getName(origin);
@@ -70,8 +76,10 @@ String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(prefixBits);
-	sb.append(" ");
-	sb.append(suffix);
+	if (suffix != null) {
+		sb.append(" ");
+		sb.append(suffix);
+	}
 	if (prefix != null) {
 		sb.append(" ");
 		sb.append(prefix);
@@ -100,10 +108,12 @@ getPrefix() {
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(prefixBits);
-	int suffixbits = 128 - prefixBits;
-	int suffixbytes = (suffixbits + 7) / 8;
-	byte [] data = suffix.toBytes();
-	out.writeByteArray(data, 16 - suffixbytes, suffixbytes);
+	if (suffix != null) {
+		int suffixbits = 128 - prefixBits;
+		int suffixbytes = (suffixbits + 7) / 8;
+		byte [] data = suffix.toBytes();
+		out.writeByteArray(data, 16 - suffixbytes, suffixbytes);
+	}
 	if (prefix != null)
 		prefix.toWire(out, null, canonical);
 }
