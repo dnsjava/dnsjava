@@ -171,92 +171,75 @@ public static final int MAILA		= 254;
 /** Matches any type */
 public static final int ANY		= 255;
 
-private static class DoubleHashMap {
-	private HashMap byString, byInteger;
-
+private static class TypeMnemonic extends Mnemonic {
 	public
-	DoubleHashMap() {
-		byString = new HashMap();
-		byInteger = new HashMap();
+	TypeMnemonic() {
+		super("Type", CASE_UPPER);
+		setPrefix("TYPE");
 	}
 
-	public void
-	put(int value, String string) {
-		Integer i = Type.toInteger(value);
-		byInteger.put(i, string);
-		byString.put(string, i);
-	}
-
-	public Integer
-	getValue(String string) {
-		return (Integer) byString.get(string);
-	}
-
-	public String
-	getString(int value) {
-		return (String) byInteger.get(Type.toInteger(value));
+	void
+	check(int val) {
+		Type.check(val);
 	}
 }
 
-private static DoubleHashMap types = new DoubleHashMap();
-private static Integer [] typecache = new Integer[44];
+private static Mnemonic types = new TypeMnemonic();
 
 static {
-	for (int i = 0; i < typecache.length; i++)
-		typecache[i] = new Integer(i);
-	types.put(A, "A");
-	types.put(NS, "NS");
-	types.put(MD, "MD");
-	types.put(MF, "MF");
-	types.put(CNAME, "CNAME");
-	types.put(SOA, "SOA");
-	types.put(MB, "MB");
-	types.put(MG, "MG");
-	types.put(MR, "MR");
-	types.put(NULL, "NULL");
-	types.put(WKS, "WKS");
-	types.put(PTR, "PTR");
-	types.put(HINFO, "HINFO");
-	types.put(MINFO, "MINFO");
-	types.put(MX, "MX");
-	types.put(TXT, "TXT");
-	types.put(RP, "RP");
-	types.put(AFSDB, "AFSDB");
-	types.put(X25, "X25");
-	types.put(ISDN, "ISDN");
-	types.put(RT, "RT");
-	types.put(NSAP, "NSAP");
-	types.put(NSAP_PTR, "NSAP_PTR");
-	types.put(SIG, "SIG");
-	types.put(KEY, "KEY");
-	types.put(PX, "PX");
-	types.put(GPOS, "GPOS");
-	types.put(AAAA, "AAAA");
-	types.put(LOC, "LOC");
-	types.put(NXT, "NXT");
-	types.put(EID, "EID");
-	types.put(NIMLOC, "NIMLOC");
-	types.put(SRV, "SRV");
-	types.put(ATMA, "ATMA");
-	types.put(NAPTR, "NAPTR");
-	types.put(KX, "KX");
-	types.put(CERT, "CERT");
-	types.put(A6, "A6");
-	types.put(DNAME, "DNAME");
-	types.put(OPT, "OPT");
-	types.put(APL, "APL");
-	types.put(DS, "DS");
-	types.put(SSHFP, "SSHFP");
-	types.put(RRSIG, "RRSIG");
-	types.put(NSEC, "NSEC");
-	types.put(DNSKEY, "DNSKEY");
-	types.put(TKEY, "TKEY");
-	types.put(TSIG, "TSIG");
-	types.put(IXFR, "IXFR");
-	types.put(AXFR, "AXFR");
-	types.put(MAILB, "MAILB");
-	types.put(MAILA, "MAILA");
-	types.put(ANY, "ANY");
+	types.add(A, "A");
+	types.add(NS, "NS");
+	types.add(MD, "MD");
+	types.add(MF, "MF");
+	types.add(CNAME, "CNAME");
+	types.add(SOA, "SOA");
+	types.add(MB, "MB");
+	types.add(MG, "MG");
+	types.add(MR, "MR");
+	types.add(NULL, "NULL");
+	types.add(WKS, "WKS");
+	types.add(PTR, "PTR");
+	types.add(HINFO, "HINFO");
+	types.add(MINFO, "MINFO");
+	types.add(MX, "MX");
+	types.add(TXT, "TXT");
+	types.add(RP, "RP");
+	types.add(AFSDB, "AFSDB");
+	types.add(X25, "X25");
+	types.add(ISDN, "ISDN");
+	types.add(RT, "RT");
+	types.add(NSAP, "NSAP");
+	types.add(NSAP_PTR, "NSAP_PTR");
+	types.add(SIG, "SIG");
+	types.add(KEY, "KEY");
+	types.add(PX, "PX");
+	types.add(GPOS, "GPOS");
+	types.add(AAAA, "AAAA");
+	types.add(LOC, "LOC");
+	types.add(NXT, "NXT");
+	types.add(EID, "EID");
+	types.add(NIMLOC, "NIMLOC");
+	types.add(SRV, "SRV");
+	types.add(ATMA, "ATMA");
+	types.add(NAPTR, "NAPTR");
+	types.add(KX, "KX");
+	types.add(CERT, "CERT");
+	types.add(A6, "A6");
+	types.add(DNAME, "DNAME");
+	types.add(OPT, "OPT");
+	types.add(APL, "APL");
+	types.add(DS, "DS");
+	types.add(SSHFP, "SSHFP");
+	types.add(RRSIG, "RRSIG");
+	types.add(NSEC, "NSEC");
+	types.add(DNSKEY, "DNSKEY");
+	types.add(TKEY, "TKEY");
+	types.add(TSIG, "TSIG");
+	types.add(IXFR, "IXFR");
+	types.add(AXFR, "AXFR");
+	types.add(MAILB, "MAILB");
+	types.add(MAILA, "MAILA");
+	types.add(ANY, "ANY");
 }
 
 private
@@ -276,22 +259,7 @@ check(int i) {
  */
 public static String
 string(int i) {
-	check(i);
-	String s = types.getString(i);
-	return (s != null) ? s : ("TYPE" + i);
-}
-
-private static int
-parseNumericType(String s) {
-	try {
-		int type = Integer.parseInt(s);
-		if (type < 0 || type > 0xFFFF)
-			return -1;
-		return type;
-	}
-	catch (NumberFormatException e) {
-		return -1;
-	}
+	return types.getText(i);
 }
 
 /**
@@ -302,22 +270,11 @@ parseNumericType(String s) {
  */
 public static int
 value(String s, boolean numberok) {
-	s = s.toUpperCase();
-	Integer val = types.getValue(s);
-	if (val != null)
-		return val.intValue();
-	if (s.startsWith("TYPE")) {
-		int code = parseNumericType(s.substring(4));
-		if (code >= 0) {
-			return code;
-		}
-	} else if (numberok) {
-		int code = parseNumericType(s);
-		if (code >= 0) {
-			return code;
-		}
+	int val = types.getValue(s);
+	if (val == -1 && numberok) {
+		val = types.getValue("TYPE" + s);
 	}
-	return -1;
+	return val;
 }
 
 /**
@@ -345,14 +302,6 @@ isRR(int type) {
 		default:
 			return true;
 	}
-}
-
-/* Converts a type into an Integer, for use in HashMaps, etc. */
-static Integer
-toInteger(int type) {
-	if (type >= 0 && type < typecache.length)
-		return (typecache[type]);
-	return new Integer(type);
 }
 
 }

@@ -34,11 +34,29 @@ public static final int NONE		= 254;
 /** Matches any class */
 public static final int ANY		= 255;
 
-private static Integer [] classcache = new Integer[5];
+private static class DClassMnemonic extends Mnemonic {
+	public
+	DClassMnemonic() {
+		super("DClass", CASE_UPPER);
+		setPrefix("CLASS");
+	}
+
+	void
+	check(int val) {
+		DClass.check(val);
+	}
+}
+
+private static Mnemonic classes = new DClassMnemonic();
 
 static {
-	for (int i = 0; i < classcache.length; i++)
-		classcache[i] = new Integer(i);
+	classes.add(IN, "IN");
+	classes.add(CH, "CH");
+	classes.addAlias(CH, "CHAOS");
+	classes.add(HS, "HS");
+	classes.addAlias(HS, "HESIOD");
+	classes.add(NONE, "NONE");
+	classes.add(ANY, "ANY");
 }
 
 private
@@ -57,15 +75,7 @@ check(int i) {
  */
 public static String
 string(int i) {
-	check(i);
-	switch (i) {
-	case IN: return "IN";
-	case CH: return "CH";
-	case HS: return "HS";
-	case NONE: return "NONE";
-	case ANY: return "ANY";
-	default: return "CLASS" + i;
-	}
+	return classes.getText(i);
 }
 
 /**
@@ -74,37 +84,7 @@ string(int i) {
  */
 public static int
 value(String s) {
-	s = s.toUpperCase();
-	if (s.equals("IN"))
-		return IN;
-	else if (s.equals("CH") || s.equals("CHAOS"))
-		return CH;
-	else if (s.equals("HS") || s.equals("HESIOS"))
-		return HS;
-	else if (s.equals("NONE"))
-		return NONE;
-	else if (s.equals("ANY"))
-		return ANY;
-	if (s.startsWith("CLASS")) {
-		try {
-			int dclass = Integer.parseInt(s.substring(5));
-			if (dclass < 0 || dclass > 0xFFFF)
-				return -1;
-			return dclass;
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-	return -1;
-}
-
-/* Converts a class into an Integer, for use in Hashmaps, etc. */
-static Integer
-toInteger(int dclass) {
-	if (dclass >= 0 && dclass < classcache.length)
-		return (classcache[dclass]);
-	return new Integer(dclass);
+	return classes.getValue(s);
 }
 
 }
