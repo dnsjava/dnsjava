@@ -21,7 +21,7 @@ public class CERTConverter {
 /** Converts a CERT record into a Certificate */
 public static Certificate
 parseRecord(CERTRecord r) {
-	short type = r.getCertType();
+	int type = r.getCertType();
 	byte [] data = r.getCert();
 	Certificate cert;
 	try {
@@ -49,10 +49,10 @@ parseRecord(CERTRecord r) {
 
 /** Builds a CERT record from a Certificate associated with a key also in DNS */
 public static CERTRecord
-buildRecord(Name name, int dclass, int ttl, Certificate cert, int tag,
+buildRecord(Name name, int dclass, long ttl, Certificate cert, int tag,
 	    int alg)
 {
-	short type;
+	int type;
 	byte [] data;
 
 	try {
@@ -74,7 +74,7 @@ buildRecord(Name name, int dclass, int ttl, Certificate cert, int tag,
 
 /** Builds a CERT record from a Certificate */
 public static CERTRecord
-buildRecord(Name name, int dclass, int ttl, Certificate cert) {
+buildRecord(Name name, int dclass, long ttl, Certificate cert) {
 	return buildRecord(name, dclass, ttl, cert, 0, 0);
 }
 

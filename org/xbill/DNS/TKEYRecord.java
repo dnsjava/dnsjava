@@ -238,14 +238,14 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	out.writeShort(error);
 
 	if (key != null) {
-		out.writeShort((short)key.length);
+		out.writeUnsignedShort(key.length);
 		out.writeArray(key);
 	}
 	else
 		out.writeShort(0);
 
 	if (other != null) {
-		out.writeShort((short)other.length);
+		out.writeUnsignedShort(other.length);
 		out.writeArray(other);
 	}
 	else

@@ -16,7 +16,7 @@ public class A6Record extends Record {
 
 private static A6Record member = new A6Record();
 
-private short prefixBits;
+private int prefixBits;
 private Inet6Address suffix;
 private Name prefix;
 
@@ -44,7 +44,8 @@ A6Record(Name name, int dclass, long ttl, int prefixBits,
 	 Inet6Address suffix, Name prefix)
 {
 	this(name, dclass, ttl);
-	this.prefixBits = (short) prefixBits;
+	checkU8("prefixBits", prefixBits);
+	this.prefixBits = prefixBits;
 	this.suffix = suffix;
 	if (prefix != null && !prefix.isAbsolute())
 		throw new RelativeNameException(prefix);
@@ -61,7 +62,7 @@ throws IOException
 	if (in == null)
 		return rec;
 
-	rec.prefixBits = in.readByte();
+	rec.prefixBits = in.readUnsignedByte();
 	int suffixbits = 128 - rec.prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
 	byte [] data = new byte[suffixbytes];
@@ -77,7 +78,7 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	A6Record rec = new A6Record(name, dclass, ttl);
-	rec.prefixBits = (short) st.getUInt16();
+	rec.prefixBits = st.getUInt8();
 	try {
 		rec.suffix = new Inet6Address(st.getString());
 	}
@@ -106,7 +107,7 @@ rdataToString() {
 }
 
 /** Returns the number of bits in the prefix */
-public short
+public int
 getPrefixBits() {
 	return prefixBits;
 }

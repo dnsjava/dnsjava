@@ -105,7 +105,7 @@ generate(Message m, byte [] b, byte error, TSIGRecord old) {
 
 	if (old != null) {
 		DataByteOutputStream dbs = new DataByteOutputStream();
-		dbs.writeShort((short)old.getSignature().length);
+		dbs.writeUnsignedShort(old.getSignature().length);
 		if (h != null) {
 			h.addData(dbs.toByteArray());
 			h.addData(old.getSignature());
@@ -122,11 +122,11 @@ generate(Message m, byte [] b, byte error, TSIGRecord old) {
 	out.writeInt(0);		/* ttl */
 	alg.toWireCanonical(out);
 	long time = timeSigned.getTime() / 1000;
-	short timeHigh = (short) (time >> 32);
-	int timeLow = (int) (time);
-	out.writeShort(timeHigh);
-	out.writeInt(timeLow);
-	out.writeShort((short)fudge);
+	int timeHigh = (int) (time >> 32);
+	long timeLow = (time & 0xFFFFFFFFL);
+	out.writeUnsignedShort(timeHigh);
+	out.writeUnsignedInt(timeLow);
+	out.writeUnsignedShort(fudge);
 
 	out.writeShort(error);
 	out.writeShort(0); /* No other data */
@@ -144,16 +144,15 @@ generate(Message m, byte [] b, byte error, TSIGRecord old) {
 	if (error == Rcode.BADTIME) {
 		out = new DataByteOutputStream();
 		time = new Date().getTime() / 1000;
-		timeHigh = (short) (time >> 32);
-		timeLow = (int) (time);
-		out.writeShort(timeHigh);
-		out.writeInt(timeLow);
+		timeHigh = (int) (time >> 32);
+		timeLow = (time & 0xFFFFFFFFL);
+		out.writeUnsignedShort(timeHigh);
+		out.writeUnsignedInt(timeLow);
 		other = out.toByteArray();
 	}
 
-	return (new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned,
-			       (short)fudge, signature,
-			       m.getHeader().getID(), error, other));
+	return (new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
+			       signature, m.getHeader().getID(), error, other));
 }
 
 /**
@@ -199,7 +198,7 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 		fudge = FUDGE;
 
 	DataByteOutputStream dbs = new DataByteOutputStream();
-	dbs.writeShort((short)old.getSignature().length);
+	dbs.writeUnsignedShort(old.getSignature().length);
 	h.addData(dbs.toByteArray());
 	h.addData(old.getSignature());
 
@@ -208,20 +207,20 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 
 	DataByteOutputStream out = new DataByteOutputStream();
 	long time = timeSigned.getTime() / 1000;
-	short timeHigh = (short) (time >> 32);
-	int timeLow = (int) (time);
-	out.writeShort(timeHigh);
-	out.writeInt(timeLow);
-	out.writeShort((short)fudge);
+	int timeHigh = (int) (time >> 32);
+	long timeLow = (time & 0xFFFFFFFFL);
+	out.writeUnsignedShort(timeHigh);
+	out.writeUnsignedInt(timeLow);
+	out.writeUnsignedShort(fudge);
 
 	h.addData(out.toByteArray());
 
 	byte [] signature = h.sign();
 	byte [] other = null;
 
-	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned,
-				  (short)fudge, signature,
-				  m.getHeader().getID(), Rcode.NOERROR, other);
+	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
+				  signature, m.getHeader().getID(),
+				  Rcode.NOERROR, other);
 	m.addRecord(r, Section.ADDITIONAL);
 }
 
@@ -264,7 +263,7 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		    tsig.getError() != Rcode.BADSIG)
 		{
 			DataByteOutputStream dbs = new DataByteOutputStream();
-			dbs.writeShort((short)old.getSignature().length);
+			dbs.writeUnsignedShort(old.getSignature().length);
 			h.addData(dbs.toByteArray());
 			h.addData(old.getSignature());
 		}
@@ -282,10 +281,10 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		out.writeUnsignedInt(tsig.ttl);
 		tsig.getAlgorithm().toWireCanonical(out);
 		long time = tsig.getTimeSigned().getTime() / 1000;
-		short timeHigh = (short) (time >> 32);
-		int timeLow = (int) (time);
-		out.writeShort(timeHigh);
-		out.writeInt(timeLow);
+		int timeHigh = (int) (time >> 32);
+		long timeLow = (time & 0xFFFFFFFFL);
+		out.writeUnsignedShort(timeHigh);
+		out.writeUnsignedInt(timeLow);
 		out.writeShort(tsig.getFudge());
 		out.writeShort(tsig.getError());
 		if (tsig.getOther() != null) {
@@ -385,7 +384,7 @@ public static class StreamVerifier {
 
 				signature = tsig.getSignature();
 				dbs = new DataByteOutputStream();
-				dbs.writeShort((short)signature.length);
+				dbs.writeUnsignedShort(signature.length);
 				verifier.addData(dbs.toByteArray());
 				verifier.addData(signature);
 			}
@@ -429,10 +428,10 @@ public static class StreamVerifier {
 
 		DataByteOutputStream out = new DataByteOutputStream();
 		long time = tsig.getTimeSigned().getTime() / 1000;
-		short timeHigh = (short) (time >> 32);
-		int timeLow = (int) (time);
-		out.writeShort(timeHigh);
-		out.writeInt(timeLow);
+		int timeHigh = (int) (time >> 32);
+		long timeLow = (time & 0xFFFFFFFFL);
+		out.writeUnsignedShort(timeHigh);
+		out.writeUnsignedInt(timeLow);
 		out.writeShort(tsig.getFudge());
 		verifier.addData(out.toByteArray());
 
@@ -444,7 +443,7 @@ public static class StreamVerifier {
 
 		verifier.clear();
 		DataByteOutputStream dbs = new DataByteOutputStream();
-		dbs.writeShort((short)tsig.getSignature().length);
+		dbs.writeUnsignedShort(tsig.getSignature().length);
 		verifier.addData(dbs.toByteArray());
 		verifier.addData(tsig.getSignature());
 

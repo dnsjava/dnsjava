@@ -98,7 +98,7 @@ parseDSA(DataByteInputStream in) throws IOException {
 /** Converts a KEY record into a PublicKey */
 public static PublicKey
 parseRecord(KEYRecord r) {
-	byte alg = r.getAlgorithm();
+	int alg = r.getAlgorithm();
 	byte [] data = r.getKey();
 	DataByteInputStream dbs = new DataByteInputStream(data); 
 	try {
@@ -196,7 +196,7 @@ buildDSA(DSAPublicKey key) {
 
 /** Builds a KEY record from a PublicKey */
 public static KEYRecord
-buildRecord(Name name, int dclass, int ttl, int flags, int proto,
+buildRecord(Name name, int dclass, long ttl, int flags, int proto,
 	    PublicKey key)
 {
 	byte [] data;

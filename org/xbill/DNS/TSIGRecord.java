@@ -26,7 +26,7 @@ private Date timeSigned;
 private int fudge;
 private byte [] signature;
 private int originalID;
-private short error;
+private int error;
 private byte [] other;
 
 private
@@ -59,13 +59,14 @@ getMember() {
  */
 public
 TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
-	   int fudge, byte [] signature, int originalID, short error,
+	   int fudge, byte [] signature, int originalID, int error,
 	   byte other[])
 {
 	this(name, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
 	checkU16("fudge", fudge);
+	checkU16("error", error);
 	this.alg = alg;
 	this.timeSigned = timeSigned;
 	this.fudge = fudge;
@@ -203,7 +204,7 @@ getOriginalID() {
 }
 
 /** Returns the extended error */
-public short
+public int
 getError() {
 	return error;
 }
@@ -222,20 +223,20 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	alg.toWire(out, null, canonical);
 
 	long time = timeSigned.getTime() / 1000;
-	short timeHigh = (short) (time >> 32);
-	int timeLow = (int) (time);
-	out.writeShort(timeHigh);
-	out.writeInt(timeLow);
-	out.writeShort(fudge);
+	int timeHigh = (int) (time >> 32);
+	long timeLow = (time & 0xFFFFFFFFL);
+	out.writeUnsignedShort(timeHigh);
+	out.writeUnsignedInt(timeLow);
+	out.writeUnsignedShort(fudge);
 
-	out.writeShort((short)signature.length);
+	out.writeUnsignedShort(signature.length);
 	out.writeArray(signature);
 
 	out.writeShort(originalID);
 	out.writeShort(error);
 
 	if (other != null) {
-		out.writeShort((short)other.length);
+		out.writeUnsignedShort(other.length);
 		out.writeArray(other);
 	}
 	else

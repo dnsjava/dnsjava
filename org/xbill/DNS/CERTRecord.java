@@ -80,7 +80,7 @@ throws IOException
 	if (in == null)
 		return rec;
 	rec.certType = in.readShort();
-	rec.keyTag = (short) in.readUnsignedShort();
+	rec.keyTag = in.readUnsignedShort();
 	rec.alg = in.readByte();
 	if (length > 5) {
 		rec.cert = new byte[length - 5];
@@ -94,9 +94,9 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
-	rec.certType = (short) st.getUInt16();
-	rec.keyTag = (short) st.getUInt16();
-	rec.alg = (byte) st.getUInt8();
+	rec.certType = st.getUInt16();
+	rec.keyTag = st.getUInt16();
+	rec.alg = st.getUInt8();
 	rec.cert = base64.fromString(remainingStrings(st));
 	return rec;
 }

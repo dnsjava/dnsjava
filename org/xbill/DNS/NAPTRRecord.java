@@ -16,7 +16,7 @@ public class NAPTRRecord extends Record {
 
 private static NAPTRRecord member = new NAPTRRecord();
 
-private short order, preference;
+private int order, preference;
 private byte [] flags, service, regexp;
 private Name replacement;
 
@@ -50,8 +50,8 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	    String flags, String service, String regexp, Name replacement)
 {
 	this(name, dclass, ttl);
-	this.order = (short) order;
-	this.preference = (short) preference;
+	checkU16("order", order);
+	checkU16("preference", preference);
 	try {
 		this.flags = byteArrayFromString(flags);
 		this.service = byteArrayFromString(service);
@@ -73,8 +73,8 @@ throws IOException
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
-	rec.order = (short) in.readUnsignedShort();
-	rec.preference = (short) in.readUnsignedShort();
+	rec.order = in.readUnsignedShort();
+	rec.preference = in.readUnsignedShort();
 	rec.flags = in.readStringIntoArray();
 	rec.service = in.readStringIntoArray();
 	rec.regexp = in.readStringIntoArray();
@@ -87,8 +87,8 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
-	rec.order = (short) st.getUInt16();
-	rec.preference = (short) st.getUInt16();
+	rec.order = st.getUInt16();
+	rec.preference = st.getUInt16();
 	try {
 		rec.flags = byteArrayFromString(st.getString());
 		rec.service = byteArrayFromString(st.getString());
@@ -122,13 +122,13 @@ rdataToString() {
 }
 
 /** Returns the order */
-public short
+public int
 getOrder() {
 	return order;
 }
 
 /** Returns the preference */
-public short
+public int
 getPreference() {
 	return preference;
 }

@@ -111,9 +111,9 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	KEYRecord rec = new KEYRecord(name, dclass, ttl);
-	rec.flags = (short) st.getUInt16();
-	rec.proto = (byte) st.getUInt8();
-	rec.alg = (byte) st.getUInt8();
+	rec.flags = st.getUInt16();
+	rec.proto = st.getUInt8();
+	rec.alg = st.getUInt8();
 	/* If this is a null key, there's no key data */
 	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
 		rec.key = base64.fromString(remainingStrings(st));
@@ -190,10 +190,10 @@ getKey() {
 /**
  * Returns the key's footprint (after computing it)
  */
-public short
+public int
 getFootprint() {
 	if (footprint >= 0)
-		return (short)footprint;
+		return footprint;
 	
 	int foot = 0;
 
@@ -217,10 +217,10 @@ getFootprint() {
 			int d1 = rdata[i] & 0xFF;
 			foot += (d1 << 8);
 		}
-		foot += ((foot >> 16) & 0xffff);
+		foot += ((foot >> 16) & 0xFFFF);
 	}
-	footprint = (foot & 0xffff);
-	return (short) footprint;
+	footprint = (foot & 0xFFFF);
+	return footprint;
 }
 
 void

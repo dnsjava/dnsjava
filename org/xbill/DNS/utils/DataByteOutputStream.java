@@ -54,6 +54,15 @@ writeShort(int i) {
 }
 
 /**
+ * Writes an unsigned short to the stream
+ * @param i The unsigned short to be written
+ */
+public void
+writeUnsignedShort(int i) {
+	writeShort((short)(i & 0xFFFF));
+}
+
+/**
  * Writes an int to the stream
  * @param i The int to be written
  */
@@ -73,6 +82,7 @@ public void
 writeUnsignedInt(long i) {
 	writeInt((int)(i & 0xFFFFFFFFL));
 }
+
 /**
  * Writes a long to the stream
  * @param l The long to be written

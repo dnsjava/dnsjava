@@ -27,7 +27,7 @@ private int covered;
 private int alg, labels;
 private long origttl;
 private Date expire, timeSigned;
-private short footprint;
+private int footprint;
 private Name signer;
 private byte [] signature;
 
@@ -73,7 +73,7 @@ SIGRecord(Name name, int dclass, long ttl, int covered, int alg, int origttl,
 	this.origttl = origttl;
 	this.expire = expire;
 	this.timeSigned = timeSigned;
-	this.footprint = (short) footprint;
+	this.footprint = footprint;
 	if (!signer.isAbsolute())
 		throw new RelativeNameException(signer);
 	this.signer = signer;
@@ -112,12 +112,12 @@ throws IOException
 	if (covered < 0)
 		throw st.exception("Invalid type: " + typeString);
 	rec.covered = covered;
-	rec.alg = (byte) st.getUInt8();
-	rec.labels = (byte) st.getUInt8();
+	rec.alg = st.getUInt8();
+	rec.labels = st.getUInt8();
 	rec.origttl = st.getTTL();
 	rec.expire = parseDate(st.getString());
 	rec.timeSigned = parseDate(st.getString());
-	rec.footprint = (short) st.getUInt16();
+	rec.footprint = st.getUInt16();
 	rec.signer = st.getName(origin);
 	rec.signature = base64.fromString(remainingStrings(st));
 	return rec;
@@ -142,7 +142,7 @@ rdataToString() {
 		sb.append (" ");
 		sb.append (formatDate(timeSigned));
 		sb.append (" ");
-		sb.append ((int)footprint);
+		sb.append (footprint);
 		sb.append (" ");
 		sb.append (signer);
 		if (Options.check("multiline")) {
@@ -200,7 +200,7 @@ getTimeSigned() {
 }
 
 /** Returns The footprint/key id of the signing key.  */
-public short
+public int
 getFootprint() {
 	return footprint;
 }
@@ -222,12 +222,12 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (signature == null)
 		return;
 
-	out.writeShort((short)covered);
+	out.writeUnsignedShort(covered);
 	out.writeByte(alg);
 	out.writeByte(labels);
 	out.writeUnsignedInt(origttl);
-	out.writeInt((int)(expire.getTime() / 1000));
-	out.writeInt((int)(timeSigned.getTime() / 1000));
+	out.writeUnsignedInt(expire.getTime() / 1000);
+	out.writeUnsignedInt(timeSigned.getTime() / 1000);
 	out.writeShort(footprint);
 	signer.toWire(out, null, canonical);
 	out.writeArray(signature);
