@@ -60,7 +60,6 @@ NXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 throws IOException
 {
 	super(_name, Type.NXT, _dclass, _ttl);
-	Vector types = new Vector();
 	next = Name.fromString(st.nextToken(), origin);
 	bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
