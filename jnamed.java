@@ -625,7 +625,7 @@ serveUDP(InetAddress addr, short port) {
 		final short udpLength = 512;
 		byte [] in = new byte[udpLength];
 		DatagramPacket indp = new DatagramPacket(in, in.length);
-		DatagramPacket outdp;
+		DatagramPacket outdp = null;
 		while (true) {
 			indp.setLength(in.length);
 			try {
@@ -646,9 +646,16 @@ serveUDP(InetAddress addr, short port) {
 			}
 			byte [] out = response.toWire();
 
-			outdp = new DatagramPacket(out, out.length,
-						   indp.getAddress(),
-						   indp.getPort());
+			if (outdp == null)
+				outdp = new DatagramPacket(out, out.length,
+							   indp.getAddress(),
+							   indp.getPort());
+			else {
+				outdp.setData(out);
+				outdp.setLength(out.length);
+				outdp.setAddress(indp.getAddress());
+				outdp.setPort(indp.getPort());
+			}
 			sock.send(outdp);
 		}
 	}
