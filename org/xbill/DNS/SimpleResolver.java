@@ -319,6 +319,18 @@ sendAXFR(Message query) throws IOException {
 				throw new WireParseException
 						("Error parsing message");
 			}
+			if (m.getHeader().getRcode() != Rcode.NOERROR) {
+				if (soacount == 0)
+					return m;
+				else {
+					if (Options.check("verbosemsg")) {
+						System.err.println("Invalid AXFR packet: ");
+						System.err.println(m);
+					}
+					throw new WireParseException
+						("Invalid AXFR message");
+				}
+			}
 			if (m.getHeader().getCount(Section.QUESTION) > 1 ||
 			    m.getHeader().getCount(Section.ANSWER) <= 0 ||
 			    m.getHeader().getCount(Section.AUTHORITY) != 0)
