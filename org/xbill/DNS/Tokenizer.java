@@ -163,8 +163,12 @@ getChar() throws IOException {
 		ungottenChar = -1;
 	} else {
 		c = is.read();
-		if (c == '\r')
+		if (c == '\r') {
+			int next = is.read();
+			if (next != '\n')
+				ungetChar(next);
 			c = '\n';
+		}
 	}
 	return c;
 }
