@@ -136,7 +136,7 @@ public static final short DNAME		= 39;
 public static final short SINK		= 40;
 
 /** Options - contains EDNS metadata */
-public static final short OPT		= 248;
+public static final short OPT		= 41;
 
 /** Transaction key - used to compute a shared secret or exchange a key */
 public static final short TKEY		= 249;
@@ -201,6 +201,7 @@ static {
 	types.put2(CERT, "CERT");
 	types.put2(A6, "A6");
 	types.put2(DNAME, "DNAME");
+	types.put2(SINK, "SINK");
 	types.put2(OPT, "OPT");
 	types.put2(TSIG, "TSIG");
 	types.put2(IXFR, "IXFR");
@@ -238,7 +239,19 @@ value(String s) {
 /** Is this type valid for a record (a non-meta type)? */
 public static boolean
 isRR(int type) {
-	return (type > 0 && type < 128);
+	switch (type) {
+		case OPT:
+		case TKEY:
+		case TSIG:
+		case IXFR:
+		case AXFR:
+		case MAILB:
+		case MAILA:
+		case ANY:
+			return false;
+		default:
+			return true;
+	}
 }
 
 }
