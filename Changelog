@@ -1,3 +1,6 @@
+9/23/2002
+	- Memory usage improvements to the ARecord class.
+
 9/16/2002
 	- Support for NetWare's sys:/etc/resolv.cfg file.
 	  (Scott Villinski <scott@villinski.com>)

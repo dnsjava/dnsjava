@@ -18,7 +18,7 @@ public class ARecord extends Record {
 
 private static ARecord member = new ARecord();
 
-private byte [] addr;
+private int addr;
 
 private
 ARecord() {}
@@ -33,6 +33,32 @@ getMember() {
 	return member;
 }
 
+private static final int
+fromBytes(byte b1, byte b2, byte b3, byte b4) {
+	return (((b1 & 0xFF) << 24) |
+		((b2 & 0xFF) << 16) |
+		((b3 & 0xFF) << 8) |
+		(b4 & 0xFF));
+}
+
+private static final int
+fromArray(byte [] array) {
+	return (fromBytes(array[0], array[1], array[2], array[3]));
+}
+
+private static final String
+toDottedQuad(int addr) {
+	StringBuffer sb = new StringBuffer();
+	sb.append(((addr >>> 24) & 0xFF));
+	sb.append(".");
+	sb.append(((addr >>> 16) & 0xFF));
+	sb.append(".");
+	sb.append(((addr >>> 8) & 0xFF));
+	sb.append(".");
+	sb.append((addr & 0xFF));
+	return sb.toString();
+}
+
 /**
  * Creates an A Record from the given data
  * @param address The address that the name refers to
@@ -42,7 +68,7 @@ ARecord(Name name, short dclass, int ttl, InetAddress address)
 throws IOException
 {
 	this(name, dclass, ttl);
-	this.addr = address.getAddress();
+	addr = fromArray(address.getAddress());
 }
 
 Record
@@ -55,8 +81,11 @@ throws IOException
 	if (in == null)
 		return rec;
 
-	rec.addr = new byte[4];
-	in.read(rec.addr);
+	byte b1 = in.readByte();
+	byte b2 = in.readByte();
+	byte b3 = in.readByte();
+	byte b4 = in.readByte();
+	rec.addr = fromBytes(b1, b2, b3, b4);
 	return rec;
 }
 
@@ -83,7 +112,7 @@ throws TextParseException
 						("invalid dotted quad");
 			address = Address.getByName(s);
 		}
-		rec.addr = address.getAddress();
+		rec.addr = fromArray(address.getAddress());
 	}
 	catch (UnknownHostException e) {
 		throw new TextParseException("invalid address");
@@ -94,21 +123,13 @@ throws TextParseException
 /** Converts rdata to a String */
 public String
 rdataToString() {
-	StringBuffer sb = new StringBuffer();
-	if (addr != null) {
-		for (int i = 0; i < addr.length; i++) {
-			sb.append(addr[i] & 0xFF);
-			if (i < addr.length - 1)
-				sb.append(".");
-		}
-	}
-	return sb.toString();
+	return (toDottedQuad(addr));
 }
 
 /** Returns the Internet address */
 public InetAddress
 getAddress() {
-	String s = Address.toDottedQuad(addr);
+	String s = toDottedQuad(addr);
 	try {
 		return InetAddress.getByName(s);
 	}
@@ -119,10 +140,10 @@ getAddress() {
 
 void
 rrToWire(DataByteOutputStream out, Compression c) throws IOException {
-	if (addr == null)
-		return;
-
-	out.write(addr);
+	out.writeByte(((addr >>> 24) & 0xFF));
+	out.writeByte(((addr >>> 16) & 0xFF));
+	out.writeByte(((addr >>> 8) & 0xFF));
+	out.writeByte((addr & 0xFF));
 }
 
 }
