@@ -453,6 +453,8 @@ byteString(byte [] array) {
  */
 public String
 toString() {
+	if (labels  == 0)
+		return "@";
 	StringBuffer sb = new StringBuffer();
 	for (int i = offset; i < labels + offset; i++) {
 		sb.append(byteString((byte [])name[i]));
@@ -519,7 +521,6 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
 			bc[j] = lowercase[b[j]];
 		out.writeString(bc);
 	}
-	out.writeByte(0);
 }
 
 /**
