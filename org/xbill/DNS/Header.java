@@ -29,10 +29,10 @@ private static Random random = new Random();
  * @param id The message id
  */
 public
-Header(int _id) {
+Header(int id) {
 	counts = new int[4];
 	flags = new boolean[16];
-	id = _id;
+	this.id = id;
 }
 
 /**
@@ -114,8 +114,8 @@ getID() {
  * Sets the message ID
  */
 public void
-setID(int _id) {
-	id = _id;
+setID(int id) {
+	this.id = id;
 }
 
 /**
@@ -251,12 +251,9 @@ toString() {
 /* Creates a new Header identical to the current one */
 public Object
 clone() {
-	Header h = new Header();
-	for (int i = 0; i < counts.length; i++)
-		h.counts[i] = counts[i];	
-	for (int i = 0; i < flags.length; i++)
-		h.flags[i] = flags[i];	
-	h.id = id;
+	Header h = new Header(id);
+	System.arraycopy(counts, 0, h.counts, 0, counts.length);
+	System.arraycopy(flags, 0, h.flags, 0, flags.length);
 	h.rcode = rcode;
 	h.rcode = rcode;
 	h.opcode = opcode;
