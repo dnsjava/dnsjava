@@ -20,6 +20,9 @@ private static StringValueTable classes = new StringValueTable();
 public static final short IN		= 1;
 
 /** Chaos network (MIT) */
+public static final short CH		= 3;
+
+/** Chaos network (MIT, alternate name) */
 public static final short CHAOS		= 3;
 
 /** Hesiod name server (MIT) */
@@ -38,6 +41,7 @@ static {
 		classcache[i] = new Short(i);
 	classes.put2(IN, "IN");
 	classes.put2(CHAOS, "CHAOS");
+	classes.put2(CH, "CH");
 	classes.put2(HESIOD, "HESIOD");
 	classes.put2(NONE, "NONE");
 	classes.put2(ANY, "ANY");
