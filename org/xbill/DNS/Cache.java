@@ -552,7 +552,7 @@ verifyRecords(Cache tcache) {
 }
 
 private final byte
-getCred(short section, boolean isAuth) {
+getCred(int section, boolean isAuth) {
 	if (section == Section.ANSWER) {
 		if (isAuth)
 			return Credibility.AUTH_ANSWER;

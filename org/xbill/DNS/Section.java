@@ -12,66 +12,67 @@ import org.xbill.DNS.utils.*;
 
 public final class Section {
 
-private static StringValueTable sections = new StringValueTable();
-private static StringValueTable longSections = new StringValueTable();
-private static StringValueTable updSections = new StringValueTable();
-
 /** The question (first) section */
-public static final byte QUESTION	= 0;
+public static final int QUESTION	= 0;
 
 /** The answer (second) section */
-public static final byte ANSWER		= 1;
+public static final int ANSWER		= 1;
 
 /** The authority (third) section */
-public static final byte AUTHORITY	= 2;
+public static final int AUTHORITY	= 2;
 
 /** The additional (fourth) section */
-public static final byte ADDITIONAL	= 3;
+public static final int ADDITIONAL	= 3;
 
 /* Aliases for dynamic update */
 /** The zone (first) section of a dynamic update message */
-public static final byte ZONE		= 0;
+public static final int ZONE		= 0;
 
 /** The prerequisite (second) section of a dynamic update message */
-public static final byte PREREQ		= 1;
+public static final int PREREQ		= 1;
 
 /** The update (third) section of a dynamic update message */
-public static final byte UPDATE		= 2;
+public static final int UPDATE		= 2;
+
+private static Mnemonic sections = new Mnemonic("Message Section",
+						Mnemonic.CASE_LOWER);
+private static String [] longSections = new String[4];
+private static String [] updateSections = new String[4];
 
 static {
-	sections.put2(QUESTION, "qd");
-	sections.put2(ANSWER, "an");
-	sections.put2(AUTHORITY, "au");
-	sections.put2(ADDITIONAL, "ad");
+	sections.setMaximum(3);
+	sections.setNumericAllowed(true);
 
-	longSections.put2(QUESTION, "QUESTIONS");
-	longSections.put2(ANSWER, "ANSWERS");
-	longSections.put2(AUTHORITY, "AUTHORITY RECORDS");
-	longSections.put2(ADDITIONAL, "ADDITIONAL RECORDS");
+	sections.add(QUESTION, "qd");
+	sections.add(ANSWER, "an");
+	sections.add(AUTHORITY, "au");
+	sections.add(ADDITIONAL, "ad");
 
-	updSections.put2(ZONE, "ZONE");
-	updSections.put2(PREREQ, "PREREQUISITES");
-	updSections.put2(UPDATE, "UPDATE RECORDS");
-	updSections.put2(ADDITIONAL, "ADDITIONAL RECORDS");
+	longSections[QUESTION]		= "QUESTIONS";
+	longSections[ANSWER]		= "ANSWERS";
+	longSections[AUTHORITY]		= "AUTHORITY RECORDS";
+	longSections[ADDITIONAL]	= "ADDITIONAL RECORDS";
 
+	updateSections[ZONE]		= "ZONE";
+	updateSections[PREREQ]		= "PREREQUISITES";
+	updateSections[UPDATE]		= "UPDATE RECORDS";
+	updateSections[ADDITIONAL]	= "ADDITIONAL RECORDS";
 }
 
 private
 Section() {}
 
-
 /** Converts a numeric Section into an abbreviation String */
 public static String
 string(int i) {
-	String s = sections.getString(i);
-	return (s != null) ? s : Integer.toString(i);
+	return sections.getText(i);
 }
 
 /** Converts a numeric Section into a full description String */
 public static String
 longString(int i) {
-	String s = longSections.getString(i);
-	return (s != null) ? s : Integer.toString(i);
+	sections.check(i);
+	return longSections[i];
 }
 
 /**
@@ -80,22 +81,14 @@ longString(int i) {
  */
 public static String
 updString(int i) {
-	String s = updSections.getString(i);
-	return (s != null) ? s : Integer.toString(i);
+	sections.check(i);
+	return updateSections[i];
 }
 
 /** Converts a String representation of a Section into its numeric value */
-public static byte
+public static int
 value(String s) {
-	byte i = (byte) sections.getValue(s.toLowerCase());
-	if (i >= 0)
-		return i;
-	try {
-		return Byte.parseByte(s);
-	}
-	catch (Exception e) {
-		return (-1);
-	}
+	return sections.getValue(s);
 }
 
 }
