@@ -126,7 +126,7 @@ lookupRecords(Name name, short type, byte minCred) {
 	if (element == null)
 		return new CacheResponse(CacheResponse.UNKNOWN);
 	if (element.expiredTTL()) {
-		removeSet(name, type);
+		removeSet(name, type, element);
 		return new CacheResponse(CacheResponse.UNKNOWN);
 	}
 	if (element.credibility >= minCred) {

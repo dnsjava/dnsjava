@@ -27,7 +27,7 @@ findSet(Name name, short type) {
 			return null;
 	}
 	Object o = nameInfo.get(new Short(type));
-	if (o != null)
+	if (o != null || type == Type.CNAME)
 		return o;
 	return nameInfo.get(new Short(Type.CNAME));
 }
@@ -46,18 +46,34 @@ findName(Name name) {
 }
 
 protected void
-addSet(Name name, short type, Object o) {
+addSet(Name name, short type, Object set) {
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null)
 		data.put(name, nameInfo = new Hashtable());
-	nameInfo.put(new Short(type), o);
+	nameInfo.put(new Short(type), set);
 }
 
 protected void
-removeSet(Name name, short type) {
+removeSet(Name name, short type, Object set) {
 	Hashtable nameInfo = findName(name);
-	if (nameInfo != null)
+	if (nameInfo == null) {
+		if (!name.isWild()) {
+			name = name.wild();
+			nameInfo = findName(name);
+		}
+		if (nameInfo == null)
+			return;
+	}
+	Object o = nameInfo.get(new Short(type));
+	if (o != set && type != Type.CNAME) {
+		type = Type.CNAME;
+		o = nameInfo.get(new Short(type));
+	}
+	if (o == set) {
 		nameInfo.remove(new Short(type));
+		if (nameInfo.isEmpty())
+			data.remove(name);
+	}
 }
 
 public String
