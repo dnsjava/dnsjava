@@ -232,10 +232,23 @@ fromString(String s, Name origin) throws TextParseException {
 	return (name);
 }
 
-/*
- * Convert a name from a string, knowing that it will succeed.
+/**
+ * Create a new name from a string.
+ * @param s  The string to be converted
+ * @throws TextParseException The name is invalid.
  */
-static Name
+public static Name
+fromString(String s) throws TextParseException {
+	return fromString(s, null);
+}
+
+/**
+ * Create a new name from a string and an origin
+ * @param s  The string to be converted
+ * @param origin  If the name is unqualified, the origin to be appended.
+ * @throws TextParseException The name is invalid.
+ */
+public static Name
 fromStringNoValidate(String s, Name origin) {
 	try {
 		return fromString(s, origin);
@@ -243,6 +256,16 @@ fromStringNoValidate(String s, Name origin) {
 	catch (TextParseException e) {
 		return null;
 	}
+}
+
+/**
+ * Create a new name from a string.
+ * @param s  The string to be converted
+ * @throws TextParseException The name is invalid.
+ */
+public static Name
+fromStringNoValidate(String s) {
+	return fromStringNoValidate(s, null);
 }
 
 /**
