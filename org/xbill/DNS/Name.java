@@ -107,29 +107,28 @@ Name(String s) {
 	this (s, null);
 }
 
+public
 Name(DataByteInputStream in, Compression c) throws IOException {
-	int len, start, count = 0;
+	int len, start, pos, count = 0;
+	Name name2;
 
 	labels = 0;
-	name = new String[MAXLABELS];
+	name = new Object[MAXLABELS];
 
 	start = in.getPos();
 loop:
 	while ((len = in.readUnsignedByte()) != 0) {
 		switch(len & LABEL_MASK) {
 		case LABEL_NORMAL:
-		{
 			byte [] b = new byte[len];
 			in.read(b);
 			name[labels++] = new String(b);
 			count++;
 			break;
-		}
 		case LABEL_COMPRESSION:
-		{
-			int pos = in.readUnsignedByte();
+			pos = in.readUnsignedByte();
 			pos += ((len & ~LABEL_MASK) << 8);
-			Name name2 = (c == null) ? null : c.get(pos);
+			name2 = (c == null) ? null : c.get(pos);
 			if (Options.check("verbosecompression"))
 				System.err.println("Looking at " + pos +
 						   ", found " + name2);
@@ -141,14 +140,12 @@ loop:
 				labels += name2.labels;
 			}
 			break loop;
-		}
 		case LABEL_EXTENDED:
-		{
 			int type = len & ~LABEL_MASK;
 			switch (type) {
 			case EXT_LABEL_COMPRESSION:
-				int pos = in.readUnsignedShort();
-				Name name2 = (c == null) ? null : c.get(pos);
+				pos = in.readUnsignedShort();
+				name2 = (c == null) ? null : c.get(pos);
 				if (Options.check("verbosecompression"))
 					System.err.println("Looking at " +
 							   pos + ", found " +
@@ -163,17 +160,15 @@ loop:
 				}
 				break loop;
 			case EXT_LABEL_BITSTRING:
-			{
 				int bits = in.readUnsignedByte();
 				if (bits == 0)
 					bits = 256;
-				int bytes = (bits + 7) & ~7;
+				int bytes = (bits + 7) / 8;
 				byte [] data = new byte[bytes];
 				in.read(data);
 				name[labels++] = new BitString(bits, data);
 				count++;
 				break;
-			}
 			case EXT_LABEL_LOCAL_COMPRESSION:
 				throw new WireParseException(
 						"Long local compression");
@@ -181,13 +176,14 @@ loop:
 				throw new WireParseException(
 						"Unknown name format");
 			} /* switch */
-		}
+			break;
 		case LABEL_LOCAL_COMPRESSION:
 			throw new WireParseException("Local compression");
 		} /* switch */
 	}
-	if (c != null) 
-		for (int i = 0, pos = start; i < count; i++) {
+	if (c != null) {
+		pos = start;
+		for (int i = 0; i < count; i++) {
 			Name tname = new Name(this, i);
 			c.add(pos, tname);
 			if (Options.check("verbosecompression"))
@@ -198,6 +194,7 @@ loop:
 			else
 				pos += (((BitString)name[i]).bytes() + 2);
 		}
+	}
 	qualified = true;
 }
 
@@ -209,7 +206,7 @@ loop:
 /* Skips n labels and creates a new name */
 public
 Name(Name d, int n) {
-	name = new String[MAXLABELS];
+	name = new Object[MAXLABELS];
 
 	labels = (byte) (d.labels - n);
 	System.arraycopy(d.name, n, name, 0, labels);
@@ -312,25 +309,26 @@ public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
 	for (int i = 0; i < labels; i++) {
 		Name tname = new Name(this, i);
-		int pos;
-		if (c != null)
+		int pos = -1;
+		if (c != null) {
 			pos = c.get(tname);
-		else
-			pos = -1;
-		if (Options.check("verbosecompression"))
-			System.err.println("Looking for " + tname +
-					   ", found " + pos);
+			if (Options.check("verbosecompression"))
+				System.err.println("Looking for " + tname +
+						   ", found " + pos);
+		}
 		if (pos >= 0) {
 			pos |= (LABEL_MASK << 8);
 			out.writeShort(pos);
 			return;
 		}
 		else {
-			if (c != null)
+			if (c != null) {
 				c.add(out.getPos(), tname);
-			if (Options.check("verbosecompression"))
-				System.err.println("Adding " + tname +
-						   " at " + out.getPos());
+				if (Options.check("verbosecompression"))
+					System.err.println("Adding " + tname +
+							   " at " +
+							   out.getPos());
+			}
 			if (name[i] instanceof String)
 				out.writeString((String)name[i]);
 			else {
