@@ -181,7 +181,7 @@ digest(byte [] data, int start, int len, int [] s) {
 
 static byte []
 pad(byte [] data, int start, int len) {
-	int size = (len + 8 + 63) & (~63);
+	int size = (len + 8 + 64) & (~63);
 	byte [] newdata = new byte[size];
 	System.arraycopy(data, start, newdata, 0, len);
 	if (size - 8 > len) {
@@ -207,10 +207,8 @@ compute(byte [] data, int start, int len) {
 	s[3] = 0x10325476;
 
 	byte [] padded = pad(data, start, len);
-	for (int i = 0; i < padded.length; i += 64) {
-		byte [] b = new byte[64];
+	for (int i = 0; i < padded.length; i += 64)
 		digest(padded, i, 64, s);
-	}
 	return encode(s);
 }
 
