@@ -1,4 +1,20 @@
+4/13/1999
+	- More javadoc-ed classes in DNS.*
+	- The message ID stuff from 4/10 broke TSIG, so it's gone
+	- Changes to ExtendedResolver's handling of child Resolvers
+	- Too many threads were being created
+	- Threads should now have meaningful names
+
 4/12/1999
+	- NameSet shouldn't be using wildcards, since it's not correct for
+		a cache (a name could match a wildcard and return wildcard
+		data before the cache learned about data for the name)
+	- javadoc-ed DNS.utils.* and some of DNS.*
+	- ExtendedResolver allows specifying Resolvers to use
+	- SimpleResolver and ExtendedResolver share a thread pool
+	- ExtendedResolver and FindServer bugfixes
+	- Header bug that actually caused the 0.8.1 release fixed
+	- bugfix release 0.8.1 released
 	- Messages weren't being cloned properly
 	- Resolver didn't handle a query to nowhere correctly
 
