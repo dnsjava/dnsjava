@@ -11,7 +11,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class NSRecord extends NS_CNAME_PTRRecord {
+public class NSRecord extends SingleCompressedNameBase {
 
 NSRecord() {}
 
@@ -26,12 +26,18 @@ getObject() {
  */
 public
 NSRecord(Name name, int dclass, long ttl, Name target) {
-	super(name, Type.NS, dclass, ttl, target);
+	super(name, Type.NS, dclass, ttl, target, "target");
+}
+
+/** Gets the target of the NS Record */
+public Name
+getTarget() {
+	return getSingleName();
 }
 
 public Name
 getAdditionalName() {
-	return target;
+	return getSingleName();
 }
 
 }

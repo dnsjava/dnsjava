@@ -12,7 +12,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class PTRRecord extends NS_CNAME_PTRRecord {
+public class PTRRecord extends SingleCompressedNameBase {
 
 PTRRecord() {}
 
@@ -27,7 +27,13 @@ getObject() {
  */
 public
 PTRRecord(Name name, int dclass, long ttl, Name target) {
-	super(name, Type.PTR, dclass, ttl, target);
+	super(name, Type.PTR, dclass, ttl, target, "target");
+}
+
+/** Gets the target of the PTR Record */
+public Name
+getTarget() {
+	return getSingleName();
 }
 
 }

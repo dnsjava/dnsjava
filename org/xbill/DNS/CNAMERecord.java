@@ -11,7 +11,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class CNAMERecord extends NS_CNAME_PTRRecord {
+public class CNAMERecord extends SingleCompressedNameBase {
 
 CNAMERecord() {}
 
@@ -22,11 +22,25 @@ getObject() {
 
 /**
  * Creates a new CNAMERecord with the given data
- * @param target The name to which the CNAME alias points
+ * @param alias The name to which the CNAME alias points
  */
 public
-CNAMERecord(Name name, int dclass, long ttl, Name target) {
-	super(name, Type.CNAME, dclass, ttl, target);
+CNAMERecord(Name name, int dclass, long ttl, Name alias) {
+	super(name, Type.CNAME, dclass, ttl, alias, "alias");
+}
+
+/**
+ * Gets the target of the CNAME Record
+ */
+public Name
+getTarget() {
+	return getSingleName();
+}
+
+/** Gets the alias specified by the CNAME Record */
+public Name
+getAlias() {
+	return getSingleName();
 }
 
 }
