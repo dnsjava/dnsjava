@@ -140,7 +140,7 @@ private class CacheCleaner extends Thread {
 				if (tm == null)
 					continue;
 				Object [] elements;
-				elements = tm.getMultiple(Type.ANY);
+				elements = tm.getAll();
 				if (elements == null)
 					continue;
 				for (int i = 0; i < elements.length; i++) {
@@ -442,7 +442,7 @@ verifyRecords(Cache tcache) {
 		if (tm == null)
 			continue;
 		Object [] elements;
-		elements = tm.getMultiple(Type.ANY);
+		elements = tm.getAll();
 		if (elements == null)
 			continue;
 		for (int i = 0; i < elements.length; i++) {

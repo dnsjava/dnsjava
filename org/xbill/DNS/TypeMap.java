@@ -29,30 +29,20 @@ get(short type) {
 }
 
 /**
- * Finds the objects corresponding to the given type, which may be ANY.
+ * Returns an array of all objects in the TypeMap.
  */
 Object []
-getMultiple(short type) {
+getAll() {
 	Object [] out;
 	int n;
 
-	if (type != Type.ANY) {
-		Object o = get(type);
-		if (o == null)
-			return null;
-		out = new Object[1];
-		out[0] = o;
-		return out;
-	}
-	else {
-		synchronized (data) {
-			int size = data.size();
-			out = new Object[size];
-			Enumeration e = data.elements();
-			n = 0;
-			while (e.hasMoreElements())
-				out[n++] = e.nextElement();
-		}
+	synchronized (data) {
+		int size = data.size();
+		out = new Object[size];
+		Enumeration e = data.elements();
+		n = 0;
+		while (e.hasMoreElements())
+			out[n++] = e.nextElement();
 	}
 	return out;
 }

@@ -47,7 +47,7 @@ class AXFREnumeration implements Enumeration {
 			if (currentName == null) {
 				currentName = getOrigin();
 				TypeMap tm = findName(currentName);
-				current = (Object []) tm.getMultiple(Type.ANY);
+				current = (Object []) tm.getAll();
 				count = 0;
 			}
 			while (count < current.length) {
@@ -67,7 +67,7 @@ class AXFREnumeration implements Enumeration {
 			if (currentName.equals(getOrigin()))
 				continue;
 			TypeMap tm = findName(currentName);
-			current = (Object []) tm.getMultiple(Type.ANY);
+			current = (Object []) tm.getAll();
 			count = 0;
 			if (count < current.length)
 				return current[count++];

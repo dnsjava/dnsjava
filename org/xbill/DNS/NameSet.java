@@ -70,7 +70,7 @@ findSets(Name name, short type) {
 
 		/* If this is an ANY lookup, return everything. */
 		if (tlabels == labels && type == Type.ANY)
-			return nameInfo.getMultiple(type);
+			return nameInfo.getAll();
 
 		/* Look for an NS */
 		if (tlabels > olabels || isCache) {
@@ -209,7 +209,7 @@ toString() {
 	Enumeration e = data.elements();
 	while (e.hasMoreElements()) {
 		TypeMap nameInfo = (TypeMap) e.nextElement();
-		Object [] elements = nameInfo.getMultiple(Type.ANY);
+		Object [] elements = nameInfo.getAll();
 		if (elements == null)
 			continue;
 		for (int i = 0; i < elements.length; i++)
