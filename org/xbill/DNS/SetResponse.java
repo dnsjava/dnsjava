@@ -126,13 +126,13 @@ isDelegation() {
 	return (type == DELEGATION);
 }
 
-/** Is the result of the lookup a dangling CNAME? */
+/** Is the result of the lookup a CNAME? */
 public boolean
 isCNAME() {
 	return (type == CNAME);
 }
 
-/** Is the result of the lookup a dangling DNAME? */
+/** Is the result of the lookup a DNAME? */
 public boolean
 isDNAME() {
 	return (type == DNAME);
@@ -157,18 +157,7 @@ answers() {
 }
 
 /**
- * If the query was partially successful, return the last CNAME/DNAME found in
- * the lookup process.
- */
-public CNAMERecord
-partial() {
-	if (type != SUCCESSFUL)
-		return null;
-	return (CNAMERecord) data;
-}
-
-/**
- * If the query encountered CNAME point, return it.
+ * If the query encountered a CNAME, return it.
  */
 public CNAMERecord
 getCNAME() {
@@ -176,7 +165,7 @@ getCNAME() {
 }
 
 /**
- * If the query encountered CNAME point, return it.
+ * If the query encountered a DNAME, return it.
  */
 public DNAMERecord
 getDNAME() {
@@ -191,7 +180,7 @@ getNS() {
 	return (RRset) data;
 }
 
-/** Prints the value of the CacheResponse */
+/** Prints the value of the SetResponse */
 public String
 toString() {
 	switch (type) {
