@@ -1,3 +1,11 @@
+3/30/1999
+	- 0.6 released
+	- bug fixes to DataInputStream, jnamed
+	- jnamed now takes config file
+	- Added basic EDNS0 and TSIG support to jnamed
+	- Added basic EDNS0 support and IgnoreTruncation flag to Resolver
+	- jnamed can now return FORMERR
+
 3/29/1999
 	- 0.5 released
 	- update client: added "echo" and "log" keywords, "file" can now
