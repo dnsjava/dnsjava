@@ -176,6 +176,8 @@ main(String argv[]) throws IOException {
 		if (name == null)
 			usage();
 	}
+	if (res == null)
+		res = new ExtendedResolver();
 
 	rec = Record.newRecord(name, type, dclass);
 	query = Message.newQuery(rec);
