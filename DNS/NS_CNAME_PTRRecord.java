@@ -24,7 +24,7 @@ NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
 	target = _target;
 }
 
-public
+protected
 NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
 		   int length, DataByteInputStream in, Compression c)
 throws IOException
@@ -35,7 +35,7 @@ throws IOException
 	target = new Name(in, c);
 }
 
-public
+protected
 NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
 		   MyStringTokenizer st, Name origin)
 throws IOException

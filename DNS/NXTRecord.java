@@ -34,9 +34,8 @@ NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
 	bitmap = _bitmap;
 }
 
-public
-NXTRecord(Name _name, short _dclass, int _ttl,
-	  int length, DataByteInputStream in, Compression c)
+NXTRecord(Name _name, short _dclass, int _ttl, int length,
+	  DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.NXT, _dclass, _ttl);
@@ -54,7 +53,6 @@ throws IOException
 	}
 }
 
-public
 NXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException

@@ -46,7 +46,6 @@ throws IOException
 	minimum = _minimum;
 }
 
-public
 SOARecord(Name _name, short _dclass, int _ttl, int length,
 	  DataByteInputStream in, Compression c) throws IOException
 {
@@ -62,7 +61,6 @@ SOARecord(Name _name, short _dclass, int _ttl, int length,
 	minimum = in.readInt();
 }
 
-public
 SOARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	     Name origin)
 throws IOException

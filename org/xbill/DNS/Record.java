@@ -31,7 +31,13 @@ Record(Name _name, short _type, short _dclass, int _ttl) {
 
 private static Class
 toClass(short type) throws ClassNotFoundException {
-	return Class.forName("DNS." + Type.string(type) + "Record");
+	String s = Record.class.toString();
+	/*
+	 * Remove "class " from the beginning, and "Record" from the end.
+	 * Then construct the new class name.
+	 */
+	return Class.forName(s.substring(6, s.length() - 6) +
+			     Type.string(type) + "Record");
 }
 
 private static Record
@@ -44,14 +50,14 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 		Constructor m;
 
 		rrclass = toClass(type);
-		m = rrclass.getConstructor(new Class [] {
-						Name.class,
-						Short.TYPE,
-						Integer.TYPE,
-						Integer.TYPE,
-						DataByteInputStream.class,
-						Compression.class
-					   });
+		m = rrclass.getDeclaredConstructor(new Class [] {
+							Name.class,
+							Short.TYPE,
+							Integer.TYPE,
+							Integer.TYPE,
+						      DataByteInputStream.class,
+							Compression.class
+						   });
 		rec = (Record) m.newInstance(new Object [] {
 							name,
 							new Short(dclass),
@@ -240,13 +246,13 @@ throws IOException
 		Constructor m;
 
 		rrclass = toClass(type);
-		m = rrclass.getConstructor(new Class [] {
-						Name.class,
-						Short.TYPE,
-						Integer.TYPE,
-						MyStringTokenizer.class,
-						Name.class,
-					   });
+		m = rrclass.getDeclaredConstructor(new Class [] {
+							Name.class,
+							Short.TYPE,
+							Integer.TYPE,
+							MyStringTokenizer.class,
+							Name.class,
+						   });
 		rec = (Record) m.newInstance(new Object [] {
 						name,
 						new Short(dclass),

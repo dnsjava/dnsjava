@@ -38,9 +38,8 @@ throws IOException
 	strings.addElement(_string);
 }
 
-public
-TXTRecord(Name _name, short _dclass, int _ttl,
-	     int length, DataByteInputStream in, Compression c)
+TXTRecord(Name _name, short _dclass, int _ttl, int length,
+	  DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.TXT, _dclass, _ttl);
@@ -57,7 +56,6 @@ throws IOException
         }
 }
 
-public
 TXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException

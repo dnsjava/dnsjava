@@ -31,7 +31,6 @@ MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 	target = _target;
 }
 
-public
 MXRecord(Name _name, short _dclass, int _ttl,
 	    int length, DataByteInputStream in, Compression c)
 throws IOException
@@ -43,7 +42,6 @@ throws IOException
 	target = new Name(in, c);
 }
 
-public
 MXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
 throws IOException
 {

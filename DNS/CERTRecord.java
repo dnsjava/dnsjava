@@ -55,9 +55,8 @@ CERTRecord(Name _name, short _dclass, int _ttl, int _certType,
 	cert = _cert;
 }
 
-public
-CERTRecord(Name _name, short _dclass, int _ttl,
-	      int length, DataByteInputStream in, Compression c)
+CERTRecord(Name _name, short _dclass, int _ttl, int length,
+	   DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.CERT, _dclass, _ttl);
@@ -72,7 +71,6 @@ throws IOException
 	}
 }
 
-public
 CERTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	   Name origin)
 throws IOException

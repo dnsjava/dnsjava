@@ -72,7 +72,6 @@ KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
 	key = _key;
 }
 
-public
 KEYRecord(Name _name, short _dclass, int _ttl,
 	     int length, DataByteInputStream in, Compression c)
 throws IOException
@@ -89,7 +88,6 @@ throws IOException
 	}
 }
 
-public
 KEYRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException

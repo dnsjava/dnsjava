@@ -34,9 +34,8 @@ OPTRecord(Name _name, short _dclass, int _ttl) {
 	options = null;
 }
 
-public
-OPTRecord(Name _name, short _dclass, int _ttl,
-	  int length, DataByteInputStream in, Compression c)
+OPTRecord(Name _name, short _dclass, int _ttl, int length,
+	  DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.OPT, _dclass, _ttl);

@@ -59,9 +59,8 @@ SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
 	signature = _signature;
 }
 
-public
-SIGRecord(Name _name, short _dclass, int _ttl,
-	  int length, DataByteInputStream in, Compression c)
+SIGRecord(Name _name, short _dclass, int _ttl, int length,
+	  DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.SIG, _dclass, _ttl);
@@ -80,7 +79,6 @@ throws IOException
 	in.read(signature);
 }
 
-public
 SIGRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	     Name origin)
 throws IOException

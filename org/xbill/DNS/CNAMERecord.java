@@ -25,14 +25,12 @@ throws IOException
         super(_name, Type.CNAME, _dclass, _ttl, _target);
 }
 
-public
 CNAMERecord(Name _name, short _dclass, int _ttl, int length,
 	    DataByteInputStream in, Compression c) throws IOException
 {
 	super(_name, Type.CNAME, _dclass, _ttl, length, in, c);
 }
 
-public
 CNAMERecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	       Name origin)
 throws IOException

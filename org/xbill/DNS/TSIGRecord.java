@@ -56,7 +56,6 @@ TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,
 	other = _other;
 }
 
-public
 TSIGRecord(Name _name, short _dclass, int _ttl, int length,
 	   DataByteInputStream in, Compression c) throws IOException
 {

@@ -29,7 +29,6 @@ HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 	os = _os;
 }
 
-public
 HINFORecord(Name _name, short _dclass, int _ttl, int length,
 	    DataByteInputStream in, Compression c)
 throws IOException
@@ -41,7 +40,6 @@ throws IOException
 	os = in.readString();
 }
 
-public
 HINFORecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	       Name origin)
 throws IOException

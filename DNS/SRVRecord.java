@@ -40,7 +40,6 @@ SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 	target = _target;
 }
 
-public
 SRVRecord(Name _name, short _dclass, int _ttl,
 	  int length, DataByteInputStream in, Compression c)
 throws IOException
@@ -54,7 +53,6 @@ throws IOException
 	target = new Name(in, c);
 }
 
-public
 SRVRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException
