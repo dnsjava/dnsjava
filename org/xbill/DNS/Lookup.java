@@ -38,6 +38,7 @@ private boolean verbose;
 private int iterations;
 private boolean foundAlias;
 private boolean done;
+private boolean doneCurrent;
 private List aliases;
 private Record [] answers;
 private int result;
@@ -362,6 +363,7 @@ processResponse(Name name, SetResponse response) {
 		done = true;
 	} else if (response.isNXDOMAIN()) {
 		nxdomain = true;
+		doneCurrent = true;
 		if (iterations > 0) {
 			result = HOST_NOT_FOUND;
 			done = true;
@@ -399,7 +401,7 @@ lookup(Name current) {
 		System.err.println(sr);
 	}
 	processResponse(current, sr);
-	if (done)
+	if (done || doneCurrent)
 		return;
 
 	Record question = Record.newRecord(current, type, dclass);
@@ -445,6 +447,7 @@ lookup(Name current) {
 
 private void
 resolve(Name current, Name suffix) {
+	doneCurrent = false;
 	Name tname = null;
 	if (suffix == null)
 		tname = current;

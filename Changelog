@@ -1,3 +1,7 @@
+3/3/2004
+	- Cached NXDOMAINs were ignored, which caused extra queries to
+	  be sent (reported by Damon Hart-Davis <d@hd.org>).
+
 2/25/2004
 	- Attempting to load a zone without specifying an origin failed.
 
