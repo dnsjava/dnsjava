@@ -12,10 +12,10 @@ import org.xbill.Task.*;
 /**
  * An implementation of Resolver that sends one query to one server.
  * SimpleResolver handles TCP retries, transaction security (TSIG), and
- * a limited subset of EDNS0.
+ * EDNS0.
  * @see Resolver
  * @see TSIG
- * @see EDNS
+ * @see OPTRecord
  *
  * @author Brian Wellington
  */

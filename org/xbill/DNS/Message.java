@@ -218,7 +218,6 @@ isVerified() {
 /**
  * Returns the OPT record from the ADDITIONAL section, if one is present
  * @see OPTRecord
- * @see EDNS
  * @see Section
  */
 public OPTRecord
@@ -233,7 +232,6 @@ getOPT() {
 /**
  * Returns the message's rcode (error code).  This incorporates the EDNS
  * extended rcode.
- * @see EDNS
  */
 public short
 getRcode() {

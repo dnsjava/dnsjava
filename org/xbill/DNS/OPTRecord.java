@@ -17,7 +17,6 @@ import org.xbill.DNS.utils.*;
  * implementation of EDNS is mostly complete at level 0 and partially
  * complete at level 1.
  *
- * @see EDNS
  * @see Message
  * @see Resolver 
  *
@@ -32,10 +31,10 @@ private
 OPTRecord() {}
 
 /**
- * Creates an OPT Record with no data.  This is normally called by the EDNS
- * class
- * @see EDNS
+ * Creates an OPT Record with no data.  This is normally called by
+ * SimpleResolver, but can also be called by a server.
  */
+public
 OPTRecord(short payloadSize, byte xrcode, byte version) {
 	super(Name.root, Type.OPT, payloadSize,
 	      ((int)xrcode << 24) + ((int)version << 16));
