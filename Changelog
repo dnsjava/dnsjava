@@ -1,3 +1,7 @@
+7/17/2001
+	- Started implementing Name.compareTo().  (loosely based on a
+	  patch from David Blacka).
+
 7/16/2001
 	- Converting a AAAA record to wire format was broken.
 	  (David Blacka)

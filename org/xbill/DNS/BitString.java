@@ -178,4 +178,18 @@ equals(Object o) {
 	return true;
 }
 
+/** Compare two bitstrings. */
+public int
+compareTo(Object o) {
+	if (!(o instanceof BitString))
+		throw new IllegalArgumentException();
+
+	BitString b = (BitString) o;
+
+	for (int i = 0; i < data.length && i < b.data.length; i++)
+		if (data[i] != b.data[i])
+			return (data[i] & 0xFF) - (b.data[i] & 0xFF);
+	return nbits - b.nbits;
+}
+
 }

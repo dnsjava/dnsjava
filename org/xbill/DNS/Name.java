@@ -497,4 +497,44 @@ hashCode() {
 	return code;
 }
 
+public int
+compareTo(Object o) {
+	if (!(o instanceof Name))
+		throw new IllegalArgumentException();
+
+	Name arg = (Name) o;
+
+	int compares = labels > arg.labels ? arg.labels : labels;
+
+	for (int i = 1; i <= compares; i++) {
+		Object label = name[labels - i];
+		Object alabel = arg.name[arg.labels - i];
+
+		if (label.getClass() != alabel.getClass()) {
+			if (label instanceof BitString)
+				return (1);
+			else
+				return (-1);
+		}
+		if (label instanceof BitString) {
+			BitString bs = (BitString)label;
+			int n = bs.compareTo(alabel);
+			if (n != 0)
+				return (n);
+		}
+		else {
+			byte [] b = (byte []) label;
+			byte [] ab = (byte []) alabel;
+			for (int j = 0; j < b.length && j < ab.length; j++) {
+				int n = toLower(b[j]) - toLower(ab[j]);
+				if (n != 0)
+					return (n);
+			}
+			if (b.length != ab.length)
+				return (b.length - ab.length);
+		}
+	}
+	return (labels - arg.labels);
+}
+
 }
