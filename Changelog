@@ -4,6 +4,7 @@
 	  FindServer class, except that it's not all static methods.
 	  Add the ability to refresh the current ResolverConfig, and
 	  make FindServer use ResolverConfig.
+	- Add Lookup.refreshDefault (based on a patch from Th Kuhne)
 
 2/4/2004
 	- 1.6.5 released.

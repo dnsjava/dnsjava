@@ -78,7 +78,9 @@ public static final int HOST_NOT_FOUND = 3;
 /** The host exists, but has no records associated with the queried type. */
 public static final int TYPE_NOT_FOUND = 4;
 
-static {
+public static synchronized void
+refreshDefault() {
+
 	try {
 		defaultResolver = new ExtendedResolver();
 	}
@@ -87,6 +89,10 @@ static {
 	}
 	defaultSearchPath = FindServer.searchPath();
 	defaultCaches = new HashMap();
+}
+
+static {
+	refreshDefault();
 }
 
 /**
