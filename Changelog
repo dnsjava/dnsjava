@@ -1,3 +1,7 @@
+10/31/2004
+	- Add partial IPv6 support to the ReverseMap class.
+	  (based on a patch from Th Kuhne)
+
 7/7/2004
 	- Implement the $GENERATE master file directive.
 
