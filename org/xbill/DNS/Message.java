@@ -27,11 +27,11 @@ private byte [] wireFormat;
 private boolean frozen;
 boolean TSIGsigned, TSIGverified;
 
+private static Record [] emptyArray = new Record[0];
+
 private
 Message(Header header) {
 	sections = new List[4];
-	for (int i = 0; i < 4; i++)
-		sections[i] = new LinkedList();
 	this.header = header;
 	wireFormat = null;
 	frozen = false;
@@ -82,6 +82,8 @@ Message(DataByteInputStream in) throws IOException {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < header.getCount(i); j++) {
 			Record rec = Record.fromWire(in, i);
+			if (sections[i] == null)
+				sections[i] = new LinkedList();
 			sections[i].add(rec);
 		}
 	}
@@ -119,6 +121,8 @@ getHeader() {
  */
 public void
 addRecord(Record r, int section) {
+	if (sections[section] == null)
+		sections[section] = new LinkedList();
 	sections[section].add(r);
 	header.incCount(section);
 }
@@ -130,7 +134,7 @@ addRecord(Record r, int section) {
  */
 public boolean
 removeRecord(Record r, int section) {
-	if (sections[section].remove(r)) {
+	if (sections[section] != null && sections[section].remove(r)) {
 		header.decCount(section);
 		return true;
 	}
@@ -145,7 +149,7 @@ removeRecord(Record r, int section) {
  */
 public void
 removeAllRecords(int section) {
-	sections[section].clear();
+	sections[section] = null;
 	header.setCount(section, (short)0);
 }
 
@@ -156,7 +160,7 @@ removeAllRecords(int section) {
  */
 public boolean
 findRecord(Record r, int section) {
-	return (sections[section].contains(r));
+	return (sections[section] != null && sections[section].contains(r));
 }
 
 /**
@@ -166,9 +170,10 @@ findRecord(Record r, int section) {
  */
 public boolean
 findRecord(Record r) {
-	return (sections[Section.ANSWER].contains(r) ||
-		sections[Section.AUTHORITY].contains(r) ||
-		sections[Section.ADDITIONAL].contains(r));
+	for (int i = Section.ANSWER; i <= Section.ADDITIONAL; i++)
+		if (sections[i] != null && sections[i].contains(r))
+			return true;
+	return false;
 }
 
 /**
@@ -179,6 +184,8 @@ findRecord(Record r) {
  */
 public boolean
 findRRset(Name name, short type, int section) {
+	if (sections[section] == null)
+		return false;
 	for (int i = 0; i < sections[section].size(); i++) {
 		Record r = (Record) sections[section].get(i);
 		if (r.getType() == type && name.equals(r.getName()))
@@ -207,6 +214,8 @@ findRRset(Name name, short type) {
  */
 public Record
 getQuestion() {
+	if (sections[Section.QUESTION] == null)
+		return null;
 	try {
 		return (Record) sections[Section.QUESTION].get(0);
 	}
@@ -285,7 +294,10 @@ getRcode() {
  */
 public Enumeration
 getSection(int section) {
-	return Collections.enumeration(sections[section]);
+	if (sections[section] != null)
+		return Collections.enumeration(sections[section]);
+	else
+		return Collections.enumeration(Collections.EMPTY_LIST);
 }
 
 /**
@@ -295,8 +307,11 @@ getSection(int section) {
  */
 public Record []
 getSectionArray(int section) {
-	List l = sections[section];
-	return (Record []) l.toArray(new Record[l.size()]);
+	if (sections[section] != null) {
+		List l = sections[section];
+		return (Record []) l.toArray(new Record[l.size()]);
+	} else
+		return emptyArray;
 }
 
 void
@@ -304,6 +319,8 @@ toWire(DataByteOutputStream out) throws IOException {
 	header.toWire(out);
 	Compression c = new Compression();
 	for (int i = 0; i < 4; i++) {
+		if (sections[i] == null)
+			continue;
 		for (int j = 0; j < sections[i].size(); j++) {
 			Record rec = (Record)sections[i].get(j);
 			rec.toWire(out, i, c);
@@ -424,8 +441,10 @@ toString() {
 public Object
 clone() {
 	Message m = new Message();
-	for (int i = 0; i < sections.length; i++)
-		m.sections[i] = new LinkedList(sections[i]);
+	for (int i = 0; i < sections.length; i++) {
+		if (sections[i] != null)
+			m.sections[i] = new LinkedList(sections[i]);
+	}
 	m.header = (Header) header.clone();
 	m.size = size;
 	return m;
