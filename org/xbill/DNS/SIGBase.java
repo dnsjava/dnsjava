@@ -43,8 +43,7 @@ SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 	this.expire = expire;
 	this.timeSigned = timeSigned;
 	this.footprint = footprint;
-	if (!signer.isAbsolute())
-		throw new RelativeNameException(signer);
+	checkName("signer", signer);
 	this.signer = signer;
 	this.signature = signature;
 }

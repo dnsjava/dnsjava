@@ -724,4 +724,11 @@ checkU32(String field, long val) {
 						   "bit value");
 }
 
+/* Checks that a name is absolute */
+static void
+checkName(String field, Name name) {
+	if (!name.isAbsolute())
+		throw new RelativeNameException(name);
+}
+
 }

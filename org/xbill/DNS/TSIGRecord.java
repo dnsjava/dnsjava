@@ -54,8 +54,7 @@ TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 	   byte other[])
 {
 	super(name, Type.TSIG, dclass, ttl);
-	if (!alg.isAbsolute())
-		throw new RelativeNameException(alg);
+	checkName("alg", alg);
 	checkU16("fudge", fudge);
 	checkU16("error", error);
 	this.alg = alg;

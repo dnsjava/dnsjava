@@ -37,8 +37,7 @@ RTRecord(Name name, int dclass, long ttl, int preference,
 
 	checkU16("preference", preference);
 	this.preference = preference;
-	if (!intermediateHost.isAbsolute())
-		throw new RelativeNameException(intermediateHost);
+	checkName("intermediateHost", intermediateHost);
 	this.intermediateHost = intermediateHost;
 }
 

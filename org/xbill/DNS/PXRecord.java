@@ -38,11 +38,9 @@ PXRecord(Name name, int dclass, long ttl, int preference,
 
 	checkU16("preference", preference);
 	this.preference = preference;
-	if (!map822.isAbsolute())
-		throw new RelativeNameException(map822);
+	checkName("map822", map822);
 	this.map822 = map822;
-	if (!mapX400.isAbsolute())
-		throw new RelativeNameException(mapX400);
+	checkName("mapX400", mapX400);
 	this.mapX400 = mapX400;
 }
 

@@ -38,8 +38,7 @@ getObject() {
 public
 NSECRecord(Name name, int dclass, long ttl, Name next, int [] types) {
 	super(name, Type.NSEC, dclass, ttl);
-	if (!next.isAbsolute())
-		throw new RelativeNameException(next);
+	checkName("next", next);
 	for (int i = 0; i < types.length; i++) {
 		Type.check(types[i]);
 	}

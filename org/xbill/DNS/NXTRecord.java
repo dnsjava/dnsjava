@@ -35,8 +35,7 @@ getObject() {
 public
 NXTRecord(Name name, int dclass, long ttl, Name next, BitSet bitmap) {
 	super(name, Type.NXT, dclass, ttl);
-	if (!next.isAbsolute())
-		throw new RelativeNameException(next);
+	checkName("next", next);
 	this.next = next;
 	this.bitmap = bitmap;
 }

@@ -38,11 +38,9 @@ MINFORecord(Name name, int dclass, long ttl,
 {
 	super(name, Type.MINFO, dclass, ttl);
 
-	if (!responsibleAddress.isAbsolute())
-		throw new RelativeNameException(responsibleAddress);
+	checkName("responsibleAddress", responsibleAddress);
 	this.responsibleAddress = responsibleAddress;
-	if (!errorAddress.isAbsolute())
-		throw new RelativeNameException(errorAddress);
+	checkName("errorAddress", errorAddress);
 	this.errorAddress = errorAddress;
 }
 

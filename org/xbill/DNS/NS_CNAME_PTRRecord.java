@@ -26,8 +26,7 @@ NS_CNAME_PTRRecord(Name name, int type, int dclass, long ttl) {
 public
 NS_CNAME_PTRRecord(Name name, int type, int dclass, long ttl, Name target) {
 	super(name, type, dclass, ttl);
-	if (!target.isAbsolute())
-		throw new RelativeNameException(target);
+	checkName("target", target);
 	this.target = target;
 }
 

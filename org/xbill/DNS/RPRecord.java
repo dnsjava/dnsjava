@@ -34,11 +34,9 @@ public
 RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
 	super(name, Type.RP, dclass, ttl);
 
-	if (!mailbox.isAbsolute())
-		throw new RelativeNameException(mailbox);
+	checkName("mailbox", mailbox);
 	this.mailbox = mailbox;
-	if (!textDomain.isAbsolute())
-		throw new RelativeNameException(textDomain);
+	checkName("textDomain", textDomain);
 	this.textDomain = textDomain;
 }
 

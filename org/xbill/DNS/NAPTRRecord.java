@@ -55,8 +55,7 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	catch (TextParseException e) {
 		throw new IllegalArgumentException(e.getMessage());
 	}
-	if (!replacement.isAbsolute())
-		throw new RelativeNameException(replacement);
+	checkName("replacement", replacement);
 	this.replacement = replacement;
 }
 

@@ -40,11 +40,9 @@ SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 	  long serial, long refresh, long retry, long expire, long minimum)
 {
 	super(name, Type.SOA, dclass, ttl);
-	if (!host.isAbsolute())
-		throw new RelativeNameException(host);
+	checkName("host", host);
 	this.host = host;
-	if (!admin.isAbsolute())
-		throw new RelativeNameException(admin);
+	checkName("admin", admin);
 	checkU32("serial", serial);
 	checkU32("refresh", refresh);
 	checkU32("retry", retry);

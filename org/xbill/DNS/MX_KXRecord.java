@@ -31,8 +31,7 @@ MX_KXRecord(Name name, int type, int dclass, long ttl, int priority,
 	super(name, type, dclass, ttl);
 	checkU16("priority", priority);
 	this.priority = priority;
-	if (!target.isAbsolute())
-		throw new RelativeNameException(target);
+	checkName("target", target);
 	this.target = target;
 }
 

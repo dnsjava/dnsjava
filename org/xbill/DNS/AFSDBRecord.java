@@ -36,8 +36,7 @@ AFSDBRecord(Name name, int dclass, long ttl, int subtype, Name host) {
 
 	checkU16("subtype", subtype);
 	this.subtype = subtype;
-	if (!host.isAbsolute())
-		throw new RelativeNameException(host);
+	checkName("host", host);
 	this.host = host;
 }
 

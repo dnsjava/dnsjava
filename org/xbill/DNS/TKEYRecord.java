@@ -64,8 +64,7 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	   byte [] key, byte other[])
 {
 	super(name, Type.TKEY, dclass, ttl);
-	if (!alg.isAbsolute())
-		throw new RelativeNameException(alg);
+	checkName("alg", alg);
 	checkU16("mode", mode);
 	checkU16("error", error);
 	this.alg = alg;
