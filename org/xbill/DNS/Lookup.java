@@ -421,6 +421,12 @@ lookup(Name current) {
 		return;
 	}
 
+	if (!query.getQuestion().equals(response.getQuestion())) {
+		// The answer doesn't match the question.  That's not good.
+		badresponse = true;
+		return;
+	}
+
 	sr = cache.addMessage(response);
 	if (sr == null)
 		sr = cache.lookupRecords(current, type, credibility);

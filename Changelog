@@ -1,4 +1,6 @@
 11/24/2003
+	- Lookup should check that the name, type, and class in the question
+	  section of a response match that of the query.
 	- SimpleResolver should check that the message id of the response
 	  is the same as the message id of the query.  On a sufficiently
 	  busy client, sockets can be reused fast enough that late responses
