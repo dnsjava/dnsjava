@@ -3,6 +3,8 @@
 	  size-bounded.  (based on a patch from several years ago
 	  from Joseph Shraibman <jks@iname.com>).
 	- Remove the FindServer class.
+	- Added a Name Service Provider interface (dns,dnsjava).
+	  (based on code from Paul Cowan <pwc21@yahoo.com>)
 
 4/1/2005
 	- Use java.nio classes for sockets internally, which provide a

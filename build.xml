@@ -28,6 +28,13 @@
         </javac>
     </target>
 
+    <target name="spi" description="Compile the Name Service Provider code">
+        <javac destdir="${build_dir}" debug="true">
+            <src path="${src_dir}"/>
+            <include name="org/xbill/DNS/spi/*.java"/>
+        </javac>
+    </target>
+
     <target name="jar" description="Makes dnsjava.jar" depends="compile">
         <jar jarfile="${dist_dir}/${jarname}"
              basedir="${build_dir}" includes="**/*.class">
@@ -36,6 +43,9 @@
                 <attribute name="Implementation-Title" value="dnsjava"/>
                 <attribute name="Implementation-Version" value="${version}"/>
             </manifest>
+            <metainf dir="org/xbill/DNS/spi/">
+                <include name="services/*"/>
+            </metainf>
         </jar>
     </target>
 
@@ -49,7 +59,7 @@
     <target name="docs" description="Makes Javadoc documentation">
         <javadoc destdir="${doc_dir}"
                  sourcepath="${src_dir}"
-                 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security"
+                 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security,org.xbill.DNS.spi"
                  windowtitle="dnsjava documentation">
 
             <link href="${j2se.javadoc}"/>
