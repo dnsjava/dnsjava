@@ -147,9 +147,9 @@ rdataToString() {
 	sb.append(" ");
 	if (Options.check("multiline"))
 		sb.append("(\n\t");
-	sb.append(SIGRecord.formatDate(timeInception));
+	sb.append(FormattedTime.format(timeInception));
 	sb.append(" ");
-	sb.append(SIGRecord.formatDate(timeExpire));
+	sb.append(FormattedTime.format(timeExpire));
 	sb.append(" ");
 	sb.append(modeString());
 	sb.append(" ");

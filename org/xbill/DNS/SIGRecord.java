@@ -114,8 +114,8 @@ throws IOException
 	rec.alg = st.getUInt8();
 	rec.labels = st.getUInt8();
 	rec.origttl = st.getTTL();
-	rec.expire = parseDate(st.getString());
-	rec.timeSigned = parseDate(st.getString());
+	rec.expire = FormattedTime.parse(st.getString());
+	rec.timeSigned = FormattedTime.parse(st.getString());
 	rec.footprint = st.getUInt16();
 	rec.signer = st.getName(origin);
 	rec.signature = base64.fromString(remainingStrings(st));
@@ -137,9 +137,9 @@ rdataToString() {
 		sb.append (" ");
 		if (Options.check("multiline"))
 			sb.append ("(\n\t");
-		sb.append (formatDate(expire));
+		sb.append (FormattedTime.format(expire));
 		sb.append (" ");
-		sb.append (formatDate(timeSigned));
+		sb.append (FormattedTime.format(timeSigned));
 		sb.append (" ");
 		sb.append (footprint);
 		sb.append (" ");
@@ -230,41 +230,6 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	out.writeShort(footprint);
 	signer.toWire(out, null, canonical);
 	out.writeArray(signature);
-}
-
-static String
-formatDate(Date d) {
-	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-	StringBuffer sb = new StringBuffer();
-	NumberFormat w4 = new DecimalFormat();
-	w4.setMinimumIntegerDigits(4);
-	w4.setGroupingUsed(false);
-	NumberFormat w2 = new DecimalFormat();
-	w2.setMinimumIntegerDigits(2);
-
-	c.setTime(d);
-	sb.append(w4.format(c.get(Calendar.YEAR)));
-	sb.append(w2.format(c.get(Calendar.MONTH)+1));
-	sb.append(w2.format(c.get(Calendar.DAY_OF_MONTH)));
-	sb.append(w2.format(c.get(Calendar.HOUR_OF_DAY)));
-	sb.append(w2.format(c.get(Calendar.MINUTE)));
-	sb.append(w2.format(c.get(Calendar.SECOND)));
-	return sb.toString();
-}
-
-static Date
-parseDate(String s) {
-	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-
-	int year = Integer.parseInt(s.substring(0, 4));
-	int month = Integer.parseInt(s.substring(4, 6)) - 1;
-	int date = Integer.parseInt(s.substring(6, 8));
-	int hour = Integer.parseInt(s.substring(8, 10));
-	int minute = Integer.parseInt(s.substring(10, 12));
-	int second = Integer.parseInt(s.substring(12, 14));
-	c.set(year, month, date, hour, minute, second);
-
-	return c.getTime();
 }
 
 }
