@@ -58,6 +58,10 @@ jnamed(String conffile) throws IOException {
 			addTCP(port);
 			started = true;
 		}
+		else {
+			System.out.println("ignoring invalid keyword: " +
+					   keyword);
+		}
 
 	}
 
