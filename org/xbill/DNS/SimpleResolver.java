@@ -103,7 +103,11 @@ setTSIGKey(Name name, byte [] key) {
 /** Specifies the TSIG key that messages will be signed with */
 public void
 setTSIGKey(String name, String key) {
-	byte [] keyArray = base64.fromString(key);
+	byte [] keyArray;
+	if (key.length() > 1 && key.charAt(0) == ':')
+		keyArray = base16.fromString(key.substring(1));
+	else
+		keyArray = base64.fromString(key);
 	if (keyArray == null) {
 		System.err.println("Invalid TSIG key string");
 		return;
