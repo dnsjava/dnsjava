@@ -54,7 +54,7 @@ private class CacheElement {
 
 	public boolean
 	expiredTTL() {
-		return (System.currentTimeMillis() > timeIn + ttl);
+		return (System.currentTimeMillis() > timeIn + (1000 * ttl));
 	}
 
 	public String
@@ -152,8 +152,7 @@ lookupRecords(Name name, short type, byte minCred) {
 
 RRset
 findRecords(Name name, short type, byte minCred) {
-	CacheResponse cr;
-	cr = lookupRecords(name, type, minCred);
+	CacheResponse cr = lookupRecords(name, type, minCred);
 	if (cr.isSuccessful())
 		return cr.answer();
 	else
@@ -177,24 +176,13 @@ addMessage(Message in) {
 	Name queryName = in.getQuestion().getName();
 	short queryType = in.getQuestion().getType();
 	byte cred;
+	short rcode = in.getHeader().getRcode();
+	short ancount = in.getHeader().getCount(Section.ANSWER);
+
+	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
+		return;
 
 	e = in.getSection(Section.ANSWER);
-	if (!e.hasMoreElements()) {
-		/* This is a negative response.  Try to cache it */
-		e = in.getSection(Section.AUTHORITY);
-		while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
-			if (r.getType() != Type.SOA)
-				continue;
-			if (isAuth)
-				cred = Credibility.AUTH_AUTHORITY;
-			else
-				cred = Credibility.NONAUTH_AUTHORITY;
-			SOARecord soa = (SOARecord) r;
-			int ttl = Math.min(soa.getTTL(), soa.getMinimum());
-			addNegative(queryName, queryType, ttl, cred, in);
-		}
-	}
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
 		if (isAuth && r.getName().equals(queryName))
@@ -204,6 +192,37 @@ addMessage(Message in) {
 		else
 			cred = Credibility.NONAUTH_ANSWER;
 		addRecord(r, cred, in);
+	}
+
+	if (ancount == 0 || rcode == Rcode.NXDOMAIN) {
+		/* This is a negative response */
+		SOARecord soa = null;
+		e = in.getSection(Section.AUTHORITY);
+		while (e.hasMoreElements()) {
+			Record r = (Record) e.nextElement();
+			if (r.getType() == Type.SOA) {
+				soa = (SOARecord) r;
+				break;
+			}
+		}
+		if (isAuth)
+			cred = Credibility.AUTH_AUTHORITY;
+		else
+			cred = Credibility.NONAUTH_AUTHORITY;
+		if (soa != null) {
+			int ttl = Math.min(soa.getTTL(), soa.getMinimum());
+			if (ancount == 0)
+				addNegative(queryName, queryType, ttl,
+					    cred, in);
+			else {
+				Record [] cnames;
+				cnames = in.getSectionArray(Section.ANSWER);
+				int last = cnames.length - 1;
+				Name cname;
+				cname = ((CNAMERecord)cnames[last]).getTarget();
+				addNegative(cname, queryType, ttl, cred, in);
+			}
+		}
 	}
 
 	e = in.getSection(Section.AUTHORITY);
