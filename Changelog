@@ -1,5 +1,5 @@
 3/4/2004
-	- Add support for more record types (AFSDB, MINFO, NULL, PX, RT).
+	- Add support for more record types (AFSDB, MINFO, NULL, PX, RT, X25).
 
 3/3/2004
 	- Cached NXDOMAINs were ignored, which caused extra queries to
