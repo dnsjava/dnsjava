@@ -60,12 +60,15 @@ findProperty() {
 			s = st.nextToken();
 			if (v == null)
 				v = new Vector();
-			v.addElement(s);
+			try {
+				v.addElement(Name.fromString(s, Name.root));
+			}
+			catch (TextParseException e) {}
 		}
-		if (v != null) {
+		if (v != null && v.size() > 0) {
 			search = new Name[v.size()];
 			for (int i = 0; i < v.size(); i++)
-				search[i] = new Name((String)v.elementAt(i));
+				search[i] = (Name)v.elementAt(i);
 		}
 	}
 }
@@ -113,7 +116,7 @@ findUnix() {
 				if (vsearch == null)
 					vsearch = new Vector();
 				StringTokenizer st = new StringTokenizer(line);
-				st.nextToken(); /* skip domain */
+				st.nextToken(); /* skip search */
 				String s;
 				while (st.hasMoreTokens()) {
 					s = st.nextToken();
@@ -132,9 +135,18 @@ findUnix() {
 			server[i] = (String) vserver.elementAt(i);
 	}
 	if (search == null && vsearch != null) {
-		search = new Name[vsearch.size()];
-		for (int i = 0; i < vsearch.size(); i++)
-			search[i] = new Name((String)vsearch.elementAt(i));
+		Vector v = new Vector();
+		for (int i = 0; i < vsearch.size(); i++) {
+			String s = (String)vsearch.elementAt(i);
+			try {
+				v.addElement(Name.fromString(s, Name.root));
+			}
+			catch (TextParseException e) {
+			}
+		}
+		search = new Name[v.size()];
+		for (int i = 0; i < v.size(); i++)
+			search[i] = (Name)v.elementAt(i);
 	}
 }
 
@@ -161,7 +173,13 @@ findWin(InputStream in) {
 			if (line.indexOf("Host Name") != -1) {
 				while (st.hasMoreTokens())
 					s = st.nextToken();
-				Name name = new Name(s);
+				Name name;
+				try {
+					name = Name.fromString(s, null);
+				}
+				catch (TextParseException e) {
+					continue;
+				}
 				if (name.labels() == 1)
 					continue;
 				name = new Name(name, 1);

@@ -136,9 +136,18 @@ setSearchPath(String [] domains) {
 	if (domains == null || domains.length == 0)
 		searchPath = null;
 	else {
-		searchPath = new Name[domains.length];
-		for (int i = 0; i < domains.length; i++)
-			searchPath[i] = new Name(domains[i]);
+		Vector v = new Vector();
+		for (int i = 0; i < domains.length; i++) {
+			try {
+				v.addElement(Name.fromString(domains[i],
+							     Name.root));
+			}
+			catch (TextParseException e) {
+			}
+		}
+		searchPath = new Name[v.size()];
+		for (int i = 0; i < searchPath.length; i++)
+			searchPath[i] = (Name)v.elementAt(i);
 	}
 	searchPathSet = true;
 }

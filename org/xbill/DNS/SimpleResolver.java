@@ -104,6 +104,7 @@ setTSIGKey(Name name, byte [] key) {
 public void
 setTSIGKey(String name, String key) {
 	byte [] keyArray;
+	Name keyname;
 	if (key.length() > 1 && key.charAt(0) == ':')
 		keyArray = base16.fromString(key.substring(1));
 	else
@@ -112,7 +113,14 @@ setTSIGKey(String name, String key) {
 		System.err.println("Invalid TSIG key string");
 		return;
 	}
-	tsig = new TSIG(new Name(name), keyArray);
+	try {
+		keyname = Name.fromString(name, Name.root);
+	}
+	catch (TextParseException e) {
+		System.err.println("Invalid TSIG key name");
+		return;
+	}
+	tsig = new TSIG(keyname, keyArray);
 }
 
 /**

@@ -28,7 +28,7 @@ private byte labels;
 private boolean qualified;
 
 /** The root name */
-public static final Name root = new Name(".");
+public static final Name root = Name.fromStringNoValidate(".", null);
 
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 128;
@@ -83,7 +83,9 @@ compact() {
 /**
  * Create a new name from a string and an origin
  * @param s  The string to be converted
- * @param origin  If the name is unqalified, the origin to be appended
+ * @param origin  If the name is unqualified, the origin to be appended
+ * @deprecated As of dnsjava 1.3.0,
+ * replaced by <code>Name.fromString</code>.
  */
 public
 Name(String s, Name origin) {
@@ -118,6 +120,16 @@ Name(String s, Name origin) {
 		else
 			qualified = (labels > 1);
 	}
+}
+
+/**
+ * Create a new name from a string
+ * @param s  The string to be converted
+ * @deprecated as of dnsjava 1.3.0, replaced by <code>Name.fromString</code>.
+ */
+public
+Name(String s) {
+	this (s, null);
 }
 
 /**
@@ -221,13 +233,17 @@ fromString(String s, Name origin) throws TextParseException {
 	return (name);
 }
 
-/**
- * Create a new name from a string
- * @param s  The string to be converted
+/*
+ * Convert a name from a string, knowing that it will succeed.
  */
-public
-Name(String s) {
-	this (s, null);
+static Name
+fromStringNoValidate(String s, Name origin) {
+	try {
+		return fromString(s, origin);
+	}
+	catch (TextParseException e) {
+		return null;
+	}
 }
 
 /**
