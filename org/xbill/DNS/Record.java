@@ -246,17 +246,32 @@ toWire(int section) {
 	return out.toByteArray();
 }
 
-void
-toWireCanonical(DataByteOutputStream out) {
+private void
+toWireCanonical(DataByteOutputStream out, boolean noTTL) {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
-	out.writeUnsignedInt(ttl);
+	if (noTTL) {
+		out.writeUnsignedInt(0);
+	} else {
+		out.writeUnsignedInt(ttl);
+	}
 	int lengthPosition = out.getPos();
 	out.writeShort(0); /* until we know better */
 	if (!empty)
 		rrToWire(out, null, true);
 	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
+}
+
+/*
+ * Converts a Record into canonical DNS uncompressed wire format (all names are
+ * converted to lowercase), optionally ignoring the TTL.
+ */
+private byte []
+toWireCanonical(boolean noTTL) {
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWireCanonical(out, noTTL);
+	return out.toByteArray();
 }
 
 /**
@@ -265,9 +280,7 @@ toWireCanonical(DataByteOutputStream out) {
  */
 public byte []
 toWireCanonical() {
-	DataByteOutputStream out = new DataByteOutputStream();
-	toWireCanonical(out);
-	return out.toByteArray();
+	return toWireCanonical(false);
 }
 
 /**
@@ -539,7 +552,10 @@ abstract void
 rrToWire(DataByteOutputStream out, Compression c, boolean canonical);
 
 /**
- * Determines if two Records are identical
+ * Determines if two Records are identical.  This compares the name, type,
+ * class, and rdata (with names canonicalized).  The TTLs are not compared.
+ * @param arg The record to compare to
+ * @return true if the records are equal, false otherwise.
  */
 public boolean
 equals(Object arg) {
@@ -554,12 +570,15 @@ equals(Object arg) {
 }
 
 /**
- * Generates a hash code based on the Record's data
+ * Generates a hash code based on the Record's data.
  */
 public int
 hashCode() {
-	byte [] array = toWireCanonical();
-	return array.hashCode();
+	byte [] array = toWireCanonical(true);
+	int code = 0;
+	for (int i = 0; i < array.length; i++)
+		code += ((code << 3) + (array[i] & 0xFF));
+	return code;
 }
 
 private Record

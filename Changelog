@@ -1,3 +1,7 @@
+10/31/2003
+	- Record.hashCode() didn't return consistent hash codes, and didn't
+	  ignore the TTL (which it should, and which Record.equals() does).
+
 10/27/2003
 	- DNS TTLs and other 32 bit unsigned values are now represented as
 	  longs, not ints.  This is an API change, but allows the full range
