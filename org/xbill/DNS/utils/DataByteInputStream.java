@@ -32,7 +32,10 @@ DataByteInputStream(byte [] b) {
  */
 public int
 read(byte b[]) throws IOException {
-	return read(b, 0, b.length);
+	int n = read(b, 0, b.length);
+	if (n < b.length)
+		throw new IOException("end of input");
+	return n;
 }
 
 /**
@@ -43,7 +46,7 @@ public byte
 readByte() throws IOException {
 	int i = read();
 	if (i == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return (byte) i;
 }
 
@@ -55,7 +58,7 @@ public int
 readUnsignedByte() throws IOException {
 	int i = read();
 	if (i == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return i;
 }
 
@@ -68,7 +71,7 @@ readShort() throws IOException {
 	int c1 = read();
 	int c2 = read();
 	if (c1 == -1 || c2 == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return (short)((c1 << 8) + c2);
 }
 
@@ -81,7 +84,7 @@ readUnsignedShort() throws IOException {
 	int c1 = read();
 	int c2 = read();
 	if (c1 == -1 || c2 == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return ((c1 << 8) + c2);
 }
 
@@ -96,7 +99,7 @@ readInt() throws IOException {
 	int c3 = read();
 	int c4 = read();
 	if (c1 == -1 || c2 == -1 || c3 == -1 || c4 == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return ((c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
 }
 
@@ -116,7 +119,7 @@ readLong() throws IOException {
 	int c8 = read();
 	if (c1 == -1 || c2 == -1 || c3 == -1 || c4 == -1 ||
 	    c5 == -1 || c6 == -1 || c7 == -1 || c8 == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return ((c1 << 56) + (c2 << 48) + (c3 << 40) + (c4 << 32) +
 		(c5 << 24) + (c6 << 16) + (c7 << 8) + c8);
 }
@@ -129,11 +132,11 @@ public String
 readString() throws IOException {
 	int len = read();
 	if (len == -1)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	byte [] b = new byte[len];
 	int n = read(b);
 	if (n < len)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return new String(b);
 }
 
@@ -148,7 +151,7 @@ readBigInteger(int len) throws IOException {
 	byte [] b = new byte[len + 1];
 	int n = read(b, 1, len);
 	if (n < len)
-		throw new IOException("no bytes left to read");
+		throw new IOException("end of input");
 	return new BigInteger(b);
 }
 
