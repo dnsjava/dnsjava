@@ -1,8 +1,12 @@
+3/21/2001
+	- Only cache relevant data from answers.
+	- Cache negative responses more correctly.
+
 3/14/2001
-	- Handle TTLs greater than 2^31 
+	- Handle TTLs greater than 2^31.
 
 3/10/2001
-	- Performance and memory imrpovements to the Name object.
+	- Performance and memory improvements to the Name object.
 
 3/7/2001
 	- Performance improvements to TypeMap (used by Zone and Cache).
