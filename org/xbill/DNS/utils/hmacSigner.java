@@ -60,8 +60,11 @@ hmacSigner(byte [] key) {
  */
 public void
 addData(byte [] b, int offset, int length) {
-	if (length <= 0 || offset + length >= b.length)
+	if (length < 0 || offset + length > b.length) {
+		if (verbose)
+			System.err.println("Invalid parameters");
 		return;
+	}
 	if (verbose)
 		System.err.println(hexdump.dump("partial add", b,
 						offset, length));
