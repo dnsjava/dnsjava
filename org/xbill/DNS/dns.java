@@ -1,3 +1,6 @@
+// Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
+// Portions Copyright (c) 1999 Network Associates, Inc.
+
 /* Routines for string/value conversion */
 
 import java.util.Hashtable;

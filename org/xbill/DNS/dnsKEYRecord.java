@@ -1,3 +1,6 @@
+// Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
+// Portions Copyright (c) 1999 Network Associates, Inc.
+
 import java.net.*;
 import java.io.*;
 import java.util.*;

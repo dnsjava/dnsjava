@@ -1,0 +1,15 @@
+dnsjava v0.0
+Brian Wellington (bwelling@anomaly.munge.com)
+
+This is a simple implementation of DNS in Java.  It supports all of the common
+record types and the DNSSEC types.  It was written so that I could learn Java,
+and so that I could test TSIG support in BIND without rewriting the resolver.
+
+This is far from complete.  It should support the rest of the record types.  It
+should handle exceptions in more places.  It should be better documented.  The
+APIs should be improved.  EDNS should be added.  One day, all of this might
+happen.
+
+There are other things I'd like to do at some point.  A GUI for the dynamic
+update program would be nice, since dynamic update can be pretty complex.
+A basic (primary, caching, non-recursive) server wouldn't be too hard.
