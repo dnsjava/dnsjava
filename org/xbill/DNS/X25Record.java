@@ -58,7 +58,7 @@ rrFromWire(DNSInput in) throws IOException {
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	address = st.getString();
+	String address = st.getString();
 	this.address = checkAndConvertAddress(address);
 	if (this.address == null)
 		throw st.exception("invalid PSDN address " + address);
