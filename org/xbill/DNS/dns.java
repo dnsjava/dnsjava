@@ -127,6 +127,8 @@ lookup(Name name, short type, short dclass, byte cred) {
 		Message query = Message.newQuery(question);
 
 		Message response = res.send(query);
+		if (response == null)
+			return null;
 
 		short rcode = response.getHeader().getRcode();
 		if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)
