@@ -358,7 +358,8 @@ lookupRecords(Name name, short type, byte minCred) {
 		}
 
 		int rtype = rrset.getType();
-		if (name.equals(rrset.getName())) {
+		Name rname = rrset.getName();
+		if (name.equals(rname)) {
 			if (type != Type.CNAME && type != Type.ANY &&
 			    rtype == Type.CNAME)
 			{
@@ -378,10 +379,8 @@ lookupRecords(Name name, short type, byte minCred) {
 				cr.addRRset(rrset);
 			}
 		}
-		else {
-			if (rtype == Type.CNAME)
-				return new SetResponse(SetResponse.NXDOMAIN);
-			else if (rtype == Type.DNAME) {
+		else if (name.subdomain(rname)) {
+			if (rtype == Type.DNAME) {
 				cr = new SetResponse(SetResponse.DNAME);
 				cr.addDNAME((DNAMERecord)rrset.first());
 				return cr;
@@ -395,8 +394,8 @@ lookupRecords(Name name, short type, byte minCred) {
 	}
 
 	/*
-	 * As far as I can tell, the only time cr will be null is if we
-	 * queried for ANY and only saw negative responses, but not an
+	 * As far as I can tell, the only legitimate time cr will be null is
+	 * if we queried for ANY and only saw negative responses, but not an
 	 * NXDOMAIN.  Return UNKNOWN.
 	 */
 	if (cr == null && type == Type.ANY)
