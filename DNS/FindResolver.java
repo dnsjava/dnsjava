@@ -9,6 +9,7 @@ import java.util.*;
 class FindResolver {
 
 static String server = null;
+static boolean searched = false;
 
 static String
 findProperty() {
@@ -45,9 +46,10 @@ findUnix() {
 
 public static String
 find() {
-	if (server != null)
+	if (server != null || searched)
 		return server;
 
+	searched = true;
 	server = findProperty();
 	if (server != null)
 		return server;
