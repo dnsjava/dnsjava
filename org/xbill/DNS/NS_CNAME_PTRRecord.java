@@ -15,7 +15,7 @@ import org.xbill.DNS.utils.*;
 
 public abstract class NS_CNAME_PTRRecord extends Record {
 
-private Name target;
+protected Name target;
 
 protected
 NS_CNAME_PTRRecord() {}

@@ -143,4 +143,9 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	target.toWire(out, null, canonical);
 }
 
+public Name
+getAdditionalName() {
+	return target;
+}
+
 }

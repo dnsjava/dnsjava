@@ -55,4 +55,9 @@ throws TextParseException
 	return rdataFromString(new NSRecord(name, dclass, ttl), st, origin);
 }
 
+public Name
+getAdditionalName() {
+	return target;
+}
+
 }

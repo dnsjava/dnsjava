@@ -544,6 +544,21 @@ getCred(short section, boolean isAuth) {
 		throw new IllegalArgumentException("getCred: invalid section");
 }
 
+private static void
+markAdditional(RRset rrset, Set names) {
+	Record first = rrset.first();
+	if (first.getAdditionalName() == null)
+		return;
+
+	Iterator it = rrset.rrs();
+	while (it.hasNext()) {
+		Record r = (Record) it.next();
+		Name name = r.getAdditionalName();
+		if (name != null)
+			names.add(name);
+	}
+}
+
 /**
  * Adds all data from a Message into the Cache.  Each record is added with
  * the appropriate credibility, and negative answers are cached as such.
@@ -568,6 +583,7 @@ addMessage(Message in) {
 	RRset [] answers, auth, addl;
 	SetResponse response = null;
 	boolean verbose = Options.check("verbosecache");
+	HashSet additionalNames;
 
 	if ((rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) ||
 	    question == null)
@@ -578,6 +594,8 @@ addMessage(Message in) {
 	qclass = question.getDClass();
 
 	curname = qname;
+
+	additionalNames = new HashSet();
 
 	answers = in.getSectionRRsets(Section.ANSWER);
 	for (int i = 0; i < answers.length; i++) {
@@ -623,6 +641,7 @@ addMessage(Message in) {
 							SetResponse.SUCCESSFUL);
 				response.addRRset(answers[i]);
 			}
+			markAdditional(answers[i], additionalNames);
 		}
 		if (restart) {
 			restart = false;
@@ -631,17 +650,17 @@ addMessage(Message in) {
 	}
 
 	auth = in.getSectionRRsets(Section.AUTHORITY);
+	RRset soa = null, ns = null;
+	for (int i = 0; i < auth.length; i++) {
+		if (auth[i].getType() == Type.SOA &&
+		    curname.subdomain(auth[i].getName()))
+			soa = auth[i];
+		else if (auth[i].getType() == Type.NS &&
+			 curname.subdomain(auth[i].getName()))
+			ns = auth[i];
+	}
 	if (!completed) {
 		/* This is a negative response or a referral. */
-		RRset soa = null, ns = null;
-		for (int i = 0; i < auth.length; i++) {
-			if (auth[i].getType() == Type.SOA &&
-			    curname.subdomain(auth[i].getName()))
-				soa = auth[i];
-			else if (auth[i].getType() == Type.NS &&
-				 curname.subdomain(auth[i].getName()))
-				ns = auth[i];
-		}
 		short cachetype = (rcode == Rcode.NXDOMAIN) ? (short)0 : qtype;
 		if (soa != null || ns == null) {
 			/* Negative response */
@@ -663,11 +682,17 @@ addMessage(Message in) {
 			/* Referral response */
 			cred = getCred(Section.AUTHORITY, isAuth);
 			addRRset(ns, cred);
+			markAdditional(ns, additionalNames);
 			if (response == null)
 				response = new SetResponse(
 							SetResponse.DELEGATION,
 							ns);
 		}
+	} else if (rcode == Rcode.NOERROR && ns != null) {
+		/* Cache the NS set from a positive response. */
+		cred = getCred(Section.AUTHORITY, isAuth);
+		addRRset(ns, cred);
+		markAdditional(ns, additionalNames);
 	}
 
 	addl = in.getSectionRRsets(Section.ADDITIONAL);
@@ -675,8 +700,9 @@ addMessage(Message in) {
 		short type = addl[i].getType();
 		if (type != Type.A && type != Type.AAAA && type != Type.A6)
 			continue;
-		/* XXX check the name */
 		Name name = addl[i].getName();
+		if (!additionalNames.contains(name))
+			continue;
 		cred = getCred(Section.ADDITIONAL, isAuth);
 		addRRset(addl[i], cred);
 	}

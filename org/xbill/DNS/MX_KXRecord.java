@@ -15,8 +15,8 @@ import org.xbill.DNS.utils.*;
 
 public abstract class MX_KXRecord extends Record {
 
-private short priority;
-private Name target;
+protected short priority;
+protected Name target;
 
 protected
 MX_KXRecord() {}
@@ -89,6 +89,11 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 		target.toWire(out, c, canonical);
 	else
 		target.toWire(out, null, canonical);
+}
+
+public Name
+getAdditionalName() {
+	return target;
 }
 
 }

@@ -158,4 +158,9 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	replacement.toWire(out, null, canonical);
 }
 
+public Name
+getAdditionalName() {
+	return replacement;
+}
+
 }

@@ -1,3 +1,7 @@
+12/14/2002
+	- Move additional data processing to the Record class from jnamed;
+	  make jnamed use it, as well as the caching code.
+
 12/9/2002
 	- Add the Lookup class, which is what the dns class should have been,
 	  and make the lookup sample program use it.

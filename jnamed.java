@@ -226,26 +226,7 @@ addAdditional2(Message response, int section, int flags) {
 	Record [] records = response.getSectionArray(section);
 	for (int i = 0; i < records.length; i++) {
 		Record r = records[i];
-		Name glueName = null;
-		switch (r.getType()) {
-			case Type.MX:
-				glueName = ((MXRecord)r).getTarget();
-				break;
-			case Type.NS:
-				glueName = ((NSRecord)r).getTarget();
-				break;
-			case Type.KX:
-				glueName = ((KXRecord)r).getTarget();
-				break;
-			case Type.NAPTR:
-				glueName = ((NAPTRRecord)r).getReplacement();
-				break;
-			case Type.SRV:
-				glueName = ((SRVRecord)r).getTarget();
-				break;
-			default:
-				break;
-		}
+		Name glueName = r.getAdditionalName();
 		if (glueName != null)
 			addGlue(response, glueName, flags);
 	}

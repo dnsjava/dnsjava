@@ -504,4 +504,16 @@ compareTo(Object o) {
 	return (rdata1.length - rdata2.length);
 }
 
+/**
+ * Returns the name for which additional data processing should be done
+ * for this record.  This can be used both for building responses and
+ * parsing responses.
+ * @return The name to used for additional data processing, or null if this
+ * record type does not require additional data processing.
+ */
+public Name
+getAdditionalName() {
+	return null;
+}
+
 }
