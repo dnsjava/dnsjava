@@ -78,7 +78,11 @@ class Receiver implements ResolverListener {
 private static final int quantum = 20;
 private static final byte retries = 3;
 private static int uniqueID = 0;
+private static final Random random = new Random();
+
 private Vector resolvers;
+private boolean loadBalance = false;
+private int lbStart = 0;
 
 private void
 init() {
@@ -216,7 +220,7 @@ setTimeout(int secs) {
  */
 public Message
 send(Message query) throws IOException {
-	int q, r;
+	int i, start, r;
 	Message best = null;
 	IOException bestException = null;
 	boolean [] invalid = new boolean[resolvers.size()];
@@ -231,7 +235,21 @@ send(Message query) throws IOException {
 		boolean waiting = false;
 		QElement qe;
 		synchronized (queue) {
-			for (r = 0; r < resolvers.size(); r++) {
+			int nresolvers = resolvers.size();
+			if (loadBalance) {
+				/*
+				 * Note: this is not synchronized, since the
+				 * worst thing that can happen is a random
+				 * ordering, which is ok.
+				 */
+				start = lbStart % nresolvers;
+				if (lbStart > nresolvers)
+					lbStart %= nresolvers;
+			}
+			else
+				start = 0;
+			for (i = start; i < nresolvers + start; i++) {
+				r = i % nresolvers;
 				if (sent[r] == recvd[r] && sent[r] < retries) {
 					sendTo(query, receiver, idMap, r);
 					sent[r]++;
@@ -301,7 +319,7 @@ sendAsync(final Message query, final ResolverListener listener) {
 	synchronized (this) {
 		id = new Integer(uniqueID++);
 	}
-	String name = this.getClass() + ": " + query.getQuestion().getName();
+	String name = getClass() + ": " + query.getQuestion().getName();
 	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
 				  name);
 	return id;
@@ -334,6 +352,15 @@ addResolver(Resolver r) {
 public void
 deleteResolver(Resolver r) {
 	resolvers.removeElement(r);
+}
+
+/** Sets whether the servers should be load balanced.
+ * @param flag If true, servers will be tried in round-robin order.  If false,
+ * servers will always be queried in the same order.
+ */
+public void
+setLoadBalance(boolean flag) {
+	loadBalance = flag;
 }
 
 }
