@@ -275,7 +275,7 @@ send(Message query) throws IOException {
 		 * if there's a malformed response that's not ours, it
 		 * doesn't confuse us.
 		 */
-		int id = ((in[0] & 0xFF) << 8) + in[1];
+		int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
 		int qid = query.getHeader().getID();
 		if (id != qid) {
 			if (Options.check("verbose")) {
