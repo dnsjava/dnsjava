@@ -366,7 +366,7 @@ sectionToString(int i) {
 	StringBuffer sb = new StringBuffer();
 
 	Record [] records = getSectionArray(i);
-	for (int j = 0; i < records.length; j++) {
+	for (int j = 0; j < records.length; j++) {
 		Record rec = records[j];
 		if (i == Section.QUESTION) {
 			sb.append(";;\t" + rec.name);
