@@ -90,6 +90,15 @@ public void toBytes(DataOutputStream out) throws IOException {
 	out.writeByte(0);
 }
 
+public void toCanonicalBytes(DataOutputStream out) throws IOException {
+	for (int i=0; i<labels; i++) {
+		out.writeByte(name[i].length());
+		for (int j=0; j<name[i].length(); j++)
+			out.writeByte(Character.toLowerCase(name[i].charAt(j)));
+	}
+	out.writeByte(0);
+}
+
 public boolean equals(Object arg) {
 	if (arg == null || !(arg instanceof dnsName))
 		return false;

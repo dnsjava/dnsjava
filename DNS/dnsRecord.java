@@ -81,6 +81,21 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	out.write(data);
 }
 
+void toCanonicalBytes(DataOutputStream out, int section) throws IOException {
+	rname.toCanonicalBytes(out);
+	out.writeShort(rtype);
+	out.writeShort(rclass);
+	if (section == dns.QUESTION)
+		return;
+	out.writeInt(rttl);
+	out.writeShort(rlength);
+	rrToCanonicalBytes(out);
+}
+
+void rrToCanonicalBytes(DataOutputStream out) throws IOException {
+	out.write(data);
+}
+
 public String toString() {
 	String rr;
 	StringBuffer sb = new StringBuffer();

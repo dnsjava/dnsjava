@@ -6,6 +6,7 @@ public class dnsResolver {
 
 InetAddress addr;
 int port = dns.PORT;
+byte [] TSIGKey = null;
 
 public dnsResolver(String hostname) {
 	try {
@@ -19,6 +20,10 @@ public dnsResolver(String hostname) {
 
 public void setPort(int port) {
 	this.port = port;
+}
+
+public void setTSIGKey(byte [] key) {
+	TSIGKey = key;
 }
 
 private byte [] toBytes(dnsMessage m) throws IOException {

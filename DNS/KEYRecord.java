@@ -39,6 +39,10 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	out.write(key, 0, key.length);
 }
 
+void rrToCanonicalBytes(DataOutputStream out) throws IOException {
+	rrToBytes(out);
+}
+
 String rrToString() {
 	if (rlength == 0)
 		return null;

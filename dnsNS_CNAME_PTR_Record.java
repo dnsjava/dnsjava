@@ -26,6 +26,10 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	name.toBytes(out);
 }
 
+void rrToCanonicalBytes(DataOutputStream out) throws IOException {
+	name.toCanonicalBytes(out);
+}
+
 String rrToString() {
 	if (rlength == 0)
 		return null;

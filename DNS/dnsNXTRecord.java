@@ -40,6 +40,17 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	}
 }
 
+void rrToCanonicalBytes(DataOutputStream out) throws IOException {
+	nextName.toCanonicalBytes(out);
+	for (int i = 0, t = 0; i < typeBitmap.length; i++) {
+		t |= (typeBitmap[i] ? (1 << (7 - i % 8)) : 0);
+		if (i % 8 == 7 || i == typeBitmap.length - 1) {
+			out.writeByte(t);
+			t = 0;
+		}
+	}
+}
+
 String rrToString() {
 	if (rlength == 0)
 		return null;

@@ -61,6 +61,18 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	out.write(signature, 0, signature.length);
 }
 
+void rrToCanonicalBytes(DataOutputStream out) throws IOException {
+	out.writeShort(typeCovered);
+	out.writeByte(alg);
+	out.writeByte(labels);
+	out.writeInt(origTTL);
+	out.writeInt((int)(expire.getTime() / 1000));
+	out.writeInt((int)(timeSigned.getTime() / 1000));
+	out.writeShort(footprint);
+	signer.toCanonicalBytes(out);
+	out.write(signature, 0, signature.length);
+}
+
 String rrToString() {
 	if (rlength == 0)
 		return null;

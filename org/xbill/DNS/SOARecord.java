@@ -45,6 +45,16 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	out.writeInt(minimum);
 }
 
+void rrToCanonicalBytes(DataOutputStream out) throws IOException {
+	host.toCanonicalBytes(out);
+	admin.toCanonicalBytes(out);
+	out.writeInt(serial);
+	out.writeInt(refresh);
+	out.writeInt(retry);
+	out.writeInt(expire);
+	out.writeInt(minimum);
+}
+
 String rrToString() {
 	if (rlength == 0)
 		return null;
