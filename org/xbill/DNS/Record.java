@@ -346,8 +346,12 @@ byteArrayFromString(String s) throws TextParseException {
 			break;
 		}
 	}
-	if (!hasEscapes)
+	if (!hasEscapes) {
+		if (array.length > 255) {
+			throw new TextParseException("text string too long");
+		}
 		return array;
+	}
 
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
 
@@ -382,6 +386,11 @@ byteArrayFromString(String s) throws TextParseException {
 	}
 	if (digits > 0 && digits < 3)
 		throw new TextParseException("bad escape");
+	array = os.toByteArray();
+	if (array.length > 255) {
+		throw new TextParseException("text string too long");
+	}
+
 	return os.toByteArray();
 }
 
