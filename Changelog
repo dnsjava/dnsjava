@@ -1,3 +1,11 @@
+6/28/2004
+	- Canonicalizing a name created with the Name(Name src, int n)
+	  constructor caused an exception.
+	  (based on a patch from Nigel Tamplin <nigel@metica.com>)
+	- Concatenating names caused an exception when the prefix was created
+	  with the Name(Name src, int n) constructor.
+	  (reported by Nigel Tamplin <nigel@metica.com>)
+
 6/22/2004
 	- The DNSSEC digesting code shouldn't throw ClassCastExceptions.
 	  (reported by Mike StJohns <Mike.StJohns@nominum.com>)
