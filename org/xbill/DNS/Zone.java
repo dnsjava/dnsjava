@@ -32,8 +32,9 @@ class AXFRIterator implements Iterator {
 
 	public Object
 	next() {
-		if (sentLastSOA)
-			return null;
+		if (sentLastSOA) {
+			throw new NoSuchElementException();
+		}
 		if (!sentFirstSOA) {
 			sentFirstSOA = true;
 			return (RRset) findExactSet(origin, Type.SOA);
