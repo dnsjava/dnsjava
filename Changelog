@@ -1,3 +1,6 @@
+9/29/2003
+	- 1.4.2 released.
+
 9/26/2003
 	- A Lookup shouldn't die when receiving a referral response; it should
 	  return an error. (reported by Elinor Chang <elinor_chang@yahoo.com>)
