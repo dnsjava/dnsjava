@@ -114,7 +114,7 @@ private class CacheCleaner extends Thread {
 	public
 	CacheCleaner() {
 		setDaemon(true);
-		setName("CacheCleaner");
+		setName("org.xbill.DNS.Cache.CacheCleaner");
 		start();
 	}
 
