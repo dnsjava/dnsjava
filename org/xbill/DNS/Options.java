@@ -18,6 +18,7 @@ import java.util.*;
  * verbosemsg - Print all messages sent or received by SimpleResolver<BR>
  * verbosecompression - Print messages related to name compression<BR>
  * verbosebitstring - Print messages related to bitstring labels<BR>
+ * verbosesec - Print messages related to signature verification<BR>
  * <BR>
  * Valued options:<BR>
  * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<BR>

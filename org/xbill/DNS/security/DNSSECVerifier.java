@@ -172,12 +172,24 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 public byte
 verify(RRset set, Cache cache) {
 	Enumeration sigs = set.sigs();
-	if (!sigs.hasMoreElements())
+	if (Options.check("verbosesec"))
+		System.out.print("Verifying " + set.getName() + "/" +
+				 Type.string(set.getType()) + ": ");
+	if (!sigs.hasMoreElements()) {
+		if (Options.check("verbosesec"))
+			System.out.println("Insecure");
 		return DNSSEC.Insecure;
+	}
 	while (sigs.hasMoreElements()) {
 		SIGRecord sigrec = (SIGRecord) sigs.nextElement();
-		return verifySIG(set, sigrec, cache);
+		if (verifySIG(set, sigrec, cache) == DNSSEC.Secure) {
+			if (Options.check("verbosesec"))
+				System.out.println("Secure");
+			return DNSSEC.Secure;
+		}
 	}
+	if (Options.check("verbosesec"))
+		System.out.println("Failed");
 	return DNSSEC.Failed;
 }
 
