@@ -21,6 +21,15 @@ class QElement {
 }
 
 class Receiver implements ResolverListener {
+	Vector queue;
+	Hashtable idMap;
+
+	public
+	Receiver(Vector _queue, Hashtable _idMap) {
+		queue = _queue;
+		idMap = _idMap;
+	}
+
 	public void
 	receiveMessage(int id, Message m) {
 		Integer ID, R;
@@ -44,17 +53,12 @@ class Receiver implements ResolverListener {
 static final int quantum = 20;
 
 private Vector resolvers;
-private Receiver receiver;
-private Vector queue;
-private Hashtable idMap;
 private Name [] searchPath;
 
 private void
 init() {
 	resolvers = new Vector();
-	receiver = new Receiver();
-	queue = new Vector();
-	idMap = new Hashtable();
+	searchPath = FindServer.searchPath();
 }
 
 public
@@ -67,7 +71,6 @@ ExtendedResolver() throws UnknownHostException {
 	}
 	else
 		resolvers.addElement(new SimpleResolver());
-	searchPath = FindServer.searchPath();
 }
 
 public
@@ -85,7 +88,7 @@ ExtendedResolver(Resolver [] res) throws UnknownHostException {
 }
 
 boolean
-sendTo(Message query, int r, int q) {
+sendTo(Message query, Receiver receiver, Hashtable idMap, int r, int q) {
 	q -= r;
 	Resolver res = (Resolver) resolvers.elementAt(r);
 	/* Three retries */
@@ -149,13 +152,16 @@ send(Message query) {
 	Message best = null;
 	byte rcode;
 	boolean [] invalid = new boolean[resolvers.size()];
+	Vector queue = new Vector();
+	Hashtable idMap = new Hashtable();
+	Receiver receiver = new Receiver(queue, idMap);
 
 	for (q = 0; q < 20; q++) {
 		Message m;
 		boolean ok = false;
 		for (r = 0; r < resolvers.size(); r++)
 			if (!invalid[r])
-				ok |= sendTo(query, r, q);
+				ok |= sendTo(query, receiver, idMap, r, q);
 		if (!ok)
 			break;
 		long start = System.currentTimeMillis();
