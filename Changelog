@@ -1,4 +1,5 @@
 4/13/1999
+	- 0.8.2 released
 	- More javadoc-ed classes in DNS.*
 	- The message ID stuff from 4/10 broke TSIG, so it's gone
 	- Changes to ExtendedResolver's handling of child Resolvers
