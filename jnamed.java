@@ -422,7 +422,7 @@ throws IOException
 	if (s != null)
 		maxLength = 65535;
 	else if (queryOPT != null)
-		maxLength = queryOPT.getPayloadSize();
+		maxLength = Math.min(queryOPT.getPayloadSize(), 512);
 	else
 		maxLength = 512;
 
@@ -448,69 +448,8 @@ throws IOException
 		return errorMessage(query, rcode);
 
 	addAdditional(response, flags);
-	if (tsig != null)
-		tsig.apply(response, queryTSIG);
-	response.freeze();
-	byte [] out = response.toWire();
-	if (out.length > maxLength) {
-		response.thaw();
-		truncate(response, out.length, maxLength);
-		if (tsig != null)
-			tsig.apply(response, queryTSIG);
-	}
-	return response.toWire();
-}
-
-public int
-truncateSection(Message in, int maxLength, int length, int section) {
-	int removed = 0;
-	Record [] records = in.getSectionArray(section);
-	for (int i = records.length - 1; i >= 0; i--) {
-		Record r = records[i];
-		int rlength = r.getWireLength();
-		removed += rlength;
-		length -= rlength;
-		in.removeRecord(r, section);
-		if (length > maxLength)
-			continue;
-		else {
-			for (int j = i - 1; j >= 0; j--) {
-				Record r2 = records[j];
-				if (!r.getName().equals(r2.getName()) ||
-				    r.getType() != r2.getType() ||
-				    r.getDClass() != r2.getDClass())
-					break;
-				rlength =  r2.getWireLength();
-				removed += rlength;
-				length -= rlength;
-				in.removeRecord(r2, section);
-			}
-			return removed;
-		}
-	}
-	return removed;
-}
-
-public void
-truncate(Message in, int length, int maxLength) {
-	TSIGRecord tsig = in.getTSIG();
-	if (tsig != null)
-		maxLength -= tsig.getWireLength();
-
-	length -= truncateSection(in, maxLength, length, Section.ADDITIONAL);
-	if (length < maxLength)
-		return;
-
-	in.getHeader().setFlag(Flags.TC);
-	if (tsig != null) {
-		in.removeAllRecords(Section.ANSWER);
-		in.removeAllRecords(Section.AUTHORITY);
-		return;
-	}
-	length -= truncateSection(in, maxLength, length, Section.AUTHORITY);
-	if (length < maxLength)
-		return;
-	length -= truncateSection(in, maxLength, length, Section.ANSWER);
+	response.setTSIG(tsig, Rcode.NOERROR, queryTSIG);
+	return response.toWire(maxLength);
 }
 
 byte []
