@@ -257,6 +257,11 @@ getDClass() {
 	return dclass;
 }
 
+public int
+getTTL() {
+	return ttl;
+}
+
 public short
 getWireLength() {
 	return (short) wireLength;
