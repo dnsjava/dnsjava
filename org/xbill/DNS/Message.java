@@ -54,4 +54,16 @@ void toBytes(DataOutputStream out) throws IOException {
 	}
 }
 
+void toCanonicalBytes(DataOutputStream out) throws IOException {
+	header.toBytes(out);
+	for (int i=0; i<4; i++) {
+		if (sections[i].size() == 0)
+			continue;
+		for (int j=0; j<sections[j].size(); j++) {
+			dnsRecord rec = (dnsRecord)sections[i].elementAt(j);
+			rec.toCanonicalBytes(out, i);
+		}
+	}
+}
+
 }

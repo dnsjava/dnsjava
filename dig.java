@@ -134,6 +134,17 @@ public static void main(String argv[]) throws IOException {
 				}
 				res.setPort(port);
 				break;
+
+			    case 'k':
+				String keyStr;
+				if (argv[arg].length() > 2)
+					keyStr = argv[arg].substring(2);
+				else
+					keyStr = argv[++arg];
+				byte [] key = keyStr.getBytes();
+				res.setTSIGKey(key);
+				break;
+
 			    default:
 				System.out.print("Invalid option");
 				System.out.println(argv[arg]);

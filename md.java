@@ -362,10 +362,10 @@ class md {
 	java.io.ByteArrayOutputStream b = new java.io.ByteArrayOutputStream();
 	java.io.DataOutputStream data = new java.io.DataOutputStream(b);
 	try {
-		data.write(this.A);
-		data.write(this.B);
-		data.write(this.C);
-		data.write(this.D);
+		data.writeInt(this.A);
+		data.writeInt(this.B);
+		data.writeInt(this.C);
+		data.writeInt(this.D);
 	}
 	catch (java.io.IOException e) {
 		System.out.println("oops...");

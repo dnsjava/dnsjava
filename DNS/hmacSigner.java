@@ -9,7 +9,7 @@ static final byte IPAD = 0x36;
 static final byte OPAD = 0x5c;
 static final byte PADLEN = 64;
 
-public void hmacSigner(byte [] key) {
+public hmacSigner(byte [] key) {
 	int i;
 	ipad = new byte[PADLEN];
 	opad = new byte[PADLEN];

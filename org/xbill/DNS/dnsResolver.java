@@ -34,6 +34,14 @@ private byte [] toBytes(dnsMessage m) throws IOException {
 	return os.toByteArray();
 }
 
+private byte [] toCanonicalBytes(dnsMessage m) throws IOException {
+	ByteArrayOutputStream os;
+
+	os = new ByteArrayOutputStream();
+	m.toCanonicalBytes(new DataOutputStream(os));
+	return os.toByteArray();
+}
+
 private dnsMessage parse(byte [] in) throws IOException {
 	ByteArrayInputStream is;
 
@@ -42,8 +50,8 @@ private dnsMessage parse(byte [] in) throws IOException {
 }
 
 
-public dnsMessage sendTCP(dnsMessage inMessage) throws IOException {
-	byte [] out, in;
+dnsMessage sendTCP(byte [] out) throws IOException {
+	byte [] in;
 	Socket s;
 	int inLength;
 	DataInputStream dataIn;
@@ -56,7 +64,6 @@ public dnsMessage sendTCP(dnsMessage inMessage) throws IOException {
 		return null;
 	}
 
-	out = toBytes(inMessage);
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
 
@@ -69,9 +76,9 @@ public dnsMessage sendTCP(dnsMessage inMessage) throws IOException {
 	return parse(in);
 }
 
-public dnsMessage send(dnsMessage inMessage) throws IOException {
+public dnsMessage send(dnsMessage query) throws IOException {
 	byte [] out, in;
-	dnsMessage outMessage;
+	dnsMessage response;
 	DatagramSocket s;
 
 	try {
@@ -82,17 +89,34 @@ public dnsMessage send(dnsMessage inMessage) throws IOException {
 		return null;
 	}
 
-	out = toBytes(inMessage);
+	if (TSIGKey != null) {
+		hmacSigner h = new hmacSigner(TSIGKey);
+		h.addData(toCanonicalBytes(query));
+		try {
+			String local = InetAddress.getLocalHost().getHostName();
+			dnsRecord r;
+			r = new dnsTSIGRecord(new dnsName(local), dns.IN, 0,
+					      new dnsName(dns.HMAC), new Date(),
+					      (short)300, h.sign(),
+					      dns.NOERROR, null);
+			query.addRecord(dns.ADDITIONAL, r);
+			System.out.println(r);
+		}
+		catch (UnknownHostException e) {
+		}
+	}
+
+	out = toBytes(query);
 	s.send(new DatagramPacket(out, out.length, addr, port));
 
 	in = new byte[512];
 	s.receive(new DatagramPacket(in, in.length));
-	outMessage = parse(in);
+	response = parse(in);
 	s.close();
-	if (outMessage.getHeader().getFlag(dns.TC))
-		return sendTCP(inMessage);
+	if (response.getHeader().getFlag(dns.TC))
+		return sendTCP(out);
 	else
-		return outMessage;
+		return response;
 }
 
 public dnsMessage sendAXFR(dnsMessage inMessage) throws IOException {

@@ -66,6 +66,8 @@ static final byte ADDITIONAL = 3;
 
 static final int PORT = 53;
 
+static final String HMAC = "HMAC-MD5.SIG-ALG.REG.INT";
+
 static {
 	types.put(new Short(A), "A");
 	types.put(new Short(NS), "NS");

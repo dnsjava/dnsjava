@@ -28,8 +28,9 @@ public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
 	this.signature = signature;
 	this.error = error;
 	this.other = other;
-	this.rlength = (short) (14 + alg.length() + signature.length +
-				other.length);
+	this.rlength = (short) (14 + alg.length() + signature.length);
+	if (other != null)
+		this.rlength += other.length;
 }
 
 void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
@@ -46,8 +47,12 @@ void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
 	error = in.readShort();
 
 	int otherLen = in.readUnsignedShort();
-	other = new byte[otherLen];
-	in.read(other);
+	if (otherLen > 0) {
+		other = new byte[otherLen];
+		in.read(other);
+	}
+	else
+		other = null;
 }
 
 void rrToBytes(DataOutputStream out) throws IOException {
@@ -60,8 +65,12 @@ void rrToBytes(DataOutputStream out) throws IOException {
 
 	out.writeShort(error);
 
-	out.writeShort((short)other.length);
-	out.write(other);
+	if (other != null) {
+		out.writeShort((short)other.length);
+		out.write(other);
+	}
+	else
+		out.writeShort(0);
 }
 
 void rrToCanonicalBytes(DataOutputStream out) throws IOException {
@@ -74,8 +83,12 @@ void rrToCanonicalBytes(DataOutputStream out) throws IOException {
 
 	out.writeShort(error);
 
-	out.writeShort((short)other.length);
-	out.write(other);
+	if (other != null) {
+		out.writeShort((short)other.length);
+		out.write(other);
+	}
+	else
+		out.writeShort(0);
 }
 
 String rrToString() {
@@ -93,7 +106,7 @@ String rrToString() {
 		sb.append ("\n\t");
 		if (i + 64 >= s.length()) {
 			sb.append(s.substring(i));
-			if (other.length > 0) {
+			if (other != null) {
 				sb.append("\n\t <");
 				sb.append(other.length);
 				sb.append(" bytes of other data>");
