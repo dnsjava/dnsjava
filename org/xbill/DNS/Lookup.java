@@ -40,9 +40,10 @@ private List aliases;
 private Record [] answers;
 private int result;
 private String error;
-private boolean nxdomain, current_nxdomain;
-private boolean badresponse, current_badresponse;
-private boolean networkerror, current_networkerror;
+private boolean nxdomain;
+private boolean badresponse;
+private boolean networkerror;
+private boolean nametoolong;
 
 /** The lookup was successful. */
 public static final int SUCCESSFUL = 0;
@@ -312,6 +313,9 @@ setCredibility(byte credibility) {
 private void
 follow(Name name, Name oldname) {
 	found = true;
+	badresponse = false;
+	networkerror = false;
+	nxdomain = false;
 	iterations++;
 	if (iterations >= 6 || name.equals(oldname)) {
 		result = UNRECOVERABLE;
@@ -340,7 +344,7 @@ processResponse(Name name, SetResponse response) {
 		answers = (Record []) l.toArray(new Record[l.size()]);
 		done = true;
 	} else if (response.isNXDOMAIN()) {
-		current_nxdomain = true;
+		nxdomain = true;
 	} else if (response.isNXRRSET()) {
 		result = TYPE_NOT_FOUND;
 		answers = null;
@@ -381,14 +385,14 @@ lookup(Name current) {
 	}
 	catch (IOException e) {
 		// A network error occurred.  Press on.
-		current_networkerror = true;
+		networkerror = true;
 		return;
 	}
 	short rcode = response.getHeader().getRcode();
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
 		// The server we contacted is broken or otherwise unhelpful.
 		// Press on.
-		current_badresponse = true;
+		badresponse = true;
 		return;
 	}
 
@@ -413,31 +417,13 @@ resolve(Name current, Name suffix) {
 			tname = Name.concatenate(current, suffix);
 		}
 		catch (NameTooLongException e) {
+			nametoolong = true;
 			return;
 		}
 	}
-	current_badresponse = false;
-	current_networkerror = false;
-	current_nxdomain = false;
 	lookup(tname);
-	if (found) {
-		if (current_badresponse) {
-			result = UNRECOVERABLE;
-			error = "bad response";
-			done = true;
-		} else if (current_networkerror) {
-			result = TRY_AGAIN;
-			error = "network error";
-			done = true;
-		} else if (current_nxdomain) {
-			result = HOST_NOT_FOUND;
-			done = true;
-		}
-	} else {
-		badresponse = badresponse || current_badresponse;
-		networkerror = networkerror || current_networkerror;
-		nxdomain = badresponse || current_nxdomain;
-	}
+	if (found)
+		done = true;
 }
 
 /**
@@ -478,7 +464,12 @@ run() {
 		} else if (nxdomain) {
 			result = HOST_NOT_FOUND;
 			done = true;
+		} else if (nametoolong) {
+			result = UNRECOVERABLE;
+			error = "name too long";
+			done = true;
 		}
+			
 	}
 	return answers;
 }
