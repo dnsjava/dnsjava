@@ -236,6 +236,7 @@ send(Message query) throws IOException {
 	byte [] out = query.toWire(Message.MAXLENGTH);
 	int udpSize = maxUDPSize(query);
 	boolean tcp = false;
+	boolean nowrite = false;
 	do {
 		byte [] in;
 
@@ -255,7 +256,9 @@ send(Message query) throws IOException {
 			DatagramSocket s = new DatagramSocket();
 			s.setSoTimeout(timeoutValue);
 			try {
-				writeUDP(s, out, addr, port);
+				if (!nowrite) {
+					writeUDP(s, out, addr, port);
+				}
 				in = readUDP(s, udpSize);
 			}
 			finally {
@@ -278,19 +281,27 @@ send(Message query) throws IOException {
 		int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
 		int qid = query.getHeader().getID();
 		if (id != qid) {
-			if (Options.check("verbose")) {
-				System.err.println("expected id " + qid +
-						   "; got id " + id);
+			String error = "invalid message id: expected " + qid +
+				       "; got id " + id;
+			if (tcp) {
+				throw new WireParseException(error);
+			} else {
+				if (Options.check("verbose")) {
+					System.err.println(error);
+				}
+				nowrite = true;
+				continue;
 			}
-			continue;
 		}
 		Message response = parseMessage(in);
 		verifyTSIG(query, response, in, tsig);
 		if (!tcp && !ignoreTruncation &&
 		    response.getHeader().getFlag(Flags.TC))
+		{
 			tcp = true;
-		else
-			return response;
+			continue;
+		}
+		return response;
 	} while (true);
 }
 
