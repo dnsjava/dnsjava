@@ -439,24 +439,6 @@ getUInt8() throws IOException {
 }
 
 /**
- * Gets the next token from a tokenizer and converts it to a double.
- * @return The next token in the stream, as a double.
- * @throws TextParseException The input was invalid or not a double.
- * @throws IOException An I/O error occurred.
- */
-public double
-getDouble() throws IOException {
-	String next = getIdentifier();
-	if (!Character.isDigit(next.charAt(0)))
-		throw exception("expecting an integer");
-	try {
-		return Double.parseDouble(next);
-	} catch (NumberFormatException e) {
-		throw exception("expecting an floating point value");
-	}
-}
-
-/**
  * Gets the next token from a tokenizer and converts it to a 32 bit unsigned
  * integer which may be encoded in the BIND TTL format.
  * @return The next token in the stream, as an unsigned 32 bit integer.
