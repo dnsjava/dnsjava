@@ -18,6 +18,7 @@ String server;
 dnsName origin;
 int defaultTTL;
 short defaultClass = dns.IN;
+short lastRcode;
 
 public
 update(String _server) throws IOException {
@@ -109,6 +110,20 @@ update(String _server) throws IOException {
 		else if (operation.equals("quit"))
 			System.exit(0);
 
+		else if (operation.equals("assert")) {
+			String s = st.nextToken();
+			String rcodeString = dns.rcodeString(lastRcode);
+			if (!s.equalsIgnoreCase(rcodeString)) {
+				System.out.println("Expected rcode " + s +
+						   ", received " + rcodeString);
+				if (st.hasMoreTokens()) {
+					s = st.nextToken();
+					System.out.println(s);
+				}
+				System.exit(-1);
+			}
+		}
+
 		else
 			System.out.println("invalid keyword: " + operation);
 	}
@@ -136,6 +151,8 @@ sendUpdate() throws IOException {
 	dnsMessage response = res.send(query);
 	if (response == null)
 		return;
+
+	lastRcode = response.getHeader().getRcode();
 
 	System.out.print(";; ->>HEADER<<- ");
 	System.out.print("opcode: ");
