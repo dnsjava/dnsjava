@@ -189,6 +189,9 @@ loop:
 	}
 	if (c != null) {
 		pos = start;
+		if (Options.check("verbosecompression"))
+			System.out.println("name = " + this +
+					   ", count = " + count);
 		for (int i = 0; i < count; i++) {
 			Name tname = new Name(this, i);
 			c.add(pos, tname);
