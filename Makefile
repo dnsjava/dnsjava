@@ -2,7 +2,7 @@ JAVAC=javac
 JFLAGS=-g
 
 all:
-	${JAVAC} ${JFLAGS} *.java DNS/*.java
+	${JAVAC} ${JFLAGS} *.java DNS/*.java DNS/utils/*.java
 
 clean:
-	rm -f *.class DNS/*.class
+	rm -f *.class DNS/*.class DNS/utils/*.class

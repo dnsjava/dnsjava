@@ -15,41 +15,42 @@ package DNS;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import DNS.utils.*;
 
-abstract public class dnsRecord {
+abstract public class Record {
 
-dnsName name;
+Name name;
 short type, dclass;
 int ttl;
 int oLength;
 
-dnsRecord(dnsName _name, short _type, short _dclass, int _ttl) {
+Record(Name _name, short _type, short _dclass, int _ttl) {
 	name = _name;
 	type = _type;
 	dclass = _dclass;
 	ttl = _ttl;
 }
 
-static dnsRecord
-newRecord(dnsName name, short type, short dclass, int ttl, int length,
-	  CountedDataInputStream in, dnsCompression c) throws IOException
+static Record
+newRecord(Name name, short type, short dclass, int ttl, int length,
+	  CountedDataInputStream in, Compression c) throws IOException
 {
 	String s = dns.typeString(type);
-	dnsRecord rec;
+	Record rec;
 	try {
 		Class rrclass;
 		Constructor m;
 
-		rrclass = Class.forName("DNS.dns" + s + "Record");
+		rrclass = Class.forName("DNS." + s + "Record");
 		m = rrclass.getConstructor(new Class [] {
-						dnsName.class,
+						Name.class,
 						Short.TYPE,
 						Integer.TYPE,
 						Integer.TYPE,
 						CountedDataInputStream.class,
-						dnsCompression.class
+						Compression.class
 					   });
-		rec = (dnsRecord) m.newInstance(new Object [] {
+		rec = (Record) m.newInstance(new Object [] {
 							name,
 							new Short(dclass),
 							new Integer(ttl),
@@ -60,7 +61,7 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 		return rec;
 	}
 	catch (ClassNotFoundException e) {
-		rec = new dnsUNKRecord(name, type, dclass, ttl, length, in, c);
+		rec = new UNKRecord(name, type, dclass, ttl, length, in, c);
 		rec.oLength = length;
 		return rec;
 	}
@@ -76,8 +77,8 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 }
 
 
-public static dnsRecord
-newRecord(dnsName name, short type, short dclass, int ttl, int length,
+public static Record
+newRecord(Name name, short type, short dclass, int ttl, int length,
 	  byte [] data)
 {
 	CountedDataInputStream cds;
@@ -95,27 +96,27 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 	}
 }
 
-public static dnsRecord
-newRecord(dnsName name, short type, short dclass, int ttl) {
+public static Record
+newRecord(Name name, short type, short dclass, int ttl) {
 	return newRecord(name, type, dclass, ttl, 0, null);
 }
 
-public static dnsRecord
-newRecord(dnsName name, short type, short dclass) {
+public static Record
+newRecord(Name name, short type, short dclass) {
 	return newRecord(name, type, dclass, 0, 0, null);
 }
 
-public static dnsRecord
-fromWire(CountedDataInputStream in, int section, dnsCompression c)
+public static Record
+fromWire(CountedDataInputStream in, int section, Compression c)
 throws IOException
 {
 	short type, dclass;
 	int ttl;
 	short length;
-	dnsName name;
-	dnsRecord rec;
+	Name name;
+	Record rec;
 
-	name = new dnsName(in, c);
+	name = new Name(in, c);
 
 	type = in.readShort();
 	dclass = in.readShort();
@@ -130,7 +131,7 @@ throws IOException
 }
 
 public void
-toWire(CountedDataOutputStream out, int section, dnsCompression c)
+toWire(CountedDataOutputStream out, int section, Compression c)
 throws IOException
 {
 	name.toWire(out, c);
@@ -197,36 +198,36 @@ toString() {
 	return sb.toString();
 }
 
-public static dnsRecord
-fromString(dnsName name, short type, short dclass, int ttl,
-	   MyStringTokenizer st, dnsName origin)
+public static Record
+fromString(Name name, short type, short dclass, int ttl,
+	   MyStringTokenizer st, Name origin)
 throws IOException
 {
-	dnsRecord rec;
+	Record rec;
 
 	try {
 		Class rrclass;
 		Constructor m;
 
 		String s = dns.typeString(type);
-		rrclass = Class.forName("dns" + s + "Record");
+		rrclass = Class.forName("DNS." + s + "Record");
 		m = rrclass.getConstructor(new Class [] {
-						dnsName.class,
+						Name.class,
 						Short.TYPE,
 						Integer.TYPE,
 						MyStringTokenizer.class,
-						dnsName.class,
+						Name.class,
 					   });
-		rec = (dnsRecord) m.newInstance(new Object [] {
-							name,
-							new Short(dclass),
-							new Integer(ttl),
-							st, origin
-						});
+		rec = (Record) m.newInstance(new Object [] {
+						name,
+						new Short(dclass),
+						new Integer(ttl),
+						st, origin
+					     });
 		return rec;
 	}
 	catch (ClassNotFoundException e) {
-		rec = new dnsUNKRecord(name, type, dclass, ttl, st, origin);
+		rec = new UNKRecord(name, type, dclass, ttl, st, origin);
 		return rec;
 	}
 	catch (InvocationTargetException e) {
@@ -240,7 +241,7 @@ throws IOException
 	}
 }
 
-public dnsName
+public Name
 getName() {
 	return name;
 }
@@ -255,7 +256,7 @@ getDClass() {
 	return dclass;
 }
 
-abstract byte [] rrToWire(dnsCompression c) throws IOException;
+abstract byte [] rrToWire(Compression c) throws IOException;
 
 byte [] rrToWireCanonical() throws IOException {
 	return rrToWire(null);

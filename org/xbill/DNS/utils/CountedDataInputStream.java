@@ -1,7 +1,7 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package DNS.utils;
 
 import java.io.InputStream;
 import java.io.DataInputStream;
@@ -18,7 +18,7 @@ CountedDataInputStream(InputStream i) {
 	counter = 0;
 }
 
-int
+public int
 read(byte b[]) throws IOException {
 	in.readFully(b);
 	int out = b.length;
@@ -26,43 +26,43 @@ read(byte b[]) throws IOException {
 	return out;
 }
 
-byte
+public byte
 readByte() throws IOException {
 	counter += 1;
 	return in.readByte();
 }
 
-int
+public int
 readUnsignedByte() throws IOException {
 	counter += 1;
 	return in.readUnsignedByte();
 }
 
-short
+public short
 readShort() throws IOException {
 	counter += 2;
 	return in.readShort();
 }
 
-int
+public int
 readUnsignedShort() throws IOException {
 	counter += 2;
 	return in.readUnsignedShort();
 }
 
-int
+public int
 readInt() throws IOException {
 	counter += 4;
 	return in.readInt();
 }
 
-long
+public long
 readLong() throws IOException {
 	counter += 8;
 	return in.readLong();
 }
 
-String
+public String
 readString() throws IOException {
 	int len = in.readByte();
 	counter++;
@@ -72,13 +72,13 @@ readString() throws IOException {
 	return new String(b);
 }
 
-int
+public int
 skipBytes(int n) throws IOException {
 	counter += n;
 	return in.skipBytes(n);
 }
 
-int
+public int
 getPos() {
 	return counter;
 }

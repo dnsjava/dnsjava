@@ -8,23 +8,23 @@ import java.net.*;
 import java.util.*;
 import DNS.utils.*;
 
-public class dnsTSIG {
+public class TSIG {
 
-private dnsName name;
+private Name name;
 private byte [] key;
 private hmacSigner axfrSigner = null;
 
-dnsTSIG(String name, byte [] key) {
-	this.name = new dnsName(name);
+TSIG(String name, byte [] key) {
+	this.name = new Name(name);
 	this.key = key;
 }
 
-void apply(dnsMessage m) throws IOException {
+void apply(Message m) throws IOException {
 	Date timeSigned = new Date();
 	short fudge = 300;
 	hmacSigner h = new hmacSigner(key);
 
-	dnsName alg = new dnsName(dns.HMAC);
+	Name alg = new Name(dns.HMAC);
 
 	try {
 		/* Digest the message */
@@ -51,9 +51,9 @@ void apply(dnsMessage m) throws IOException {
 	catch (IOException e) {
 		return;
 	}
-	dnsRecord r = new dnsTSIGRecord(name, dns.ANY, 0, alg, timeSigned,
-					fudge, h.sign(), m.getHeader().getID(),
-					dns.NOERROR, null);
+	Record r = new TSIGRecord(name, dns.ANY, 0, alg, timeSigned, fudge,
+				  h.sign(), m.getHeader().getID(), dns.NOERROR,
+				  null);
 	m.addRecord(dns.ADDITIONAL, r);
 }
 
@@ -63,8 +63,8 @@ void apply(dnsMessage m) throws IOException {
  * as input, since we can't recreate the wire format exactly (with the same
  * name compression).
  */
-boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
-	dnsTSIGRecord tsig = m.getTSIG();
+boolean verify(Message m, byte [] b, TSIGRecord old) {
+	TSIGRecord tsig = m.getTSIG();
 	hmacSigner h = new hmacSigner(key);
 	if (tsig == null)
 		return false;
@@ -139,10 +139,10 @@ void verifyAXFRStart() {
 	axfrSigner = new hmacSigner(key);
 }
 
-boolean verifyAXFR(dnsMessage m, byte [] b, dnsTSIGRecord old,
+boolean verifyAXFR(Message m, byte [] b, TSIGRecord old,
 		   boolean required, boolean first)
 {
-	dnsTSIGRecord tsig = m.getTSIG();
+	TSIGRecord tsig = m.getTSIG();
 	hmacSigner h = axfrSigner;
 	
 	if (first)

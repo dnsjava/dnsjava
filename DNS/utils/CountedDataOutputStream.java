@@ -1,7 +1,7 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package DNS.utils;
 
 import java.io.OutputStream;
 import java.io.DataOutputStream;
@@ -18,37 +18,37 @@ CountedDataOutputStream(OutputStream o) {
 	counter = 0;
 }
 
-void
+public void
 write(byte b[]) throws IOException {
 	out.write(b);
 	counter += b.length;
 }
 
-void
+public void
 writeByte(int i) throws IOException {
 	counter += 1;
 	out.writeByte((byte)i);
 }
 
-void
+public void
 writeShort(int i) throws IOException {
 	counter += 2;
 	out.writeShort((short)i);
 }
 
-void
+public void
 writeInt(int i) throws IOException {
 	counter += 4;
 	out.writeInt(i);
 }
 
-void
+public void
 writeLong(long l) throws IOException {
 	counter += 8;
 	out.writeLong(l);
 }
 
-void
+public void
 writeString(String s) throws IOException {
 	byte [] b = s.getBytes();
 	out.writeByte(b.length);
@@ -56,7 +56,7 @@ writeString(String s) throws IOException {
 	counter += (1 + b.length);
 }
 
-int
+public int
 getPos() {
 	return counter;
 }

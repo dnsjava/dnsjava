@@ -6,12 +6,12 @@ package DNS;
 import java.util.*;
 import java.io.*;
 
-public class dnsZone {
+public class Zone {
 
 Hashtable data;
-dnsName origin = null;
+Name origin = null;
 
-public dnsZone(String file) throws IOException {
+public Zone(String file) throws IOException {
 	FileInputStream fis;
 	try {
 		fis = new FileInputStream(file);
@@ -23,12 +23,12 @@ public dnsZone(String file) throws IOException {
 	String line;
 	MyStringTokenizer st;
 
-	dnsRecord record = null;
+	Record record = null;
 
 	data = new Hashtable();
 
 	while (true) {
-		line = dnsIO.readExtendedLine(br);
+		line = IO.readExtendedLine(br);
 		if (line == null)
 			break;
 		boolean space = line.startsWith(" ") || line.startsWith("\t");
@@ -51,30 +51,30 @@ public dnsZone(String file) throws IOException {
 }
 
 public Vector
-findName(dnsName name) {
+findName(Name name) {
 	return (Vector) data.get(name);
 }
 
-public dnsName
+public Name
 getOrigin() {
 	return origin;
 }
 
-dnsName
+Name
 parseOrigin(MyStringTokenizer st) throws IOException {
-	return new dnsName(st.nextToken());
+	return new Name(st.nextToken());
 }
 
-dnsRecord
-parseRR(MyStringTokenizer st, boolean useLast, dnsRecord last, dnsName origin)
+Record
+parseRR(MyStringTokenizer st, boolean useLast, Record last, Name origin)
 throws IOException
 {
-	dnsName name;
+	Name name;
 	int ttl;
 	short type, dclass;
 
 	if (!useLast)
-		name = new dnsName(st.nextToken(), origin);
+		name = new Name(st.nextToken(), origin);
 	else
 		name = last.name;
 
@@ -100,7 +100,7 @@ throws IOException
 	if ((type = dns.typeValue(s)) < 0)
 		throw new IOException("Parse error");
 
-	return dnsRecord.fromString(name, type, dclass, ttl, st, origin);
+	return Record.fromString(name, type, dclass, ttl, st, origin);
 }
 
 }

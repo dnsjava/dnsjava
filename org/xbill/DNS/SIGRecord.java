@@ -8,20 +8,20 @@ import java.text.*;
 import java.util.*;
 import DNS.utils.*;
 
-public class dnsSIGRecord extends dnsRecord {
+public class SIGRecord extends Record {
 
 short covered;
 byte alg, labels;
 int origttl;
 Date expire, timeSigned;
 short footprint;
-dnsName signer;
+Name signer;
 byte [] signature;
 
 public
-dnsSIGRecord(dnsName _name, short _dclass, int _ttl, int _covered, int _alg,
-	     int _origttl, Date _expire, Date _timeSigned,
-	     int _footprint, dnsName _signer, byte [] _signature)
+SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
+	  int _origttl, Date _expire, Date _timeSigned,
+	  int _footprint, Name _signer, byte [] _signature)
 {
 	super(_name, dns.SIG, _dclass, _ttl);
 	covered = (short) _covered;
@@ -36,8 +36,8 @@ dnsSIGRecord(dnsName _name, short _dclass, int _ttl, int _covered, int _alg,
 }
 
 public
-dnsSIGRecord(dnsName _name, short _dclass, int _ttl,
-	     int length, CountedDataInputStream in, dnsCompression c)
+SIGRecord(Name _name, short _dclass, int _ttl,
+	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.SIG, _dclass, _ttl);
@@ -51,14 +51,14 @@ throws IOException
 	expire = new Date(1000 * (long)in.readInt());
 	timeSigned = new Date(1000 * (long)in.readInt());
 	footprint = in.readShort();
-	signer = new dnsName(in, c);
+	signer = new Name(in, c);
 	signature = new byte[length - (in.getPos() - start)];
 	in.read(signature);
 }
 
 public
-dnsSIGRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+SIGRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     Name origin)
 throws IOException
 {
 	super(_name, dns.SIG, _dclass, _ttl);
@@ -69,7 +69,7 @@ throws IOException
 	expire = parseDate(st.nextToken());
 	timeSigned = parseDate(st.nextToken());
 	footprint = (short) Integer.parseInt(st.nextToken());
-	signer = new dnsName(st.nextToken(), origin);
+	signer = new Name(st.nextToken(), origin);
 	if (st.hasMoreTokens())
 		signature = base64.fromString(st.nextToken());
 }
@@ -93,13 +93,13 @@ toString() {
 		sb.append (signer);
 		sb.append ("\n");
 		String s = base64.toString(signature);
-		sb.append (dnsIO.formatBase64String(s, 64, "\t", true));
+		sb.append (IO.formatBase64String(s, 64, "\t", true));
         }
 	return sb.toString();
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (signature == null)
 		return null;
 

@@ -5,16 +5,17 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsSOARecord extends dnsRecord {
+public class SOARecord extends Record {
 
-dnsName host, admin;
+Name host, admin;
 int serial, refresh, retry, expire, minimum;
 
 public
-dnsSOARecord(dnsName _name, short _dclass, int _ttl, dnsName _host,
-	     dnsName _admin, int _serial, int _refresh, int _retry,
-	     int _expire, int _minimum) throws IOException
+SOARecord(Name _name, short _dclass, int _ttl, Name _host, Name _admin,
+	  int _serial, int _refresh, int _retry, int _expire, int _minimum)
+throws IOException
 {
 	super(_name, dns.SOA, _dclass, _ttl);
 	host = _host;
@@ -27,14 +28,14 @@ dnsSOARecord(dnsName _name, short _dclass, int _ttl, dnsName _host,
 }
 
 public
-dnsSOARecord(dnsName _name, short _dclass, int _ttl, int length,
-	     CountedDataInputStream in, dnsCompression c) throws IOException
+SOARecord(Name _name, short _dclass, int _ttl, int length,
+	  CountedDataInputStream in, Compression c) throws IOException
 {
 	super(_name, dns.SOA, _dclass, _ttl);
 	if (in == null)
 		return;
-	host = new dnsName(in, c);
-	admin = new dnsName(in, c);
+	host = new Name(in, c);
+	admin = new Name(in, c);
 	serial = in.readInt();
 	refresh = in.readInt();
 	retry = in.readInt();
@@ -43,13 +44,13 @@ dnsSOARecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsSOARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+SOARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     Name origin)
 throws IOException
 {
 	super(_name, dns.SOA, _dclass, _ttl);
-	host = new dnsName(st.nextToken(), origin);
-	admin = new dnsName(st.nextToken(), origin);
+	host = new Name(st.nextToken(), origin);
+	admin = new Name(st.nextToken(), origin);
 	serial = Integer.parseInt(st.nextToken());
 	refresh = Integer.parseInt(st.nextToken());
 	retry = Integer.parseInt(st.nextToken());
@@ -80,12 +81,12 @@ toString() {
 	return sb.toString();
 }
 
-public dnsName
+public Name
 getHost() {  
 	return host;
 }       
 
-public dnsName
+public Name
 getAdmin() {  
 	return admin;
 }       
@@ -116,7 +117,7 @@ getMinimum() {
 }       
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 

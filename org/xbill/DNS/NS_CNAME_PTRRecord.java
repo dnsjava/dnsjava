@@ -5,37 +5,38 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsNS_CNAME_PTRRecord extends dnsRecord {
+class NS_CNAME_PTRRecord extends Record {
 
-dnsName target;
+Name target;
 
 public
-dnsNS_CNAME_PTRRecord(dnsName _name, short _type, short _dclass, int _ttl,
-		      dnsName _target)
+NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
+		   Name _target)
 {
 	super(_name, _type, _dclass, _ttl);
 	target = _target;
 }
 
 public
-dnsNS_CNAME_PTRRecord(dnsName _name, short _type, short _dclass, int _ttl,
-		      int length, CountedDataInputStream in, dnsCompression c)
+NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
+		   int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	if (in == null)
 		return;
-	target = new dnsName(in, c);
+	target = new Name(in, c);
 }
 
 public
-dnsNS_CNAME_PTRRecord(dnsName _name, short _type, short _dclass, int _ttl,
-		      MyStringTokenizer st, dnsName origin)
+NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
+		   MyStringTokenizer st, Name origin)
 throws IOException
 {
         super(_name, _type, _dclass, _ttl);
-        target = new dnsName(st.nextToken(), origin);
+        target = new Name(st.nextToken(), origin);
 }
 
 
@@ -47,13 +48,13 @@ toString() {
 	return sb.toString();
 }
 
-public dnsName
+public Name
 getTarget() {
 	return target;
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (target == null)
 		return null;
 

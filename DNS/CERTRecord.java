@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
-public class dnsCERTRecord extends dnsRecord {
+public class CERTRecord extends Record {
 
 short certType, keyTag;
 byte alg;
@@ -17,7 +17,7 @@ static int NOCONF = 0x8000;
 static int NOAUTH = 0x4000;
 
 public
-dnsCERTRecord(dnsName _name, short _dclass, int _ttl, int _certType,
+CERTRecord(Name _name, short _dclass, int _ttl, int _certType,
 	      int _keyTag, int _alg, byte []  _cert)
 {
 	super(_name, dns.CERT, _dclass, _ttl);
@@ -28,8 +28,8 @@ dnsCERTRecord(dnsName _name, short _dclass, int _ttl, int _certType,
 }
 
 public
-dnsCERTRecord(dnsName _name, short _dclass, int _ttl,
-	      int length, CountedDataInputStream in, dnsCompression c)
+CERTRecord(Name _name, short _dclass, int _ttl,
+	      int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.CERT, _dclass, _ttl);
@@ -45,8 +45,8 @@ throws IOException
 }
 
 public
-dnsCERTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	      dnsName origin)
+CERTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	   Name origin)
 throws IOException
 {
 	super(_name, dns.CERT, _dclass, _ttl);
@@ -68,7 +68,7 @@ toString() {
 		if (cert != null) {
 			sb.append (" (\n");
 			String s = base64.toString(cert);
-			sb.append (dnsIO.formatBase64String(s, 64, "\t", true));
+			sb.append (IO.formatBase64String(s, 64, "\t", true));
 		}
 	}
 	return sb.toString();
@@ -90,7 +90,7 @@ getAlgorithm() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (cert == null)
 		return null;
 

@@ -5,8 +5,9 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsHeader {
+public class Header {
 
 private int id; 
 private boolean [] flags;
@@ -14,14 +15,14 @@ byte rcode, opcode;
 private short [] counts;
 
 public
-dnsHeader(int _id) {
+Header(int _id) {
 	counts = new short[4];
 	flags = new boolean[16];
 	id = _id;
 }
 
 public
-dnsHeader(CountedDataInputStream in) throws IOException {
+Header(CountedDataInputStream in) throws IOException {
 	this(in.readUnsignedShort());
 	readFlags(in);
 	for (int i=0; i<counts.length; i++)

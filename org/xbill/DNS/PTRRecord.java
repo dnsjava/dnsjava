@@ -5,26 +5,27 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsPTRRecord extends dnsNS_CNAME_PTRRecord {
+public class PTRRecord extends NS_CNAME_PTRRecord {
 
 public
-dnsPTRRecord(dnsName _name, short _dclass, int _ttl, dnsName _target)
+PTRRecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException
 {
         super(_name, dns.PTR, _dclass, _ttl, _target);
 }
 
 public
-dnsPTRRecord(dnsName _name, short _dclass, int _ttl, int length,
-	     CountedDataInputStream in, dnsCompression c) throws IOException
+PTRRecord(Name _name, short _dclass, int _ttl, int length,
+	  CountedDataInputStream in, Compression c) throws IOException
 {
 	super(_name, dns.PTR, _dclass, _ttl, length, in, c);
 }
 
 public
-dnsPTRRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+PTRRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	  Name origin)
 throws IOException
 {
         super(_name, dns.PTR, _dclass, _ttl, st, origin);

@@ -7,7 +7,7 @@ import DNS.*;
 
 public class dig {
 
-static dnsName name = null;
+static Name name = null;
 static short type = dns.A, _class = dns.IN;
 
 static void
@@ -17,8 +17,8 @@ usage() {
 }
 
 static void
-doQuery(dnsMessage query, dnsResolver res) throws IOException {
-	dnsMessage response;
+doQuery(Message query, Resolver res) throws IOException {
+	Message response;
 
 	System.out.println("; java dig 0.0");
 
@@ -30,8 +30,8 @@ doQuery(dnsMessage query, dnsResolver res) throws IOException {
 }
 
 static void
-doAXFR(dnsMessage query, dnsResolver res) throws IOException {
-	dnsMessage response;
+doAXFR(Message query, Resolver res) throws IOException {
+	Message response;
 
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
 
@@ -54,9 +54,9 @@ public static void
 main(String argv[]) throws IOException {
 	String server;
 	int arg;
-	dnsMessage query = new dnsMessage();
-	dnsRecord rec;
-	dnsResolver res = null;
+	Message query = new Message();
+	Record rec;
+	Resolver res = null;
 
 	query.getHeader().setFlag(dns.RD);
 	query.getHeader().setOpcode(dns.QUERY);
@@ -69,12 +69,12 @@ main(String argv[]) throws IOException {
 		arg = 0;
 		if (argv[arg].startsWith("@")) {
 			server = argv[arg++].substring(1);
-			res = new dnsResolver(server);
+			res = new Resolver(server);
 		}
 		else
-			res = new dnsResolver();
+			res = new Resolver();
 
-		name = new dnsName(argv[arg++]);
+		name = new Name(argv[arg++]);
 
 		type = dns.typeValue(argv[arg]);
 		if (type < 0)
@@ -140,7 +140,7 @@ main(String argv[]) throws IOException {
 			usage();
 	}
 
-	rec = dnsRecord.newRecord(name, type, _class);
+	rec = Record.newRecord(name, type, _class);
 	query.addRecord(dns.QUESTION, rec);
 
 	if (type == dns.AXFR)

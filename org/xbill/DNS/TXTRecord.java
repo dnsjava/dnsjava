@@ -5,13 +5,14 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsTXTRecord extends dnsRecord {
+public class TXTRecord extends Record {
 
 Vector strings;
 
 public
-dnsTXTRecord(dnsName _name, short _dclass, int _ttl, Vector _strings)
+TXTRecord(Name _name, short _dclass, int _ttl, Vector _strings)
 throws IOException
 {
 	super(_name, dns.TXT, _dclass, _ttl);
@@ -19,7 +20,7 @@ throws IOException
 }
 
 public
-dnsTXTRecord(dnsName _name, short _dclass, int _ttl, String _string)
+TXTRecord(Name _name, short _dclass, int _ttl, String _string)
 throws IOException
 {
 	super(_name, dns.TXT, _dclass, _ttl);
@@ -28,8 +29,8 @@ throws IOException
 }
 
 public
-dnsTXTRecord(dnsName _name, short _dclass, int _ttl,
-	     int length, CountedDataInputStream in, dnsCompression c)
+TXTRecord(Name _name, short _dclass, int _ttl,
+	     int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.TXT, _dclass, _ttl);
@@ -47,8 +48,8 @@ throws IOException
 }
 
 public
-dnsTXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+TXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	  Name origin)
 throws IOException
 {
 	super(_name, dns.TXT, _dclass, _ttl);
@@ -78,7 +79,7 @@ getStrings() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (strings == null)
 		return null;
 

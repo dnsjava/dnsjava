@@ -5,31 +5,30 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsNXTRecord extends dnsRecord {
+public class NXTRecord extends Record {
 
-dnsName next;
+Name next;
 BitSet bitmap;
 
 public
-dnsNXTRecord(dnsName _name, short _dclass, int _ttl, dnsName _next,
-	     BitSet _bitmap)
-{
+NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
 	super(_name, dns.NXT, _dclass, _ttl);
 	next = _next;
 	bitmap = _bitmap;
 }
 
 public
-dnsNXTRecord(dnsName _name, short _dclass, int _ttl,
-	     int length, CountedDataInputStream in, dnsCompression c)
+NXTRecord(Name _name, short _dclass, int _ttl,
+	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.NXT, _dclass, _ttl);
 	if (in == null)
 		return;
 	int start = in.getPos();
-	next = new dnsName(in, c);
+	next = new Name(in, c);
 	bitmap = new BitSet();
 	int bitmapLength = length - (in.getPos() - start);
 	for (int i = 0; i < bitmapLength; i++) {
@@ -41,13 +40,13 @@ throws IOException
 }
 
 public
-dnsNXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+NXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	  Name origin)
 throws IOException
 {
 	super(_name, dns.NXT, _dclass, _ttl);
 	Vector types = new Vector();
-	next = new dnsName(st.nextToken(), origin);
+	next = new Name(st.nextToken(), origin);
 	bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
 		short t = dns.typeValue(st.nextToken());
@@ -70,7 +69,7 @@ toString() {
 	return sb.toString();
 }
 
-public dnsName
+public Name
 getNext() {
 	return next;
 }
@@ -81,7 +80,7 @@ getBitmap() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (next == null)
 		return null;
 

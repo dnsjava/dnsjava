@@ -6,13 +6,14 @@ package DNS;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsARecord extends dnsRecord {
+public class ARecord extends Record {
 
 InetAddress address;
 
 public
-dnsARecord(dnsName _name, short _dclass, int _ttl, InetAddress _address) 
+ARecord(Name _name, short _dclass, int _ttl, InetAddress _address) 
 throws IOException
 {
 	super(_name, dns.A, _dclass, _ttl);
@@ -20,8 +21,8 @@ throws IOException
 }
 
 public
-dnsARecord(dnsName _name, short _dclass, int _ttl, int length,
-	   CountedDataInputStream in, dnsCompression c) throws IOException
+ARecord(Name _name, short _dclass, int _ttl, int length,
+	   CountedDataInputStream in, Compression c) throws IOException
 {
 	super(_name, dns.A, _dclass, _ttl);
 
@@ -43,8 +44,7 @@ dnsARecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	   dnsName origin)
+ARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
 throws IOException
 {
 	super(_name, dns.A, _dclass, _ttl);
@@ -80,7 +80,7 @@ getAddress() {
 }
 
 byte []
-rrToWire(dnsCompression c) {
+rrToWire(Compression c) {
 	if (address == null)
 		return null;
 	else

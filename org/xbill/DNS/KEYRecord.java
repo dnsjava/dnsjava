@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
-public class dnsKEYRecord extends dnsRecord {
+public class KEYRecord extends Record {
 
 short flags;
 byte proto, alg;
@@ -17,8 +17,8 @@ static int NOCONF = 0x8000;
 static int NOAUTH = 0x4000;
 
 public
-dnsKEYRecord(dnsName _name, short _dclass, int _ttl, int _flags, int _proto,
-	     int _alg, byte []  _key)
+KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
+	  int _alg, byte []  _key)
 {
 	super(_name, dns.KEY, _dclass, _ttl);
 	flags = (short) _flags;
@@ -28,8 +28,8 @@ dnsKEYRecord(dnsName _name, short _dclass, int _ttl, int _flags, int _proto,
 }
 
 public
-dnsKEYRecord(dnsName _name, short _dclass, int _ttl,
-	     int length, CountedDataInputStream in, dnsCompression c)
+KEYRecord(Name _name, short _dclass, int _ttl,
+	     int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.KEY, _dclass, _ttl);
@@ -45,8 +45,8 @@ throws IOException
 }
 
 public
-dnsKEYRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+KEYRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	  Name origin)
 throws IOException
 {
 	super(_name, dns.KEY, _dclass, _ttl);
@@ -69,7 +69,7 @@ toString() {
 		if (key != null) {
 			sb.append (" (\n");
 			String s = base64.toString(key);
-			sb.append (dnsIO.formatBase64String(s, 64, "\t", true));
+			sb.append (IO.formatBase64String(s, 64, "\t", true));
 		}
 	}
 	return sb.toString();
@@ -91,7 +91,7 @@ getAlgorithm() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
 		return null;
 

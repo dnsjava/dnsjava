@@ -8,26 +8,26 @@ import java.io.*;
 import java.net.*;
 import DNS.utils.*;
 
-public class dnsResolver {
+public class Resolver {
 
 InetAddress addr;
 int port = dns.PORT;
 boolean useTCP, useEDNS;
-dnsTSIG TSIG;
+TSIG tsig;
 int timeoutValue = 60 * 1000;
 
 static String defaultResolver = "localhost";
 
 public
-dnsResolver(String hostname) throws UnknownHostException {
+Resolver(String hostname) throws UnknownHostException {
 	if (hostname == null)
 		hostname = defaultResolver;
 	addr = InetAddress.getByName(hostname);
 }
 
 public
-dnsResolver() throws UnknownHostException {
-	this(dnsFindResolver.find());
+Resolver() throws UnknownHostException {
+	this(FindResolver.find());
 }
 
 public static void
@@ -57,7 +57,7 @@ setTSIGKey(String name, String key) {
 		System.out.println("Invalid TSIG key string");
 		return;
 	}
-	TSIG = new dnsTSIG(name, keyArray);
+	tsig = new TSIG(name, keyArray);
 }
 
 public void
@@ -73,8 +73,8 @@ setTSIGKey(String key) {
 	setTSIGKey(name, key);
 }
 
-dnsMessage
-sendTCP(dnsMessage query, byte [] out) throws IOException {
+Message
+sendTCP(Message query, byte [] out) throws IOException {
 	byte [] in;
 	Socket s;
 	int inLength;
@@ -105,18 +105,18 @@ sendTCP(dnsMessage query, byte [] out) throws IOException {
 	}
 
 	s.close();
-	dnsMessage response = new dnsMessage(in);
-	if (TSIG != null) {
-		boolean ok = TSIG.verify(response, in, query.getTSIG());
+	Message response = new Message(in);
+	if (tsig != null) {
+		boolean ok = tsig.verify(response, in, query.getTSIG());
 		System.out.println("TSIG verify: " + ok);
 	}
 	return response;
 }
 
-public dnsMessage
-send(dnsMessage query) throws IOException {
+public Message
+send(Message query) throws IOException {
 	byte [] out, in;
-	dnsMessage response;
+	Message response;
 	DatagramSocket s;
 	DatagramPacket dp;
 
@@ -129,10 +129,10 @@ send(dnsMessage query) throws IOException {
 	}
 
 	if (useEDNS)
-		query.addRecord(dns.ADDITIONAL, dnsEDNS.newOPT(1280));
+		query.addRecord(dns.ADDITIONAL, EDNS.newOPT(1280));
 
-	if (TSIG != null)
-		TSIG.apply(query);
+	if (tsig != null)
+		tsig.apply(query);
 
 
 	out = query.toWire();
@@ -154,9 +154,9 @@ send(dnsMessage query) throws IOException {
 	}
 	in = new byte [dp.getLength()];
 	System.arraycopy(dp.getData(), 0, in, 0, in.length);
-	response = new dnsMessage(in);
-	if (TSIG != null) {
-		boolean ok = TSIG.verify(response, in, query.getTSIG());
+	response = new Message(in);
+	if (tsig != null) {
+		boolean ok = tsig.verify(response, in, query.getTSIG());
 		System.out.println(";; TSIG verify: " + ok);
 	}
 
@@ -167,14 +167,14 @@ send(dnsMessage query) throws IOException {
 		return response;
 }
 
-public dnsMessage
-sendAXFR(dnsMessage query) throws IOException {
+public Message
+sendAXFR(Message query) throws IOException {
 	byte [] out, in;
 	Socket s;
 	int inLength;
 	DataInputStream dataIn;
 	int soacount = 0;
-	dnsMessage response;
+	Message response;
 	boolean first = true;
 
 	try {
@@ -185,18 +185,18 @@ sendAXFR(dnsMessage query) throws IOException {
 		return null;
 	}
 
-	if (TSIG != null)
-		TSIG.apply(query);
+	if (tsig != null)
+		tsig.apply(query);
 
 	out = query.toWire();
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
 	s.setSoTimeout(timeoutValue);
 
-	response = new dnsMessage();
+	response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
-	if (TSIG != null)
-		TSIG.verifyAXFRStart();
+	if (tsig != null)
+		tsig.verifyAXFRStart();
 	while (soacount < 2) {
 		try {
 			dataIn = new DataInputStream(s.getInputStream());
@@ -209,7 +209,7 @@ sendAXFR(dnsMessage query) throws IOException {
 			System.out.println(";; No response");
 			return null;
 		}
-		dnsMessage m = new dnsMessage(in);
+		Message m = new Message(in);
 		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
 		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
 		    m.getHeader().getCount(dns.AUTHORITY) != 0)
@@ -220,8 +220,8 @@ sendAXFR(dnsMessage query) throws IOException {
 				Enumeration e = m.getSection(i);
 				System.out.println("--");
 				while (e.hasMoreElements()) {
-					dnsRecord r;
-					r = (dnsRecord)e.nextElement();
+					Record r;
+					r = (Record)e.nextElement();
 					System.out.println(r);
 				}
 				System.out.println();
@@ -233,15 +233,15 @@ sendAXFR(dnsMessage query) throws IOException {
 		for (int i = 1; i < 4; i++) {
 			Enumeration e = m.getSection(i);
 			while (e.hasMoreElements()) {
-				dnsRecord r = (dnsRecord)e.nextElement();
+				Record r = (Record)e.nextElement();
 				response.addRecord(i, r);
-				if (r instanceof dnsSOARecord)
+				if (r instanceof SOARecord)
 					soacount++;
 			}
 		}
-		if (TSIG != null) {
+		if (tsig != null) {
 			boolean required = (soacount > 1 || first);
-			boolean ok = TSIG.verifyAXFR(m, in, query.getTSIG(),
+			boolean ok = tsig.verifyAXFR(m, in, query.getTSIG(),
 						     required, first);
 			System.out.println("TSIG verify: " + ok);
 		}

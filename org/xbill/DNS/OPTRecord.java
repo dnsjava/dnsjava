@@ -5,20 +5,18 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsOPTRecord extends dnsRecord {
-
-short priority;
-dnsName target;
+public class OPTRecord extends Record {
 
 public
-dnsOPTRecord(dnsName _name, short _dclass, int _ttl) {
+OPTRecord(Name _name, short _dclass, int _ttl) {
 	super(_name, dns.OPT, _dclass, _ttl);
 }
 
 public
-dnsOPTRecord(dnsName _name, short _dclass, int _ttl,
-	     int length, CountedDataInputStream in, dnsCompression c)
+OPTRecord(Name _name, short _dclass, int _ttl,
+	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.OPT, _dclass, _ttl);
@@ -49,10 +47,7 @@ getVersion() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
-	if (target == null)
-		return null;
-
+rrToWire(Compression c) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 

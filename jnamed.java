@@ -5,49 +5,49 @@ import DNS.*;
 
 public class dnsServer {
 
-dnsZone [] zones;
+Zone [] zones;
 int zcount;
 Hashtable znames;
 
 public
 dnsServer() {
-	zones = new dnsZone[20];
+	zones = new Zone[20];
 	zcount = 0;
 	znames = new Hashtable();
 };
 
 public void
 addZone(String zonefile) throws IOException {
-	dnsZone newzone = new dnsZone(zonefile);
+	Zone newzone = new Zone(zonefile);
 	znames.put(newzone.getOrigin(), newzone);
 	zones[zcount++] = newzone;
 };
 
-public dnsZone
-findBestZone(dnsName name) {
-	dnsZone foundzone = null;
-	dnsName tname = name;
+public Zone
+findBestZone(Name name) {
+	Zone foundzone = null;
+	Name tname = name;
 	do {
-		if (tname.equals(dnsName.root))
+		if (tname.equals(Name.root))
 			return null;
-		tname = new dnsName(tname, 1);
-		foundzone = (dnsZone) znames.get(tname);
+		tname = new Name(tname, 1);
+		foundzone = (Zone) znames.get(tname);
 	} while (foundzone == null);
 	return foundzone;
 }
 
-public dnsMessage
-generateReply(dnsMessage query) {
+public Message
+generateReply(Message query) {
 	Enumeration qds = query.getSection(dns.QUESTION);
-	dnsRecord queryRecord = (dnsRecord) qds.nextElement();
+	Record queryRecord = (Record) qds.nextElement();
 
-	dnsMessage response = new dnsMessage();
+	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(dns.AA);
 	response.addRecord(dns.QUESTION, queryRecord);
 
-	dnsName name = queryRecord.getName();
-	dnsZone zone = findBestZone(name);
+	Name name = queryRecord.getName();
+	Zone zone = findBestZone(name);
 	if (zone == null) {
 		response.getHeader().setRcode(dns.SERVFAIL);
 	}
@@ -60,7 +60,7 @@ generateReply(dnsMessage query) {
 			int added = 0;
 			Enumeration e = responseRecords.elements();
 			while (e.hasMoreElements()) {
-				dnsRecord r = (dnsRecord) e.nextElement();
+				Record r = (Record) e.nextElement();
 				if (r.getType() == queryRecord.getType() &&
 				    r.getDClass() == queryRecord.getDClass())
 				{
@@ -95,8 +95,8 @@ serveTCP(short port) {
 				s.close();
 				continue;
 			}
-			dnsMessage query = new dnsMessage(in);
-			dnsMessage response = generateReply(query);
+			Message query = new Message(in);
+			Message response = generateReply(query);
 			byte [] out = response.toWire();
 			dataOut = new DataOutputStream(s.getOutputStream());
 			dataOut.writeShort(out.length);
@@ -124,8 +124,8 @@ serveUDP(short port) {
 			}
 			byte [] in = new byte[dp.getLength()];
 			System.arraycopy(dp.getData(), 0, in, 0, in.length);
-			dnsMessage query = new dnsMessage(in);
-			dnsMessage response = generateReply(query);
+			Message query = new Message(in);
+			Message response = generateReply(query);
 			byte [] out = response.toWire();
 			dp = new DatagramPacket(out, out.length,
 						dp.getAddress(), dp.getPort());

@@ -5,15 +5,16 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsSRVRecord extends dnsRecord {
+public class SRVRecord extends Record {
 
 short priority, weight, port;
-dnsName target;
+Name target;
 
 public
-dnsSRVRecord(dnsName _name, short _dclass, int _ttl, int _priority,
-	     int _weight, int _port, dnsName _target)
+SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
+	  int _weight, int _port, Name _target)
 {
 	super(_name, dns.SRV, _dclass, _ttl);
 	priority = (short) _priority;
@@ -23,8 +24,8 @@ dnsSRVRecord(dnsName _name, short _dclass, int _ttl, int _priority,
 }
 
 public
-dnsSRVRecord(dnsName _name, short _dclass, int _ttl,
-	    int length, CountedDataInputStream in, dnsCompression c)
+SRVRecord(Name _name, short _dclass, int _ttl,
+	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.SRV, _dclass, _ttl);
@@ -33,19 +34,19 @@ throws IOException
 	priority = (short) in.readUnsignedShort();
 	weight = (short) in.readUnsignedShort();
 	port = (short) in.readUnsignedShort();
-	target = new dnsName(in, c);
+	target = new Name(in, c);
 }
 
 public
-dnsSRVRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     dnsName origin)
+SRVRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	  Name origin)
 throws IOException
 {
 	super(_name, dns.SRV, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
 	weight = Short.parseShort(st.nextToken());
 	port = Short.parseShort(st.nextToken());
-	target = new dnsName(st.nextToken(), origin);
+	target = new Name(st.nextToken(), origin);
 }
 
 public String
@@ -78,13 +79,13 @@ getPort() {
 	return port;
 }
 
-public dnsName
+public Name
 getTarget() {
 	return target;
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (target == null)
 		return null;
 

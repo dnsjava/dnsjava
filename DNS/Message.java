@@ -5,35 +5,36 @@ package DNS;
 
 import java.util.*;
 import java.io.*;
+import DNS.utils.*;
 
-public class dnsMessage {
+public class Message {
 
-private dnsHeader header;
+private Header header;
 private Vector [] sections;
 private int size;
 
 public
-dnsMessage(int id) {
+Message(int id) {
 	sections = new Vector[4];
 	for (int i=0; i<4; i++)
 		sections[i] = new Vector();
-	header = new dnsHeader(id);
+	header = new Header(id);
 }
 
 public
-dnsMessage() {
-	this(dnsHeader.randomID());
+Message() {
+	this(Header.randomID());
 }
 
 public
-dnsMessage(CountedDataInputStream in) throws IOException {
+Message(CountedDataInputStream in) throws IOException {
 	this();
 	int startpos = in.getPos();
-	dnsCompression c = new dnsCompression();
-	header = new dnsHeader(in);
+	Compression c = new Compression();
+	header = new Header(in);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < header.getCount(i); j++) {
-			dnsRecord rec = dnsRecord.fromWire(in, i, c);
+			Record rec = Record.fromWire(in, i, c);
 			sections[i].addElement(rec);
 		}
 	}
@@ -41,28 +42,28 @@ dnsMessage(CountedDataInputStream in) throws IOException {
 }
 
 public
-dnsMessage(byte [] b) throws IOException {
+Message(byte [] b) throws IOException {
 	this(new CountedDataInputStream(new ByteArrayInputStream(b)));
 }
 
 public void
-setHeader(dnsHeader h) {
+setHeader(Header h) {
 	header = h;
 }
 
-public dnsHeader
+public Header
 getHeader() {
 	return header;
 }
 
 public void
-addRecord(int section, dnsRecord r) {
+addRecord(int section, Record r) {
 	sections[section].addElement(r);
 	header.incCount(section);
 }
 
 public boolean
-removeRecord(int section, dnsRecord r) {
+removeRecord(int section, Record r) {
 	if (sections[section].removeElement(r)) {
 		header.decCount(section);
 		return true;
@@ -71,16 +72,16 @@ removeRecord(int section, dnsRecord r) {
 		return false;
 }
 
-public dnsTSIGRecord
+public TSIGRecord
 getTSIG() {
 	int count = header.getCount(dns.ADDITIONAL);
 	if (count == 0)
 		return null;
 	Vector v = sections[dns.ADDITIONAL];
-	dnsRecord rec = (dnsRecord) v.elementAt(count - 1);
+	Record rec = (Record) v.elementAt(count - 1);
 	if (rec.type !=  dns.TSIG)
 		return null;
-	return (dnsTSIGRecord) rec;
+	return (TSIGRecord) rec;
 }
 
 public Enumeration
@@ -91,12 +92,12 @@ getSection(int section) {
 public void
 toWire(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
-	dnsCompression c = new dnsCompression();
+	Compression c = new Compression();
 	for (int i=0; i<4; i++) {
 		if (sections[i].size() == 0)
 			continue;
 		for (int j=0; j<sections[i].size(); j++) {
-			dnsRecord rec = (dnsRecord)sections[i].elementAt(j);
+			Record rec = (Record)sections[i].elementAt(j);
 			rec.toWire(out, i, c);
 		}
 	}
@@ -117,7 +118,7 @@ toWireCanonical(CountedDataOutputStream out) throws IOException {
 		if (sections[i].size() == 0)
 			continue;
 		for (int j=0; j<sections[j].size(); j++) {
-			dnsRecord rec = (dnsRecord)sections[i].elementAt(j);
+			Record rec = (Record)sections[i].elementAt(j);
 			rec.toWireCanonical(out, i);
 		}
 	}
@@ -138,7 +139,7 @@ sectionToString(int i) {
 	sb.append(";; " + dns.longSectionString(i) + ":\n");
 
 	while (e.hasMoreElements()) {
-		dnsRecord rec = (dnsRecord) e.nextElement();
+		Record rec = (Record) e.nextElement();
 		if (i == dns.QUESTION) {
 			sb.append(";;\t" + rec.name);
 			sb.append(", type = " + dns.typeString(rec.type));

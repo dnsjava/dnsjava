@@ -1,6 +1,7 @@
 dnsjava v0.1
 Brian Wellington (bwelling@xbill.org)
 March 23, 1999
+www.xbill.org/dnsjava
 
 Overview:
 
@@ -30,7 +31,7 @@ If the underlying OS is unix-based, the dnsjava package can parse
 and the OS is not unix-based, the default nameserver is "localhost".  This is
 very bad.  Unfortuantely, I have no idea how to determine the nameserver under
 Windows, MacOS, etc.  Contributions of code are welcome (see
-DNS/dnsFindResolver.java for the basic structure).
+DNS/FindResolver.java for the basic structure).
 
 One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
@@ -44,8 +45,7 @@ Future:
 
 - A GUI for the dynamic update program would be nice
 - A basic (primary, caching, non-recursive) server wouldn't be too hard.
-  dnsServer.java & dnsZone.java contain part of a server, but it's not
-  done yet.
+  dnsServer.java contains part of a server, but it's not done yet.
 - javadoc documentation
 
 

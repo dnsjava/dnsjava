@@ -19,53 +19,53 @@ Function calls:
 	convert between numeric and string representations.
 
 - High Level API:
-	These are static methods in the dns class, and return 'dnsRecord []'
+	These are static methods in the dns class, and return 'Record []'
 
-	getRecords(dnsResolver res, String name, short type, short dclass)
-	getRecords(dnsResolver res, String name, short type)
+	getRecords(Resolver res, String name, short type, short dclass)
+	getRecords(Resolver res, String name, short type)
 	getRecords(String name, short type, short dclass)
 	getRecords(String name, short type)
-	getRecordsByAddress(dnsResolver res, String addr, short type)
+	getRecordsByAddress(Resolver res, String addr, short type)
 	getRecordsByAddress(String addr, short type)
 
 - Lower Level API
 
 	Names:
-		Names are normally represented by dnsName objects, which
+		Names are normally represented by Name objects, which
 		can be created from Strings.
 
 	Records:
 		Each record type is represented by a subclass of dnsRecord.
-		For example, an A record is an instance of dnsARecord.  Each
-		class has accessor functions which extract the data:
-			dnsARecord.getName()
-			dnsARecord.getType()
-			dnsARecord.getDClass()
-			dnsARecord.getAddress()
+		Each class has accessor functions which extract the data.
+		For example, an A record is an instance of ARecord:
+			ARecord.getName()
+			ARecord.getType()
+			ARecord.getDClass()
+			ARecord.getAddress()
 			(not all of the accessor functions are complete yet)
 		Each class defines a constructor that takes all fields as
-		parameters, and dnsRecord provides dnsRecord.newRecord()
+		parameters, and Record provides Record.newRecord()
 		to create records in a non-type specific way.
 	
 	Messages:
-		To extract the message header, use dnsMessage.getHeader().
+		To extract the message header, use Message.getHeader().
 		The header object supports:
-			dnsHeader.getID() / dnsHeader.setID(id)
-			dnsHeader.getFlag(flag)
-			dnsHeader.setFlag(flag) / dnsHeader.unsetFlag(flag)
-			dnsHeader.getRcode() / dnsHeader.setRcode(rcode)
-			dnsHeader.getOpcode() / dnsHeader.setOpcode(opcode)
-			dnsHeader.getCount()
+			Header.getID() / Header.setID(id)
+			Header.getFlag(flag)
+			Header.setFlag(flag) / Header.unsetFlag(flag)
+			Header.getRcode() / Header.setRcode(rcode)
+			Header.getOpcode() / Header.setOpcode(opcode)
+			Header.getCount()
 		The message object supports:
-			dnsMessage.addRecord(section, record)
-			dnsMessage.removeRecord(section, record)
-			dnsMessage.getSection(section)
+			Message.addRecord(section, record)
+			Message.removeRecord(section, record)
+			Message.getSection(section)
 
 	Resolver:
 		dnsResolver.send(message) is used to send/receive messages.
 		Resolver options can also be set:
-			dnsResolver.setPort(port)
-			dnsResolver.useTCP(flag)
-			dnsResolver.setTSIGKey(name, key)
+			Resolver.setPort(port)
+			Resolver.useTCP(flag)
+			Resolver.setTSIGKey(name, key)
 
 	See the dig client for a simple use of the resolver.

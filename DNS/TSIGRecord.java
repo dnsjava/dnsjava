@@ -8,9 +8,9 @@ import java.util.*;
 import java.text.*;
 import DNS.utils.*;
 
-public class dnsTSIGRecord extends dnsRecord {
+public class TSIGRecord extends Record {
 
-dnsName alg;
+Name alg;
 Date timeSigned;
 short fudge;
 byte [] signature;
@@ -19,9 +19,9 @@ short error;
 byte [] other;
 
 public
-dnsTSIGRecord(dnsName _name, short _dclass, int _ttl, dnsName _alg,
-	      Date _timeSigned, short _fudge, byte [] _signature,
-	      int _originalID, short _error, byte _other[]) throws IOException
+TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,
+	   Date _timeSigned, short _fudge, byte [] _signature,
+	   int _originalID, short _error, byte _other[]) throws IOException
 {
 	super(_name, dns.TSIG, _dclass, _ttl);
 	alg = _alg;
@@ -34,13 +34,13 @@ dnsTSIGRecord(dnsName _name, short _dclass, int _ttl, dnsName _alg,
 }
 
 public
-dnsTSIGRecord(dnsName _name, short _dclass, int _ttl, int length,
-	      CountedDataInputStream in, dnsCompression c) throws IOException
+TSIGRecord(Name _name, short _dclass, int _ttl, int length,
+	   CountedDataInputStream in, Compression c) throws IOException
 {
 	super(_name, dns.TSIG, _dclass, _ttl);
 	if (in == null)
 		return;
-	alg = new dnsName(in, c);
+	alg = new Name(in, c);
 
 	short timeHigh = in.readShort();
 	int timeLow = in.readInt();
@@ -79,7 +79,7 @@ toString() {
 	sb.append (dns.rcodeString(error));
 	sb.append ("\n");
 	String s = base64.toString(signature);
-	sb.append (dnsIO.formatBase64String(s, 64, "\t", false));
+	sb.append (IO.formatBase64String(s, 64, "\t", false));
 	if (other != null) {
 		sb.append("\n\t <");
 		if (error == dns.BADTIME) {
@@ -105,7 +105,7 @@ toString() {
 	return sb.toString();
 }
 
-public dnsName
+public Name
 getAlg() {
 	return alg;
 }
@@ -141,7 +141,7 @@ getOther() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 

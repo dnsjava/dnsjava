@@ -5,13 +5,14 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsHINFORecord extends dnsRecord {
+public class HINFORecord extends Record {
 
 String cpu, os;
 
 public
-dnsHINFORecord(dnsName _name, short _dclass, int _ttl, String _cpu, String _os)
+HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 {
 	super(_name, dns.HINFO, _dclass, _ttl);
 	cpu = _cpu;
@@ -19,8 +20,8 @@ dnsHINFORecord(dnsName _name, short _dclass, int _ttl, String _cpu, String _os)
 }
 
 public
-dnsHINFORecord(dnsName _name, short _dclass, int _ttl, int length,
-	       CountedDataInputStream in, dnsCompression c)
+HINFORecord(Name _name, short _dclass, int _ttl, int length,
+	    CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.HINFO, _dclass, _ttl);
@@ -31,8 +32,8 @@ throws IOException
 }
 
 public
-dnsHINFORecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	       dnsName origin)
+HINFORecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	       Name origin)
 throws IOException
 {
 	super(_name, dns.HINFO, _dclass, _ttl);
@@ -51,7 +52,7 @@ getOS() {
 	return os;
 }
 
-byte[] rrToWire(dnsCompression c) throws IOException {
+byte[] rrToWire(Compression c) throws IOException {
 	if (cpu == null || os == null)
 		return null;
 

@@ -5,14 +5,15 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsUNKRecord extends dnsRecord {
+public class UNKRecord extends Record {
 
 byte [] data;
 
 public 
-dnsUNKRecord(dnsName _name, short _type, short _dclass, int _ttl, int length,
-	     CountedDataInputStream in, dnsCompression c) throws IOException
+UNKRecord(Name _name, short _type, short _dclass, int _ttl, int length,
+	  CountedDataInputStream in, Compression c) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	if (in == null)
@@ -22,8 +23,8 @@ dnsUNKRecord(dnsName _name, short _type, short _dclass, int _ttl, int length,
 }
 
 public 
-dnsUNKRecord(dnsName _name, short _type, short _dclass, int _ttl,
-	     MyStringTokenizer st, dnsName origin) throws IOException
+UNKRecord(Name _name, short _type, short _dclass, int _ttl,
+	  MyStringTokenizer st, Name origin) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	System.out.println("Unknown type: " + type);
@@ -39,7 +40,7 @@ toString() {
 }
 
 byte []
-rrToWire(dnsCompression c) {
+rrToWire(Compression c) {
 	return data;
 }
 

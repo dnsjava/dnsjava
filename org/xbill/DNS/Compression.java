@@ -5,28 +5,28 @@ package DNS;
 
 import java.util.Hashtable;
 
-public class dnsCompression {
+public class Compression {
 
 Hashtable h;
 
 public
-dnsCompression() {
+Compression() {
 	h = new Hashtable();
 }
 
 public void
-add(int pos, dnsName name) {
+add(int pos, Name name) {
 	h.put (new Integer(pos), name);
 	h.put (name, new Integer(pos));
 }
 
-public dnsName
+public Name
 get(int pos) {
-	return (dnsName)h.get(new Integer(pos));
+	return (Name)h.get(new Integer(pos));
 }
 
 public int
-get(dnsName name) {
+get(Name name) {
 	Integer I = (Integer) h.get(name);
 	return (I == null) ? (-1) : I.intValue();
 }

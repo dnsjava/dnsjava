@@ -6,7 +6,7 @@ package DNS;
 import java.io.*;
 import java.util.*;
 
-public class dnsFindResolver {
+class FindResolver {
 
 static String server = null;
 

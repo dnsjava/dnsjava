@@ -3,11 +3,11 @@
 
 package DNS;
 
-public class dnsEDNS {
+public class EDNS {
 
-public static dnsOPTRecord
+public static OPTRecord
 newOPT(int payloadSize) {
-	return new dnsOPTRecord(dnsName.root, (short)payloadSize, 0);
+	return new OPTRecord(Name.root, (short)payloadSize, 0);
 }
 
 }

@@ -6,7 +6,7 @@ package DNS;
 import java.io.*;
 import java.util.*;
 
-public class dnsIO {
+public class IO {
 
 public static String
 readExtendedLine(BufferedReader br) throws IOException {

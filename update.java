@@ -13,10 +13,10 @@ static final int PREREQ = dns.ANSWER;
 static final int UPDATE = dns.AUTHORITY;
 static final int ADDITIONAL = dns.ADDITIONAL;
 
-dnsMessage query, response;
-dnsResolver res;
+Message query, response;
+Resolver res;
 String server = "localhost";
-dnsName origin;
+Name origin;
 int defaultTTL;
 short defaultClass = dns.IN;
 
@@ -24,7 +24,7 @@ public
 update(InputStream in) throws IOException {
 	Vector inputs = new Vector();
 
-	query = new dnsMessage();
+	query = new Message();
 	query.getHeader().setOpcode(dns.UPDATE);
 
 	InputStreamReader isr = new InputStreamReader(in);
@@ -41,7 +41,7 @@ update(InputStream in) throws IOException {
 			if (in == System.in && brOrig == br)
 				System.out.print("> ");
 
-			line = dnsIO.readExtendedLine(br);
+			line = IO.readExtendedLine(br);
 			if (line == null) {
 				inputs.removeElement(br);
 				if (inputs.isEmpty())
@@ -59,26 +59,26 @@ update(InputStream in) throws IOException {
 
 		else if (operation.equals("server")) {
 			server = st.nextToken();
-			res = new dnsResolver(server);
+			res = new Resolver(server);
 		}
 
 		else if (operation.equals("key")) {
 			String keyname = st.nextToken();
 			String keydata = st.nextToken();
 			if (res == null)
-				res = new dnsResolver(server);
+				res = new Resolver(server);
 			res.setTSIGKey(keyname, keydata);
 		}
 
 		else if (operation.equals("port")) {
 			if (res == null)
-				res = new dnsResolver(server);
+				res = new Resolver(server);
 			res.setPort(Short.parseShort(st.nextToken()));
 		}
 
 		else if (operation.equals("tcp")) {
 			if (res == null)
-				res = new dnsResolver(server);
+				res = new Resolver(server);
 			res.setTCP(true);
 		}
 
@@ -95,7 +95,7 @@ update(InputStream in) throws IOException {
 			defaultTTL = Integer.parseInt(st.nextToken());
 
 		else if (operation.equals("origin"))
-			origin = new dnsName(st.nextToken());
+			origin = new Name(st.nextToken());
 
 		else if (operation.equals("require"))
 			doRequire(st);
@@ -121,9 +121,9 @@ update(InputStream in) throws IOException {
 
 		else if (operation.equals("send")) {
 			if (res == null)
-				res = new dnsResolver(server);
+				res = new Resolver(server);
 			sendUpdate();
-			query = new dnsMessage();
+			query = new Message();
 			query.getHeader().setOpcode(dns.UPDATE);
 		}
 
@@ -150,7 +150,7 @@ update(InputStream in) throws IOException {
 void
 sendUpdate() throws IOException {
 	if (query.getHeader().getCount(ZONE) == 0) {
-		dnsName zone = origin;
+		Name zone = origin;
 		short dclass = defaultClass;
 		if (zone == null) {
 			Enumeration updates = query.getSection(UPDATE);
@@ -158,11 +158,11 @@ sendUpdate() throws IOException {
 				System.out.println("Invalid update");
 				return;
 			}
-			dnsRecord r = (dnsRecord) updates.nextElement();
-			zone = new dnsName(r.getName(), 1);
+			Record r = (Record) updates.nextElement();
+			zone = new Name(r.getName(), 1);
 			dclass = r.getDClass();
 		}
-		dnsRecord soa = dnsRecord.newRecord(zone, dns.SOA, dclass);
+		Record soa = Record.newRecord(zone, dns.SOA, dclass);
 		query.addRecord(ZONE, soa);
 	}
 
@@ -180,11 +180,11 @@ sendUpdate() throws IOException {
  * <name> [ttl] [class] <type> <data>
  * Ignore the class, if present.
  */
-dnsRecord
+Record
 parseRR(MyStringTokenizer st, short classValue, int TTLValue)
 throws IOException
 {
-	dnsName name = new dnsName(st.nextToken(), origin);
+	Name name = new Name(st.nextToken(), origin);
 	int ttl;
 	short type;
 
@@ -204,38 +204,38 @@ throws IOException
 	if ((type = dns.typeValue(s)) < 0)
 		throw new IOException("Parse error");
 
-	return dnsRecord.fromString(name, type, classValue, ttl, st, origin);
+	return Record.fromString(name, type, classValue, ttl, st, origin);
 }
 
 /* 
  * <name> <type>
  */
-dnsRecord
+Record
 parseSet(MyStringTokenizer st, short classValue) throws IOException {
-	dnsName name = new dnsName(st.nextToken(), origin);
+	Name name = new Name(st.nextToken(), origin);
 	short type;
 
 	if ((type = dns.typeValue(st.nextToken())) < 0)
 		throw new IOException("Parse error");
 
-	return dnsRecord.newRecord(name, type, classValue, 0);
+	return Record.newRecord(name, type, classValue, 0);
 	
 }
 
 /* 
  * <name>
  */
-dnsRecord
+Record
 parseName(MyStringTokenizer st, short classValue) throws IOException {
-	dnsName name = new dnsName(st.nextToken(), origin);
+	Name name = new Name(st.nextToken(), origin);
 
-	return dnsRecord.newRecord(name, dns.ANY, classValue, 0);
+	return Record.newRecord(name, dns.ANY, classValue, 0);
 	
 }
 
 void
 doRequire(MyStringTokenizer st) throws IOException {
-	dnsRecord rec;
+	Record rec;
 
 	String qualifier = st.nextToken();
 	if (qualifier.equals("-r")) 
@@ -256,7 +256,7 @@ doRequire(MyStringTokenizer st) throws IOException {
 
 void
 doProhibit(MyStringTokenizer st) throws IOException {
-	dnsRecord rec;
+	Record rec;
 
 	String qualifier = st.nextToken();
 	if (qualifier.equals("-r")) 
@@ -277,7 +277,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 
 void
 doAdd(MyStringTokenizer st) throws IOException {
-	dnsRecord rec;
+	Record rec;
 
 	String qualifier = st.nextToken();
 	if (!qualifier.startsWith("-")) {
@@ -298,7 +298,7 @@ doAdd(MyStringTokenizer st) throws IOException {
 
 void
 doDelete(MyStringTokenizer st) throws IOException {
-	dnsRecord rec;
+	Record rec;
 
 	String qualifier = st.nextToken();
 	if (qualifier.equals("-r"))
@@ -319,7 +319,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 
 void
 doGlue(MyStringTokenizer st) throws IOException {
-	dnsRecord rec;
+	Record rec;
 
 	String qualifier = st.nextToken();
 	if (!qualifier.startsWith("-")) {
@@ -340,15 +340,15 @@ doGlue(MyStringTokenizer st) throws IOException {
 
 void
 doQuery(MyStringTokenizer st) throws IOException {
-	dnsRecord rec;
-	dnsMessage newQuery = new dnsMessage();
+	Record rec;
+	Message newQuery = new Message();
 
 	rec = parseSet(st, defaultClass);
 	newQuery.getHeader().setFlag(dns.RD);
 	newQuery.getHeader().setOpcode(dns.QUERY);
 	newQuery.addRecord(dns.QUESTION, rec);
 	if (res == null)
-		res = new dnsResolver(server);
+		res = new Resolver(server);
 	if (rec.getType() == dns.AXFR)
 		response = res.sendAXFR(newQuery);
 	else

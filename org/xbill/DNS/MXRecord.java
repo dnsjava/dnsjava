@@ -5,15 +5,15 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsMXRecord extends dnsRecord {
+public class MXRecord extends Record {
 
 short priority;
-dnsName target;
+Name target;
 
 public
-dnsMXRecord(dnsName _name, short _dclass, int _ttl, int _priority,
-	    dnsName _target)
+MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 {
 	super(_name, dns.MX, _dclass, _ttl);
 	priority = (short) _priority;
@@ -21,25 +21,24 @@ dnsMXRecord(dnsName _name, short _dclass, int _ttl, int _priority,
 }
 
 public
-dnsMXRecord(dnsName _name, short _dclass, int _ttl,
-	    int length, CountedDataInputStream in, dnsCompression c)
+MXRecord(Name _name, short _dclass, int _ttl,
+	    int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
 	super(_name, dns.MX, _dclass, _ttl);
 	if (in == null)
 		return;
 	priority = (short) in.readUnsignedShort();
-	target = new dnsName(in, c);
+	target = new Name(in, c);
 }
 
 public
-dnsMXRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
-	    dnsName origin)
+MXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
 throws IOException
 {
 	super(_name, dns.MX, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
-	target = new dnsName(st.nextToken(), origin);
+	target = new Name(st.nextToken(), origin);
 }
 
 public String
@@ -53,7 +52,7 @@ toString() {
 	return sb.toString();
 }
 
-public dnsName
+public Name
 getTarget() {
 	return target;
 }
@@ -64,7 +63,7 @@ getPriority() {
 }
 
 byte []
-rrToWire(dnsCompression c) throws IOException {
+rrToWire(Compression c) throws IOException {
 	if (target == null)
 		return null;
 

@@ -19,7 +19,7 @@ private static Hashtable flags = new Hashtable();
 private static Hashtable sections = new Hashtable();
 private static Hashtable longSections = new Hashtable();
 
-private static dnsResolver _res;
+private static Resolver _res;
 
 /* Types */
 public static final short A		= 1;
@@ -316,21 +316,21 @@ matchType(short type1, short type2) {
 
 public static void
 init(String defaultResolver) {
-	dnsResolver.setDefaultResolver(defaultResolver);
+	Resolver.setDefaultResolver(defaultResolver);
 }
 
-public static dnsRecord []
-getRecords(dnsResolver res, String name, short type, short dclass) {
-	dnsMessage query = new dnsMessage();
-	dnsMessage response;
-	dnsRecord question;
-	dnsRecord [] answers;
+public static Record []
+getRecords(Resolver res, String name, short type, short dclass) {
+	Message query = new Message();
+	Message response;
+	Record question;
+	Record [] answers;
 	int answerCount = 0, i = 0;
 	Enumeration e;
 
 	if (res == _res && _res == null) {
 		try {
-			_res = new dnsResolver();
+			_res = new Resolver();
 		}
 		catch (UnknownHostException uhe) {
 			System.out.println("Failed to initialize resolver");
@@ -340,7 +340,7 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 
 	query.getHeader().setFlag(dns.RD);
 	query.getHeader().setOpcode(dns.QUERY);
-	question = dnsRecord.newRecord(new dnsName(name), type, dclass);
+	question = Record.newRecord(new Name(name), type, dclass);
 	query.addRecord(dns.QUESTION, question);
 
 	try {
@@ -355,7 +355,7 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 
 	e = response.getSection(dns.ANSWER);
 	while (e.hasMoreElements()) {
-		dnsRecord r = (dnsRecord)e.nextElement();
+		Record r = (Record)e.nextElement();
 		if (matchType(r.getType(), type))
 			answerCount++;
 	}
@@ -363,11 +363,11 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 	if (answerCount == 0)
 		return null;
 
-	answers = new dnsRecord[answerCount];
+	answers = new Record[answerCount];
 
 	e = response.getSection(dns.ANSWER);
 	while (e.hasMoreElements()) {
-		dnsRecord r = (dnsRecord)e.nextElement();
+		Record r = (Record)e.nextElement();
 		if (matchType(r.getType(), type))
 			answers[i++] = r;
 	}
@@ -375,24 +375,24 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 	return answers;
 }
 
-public static dnsRecord []
-getRecords(dnsResolver res, String name, short type) {
+public static Record []
+getRecords(Resolver res, String name, short type) {
 	return getRecords(res, name, type, dns.IN);
 }
 
-public static dnsRecord []
+public static Record []
 getRecords(String name, short type, short dclass) {
 	return getRecords(_res, name, type, dclass);
 }
 
-public static dnsRecord []
+public static Record []
 getRecords(String name, short type) {
 	return getRecords(_res, name, type, dns.IN);
 }
 
 
-public static dnsRecord []
-getRecordsByAddress(dnsResolver res, String addr, short type) {
+public static Record []
+getRecordsByAddress(Resolver res, String addr, short type) {
 	byte [] address;
 	try {
 		address = InetAddress.getByName(addr).getAddress();
@@ -410,7 +410,7 @@ getRecordsByAddress(dnsResolver res, String addr, short type) {
 	return getRecords(res, name, type, dns.IN);
 }
 
-public static dnsRecord []
+public static Record []
 getRecordsByAddress(String addr, short type) {
 	return getRecordsByAddress(_res, addr, type);
 }

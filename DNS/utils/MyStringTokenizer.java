@@ -16,7 +16,7 @@ import java.util.*;
  * These should probably be optional.
  *
  * This could do multiline handling, but I think I should leave that in
- *    dnsIO.readExtendedLine.
+ *    IO.readExtendedLine.
  */
 
 public class MyStringTokenizer implements Enumeration {

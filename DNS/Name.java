@@ -5,18 +5,19 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
-public class dnsName {
+public class Name {
 
 private String [] name;
 private byte labels;
 
-public static dnsName root = new dnsName("");
+public static Name root = new Name("");
 
 static final int MAXLABELS = 64;
 
 public
-dnsName(String s, dnsName origin) {
+Name(String s, Name origin) {
 	labels = 0;
 	name = new String[MAXLABELS];
 
@@ -50,11 +51,11 @@ dnsName(String s, dnsName origin) {
 }
 
 public
-dnsName(String s) {
+Name(String s) {
 	this (s, null);
 }
 
-dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
+Name(CountedDataInputStream in, Compression c) throws IOException {
 	int len, start, count = 0;
 
 	labels = 0;
@@ -65,7 +66,7 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 		if ((len & 0xC0) != 0) {
 			int pos = in.readUnsignedByte();
 			pos += ((len & ~0xC0) << 8);
-			dnsName name2 = (c == null) ? null : c.get(pos);
+			Name name2 = (c == null) ? null : c.get(pos);
 /*System.out.println("Looking for name at " + pos + ", found " + name2);*/
 			if (name2 == null)
 				name[labels++] = new String("<compressed>");
@@ -83,7 +84,7 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 	}
 	if (c != null) 
 		for (int i = 0, pos = start; i < count; i++) {
-			dnsName tname = new dnsName(this, i);
+			Name tname = new Name(this, i);
 			c.add(pos, tname);
 /*System.out.println("(D) Adding " + tname + " at " + pos);*/
 			pos += (name[i].length() + 1);
@@ -92,7 +93,7 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 
 /* Skips n labels and creates a new name */
 public
-dnsName(dnsName d, int n) {
+Name(Name d, int n) {
 	name = new String[MAXLABELS];
 
 	labels = (byte) (d.labels - n);
@@ -100,7 +101,7 @@ dnsName(dnsName d, int n) {
 }
 
 public void
-append(dnsName d) {
+append(Name d) {
 	System.arraycopy(d.name, 0, name, labels, d.labels);
 	labels += d.labels;
 }
@@ -129,9 +130,9 @@ toString() {
 }
 
 public void
-toWire(CountedDataOutputStream out, dnsCompression c) throws IOException {
+toWire(CountedDataOutputStream out, Compression c) throws IOException {
 	for (int i=0; i<labels; i++) {
-		dnsName tname = new dnsName(this, i);
+		Name tname = new Name(this, i);
 		int pos;
 		if (c != null)
 			pos = c.get(tname);
@@ -165,9 +166,9 @@ toWireCanonical(CountedDataOutputStream out) throws IOException {
 
 public boolean
 equals(Object arg) {
-	if (arg == null || !(arg instanceof dnsName))
+	if (arg == null || !(arg instanceof Name))
 		return false;
-	dnsName d = (dnsName) arg;
+	Name d = (Name) arg;
 	if (d.labels != labels)
 		return false;
 	for (int i = 0; i < labels; i++) {
