@@ -1,3 +1,8 @@
+2/3/2004
+	- The Lookup.run() method should be usable more than once on a Lookup
+	  object.
+	  (reported by Joseph Shraibman <jks@iname.com>)
+
 10/31/2004
 	- Add partial IPv6 support to the ReverseMap class.
 	  (based on a patch from Th Kuhne)

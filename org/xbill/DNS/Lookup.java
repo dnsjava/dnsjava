@@ -14,6 +14,9 @@ import java.net.*;
  * resolvers located by the FindServer class, performs the queries.  A search
  * path of domain suffixes is used to resolve relative names, and is also
  * determined by the FindServer class.
+ *
+ * A Lookup object may be reused, but should not be used by multiple threads.
+ *
  * @see Cache
  * @see Resolver
  * @see FindServer
@@ -30,6 +33,7 @@ private static Map defaultCaches;
 private Resolver resolver;
 private Name [] searchPath;
 private Cache cache;
+private boolean temporary_cache;
 private int credibility;
 private Name name;
 private int type;
@@ -50,6 +54,8 @@ private boolean networkerror;
 private boolean timedout;
 private boolean nametoolong;
 private boolean referral;
+
+private static final Name [] noAliases = new Name[0];
 
 /** The lookup was successful. */
 public static final int SUCCESSFUL = 0;
@@ -165,6 +171,27 @@ setDefaultSearchPath(String [] domains) throws TextParseException {
 	defaultSearchPath = newdomains;
 }
 
+private final void
+reset() {
+	iterations = 0;
+	foundAlias = false;
+	done = false;
+	doneCurrent = false;
+	aliases = null;
+	answers = null;
+	result = -1;
+	error = null;
+	nxdomain = false;
+	badresponse = false;
+	badresponse_error = null;
+	networkerror = false;
+	timedout = false;
+	nametoolong = false;
+	referral = false;
+	if (temporary_cache)
+		cache.clearCache();
+}
+
 /**
  * Create a Lookup object that will find records of the given name, type,
  * and class.  The lookup will use the default cache, resolver, and search
@@ -198,7 +225,6 @@ Lookup(Name name, int type, int dclass) {
 	this.credibility = Credibility.NORMAL;
 	this.verbose = Options.check("verbose");
 	this.result = -1;
-	this.aliases = new ArrayList();
 }
 
 /**
@@ -312,9 +338,13 @@ setSearchPath(String [] domains) throws TextParseException {
  */
 public void
 setCache(Cache cache) {
-	if (cache == null)
-		cache = new Cache(dclass, 0);
-	this.cache = cache;
+	if (cache == null) {
+		this.cache = new Cache(dclass, 0);
+		this.temporary_cache = true;
+	} else {
+		this.cache = cache;
+		this.temporary_cache = false;
+	}
 }
 
 /**
@@ -342,6 +372,8 @@ follow(Name name, Name oldname) {
 		done = true;
 		return;
 	}
+	if (aliases == null)
+		aliases = new ArrayList();
 	aliases.add(name);
 	lookup(name);
 }
@@ -470,6 +502,8 @@ resolve(Name current, Name suffix) {
  */
 public Record []
 run() {
+	if (done)
+		reset();
 	if (name.isAbsolute())
 		resolve(name, null);
 	else if (searchPath == null)
@@ -549,6 +583,8 @@ getAnswers() {
 public Name []
 getAliases() {
 	checkDone();
+	if (aliases == null)
+		return noAliases;
 	return (Name []) aliases.toArray(new Name[aliases.size()]);
 }
 
