@@ -41,9 +41,9 @@ doAXFR(Message response) throws IOException {
 		return;
 	}
 
-	Enumeration e = response.getSection(Section.ANSWER);
-	while (e.hasMoreElements())
-		System.out.println(e.nextElement());
+	Record [] records = response.getSectionArray(Section.ANSWER);
+	for (int i = 0; i < records.length; i++)
+		System.out.println(records[i]);
 
 	System.out.print(";; done (");
 	System.out.print(response.getHeader().getCount(Section.ANSWER));
