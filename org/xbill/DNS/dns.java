@@ -132,7 +132,7 @@ getCache() {
 }
 
 private static Record []
-lookup(Name name, short type, short dclass, byte cred) {
+lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
 	Record [] answers;
 	int answerCount = 0, n = 0;
 	Enumeration e;
@@ -159,6 +159,9 @@ lookup(Name name, short type, short dclass, byte cred) {
 	else if (cached.isNegative()) {
 		return null;
 	}
+	else if (querysent) {
+		return null;
+	}
 	else {
 		Record question = Record.newRecord(name, type, dclass);
 		Message query = Message.newQuery(question);
@@ -178,23 +181,7 @@ lookup(Name name, short type, short dclass, byte cred) {
 		if (rcode != Rcode.NOERROR)
 			return null;
 
-		e = response.getSection(Section.ANSWER);
-		while (e.hasMoreElements()) {
-			Record r = (Record)e.nextElement();
-			if (matchType(r.getType(), type))
-				answerCount++;
-		}
-		if (answerCount == 0)
-			return null;
-
-		answers = new Record[answerCount];
-
-		e = response.getSection(Section.ANSWER);
-		while (e.hasMoreElements()) {
-			Record r = (Record)e.nextElement();
-			if (matchType(r.getType(), type))
-				answers[n++] = r;
-		}
+		return lookup(name, type, dclass, cred, true);
 	}
 
 	return answers;
@@ -220,11 +207,11 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 
 	initialize();
 	if (searchPath == null || name.isQualified())
-		answers = lookup(name, type, dclass, cred);
+		answers = lookup(name, type, dclass, cred, false);
 	else {
 		for (int i = 0; i < searchPath.length; i++) {
 			answers = lookup(new Name(namestr, searchPath[i]),
-					 type, dclass, cred);
+					 type, dclass, cred, false);
 			if (answers != null)
 				break;
 		}

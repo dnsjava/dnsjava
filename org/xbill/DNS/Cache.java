@@ -27,6 +27,7 @@ private class Element {
 	long timeIn;
 	int ttl;
 	int srcid;
+	Thread tid;
 
 	public
 	Element(int _ttl, byte cred, int src) {
@@ -35,6 +36,7 @@ private class Element {
 		ttl = _ttl;
 		srcid = src;
 		timeIn = System.currentTimeMillis();
+		tid = Thread.currentThread();
 	}
 	public
 	Element(Record r, byte cred, int src) {
@@ -43,6 +45,7 @@ private class Element {
 		ttl = -1;
 		srcid = src;
 		update(r);
+		tid = Thread.currentThread();
 	}
 
 	public
@@ -53,6 +56,7 @@ private class Element {
 		timeIn = System.currentTimeMillis();
 		ttl = r.getTTL();
 		srcid = src;
+		tid = Thread.currentThread();
 	}
 
 	public void
@@ -68,9 +72,17 @@ private class Element {
 		rrset.deleteRR(r);
 	}
 
+	/* Consider a TTL 0 rrset that isn't ours to return as expired */
 	public boolean
 	expiredTTL() {
+		if (ttl == 0 && tid != Thread.currentThread())
+			return true;
 		return (System.currentTimeMillis() > timeIn + (1000 * ttl));
+	}
+
+	public boolean
+	TTL0Ours() {
+		return (ttl == 0 && tid == Thread.currentThread());
 	}
 
 	public String
@@ -191,6 +203,9 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 		if (element.expiredTTL()) {
 			removeSet(name, type, dclass, element);
 			objects[i] = null;
+		}
+		else if (element.TTL0Ours()) {
+			removeSet(name, type, dclass, element);
 		}
 		else if (element.credibility < minCred)
 			objects[i] = null;
