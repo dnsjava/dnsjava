@@ -123,6 +123,7 @@ nextToken() {
 	}
 	boolean quoted = false;
 	boolean escaped = false;
+	boolean bracketed = false;
 	StringBuffer sb = new StringBuffer();
 	while (true) {
 		if (current == string.length)
@@ -146,11 +147,22 @@ nextToken() {
 			else
 				sb.append(string[current]);
 		}
+		else if (bracketed) {
+			if (string[current] == ']')
+				bracketed = false;
+			sb.append(string[current]);
+		}
 		else {
 			if (string[current] == '"') 
 				quoted = true;
-			else if (string[current] == '\\' & !noescape)
+			else if (string[current] == '\\' && !noescape)
 				escaped = true;
+			else if (string[current] == '[' &&
+				 delim.indexOf('.') >= 0)
+			{
+				bracketed = true;
+				sb.append(string[current]);
+			}
 			else if (isDelim(current)) {
 				break;
 			}
@@ -159,6 +171,7 @@ nextToken() {
 		}
 		current++;
 	}
+System.out.println("->" + sb.toString());
 	return sb.toString();
 }
 
