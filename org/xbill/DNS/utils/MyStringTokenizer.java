@@ -9,8 +9,8 @@ import java.util.*;
 /**
  * A class similar to StringTokenizer, with a few differences making it more
  * suitable.  The \ character is used as an escape character, allowing
- * delimiters to be escaped and \xxx decimal value to be used.  Quoted
- * strings (delimited by double quotes) are treated as one token.
+ * delimiters to be escaped.  Quoted strings (delimited by double quotes)
+ * are treated as one token.
  *
  * @author Brian Wellington
  */
@@ -22,7 +22,6 @@ private String delim;
 private boolean returnTokens;
 private int current;
 private String putBack;
-private boolean noescape;
 
 /** Creates a new instance of MyStringTokenizer.
  * @param s The string to be tokenized
@@ -56,15 +55,6 @@ MyStringTokenizer(String s, String delim) {
 public
 MyStringTokenizer(String s) {
 	this(s, " \t\n\r", false);
-}
-
-/**
- * Turns off the escape character.  Useful when tokenizing the output
- * of the tokenizer.
- */
-public void
-setNoEscapeCharacter() {
-	noescape = true;
 }
 
 private boolean
@@ -125,49 +115,28 @@ nextToken() {
 	}
 	boolean quoted = false;
 	boolean escaped = false;
-	boolean bracketed = false;
 	StringBuffer sb = new StringBuffer();
 	while (true) {
 		if (current == string.length)
 			break;
 		if (escaped) {
-			if (Character.digit(string[current], 10) >= 0) {
-				String s = new String(string, current, 3);
-				int i = Integer.parseInt(s);
-				sb.append((char)i);
-				current += 2;
-			}
-			else
-				sb.append(string[current]);
+			sb.append('\\');
+			sb.append(string[current]);
 			escaped = false;
-		}
-		else if (quoted) {
+		} else if (quoted) {
 			if (string[current] == '"') {
 				current++;
 				break;
 			}
 			else
 				sb.append(string[current]);
-		}
-		else if (bracketed) {
-			if (string[current] == ']')
-				bracketed = false;
-			sb.append(string[current]);
-		}
-		else {
+		} else {
 			if (string[current] == '"') 
 				quoted = true;
-			else if (string[current] == '\\' && !noescape)
+			else if (string[current] == '\\')
 				escaped = true;
-			else if (string[current] == '[' &&
-				 delim.indexOf('.') >= 0)
-			{
-				bracketed = true;
-				sb.append(string[current]);
-			}
-			else if (isDelim(current)) {
+			else if (isDelim(current))
 				break;
-			}
 			else
 				sb.append(string[current]);
 		}
