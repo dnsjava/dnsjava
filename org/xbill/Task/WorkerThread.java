@@ -18,7 +18,7 @@ private Runnable task;
 private String name;
 
 private static int nactive = 0;
-private static Vector list = new Vector();
+private static LinkedList list = new LinkedList();
 private static int max = 10;
 private static long lifetime = 900 * 1000; /* 15 minute default */
 
@@ -59,8 +59,8 @@ getThread() {
 	WorkerThread t;
 	synchronized (list) {
 		if (list.size() > 0) {
-			t = (WorkerThread) list.firstElement();
-			list.removeElement(t);
+			t = (WorkerThread) list.getFirst();
+			list.remove(t);
 		}
 		else if (nactive >= max) {
 			while (true) {
@@ -71,8 +71,8 @@ getThread() {
 				}
 				if (list.size() == 0)
 					continue;
-				t = (WorkerThread) list.firstElement();
-				list.removeElement(t);
+				t = (WorkerThread) list.getFirst();
+				list.remove(t);
 				break;
 			}
 		}
@@ -121,7 +121,7 @@ run() {
 		}
 		setName("idle thread");
 		synchronized (list) {
-			list.addElement(this);
+			list.add(this);
 			list.notify();
 			nactive--;
 		}
@@ -132,7 +132,7 @@ run() {
 		catch (InterruptedException e) {
 		}
 		if (task == null) {
-			list.removeElement(this);
+			list.remove(this);
 			return;
 		}
 	}
