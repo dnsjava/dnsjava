@@ -62,12 +62,11 @@ fromString(String str) {
 
 		t[0] = (short) ((s[0] << 2) + (s[1] >> 4));
 		if (s[2] == 64) {
-			t[1] = (short) ((s[1] << 4) & 0xFF);
-			t[2] = (short) (-1);
+			t[1] = t[2] = (short) (-1);
 		}
 		else if (s[3] == 64) {
 			t[1] = (short) (((s[1] << 4) + (s[2] >> 2)) & 0xFF);
-			t[2] = (short) ((s[2] << 6) & 0xFF);
+			t[2] = (short) (-1);
 		}
 		else {
 			t[1] = (short) (((s[1] << 4) + (s[2] >> 2)) & 0xFF);
