@@ -145,10 +145,18 @@ findWin(InputStream in) {
 	try {
 		Vector vserver = null;
 		String line = null;
+		boolean readingServers = false;
 		while ((line = br.readLine()) != null) {
+			StringTokenizer st = new StringTokenizer(line);
+			if (!st.hasMoreTokens()) {
+				readingServers = false;
+				continue;
+			}
+			String s = st.nextToken();
+			if (line.indexOf(":") != -1)
+				readingServers = false;
+			
 			if (line.indexOf("Host Name") != -1) {
-				String s = null;
-				StringTokenizer st = new StringTokenizer(line);
 				while (st.hasMoreTokens())
 					s = st.nextToken();
 				Name name = new Name(s);
@@ -158,24 +166,20 @@ findWin(InputStream in) {
 				search = new Name[1];
 				search[0] = name;
 			}
-			else if (line.indexOf("DNS Servers") != -1)
-				break;
+			else if (readingServers ||
+				 line.indexOf("DNS Servers") != -1)
+			{
+				while (st.hasMoreTokens())
+					s = st.nextToken();
+				if (s.equals(":"))
+					continue;
+				if (vserver == null)
+					vserver = new Vector();
+				vserver.addElement(s);
+				readingServers = true;
+			}
 		}
 		
-		if (line == null)
-			return;
-
-		do {
-			String s = null;
-			StringTokenizer st = new StringTokenizer(line);
-			while (st.hasMoreTokens())
-				s = st.nextToken();
-			if (vserver == null)
-				vserver = new Vector();
-			vserver.addElement(s);
-			line = br.readLine();
-		} while (line != null && line.indexOf(":") == -1);
-
 		if (server == null && vserver != null) {
 			server = new String[vserver.size()];
 			for (int i = 0; i < vserver.size(); i++)

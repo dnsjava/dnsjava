@@ -1,3 +1,6 @@
+5/23/2001
+	- Automatically determining name servers didn't work on Windows 2000.
+
 4/13/2001
 	- Converting a Name to a String does proper character escaping.
 
