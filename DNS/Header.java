@@ -52,6 +52,11 @@ setFlag(int bit) {
 	flags[bit] = true;
 }
 
+void
+setFlags(boolean [] _flags) {
+	flags = flags;
+}
+
 public void
 unsetFlag(int bit) {
 	flags[bit] = false;
@@ -60,6 +65,11 @@ unsetFlag(int bit) {
 public boolean
 getFlag(int bit) {
 	return flags[bit];
+}
+
+boolean []
+getFlags() {
+	return flags;
 }
 
 public int

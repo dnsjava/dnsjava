@@ -7,7 +7,7 @@ import java.util.*;
 import java.io.*;
 import DNS.utils.*;
 
-public class Message {
+public class Message implements Cloneable {
 
 private Header header;
 private Vector [] sections;
@@ -201,6 +201,21 @@ toString() {
 		sb.append(sectionToString(i) + "\n");
 	sb.append(";; done (" + numBytes() + " bytes)");
 	return sb.toString();
+}
+
+public Object
+clone() {
+	Message m = new Message();
+	for (int i = 0; i < sections.length; i++) {
+		m.sections[i] = (Vector) sections[i].clone();
+		m.header.setCount(i, header.getCount(i));
+	}
+	m.header.setID(header.getID());
+	m.header.setRcode(header.getRcode());
+	m.header.setOpcode(header.getOpcode());
+	m.header.setFlags(header.getFlags());
+	m.size = size;
+	return m;
 }
 
 }
