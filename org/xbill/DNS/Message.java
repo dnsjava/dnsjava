@@ -97,13 +97,14 @@ newUpdate(Name zone) {
 
 Message(DNSInput in) throws IOException {
 	this(new Header(in));
+	boolean isUpdate = (header.getOpcode() == Opcode.UPDATE);
 	for (int i = 0; i < 4; i++) {
 		int count = header.getCount(i);
 		if (count > 0)
 			sections[i] = new ArrayList(count);
 		for (int j = 0; j < count; j++) {
 			int pos = in.current();
-			Record rec = Record.fromWire(in, i);
+			Record rec = Record.fromWire(in, i, isUpdate);
 			sections[i].add(rec);
 			if (rec.getType() == Type.TSIG)
 				tsigstart = pos;

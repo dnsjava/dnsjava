@@ -1,3 +1,7 @@
+2/4/2004
+	- Records of an unknown type and length 0 weren't handled properly.
+	  (reported by Olafur Gudmundsson <ogud@ogud.com>)
+
 2/3/2004
 	- The Lookup.run() method should be usable more than once on a Lookup
 	  object.

@@ -203,7 +203,7 @@ newRecord(Name name, int type, int dclass) {
 }
 
 static Record
-fromWire(DNSInput in, int section) throws IOException {
+fromWire(DNSInput in, int section, boolean isUpdate) throws IOException {
 	int type, dclass;
 	long ttl;
 	int length;
@@ -219,10 +219,15 @@ fromWire(DNSInput in, int section) throws IOException {
 
 	ttl = in.readU32();
 	length = in.readU16();
-	if (length == 0)
+	if (length == 0 && isUpdate)
 		return newRecord(name, type, dclass, ttl);
 	rec = newRecord(name, type, dclass, ttl, length, in);
 	return rec;
+}
+
+static Record
+fromWire(DNSInput in, int section) throws IOException {
+	return fromWire(in, section, false);
 }
 
 /**
@@ -230,7 +235,7 @@ fromWire(DNSInput in, int section) throws IOException {
  */
 public static Record
 fromWire(byte [] b, int section) throws IOException {
-	return fromWire(new DNSInput(b), section);
+	return fromWire(new DNSInput(b), section, false);
 }
 
 void
