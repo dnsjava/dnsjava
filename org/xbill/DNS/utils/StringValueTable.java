@@ -3,7 +3,7 @@
 
 package org.xbill.DNS.utils;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 /**
  * A table used for storing mappings between Strings and constant values
@@ -14,12 +14,12 @@ import java.util.Hashtable;
 
 public class StringValueTable {
 
-private Hashtable s2v, v2s;
+private HashMap s2v, v2s;
 
 public
 StringValueTable() {
-	s2v = new Hashtable();
-	v2s = new Hashtable();
+	s2v = new HashMap();
+	v2s = new HashMap();
 }
 
 /**
