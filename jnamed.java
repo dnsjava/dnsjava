@@ -101,10 +101,12 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 }
 
 void
-addRRset(Message response, RRset rrset) {
+addRRset(Name name, Message response, RRset rrset) {
 	Enumeration e = rrset.rrs();
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
+		if (!name.isWild() && r.getName().isWild())
+			r = r.withName(name);
 		response.addRecord(r, Section.ANSWER);
 	}
 }
@@ -223,7 +225,7 @@ generateReply(Message query, byte [] in, int maxLength) {
 		if (zr.isSuccessful()) {
 			RRset [] rrsets = zr.answers();
 			for (int i = 0; i < rrsets.length; i++)
-				addRRset(response, rrsets[i]);
+				addRRset(name, response, rrsets[i]);
 		}
 	}
 	else {
@@ -244,7 +246,7 @@ generateReply(Message query, byte [] in, int maxLength) {
 		if (cr.isSuccessful()) {
 			RRset [] rrsets = cr.answers();
 			for (int i = 0; i < rrsets.length; i++)
-				addRRset(response, rrsets[i]);
+				addRRset(name, response, rrsets[i]);
 		}
 	}
 	addAuthority(response, name, zone);

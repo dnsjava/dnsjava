@@ -79,7 +79,7 @@ getDClass() {
 }
 
 /**     
- * Looks up Records in the Zone.  This follows CNAMEs.
+ * Looks up Records in the Zone.  This follows CNAMEs and wildcards.
  * @param name The name to look up
  * @param type The type to look up
  * @return A SetResponse object
@@ -89,8 +89,12 @@ public SetResponse
 findRecords(Name name, short type) {
 	SetResponse zr = null;
 
-	if (findName(name) == null)
-		return new SetResponse(SetResponse.NXDOMAIN);
+	if (findName(name) == null) {
+		if (name.isWild())
+			return new SetResponse(SetResponse.NXDOMAIN);
+		else
+			return findRecords(name.wild(), type);
+	}
 	Object [] objects = findSets(name, type, dclass);
 	if (objects == null)
 		return new SetResponse(SetResponse.NODATA);

@@ -14,7 +14,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-abstract public class Record {
+abstract public class Record implements Cloneable {
 
 protected Name name;
 protected short type, dclass;
@@ -401,6 +401,22 @@ hashCode() {
 	catch (IOException e) {
 		return 0;
 	}
+}
+
+/**
+ * Creates a new record identical to the current record, but with a different
+ * name.  This is most useful for replacing the name of a wildcard record.
+ */
+public Record
+withName(Name name) {
+	Record rec = null;
+	try {
+		rec = (Record) clone();
+	}
+	catch (CloneNotSupportedException e) {
+	}
+	rec.name = name;
+	return rec;
 }
 
 }
