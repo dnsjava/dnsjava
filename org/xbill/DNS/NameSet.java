@@ -210,8 +210,10 @@ toString() {
 		Object [] elements = nameInfo.getAll();
 		if (elements == null)
 			continue;
-		for (int i = 0; i < elements.length; i++)
+		for (int i = 0; i < elements.length; i++) {
 			sb.append(elements[i]);
+			sb.append("\n");
+		}
 	}
 	return sb.toString();
 }
