@@ -1,4 +1,4 @@
-// Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
+// Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
 // This class should be extended for each record type.  The individual

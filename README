@@ -1,19 +1,41 @@
-dnsjava v0.0
-Brian Wellington (bwelling@anomaly.munge.com)
+dnsjava v0.1
+Brian Wellington (bwelling@xbill.org)
+March 21, 1999
+
+Overview:
 
 This is a simple implementation of DNS in Java.  It supports all of the common
-record types and the DNSSEC types.  It was written so that I could learn Java,
-and so that I could test TSIG support in BIND without rewriting the resolver.
+record types and the DNSSEC types.  It can be used for queries, zone
+transfers, and dynamic updates.
 
-This is far from complete.  It should support the rest of the record types.  It
-should handle exceptions in more places.  It should be better documented.  The
-APIs should be improved.  EDNS should be added.  One day, all of this might
-happen.
+This was started as an excuse to learn Java.  It was useful for testing TSIG
+support in BIND without rewriting the C resolver.  It was then cleaned up and
+extended in order to be used as a testing framework for the DNS
+interoperability testing at the 44th IETF.
 
-There are other things I'd like to do at some point.  A GUI for the dynamic
-update program would be nice, since dynamic update can be pretty complex.
-A basic (primary, caching, non-recursive) server wouldn't be too hard.
+dnsjava is far from complete.  It should support the rest of the record types,
+even though most are deprecated and/or rarely used.  It should handle
+exceptions in more places, and probably define exception of its own.  It should
+be better documented.
 
-*** This software will be freely redistributable.  Right now, it is not
-complete enough to warrant release.  It is being made available for
-DNSSEC research purposes only.
+
+Usage:
+
+The dig client looks more or less like dig:
+	dig @server name type [class] [-p port]
+
+The update program is well documented; run 'help' from the command line.
+
+
+Future:
+
+- A GUI for the dynamic update program would be nice
+- A basic (primary, caching, non-recursive) server wouldn't be too hard.
+  dnsServer.java & dnsZone.java contain part of a server, but it's not
+  done yet.
+
+
+License:
+
+dnsjava is placed under the GNU General Public License (GPL).  However,
+usage under additional licenses may be granted by the author.

@@ -1,4 +1,4 @@
-// Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
+// Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
 import java.io.*;
