@@ -84,8 +84,7 @@ compact() {
  * Create a new name from a string and an origin
  * @param s  The string to be converted
  * @param origin  If the name is unqualified, the origin to be appended
- * @deprecated As of dnsjava 1.3.0,
- * replaced by <code>Name.fromString</code>.
+ * @deprecated As of dnsjava 1.3.0, * replaced by <code>Name.fromString</code>.
  */
 public
 Name(String s, Name origin) {
