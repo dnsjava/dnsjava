@@ -210,8 +210,6 @@ static {
 	longSections.put(new Byte(ANSWER), "ANSWERS");
 	longSections.put(new Byte(AUTHORITY), "AUTHORITY RECORDS");
 	longSections.put(new Byte(ADDITIONAL), "ADDITIONAL RECORDS");
-
-	_res = new dnsResolver();
 }
 
 public static String
@@ -316,6 +314,11 @@ matchType(short type1, short type2) {
 	return (type1 == dns.ANY || type2 == dns.ANY || type1 == type2);
 }
 
+public static void
+init(String defaultResolver) {
+	dnsResolver.setDefaultResolver(defaultResolver);
+}
+
 public static dnsRecord []
 getRecords(dnsResolver res, String name, short type, short dclass) {
 	dnsMessage query = new dnsMessage();
@@ -324,6 +327,16 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 	dnsRecord [] answers;
 	int answerCount = 0, i = 0;
 	Enumeration e;
+
+	if (res == _res && _res == null) {
+		try {
+			_res = new dnsResolver();
+		}
+		catch (UnknownHostException uhe) {
+			System.out.println("Failed to initialize resolver");
+			System.exit(-1);
+		}
+	}
 
 	query.getHeader().setFlag(dns.RD);
 	query.getHeader().setOpcode(dns.QUERY);

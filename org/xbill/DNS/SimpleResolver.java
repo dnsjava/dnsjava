@@ -15,18 +15,23 @@ boolean useTCP, useEDNS;
 dnsTSIG TSIG;
 int timeoutValue = 60 * 1000;
 
-public dnsResolver(String hostname) {
-	try {
-		addr = InetAddress.getByName(hostname);
-	}
-	catch (UnknownHostException e) {
-		System.out.println("Unknown host " + hostname);
-		return;
-	}
+static String defaultResolver = "localhost";
+
+public
+dnsResolver(String hostname) throws UnknownHostException {
+	if (hostname == null)
+		hostname = defaultResolver;
+	addr = InetAddress.getByName(hostname);
 }
 
-public dnsResolver() {
-	this("localhost");
+public
+dnsResolver() throws UnknownHostException {
+	this(dnsFindResolver.find());
+}
+
+public static void
+setDefaultResolver(String hostname) {
+	defaultResolver = hostname;
 }
 
 public void
