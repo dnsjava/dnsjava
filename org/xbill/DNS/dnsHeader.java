@@ -15,6 +15,11 @@ dnsHeader() {
 	flags = new boolean[16];
 }
 
+dnsHeader(int id) {
+	this();
+	this.id = id;
+}
+
 dnsHeader(CountedDataInputStream in) throws IOException {
 	this();
 	id = in.readUnsignedShort();

@@ -14,6 +14,13 @@ dnsMessage() {
 	header = new dnsHeader();
 }
 
+dnsMessage(int id) {
+	sections = new Vector[4];
+	for (int i=0; i<4; i++)
+		sections[i] = new Vector();
+	header = new dnsHeader(id);
+}
+
 dnsMessage(CountedDataInputStream in) throws IOException {
 	this();
 	int startpos = in.pos();
