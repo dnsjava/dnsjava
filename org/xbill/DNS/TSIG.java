@@ -189,15 +189,16 @@ applyAXFR(Message m, TSIGRecord old, boolean first) {
  * in the context where a TSIG is expected to be present, it is an error
  * if one is not present.
  * @param m The message
- * @param b The message in unparsed form.  This is necessary since TSIG
- * signs the message in wire format, and we can't recreate the exact wire
- * format (with the same name compression).
+ * @param b An array containing the message in unparsed form.  This is
+ * necessary since TSIG signs the message in wire format, and we can't
+ * recreate the exact wire format (with the same name compression).
+ * @param length The length of the message in the array.
  * @param old If this message is a response, the TSIG from the request
  * @return The result of the verification (as an Rcode)
  * @see Rcode
  */
 public byte
-verify(Message m, byte [] b, TSIGRecord old) {
+verify(Message m, byte [] b, int length, TSIGRecord old) {
 	TSIGRecord tsig = m.getTSIG();
 	hmacSigner h = new hmacSigner(key);
 	if (tsig == null)
@@ -231,7 +232,7 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		m.getHeader().incCount(Section.ADDITIONAL);
 		h.addData(header);
 
-		int len = b.length - header.length;	
+		int len = length - header.length;	
 		len -= tsig.wireLength;
 		h.addData(b, header.length, len);
 
@@ -273,6 +274,23 @@ verify(Message m, byte [] b, TSIGRecord old) {
 			System.err.println("BADSIG failure");
 		return Rcode.BADSIG;
 	}
+}
+
+/**
+ * Verifies a TSIG record on an incoming message.  Since this is only called
+ * in the context where a TSIG is expected to be present, it is an error
+ * if one is not present.
+ * @param m The message
+ * @param b The message in unparsed form.  This is necessary since TSIG
+ * signs the message in wire format, and we can't recreate the exact wire
+ * format (with the same name compression).
+ * @param old If this message is a response, the TSIG from the request
+ * @return The result of the verification (as an Rcode)
+ * @see Rcode
+ */
+public byte
+verify(Message m, byte [] b, TSIGRecord old) {
+	return verify(m, b, b.length, old);
 }
 
 /** Prepares the TSIG object to verify an AXFR */
