@@ -141,6 +141,15 @@ writeShortAt(int i, int pos) throws IllegalArgumentException {
 }
 
 /**
+ * Set the current position in the stream
+ * @param pos The current position
+ */
+public void
+setPos(int pos) {
+	count = pos;
+}
+
+/**
  * Get the current position in the stream
  * @return The current position
  */
