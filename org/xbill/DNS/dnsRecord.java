@@ -40,7 +40,7 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 		Class rrclass;
 		Constructor m;
 
-		rrclass = Class.forName("dns" + s + "Record");
+		rrclass = Class.forName("DNS.dns" + s + "Record");
 		m = rrclass.getConstructor(new Class [] {
 						dnsName.class,
 						Short.TYPE,
