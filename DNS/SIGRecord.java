@@ -89,7 +89,7 @@ String rrToString() {
         sb.append (" ");
 	sb.append (formatDate(timeSigned));
 	sb.append (" ");
-	sb.append (footprint);
+	sb.append ((int)footprint & 0xFFFF);
 	sb.append (" ");
 	sb.append (signer);
 	String s = base64.toString(signature);
