@@ -61,6 +61,12 @@ getType() {
 	return r.getType();
 }
 
+public short
+getDClass() {
+	Record r =  (Record) rrs.elementAt(0);
+	return r.getDClass();
+}
+
 public int
 getTTL() {
 	int ttl = Integer.MAX_VALUE;

@@ -14,6 +14,7 @@ public static final int SECONDARY = 3;
 
 private int type;
 private Name origin;
+private short dclass = DClass.IN;
 
 public
 Zone(String file, Cache cache) throws IOException {
@@ -41,21 +42,26 @@ getOrigin() {
 
 public RRset
 getNS() {
-	return (RRset) findSet(origin, Type.NS);
+	return (RRset) findSet(origin, Type.NS, dclass);
 }
 
 public SOARecord
 getSOA() {
-	RRset rrset = (RRset) findSet(origin, Type.SOA);
+	RRset rrset = (RRset) findSet(origin, Type.SOA, dclass);
 	if (rrset == null)
 		return null;
 	Enumeration e = rrset.rrs();
 	return (SOARecord) e.nextElement();
 }
 
+public short
+getDClass() {
+	return dclass;
+}
+
 public RRset
 findRecords(Name name, short type) {
-	return (RRset) findSet(name, type);
+	return (RRset) findSet(name, type, dclass);
 }
 
 public Hashtable
@@ -67,9 +73,9 @@ public void
 addRR(Record record) {
 	Name name = record.getName();
 	short type = record.getType();
-	RRset rrset = (RRset) findSet (name, type);
+	RRset rrset = (RRset) findSet (name, type, dclass);
 	if (rrset == null)
-		addSet(name, type, rrset = new RRset());
+		addSet(name, type, dclass, rrset = new RRset());
 	rrset.addRR(record);
 }
 

@@ -18,7 +18,7 @@ NameSet() {
 }
 
 protected Object
-findSet(Name name, short type) {
+findSet(Name name, short type, short dclass) {
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null) {
 		if (!name.isWild())
@@ -26,18 +26,18 @@ findSet(Name name, short type) {
 		if (nameInfo == null)
 			return null;
 	}
-	Object o = nameInfo.get(new Short(type));
+	Object o = nameInfo.get(new TypeClass(type, dclass));
 	if (o != null || type == Type.CNAME)
 		return o;
-	return nameInfo.get(new Short(Type.CNAME));
+	return nameInfo.get(new TypeClass(Type.CNAME, dclass));
 }
 
 protected Object
-findExactSet(Name name, short type) {
+findExactSet(Name name, short type, short dclass) {
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null)
 		return null;
-	return nameInfo.get(new Short(type));
+	return nameInfo.get(new TypeClass(type, dclass));
 }
 
 protected Hashtable
@@ -46,15 +46,15 @@ findName(Name name) {
 }
 
 protected void
-addSet(Name name, short type, Object set) {
+addSet(Name name, short type, short dclass, Object set) {
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null)
 		data.put(name, nameInfo = new Hashtable());
-	nameInfo.put(new Short(type), set);
+	nameInfo.put(new TypeClass(type, dclass), set);
 }
 
 protected void
-removeSet(Name name, short type, Object set) {
+removeSet(Name name, short type, short dclass, Object set) {
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null) {
 		if (!name.isWild()) {
@@ -64,13 +64,13 @@ removeSet(Name name, short type, Object set) {
 		if (nameInfo == null)
 			return;
 	}
-	Object o = nameInfo.get(new Short(type));
+	Object o = nameInfo.get(new TypeClass(type, dclass));
 	if (o != set && type != Type.CNAME) {
 		type = Type.CNAME;
-		o = nameInfo.get(new Short(type));
+		o = nameInfo.get(new TypeClass(type, dclass));
 	}
 	if (o == set) {
-		nameInfo.remove(new Short(type));
+		nameInfo.remove(new TypeClass(type, dclass));
 		if (nameInfo.isEmpty())
 			data.remove(name);
 	}

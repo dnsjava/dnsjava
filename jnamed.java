@@ -86,9 +86,9 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 	if (zone != null)
 		return zone.findRecords(name, type);
 	else if (glue)
-		return cache.findAnyRecords(name, type);
+		return cache.findAnyRecords(name, type, dclass);
 	else 
-		return cache.findRecords(name, type);
+		return cache.findRecords(name, type, dclass);
 	
 }
 
@@ -113,7 +113,8 @@ addAuthority(Message response, Name name, Zone zone) {
 				nsRecords = zone.getNS();
 			else
 				nsRecords = cache.findRecords(Name.root,
-							      Type.NS);
+							      Type.NS,
+							      DClass.IN);
 		}
 		Enumeration e = nsRecords.rrs();
 		while (e.hasMoreElements()) {

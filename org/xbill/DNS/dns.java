@@ -79,7 +79,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	if (cache == null)
 		cache = new Cache();
 
-	CacheResponse cached = cache.lookupRecords(name, type, cred);
+	CacheResponse cached = cache.lookupRecords(name, type, dclass, cred);
 /*System.out.println(cached);*/
 	if (cached.isSuccessful()) {
 		RRset rrset = cached.answer();
