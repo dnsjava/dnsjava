@@ -119,7 +119,7 @@ private int
 parseTTL(MyStringTokenizer st) throws IOException {
 	if (!st.hasMoreTokens())
 		throw new IOException ("Missing TTL");
-	return Integer.parseInt(st.nextToken());
+	return TTL.parseTTL(st.nextToken());
 }
 
 private void
