@@ -507,7 +507,7 @@ addMessage(Message in) {
 	byte cred;
 	short rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
-	Record [] answers;
+	Record [] answers, auth, addl;
 
 	if (secure) {
 		Cache c = new Cache(dclass);
@@ -521,58 +521,60 @@ addMessage(Message in) {
 
 	answers = in.getSectionArray(Section.ANSWER);
 	while (!haveAnswer) {
- loop:
+		boolean restart = false;
 		for (int i = 0; i < answers.length; i++) {
-			short answerType = answers[i].getType();
-			Name answerName = answers[i].getName();
-			if (answerType == Type.CNAME &&
-			    answerName.equals(lookupName))
-			{
-				cred = getCred(answerName, queryName,
-					       Section.ANSWER, isAuth);
+			short type = answers[i].getType();
+			short rrtype = answers[i].getRRsetType();
+			Name name = answers[i].getName();
+			cred = getCred(name, queryName, Section.ANSWER, isAuth);
+			if (type == Type.CNAME && name.equals(lookupName)) {
 				addRecord(answers[i], cred, in);
 				CNAMERecord cname = (CNAMERecord) answers[i];
 				lookupName = cname.getTarget();
-				break loop;
+				restart = true;
 			}
-			else if (answerType == Type.DNAME &&
-				 lookupName.subdomain(answerName))
+			else if (rrtype == Type.CNAME &&
+				 name.equals(lookupName))
 			{
-				cred = getCred(answerName, queryName,
-					       Section.ANSWER, isAuth);
+				addRecord(answers[i], cred, in);
+			}
+			else if (type == Type.DNAME &&
+				 lookupName.subdomain(name))
+			{
 				addRecord(answers[i], cred, in);
 				DNAMERecord dname = (DNAMERecord) answers[i];
 				lookupName = lookupName.fromDNAME(dname);
-				break loop;
+				restart = true;
 			}
-			else if ((answerType == queryType ||
-				  answerType == Type.ANY) &&
-				 answerName.equals(lookupName))
+			else if (rrtype == Type.DNAME &&
+				 lookupName.subdomain(name))
 			{
-				haveAnswer = true;
-				cred = getCred(answerName, queryName,
-					       Section.ANSWER, isAuth);
 				addRecord(answers[i], cred, in);
 			}
+			else if ((rrtype == queryType || type == Type.ANY) &&
+				 name.equals(lookupName))
+			{
+				addRecord(answers[i], cred, in);
+				haveAnswer = true;
+			}
 		}
-		break;
+		if (!restart)
+			break;
 	}
+
+	auth = in.getSectionArray(Section.AUTHORITY);
 
 	if (!haveAnswer) {
 		/* This is a negative response */
 		SOARecord soa = null;
-		e = in.getSection(Section.AUTHORITY);
-		while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
-			if (r.getType() == Type.SOA &&
-			    queryName.subdomain(r.getName()))
+		for (int i = 0; i < auth.length; i++) {
+			if (auth[i].getType() == Type.SOA &&
+			    lookupName.subdomain(auth[i].getName()))
 			{
-				soa = (SOARecord) r;
+				soa = (SOARecord) auth[i];
 				break;
 			}
 		}
-		cred = getCred(soa.getName(), queryName, Section.AUTHORITY,
-			       isAuth);
 		if (soa != null) {
 			/* This is a negative response. */
 			long soattl = (long)soa.getTTL() & 0xFFFFFFFFL;
@@ -580,6 +582,8 @@ addMessage(Message in) {
 			long ttl = Math.min(soattl, soamin);
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
+			cred = getCred(soa.getName(), queryName,
+				       Section.AUTHORITY, isAuth);
 			if (rcode == Rcode.NXDOMAIN)
 				addNegative(rcode, lookupName, (short)0,
 					    ttl, cred, in);
@@ -589,20 +593,28 @@ addMessage(Message in) {
 		}
 	}
 
-	e = in.getSection(Section.AUTHORITY);
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		cred = getCred(r.getName(), queryName, Section.AUTHORITY,
-			       isAuth);
-		addRecord(r, cred, in);
+	for (int i = 0; i < auth.length; i++) {
+		short type = auth[i].getRRsetType();
+		Name name = auth[i].getName();
+		if ((type == Type.NS || type == Type.SOA) &&
+		    lookupName.subdomain(name))
+		{
+			cred = getCred(name, queryName, Section.AUTHORITY,
+				       isAuth);
+			addRecord(auth[i], cred, in);
+		}
+		/* NXT records are not cached yet. */
 	}
 
-	e = in.getSection(Section.ADDITIONAL);
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		cred = getCred(r.getName(), queryName, Section.ADDITIONAL,
-			       isAuth);
-		addRecord(r, cred, in);
+	addl = in.getSectionArray(Section.ADDITIONAL);
+	for (int i = 0; i < addl.length; i++) {
+		short type = addl[i].getRRsetType();
+		if (type != Type.A && type != Type.AAAA && type != Type.A6)
+			continue;
+		/* XXX check the name */
+		Name name = addl[i].getName();
+		cred = getCred(name, queryName, Section.ADDITIONAL, isAuth);
+		addRecord(addl[i], cred, in);
 	}
 }
 
