@@ -12,6 +12,7 @@ import java.net.*;
 public final class dns {
 
 private static Resolver res;
+private static ExtendedResolver eres;
 private static Cache cache;
 
 static boolean
@@ -69,7 +70,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 
 	if (res == null) {
 		try {
-			res = new Resolver();
+			eres = new ExtendedResolver();
 		}
 		catch (UnknownHostException uhe) {
 			System.out.println("Failed to initialize resolver");
@@ -95,7 +96,10 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 		query = Message.newQuery(question);
 
 		try {
-			response = res.send(query);
+			if (res != null)
+				response = res.send(query);
+			else
+				response = eres.send(query);
 		}
 		catch (IOException ioe) {
 			return null;
