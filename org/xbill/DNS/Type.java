@@ -189,7 +189,7 @@ private static class DoubleHashMap {
 }
 
 private static DoubleHashMap types = new DoubleHashMap();
-private static Short [] typecache = new Short [43];
+private static Short [] typecache = new Short [44];
 
 static {
 	for (short i = 0; i < typecache.length; i++)
