@@ -26,11 +26,13 @@ findSets(Name name, short type, short dclass) {
 	if (nameInfo == null) 
 		return null;
 	if (type == Type.ANY) {
-		array = new Object[nameInfo.size()];
-		int i = 0;
-		Enumeration e = nameInfo.elements();
-		while (e.hasMoreElements())
-			array[i++] = e.nextElement();
+		synchronized (nameInfo) {
+			array = new Object[nameInfo.size()];
+			int i = 0;
+			Enumeration e = nameInfo.elements();
+			while (e.hasMoreElements())
+				array[i++] = e.nextElement();
+			}
 		return array;
 	}
 	o = nameInfo.get(new TypeClass(type, dclass));
@@ -70,7 +72,9 @@ addSet(Name name, short type, short dclass, Object set) {
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null)
 		data.put(name, nameInfo = new Hashtable());
-	nameInfo.put(new TypeClass(type, dclass), set);
+	synchronized (nameInfo) {
+		nameInfo.put(new TypeClass(type, dclass), set);
+	}
 }
 
 protected void
@@ -84,7 +88,9 @@ removeSet(Name name, short type, short dclass, Object set) {
 		o = nameInfo.get(new TypeClass(type, dclass));
 	}
 	if (o == set) {
-		nameInfo.remove(new TypeClass(type, dclass));
+		synchronized (nameInfo) {
+			nameInfo.remove(new TypeClass(type, dclass));
+		}
 		if (nameInfo.isEmpty())
 			data.remove(name);
 	}
