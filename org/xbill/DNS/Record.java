@@ -276,6 +276,7 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(name);
 	sb.append("\t");
+	int position = sb.length();
 	if (Options.check("BINDTTL"))
 		sb.append(TTL.format(ttl));
 	else
@@ -286,7 +287,9 @@ toString() {
 		sb.append(" ");
 	}
 	sb.append(Type.string(type));
-	sb.append("\t\t");
+	if (sb.length() - position < 8)
+		sb.append("\t");
+	sb.append("\t");
 	sb.append(rdataToString());
 	return sb.toString();
 }
