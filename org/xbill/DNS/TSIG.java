@@ -159,18 +159,20 @@ apply(Message m, TSIGRecord old) throws IOException {
  * signs the message in wire format, and we can't recreate the exact wire
  * format (with the same name compression).
  * @param old If this message is a response, the TSIG from the request
+ * @return The result of the verification (as an Rcode)
+ * @see Rcode
  */
-public boolean
+public byte
 verify(Message m, byte [] b, TSIGRecord old) {
 	TSIGRecord tsig = m.getTSIG();
 	hmacSigner h = new hmacSigner(key);
 	if (tsig == null)
-		return false;
+		return Rcode.FORMERR;
 
 	if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
 		if (Options.check("verbose"))
 			System.err.println("BADKEY failure");
-		return false;
+		return Rcode.BADKEY;
 	}
 	long now = System.currentTimeMillis();
 	long then = tsig.getTimeSigned().getTime();
@@ -178,7 +180,7 @@ verify(Message m, byte [] b, TSIGRecord old) {
 	if (Math.abs(now - then) > fudge * 1000) {
 		if (Options.check("verbose"))
 			System.err.println("BADTIME failure");
-		return false;
+		return Rcode.BADTIME;
 	}
 
 	try {
@@ -221,7 +223,7 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		h.addData(out.toByteArray());
 	}
 	catch (IOException e) {
-		return false;
+		return Rcode.SERVFAIL;
 	}
 
 	if (axfrSigner != null) {
@@ -231,11 +233,11 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		axfrSigner.addData(tsig.getSignature());
 	}
 	if (h.verify(tsig.getSignature()))
-		return true;
+		return Rcode.NOERROR;
 	else {
 		if (Options.check("verbose"))
 			System.err.println("BADSIG failure");
-		return false;
+		return Rcode.BADSIG;
 	}
 }
 
@@ -254,8 +256,10 @@ verifyAXFRStart() {
  * @param old The TSIG from the AXFR request
  * @param required True if this message is required to include a TSIG.
  * @param first True if this message is the first message of the AXFR
+ * @return The result of the verification (as an Rcode)
+ * @see Rcode
  */
-public boolean
+public byte
 verifyAXFR(Message m, byte [] b, TSIGRecord old,
 	   boolean required, boolean first)
 {
@@ -279,9 +283,9 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 
 		if (tsig == null) {
 			if (required)
-				return false;
+				return Rcode.FORMERR;
 			else
-				return true;
+				return Rcode.NOERROR;
 		}
 
 		if (!tsig.getName().equals(name) ||
@@ -289,7 +293,7 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 		{
 			if (Options.check("verbose"))
 				System.err.println("BADKEY failure");
-			return false;
+			return Rcode.BADKEY;
 		}
 
 		DataByteOutputStream out = new DataByteOutputStream();
@@ -302,13 +306,13 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 		h.addData(out.toByteArray());
 	}
 	catch (IOException e) {
-		return false;
+		return Rcode.SERVFAIL;
 	}
 
 	if (h.verify(tsig.getSignature()) == false) {
 		if (Options.check("verbose"))
 			System.err.println("BADSIG failure");
-		return false;
+		return Rcode.BADSIG;
 	}
 
 	h.clear();
@@ -317,7 +321,7 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 	h.addData(dbs.toByteArray());
 	h.addData(tsig.getSignature());
 
-	return true;
+	return Rcode.NOERROR;
 }
 
 }

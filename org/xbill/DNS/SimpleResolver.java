@@ -183,9 +183,11 @@ sendTCP(Message query, byte [] out) throws IOException {
 	}
 	if (tsig != null) {
 		response.TSIGsigned = true;
-		boolean ok = tsig.verify(response, in, query.getTSIG());
+		byte error = tsig.verify(response, in, query.getTSIG());
+		boolean ok = (error == Rcode.NOERROR);
 		if (Options.check("verbose"))
-			System.err.println("TSIG verify: " + ok);
+			System.err.println("TSIG verify: " +
+					   Rcode.string(error));
 		response.TSIGverified = ok;
 	}
 	return response;
@@ -263,9 +265,11 @@ send(Message query) throws IOException {
 	}
 	if (tsig != null) {
 		response.TSIGsigned = true;
-		boolean ok = tsig.verify(response, in, query.getTSIG());
+		byte error = tsig.verify(response, in, query.getTSIG());
+		boolean ok = (error == Rcode.NOERROR);
 		if (Options.check("verbose"))
-			System.err.println("TSIG verify: " + ok);
+			System.err.println("TSIG verify: " +
+					   Rcode.string(error));
 		response.TSIGverified = ok;
 	}
 
@@ -383,9 +387,10 @@ sendAXFR(Message query) throws IOException {
 			}
 			if (tsig != null) {
 				boolean required = (soacount > 1 || first);
-				boolean ok = tsig.verifyAXFR(m, in,
+				byte error = tsig.verifyAXFR(m, in,
 							     query.getTSIG(),
 							     required, first);
+				boolean ok = (error == Rcode.NOERROR);
 				if (!ok)
 					response.TSIGverified = false;
 				if (Options.check("verbose")) {

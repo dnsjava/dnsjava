@@ -400,7 +400,7 @@ generateReply(Message query, byte [] in, Socket s) {
 	TSIG tsig = null;
 	if (queryTSIG != null) {
 		tsig = findTSIG(queryTSIG.getName());
-		if (!tsig.verify(query, in, null))
+		if (tsig.verify(query, in, null) != Rcode.NOERROR)
 			return formerrMessage(in);
 	}
 
