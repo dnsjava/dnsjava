@@ -36,7 +36,7 @@ private static abstract class Element implements TypedObject {
 	public final boolean
 	expired() {
 		int now = (int)(System.currentTimeMillis() / 1000);
-		return (now > expire);
+		return (now >= expire);
 	}
 
 	public abstract short getType();
@@ -241,6 +241,8 @@ addRecord(Record r, byte cred, Object o) {
  */
 public void
 addRRset(RRset rrset, byte cred) {
+	if (rrset.getTTL() == 0)
+		return;
 	Name name = rrset.getName();
 	short type = rrset.getType();
 	if (verifier != null)
