@@ -323,9 +323,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 	Record rec;
 
 	String qualifier = st.nextToken();
-	if (qualifier.equals("-r")) 
-		rec = parseRR(st, defaultClass, 0);
-	else if (qualifier.equals("-s"))
+	if (qualifier.equals("-s"))
 		rec = parseSet(st, DClass.NONE);
 	else if (qualifier.equals("-n"))
 		rec = parseName(st, DClass.NONE);
@@ -601,10 +599,9 @@ help(String topic) {
 			"UDP/TCP port messages are sent to (default: 53)\n");
 	else if (topic.equalsIgnoreCase("prohibit"))
 		System.out.println(
-			"prohibit -r <name> [ttl] [class] <type> <data> \n" +
 			"prohibit -s <name> <type> \n" +
 			"prohibit -n <name>\n\n" +
-			"require that a record, set, or name is not present\n");
+			"require that a set or name is not present\n");
 	else if (topic.equalsIgnoreCase("query"))
 		System.out.println(
 			"query <name> [type [class]] \n\n" +
