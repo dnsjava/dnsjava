@@ -28,6 +28,7 @@ private static class Resolution implements ResolverListener {
 	Message query;
 	Message response;
 	Exception exception;
+	ResolverListener listener;
 
 	public
 	Resolution(ExtendedResolver eres, Message query) {
@@ -88,6 +89,12 @@ private static class Resolution implements ResolverListener {
 	}
 
 	public void
+	startAsync(ResolverListener listener) {
+		this.listener = listener;
+		send(0);
+	}
+
+	public void
 	receiveMessage(Object id, Message m) {
 		if (Options.check("verbose"))
 			System.err.println("ExtendedResolver: " +
@@ -97,7 +104,10 @@ private static class Resolution implements ResolverListener {
 				return;
 			response = m;
 			done = true;
-			notifyAll();
+			if (listener == null)
+				notifyAll();
+			else
+				listener.receiveMessage(this, response);
 		}
 	}
 
@@ -137,15 +147,17 @@ private static class Resolution implements ResolverListener {
 				send(n + 1);
 			if (outstanding == 0) {
 				done = true;
-				notifyAll();
+				if (listener == null)
+					notifyAll();
+				else
+					listener.handleException(this,
+								 exception);
 			}
 		}
 	}
 }
 
 private static final int quantum = 5;
-private static int uniqueID = 0;
-private static final Random random = new Random();
 
 private List resolvers;
 private boolean loadBalance = false;
@@ -283,20 +295,9 @@ send(Message query) throws IOException {
  */
 public Object
 sendAsync(final Message query, final ResolverListener listener) {
-	final Object id;
-	synchronized (this) {
-		id = new Integer(uniqueID++);
-	}
-	Record question = query.getQuestion();
-	String qname;
-	if (question != null)
-		qname = question.getName().toString();
-	else
-		qname = "(none)";
-	String name = getClass() + ": " + query.getQuestion().getName();
-	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
-				  name);
-	return id;
+	Resolution res = new Resolution(this, query);
+	res.startAsync(listener);
+	return res;
 }
 
 /** Returns the nth resolver used by this ExtendedResolver */
