@@ -19,9 +19,13 @@ NameSet() {
 
 protected Object
 findSet(Name name, short type) {
-	Hashtable nameInfo = (Hashtable) data.get(name);
-	if (nameInfo == null)
-		return null;
+	Hashtable nameInfo = findName(name);
+	if (nameInfo == null) {
+		if (!name.isWild())
+			nameInfo = findName(name.wild());
+		if (nameInfo == null)
+			return null;
+	}
 	Object o = nameInfo.get(new Short(type));
 	if (o != null)
 		return o;
@@ -35,7 +39,7 @@ findName(Name name) {
 
 protected void
 addSet(Name name, short type, Object o) {
-	Hashtable nameInfo = (Hashtable) data.get(name);
+	Hashtable nameInfo = findName(name);
 	if (nameInfo == null)
 		data.put(name, nameInfo = new Hashtable());
 	nameInfo.put(new Short(type), o);
@@ -43,7 +47,7 @@ addSet(Name name, short type, Object o) {
 
 protected void
 removeSet(Name name, short type) {
-	Hashtable nameInfo = (Hashtable) data.get(name);
+	Hashtable nameInfo = findName(name);
 	if (nameInfo != null)
 		nameInfo.remove(new Short(type));
 }
