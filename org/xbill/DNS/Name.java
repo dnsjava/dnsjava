@@ -698,13 +698,13 @@ toWireCanonical() {
 	if (labels == 0)
 		return (new byte[0]);
 	byte [] b = new byte[name.length - offset(0)];
-	for (int i = 0, pos = offset(0); i < labels; i++) {
-		int len = name[pos];
+	for (int i = 0, spos = offset(0), dpos = 0; i < labels; i++) {
+		int len = name[spos];
 		if (len > MAXLABEL)
 			throw new IllegalStateException("invalid label");
-		b[pos] = name[pos++];
+		b[dpos++] = name[spos++];
 		for (int j = 0; j < len; j++)
-			b[pos] = lowercase[(name[pos++] & 0xFF)];
+			b[dpos++] = lowercase[(name[spos++] & 0xFF)];
 	}
 	return b;
 }
