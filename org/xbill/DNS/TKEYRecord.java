@@ -146,17 +146,17 @@ rdataToString() {
 	sb.append(" (\n\t");
 
 	sb.append(SIGRecord.formatDate(timeInception));
-	sb.append (" ");
+	sb.append(" ");
 	sb.append(SIGRecord.formatDate(timeExpire));
-	sb.append (" ");
-	sb.append (modeString());
-	sb.append (" ");
-	sb.append (Rcode.TSIGstring(error));
-	sb.append ("\n");
+	sb.append(" ");
+	sb.append(modeString());
+	sb.append(" ");
+	sb.append(Rcode.TSIGstring(error));
+	sb.append("\n");
 	if (key != null)
-		sb.append (base64.formatString(key, 64, "\t", false));
+		sb.append(base64.formatString(key, 64, "\t", false));
 	if (other != null)
-		sb.append (base64.formatString(other, 64, "\t", false));
+		sb.append(base64.formatString(other, 64, "\t", false));
 	sb.append(" )");
 	return sb.toString();
 }
