@@ -385,6 +385,10 @@ doxfr() throws IOException, ZoneTransferException {
 		Record [] answers;
 
 		response = stream.next();
+		if (response.tsigState == Message.TSIG_FAILED) {
+			fail("TSIG failure");
+		}
+
 		answers = response.getSectionArray(Section.ANSWER);
 
 		if (state == INITIALSOA) {
@@ -415,6 +419,10 @@ doxfr() throws IOException, ZoneTransferException {
 		for (int i = 0; i < answers.length; i++) {
 			parseRR(answers[i]);
 		}
+
+		if (state == END &&
+		    response.tsigState == Message.TSIG_INTERMEDIATE)
+			fail("last message must be signed");
 	}
 }
 

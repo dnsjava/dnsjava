@@ -183,10 +183,11 @@ private void
 verifyTSIG(Message query, Message response, byte [] b, TSIG tsig) {
 	if (tsig == null)
 		return;
-	response.TSIGsigned = true;
 	byte error = tsig.verify(response, b, query.getTSIG());
 	if (error == Rcode.NOERROR)
-		response.TSIGverified = true;
+		response.tsigState = Message.TSIG_VERIFIED;
+	else
+		response.tsigState = Message.TSIG_FAILED;
 	if (Options.check("verbose"))
 		System.err.println("TSIG verify: " + Rcode.string(error));
 }
@@ -342,8 +343,10 @@ static class Stream {
 
 	void
 	send(Message query) throws IOException {
-		if (tsig != null)
+		if (tsig != null) {
 			tsig.apply(query, null);
+			lastTSIG = query.getTSIG();
+		}
 
 		byte [] out = query.toWire(Message.MAXLENGTH);
 		res.writeTCP(sock, out);
@@ -362,16 +365,17 @@ static class Stream {
 			boolean required = (nresponses % 100 == 0);
 
 			TSIGRecord tsigrec = response.getTSIG();
-			if (tsigrec != null) {
-				lastTSIG = tsigrec;
-				response.TSIGsigned = true;
-			} else
-				response.TSIGsigned = false;
 
 			byte error = tsig.verifyStream(response, in, lastTSIG,
 						       required, first);
-			if (error == Rcode.NOERROR && response.TSIGsigned)
-				response.TSIGverified = true;
+			if (error == Rcode.NOERROR && tsigrec != null)
+				response.tsigState = Message.TSIG_VERIFIED;
+			else if (error == Rcode.NOERROR)
+				response.tsigState = Message.TSIG_INTERMEDIATE;
+			else
+				response.tsigState = Message.TSIG_FAILED;
+			if (tsigrec != null)
+				lastTSIG = tsigrec;
 		}
 		return response;
 	}
