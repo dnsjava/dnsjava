@@ -23,6 +23,7 @@ public class Cache extends NameSet {
 
 private class Element {
 	RRset rrset;
+	short type, dclass;
 	byte credibility;
 	long timeIn;
 	int ttl;
@@ -30,8 +31,10 @@ private class Element {
 	Thread tid;
 
 	public
-	Element(int _ttl, byte cred, int src) {
+	Element(int _ttl, byte cred, int src, short _type, short _dclass) {
 		rrset = null;
+		type = _type;
+		dclass = _dclass;
 		credibility = cred;
 		ttl = _ttl;
 		srcid = src;
@@ -41,7 +44,10 @@ private class Element {
 	public
 	Element(Record r, byte cred, int src) {
 		rrset = new RRset();
+		type = rrset.getType();
+		dclass = rrset.getDClass();
 		credibility = cred;
+		timeIn = System.currentTimeMillis();
 		ttl = -1;
 		srcid = src;
 		update(r);
@@ -51,8 +57,9 @@ private class Element {
 	public
 	Element(RRset r, byte cred, int src) {
 		rrset = r;
+		type = r.getType();
+		dclass = r.getDClass();
 		credibility = cred;
-		ttl = -1;
 		timeIn = System.currentTimeMillis();
 		ttl = r.getTTL();
 		srcid = src;
@@ -99,17 +106,65 @@ private class Element {
 	}
 }
 
+private class CacheCleaner extends Thread {
+	public
+	CacheCleaner() {
+		setDaemon(true);
+		setName("CacheCleaner");
+	}
+
+	public void
+	run() {
+		while (true) {
+			boolean interrupted = false;
+			try {
+				Thread.sleep(cleanInterval * 60 * 1000);
+			}
+			catch (InterruptedException e) {
+				interrupted = true;
+			}
+			if (interrupted)
+				continue;
+
+			Enumeration e = names();
+			while (e.hasMoreElements()) {
+				Name name = (Name) e.nextElement();
+				TypeClassMap tcm = findName(name);
+				if (tcm == null)
+					continue;
+				Object [] elements;
+				elements = tcm.getMultiple(Type.ANY,
+							   DClass.ANY);
+				if (elements == null)
+					continue;
+				for (int i = 0; i < elements.length; i++) {
+					Element element = (Element) elements[i];
+					if (element.ttl == 0)
+						continue;
+					if (element.expiredTTL())
+						removeSet(name, element.type,
+							  element.dclass,
+							  element);
+				}
+			}
+		}
+	}
+}
+
 private Verifier verifier;
 private boolean secure;
 private int maxncache = -1;
+private long cleanInterval = 30;
+private Thread cleaner;
 
 /** Creates an empty Cache */
 public
 Cache() {
 	super();
+	cleaner = new CacheCleaner();
 }
 
-/** Creates an empty Cache */
+/** Empties the Cache */
 public void
 clearCache() {
 	clear();
@@ -120,6 +175,7 @@ clearCache() {
  */
 public
 Cache(String file) throws IOException {
+	cleaner = new CacheCleaner();
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null) {
@@ -191,7 +247,8 @@ addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
 	Element element = (Element) findExactSet(name, type, dclass);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, dclass, new Element(ttl, cred, src));
+		addSet(name, type, dclass,
+		       new Element(ttl, cred, src, type, dclass));
 }
 
 /**
@@ -508,6 +565,20 @@ setSecurePolicy() {
 public void
 setMaxNCache(int seconds) {
         maxncache = seconds;
+}
+
+/**
+ * Sets the interval (in minutes) that all expired records will be expunged
+ * the cache.  The default is 30 minutes.  0 or a negative value disables this
+ * feature.
+ */
+public void
+setCleanInterval(int minutes) {
+        cleanInterval = minutes;
+	if (cleanInterval <= 0)
+		cleaner = null;
+	else if (cleaner == null)
+		cleaner = new CacheCleaner();
 }
 
 }
