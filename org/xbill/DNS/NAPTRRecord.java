@@ -52,6 +52,8 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	this(name, dclass, ttl);
 	checkU16("order", order);
 	checkU16("preference", preference);
+	this.order = order;
+	this.preference = order;
 	try {
 		this.flags = byteArrayFromString(flags);
 		this.service = byteArrayFromString(service);
