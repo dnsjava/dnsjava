@@ -9,9 +9,12 @@ import DNS.utils.*;
 
 public class OPTRecord extends Record {
 
+Hashtable options;
+
 public
 OPTRecord(Name _name, short _dclass, int _ttl) {
 	super(_name, Type.OPT, _dclass, _ttl);
+	options = null;
 }
 
 public
@@ -22,12 +25,27 @@ throws IOException
 	super(_name, Type.OPT, _dclass, _ttl);
 	if (in == null)
 		return;
-	/* for now, skip the rest */
+	int count = 0;
+	if (count < length)
+		options = new Hashtable();
+	while (count < length) {
+		int code = in.readUnsignedShort();
+		int len = in.readUnsignedShort();
+		byte [] data = new byte[len];
+		in.read(data);
+		count += (4 + len);
+		options.put(new Integer(code), data);
+	}
 }
 
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
+	Enumeration e = options.keys();
+	while (e.hasMoreElements()) {
+		Integer i = (Integer) e.nextElement();
+		sb.append(i + " ");
+	}
 	return sb.toString();
 }
 
@@ -48,7 +66,15 @@ getVersion() {
 
 void
 rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
-	/* probably should dump bytes in here */
+	Enumeration e = options.keys();
+	while (e.hasMoreElements()) {
+		Integer i = (Integer) e.nextElement();
+		short key = i.shortValue();
+		dbs.writeShort(key);
+		byte [] data = (byte []) options.get(i);
+		dbs.writeShort(data.length);
+		dbs.write(data);
+	}
 }
 
 }
