@@ -59,7 +59,7 @@ setFlag(int bit) {
 
 void
 setFlags(boolean [] _flags) {
-	flags = flags;
+	flags = _flags;
 }
 
 public void
