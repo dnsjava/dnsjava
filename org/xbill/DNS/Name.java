@@ -24,8 +24,10 @@ private static final int LABEL_MASK = 0xC0;
 private static final int EXT_LABEL_BITSTRING = 1;
 
 private Object [] name;
+private byte offset;
 private byte labels;
 private boolean qualified;
+private boolean hasBitString;
 private int hashcode;
 
 /** The root name */
@@ -42,6 +44,9 @@ private static DecimalFormat byteFormat = new DecimalFormat();
 
 /* Used to efficiently convert bytes to lowercase */
 private static byte lowercase[] = new byte[256];
+
+/* Used in wildcard names. */
+private static byte wildcardLabel[] = new byte[] {(byte)'*'};
 
 static {
 	byteFormat.setMinimumIntegerDigits(3);
@@ -73,7 +78,7 @@ grow() {
 
 private final void
 compact() {
-	for (int i = labels - 1; i > 0; i--) {
+	for (int i = labels - 1 + offset; i > offset; i--) {
 		if (!(name[i] instanceof BitString) ||
 		    !(name[i - 1] instanceof BitString))
 		    	continue;
@@ -154,13 +159,10 @@ fromString(String s, Name origin) throws TextParseException {
 	Name name = new Name();
 	name.labels = 0;
 	name.name = new Object[1];
-	boolean seenBitString = false;
 
 	if (s.equals("@")) {
 		if (origin != null)
-			name.append(origin);
-		name.qualified = true;
-		return name;
+			return origin;
 	} else if (s.equals(".")) {
 		name.qualified = true;
 		return name;
@@ -233,13 +235,14 @@ fromString(String s, Name origin) throws TextParseException {
 		if (bitstring) {
 			bitstring = false;
 			name.name[name.labels++] = new BitString(newlabel);
+			name.hasBitString = true;
 		}
 		else
 			name.name[name.labels++] = newlabel;
 	}
 	if (!name.qualified && origin != null)
 		name.append(origin);
-	if (seenBitString)
+	if (name.hasBitString)
 		name.compact();
 	return (name);
 }
@@ -279,7 +282,6 @@ public
 Name(DataByteInputStream in) throws IOException {
 	int len, start, pos, count = 0, savedpos;
 	Name name2;
-	boolean seenBitString = false;
 
 	labels = 0;
 	name = new Object[STARTLABELS];
@@ -334,7 +336,7 @@ loop:
 				if (labels == name.length)
 					grow();
 				name[labels++] = new BitString(bits, data);
-				seenBitString = true;
+				hasBitString = true;
 				break;
 			default:
 				throw new WireParseException(
@@ -345,7 +347,7 @@ loop:
 	}
 	qualified = true;
 
-	if (seenBitString)
+	if (hasBitString)
 		compact();
 }
 
@@ -357,10 +359,9 @@ loop:
 /* Skips n labels and creates a new name */
 public
 Name(Name d, int n) {
-	name = new Object[d.labels - n];
-
-	labels = (byte) (d.labels - n);
-	System.arraycopy(d.name, n, name, 0, labels);
+	name = d.name;
+	offset = (byte)(d.offset + n);
+	labels = (byte)(d.labels - n);
 	qualified = d.qualified;
 }
 
@@ -371,7 +372,7 @@ Name(Name d, int n) {
 public Name
 wild(int n) {
 	Name wild = new Name(this, n - 1);
-	wild.name[0] = new byte[] {(byte)'*'};
+	wild.name[0] = wildcardLabel;
 	return wild;
 }
 
@@ -398,7 +399,11 @@ fromDNAME(DNAMERecord dname) {
 	System.arraycopy(dnametarget.name, 0, newname.name, saved,
 			 dnametarget.labels);
 	newname.qualified = true;
-	newname.compact();
+	for (int i = 0; i < newname.labels; i++)
+		if (newname.name[i] instanceof BitString)
+			newname.hasBitString = true;
+	if (newname.hasBitString)
+		newname.compact();
 	return newname;
 }
 
@@ -409,6 +414,8 @@ public boolean
 isWild() {
 	if (labels == 0 || (name[0] instanceof BitString))
 		return false;
+	if (name[0] == wildcardLabel)
+		return true;
 	byte [] b = (byte []) name[0];
 	return (b.length == 1 && b[0] == '*');
 }
@@ -431,7 +438,8 @@ append(Name d) {
 	System.arraycopy(d.name, 0, name, labels, d.labels);
 	labels += d.labels;
 	qualified = d.qualified;
-	compact();
+	if (hasBitString || d.hasBitString)
+		compact();
 }
 
 /**
@@ -440,7 +448,7 @@ append(Name d) {
 public short
 length() {
 	short total = 0;
-	for (int i = 0; i < labels; i++) {
+	for (int i = offset; i < labels + offset; i++) {
 		if (name[i] instanceof BitString)
 			total += (((BitString)name[i]).bytes() + 2);
 		else
@@ -498,7 +506,7 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	if (labels == 0)
 		sb.append(".");
-	for (int i = 0; i < labels; i++) {
+	for (int i = offset; i < labels + offset; i++) {
 		if (name[i] instanceof BitString)
 			sb.append(name[i]);
 		else
@@ -515,6 +523,7 @@ toString() {
  */
 public String
 getLabelString(int n) {
+	n += offset;
 	if (name[n] instanceof BitString)
 		return name[n].toString();
 	else
@@ -527,9 +536,9 @@ getLabelString(int n) {
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
 	boolean log = (c != null && Options.check("verbosecompression"));
-	for (int i = 0; i < labels; i++) {
+	for (int i = offset; i < labels + offset; i++) {
 		Name tname;
-		if (i == 0)
+		if (i == offset)
 			tname = this;
 		else
 			tname = new Name(this, i);
@@ -571,7 +580,7 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
  */
 public void
 toWireCanonical(DataByteOutputStream out) throws IOException {
-	for (int i = 0; i < labels; i++) {
+	for (int i = offset; i < labels + offset; i++) {
 		if (name[i] instanceof BitString) {
 			out.writeByte(LABEL_EXTENDED | EXT_LABEL_BITSTRING);
 			out.writeByte(((BitString)name[i]).wireBits());
@@ -601,14 +610,16 @@ equals(Object arg) {
 	if (d.labels != labels)
 		return false;
 	for (int i = 0; i < labels; i++) {
-		if (name[i].getClass() != d.name[i].getClass())
+		Object nobj = name[offset + i];
+		Object dnobj = d.name[d.offset + i];
+		if (nobj.getClass() != dnobj.getClass())
 			return false;
-		if (name[i] instanceof BitString) {
-			if (!name[i].equals(d.name[i]))
+		if (nobj instanceof BitString) {
+			if (!nobj.equals(dnobj))
 				return false;
 		} else {
-			byte [] b1 = (byte []) name[i];
-			byte [] b2 = (byte []) d.name[i];
+			byte [] b1 = (byte []) nobj;
+			byte [] b2 = (byte []) dnobj;
 			if (b1.length != b2.length)
 				return false;
 			for (int j = 0; j < b1.length; j++) {
@@ -628,7 +639,7 @@ hashCode() {
 	if (hashcode != 0)
 		return (hashcode);
 	int code = labels;
-	for (int i = 0; i < labels; i++) {
+	for (int i = offset; i < labels + offset; i++) {
 		if (name[i] instanceof BitString) {
 			BitString b = (BitString) name[i];
 			for (int j = 0; j < b.bytes(); j++)
@@ -651,7 +662,7 @@ hashCode() {
  * a value less than 0 if the argument is less than this name in the canonical 
  * ordering, and a value greater than 0 if the argument is greater than this
  * name in the canonical ordering.
- * @throws ClassCastException if the argument is not a String.
+ * @throws ClassCastException if the argument is not a Name.
  */
 public int
 compareTo(Object o) {
@@ -660,8 +671,8 @@ compareTo(Object o) {
 	int compares = labels > arg.labels ? arg.labels : labels;
 
 	for (int i = 1; i <= compares; i++) {
-		Object label = name[labels - i];
-		Object alabel = arg.name[arg.labels - i];
+		Object label = name[labels - i + offset];
+		Object alabel = arg.name[arg.labels - i + arg.offset];
 
 		if (label.getClass() != alabel.getClass()) {
 			if (label instanceof BitString)
