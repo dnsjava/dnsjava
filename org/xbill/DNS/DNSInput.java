@@ -12,11 +12,11 @@ import java.io.*;
 
 public class DNSInput {
 
-byte [] array;
-int pos;
-int end;
-int saved_pos;
-int saved_end;
+private byte [] array;
+private int pos;
+private int end;
+private int saved_pos;
+private int saved_end;
 
 /**
  * Creates a new DNSInput
