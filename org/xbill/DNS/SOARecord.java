@@ -95,7 +95,7 @@ rdataToString() {
 		sb.append(expire);
 		sb.append("\t; expire\n\t\t\t\t\t");
 		sb.append(minimum);
-		sb.append(")\t; minimum");
+		sb.append(" )\t; minimum");
 	}
 	return sb.toString();
 }
