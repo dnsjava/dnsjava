@@ -238,7 +238,7 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 		if (c == -1 || delimiters.indexOf(c) != -1) {
 			if (c == -1) {
 				if (quoting)
-					throw new EOFException();
+					fail("newline in quoted string");
 				else if (sb.length() == 0)
 					return current.set(EOF, null);
 				else
@@ -293,13 +293,10 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 			} else
 				ungetChar(c);
 			break;
-		} else if (quoting) {
-			if (c == '\\') {
-				c = getChar();
-				if (c == -1)
-					throw new EOFException();
-			} else if (c == '\n')
-				fail("newline in quoted string");
+		} else if (c == '\\') {
+			c = getChar();
+			if (c == -1)
+				fail("unterminated escape sequence");
 		}
 		sb.append((char)c);
 	}
