@@ -272,7 +272,7 @@ addNegative(Name name, short type, SOARecord soa, byte cred) {
 	if (verifier != null && secure)
 		return;
 	Element element = (Element) findExactSet(name, type);
-	if (soa.getTTL() == 0) {
+	if (soa == null || soa.getTTL() == 0) {
 		if (element != null && cred >= element.credibility)
 			removeSet(name, type, element);
 	}
@@ -566,6 +566,7 @@ addMessage(Message in) {
 	boolean restart = false;
 	RRset [] answers, auth, addl;
 	SetResponse response = null;
+	boolean verbose = Options.check("verbosecache");
 
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return null;
@@ -671,6 +672,8 @@ addMessage(Message in) {
 		cred = getCred(Section.ADDITIONAL, isAuth);
 		addRRset(addl[i], cred);
 	}
+	if (verbose)
+		System.out.println("addMessage: " + response);
 	return (response);
 }
 
