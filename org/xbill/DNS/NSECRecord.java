@@ -102,6 +102,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 		}
 		list.add(Mnemonic.toInteger(type));
 	}
+	st.unget();
 	types = listToArray(list);
 	Arrays.sort(types);
 }

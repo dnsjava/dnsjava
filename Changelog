@@ -1,3 +1,7 @@
+5/25/2004
+	- Fix a bug where parsing the text format of an NSEC record
+	  incorrectly parsed one token too many.
+
 5/18/2004
 	- 1.6.3 released.
 
