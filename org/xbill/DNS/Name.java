@@ -576,7 +576,7 @@ byteString(byte [] array, int pos) {
 	StringBuffer sb = new StringBuffer();
 	int len = array[pos++];
 	for (int i = pos; i < pos + len; i++) {
-		short b = (short)(array[i] & 0xFF);
+		int b = array[i] & 0xFF;
 		if (b <= 0x20 || b >= 0x7f) {
 			sb.append('\\');
 			sb.append(byteFormat.format(b));

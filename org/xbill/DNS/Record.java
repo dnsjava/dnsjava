@@ -444,7 +444,7 @@ byteArrayToString(byte [] array, boolean quote) {
 	if (quote)
 		sb.append('"');
 	for (int i = 0; i < array.length; i++) {
-		short b = (short)(array[i] & 0xFF);
+		int b = array[i] & 0xFF;
 		if (b < 0x20 || b >= 0x7f) {
 			sb.append('\\');
 			sb.append(byteFormat.format(b));
