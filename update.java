@@ -123,6 +123,7 @@ public static void main(String argv[]) throws IOException {
 
 	query.addRecord(ZONE, soa);
 	query.addRecord(UPDATE, a);
+	query.addRecord(UPDATE, dela);
 
 	doUpdate(query, res);
 }
