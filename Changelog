@@ -1,3 +1,6 @@
+2/25/2004
+	- Attempting to load a zone without specifying an origin failed.
+
 2/24/2004
 	- 1.5.2 released.
 
