@@ -205,6 +205,8 @@ send(Message query) throws IOException {
 	DatagramSocket s;
 	DatagramPacket dp;
 	short udpLength = 512;
+	OPTRecord opt;
+	int edns;
 
 	if (Options.check("verbose"))
 		System.err.println("Sending to " + addr.getHostAddress() +
@@ -214,9 +216,13 @@ send(Message query) throws IOException {
 		return sendAXFR(query);
 
 	query = (Message) query.clone();
-	if (EDNSlevel >= 0) {
+	opt = query.getOPT();
+	if (opt != null) {
+		edns = opt.getVersion();
+		udpLength = opt.getPayloadSize();
+	} else if (EDNSlevel >= 0) {
 		udpLength = 1280;
-		Record opt = new OPTRecord(udpLength, Rcode.NOERROR, EDNSlevel);
+		opt = new OPTRecord(udpLength, Rcode.NOERROR, EDNSlevel);
 		query.addRecord(opt, Section.ADDITIONAL);
 	}
 
