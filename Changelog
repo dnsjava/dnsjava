@@ -2,6 +2,9 @@
 	- Converting some types of records (TXT, for example) to wire format
 	  could throw an IndexOutOfBoundsException.
 	- TSIG signed UDP queries weren't properly verified by jnamed.
+	- Add a method to render a Message with a specified maximum size - 
+	  this method will properly truncate large responses and apply
+	  TSIG signatures.
 
 12/14/2002
 	- Move additional data processing to the Record class from jnamed;

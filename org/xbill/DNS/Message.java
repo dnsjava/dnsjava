@@ -25,6 +25,9 @@ private List [] sections;
 private int size;
 private byte [] wireFormat;
 private boolean frozen;
+private TSIG tsigkey;
+private TSIGRecord querytsig;
+private byte tsigerror;
 boolean TSIGsigned, TSIGverified;
 
 private static Record [] emptyRecordArray = new Record[0];
@@ -319,6 +322,18 @@ getSectionArray(int section) {
 	return (Record []) l.toArray(new Record[l.size()]);
 }
 
+private static boolean
+sameSet(Record r1, Record r2) {
+	return (r1.getRRsetType() == r2.getRRsetType() &&
+		r1.getDClass() == r2.getDClass() &&
+		r1.getName().equals(r2.getName()));
+}
+
+private static boolean
+sameSet(RRset set, Record rec) {
+	return (sameSet(set.first(), rec));
+}
+
 /**
  * Returns an array containing all records in the given section grouped into
  * RRsets.
@@ -339,10 +354,7 @@ getSectionRRsets(int section) {
 		do {
 			set.addRR(recs[i]);
 			i++;
-		} while (i < recs.length &&
-			 set.getType() == recs[i].getRRsetType() &&
-			 set.getDClass() == recs[i].getDClass() &&
-			 set.getName().equals(recs[i].getName()));
+		} while (i < recs.length && sameSet(set, recs[i]));
 	}
 	return (RRset []) sets.toArray(new RRset[sets.size()]);
 }
@@ -359,6 +371,89 @@ toWire(DataByteOutputStream out) {
 			rec.toWire(out, i, c);
 		}
 	}
+}
+
+/* Returns the number of records not successfully rendered. */
+private int
+sectionToWire(DataByteOutputStream out, int section, Compression c,
+	      int maxLength)
+{
+	int n = sections[section].size();
+	int pos = out.getPos();
+	int rendered = 0;
+	Record lastrec = null;
+
+	for (int i = 0; i < n; i++) {
+		Record rec = (Record)sections[section].get(i);
+		if (lastrec != null && !sameSet(rec, lastrec)) {
+			pos = out.getPos();
+			rendered = i;
+		}
+		lastrec = rec;
+		rec.toWire(out, section, c);
+		if (out.getPos() > maxLength) {
+			out.setPos(pos);
+			return n - rendered;
+		}
+	}
+	return 0;
+}
+
+/* Returns true if the message could be rendered. */
+private boolean
+toWire(DataByteOutputStream out, int maxLength) {
+	if (maxLength < Header.LENGTH)
+		return false;
+
+	Header newheader = null;
+
+	int tempMaxLength = maxLength;
+	if (tsigkey != null)
+		tempMaxLength -= tsigkey.recordLength();
+
+	int startpos = out.getPos();
+	header.toWire(out);
+	Compression c = new Compression();
+	for (int i = 0; i < 4; i++) {
+		int skipped;
+		if (sections[i] == null)
+			continue;
+		skipped = sectionToWire(out, i, c, tempMaxLength);
+		if (skipped != 0) {
+			if (i != Section.ADDITIONAL) {
+				if (newheader == null)
+					newheader = (Header) header.clone();
+				newheader.setFlag(Flags.TC);
+				int count = newheader.getCount(i);
+				newheader.setCount(i, count - skipped);
+				for (int j = i + 1; j < 4; j++)
+					newheader.setCount(j, 0);
+
+				int pos = out.getPos();
+				out.setPos(startpos);
+				newheader.toWire(out);
+				out.setPos(pos);
+			}
+			break;
+		}
+	}
+
+	if (tsigkey != null) {
+		TSIGRecord tsigrec = tsigkey.generate(this, out.toByteArray(),
+						      tsigerror, querytsig);
+
+		if (newheader == null)
+			newheader = (Header) header.clone();
+		tsigrec.toWire(out, Section.ADDITIONAL, c);
+		newheader.incCount(Section.ADDITIONAL);
+
+		int pos = out.getPos();
+		out.setPos(startpos);
+		newheader.toWire(out);
+		out.setPos(pos);
+	}
+
+	return true;
 }
 
 /**
@@ -380,6 +475,27 @@ toWire() {
 }
 
 /**
+ * Returns an array containing the wire format representation of the Message
+ * with the specified maximum length.  This will generate a truncated
+ * message (with the TC bit) if the message doesn't fit, and will also
+ * sign the message with the TSIG key set by a call to setTSIG().  This
+ * method may return null if the message could not be rendered at all; this
+ * could happen if maxLength is smaller than a DNS header, for example.
+ * @param maxLength The maximum length of the message.
+ * @return The wire format of the message, or null if the message could not be
+ * rendered into the specified length.
+ * @see Flags
+ * @see TSIG
+ */
+public byte []
+toWire(int maxLength) {
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWire(out, maxLength);
+	size = out.getPos();
+	return out.toByteArray();
+}
+
+/**
  * Indicates that a message's contents will not be changed until a thaw
  * operation.
  * @see #thaw
@@ -397,6 +513,19 @@ public void
 thaw() {
 	frozen = false;
 	wireFormat = null;
+}
+
+/**
+ * Sets the TSIG key and other necessary information to sign a message.
+ * @param key The TSIG key.
+ * @param error The value of the TSIG error field.
+ * @param querytsig If this is a response, the TSIG from the request.
+ */
+public void
+setTSIG(TSIG key, byte error, TSIGRecord querytsig) {
+	this.tsigkey = key;
+	this.tsigerror = error;
+	this.querytsig = querytsig;
 }
 
 /**
