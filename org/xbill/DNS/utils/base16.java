@@ -4,7 +4,6 @@
 package org.xbill.DNS.utils;
 
 import java.io.*;
-import java.util.*;
 
 /**
  * Routines for converting between Strings of hex-encoded data and arrays of

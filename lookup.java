@@ -1,4 +1,3 @@
-import java.util.*;
 import org.xbill.DNS.*;
 
 public class lookup {

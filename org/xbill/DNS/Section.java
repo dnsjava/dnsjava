@@ -3,7 +3,6 @@
 
 package org.xbill.DNS;
 
-import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**

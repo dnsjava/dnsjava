@@ -4,11 +4,8 @@
 package org.xbill.DNS.security;
 
 import java.io.*;
-import java.math.*;
-import java.util.*;
 import java.security.cert.*;
 import org.xbill.DNS.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Routines to convert between a DNS CERT record and a Java Certificate.

@@ -10,7 +10,6 @@ import java.security.SignatureException;
 import java.security.interfaces.DSAKey;
 import java.util.Date;
 import org.xbill.DNS.*;
-import org.xbill.DNS.utils.DataByteOutputStream;
 
 /**
  * Creates SIG(0) transaction signatures.

@@ -4,7 +4,6 @@
 package org.xbill.DNS;
 
 import java.util.*;
-import java.io.*;
 
 /**
  * A set of Records with the same name, type, and class.  Also included

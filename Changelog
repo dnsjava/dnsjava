@@ -1,3 +1,6 @@
+7/18/2003
+	- Remove lots of unused imports. (Jared Richardson <jaredr@nc.rr.com>)
+
 7/14/2003
 	- Fix a long-existing bug where empty records (in update messages)
 	  were incorrectly handled

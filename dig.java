@@ -2,7 +2,6 @@
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
 import java.io.*;
-import java.util.*;
 import org.xbill.DNS.*;
 
 /** @author Brian Wellington &lt;bwelling@xbill.org&gt; */

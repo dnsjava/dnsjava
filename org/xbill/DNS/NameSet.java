@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.util.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * The shared superclass of Zone and Cache.  All names are stored in a

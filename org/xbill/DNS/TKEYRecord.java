@@ -5,7 +5,6 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.util.*;
-import java.text.*;
 import org.xbill.DNS.utils.*;
 
 /**

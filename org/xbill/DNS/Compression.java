@@ -3,8 +3,6 @@
 
 package org.xbill.DNS;
 
-import java.util.*;
-
 /**
  * DNS Name Compression object.
  * @see Name

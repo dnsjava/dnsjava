@@ -3,8 +3,6 @@
 
 package org.xbill.DNS.utils;
 
-import java.io.*;
-
 /**
  * A routine to produce a nice looking hex dump
  *

@@ -4,7 +4,6 @@
 package org.xbill.DNS;
 
 import java.util.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * The Response from a query to Cache.lookupRecords() or Zone.findRecords()

@@ -3,9 +3,7 @@
 
 package org.xbill.DNS;
 
-import java.util.*;
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * A DNS master file parser.  This incrementally parses the file, returning

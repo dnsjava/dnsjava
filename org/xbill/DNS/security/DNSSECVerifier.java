@@ -3,13 +3,8 @@
 
 package org.xbill.DNS.security;
 
-import java.io.*;
-import java.math.*;
 import java.util.*;
 import java.security.*;
-import java.security.interfaces.*;
-import javax.crypto.*;
-import javax.crypto.interfaces.*;
 import org.xbill.DNS.*;
 import org.xbill.DNS.utils.*;
 

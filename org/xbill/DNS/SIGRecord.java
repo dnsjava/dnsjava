@@ -240,12 +240,12 @@ formatDate(Date d) {
 	w2.setMinimumIntegerDigits(2);
 
 	c.setTime(d);
-	sb.append(w4.format(c.get(c.YEAR)));
-	sb.append(w2.format(c.get(c.MONTH)+1));
-	sb.append(w2.format(c.get(c.DAY_OF_MONTH)));
-	sb.append(w2.format(c.get(c.HOUR_OF_DAY)));
-	sb.append(w2.format(c.get(c.MINUTE)));
-	sb.append(w2.format(c.get(c.SECOND)));
+	sb.append(w4.format(c.get(Calendar.YEAR)));
+	sb.append(w2.format(c.get(Calendar.MONTH)+1));
+	sb.append(w2.format(c.get(Calendar.DAY_OF_MONTH)));
+	sb.append(w2.format(c.get(Calendar.HOUR_OF_DAY)));
+	sb.append(w2.format(c.get(Calendar.MINUTE)));
+	sb.append(w2.format(c.get(Calendar.SECOND)));
 	return sb.toString();
 }
 

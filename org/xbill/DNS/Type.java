@@ -4,7 +4,6 @@
 package org.xbill.DNS;
 
 import java.util.HashMap;
-import org.xbill.DNS.utils.*;
 
 /**
  * Constants and functions relating to DNS Types

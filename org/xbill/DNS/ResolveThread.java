@@ -3,10 +3,6 @@
 
 package org.xbill.DNS;
 
-import java.util.*;
-import java.io.*;
-import java.net.*;
-
 /**
  * A special-purpose thread used by Resolvers (both SimpleResolver and
  * ExtendedResolver) to perform asynchronous queries.

@@ -3,8 +3,6 @@
 
 package org.xbill.DNS.utils;
 
-import java.io.*;
-
 /**
  * A pure java implementation of the MD5 digest algorithm
  *

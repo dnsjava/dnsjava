@@ -3,10 +3,8 @@
 
 package org.xbill.DNS;
 
-import java.net.*;
 import java.io.*;
 import java.util.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Inet6Address - implementation of IPv6 address

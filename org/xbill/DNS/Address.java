@@ -3,9 +3,7 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
 import java.net.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * A simple clone of the java.net.InetAddress class, using dnsjava routines.
