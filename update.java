@@ -414,7 +414,7 @@ doLog(MyStringTokenizer st) {
 		FileOutputStream fos = new FileOutputStream(s);
 		log = new PrintStream(fos);
 	}
-	catch (FileNotFoundException e) {
+	catch (Exception e) {
 		print("Error opening " + s);
 	}
 }
