@@ -10,6 +10,16 @@ printAnswer(String name, Lookup lookup) {
 	if (result != Lookup.SUCCESSFUL)
 		System.out.print(" " + lookup.getErrorString());
 	System.out.println();
+	Name [] aliases = lookup.getAliases();
+	if (aliases.length > 0) {
+		System.out.print("# aliases: ");
+		for (int i = 0; i < aliases.length; i++) {
+			System.out.print(aliases[i]);
+			if (i < aliases.length - 1)
+				System.out.print(" ");
+		}
+		System.out.println();
+	}
 	if (lookup.getResult() == Lookup.SUCCESSFUL) {
 		Record [] answers = lookup.getAnswers();
 		for (int i = 0; i < answers.length; i++)
