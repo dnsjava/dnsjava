@@ -28,6 +28,13 @@ doQuery(Message response) throws IOException {
 static void
 doAXFR(Message response) throws IOException {
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
+	if (response.isSigned()) {
+		System.out.print(";; TSIG ");
+		if (response.isVerified())
+			System.out.println("ok");
+		else
+			System.out.println("failed");
+	}
 
 	if (response.getRcode() != Rcode.NOERROR) {
 		System.out.println(response);
