@@ -169,9 +169,10 @@ sendUpdate() throws IOException {
 	if (response == null)
 		return;
 
-	System.out.println(response.getHeader());
+	System.out.println(response);
+	// System.out.println(response.getHeader());
 
-	System.out.println(";; done");
+	// System.out.println(";; done");
 }
 
 /* 
@@ -363,7 +364,7 @@ doFile(MyStringTokenizer st, Vector inputs) {
 		BufferedReader br2 = new BufferedReader(isr2);
 		inputs.addElement(br2);
 	}
-	catch (Exception e) {
+	catch (FileNotFoundException e) {
 		System.out.println(s + "not found");
 		return;
 	}
@@ -521,9 +522,21 @@ help(String topic) {
 }
 
 public static void
-main(String argv[]) throws IOException {
+main(String args[]) throws IOException {
 
-	update u = new update(System.in);
+	InputStream in = null;
+	if (args.length == 1) {
+		try {
+			in = new FileInputStream(args[0]);
+		}
+		catch (FileNotFoundException e) {
+			System.out.println(args[0] + " not found.");
+			System.exit(-1);
+		}
+	}
+	else
+		in = System.in;
+	update u = new update(in);
 }
 
 }
