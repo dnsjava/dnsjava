@@ -1,3 +1,7 @@
+1/12/2004
+	- Add a MANIFEST to the jar file containing implementation name and
+	  version. (Harel Efraim <harel.efraim@nominum.com>)
+
 1/11/2004
 	- Fix a couple minor bugs found by FindBugs
 	  (http://www.cs.umd.edu/~pugh/java/bugs/)

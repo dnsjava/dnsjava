@@ -30,7 +30,12 @@
 
     <target name="jar" description="Makes dnsjava.jar" depends="compile">
         <jar jarfile="${dist_dir}/${jarname}"
-             basedir="${build_dir}" includes="**/*.class"/>
+             basedir="${build_dir}" includes="**/*.class">
+            <manifest>
+                <attribute name="Implementation-Title" value="dnsjava"/>
+                <attribute name="Implementation-Version" value="${version}"/>
+            </manifest>
+        </jar>
     </target>
 
     <target name="clean" description="Remove old class files">
