@@ -30,7 +30,7 @@ private byte labels;
 private boolean qualified;
 
 /** The root name */
-public static Name root = new Name("");
+public static Name root = new Name(".");
 
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 256;
@@ -235,7 +235,7 @@ wild(int n) {
  */
 public boolean
 isWild() {
-	return name[0].equals("*");
+	return (labels > 0 && name[0].equals("*"));
 }
 
 /**
