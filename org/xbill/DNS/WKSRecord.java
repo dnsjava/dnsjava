@@ -630,13 +630,9 @@ rrFromWire(DNSInput in) throws IOException {
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = st.getString();
-	int [] array = Address.toArray(s);
-	if (array == null)
+	address = Address.toByteArray(s, Address.IPv4);
+	if (address == null)
 		throw st.exception("invalid address");
-	address = new byte[4];
-	for (int i = 0; i < 4; i++) {
-		address[i] = (byte)array[i];
-	}
 
 	s = st.getString();
 	protocol = Protocol.value(s);
