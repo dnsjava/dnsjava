@@ -25,7 +25,7 @@ import org.xbill.DNS.utils.*;
 
 public class DNSSECVerifier implements Verifier {
 
-public class ByteArrayComparator implements Comparator {
+class ByteArrayComparator implements Comparator {
 	public int
 	compare(Object o1, Object o2) throws ClassCastException {
 		byte [] b1 = (byte []) o1;
