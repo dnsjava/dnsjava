@@ -1,11 +1,11 @@
-dnsjava
+dnsjava v1.0
 
 http://www.xbill.org/dnsjava
 
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-
+June 18, 1999
 
 Overview:
 
@@ -15,15 +15,14 @@ and dynamic updates.  It includes a cache which can be used by clients, and a
 minimal implementation of a server.  It supports TSIG authenticated messages
 (if you don't know, don't worry about it).
 
-dnsjava is designed to be a complete replacement for the DNS functionality
-provided by the InetAddress class.  Since it is written in pure Java, dnsjava
-is fully threadable.
+dnsjava provides functionality above and beyond that of the InetAddress class.
+Since it is written in pure Java, dnsjava is fully threadable.
 
 dnsjava was started as an excuse to learn Java.  It was useful for testing new
 features in BIND without rewriting the C resolver.  It was then cleaned up and
 extended in order to be used as a testing framework for the DNS
-interoperability testing at the 44th IETF.  The high level API was added to
-make it useful to a wider audience.
+interoperability testing at the 44th IETF.  The high level API and caching
+resolver were added to make it useful to a wider audience.
 
 
 Limitations:
@@ -45,18 +44,14 @@ is present in the textual form of an A record and InetAddress.getLocalHost()
 doesn't work, dnsjava will print an error and die.  I'm investigating
 ways to improve this behavior without using JNI.
 
-Not all of the record types are supported.  Most other types are deprecated or
-rarely used.
+Not all of the record types are supported.  Most unsupported types are
+deprecated or rarely used.  Adding support for a new type is not difficult,
+and requires no changes to any existing files.
 
 
 Additional documentation:
 
 Javadoc (1.2) documentation is provided in the doc/ subdirectory.
-
-
-Future:
-
-- A GUI for the dynamic update program would be nice
 
 
 License:

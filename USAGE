@@ -2,7 +2,8 @@ dnsjava can be used in several ways:
 
 Command line programs:
 
-- dig: A clone of dig (as distributed with BIND)
+- dig:
+	A clone of dig (as distributed with BIND)
 	dig @server [-x] name type [class] [-p port] [-k name/secret] [-t] [-i]
 		-x : reverse lookup, name must be a dotted quad
 		-k : use TSIG transaction security
@@ -10,16 +11,16 @@ Command line programs:
 		-i : ignore truncation errors
 
 - update:
-	A dynamic update client with some extra functionality.  Rather than
-	describing it all here, run 'help' from the command line.  Run it
-	with:
+	A dynamic update client with some extra functionality.  This can be
+	used either interactively or by specifying a file containing commands
+	to be executed.  Running 'help' lists all other commands.
 	update [file]
 	
 
 - jnamed:
 	A basic primary, non-caching, non-recursive server.  Not very good,
-	but it runs now.  The config file specifies "primary file",
-	"cache file", and "key name data".
+	or useful at all, but it runs.  The config file specifies
+	"primary file", "cache file", and "key name data".
 	jnamed config_file
 
 DNS and DNS.utils packages:
