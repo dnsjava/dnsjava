@@ -93,7 +93,8 @@ byte [] toBytes(int section) throws IOException {
 }
 
 void rrToBytes(DataOutputStream out) throws IOException {
-	out.write(data);
+	if (rlength > 0)
+		out.write(data);
 }
 
 void toCanonicalBytes(DataOutputStream out, int section) throws IOException {
