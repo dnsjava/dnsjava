@@ -200,6 +200,10 @@ expand() throws IOException {
 	return (Record []) list.toArray(new Record[list.size()]);
 }
 
+/**
+ * Converts the generate specification to a string containing the corresponding
+ * $GENERATE statement.
+ */
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
