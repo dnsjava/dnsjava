@@ -49,6 +49,7 @@ private String badresponse_error;
 private boolean networkerror;
 private boolean timedout;
 private boolean nametoolong;
+private boolean referral;
 
 /** The lookup was successful. */
 public static final int SUCCESSFUL = 0;
@@ -333,6 +334,7 @@ follow(Name name, Name oldname) {
 	networkerror = false;
 	timedout = false;
 	nxdomain = false;
+	referral = false;
 	iterations++;
 	if (iterations >= 6 || name.equals(oldname)) {
 		result = UNRECOVERABLE;
@@ -387,8 +389,7 @@ processResponse(Name name, SetResponse response) {
 		}
 	} else if (response.isDelegation()) {
 		// We shouldn't get a referral.  Ignore it.
-		badresponse = true;
-		badresponse_error = "referral";
+		referral = true;
 	}
 }
 
@@ -502,6 +503,10 @@ run() {
 			done = true;
 		} else if (nxdomain) {
 			result = HOST_NOT_FOUND;
+			done = true;
+		} else if (referral) {
+			result = UNRECOVERABLE;
+			error = "referral";
 			done = true;
 		} else if (nametoolong) {
 			result = UNRECOVERABLE;

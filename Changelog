@@ -1,3 +1,7 @@
+3/20/2004
+	- Lookups could return "referral" instead of "host not found" in some
+	  cases.
+
 3/18/2004
 	- Fix NullPointerExceptions caused by bad empty Record handling.
 	  (reported by Dharmveer Jain <dharmveer_jain@yahoo.com>)
