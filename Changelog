@@ -1,3 +1,6 @@
+8/6/2002
+	- The AAAARecord constructor was broken.
+
 6/22/2002
 	- Significant speed improvements in the Record class and its
 	  subclasses.

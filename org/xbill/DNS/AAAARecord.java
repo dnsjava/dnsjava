@@ -18,9 +18,7 @@ public class AAAARecord extends Record {
 
 private static AAAARecord member = new AAAARecord();
 
-private short prefixBits;
 private Inet6Address address;
-private Name prefix;
 
 private
 AAAARecord() {}
@@ -40,8 +38,7 @@ getMember() {
  * @param address The address suffix
  */
 public
-AAAARecord(Name name, short dclass, int ttl, int prefixBits,
-	   Inet6Address address, Name prefix)
+AAAARecord(Name name, short dclass, int ttl, Inet6Address address)
 throws IOException
 {
 	this(name, dclass, ttl);
