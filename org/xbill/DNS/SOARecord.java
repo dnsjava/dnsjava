@@ -52,10 +52,10 @@ throws IOException
 	host = new Name(st.nextToken(), origin);
 	admin = new Name(st.nextToken(), origin);
 	serial = Integer.parseInt(st.nextToken());
-	refresh = Integer.parseInt(st.nextToken());
-	retry = Integer.parseInt(st.nextToken());
-	expire = Integer.parseInt(st.nextToken());
-	minimum = Integer.parseInt(st.nextToken());
+	refresh = TTL.parseTTL(st.nextToken());
+	retry = TTL.parseTTL(st.nextToken());
+	expire = TTL.parseTTL(st.nextToken());
+	minimum = TTL.parseTTL(st.nextToken());
 }
 
 
