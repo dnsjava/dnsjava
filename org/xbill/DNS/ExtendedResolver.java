@@ -241,7 +241,10 @@ send(Message query) throws IOException {
 				start = 0;
 			for (i = start; i < nresolvers + start; i++) {
 				r = i % nresolvers;
-				if (sent[r] == recvd[r] && sent[r] < retries) {
+				if (!invalid[r] &&
+				    sent[r] == recvd[r] &&
+				    sent[r] < retries)
+				{
 					sendTo(query, receiver, idMap, r);
 					sent[r]++;
 					waiting = true;
