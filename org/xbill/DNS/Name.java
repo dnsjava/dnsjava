@@ -107,6 +107,12 @@ Name(String s) {
 	this (s, null);
 }
 
+/**
+ * Create a new name from DNS wire format
+ * @param in  A stream containing the input data
+ * @param c  The compression context.  This should be null unless a full
+ * message is being parsed.
+ */
 public
 Name(DataByteInputStream in, Compression c) throws IOException {
 	int len, start, pos, count = 0;
