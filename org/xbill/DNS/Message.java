@@ -24,7 +24,6 @@ private Header header;
 private List [] sections;
 private int size;
 private byte [] wireFormat;
-private boolean frozen;
 private TSIG tsigkey;
 private TSIGRecord querytsig;
 private byte tsigerror;
@@ -40,7 +39,6 @@ Message(Header header) {
 	sections = new List[4];
 	this.header = header;
 	wireFormat = null;
-	frozen = false;
 }
 
 /** Creates a new Message with the specified Message ID */
@@ -466,17 +464,10 @@ toWire(DataByteOutputStream out, int maxLength) {
  */
 public byte []
 toWire() {
-	if (frozen && wireFormat != null)
-		return wireFormat;
 	DataByteOutputStream out = new DataByteOutputStream();
 	toWire(out);
 	size = out.getPos();
-	if (frozen) {
-		wireFormat = out.toByteArray();
-		return wireFormat;
-	}
-	else
-		return out.toByteArray();
+	return out.toByteArray();
 }
 
 /**
@@ -498,26 +489,6 @@ toWire(int maxLength) {
 	toWire(out, maxLength);
 	size = out.getPos();
 	return out.toByteArray();
-}
-
-/**
- * Indicates that a message's contents will not be changed until a thaw
- * operation.
- * @see #thaw
- */
-public void
-freeze() {
-	frozen = true;
-}
-
-/**
- * Indicates that a message's contents can now change (are no longer frozen).
- * @see #freeze
- */
-public void
-thaw() {
-	frozen = false;
-	wireFormat = null;
 }
 
 /**
