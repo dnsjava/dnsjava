@@ -45,11 +45,6 @@ inaddrString(String s) {
 }
 
 public static void
-init(String defaultResolver) {
-	Resolver.setDefaultResolver(defaultResolver);
-}
-
-public static void
 setResolver(Resolver _res) {
 	res = _res;
 }
