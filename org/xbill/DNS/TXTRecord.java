@@ -39,6 +39,9 @@ getMember() {
 public
 TXTRecord(Name name, short dclass, int ttl, List strings) {
 	this(name, dclass, ttl);
+	if (strings == null)
+		throw new IllegalArgumentException
+				("TXTRecord: strings must not be null");
 	this.strings = strings;
 }
 
