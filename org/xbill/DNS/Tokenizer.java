@@ -534,16 +534,22 @@ remainingStrings() throws IOException {
 /**
  * Gets the remaining string tokens until an EOL/EOF is seen, concatenates
  * them together, and converts the base64 encoded data to a byte array.
+ * @param required If true, an exception will be thrown if no strings remain;
+ * otherwise null be be returned.
  * @return The byte array containing the decoded strings, or null if there
  * were no strings to decode.
- * @throws TextParseException The input was invalid or not an EOL or EOF token.
+ * @throws TextParseException The input was invalid.
  * @throws IOException An I/O error occurred.
  */
 public byte []
-getBase64() throws IOException {
+getBase64(boolean required) throws IOException {
 	String s = remainingStrings();
-	if (s == null)
-		return null;
+	if (s == null) {
+		if (required)
+			throw exception("expected base64 encoded string");
+		else
+			return null;
+	}
 	byte [] array = base64.fromString(s);
 	if (array == null)
 		throw exception("invalid base64 encoding");
@@ -552,21 +558,53 @@ getBase64() throws IOException {
 
 /**
  * Gets the remaining string tokens until an EOL/EOF is seen, concatenates
- * them together, and converts the hex encoded data to a byte array.
+ * them together, and converts the base64 encoded data to a byte array.
  * @return The byte array containing the decoded strings, or null if there
  * were no strings to decode.
- * @throws TextParseException The input was invalid or not an EOL or EOF token.
+ * @throws TextParseException The input was invalid.
  * @throws IOException An I/O error occurred.
  */
 public byte []
-getHex() throws IOException {
+getBase64() throws IOException {
+	return getBase64(false);
+}
+
+/**
+ * Gets the remaining string tokens until an EOL/EOF is seen, concatenates
+ * them together, and converts the hex encoded data to a byte array.
+ * @param required If true, an exception will be thrown if no strings remain;
+ * otherwise null be be returned.
+ * @return The byte array containing the decoded strings, or null if there
+ * were no strings to decode.
+ * @throws TextParseException The input was invalid.
+ * @throws IOException An I/O error occurred.
+ */
+public byte []
+getHex(boolean required) throws IOException {
 	String s = remainingStrings();
-	if (s == null)
-		return null;
+	if (s == null) {
+		if (required)
+			throw exception("expected hex encoded string");
+		else
+			return null;
+	}
 	byte [] array = base16.fromString(s);
 	if (array == null)
 		throw exception("invalid hex encoding");
 	return array;
+}
+
+/**
+ * Gets the remaining string tokens until an EOL/EOF is seen, concatenates
+ * them together, and converts the hex encoded data to a byte array.
+ * @return The byte array containing the decoded strings, or null if there
+ * were no strings to decode.
+ * @throws TextParseException The input was invalid.
+ * @throws IOException An I/O error occurred.
+ */
+public byte []
+getHex() throws IOException {
+	return getHex(false);
 }
 
 /**
