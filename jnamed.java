@@ -208,6 +208,8 @@ generateReply(Message query, byte [] in, int maxLength) {
 
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
+	if (!Type.isRR(type))
+		return notimplMessage(query);
 	short dclass = queryRecord.getDClass();
 	Zone zone = findBestZone(name);
 	if (zone != null) {
@@ -447,13 +449,18 @@ addUDP(final short port) {
 }
 
 public static void main(String [] args) {
-	if (args.length != 1) {
-		System.out.println("usage: server conf");
+	if (args.length > 1) {
+		System.out.println("usage: jnamed [conf]");
 		System.exit(0);	
 	}
 	jnamed s;
 	try {
-		s = new jnamed(args[0]);
+		String conf;
+		if (args.length == 1)
+			conf = args[0];
+		else
+			conf = "jnamed.conf";
+		s = new jnamed(conf);
 	}
 	catch (IOException e) {
 		System.out.println(e);

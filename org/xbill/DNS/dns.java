@@ -142,10 +142,10 @@ lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
 	int answerCount = 0, n = 0;
 	Enumeration e;
 
-	if (Options.check("verboselookup"))
+	if (Options.check("verbose"))
 		System.err.println("lookup " + name + " " + Type.string(type));
 	SetResponse cached = cache.lookupRecords(name, type, dclass, cred);
-	if (Options.check("verboselookup"))
+	if (Options.check("verbose"))
 		System.err.println(cached);
 	if (cached.isSuccessful()) {
 		RRset [] rrsets = cached.answers();

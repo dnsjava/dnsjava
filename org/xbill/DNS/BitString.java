@@ -19,12 +19,14 @@ int nbits;
 byte [] data;
 
 BitString(String s) throws IOException {
-System.out.println("parsing BitString");
+	if (Options.check("verbosebitstring"))
+		System.err.println("parsing BitString" + s);
 	if (s.length() < 4 || !s.startsWith("[") || !s.endsWith("]"))
 		throw new IOException("Invalid encoding: " + s);
-System.out.println("basic encoding ok");
+	if (Options.check("verbosebitstring"))
+		System.err.println("basic encoding ok");
 	int radix;
-	switch (s.charAt(2)) {
+	switch (s.charAt(1)) {
 		case 'x':
 			radix = 16;
 			break;
@@ -41,12 +43,14 @@ System.out.println("basic encoding ok");
 		default:
 			throw new IOException("Invalid encoding: " + s);
 	}
+	if (Options.check("verbosebitstring"))
+		System.err.println("radix = " + radix);
 
 	int slash = s.indexOf('/');
 	BitSet set = new BitSet();
 
 	if (radix > 0) {
-		for (int i = 3, j = 0;
+		for (int i = 2, j = 0;
 		     i < s.length() - 1 && i != slash;
 		     i++, j++)
 		{
@@ -90,7 +94,7 @@ System.out.println("basic encoding ok");
 		}
 		else
 			end = s.length() - 1;
-		String quad = s.substring(2, end);
+		String quad = s.substring(1, end);
 		StringTokenizer st = new StringTokenizer(quad, ".");
 		for (int i = 0; i < 4; i++) {
 			if (!st.hasMoreTokens())
@@ -151,9 +155,9 @@ toString() {
 		int value = (int)(data[i] & 0xFF);
 		int high = value >> 4;
 		int low = value & 0xf;
-		sb.append(Integer.toHexString(high));
+		sb.append(Integer.toHexString(high).toUpperCase());
 		if (low > 0 || i < bytes() - 1)
-			sb.append(Integer.toHexString(low));
+			sb.append(Integer.toHexString(low).toUpperCase());
 	}
 	sb.append("/");
 	sb.append(nbits);

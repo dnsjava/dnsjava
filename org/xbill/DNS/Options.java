@@ -13,12 +13,11 @@ import java.util.*;
  * pqdn - Allow partially qualified domain names<BR>
  * 2065sig - Omit the labels field from the SIG record's text format, as
  *	specified in RFC 2065 and changed in RFC 2535<BR>
+ * verbose - Turn on general debugging statements<BR>
  * verbosehmac - Print all data digested by the HMAC routines<BR>
  * verbosemsg - Print all messages sent or received by SimpleResolver<BR>
  * verbosecompression - Print messages related to name compression<BR>
- * verboseexceptions - Print messages when certain exceptions are received
- *	and handled<BR>
- * verboselookup - Print lookups and cache responses from the dns class<BR>
+ * verbosebitstring - Print messages related to bitstring labels<BR>
  * <BR>
  * Valued options:<BR>
  * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<BR>

@@ -132,8 +132,14 @@ public static final short A6		= 38;
 /** Non-terminal name redirection */
 public static final short DNAME		= 39;
 
+/** Kitchen sink record - free form binary record (and a bad idea) */
+public static final short SINK		= 40;
+
 /** Options - contains EDNS metadata */
-public static final short OPT		= 249;
+public static final short OPT		= 248;
+
+/** Transaction key - used to compute a shared secret or exchange a key */
+public static final short TKEY		= 249;
 
 /** Transaction signature */
 public static final short TSIG		= 250;

@@ -60,11 +60,17 @@ class Receiver implements ResolverListener {
 
 	public void
 	receiveMessage(Object id, Message m) {
+		if (Options.check("verbose"))
+			System.err.println("ExtendedResolver: " +
+					   "message from " + id);
 		enqueueInfo(id, m);
 	}
 
 	public void
 	handleException(Object id, Exception e) {
+		if (Options.check("verbose"))
+			System.err.println("ExtendedResolver: " +
+					   "exception from " + id);
 		enqueueInfo(id, e);
 	}
 }
@@ -136,6 +142,9 @@ sendTo(Message query, Receiver receiver, Hashtable idMap, int r) {
 	Resolver res = (Resolver) resolvers.elementAt(r);
 	synchronized (idMap) {
 		Object id = res.sendAsync(query, receiver);
+		if (Options.check("verbose"))
+			System.err.println("ExtendedResolver: sending " +
+					   id + "to resolver " + r);
 		idMap.put(id, new Integer(r));
 	}
 }

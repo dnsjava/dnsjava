@@ -151,7 +151,7 @@ sendTCP(Message query, byte [] out) throws IOException {
 				System.err.println(hexdump.dump("in", in));
 		}
 		catch (IOException e) {
-			if (Options.check("verboseexceptions"))
+			if (Options.check("verbose"))
 				System.err.println(";; No response");
 			throw e;
 		}
@@ -214,7 +214,7 @@ send(Message query) throws IOException {
 			s.receive(dp);
 		}
 		catch (IOException e) {
-			if (Options.check("verboseexceptions"))
+			if (Options.check("verbose"))
 				System.err.println(";; No response");
 			throw e;
 		}
@@ -306,7 +306,7 @@ sendAXFR(Message query) throws IOException {
 				dataIn.readFully(in);
 			}
 			catch (IOException e) {
-				if (Options.check("verboseexceptions"))
+				if (Options.check("verbose"))
 					System.err.println(";; No response");
 				throw e;
 			}

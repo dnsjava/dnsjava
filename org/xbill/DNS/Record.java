@@ -75,14 +75,14 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 		return rec;
 	}
 	catch (InvocationTargetException e) {
-		if (Options.check("verboseexceptions")) {
+		if (Options.check("verbose")) {
 			System.err.println("new record: " + e);
 			System.err.println(e.getTargetException());
 		}
 		return null;
 	}
 	catch (Exception e) {
-		if (Options.check("verboseexceptions"))
+		if (Options.check("verbose"))
 			System.err.println("new record: " + e);
 		return null;
 	}
@@ -285,14 +285,14 @@ throws IOException
 		return rec;
 	}
 	catch (InvocationTargetException e) {
-		if (Options.check("verboseexceptions")) {
+		if (Options.check("verbose")) {
 			System.err.println("from text: " + e);
 			System.err.println(e.getTargetException());
 		}
 		return null;
 	}
 	catch (Exception e) {
-		if (Options.check("verboseexceptions"))
+		if (Options.check("verbose"))
 			System.err.println("from text: " + e);
 		return null;
 	}
