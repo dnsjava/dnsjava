@@ -85,7 +85,7 @@ updString(int i) {
 /** Converts a String representation of a Section into its numeric value */
 public static byte
 value(String s) {
-	byte i = (byte) sections.getValue(s.toUpperCase());
+	byte i = (byte) sections.getValue(s.toLowerCase());
 	if (i >= 0)
 		return i;
 	try {

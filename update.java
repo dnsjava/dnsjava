@@ -60,15 +60,15 @@ update(InputStream in) throws IOException {
 		if (log != null)
 			log.println("> " + line);
 
+		if (line.length() == 0 || line.charAt(0) == '#')
+			continue;
+
 		MyStringTokenizer st = new MyStringTokenizer(line);
 		if (!st.hasMoreTokens())
 			continue;
 		String operation = st.nextToken();
 
-		if (operation.equals("#"))
-			continue;
-
-		else if (operation.equals("server")) {
+		if (operation.equals("server")) {
 			server = st.nextToken();
 			res = new SimpleResolver(server);
 		}

@@ -1,3 +1,7 @@
+5/22/1999
+	- fixed comment processing in update
+	- fixed case bug in Section handling
+
 5/21/1999
 	- 0.9.4 released
 	- fixed the same round-robin bug, hopefully correctly this time
