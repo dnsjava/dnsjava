@@ -14,7 +14,7 @@ public class update {
 Message query, response;
 Resolver res;
 String server = null;
-Name origin, zone;
+Name zone;
 int defaultTTL;
 short defaultClass = DClass.IN;
 PrintStream log = null;
@@ -123,15 +123,11 @@ update(InputStream in) throws IOException {
 			else if (operation.equals("ttl"))
 				defaultTTL = TTL.parseTTL(st.nextToken());
 
-			else if (operation.equals("origin"))
-				origin = Name.fromString(st.nextToken(),
-							 Name.root);
-
-			else if (operation.equals("zone")) {
+			else if (operation.equals("origin") ||
+				 operation.equals("zone"))
+			{
 				zone = Name.fromString(st.nextToken(),
 						       Name.root);
-				if (origin == null)
-					origin = zone;
 			}
 
 			else if (operation.equals("require"))
@@ -250,10 +246,7 @@ sendUpdate() throws IOException {
 	}
 	if (query.getHeader().getCount(Section.ZONE) == 0) {
 		Name updzone;
-		if (zone != null)
-			updzone = zone;
-		else
-			updzone = origin;
+		updzone = zone;
 		short dclass = defaultClass;
 		if (updzone == null) {
 			Enumeration updates = query.getSection(Section.UPDATE);
@@ -293,7 +286,7 @@ Record
 parseRR(MyStringTokenizer st, short classValue, int TTLValue)
 throws IOException
 {
-	Name name = Name.fromString(st.nextToken(), origin);
+	Name name = Name.fromString(st.nextToken(), zone);
 	int ttl;
 	short type;
 	Record record;
@@ -316,7 +309,7 @@ throws IOException
 	if ((type = Type.value(s)) < 0)
 		throw new IOException("Invalid type: " + s);
 
-	record = Record.fromString(name, type, classValue, ttl, st, origin);
+	record = Record.fromString(name, type, classValue, ttl, st, zone);
 	if (record != null)
 		return (record);
 	else
@@ -336,14 +329,14 @@ doRequire(MyStringTokenizer st) throws IOException {
 		print("qualifiers are now ignored");
 		s = st.nextToken();
 	}
-	name = Name.fromString(s, origin);
+	name = Name.fromString(s, zone);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
 		if ((type = Type.value(s)) < 0)
 			throw new IOException("Invalid type: " + s);
 		if (st.hasMoreTokens()) {
 			record = Record.fromString(name, type, defaultClass,
-						   0, st, origin);
+						   0, st, zone);
 		}
 		else
 			record = Record.newRecord(name, type, DClass.ANY, 0);
@@ -367,7 +360,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 		print("qualifiers are now ignored");
 		s = st.nextToken();
 	}
-	name = Name.fromString(s, origin);
+	name = Name.fromString(s, zone);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
 		if ((type = Type.value(s)) < 0)
@@ -410,7 +403,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 		print("qualifiers are now ignored");
 		s = st.nextToken();
 	}
-	name = Name.fromString(s, origin);
+	name = Name.fromString(s, zone);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
 		if ((dclass = DClass.value(s)) >= 0) {
@@ -422,7 +415,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 			throw new IOException("Invalid type: " + s);
 		if (st.hasMoreTokens()) {
 			record = Record.fromString(name, type, DClass.NONE,
-						   0, st, origin);
+						   0, st, zone);
 		}
 		else
 			record = Record.newRecord(name, type, DClass.ANY, 0);
@@ -456,7 +449,7 @@ doQuery(MyStringTokenizer st) throws IOException {
 	Name name = null;
 	short type = Type.A, dclass = defaultClass;
 
-	name = Name.fromString(st.nextToken(), origin);
+	name = Name.fromString(st.nextToken(), zone);
 	if (st.hasMoreTokens()) {
 		type = Type.value(st.nextToken());
 		if (type < 0)
@@ -652,7 +645,7 @@ help(String topic) {
 	else if (topic.equalsIgnoreCase("origin"))
 		System.out.println(
 			"origin <origin>\n\n" +
-			"default origin of unqualified names (default: .)\n");
+			"<same as zone>\n");
 	else if (topic.equalsIgnoreCase("port"))
 		System.out.println(
 			"port <port>\n\n" +
@@ -704,7 +697,7 @@ help(String topic) {
 	else if (topic.equalsIgnoreCase("zone"))
 		System.out.println(
 			"zone <zone>\n\n" +
-			"zone to update (default: value of <origin>\n");
+			"zone to update (default: .\n");
 	else if (topic.equalsIgnoreCase("#"))
 		System.out.println(
 			"# <text>\n\n" +
