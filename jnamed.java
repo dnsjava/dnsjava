@@ -355,8 +355,9 @@ findTSIG(Name name) {
 }
 
 Message
-doAXFR(Name name, Message query, Socket s) {
+doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 	Zone zone = (Zone) znames.get(name);
+	boolean first = true;
 	if (zone == null) {
 /*		System.out.println("no zone " + name + " to AXFR");*/
 		return errorMessage(query, Rcode.REFUSED);
@@ -375,6 +376,9 @@ doAXFR(Name name, Message query, Socket s) {
 			header.setFlag(Flags.AA);
 			addRRset(rrset.getName(), response, rrset,
 				 Section.ANSWER, FLAG_DNSSECOK);
+			tsig.applyAXFR(response, qtsig, first);
+			qtsig = response.getTSIG();
+			first = false;
 			byte [] out = response.toWire();
 			dataOut.writeShort(out.length);
 			dataOut.write(out);
@@ -449,7 +453,7 @@ generateReply(Message query, byte [] in, Socket s) {
 	short type = queryRecord.getType();
 	short dclass = queryRecord.getDClass();
 	if (type == Type.AXFR && s != null)
-		return doAXFR(name, query, s);
+		return doAXFR(name, query, tsig, queryTSIG, s);
 	if (!Type.isRR(type) && type != Type.ANY)
 		return errorMessage(query, Rcode.NOTIMPL);
 

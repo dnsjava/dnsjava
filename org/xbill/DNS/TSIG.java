@@ -151,6 +151,65 @@ apply(Message m, TSIGRecord old) throws IOException {
 }
 
 /**
+ * Generates a TSIG record for a message and adds it to the message
+ * @param m The message
+ * @param old If this message is a response, the TSIG from the request
+ */
+public void
+applyAXFR(Message m, TSIGRecord old, boolean first) throws IOException {
+	if (first) {
+		apply(m, old);
+		return;
+	}
+	Date timeSigned = new Date();
+	short fudge;
+	hmacSigner h = new hmacSigner(key);
+
+	if (Options.check("tsigfudge")) {
+		String s = Options.value("tsigfudge");
+		try {
+			fudge = Short.parseShort(s);
+		}
+		catch (NumberFormatException e) {
+			fudge = FUDGE;
+		}
+	}
+	else
+		fudge = FUDGE;
+
+	try {
+		DataByteOutputStream dbs = new DataByteOutputStream();
+		dbs.writeShort((short)old.getSignature().length);
+		h.addData(dbs.toByteArray());
+		h.addData(old.getSignature());
+
+		/* Digest the message */
+		h.addData(m.toWire());
+
+		DataByteOutputStream out = new DataByteOutputStream();
+		long time = timeSigned.getTime() / 1000;
+		short timeHigh = (short) (time >> 32);
+		int timeLow = (int) (time);
+		out.writeShort(timeHigh);
+		out.writeInt(timeLow);
+		out.writeShort(fudge);
+
+		h.addData(out.toByteArray());
+	}
+	catch (IOException e) {
+		return;
+	}
+
+	byte [] signature = h.sign();
+	byte [] other = null;
+
+	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
+				  signature, m.getHeader().getID(),
+				  Rcode.NOERROR, other);
+	m.addRecord(r, Section.ADDITIONAL);
+}
+
+/**
  * Verifies a TSIG record on an incoming message.  Since this is only called
  * in the context where a TSIG is expected to be present, it is an error
  * if one is not present.
