@@ -89,6 +89,8 @@ rdataToString() {
 	sb.append(getExtendedRcode());
 	sb.append(", version ");
 	sb.append(getVersion());
+	sb.append(", flags ");
+	sb.append(getFlags());
 	return sb.toString();
 }
 
