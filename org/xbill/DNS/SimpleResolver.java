@@ -10,43 +10,6 @@ import DNS.utils.*;
 
 public class SimpleResolver implements Resolver {
 
-class WorkerThread extends Thread {
-	private Message query;
-	private int id;
-	private ResolverListener listener;
-
-	public void assign(Message _query, int _id, ResolverListener _listener)
-	{
-		query = _query;
-		id = _id;
-		listener = _listener;
-	}
-
-	public void run() {
-		while (true) {
-			Message response = null;
-			try {
-				response = send(query);
-			}
-			catch (IOException e) {
-			}
-			listener.receiveMessage(id, response);
-			synchronized (workerthreads) {
-				if (workerthreads.size() > 3)
-					return;
-				workerthreads.addElement(this);
-			}
-			synchronized (this) {
-				try {
-					wait();
-				}
-				catch (InterruptedException e) {
-				}
-			}
-		}
-	}
-}
-
 public static final int PORT = 53;
 
 InetAddress addr;
@@ -246,7 +209,7 @@ sendAsync(final Message query, final ResolverListener listener) {
 		}
 	}
 	if (t == null) {
-		t = new WorkerThread();
+		t = new WorkerThread(this, workerthreads);
 		t.setDaemon(true);
 		t.start();
 	}

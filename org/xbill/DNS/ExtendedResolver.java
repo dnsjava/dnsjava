@@ -33,6 +33,7 @@ boolean [] invalid;
 Receiver receiver;
 Vector queue;
 Hashtable idMap;
+Vector workerthreads;
 
 public
 ExtendedResolver() throws UnknownHostException {
@@ -165,9 +166,36 @@ send(Message query) {
 	return best;
 }
 
+private int
+uniqueID(Message m) {
+	Record r = m.getQuestion();
+	return (((r.getName().hashCode() & 0xFFFF) << 16) +
+		(r.getType() + hashCode() << 8) +
+		(hashCode() & 0xFF));
+}
+
 public int
 sendAsync(final Message query, final ResolverListener listener) {
-	return 0;
+	final int id = uniqueID(query);
+	if (workerthreads == null)
+		workerthreads = new Vector();
+	WorkerThread t = null;
+	synchronized (workerthreads) {
+		if (workerthreads.size() > 0) {
+			t = (WorkerThread) workerthreads.firstElement();
+			workerthreads.removeElement(t);
+		}
+	}
+	if (t == null) {
+		t = new WorkerThread(this, workerthreads);
+		t.setDaemon(true);
+		t.start();
+	}
+	synchronized (t) {
+		t.assign(query, id, listener);
+		t.notify();
+	}
+	return id;
 }
 
 public
