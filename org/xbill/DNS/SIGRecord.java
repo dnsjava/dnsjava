@@ -101,14 +101,14 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	SIGRecord rec = new SIGRecord(name, dclass, ttl);
-	rec.covered = Type.value(st.nextToken());
-	rec.alg = Byte.parseByte(st.nextToken());
-	rec.labels = Byte.parseByte(st.nextToken());
-	rec.origttl = TTL.parseTTL(st.nextToken());
-	rec.expire = parseDate(st.nextToken());
-	rec.timeSigned = parseDate(st.nextToken());
-	rec.footprint = (short) Integer.parseInt(st.nextToken());
-	rec.signer = Name.fromString(st.nextToken(), origin);
+	rec.covered = Type.value(nextString(st));
+	rec.alg = Byte.parseByte(nextString(st));
+	rec.labels = Byte.parseByte(nextString(st));
+	rec.origttl = TTL.parseTTL(nextString(st));
+	rec.expire = parseDate(nextString(st));
+	rec.timeSigned = parseDate(nextString(st));
+	rec.footprint = (short) Integer.parseInt(nextString(st));
+	rec.signer = Name.fromString(nextString(st), origin);
 	rec.signer.checkAbsolute("read an SIG record");
 	if (st.hasMoreTokens())
 		rec.signature = base64.fromString(st.remainingTokens());

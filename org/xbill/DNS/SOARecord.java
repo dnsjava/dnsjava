@@ -83,18 +83,18 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	SOARecord rec = new SOARecord(name, dclass, ttl);
-	rec.host = Name.fromString(st.nextToken(), origin);
+	rec.host = Name.fromString(nextString(st), origin);
 	rec.host.checkAbsolute("read an SOA record");
-	rec.admin = Name.fromString(st.nextToken(), origin);
+	rec.admin = Name.fromString(nextString(st), origin);
 	rec.admin.checkAbsolute("read an SOA record");
-	long tserial = Long.parseLong(st.nextToken());
+	long tserial = Long.parseLong(nextString(st));
 	if (tserial > 0xFFFFFFFFL)
 		throw new TextParseException("Invalid serial number");
 	rec.serial = (int) tserial;
-	rec.refresh = TTL.parseTTL(st.nextToken());
-	rec.retry = TTL.parseTTL(st.nextToken());
-	rec.expire = TTL.parseTTL(st.nextToken());
-	rec.minimum = TTL.parseTTL(st.nextToken());
+	rec.refresh = TTL.parseTTL(nextString(st));
+	rec.retry = TTL.parseTTL(nextString(st));
+	rec.expire = TTL.parseTTL(nextString(st));
+	rec.minimum = TTL.parseTTL(nextString(st));
 	return rec;
 }
 

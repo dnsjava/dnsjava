@@ -81,12 +81,12 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
-	rec.order = Short.parseShort(st.nextToken());
-	rec.preference = Short.parseShort(st.nextToken());
-	rec.flags = st.nextToken();
-	rec.service = st.nextToken();
-	rec.regexp = st.nextToken();
-	rec.replacement = Name.fromString(st.nextToken(), origin);
+	rec.order = Short.parseShort(nextString(st));
+	rec.preference = Short.parseShort(nextString(st));
+	rec.flags = nextString(st);
+	rec.service = nextString(st);
+	rec.regexp = nextString(st);
+	rec.replacement = Name.fromString(nextString(st), origin);
 	rec.replacement.checkAbsolute("read a NAPTR record");
 	return rec;
 }

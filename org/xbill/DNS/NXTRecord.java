@@ -75,11 +75,11 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	NXTRecord rec = new NXTRecord(name, dclass, ttl);
-	rec.next = Name.fromString(st.nextToken(), origin);
+	rec.next = Name.fromString(nextString(st), origin);
 	rec.next.checkAbsolute("read an NXT record");
 	rec.bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
-		short t = Type.value(st.nextToken());
+		short t = Type.value(nextString(st));
 		if (t > 0)
 			rec.bitmap.set(t);
 	}

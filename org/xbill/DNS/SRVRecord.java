@@ -82,16 +82,16 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	SRVRecord rec = new SRVRecord(name, dclass, ttl);
-	rec.priority = Integer.parseInt(st.nextToken());
-	rec.weight = Integer.parseInt(st.nextToken());
-	rec.port = Integer.parseInt(st.nextToken());
+	rec.priority = Integer.parseInt(nextString(st));
+	rec.weight = Integer.parseInt(nextString(st));
+	rec.port = Integer.parseInt(nextString(st));
 	if (rec.priority < 0 || rec.priority > 0xFFFF)
 		throw new TextParseException("priority is out of range");
 	if (rec.weight < 0 || rec.weight > 0xFFFF)
 		throw new TextParseException("weight is out of range");
 	if (rec.port < 0 || rec.port > 0xFFFF)
 		throw new TextParseException("port is out of range");
-	rec.target = Name.fromString(st.nextToken(), origin);
+	rec.target = Name.fromString(nextString(st), origin);
 	rec.target.checkAbsolute("read an SRV record");
 	return rec;
 }

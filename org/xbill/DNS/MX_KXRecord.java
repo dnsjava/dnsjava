@@ -50,8 +50,8 @@ protected static Record
 rdataFromString(MX_KXRecord rec, MyStringTokenizer st, Name origin)
 throws TextParseException
 {
-	rec.priority = Short.parseShort(st.nextToken());
-	rec.target = Name.fromString(st.nextToken(), origin);
+	rec.priority = Short.parseShort(nextString(st));
+	rec.target = Name.fromString(nextString(st), origin);
 	rec.target.checkAbsolute("read an MX or KX record");
 	return rec;
 }

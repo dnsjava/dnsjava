@@ -93,9 +93,9 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
-	rec.certType = (short) Integer.parseInt(st.nextToken());
-	rec.keyTag = (short) Integer.parseInt(st.nextToken());
-	rec.alg = (byte) Integer.parseInt(st.nextToken());
+	rec.certType = (short) Integer.parseInt(nextString(st));
+	rec.keyTag = (short) Integer.parseInt(nextString(st));
+	rec.alg = (byte) Integer.parseInt(nextString(st));
 	rec.cert = base64.fromString(st.remainingTokens());
 	return rec;
 }

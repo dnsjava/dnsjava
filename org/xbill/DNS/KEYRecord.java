@@ -114,9 +114,9 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	KEYRecord rec = new KEYRecord(name, dclass, ttl);
-	rec.flags = (short) Integer.decode(st.nextToken()).intValue();
-	rec.proto = (byte) Integer.parseInt(st.nextToken());
-	rec.alg = (byte) Integer.parseInt(st.nextToken());
+	rec.flags = (short) Integer.decode(nextString(st)).intValue();
+	rec.proto = (byte) Integer.parseInt(nextString(st));
+	rec.alg = (byte) Integer.parseInt(nextString(st));
 	/* If this is a null key, there's no key data */
 	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
 		rec.key = base64.fromString(st.remainingTokens());

@@ -83,9 +83,9 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	DSRecord rec = new DSRecord(name, dclass, ttl);
-	rec.footprint = Integer.decode(st.nextToken()).intValue();
-	rec.alg = (byte) Integer.parseInt(st.nextToken());
-	rec.digestid = (byte) Integer.parseInt(st.nextToken());
+	rec.footprint = Integer.decode(nextString(st)).intValue();
+	rec.alg = (byte) Integer.parseInt(nextString(st));
+	rec.digestid = (byte) Integer.parseInt(nextString(st));
 
 	// note that the draft says that the digest is presented as hex,
 	// not base64.

@@ -93,7 +93,7 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	ARecord rec = new ARecord(name, dclass, ttl);
-	String s = st.nextToken();
+	String s = nextString(st);
 	try {
 		InetAddress address;
 		if (s.equals("@me@")) {

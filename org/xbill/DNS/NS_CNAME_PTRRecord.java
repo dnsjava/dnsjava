@@ -45,7 +45,7 @@ protected static Record
 rdataFromString(NS_CNAME_PTRRecord rec, MyStringTokenizer st, Name origin)
 throws TextParseException
 {
-	rec.target = Name.fromString(st.nextToken(), origin);
+	rec.target = Name.fromString(nextString(st), origin);
 	rec.target.checkAbsolute("read an NS, CNAME, PTR, or similar record");
 	return rec;
 }

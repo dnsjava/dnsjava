@@ -78,10 +78,10 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	A6Record rec = new A6Record(name, dclass, ttl);
-	rec.prefixBits = Short.parseShort(st.nextToken());
-	rec.suffix = new Inet6Address(st.nextToken());
+	rec.prefixBits = Short.parseShort(nextString(st));
+	rec.suffix = new Inet6Address(nextString(st));
 	if (rec.prefixBits > 0) {
-		rec.prefix = Name.fromString(st.nextToken(), origin);
+		rec.prefix = Name.fromString(nextString(st), origin);
 		rec.prefix.checkAbsolute("read an A6 record");
 	}
 	return rec;

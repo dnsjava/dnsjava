@@ -66,9 +66,9 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	RPRecord rec = new RPRecord(name, dclass, ttl);
-	rec.mailbox = Name.fromString(st.nextToken(), origin);
+	rec.mailbox = Name.fromString(nextString(st), origin);
 	rec.mailbox.checkAbsolute("read an RP record");
-	rec.textDomain = Name.fromString(st.nextToken(), origin);
+	rec.textDomain = Name.fromString(nextString(st), origin);
 	rec.textDomain.checkAbsolute("read an RP record");
 	return rec;
 }

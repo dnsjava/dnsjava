@@ -63,8 +63,8 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	HINFORecord rec = new HINFORecord(name, dclass, ttl);
-	rec.cpu = st.nextToken();
-	rec.os = st.nextToken();
+	rec.cpu = nextString(st);
+	rec.os = nextString(st);
 	return rec;
 }
 

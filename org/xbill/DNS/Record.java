@@ -292,6 +292,14 @@ rdataFromString(Name name, short dclass, int ttl,
 		MyStringTokenizer st, Name origin)
 throws TextParseException;
 
+protected static String
+nextString(MyStringTokenizer st) throws TextParseException {
+	String s = st.nextToken();
+	if (s == null)
+		throw new TextParseException("incomplete record");
+	return s;
+}
+
 /**
  * Builds a new Record from its textual representation
  * @param name The owner name of the record.
@@ -312,10 +320,10 @@ throws IOException
 
 	name.checkAbsolute("create a Record");
 
-	String s = st.nextToken();
+	String s = nextString(st);
 	/* the string tokenizer loses the \\. */
 	if (s.equals("#")) {
-		s = st.nextToken();
+		s = nextString(st);
 		short length = Short.parseShort(s);
 		s = st.remainingTokens();
 		byte [] data = base16.fromString(s);

@@ -65,7 +65,7 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 throws TextParseException
 {
 	AAAARecord rec = new AAAARecord(name, dclass, ttl);
-	rec.address = new Inet6Address(st.nextToken());
+	rec.address = new Inet6Address(nextString(st));
 	return rec;
 }
 

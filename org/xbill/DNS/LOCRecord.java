@@ -94,13 +94,13 @@ throws TextParseException
 	deg = min = 0;
 	sec = 0.0;
 	try {
-		s = st.nextToken();
+		s = nextString(st);
 		deg = Integer.parseInt(s);
-		s = st.nextToken();
+		s = nextString(st);
 		min = Integer.parseInt(s);
-		s = st.nextToken();
+		s = nextString(st);
 		sec = new Double(s).doubleValue();
-		s = st.nextToken();
+		s = nextString(st);
 	}
 	catch (NumberFormatException e) {
 	}
@@ -115,13 +115,13 @@ throws TextParseException
 	deg = min = 0;
 	sec = 0.0;
 	try {
-		s = st.nextToken();
+		s = nextString(st);
 		deg = Integer.parseInt(s);
-		s = st.nextToken();
+		s = nextString(st);
 		min = Integer.parseInt(s);
-		s = st.nextToken();
+		s = nextString(st);
 		sec = new Double(s).doubleValue();
-		s = st.nextToken();
+		s = nextString(st);
 	}
 	catch (NumberFormatException e) {
 	}
@@ -135,7 +135,7 @@ throws TextParseException
 	/* Altitude */
 	if (!st.hasMoreTokens())
 		return rec;
-	s = st.nextToken();
+	s = nextString(st);
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
@@ -149,7 +149,7 @@ throws TextParseException
 	/* Size */
 	if (!st.hasMoreTokens())
 		return rec;
-	s = st.nextToken();
+	s = nextString(st);
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
@@ -162,7 +162,7 @@ throws TextParseException
 	/* Horizontal precision */
 	if (!st.hasMoreTokens())
 		return rec;
-	s = st.nextToken();
+	s = nextString(st);
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
@@ -176,7 +176,7 @@ throws TextParseException
 	/* Vertical precision */
 	if (!st.hasMoreTokens())
 		return rec;
-	s = st.nextToken();
+	s = nextString(st);
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {

@@ -84,7 +84,7 @@ throws TextParseException
 	TXTRecord rec = new TXTRecord(name, dclass, ttl);
 	rec.strings = new ArrayList();
 	while (st.hasMoreTokens())
-		rec.strings.add(st.nextToken());
+		rec.strings.add(nextString(st));
 	return rec;
 }
 
