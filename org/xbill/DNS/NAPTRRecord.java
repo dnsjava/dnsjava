@@ -107,8 +107,6 @@ rdataToString() {
 		sb.append(" ");
 		sb.append(replacement);
 	}
-	if (Options.check("verbose"))
-		System.err.println(" NAPTR toString(): : " + sb.toString());
 	return sb.toString();
 }
 
@@ -157,8 +155,6 @@ void rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeString(service);
 	out.writeString(regexp);
 	replacement.toWire(out, null);
-	if (Options.check("verbose"))
-		System.err.println(" NAPTR rrToWire(): " + this.toString());
 }
 
 void rrToWireCanonical(DataByteOutputStream out) throws IOException {
@@ -170,9 +166,6 @@ void rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	out.writeString(service);
 	out.writeString(regexp);
 	replacement.toWireCanonical(out);
-	if (Options.check("verbose"))
-		System.err.println(" NAPTR rrToWireCanonical(): " +
-				   this.toString());
 }
 
 }
