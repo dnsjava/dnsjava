@@ -97,7 +97,7 @@ ZoneTransferIn() {}
 
 private
 ZoneTransferIn(Name zone, int xfrtype, long serial, boolean fallback,
-	       InetSocketAddress address, TSIG key)
+	       SocketAddress address, TSIG key)
 {
 	this.address = address;
 	this.tsig = key;
@@ -121,6 +121,19 @@ ZoneTransferIn(Name zone, int xfrtype, long serial, boolean fallback,
 /**
  * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
  * @param zone The zone to transfer.
+ * @param address The host/port from which to transfer the zone.
+ * @param key The TSIG key used to authenticate the transfer, or null.
+ * @return The ZoneTransferIn object.
+ * @throws UnknownHostException The host does not exist.
+ */
+public static ZoneTransferIn
+newAXFR(Name zone, SocketAddress address, TSIG key) {
+	return new ZoneTransferIn(zone, Type.AXFR, 0, false, address, key);
+}
+
+/**
+ * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
+ * @param zone The zone to transfer.
  * @param host The host from which to transfer the zone.
  * @param port The port to connect to on the server, or 0 for the default.
  * @param key The TSIG key used to authenticate the transfer, or null.
@@ -131,8 +144,7 @@ public static ZoneTransferIn
 newAXFR(Name zone, String host, int port, TSIG key)
 throws UnknownHostException
 {
-	return new ZoneTransferIn(zone, Type.AXFR, 0, false,
-				  new InetSocketAddress(host, port), key);
+	return newAXFR(zone, new InetSocketAddress(host, port), key);
 }
 
 /**
@@ -140,12 +152,14 @@ throws UnknownHostException
  * @param zone The zone to transfer.
  * @param res The resolver to use when doing the transfer.
  * @return The ZoneTransferIn object.
+ *
+ * @deprecated Use newAXFR(Name, String, int, TSIG) or newAXFR(Name,
+ * SocketAddress, TSIG)
  */
 public static ZoneTransferIn
 newAXFR(Name zone, SimpleResolver res) {
-	ZoneTransferIn xfrin = new ZoneTransferIn(zone, Type.AXFR, 0, false,
-						  res.getAddress(),
-						  res.getTSIGKey());
+	ZoneTransferIn xfrin = newAXFR(zone, res.getAddress(),
+				       res.getTSIGKey());
 	xfrin.timeout = res.getTimeout() * 1000L;
 	return xfrin;
 }
@@ -171,6 +185,25 @@ throws UnknownHostException
  * @param zone The zone to transfer.
  * @param serial The existing serial number.
  * @param fallback If true, fall back to AXFR if IXFR is not supported.
+ * @param address The host/port from which to transfer the zone.
+ * @param key The TSIG key used to authenticate the transfer, or null.
+ * @return The ZoneTransferIn object.
+ * @throws UnknownHostException The host does not exist.
+ */
+public static ZoneTransferIn
+newIXFR(Name zone, long serial, boolean fallback, SocketAddress address,
+	TSIG key)
+{
+	return new ZoneTransferIn(zone, Type.IXFR, serial, fallback, address,
+				  key);
+}
+
+/**
+ * Instantiates a ZoneTransferIn object to do an IXFR (incremental zone
+ * transfer).
+ * @param zone The zone to transfer.
+ * @param serial The existing serial number.
+ * @param fallback If true, fall back to AXFR if IXFR is not supported.
  * @param host The host from which to transfer the zone.
  * @param port The port to connect to on the server, or 0 for the default.
  * @param key The TSIG key used to authenticate the transfer, or null.
@@ -178,12 +211,12 @@ throws UnknownHostException
  * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
-newIXFR(Name zone, long serial, boolean fallback,
-	String host, int port, TSIG key)
+newIXFR(Name zone, long serial, boolean fallback, String host, int port,
+	TSIG key)
 throws UnknownHostException
 {
-	return new ZoneTransferIn(zone, Type.IXFR, serial, fallback,
-				  new InetSocketAddress(host, port), key);
+	return newIXFR(zone, serial, fallback,
+		       new InetSocketAddress(host, port), key);
 }
 
 /**
@@ -194,13 +227,14 @@ throws UnknownHostException
  * @param fallback If true, fall back to AXFR if IXFR is not supported.
  * @param res The resolver to use when doing the transfer.
  * @return The ZoneTransferIn object.
+ *
+ * @deprecated Use newIXFR(Name, long, int, String, int, TSIG) or
+ * newIXFR((Name, long, int, SocketAddress, TSIG)
  */
 public static ZoneTransferIn
 newIXFR(Name zone, long serial, boolean fallback, SimpleResolver res) {
-	ZoneTransferIn xfrin = new ZoneTransferIn(zone, Type.IXFR, serial,
-						  fallback,
-						  res.getAddress(),
-						  res.getTSIGKey());
+	ZoneTransferIn xfrin = newIXFR(zone, serial, fallback,
+				       res.getAddress(), res.getTSIGKey());
 	xfrin.timeout = res.getTimeout() * 1000L;
 	return xfrin;
 }
