@@ -7,7 +7,7 @@ import DNS.utils.*;
 
 public class jnamed {
 
-Zone cache;
+Cache cache;
 Hashtable znames;
 Hashtable TSIGs;
 
@@ -38,9 +38,9 @@ jnamed(String conffile) throws IOException {
 			continue;
 		}
 		if (keyword.equals("primary"))
-			addZone(st.nextToken(), Zone.PRIMARY);
+			addZone(st.nextToken());
 		else if (keyword.equals("cache"))
-			cache = new Zone(st.nextToken(), Zone.CACHE, null);
+			cache = new Cache(st.nextToken());
 		else if (keyword.equals("key"))
 			addTSIG(st.nextToken(), st.nextToken());
 
@@ -55,8 +55,8 @@ jnamed(String conffile) throws IOException {
 };
 
 public void
-addZone(String zonefile, int type) throws IOException {
-	Zone newzone = new Zone(zonefile, type, cache);
+addZone(String zonefile) throws IOException {
+	Zone newzone = new Zone(zonefile, cache);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
 };
@@ -77,18 +77,16 @@ findBestZone(Name name) {
 			return foundzone;
 		tname = new Name(tname, 1);
 	} while (!tname.equals(Name.root));
-	return cache;
+	return null;
 }
 
 public RRset
 findExactMatch(Name name, short type, short dclass) {
 	Zone zone = findBestZone(name);
-	Hashtable sets = zone.findName(name);
-	if (sets == null)
-		return null;
-	Short Type = new Short(type);
-	RRset rrset = (RRset) sets.get(Type);
-	return rrset;
+	if (zone != null)
+		return zone.findRecords(name, type);
+	else
+		return cache.findRecords(name, type);
 	
 }
 
@@ -104,11 +102,16 @@ addRRset(Message response, RRset rrset) {
 
 void
 addAuthority(Message response, Name name, Zone zone) {
-	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == cache)
+	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == null)
 	{
 		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN);
-		if (nsRecords == null)
-			nsRecords = (RRset) zone.getNS();
+		if (nsRecords == null) {
+			if (zone != null)
+				nsRecords = zone.getNS();
+			else
+				nsRecords = cache.findRecords(Name.root,
+							      Type.NS);
+		}
 		Enumeration e = nsRecords.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
@@ -186,33 +189,28 @@ generateReply(Message query, byte [] in, int maxLength) {
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
 	Zone zone = findBestZone(name);
-	if (zone == null) {
-		response.getHeader().setRcode(Rcode.SERVFAIL);
+/*System.out.println("Looking up name <" + name + "> in [" + zone.getOrigin() + "]");*/
+	Hashtable nameRecords = (Hashtable) zone.findName(name);
+	if (nameRecords == null) {
+		response.getHeader().setRcode(Rcode.NXDOMAIN);
 	}
 	else {
-/*System.out.println("Looking up name <" + name + "> in [" + zone.getOrigin() + "]");*/
-		Hashtable nameRecords = (Hashtable) zone.findName(name);
-		if (nameRecords == null) {
-			response.getHeader().setRcode(Rcode.NXDOMAIN);
+		if (type == Type.ANY) {
+			Enumeration e = nameRecords.elements();
+			while (e.hasMoreElements()) {
+				RRset rrset = (RRset) e.nextElement();
+				addRRset(response, rrset);
+			}
 		}
 		else {
-			if (type == Type.ANY) {
-				Enumeration e = nameRecords.elements();
-				while (e.hasMoreElements()) {
-					RRset rrset = (RRset) e.nextElement();
-					addRRset(response, rrset);
-				}
-			}
-			else {
-				Short Type = new Short(type);
-				RRset rrset = (RRset) nameRecords.get(Type);
-				if (rrset != null)
-					addRRset(response, rrset);
-			}
+			Short Type = new Short(type);
+			RRset rrset = (RRset) nameRecords.get(Type);
+			if (rrset != null)
+				addRRset(response, rrset);
 		}
-		addAuthority(response, name, zone);
-		addAdditional(response);
 	}
+	addAuthority(response, name, zone);
+	addAdditional(response);
 	if (queryTSIG != null) {
 		try {
 			if (tsig != null)
