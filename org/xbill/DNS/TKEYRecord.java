@@ -23,24 +23,24 @@ private static TKEYRecord member = new TKEYRecord();
 private Name alg;
 private Date timeInception;
 private Date timeExpire;
-private short mode, error;
+private int mode, error;
 private byte [] key;
 private byte [] other;
 
 /** The key is assigned by the server (unimplemented) */
-public static final short SERVERASSIGNED	= 1;
+public static final int SERVERASSIGNED		= 1;
 
 /** The key is computed using a Diffie-Hellman key exchange */
-public static final short DIFFIEHELLMAN		= 2;
+public static final int DIFFIEHELLMAN		= 2;
 
 /** The key is computed using GSS_API (unimplemented) */
-public static final short GSSAPI		= 3;
+public static final int GSSAPI			= 3;
 
 /** The key is assigned by the resolver (unimplemented) */
-public static final short RESOLVERASSIGNED	= 4;
+public static final int RESOLVERASSIGNED	= 4;
 
 /** The key should be deleted */
-public static final short DELETE		= 5;
+public static final int DELETE			= 5;
 
 private
 TKEYRecord() {}
@@ -70,12 +70,18 @@ getMember() {
  */
 public
 TKEYRecord(Name name, int dclass, int ttl, Name alg,
-	   Date timeInception, Date timeExpire, short mode, short error,
+	   Date timeInception, Date timeExpire, int mode, int error,
 	   byte [] key, byte other[])
 {
 	this(name, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
+	if (mode < 0 || mode > 0xFFFF)
+		throw new IllegalArgumentException("invalid TKEY mode: " +
+						   mode);
+	if (error < 0 || error > 0xFFFF)
+		throw new IllegalArgumentException("invalid TKEY error: " +
+						   error);
 	this.alg = alg;
 	this.timeInception = timeInception;
 	this.timeExpire = timeExpire;
@@ -96,8 +102,8 @@ throws IOException
 	rec.alg = new Name(in);
 	rec.timeInception = new Date(1000 * (long)in.readInt());
 	rec.timeExpire = new Date(1000 * (long)in.readInt());
-	rec.mode = in.readShort();
-	rec.error = in.readShort();
+	rec.mode = in.readUnsignedShort();
+	rec.error = in.readUnsignedShort();
 
 	int keylen = in.readUnsignedShort();
 	if (keylen > 0) {
@@ -132,7 +138,7 @@ modeString() {
 		case GSSAPI:		return "GSSAPRESOLVERASSIGNED";
 		case RESOLVERASSIGNED:	return "RESOLVERASSIGNED";
 		case DELETE:		return "DELETE";
-		default:		return new Short(mode).toString();
+		default:		return Integer.toString(mode);
 	}
 }
 
@@ -200,13 +206,13 @@ getTimeExpire() {
 }
 
 /** Returns the key agreement mode */
-public short
+public int
 getMode() {
 	return mode;
 }
 
 /** Returns the extended error */
-public short
+public int
 getError() {
 	return error;
 }

@@ -15,7 +15,7 @@ import org.xbill.DNS.utils.*;
 
 public abstract class MX_KXRecord extends Record {
 
-protected short priority;
+protected int priority;
 protected Name target;
 
 protected
@@ -31,7 +31,10 @@ MX_KXRecord(Name name, int type, int dclass, int ttl, int priority,
 	    Name target)
 {
 	super(name, type, dclass, ttl);
-	this.priority = (short) priority;
+	if (priority < 0 || priority > 0xFFFF)
+		throw new IllegalArgumentException("invalid priority: " +
+						   priority);
+	this.priority = priority;
 	if (!target.isAbsolute())
 		throw new RelativeNameException(target);
 	this.target = target;
@@ -43,7 +46,7 @@ throws IOException
 {
 	if (in == null)
 		return rec;
-	rec.priority = (short) in.readUnsignedShort();
+	rec.priority = in.readUnsignedShort();
 	rec.target = new Name(in);
 	return rec;
 }
@@ -52,7 +55,7 @@ protected static Record
 rdataFromString(MX_KXRecord rec, Tokenizer st, Name origin)
 throws IOException
 {
-	rec.priority = (short) st.getUInt16();
+	rec.priority = st.getUInt16();
 	rec.target = st.getName(origin);
 	return rec;
 }
@@ -76,7 +79,7 @@ getTarget() {
 }
 
 /** Returns the priority of this record */
-public short
+public int
 getPriority() {
 	return priority;
 }

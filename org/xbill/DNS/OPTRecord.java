@@ -46,7 +46,7 @@ getMember() {
  * SimpleResolver, but can also be called by a server.
  */
 public
-OPTRecord(short payloadSize, byte xrcode, byte version, int flags) {
+OPTRecord(int payloadSize, byte xrcode, byte version, int flags) {
 	this(Name.root, payloadSize,
 	      ((int)xrcode << 24) + ((int)version << 16) + flags);
 	options = null;
@@ -57,7 +57,7 @@ OPTRecord(short payloadSize, byte xrcode, byte version, int flags) {
  * SimpleResolver, but can also be called by a server.
  */
 public
-OPTRecord(short payloadSize, byte xrcode, byte version) {
+OPTRecord(int payloadSize, byte xrcode, byte version) {
 	this(payloadSize, xrcode, version, 0);
 }
 
@@ -125,21 +125,21 @@ getPayloadSize() {
  * Returns the extended Rcode
  * @see Rcode
  */
-public short
+public int
 getExtendedRcode() {
-	return (short) (ttl >>> 24);
+	return (ttl >>> 24);
 }
 
 /** Returns the highest supported EDNS version */
-public short
+public int
 getVersion() {
-	return (short) ((ttl >>> 16) & 0xFF);
+	return ((ttl >>> 16) & 0xFF);
 }
 
 /** Returns the EDNS flags */
 public int
 getFlags() {
-	return (int) (ttl & 0xFFFF);
+	return (ttl & 0xFFFF);
 }
 
 void
@@ -149,8 +149,7 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	Iterator it = options.keySet().iterator();
 	while (it.hasNext()) {
 		Integer i = (Integer) it.next();
-		short key = i.shortValue();
-		out.writeShort(key);
+		out.writeShort(i.intValue());
 		byte [] data = (byte []) options.get(i);
 		out.writeShort(data.length);
 		out.writeArray(data);
