@@ -240,7 +240,7 @@ send(Message query) throws IOException {
 	query = (Message) query.clone();
 	applyEDNS(query);
 	if (tsig != null)
-		query.setTSIG(tsig, Rcode.NOERROR, null);
+		tsig.apply(query, null);
 
 	byte [] out = query.toWire(Message.MAXLENGTH);
 	int udpSize = maxUDPSize(query);
