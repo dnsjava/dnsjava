@@ -47,7 +47,8 @@ throws IOException
 }
 
 LOCRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c) throws IOException
+	  DataByteInputStream in)
+throws IOException
 {
 	super(_name, Type.LOC, _dclass, _ttl);
 	if (in == null)

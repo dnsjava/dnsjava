@@ -50,7 +50,7 @@ NAPTRRecord(Name _name, short _dclass, int _ttl, int _order, int _preference,
 }
 
 NAPTRRecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in, Compression c)
+	    DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.NAPTR, _dclass, _ttl);
@@ -60,10 +60,7 @@ throws IOException
 	flags = in.readString();
 	service = in.readString();
 	regexp = in.readString();
-	replacement = new Name(in, c);
-	if (Options.check("verbose"))
-	System.err.println(" NAPTR DataByteInputStream Constructor: " +
-			   this.toString());
+	replacement = new Name(in);
 }
 
 NAPTRRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,

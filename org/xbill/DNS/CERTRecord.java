@@ -58,7 +58,7 @@ CERTRecord(Name _name, short _dclass, int _ttl, int _certType,
 }
 
 CERTRecord(Name _name, short _dclass, int _ttl, int length,
-	   DataByteInputStream in, Compression c)
+	   DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.CERT, _dclass, _ttl);

@@ -32,14 +32,14 @@ MX_KXRecord(Name _name, short _type, short _dclass, int _ttl, int _priority,
 
 protected
 MX_KXRecord(Name _name, short _type, short _dclass, int _ttl,
-	    int length, DataByteInputStream in, Compression c)
+	    int length, DataByteInputStream in)
 throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	if (in == null)
 		return;
 	priority = (short) in.readUnsignedShort();
-	target = new Name(in, c);
+	target = new Name(in);
 }
 
 protected

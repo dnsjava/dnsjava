@@ -37,7 +37,7 @@ throws IOException
 }
 
 AAAARecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in, Compression c) throws IOException
+	 DataByteInputStream in) throws IOException
 {
 	super(_name, Type.AAAA, _dclass, _ttl);
 

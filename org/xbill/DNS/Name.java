@@ -161,13 +161,11 @@ Name(String s) {
 
 /**
  * Create a new name from DNS wire format
- * @param in  A stream containing the input data
- * @param c  The compression context.  This should be null unless a full
- * message is being parsed.
+ * @param in A stream containing the input data
  */
 public
-Name(DataByteInputStream in, Compression c) throws IOException {
-	int len, start, pos, count = 0;
+Name(DataByteInputStream in) throws IOException {
+	int len, start, pos, count = 0, savedpos;
 	Name name2;
 	boolean seenBitString = false;
 
@@ -189,19 +187,27 @@ loop:
 		case LABEL_COMPRESSION:
 			pos = in.readUnsignedByte();
 			pos += ((len & ~LABEL_MASK) << 8);
-			name2 = (c == null) ? null : c.get(pos);
 			if (Options.check("verbosecompression"))
-				System.err.println("Looking at " + pos +
-						   ", found " + name2);
-			if (name2 == null)
+				System.err.println("currently " + in.getPos() +
+						   ", pointer to " + pos);
+			if (pos >= in.getPos())
 				throw new WireParseException("bad compression");
-			else {
-				if (labels + name2.labels > name.length)
-					grow(labels + name2.labels);
-				System.arraycopy(name2.name, 0, name, labels,
-						 name2.labels);
-				labels += name2.labels;
+			savedpos = in.getPos();
+			in.setPos(pos);
+			if (Options.check("verbosecompression"))
+				System.err.println("current name '" + this +
+						   "', seeking to " + pos);
+			try {
+				name2 = new Name(in);
 			}
+			finally {
+				in.setPos(savedpos);
+			}
+			if (labels + name2.labels > name.length)
+				grow(labels + name2.labels);
+			System.arraycopy(name2.name, 0, name, labels,
+					 name2.labels);
+			labels += name2.labels;
 			break loop;
 		case LABEL_EXTENDED:
 			int type = len & ~LABEL_MASK;
@@ -224,23 +230,6 @@ loop:
 			} /* switch */
 			break;
 		} /* switch */
-	}
-	if (c != null) {
-		pos = start;
-		if (Options.check("verbosecompression"))
-			System.out.println("name = " + this +
-					   ", count = " + count);
-		for (int i = 0; i < count; i++) {
-			Name tname = new Name(this, i);
-			c.add(pos, tname);
-			if (Options.check("verbosecompression"))
-				System.err.println("Adding " + tname +
-						   " at " + pos);
-			if (name[i] instanceof BitString)
-				pos += (((BitString)name[i]).bytes() + 2);
-			else
-				pos += (((byte [])name[i]).length + 1);
-		}
 	}
 	qualified = true;
 

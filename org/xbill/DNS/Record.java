@@ -27,8 +27,7 @@ private static Class [] fromWireList = new Class [] {Name.class,
                                                      Short.TYPE,
                                                      Integer.TYPE,
                                                      Integer.TYPE,
-                                                     DataByteInputStream.class,
-                                                     Compression.class};
+                                                     DataByteInputStream.class};
 private static Class [] fromTextList = new Class [] {Name.class,
 						     Short.TYPE,
 						     Integer.TYPE,
@@ -67,7 +66,7 @@ toClass(short type) throws ClassNotFoundException {
 
 private static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
-	  DataByteInputStream in, Compression c) throws IOException
+	  DataByteInputStream in) throws IOException
 {
 	Record rec;
 	int recstart;
@@ -87,11 +86,11 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 							new Short(dclass),
 							new Integer(ttl),
 							new Integer(length),
-							in, c
+							in
 						});
 	}
 	catch (ClassNotFoundException e) {
-		rec = new UNKRecord(name, type, dclass, ttl, length, in, c);
+		rec = new UNKRecord(name, type, dclass, ttl, length, in);
 	}
 	catch (InvocationTargetException e) {
 		if (e.getTargetException() instanceof IOException)
@@ -127,7 +126,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	else
 		dbs = null;
 	try {
-		return newRecord(name, type, dclass, ttl, length, dbs, null);
+		return newRecord(name, type, dclass, ttl, length, dbs);
 	}
 	catch (IOException e) {
 		return null;
@@ -140,7 +139,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
  */
 public static Record
 newRecord(Name name, short type, short dclass, int ttl) {
-	return newRecord(name, type, dclass, ttl, 0, null);
+	return newRecord(name, type, dclass, ttl, 0, (byte []) null);
 }
 
 /**
@@ -151,13 +150,11 @@ newRecord(Name name, short type, short dclass, int ttl) {
  */
 public static Record
 newRecord(Name name, short type, short dclass) {
-	return newRecord(name, type, dclass, 0, 0, null);
+	return newRecord(name, type, dclass, 0, 0, (byte []) null);
 }
 
 static Record
-fromWire(DataByteInputStream in, int section, Compression c)
-throws IOException
-{
+fromWire(DataByteInputStream in, int section) throws IOException {
 	short type, dclass;
 	int ttl;
 	short length;
@@ -167,7 +164,7 @@ throws IOException
 
 	start = in.getPos();
 
-	name = new Name(in, c);
+	name = new Name(in);
 
 	type = in.readShort();
 	dclass = in.readShort();
@@ -179,7 +176,7 @@ throws IOException
 	length = in.readShort();
 	if (length == 0)
 		return newRecord(name, type, dclass, ttl);
-	rec = newRecord(name, type, dclass, ttl, length, in, c);
+	rec = newRecord(name, type, dclass, ttl, length, in);
 	rec.wireLength = in.getPos() - start;
 	return rec;
 }
@@ -190,7 +187,7 @@ throws IOException
 public static Record
 fromWire(byte [] b, int section) throws IOException {
 	DataByteInputStream in = new DataByteInputStream(b);
-	return fromWire(in, section, null);
+	return fromWire(in, section);
 }
 
 void
@@ -302,7 +299,7 @@ throws IOException
 			throw new IOException("Invalid unknown RR encoding: " +
 					      "length mismatch");
 		DataByteInputStream in = new DataByteInputStream(data);
-		rec = newRecord(name, type, dclass, ttl, length, in, null);
+		rec = newRecord(name, type, dclass, ttl, length, in);
 	}
 	st.putBackToken(s);
 

@@ -62,7 +62,7 @@ SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
 }
 
 SIGRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c)
+	  DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.SIG, _dclass, _ttl);
@@ -76,7 +76,7 @@ throws IOException
 	expire = new Date(1000 * (long)in.readInt());
 	timeSigned = new Date(1000 * (long)in.readInt());
 	footprint = in.readShort();
-	signer = new Name(in, c);
+	signer = new Name(in);
 	signature = new byte[length - (in.getPos() - start)];
 	in.read(signature);
 }

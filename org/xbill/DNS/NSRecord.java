@@ -30,9 +30,9 @@ throws IOException
 }
 
 NSRecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in, Compression c) throws IOException
+	 DataByteInputStream in) throws IOException
 {
-	super(_name, Type.NS, _dclass, _ttl, length, in, c);
+	super(_name, Type.NS, _dclass, _ttl, length, in);
 }
 
 NSRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)

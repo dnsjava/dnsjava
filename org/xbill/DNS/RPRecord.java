@@ -36,14 +36,14 @@ RPRecord(Name _name, short _dclass, int _ttl, Name _mailbox, Name _textDomain) {
 }
 
 RPRecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in, Compression c)
+	 DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.RP, _dclass, _ttl);
 	if (in == null)
 		return;
-	mailbox = new Name(in, c);
-	textDomain = new Name(in, c);
+	mailbox = new Name(in);
+	textDomain = new Name(in);
 }
 
 RPRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,

@@ -41,7 +41,8 @@ throws IOException
 }
 
 A6Record(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in, Compression c) throws IOException
+	 DataByteInputStream in)
+throws IOException
 {
 	super(_name, Type.A6, _dclass, _ttl);
 
@@ -55,7 +56,7 @@ A6Record(Name _name, short _dclass, int _ttl, int length,
 	in.read(data);
 	suffix = new Inet6Address(128 - prefixBits, data);
 	if (prefixBits > 0)
-		prefix = new Name(in, c);
+		prefix = new Name(in);
 }
 
 A6Record(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)

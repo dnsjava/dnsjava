@@ -37,14 +37,14 @@ NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
 }
 
 NXTRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c)
+	  DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.NXT, _dclass, _ttl);
 	if (in == null)
 		return;
 	int start = in.getPos();
-	next = new Name(in, c);
+	next = new Name(in);
 	bitmap = new BitSet();
 	int bitmapLength = length - (in.getPos() - start);
 	for (int i = 0; i < bitmapLength; i++) {

@@ -45,8 +45,8 @@ DSRecord(Name _name, short _dclass, int _ttl, int _footprint,
 	digest = _digest;
 }
 
-DSRecord(Name _name, short _dclass, int _ttl,
-	 int length, DataByteInputStream in, Compression c)
+DSRecord(Name _name, short _dclass, int _ttl, int length,
+	 DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.DS, _dclass, _ttl);

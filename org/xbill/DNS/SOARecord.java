@@ -49,13 +49,13 @@ throws IOException
 }
 
 SOARecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c) throws IOException
+	  DataByteInputStream in) throws IOException
 {
 	super(_name, Type.SOA, _dclass, _ttl);
 	if (in == null)
 		return;
-	host = new Name(in, c);
-	admin = new Name(in, c);
+	host = new Name(in);
+	admin = new Name(in);
 	serial = in.readInt();
 	refresh = in.readInt();
 	retry = in.readInt();

@@ -173,4 +173,12 @@ getPos() {
 	return pos;
 }
 
+/**
+ * Sets the current position in the stream
+ */
+public void
+setPos(int pos) {
+	this.pos = pos;
+}
+
 }

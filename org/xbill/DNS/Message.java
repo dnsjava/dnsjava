@@ -74,11 +74,10 @@ newUpdate(Name zone) {
 
 Message(DataByteInputStream in) throws IOException {
 	this();
-	Compression c = new Compression();
 	header = new Header(in);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < header.getCount(i); j++) {
-			Record rec = Record.fromWire(in, i, c);
+			Record rec = Record.fromWire(in, i);
 			sections[i].addElement(rec);
 		}
 	}

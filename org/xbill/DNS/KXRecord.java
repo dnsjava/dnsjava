@@ -30,11 +30,11 @@ KXRecord(Name _name, short _dclass, int _ttl, int _preference, Name _target)
 	super(_name, Type.KX, _dclass, _ttl, _preference, _target);
 }
 
-KXRecord(Name _name, short _dclass, int _ttl,
-	    int length, DataByteInputStream in, Compression c)
+KXRecord(Name _name, short _dclass, int _ttl, int length,
+	 DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.KX, _dclass, _ttl, length, in, c);
+	super(_name, Type.KX, _dclass, _ttl, length, in);
 }
 
 KXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)

@@ -50,7 +50,7 @@ OPTRecord(short payloadSize, byte xrcode, byte version) {
 }
 
 OPTRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c)
+	  DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.OPT, _dclass, _ttl);

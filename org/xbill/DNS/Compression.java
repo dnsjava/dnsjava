@@ -28,14 +28,7 @@ Compression() {
 /** Adds a compression entry mapping a name to a position.  */
 public void
 add(int pos, Name name) {
-	h.put (new Integer(pos), name);
 	h.put (name, new Integer(pos));
-}
-
-/** Retrieves the name at the specified position.  Used for decompression */
-public Name
-get(int pos) {
-	return (Name)h.get(new Integer(pos));
 }
 
 /**

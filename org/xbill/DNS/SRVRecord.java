@@ -44,7 +44,7 @@ SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 }
 
 SRVRecord(Name _name, short _dclass, int _ttl,
-	  int length, DataByteInputStream in, Compression c)
+	  int length, DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.SRV, _dclass, _ttl);
@@ -53,7 +53,7 @@ throws IOException
 	priority = (short) in.readUnsignedShort();
 	weight = (short) in.readUnsignedShort();
 	port = (short) in.readUnsignedShort();
-	target = new Name(in, c);
+	target = new Name(in);
 }
 
 SRVRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,

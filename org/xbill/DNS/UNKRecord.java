@@ -22,7 +22,7 @@ private
 UNKRecord() {}
 
 UNKRecord(Name _name, short _type, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c) throws IOException
+	  DataByteInputStream in) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	if (in == null)

@@ -78,8 +78,8 @@ KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
 	key = _key;
 }
 
-KEYRecord(Name _name, short _dclass, int _ttl,
-	     int length, DataByteInputStream in, Compression c)
+KEYRecord(Name _name, short _dclass, int _ttl, int length,
+	  DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.KEY, _dclass, _ttl);

@@ -34,7 +34,7 @@ HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 }
 
 HINFORecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in, Compression c)
+	    DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.HINFO, _dclass, _ttl);

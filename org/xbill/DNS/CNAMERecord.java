@@ -30,9 +30,9 @@ throws IOException
 }
 
 CNAMERecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in, Compression c) throws IOException
+	    DataByteInputStream in) throws IOException
 {
-	super(_name, Type.CNAME, _dclass, _ttl, length, in, c);
+	super(_name, Type.CNAME, _dclass, _ttl, length, in);
 }
 
 CNAMERecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,

@@ -43,7 +43,7 @@ throws IOException
 }
 
 TXTRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in, Compression c)
+	  DataByteInputStream in)
 throws IOException
 {
 	super(_name, Type.TXT, _dclass, _ttl);

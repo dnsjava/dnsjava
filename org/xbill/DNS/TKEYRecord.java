@@ -69,12 +69,12 @@ TKEYRecord(Name _name, short _dclass, int _ttl, Name _alg,
 }
 
 TKEYRecord(Name _name, short _dclass, int _ttl, int length,
-	   DataByteInputStream in, Compression c) throws IOException
+	   DataByteInputStream in) throws IOException
 {
 	super(_name, Type.TKEY, _dclass, _ttl);
 	if (in == null)
 		return;
-	alg = new Name(in, c);
+	alg = new Name(in);
 	timeInception = new Date(1000 * (long)in.readInt());
 	timeExpire = new Date(1000 * (long)in.readInt());
 	mode = in.readShort();

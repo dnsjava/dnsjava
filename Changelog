@@ -1,3 +1,6 @@
+4/22/2002
+	- Improve name decompression by not requiring a decompression context.
+
 3/27/2002
 	- Add support for the Delegation Signer (DS) record. (David Blacka)
 

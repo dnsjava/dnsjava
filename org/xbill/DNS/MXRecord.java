@@ -30,11 +30,11 @@ MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 	super(_name, Type.MX, _dclass, _ttl, _priority, _target);
 }
 
-MXRecord(Name _name, short _dclass, int _ttl,
-	    int length, DataByteInputStream in, Compression c)
+MXRecord(Name _name, short _dclass, int _ttl, int length,
+	 DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.MX, _dclass, _ttl, length, in, c);
+	super(_name, Type.MX, _dclass, _ttl, length, in);
 }
 
 MXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
