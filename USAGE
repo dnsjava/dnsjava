@@ -10,7 +10,7 @@ Command line programs:
 		-k  : use TSIG transaction security
 		-t  : use TCP by default
 		-i  : ignore truncation errors
-		-e n: Use EDNS level n (only 0 is complete)
+		-e n: Use EDNS level n (only 0 is defined)
 		-d  : Set the DNSSEC OK bit
 
 - update:
