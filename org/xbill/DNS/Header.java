@@ -26,15 +26,21 @@ private static Random random = new Random();
 /** The length of a DNS Header in wire format. */
 public static final int LENGTH = 12;
 
+private void
+init() {
+	counts = new int[4];
+	flags = new boolean[16];
+	id = -1;
+}
+
 /**
  * Create a new empty header.
  * @param id The message id
  */
 public
 Header(int id) {
-	counts = new int[4];
-	flags = new boolean[16];
-	this.id = id;
+	init();
+	setID(id);
 }
 
 /**
@@ -42,7 +48,7 @@ Header(int id) {
  */
 public
 Header() {
-	this(random.nextInt(0xffff));
+	init();
 }
 
 /**
@@ -116,7 +122,13 @@ getFlags() {
  */
 public int
 getID() {
-	return id & 0xFFFF;
+	if (id >= 0)
+		return id;
+	synchronized (this) {
+		if (id < 0)
+			id = random.nextInt(0xffff);
+		return id;
+	}
 }
 
 /**
@@ -124,18 +136,10 @@ getID() {
  */
 public void
 setID(int id) {
-	if (opcode > 0xFF)
+	if (id > 0xffff)
 		throw new IllegalArgumentException("DNS message ID " + id +
 						   "is out of range");
 	this.id = id;
-}
-
-/**
- * Generates a random number suitable for use as a message ID
- */
-static int
-randomID() {
-	return (random.nextInt(0xffff));
 }
 
 /**
@@ -269,7 +273,8 @@ toString() {
 /* Creates a new Header identical to the current one */
 public Object
 clone() {
-	Header h = new Header(id);
+	Header h = new Header();
+	h.id = id;
 	System.arraycopy(counts, 0, h.counts, 0, counts.length);
 	System.arraycopy(flags, 0, h.flags, 0, flags.length);
 	h.rcode = rcode;
