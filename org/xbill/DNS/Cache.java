@@ -67,7 +67,7 @@ private class Element {
 		tid = Thread.currentThread();
 	}
 
-	public void
+	public final void
 	update(Record r) {
 		rrset.addRR(r);
 		timeIn = System.currentTimeMillis();
@@ -80,24 +80,24 @@ private class Element {
 		rrset.deleteRR(r);
 	}
 
-	public boolean
+	public final boolean
 	expiredTTL() {
 		long now = System.currentTimeMillis();
 		long expire = timeIn + (1000 * (long)ttl);
 		return (now > expire);
 	}
 
-	public boolean
+	public final boolean
 	TTL0Ours() {
 		return (ttl == 0 && tid == Thread.currentThread());
 	}
 
-	public boolean
+	public final boolean
 	TTL0NotOurs() {
 		return (ttl == 0 && tid != Thread.currentThread());
 	}
 
-	public String
+	public final String
 	toString() {
 		StringBuffer sb = new StringBuffer();
 		if (rrset != null)
@@ -359,7 +359,6 @@ lookupRecords(Name name, short type, byte minCred) {
 			else if (type != Type.NS && type != Type.ANY &&
 				 rrset.getType() == Type.NS)
 			{
-				/* XXX */
 				cr = new SetResponse(SetResponse.DELEGATION);
 				cr.addNS(rrset);
 				return cr;
@@ -432,6 +431,36 @@ findAnyRecords(Name name, short type) {
 	return findRecords(name, type, Credibility.NONAUTH_ADDITIONAL);
 }
 
+private void
+verifyRecords(Cache tcache) {
+	Enumeration e;
+
+	e = tcache.names();
+	while (e.hasMoreElements()) {
+		Name name = (Name) e.nextElement();
+		TypeMap tm = tcache.findName(name);
+		if (tm == null)
+			continue;
+		Object [] elements;
+		elements = tm.getMultiple(Type.ANY);
+		if (elements == null)
+			continue;
+		for (int i = 0; i < elements.length; i++) {
+			Element element = (Element) elements[i];
+			RRset rrset = element.rrset;
+
+			/* for now, ignore negative cache entries */
+			if (rrset == null)
+				continue;
+			if (verifier != null)
+				rrset.setSecurity(verifier.verify(rrset, this));
+			if (rrset.getSecurity() < DNSSEC.Secure)
+				continue;
+			addSet(name, rrset.getType(), element);
+		}
+	}
+}
+
 /**
  * Adds all data from a Message into the Cache.  Each record is added with
  * the appropriate credibility, and negative answers are cached as such.
@@ -448,12 +477,13 @@ addMessage(Message in) {
 	byte cred;
 	short rcode = in.getHeader().getRcode();
 	int ancount = in.getHeader().getCount(Section.ANSWER);
-	Cache c;
 
-	if (secure)
-		c = new Cache(dclass);
-	else
-		c = this;
+	if (secure) {
+		Cache c = new Cache(dclass);
+		c.addMessage(in);
+		verifyRecords(c);
+		return;
+	}
 
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return;
@@ -467,7 +497,7 @@ addMessage(Message in) {
 			cred = Credibility.AUTH_NONAUTH_ANSWER;
 		else
 			cred = Credibility.NONAUTH_ANSWER;
-		c.addRecord(r, cred, in);
+		addRecord(r, cred, in);
 	}
 
 	if (ancount == 0 || rcode == Rcode.NXDOMAIN) {
@@ -490,16 +520,16 @@ addMessage(Message in) {
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
 			if (ancount == 0)
-				c.addNegative(rcode, queryName, queryType,
-					      ttl, cred, in);
+				addNegative(rcode, queryName, queryType,
+					    ttl, cred, in);
 			else {
 				Record [] cnames;
 				cnames = in.getSectionArray(Section.ANSWER);
 				int last = cnames.length - 1;
 				Name cname;
 				cname = ((CNAMERecord)cnames[last]).getTarget();
-				c.addNegative(rcode, cname, queryType,
-					      ttl, cred, in);
+				addNegative(rcode, cname, queryType,
+					    ttl, cred, in);
 			}
 		}
 	}
@@ -511,7 +541,7 @@ addMessage(Message in) {
 			cred = Credibility.AUTH_AUTHORITY;
 		else
 			cred = Credibility.NONAUTH_AUTHORITY;
-		c.addRecord(r, cred, in);
+		addRecord(r, cred, in);
 	}
 
 	e = in.getSection(Section.ADDITIONAL);
@@ -521,34 +551,7 @@ addMessage(Message in) {
 			cred = Credibility.AUTH_ADDITIONAL;
 		else
 			cred = Credibility.NONAUTH_ADDITIONAL;
-		c.addRecord(r, cred, in);
-	}
-	if (secure) {
-		e = c.names();
-		while (e.hasMoreElements()) {
-			Name name = (Name) e.nextElement();
-			TypeMap tm = c.findName(name);
-			if (tm == null)
-				continue;
-			Object [] elements;
-			elements = tm.getMultiple(Type.ANY);
-			if (elements == null)
-				continue;
-			for (int i = 0; i < elements.length; i++) {
-				Element element = (Element) elements[i];
-				RRset rrset = element.rrset;
-
-				/* for now, ignore negative cache entries */
-				if (rrset == null)
-					continue;
-				if (verifier != null)
-					rrset.setSecurity(
-						verifier.verify(rrset, this));
-				if (rrset.getSecurity() < DNSSEC.Secure)
-					continue;
-				addSet(name, rrset.getType(), element);
-			}
-		}
+		addRecord(r, cred, in);
 	}
 }
 
