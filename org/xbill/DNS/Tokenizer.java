@@ -58,8 +58,8 @@ private String delimiters;
 private Token current;
 private StringBuffer sb;
 
-private String filename = null;
-private int line = 1;
+private String filename;
+private int line;
 
 public static class Token {
 	/** The type of token. */
@@ -136,6 +136,7 @@ Tokenizer(InputStream is) {
 	current = new Token();
 	sb = new StringBuffer();
 	filename = "<none>";
+	line = 1;
 }
 
 /**
