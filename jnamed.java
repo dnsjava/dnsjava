@@ -62,9 +62,11 @@ addRRset(Message response, RRset rrset) {
 
 
 void
-addAuthority(Message response, Zone zone) {
+addAuthority(Message response, Name name, Zone zone) {
 	if (response.getHeader().getCount(Section.ANSWER) > 0) {
-		RRset nsRecords = (RRset) zone.getNS();
+		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN);
+		if (nsRecords == null)
+			nsRecords = (RRset) zone.getNS();
 		Enumeration e = nsRecords.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
@@ -149,7 +151,7 @@ generateReply(Message query) {
 					addRRset(response, rrset);
 			}
 		}
-		addAuthority(response, zone);
+		addAuthority(response, name, zone);
 		addAdditional(response);
 	}
 	return response;
