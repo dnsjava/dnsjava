@@ -72,6 +72,24 @@ removeRecord(int section, Record r) {
 		return false;
 }
 
+public void
+removeAllRecords(int section) {
+		sections[section].setSize(0);
+		header.setCount(section, (short)0);
+}
+
+public boolean
+findRecord(int section, Record r) {
+	return (sections[section].contains(r));
+}
+
+public boolean
+findRecord(Record r) {
+	return (sections[Section.ANSWER].contains(r) ||
+		sections[Section.AUTHORITY].contains(r) ||
+		sections[Section.ADDITIONAL].contains(r));
+}
+
 public TSIGRecord
 getTSIG() {
 	int count = header.getCount(Section.ADDITIONAL);
@@ -89,7 +107,7 @@ getSection(int section) {
 	return sections[section].elements();
 }
 
-public void
+void
 toWire(CountedDataOutputStream out) throws IOException {
 	header.toWire(out);
 	Compression c = new Compression();
