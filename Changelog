@@ -1,5 +1,6 @@
 8/6/2002
 	- The AAAARecord constructor was broken.
+	- The Record class now implements Comparable.
 
 6/22/2002
 	- Significant speed improvements in the Record class and its

@@ -14,7 +14,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-abstract public class Record implements Cloneable {
+abstract public class Record implements Cloneable, Comparable {
 
 protected Name name;
 protected short type, dclass;
@@ -484,6 +484,44 @@ withName(Name name) {
 	}
 	rec.name = name;
 	return rec;
+}
+
+/**                     
+ * Compares this Record to another Object.
+ * @param The Object to be compared.
+ * @return The value 0 if the argument is a record equivalent to this record;
+ * a value less than 0 if the argument is less than this record in the
+ * canonical ordering, and a value greater than 0 if the argument is greater
+ * than this record in the canonical ordering.  The canonical ordering
+ * is defined to compare by name, class, type, and rdata.
+ * @throws ClassCastException if the argument is not a Record.
+ */
+public int
+compareTo(Object o) {
+        Record arg = (Record) o;
+
+	int n = name.compareTo(arg.name);
+	if (n != 0)
+		return (n);
+	n = dclass - arg.dclass;
+	if (n != 0)
+		return (n);
+	n = type - arg.type;
+	if (n != 0)
+		return (n);
+	try {
+		byte [] rdata1 = toWireCanonical();
+		byte [] rdata2 = arg.toWireCanonical();
+		for (int i = 0; i < rdata1.length && i < rdata2.length; i++) {
+			n = (rdata1[i] & 0xFF) - (rdata2[i] & 0xFF);
+			if (n != 0)
+				return (n);
+		}
+		return (rdata1.length - rdata2.length);
+	}
+	catch (IOException e) {
+		throw new RuntimeException("Record.toWireCanonical failed");
+	}
 }
 
 }
