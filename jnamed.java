@@ -422,7 +422,7 @@ throws IOException
 	if (s != null)
 		maxLength = 65535;
 	else if (queryOPT != null)
-		maxLength = Math.min(queryOPT.getPayloadSize(), 512);
+		maxLength = Math.max(queryOPT.getPayloadSize(), 512);
 	else
 		maxLength = 512;
 
@@ -448,6 +448,14 @@ throws IOException
 		return errorMessage(query, rcode);
 
 	addAdditional(response, flags);
+
+	if (queryOPT != null) {
+		int optflags = (flags == FLAG_DNSSECOK) ? Flags.DO : 0;
+		OPTRecord opt = new OPTRecord((short)4096, rcode, (byte)0,
+					      optflags);
+		response.addRecord(opt, Section.ADDITIONAL);
+	}
+
 	response.setTSIG(tsig, Rcode.NOERROR, queryTSIG);
 	return response.toWire(maxLength);
 }
