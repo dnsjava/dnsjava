@@ -13,7 +13,7 @@ import java.io.*;
 
 public class hexdump {
 
-private static final byte [] hex = "0123456789ABCDEF".getBytes();
+private static final char [] hex = "0123456789ABCDEF".toCharArray();
 
 /**
  * Dumps a byte array into hex format.
@@ -26,7 +26,7 @@ public static String
 dump(String description, byte [] b, int offset, int length) {
 	StringBuffer sb = new StringBuffer();
 
-	sb.append(length + 'b');
+	sb.append(length + "b");
 	if (description != null)
 		sb.append(" (" + description + ")");
 	sb.append(':');
