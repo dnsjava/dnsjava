@@ -158,7 +158,7 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 /**
  * Attempts to verify an RRset.  This does not modify the set.
  * @param set The RRset to verify
- * @param set The Cache where obtained secure keys are found (may be null)
+ * @param cache The Cache where obtained secure keys are found (may be null)
  * @return The new security status of the set
  * @see RRset
  */
