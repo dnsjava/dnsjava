@@ -197,7 +197,7 @@ private int
 uniqueID(Message m) {
 	Record r = m.getQuestion();
 	return (((r.getName().hashCode() & 0xFFFF) << 16) +
-		(r.getType() + hashCode() << 8) +
+		(r.getType() << 8) +
 		(hashCode() & 0xFF));
 }
 
