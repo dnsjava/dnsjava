@@ -25,6 +25,8 @@ class Enumerator implements Enumeration {
 		synchronized (rrs) {
 			int size = rrs.size();
 			records = new Record[size];
+			if (size == 0)
+				return;
 			start++;
 			while (start >= size)
 				start -= size;
