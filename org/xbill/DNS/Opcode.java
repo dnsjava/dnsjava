@@ -15,8 +15,14 @@ public final class Opcode {
 
 private static StringValueTable opcodes = new StringValueTable();
 
-/** A query sent to a server */
+/** A standard query */
 public static final byte QUERY		= 0;
+
+/** An inverse query (deprecated) */
+public static final byte IQUERY		= 1;
+
+/** A server status request (not used) */
+public static final byte STATUS		= 2;
 
 /**
  * A message from a primary to a secondary server to initiate a zone transfer
@@ -28,6 +34,8 @@ public static final byte UPDATE		= 5;
 
 static {
 	opcodes.put2(QUERY, "QUERY");
+	opcodes.put2(QUERY, "IQUERY");
+	opcodes.put2(QUERY, "STATUS");
 	opcodes.put2(NOTIFY, "NOTIFY");
 	opcodes.put2(UPDATE, "UPDATE");
 }
