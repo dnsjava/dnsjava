@@ -395,7 +395,7 @@ doxfr() throws IOException, ZoneTransferException {
 			int rcode = response.getRcode();
 			if (rcode != Rcode.NOERROR) {
 				if (qtype == Type.IXFR &&
-				    rcode == Rcode.NOTIMPL)
+				    rcode == Rcode.NOTIMP)
 				{
 					fallback();
 					run();

@@ -31,7 +31,7 @@ public static final int SERVFAIL	= 2;
 public static final int NXDOMAIN	= 3;
 
 /** The operation requested is not implemented */
-public static final int NOTIMPL		= 4;
+public static final int NOTIMP		= 4;
 
 /** The operation was refused by the server */
 public static final int REFUSED		= 5;
@@ -77,7 +77,7 @@ static {
 	rcodes.add(FORMERR, "FORMERR");
 	rcodes.add(SERVFAIL, "SERVFAIL");
 	rcodes.add(NXDOMAIN, "NXDOMAIN");
-	rcodes.add(NOTIMPL, "NOTIMPL");
+	rcodes.add(NOTIMP, "NOTIMP");
 	rcodes.add(REFUSED, "REFUSED");
 	rcodes.add(YXDOMAIN, "YXDOMAIN");
 	rcodes.add(YXRRSET, "YXRRSET");

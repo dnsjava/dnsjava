@@ -1,3 +1,6 @@
+6/8/2004
+	- Rcode 4 is NOTIMP, not NOTIMPL.
+
 6/5/2004
 	- Fixes to LOCRecord.
 

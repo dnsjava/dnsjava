@@ -411,7 +411,7 @@ throws IOException
 	if (header.getRcode() != Rcode.NOERROR)
 		return errorMessage(query, Rcode.FORMERR);
 	if (header.getOpcode() != Opcode.QUERY)
-		return errorMessage(query, Rcode.NOTIMPL);
+		return errorMessage(query, Rcode.NOTIMP);
 
 	Record queryRecord = query.getQuestion();
 
@@ -450,7 +450,7 @@ throws IOException
 	if (type == Type.AXFR && s != null)
 		return doAXFR(name, query, tsig, queryTSIG, s);
 	if (!Type.isRR(type) && type != Type.ANY)
-		return errorMessage(query, Rcode.NOTIMPL);
+		return errorMessage(query, Rcode.NOTIMP);
 
 	byte rcode = addAnswer(response, name, type, dclass, 0, flags);
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
