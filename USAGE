@@ -11,8 +11,9 @@ Command line programs:
 
 - jnamed:
 	A basic primary, non-caching, non-recursive server.  Not very good,
-	but it runs now.
-	jnamed cachefile zone1 zone2 ...
+	but it runs now.  The config file specifies "primary file",
+	"cache file", and "key name data".
+	jnamed config_file
 
 Function calls:
 
