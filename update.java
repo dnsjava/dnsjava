@@ -43,6 +43,7 @@ update(InputStream in) throws IOException {
 
 			line = IO.readExtendedLine(br);
 			if (line == null) {
+				br.close();
 				inputs.removeElement(br);
 				if (inputs.isEmpty())
 					return;
