@@ -435,7 +435,7 @@ throws IOException
 	else
 		maxLength = 512;
 
-	if (queryOPT != null && (queryOPT.getFlags() & Flags.DO) != 0)
+	if (queryOPT != null && (queryOPT.getFlags() & ExtendedFlags.DO) != 0)
 		flags = FLAG_DNSSECOK;
 
 	Message response = new Message(query.getHeader().getID());
@@ -459,7 +459,7 @@ throws IOException
 	addAdditional(response, flags);
 
 	if (queryOPT != null) {
-		int optflags = (flags == FLAG_DNSSECOK) ? Flags.DO : 0;
+		int optflags = (flags == FLAG_DNSSECOK) ? ExtendedFlags.DO : 0;
 		OPTRecord opt = new OPTRecord((short)4096, rcode, (byte)0,
 					      optflags);
 		response.addRecord(opt, Section.ADDITIONAL);

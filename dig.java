@@ -154,7 +154,7 @@ main(String argv[]) throws IOException {
 
 			    case 'd':
 			    	opt = new OPTRecord((short)1280, (byte)0,
-						    (byte)0, Flags.DO);
+						    (byte)0, ExtendedFlags.DO);
 				break;
 
 			    case 'q':
