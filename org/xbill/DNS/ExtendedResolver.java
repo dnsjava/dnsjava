@@ -245,16 +245,17 @@ init() {
 }
 
 /**
- * Creates a new Extended Resolver.  FindServer is used to locate the servers
- * for which SimpleResolver contexts should be initialized.
+ * Creates a new Extended Resolver.  The default ResolverConfig is used to
+ * determine the servers for which SimpleResolver contexts should be
+ * initialized.
  * @see SimpleResolver
- * @see FindServer
+ * @see ResolverConfig
  * @exception UnknownHostException Failure occured initializing SimpleResolvers
  */
 public
 ExtendedResolver() throws UnknownHostException {
 	init();
-	String [] servers = FindServer.servers();
+	String [] servers = ResolverConfig.getCurrentConfig().servers();
 	if (servers != null) {
 		for (int i = 0; i < servers.length; i++) {
 			Resolver r = new SimpleResolver(servers[i]);

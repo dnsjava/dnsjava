@@ -45,7 +45,7 @@ private static int uniqueID = 0;
 public
 SimpleResolver(String hostname) throws UnknownHostException {
 	if (hostname == null) {
-		hostname = FindServer.server();
+		hostname = ResolverConfig.getCurrentConfig().server();
 		if (hostname == null)
 			hostname = defaultResolver;
 	}
@@ -56,9 +56,9 @@ SimpleResolver(String hostname) throws UnknownHostException {
 }
 
 /**
- * Creates a SimpleResolver.  The host to query is either found by
- * FindServer, or the default host is used.
- * @see FindServer
+ * Creates a SimpleResolver.  The host to query is either found by using
+ * ResolverConfig, or the default host is used.
+ * @see ResolverConfig
  * @exception UnknownHostException Failure occurred while finding the host
  */
 public

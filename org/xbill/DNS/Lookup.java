@@ -87,7 +87,7 @@ refreshDefault() {
 	catch (UnknownHostException e) {
 		throw new RuntimeException("Failed to initialize resolver");
 	}
-	defaultSearchPath = FindServer.searchPath();
+	defaultSearchPath = ResolverConfig.getCurrentConfig().searchPath();
 	defaultCaches = new HashMap();
 }
 
