@@ -135,10 +135,17 @@ probe() {
 		return;
 	probed = true;
 	findProperty();
-	if (server != null && search != null)
-		return;
-	findUnix();
-	return;
+	if (server == null || search == null)
+		findUnix();
+
+	if (search == null)
+		search = new Name[1];
+	else {
+		Name [] oldsearch = search;
+		search = new Name[oldsearch.length + 1];
+		System.arraycopy(oldsearch, 0, search, 0, oldsearch.length);
+	}
+	search[search.length - 1] = Name.root;
 }
 
 /** Returns all located servers */
