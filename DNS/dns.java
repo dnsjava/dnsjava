@@ -18,12 +18,36 @@ matchType(short type1, short type2) {
 	return (type1 == Type.ANY || type2 == Type.ANY || type1 == type2);
 }
 
+public static String
+inaddrString(InetAddress addr) {
+	byte [] address = addr.getAddress();
+	StringBuffer sb = new StringBuffer();
+	for (int i = 3; i >= 0; i--) {
+		sb.append(address[i] & 0xFF);
+		sb.append(".");
+	}
+	sb.append(".IN-ADDR.ARPA.");
+	return sb.toString();
+}
+
+public static String
+inaddrString(String s) {
+	InetAddress address;
+	try {
+		address = InetAddress.getByName(s);
+	}
+	catch (UnknownHostException e) {
+		return null;
+	}
+	return inaddrString(address);
+}
+
 public static void
 init(String defaultResolver) {
 	Resolver.setDefaultResolver(defaultResolver);
 }
 
-public void
+public static void
 setResolver(Resolver res) {
 	_res = res;
 }
@@ -96,20 +120,7 @@ getRecords(String name, short type) {
 
 public static Record []
 getRecordsByAddress(String addr, short type) {
-	byte [] address;
-	try {
-		address = InetAddress.getByName(addr).getAddress();
-	}
-	catch (UnknownHostException e) {
-		return null;
-	}
-	StringBuffer sb = new StringBuffer();
-	for (int i = 3; i >= 0; i--) {
-		sb.append(address[i] & 0xFF);
-		sb.append(".");
-	}
-	sb.append(".IN-ADDR.ARPA.");
-	String name = sb.toString();
+	String name = inaddrString(addr);
 	return getRecords(name, type, DClass.IN);
 }
 
