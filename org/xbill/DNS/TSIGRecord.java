@@ -127,10 +127,19 @@ rdataToString() {
 
 	sb.append (timeSigned.getTime() / 1000);
 	sb.append (" ");
-	sb.append (Rcode.TSIGstring(error));
+	sb.append (fudge);
+	sb.append (" ");
+	sb.append (signature.length);
 	sb.append ("\n");
 	sb.append (base64.formatString(signature, 64, "\t", false));
-	if (other != null) {
+	sb.append (" ");
+	sb.append (Rcode.TSIGstring(error));
+	sb.append (" ");
+	if (other == null)
+		sb.append (0);
+	else {
+		sb.append (other.length);
+		sb.append ("\n");
 		sb.append("\n\t <");
 		if (error == Rcode.BADTIME) {
 			if (other.length != 6) {
