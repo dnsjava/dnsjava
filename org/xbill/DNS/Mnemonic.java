@@ -78,8 +78,10 @@ setNumericAllowed(boolean numeric) {
 	this.numericok = numeric;
 }
 
-/* Converts an int into a possibly cached Integer. */
-static Integer
+/**
+ * Converts an int into a possibly cached Integer.
+ */
+public static Integer
 toInteger(int val) {
 	if (val >= 0 && val < cachedInts.length)
 		return (cachedInts[val]);
@@ -109,7 +111,7 @@ private int
 parseNumeric(String s) {
 	try {
 		int val = Integer.parseInt(s);
-		if (val >= 0 && val <= max)
+		if (val >= 0 && (max == 0 || val <= max))
 			return val;
 	}
 	catch (NumberFormatException e) {
@@ -156,6 +158,7 @@ getText(int val) {
  */
 public int
 getValue(String str) {
+	str = sanitize(str);
 	Integer value = (Integer) strings.get(str);
 	if (value != null) {
 		return value.intValue();
