@@ -243,6 +243,11 @@ getName() {
 	return name;
 }
 
+public short
+getType() {
+	return type;
+}
+
 abstract byte [] rrToWire(dnsCompression c) throws IOException;
 
 byte [] rrToWireCanonical() throws IOException {
