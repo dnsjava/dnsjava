@@ -337,6 +337,28 @@ subdomain(Name domain) {
 	return (tname.equals(domain));
 }
 
+private String
+byteString(byte [] array) {
+	StringBuffer sb = new StringBuffer();
+	for (int i = 0; i < array.length; i++) {
+		/* Ick. */
+		short b = (short)(array[i] & 0xFF);
+		if (b <= 0x20 || b >= 0x7f) {
+			sb.append('\\');
+			sb.append(byteFormat.format(b));
+		}
+		else if (b == '"' || b == '(' || b == ')' || b == '.' ||
+			 b == ';' || b == '\\' || b == '@' || b == '$')
+		{
+			sb.append('\\');
+			sb.append((char)b);
+		}
+		else
+			sb.append((char)b);
+	}
+	return sb.toString();
+}
+
 /**
  * Convert Name to a String
  */
@@ -348,30 +370,24 @@ toString() {
 	for (int i = 0; i < labels; i++) {
 		if (name[i] instanceof BitString)
 			sb.append(name[i]);
-		else {
-			byte [] s = (byte []) name[i];
-			for (int j = 0; j < s.length; j++) {
-				/* Ick. */
-				short b = (short)(s[j] & 0xFF);
-				if (b <= 0x20 || b >= 0x7f) {
-					sb.append('\\');
-					sb.append(byteFormat.format(b));
-				}
-				else if (b == '"' || b == '(' || b == ')' ||
-					 b == '.' || b == ';' || b == '\\' ||
-					 b == '@' || b == '$')
-				{
-					sb.append('\\');
-					sb.append((char)b);
-				}
-				else
-					sb.append((char)b);
-			}
-		}
+		else
+			sb.append(byteString((byte [])name[i]));
 		if (qualified || i < labels - 1)
 			sb.append(".");
 	}
 	return sb.toString();
+}
+
+/**
+ * Convert the nth label in a Name to a String
+ * @param n  The label to be converted to a String
+ */
+public String
+getLabelString(int n) {
+	if (name[n] instanceof BitString)
+		return name[n].toString();
+	else
+		return byteString((byte [])name[n]);
 }
 
 /**
