@@ -79,6 +79,10 @@ update(InputStream in) throws IOException {
 			if (operation.equals("server")) {
 				server = st.nextToken();
 				res = new SimpleResolver(server);
+				if (st.hasMoreTokens()) {
+					String portstr = st.nextToken();
+					res.setPort(Short.parseShort(portstr));
+				}
 			}
 
 			else if (operation.equals("key")) {
@@ -234,9 +238,18 @@ sendUpdate() throws IOException {
 				print("Invalid update");
 				return;
 			}
-			Record r = (Record) updates.nextElement();
-			updzone = new Name(r.getName(), 1);
-			dclass = r.getDClass();
+			Record r = null;
+			while (updates.hasMoreElements()) {
+				r = (Record) updates.nextElement();
+				if (updzone == null)
+					updzone = new Name(r.getName(), 1);
+				if (r.getDClass() != DClass.NONE &&
+				    r.getDClass() != DClass.ANY)
+				{
+					dclass = r.getDClass();
+					break;
+				}
+			}
 		}
 		Record soa = Record.newRecord(updzone, Type.SOA, dclass);
 		query.addRecord(soa, Section.ZONE);
@@ -377,6 +390,11 @@ doDelete(MyStringTokenizer st) throws IOException {
 	name = new Name(s, origin);
 	if (st.hasMoreTokens()) {
 		s = st.nextToken();
+		if ((dclass = DClass.value(s)) >= 0) {
+			if (!st.hasMoreTokens())
+				throw new IOException("Invalid format");
+			s = st.nextToken();
+		}
 		if ((type = Type.value(s)) < 0)
 			throw new IOException("Invalid type: " + s);
 		if (st.hasMoreTokens()) {
@@ -636,7 +654,7 @@ help(String topic) {
 			"sends and resets the current update packet\n");
 	else if (topic.equalsIgnoreCase("server"))
 		System.out.println(
-			"server <name>\n\n" +
+			"server <name> [port]\n\n" +
 			"server that receives send updates/queries\n");
 	else if (topic.equalsIgnoreCase("show"))
 		System.out.println(
