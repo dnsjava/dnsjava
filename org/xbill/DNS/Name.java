@@ -377,7 +377,7 @@ Name(Name src, int n) {
  * Creates a new name by concatenating two existing names.
  * @param prefix The prefix name.
  * @param suffix The suffix name.
- * @returns The concatenated name.
+ * @return The concatenated name.
  */
 public static Name
 concatenate(Name prefix, Name suffix) {

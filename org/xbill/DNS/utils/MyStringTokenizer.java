@@ -72,7 +72,7 @@ isDelim(int i) {
 	return (delim.indexOf(string[i]) >= 0);
 }
 
-/** Are there any more tokens in the string */
+/** Returns true if there are more tokens in the string. */
 public boolean
 hasMoreTokens() {
 	if (putBack != null)
@@ -87,16 +87,16 @@ hasMoreTokens() {
 	return (t < string.length);
 }
 
-/** Are there any more tokens in the string */
+/** Returns true if there are more tokens in the string. */
 public boolean
 hasMoreElements() {
 	return hasMoreTokens();
 }
 
 /**
- * Are there any more delimiters in the string?  This should only be called
- * if hasMoreTokens is false, to determine if the string contains trailing
- * delimiters.
+ * Returns true if there are more delimiters in the string.  This should
+ * only be called if hasMoreTokens is false, to determine if the string
+ * contains trailing delimiters.
  */
 public boolean
 hasMoreDelimiters() {
