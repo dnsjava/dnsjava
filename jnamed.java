@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import DNS.*;
+import DNS.utils.*;
 
 public class jnamed {
 
@@ -113,11 +114,24 @@ addAdditional(Message response) {
 	addAdditional2(response, Section.AUTHORITY);
 }
 
+/* FIX ME */
+TSIG
+findTSIG(Name name) {
+	return new TSIG(name.toString(), base64.fromString("1234"));
+}
+
 Message
-generateReply(Message query) {
+generateReply(Message query, byte [] in) {
 	Enumeration qds = query.getSection(Section.QUESTION);
 	Record queryRecord = (Record) qds.nextElement();
 
+	TSIGRecord queryTSIG = query.getTSIG();
+	TSIG tsig = null;
+	if (queryTSIG != null) {
+		tsig = findTSIG(queryTSIG.getName());
+		if (!tsig.verify(query, in, null))
+			return formerrMessage(in);
+	}
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(Flags.AA);
@@ -153,6 +167,14 @@ generateReply(Message query) {
 		}
 		addAuthority(response, name, zone);
 		addAdditional(response);
+	}
+	if (queryTSIG != null) {
+		try {
+			if (tsig != null)
+				tsig.apply(response, queryTSIG);
+		}
+		catch (IOException e) {
+		}
 	}
 	return response;
 }
@@ -197,6 +219,23 @@ truncate(Message in, int length, int maxLength) {
 	length -= truncateSection(in, maxLength, length, Section.ANSWER);
 }
 
+public Message
+formerrMessage(byte [] in) {
+	Header header;
+	try {
+		header = new Header(new DataByteInputStream(in));
+		for (int i = 0; i < 4; i++)
+			header.setCount(i, 0);
+	}
+	catch (IOException e) {
+		header = new Header(0);
+	}
+	Message response = new Message();
+	header.setRcode(Rcode.FORMERR);
+	response.setHeader(header);
+	return response;
+}
+
 public void
 serveTCP(short port) {
 	try {
@@ -219,8 +258,14 @@ serveTCP(short port) {
 				s.close();
 				continue;
 			}
-			Message query = new Message(in);
-			Message response = generateReply(query);
+			Message query, response;
+			try {
+				query = new Message(in);
+				response = generateReply(query, in);
+			}
+			catch (IOException e) {
+				response = formerrMessage(in);
+			}
 			byte [] out = response.toWire();
 			dataOut = new DataOutputStream(s.getOutputStream());
 			dataOut.writeShort(out.length);
@@ -238,6 +283,7 @@ serveUDP(short port) {
 	try {
 		DatagramSocket sock = new DatagramSocket(port);
 		while (true) {
+			short udpLength = 512;
 			DatagramPacket dp = new DatagramPacket(new byte[512],
 							       512);
 			try {
@@ -248,11 +294,23 @@ serveUDP(short port) {
 			}
 			byte [] in = new byte[dp.getLength()];
 			System.arraycopy(dp.getData(), 0, in, 0, in.length);
-			Message query = new Message(in);
-			Message response = generateReply(query);
+			Message query, response;
+			try {
+				query = new Message(in);
+				response = generateReply(query, in);
+
+				OPTRecord opt = query.getOPT();
+				if (opt != null)
+					udpLength = opt.getPayloadSize();
+
+			}
+			catch (IOException e) {
+				response = formerrMessage(in);
+			}
 			byte [] out = response.toWire();
-			if (out.length > 512) {
-				truncate(response, out.length, 512);
+
+			if (out.length > udpLength) {
+				truncate(response, out.length, udpLength);
 				out = response.toWire();
 			}
 			dp = new DatagramPacket(out, out.length,
@@ -268,14 +326,14 @@ serveUDP(short port) {
 public void
 addTCP(final short port) {
 	Thread t;
-	t = new Thread(new Runnable() {public void run() {serveUDP(port);}});
+	t = new Thread(new Runnable() {public void run() {serveTCP(port);}});
 	t.start();
 }
 
 public void
 addUDP(final short port) {
 	Thread t;
-	t = new Thread(new Runnable() {public void run() {serveTCP(port);}});
+	t = new Thread(new Runnable() {public void run() {serveUDP(port);}});
 	t.start();
 }
 
