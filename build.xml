@@ -31,6 +31,7 @@
     <target name="jar" description="Makes dnsjava.jar" depends="compile">
         <jar jarfile="${dist_dir}/${jarname}"
              basedir="${build_dir}" includes="**/*.class">
+            <exclude name="org/xbill/DNS/tests/*.class"/>
             <manifest>
                 <attribute name="Implementation-Title" value="dnsjava"/>
                 <attribute name="Implementation-Version" value="${version}"/>
