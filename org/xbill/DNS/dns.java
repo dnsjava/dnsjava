@@ -21,6 +21,7 @@ public final class dns {
 
 private static Resolver res;
 private static Cache cache;
+private static Name [] searchPath;
 
 /* Otherwise the class could be instantiated */
 private
@@ -74,6 +75,14 @@ setResolver(Resolver _res) {
 	res = _res;
 }
 
+public void
+setSearchPath(String [] domains) {
+	searchPath = new Name[domains.length];
+	for (int i = 0; i < domains.length; i++)
+		searchPath[i] = new Name(domains[i]);
+}
+
+
 /**
  * Finds records with the given name, type, and class with a certain credibility
  * @param namestr  The name of the desired records
@@ -93,13 +102,12 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	Enumeration e;
 	Name name = new Name(namestr);
 
-/*System.out.println("lookup of " + name + " " + Type.string(type));*/
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
 
 	if (res == null) {
 		try {
-			res = new ExtendedResolver();
+			setResolver(new ExtendedResolver());
 		}
 		catch (UnknownHostException uhe) {
 			System.out.println("Failed to initialize resolver");
@@ -109,6 +117,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	if (cache == null)
 		cache = new Cache();
 
+/*System.out.println("lookup of " + name + " " + Type.string(type));*/
 	CacheResponse cached = cache.lookupRecords(name, type, dclass, cred);
 /*System.out.println(cached);*/
 	if (cached.isSuccessful()) {
