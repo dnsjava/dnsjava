@@ -5,6 +5,7 @@ package DNS;
 
 import java.io.*;
 import java.util.*;
+import DNS.utils.*;
 
 public class dnsCERTRecord extends dnsRecord {
 

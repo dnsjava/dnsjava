@@ -6,6 +6,7 @@ package DNS;
 import java.io.*;
 import java.util.*;
 import java.text.*;
+import DNS.utils.*;
 
 public class dnsTSIGRecord extends dnsRecord {
 

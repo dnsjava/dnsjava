@@ -1,7 +1,7 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-package DNS;
+package DNS.utils;
 
 import java.io.*;
 
@@ -46,7 +46,7 @@ hmacSigner(byte [] key) {
 /*	printByteString("key", key, 0, key.length);*/
 }
 
-void
+public void
 addData(byte [] b, int offset, int length) {
 	if (length < offset || offset >= b.length || length >= b.length)
 		return;
@@ -54,7 +54,7 @@ addData(byte [] b, int offset, int length) {
 	bytes.write(b, offset, length);
 }
 
-void
+public void
 addData(byte [] b) {
 /*	printByteString("add", b, 0, b.length);*/
 	try {
@@ -64,7 +64,7 @@ addData(byte [] b) {
 	}
 }
 
-byte []
+public byte []
 sign() {
 	byte [] output = md5.compute(bytes.toByteArray());
 	bytes = new ByteArrayOutputStream();
@@ -79,13 +79,13 @@ sign() {
 	return b;
 }
 
-boolean
+public boolean
 verify(byte [] signature) {
 /*	printByteString("ver", signature, 0, signature.length);*/
 	return (byteArrayCompare(signature, sign()));
 }
 
-void
+public void
 clear() {
 	bytes = new ByteArrayOutputStream();
 	try {

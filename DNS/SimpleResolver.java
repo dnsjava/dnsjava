@@ -6,6 +6,7 @@ package DNS;
 import java.util.*;
 import java.io.*;
 import java.net.*;
+import DNS.utils.*;
 
 public class dnsResolver {
 
