@@ -44,12 +44,12 @@ static void doUpdate(dnsMessage query, dnsResolver res) throws IOException {
 }
 
 public static void main(String argv[]) throws IOException {
-	String server;
+	String server, newname;
 	dnsName name, domain;
 	InetAddress addr;
 	int ttl = 3600;
 	dnsMessage query = new dnsMessage();
-	dnsRecord soa, a;
+	dnsRecord soa, a, dela;
 	dnsResolver res = null;
 
 	query.getHeader().setRandomID();
@@ -64,7 +64,8 @@ public static void main(String argv[]) throws IOException {
 	}
 	server = argv[0].substring(1);
 	res = new dnsResolver(server);
-	name = new dnsName(argv[1]);
+	newname = argv[1];
+	name = new dnsName(newname);
 
 	for (int arg = 2; arg < argv.length; arg++) {
 		if (!argv[arg].startsWith("-") || argv[arg].length() < 2)
@@ -91,7 +92,7 @@ public static void main(String argv[]) throws IOException {
 				key = argv[arg].substring(2);
 			else
 				key = argv[++arg];
-			res.setTSIGKey(key);
+			res.setTSIGKey(newname, key);
 			break;
 
 		    case 't':
@@ -116,6 +117,7 @@ public static void main(String argv[]) throws IOException {
 	domain = new dnsName(name, 1);
 	soa = new dnsSOARecord(domain, dns.IN);
 	a = new dnsARecord(name, dns.IN, ttl, addr);
+	dela = new dnsARecord(name, dns.ANY);
 
 	query.addRecord(ZONE, soa);
 	query.addRecord(UPDATE, a);

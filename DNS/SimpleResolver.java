@@ -24,13 +24,26 @@ setPort(int port) {
 }
 
 public void
-setTSIGKey(String key) {
+setTSIGKey(String name, String key) {
 	byte [] keyArray = base64.fromString(key);
 	if (keyArray == null) {
 		System.out.println("Invalid TSIG key string");
 		return;
 	}
-	TSIG = new dnsTSIG(keyArray);
+	TSIG = new dnsTSIG(name, keyArray);
+}
+
+public void
+setTSIGKey(String key) {
+	String name;
+	try {
+		name = InetAddress.getLocalHost().getHostName();
+	}
+	catch (UnknownHostException e) {
+		System.out.println("getLocalHost failed");
+		return;
+	}
+	setTSIGKey(name, key);
 }
 
 dnsMessage

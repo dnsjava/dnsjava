@@ -13,17 +13,6 @@ dnsTSIG(String name, byte [] key) {
 	this.key = key;
 }
 
-dnsTSIG(byte [] key) {
-	try {
-		String s = InetAddress.getLocalHost().getHostName();
-		this.name = new dnsName(s);
-	}
-	catch (UnknownHostException e) {
-		System.out.println("getLocalHost failed");
-	}
-	this.key = key;
-}
-
 void apply(dnsMessage m) {
 	Date timeSigned = new Date();
 	short fudge = 300;
