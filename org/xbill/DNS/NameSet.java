@@ -121,6 +121,14 @@ removeSet(Name name, short type, short dclass, Object set) {
 	}
 }
 
+/**
+ * Removes all data associated with the given name.
+ */
+protected void
+removeName(Name name) {
+	data.remove(name);
+}
+
 /** Converts the NameSet to a String */
 public String
 toString() {

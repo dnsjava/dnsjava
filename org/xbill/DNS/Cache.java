@@ -63,6 +63,11 @@ private class Element {
 			ttl = r.getTTL();
 	}
 
+	public void
+	deleteRecord(Record r) {
+		rrset.deleteRR(r);
+	}
+
 	public boolean
 	expiredTTL() {
 		return (System.currentTimeMillis() > timeIn + (1000 * ttl));
@@ -368,6 +373,31 @@ addMessage(Message in) {
 			cred = Credibility.NONAUTH_ADDITIONAL;
 		addRecord(r, cred, in);
 	}
+}
+
+/**
+ * Flushes an RRset from the cache
+ * @param name The name of the records to be flushed
+ * @param type The type of the records to be flushed
+ * @param dclass The class of the records to be flushed
+ * @see RRset
+ */
+void
+flushSet(Name name, short type, short dclass) {
+	Element element = (Element) findExactSet(name, type, dclass);
+	if (element == null || element.rrset == null)
+		return;
+	removeSet(name, type, dclass, element);
+}
+
+/**
+ * Flushes all RRsets with a given name from the cache
+ * @param name The name of the records to be flushed
+ * @see RRset
+ */
+void
+flushName(Name name) {
+	removeName(name);
 }
 
 }
