@@ -44,7 +44,7 @@ jnamed(String conffile) throws IOException {
 			continue;
 		if (keyword.equals("primary"))
 			addPrimaryZone(st.nextToken(), st.nextToken());
-		if (keyword.equals("secondary"))
+		else if (keyword.equals("secondary"))
 			addSecondaryZone(st.nextToken(), st.nextToken());
 		else if (keyword.equals("cache")) {
 			Cache cache = new Cache(st.nextToken());
