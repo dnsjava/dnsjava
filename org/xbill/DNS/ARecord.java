@@ -89,9 +89,7 @@ rdataToString() {
 /** Returns the Internet address */
 public InetAddress
 getAddress() {
-	String s;
-	s = (addr[0] & 0xFF) + "." + (addr[1] & 0xFF) + "." +
-	    (addr[2] & 0xFF) + "." + (addr[3] & 0xFF);
+	String s = Address.toDottedQuad(addr);
 	try {
 		return InetAddress.getByName(s);
 	}

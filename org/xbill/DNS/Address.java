@@ -45,6 +45,18 @@ isDottedQuad(String s) {
 }
 
 /**
+ * Converts a byte array containing an IPv4 address into a dotted quad string.
+ * @param attr The byte array
+ * @return The string representation
+ */
+public static String
+toDottedQuad(byte [] addr) {
+	return ((addr[0] & 0xFF) + "." + (addr[1] & 0xFF) + "." +
+		(addr[2] & 0xFF) + "." + (addr[3] & 0xFF));
+
+}
+
+/**
  * Determines the IP address of a host
  * @param name The hostname to look up
  * @return The first matching IP address
