@@ -520,7 +520,7 @@ addMessage(Message in) {
 		return;
 
 	answers = in.getSectionArray(Section.ANSWER);
-	while (!haveAnswer) {
+	while (!haveAnswer || queryType == Type.ANY) {
 		boolean restart = false;
 		for (int i = 0; i < answers.length; i++) {
 			short type = answers[i].getType();
@@ -551,7 +551,8 @@ addMessage(Message in) {
 			{
 				addRecord(answers[i], cred, in);
 			}
-			else if ((rrtype == queryType || type == Type.ANY) &&
+			else if ((rrtype == queryType ||
+				  queryType == Type.ANY) &&
 				 name.equals(lookupName))
 			{
 				addRecord(answers[i], cred, in);

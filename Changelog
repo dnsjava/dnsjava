@@ -1,3 +1,6 @@
+8/8/2001
+	- The results of ANY queries were not properly cached.
+
 8/4/2001
 	- 1.2.2 released
 
