@@ -5,72 +5,93 @@ package org.xbill.DNS;
 import java.util.*;
 
 /**
- * A TypeMap is basically a hash table indexed by type.
+ * A TypeMap is a type-indexed hash table.
  *
  * @author Brian Wellington
  */
 
 class TypeMap {
 
+/* The Map stores data if there is more than one type. */
 private Map data;
 
+/* Otherwise the data is stored explicitly. */
+private Object object;
+private short otype;
+
 TypeMap() {
-	data = new HashMap(2);
 }
 
 /**
  * Finds the object corresponding to the given type.
  */
-Object
+synchronized Object
 get(short type) {
 	if (type == Type.ANY)
 		throw new RuntimeException("called TypeMap.get() with ANY");
-	return data.get(Type.toShort(type));
+	if (data != null)
+		return data.get(Type.toShort(type));
+	else if (object != null && otype == type)
+		return object;
+	else
+		return null;
 }
 
 /**
  * Returns an array of all objects in the TypeMap.
  */
-Object []
+synchronized Object []
 getAll() {
 	Object [] out;
 	int n;
 
-	synchronized (data) {
-		int size = data.size();
-		out = new Object[size];
-		Iterator it = data.values().iterator();
-		n = 0;
-		while (it.hasNext())
-			out[n++] = it.next();
-	}
-	return out;
+	if (data != null)
+		return (Object []) data.values().toArray();
+	else if (object != null)
+		return new Object[] {object};
+	else
+		return new Object[0];
 }
 
 /**
  * Associates an object with a type.
  */
-void
+synchronized void
 put(short type, Object value) {
-	synchronized (data) {
+	if (object != null) {
+		if (type == otype)
+			object = value;
+		else {
+			data = new HashMap(2);
+			data.put(Type.toShort(otype), object);
+			object = null;
+		}
+	}
+	if (data != null)
 		data.put(Type.toShort(type), value);
+	else {
+		otype = type;
+		object = value;
 	}
 }
 
 /**
  * Removes the object with the given type.
  */
-void
+synchronized void
 remove(short type) {
-	data.remove(Type.toShort(type));
+	if (data != null)
+		data.remove(Type.toShort(type));
+	else if (object != null && otype == type)
+		object = null;
 }
 
 /**
  * Is this map empty?
  */
-boolean
+synchronized boolean
 isEmpty() {
-	return data.isEmpty();
+	return ((data == null && object == null) || data.isEmpty());
 }
 
 }
