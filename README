@@ -29,14 +29,14 @@ exceptions in more places, and probably define exceptions of its own.
 Limitations:
 
 There's no way to determine what the local nameserver is at runtime from within
-the JVM.  First, the property 'dns.resolver' is checked.  This can either be an
-IP address or a hostname (which is resolved using Java's built in DNS support).
-If the underlying OS is unix-based, the dnsjava package can parse
-/etc/resolv.conf and determine the nameserver.  If the property is not defined
-and the OS is not unix-based, the default nameserver is "localhost".  This is
-very bad.  Unfortuantely, I have no idea how to determine the nameserver under
-Windows, MacOS, etc.  Contributions of code are welcome (see
-DNS/FindResolver.java for the basic structure).
+the JVM.  First, the properties 'dns.server1',  'dns.server2', etc. are
+checked.  These can either be IP addresses or hostnames (which are resolved
+using Java's built in DNS support).  If the underlying OS is unix-based, the
+dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
+the property is not defined and the OS is not unix-based, the default
+nameserver is "localhost".  This is very bad.  Unfortuantely, I have no idea
+how to determine the nameserver under Windows, MacOS, etc.  Contributions of
+code are welcome (see DNS/FindResolver.java for the basic structure).
 
 One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
@@ -49,7 +49,7 @@ ways to improve this behavior without using JNI.
 Future:
 
 - A GUI for the dynamic update program would be nice
-- javadoc documentation
+- javadoc documentation (hopefully by 0.9)
 
 
 License:

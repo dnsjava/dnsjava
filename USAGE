@@ -3,11 +3,16 @@ dnsjava can be used in several ways:
 Command line programs:
 
 - dig: A clone of dig (as distributed with BIND)
-	dig @server name type [class] [-p port]
+	dig @server name type [class] [-p port] [-k keyname/secret] [-t] [-i]
+		-t : use TCP by default
+		-i : ignore truncation errors
 
 - update:
 	A dynamic update client with some extra functionality.  Rather than
-	describing it all here, run 'help' from the command line.
+	describing it all here, run 'help' from the command line.  Run it
+	with:
+	update [file]
+	
 
 - jnamed:
 	A basic primary, non-caching, non-recursive server.  Not very good,
@@ -17,7 +22,7 @@ Command line programs:
 
 Function calls:
 
-- All functions are defined in the DNS package.
+- All classes are defined in the DNS and DNS.utils packages.
 
 - All constants are defined in appropriate classes.  These include Type,
 	Dclass, Flags, Rcode, Opcode, Section, Credibility, and Security.
@@ -32,8 +37,8 @@ Function calls:
 	The main function is:
 		getRecords(String namestr, short type, short dclass, byte cred)
 	This returns any records in the cache that satisfy the requirements.
-	If none exist, it does a DNS query to determine the answers, and
-	caches them.
+	If none exist, it uses DNS queries to determine the answers, and
+	caches them for further use.
 
 	The other functions (wrappers around the above function) are:
 		getRecords(String namestr, short type, short dclass)
@@ -48,7 +53,7 @@ Function calls:
 	additional section of earlier queries (addresses of NS and MX records,
 	for example).  If dclass is unspecified, IN is assumed.
 
-	To set resolver properties, call:
+	To set resolver properties, create a Resolver and call:
 		setResolver(Resolver res)
 	
 
@@ -91,12 +96,28 @@ Function calls:
 			Message.getSection(section)
 
 	Resolver:
-		dnsResolver.send(message) is used to send/receive messages.
+		An interface implemented by SimpleResolver and ExtendedResolver.
+		SimpleResolver only communicates with one server, and does
+		no retries.  ExtendedResolver communicates with multiple
+		servers sends retries if queries fail.
+
+		Resolver.send(message) is used to send/receive messages.
+
+		Resolver.sendAsync(message, ResolverListener) sends a message
+		whose answer will be delivered asynchronously.  The
+		ResolverListener interface defines:
+			receiveMessage(int id, Message m)
+		where 'id' is returned by sendAsync.
+
+		Resolver.sendAXFR(message) performs a zone transfer.
+
 		Resolver options can also be set:
 			Resolver.setPort(port)
 			Resolver.useTCP(flag)
 			Resolver.setTSIGKey(name, key)
-		See the dig client for a simple use of the resolver.
+			Resolver.setTimeout(secs)
+			Resolver.setIgnoreTruncation(flag)
+		See the dig client for a sample use of the resolver.
 
 	Cache:
 		Records are added with:

@@ -1,3 +1,38 @@
+4/11/1999
+	- 0.8 released
+	- Resolver is now an interface, implemented by SimpleResolver
+		and ExtendedResolver.
+	- added ExtendedResolver, which sends multiple queries to multiple
+		resolvers.
+	- jnamed rejects non-queries
+
+4/10/1999
+	- added Message.newQuery() to make building queries easier
+	- Record.fromWire verifies that the record length is correct
+	- Resolver.sendAsync() now uses worker threads rather than
+		starting a new thread each time.
+	- Multiple servers can be found by setting the dns.server<n>
+		properties (or from /etc/resolv.conf).
+	- Message/Header doesn't generate the message id until the message
+		is sent or the id is queried for
+
+4/9/1999
+	- added setTimeout to Resolver
+
+4/8/1999
+	- fixed obscure md5 bug
+	- made Resolver(null) and Resolver() equivalent
+
+4/7/1999
+	- Added simple asynchronous interface to resolver
+
+4/6/1999
+	- CERT and SIG bug fixes
+
+4/5/1999
+	- data lookups should use class in addition to type
+	- CERT record bug fix
+
 4/4/1999
 	- 0.7 released
 	- DNS.dns uses Cache
