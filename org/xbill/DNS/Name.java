@@ -298,6 +298,8 @@ fromString(String s, Name origin) throws TextParseException {
 			label[pos++] = b;
 		}
 	}
+	if (digits > 0 && digits < 3)
+		throw new TextParseException("bad escape");
 	if (labelstart == -1) {
 		name.appendFromString(emptyLabel, 0, 1);
 		absolute = true;
