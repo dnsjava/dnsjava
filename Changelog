@@ -1,6 +1,9 @@
 4/23/2002
 	- Fix potential race conditions in the RRset class.
 	  (David Esposito <esposito@newnetco.com>)
+	- Fix potential race condition in the WorkerThread class when two
+	  threads complete their run methods nearly simultaneously.
+	  (David Esposito)
 
 4/22/2002
 	- Improve name decompression by not requiring a decompression context.

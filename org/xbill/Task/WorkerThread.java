@@ -122,8 +122,7 @@ run() {
 		setName("idle thread");
 		synchronized (list) {
 			list.addElement(this);
-			if (nactive >= max)
-				list.notify();
+			list.notify();
 			nactive--;
 		}
 		task = null;
