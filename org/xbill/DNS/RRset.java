@@ -8,7 +8,7 @@ import java.util.*;
  * A set of Records with the same name, type, and class.  Also included
  * are all SIG records signing the data records.
  * @see Record
- * @see SIGRecord
+ * @see SIGRecord 
  *
  * @author Brian Wellington
  */
@@ -18,7 +18,7 @@ public class RRset implements TypedObject {
 private List rrs;
 private List sigs;
 private int start;
-private byte securityStatus;
+private int securityStatus;
 
 /** Creates an empty RRset */
 public
@@ -169,12 +169,12 @@ first() {
 
 /** Sets the DNSSEC security of the RRset. */
 void
-setSecurity(byte status) {
+setSecurity(int status) {
 	securityStatus = status;
 }
 
 /** Returns the DNSSEC security of the RRset. */
-public byte
+public int
 getSecurity() {
 	return securityStatus;
 }
