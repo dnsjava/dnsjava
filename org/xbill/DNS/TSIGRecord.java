@@ -133,20 +133,18 @@ rdataToString() {
 	if (other != null) {
 		sb.append("\n\t <");
 		if (error == Rcode.BADTIME) {
-			try {
-				DataByteInputStream is;
-				is = new DataByteInputStream(other);
-				long time = is.readUnsignedShort();
-				time <<= 32;
-				time += ((long)is.readInt() & 0xFFFFFFFF);
-				sb.append("Server time: ");
-				sb.append(new Date(time * 1000));
-			}
-			catch (IOException e) {
-				sb.append("Truncated BADTIME other data");
-			}
-		}
-		else
+			if (other.length != 6) {
+				sb.append("<invalid BADTIME other data>");
+			time = ((other[0] & 0xFF) << 40) +
+			       ((other[1] & 0xFF) << 32) +
+			       ((other[2] & 0xFF) << 24) +
+			       ((other[3] & 0xFF) << 16) +
+			       ((other[4] & 0xFF) << 8) +
+			       ((other[5] & 0xFF)     );
+			sb.append("<server time: ");
+			sb.append(new Date(time * 1000));
+			sb.append(">");
+		} else
 			sb.append(base64.toString(other));
 		sb.append(">");
 	}
