@@ -44,7 +44,7 @@ ARecord(Name _name, short _dclass, int _ttl, int length,
 	byte [] data = new byte[4];
 	in.read(data);
 
-	String s = new String();
+	String s;
 	s = (data[0] & 0xFF) + "." + (data[1] & 0xFF) + "." +
 	    (data[2] & 0xFF)  + "." + (data[3] & 0xFF);
 	try {
