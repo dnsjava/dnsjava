@@ -42,7 +42,7 @@ findSets(Name name, short type, short dclass) {
 			Enumeration e = nameInfo.elements();
 			while (e.hasMoreElements())
 				array[i++] = e.nextElement();
-			}
+		}
 		return array;
 	}
 	o = nameInfo.get(new TypeClass(type, dclass));
