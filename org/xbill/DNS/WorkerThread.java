@@ -8,6 +8,13 @@ import java.io.*;
 import java.net.*;
 import DNS.utils.*;
 
+/**
+ * A special-purpose thread used by Resolvers (both SimpleResolver and
+ * ExtendedResolver) to perform asynchronous queries.  Once started, a
+ * WorkerThread never exits.  After completing a task, it blocks until
+ * another task is assigned.
+ */
+
 class WorkerThread extends Thread {
 
 private Message query;
@@ -23,6 +30,13 @@ WorkerThread() {
 	setDaemon(true);
 }
 
+/**
+ * Obtains a WorkerThread to which a task can be assigned.  If an idle
+ * WorkerThread is present, it is removed from the idle list and returned.
+ * If not, and the maximum number of WorkerThreads has not been reached,
+ * a new WorkerThread is created.  If the maximum number has been reached,
+ * this blocks until a WorkerThread is free.
+ */
 static WorkerThread
 getThread() {
 	WorkerThread t;
@@ -33,7 +47,6 @@ getThread() {
 		}
 		else if (nactive == max) {
 			while (true) {
-System.out.println("waiting for thread");
 				try {
 					list.wait();
 				}
@@ -42,7 +55,6 @@ System.out.println("waiting for thread");
 				if (list.size() == 0)
 					continue;
 				t = (WorkerThread) list.firstElement();
-System.out.println("got a thread");
 				list.removeElement(t);
 				break;
 			}
@@ -54,6 +66,13 @@ System.out.println("got a thread");
 	return t;
 }
 
+/**
+ * Assigns a task to a WorkerThread
+ * @param res The resolver using the WorkerThread
+ * @param query The query to send
+ * @param id The id of the query
+ * @param listener The object registered to receive a callback
+ */
 public static void
 assignThread(Resolver _res, Message _query, int _id,
 	     ResolverListener _listener)
@@ -70,6 +89,7 @@ assignThread(Resolver _res, Message _query, int _id,
 	}
 }
 
+/** Performs the task and executes the callback */
 public void
 run() {
 	while (true) {

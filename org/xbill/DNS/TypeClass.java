@@ -3,10 +3,15 @@
 
 package DNS;
 
+/** A type/class pair.  Used for lookup purposes */
+
 class TypeClass {
 
 private short type;
 private short dclass;
+
+private
+TypeClass() {}
 
 TypeClass(short _type, short _dclass) {
 	type = _type;
