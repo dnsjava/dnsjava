@@ -157,6 +157,15 @@ throws IOException
 	return rec;
 }
 
+/**
+ * Builds a Record from DNS uncompressed wire format.
+ */
+public static Record
+fromWire(byte [] b, int section) throws IOException {
+	DataByteInputStream in = new DataByteInputStream(b);
+	return fromWire(in, section, null);
+}
+
 void
 toWire(DataByteOutputStream out, int section, Compression c)
 throws IOException
