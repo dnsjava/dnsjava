@@ -6,37 +6,41 @@ package DNS;
 import java.io.*;
 import java.util.*;
 
+/**
+ * A helper class that tries to locate name servers and the search path to
+ * be appended to unqualified names.  Currently, this works if either the
+ * appropriate properties are set, or the OS has a unix-like /etc/resolv.conf
+ */
 class FindServer {
 
-static String [] server = null;
-static Name [] search = null;
-static boolean probed = false;
+private static String [] server = null;
+private static Name [] search = null;
+private static boolean probed = false;
 
-static void
+/**
+ * Looks in the system properties to find servers and a search path.
+ * Properties of the form dns.server1, dns.server2, etc. define servers.
+ * Properties of the form dns.search1, dns.seearch, etc. define the search path.
+ */
+private static void
 findProperty() {
 	String s;
-	s = System.getProperty("dns.resolver");
-	if (s != null) {
-		server = new String[1];
-		server[0] = s;
-	}
-	else {
-		Vector v = null;
-		for (int i = 1; i <= 5; i++) {
-			s = System.getProperty("dns.server" + i);
-			if (s == null)
-				break;
-			if (v == null)
-				v = new Vector();
-			v.addElement(s);
-		}
-		if (v != null) {
-			server = new String[v.size()];
-			for (int i = 0; i < v.size(); i++)
-				server[i] = (String) v.elementAt(i);
-		}
-	}
 	Vector v = null;
+	for (int i = 1; i <= 5; i++) {
+		s = System.getProperty("dns.server" + i);
+		if (s == null)
+			break;
+		if (v == null)
+			v = new Vector();
+		v.addElement(s);
+	}
+	if (v != null) {
+		server = new String[v.size()];
+		for (int i = 0; i < v.size(); i++)
+			server[i] = (String) v.elementAt(i);
+	}
+
+	v = null;
 	for (int i = 1; i <= 5; i++) {
 		s = System.getProperty("dns.search" + i);
 		if (s == null)
@@ -52,7 +56,12 @@ findProperty() {
 	}
 }
 
-static void
+/**
+ * Looks in /etc/resolv.conf to find servers and a search path.
+ * "nameserver" lines specify servers.  "domain" and "search" lines
+ * define the search path.
+ */
+private static void
 findUnix() {
 	InputStream in = null;
 	try {
@@ -112,7 +121,7 @@ findUnix() {
 	}
 }
 
-public static void
+private static void
 probe() {
 	if (probed)
 		return;
@@ -124,12 +133,14 @@ probe() {
 	return;
 }
 
+/** Returns all located servers */
 public static String []
 servers() {
 	probe();
 	return server;
 }
 
+/** Returns the first located server */
 public static String
 server() {
 	String [] array = servers();
@@ -139,6 +150,7 @@ server() {
 		return array[0];
 }
 
+/** Returns all entries in the located search path */
 public static Name []
 searchPath() {
 	probe();
