@@ -62,12 +62,10 @@ getTypedObject(int type) {
 		return knownRecords[type];
 
 	/* Construct the class name by putting the type before "Record". */
-	String s = Record.class.getName();
-	StringBuffer sb = new StringBuffer(s);
-	sb.insert(s.lastIndexOf("Record"), Type.string(type));
-
+	String s = Record.class.getPackage().getName() + "." +
+		   Type.string(type).replace('-', '_') + "Record";
 	try {
-		Class c = Class.forName(sb.toString().replace('-', '_'));
+		Class c = Class.forName(s);
 		Constructor m = c.getDeclaredConstructor(emptyClassArray);
 		knownRecords[type] = (Record) m.newInstance(emptyObjectArray);
 	}
