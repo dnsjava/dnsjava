@@ -365,9 +365,14 @@ doAXFR(Name name, Message query, Socket s) {
 	try {
 		DataOutputStream dataOut;
 		dataOut = new DataOutputStream(s.getOutputStream());
+		int id = query.getHeader().getID();
 		while (e.hasMoreElements()) {
 			RRset rrset = (RRset) e.nextElement();
 			Message response = new Message();
+			Header header = response.getHeader();
+			header.setID(id);
+			header.setFlag(Flags.QR);
+			header.setFlag(Flags.AA);
 			addRRset(rrset.getName(), response, rrset,
 				 Section.ANSWER, FLAG_DNSSECOK);
 			byte [] out = response.toWire();
