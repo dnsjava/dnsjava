@@ -150,7 +150,6 @@ nextRecord() throws IOException {
 			throw st.exception("Invalid type '" + s + "'");
 
 		last = Record.fromString(name, type, dclass, ttl, st, origin);
-		st.getEOL();
 		return last;
 	}
 }

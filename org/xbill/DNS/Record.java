@@ -450,7 +450,12 @@ throws IOException
 	}
 	st.unget();
 	rec = getTypedObject(type);
-	return rec.rdataFromString(name, dclass, ttl, st, origin);
+	rec = rec.rdataFromString(name, dclass, ttl, st, origin);
+	t = st.get();
+	if (t.type != Tokenizer.EOL && t.type != Tokenizer.EOF) {
+		throw st.exception("unexpected tokens at end of record");
+	}
+	return rec;
 }
 
 /**

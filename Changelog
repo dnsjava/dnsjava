@@ -1,3 +1,9 @@
+8/23/2003
+	- Change Record.fromString() to expect an EOL/EOF token at the end
+	  of the string, so that extraneous tokens can be detected.  The master
+	  file parser was updated to this change.
+	  (noticed by Bob Halley <bob.halley@nominum.com>)
+
 8/22/2003
 	- Changing TXTRecord.getStrings() from returning a List of Strings
 	  to a List of byte []'s was a bad idea.  Change it back, and
