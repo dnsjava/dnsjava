@@ -93,7 +93,7 @@ update(InputStream in) throws IOException {
 		}
 
 		else if (operation.equals("ttl"))
-			defaultTTL = Integer.parseInt(st.nextToken());
+			defaultTTL = TTL.parseTTL(st.nextToken());
 
 		else if (operation.equals("origin"))
 			origin = new Name(st.nextToken());
@@ -192,7 +192,7 @@ throws IOException
 	String s = st.nextToken();
 
 	try {
-		ttl = Integer.parseInt(s);
+		ttl = TTL.parseTTL(s);
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {

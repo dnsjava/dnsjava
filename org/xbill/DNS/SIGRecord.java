@@ -65,7 +65,7 @@ throws IOException
 	covered = Type.value(st.nextToken());
 	alg = Byte.parseByte(st.nextToken());
 	labels = name.labels();
-	origttl = Integer.parseInt(st.nextToken());
+	origttl = TTL.parseTTL(st.nextToken());
 	expire = parseDate(st.nextToken());
 	timeSigned = parseDate(st.nextToken());
 	footprint = (short) Integer.parseInt(st.nextToken());

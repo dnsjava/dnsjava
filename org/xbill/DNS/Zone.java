@@ -106,7 +106,7 @@ throws IOException
 	String s = st.nextToken();
 
 	try {
-		ttl = Integer.parseInt(s);
+		ttl = TTL.parseTTL(s);
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {
