@@ -230,6 +230,8 @@ send(Message query) throws IOException {
 		response = new Message(in);
 	}
 	catch (IOException e) {
+		if (Options.check("verbose"))
+			e.printStackTrace();
 		throw new WireParseException("Error parsing message");
 	}
 	if (tsig != null) {
