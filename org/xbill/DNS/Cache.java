@@ -22,6 +22,7 @@ import org.xbill.DNS.utils.*;
 public class Cache extends NameSet {
 
 private class Element {
+	Name name;
 	RRset rrset;
 	short type;
 	byte credibility;
@@ -31,7 +32,8 @@ private class Element {
 	Thread tid;
 
 	public
-	Element(int _ttl, byte cred, int src, short _type) {
+	Element(Name _name, int _ttl, byte cred, int src, short _type) {
+		name = _name;
 		rrset = null;
 		type = _type;
 		credibility = cred;
@@ -42,6 +44,7 @@ private class Element {
 	}
 	public
 	Element(Record r, byte cred, int src) {
+		name = r.getName();
 		rrset = new RRset();
 		type = rrset.getType();
 		credibility = cred;
@@ -54,6 +57,7 @@ private class Element {
 
 	public
 	Element(RRset r, byte cred, int src) {
+		name = r.getName();
 		rrset = r;
 		type = r.getType();
 		credibility = cred;
@@ -96,9 +100,15 @@ private class Element {
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(rrset);
+		if (rrset != null)
+			sb.append(rrset);
+		else if (type == 0)
+			sb.append("NXDOMAIN " + name);
+		else
+			sb.append("NXRRSET " + name + " " + Type.string(type));
 		sb.append(" cl = ");
 		sb.append(credibility);
+		sb.append("\n");
 		return sb.toString();
 	}
 }
@@ -247,7 +257,7 @@ addNegative(short rcode, Name name, short type, int ttl, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, new Element(ttl, cred, src, type));
+		addSet(name, type, new Element(name, ttl, cred, src, type));
 }
 
 /**
