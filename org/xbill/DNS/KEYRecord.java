@@ -32,10 +32,10 @@ public static final int FLAG_NOAUTH = 0x4000;
 public static final int FLAG_NOKEY = 0xC000;
 
 /** A zone key */
-public static final int OWNER_ZONE = 0x1000;
+public static final int OWNER_ZONE = 0x0100;
 
 /** A host/end entity key */
-public static final int OWNER_HOST = 0x2000;
+public static final int OWNER_HOST = 0x0200;
 
 /** A user key */
 public static final int OWNER_USER = 0x0000;
