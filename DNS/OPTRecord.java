@@ -16,7 +16,7 @@ OPTRecord(Name _name, short _dclass, int _ttl) {
 
 public
 OPTRecord(Name _name, short _dclass, int _ttl,
-	  int length, CountedDataInputStream in, Compression c)
+	  int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.OPT, _dclass, _ttl);

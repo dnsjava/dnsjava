@@ -21,7 +21,7 @@ NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
 
 public
 NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
-		   int length, CountedDataInputStream in, Compression c)
+		   int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, _type, _dclass, _ttl);

@@ -21,7 +21,7 @@ NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
 
 public
 NXTRecord(Name _name, short _dclass, int _ttl,
-	  int length, CountedDataInputStream in, Compression c)
+	  int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.NXT, _dclass, _ttl);

@@ -27,7 +27,7 @@ Message() {
 }
 
 public
-Message(CountedDataInputStream in) throws IOException {
+Message(DataByteInputStream in) throws IOException {
 	this();
 	Compression c = new Compression();
 	header = new Header(in);
@@ -42,7 +42,7 @@ Message(CountedDataInputStream in) throws IOException {
 
 public
 Message(byte [] b) throws IOException {
-	this(new CountedDataInputStream(new ByteArrayInputStream(b)));
+	this(new DataByteInputStream(b));
 }
 
 public void

@@ -29,7 +29,7 @@ throws IOException
 
 public
 SOARecord(Name _name, short _dclass, int _ttl, int length,
-	  CountedDataInputStream in, Compression c) throws IOException
+	  DataByteInputStream in, Compression c) throws IOException
 {
 	super(_name, Type.SOA, _dclass, _ttl);
 	if (in == null)

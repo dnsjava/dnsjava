@@ -37,7 +37,7 @@ SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
 
 public
 SIGRecord(Name _name, short _dclass, int _ttl,
-	  int length, CountedDataInputStream in, Compression c)
+	  int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.SIG, _dclass, _ttl);

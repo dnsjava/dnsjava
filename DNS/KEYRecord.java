@@ -30,7 +30,7 @@ KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
 
 public
 KEYRecord(Name _name, short _dclass, int _ttl,
-	     int length, CountedDataInputStream in, Compression c)
+	     int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.KEY, _dclass, _ttl);

@@ -22,7 +22,7 @@ MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 
 public
 MXRecord(Name _name, short _dclass, int _ttl,
-	    int length, CountedDataInputStream in, Compression c)
+	    int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.MX, _dclass, _ttl);

@@ -22,7 +22,7 @@ throws IOException
 
 public
 ARecord(Name _name, short _dclass, int _ttl, int length,
-	   CountedDataInputStream in, Compression c) throws IOException
+	   DataByteInputStream in, Compression c) throws IOException
 {
 	super(_name, Type.A, _dclass, _ttl);
 

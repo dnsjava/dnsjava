@@ -21,7 +21,7 @@ HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 
 public
 HINFORecord(Name _name, short _dclass, int _ttl, int length,
-	    CountedDataInputStream in, Compression c)
+	    DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.HINFO, _dclass, _ttl);

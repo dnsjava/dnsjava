@@ -22,7 +22,7 @@ Header(int _id) {
 }
 
 public
-Header(CountedDataInputStream in) throws IOException {
+Header(DataByteInputStream in) throws IOException {
 	this(in.readUnsignedShort());
 	readFlags(in);
 	for (int i=0; i<counts.length; i++)
@@ -130,7 +130,7 @@ writeFlags(DataByteOutputStream out) throws IOException {
 }
 
 private void
-readFlags(CountedDataInputStream in) throws IOException {
+readFlags(DataByteInputStream in) throws IOException {
 	short flags1 = (short)in.readUnsignedByte();
 	short flags2 = (short)in.readUnsignedByte();
 	for (int i = 0; i < 8; i++) {

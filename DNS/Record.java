@@ -38,7 +38,7 @@ toClass(short type) throws ClassNotFoundException {
 
 static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
-	  CountedDataInputStream in, Compression c) throws IOException
+	  DataByteInputStream in, Compression c) throws IOException
 {
 	Record rec;
 	try {
@@ -51,7 +51,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 						Short.TYPE,
 						Integer.TYPE,
 						Integer.TYPE,
-						CountedDataInputStream.class,
+						DataByteInputStream.class,
 						Compression.class
 					   });
 		rec = (Record) m.newInstance(new Object [] {
@@ -84,15 +84,13 @@ public static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
 	  byte [] data)
 {
-	CountedDataInputStream cds;
-	if (data != null) {
-		ByteArrayInputStream bs = new ByteArrayInputStream(data);
-		cds = new CountedDataInputStream(bs);
-	}
+	DataByteInputStream dbs;
+	if (data != null)
+		dbs = new DataByteInputStream(data);
 	else
-		cds = null;
+		dbs = null;
 	try {
-		return newRecord(name, type, dclass, ttl, length, cds, null);
+		return newRecord(name, type, dclass, ttl, length, dbs, null);
 	}
 	catch (IOException e) {
 		return null;
@@ -110,7 +108,7 @@ newRecord(Name name, short type, short dclass) {
 }
 
 public static Record
-fromWire(CountedDataInputStream in, int section, Compression c)
+fromWire(DataByteInputStream in, int section, Compression c)
 throws IOException
 {
 	short type, dclass;

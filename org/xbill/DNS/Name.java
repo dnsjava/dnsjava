@@ -55,7 +55,7 @@ Name(String s) {
 	this (s, null);
 }
 
-Name(CountedDataInputStream in, Compression c) throws IOException {
+Name(DataByteInputStream in, Compression c) throws IOException {
 	int len, start, count = 0;
 
 	labels = 0;

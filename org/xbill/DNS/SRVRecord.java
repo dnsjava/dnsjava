@@ -25,7 +25,7 @@ SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 
 public
 SRVRecord(Name _name, short _dclass, int _ttl,
-	  int length, CountedDataInputStream in, Compression c)
+	  int length, DataByteInputStream in, Compression c)
 throws IOException
 {
 	super(_name, Type.SRV, _dclass, _ttl);

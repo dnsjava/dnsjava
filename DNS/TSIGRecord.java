@@ -35,7 +35,7 @@ TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,
 
 public
 TSIGRecord(Name _name, short _dclass, int _ttl, int length,
-	   CountedDataInputStream in, Compression c) throws IOException
+	   DataByteInputStream in, Compression c) throws IOException
 {
 	super(_name, Type.TSIG, _dclass, _ttl);
 	if (in == null)
@@ -84,12 +84,11 @@ toString() {
 		sb.append("\n\t <");
 		if (error == Rcode.BADTIME) {
 			try {
-				ByteArrayInputStream is;
-				is = new ByteArrayInputStream(other);
-				DataInputStream ds = new DataInputStream(is);
-				long time = ds.readUnsignedShort();
+				DataByteInputStream is;
+				is = new DataByteInputStream(other);
+				long time = is.readUnsignedShort();
 				time <<= 32;
-				time += ((long)ds.readInt() & 0xFFFFFFFF);
+				time += ((long)is.readInt() & 0xFFFFFFFF);
 				sb.append("Server time: ");
 				sb.append(new Date(time * 1000));
 			}

@@ -18,7 +18,7 @@ throws IOException
 
 public
 NSRecord(Name _name, short _dclass, int _ttl, int length,
-	    CountedDataInputStream in, Compression c) throws IOException
+	    DataByteInputStream in, Compression c) throws IOException
 {
 	super(_name, Type.NS, _dclass, _ttl, length, in, c);
 }

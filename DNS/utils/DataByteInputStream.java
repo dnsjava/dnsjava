@@ -3,98 +3,96 @@
 
 package DNS.utils;
 
-import java.io.InputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 
-public class CountedDataInputStream {
-
-int counter;
-DataInputStream in;
+public class DataByteInputStream extends ByteArrayInputStream {
 
 public
-CountedDataInputStream(InputStream i) {
-	in = new DataInputStream(i);
-	counter = 0;
+DataByteInputStream(byte [] b) {
+	super(b);
 }
 
 public int
 read(byte b[]) throws IOException {
-	in.readFully(b);
-	int out = b.length;
-	counter += out;
-	return out;
+	return read(b, 0, b.length);
 }
 
 public byte
 readByte() throws IOException {
-	counter += 1;
-	return in.readByte();
+	return (byte) read();
 }
 
 public int
 readUnsignedByte() throws IOException {
-	counter += 1;
-	return in.readUnsignedByte();
+	return read();
 }
 
 public short
 readShort() throws IOException {
-	counter += 2;
-	return in.readShort();
+	int c1 = read();
+	int c2 = read();
+	return (short)((c1 << 8) + c2);
 }
 
 public int
 readUnsignedShort() throws IOException {
-	counter += 2;
-	return in.readUnsignedShort();
+	int c1 = read();
+	int c2 = read();
+	return ((c1 << 8) + c2);
 }
 
 public int
 readInt() throws IOException {
-	counter += 4;
-	return in.readInt();
+	int c1 = read();
+	int c2 = read();
+	int c3 = read();
+	int c4 = read();
+	return (short)((c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
 }
 
 public long
 readLong() throws IOException {
-	counter += 8;
-	return in.readLong();
+	int c1 = read();
+	int c2 = read();
+	int c3 = read();
+	int c4 = read();
+	int c5 = read();
+	int c6 = read();
+	int c7 = read();
+	int c8 = read();
+	return ((c1 << 56) + (c2 << 48) + (c3 << 40) + (c4 << 32) +
+		(c5 << 24) + (c6 << 16) + (c7 << 8) + c8);
 }
 
 public String
 readString() throws IOException {
-	int len = in.readByte();
-	counter++;
+	int len = read();
 	byte [] b = new byte[len];
-	in.readFully(b);
-	counter+=len;
+	read(b);
 	return new String(b);
 }
 
 public BigInteger
 readBigInteger(int len) throws IOException {
 	byte [] b = new byte[len + 1];
-	in.read(b, 1, len);
-	counter += len;
+	read(b, 1, len);
 	return new BigInteger(b);
 }
 
-public int
+public void
 skipBytes(int n) throws IOException {
-	counter += n;
-	return in.skipBytes(n);
+	skip(n);
 }
 
 public int
-available() throws IOException {
-	return in.available();
+available() {
+	return available();
 }
 
 public int
 getPos() {
-	return counter;
+	return pos;
 }
 
 }
