@@ -32,7 +32,7 @@ WorkerThread() {
  * will remain on the idle list for this much time before exiting.  This
  * does not affect WorkerThreads currently idling.
  */
-synchronized public static void
+public static synchronized void
 setLifetime(long time) {
 	lifetime = time;
 }
@@ -42,7 +42,7 @@ setLifetime(long time) {
  * time.  If this value is decreased below the current number of
  * WorkerThreads, this will not take effect immediately.
  */
-synchronized public static void
+public static synchronized void
 setMaxThreads(int maxThreads) {
 	max = maxThreads;
 }
@@ -54,7 +54,7 @@ setMaxThreads(int maxThreads) {
  * a new WorkerThread is created.  If the maximum number has been reached,
  * this blocks until a WorkerThread is free.
  */
-static public WorkerThread
+public static WorkerThread
 getThread() {
 	WorkerThread t;
 	synchronized (list) {
@@ -109,7 +109,7 @@ assignThread(Runnable task, String name) {
 }
 
 /** Performs the task */
-synchronized public void
+public synchronized void
 run() {
 	while (true) {
 		setName(name);

@@ -14,7 +14,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-abstract public class Record implements Cloneable, Comparable {
+public abstract class Record implements Cloneable, Comparable {
 
 protected Name name;
 protected short type, dclass;

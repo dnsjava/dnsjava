@@ -15,7 +15,7 @@ import java.util.*;
 
 public class base16 {
 
-static private final String Base16 = "0123456789ABCDEF";
+private static final String Base16 = "0123456789ABCDEF";
 
 private
 base16() {}

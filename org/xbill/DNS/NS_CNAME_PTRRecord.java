@@ -13,7 +13,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-abstract public class NS_CNAME_PTRRecord extends Record {
+public abstract class NS_CNAME_PTRRecord extends Record {
 
 private Name target;
 

@@ -36,7 +36,7 @@ static {
 private
 dns() {}
 
-synchronized private static void
+private static synchronized void
 clearCaches() {
 	Iterator it = caches.entrySet().iterator();
 	while (it.hasNext()) {
@@ -45,7 +45,7 @@ clearCaches() {
 	}
 }
 
-synchronized private static void
+private static synchronized void
 initialize() {
 	if (initialized)
 		return;
