@@ -38,8 +38,8 @@ Inet6Address(int bits, byte [] data) throws IOException
 	if (data.length > 16)
 		throw new IOException("An Inet6Address is only 128 bits");
 	int bytes = (bits + 7) / 8;
-	this.data = new byte[8];
-	System.arraycopy(data, 0, this.data, 8 - bytes, bytes);
+	this.data = new byte[16];
+	System.arraycopy(data, 0, this.data, 16 - bytes, bytes);
 }
 
 /**
