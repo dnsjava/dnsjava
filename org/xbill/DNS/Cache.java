@@ -251,10 +251,10 @@ addRRset(RRset rrset, byte cred) {
 		return;
 	Element element = (Element) findExactSet(name, type);
 	if (rrset.getTTL() == 0) {
-		if (element != null)
+		if (element != null && cred >= element.credibility)
 			removeSet(name, type, element);
 	} else {
-		if (element == null || cred > element.credibility)
+		if (element == null || cred >= element.credibility)
 			addSet(name, type, new PositiveElement(rrset, cred));
 	}
 }
@@ -270,6 +270,10 @@ addRRset(RRset rrset, byte cred) {
 public void
 addNegative(Name name, short type, SOARecord soa, byte cred) {
 	Element element = (Element) findExactSet(name, type);
+	if (soa.getTTL() == 0) {
+		if (element != null && cred >= element.credibility)
+			removeSet(name, type, element);
+	}
 	if (element == null || cred >= element.credibility)
 		addSet(name, type, new NegativeElement(name, type, soa, cred));
 }
