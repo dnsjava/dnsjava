@@ -82,17 +82,13 @@ TSIG(Name name, byte [] key) {
 /**
  * Creates a new TSIG object, which can be used to sign or verify a message.
  * @param name The name of the shared key
- * @param key The shared key's data, represented as either a base64 encoded
- * string or (if the first character is ':') a hex encoded string
+ * @param key The shared key's data represented as a base64 encoded string.
  * @throws IllegalArgumentException The key name is an invalid name
  * @throws IllegalArgumentException The key data is improperly encoded
  */
 public
 TSIG(Name algorithm, String name, String key) {
-	if (key.length() > 1 && key.charAt(0) == ':')
-		this.key = base16.fromString(key.substring(1));
-	else
-		this.key = base64.fromString(key);
+	this.key = base64.fromString(key);
 	if (this.key == null)
 		throw new IllegalArgumentException("Invalid TSIG key string");
 	try {
@@ -106,16 +102,36 @@ TSIG(Name algorithm, String name, String key) {
 }
 
 /**
- * Creates a new TSIG object, which can be used to sign or verify a message.
+ * Creates a new TSIG object with the hmac-md5 algorithm, which can be used to
+ * sign or verify a message.
  * @param name The name of the shared key
- * @param key The shared key's data, represented as either a base64 encoded
- * string or (if the first character is ':') a hex encoded string
+ * @param key The shared key's data, represented as a base64 encoded string.
  * @throws IllegalArgumentException The key name is an invalid name
  * @throws IllegalArgumentException The key data is improperly encoded
  */
 public
 TSIG(String name, String key) {
 	this(HMAC_MD5, name, key);
+}
+
+/**
+ * Creates a new TSIG object with the hmac-md5 algorithm, which can be used to
+ * sign or verify a message.
+ * @param str The TSIG key, in the form name/secret or name:secret.
+ * @throws IllegalArgumentException The string does not contain both a name
+ * and secret.
+ * @throws IllegalArgumentException The key name is an invalid name
+ * @throws IllegalArgumentException The key data is improperly encoded
+ */
+static public TSIG
+fromString(String str) {
+	int index = str.indexOf('/');
+	if (index < 0)
+		index = str.indexOf(':');
+	if (index < 0)
+		throw new IllegalArgumentException("String does not contain " +
+						   "both name and secret");
+	return new TSIG(str.substring(0, index), str.substring(index + 1));
 }
 
 /**
