@@ -19,6 +19,8 @@ public class DSASignature {
 static final int ASN1_SEQ = 0x30;
 static final int ASN1_INT = 0x2;
 
+private DSASignature() {}
+
 /**
  * Converts the signature field in a SIG record to the
  * format expected by the DSA verification routines.
