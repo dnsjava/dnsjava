@@ -195,12 +195,4 @@ toString() {
 	return sb.toString();
 }
 
-public static void
-main(String [] args) throws IOException {
-	for (int i = 0; i < args.length; i++) {
-		Inet6Address addr6 = new Inet6Address(args[i]);
-		System.out.println(args[i] + " -> " + addr6);
-	}
-}
-
 }
