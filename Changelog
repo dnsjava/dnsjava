@@ -1,3 +1,9 @@
+9/26/2003
+	- A Lookup shouldn't die when receiving a referral response; it should
+	  return an error. (reported by Elinor Chang <elinor_chang@yahoo.com>)
+	- A Lookup should distinguish between timeouts and other network
+	  errors.
+
 9/17/2003
 	- Fix an off-by-one error in the Name code; labels of length 63
 	  were not accepted (patch from David Blacka <davidb@verisignlabs.com>)

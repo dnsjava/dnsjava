@@ -7,11 +7,11 @@ import java.io.*;
 import java.net.*;
 
 /**
- * The Lookup object performs queries at a high level.  The input consists
+ * The Lookup object issues queries to caching DNS servers.  The input consists
  * of a name, an optional type, and an optional class.  Caching is enabled
  * by default and used when possible to reduce the number of DNS requests.
  * A Resolver, which defaults to an ExtendedResolver initialized with the
- * resolvers located by the FindServer class, performs the queries.  A serach
+ * resolvers located by the FindServer class, performs the queries.  A search
  * path of domain suffixes is used to resolve relative names, and is also
  * determined by the FindServer class.
  * @see Cache
@@ -45,6 +45,7 @@ private String error;
 private boolean nxdomain;
 private boolean badresponse;
 private boolean networkerror;
+private boolean timedout;
 private boolean nametoolong;
 
 /** The lookup was successful. */
@@ -328,6 +329,7 @@ follow(Name name, Name oldname) {
 	found = true;
 	badresponse = false;
 	networkerror = false;
+	timedout = false;
 	nxdomain = false;
 	iterations++;
 	if (iterations >= 6 || name.equals(oldname)) {
@@ -375,6 +377,9 @@ processResponse(Name name, SetResponse response) {
 			error = "Invalid DNAME target";
 			done = true;
 		}
+	} else if (response.isDelegation()) {
+		// We shouldn't get a referral.  Ignore it.
+		badresponse = true;
 	}
 }
 
@@ -398,7 +403,10 @@ lookup(Name current) {
 	}
 	catch (IOException e) {
 		// A network error occurred.  Press on.
-		networkerror = true;
+		if (e instanceof InterruptedIOException)
+			timedout = true;
+		else
+			networkerror = true;
 		return;
 	}
 	short rcode = response.getHeader().getRcode();
@@ -466,6 +474,10 @@ run() {
 			result = UNRECOVERABLE;
 			error = "bad response";
 			done = true;
+		} else if (timedout) {
+			result = TRY_AGAIN;
+			error = "timed out";
+			done = true;
 		} else if (networkerror) {
 			result = TRY_AGAIN;
 			error = "network error";
@@ -478,7 +490,6 @@ run() {
 			error = "name too long";
 			done = true;
 		}
-			
 	}
 	return answers;
 }
