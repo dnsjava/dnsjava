@@ -101,6 +101,7 @@ private class Element {
 
 private Verifier verifier;
 private boolean secure;
+private int maxncache = -1;
 
 /** Creates an empty Cache */
 public
@@ -389,6 +390,8 @@ addMessage(Message in) {
 			cred = Credibility.NONAUTH_AUTHORITY;
 		if (soa != null) {
 			int ttl = Math.min(soa.getTTL(), soa.getMinimum());
+			if (maxncache >= 0)
+				ttl = Math.min(ttl, maxncache);
 			if (ancount == 0)
 				c.addNegative(queryName, queryType, queryClass,
 					      ttl, cred, in);
@@ -495,6 +498,16 @@ setVerifier(Verifier v) {
 public void
 setSecurePolicy() {
         secure = true;
+}
+
+/**
+ * Sets the maximum length of time that a negative response will be stored
+ * in this Cache.  A negative value disables this feature (that is, sets
+ * no limit).
+ */
+public void
+setMaxNCache(int seconds) {
+        maxncache = seconds;
 }
 
 }
