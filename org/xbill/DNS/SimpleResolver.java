@@ -97,27 +97,18 @@ setEDNS(int level) {
 }
 
 public void
+setTSIGKey(TSIG key) {
+	tsig = key;
+}
+
+public void
 setTSIGKey(Name name, byte [] key) {
 	tsig = new TSIG(name, key);
 }
 
 public void
 setTSIGKey(String name, String key) {
-	byte [] keyArray;
-	Name keyname;
-	if (key.length() > 1 && key.charAt(0) == ':')
-		keyArray = base16.fromString(key.substring(1));
-	else
-		keyArray = base64.fromString(key);
-	if (keyArray == null)
-		throw new IllegalArgumentException("Invalid TSIG key string");
-	try {
-		keyname = Name.fromString(name, Name.root);
-	}
-	catch (TextParseException e) {
-		throw new IllegalArgumentException("Invalid TSIG key name");
-	}
-	setTSIGKey(keyname, keyArray);
+	tsig = new TSIG(name, key);
 }
 
 public void

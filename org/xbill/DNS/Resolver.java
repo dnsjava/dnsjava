@@ -43,6 +43,12 @@ void setEDNS(int level);
 
 /**
  * Specifies the TSIG key that messages will be signed with
+ * @param key The key
+ */
+void setTSIGKey(TSIG key);
+
+/**
+ * Specifies the TSIG key that messages will be signed with
  * @param name The key name
  * @param key The key data
  */

@@ -303,6 +303,12 @@ setEDNS(int level) {
 }
 
 public void
+setTSIGKey(TSIG key) {
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.get(i)).setTSIGKey(key);
+}
+
+public void
 setTSIGKey(Name name, byte [] key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
