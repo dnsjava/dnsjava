@@ -51,15 +51,23 @@ TSIG(Name name, byte [] key) {
 }
 
 /**
- * Generates a TSIG record for a message and adds it to the message
+ * Generates a TSIG record with a specific error for a message and adds it'
+ * to the message.
  * @param m The message
+ * @param error The error
  * @param old If this message is a response, the TSIG from the request
  */
 public void
-apply(Message m, TSIGRecord old) throws IOException {
-	Date timeSigned = new Date();
+apply(Message m, byte error, TSIGRecord old) throws IOException {
+	Date timeSigned;
+	if (error != Rcode.BADTIME)
+		timeSigned = new Date();
+	else
+		timeSigned = old.getTimeSigned();
 	short fudge;
-	hmacSigner h = new hmacSigner(key);
+	hmacSigner h = null;
+	if (error == Rcode.NOERROR || error == Rcode.BADTIME)
+		h = new hmacSigner(key);
 
 	if (Options.check("tsigfudge")) {
 		String s = Options.value("tsigfudge");
@@ -77,12 +85,15 @@ apply(Message m, TSIGRecord old) throws IOException {
 		if (old != null) {
 			DataByteOutputStream dbs = new DataByteOutputStream();
 			dbs.writeShort((short)old.getSignature().length);
-			h.addData(dbs.toByteArray());
-			h.addData(old.getSignature());
+			if (h != null) {
+				h.addData(dbs.toByteArray());
+				h.addData(old.getSignature());
+			}
 		}
 
 		/* Digest the message */
-		h.addData(m.toWire());
+		if (h != null)
+			h.addData(m.toWire());
 
 		DataByteOutputStream out = new DataByteOutputStream();
 		name.toWireCanonical(out);
@@ -96,18 +107,47 @@ apply(Message m, TSIGRecord old) throws IOException {
 		out.writeInt(timeLow);
 		out.writeShort(fudge);
 
-		out.writeShort(0); /* No error */
+		out.writeShort(error);
 		out.writeShort(0); /* No other data */
 
-		h.addData(out.toByteArray());
+		if (h != null)
+			h.addData(out.toByteArray());
 	}
 	catch (IOException e) {
 		return;
 	}
+
+	byte [] signature;
+	if (h != null)
+		signature = h.sign();
+	else
+		signature = new byte[0];
+
+	byte [] other = null;
+	if (error == Rcode.BADTIME) {
+		DataByteOutputStream out = new DataByteOutputStream();
+		long time = new Date().getTime() / 1000;
+		short timeHigh = (short) (time >> 32);
+		int timeLow = (int) (time);
+		out.writeShort(timeHigh);
+		out.writeInt(timeLow);
+		other = out.toByteArray();
+	}
+
 	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
-				  h.sign(), m.getHeader().getID(),
-				  Rcode.NOERROR, null);
+				  signature, m.getHeader().getID(),
+				  error, other);
 	m.addRecord(r, Section.ADDITIONAL);
+}
+
+/**
+ * Generates a TSIG record for a message and adds it to the message
+ * @param m The message
+ * @param old If this message is a response, the TSIG from the request
+ */
+public void
+apply(Message m, TSIGRecord old) throws IOException {
+	apply(m, Rcode.NOERROR, old);
 }
 
 /**
