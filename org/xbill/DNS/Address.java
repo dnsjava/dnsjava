@@ -37,6 +37,9 @@ toArray(String s) {
 			/* Can't have more than 3 digits per octet. */
 			if (numDigits == 3)
 				return null;
+			/* Octets shouldn't start with 0, unless they are 0. */
+			if (numDigits > 0 && values[currentOctet] == 0)
+				return null;
 			numDigits++;
 			values[currentOctet] *= 10;
 			values[currentOctet] += (c - '0');

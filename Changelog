@@ -3,6 +3,10 @@
 	  return an error. (reported by Elinor Chang <elinor_chang@yahoo.com>)
 	- A Lookup should distinguish between timeouts and other network
 	  errors.
+	- When parsing IP addresses from text format, treat the presence of
+	  a leading zero on an octet as an error.  It's unclear whether
+	  it would be treated as decimal or octal, which means it should
+	  be fixed. (reported by Marcos Sanz/Denic <sanz@denic.de>)
 
 9/17/2003
 	- Fix an off-by-one error in the Name code; labels of length 63
