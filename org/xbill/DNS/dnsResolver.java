@@ -9,7 +9,7 @@ public class dnsResolver {
 
 InetAddress addr;
 int port = dns.PORT;
-boolean useTCP;
+boolean useTCP, useEDNS;
 dnsTSIG TSIG;
 int timeoutValue = 60 * 1000;
 
@@ -31,6 +31,11 @@ setPort(int port) {
 public void
 setTCP(boolean flag) {
 	this.useTCP = flag;
+}
+
+public void
+setEDNS(boolean flag) {
+	this.useEDNS = flag;
 }
 
 public void
@@ -111,9 +116,15 @@ send(dnsMessage query) throws IOException {
 		return null;
 	}
 
+	if (useEDNS)
+		query.addRecord(dns.ADDITIONAL, dnsEDNS.newOPT(1280));
+
 	if (TSIG != null)
 		TSIG.apply(query);
 
+
+System.out.println(query);
+System.out.println("----------------");
 	out = query.toWire();
 
 	if (useTCP)

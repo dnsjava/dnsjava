@@ -52,6 +52,7 @@ static final short SRV		= 33;
 static final short ATMA		= 34;
 static final short NAPTR	= 35;
 static final short CERT		= 37;
+static final short OPT		= 249;
 static final short TSIG		= 250;
 static final short IXFR		= 251;
 static final short AXFR		= 252;
@@ -152,6 +153,7 @@ static {
 	put2(types, new Short(ATMA), "ATMA");
 	put2(types, new Short(NAPTR), "NAPTR");
 	put2(types, new Short(CERT), "CERT");
+	put2(types, new Short(OPT), "OPT");
 	put2(types, new Short(TSIG), "TSIG");
 	put2(types, new Short(IXFR), "IXFR");
 	put2(types, new Short(AXFR), "AXFR");

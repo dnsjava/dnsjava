@@ -118,6 +118,14 @@ main(String argv[]) throws IOException {
 						       key.substring(index+1));
 				break;
 
+			    case 't':
+					res.setTCP(true);
+					break;
+
+			    case 'e':
+					res.setEDNS(true);
+					break;
+
 			    default:
 				System.out.print("Invalid option");
 				System.out.println(argv[arg]);
