@@ -16,6 +16,7 @@ public class Name {
 
 private String [] name;
 private byte labels;
+private boolean qualified;
 
 /** The root name */
 public static Name root = new Name("");
@@ -35,6 +36,7 @@ Name(String s, Name origin) {
 
 	if (s.equals("@") && origin != null) {
 		append(origin);
+		qualified = true;
 		return;
 	}
 	try {
@@ -43,8 +45,16 @@ Name(String s, Name origin) {
 		while (st.hasMoreTokens())
 			name[labels++] = st.nextToken();
 
-		if (!st.hasMoreDelimiters() && origin != null)
-			append(origin);
+		if (st.hasMoreDelimiters())
+			qualified = true;
+		else {
+			if (origin != null) {
+				append(origin);
+				qualified = true;
+			}
+			else
+				qualified = false;
+		}
 	}
 	catch (ArrayIndexOutOfBoundsException e) {
 		StringBuffer sb = new StringBuffer();
@@ -98,6 +108,7 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 		name[labels++] = new String(b);
 		count++;
 	}
+	/* XXX - this appears to only be storing pointers to the whole name? */
 	if (c != null) 
 		for (int i = 0, pos = start; i < count; i++) {
 			Name tname = new Name(this, i);
@@ -105,6 +116,7 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 /*System.out.println("(D) Adding " + tname + " at " + pos);*/
 			pos += (name[i].length() + 1);
 		}
+	qualified = true;
 }
 
 /**
@@ -119,6 +131,7 @@ Name(Name d, int n) {
 
 	labels = (byte) (d.labels - n);
 	System.arraycopy(d.name, n, name, 0, labels);
+	qualified = d.qualified;
 }
 
 /**
@@ -138,6 +151,14 @@ wild() {
 public boolean
 isWild() {
 	return name[0].equals("*");
+}
+
+/**
+ * Is this name fully qualified?
+ */
+public boolean
+isQualified() {
+	return qualified;
 }
 
 /**
@@ -190,8 +211,11 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	if (labels == 0)
 		sb.append(".");
-	for (int i=0; i<labels; i++)
-		sb.append(name[i] + ".");
+	for (int i=0; i<labels; i++) {
+		sb.append(name[i]);
+		if (qualified || i < labels - 1)
+			sb.append(".");
+	}
 	return sb.toString();
 }
 
