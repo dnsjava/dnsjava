@@ -1,58 +1,78 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 public class dnsHINFORecord extends dnsRecord {
 
-String cpu, OS;
+String cpu, os;
 
-public dnsHINFORecord(dnsName rname, short rclass) {
-	super(rname, dns.HINFO, rclass);
+public
+dnsHINFORecord(dnsName _name, short _dclass, int _ttl, String _cpu, String _os)
+{
+	super(_name, dns.HINFO, _dclass, _ttl);
+	cpu = _cpu;
+	os = _os;
 }
 
-public dnsHINFORecord(dnsName rname, short rclass, int ttl, String cpu,
-		      String OS) {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.rlength = (short) (cpu.length() + OS.length() + 2);
-	this.cpu = cpu;
-	this.OS = OS;
+public
+dnsHINFORecord(dnsName _name, short _dclass, int _ttl, int length,
+	       CountedDataInputStream in, dnsCompression c)
+throws IOException
+{
+	super(_name, dns.HINFO, _dclass, _ttl);
+	if (in == null)
+		return;
+	cpu = in.readString();
+	os = in.readString();
 }
 
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	int len = in.readByte();
-	byte [] b = new byte[len];
-	in.read(b);
-	cpu = new String(b);
-
-	len = in.readByte();
-	b = new byte[len];
-	in.read(b);
-	cpu = new String(b);
+public
+dnsHINFORecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+throws IOException
+{
+	super(_name, dns.HINFO, _dclass, _ttl);
+	cpu = st.nextToken();
+	os = st.nextToken();
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	out.writeByte(cpu.getBytes().length);
-	out.write(cpu.getBytes());
-	out.writeByte(OS.getBytes().length);
-	out.write(OS.getBytes());
+
+public String
+getCPU() {
+	return cpu;
 }
 
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	rrToBytes(out);
+public String
+getOS() {
+	return os;
 }
 
-String rrToString() {
-	if (rlength == 0)
+byte[] rrToWire() throws IOException {
+	if (cpu == null || os == null)
 		return null;
-	StringBuffer sb = new StringBuffer();
-	sb.append("\"");
-	sb.append(cpu);
-	sb.append("\" \"");
-	sb.append(OS);
-	sb.append("\"");
+
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	DataOutputStream ds = new DataOutputStream(bs);
+
+	ds.write(cpu.getBytes().length);
+	ds.write(cpu.getBytes());
+	ds.write(os.getBytes().length);
+	ds.write(os.getBytes());
+
+	return bs.toByteArray();
+}
+
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (cpu != null && os != null) {
+		sb.append("\"");
+		sb.append(cpu);
+		sb.append("\" \"");
+		sb.append(os);
+		sb.append("\"");
+	}
 	return sb.toString();
 }
 

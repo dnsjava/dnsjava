@@ -1,77 +1,96 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 public class dnsTXTRecord extends dnsRecord {
 
 Vector strings;
 
-public dnsTXTRecord(dnsName rname, short rclass) {
-	super(rname, dns.TXT, rclass);
+public
+dnsTXTRecord(dnsName _name, short _type, short _dclass, int _ttl,
+	     Vector _strings) throws IOException
+{
+	super(_name, _type, _dclass, _ttl);
+	strings = _strings;
 }
 
-public dnsTXTRecord(dnsName rname, short rclass, int ttl, Vector strings) {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.rlength = 0;
-	Enumeration e = strings.elements();
-	while (e.hasMoreElements()) {
-		String s = (String) e.nextElement();
-		this.rlength += (s.length() + 1);
-	}
-	this.strings = strings;
+public
+dnsTXTRecord(dnsName _name, short _type, short _dclass, int _ttl,
+	     String _string) throws IOException
+{
+	super(_name, _type, _dclass, _ttl);
+	strings = new Vector();
+	strings.addElement(_string);
 }
 
-public dnsTXTRecord(dnsName rname, short rclass, int ttl, String string) {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.rlength = 0;
-	Vector v = new Vector();
-	v.addElement(string);
-	this.strings = v;
-	this.rlength = (short) (string.length() + 1);
-}
-
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
+public
+dnsTXTRecord(dnsName _name, short _type, short _dclass, int _ttl,
+	     int length, CountedDataInputStream in, dnsCompression c)
+throws IOException
+{
+	super(_name, _type, _dclass, _ttl);
+	if (in == null)
+		return;
 	int count = 0;
 	strings = new Vector();
+        while (count < length) {
+                int len = in.readByte();
+                byte [] b = new byte[len];
+                in.read(b);
+                count += (len + 1);
+                strings.addElement(new String(b));
+        }
+}
 
-	while (count < rlength) {
-		int len = in.readByte();
-		byte [] b = new byte[len];
-		in.read(b);
-		count += (len + 1);
-		strings.addElement(new String(b));
+public
+dnsTXTRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+throws IOException
+{
+	super(_name, dns.TXT, _dclass, _ttl);
+	Vector v = new Vector();
+	while (st.hasMoreTokens()) {
+		String s = st.nextToken();
+		v.addElement(s.substring(1, s.length() - 1));
 	}
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	Enumeration e = strings.elements();
-	while (e.hasMoreElements()) {
-		String s = (String) e.nextElement();
-		out.writeByte(s.getBytes().length);
-		out.write(s.getBytes());
-	}
-}
-
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	rrToBytes(out);
-}
-
-String rrToString() {
-	if (rlength == 0)
-		return null;
-	StringBuffer sb = new StringBuffer();
-	Enumeration e = strings.elements();
-	while (e.hasMoreElements()) {
-		String s = (String) e.nextElement();
-		sb.append("\"");
-		sb.append(s);
-		sb.append("\" ");
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (strings != null) {
+		Enumeration e = strings.elements();
+		while (e.hasMoreElements()) {
+			String s = (String) e.nextElement();
+			sb.append("\"");
+			sb.append(s);
+			sb.append("\"");
+		}
 	}
 	return sb.toString();
+}
+
+public Vector
+getStrings() {
+	return strings;
+}
+
+byte []
+rrToWire() throws IOException {
+	if (strings == null)
+		return null;
+
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	DataOutputStream ds = new DataOutputStream(bs);
+
+	Enumeration e = strings.elements();
+	while (e.hasMoreElements()) {
+		String s = (String) e.nextElement();
+		ds.writeByte(s.getBytes().length);
+		ds.write(s.getBytes());
+	}
+	return bs.toByteArray();
 }
 
 }

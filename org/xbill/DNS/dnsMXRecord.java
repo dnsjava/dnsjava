@@ -1,51 +1,76 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-import java.net.*;
 import java.io.*;
+import java.util.*;
 
 public class dnsMXRecord extends dnsRecord {
 
-int priority;
-dnsName name;
+short priority;
+dnsName target;
 
-public dnsMXRecord(dnsName rname, short rclass) {
-	super(rname, dns.MX, rclass);
-}
-
-public dnsMXRecord(dnsName rname, short rclass, int rttl, int priority,
-		   dnsName name)
+public
+dnsMXRecord(dnsName _name, short _dclass, int _ttl, int _priority,
+	    dnsName _target)
 {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.priority = (short)priority;
-	this.name = name;
-	this.rlength = (short)(2 + name.length());
+	super(_name, dns.MX, _dclass, _ttl);
+	priority = (short) _priority;
+	target = _target;
 }
 
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	priority = in.readUnsignedShort();
-	name = new dnsName(in, c);
+public
+dnsMXRecord(dnsName _name, short _dclass, int _ttl,
+	    int length, CountedDataInputStream in, dnsCompression c)
+throws IOException
+{
+	super(_name, dns.MX, _dclass, _ttl);
+	if (in == null)
+		return;
+	priority = (short) in.readUnsignedShort();
+	target = new dnsName(in, c);
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	out.writeShort(priority);
-	name.toBytes(out);
+public
+dnsMXRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+throws IOException
+{
+	super(_name, dns.MX, _dclass, _ttl);
+	priority = Short.parseShort(st.nextToken());
+	target = new dnsName(st.nextToken());
 }
 
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	out.writeShort(priority);
-	name.toCanonicalBytes(out);
-}
-
-String rrToString() {
-	if (rlength == 0)
-		return null;
-	StringBuffer sb = new StringBuffer();
-	sb.append(priority);
-	sb.append(" ");
-	sb.append(name);
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (target != null) {
+		sb.append(priority);
+		sb.append(" ");
+		sb.append(target);
+	}
 	return sb.toString();
+}
+
+public dnsName
+getTarget() {
+	return target;
+}
+
+public short
+getPriority() {
+	return priority;
+}
+
+byte []
+rrToWire() throws IOException {
+	if (target == null)
+		return null;
+
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	DataOutputStream ds = new DataOutputStream(bs);
+
+	ds.writeShort(priority);
+	target.toWire(ds);
+	return bs.toByteArray();
 }
 
 }

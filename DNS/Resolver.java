@@ -108,7 +108,7 @@ send(dnsMessage query) throws IOException {
 	if (TSIG != null)
 		TSIG.apply(query);
 
-	out = query.toBytes();
+	out = query.toWire();
 	s.send(new DatagramPacket(out, out.length, addr, port));
 
 	dp = new DatagramPacket(new byte[512], 512);
@@ -157,7 +157,7 @@ sendAXFR(dnsMessage query) throws IOException {
 	if (TSIG != null)
 		TSIG.apply(query);
 
-	out = query.toBytes();
+	out = query.toWire();
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
 	s.setSoTimeout(timeoutValue);

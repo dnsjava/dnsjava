@@ -12,14 +12,16 @@ static final byte IPAD = 0x36;
 static final byte OPAD = 0x5c;
 static final byte PADLEN = 64;
 
-static void printByteString(String s, byte [] b, int offset, int length) {
+static void
+printByteString(String s, byte [] b, int offset, int length) {
 	System.out.print(length + " bytes (" + s + "): ");
 	for (int i=offset; i<offset+length; i++)
 		System.out.print(Integer.toHexString((int)b[i] & 0xFF) + " ");
 	System.out.println();
 }
 
-public hmacSigner(byte [] key) {
+public
+hmacSigner(byte [] key) {
 	int i;
 	if (key.length > PADLEN)
 		key = md5.compute(key);
@@ -42,14 +44,16 @@ public hmacSigner(byte [] key) {
 /*	printByteString("key", key, 0, key.length);*/
 }
 
-void addData(byte [] b, int offset, int length) {
+void
+addData(byte [] b, int offset, int length) {
 	if (length < offset || offset >= b.length || length >= b.length)
 		return;
 /*	printByteString("partial add", b, offset, length);*/
 	bytes.write(b, offset, length);
 }
 
-void addData(byte [] b) {
+void
+addData(byte [] b) {
 /*	printByteString("add", b, 0, b.length);*/
 	try {
 		bytes.write(b);
@@ -58,7 +62,8 @@ void addData(byte [] b) {
 	}
 }
 
-byte [] sign() {
+byte []
+sign() {
 	byte [] output = md5.compute(bytes.toByteArray());
 	bytes = new ByteArrayOutputStream();
 	try {
@@ -72,12 +77,14 @@ byte [] sign() {
 	return b;
 }
 
-boolean verify(byte [] signature) {
+boolean
+verify(byte [] signature) {
 /*	printByteString("ver", signature, 0, signature.length);*/
 	return (byteArrayCompare(signature, sign()));
 }
 
-void clear() {
+void
+clear() {
 	bytes = new ByteArrayOutputStream();
 	try {
 		bytes.write(ipad);
@@ -86,7 +93,8 @@ void clear() {
 	}
 }
 
-static boolean byteArrayCompare(byte [] b1, byte [] b2) {
+static boolean
+byteArrayCompare(byte [] b1, byte [] b2) {
 	if (b1.length != b2.length)
 		return false;
 	for (int i = 0; i < b1.length; i++)

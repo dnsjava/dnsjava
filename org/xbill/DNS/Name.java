@@ -7,7 +7,7 @@ import java.util.*;
 public class dnsName {
 
 private String [] name;
-private int labels;
+private byte labels;
 
 static final int MAXLABELS = 64;
 
@@ -35,12 +35,13 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 	labels = 0;
 	name = new String[MAXLABELS];
 
-	start = in.pos();
+	start = in.getPos();
 	while ((len = in.readUnsignedByte()) != 0) {
 		if ((len & 0xC0) != 0) {
 			int pos = in.readUnsignedByte();
 			pos += ((len & ~0xC0) << 8);
-			dnsName name2 = c.get(pos);
+			dnsName name2 = (c == null) ? null : c.get(pos);
+/*System.out.println("Looking for compressed name at " + pos + ", found " + name2);*/
 			if (name2 == null)
 				name[labels++] = new String("<compressed>");
 			else {
@@ -55,36 +56,46 @@ dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
 		name[labels++] = new String(b);
 		count++;
 	}
-	for (int i = 0, pos = start; i < count; i++) {
-		dnsName tname = new dnsName(this, i);
-		c.add(pos, tname);
-		pos += (name[i].length() + 1);
-	}
+	if (c != null) 
+		for (int i = 0, pos = start; i < count; i++) {
+			dnsName tname = new dnsName(this, i);
+			c.add(pos, tname);
+/*System.out.println("Adding " + tname + " at " + pos);*/
+			pos += (name[i].length() + 1);
+		}
 }
 
 /* Skips n labels and creates a new name */
 dnsName(dnsName d, int n) {
 	name = new String[MAXLABELS];
 
-	labels = d.labels - n;
+	labels = (byte) (d.labels - n);
 	System.arraycopy(d.name, n, name, 0, labels);
 }
 
-public short length() {
+public short
+length() {
 	short total = 0;
 	for (int i = 0; i < labels; i++)
 		total += (name[i].length() + 1);
 	return ++total;
 }
 
-public String toString() {
+public byte
+labels() {
+	return labels;
+}
+
+public String
+toString() {
 	StringBuffer sb = new StringBuffer();
 	for (int i=0; i<labels; i++)
 		sb.append(name[i] + ".");
 	return sb.toString();
 }
 
-public void toBytes(DataOutputStream out) throws IOException {
+public void
+toWire(DataOutputStream out) throws IOException {
 	for (int i=0; i<labels; i++) {
 		out.writeByte(name[i].length());
 		for (int j=0; j<name[i].length(); j++)
@@ -93,7 +104,8 @@ public void toBytes(DataOutputStream out) throws IOException {
 	out.writeByte(0);
 }
 
-public void toCanonicalBytes(DataOutputStream out) throws IOException {
+public void
+toWireCanonical(DataOutputStream out) throws IOException {
 	for (int i=0; i<labels; i++) {
 		out.writeByte(name[i].length());
 		for (int j=0; j<name[i].length(); j++)
@@ -102,7 +114,8 @@ public void toCanonicalBytes(DataOutputStream out) throws IOException {
 	out.writeByte(0);
 }
 
-public boolean equals(Object arg) {
+public boolean
+equals(Object arg) {
 	if (arg == null || !(arg instanceof dnsName))
 		return false;
 	dnsName d = (dnsName) arg;

@@ -15,15 +15,27 @@ static final int ADDITIONAL = dns.ADDITIONAL;
 static dnsName name = null;
 static short type = dns.A, _class = dns.IN;
 
-static void usage() {
-	System.out.println("Usage: update @server name [-t ttl] [-p port] [-k key]");
+static void
+usage() {
+	System.out.println("Usage: update [@server]");
 	System.exit(0);
 }
 
-static void doUpdate(dnsMessage query, dnsResolver res) throws IOException {
-	dnsMessage response;
+static void
+doUpdate(dnsMessage query, dnsResolver res) throws IOException {
+	if (query.getHeader().getCount(ZONE) == 0) {
+		Vector updates = query.getSection(UPDATE);
+		if (updates == null) {
+			System.out.println("Invalid update - no records");
+			return;
+		}
+		dnsRecord r = (dnsRecord) query.getSection(UPDATE).elementAt(0);
+		dnsName zone = new dnsName(r.getName(), 1);
+		dnsRecord soa = dnsRecord.newRecord(zone, dns.SOA, r.dclass);
+		query.addRecord(ZONE, soa);
+	}
 
-	response = res.send(query);
+	dnsMessage response = res.send(query);
 	if (response == null)
 		return;
 
@@ -48,87 +60,92 @@ static void doUpdate(dnsMessage query, dnsResolver res) throws IOException {
 	System.out.println(";; done");
 }
 
-public static void main(String argv[]) throws IOException {
-	String server, newname;
-	dnsName name, domain;
-	InetAddress addr;
-	int ttl = 3600;
-	dnsMessage query = new dnsMessage();
-	dnsRecord soa, a, dela;
-	dnsResolver res = null;
+static void
+doAdd(dnsMessage query, StringTokenizer st) throws IOException {
+	dnsRecord rec;
 
-	query.getHeader().setRandomID();
-	query.getHeader().setOpcode(dns.UPDATE);
-
-	if (argv.length < 2) {
-		usage();
+	String qualifier = st.nextToken();
+	if (qualifier.equals("-r")) {
+		dnsName name = new dnsName(st.nextToken());
+		int ttl = Integer.parseInt(st.nextToken());
+		short dclass = dns.classValue(st.nextToken());
+		short type = dns.typeValue(st.nextToken());
+		rec = dnsRecord.fromString(st, name, ttl, type, dclass);
+		query.addRecord(UPDATE, rec);
+		System.out.println(rec);
 	}
-
-	if (!argv[0].startsWith("@")) {
-		usage();
-	}
-	server = argv[0].substring(1);
-	res = new dnsResolver(server);
-	newname = argv[1];
-	name = new dnsName(newname);
-
-	for (int arg = 2; arg < argv.length; arg++) {
-		if (!argv[arg].startsWith("-") || argv[arg].length() < 2)
-			continue;
-		switch (argv[arg].charAt(1)) {
-		    case 'p':
-			String portStr;
-			int port;
-			if (argv[arg].length() > 2)
-				portStr = argv[arg].substring(2);
-			else
-				portStr = argv[++arg];
-			port = Integer.parseInt(portStr);
-			if (port < 0 || port > 65536) {
-				System.out.println("Invalid port");
-				return;
-			}
-			res.setPort(port);
-			break;
-
-		    case 'k':
-			String key;
-			if (argv[arg].length() > 2)
-				key = argv[arg].substring(2);
-			else
-				key = argv[++arg];
-			res.setTSIGKey(newname, key);
-			break;
-
-		    case 't':
-			ttl = Integer.parseInt(argv[arg]);
-			if (ttl <= 0)
-				ttl = 3600;
-			break;
-
-		    default:
-			System.out.print("Invalid option" + argv[arg]);
-		}
-	}
-
-	try {
-		addr = InetAddress.getLocalHost();
-	}
-	catch (UnknownHostException e) {
-		System.out.println(e);
+	else {
+		System.out.println("qualifier " + qualifier + " not supported");
 		return;
 	}
+	
 
-	domain = new dnsName(name, 1);
-	soa = new dnsSOARecord(domain, dns.IN);
-	a = new dnsARecord(name, dns.IN, ttl, addr);
-	dela = new dnsARecord(name, dns.ANY);
+}
 
-	query.addRecord(ZONE, soa);
-	query.addRecord(UPDATE, a);
-	query.addRecord(UPDATE, dela);
+public static void
+main(String argv[]) throws IOException {
+	String server = null;
 
-	doUpdate(query, res);
+	if (argv.length == 0)
+		server = "localhost";
+	else if (argv.length == 1 &&  argv[0].startsWith("@"))
+		server = argv[0].substring(1);
+	else
+		usage();
+
+	dnsMessage query = new dnsMessage();
+	query.getHeader().setOpcode(dns.UPDATE);
+
+	dnsResolver res;
+
+	InputStreamReader isr = new InputStreamReader(System.in);
+	BufferedReader br = new BufferedReader(isr);
+
+	while (true) {
+		System.out.print("> ");
+
+		String s = dnsIO.readExtendedLine(br);
+		StringTokenizer st = new StringTokenizer(s);
+		String operation = st.nextToken();
+
+		if (operation.equals("server"))
+			server = st.nextToken();
+
+		else if (operation.equals("class"))
+			System.out.println("class operation not supported");
+
+		else if (operation.equals("ttl"))
+			System.out.println("ttl operation not supported");
+
+		else if (operation.equals("key"))
+			System.out.println("key operation not supported");
+
+		else if (operation.equals("send")) {
+			res = new dnsResolver(server);
+			doUpdate(query, res);
+		}
+
+		else if (operation.equals("quit"))
+			System.exit(0);
+
+		else if (operation.equals("require"))
+			System.out.println("require operation not supported");
+
+		else if (operation.equals("prohibit"))
+			System.out.println("prohibit operation not supported");
+
+		else if (operation.equals("add"))
+			doAdd(query, st);
+
+		else if (operation.equals("delete"))
+			System.out.println("delete operation not supported");
+
+		else if (operation.equals("glue"))
+			System.out.println("glue operation not supported");
+
+		else
+			System.out.println("invalid keyword: " + operation);
+	}
 }
 
 }

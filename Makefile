@@ -1,5 +1,5 @@
 all:
-	javac *.java
+	jikes -g *.java
 
 clean:
 	rm -f *.class

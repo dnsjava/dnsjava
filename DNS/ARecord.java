@@ -3,56 +3,70 @@
 
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 public class dnsARecord extends dnsRecord {
 
 InetAddress address;
 
-public dnsARecord(dnsName rname, short rclass) {
-	super(rname, dns.A, rclass);
+public
+dnsARecord(dnsName _name, short _dclass, int _ttl, InetAddress _address) 
+throws IOException
+{
+	super(_name, dns.A, _dclass, _ttl);
+	address = _address;
 }
 
-public dnsARecord(dnsName rname, short rclass, int ttl, InetAddress address) {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.rlength = 4;
-	this.address = address;
-}
+public
+dnsARecord(dnsName _name, short _dclass, int _ttl, int length,
+	   CountedDataInputStream in, dnsCompression c) throws IOException
+{
+	super(_name, dns.A, _dclass, _ttl);
 
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	int i;
-	StringBuffer addressbuf = new StringBuffer();
+	if (in == null)
+		return;
 
-	if (rlength != 4) {
-		System.out.println("Invalid A record - length " + rlength);
-	}
+	byte [] data = new byte[4];
+	in.read(data);
 
-	addressbuf.append(in.readUnsignedByte() + ".");
-	addressbuf.append(in.readUnsignedByte() + ".");
-	addressbuf.append(in.readUnsignedByte() + ".");
-	addressbuf.append(in.readUnsignedByte());
+	String s = new String();
+	s = (data[0] & 0xFF) + "." + (data[1] & 0xFF) + "." +
+	    (data[2] & 0xFF)  + "." + (data[3] & 0xFF);
 	try {
-		address = InetAddress.getByName(addressbuf.toString());
+		address = InetAddress.getByName(s);
 	}
 	catch (UnknownHostException e) {
-		System.out.println("Invalid IP address " + addressbuf);
+		System.out.println("Invalid IP address " + s);
 	}
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	byte [] b = address.getAddress();
-	for (int i=0; i<4; i++)
-		out.writeByte(b[i]);
+public
+dnsARecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+throws IOException
+{
+	super(_name, dns.A, _dclass, _ttl);
+	address = InetAddress.getByName(st.nextToken());
 }
 
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	rrToBytes(out);
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (address != null)
+		sb.append(address.getHostAddress());
+	return sb.toString();
 }
 
-String rrToString() {
-	if (rlength == 0)
+public InetAddress
+getAddress() {
+	return address;
+}
+
+byte []
+rrToWire() {
+	if (address == null)
 		return null;
-	return address.getHostAddress();
+	else
+		return address.getAddress();
 }
 
 }

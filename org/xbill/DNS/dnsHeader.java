@@ -11,97 +11,111 @@ private boolean [] flags;
 byte rcode, opcode;
 private short [] counts;
 
-static private Random random = new Random();
-
-dnsHeader() {
+public
+dnsHeader(int _id) {
 	counts = new short[4];
 	flags = new boolean[16];
+	id = _id;
 }
 
-dnsHeader(int id) {
-	this();
-	this.id = id;
-}
-
+public
 dnsHeader(CountedDataInputStream in) throws IOException {
-	this();
-	id = in.readUnsignedShort();
+	this(in.readUnsignedShort());
 	readFlags(in);
 	for (int i=0; i<counts.length; i++)
 		counts[i] = in.readShort();
 }
 
-void toBytes(DataOutputStream out) throws IOException {
+public void
+toWire(DataOutputStream out) throws IOException {
 	out.writeShort(id);
 	writeFlags(out);
 	for (int i=0; i<counts.length; i++)
 		out.writeShort(counts[i]);
 }
 
-byte [] toBytes() throws IOException {
+public byte []
+toWire() throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	DataOutputStream dout = new DataOutputStream(out);
-	toBytes(dout);
+	toWire(dout);
 	return out.toByteArray();
 }
 
-void setFlag(int bit) {
+public void
+setFlag(int bit) {
 	flags[bit] = true;
 }
 
-void unsetFlag(int bit) {
+public void
+unsetFlag(int bit) {
 	flags[bit] = false;
 }
 
-boolean getFlag(int bit) {
+public boolean
+getFlag(int bit) {
 	return flags[bit];
 }
 
-int getID() {
+public int
+getID() {
 	return id;
 }
 
-void setID(int id) {
-	this.id = id;
+public void
+setID(int _id) {
+	id = _id;
 }
 
-void setRandomID() {
-	id = random.nextInt() & 0xFFFF;
+static short
+randomID() {
+	// why can't this be static?
+	Random random = new Random();
+	return (short) (random.nextInt() & 0xFFFF);
 }
 
-void setRcode(byte value) {
+public void
+setRcode(byte value) {
 	rcode = value;
 }
 
-byte getRcode() {
+public byte
+getRcode() {
 	return rcode;
 }
 
-void setOpcode(byte value) {
+public void
+setOpcode(byte value) {
 	opcode = value;
 }
 
-byte getOpcode() {
+public byte
+getOpcode() {
 	return opcode;
 }
 
-void setCount(int field, short value) {
+public void
+setCount(int field, short value) {
 	counts[field] = value;
 }
 
-void incCount(int field) {
+public void
+incCount(int field) {
 	counts[field]++;
 }
 
-void decCount(int field) {
+public void
+decCount(int field) {
 	counts[field]--;
 }
 
-int getCount(int field) {
+public int
+getCount(int field) {
 	return counts[field];
 }
 
-private void writeFlags(DataOutputStream out) throws IOException {
+private void
+writeFlags(DataOutputStream out) throws IOException {
 	short flags1 = 0, flags2 = 0;
 	for (int i = 0; i < 8; i++) {
 		if (flags[i])	flags1 |= (1 << (7-i));
@@ -113,7 +127,8 @@ private void writeFlags(DataOutputStream out) throws IOException {
 	out.writeByte(flags2);
 }
 
-private void readFlags(CountedDataInputStream in) throws IOException {
+private void
+readFlags(CountedDataInputStream in) throws IOException {
 	short flags1 = (short)in.readUnsignedByte();
 	short flags2 = (short)in.readUnsignedByte();
 	for (int i = 0; i < 8; i++) {
@@ -124,7 +139,8 @@ private void readFlags(CountedDataInputStream in) throws IOException {
 	rcode = (byte) (flags2 & 0xF);
 }
 
-String printFlags() {
+public String
+printFlags() {
 	String s;
 	StringBuffer sb = new StringBuffer();
 

@@ -1,74 +1,105 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-import java.net.*;
 import java.io.*;
 import java.util.*;
-import java.text.*;
 
 public class dnsKEYRecord extends dnsRecord {
 
-short flags, protocol, alg;
+short flags;
+byte proto, alg;
 byte [] key;
 
-public dnsKEYRecord(dnsName rname, short rclass) {
-	super(rname, dns.KEY, rclass);
-}
+static int NOCONF = 0x8000;
+static int NOAUTH = 0x4000;
 
-public dnsKEYRecord(dnsName rname, short rclass, int rttl, int flags,
-		    int protocol, int alg, byte [] key)
+public
+dnsKEYRecord(dnsName _name, short _dclass, int _ttl, int _flags, int _proto,
+	     int _alg, byte []  _key)
 {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.flags = (short)flags;
-	this.protocol = (short)protocol;
-	this.alg = (short)alg;
-	this.key = key;
-	this.rlength = (short) (4 + key.length);
+	super(_name, dns.KEY, _dclass, _ttl);
+	flags = (short) _flags;
+	proto = (byte) _proto;
+	alg = (byte) _alg;
+	key = _key;
 }
 
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
+public
+dnsKEYRecord(dnsName _name, short _dclass, int _ttl,
+	     int length, CountedDataInputStream in, dnsCompression c)
+throws IOException
+{
+	super(_name, dns.KEY, _dclass, _ttl);
+	if (in == null)
+		return;
 	flags = in.readShort();
-	protocol = (short)in.readUnsignedByte();
-	alg = (short)in.readUnsignedByte();
-	key = new byte[rlength - 4];
-	in.read(key);
+	proto = in.readByte();
+	alg = in.readByte();
+	if (length > 4) {
+		key = new byte[length - 4];
+		in.read(key);
+	}
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	out.writeShort(flags);
-	out.writeByte((byte)protocol);
-	out.writeByte((byte)alg);
-	out.write(key, 0, key.length);
+public
+dnsKEYRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+throws IOException
+{
+	super(_name, dns.KEY, _dclass, _ttl);
+	flags = (short) Integer.decode(st.nextToken()).intValue();
+	proto = (byte) Integer.parseInt(st.nextToken());
+	alg = (byte) Integer.parseInt(st.nextToken());
+	key = base64.fromString(st.nextToken());
 }
 
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	rrToBytes(out);
-}
-
-String rrToString() {
-	if (rlength == 0)
-		return null;
-	StringBuffer sb = new StringBuffer();
-	sb.append ("0x");
-	sb.append (Integer.toHexString(flags));
-	sb.append (" ");
-	sb.append (protocol);
-	sb.append (" ");
-	sb.append (alg);
-	sb.append (" (");
-	String s = base64.toString(key);
-       	for (int i = 0; i < s.length(); i += 64) {
-		sb.append ("\n\t");
-		if (i + 64 >= s.length()) {
-			sb.append(s.substring(i));
-			sb.append(" )");
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (key != null || (flags & (NOAUTH|NOCONF)) == (NOAUTH|NOCONF) ) {
+		sb.append ("0x");
+		sb.append (Integer.toHexString(flags));
+		sb.append (" ");
+		sb.append (proto);
+		sb.append (" ");
+		sb.append (alg);
+		if (key != null) {
+			sb.append (" (\n");
+			String s = base64.toString(key);
+			sb.append (dnsIO.formatBase64String(s, 64, "\t", true));
 		}
-		else {
-			sb.append(s.substring(i, i+64));
-		} 
 	}
 	return sb.toString();
+}
+
+public short
+getFlags() {
+	return flags;
+}
+
+public byte
+getProtocol() {
+	return proto;
+}
+
+public byte
+getAlgorithm() {
+	return alg;
+}
+
+byte []
+rrToWire() throws IOException {
+	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
+		return null;
+
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	DataOutputStream ds = new DataOutputStream(bs);
+
+	ds.writeShort(flags);
+	ds.writeByte(proto);
+	ds.writeByte(alg);
+	if (key != null)
+		ds.write(key);
+	return bs.toByteArray();
 }
 
 }

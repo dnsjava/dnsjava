@@ -2,6 +2,7 @@
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
 import java.io.*;
+import java.util.*;
 
 public class base64 {
 
@@ -73,7 +74,7 @@ fromString(String str) {
 
 		try {
 			for (int j = 0; j < 3; j++)
-				if (t[j] > 0)
+				if (t[j] >= 0)
 					ds.writeByte(t[j]);
 		}
 		catch (IOException e) {

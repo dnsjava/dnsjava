@@ -1,14 +1,30 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-public class dnsCNAMERecord extends dnsNS_CNAME_PTR_Record {
+import java.io.*;
+import java.util.*;
 
-public dnsCNAMERecord(dnsName rname, short rclass) {
-	super(rname, dns.CNAME, rclass);
+public class dnsCNAMERecord extends dnsNS_CNAME_PTRRecord {
+
+public
+dnsCNAMERecord(dnsName _name, short _dclass, int _ttl, dnsName _target)
+throws IOException
+{
+        super(_name, dns.CNAME, _dclass, _ttl, _target);
 }
 
-public dnsCNAMERecord(dnsName rname, short rclass, int rttl, dnsName name) {
-	super(rname, dns.CNAME, rclass, rttl, name);
+public
+dnsCNAMERecord(dnsName _name, short _dclass, int _ttl, int length,
+	       CountedDataInputStream in, dnsCompression c) throws IOException
+{
+	super(_name, dns.CNAME, _dclass, _ttl, length, in, c);
+}
+
+public
+dnsCNAMERecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+throws IOException
+{
+	super(_name, dns.CNAME, _dclass, _ttl, st);
 }
 
 }

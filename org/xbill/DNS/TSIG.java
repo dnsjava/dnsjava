@@ -16,7 +16,7 @@ dnsTSIG(String name, byte [] key) {
 	this.key = key;
 }
 
-void apply(dnsMessage m) {
+void apply(dnsMessage m) throws IOException {
 	Date timeSigned = new Date();
 	short fudge = 300;
 	hmacSigner h = new hmacSigner(key);
@@ -25,14 +25,14 @@ void apply(dnsMessage m) {
 
 	try {
 		/* Digest the message */
-		h.addData(m.toBytes());
+		h.addData(m.toWire());
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
-		name.toCanonicalBytes(dout);
+		name.toWireCanonical(dout);
 		dout.writeShort(dns.ANY);	/* class */
 		dout.writeInt(0);		/* ttl */
-		alg.toCanonicalBytes(dout);
+		alg.toWireCanonical(dout);
 		long time = timeSigned.getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
@@ -68,40 +68,40 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 /*System.out.println("found TSIG");*/
 
 	try {
-		if (old != null && tsig.error == dns.NOERROR) {
+		if (old != null && tsig.getError() == dns.NOERROR) {
 			ByteArrayOutputStream bs = new ByteArrayOutputStream();
 			DataOutputStream d = new DataOutputStream(bs);
-			d.writeShort((short)old.signature.length);
+			d.writeShort((short)old.getSignature().length);
 			h.addData(bs.toByteArray());
-			h.addData(old.signature);
+			h.addData(old.getSignature());
 /*System.out.println("digested query TSIG");*/
 		}
 		m.getHeader().decCount(dns.ADDITIONAL);
-		byte [] header = m.getHeader().toBytes();
+		byte [] header = m.getHeader().toWire();
 		m.getHeader().incCount(dns.ADDITIONAL);
 		h.addData(header);
 
 		int len = b.length - header.length;	
-		len -= tsig.rrLength();
+		len -= tsig.oLength;
 		h.addData(b, header.length, len);
 /*System.out.println("digested message");*/
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
-		tsig.rname.toCanonicalBytes(dout);
-		dout.writeShort(tsig.rclass);
-		dout.writeInt(tsig.rttl);
-		tsig.alg.toCanonicalBytes(dout);
-		long time = tsig.timeSigned.getTime() / 1000;
+		tsig.getName().toWireCanonical(dout);
+		dout.writeShort(tsig.dclass);
+		dout.writeInt(tsig.ttl);
+		tsig.getAlg().toWireCanonical(dout);
+		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
 		dout.writeShort(timeHigh);
 		dout.writeInt(timeLow);
-		dout.writeShort(tsig.fudge);
-		dout.writeShort(tsig.error);
-		if (tsig.other != null) {
-			dout.writeShort(tsig.other.length);
-			dout.write(tsig.other);
+		dout.writeShort(tsig.getFudge());
+		dout.writeShort(tsig.getError());
+		if (tsig.getOther() != null) {
+			dout.writeShort(tsig.getOther().length);
+			dout.write(tsig.getOther());
 		}
 		else
 			dout.writeShort(0);
@@ -117,14 +117,14 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 		try {
 			ByteArrayOutputStream bs = new ByteArrayOutputStream();
 			DataOutputStream d = new DataOutputStream(bs);
-			d.writeShort((short)tsig.signature.length);
+			d.writeShort((short)tsig.getSignature().length);
 			axfrSigner.addData(bs.toByteArray());
-			axfrSigner.addData(tsig.signature);
+			axfrSigner.addData(tsig.getSignature());
 		}
 		catch (IOException e) {
 		}
 	}
-	if (h.verify(tsig.signature))
+	if (h.verify(tsig.getSignature()))
 		return true;
 	else
 		return false;
@@ -145,14 +145,14 @@ boolean verifyAXFR(dnsMessage m, byte [] b, dnsTSIGRecord old,
 	try {
 		if (tsig != null)
 			m.getHeader().decCount(dns.ADDITIONAL);
-		byte [] header = m.getHeader().toBytes();
+		byte [] header = m.getHeader().toWire();
 		if (tsig != null)
 			m.getHeader().incCount(dns.ADDITIONAL);
 		h.addData(header);
 
 		int len = b.length - header.length;	
 		if (tsig != null)
-			len -= tsig.rrLength();
+			len -= tsig.oLength;
 		h.addData(b, header.length, len);
 
 		if (tsig == null) {
@@ -164,24 +164,24 @@ boolean verifyAXFR(dnsMessage m, byte [] b, dnsTSIGRecord old,
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
-		long time = tsig.timeSigned.getTime() / 1000;
+		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
 		dout.writeShort(timeHigh);
 		dout.writeInt(timeLow);
-		dout.writeShort(tsig.fudge);
+		dout.writeShort(tsig.getFudge());
 		h.addData(out.toByteArray());
 	}
 	catch (IOException e) {
 		return false;
 	}
 
-	if (h.verify(tsig.signature) == false) {
+	if (h.verify(tsig.getSignature()) == false) {
 		return false;
 	}
 
 	h.clear();
-	h.addData(tsig.signature);
+	h.addData(tsig.getSignature());
 
 	return true;
 }

@@ -79,6 +79,7 @@ static final byte NOTZONE = 10;
 static final byte BADSIG = 16;
 static final byte BADKEY = 17;
 static final byte BADTIME = 18;
+static final byte BADID = 19;
 
 /* Opcodes */
 static final byte QUERY = 0;

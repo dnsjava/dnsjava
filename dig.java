@@ -9,12 +9,14 @@ public class dig {
 static dnsName name = null;
 static short type = dns.A, _class = dns.IN;
 
-static void usage() {
+static void
+usage() {
 	System.out.println("Usage: dig [@server] name [<type>] [<class>]");
 	System.exit(0);
 }
 
-static void doQuery(dnsMessage query, dnsResolver res) throws IOException {
+static void
+doQuery(dnsMessage query, dnsResolver res) throws IOException {
 	dnsMessage response;
 
 	System.out.println("; java dig 0.0");
@@ -48,11 +50,11 @@ static void doQuery(dnsMessage query, dnsResolver res) throws IOException {
 		while (e.hasMoreElements()) {
 			dnsRecord rec = (dnsRecord) e.nextElement();
 			System.out.print(";;\t");
-			System.out.print(rec.rname);
+			System.out.print(rec.name);
 			System.out.print(", type = ");
-			System.out.print(dns.typeString(rec.rtype));
+			System.out.print(dns.typeString(rec.type));
 			System.out.print(", class = ");
-			System.out.println(dns.classString(rec.rclass));
+			System.out.println(dns.classString(rec.dclass));
 		}
 		System.out.println();
 	}
@@ -68,10 +70,11 @@ static void doQuery(dnsMessage query, dnsResolver res) throws IOException {
 		}
 		System.out.println();
 	}
-	System.out.println(";; done (" + response.getNumBytes() + " bytes)");
+	System.out.println(";; done (" + response.numBytes() + " bytes)");
 }
 
-static void doAXFR(dnsMessage query, dnsResolver res) throws IOException {
+static void
+doAXFR(dnsMessage query, dnsResolver res) throws IOException {
 	dnsMessage response;
 
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
@@ -91,14 +94,14 @@ static void doAXFR(dnsMessage query, dnsResolver res) throws IOException {
 	System.out.println(" additional)");
 }
 
-public static void main(String argv[]) throws IOException {
+public static void
+main(String argv[]) throws IOException {
 	String server;
 	int arg;
 	dnsMessage query = new dnsMessage();
 	dnsRecord rec;
 	dnsResolver res = null;
 
-	query.getHeader().setRandomID();
 	query.getHeader().setFlag(dns.RD);
 	query.getHeader().setOpcode(dns.QUERY);
 
@@ -152,7 +155,7 @@ public static void main(String argv[]) throws IOException {
 					key = argv[arg].substring(2);
 				else
 					key = argv[++arg];
-				res.setTSIGKey(key);
+				res.setTSIGKey("test-key", key);
 				break;
 
 			    default:

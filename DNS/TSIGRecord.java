@@ -1,7 +1,6 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -16,119 +15,44 @@ int originalID;
 short error;
 byte [] other;
 
-public dnsTSIGRecord(dnsName rname, short rclass) {
-	super(rname, dns.TSIG, rclass);
-}
-
-public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
-		     Date timeSigned, short fudge, byte [] signature,
-		     int originalID, short error, byte other[])
+public
+dnsTSIGRecord(dnsName _name, short _dclass, int _ttl, dnsName _alg,
+	      Date _timeSigned, short _fudge, byte [] _signature,
+	      int _originalID, short _error, byte _other[]) throws IOException
 {
-	this(rname, rclass);
-	this.rttl = rttl;
-	this.alg = alg;
-	this.timeSigned = timeSigned;
-	this.fudge = fudge;
-	this.signature = signature;
-	this.originalID = originalID;
-	this.error = error;
-	this.other = other;
-	this.rlength = (short) (16 + alg.length() + signature.length);
-	if (other != null)
-		this.rlength += other.length;
+	super(_name, dns.TSIG, _dclass, _ttl);
+	alg = _alg;
+	timeSigned = _timeSigned;
+	fudge = _fudge;
+	signature = _signature;
+	originalID = _originalID;
+	error = _error;
+	other = _other;
 }
 
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	alg = new dnsName(in, c);
-
-	short timeHigh = in.readShort();
-	int timeLow = in.readInt();
-	long time = ((long)timeHigh & 0xFFFF) << 32;
-	time += (long)timeLow & 0xFFFFFFFF;
-	timeSigned = new Date(time * 1000);
-	fudge = in.readShort();
-
-	int sigLen = in.readUnsignedShort();
-	signature = new byte[sigLen];
-	in.read(signature);
-
-	originalID = in.readUnsignedShort();
-	error = in.readShort();
-
-	int otherLen = in.readUnsignedShort();
-	if (otherLen > 0) {
-		other = new byte[otherLen];
-		in.read(other);
-	}
-	else
-		other = null;
+public
+dnsTSIGRecord(dnsName _name, short _dclass, int _ttl, int length,
+	      CountedDataInputStream in, dnsCompression c) throws IOException
+{
+	super(_name, dns.TSIG, _dclass, _ttl);
+	wireToData(in, c);
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	alg.toBytes(out);
-	long time = timeSigned.getTime() / 1000;
-	short timeHigh = (short) (time >> 32);
-	int timeLow = (int) (time);
-	out.writeShort(timeHigh);
-	out.writeInt(timeLow);
-	out.writeShort(fudge);
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (alg == null)
+		return sb.toString();
 
-	out.writeShort((short)signature.length);
-	out.write(signature);
+	sb.append(alg);
+	sb.append(" (\n\t");
 
-	out.writeShort(originalID);
-	out.writeShort(error);
-
-	if (other != null) {
-		out.writeShort((short)other.length);
-		out.write(other);
-	}
-	else
-		out.writeShort(0);
-}
-
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	alg.toCanonicalBytes(out);
-	long time = timeSigned.getTime() / 1000;
-	short timeHigh = (short) (time >> 32);
-	int timeLow = (int) (time);
-	out.writeShort(timeHigh);
-	out.writeInt(timeLow);
-	out.writeShort(fudge);
-
-	out.writeShort((short)signature.length);
-	out.write(signature);
-
-	out.writeShort((int)originalID & 0xFFFF);
-	out.writeShort(error);
-
-	if (other != null) {
-		out.writeShort((short)other.length);
-		out.write(other);
-	}
-	else
-		out.writeShort(0);
-}
-
-String rrToString() {
-	if (rlength == 0)
-		return null;
-	StringBuffer sb = new StringBuffer();
-	sb.append (alg);
-	sb.append (" (\n\t");
 	sb.append (timeSigned.getTime() / 1000);
 	sb.append (" ");
 	sb.append (dns.rcodeString(error));
-	sb.append (" ");
+	sb.append ("\n");
 	String s = base64.toString(signature);
-	for (int i = 0; i < s.length(); i += 64) {
-		if (i != 0)
-			sb.append ("\n\t");
-		if (i + 64 >= s.length())
-			sb.append(s.substring(i));
-		else
-			sb.append(s.substring(i, i+64));
-	}
+	sb.append (dnsIO.formatBase64String(s, 64, "\t", false));
 	if (other != null) {
 		sb.append("\n\t <");
 		if (error == dns.BADTIME) {
@@ -152,6 +76,100 @@ String rrToString() {
 	}
 	sb.append(" )");
 	return sb.toString();
+}
+
+public dnsName
+getAlg() {
+	return alg;
+}
+
+public Date
+getTimeSigned() {
+	return timeSigned;
+}
+
+public short
+getFudge() {
+	return fudge;
+}
+
+public byte []
+getSignature() {
+	return signature;
+}
+
+public int
+getOriginalID() {
+	return originalID;
+}
+
+public short
+getError() {
+	return error;
+}
+
+public byte []
+getOther() {
+	return other;
+}
+
+void
+wireToData(CountedDataInputStream in, dnsCompression c) throws IOException {
+	if (in == null)
+		return;
+	alg = new dnsName(in, c);
+
+	short timeHigh = in.readShort();
+	int timeLow = in.readInt();
+	long time = ((long)timeHigh & 0xFFFF) << 32;
+	time += (long)timeLow & 0xFFFFFFFF;
+	timeSigned = new Date(time * 1000);
+	fudge = in.readShort();
+
+	int sigLen = in.readUnsignedShort();
+	signature = new byte[sigLen];
+	in.read(signature);
+
+	originalID = in.readUnsignedShort();
+	error = in.readShort();
+
+	int otherLen = in.readUnsignedShort();
+	if (otherLen > 0) {
+		other = new byte[otherLen];
+		in.read(other);
+	}
+	else
+		other = null;
+
+}
+
+byte []
+rrToWire() throws IOException {
+	ByteArrayOutputStream bs = new ByteArrayOutputStream();
+	DataOutputStream ds = new DataOutputStream(bs);
+
+	alg.toWire(ds);
+
+	long time = timeSigned.getTime() / 1000;
+	short timeHigh = (short) (time >> 32);
+	int timeLow = (int) (time);
+	ds.writeShort(timeHigh);
+	ds.writeInt(timeLow);
+	ds.writeShort(fudge);
+
+	ds.writeShort((short)signature.length);
+	ds.write(signature);
+
+	ds.writeShort(originalID);
+	ds.writeShort(error);
+
+	if (other != null) {
+		ds.writeShort((short)other.length);
+		ds.write(other);
+	}
+	else
+		ds.writeShort(0);
+	return bs.toByteArray();
 }
 
 }

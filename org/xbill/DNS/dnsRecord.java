@@ -1,150 +1,248 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
+// This class should be extended for each record type.  The individual
+// types must provide:
+//	constructors
+//	toString()
+// and may provide, if necessary:
+//	toWireCanonical()
+// and should provide
+//	accessor functions
+
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.*;
 
-public class dnsRecord {
+abstract public class dnsRecord {
 
-dnsName rname;
-short rtype, rclass, rlength;
-int rttl;
-private short msgLength = 0;
+dnsName name;
+short type, dclass;
+int ttl;
+int oLength;
 
-byte [] data;
-
-dnsRecord(dnsName name, short type, short _class) {
-	rname = name;
-	rtype = type;
-	rclass = _class;
+dnsRecord(dnsName _name, short _type, short _dclass, int _ttl) {
+	name = _name;
+	type = _type;
+	dclass = _dclass;
+	ttl = _ttl;
 }
 
-dnsRecord(dnsName rname, short rtype, short rclass, int rttl, byte [] data) {
-	this(rname, rtype, rclass);
-	this.rttl = rttl;
-	this.data = data;
-	this.rlength = (short)data.length;
-}
-
-static dnsRecord newRecord(dnsName name, short type, short _class) {
+static dnsRecord
+newRecord(dnsName name, short type, short dclass, int ttl, int length,
+	  CountedDataInputStream in, dnsCompression c) throws IOException
+{
 	String s = dns.typeString(type);
+	dnsRecord rec;
 	try {
-		Class c;
+		Class rrclass;
 		Constructor m;
-		dnsRecord rec;
 
-		c = Class.forName("dns" + s + "Record");
-		m = c.getConstructor(new Class [] {dnsName.class,
-						   java.lang.Short.TYPE});
-		rec = (dnsRecord) m.newInstance(new Object []
-						{name, new Short(_class)});
+		rrclass = Class.forName("dns" + s + "Record");
+		m = rrclass.getConstructor(new Class [] {
+						dnsName.class,
+						java.lang.Short.TYPE,
+						java.lang.Integer.TYPE,
+						java.lang.Integer.TYPE,
+						CountedDataInputStream.class,
+						dnsCompression.class
+					   });
+		rec = (dnsRecord) m.newInstance(new Object [] {
+							name,
+							new Short(dclass),
+							new Integer(ttl),
+							new Integer(length),
+							in, c
+						});
+		rec.oLength = length;
 		return rec;
 	}
+	catch (ClassNotFoundException e) {
+		rec = new dnsUNKRecord(name, type, dclass, ttl, length, in, c);
+		rec.oLength = length;
+		return rec;
+	}
+	catch (InvocationTargetException e) {
+		System.out.println("new record: " + e);
+		System.out.println(e.getTargetException());
+		return null;
+	}
 	catch (Exception e) {
-		if (!(e instanceof ClassNotFoundException))
-			System.out.println(e);
-		return new dnsRecord(name, type, _class);
+		System.out.println("new record: " + e);
+		return null;
 	}
 }
 
 
-static dnsRecord buildRecord(CountedDataInputStream in, int section,
-			     dnsCompression c) throws IOException
+static dnsRecord
+newRecord(dnsName name, short type, short dclass, int ttl, int length,
+	  byte [] data)
 {
-	short type, _class;
+	CountedDataInputStream cds;
+	if (data != null) {
+		ByteArrayInputStream bs = new ByteArrayInputStream(data);
+		cds = new CountedDataInputStream(bs);
+	}
+	else
+		cds = null;
+	try {
+		return newRecord(name, type, dclass, ttl, length, cds, null);
+	}
+	catch (IOException e) {
+		return null;
+	}
+}
+
+static dnsRecord
+newRecord(dnsName name, short type, short dclass, int ttl) {
+	return newRecord(name, type, dclass, ttl, 0, null);
+}
+
+static dnsRecord
+newRecord(dnsName name, short type, short dclass) {
+	return newRecord(name, type, dclass, 0, 0, null);
+}
+
+public static dnsRecord
+fromWire(CountedDataInputStream in, int section, dnsCompression c)
+throws IOException
+{
+	short type, dclass;
+	int ttl;
+	short length;
 	dnsName name;
 	dnsRecord rec;
 
-	int startpos = in.pos();
 	name = new dnsName(in, c);
 
 	type = in.readShort();
-	_class = in.readShort();
-	rec = newRecord(name, type, _class);
+	dclass = in.readShort();
 
 	if (section == dns.QUESTION)
-		return rec;
+		return newRecord(name, type, dclass);
 
-	rec.rttl = in.readInt();
-	rec.rlength = in.readShort();
-	rec.parse(in, c);
-	rec.msgLength = (short)(in.pos() - startpos);
+	ttl = in.readInt();
+	length = in.readShort();
+	rec = newRecord(name, type, dclass, ttl, length, in, c);
 	return rec;
 }
 
-void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	data = new byte[rlength];
-	in.read(data);
-}
-
-void toBytes(DataOutputStream out, int section) throws IOException {
-	rname.toBytes(out);
-	out.writeShort(rtype);
-	out.writeShort(rclass);
+public void
+toWire(DataOutputStream out, int section) throws IOException {
+	name.toWire(out);
+	out.writeShort(type);
+	out.writeShort(dclass);
 	if (section == dns.QUESTION)
 		return;
-	out.writeInt(rttl);
-	out.writeShort(rlength);
-	rrToBytes(out);
+	out.writeInt(ttl);
+	byte [] data = rrToWire();
+	if (data == null)
+		out.writeShort(0);
+	else {
+		out.writeShort(data.length);
+		out.write(data);
+	}
+
 }
 
-byte [] toBytes(int section) throws IOException {
+public byte []
+toWire(int section) throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	DataOutputStream dout = new DataOutputStream(out);
-	toBytes(dout, section);
+	toWire(dout, section);
 	return out.toByteArray();
 }
 
-void rrToBytes(DataOutputStream out) throws IOException {
-	if (rlength > 0)
-		out.write(data);
-}
-
-void toCanonicalBytes(DataOutputStream out, int section) throws IOException {
-	rname.toCanonicalBytes(out);
-	out.writeShort(rtype);
-	out.writeShort(rclass);
+void
+toWireCanonical(DataOutputStream out, int section) throws IOException {
+	name.toWireCanonical(out);
+	out.writeShort(type);
+	out.writeShort(dclass);
 	if (section == dns.QUESTION)
 		return;
-	out.writeInt(rttl);
-	out.writeShort(rlength);
-	rrToCanonicalBytes(out);
+	out.writeInt(ttl);
+	byte [] data = rrToWire();
+	if (data == null)
+		out.writeShort(0);
+	else {
+		out.writeShort(data.length);
+		out.write(data);
+	}
 }
 
-void rrToCanonicalBytes(DataOutputStream out) throws IOException {
-	out.write(data);
-}
-
-public String toString() {
-	String rr;
+StringBuffer
+toStringNoData() {
 	StringBuffer sb = new StringBuffer();
-	rr = rrToString();
-	sb.append(rname);
+	sb.append(name);
 	sb.append("\t");
-	sb.append(rttl);
+	sb.append(ttl);
 	sb.append("\t");
-	sb.append(dns.typeString(rtype));
-	if (rclass != dns.IN) {
+	sb.append(dns.typeString(type));
+	if (dclass != dns.IN) {
 		sb.append("\t");
-		sb.append(dns.classString(rclass));
+		sb.append(dns.classString(dclass));
 	}
-	if (rr != null) {
-		if (this instanceof dnsSIGRecord)
-			sb.append(" ");
-		else
-			sb.append("\t");
-		sb.append(rr);
-	}
+	sb.append("\t");
+	return sb;
+}
+
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	sb.append("<unknown format>");
 	return sb.toString();
 }
 
-String rrToString() {
-	return null;
+public static dnsRecord
+fromString(StringTokenizer st, dnsName name, int ttl, short type, short dclass)
+throws IOException {
+	dnsRecord rec;
+
+	try {
+		Class rrclass;
+		Constructor m;
+
+		String s = dns.typeString(type);
+		rrclass = Class.forName("dns" + s + "Record");
+		m = rrclass.getConstructor(new Class [] {
+						dnsName.class,
+						java.lang.Short.TYPE,
+						java.lang.Integer.TYPE,
+						StringTokenizer.class
+					   });
+		rec = (dnsRecord) m.newInstance(new Object [] {
+							name,
+							new Short(dclass),
+							new Integer(ttl),
+							st
+						});
+		return rec;
+	}
+	catch (ClassNotFoundException e) {
+		rec = new dnsUNKRecord(name, type, dclass, ttl, st);
+		return rec;
+	}
+	catch (InvocationTargetException e) {
+		System.out.println("from text: " + e);
+		System.out.println(e.getTargetException());
+		return null;
+	}
+	catch (Exception e) {
+		System.out.println("from text: " + e);
+		return null;
+	}
 }
 
-short
-rrLength() {
-	return msgLength;
+public dnsName
+getName() {
+	return name;
 }
+
+abstract byte [] rrToWire() throws IOException;
+
+byte [] rrToWireCanonical() throws IOException {
+	return rrToWire();
+}
+
 
 }
