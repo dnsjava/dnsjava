@@ -291,7 +291,8 @@ sendAsync(final Message query, final ResolverListener listener) {
 private Message
 sendAXFR(Message query) throws IOException {
 	Name qname = query.getQuestion().getName();
-	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, this);
+	SocketAddress sockaddr = new InetSocketAddress(addr, port);
+	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, sockaddr, tsig);
 	try {
 		xfrin.run();
 	}
