@@ -362,7 +362,6 @@ byteArrayFromString(String s) throws TextParseException {
 								("bad escape");
 				if (digits < 3)
 					continue;
-				System.out.println("intval = " + intval);
 				b = (byte) intval;
 			}
 			else if (digits > 0 && digits < 3)
@@ -378,6 +377,8 @@ byteArrayFromString(String s) throws TextParseException {
 		else
 			os.write(array[i]);
 	}
+	if (digits > 0 && digits < 3)
+		throw new TextParseException("bad escape");
 	return os.toByteArray();
 }
 
