@@ -47,7 +47,10 @@ SimpleResolver(String hostname) throws UnknownHostException {
 		if (hostname == null)
 			hostname = defaultResolver;
 	}
-	addr = InetAddress.getByName(hostname);
+	if (hostname.equals("0"))
+		addr = InetAddress.getLocalHost();
+	else
+		addr = InetAddress.getByName(hostname);
 }
 
 /**
