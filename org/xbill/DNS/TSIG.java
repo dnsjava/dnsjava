@@ -52,6 +52,35 @@ TSIG(Name name, byte [] key) {
 }
 
 /**
+ * Creates a new TSIG object, which can be used to sign or verify a message.
+ * @param name The name of the shared key
+ * @param key The shared key's data, represented as either a base64 encoded
+ * string or (if the first character is ':') a hex encoded string
+ * @throws IllegalArgumentException The key name is an invalid name
+ * @throws IllegalArgumentException The key data is improperly encoded
+ */
+public
+TSIG(String name, String key) {
+	byte [] keyArray;
+	Name keyname;
+	if (key.length() > 1 && key.charAt(0) == ':')
+		keyArray = base16.fromString(key.substring(1));
+	else
+		keyArray = base64.fromString(key);
+	if (keyArray == null)
+		throw new IllegalArgumentException("Invalid TSIG key string");
+	try {
+		keyname = Name.fromString(name, Name.root);
+	}
+	catch (TextParseException e) {
+		throw new IllegalArgumentException("Invalid TSIG key name");
+	}
+	this.name = keyname;
+	this.alg = HMAC;
+	this.key = keyArray;
+}
+
+/**
  * Generates a TSIG record with a specific error for a message that has
  * been rendered.
  * @param m The message
