@@ -206,6 +206,7 @@ send(Message query) throws IOException {
 	IOException bestException = null;
 	boolean [] invalid = new boolean[resolvers.size()];
 	byte [] sent = new byte[resolvers.size()];
+	byte [] recvd = new byte[resolvers.size()];
 	Vector queue = new Vector();
 	Hashtable idMap = new Hashtable();
 	Receiver receiver = new Receiver(queue, idMap);
@@ -216,13 +217,13 @@ send(Message query) throws IOException {
 		QElement qe;
 		synchronized (queue) {
 			for (r = 0; r < resolvers.size(); r++) {
-				if (sent[r] == 0) {
+				if (sent[r] == recvd[r] && sent[r] < retries) {
 					sendTo(query, receiver, idMap, r);
 					sent[r]++;
 					waiting = true;
 					break;
 				}
-				if (!invalid[r] && sent[r] < retries)
+				else if (recvd[r] < sent[r])
 					waiting = true;
 			}
 			if (!waiting)
@@ -242,6 +243,7 @@ send(Message query) throws IOException {
 			else
 				m = null;
 			r = qe.res;
+			recvd[r]++;
 		}
 		if (m == null) {
 			IOException e = (IOException) qe.obj;
