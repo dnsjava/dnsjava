@@ -408,10 +408,7 @@ doQuery(MyStringTokenizer st) throws IOException {
 	Message newQuery = Message.newQuery(rec);
 	if (res == null)
 		res = new SimpleResolver(server);
-	if (rec.getType() == Type.AXFR)
-		response = res.sendAXFR(newQuery);
-	else
-		response = res.send(newQuery);
+	response = res.send(newQuery);
 	print(response);
 }
 

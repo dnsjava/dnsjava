@@ -20,27 +20,14 @@ usage() {
 }
 
 static void
-doQuery(Message query, Resolver res) throws IOException {
-	Message response;
-
+doQuery(Message response) throws IOException {
 	System.out.println("; java dig 0.0");
-
-	response = res.send(query);
-	if (response == null)
-		return;
-
 	System.out.println(response);
 }
 
 static void
-doAXFR(Message query, Resolver res) throws IOException {
-	Message response;
-
+doAXFR(Message response) throws IOException {
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
-
-	response = res.sendAXFR(query);
-	if (response == null)
-		return;
 
 	Enumeration e = response.getSection(Section.ANSWER);
 	while (e.hasMoreElements())
@@ -57,7 +44,7 @@ public static void
 main(String argv[]) throws IOException {
 	String server;
 	int arg;
-	Message query;
+	Message query, response;
 	Record rec;
 	Resolver res = null;
 
@@ -166,11 +153,12 @@ main(String argv[]) throws IOException {
 
 	rec = Record.newRecord(name, type, _class);
 	query = Message.newQuery(rec);
+	response = res.send(query);
 
 	if (type == Type.AXFR)
-		doAXFR(query, res);
+		doAXFR(response);
 	else
-		doQuery(query, res);
+		doQuery(response);
 }
 
 }

@@ -53,10 +53,4 @@ public Message send(Message query) throws IOException;
  */
 public Object sendAsync(final Message query, final ResolverListener listener);
 
-/**
- * Sends a zone transfer message, and waits for a response
- * @return The response
- */
-public Message sendAXFR(Message query) throws IOException;
-
 }

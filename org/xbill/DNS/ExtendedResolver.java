@@ -300,16 +300,6 @@ sendAsync(final Message query, final ResolverListener listener) {
 	return id;
 }
 
-/**
- * Sends a zone transfer message to the first known server, and waits for a
- * response.  This should be further tuned later.
- * @return The response
- */
-public
-Message sendAXFR(Message query) throws IOException {
-	return ((Resolver)resolvers.elementAt(0)).sendAXFR(query);
-}
-
 /** Returns the i'th resolver used by this ExtendedResolver */
 public Resolver
 getResolver(int i) {

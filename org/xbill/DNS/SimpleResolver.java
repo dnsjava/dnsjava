@@ -192,6 +192,9 @@ send(Message query) throws IOException {
 	DatagramPacket dp;
 	short udpLength = 512;
 
+	if (query.getQuestion().getType() == Type.AXFR)
+		return sendAXFR(query);
+
 	query = (Message) query.clone();
 	if (EDNSlevel >= 0) {
 		udpLength = 1280;
@@ -272,11 +275,7 @@ sendAsync(final Message query, final ResolverListener listener) {
 	return id;
 }
 
-/**
- * Sends a zone transfer message, and waits for a response
- * @return The response
- */
-public Message
+private Message
 sendAXFR(Message query) throws IOException {
 	byte [] out, in;
 	Socket s;
