@@ -7,24 +7,64 @@ import DNS.utils.*;
 
 public class jnamed {
 
-Zone [] zones;
-int zcount;
+Zone cache;
 Hashtable znames;
+Hashtable TSIGs;
 
 public
-jnamed() {
-	zones = new Zone[20];
-	zcount = 0;
+jnamed(String conffile) throws IOException {
+	FileInputStream fs;
+	try {
+		fs = new FileInputStream(conffile);
+	}
+	catch (Exception e) {
+		System.out.println("Cannot open " + conffile);
+		return;
+	}
+
+	cache = null;
 	znames = new Hashtable();
+	TSIGs = new Hashtable();
+
+	BufferedReader br = new BufferedReader(new InputStreamReader(fs));
+	String line = null;
+	while ((line = br.readLine()) != null) {
+		StringTokenizer st = new StringTokenizer(line);
+		if (!st.hasMoreTokens())
+			continue;
+		String keyword = st.nextToken();
+		if (!st.hasMoreTokens()) {
+			System.out.println("Invalid line: " + line);
+			continue;
+		}
+		if (keyword.equals("primary"))
+			addZone(st.nextToken(), Zone.PRIMARY);
+		else if (keyword.equals("cache"))
+			cache = new Zone(st.nextToken(), Zone.CACHE, null);
+		else if (keyword.equals("key"))
+			addTSIG(st.nextToken(), st.nextToken());
+
+	}
+
+	if (cache == null) {
+		System.out.println("no cache specified");
+		System.exit(-1);
+	}
+	addUDP((short)12345);
+	addTCP((short)12345);
 };
 
 public void
 addZone(String zonefile, int type) throws IOException {
-	Zone newzone = new Zone(zonefile, type, zones[0]);
+	Zone newzone = new Zone(zonefile, type, cache);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
-	zones[zcount++] = newzone;
 };
+
+public void
+addTSIG(String name, String key) {
+	TSIGs.put(new Name(name), base64.fromString(key));
+}
 
 public Zone
 findBestZone(Name name) {
@@ -37,7 +77,7 @@ findBestZone(Name name) {
 			return foundzone;
 		tname = new Name(tname, 1);
 	} while (!tname.equals(Name.root));
-	return null;
+	return cache;
 }
 
 public RRset
@@ -64,7 +104,8 @@ addRRset(Message response, RRset rrset) {
 
 void
 addAuthority(Message response, Name name, Zone zone) {
-	if (response.getHeader().getCount(Section.ANSWER) > 0) {
+	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == cache)
+	{
 		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN);
 		if (nsRecords == null)
 			nsRecords = (RRset) zone.getNS();
@@ -117,11 +158,15 @@ addAdditional(Message response) {
 /* FIX ME */
 TSIG
 findTSIG(Name name) {
-	return new TSIG(name.toString(), base64.fromString("1234"));
+	byte [] key = (byte []) TSIGs.get(name);
+	if (key != null)
+		return new TSIG(name.toString(), key);
+	else
+		return null;
 }
 
 Message
-generateReply(Message query, byte [] in) {
+generateReply(Message query, byte [] in, int maxLength) {
 	Enumeration qds = query.getSection(Section.QUESTION);
 	Record queryRecord = (Record) qds.nextElement();
 
@@ -176,6 +221,16 @@ generateReply(Message query, byte [] in) {
 		catch (IOException e) {
 		}
 	}
+	try {
+		byte [] out = response.toWire();
+		if (out.length > maxLength) {
+			truncate(response, out.length, maxLength);
+			if (tsig != null)
+				tsig.apply(response, queryTSIG);
+		}
+	}
+	catch (IOException e) {
+	}
 	return response;
 }
 
@@ -209,10 +264,20 @@ truncateSection(Message in, int maxLength, int length, int section) {
 
 public void
 truncate(Message in, int length, int maxLength) {
+	TSIGRecord tsig = in.getTSIG();
+	if (tsig != null)
+		maxLength -= tsig.getWireLength();
+
 	length -= truncateSection(in, maxLength, length, Section.ADDITIONAL);
 	if (length < maxLength)
 		return;
+
 	in.getHeader().setFlag(Flags.TC);
+	if (tsig != null) {
+		in.removeAllRecords(Section.ANSWER);
+		in.removeAllRecords(Section.AUTHORITY);
+		return;
+	}
 	length -= truncateSection(in, maxLength, length, Section.AUTHORITY);
 	if (length < maxLength)
 		return;
@@ -261,7 +326,7 @@ serveTCP(short port) {
 			Message query, response;
 			try {
 				query = new Message(in);
-				response = generateReply(query, in);
+				response = generateReply(query, in, 65535);
 			}
 			catch (IOException e) {
 				response = formerrMessage(in);
@@ -297,22 +362,17 @@ serveUDP(short port) {
 			Message query, response;
 			try {
 				query = new Message(in);
-				response = generateReply(query, in);
-
 				OPTRecord opt = query.getOPT();
 				if (opt != null)
 					udpLength = opt.getPayloadSize();
 
+				response = generateReply(query, in, udpLength);
 			}
 			catch (IOException e) {
 				response = formerrMessage(in);
 			}
 			byte [] out = response.toWire();
 
-			if (out.length > udpLength) {
-				truncate(response, out.length, udpLength);
-				out = response.toWire();
-			}
 			dp = new DatagramPacket(out, out.length,
 						dp.getAddress(), dp.getPort());
 			sock.send(dp);
@@ -338,18 +398,13 @@ addUDP(final short port) {
 }
 
 public static void main(String [] args) {
-	if (args.length == 0) {
-		System.out.println("usage: server cache zone ... ");
+	if (args.length != 1) {
+		System.out.println("usage: server conf");
 		System.exit(0);	
 	}
 	jnamed s;
 	try {
-		s = new jnamed();
-		s.addZone(args[0], Zone.CACHE);
-		for (int i = 1; i < args.length; i++)
-			s.addZone(args[i], Zone.PRIMARY);
-		s.addUDP((short)12345);
-		s.addTCP((short)12345);
+		s = new jnamed(args[0]);
 	}
 	catch (IOException e) {
 		System.out.println(e);
