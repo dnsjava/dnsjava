@@ -127,7 +127,7 @@ put(short type, short dclass, Object value) {
 	}
 	Wrapper w = new Wrapper(dclass, value);
 	synchronized (v) {
-		v.remove(w);
+		v.removeElement(w);
 		v.addElement(w);
 	}
 }
@@ -143,7 +143,7 @@ remove(short type, short dclass) {
 		return;
 	Wrapper w = new Wrapper(dclass, null);
 	synchronized (v) {
-		v.remove(w);
+		v.removeElement(w);
 		if (v.size() == 0)
 			data.remove(T);
 	}
