@@ -21,7 +21,7 @@ import org.xbill.DNS.utils.*;
 public class Message implements Cloneable {
 
 private Header header;
-private Vector [] sections;
+private List [] sections;
 private int size;
 private byte [] wireFormat;
 private boolean frozen;
@@ -30,9 +30,9 @@ boolean TSIGsigned, TSIGverified;
 /** Creates a new Message with the specified Message ID */
 public
 Message(int id) {
-	sections = new Vector[4];
+	sections = new List[4];
 	for (int i=0; i<4; i++)
-		sections[i] = new Vector();
+		sections[i] = new LinkedList();
 	header = new Header(id);
 	wireFormat = null;
 	frozen = false;
@@ -78,7 +78,7 @@ Message(DataByteInputStream in) throws IOException {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < header.getCount(i); j++) {
 			Record rec = Record.fromWire(in, i);
-			sections[i].addElement(rec);
+			sections[i].add(rec);
 		}
 	}
 	size = in.getPos();
@@ -115,7 +115,7 @@ getHeader() {
  */
 public void
 addRecord(Record r, int section) {
-	sections[section].addElement(r);
+	sections[section].add(r);
 	header.incCount(section);
 }
 
@@ -126,7 +126,7 @@ addRecord(Record r, int section) {
  */
 public boolean
 removeRecord(Record r, int section) {
-	if (sections[section].removeElement(r)) {
+	if (sections[section].remove(r)) {
 		header.decCount(section);
 		return true;
 	}
@@ -141,7 +141,7 @@ removeRecord(Record r, int section) {
  */
 public void
 removeAllRecords(int section) {
-	sections[section].setSize(0);
+	sections[section].clear();
 	header.setCount(section, (short)0);
 }
 
@@ -176,7 +176,7 @@ findRecord(Record r) {
 public boolean
 findRRset(Name name, short type, int section) {
 	for (int i = 0; i < sections[section].size(); i++) {
-		Record r = (Record) sections[section].elementAt(i);
+		Record r = (Record) sections[section].get(i);
 		if (r.getType() == type && name.equals(r.getName()))
 			return true;
 	}
@@ -204,7 +204,7 @@ findRRset(Name name, short type) {
 public Record
 getQuestion() {
 	try {
-		return (Record) sections[Section.QUESTION].firstElement();
+		return (Record) sections[Section.QUESTION].get(0);
 	}
 	catch (NoSuchElementException e) {
 		return null;
@@ -222,8 +222,8 @@ getTSIG() {
 	int count = header.getCount(Section.ADDITIONAL);
 	if (count == 0)
 		return null;
-	Vector v = sections[Section.ADDITIONAL];
-	Record rec = (Record) v.elementAt(count - 1);
+	List l = sections[Section.ADDITIONAL];
+	Record rec = (Record) l.get(count - 1);
 	if (rec.type !=  Type.TSIG)
 		return null;
 	return (TSIGRecord) rec;
@@ -281,7 +281,7 @@ getRcode() {
  */
 public Enumeration
 getSection(int section) {
-	return sections[section].elements();
+	return Collections.enumeration(sections[section]);
 }
 
 /**
@@ -291,11 +291,8 @@ getSection(int section) {
  */
 public Record []
 getSectionArray(int section) {
-	int size = sections[section].size();
-	Record [] records = new Record[size];
-	for (int i = 0; i < size; i++)
-		records[i] = (Record) sections[section].elementAt(i);
-	return records;
+	List l = sections[section];
+	return (Record []) l.toArray(new Record[l.size()]);
 }
 
 void
@@ -303,10 +300,8 @@ toWire(DataByteOutputStream out) throws IOException {
 	header.toWire(out);
 	Compression c = new Compression();
 	for (int i = 0; i < 4; i++) {
-		if (sections[i].size() == 0)
-			continue;
 		for (int j = 0; j < sections[i].size(); j++) {
-			Record rec = (Record)sections[i].elementAt(j);
+			Record rec = (Record)sections[i].get(j);
 			rec.toWire(out, i, c);
 		}
 	}
@@ -425,9 +420,8 @@ toString() {
 public Object
 clone() {
 	Message m = new Message();
-	for (int i = 0; i < sections.length; i++) {
-		m.sections[i] = (Vector) sections[i].clone();
-	}
+	for (int i = 0; i < sections.length; i++)
+		m.sections[i] = new LinkedList(sections[i]);
 	m.header = (Header) header.clone();
 	m.size = size;
 	return m;

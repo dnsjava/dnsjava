@@ -7,14 +7,14 @@ import org.xbill.DNS.utils.*;
 
 /**
  * The shared superclass of Zone and Cache.  All names are stored in a
- * hashtable.  Each name contains a hashtable indexed by type.
+ * map.  Each name contains a map indexed by type.
  *
  * @author Brian Wellington
  */
 
 class NameSet {
 
-private Hashtable data;
+private Map data;
 private Name origin;
 private boolean isCache;
 
@@ -23,7 +23,7 @@ private boolean isCache;
  */
 protected
 NameSet(boolean isCache) {
-	data = new Hashtable();
+	data = new HashMap();
 	origin = Name.root;
 	this.isCache = isCache;
 }
@@ -37,7 +37,7 @@ setOrigin(Name origin) {
 /** Deletes all sets in a NameSet */
 protected void
 clear() {
-	data = new Hashtable();
+	data = new HashMap();
 }
 
 /**
@@ -197,18 +197,18 @@ removeName(Name name) {
 /**
  * Returns a list of all names stored in this NameSet.
  */
-Enumeration
+Iterator
 names() {
-	return data.keys();
+	return data.keySet().iterator();
 }
 
 /** Converts the NameSet to a String */
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	Enumeration e = data.elements();
-	while (e.hasMoreElements()) {
-		TypeMap nameInfo = (TypeMap) e.nextElement();
+	Iterator it = data.values().iterator();
+	while (it.hasNext()) {
+		TypeMap nameInfo = (TypeMap) it.next();
 		Object [] elements = nameInfo.getAll();
 		if (elements == null)
 			continue;

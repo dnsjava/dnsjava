@@ -133,9 +133,9 @@ private class CacheCleaner extends Thread {
 			if (interrupted)
 				continue;
 
-			Enumeration e = names();
-			while (e.hasMoreElements()) {
-				Name name = (Name) e.nextElement();
+			Iterator it = names();
+			while (it.hasNext()) {
+				Name name = (Name) it.next();
 				TypeMap tm = findName(name);
 				if (tm == null)
 					continue;
@@ -442,11 +442,11 @@ findAnyRecords(Name name, short type) {
 
 private void
 verifyRecords(Cache tcache) {
-	Enumeration e;
+	Iterator it;
 
-	e = tcache.names();
-	while (e.hasMoreElements()) {
-		Name name = (Name) e.nextElement();
+	it = tcache.names();
+	while (it.hasNext()) {
+		Name name = (Name) it.next();
 		TypeMap tm = tcache.findName(name);
 		if (tm == null)
 			continue;

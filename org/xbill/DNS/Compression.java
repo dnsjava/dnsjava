@@ -3,10 +3,10 @@
 
 package org.xbill.DNS;
 
-import java.util.Hashtable;
+import java.util.*;
 
 /**
- * DNS Compression object.  Name compression and decompression are supported.
+ * DNS Name Compression object.
  * @see Name
  *
  * @author Brian Wellington
@@ -14,15 +14,14 @@ import java.util.Hashtable;
 
 class Compression {
 
-private Hashtable h;
+private Map h;
 
 /**
- * Creates a new Compression object, suitable for either compression or
- * decompression.
+ * Creates a new Compression object.
  */
 public
 Compression() {
-	h = new Hashtable();
+	h = new HashMap();
 }
 
 /** Adds a compression entry mapping a name to a position.  */
@@ -33,7 +32,7 @@ add(int pos, Name name) {
 
 /**
  * Retrieves the position of the given name, if it has been previously
- * included in the message.  Used for compression
+ * included in the message.
  */
 public int
 get(Name name) {

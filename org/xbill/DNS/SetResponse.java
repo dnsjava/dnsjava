@@ -82,9 +82,9 @@ set(byte _type, Object _data) {
 void
 addRRset(RRset rrset) {
 	if (data == null)
-		data = new Vector();
-	Vector v = (Vector) data;
-	v.addElement(rrset);
+		data = new ArrayList();
+	List l = (List) data;
+	l.add(rrset);
 }
 
 void
@@ -149,11 +149,8 @@ public RRset []
 answers() {
 	if (type != SUCCESSFUL)
 		return null;
-	Vector v = (Vector) data;
-	RRset [] rrsets = new RRset[v.size()];
-	for (int i = 0; i < rrsets.length; i++)
-		rrsets[i] = (RRset) v.elementAt(i);
-	return rrsets;
+	List l = (List) data;
+	return (RRset []) l.toArray(new RRset[l.size()]);
 }
 
 /**

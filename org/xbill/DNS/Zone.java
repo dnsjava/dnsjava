@@ -16,7 +16,7 @@ import java.util.*;
 public class Zone extends NameSet {
 
 class AXFREnumeration implements Enumeration {
-	private Enumeration znames;
+	private Iterator znames;
 	private Name currentName;
 	private Object [] current;
 	int count;
@@ -62,8 +62,8 @@ class AXFREnumeration implements Enumeration {
 		}
 		if (current != null && count < current.length)
 			return current[count++];
-		while (znames.hasMoreElements()) {
-			Name currentName = (Name) znames.nextElement();
+		while (znames.hasNext()) {
+			Name currentName = (Name) znames.next();
 			if (currentName.equals(getOrigin()))
 				continue;
 			TypeMap tm = findName(currentName);

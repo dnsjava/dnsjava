@@ -12,10 +12,10 @@ import java.util.*;
 
 class TypeMap {
 
-private Hashtable data;
+private Map data;
 
 TypeMap() {
-	data = new Hashtable(3);
+	data = new HashMap(3);
 }
 
 /**
@@ -39,10 +39,10 @@ getAll() {
 	synchronized (data) {
 		int size = data.size();
 		out = new Object[size];
-		Enumeration e = data.elements();
+		Iterator it = data.values().iterator();
 		n = 0;
-		while (e.hasMoreElements())
-			out[n++] = e.nextElement();
+		while (it.hasNext())
+			out[n++] = it.next();
 	}
 	return out;
 }

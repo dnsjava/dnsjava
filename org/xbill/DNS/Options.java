@@ -30,10 +30,10 @@ import java.util.*;
 
 public final class Options {
 
-private static Hashtable table;
+private static Map table;
 
 static {
-	table = new Hashtable();
+	table = new HashMap();
 	String s = System.getProperty("dnsjava.options");
 	if (s != null) {
 		StringTokenizer st = new StringTokenizer(s, ",");

@@ -22,6 +22,8 @@ private short rcode;
 private byte opcode;
 private int [] counts;
 
+private static Random random = new Random();
+
 /**
  * Create a new empty header.
  * @param id The message id
@@ -38,7 +40,7 @@ Header(int _id) {
  */
 public
 Header() {
-	this(randomID());
+	this(random.nextInt(0xffff));
 }
 
 /**
@@ -121,8 +123,7 @@ setID(int _id) {
  */
 static short
 randomID() {
-	Random random = new Random();
-	return (short) (random.nextInt() & 0xFFFF);
+	return (short) (random.nextInt(0xffff));
 }
 
 /**

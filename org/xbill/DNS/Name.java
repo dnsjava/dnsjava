@@ -14,7 +14,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class Name {
+public class Name implements Comparable {
 
 private static final int LABEL_NORMAL = 0;
 private static final int LABEL_COMPRESSION = 0xC0;
@@ -39,8 +39,17 @@ private static final int STARTLABELS = 4;
 /* Used for printing non-printable characters */
 private static DecimalFormat byteFormat = new DecimalFormat();
 
+/* Used to efficiently convert bytes to lowercase */
+private static byte lowercase[] = new byte[256];
+
 static {
 	byteFormat.setMinimumIntegerDigits(3);
+	for (int i = 0; i < lowercase.length; i++) {
+		if (i < 'A' || i > 'Z')
+			lowercase[i] = (byte)i;
+		else
+			lowercase[i] = (byte)(i - 'A' + 'a');
+	}
 }
 
 private
@@ -84,7 +93,7 @@ compact() {
  * Create a new name from a string and an origin
  * @param s  The string to be converted
  * @param origin  If the name is unqualified, the origin to be appended
- * @deprecated As of dnsjava 1.3.0, * replaced by <code>Name.fromString</code>.
+ * @deprecated As of dnsjava 1.3.0, replaced by <code>Name.fromString</code>.
  */
 public
 Name(String s, Name origin) {
@@ -517,6 +526,7 @@ getLabelString(int n) {
  */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
+	boolean log = (c != null && Options.check("verbosecompression"));
 	for (int i = 0; i < labels; i++) {
 		Name tname;
 		if (i == 0)
@@ -526,7 +536,7 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 		int pos = -1;
 		if (c != null) {
 			pos = c.get(tname);
-			if (Options.check("verbosecompression"))
+			if (log)
 				System.err.println("Looking for " + tname +
 						   ", found " + pos);
 		}
@@ -538,7 +548,7 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 		else {
 			if (c != null) {
 				c.add(out.getPos(), tname);
-				if (Options.check("verbosecompression"))
+				if (log)
 					System.err.println("Adding " + tname +
 							   " at " +
 							   out.getPos());
@@ -567,18 +577,15 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
 			out.writeByte(((BitString)name[i]).wireBits());
 			out.write(((BitString)name[i]).data);
 		}
-		else
-			out.writeStringCanonical(new String((byte []) name[i]));
+		else {
+			byte [] b = (byte []) name[i];
+			byte [] bc = new byte[b.length];
+			for (int j = 0; j < b.length; j++)
+				bc[j] = lowercase[b[j]];
+			out.writeString(bc);
+		}
 	}
 	out.writeByte(0);
-}
-
-private static final byte
-toLower(byte b) {
-	if (b < 'A' || b > 'Z')
-		return b;
-	else
-		return (byte)(b - 'A' + 'a');
 }
 
 /**
@@ -586,10 +593,10 @@ toLower(byte b) {
  */
 public boolean
 equals(Object arg) {
-	if (arg == null || !(arg instanceof Name))
-		return false;
 	if (arg == this)
 		return true;
+	if (arg == null || !(arg instanceof Name))
+		return false;
 	Name d = (Name) arg;
 	if (d.labels != labels)
 		return false;
@@ -599,14 +606,13 @@ equals(Object arg) {
 		if (name[i] instanceof BitString) {
 			if (!name[i].equals(d.name[i]))
 				return false;
-		}
-		else {
+		} else {
 			byte [] b1 = (byte []) name[i];
 			byte [] b2 = (byte []) d.name[i];
 			if (b1.length != b2.length)
 				return false;
 			for (int j = 0; j < b1.length; j++) {
-				if (toLower(b1[j]) != toLower(b2[j]))
+				if (lowercase[b1[j]] != lowercase[b2[j]])
 					return false;
 			}
 		}
@@ -629,7 +635,7 @@ hashCode() {
 		else {
 			byte [] b = (byte []) name[i];
 			for (int j = 0; j < b.length; j++)
-				code += ((code << 3) + toLower(b[j]));
+				code += ((code << 3) + lowercase[b[j]]);
 		}
 	}
 	return code;
@@ -675,7 +681,7 @@ compareTo(Object o) {
 			byte [] b = (byte []) label;
 			byte [] ab = (byte []) alabel;
 			for (int j = 0; j < b.length && j < ab.length; j++) {
-				int n = toLower(b[j]) - toLower(ab[j]);
+				int n = lowercase[b[j]] - lowercase[ab[j]];
 				if (n != 0)
 					return (n);
 			}

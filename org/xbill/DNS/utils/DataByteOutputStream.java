@@ -113,22 +113,6 @@ writeString(byte [] s) {
 }
 
 /**
- * Writes a canonical String to the stream, encoded as a length byte followed
- * by data
- * @param s The String to be written
- */
-public void
-writeStringCanonical(String s) {
-	try {
-		byte [] b = s.toLowerCase().getBytes();
-		write(b.length);
-		write(b);
-	}
-	catch (IOException e) {
-	}
-}
-
-/**
  * Writes a BigInteger to the stream, encoded as binary data.  If present,
  * the leading 0 byte is removed.
  * @param i The BigInteger to be written

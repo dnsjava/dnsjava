@@ -12,9 +12,9 @@ public class jnamed {
 static final int FLAG_DNSSECOK = 1;
 static final int FLAG_SIGONLY = 2;
 
-Hashtable caches;
-Hashtable znames;
-Hashtable TSIGs;
+Map caches;
+Map znames;
+Map TSIGs;
 
 public
 jnamed(String conffile) throws IOException {
@@ -29,9 +29,9 @@ jnamed(String conffile) throws IOException {
 		return;
 	}
 
-	caches = new Hashtable();
-	znames = new Hashtable();
-	TSIGs = new Hashtable();
+	caches = new HashMap();
+	znames = new HashMap();
+	TSIGs = new HashMap();
 
 	BufferedReader br = new BufferedReader(new InputStreamReader(fs));
 	String line = null;
@@ -613,7 +613,8 @@ serveTCP(InetAddress addr, short port) {
 		}
 	}
 	catch (IOException e) {
-		System.out.println("serveTCP: " + e);
+		System.out.println("serveTCP(" + addr.getHostAddress() + ", " +
+				   port + "): " + e);
 	}
 }
 
@@ -649,7 +650,8 @@ serveUDP(InetAddress addr, short port) {
 		}
 	}
 	catch (IOException e) {
-		System.out.println("serveUDP: " + e);
+		System.out.println("serveUDP(" + addr.getHostAddress() + ", " +
+				   port + "): " + e);
 	}
 }
 
