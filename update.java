@@ -92,7 +92,7 @@ update(InputStream in) throws IOException {
 				String keydata = st.getString();
 				if (res == null)
 					res = new SimpleResolver(server);
-				res.setTSIGKey(keyname, keydata);
+				res.setTSIGKey(new TSIG(keyname, keydata));
 			}
 
 			else if (operation.equals("edns")) {
