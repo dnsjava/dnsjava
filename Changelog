@@ -1,3 +1,23 @@
+8/27/2000
+	- 1.1.6 released
+	- The high level api wasn't properly initialized.
+	  (Christopher Fitch <cfitch@sbti.com>)
+	- Added a routine to build a SIG record based on the results of
+	  a DSA signature (Pasi Eronen <pe@iki.fi>)
+	
+8/13/2000
+	- Added 'clear' command to update client
+	- Removed some deprecated code
+
+8/8/2000
+	- Invalid binary labels were not always rejected
+	- SRV initialization didn't work (reported by Chuck Santos
+	  <csantos@netnumber.com>)
+	- jnamed failed if no Cache was specified
+	- The Zone object didn't handle zones with no NS records.
+	- Added support for the NAPTR record (Chuck Santos
+	  <csantos@netnumber.com>)
+
 7/17/2000
 	- 1.1.5 released
 	- CERT records were printed with a negative keytag half the time.
