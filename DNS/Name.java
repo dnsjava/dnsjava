@@ -119,6 +119,17 @@ labels() {
 	return labels;
 }
 
+public boolean
+subdomain(Name domain) {
+	if (domain == null || domain.labels > labels)
+		return false;
+	int i = labels, j = domain.labels;
+	while (j > 0)
+		if (!name[--i].equals(domain.name[--j]))
+			return false;
+	return true;
+}
+
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
