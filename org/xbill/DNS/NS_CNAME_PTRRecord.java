@@ -42,12 +42,9 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the NS, CNAME, or PTR Record to a String */
-public String
-rdataToString() {
-	StringBuffer sb = new StringBuffer();
-	if (target != null)
-		sb.append(target);
-	return sb.toString();
+String
+rrToString() {
+	return target.toString();
 }
 
 /** Gets the target of the NS, CNAME, or PTR Record */

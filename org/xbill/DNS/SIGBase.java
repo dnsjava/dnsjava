@@ -82,35 +82,33 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the RRSIG/SIG Record to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (signature != null) {
-		sb.append (Type.string(covered));
+	sb.append (Type.string(covered));
+	sb.append (" ");
+	sb.append (alg);
+	sb.append (" ");
+	sb.append (labels);
+	sb.append (" ");
+	sb.append (origttl);
+	sb.append (" ");
+	if (Options.check("multiline"))
+		sb.append ("(\n\t");
+	sb.append (FormattedTime.format(expire));
+	sb.append (" ");
+	sb.append (FormattedTime.format(timeSigned));
+	sb.append (" ");
+	sb.append (footprint);
+	sb.append (" ");
+	sb.append (signer);
+	if (Options.check("multiline")) {
+		sb.append("\n");
+		sb.append(base64.formatString(signature, 64, "\t",
+					      true));
+	} else {
 		sb.append (" ");
-		sb.append (alg);
-		sb.append (" ");
-		sb.append (labels);
-		sb.append (" ");
-		sb.append (origttl);
-		sb.append (" ");
-		if (Options.check("multiline"))
-			sb.append ("(\n\t");
-		sb.append (FormattedTime.format(expire));
-		sb.append (" ");
-		sb.append (FormattedTime.format(timeSigned));
-		sb.append (" ");
-		sb.append (footprint);
-		sb.append (" ");
-		sb.append (signer);
-		if (Options.check("multiline")) {
-			sb.append("\n");
-			sb.append(base64.formatString(signature, 64, "\t",
-						      true));
-		} else {
-			sb.append (" ");
-			sb.append(base64.toString(signature));
-		}
+		sb.append(base64.toString(signature));
 	}
 	return sb.toString();
 }

@@ -49,14 +49,12 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (target != null) {
-		sb.append(priority);
-		sb.append(" ");
-		sb.append(target);
-	}
+	sb.append(priority);
+	sb.append(" ");
+	sb.append(target);
 	return sb.toString();
 }
 

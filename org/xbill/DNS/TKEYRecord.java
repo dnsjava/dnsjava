@@ -116,12 +116,9 @@ modeString() {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (alg == null)
-		return sb.toString();
-
 	sb.append(alg);
 	sb.append(" ");
 	if (Options.check("multiline"))

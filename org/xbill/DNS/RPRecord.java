@@ -55,14 +55,12 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the RP Record to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (mailbox != null && textDomain != null) {
-		sb.append(mailbox);
-		sb.append(" ");
-		sb.append(textDomain);
-	}
+	sb.append(mailbox);
+	sb.append(" ");
+	sb.append(textDomain);
 	return sb.toString();
 }
 

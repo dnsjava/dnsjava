@@ -81,37 +81,35 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Convert to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (host != null) {
-		sb.append(host);
+	sb.append(host);
+	sb.append(" ");
+	sb.append(admin);
+	if (Options.check("multiline")) {
+		sb.append(" (\n\t\t\t\t\t");
+		sb.append(serial);
+		sb.append("\t; serial\n\t\t\t\t\t");
+		sb.append(refresh);
+		sb.append("\t; refresh\n\t\t\t\t\t");
+		sb.append(retry);
+		sb.append("\t; retry\n\t\t\t\t\t");
+		sb.append(expire);
+		sb.append("\t; expire\n\t\t\t\t\t");
+		sb.append(minimum);
+		sb.append(" )\t; minimum");
+	} else {
 		sb.append(" ");
-		sb.append(admin);
-		if (Options.check("multiline")) {
-			sb.append(" (\n\t\t\t\t\t");
-			sb.append(serial);
-			sb.append("\t; serial\n\t\t\t\t\t");
-			sb.append(refresh);
-			sb.append("\t; refresh\n\t\t\t\t\t");
-			sb.append(retry);
-			sb.append("\t; retry\n\t\t\t\t\t");
-			sb.append(expire);
-			sb.append("\t; expire\n\t\t\t\t\t");
-			sb.append(minimum);
-			sb.append(" )\t; minimum");
-		} else {
-			sb.append(" ");
-			sb.append(serial);
-			sb.append(" ");
-			sb.append(refresh);
-			sb.append(" ");
-			sb.append(retry);
-			sb.append(" ");
-			sb.append(expire);
-			sb.append(" ");
-			sb.append(minimum);
-		}
+		sb.append(serial);
+		sb.append(" ");
+		sb.append(refresh);
+		sb.append(" ");
+		sb.append(retry);
+		sb.append(" ");
+		sb.append(expire);
+		sb.append(" ");
+		sb.append(minimum);
 	}
 	return sb.toString();
 }

@@ -307,7 +307,20 @@ rdataToWireCanonical() {
 	return out.toByteArray();
 }
 
-public abstract String rdataToString();
+/**
+ * Converts the type-specific RR to text format - must be overriden
+ */
+abstract String rrToString();
+
+/**
+ * Converts the rdata portion of a Record into a String representation
+ */
+public String
+rdataToString() {
+	if (empty)
+		return "";
+	return rrToString();
+}
 
 /**
  * Converts a Record into a String representation
@@ -333,7 +346,7 @@ toString() {
 	sb.append(Type.string(type));
 	if (!empty) {
 		sb.append("\t");
-		sb.append(rdataToString());
+		sb.append(rrToString());
 	}
 	return sb.toString();
 }

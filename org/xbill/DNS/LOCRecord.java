@@ -172,80 +172,79 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Convert to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (latitude != 0 || longitude != 0 || altitude != 0) {
-		long temp;
-		char direction;
-		NumberFormat nf = new DecimalFormat();
-		nf.setMaximumFractionDigits(3);
-		nf.setGroupingUsed(false);
+	long temp;
+	char direction;
+	NumberFormat nf = new DecimalFormat();
+	nf.setMaximumFractionDigits(3);
+	nf.setGroupingUsed(false);
 
-		/* Latitude */
-		temp = (latitude & 0xFFFFFFFF) - (1 << 31);
-		if (temp < 0) {
-			temp = -temp;
-			direction = 'S';
-		}
-		else
-			direction = 'N';
-
-		sb.append(temp / (3600 * 1000)); /* degrees */
-		temp = temp % (3600 * 1000);
-		sb.append(" ");
-
-		sb.append(temp / (60 * 1000)); /* minutes */
-		temp = temp % (60 * 1000);
-		sb.append(" ");
-
-		sb.append(nf.format((double)temp / 1000)); /* seconds */
-		sb.append(" ");
-
-		sb.append(direction);
-		sb.append(" ");
-
-		/* Latitude */
-		temp = (longitude & 0xFFFFFFFF) - (1 << 31);
-		if (temp < 0) {
-			temp = -temp;
-			direction = 'W';
-		}
-		else
-			direction = 'E';
-
-		sb.append(temp / (3600 * 1000)); /* degrees */
-		temp = temp % (3600 * 1000);
-		sb.append(" ");
-
-		sb.append(temp / (60 * 1000)); /* minutes */
-		temp = temp % (60 * 1000);
-		sb.append(" ");
-
-		sb.append(nf.format((double)temp / 1000)); /* seconds */
-		sb.append(" ");
-
-		sb.append(direction);
-		sb.append(" ");
-
-		nf.setMaximumFractionDigits(2);
-
-		/* Altitude */
-		sb.append(nf.format((double)(altitude - 10000000)/100));
-		sb.append("m ");
-
-		/* Size */
-		sb.append(nf.format((double)size/100));
-		sb.append("m ");
-
-		/* Horizontal precision */
-		sb.append(nf.format((double)hPrecision/100));
-		sb.append("m ");
-
-		/* Vertical precision */
-		sb.append(nf.format((double)vPrecision/100));
-		sb.append("m");
+	/* Latitude */
+	temp = (latitude & 0xFFFFFFFF) - (1 << 31);
+	if (temp < 0) {
+		temp = -temp;
+		direction = 'S';
 	}
+	else
+		direction = 'N';
+
+	sb.append(temp / (3600 * 1000)); /* degrees */
+	temp = temp % (3600 * 1000);
+	sb.append(" ");
+
+	sb.append(temp / (60 * 1000)); /* minutes */
+	temp = temp % (60 * 1000);
+	sb.append(" ");
+
+	sb.append(nf.format((double)temp / 1000)); /* seconds */
+	sb.append(" ");
+
+	sb.append(direction);
+	sb.append(" ");
+
+	/* Latitude */
+	temp = (longitude & 0xFFFFFFFF) - (1 << 31);
+	if (temp < 0) {
+		temp = -temp;
+		direction = 'W';
+	}
+	else
+		direction = 'E';
+
+	sb.append(temp / (3600 * 1000)); /* degrees */
+	temp = temp % (3600 * 1000);
+	sb.append(" ");
+
+	sb.append(temp / (60 * 1000)); /* minutes */
+	temp = temp % (60 * 1000);
+	sb.append(" ");
+
+	sb.append(nf.format((double)temp / 1000)); /* seconds */
+	sb.append(" ");
+
+	sb.append(direction);
+	sb.append(" ");
+
+	nf.setMaximumFractionDigits(2);
+
+	/* Altitude */
+	sb.append(nf.format((double)(altitude - 10000000)/100));
+	sb.append("m ");
+
+	/* Size */
+	sb.append(nf.format((double)size/100));
+	sb.append("m ");
+
+	/* Horizontal precision */
+	sb.append(nf.format((double)hPrecision/100));
+	sb.append("m ");
+
+	/* Vertical precision */
+	sb.append(nf.format((double)vPrecision/100));
+	sb.append("m");
+
 	return sb.toString();
 }
 

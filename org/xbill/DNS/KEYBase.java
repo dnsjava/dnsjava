@@ -63,26 +63,23 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the DNSKEY/KEY Record to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (key != null || isNullKEY()) {
-		sb.append(flags);
-		sb.append(" ");
-		sb.append(proto);
-		sb.append(" ");
-		sb.append(alg);
-		if (key != null) {
-			if (Options.check("multiline")) {
-				sb.append(" (\n");
-				sb.append(base64.formatString(key, 64, "\t",
-							      true));
-				sb.append(" ; key_tag = ");
-				sb.append(getFootprint());
-			} else {
-				sb.append(" ");
-				sb.append(base64.toString(key));
-			}
+	sb.append(flags);
+	sb.append(" ");
+	sb.append(proto);
+	sb.append(" ");
+	sb.append(alg);
+	if (key != null) {
+		if (Options.check("multiline")) {
+			sb.append(" (\n");
+			sb.append(base64.formatString(key, 64, "\t", true));
+			sb.append(" ; key_tag = ");
+			sb.append(getFootprint());
+		} else {
+			sb.append(" ");
+			sb.append(base64.toString(key));
 		}
 	}
 	return sb.toString();

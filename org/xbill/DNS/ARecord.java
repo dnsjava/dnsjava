@@ -92,8 +92,8 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	return (toDottedQuad(addr));
 }
 

@@ -48,12 +48,9 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString() {
-	StringBuffer sb = new StringBuffer();
-	if (address != null)
-		sb.append(address);
-	return sb.toString();
+String
+rrToString() {
+	return address.toString();
 }
 
 /** Returns the address */

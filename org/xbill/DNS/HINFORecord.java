@@ -85,14 +85,12 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 /**
  * Converts to a string
  */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (cpu != null && os != null) {
-		sb.append(byteArrayToString(cpu, true));
-		sb.append(" ");
-		sb.append(byteArrayToString(os, true));
-	}
+	sb.append(byteArrayToString(cpu, true));
+	sb.append(" ");
+	sb.append(byteArrayToString(os, true));
 	return sb.toString();
 }
 

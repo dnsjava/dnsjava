@@ -109,16 +109,14 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString()
+String
+rrToString()
 {
 	StringBuffer sb = new StringBuffer();
-	if (next != null) {
-		sb.append(next);
-		for (int i = 0; i < types.length; i++) {
-			sb.append(" ");
-			sb.append(Type.string(types[i]));
-		}
+	sb.append(next);
+	for (int i = 0; i < types.length; i++) {
+		sb.append(" ");
+		sb.append(Type.string(types[i]));
 	}
 	return sb.toString();
 }

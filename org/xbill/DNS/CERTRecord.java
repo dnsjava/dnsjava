@@ -142,24 +142,21 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /**
  * Converts rdata to a String
  */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
+	sb.append (certType);
+	sb.append (" ");
+	sb.append (keyTag);
+	sb.append (" ");
+	sb.append (alg);
 	if (cert != null) {
-		sb.append (certType);
-		sb.append (" ");
-		sb.append (keyTag);
-		sb.append (" ");
-		sb.append (alg);
-		if (cert != null) {
-			if (Options.check("multiline")) {
-				sb.append(" (\n");
-				sb.append(base64.formatString(cert, 64,
-							      "\t", true));
-			} else {
-				sb.append(" ");
-				sb.append(base64.toString(cert));
-			}
+		if (Options.check("multiline")) {
+			sb.append(" (\n");
+			sb.append(base64.formatString(cert, 64, "\t", true));
+		} else {
+			sb.append(" ");
+			sb.append(base64.toString(cert));
 		}
 	}
 	return sb.toString();

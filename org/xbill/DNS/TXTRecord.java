@@ -85,17 +85,15 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** converts to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (strings != null) {
-		Iterator it = strings.iterator();
-		while (it.hasNext()) {
-			byte [] array = (byte []) it.next();
-			sb.append(byteArrayToString(array, true));
-			if (it.hasNext())
-				sb.append(" ");
-		}
+	Iterator it = strings.iterator();
+	while (it.hasNext()) {
+		byte [] array = (byte []) it.next();
+		sb.append(byteArrayToString(array, true));
+		if (it.hasNext())
+			sb.append(" ");
 	}
 	return sb.toString();
 }

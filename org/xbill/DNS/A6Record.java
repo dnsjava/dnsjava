@@ -68,17 +68,15 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (suffix != null) {
-		sb.append(prefixBits);
+	sb.append(prefixBits);
+	sb.append(" ");
+	sb.append(suffix);
+	if (prefix != null) {
 		sb.append(" ");
-		sb.append(suffix);
-		if (prefix != null) {
-			sb.append(" ");
-			sb.append(prefix);
-		}
+		sb.append(prefix);
 	}
 	return sb.toString();
 }

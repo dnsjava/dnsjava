@@ -86,22 +86,20 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
-public String
-rdataToString() {
+String
+rrToString() {
 	StringBuffer sb = new StringBuffer();
-	if (replacement != null) {
-		sb.append(order);
-		sb.append(" ");
-		sb.append(preference);
-		sb.append(" ");
-		sb.append(byteArrayToString(flags, true));
-		sb.append(" ");
-		sb.append(byteArrayToString(service, true));
-		sb.append(" ");
-		sb.append(byteArrayToString(regexp, true));
-		sb.append(" ");
-		sb.append(replacement);
-	}
+	sb.append(order);
+	sb.append(" ");
+	sb.append(preference);
+	sb.append(" ");
+	sb.append(byteArrayToString(flags, true));
+	sb.append(" ");
+	sb.append(byteArrayToString(service, true));
+	sb.append(" ");
+	sb.append(byteArrayToString(regexp, true));
+	sb.append(" ");
+	sb.append(replacement);
 	return sb.toString();
 }
 
