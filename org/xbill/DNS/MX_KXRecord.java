@@ -11,7 +11,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public abstract class MX_KXRecord extends Record {
+abstract class MX_KXRecord extends Record {
 
 protected int priority;
 protected Name target;
