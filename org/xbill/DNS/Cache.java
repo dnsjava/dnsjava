@@ -611,7 +611,20 @@ addMessage(Message in) {
 		short type = answers[i].getType();
 		Name name = answers[i].getName();
 		cred = getCred(Section.ANSWER, isAuth);
-		if (type == Type.CNAME && name.equals(curname)) {
+		if ((type == qtype || qtype == Type.ANY) &&
+		    name.equals(curname))
+		{
+			addRRset(answers[i], cred);
+			completed = true;
+			haveAnswer = true;
+			if (curname == qname) {
+				if (response == null)
+					response = new SetResponse(
+							SetResponse.SUCCESSFUL);
+				response.addRRset(answers[i]);
+			}
+			markAdditional(answers[i], additionalNames);
+		} else if (type == Type.CNAME && name.equals(curname)) {
 			CNAMERecord cname;
 			addRRset(answers[i], cred);
 			if (curname == qname)
@@ -636,19 +649,6 @@ addMessage(Message in) {
 			}
 			restart = true;
 			haveAnswer = true;
-		} else if ((type == qtype || qtype == Type.ANY) &&
-			   name.equals(curname))
-		{
-			addRRset(answers[i], cred);
-			completed = true;
-			haveAnswer = true;
-			if (curname == qname) {
-				if (response == null)
-					response = new SetResponse(
-							SetResponse.SUCCESSFUL);
-				response.addRRset(answers[i]);
-			}
-			markAdditional(answers[i], additionalNames);
 		}
 		if (restart) {
 			restart = false;
