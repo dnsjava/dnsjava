@@ -18,37 +18,34 @@ import java.io.*;
 public class RRset {
 
 class Enumerator implements Enumeration {
-	int first, count, size;
+	int count;
 	Record [] records;
-	boolean cycled;
 
 	Enumerator() {
 		synchronized (rrs) {
-			size = rrs.size();
+			int size = rrs.size();
 			records = new Record[size];
-			for (int i = 0; i < size; i++)
-				records[i] = (Record) rrs.elementAt(i);
+			start++;
+			while (start >= size)
+				start -= size;
+			int i = 0;
+			for (int j = start; j < size; j++)
+				records[i++] = (Record) rrs.elementAt(j);
+			for (int j = 0; j < start; j++)
+				records[i++] = (Record) rrs.elementAt(j);
 		}
-		if (++start >= size)
-			start -= size;
-		first = count = start;
 	}
 
 	public boolean
 	hasMoreElements() {
-		return (!cycled || count < first);
+		return (count < records.length);
 	}
 
 	public Object
 	nextElement() {
-		if (count == first && cycled)
+		if (count == records.length)
 			throw new NoSuchElementException();
-		Object o = records[count++];
-		if (count == size) {
-			count = 0;
-			cycled = true;
-		}
-		return o;
+		return records[count++];
 	}
 }
 
