@@ -116,8 +116,7 @@ toString() {
 		sb.append (alg);
 		if (key != null) {
 			sb.append (" (\n");
-			String s = base64.toString(key);
-			sb.append (IO.formatBase64String(s, 64, "\t", true));
+			sb.append (base64.formatString(key, 64, "\t", true));
 		}
 	}
 	return sb.toString();

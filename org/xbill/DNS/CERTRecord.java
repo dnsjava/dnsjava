@@ -98,8 +98,7 @@ toString() {
 		sb.append (alg);
 		if (cert != null) {
 			sb.append (" (\n");
-			String s = base64.toString(cert);
-			sb.append (IO.formatBase64String(s, 64, "\t", true));
+			sb.append (base64.formatString(cert, 64, "\t", true));
 		}
 	}
 	return sb.toString();

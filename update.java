@@ -46,7 +46,7 @@ update(InputStream in) throws IOException {
 			if (is == System.in)
 				System.out.print("> ");
 
-			line = IO.readExtendedLine(br);
+			line = Master.readExtendedLine(br);
 			if (line == null) {
 				br.close();
 				inputs.removeElement(br);

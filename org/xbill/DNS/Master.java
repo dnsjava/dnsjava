@@ -30,7 +30,7 @@ nextRecord() throws IOException {
 	MyStringTokenizer st;
 
 	while (true) {
-		line = IO.readExtendedLine(br);
+		line = readExtendedLine(br);
 		if (line == null)
 			return null;
 		if (line.length() == 0 || line.startsWith(";"))
@@ -49,12 +49,12 @@ nextRecord() throws IOException {
 	}
 }
 
-Name
+private Name
 parseOrigin(MyStringTokenizer st) throws IOException {
 	return new Name(st.nextToken());
 }
 
-Record
+private Record
 parseRR(MyStringTokenizer st, boolean useLast, Record last, Name origin)
 throws IOException
 {
@@ -90,6 +90,51 @@ throws IOException
 		throw new IOException("Parse error");
 
 	return Record.fromString(name, type, dclass, ttl, st, origin);
+}
+
+private static String
+stripTrailing(String s) {
+	if (s == null)
+		return null;
+	int lastChar;
+	int semi;
+	if ((semi = s.lastIndexOf(';')) < 0)
+		lastChar = s.length() - 1;
+	else
+		lastChar = semi - 1;
+	for (int i = lastChar; i >= 0; i--) {
+		if (!Character.isWhitespace(s.charAt(i)))
+			return s.substring(0, i+1);
+	}
+	return "";
+}
+
+/**
+ * Reads a line using the master file format.  Removes all data following
+ * a semicolon and uses parentheses as line continuation markers.
+ * @param br The BufferedReader supplying the data
+ * @return A String representing the normalized line
+ */
+public static String
+readExtendedLine(BufferedReader br) throws IOException {
+	String s = stripTrailing(br.readLine());
+	if (s == null)
+		return null;
+	if (!s.endsWith("("))
+		return s;
+	StringBuffer sb = new StringBuffer(s.substring(0, s.length() - 1));
+	while (true) {
+		s = stripTrailing(br.readLine());
+		if (s == null)
+			return sb.toString();
+		if (s.endsWith(")")) {
+			sb.append(s.substring(0, s.length() - 1));
+			break;
+		}
+		else
+			sb.append(s);
+	}
+	return sb.toString();
 }
 
 }

@@ -59,6 +59,34 @@ toString(byte [] b) {
 }
 
 /**
+ * Formats data into a nicely formatted base64 encoded String
+ * @param b An array containing binary data
+ * @param lineLength The number of characters per line
+ * @param prefix A string prefixing the characters on each line
+ * @param addClose Whether to add a close parenthesis or not
+ * @return A String representing the formatted output
+ */
+public static String
+formatString(byte [] b, int lineLength, String prefix, boolean addClose) {
+	String s = toString(b);
+	StringBuffer sb = new StringBuffer();
+	for (int i = 0; i < s.length(); i += lineLength) {
+		sb.append (prefix);
+		if (i + lineLength >= s.length()) {
+			sb.append(s.substring(i));
+			if (addClose)
+				sb.append(" )");
+		}
+		else {
+			sb.append(s.substring(i, i+64));
+			sb.append("\n");
+		}
+	}
+	return sb.toString();
+}
+
+
+/**
  * Convert a base64-encoded String to binary data
  * @param b A String containing the encoded data
  * @return An array containing the binary data, or null if the string is invalid

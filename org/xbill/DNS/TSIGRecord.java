@@ -78,8 +78,7 @@ toString() {
 	sb.append (" ");
 	sb.append (Rcode.string(error));
 	sb.append ("\n");
-	String s = base64.toString(signature);
-	sb.append (IO.formatBase64String(s, 64, "\t", false));
+	sb.append (base64.formatString(signature, 64, "\t", false));
 	if (other != null) {
 		sb.append("\n\t <");
 		if (error == Rcode.BADTIME) {
