@@ -49,7 +49,7 @@ parsed.  Otherwise, or if these attempts fail, the default nameserver is
 determine the nameserver under MacOS or any other OSes.  Contributions of code
 are welcome (see org/xbill/DNS/FindServer.java for the basic structure).
 
-One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
+On some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
 a dynamic address and its hostname is not in DNS.  This breaks the (mostly
 undocumented) feature that the @me@ variable can be used in the textual form
