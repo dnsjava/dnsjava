@@ -1,3 +1,6 @@
+1/25/2003
+	- Cleanup and improvements to the ExtendedResolver class.
+
 1/23/2003
 	- Add the setMaxCache() method to the Cache class.
 	- Check for non-absolute names when creating Records.
