@@ -303,7 +303,8 @@ getSection(int section) {
 }
 
 /**
- * Returns an array containing all records in the given section.
+ * Returns an array containing all records in the given section, or an
+ * empty array if the section is empty.
  * @see Record
  * @see Section
  */
