@@ -366,12 +366,12 @@ lookup(Name current, Name suffix) {
 		}
 	}
 
-	if (verbose)
-		System.err.println("lookup " + tname + " " + Type.string(type));
-
 	SetResponse sr = cache.lookupRecords(tname, type, credibility);
-	if (verbose)
+	if (verbose) {
+		System.err.println("lookup " + tname + " " +
+				   Type.string(type));
 		System.err.println(sr);
+	}
 	processResponse(sr);
 	if (done)
 		return;
@@ -398,6 +398,11 @@ lookup(Name current, Name suffix) {
 	sr = cache.addMessage(response);
 	if (sr == null)
 		sr = cache.lookupRecords(tname, type, credibility);
+	if (verbose) {
+		System.err.println("queried " + tname + " " +
+				   Type.string(type));
+		System.err.println(sr);
+	}
 	processResponse(sr);
 }
 
