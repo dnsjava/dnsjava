@@ -633,6 +633,10 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	int [] array = Address.toArray(s);
 	if (array == null)
 		throw st.exception("invalid address");
+	address = new byte[4];
+	for (int i = 0; i < 4; i++) {
+		address[i] = (byte)array[i];
+	}
 
 	s = st.getString();
 	protocol = Protocol.value(s);
@@ -652,6 +656,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 		}
 		list.add(new Integer(service));
 	}
+	st.unget();
 	services = new int[list.size()];
 	for (int i = 0; i < list.size(); i++) {
 		services[i] = ((Integer) list.get(i)).intValue();
