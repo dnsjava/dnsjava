@@ -8,10 +8,12 @@ import java.net.*;
 
 /**
  * The Lookup object performs queries at a high level.  The input consists
- * of a name, an optional type, and an optional class.  Caching is used
- * when possible to reduce the number of DNS requests, and a Resolver
- * is used to perform the queries.  A search path can be set or determined
- * by FindServer, which allows lookups of unqualified names.
+ * of a name, an optional type, and an optional class.  Caching is enabled
+ * by default and used when possible to reduce the number of DNS requests.
+ * A Resolver, which defaults to an ExtendedResolver initialized with the
+ * resolvers located by the FindServer class, performs the queries.  A serach
+ * path of domain suffixes is used to resolve relative names, and is also
+ * determined by the FindServer class.
  * @see Cache
  * @see Resolver
  * @see FindServer
@@ -87,7 +89,7 @@ getDefaultResolver() {
 }
 
 /**
- * Sets the Resolver that will be used as the default by future Lookups.
+ * Sets the default Resolver to be used as the default by future Lookups.
  * @param resolver The default resolver.
  */
 public static synchronized void
@@ -113,8 +115,8 @@ getDefaultCache(int dclass) {
 }
 
 /**
- * Sets the Cache that will be used as the default for the specified
- * class by future Lookups.
+ * Sets the Cache to be used as the default for the specified class by future
+ * Lookups.
  * @param cache The default cache for the specified class.
  * @param dclass The class whose cache is being set.
  */
@@ -134,7 +136,7 @@ getDefaultSearchPath() {
 }
 
 /**
- * Sets the search path that will be used as the default by future Lookups.
+ * Sets the search path to be used as the default by future Lookups.
  * @param domains The default search path.
  */
 public static synchronized void
@@ -261,7 +263,8 @@ Lookup(String name) throws TextParseException {
 }
 
 /**
- * Sets the resolver to use when performing the lookup.
+ * Sets the resolver to use when performing this lookup.  This overrides the
+ * default value.
  * @param resolver The resolver to use.
  */
 public void
@@ -270,7 +273,8 @@ setResolver(Resolver resolver) {
 }
 
 /**
- * Sets the search path to use when performing the lookup.
+ * Sets the search path to use when performing this lookup.  This overrides the
+ * default value.
  * @param domains An array of names containing the search path.
  */
 public void
@@ -279,7 +283,8 @@ setSearchPath(Name [] domains) {
 }
 
 /**
- * Sets the search path to use when performing the lookup.
+ * Sets the search path to use when performing this lookup. This overrides the
+ * default value.
  * @param domains An array of names containing the search path.
  * @throws TextParseException A name in the array is not a valid DNS name.
  */
@@ -296,9 +301,9 @@ setSearchPath(String [] domains) throws TextParseException {
 }
 
 /**
- * Sets the cache to use when performing the lookup.  If the results of this
- * lookup should not be permanently cached, a temporary cache or null can
- * be provided here.
+ * Sets the cache to use when performing this lookup.  This overrides the
+ * default value.  If the results of this lookup should not be permanently
+ * cached, a temporary cache or null can be provided here.
  * @param cache The cache to use.
  */
 public void
@@ -310,7 +315,7 @@ setCache(Cache cache) {
 
 /**
  * Sets the minimum credibility level that will be accepted when performing
- * the lookup.
+ * the lookup.  This defaults to Crefibility.NORMAL.
  * @param credibility The minimum credibility level.
  */
 public void
@@ -435,7 +440,7 @@ resolve(Name current, Name suffix) {
 }
 
 /**
- * Performs the lookup.
+ * Performs the lookup, using the specified Cache, Resolver, and search path.
  * @return The answers, or null if none are found.
  */
 public Record []
