@@ -19,11 +19,31 @@ private String name;
 
 private static int nactive = 0;
 private static Vector list = new Vector();
-private static final int max = 10;
-private static final long lifetime = 900 * 1000;
+private static int max = 10;
+private static long lifetime = 900 * 1000; /* 15 minute default */
 
+private
 WorkerThread() {
 	setDaemon(true);
+}
+
+/**
+ * Sets the lifetime of an idle WorkerThread (in ms).  A WorkerThread
+ * will remain on the idle list for this much time before exiting.
+ */
+static void
+setLifetime(long time) {
+	lifetime = time;
+}
+
+/**
+ * Sets the maximum number of WorkerThreads that can exist at any given
+ * time.  If this value is decreased below the current number of
+ * WorkerThreads, this will not take effect immediately.
+ */
+static void
+setMaxThreads(int maxThreads) {
+	max = maxThreads;
 }
 
 /**
@@ -41,7 +61,7 @@ getThread() {
 			t = (WorkerThread) list.firstElement();
 			list.removeElement(t);
 		}
-		else if (nactive == max) {
+		else if (nactive >= max) {
 			while (true) {
 				try {
 					list.wait();
