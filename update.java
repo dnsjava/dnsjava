@@ -388,7 +388,7 @@ doQuery(MyStringTokenizer st) throws IOException {
 	Name name = null;
 	short type = Type.A, dclass = defaultClass;
 
-	name = new Name(st.nextToken());
+	name = new Name(st.nextToken(), origin);
 	if (st.hasMoreTokens()) {
 		type = Type.value(st.nextToken());
 		if (type < 0)
