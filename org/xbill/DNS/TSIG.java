@@ -17,8 +17,8 @@ import org.xbill.DNS.utils.*;
 public class TSIG {
 
 private static final String HMAC_MD5_STR = "HMAC-MD5.SIG-ALG.REG.INT.";
-private static final String HMAC_SHA1_STR = "hmac-sha1";
-private static final String HMAC_SHA256_STR = "hmac-sha256";
+private static final String HMAC_SHA1_STR = "hmac-sha1.";
+private static final String HMAC_SHA256_STR = "hmac-sha256.";
 
 /** The domain name representing the HMAC-MD5 algorithm. */
 public static final Name HMAC_MD5 = Name.fromConstantString(HMAC_MD5_STR);
