@@ -23,6 +23,10 @@ public dnsResolver(String hostname) {
 	}
 }
 
+public dnsResolver() {
+	this("localhost");
+}
+
 public void
 setPort(int port) {
 	this.port = port;
@@ -123,8 +127,6 @@ send(dnsMessage query) throws IOException {
 		TSIG.apply(query);
 
 
-System.out.println(query);
-System.out.println("----------------");
 	out = query.toWire();
 
 	if (useTCP)
