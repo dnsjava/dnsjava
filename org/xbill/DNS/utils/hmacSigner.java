@@ -23,14 +23,6 @@ private static final byte PADLEN = 64;
 /** If true, all digested bytes will be printed */
 public static boolean verbose = false;
 
-private static void
-printByteString(String s, byte [] b, int offset, int length) {
-	System.out.print(length + " bytes (" + s + "): ");
-	for (int i=offset; i<offset+length; i++)
-		System.out.print(Integer.toHexString((int)b[i] & 0xFF) + " ");
-	System.out.println();
-}
-
 /**
  * Creates a new HMAC instance
  * @param key The secret key
@@ -57,7 +49,7 @@ hmacSigner(byte [] key) {
 	catch (IOException e) {
 	}
 	if (verbose)
-		printByteString("key", key, 0, key.length);
+		System.err.println(hexdump.dump("key", key));
 }
 
 /**
@@ -71,7 +63,8 @@ addData(byte [] b, int offset, int length) {
 	if (length <= 0 || offset + length >= b.length)
 		return;
 	if (verbose)
-		printByteString("partial add", b, offset, length);
+		System.err.println(hexdump.dump("partial add", b,
+						offset, length));
 	bytes.write(b, offset, length);
 }
 
@@ -82,7 +75,7 @@ addData(byte [] b, int offset, int length) {
 public void
 addData(byte [] b) {
 	if (verbose)
-		printByteString("add", b, 0, b.length);
+		System.err.println(hexdump.dump("add", b));
 	try {
 		bytes.write(b);
 	}
@@ -106,7 +99,7 @@ sign() {
 	}
 	byte [] b = md5.compute(bytes.toByteArray());
 	if (verbose)
-		printByteString("sig", b, 0, b.length);
+		System.err.println(hexdump.dump("sig", b));
 	return b;
 }
 
@@ -118,7 +111,7 @@ sign() {
 public boolean
 verify(byte [] signature) {
 	if (verbose)
-		printByteString("ver", signature, 0, signature.length);
+		System.err.println(hexdump.dump("ver", signature));
 	return (byteArrayCompare(signature, sign()));
 }
 
