@@ -190,12 +190,6 @@ parseMessage(byte [] b) throws WireParseException {
 }
 
 private void
-applyTSIG(Message query) throws IOException {
-	if (tsig != null)
-		tsig.apply(query, null);
-}
-
-private void
 verifyTSIG(Message query, Message response, byte [] b, TSIG tsig) {
 	if (tsig == null)
 		return;
@@ -245,9 +239,10 @@ send(Message query) throws IOException {
 
 	query = (Message) query.clone();
 	applyEDNS(query);
-	applyTSIG(query);
+	if (tsig != null)
+		query.setTSIG(tsig, Rcode.NOERROR, null);
 
-	byte [] out = query.toWire();
+	byte [] out = query.toWire(Message.MAXLENGTH);
 	int udpSize = maxUDPSize(query);
 	boolean tcp = false;
 	do {
@@ -320,9 +315,10 @@ sendAXFR(Message query) throws IOException {
 
 	try {
 		query = (Message) query.clone();
-		applyTSIG(query);
+		if (tsig != null)
+			tsig.apply(query, null);
 
-		byte [] out = query.toWire();
+		byte [] out = query.toWire(Message.MAXLENGTH);
 		writeTCP(s, out);
 		byte [] in = readTCP(s);
 		Message response = parseMessage(in);
