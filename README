@@ -43,11 +43,11 @@ checked.  These can either be IP addresses or hostnames (which are resolved
 using Java's built in DNS support).  If the underlying OS is unix-based, the
 dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
 the underlying OS is Windows, winipcfg/ipconfig can be called and the output
-parsed.  Note that this may fail for non-English versions of Windows.
+parsed.  Note that this may fail for some non-English versions of Windows.
 Otherwise, or if these attempts fail, the default nameserver is
 "localhost".  This is unavoidable.  Unfortunately, I have no idea how to
 determine the nameserver for any other OSes.  Contributions of code
-are welcome (see org/xbill/DNS/FindServer.java for the basic structure).
+are welcome (see org/xbill/DNS/ResolverConfig.java for the basic structure).
 
 On some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
