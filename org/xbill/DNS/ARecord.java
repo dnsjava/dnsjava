@@ -36,17 +36,14 @@ fromArray(byte [] array) {
 	return (fromBytes(array[0], array[1], array[2], array[3]));
 }
 
-private static final String
-toDottedQuad(int addr) {
-	StringBuffer sb = new StringBuffer();
-	sb.append(((addr >>> 24) & 0xFF));
-	sb.append(".");
-	sb.append(((addr >>> 16) & 0xFF));
-	sb.append(".");
-	sb.append(((addr >>> 8) & 0xFF));
-	sb.append(".");
-	sb.append((addr & 0xFF));
-	return sb.toString();
+private static final byte []
+toArray(int addr) {
+	byte [] bytes = new byte[4];
+	bytes[0] = (byte) ((addr >>> 24) & 0xFF);
+	bytes[1] = (byte) ((addr >>> 16) & 0xFF);
+	bytes[2] = (byte) ((addr >>> 8) & 0xFF);
+	bytes[3] = (byte) (addr & 0xFF);
+	return bytes;
 }
 
 /**
@@ -96,17 +93,15 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /** Converts rdata to a String */
 String
 rrToString() {
-	return (toDottedQuad(addr));
+	return (Address.toDottedQuad(toArray(addr)));
 }
 
 /** Returns the Internet address */
 public InetAddress
 getAddress() {
-	String s = toDottedQuad(addr);
 	try {
-		return InetAddress.getByName(s);
-	}
-	catch (UnknownHostException e) {
+		return InetAddress.getByAddress(toArray(addr));
+	} catch (UnknownHostException e) {
 		return null;
 	}
 }

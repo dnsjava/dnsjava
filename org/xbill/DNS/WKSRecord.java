@@ -595,6 +595,8 @@ WKSRecord(Name name, int dclass, long ttl, InetAddress address, int protocol,
 	  int [] services)
 {
 	super(name, Type.WKS, dclass, ttl);
+	if (Address.familyOf(address) != Address.IPv4)
+		throw new IllegalArgumentException("invalid IPv4 address");
 	this.address = address.getAddress();
 	this.protocol = checkU8("protocol", protocol);
 	for (int i = 0; i < services.length; i++) {
@@ -682,9 +684,9 @@ rrToString() {
 public InetAddress
 getAddress() {
 	try {
-		return Address.getByName(Address.toDottedQuad(address));
+		return InetAddress.getByAddress(address);
 	} catch (UnknownHostException e) {
-		throw new IllegalStateException("dotted quad lookup failure");
+		return null;
 	}
 }
 
