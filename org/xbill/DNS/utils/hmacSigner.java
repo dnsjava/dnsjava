@@ -66,7 +66,16 @@ boolean verify(byte [] signature) {
 	}
 	mdc = new md5(bytes.toByteArray());
 	mdc.calc();
-	return (signature.equals(mdc.toBytes()));
+	return (byteArrayCompare(signature, mdc.toBytes()));
+}
+
+static boolean byteArrayCompare(byte [] b1, byte [] b2) {
+	if (b1.length != b2.length)
+		return false;
+	for (int i = 0; i < b1.length; i++)
+		if (b1[i] != b2[i])
+			return false;
+	return true;
 }
 
 }
