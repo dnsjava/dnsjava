@@ -18,7 +18,7 @@ dump(String description, byte [] b, int offset, int length) {
 	StringBuffer sb = new StringBuffer();
 
 	sb.append(length);
-	sb.append(" bytes");
+	sb.append("b");
 	if (description != null) {
 		sb.append(" (");
 		sb.append(description);
@@ -33,8 +33,9 @@ dump(String description, byte [] b, int offset, int length) {
 	int perline = (80 - prefixlen) / 3;
 	for (int i = 0; i < length; i++) {
 		if (i != 0 && i % perline == 0) {
+			sb.append('\n');
 			for (int j = 0; j < prefixlen; j+=8)
-				sb.append("\n\t");
+				sb.append('\t');
 		}
 		int value = (int)(b[i + offset]) & 0xFF;
 		if (value < 16)
