@@ -1,4 +1,4 @@
-// Copyright (c) 1999-2003 Brian Wellington (bwelling@xbill.org)
+// Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
 
 import java.io.*;
 import java.net.*;
