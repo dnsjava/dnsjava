@@ -72,7 +72,6 @@ sendTo(Message query, int r, int q) {
 				return true;
 			return false;
 	}
-System.out.println("sending to resolver " + r);
 	int id = resolvers[r].sendAsync(query, receiver);
 	synchronized (idMap) {
 		idMap.put(new Integer(id), new Integer(r));
@@ -122,6 +121,18 @@ send(Message query) {
 		}
 	}
 	return nx;
+}
+
+public Resolver
+getResolver(int i) {
+	if (i < resolvers.length)
+		return resolvers[i];
+	return null;
+}
+
+public Resolver []
+getResolvers() {
+	return resolvers;
 }
 
 }
