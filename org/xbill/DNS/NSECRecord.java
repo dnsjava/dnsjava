@@ -61,9 +61,6 @@ listToArray(List list) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	next = new Name(in);
 
 	int lastbase = -1;

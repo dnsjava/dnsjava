@@ -25,8 +25,6 @@ getObject() {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	data = in.readByteArray();
 }
 

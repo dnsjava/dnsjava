@@ -59,9 +59,6 @@ TXTRecord(Name name, int dclass, long ttl, String string) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	strings = new ArrayList(2);
 	while (in.remaining() > 0) {
 		byte [] b = in.readCountedString();

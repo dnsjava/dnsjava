@@ -43,8 +43,6 @@ NXTRecord(Name name, int dclass, long ttl, Name next, BitSet bitmap) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	next = new Name(in);
 	bitmap = new BitSet();
 	int bitmapLength = in.remaining();

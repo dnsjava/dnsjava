@@ -58,9 +58,6 @@ OPTRecord(int payloadSize, int xrcode, int version) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	if (in.remaining() > 0)
 		options = new HashMap();
 	while (in.remaining() > 0) {

@@ -38,8 +38,6 @@ MX_KXRecord(Name name, int type, int dclass, long ttl, int priority,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	priority = in.readU16();
 	target = new Name(in);
 }

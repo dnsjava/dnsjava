@@ -79,9 +79,6 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	alg = new Name(in);
 	timeInception = new Date(1000 * in.readU32());
 	timeExpire = new Date(1000 * in.readU32());

@@ -52,8 +52,6 @@ SRVRecord(Name name, int dclass, long ttl, int priority,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	priority = in.readU16();
 	weight = in.readU16();
 	port = in.readU16();

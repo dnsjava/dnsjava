@@ -62,9 +62,6 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	order = in.readU16();
 	preference = in.readU16();
 	flags = in.readCountedString();

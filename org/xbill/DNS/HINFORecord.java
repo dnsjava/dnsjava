@@ -42,8 +42,6 @@ HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	cpu = in.readCountedString();
 	os = in.readCountedString();
 }

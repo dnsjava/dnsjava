@@ -60,9 +60,6 @@ SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	host = new Name(in);
 	admin = new Name(in);
 	serial = in.readU32();

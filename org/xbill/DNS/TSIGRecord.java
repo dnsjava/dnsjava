@@ -69,9 +69,6 @@ TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	alg = new Name(in);
 
 	long timeHigh = in.readU16();

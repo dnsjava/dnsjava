@@ -44,8 +44,6 @@ RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	mailbox = new Name(in);
 	textDomain = new Name(in);
 }

@@ -33,8 +33,6 @@ NS_CNAME_PTRRecord(Name name, int type, int dclass, long ttl, Name target) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	target = new Name(in);
 }
 

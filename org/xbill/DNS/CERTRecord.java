@@ -118,8 +118,6 @@ CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	certType = in.readU16();
 	keyTag = in.readU16();
 	alg = in.readU8();

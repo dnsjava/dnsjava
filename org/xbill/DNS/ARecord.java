@@ -61,8 +61,6 @@ ARecord(Name name, int dclass, long ttl, InetAddress address) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	addr = fromArray(in.readByteArray(4));
 }
 

@@ -25,11 +25,6 @@ protected byte [] signature;
 protected
 SIGBase() {}
 
-protected
-SIGBase(Name name, int type, int dclass, long ttl) {
-	super(name, type, dclass, ttl);
-}
-
 public
 SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 	long origttl, Date expire, Date timeSigned, int footprint, Name signer,
@@ -56,8 +51,6 @@ SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	covered = in.readU16();
 	alg = in.readU8();
 	labels = in.readU8();

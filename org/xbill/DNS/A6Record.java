@@ -45,9 +45,6 @@ A6Record(Name name, int dclass, long ttl, int prefixBits,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	prefixBits = in.readU8();
 	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;

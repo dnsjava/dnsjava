@@ -34,9 +34,6 @@ AAAARecord(Name name, int dclass, long ttl, Inet6Address address) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	address = new Inet6Address(in.readByteArray(16));
 }
 

@@ -21,11 +21,6 @@ protected int footprint = -1;
 protected
 KEYBase() {}
 
-protected
-KEYBase(Name name, int type, int dclass, long ttl) {
-	super(name, type, dclass, ttl);
-}
-
 public
 KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
 	int alg, byte [] key)
@@ -39,8 +34,6 @@ KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
 	flags = in.readU16();
 	proto = in.readU8();
 	alg = in.readU8();

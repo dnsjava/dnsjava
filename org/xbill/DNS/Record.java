@@ -177,7 +177,15 @@ newRecord(Name name, int type, int dclass, long ttl, byte [] data) {
  */
 public static Record
 newRecord(Name name, int type, int dclass, long ttl) {
-	return newRecord(name, type, dclass, ttl, 0, (byte []) null);
+	if (!name.isAbsolute())
+		throw new RelativeNameException(name);
+	Type.check(type);
+	DClass.check(dclass);
+	TTL.check(ttl);
+
+	Record rec = getEmptyRecord(name, type, dclass, ttl);
+	rec.empty = true;
+	return rec;
 }
 
 /**
@@ -191,7 +199,7 @@ newRecord(Name name, int type, int dclass, long ttl) {
  */
 public static Record
 newRecord(Name name, int type, int dclass) {
-	return newRecord(name, type, dclass, 0, 0, (byte []) null);
+	return newRecord(name, type, dclass, 0);
 }
 
 static Record

@@ -48,9 +48,6 @@ LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	int version;
 
 	version = in.readU8();

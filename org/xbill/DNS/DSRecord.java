@@ -53,9 +53,6 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (in == null)
-		return;
-
 	footprint = in.readU16();
 	alg = in.readU8();
 	digestid = in.readU8();
