@@ -65,7 +65,7 @@ newQuery(Record r) {
 
 /**
  * Creates a new Message to contain a dynamic update.  A random Message ID
- * the zone are filled in.
+ * and the zone are filled in.
  * @param zone The zone to be updated
  */
 public static Message
@@ -97,7 +97,7 @@ Message(byte [] b) throws IOException {
 }
 
 /**
- * Replaces the Header with a new one
+ * Replaces the Header with a new one.
  * @see Header
  */
 public void
@@ -106,7 +106,7 @@ setHeader(Header h) {
 }
 
 /**
- * Retrieves the Header
+ * Retrieves the Header.
  * @see Header
  */
 public Header
@@ -115,7 +115,7 @@ getHeader() {
 }
 
 /**
- * Adds a record to a section of the Message, and adjusts the header
+ * Adds a record to a section of the Message, and adjusts the header.
  * @see Record
  * @see Section
  */
@@ -128,7 +128,7 @@ addRecord(Record r, int section) {
 }
 
 /**
- * Removes a record from a section of the Message, and adjusts the header
+ * Removes a record from a section of the Message, and adjusts the header.
  * @see Record
  * @see Section
  */
@@ -143,7 +143,7 @@ removeRecord(Record r, int section) {
 }
 
 /**
- * Removes all records from a section of the Message, and adjusts the header
+ * Removes all records from a section of the Message, and adjusts the header.
  * @see Record
  * @see Section
  */
@@ -154,7 +154,7 @@ removeAllRecords(int section) {
 }
 
 /**
- * Determines if the given record is already present in the given section
+ * Determines if the given record is already present in the given section.
  * @see Record
  * @see Section
  */
@@ -164,7 +164,7 @@ findRecord(Record r, int section) {
 }
 
 /**
- * Determines if the given record is already present in any section
+ * Determines if the given record is already present in any section.
  * @see Record
  * @see Section
  */
@@ -178,7 +178,7 @@ findRecord(Record r) {
 
 /**
  * Determines if an RRset with the given name and type is already
- * present in the given section
+ * present in the given section.
  * @see RRset
  * @see Section
  */
@@ -196,7 +196,7 @@ findRRset(Name name, short type, int section) {
 
 /**
  * Determines if an RRset with the given name and type is already
- * present in any section
+ * present in any section.
  * @see RRset
  * @see Section
  */
@@ -208,7 +208,7 @@ findRRset(Name name, short type) {
 }
 
 /**
- * Returns the first record in the QUESTION section
+ * Returns the first record in the QUESTION section.
  * @see Record
  * @see Section
  */
@@ -225,7 +225,7 @@ getQuestion() {
 }
 
 /**
- * Returns the TSIG record from the ADDITIONAL section, if one is present
+ * Returns the TSIG record from the ADDITIONAL section, if one is present.
  * @see TSIGRecord
  * @see TSIG
  * @see Section
@@ -261,7 +261,7 @@ isVerified() {
 }
 
 /**
- * Returns the OPT record from the ADDITIONAL section, if one is present
+ * Returns the OPT record from the ADDITIONAL section, if one is present.
  * @see OPTRecord
  * @see Section
  */
@@ -288,7 +288,7 @@ getRcode() {
 }
 
 /**
- * Returns an Enumeration listing all records in the given section
+ * Returns an Enumeration listing all records in the given section.
  * @see Record
  * @see Section
  * @deprecated As of dnsjava 1.3.0, replaced by <code>getSectionArray()</code>.
@@ -302,7 +302,7 @@ getSection(int section) {
 }
 
 /**
- * Returns an array containing all records in the given section
+ * Returns an array containing all records in the given section.
  * @see Record
  * @see Section
  */
@@ -377,7 +377,7 @@ numBytes() {
 }
 
 /**
- * Converts the given section of the Message to a String
+ * Converts the given section of the Message to a String.
  * @see Section
  */
 public String
@@ -403,7 +403,7 @@ sectionToString(int i) {
 }
 
 /**
- * Converts the Message to a String
+ * Converts the Message to a String.
  */
 public String
 toString() {
