@@ -1,3 +1,7 @@
+1/8/2004
+	- LOC records weren't parsed correctly.
+	  (reported by Harel Efraim <harel.efraim@nominum.com>)
+
 12/15/2003
 	- TTLs weren't handled properly in the master file parser.
 	  (Jack Tavares <tavares@drizzle.com>)

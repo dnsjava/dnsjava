@@ -98,6 +98,7 @@ throws IOException
 	catch (NumberFormatException e) {
 		st.unget();
 	}
+	s = st.getString();
 	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
 		throw st.exception("Invalid LOC latitude");
 	rec.latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
@@ -142,6 +143,7 @@ throws IOException
 	}
 	
 	/* Size */
+	token = st.get();
 	if (token.isEOL()) {
 		st.unget();
 		return rec;
@@ -157,6 +159,7 @@ throws IOException
 	}
 	
 	/* Horizontal precision */
+	token = st.get();
 	if (token.isEOL()) {
 		st.unget();
 		return rec;
@@ -172,6 +175,7 @@ throws IOException
 	}
 	
 	/* Vertical precision */
+	token = st.get();
 	if (token.isEOL()) {
 		st.unget();
 		return rec;
