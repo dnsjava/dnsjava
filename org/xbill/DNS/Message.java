@@ -68,7 +68,7 @@ Message(int id) {
 /** Creates a new Message with a random Message ID */
 public
 Message() {
-	this(Header.randomID());
+	this(new Header());
 }
 
 /**
