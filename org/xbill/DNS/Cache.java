@@ -201,16 +201,23 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 	}
 
 	for (int i = 0; i < elements.length; i++) {
-		if (elements[i] == null)
-			continue;
-
 		RRset rrset = elements[i].rrset;
+
+		/* Is this a negatively cached entry? */
 		if (rrset == null) {
+			/*
+			 * If we're looking for ANY, don't return it in
+			 * case we find something better.
+			 */
 			if (type == Type.ANY)
 				continue;
 			return new SetResponse(SetResponse.NEGATIVE);
 		}
 
+		/*
+		 * Found a CNAME when we weren't looking for one.  Time
+		 * to recurse.
+		 */
 		if (type != Type.CNAME && type != Type.ANY &&
 		    rrset.getType() == Type.CNAME)
 		{
@@ -222,10 +229,20 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			cr.addCNAME(cname);
 			return cr;
 		}
+
+		/* If we found something, save it */
 		if (cr == null)
 			cr = new SetResponse(SetResponse.SUCCESSFUL);
 		cr.addRRset(rrset);	
 	}
+
+	/*
+	 * As far as I can tell, the only time cr will be null is if we
+	 * queried for ANY and only saw negative responses.  So, return
+	 * NEGATIVE.
+	 */
+	if (cr == null && type == Type.ANY)
+		return new SetResponse(SetResponse.NEGATIVE);
 	return cr;
 }
 
