@@ -54,7 +54,8 @@ throws IOException
 }
 
 public
-dnsSIGRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsSIGRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     dnsName origin)
 throws IOException
 {
 	super(_name, dns.SIG, _dclass, _ttl);
@@ -65,7 +66,7 @@ throws IOException
 	expire = parseDate(st.nextToken());
 	timeSigned = parseDate(st.nextToken());
 	footprint = (short) Integer.parseInt(st.nextToken());
-	signer = new dnsName(st.nextToken());
+	signer = new dnsName(st.nextToken(), origin);
 	if (st.hasMoreTokens())
 		signature = base64.fromString(st.nextToken());
 }

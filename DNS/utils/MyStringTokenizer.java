@@ -22,6 +22,7 @@ char [] string;
 String delim;
 boolean returnTokens;
 int current;
+String putBack;
 
 public
 MyStringTokenizer(String _s, String _delim, boolean _returnTokens) {
@@ -42,9 +43,21 @@ MyStringTokenizer(String _s) {
 	this(_s, " \t\n\r", false);
 }
 
+private boolean
+isDelim(int i) {
+	return (delim.indexOf(string[i]) >= 0);
+}
+
 public boolean
 hasMoreTokens() {
-	return (current < string.length);
+	if (current >= string.length)
+		return false;
+	if (!isDelim(current) || returnTokens)
+		return true;
+	int t = current;
+	while (t < string.length && isDelim(t))
+		t++;
+	return (t < string.length);
 }
 
 public boolean
@@ -52,13 +65,23 @@ hasMoreElements() {
 	return hasMoreTokens();
 }
 
+/* This should _only_ be called if hasMoreTokens == false */
+public boolean
+hasMoreDelimiters() {
+	return (current < string.length);
+}
+
 public String
 nextToken() {
+	if (putBack != null) {
+		String s = putBack;
+		putBack = null;
+		return s;
+	}
 	int start = current;
-	if (delim.indexOf(string[current]) >= 0) {
+	if (isDelim(current)) {
 		/* This is whitespace */
-		while (current < string.length &&
-		       delim.indexOf(string[current]) >= 0)
+		while (current < string.length && isDelim(current))
 			current++;
 		if (returnTokens)
 			return new String(string, start, current - start);
@@ -85,7 +108,7 @@ nextToken() {
 				quoted = true;
 			else if (string[current] == '\\')
 				escaped = true;
-			else if (delim.indexOf(string[current]) >= 0) {
+			else if (isDelim(current)) {
 				break;
 			}
 			else
@@ -99,6 +122,11 @@ nextToken() {
 public Object
 nextElement() {
 	return nextToken();
+}
+
+public void
+putBackToken(String s) {
+	putBack = s;
 }
 
 public static void

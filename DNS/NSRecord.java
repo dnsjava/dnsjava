@@ -21,10 +21,11 @@ dnsNSRecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsNSRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsNSRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	    dnsName origin)
 throws IOException
 {
-	super(_name, dns.NS, _dclass, _ttl, st);
+	super(_name, dns.NS, _dclass, _ttl, st, origin);
 }
 
 }

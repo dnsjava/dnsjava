@@ -57,13 +57,15 @@ static final short IXFR		= 251;
 static final short AXFR		= 252;
 static final short MAILB	= 253;
 static final short MAILA	= 254;
-static final short ANY		= 255;
 
 /* Classes */
-static final short IN		 = 1;
-static final short CHAOS	 = 3;
-static final short HESIOD	 = 4;
-/*static final short ANY = 255;*/
+static final short IN		= 1;
+static final short CHAOS	= 3;
+static final short HESIOD	= 4;
+static final short NONE		= 254;
+
+/* Shared by Type & Class */
+static final short ANY		= 255;
 
 /* Rcodes */
 static final byte NOERROR = 0;

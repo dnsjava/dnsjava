@@ -35,14 +35,15 @@ throws IOException
 }
 
 public
-dnsSRVRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsSRVRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     dnsName origin)
 throws IOException
 {
 	super(_name, dns.SRV, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
 	weight = Short.parseShort(st.nextToken());
 	port = Short.parseShort(st.nextToken());
-	target = new dnsName(st.nextToken());
+	target = new dnsName(st.nextToken(), origin);
 }
 
 public String

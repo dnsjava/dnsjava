@@ -45,7 +45,8 @@ throws IOException
 }
 
 public
-dnsTXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsTXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     dnsName origin)
 throws IOException
 {
 	super(_name, dns.TXT, _dclass, _ttl);

@@ -41,12 +41,13 @@ dnsSOARecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsSOARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsSOARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     dnsName origin)
 throws IOException
 {
 	super(_name, dns.SOA, _dclass, _ttl);
-	host = new dnsName(st.nextToken());
-	admin = new dnsName(st.nextToken());
+	host = new dnsName(st.nextToken(), origin);
+	admin = new dnsName(st.nextToken(), origin);
 	serial = Integer.parseInt(st.nextToken());
 	refresh = Integer.parseInt(st.nextToken());
 	retry = Integer.parseInt(st.nextToken());

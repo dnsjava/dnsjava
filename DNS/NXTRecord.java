@@ -39,12 +39,13 @@ throws IOException
 }
 
 public
-dnsNXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsNXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     dnsName origin)
 throws IOException
 {
 	super(_name, dns.NXT, _dclass, _ttl);
 	Vector types = new Vector();
-	next = new dnsName(st.nextToken());
+	next = new dnsName(st.nextToken(), origin);
 	bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
 		short t = dns.typeValue(st.nextToken());

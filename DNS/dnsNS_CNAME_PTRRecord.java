@@ -27,11 +27,11 @@ throws IOException
 
 public
 dnsNS_CNAME_PTRRecord(dnsName _name, short _type, short _dclass, int _ttl,
-		      MyStringTokenizer st)
+		      MyStringTokenizer st, dnsName origin)
 throws IOException
 {
         super(_name, _type, _dclass, _ttl);
-        target = new dnsName(st.nextToken());
+        target = new dnsName(st.nextToken(), origin);
 }
 
 

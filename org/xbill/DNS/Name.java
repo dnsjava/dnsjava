@@ -11,7 +11,7 @@ private byte labels;
 
 static final int MAXLABELS = 64;
 
-dnsName(String s, String origin) {
+dnsName(String s, dnsName origin) {
 	labels = 0;
 	name = new String[MAXLABELS];
 
@@ -21,12 +21,8 @@ dnsName(String s, String origin) {
 		while (st.hasMoreTokens())
 			name[labels++] = st.nextToken();
 
-		if (origin != null) {
-			st = new MyStringTokenizer(origin, ".");
-
-			while (st.hasMoreTokens())
-				name[labels++] = st.nextToken();
-		}
+		if (!st.hasMoreDelimiters() && origin != null)
+			append(origin);
 	}
 	catch (ArrayIndexOutOfBoundsException e) {
 		StringBuffer sb = new StringBuffer();
@@ -90,6 +86,12 @@ dnsName(dnsName d, int n) {
 
 	labels = (byte) (d.labels - n);
 	System.arraycopy(d.name, n, name, 0, labels);
+}
+
+public void
+append(dnsName d) {
+	System.arraycopy(d.name, 0, name, labels, d.labels);
+	labels += d.labels;
 }
 
 public short

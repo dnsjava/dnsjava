@@ -21,10 +21,11 @@ dnsCNAMERecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsCNAMERecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsCNAMERecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	       dnsName origin)
 throws IOException
 {
-	super(_name, dns.CNAME, _dclass, _ttl, st);
+	super(_name, dns.CNAME, _dclass, _ttl, st, origin);
 }
 
 }

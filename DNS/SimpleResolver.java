@@ -9,6 +9,7 @@ public class dnsResolver {
 
 InetAddress addr;
 int port = dns.PORT;
+boolean useTCP;
 dnsTSIG TSIG;
 int timeoutValue = 60 * 1000;
 
@@ -25,6 +26,11 @@ public dnsResolver(String hostname) {
 public void
 setPort(int port) {
 	this.port = port;
+}
+
+public void
+setTCP(boolean flag) {
+	this.useTCP = flag;
 }
 
 public void
@@ -109,6 +115,10 @@ send(dnsMessage query) throws IOException {
 		TSIG.apply(query);
 
 	out = query.toWire();
+
+	if (useTCP)
+		return sendTCP(query, out);
+
 	s.send(new DatagramPacket(out, out.length, addr, port));
 
 	dp = new DatagramPacket(new byte[512], 512);

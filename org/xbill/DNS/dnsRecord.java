@@ -41,9 +41,9 @@ newRecord(dnsName name, short type, short dclass, int ttl, int length,
 		rrclass = Class.forName("dns" + s + "Record");
 		m = rrclass.getConstructor(new Class [] {
 						dnsName.class,
-						java.lang.Short.TYPE,
-						java.lang.Integer.TYPE,
-						java.lang.Integer.TYPE,
+						Short.TYPE,
+						Integer.TYPE,
+						Integer.TYPE,
 						CountedDataInputStream.class,
 						dnsCompression.class
 					   });
@@ -194,8 +194,8 @@ toString() {
 }
 
 public static dnsRecord
-fromString(MyStringTokenizer st, dnsName name, int ttl, short type,
-	   short dclass)
+fromString(dnsName name, short type, short dclass, int ttl,
+	   MyStringTokenizer st, dnsName origin)
 throws IOException
 {
 	dnsRecord rec;
@@ -208,20 +208,21 @@ throws IOException
 		rrclass = Class.forName("dns" + s + "Record");
 		m = rrclass.getConstructor(new Class [] {
 						dnsName.class,
-						java.lang.Short.TYPE,
-						java.lang.Integer.TYPE,
-						MyStringTokenizer.class
+						Short.TYPE,
+						Integer.TYPE,
+						MyStringTokenizer.class,
+						dnsName.class,
 					   });
 		rec = (dnsRecord) m.newInstance(new Object [] {
 							name,
 							new Short(dclass),
 							new Integer(ttl),
-							st
+							st, origin
 						});
 		return rec;
 	}
 	catch (ClassNotFoundException e) {
-		rec = new dnsUNKRecord(name, type, dclass, ttl, st);
+		rec = new dnsUNKRecord(name, type, dclass, ttl, st, origin);
 		return rec;
 	}
 	catch (InvocationTargetException e) {

@@ -31,12 +31,13 @@ throws IOException
 }
 
 public
-dnsMXRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsMXRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	    dnsName origin)
 throws IOException
 {
 	super(_name, dns.MX, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
-	target = new dnsName(st.nextToken());
+	target = new dnsName(st.nextToken(), origin);
 }
 
 public String

@@ -42,7 +42,8 @@ throws IOException
 }
 
 public
-dnsKEYRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
+dnsKEYRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
+	     dnsName origin)
 throws IOException
 {
 	super(_name, dns.KEY, _dclass, _ttl);
