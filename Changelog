@@ -1,5 +1,6 @@
 4/18/2004
 	- Add support for the SSHFP record type.
+	- Fix a bug in the zone code which would cause record lookups to fail.
 
 4/10/2004
 	- When parsing paster files, handle the fact that class and ttl may

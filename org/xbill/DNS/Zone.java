@@ -141,6 +141,8 @@ Zone(String file, Cache cache, Name initialOrigin) throws IOException {
 	Record record;
 
 	origin = initialOrigin;
+	if (origin != null)
+		setOrigin(origin);
 	while ((record = m.nextRecord()) != null)
 		maybeAddRecord(record, cache, file);
 	validate();
@@ -157,6 +159,8 @@ Zone(Record [] records, Cache cache, Name initialOrigin) throws IOException {
 	super(false);
 
 	origin = initialOrigin;
+	if (origin != null)
+		setOrigin(origin);
 	for (int i = 0; i < records.length; i++) {
 		maybeAddRecord(records[i], cache, records);
 	}
@@ -183,6 +187,7 @@ throws IOException, ZoneTransferException
 	DClass.check(dclass);
 
 	origin = zone;
+	setOrigin(origin);
 	this.dclass = dclass;
 	type = SECONDARY;
 	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(zone, remote, null);
