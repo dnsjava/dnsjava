@@ -143,7 +143,7 @@ addRRset(Name name, Message response, RRset rrset, byte section,
 	 boolean sigonly)
 {
 	Enumeration e;
-	for (byte s = 1; s < section; s++)
+	for (byte s = 1; s <= section; s++)
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
 	if (!sigonly) {
@@ -252,7 +252,7 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 	byte rcode = Rcode.NOERROR;
 
 	if (iterations > 6)
-		return Rcode.SERVFAIL;
+		return Rcode.NOERROR;
 
 	if (type == Type.SIG) {
 		type = Type.ANY;
