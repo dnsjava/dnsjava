@@ -119,7 +119,8 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
  * @param dclass The record's class.
  * @param ttl The record's time to live.
  * @param length The length of the record's data.
- * @param data The rdata of the record, in uncompressed DNS wire format.
+ * @param data The rdata of the record, in uncompressed DNS wire format.  Only
+ * the first length bytes are used.
  */
 public static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
@@ -139,7 +140,25 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 }
 
 /**
+ * Creates a new record, with the given parameters.
+ * @param name The owner name of the record.
+ * @param type The record's type.
+ * @param dclass The record's class.
+ * @param ttl The record's time to live.
+ * @param data The complete rdata of the record, in uncompressed DNS wire
+ * format.
+ */
+public static Record
+newRecord(Name name, short type, short dclass, int ttl, byte [] data) {
+	return newRecord(name, type, dclass, ttl, data.length, data);
+}
+
+/**
  * Creates a new empty record, with the given parameters.
+ * @param name The owner name of the record.
+ * @param type The record's type.
+ * @param dclass The record's class.
+ * @param ttl The record's time to live.
  * @return An object of a type extending Record
  */
 public static Record
@@ -151,6 +170,9 @@ newRecord(Name name, short type, short dclass, int ttl) {
  * Creates a new empty record, with the given parameters.  This method is
  * designed to create records that will be added to the QUERY section
  * of a message.
+ * @param name The owner name of the record.
+ * @param type The record's type.
+ * @param dclass The record's class.
  * @return An object of a type extending Record
  */
 public static Record
@@ -350,7 +372,7 @@ getName() {
 }
 
 /**
- * Returns record's type
+ * Returns the record's type
  * @see Type
  */
 public short
