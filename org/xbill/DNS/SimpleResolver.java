@@ -29,7 +29,7 @@ public static final int PORT = 53;
 private InetAddress addr;
 private int port = PORT;
 private boolean useTCP, ignoreTruncation;
-private int EDNSlevel = -1;
+private byte EDNSlevel = -1;
 private TSIG tsig;
 private int timeoutValue = 60 * 1000;
 
@@ -88,7 +88,7 @@ setIgnoreTruncation(boolean flag) {
 /** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
 public void
 setEDNS(int level) {
-	this.EDNSlevel = level;
+	this.EDNSlevel = (byte) level;
 }
 
 /** Specifies the TSIG key that messages will be signed with */
@@ -185,12 +185,13 @@ send(Message query) throws IOException {
 	Message response;
 	DatagramSocket s;
 	DatagramPacket dp;
-	int udpLength = 512;
+	short udpLength = 512;
 
 	query = (Message) query.clone();
 	if (EDNSlevel >= 0) {
 		udpLength = 1280;
-		query.addRecord(EDNS.newOPT(udpLength), Section.ADDITIONAL);
+		Record opt = new OPTRecord(udpLength, Rcode.NOERROR, EDNSlevel);
+		query.addRecord(opt, Section.ADDITIONAL);
 	}
 
 	if (tsig != null)
