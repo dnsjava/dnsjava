@@ -343,6 +343,10 @@ recordLength() {
 }
 
 public static class StreamVerifier {
+	/**
+	 * A helper class for verifying multiple message responses.
+	 */
+
 	private TSIG key;
 	private hmacSigner verifier;
 	private int nresponses;
