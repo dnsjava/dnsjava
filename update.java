@@ -114,11 +114,12 @@ update(InputStream in) throws IOException {
 			}
 
 			else if (operation.equals("class")) {
-				int newClass = DClass.value(st.getString());
+				String classStr = st.getString();
+				int newClass = DClass.value(classStr);
 				if (newClass > 0)
 					defaultClass = newClass;
 				else
-					print("Invalid class " + newClass);
+					print("Invalid class " + classStr);
 			}
 
 			else if (operation.equals("ttl"))
