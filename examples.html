@@ -22,7 +22,7 @@ InetAddress addr = Address.getByName("www.dnsjava.org");
 <p><b>Get the MX target and preference of a name:</b></p>
 <pre><code>
 Record [] records = new Lookup("dnsjava.org", Type.MX).run();
-for (int i = 0; i < records.length; i++) {
+for (int i = 0; i &lt; records.length; i++) {
 	MXRecord mx = (MXRecord) records[i];
 	System.out.println("Host " + mx.getTarget() + " has preference ", mx.getPriority());
 }
@@ -82,7 +82,7 @@ System.out.println(n2.equals(n));              // True
 // www
 // dnsjava
 // org
-for (int i = 0; i < n.labels(); i++)
+for (int i = 0; i &lt; n.labels(); i++)
 	System.out.println(n.getLabelString(i));
 </code></pre>
 
