@@ -62,8 +62,8 @@ nextRecord() throws IOException {
 			defaultTTL = parseTTL(st);
 			continue;
 		}
-		else if (s.charAt[0] == '$')
-			throw new IOException("Invalid directive");
+		else if (s.charAt(0) == '$')
+			throw new IOException("Invalid directive: " + s);
 		st.putBackToken(s);
 		return (last = parseRR(st, space, last, origin));
 	}
@@ -80,7 +80,7 @@ private int
 parseTTL(MyStringTokenizer st) throws IOException {
 	if (!st.hasMoreTokens())
 		throw new IOException ("Missing TTL");
-	return Integer(st.nextToken().intValue());
+	return new Integer(st.nextToken()).intValue();
 }
 
 private Record
