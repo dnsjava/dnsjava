@@ -55,8 +55,8 @@ hmacSigner(byte [] key) {
 /**
  * Adds data to the current hash
  * @param b The data
- * @param start The index at which to start adding to the hash
- * @param len The number of bytes to hash
+ * @param offset The index at which to start adding to the hash
+ * @param length The number of bytes to hash
  */
 public void
 addData(byte [] b, int offset, int length) {

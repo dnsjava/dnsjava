@@ -37,7 +37,7 @@ getMember() {
 /**
  * Creates an RP Record from the given data
  * @param mailbox The responsible person
- * @param textdomain The address where TXT records can be found
+ * @param textDomain The address where TXT records can be found
  */
 public
 RPRecord(Name name, int dclass, int ttl, Name mailbox, Name textDomain) {

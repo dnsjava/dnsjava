@@ -394,7 +394,7 @@ Name(DataByteInputStream in) throws IOException {
 
 /**
  * Create a new name from DNS wire format
- * @param in A byte array containing the wire format of the name.
+ * @param b A byte array containing the wire format of the name.
  */
 public
 Name(byte [] b) throws IOException {

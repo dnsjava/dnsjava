@@ -58,7 +58,7 @@ TXTRecord(Name name, int dclass, int ttl, List strings) {
 
 /**
  * Creates a TXT Record from the given data
- * @param strings One text string
+ * @param string One text string
  * @throws IllegalArgumentException The string has invalid escapes
  */
 public

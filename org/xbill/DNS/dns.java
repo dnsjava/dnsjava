@@ -120,8 +120,6 @@ getCache(int dclass) {
 /**
  * Obtains the (class IN) Cache used by functions in the dns class.  This
  * can be used to perform more specific queries and/or remove elements.
- *
- * @param dclass The dns class of data in the cache
  */
 public static synchronized Cache
 getCache() {
@@ -179,8 +177,8 @@ getAnyRecords(String namestr, int type, int dclass) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getRecords(String name, int type) {
-	return getRecords(name, type, DClass.IN, Credibility.NORMAL);
+getRecords(String namestr, int type) {
+	return getRecords(namestr, type, DClass.IN, Credibility.NORMAL);
 }
 
 /**
@@ -190,8 +188,8 @@ getRecords(String name, int type) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getAnyRecords(String name, int type) {
-	return getRecords(name, type, DClass.IN, Credibility.ANY);
+getAnyRecords(String namestr, int type) {
+	return getRecords(namestr, type, DClass.IN, Credibility.ANY);
 }
 
 /**
@@ -202,8 +200,8 @@ getAnyRecords(String name, int type) {
  */
 public static Record []
 getRecordsByAddress(String addr, int type) {
-	String name = inaddrString(addr);
-	return getRecords(name, type, DClass.IN, Credibility.NORMAL);
+	String namestr = inaddrString(addr);
+	return getRecords(namestr, type, DClass.IN, Credibility.NORMAL);
 }
 
 /**

@@ -459,7 +459,7 @@ throws IOException
  * @param type The record's type.
  * @param dclass The record's class.
  * @param ttl The record's time to live.
- * @param st The textual representation of the rdata.
+ * @param s The textual representation of the rdata.
  * @param origin The default origin to be appended to relative domain names.
  * @return The new record
  * @throws IOException The text format was invalid.

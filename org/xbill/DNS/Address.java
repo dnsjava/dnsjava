@@ -76,7 +76,7 @@ isDottedQuad(String s) {
 
 /**
  * Converts a byte array containing an IPv4 address into a dotted quad string.
- * @param attr The byte array
+ * @param addr The byte array
  * @return The string representation
  */
 public static String

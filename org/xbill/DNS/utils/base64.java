@@ -89,7 +89,7 @@ formatString(byte [] b, int lineLength, String prefix, boolean addClose) {
 
 /**
  * Convert a base64-encoded String to binary data
- * @param b A String containing the encoded data
+ * @param str A String containing the encoded data
  * @return An array containing the binary data, or null if the string is invalid
  */
 public static byte []

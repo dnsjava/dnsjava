@@ -239,9 +239,8 @@ addRecord(Record r, byte cred, Object o) {
 
 /**
  * Adds an RRset to the Cache.
- * @param r The RRset to be added
+ * @param rrset The RRset to be added
  * @param cred The credibility of these records
- * @param o The source of this RRset (this could be a Message, for example)
  * @see RRset
  */
 public void

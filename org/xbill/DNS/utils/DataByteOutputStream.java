@@ -28,7 +28,6 @@ DataByteOutputStream(int size) {
 
 /**
  * Create a new DataByteOutputStream with the default initial size
- * @param size The initial size
  */
 public
 DataByteOutputStream() {
