@@ -37,7 +37,7 @@ Master(File _file, Name defaultOrigin) throws IOException {
 	origin = defaultOrigin;
 }
 
-/** Begins parsing the specified file with an initial origin*/
+/** Begins parsing the specified file with an initial origin */
 public
 Master(String filename, Name origin) throws IOException {
 	this(new File(filename), origin);
@@ -47,6 +47,19 @@ Master(String filename, Name origin) throws IOException {
 public
 Master(String filename) throws IOException {
 	this(new File(filename), null);
+}
+
+/** Begins parsing from an input reader */
+public
+Master(BufferedReader in, Name defaultOrigin) {
+	br = in;
+	origin = defaultOrigin;
+}
+
+/** Begins parsing from an input reader with an initial origin */
+public
+Master(BufferedReader in) {
+	this(in, null);
 }
 
 /** Returns the next record in the master file */

@@ -1,3 +1,8 @@
+7/13/2001
+	- KEY flags were incorrect (David Blacka <davidb@research.netsol.com>)
+	- Add routines for parsing a master file from a non-file input
+	  source (David Blacka)
+
 5/23/2001
 	- Automatically determining name servers didn't work on Windows 2000.
 
