@@ -85,7 +85,7 @@ getAddress() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (address == null)
 		return;
 	byte [] b = address.toBytes();

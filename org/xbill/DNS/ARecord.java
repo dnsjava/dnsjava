@@ -137,7 +137,7 @@ getAddress() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	out.writeByte(((addr >>> 24) & 0xFF));
 	out.writeByte(((addr >>> 16) & 0xFF));
 	out.writeByte(((addr >>> 8) & 0xFF));

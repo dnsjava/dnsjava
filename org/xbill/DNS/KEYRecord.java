@@ -195,7 +195,7 @@ getFootprint() {
 	int foot = 0;
 
 	DataByteOutputStream out = new DataByteOutputStream();
-	rrToWire(out, null);
+	rrToWire(out, null, false);
 	byte [] rdata = out.toByteArray();
 
 	if (alg == DNSSEC.RSAMD5) {
@@ -221,7 +221,7 @@ getFootprint() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (key == null && (flags & (FLAG_NOKEY)) != (FLAG_NOKEY) )
 		return;
 

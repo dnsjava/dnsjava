@@ -201,7 +201,7 @@ getSignature() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (signature == null)
 		return;
 
@@ -212,23 +212,7 @@ rrToWire(DataByteOutputStream out, Compression c) {
 	out.writeInt((int)(expire.getTime() / 1000));
 	out.writeInt((int)(timeSigned.getTime() / 1000));
 	out.writeShort(footprint);
-	signer.toWire(out, null);
-	out.writeArray(signature);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (signature == null)
-		return;
-
-	out.writeShort(covered);
-	out.writeByte(alg);
-	out.writeByte(labels);
-	out.writeInt(origttl);
-	out.writeInt((int)(expire.getTime() / 1000));
-	out.writeInt((int)(timeSigned.getTime() / 1000));
-	out.writeShort(footprint);
-	signer.toWireCanonical(out);
+	signer.toWire(out, null, canonical);
 	out.writeArray(signature);
 }
 

@@ -162,26 +162,12 @@ getMinimum() {
 }       
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (host == null)
 		return;
 
-	host.toWire(out, c);
-	admin.toWire(out, c);
-	out.writeInt(serial);
-	out.writeInt(refresh);
-	out.writeInt(retry);
-	out.writeInt(expire);
-	out.writeInt(minimum);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (host == null)
-		return;
-
-	host.toWireCanonical(out);
-	admin.toWireCanonical(out);
+	host.toWire(out, c, canonical);
+	admin.toWire(out, c, canonical);
 	out.writeInt(serial);
 	out.writeInt(refresh);
 	out.writeInt(retry);

@@ -65,22 +65,14 @@ getTarget() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (target == null)
 		return;
 
 	if (type == Type.DNAME)
-		target.toWire(out, null);
+		target.toWire(out, null, canonical);
 	else
-		target.toWire(out, c);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (target == null)
-		return;
-
-	target.toWireCanonical(out);
+		target.toWire(out, c, canonical);
 }
 
 }

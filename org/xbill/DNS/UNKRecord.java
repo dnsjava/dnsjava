@@ -72,7 +72,7 @@ rdataToString() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (data != null)
 		out.writeArray(data);
 }

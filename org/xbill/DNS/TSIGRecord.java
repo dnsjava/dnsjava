@@ -197,11 +197,11 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (alg == null)
 		return;
 
-	alg.toWire(out, null);
+	alg.toWire(out, null, canonical);
 
 	long time = timeSigned.getTime() / 1000;
 	short timeHigh = (short) (time >> 32);
@@ -222,12 +222,6 @@ rrToWire(DataByteOutputStream out, Compression c) {
 	}
 	else
 		out.writeShort(0);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	throw new RuntimeException
-			("A TSIG should never be converted to canonical");
 }
 
 }

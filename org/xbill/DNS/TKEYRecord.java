@@ -210,11 +210,11 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (alg == null)
 		return;
 
-	alg.toWire(out, null);
+	alg.toWire(out, null, canonical);
 
 	out.writeInt((int)(timeInception.getTime() / 1000));
 	out.writeInt((int)(timeExpire.getTime() / 1000));
@@ -235,12 +235,6 @@ rrToWire(DataByteOutputStream out, Compression c) {
 	}
 	else
 		out.writeShort(0);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	throw new RuntimeException
-		("A TKEY should never be converted to canonical");
 }
 
 }

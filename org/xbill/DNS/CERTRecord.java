@@ -153,7 +153,7 @@ getCert() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (cert == null)
 		return;
 

@@ -604,7 +604,7 @@ getLabelString(int n) {
  * @param c The compression context, or null of no compression is desired.
  * @throws IllegalArgumentException The name is not absolute.
  */
-public void
+void
 toWire(DataByteOutputStream out, Compression c) {
 	if (!isAbsolute())
 		throw new IllegalArgumentException("toWire() called on " +
@@ -631,6 +631,17 @@ toWire(DataByteOutputStream out, Compression c) {
 		}
 	}
 	out.writeByte(0);
+}
+
+/**
+ * Convert Name to DNS wire format
+ * @throws IllegalArgumentException The name is not absolute.
+ */
+public byte []
+toWire() {
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWire(out, null);
+	return out.toByteArray();
 }
 
 /**
@@ -661,6 +672,20 @@ toWireCanonical() {
 			b[pos] = lowercase[name[pos++]];
 	}
 	return b;
+}
+
+/**
+ * Convert Name to DNS wire format
+ * @param out The output stream containing the DNS message.
+ * @param c The compression context, or null of no compression is desired.
+ * @throws IllegalArgumentException The name is not absolute.
+ */
+void
+toWire(DataByteOutputStream out, Compression c, boolean canonical) {
+	if (canonical)
+		toWireCanonical(out);
+	else
+		toWire(out, c);
 }
 
 private final boolean

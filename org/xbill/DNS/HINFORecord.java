@@ -85,7 +85,7 @@ getOS() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (cpu == null || os == null)
 		return;
 

@@ -114,27 +114,11 @@ getBitmap() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (next == null)
 		return;
 
-	next.toWire(out, null);
-	int length = BitSetLength(bitmap);
-	for (int i = 0, t = 0; i < length; i++) {
-		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
-		if (i % 8 == 7 || i == length - 1) {
-			out.writeByte(t);
-			t = 0;
-		}
-	}
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (next == null)
-		return;
-
-	next.toWireCanonical(out);
+	next.toWire(out, null, canonical);
 	int length = BitSetLength(bitmap);
 	for (int i = 0, t = 0; i < length; i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);

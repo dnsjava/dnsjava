@@ -91,7 +91,10 @@ Message(DataByteInputStream in) throws IOException {
 	size = in.getPos();
 }
 
-/** Creates a new Message from its DNS wire format representation */
+/**
+ * Creates a new Message from its DNS wire format representation
+ * @param b A byte array containing the DNS Message.
+ */
 public
 Message(byte [] b) throws IOException {
 	this(new DataByteInputStream(b));

@@ -303,7 +303,7 @@ getVPrecision() {
 }       
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (latitude == 0 && longitude == 0 && altitude == 0)
 		return;
 

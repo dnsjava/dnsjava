@@ -147,7 +147,7 @@ getReplacement() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (replacement == null && regexp == null)
 		return;
 	out.writeShort(order);
@@ -155,19 +155,7 @@ rrToWire(DataByteOutputStream out, Compression c) {
 	out.writeString(flags);
 	out.writeString(service);
 	out.writeString(regexp);
-	replacement.toWire(out, null);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (replacement == null && regexp == null)
-		return;
-	out.writeShort(order);
-	out.writeShort(preference);
-	out.writeString(flags);
-	out.writeString(service);
-	out.writeString(regexp);
-	replacement.toWireCanonical(out);
+	replacement.toWire(out, null, canonical);
 }
 
 }

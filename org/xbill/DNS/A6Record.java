@@ -120,7 +120,7 @@ getPrefix() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (suffix == null)
 		return;
 	out.write(prefixBits);
@@ -129,7 +129,7 @@ rrToWire(DataByteOutputStream out, Compression c) {
 	byte [] data = suffix.toBytes();
 	out.write(data, 16 - suffixbytes, suffixbytes);
 	if (prefix != null)
-		prefix.toWire(out, null);
+		prefix.toWire(out, null, canonical);
 }
 
 }

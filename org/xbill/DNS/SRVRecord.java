@@ -133,25 +133,14 @@ getTarget() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (target == null)
 		return;
 
 	out.writeShort(priority);
 	out.writeShort(weight);
 	out.writeShort(port);
-	target.toWire(out, null);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (target == null)
-		return;
-
-	out.writeShort(priority);
-	out.writeShort(weight);
-	out.writeShort(port);
-	target.toWireCanonical(out);
+	target.toWire(out, null, canonical);
 }
 
 }

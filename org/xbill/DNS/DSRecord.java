@@ -146,7 +146,7 @@ getFootprint() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	out.writeShort(footprint);
 	out.writeByte(alg);
 	out.writeByte(digestid);

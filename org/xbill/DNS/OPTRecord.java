@@ -144,7 +144,7 @@ getFlags() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (options == null)
 		return;
 	Iterator it = options.keySet().iterator();
@@ -156,12 +156,6 @@ rrToWire(DataByteOutputStream out, Compression c) {
 		out.writeShort(data.length);
 		out.writeArray(data);
 	}
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	throw new RuntimeException
-			("An OPT should never be converted to canonical");
 }
 
 }

@@ -96,21 +96,12 @@ getTextDomain() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (mailbox == null || textDomain == null)
 		return;
 
-	mailbox.toWire(out, null);
-	textDomain.toWire(out, null);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (mailbox == null || textDomain == null)
-		return;
-
-	mailbox.toWireCanonical(out);
-	textDomain.toWireCanonical(out);
+	mailbox.toWire(out, null, canonical);
+	textDomain.toWire(out, null, canonical);
 }
 
 }

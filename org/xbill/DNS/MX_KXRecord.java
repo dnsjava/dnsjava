@@ -80,24 +80,15 @@ getPriority() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (target == null)
 		return;
 
 	out.writeShort(priority);
 	if (type == Type.MX)
-		target.toWire(out, c);
+		target.toWire(out, c, canonical);
 	else
-		target.toWire(out, null);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	if (target == null)
-		return;
-
-	out.writeShort(priority);
-	target.toWireCanonical(out);
+		target.toWire(out, null, canonical);
 }
 
 }

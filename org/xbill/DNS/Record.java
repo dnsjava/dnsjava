@@ -213,7 +213,7 @@ toWire(DataByteOutputStream out, int section, Compression c) {
 	out.writeInt(ttl);
 	int lengthPosition = out.getPos();
 	out.writeShort(0); /* until we know better */
-	rrToWire(out, c);
+	rrToWire(out, c, false);
 	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
 	wireLength = out.getPos() - start;
 }
@@ -236,7 +236,7 @@ toWireCanonical(DataByteOutputStream out) {
 	out.writeInt(ttl);
 	int lengthPosition = out.getPos();
 	out.writeShort(0); /* until we know better */
-	rrToWireCanonical(out);
+	rrToWire(out, null, true);
 	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
 }
 
@@ -258,7 +258,7 @@ toWireCanonical() {
 public byte []
 rdataToWireCanonical() throws IOException {
 	DataByteOutputStream out = new DataByteOutputStream();
-	rrToWireCanonical(out);
+	rrToWire(out, null, true);
 	return out.toByteArray();
 }
 
@@ -419,17 +419,8 @@ getWireLength() {
 /**
  * Converts the type-specific RR to wire format - must be overriden
  */
-abstract void rrToWire(DataByteOutputStream out, Compression c);
-
-/**
- * Converts the type-specific RR to canonical wire format - must be overriden
- * if the type-specific RR data includes a Name
- * @see Name
- */
-void
-rrToWireCanonical(DataByteOutputStream out) {
-	rrToWire(out, null);
-}
+abstract void
+rrToWire(DataByteOutputStream out, Compression c, boolean canonical);
 
 /**
  * Determines if two Records are identical
