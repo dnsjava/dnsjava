@@ -1,3 +1,28 @@
+4/4/1999
+	- 0.7 released
+	- DNS.dns uses Cache
+	- Added getAny* to DNS.dns
+	- Cache can return information indicating partial success on lookup
+
+4/3/1999
+	- Cache does negative caching
+	- Cache follows CNAMEs when looking for cached data
+
+4/2/1999
+	- dig now understands -x
+	- added DNS.Address, a clone of InetAddress
+	- Cache can now follow CNAME chains
+	- Cache now expires records based on TTL and doesn't cache records
+		with TTL = 0.
+
+4/1/1999
+	- Made Cache and Zone extend NameSet
+	- Created Master class to parse master files
+
+3/31/1999
+	- Added first cut at Cache
+	- Changes to RRset to make it more useful
+
 3/30/1999
 	- 0.6 released
 	- bug fixes to DataInputStream, jnamed
