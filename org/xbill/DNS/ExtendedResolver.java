@@ -113,7 +113,7 @@ ExtendedResolver() throws UnknownHostException {
 
 /**
  * Creates a new Extended Resolver
- * @param servers  An array of server names for which SimpleResolver
+ * @param servers An array of server names for which SimpleResolver
  * contexts should be initialized.
  * @see SimpleResolver
  * @exception UnknownHostException Failure occured initializing SimpleResolvers

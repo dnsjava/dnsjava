@@ -32,7 +32,7 @@ private DSRecord() {}
  * @param footprint The original KEY record's footprint (keyid).
  * @param alg The original key algorithm.
  * @param digestid The digest id code.
- * @param digest A hash of the original key.  
+ * @param digest A hash of the original key.
  */
 public
 DSRecord(Name _name, short _dclass, int _ttl, int _footprint,

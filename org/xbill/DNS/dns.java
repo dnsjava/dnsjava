@@ -153,7 +153,7 @@ setSearchPath(String [] domains) {
  * Obtains the Cache used by functions in the dns class.  This can be used
  * to perform more specific queries and/or remove elements.
  *
- * @param dclass  The dns class of data in the cache
+ * @param dclass The dns class of data in the cache
  */
 public static synchronized Cache
 getCache(short dclass) {
@@ -169,7 +169,7 @@ getCache(short dclass) {
  * Obtains the (class IN) Cache used by functions in the dns class.  This
  * can be used to perform more specific queries and/or remove elements.
  *
- * @param dclass  The dns class of data in the cache
+ * @param dclass The dns class of data in the cache
  */
 public static synchronized Cache
 getCache() {
@@ -249,10 +249,10 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 
 /**
  * Finds records with the given name, type, and class with a certain credibility
- * @param namestr  The name of the desired records
- * @param type  The type of the desired records
- * @param dclass  The class of the desired records
- * @param cred  The minimum credibility of the desired records
+ * @param namestr The name of the desired records
+ * @param type The type of the desired records
+ * @param dclass The class of the desired records
+ * @param cred The minimum credibility of the desired records
  * @see Credibility
  * @return The matching records, or null if none are found
  */
@@ -291,9 +291,9 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 
 /**
  * Finds credible records with the given name, type, and class
- * @param namestr  The name of the desired records
- * @param type  The type of the desired records
- * @param dclass  The class of the desired records
+ * @param namestr The name of the desired records
+ * @param type The type of the desired records
+ * @param dclass The class of the desired records
  * @return The matching records, or null if none are found
  */
 public static Record []
@@ -303,9 +303,9 @@ getRecords(String namestr, short type, short dclass) {
 
 /**
  * Finds any records with the given name, type, and class
- * @param namestr  The name of the desired records
- * @param type  The type of the desired records
- * @param dclass  The class of the desired records
+ * @param namestr The name of the desired records
+ * @param type The type of the desired records
+ * @param dclass The class of the desired records
  * @return The matching records, or null if none are found
  */
 public static Record []
@@ -315,8 +315,8 @@ getAnyRecords(String namestr, short type, short dclass) {
 
 /**
  * Finds credible records with the given name and type in class IN
- * @param namestr  The name of the desired records
- * @param type  The type of the desired records
+ * @param namestr The name of the desired records
+ * @param type The type of the desired records
  * @return The matching records, or null if none are found
  */
 public static Record []
@@ -326,8 +326,8 @@ getRecords(String name, short type) {
 
 /**
  * Finds any records with the given name and type in class IN
- * @param namestr  The name of the desired records
- * @param type  The type of the desired records
+ * @param namestr The name of the desired records
+ * @param type The type of the desired records
  * @return The matching records, or null if none are found
  */
 public static Record []
@@ -337,8 +337,8 @@ getAnyRecords(String name, short type) {
 
 /**
  * Finds credible records for the given dotted quad address and type in class IN
- * @param addr  The dotted quad address of the desired records
- * @param type  The type of the desired records
+ * @param addr The dotted quad address of the desired records
+ * @param type The type of the desired records
  * @return The matching records, or null if none are found
  */
 public static Record []
@@ -349,8 +349,8 @@ getRecordsByAddress(String addr, short type) {
 
 /**
  * Finds any records for the given dotted quad address and type in class IN
- * @param addr  The dotted quad address of the desired records
- * @param type  The type of the desired records
+ * @param addr The dotted quad address of the desired records
+ * @param type The type of the desired records
  * @return The matching records, or null if none are found
  */
 public static Record []
