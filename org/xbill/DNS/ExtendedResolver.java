@@ -9,24 +9,39 @@ import java.net.*;
 
 public class ExtendedResolver implements Resolver {
 
-public class Receiver implements ResolverListener {
+class QElement {
+	Message m;
+	int res;
+
+	public
+	QElement(Message _m, int _res) {
+		m = _m;
+		res = _res;
+	}
+}
+
+class Receiver implements ResolverListener {
 	public void
 	receiveMessage(int id, Message m) {
 		Integer ID, R;
+		int r;
 		synchronized (idMap) {
 			ID = new Integer(id);
 			R = (Integer)idMap.get(ID);
+			if (R == null)
+				return;
+			r = R.intValue();
 			idMap.remove(ID);
 		}
 		synchronized (queue) {
-			queue.addElement(m);
-			queue.addElement(R);
+			QElement qe = new QElement(m, r);
+			queue.addElement(qe);
 			queue.notify();
 		}
 	}
 }
 
-static final int quantum = 15;
+static final int quantum = 20;
 
 Vector resolvers;
 Receiver receiver;
@@ -71,26 +86,17 @@ boolean
 sendTo(Message query, int r, int q) {
 	q -= r;
 	Resolver res = (Resolver) resolvers.elementAt(r);
-	switch (q) {
-		case 0:
-			res.setTimeout(quantum);
-			break;
-		case 1:
-			res.setTimeout(2 * quantum);
-			break;
-		case 3:
-			res.setTimeout(3 * quantum);
-			break;
-		default:
-			if (q < 6)
-				return true;
-			return false;
+	/* Three retries */
+	if (q >= 0 && q < 3) {
+		synchronized (idMap) {
+			res.setTimeout(2 * quantum * (q + 1));
+			int id = res.sendAsync(query, receiver);
+			idMap.put(new Integer(id), new Integer(r));
+		}
 	}
-	synchronized (idMap) {
-		int id = res.sendAsync(query, receiver);
-		idMap.put(new Integer(id), new Integer(r));
-	}
-	return true;
+	if (q < 6)
+		return true;
+	return false;
 }
 
 public void
@@ -144,37 +150,45 @@ send(Message query) {
 
 	for (q = 0; q < 20; q++) {
 		Message m;
-		synchronized (queue) {
-			boolean ok = false;
-			for (r = 0; r < resolvers.size(); r++)
-				if (!invalid[r])
-					ok |= sendTo(query, r, q);
-			if (!ok)
+		boolean ok = false;
+		for (r = 0; r < resolvers.size(); r++)
+			if (!invalid[r])
+				ok |= sendTo(query, r, q);
+		if (!ok)
+			break;
+		long start = System.currentTimeMillis();
+		long now = start;
+		while (true) {
+			now = System.currentTimeMillis();
+			if (now - start > quantum * 1000)
 				break;
-			try {
-				queue.wait((quantum+1) * 1000);
+			synchronized (queue) {
+				try {
+					long left;
+					left = (quantum * 1000) + start - now;
+					if (left > 0)
+						queue.wait(left);
+				}
+				catch (InterruptedException e) {
+				}
+				if (queue.size() == 0)
+					continue;
+				QElement qe = (QElement) queue.firstElement();
+				queue.removeElement(qe);
+				m = qe.m;
+				r = qe.res;
 			}
-			catch (InterruptedException e) {
-				System.out.println("interrupted");
-			}
-			if (queue.size() == 0)
-				continue;
-			m = (Message) queue.firstElement();
-			queue.removeElementAt(0);
-			Integer I = (Integer) queue.firstElement();
-			queue.removeElementAt(0);
-			r = I.intValue();
-		}
-		if (m == null)
-			invalid[r] = true;
-		else {
-			rcode = m.getHeader().getRcode();
-			if (rcode == Rcode.NOERROR)
-				return m;
-			else {
-				if (best == null)
-					best = m;
+			if (m == null)
 				invalid[r] = true;
+			else {
+				rcode = m.getHeader().getRcode();
+				if (rcode == Rcode.NOERROR)
+					return m;
+				else {
+					if (best == null)
+						best = m;
+					invalid[r] = true;
+				}
 			}
 		}
 	}
@@ -185,7 +199,7 @@ private int
 uniqueID(Message m) {
 	Record r = m.getQuestion();
 	return (((r.getName().hashCode() & 0xFFFF) << 16) +
-		(r.getType() + hashCode() << 8) +
+		(r.getType() << 8) +
 		(hashCode() & 0xFF));
 }
 
