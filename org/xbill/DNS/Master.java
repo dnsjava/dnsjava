@@ -82,6 +82,13 @@ nextRecord() throws IOException {
 
 		token = st.get(true, false);
 		if (token.type == Tokenizer.WHITESPACE) {
+			Tokenizer.Token next = st.get();
+			if (token.type == Tokenizer.EOL)
+				continue;
+			else if (token.type == Tokenizer.EOF)
+				return null;
+			else
+				st.unget();
 			if (last == null)
 				throw st.exception("no owner");
 			name = last.getName();
