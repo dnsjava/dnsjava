@@ -200,4 +200,21 @@ expand() throws IOException {
 	return (Record []) list.toArray(new Record[list.size()]);
 }
 
+public String
+toString() {
+	StringBuffer sb = new StringBuffer();
+	sb.append("$GENERATE ");
+	sb.append(start + "-" + end);
+	if (step > 1)
+		sb.append("/" + step);
+	sb.append(" ");
+	sb.append(namePattern + " ");
+	sb.append(ttl + " ");
+	if (dclass != DClass.IN || !Options.check("noPrintIN"))
+		sb.append(DClass.string(dclass) + " ");
+	sb.append(Type.string(type) + " ");
+	sb.append(rdataPattern + " ");
+	return sb.toString();
+}
+
 }
