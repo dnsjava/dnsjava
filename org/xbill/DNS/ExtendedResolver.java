@@ -104,11 +104,12 @@ private static class Resolution implements ResolverListener {
 				return;
 			response = m;
 			done = true;
-			if (listener == null)
+			if (listener == null) {
 				notifyAll();
-			else
-				listener.receiveMessage(this, response);
+				return;
+			}
 		}
+		listener.receiveMessage(this, response);
 	}
 
 	public void
@@ -147,13 +148,15 @@ private static class Resolution implements ResolverListener {
 				send(n + 1);
 			if (outstanding == 0) {
 				done = true;
-				if (listener == null)
+				if (listener == null) {
 					notifyAll();
-				else
-					listener.handleException(this,
-								 exception);
+					return;
+				}
 			}
+			if (!done)
+				return;
 		}
+		listener.handleException(this, exception);
 	}
 }
 
