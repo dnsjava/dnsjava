@@ -260,7 +260,7 @@ toWireCanonical() {
  * (all names are converted to lowercase).
  */
 public byte []
-rdataToWireCanonical() throws IOException {
+rdataToWireCanonical() {
 	DataByteOutputStream out = new DataByteOutputStream();
 	rrToWire(out, null, true);
 	return out.toByteArray();
@@ -509,17 +509,11 @@ equals(Object arg) {
 	if (arg == null || !(arg instanceof Record))
 		return false;
 	Record r = (Record) arg;
-	try {
-		if (type != r.type || dclass != r.dclass ||
-		    !name.equals(r.name))
-			return false;
-		byte [] array1 = rdataToWireCanonical();
-		byte [] array2 = r.rdataToWireCanonical();
-		return Arrays.equals(array1, array2);
-	}
-	catch (IOException e) {
+	if (type != r.type || dclass != r.dclass || !name.equals(r.name))
 		return false;
-	}
+	byte [] array1 = rdataToWireCanonical();
+	byte [] array2 = r.rdataToWireCanonical();
+	return Arrays.equals(array1, array2);
 }
 
 /**
@@ -574,8 +568,8 @@ compareTo(Object o) {
 	n = type - arg.type;
 	if (n != 0)
 		return (n);
-	byte [] rdata1 = toWireCanonical();
-	byte [] rdata2 = arg.toWireCanonical();
+	byte [] rdata1 = rdataToWireCanonical();
+	byte [] rdata2 = arg.rdataToWireCanonical();
 	for (int i = 0; i < rdata1.length && i < rdata2.length; i++) {
 		n = (rdata1[i] & 0xFF) - (rdata2[i] & 0xFF);
 		if (n != 0)
