@@ -211,12 +211,7 @@ startGenerate() throws IOException {
 	// Then the ttl/class/type, in the same form as a normal record.
 	// Only some types are supported.
 	parseTTLClassAndType();
-	if (currentType != Type.PTR &&
-	    currentType != Type.CNAME &&
-	    currentType != Type.DNAME &&
-	    currentType != Type.A &&
-	    currentType != Type.AAAA &&
-	    currentType != Type.NS)
+	if (!Generator.supportedType(currentType))
 		throw st.exception("$GENERATE does not support " +
 				   Type.string(currentType) + " records");
 

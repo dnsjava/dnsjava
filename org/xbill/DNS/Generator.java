@@ -43,6 +43,17 @@ public final Name origin;
 private long current;
 
 /**
+ * Indicates whether generation is supported for this type.
+ * @throws InvalidTypeException The type is out of range.
+ */
+public static boolean
+supportedType(int type) {
+	Type.check(type);
+	return (type == Type.PTR || type == Type.CNAME || type == Type.DNAME ||
+		type == Type.A || type == Type.AAAA || type == Type.NS);
+}
+
+/**
  * Creates a specification for generating records, as a $GENERATE
  * statement in a master file.
  * @param start The start of the range.
@@ -65,8 +76,7 @@ Generator(long start, long end, long step, String namePattern,
 	if (start < 0 || end < 0 || start > end || step <= 0)
 		throw new IllegalArgumentException
 				("invalid range specification");
-	if (type != Type.PTR && type != Type.CNAME && type != Type.DNAME &&
-	    type != Type.A && type != Type.AAAA && type != Type.NS)
+	if (!supportedType(type))
 		throw new IllegalArgumentException("unsupported type");
 
 	this.start = start;
