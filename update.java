@@ -160,8 +160,6 @@ update(InputStream in) throws IOException {
 				print(line.substring(4).trim());
 
 			else if (operation.equals("send")) {
-				if (res == null)
-					res = new SimpleResolver(server);
 				sendUpdate();
 				query = new Message();
 				query.getHeader().setOpcode(Opcode.UPDATE);
@@ -272,10 +270,9 @@ sendUpdate() throws IOException {
 		query.addRecord(soa, Section.ZONE);
 	}
 
+	if (res == null)
+		res = new SimpleResolver(server);
 	response = res.send(query);
-	if (response == null)
-		return;
-
 	print(response);
 }
 
@@ -683,13 +680,13 @@ public static void
 main(String args[]) throws IOException {
 
 	InputStream in = null;
-	if (args.length == 1) {
+	if (args.length >= 1) {
 		try {
 			in = new FileInputStream(args[0]);
 		}
 		catch (FileNotFoundException e) {
 			System.out.println(args[0] + " not found.");
-			System.exit(-1);
+			System.exit(1);
 		}
 	}
 	else
