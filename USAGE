@@ -5,11 +5,11 @@ Command line programs:
 - dig:
 	A clone of dig (as distributed with BIND)
 	dig @server [-x] name type [class] [-p port] [-k name/secret] [-t] [-i]
-		-x : reverse lookup, name must be a dotted quad
-		-k : use TSIG transaction security
-		-t : use TCP by default
-		-i : ignore truncation errors
-		-e : Use EDNS0 (not complete)
+		-x  : reverse lookup, name must be a dotted quad
+		-k  : use TSIG transaction security
+		-t  : use TCP by default
+		-i  : ignore truncation errors
+		-e n: Use EDNS level n (only 0 is complete)
 
 - update:
 	A dynamic update client with some extra functionality.  This can be

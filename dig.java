@@ -14,7 +14,8 @@ static short type = Type.A, _class = DClass.IN;
 
 static void
 usage() {
-	System.out.println("Usage: dig [@server] name [<type>] [<class>]");
+	System.out.println("Usage: dig [@server] name [<type>] [<class>] " +
+			   "[options]");
 	System.exit(0);
 }
 
