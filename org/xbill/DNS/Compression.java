@@ -11,7 +11,7 @@ package org.xbill.DNS;
 
 class Compression {
 
-private class Entry {
+private static class Entry {
 	Name name;
 	int pos;
 	Entry next;
