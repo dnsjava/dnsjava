@@ -290,16 +290,10 @@ findRecords(Name name, short type) {
 	if (name.equals(rrset.getName())) {
 		if (type != Type.CNAME && type != Type.ANY &&
 		    rrset.getType() == Type.CNAME)
-		{
-			zr = new SetResponse(SetResponse.CNAME);
-			zr.addCNAME((CNAMERecord) rrset.first());
-		}
+			zr = new SetResponse(SetResponse.CNAME, rrset);
 		else if (rrset.getType() == Type.NS &&
 			 !name.equals(origin))
-		{
-			zr = new SetResponse(SetResponse.DELEGATION);
-			zr.addNS(rrset);
-		}
+			zr = new SetResponse(SetResponse.DELEGATION, rrset);
 		else {
 			zr = new SetResponse(SetResponse.SUCCESSFUL);
 			zr.addRRset(rrset);
@@ -312,12 +306,10 @@ findRecords(Name name, short type) {
 		if (rrset.getType() == Type.CNAME)
 			return new SetResponse(SetResponse.NXDOMAIN);
 		else if (rrset.getType() == Type.DNAME) {
-			zr = new SetResponse(SetResponse.DNAME);
-			zr.addDNAME((DNAMERecord) rrset.first());
+			zr = new SetResponse(SetResponse.DNAME, rrset);
 		}
 		else if (rrset.getType() == Type.NS) {
-			zr = new SetResponse(SetResponse.DELEGATION);
-			zr.addNS(rrset);
+			zr = new SetResponse(SetResponse.DELEGATION, rrset);
 		}
 	}
 	return zr;

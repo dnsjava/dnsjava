@@ -362,17 +362,13 @@ lookupRecords(Name name, short type, byte minCred) {
 		if (name.equals(rname)) {
 			if (type != Type.CNAME && type != Type.ANY &&
 			    rtype == Type.CNAME)
-			{
-				cr = new SetResponse(SetResponse.CNAME);
-				cr.addCNAME((CNAMERecord) rrset.first());
-				return cr;
-			} else if (type != Type.NS && type != Type.ANY &&
-				   rtype == Type.NS)
-			{
-				cr = new SetResponse(SetResponse.DELEGATION);
-				cr.addNS(rrset);
-				return cr;
-			} else {
+				return new SetResponse(SetResponse.CNAME,
+						       rrset);
+			else if (type != Type.NS && type != Type.ANY &&
+				 rtype == Type.NS)
+				return new SetResponse(SetResponse.DELEGATION,
+						       rrset);
+			else {
 				if (cr == null)
 					cr = new SetResponse
 						(SetResponse.SUCCESSFUL);
@@ -380,16 +376,12 @@ lookupRecords(Name name, short type, byte minCred) {
 			}
 		}
 		else if (name.subdomain(rname)) {
-			if (rtype == Type.DNAME) {
-				cr = new SetResponse(SetResponse.DNAME);
-				cr.addDNAME((DNAMERecord)rrset.first());
-				return cr;
-			}
-			else if (rtype == Type.NS) {
-				cr = new SetResponse(SetResponse.DELEGATION);
-				cr.addNS(rrset);
-				return cr;
-			}
+			if (rtype == Type.DNAME)
+				return new SetResponse(SetResponse.DNAME,
+						       rrset);
+			else if (rtype == Type.NS)
+				return new SetResponse(SetResponse.DELEGATION,
+						       rrset);
 		}
 	}
 

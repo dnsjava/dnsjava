@@ -47,7 +47,7 @@ static final byte CNAME		= 4;
 
 /**
  * The Cache/Zone found a DNAME when looking for the name.
- * @see CNAMERecord
+ * @see DNAMERecord
  */
 static final byte DNAME		= 5;
 
@@ -63,13 +63,18 @@ private Object data;
 private
 SetResponse() {}
 
-SetResponse(byte type, Object data) {
+SetResponse(byte type, RRset rrset) {
+	if (type < 0 || type > 6)
+		throw new IllegalArgumentException("invalid type");
 	this.type = type;
-	this.data = data;
+	this.data = rrset;
 }
 
 SetResponse(byte type) {
-	this(type, null);
+	if (type < 0 || type > 6)
+		throw new IllegalArgumentException("invalid type");
+	this.type = type;
+	this.data = null;
 }
 
 /** Changes the value of a SetResponse */
@@ -85,21 +90,6 @@ addRRset(RRset rrset) {
 		data = new ArrayList();
 	List l = (List) data;
 	l.add(rrset);
-}
-
-void
-addNS(RRset nsset) {
-	data = nsset;
-}
-
-void
-addCNAME(CNAMERecord cname) {
-	data = cname;
-}
-
-void
-addDNAME(DNAMERecord dname) {
-	data = dname;
 }
 
 /** Is the answer to the query unknown? */
@@ -158,7 +148,7 @@ answers() {
  */
 public CNAMERecord
 getCNAME() {
-	return (CNAMERecord) data;
+	return (CNAMERecord)((RRset)data).first();
 }
 
 /**
@@ -166,7 +156,7 @@ getCNAME() {
  */
 public DNAMERecord
 getDNAME() {
-	return (DNAMERecord) data;
+	return (DNAMERecord)((RRset)data).first();
 }
 
 /**
@@ -174,7 +164,7 @@ getDNAME() {
  */
 public RRset
 getNS() {
-	return (RRset) data;
+	return (RRset)data;
 }
 
 /** Prints the value of the SetResponse */
