@@ -9,7 +9,7 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * Address Record - maps a domain name to an IPv6 address
+ * Address Record - maps a domain name to an IPv6 address (experimental)
  *
  * @author Brian Wellington
  */

@@ -95,7 +95,7 @@ public static final short PX		= 26;
 /** Geographical position (withdrawn) */
 public static final short GPOS		= 27;
 
-/** IPv6 address (old) */
+/** IPv6 address */
 public static final short AAAA		= 28;
 
 /** Location */
@@ -125,7 +125,7 @@ public static final short KX		= 36;
 /** Certificate */
 public static final short CERT		= 37;
 
-/** IPv6 address */
+/** IPv6 address (experimental) */
 public static final short A6		= 38;
 
 /** Non-terminal name redirection */
@@ -291,7 +291,7 @@ isRR(int type) {
 	}
 }
 
-/* Converts a type into a Short, for use in Hashmaps, etc. */
+/* Converts a type into a Short, for use in HashMaps, etc. */
 static Short
 toShort(short type) {
 	if (type < typecache.length)
