@@ -91,4 +91,22 @@ value(String option) {
 	return ((String)table.get(option.toLowerCase()));
 }
 
+/**
+ * Returns the value of an option as an integer, or -1 if not defined.
+ */
+public static int
+intValue(String option) {
+	String s = value(option);
+	if (s != null) {
+		try {
+			int val = Integer.parseInt(s);
+			if (val > 0)
+				return (val);
+		}
+		catch (NumberFormatException e) {
+		}
+	}
+	return (-1);
+}
+
 }
