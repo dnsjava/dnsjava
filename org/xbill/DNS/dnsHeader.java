@@ -16,8 +16,7 @@ dnsHeader() {
 }
 
 dnsHeader(CountedDataInputStream in) throws IOException {
-	counts = new short[4];
-	flags = new boolean[16];
+	this();
 	id = in.readUnsignedShort();
 	readFlags(in);
 	for (int i=0; i<counts.length; i++)
