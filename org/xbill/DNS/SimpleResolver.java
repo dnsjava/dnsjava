@@ -147,6 +147,8 @@ sendTCP(Message query, byte [] out) throws IOException {
 			inLength = dataIn.readUnsignedShort();
 			in = new byte[inLength];
 			dataIn.readFully(in);
+			if (Options.check("verbosemsg"))
+				System.err.println(hexdump.dump("in", in));
 		}
 		catch (IOException e) {
 			System.out.println(";; No response");
@@ -193,6 +195,8 @@ send(Message query) throws IOException {
 		tsig.apply(query, null);
 
 	out = query.toWire();
+	if (Options.check("verbosemsg"))
+		System.err.println(hexdump.dump("out", out));
 
 	if (useTCP || out.length > udpLength)
 		return sendTCP(query, out);
@@ -217,6 +221,8 @@ send(Message query) throws IOException {
 	}
 	in = new byte [dp.getLength()];
 	System.arraycopy(dp.getData(), 0, in, 0, in.length);
+	if (Options.check("verbosemsg"))
+		System.err.println(hexdump.dump("in", in));
 	try {
 		response = new Message(in);
 	}
@@ -274,6 +280,8 @@ sendAXFR(Message query) throws IOException {
 			tsig.apply(query, null);
 
 		out = query.toWire();
+		if (Options.check("verbosemsg"))
+			System.err.println(hexdump.dump("out", out));
 		OutputStream sOut = s.getOutputStream();
 		new DataOutputStream(sOut).writeShort(out.length);
 		sOut.write(out);
@@ -295,6 +303,8 @@ sendAXFR(Message query) throws IOException {
 				System.out.println(";; No response");
 				throw e;
 			}
+			if (Options.check("verbosemsg"))
+				System.err.println(hexdump.dump("in", in));
 			try {
 				m = new Message(in);
 			}

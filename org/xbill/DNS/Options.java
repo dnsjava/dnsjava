@@ -15,6 +15,7 @@ import java.util.*;
  *	specified in RFC 2065 and changed in RFC 2535
  * tsigfudge=n - Sets the default TSIG fudge value
  * verbosehmac - Print all data digested by the HMAC routines
+ * verbosemsg - Print all messages sent or received by SimpleResolver
  * @author Brian Wellington
  */
 
