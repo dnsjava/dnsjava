@@ -226,7 +226,7 @@ readFlags(DNSInput in) throws IOException {
 	for (int i = 0; i < 16; i++) {
 		flags[i] = ((flagsval & (1 << (15 - i))) != 0);
 	}
-	opcode = (byte) ((flagsval >> 3) & 0xF);
+	opcode = (byte) ((flagsval >> 11) & 0xF);
 	rcode = (byte) (flagsval & 0xF);
 }
 

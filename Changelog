@@ -1,3 +1,8 @@
+4/8/2004
+	- The opcode field in the DNS header was incorrectly parsed; this
+	  would affect messages with opcodes other than QUERY.
+	  (Madhu Siddalingaiah <madhu@madhu.com>)
+
 3/20/2004
 	- 1.6.2 released.
 	- Lookups could return "referral" instead of "host not found" in some
