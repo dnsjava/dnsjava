@@ -5,6 +5,7 @@ package DNS;
 
 import java.util.*;
 import java.io.*;
+import DNS.utils.*;
 
 public class Master {
 

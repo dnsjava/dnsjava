@@ -5,6 +5,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import DNS.*;
+import DNS.utils.*;
 
 public class update {
 
