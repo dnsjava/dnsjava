@@ -22,6 +22,7 @@ private String delim;
 private boolean returnTokens;
 private int current;
 private String putBack;
+private boolean noescape;
 
 /** Creates a new instance of MyStringTokenizer.
  * @param s The string to be tokenized
@@ -55,6 +56,15 @@ MyStringTokenizer(String _s, String _delim) {
 public
 MyStringTokenizer(String _s) {
 	this(_s, " \t\n\r", false);
+}
+
+/**
+ * Turns off the escape character.  Useful when tokenizing the output
+ * of the tokenizer.
+ */
+public void
+setNoEscapeCharacter() {
+	noescape = true;
 }
 
 private boolean
@@ -139,7 +149,7 @@ nextToken() {
 		else {
 			if (string[current] == '"') 
 				quoted = true;
-			else if (string[current] == '\\')
+			else if (string[current] == '\\' & !noescape)
 				escaped = true;
 			else if (isDelim(current)) {
 				break;
