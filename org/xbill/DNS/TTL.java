@@ -25,18 +25,21 @@ check(long i) {
 /**
  * Parses a BIND-stype TTL
  * @return The TTL as a number of seconds
- * @throws NumberFormatException The TTL was not a valid number
+ * @throws NumberFormatException The TTL was not a valid TTL.
  */
 public static long
 parseTTL(String s) {
 	if (s == null || !Character.isDigit(s.charAt(0)))
 		throw new NumberFormatException();
-	int value = 0;
+	long value = 0;
 	long ttl = 0;
 	for (int i = 0; i < s.length(); i++) {
 		char c = s.charAt(i);
+		long oldvalue = value;
 		if (Character.isDigit(c))
 			value = (value * 10) + Character.getNumericValue(c);
+		if (value < oldvalue)
+			throw new NumberFormatException();
 		else {
 			switch (Character.toUpperCase(c)) {
 				case 'W': value *= 7;
@@ -48,10 +51,15 @@ parseTTL(String s) {
 			}
 			ttl += value;
 			value = 0;
+			if (ttl > 0xFFFFFFFFL)
+				throw new NumberFormatException();
 		}
 	}
-	if (ttl == 0)
+	if (ttl == 0) {
 		ttl = value;
+		if (ttl > 0xFFFFFFFFL)
+			throw new NumberFormatException();
+	}
 	return ttl;
 }
 
