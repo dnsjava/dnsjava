@@ -136,15 +136,106 @@ findUnix() {
 	}
 }
 
+/**
+ * Parses the output of winipcfg or ipconfig.
+ */
+private static void
+findWin(InputStream in) {
+	BufferedReader br = new BufferedReader(new InputStreamReader(in));
+	try {
+		Vector vserver = null;
+		String line = null;
+		while ((line = br.readLine()) != null) {
+			if (line.indexOf("DNS") != -1)
+				break;
+		}
+		
+		if (line == null)
+			return;
+
+		do {
+			String s = null;
+			StringTokenizer st = new StringTokenizer(line);
+			while (st.hasMoreTokens())
+				s = st.nextToken();
+			if (vserver == null)
+				vserver = new Vector();
+			vserver.addElement(s);
+			line = br.readLine();
+		} while (line != null && line.indexOf(":") == -1);
+
+		if (server == null && vserver != null) {
+			server = new String[vserver.size()];
+			for (int i = 0; i < vserver.size(); i++)
+				server[i] = (String) vserver.elementAt(i);
+		}
+	}
+	catch (IOException e) {
+	}
+	finally {
+		try {
+			br.close();
+		}
+		catch (IOException e) {
+		}
+	}
+	return;
+}
+
+/**
+ * Calls winipcfg and parses the result to find servers.  I don't see a way
+ * to find a search path.
+ */
+private static void
+find95() {
+	String s = "winipcfg.out";
+	try {
+		Process p;
+		p = Runtime.getRuntime().exec("winipcfg /all /batch " + s);
+		p.waitFor();
+		File f = new File(s);
+		findWin(new FileInputStream(f));
+		new File(s).delete();
+	}
+	catch(Exception e) {
+		return;
+	}
+}
+
+/**
+ * Calls ipconfig and parses the result to find servers.  I don't see a way
+ * to find a search path.
+ */
+private static void
+findNT() {
+	try {
+		Process p;
+		p = Runtime.getRuntime().exec("ipconfig /all");
+		findWin(p.getInputStream());
+		p.destroy();
+	}
+	catch(Exception e) {
+		return;
+	}
+}
+
 synchronized private static void
 probe() {
 	if (probed)
 		return;
 	probed = true;
 	findProperty();
-	if (server == null || search == null)
-		findUnix();
-
+	if (server == null || search == null) {
+		String OS = System.getProperty("os.name");
+		if (OS.indexOf("Windows") != -1) {
+			if (OS.indexOf("NT") != -1)
+				findNT();
+			else
+				find95();
+		}
+		else
+			findUnix();
+	}
 	if (search == null)
 		search = new Name[1];
 	else {
