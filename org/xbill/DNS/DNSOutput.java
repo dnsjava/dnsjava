@@ -28,7 +28,6 @@ DNSOutput(int size) {
 
 /**
  * Create a new DNSOutput
- * @param size The initial size
  */
 public
 DNSOutput() {
