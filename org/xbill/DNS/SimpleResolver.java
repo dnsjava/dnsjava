@@ -302,9 +302,6 @@ sendAsync(final Message query, final ResolverListener listener) {
 
 private Message
 sendAXFR(Message query) throws IOException {
-	Socket s = new Socket(addr, port);
-	s.setSoTimeout(timeoutValue);
-
 	Name qname = query.getQuestion().getName();
 	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, this);
 	try {
