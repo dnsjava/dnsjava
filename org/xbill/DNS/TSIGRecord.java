@@ -135,15 +135,17 @@ rdataToString() {
 		if (error == Rcode.BADTIME) {
 			if (other.length != 6) {
 				sb.append("<invalid BADTIME other data>");
-			time = ((other[0] & 0xFF) << 40) +
-			       ((other[1] & 0xFF) << 32) +
-			       ((other[2] & 0xFF) << 24) +
-			       ((other[3] & 0xFF) << 16) +
-			       ((other[4] & 0xFF) << 8) +
-			       ((other[5] & 0xFF)     );
-			sb.append("<server time: ");
-			sb.append(new Date(time * 1000));
-			sb.append(">");
+			} else {
+				long time = ((other[0] & 0xFF) << 40) +
+					    ((other[1] & 0xFF) << 32) +
+					    ((other[2] & 0xFF) << 24) +
+					    ((other[3] & 0xFF) << 16) +
+					    ((other[4] & 0xFF) << 8) +
+					    ((other[5] & 0xFF)     );
+				sb.append("<server time: ");
+				sb.append(new Date(time * 1000));
+				sb.append(">");
+			}
 		} else
 			sb.append(base64.toString(other));
 		sb.append(">");
