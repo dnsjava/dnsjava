@@ -300,7 +300,7 @@ addMessage(Message in) {
 	short queryClass = in.getQuestion().getDClass();
 	byte cred;
 	short rcode = in.getHeader().getRcode();
-	short ancount = in.getHeader().getCount(Section.ANSWER);
+	int ancount = in.getHeader().getCount(Section.ANSWER);
 
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return;

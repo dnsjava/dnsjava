@@ -19,7 +19,7 @@ public class Header {
 private int id; 
 private boolean [] flags;
 private byte rcode, opcode;
-private short [] counts;
+private int [] counts;
 
 /**
  * Create a new empty header.
@@ -27,7 +27,7 @@ private short [] counts;
  */
 public
 Header(int _id) {
-	counts = new short[4];
+	counts = new int[4];
 	flags = new boolean[16];
 	id = _id;
 }
@@ -48,16 +48,16 @@ public
 Header(DataByteInputStream in) throws IOException {
 	this(in.readUnsignedShort());
 	readFlags(in);
-	for (int i=0; i<counts.length; i++)
-		counts[i] = in.readShort();
+	for (int i = 0; i<counts.length; i++)
+		counts[i] = in.readUnsignedShort();
 }
 
 void
 toWire(DataByteOutputStream out) throws IOException {
 	out.writeShort(getID());
 	writeFlags(out);
-	for (int i=0; i<counts.length; i++)
-		out.writeShort(counts[i]);
+	for (int i = 0; i<counts.length; i++)
+		out.writeShort((short)counts[i]);
 }
 
 public byte []
@@ -162,7 +162,7 @@ getOpcode() {
 
 void
 setCount(int field, int value) {
-	counts[field] = (short) value;
+	counts[field] = value;
 }
 
 void
@@ -179,7 +179,7 @@ decCount(int field) {
  * Retrieves the record count for the given section
  * @see Section
  */
-public short
+public int
 getCount(int field) {
 	return counts[field];
 }

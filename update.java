@@ -479,9 +479,9 @@ doAssert(MyStringTokenizer st) {
 		}
 	}
 	else if ((section = Section.value(field)) >= 0) {
-		short count = response.getHeader().getCount(section);
-		if (count != Short.parseShort(expected)) {
-			value = new Short(count).toString();
+		int count = response.getHeader().getCount(section);
+		if (count != Integer.parseInt(expected)) {
+			value = new Integer(count).toString();
 			flag = false;
 		}
 	}
