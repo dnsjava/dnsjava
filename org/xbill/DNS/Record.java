@@ -194,7 +194,7 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
  * converted to lowercase).
  */
 public byte []
-toWireCanonical(int section) throws IOException {
+toWireCanonical() throws IOException {
 	DataByteOutputStream out = new DataByteOutputStream();
 	toWireCanonical(out);
 	return out.toByteArray();
