@@ -1,3 +1,16 @@
+2/8/2000
+	- 1.1.3 released
+	- Added lookup program
+	- FindServer finds a search path on Win95/WinNT
+
+2/7/2000
+	- minor TKEY record updates
+	- FindServer should work on Win95/WinNT
+	- Added 'make jar' and a jar file
+
+1/20/2000
+	- Added AAAA record
+
 1/13/2000
 	- 1.1.2 released
 	- dns.setResolver() clears the cache
