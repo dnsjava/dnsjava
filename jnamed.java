@@ -154,7 +154,7 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 		Cache cache = getCache(dclass);
 		if (glue)
 			rrsets = cache.findAnyRecords(name, type);
-		else 
+		else
 			rrsets = cache.findRecords(name, type);
 		if (rrsets == null)
 			return null;
@@ -386,11 +386,11 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 			byte [] out = response.toWire();
 			dataOut.writeShort(out.length);
 			dataOut.write(out);
-		} 
+		}
 	}
 	catch (IOException ex) {
 		System.out.println("AXFR failed");
-	}	
+	}
 	try {
 		s.close();
 	}
@@ -689,7 +689,7 @@ addUDP(final InetAddress addr, final short port) {
 public static void main(String [] args) {
 	if (args.length > 1) {
 		System.out.println("usage: jnamed [conf]");
-		System.exit(0);	
+		System.exit(0);
 	}
 	jnamed s;
 	try {

@@ -275,7 +275,7 @@ sendUpdate() throws IOException {
 	print(response);
 }
 
-/* 
+/*
  * <name> [ttl] [class] <type> <data>
  * Ignore the class, if present.
  */
@@ -486,7 +486,6 @@ doFile(MyStringTokenizer st, List inputs, List istreams) {
 	catch (FileNotFoundException e) {
 		print(s + " not found");
 	}
-	
 }
 
 void
@@ -556,7 +555,7 @@ doAssert(MyStringTokenizer st) {
 		print("Invalid assertion keyword: " + field);
 
 	if (flag == false) {
-		print("Expected " + field + " " + expected + 
+		print("Expected " + field + " " + expected +
 		      ", received " + value);
 		if (st.hasMoreTokens())
 			print(st.nextToken());
