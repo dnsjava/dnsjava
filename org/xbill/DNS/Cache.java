@@ -461,6 +461,36 @@ verifyRecords(Cache tcache) {
 	}
 }
 
+private final byte
+getCred(Record r, Name queryName, short section, boolean isAuth) {
+	byte cred;
+
+	if (section == Section.ANSWER) {
+		if (isAuth && r.getName() == queryName)
+			cred = Credibility.AUTH_ANSWER;
+		else if (isAuth)
+			cred = Credibility.AUTH_NONAUTH_ANSWER;
+		else
+			cred = Credibility.NONAUTH_ANSWER;
+	}
+	else if (section == Section.AUTHORITY) {
+		if (isAuth)
+			cred = Credibility.AUTH_AUTHORITY;
+		else
+			cred = Credibility.NONAUTH_AUTHORITY;
+	}
+	else if (section == Section.ADDITIONAL) {
+		if (isAuth)
+			cred = Credibility.AUTH_ADDITIONAL;
+		else
+			cred = Credibility.NONAUTH_ADDITIONAL;
+	}
+	else
+		cred = 0;
+	return cred;
+}
+
+
 /**
  * Adds all data from a Message into the Cache.  Each record is added with
  * the appropriate credibility, and negative answers are cached as such.
@@ -491,12 +521,7 @@ addMessage(Message in) {
 	e = in.getSection(Section.ANSWER);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		if (isAuth && r.getName().equals(queryName))
-			cred = Credibility.AUTH_ANSWER;
-		else if (isAuth)
-			cred = Credibility.AUTH_NONAUTH_ANSWER;
-		else
-			cred = Credibility.NONAUTH_ANSWER;
+		cred = getCred(r, queryName, Section.ANSWER, isAuth);
 		addRecord(r, cred, in);
 	}
 
@@ -511,10 +536,7 @@ addMessage(Message in) {
 				break;
 			}
 		}
-		if (isAuth)
-			cred = Credibility.AUTH_AUTHORITY;
-		else
-			cred = Credibility.NONAUTH_AUTHORITY;
+		cred = getCred(r, queryName, Section.AUTHORITY, isAuth);
 		if (soa != null) {
 			long soattl = (long)soa.getTTL() & 0xFFFFFFFFL;
 			long soamin = (long)soa.getMinimum() & 0xFFFFFFFFL;
@@ -539,20 +561,14 @@ addMessage(Message in) {
 	e = in.getSection(Section.AUTHORITY);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		if (isAuth)
-			cred = Credibility.AUTH_AUTHORITY;
-		else
-			cred = Credibility.NONAUTH_AUTHORITY;
+		cred = getCred(r, queryName, Section.AUTHORITY, isAuth);
 		addRecord(r, cred, in);
 	}
 
 	e = in.getSection(Section.ADDITIONAL);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		if (isAuth)
-			cred = Credibility.AUTH_ADDITIONAL;
-		else
-			cred = Credibility.NONAUTH_ADDITIONAL;
+		cred = getCred(r, queryName, Section.ADDITIONAL, isAuth);
 		addRecord(r, cred, in);
 	}
 }
@@ -588,7 +604,7 @@ flushName(Name name) {
  */
 public void
 setVerifier(Verifier v) {
-        verifier = v;
+	verifier = v;
 }
 
 /**
@@ -597,7 +613,7 @@ setVerifier(Verifier v) {
  */
 public void
 setSecurePolicy() {
-        secure = true;
+	secure = true;
 }
 
 /**
@@ -607,7 +623,7 @@ setSecurePolicy() {
  */
 public void
 setMaxNCache(int seconds) {
-        maxncache = seconds;
+	maxncache = seconds;
 }
 
 /**
@@ -617,7 +633,7 @@ setMaxNCache(int seconds) {
  */
 public void
 setCleanInterval(int minutes) {
-        cleanInterval = minutes;
+	cleanInterval = minutes;
 	if (cleanInterval <= 0)
 		cleaner = null;
 	else if (cleaner == null)
