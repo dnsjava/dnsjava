@@ -75,6 +75,8 @@ unset(String option) {
 /** Checks if an option is defined */
 public static boolean
 check(String option) {
+	if (table.size() == 0)
+		return (false);
 	return (table.get(option.toLowerCase()) != null);
 }
 
