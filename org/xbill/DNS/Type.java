@@ -178,7 +178,7 @@ private static class TypeMnemonic extends Mnemonic {
 		setPrefix("TYPE");
 	}
 
-	void
+	public void
 	check(int val) {
 		Type.check(val);
 	}

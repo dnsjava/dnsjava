@@ -41,7 +41,7 @@ private static class DClassMnemonic extends Mnemonic {
 		setPrefix("CLASS");
 	}
 
-	void
+	public void
 	check(int val) {
 		DClass.check(val);
 	}

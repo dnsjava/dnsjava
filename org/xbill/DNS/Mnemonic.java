@@ -88,8 +88,10 @@ toInteger(int val) {
 	return new Integer(val);
 }       
 
-/* Checks that a numeric value is with the range [0..max] */
-private void
+/**
+ * Checks that a numeric value is within the range [0..max]
+ */
+public void
 check(int val) {
 	if (val < 0 || (max > 0 && val > max)) {
 		throw new IllegalArgumentException(description + " " + val +
