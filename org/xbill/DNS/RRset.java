@@ -44,6 +44,11 @@ sigs() {
 	return sigs.elements();
 }
 
+public int
+size() {
+	return rrs.size();
+}
+
 public Name
 getName() {
 	Record r =  (Record) rrs.elementAt(0);
