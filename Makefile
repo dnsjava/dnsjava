@@ -1,5 +1,6 @@
 JAVAC=javac
 JFLAGS=-g
+JAR = jar
 
 JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.2/docs/api
 
@@ -9,8 +10,11 @@ all:
 dnssec:
 	${JAVAC} ${JFLAGS} org/xbill/DNS/security/*.java
 
+jar:
+	${JAR} cf dnsjava.jar *.class org/xbill/Task/*.class org/xbill/DNS/*.class org/xbill/DNS/utils/*.class org/xbill/DNS/security/*.class
+
 clean:
-	rm -f *.class org/xbill/Task/*.class org/xbill/DNS/*.class org/xbill/DNS/utils/*.class org/xbill/DNS/security/*.class
+	rm -f *.class org/xbill/Task/*.class org/xbill/DNS/*.class org/xbill/DNS/utils/*.class org/xbill/DNS/security/*.class *.jar
 
 docs:
 	if test ! -d doc ; then mkdir doc ; fi
