@@ -130,16 +130,14 @@ nextToken() {
 			}
 			else
 				sb.append(string[current]);
-		} else {
-			if (string[current] == '"') 
-				quoted = true;
-			else if (string[current] == '\\')
-				escaped = true;
-			else if (isDelim(current))
-				break;
-			else
-				sb.append(string[current]);
-		}
+		} else if (string[current] == '"') 
+			quoted = true;
+		else if (string[current] == '\\')
+			escaped = true;
+		else if (isDelim(current))
+			break;
+		else
+			sb.append(string[current]);
 		current++;
 	}
 	return sb.toString();
@@ -167,19 +165,6 @@ remainingTokens() {
 	while (hasMoreTokens())
 		sb.append(nextToken());
 	return sb.toString();
-}
-
-public static void
-main(String args[]) throws IOException {
-
-	InputStreamReader isr = new InputStreamReader(System.in);
-	BufferedReader br = new BufferedReader(isr);
-
-	while (true) {
-		MyStringTokenizer st = new MyStringTokenizer(br.readLine());
-		while (st.hasMoreTokens())
-			System.out.println(st.nextToken());
-	}
 }
 
 }
