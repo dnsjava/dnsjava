@@ -291,6 +291,7 @@ getRcode() {
  * Returns an Enumeration listing all records in the given section
  * @see Record
  * @see Section
+ * @deprecated As of dnsjava 1.3.0, replaced by <code>getSectionArray()</code>.
  */
 public Enumeration
 getSection(int section) {
