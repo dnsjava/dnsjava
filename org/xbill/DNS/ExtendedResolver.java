@@ -90,7 +90,7 @@ send(Message query) {
 		for (r = 0; r < resolvers.length; r++)
 			ok |= sendTo(query, r, q);
 		if (!ok)
-			return null;
+			break;
 		Message m = null;
 		synchronized (queue) {
 			try {
