@@ -100,7 +100,7 @@ throws IOException
 	alg = (byte) Integer.parseInt(st.nextToken());
 	/* If this is a null key, there's no key data */
 	if (!((flags & (NOAUTH|NOCONF)) == (NOAUTH|NOCONF)))
-		key = base64.fromString(st.nextToken());
+		key = base64.fromString(st.remainingTokens());
 	else
 		key = null;
 }

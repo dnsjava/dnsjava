@@ -81,7 +81,7 @@ throws IOException
 	certType = (short) Integer.parseInt(st.nextToken());
 	keyTag = (short) Integer.parseInt(st.nextToken());
 	alg = (byte) Integer.parseInt(st.nextToken());
-	cert = base64.fromString(st.nextToken());
+	cert = base64.fromString(st.remainingTokens());
 }
 
 /**

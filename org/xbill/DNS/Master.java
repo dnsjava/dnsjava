@@ -189,9 +189,10 @@ readExtendedLine(BufferedReader br) throws IOException {
 		return s;
 	StringBuffer sb = new StringBuffer(s.substring(0, s.length() - 1));
 	while (true) {
-		s = stripTrailing(br.readLine());
+		s = stripTrailing(br.readLine().trim());
 		if (s == null)
 			return sb.toString();
+		sb.append(" ");
 		if (s.endsWith(")")) {
 			sb.append(s.substring(0, s.length() - 1));
 			break;

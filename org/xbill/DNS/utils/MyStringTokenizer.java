@@ -167,6 +167,15 @@ putBackToken(String s) {
 	putBack = s;
 }
 
+/** Returns a concatenation of all remaining tokens */
+public String
+remainingTokens() {
+	StringBuffer sb = new StringBuffer();
+	while (hasMoreTokens())
+		sb.append(nextToken());
+	return sb.toString();
+}
+
 public static void
 main(String args[]) throws IOException {
 

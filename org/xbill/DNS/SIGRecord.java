@@ -95,7 +95,7 @@ throws IOException
 	footprint = (short) Integer.parseInt(st.nextToken());
 	signer = new Name(st.nextToken(), origin);
 	if (st.hasMoreTokens())
-		signature = base64.fromString(st.nextToken());
+		signature = base64.fromString(st.remainingTokens());
 }
 
 /** Converts to a String */
