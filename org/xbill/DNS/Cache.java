@@ -46,9 +46,12 @@ private static class PositiveElement extends Element {
 	RRset rrset;
 
 	public
-	PositiveElement(RRset r, byte cred) {
+	PositiveElement(RRset r, byte cred, long maxttl) {
 		rrset = r;
-		setValues(cred, r.getTTL());
+		long ttl = ((long) r.getTTL()) & 0xFFFFFFFFL;
+		if (maxttl >= 0 && maxttl < ttl)
+			ttl = maxttl;
+		setValues(cred, ttl);
 	}
 
 	public short
@@ -66,21 +69,23 @@ private static class PositiveElement extends Element {
 	}
 }
 
-private class NegativeElement extends Element {
+private static class NegativeElement extends Element {
 	short type;
 	Name name;
 	SOARecord soa;
 
 	public
-	NegativeElement(Name name, short type, SOARecord soa, byte cred) {
+	NegativeElement(Name name, short type, SOARecord soa, byte cred,
+			long maxttl)
+	{
 		this.name = name;
 		this.type = type;
 		this.soa = soa;
 		long cttl = 0;
 		if (soa != null) {
 			cttl = soa.getMinimum() & 0xFFFFFFFFL;
-			if (maxncache >= 0)
-				cttl = Math.min(cttl, maxncache);
+			if (maxttl >= 0)
+				cttl = Math.min(cttl, maxttl);
 		}
 		setValues(cred, cttl);
 	}
@@ -159,6 +164,7 @@ private class CacheCleaner extends Thread {
 private Verifier verifier;
 private boolean secure;
 private int maxncache = -1;
+private int maxcache = -1;
 private long cleanInterval = 30;
 private CacheCleaner cleaner;
 private short dclass;
@@ -241,8 +247,7 @@ addRecord(Record r, byte cred, Object o) {
  */
 public void
 addRRset(RRset rrset, byte cred) {
-	if (rrset.getTTL() == 0)
-		return;
+	long ttl = ((long) rrset.getTTL()) & 0xFFFFFFFFL;
 	Name name = rrset.getName();
 	short type = rrset.getType();
 	if (verifier != null)
@@ -250,12 +255,13 @@ addRRset(RRset rrset, byte cred) {
 	if (secure && rrset.getSecurity() < DNSSEC.Secure)
 		return;
 	Element element = (Element) findExactSet(name, type);
-	if (rrset.getTTL() == 0) {
+	if (ttl == 0) {
 		if (element != null && cred >= element.credibility)
 			removeSet(name, type, element);
 	} else {
 		if (element == null || cred >= element.credibility)
-			addSet(name, type, new PositiveElement(rrset, cred));
+			addSet(name, type,
+				new PositiveElement(rrset, cred, maxcache));
 	}
 }
 
@@ -277,7 +283,8 @@ addNegative(Name name, short type, SOARecord soa, byte cred) {
 			removeSet(name, type, element);
 	}
 	if (element == null || cred >= element.credibility)
-		addSet(name, type, new NegativeElement(name, type, soa, cred));
+		addSet(name, type,
+		       new NegativeElement(name, type, soa, cred, maxncache));
 }
 
 private void
@@ -762,6 +769,15 @@ setSecurePolicy() {
 public void
 setMaxNCache(int seconds) {
 	maxncache = seconds;
+}
+
+/**
+ * Sets the maximum length of time that records will be stored in this
+ * Cache.  A negative value disables this feature (that is, sets no limit).
+ */
+public void
+setMaxCache(int seconds) {
+	maxcache = seconds;
 }
 
 /**
