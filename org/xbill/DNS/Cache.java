@@ -182,7 +182,7 @@ private int dclass;
  *
  * @param dclass The dns class of this cache
  * @param cleanInterval The interval between cache cleanings, in minutes.
- * @see #setCleanInterval(long)
+ * @see #setCleanInterval(int)
  */
 public
 Cache(int dclass, int cleanInterval) {
