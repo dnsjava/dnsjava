@@ -11,12 +11,20 @@ import DNS.utils.*;
 public class Resolver {
 
 class WorkerThread extends Thread {
-	Message query = null, response = null;
-	int id;
-	ResolverListener listener;
+	private Message query;
+	private int id;
+	private ResolverListener listener;
+
+	public void assign(Message _query, int _id, ResolverListener _listener)
+	{
+		query = _query;
+		id = _id;
+		listener = _listener;
+	}
 
 	public void run() {
 		while (true) {
+			Message response = null;
 			try {
 				response = send(query);
 			}
@@ -24,6 +32,8 @@ class WorkerThread extends Thread {
 			}
 			listener.receiveMessage(id, response);
 			synchronized (workerthreads) {
+				if (workerthreads.size() > 3)
+					return;
 				workerthreads.addElement(this);
 			}
 			synchronized (this) {
@@ -214,9 +224,17 @@ send(Message query) throws IOException {
 		return response;
 }
 
+private int
+uniqueID(Message m) {
+	Record r = m.getQuestion();
+	return (((r.getName().hashCode() & 0xFFFF) << 16) +
+		(r.getType() + hashCode() << 8) +
+		(hashCode() & 0xFF));
+}
+
 public int
 sendAsync(final Message query, final ResolverListener listener) {
-	final int id = query.getHeader().getID();
+	final int id = uniqueID(query);
 	if (workerthreads == null)
 		workerthreads = new Vector();
 	WorkerThread t = null;
@@ -232,9 +250,7 @@ sendAsync(final Message query, final ResolverListener listener) {
 		t.start();
 	}
 	synchronized (t) {
-		t.query = query;
-		t.id = id;
-		t.listener = listener;
+		t.assign(query, id, listener);
 		t.notify();
 	}
 	return id;
