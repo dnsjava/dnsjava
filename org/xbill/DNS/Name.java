@@ -463,6 +463,10 @@ getLabelString(int n) {
 
 /**
  * Convert Name to DNS wire format
+ * @param out The output stream containing the DNS message.
+ * @param c The compression context, or null of no compression is desired.
+ * @throws IOException An error occurred writing the name.
+ * @throws IllegalArgumentException The name is not absolute.
  */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
@@ -493,6 +497,8 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 
 /**
  * Convert Name to canonical DNS wire format (all lowercase)
+ * @param out The output stream to which the message is written.
+ * @throws IOException An error occurred writing the name.
  */
 public void
 toWireCanonical(DataByteOutputStream out) throws IOException {
@@ -508,6 +514,7 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
 
 /**
  * Convert Name to canonical DNS wire format (all lowercase)
+ * @throws IOException An error occurred writing the name.
  */
 public byte []
 toWireCanonical() throws IOException {
@@ -562,7 +569,7 @@ hashCode() {
 
 /**
  * Compares this Name to another Object.
- * @param The Object to be compared.
+ * @param o The Object to be compared.
  * @return The value 0 if the argument is a name equivalent to this name;
  * a value less than 0 if the argument is less than this name in the canonical 
  * ordering, and a value greater than 0 if the argument is greater than this

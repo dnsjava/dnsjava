@@ -488,7 +488,7 @@ withName(Name name) {
 
 /**                     
  * Compares this Record to another Object.
- * @param The Object to be compared.
+ * @param o The Object to be compared.
  * @return The value 0 if the argument is a record equivalent to this record;
  * a value less than 0 if the argument is less than this record in the
  * canonical ordering, and a value greater than 0 if the argument is greater
