@@ -1,4 +1,5 @@
 1/8/2004
+	- 1.5.1 released.
 	- LOC records weren't parsed correctly.
 	  (reported by Harel Efraim <harel.efraim@nominum.com>)
 	- Lines with only whitespace in master files should be ignored.
