@@ -1,3 +1,12 @@
+3/28/1999
+	- 0.4 released
+	- fixed compression bug where all pointers into rdata were 0
+	- server sends authority records (NS or SOA)
+	- server now loads glue data separately from zone data, adds
+		authority and additional data, and deals with truncation.
+	- fixed a few Zone bugs
+	- added signatures to RRset
+
 3/27/1999
 	- 0.3 released
 	- _res was set wrong, so the high level functions wouldn't work.
