@@ -223,6 +223,13 @@ throws UnknownHostException
 	return newIXFR(zone, serial, fallback, host, 0, key);
 }
 
+public void
+setTimeout(int secs) {
+	if (secs < 0)
+		throw new IllegalArgumentException("timeout cannt be negative");
+	timeout = 1000L * secs;
+}
+
 private void
 openConnection() throws IOException {
 	key = TCPClient.initialize();
