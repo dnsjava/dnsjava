@@ -253,6 +253,20 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 }
 
 
+private static Record []
+lookupAppend(Name name, Name suffix, short type, short dclass, byte cred,
+	     int iterations, boolean querysent)
+{
+	try {
+		Name newname = Name.concatenate(name, suffix);
+		return lookup(newname, type, dclass, cred, iterations,
+			      querysent);
+	}
+	catch (NameTooLongException e) {
+		return null;
+	}
+}
+
 /**
  * Finds records with the given name, type, and class with a certain credibility
  * @param namestr The name of the desired records
@@ -276,29 +290,22 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
 
-	if (!name.isQualified() && name.labels() > 1) {
-		try {
-			name = Name.concatenate(name, Name.root);
-		}
-		catch (NameTooLongException e) {
-			return null;
-		}
-	}
-
 	if (searchPath == null || name.isQualified())
 		answers = lookup(name, type, dclass, cred, 0, false);
 	else {
-		for (int i = 0; i < searchPath.length; i++) {
-			try {
-				name = Name.fromString(namestr, searchPath[i]);
-			}
-			catch (TextParseException e) {
-				continue;
-			}
-			answers = lookup(name, type, dclass, cred, 0, false);
-			if (answers != null)
-				break;
-		}
+		answers = null;
+
+		if (name.labels() > 1)
+			answers = lookupAppend(name, Name.root, type, dclass,
+					       cred, 0, false);
+
+		for (int i = 0; answers == null && i < searchPath.length; i++)
+			answers = lookupAppend(name, searchPath[i], type,
+					       dclass, cred, 0, false);
+
+		if (answers == null && name.labels() <= 1)
+			answers = lookupAppend(name, Name.root, type, dclass,
+					       cred, 0, false);
 	}
 
 	return answers;
