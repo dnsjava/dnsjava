@@ -12,7 +12,7 @@ import org.xbill.Task.*;
 /**
  * An implementation of Resolver that sends one query to one server.
  * SimpleResolver handles TCP retries, transaction security (TSIG), and
- * EDNS0.
+ * EDNS 0.
  * @see Resolver
  * @see TSIG
  * @see OPTRecord
@@ -33,8 +33,12 @@ private byte EDNSlevel = -1;
 private TSIG tsig;
 private int timeoutValue = 10 * 1000;
 
+private static final short DEFAULT_UDPSIZE = 512;
+private static final short EDNS_UDPSIZE = 1280;
+
 private static String defaultResolver = "localhost";
 private static int uniqueID = 0;
+
 
 /**
  * Creates a SimpleResolver that will query the specified host 
@@ -127,59 +131,97 @@ setTimeout(int secs) {
 	timeoutValue = secs * 1000;
 }
 
-private Message
-sendTCP(Message query, byte [] out) throws IOException {
-	byte [] in;
-	Socket s;
-	int inLength;
+private byte []
+readUDP(DatagramSocket s, int max) throws IOException {
+	DatagramPacket dp = new DatagramPacket(new byte[max], max);
+	s.receive(dp);
+	byte [] in = new byte[dp.getLength()];
+	System.arraycopy(dp.getData(), 0, in, 0, in.length);
+	if (Options.check("verbosemsg"))
+		System.err.println(hexdump.dump("UDP read", in));
+	return (in);
+}
+
+private void
+writeUDP(DatagramSocket s, byte [] out, InetAddress addr, int port)
+throws IOException
+{
+	if (Options.check("verbosemsg"))
+		System.err.println(hexdump.dump("UDP write", out));
+	s.send(new DatagramPacket(out, out.length, addr, port));
+}
+
+private byte []
+readTCP(Socket s) throws IOException {
 	DataInputStream dataIn;
+
+	dataIn = new DataInputStream(s.getInputStream());
+	int inLength = dataIn.readUnsignedShort();
+	byte [] in = new byte[inLength];
+	dataIn.readFully(in);
+	if (Options.check("verbosemsg"))
+		System.err.println(hexdump.dump("TCP read", in));
+	return (in);
+}
+
+private void
+writeTCP(Socket s, byte [] out) throws IOException {
 	DataOutputStream dataOut;
-	Message response;
 
-	s = new Socket(addr, port);
+	if (Options.check("verbosemsg"))
+		System.err.println(hexdump.dump("TCP write", out));
+	dataOut = new DataOutputStream(s.getOutputStream());
+	dataOut.writeShort(out.length);
+	dataOut.write(out);
+}
 
+private Message
+parseMessage(byte [] b) throws WireParseException {
 	try {
-		dataOut = new DataOutputStream(s.getOutputStream());
-		dataOut.writeShort(out.length);
-		dataOut.write(out);
-		s.setSoTimeout(timeoutValue);
-
-		try {
-			dataIn = new DataInputStream(s.getInputStream());
-			inLength = dataIn.readUnsignedShort();
-			in = new byte[inLength];
-			dataIn.readFully(in);
-			if (Options.check("verbosemsg"))
-				System.err.println(hexdump.dump("in", in));
-		}
-		catch (IOException e) {
-			if (Options.check("verbose")) {
-				System.err.println(";;" + e);
-				System.err.println(";; No response");
-			}
-			throw e;
-		}
-	}
-	finally {
-		s.close();
-	}
-
-	try {
-		response = new Message(in);
+		return (new Message(b));
 	}
 	catch (IOException e) {
-		throw new WireParseException("Error parsing message");
-	}
-	if (tsig != null) {
-		response.TSIGsigned = true;
-		byte error = tsig.verify(response, in, query.getTSIG());
-		boolean ok = (error == Rcode.NOERROR);
 		if (Options.check("verbose"))
-			System.err.println("TSIG verify: " +
-					   Rcode.string(error));
-		response.TSIGverified = ok;
+			e.printStackTrace();
+		if (!(e instanceof WireParseException))
+			e = new WireParseException("Error parsing message");
+		throw (WireParseException) e;
 	}
-	return response;
+}
+
+private void
+applyTSIG(Message query) throws IOException {
+	if (tsig != null)
+		tsig.apply(query, null);
+}
+
+private void
+verifyTSIG(Message query, Message response, byte [] b, TSIG tsig) {
+	if (tsig == null)
+		return;
+	response.TSIGsigned = true;
+	byte error = tsig.verify(response, b, query.getTSIG());
+	if (error == Rcode.NOERROR)
+		response.TSIGverified = true;
+	if (Options.check("verbose"))
+		System.err.println("TSIG verify: " + Rcode.string(error));
+}
+
+private void
+applyEDNS(Message query) {
+	if (EDNSlevel < 0 || query.getOPT() != null)
+		return;
+	OPTRecord opt = new OPTRecord(EDNS_UDPSIZE, Rcode.NOERROR, (byte)0);
+	query.addRecord(opt, Section.ADDITIONAL);
+}
+
+private int
+maxUDPSize(Message query) {
+	OPTRecord opt = query.getOPT();
+	if (opt == null)
+		return DEFAULT_UDPSIZE;
+	else
+		return opt.getPayloadSize();
 }
 
 /**
@@ -190,14 +232,6 @@ sendTCP(Message query, byte [] out) throws IOException {
  */
 public Message
 send(Message query) throws IOException {
-	byte [] out, in;
-	Message response;
-	DatagramSocket s;
-	DatagramPacket dp;
-	short udpLength = 512;
-	OPTRecord opt;
-	byte edns;
-
 	if (Options.check("verbose"))
 		System.err.println("Sending to " + addr.getHostAddress() +
 				   ":" + port);
@@ -206,74 +240,46 @@ send(Message query) throws IOException {
 		return sendAXFR(query);
 
 	query = (Message) query.clone();
-	opt = query.getOPT();
-	if (opt != null) {
-		edns = (byte) opt.getVersion();
-		udpLength = opt.getPayloadSize();
-	} else if (EDNSlevel >= 0) {
-		edns = EDNSlevel;
-		udpLength = 1280;
-		opt = new OPTRecord(udpLength, Rcode.NOERROR, edns);
-		query.addRecord(opt, Section.ADDITIONAL);
-	}
+	applyEDNS(query);
+	applyTSIG(query);
 
-	if (tsig != null)
-		tsig.apply(query, null);
+	byte [] out = query.toWire();
+	int udpSize = maxUDPSize(query);
+	boolean tcp = false;
+	do {
+		byte [] in;
 
-	out = query.toWire();
-	if (Options.check("verbosemsg"))
-		System.err.println(hexdump.dump("out", out));
-
-	if (useTCP || out.length > udpLength)
-		return sendTCP(query, out);
-
-	s = new DatagramSocket();
-
-	try {
-		s.send(new DatagramPacket(out, out.length, addr, port));
-
-		dp = new DatagramPacket(new byte[udpLength], udpLength);
-		s.setSoTimeout(timeoutValue);
-		try {
-			s.receive(dp);
-		}
-		catch (IOException e) {
-			if (Options.check("verbose")) {
-				System.err.println(";;" + e);
-				System.err.println(";; No response");
+		if (useTCP || out.length > udpSize)
+			tcp = true;
+		if (tcp) {
+			Socket s = new Socket(addr, port);
+			s.setSoTimeout(timeoutValue);
+			try {
+				writeTCP(s, out);
+				in = readTCP(s);
 			}
-			throw e;
+			finally {
+				s.close();
+			}
+		} else {
+			DatagramSocket s = new DatagramSocket();
+			s.setSoTimeout(timeoutValue);
+			try {
+				writeUDP(s, out, addr, port);
+				in = readUDP(s, udpSize);
+			}
+			finally {
+				s.close();
+			}
 		}
-	}
-	finally {
-		s.close();
-	}
-	in = new byte [dp.getLength()];
-	System.arraycopy(dp.getData(), 0, in, 0, in.length);
-	if (Options.check("verbosemsg"))
-		System.err.println(hexdump.dump("in", in));
-	try {
-		response = new Message(in);
-	}
-	catch (IOException e) {
-		if (Options.check("verbose"))
-			e.printStackTrace();
-		throw new WireParseException("Error parsing message");
-	}
-	if (tsig != null) {
-		response.TSIGsigned = true;
-		byte error = tsig.verify(response, in, query.getTSIG());
-		boolean ok = (error == Rcode.NOERROR);
-		if (Options.check("verbose"))
-			System.err.println("TSIG verify: " +
-					   Rcode.string(error));
-		response.TSIGverified = ok;
-	}
-
-	if (response.getHeader().getFlag(Flags.TC) && !ignoreTruncation)
-		return sendTCP(query, out);
-	else
-		return response;
+		Message response = parseMessage(in);
+		verifyTSIG(query, response, in, tsig);
+		if (!tcp && !ignoreTruncation &&
+		    response.getHeader().getFlag(Flags.TC))
+			tcp = true;
+		else
+			return response;
+	} while (true);
 }
 
 /**
@@ -299,122 +305,70 @@ sendAsync(final Message query, final ResolverListener listener) {
 
 private Message
 sendAXFR(Message query) throws IOException {
-	byte [] out, in;
-	Socket s;
-	int inLength;
-	DataInputStream dataIn;
-	int soacount = 0;
-	Message m, response;
-	boolean first = true;
-
-	s = new Socket(addr, port);
+	Socket s = new Socket(addr, port);
+	s.setSoTimeout(timeoutValue);
 
 	try {
 		query = (Message) query.clone();
-		if (tsig != null)
-			tsig.apply(query, null);
+		applyTSIG(query);
 
-		out = query.toWire();
-		if (Options.check("verbosemsg"))
-			System.err.println(hexdump.dump("out", out));
-		OutputStream sOut = s.getOutputStream();
-		new DataOutputStream(sOut).writeShort(out.length);
-		sOut.write(out);
-		s.setSoTimeout(timeoutValue);
-
-		response = new Message();
-		response.getHeader().setID(query.getHeader().getID());
+		byte [] out = query.toWire();
+		writeTCP(s, out);
+		byte [] in = readTCP(s);
+		Message response = parseMessage(in);
+		if (response.getHeader().getRcode() != Rcode.NOERROR)
+			return response;
 		if (tsig != null) {
 			tsig.verifyAXFRStart();
-			response.TSIGsigned = true;
-			response.TSIGverified = true;
+			verifyTSIG(query, response, in, tsig);
 		}
+		int soacount = 0;
+		Record [] records = response.getSectionArray(Section.ANSWER);
+		for (int i = 0; i < records.length; i++)
+			if (records[i] instanceof SOARecord)
+				soacount++;
+
 		while (soacount < 2) {
-			try {
-				InputStream sIn = s.getInputStream();
-				dataIn = new DataInputStream(sIn);
-				inLength = dataIn.readUnsignedShort();
-				in = new byte[inLength];
-				dataIn.readFully(in);
-			}
-			catch (IOException e) {
-				if (Options.check("verbose")) {
-					System.err.println(";;" + e);
-					System.err.println(";; No response");
-				}
-				throw e;
-			}
-			if (Options.check("verbosemsg"))
-				System.err.println(hexdump.dump("in", in));
-			try {
-				m = new Message(in);
-			}
-			catch (IOException e) {
+			in = readTCP(s);
+			Message m = parseMessage(in);
+			short rcode = m.getHeader().getRcode();
+			if (rcode != Rcode.NOERROR)
 				throw new WireParseException
-						("Error parsing message");
-			}
-			if (m.getHeader().getRcode() != Rcode.NOERROR) {
-				if (soacount == 0)
-					return m;
-				if (Options.check("verbosemsg")) {
-					System.err.println("Invalid AXFR packet: ");
-					System.err.println(m);
-				}
-				throw new WireParseException
-					("Invalid AXFR message");
-			}
-			if (m.getHeader().getCount(Section.QUESTION) > 1 ||
-			    m.getHeader().getCount(Section.ANSWER) <= 0 ||
-			    m.getHeader().getCount(Section.AUTHORITY) != 0)
+					("AXFR: rcode " + Rcode.string(rcode));
+			Header header = m.getHeader();
+			if (header.getCount(Section.QUESTION) > 1 ||
+			    header.getCount(Section.ANSWER) <= 0 ||
+			    header.getCount(Section.AUTHORITY) != 0)
 			{
-				if (Options.check("verbosemsg")) {
-					System.err.println("Invalid AXFR packet: ");
+				if (Options.check("verbosemsg"))
 					System.err.println(m);
-				}
+			    	throw new WireParseException
+					("AXFR: invalid record counts");
+			}
+			records = m.getSectionArray(Section.ANSWER);
+			for (int i = 0; i < records.length; i++) {
+				response.addRecord(records[i], Section.ANSWER);
+				if (records[i] instanceof SOARecord)
+					soacount++;
+			}
+			if (soacount > 2)
 				throw new WireParseException
-						("Invalid AXFR message");
-			}
-			for (int i = 1; i < 4; i++) {
-				Record [] records = m.getSectionArray(i);
-				for (int j = 0; j < records.length; j++) {
-					response.addRecord(records[j], i);
-					if (records[j] instanceof SOARecord)
-						soacount++;
-				}
-			}
-			if (tsig != null) {
-				boolean required = (soacount > 1 || first);
-				byte error = tsig.verifyAXFR(m, in,
-							     query.getTSIG(),
-							     required, first);
-				boolean ok = (error == Rcode.NOERROR);
-				if (!ok)
-					response.TSIGverified = false;
-				if (Options.check("verbose")) {
-					String status;
-					if (m.getTSIG() == null) {
-						if (!ok)
-							status = "expected";
-						else
-							status = "<>";
-					}
-					else {
-						if (!ok)
-							status = "failed";
-						else
-							status = "ok";
-					}
-					System.err.println("TSIG verify: " +
-							   status);
-				}
-			}
-			first = false;
+					("AXFR: too many SOAs");
+			if (tsig == null)
+				continue;
+			byte error = tsig.verifyAXFR(m, in, query.getTSIG(),
+						     (soacount > 1), false);
+			if (error != Rcode.NOERROR)
+				response.TSIGverified = false;
+			if (Options.check("verbose"))
+				System.err.println("TSIG verify: " +
+						   Rcode.string(error));
 		}
+		return response;
 	}
 	finally {
 		s.close();
 	}
-	return response;
 }
 
 }
