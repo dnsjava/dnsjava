@@ -317,6 +317,7 @@ sendAXFR(Message query) throws IOException {
 		query = (Message) query.clone();
 		if (tsig != null)
 			tsig.apply(query, null);
+		query.getHeader().unsetFlag(Flags.RD);
 
 		byte [] out = query.toWire(Message.MAXLENGTH);
 		writeTCP(s, out);
