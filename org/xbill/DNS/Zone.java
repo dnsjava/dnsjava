@@ -255,11 +255,11 @@ findRecords(Name name, short type) {
 	if (o == null) {
 		/* The name does not exist */
 		if (name.isWild())
-			return new SetResponse(SetResponse.NXDOMAIN);
+			return SetResponse.ofType(SetResponse.NXDOMAIN);
 
 		int labels = name.labels() - origin.labels();
 		if (labels == 0)
-			return new SetResponse(SetResponse.NXDOMAIN);
+			return SetResponse.ofType(SetResponse.NXDOMAIN);
 		if (hasWild) {
 			SetResponse sr;
 			Name tname = name;
@@ -271,12 +271,12 @@ findRecords(Name name, short type) {
 			} while (labels-- >= 1);
 			return sr;
 		} else
-			return new SetResponse(SetResponse.NXDOMAIN);
+			return SetResponse.ofType(SetResponse.NXDOMAIN);
 	}
 
 	if (o instanceof TypeMap) {
 		/* The name exists but the type does not. */
-		return new SetResponse(SetResponse.NXRRSET);
+		return SetResponse.ofType(SetResponse.NXRRSET);
 	}
 
 	Object [] objects;
@@ -308,7 +308,7 @@ findRecords(Name name, short type) {
 		}
 	} else {
 		if (rrset.getType() == Type.CNAME)
-			return new SetResponse(SetResponse.NXDOMAIN);
+			return SetResponse.ofType(SetResponse.NXDOMAIN);
 		else if (rrset.getType() == Type.DNAME) {
 			zr = new SetResponse(SetResponse.DNAME, rrset);
 		}

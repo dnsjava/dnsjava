@@ -57,6 +57,10 @@ static final byte DNAME		= 5;
  */
 static final byte SUCCESSFUL	= 6;
 
+private static final SetResponse unknown = new SetResponse(UNKNOWN);
+private static final SetResponse nxdomain = new SetResponse(NXDOMAIN);
+private static final SetResponse nxrrset = new SetResponse(NXRRSET);
+
 private byte type;
 private Object data;
 
@@ -75,6 +79,28 @@ SetResponse(byte type) {
 		throw new IllegalArgumentException("invalid type");
 	this.type = type;
 	this.data = null;
+}
+
+static SetResponse
+ofType(byte type) {
+	switch (type) {
+		case UNKNOWN:
+			return unknown;
+		case NXDOMAIN:
+			return nxdomain;
+		case NXRRSET:
+			return nxrrset;
+		case DELEGATION:
+		case CNAME:
+		case DNAME:
+		case SUCCESSFUL:
+			SetResponse sr = new SetResponse();
+			sr.type = type;
+			sr.data = null;
+			return sr;
+		default:
+			throw new IllegalArgumentException("invalid type");
+	}
 }
 
 void
@@ -171,7 +197,7 @@ toString() {
 		case CNAME:		return "CNAME: " + data;
 		case DNAME:		return "DNAME: " + data;
 		case SUCCESSFUL:	return "successful";
-		default:	return null;
+		default:		return null;
 	}
 }
 

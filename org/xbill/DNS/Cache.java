@@ -304,7 +304,7 @@ lookupRecords(Name name, short type, byte minCred) {
 		 */
 		if (verbose)
 			logLookup(name, type, "no information found");
-		return new SetResponse(SetResponse.UNKNOWN);
+		return SetResponse.ofType(SetResponse.UNKNOWN);
 	}
 
 	Object [] objects;
@@ -350,7 +350,7 @@ lookupRecords(Name name, short type, byte minCred) {
 		/* We have data, but can't use it.  Punt. */
 		if (verbose)
 			logLookup(name, type, "no useful data found");
-		return new SetResponse(SetResponse.UNKNOWN);
+		return SetResponse.ofType(SetResponse.UNKNOWN);
 	}
 
 	/*
@@ -378,7 +378,7 @@ lookupRecords(Name name, short type, byte minCred) {
 			if (element.type == 0) {
 				if (verbose)
 					logLookup(name, type, "NXDOMAIN");
-				return new SetResponse(SetResponse.NXDOMAIN);
+				return SetResponse.ofType(SetResponse.NXDOMAIN);
 			}
 
 			/*
@@ -388,7 +388,7 @@ lookupRecords(Name name, short type, byte minCred) {
 			if (type != Type.ANY) {
 				if (verbose)
 					logLookup(name, type, "NXRRSET");
-				return new SetResponse(SetResponse.NXRRSET);
+				return SetResponse.ofType(SetResponse.NXRRSET);
 			} else {
 				if (verbose)
 					logLookup(name, type,
@@ -458,7 +458,7 @@ lookupRecords(Name name, short type, byte minCred) {
 	 * NXDOMAIN.  Return UNKNOWN.
 	 */
 	if (cr == null && type == Type.ANY)
-		return new SetResponse(SetResponse.UNKNOWN);
+		return SetResponse.ofType(SetResponse.UNKNOWN);
 	else if (cr == null)
 		throw new IllegalStateException("looking up (" + name + " " +
 						Type.string(type) + "): " +
