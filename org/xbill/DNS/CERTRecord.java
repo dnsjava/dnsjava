@@ -42,7 +42,7 @@ throws IOException
 }
 
 public
-dnsCERTRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsCERTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.CERT, _dclass, _ttl);

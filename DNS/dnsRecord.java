@@ -176,12 +176,12 @@ toStringNoData() {
 	sb.append(name);
 	sb.append("\t");
 	sb.append(ttl);
-	sb.append("\t");
-	sb.append(dns.typeString(type));
 	if (dclass != dns.IN) {
 		sb.append("\t");
 		sb.append(dns.classString(dclass));
 	}
+	sb.append("\t");
+	sb.append(dns.typeString(type));
 	sb.append("\t");
 	return sb;
 }
@@ -194,8 +194,10 @@ toString() {
 }
 
 public static dnsRecord
-fromString(StringTokenizer st, dnsName name, int ttl, short type, short dclass)
-throws IOException {
+fromString(MyStringTokenizer st, dnsName name, int ttl, short type,
+	   short dclass)
+throws IOException
+{
 	dnsRecord rec;
 
 	try {
@@ -208,7 +210,7 @@ throws IOException {
 						dnsName.class,
 						java.lang.Short.TYPE,
 						java.lang.Integer.TYPE,
-						StringTokenizer.class
+						MyStringTokenizer.class
 					   });
 		rec = (dnsRecord) m.newInstance(new Object [] {
 							name,

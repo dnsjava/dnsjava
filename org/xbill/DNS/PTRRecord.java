@@ -21,7 +21,7 @@ dnsPTRRecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsPTRRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsPTRRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
         super(_name, dns.PTR, _dclass, _ttl, st);

@@ -29,7 +29,7 @@ throws IOException
 }
 
 public
-dnsHINFORecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsHINFORecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.HINFO, _dclass, _ttl);

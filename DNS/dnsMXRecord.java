@@ -31,7 +31,7 @@ throws IOException
 }
 
 public
-dnsMXRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsMXRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.MX, _dclass, _ttl);

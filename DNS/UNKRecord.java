@@ -18,7 +18,7 @@ dnsUNKRecord(dnsName _name, short _type, short _dclass, int _ttl, int length,
 
 public 
 dnsUNKRecord(dnsName _name, short _type, short _dclass, int _ttl,
-	     StringTokenizer st) throws IOException
+	     MyStringTokenizer st) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
 	System.out.println("Unknown type: " + type);

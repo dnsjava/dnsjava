@@ -39,7 +39,7 @@ throws IOException
 }
 
 public
-dnsNXTRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsNXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.NXT, _dclass, _ttl);

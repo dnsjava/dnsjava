@@ -60,7 +60,9 @@ static final short MAILA	= 254;
 static final short ANY		= 255;
 
 /* Classes */
-static final short IN	 = 1;
+static final short IN		 = 1;
+static final short CHAOS	 = 3;
+static final short HESIOD	 = 4;
 /*static final short ANY = 255;*/
 
 /* Rcodes */
@@ -193,9 +195,13 @@ static {
 	types.put("ANY", new Short(ANY));
 
 	classes.put(new Short(IN), "IN");
+	classes.put(new Short(CHAOS), "CHAOS");
+	classes.put(new Short(HESIOD), "HESIOD");
 	classes.put(new Short(ANY), "ANY");
 
 	classes.put("IN", new Short(IN));
+	classes.put("CHAOS", new Short(CHAOS));
+	classes.put("HESIOD", new Short(HESIOD));
 	classes.put("ANY", new Short(ANY));
 
 	rcodes.put(new Byte(NOERROR), "NOERROR");
@@ -243,7 +249,14 @@ static String typeString(int i) {
 
 static short typeValue(String s) {
 	Short i = (Short) types.get(s.toUpperCase());
-	return (i != null) ? i.shortValue() : (-1);
+	if (i != null)
+		return i.shortValue();
+	try {
+		return Short.parseShort(s);
+	}
+	catch (Exception e) {
+		return (-1);
+	}
 }
 
 static String classString(int i) {
@@ -253,7 +266,14 @@ static String classString(int i) {
 
 static short classValue(String s) {
 	Short i = (Short) classes.get(s.toUpperCase());
-	return (i != null) ? i.shortValue() : (-1);
+	if (i != null)
+		return i.shortValue();
+	try {
+		return Short.parseShort(s);
+	}
+	catch (Exception e) {
+		return (-1);
+	}
 }
 
 static String rcodeString(int i) {

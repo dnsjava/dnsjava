@@ -45,15 +45,13 @@ throws IOException
 }
 
 public
-dnsTXTRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsTXTRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.TXT, _dclass, _ttl);
-	Vector v = new Vector();
-	while (st.hasMoreTokens()) {
-		String s = st.nextToken();
-		v.addElement(s.substring(1, s.length() - 1));
-	}
+	strings = new Vector();
+	while (st.hasMoreTokens())
+		strings.addElement(st.nextToken());
 }
 
 public String
@@ -65,7 +63,7 @@ toString() {
 			String s = (String) e.nextElement();
 			sb.append("\"");
 			sb.append(s);
-			sb.append("\"");
+			sb.append("\" ");
 		}
 	}
 	return sb.toString();

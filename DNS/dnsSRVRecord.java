@@ -35,7 +35,7 @@ throws IOException
 }
 
 public
-dnsSRVRecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsSRVRecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.SRV, _dclass, _ttl);

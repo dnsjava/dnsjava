@@ -41,7 +41,7 @@ dnsARecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsARecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.A, _dclass, _ttl);

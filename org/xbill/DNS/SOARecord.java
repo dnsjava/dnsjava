@@ -41,7 +41,7 @@ dnsSOARecord(dnsName _name, short _dclass, int _ttl, int length,
 }
 
 public
-dnsSOARecord(dnsName _name, short _dclass, int _ttl, StringTokenizer st)
+dnsSOARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st)
 throws IOException
 {
 	super(_name, dns.SOA, _dclass, _ttl);

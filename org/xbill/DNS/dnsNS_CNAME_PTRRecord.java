@@ -27,7 +27,7 @@ throws IOException
 
 public
 dnsNS_CNAME_PTRRecord(dnsName _name, short _type, short _dclass, int _ttl,
-		      StringTokenizer st)
+		      MyStringTokenizer st)
 throws IOException
 {
         super(_name, _type, _dclass, _ttl);

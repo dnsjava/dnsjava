@@ -11,22 +11,41 @@ private byte labels;
 
 static final int MAXLABELS = 64;
 
-dnsName(String s) {
-	StringTokenizer st = new StringTokenizer(s, ".");
-
+dnsName(String s, String origin) {
 	labels = 0;
 	name = new String[MAXLABELS];
 
 	try {
+		MyStringTokenizer st = new MyStringTokenizer(s, ".");
+
 		while (st.hasMoreTokens())
 			name[labels++] = st.nextToken();
+
+		if (origin != null) {
+			st = new MyStringTokenizer(origin, ".");
+
+			while (st.hasMoreTokens())
+				name[labels++] = st.nextToken();
+		}
 	}
 	catch (ArrayIndexOutOfBoundsException e) {
-		System.out.println("String " + s + " has too many labels");
+		StringBuffer sb = new StringBuffer();
+		sb.append("String ");
+		sb.append(s);
+		if (origin != null) {
+			sb.append(".");
+			sb.append(origin);
+		}
+		sb.append(" has too many labels");
+		System.out.println(sb.toString());
 		name = null;
 		labels = 0;
 	}
 	
+}
+
+dnsName(String s) {
+	this (s, null);
 }
 
 dnsName(CountedDataInputStream in, dnsCompression c) throws IOException {
