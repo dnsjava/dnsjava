@@ -101,6 +101,15 @@ getTSIG() {
 	return (TSIGRecord) rec;
 }
 
+public OPTRecord
+getOPT() {
+	Record [] additional = getSectionArray(Section.ADDITIONAL);
+	for (int i = 0; i < additional.length; i++)
+		if (additional[i] instanceof OPTRecord)
+			return (OPTRecord) additional[i];
+	return null;
+}
+
 public Enumeration
 getSection(int section) {
 	return sections[section].elements();
