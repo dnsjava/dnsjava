@@ -1,3 +1,8 @@
+3/17/2003
+	- Make the routine that converts an IP address from a string
+	  more efficient and correct.
+	  (based on a patch by Sean O'Neil <SeanO@telemate.net>)
+
 2/12/2003
 	- Fix an infinite loop that could occur when processing a response
 	  containing a CNAME loop and an rcode of NOERROR.
