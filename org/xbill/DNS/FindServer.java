@@ -239,7 +239,9 @@ probe() {
 	if (server == null || search == null) {
 		String OS = System.getProperty("os.name");
 		if (OS.indexOf("Windows") != -1) {
-			if ((OS.indexOf("NT") != -1) || (OS.indexOf("2000") != -1))
+			if (OS.indexOf("NT") != -1 ||
+			    OS.indexOf("2000") != -1 ||
+			    OS.indexOf("XP") != -1)
 				findNT();
 			else
 				find95();
