@@ -34,21 +34,21 @@ clear() {
  * type/class ANY.
  */
 protected Object []
-findSets(Name name, short type, short dclass) {
+findSets(Name name, short type) {
 	Object [] array;
 	Object o;
 
-	TypeClassMap nameInfo = findName(name);
+	TypeMap nameInfo = findName(name);
 	if (nameInfo == null) 
 		return null;
 	while (true) {
-		if (type == Type.ANY || dclass == DClass.ANY) {
-			array = nameInfo.getMultiple(type, dclass);
+		if (type == Type.ANY) {
+			array = nameInfo.getMultiple(type);
 			if (array != null)
 				return array;
 		}
 		else {
-			o = nameInfo.get(type, dclass);
+			o = nameInfo.get(type);
 			if (o != null)
 				return new Object[] {o};
 		}
@@ -65,32 +65,32 @@ findSets(Name name, short type, short dclass) {
  * Type ANY queries.
  */
 protected Object
-findExactSet(Name name, short type, short dclass) {
-	TypeClassMap nameInfo = findName(name);
+findExactSet(Name name, short type) {
+	TypeMap nameInfo = findName(name);
 	if (nameInfo == null)
 		return null;
-	return nameInfo.get(type, dclass);
+	return nameInfo.get(type);
 }
 
 /**
  * Finds all records for a given name, if the name exists.
  */
-protected TypeClassMap
+protected TypeMap
 findName(Name name) {
-	return (TypeClassMap) data.get(name);
+	return (TypeMap) data.get(name);
 }
 
 /**
- * Adds a set associated with a name/type/class.  The data contained in the
+ * Adds a set associated with a name/type.  The data contained in the
  * set is abstract.
  */
 protected void
-addSet(Name name, short type, short dclass, Object set) {
-	TypeClassMap nameInfo = findName(name);
+addSet(Name name, short type, Object set) {
+	TypeMap nameInfo = findName(name);
 	if (nameInfo == null)
-		data.put(name, nameInfo = new TypeClassMap());
+		data.put(name, nameInfo = new TypeMap());
 	synchronized (nameInfo) {
-		nameInfo.put(type, dclass, set);
+		nameInfo.put(type, set);
 	}
 }
 
@@ -99,18 +99,18 @@ addSet(Name name, short type, short dclass, Object set) {
  * set is abstract.
  */
 protected void
-removeSet(Name name, short type, short dclass, Object set) {
-	TypeClassMap nameInfo = findName(name);
+removeSet(Name name, short type, Object set) {
+	TypeMap nameInfo = findName(name);
 	if (nameInfo == null)
 		return;
-	Object o = nameInfo.get(type, dclass);
+	Object o = nameInfo.get(type);
 	if (o != set && type != Type.CNAME) {
 		type = Type.CNAME;
-		o = nameInfo.get(type, dclass);
+		o = nameInfo.get(type);
 	}
 	if (o == set) {
 		synchronized (nameInfo) {
-			nameInfo.remove(type, dclass);
+			nameInfo.remove(type);
 		}
 		if (nameInfo.isEmpty())
 			data.remove(name);
@@ -139,8 +139,8 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	Enumeration e = data.elements();
 	while (e.hasMoreElements()) {
-		TypeClassMap nameInfo = (TypeClassMap) e.nextElement();
-		Object [] elements = nameInfo.getMultiple(Type.ANY, DClass.ANY);
+		TypeMap nameInfo = (TypeMap) e.nextElement();
+		Object [] elements = nameInfo.getMultiple(Type.ANY);
 		if (elements == null)
 			continue;
 		for (int i = 0; i < elements.length; i++)

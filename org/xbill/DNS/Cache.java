@@ -23,7 +23,7 @@ public class Cache extends NameSet {
 
 private class Element {
 	RRset rrset;
-	short type, dclass;
+	short type;
 	byte credibility;
 	long timeIn;
 	int ttl;
@@ -31,10 +31,9 @@ private class Element {
 	Thread tid;
 
 	public
-	Element(int _ttl, byte cred, int src, short _type, short _dclass) {
+	Element(int _ttl, byte cred, int src, short _type) {
 		rrset = null;
 		type = _type;
-		dclass = _dclass;
 		credibility = cred;
 		ttl = _ttl;
 		srcid = src;
@@ -45,7 +44,6 @@ private class Element {
 	Element(Record r, byte cred, int src) {
 		rrset = new RRset();
 		type = rrset.getType();
-		dclass = rrset.getDClass();
 		credibility = cred;
 		timeIn = System.currentTimeMillis();
 		ttl = -1;
@@ -58,7 +56,6 @@ private class Element {
 	Element(RRset r, byte cred, int src) {
 		rrset = r;
 		type = r.getType();
-		dclass = r.getDClass();
 		credibility = cred;
 		timeIn = System.currentTimeMillis();
 		ttl = r.getTTL();
@@ -129,12 +126,11 @@ private class CacheCleaner extends Thread {
 			Enumeration e = names();
 			while (e.hasMoreElements()) {
 				Name name = (Name) e.nextElement();
-				TypeClassMap tcm = findName(name);
-				if (tcm == null)
+				TypeMap tm = findName(name);
+				if (tm == null)
 					continue;
 				Object [] elements;
-				elements = tcm.getMultiple(Type.ANY,
-							   DClass.ANY);
+				elements = tm.getMultiple(Type.ANY);
 				if (elements == null)
 					continue;
 				for (int i = 0; i < elements.length; i++) {
@@ -143,7 +139,6 @@ private class CacheCleaner extends Thread {
 						continue;
 					if (element.expiredTTL())
 						removeSet(name, element.type,
-							  element.dclass,
 							  element);
 				}
 			}
@@ -156,12 +151,18 @@ private boolean secure;
 private int maxncache = -1;
 private long cleanInterval = 30;
 private Thread cleaner;
+short dclass;
 
-/** Creates an empty Cache */
+/**
+ * Creates an empty Cache
+ *
+ * @param dclass The dns class of this cache
+ */
 public
-Cache() {
+Cache(short dclass) {
 	super();
 	cleaner = new CacheCleaner();
+	this.dclass = dclass;
 }
 
 /** Empties the Cache */
@@ -194,14 +195,12 @@ public void
 addRecord(Record r, byte cred, Object o) {
 	Name name = r.getName();
 	short type = r.getRRsetType();
-	short dclass = r.getDClass();
 	if (!Type.isRR(type))
 		return;
 	int src = (o != null) ? o.hashCode() : 0;
-	Element element = (Element) findExactSet(name, type, dclass);
+	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, dclass,
-		       element = new Element(r, cred, src));
+		addSet(name, type, element = new Element(r, cred, src));
 	else if (cred == element.credibility) {
 		if (element.srcid != src) {
 			element.rrset.clear();
@@ -222,33 +221,30 @@ public void
 addRRset(RRset rrset, byte cred, Object o) {
 	Name name = rrset.getName();
 	short type = rrset.getType();
-	short dclass = rrset.getDClass();
 	int src = (o != null) ? o.hashCode() : 0;
 	if (verifier != null)
 		rrset.setSecurity(verifier.verify(rrset, this));
 	if (secure && rrset.getSecurity() < DNSSEC.Secure)
 		return;
-	Element element = (Element) findExactSet(name, type, dclass);
+	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, dclass, new Element(rrset, cred, src));
+		addSet(name, type, new Element(rrset, cred, src));
 }
 
 /**
  * Adds a negative entry to the Cache
  * @param name The name of the negative entry
  * @param type The type of the negative entry
- * @param dclass The class of the negative entry
  * @param ttl The ttl of the negative entry
  * @param cred The credibility of the negative entry
  * @param o The source of this data
  */
 public void
-addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
+addNegative(Name name, short type, int ttl, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
-	Element element = (Element) findExactSet(name, type, dclass);
+	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, dclass,
-		       new Element(ttl, cred, src, type, dclass));
+		addSet(name, type, new Element(ttl, cred, src, type));
 }
 
 /**
@@ -256,16 +252,15 @@ addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
  * cached data.
  * @param name The name to look up
  * @param type The type to look up
- * @param dclass The class to look up
  * @param minCred The minimum acceptable credibility
  * @return A SetResponse object
  * @see SetResponse
  * @see Credibility
  */
 public SetResponse
-lookupRecords(Name name, short type, short dclass, byte minCred) {
+lookupRecords(Name name, short type, byte minCred) {
 	SetResponse cr = null;
-	Object [] objects = findSets(name, type, dclass);
+	Object [] objects = findSets(name, type);
 
 	if (objects == null)
 		return new SetResponse(SetResponse.UNKNOWN);
@@ -274,14 +269,14 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 	for (int i = 0; i < objects.length; i++) {
 		Element element = (Element) objects[i];
 		if (element.TTL0Ours()) {
-			removeSet(name, type, dclass, element);
+			removeSet(name, type, element);
 			nelements++;
 		}
 		else if (element.TTL0NotOurs()) {
 			objects[i] = null;
 		}
 		else if (element.expiredTTL()) {
-			removeSet(name, type, dclass, element);
+			removeSet(name, type, element);
 			objects[i] = null;
 		}
 		else if (element.credibility < minCred)
@@ -315,8 +310,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			 * try that instead.
 			 */
 			if (!name.isWild()) {
-				cr = lookupRecords(name.wild(1), type, dclass,
-						   minCred);
+				cr = lookupRecords(name.wild(1), type, minCred);
 				if (cr.isSuccessful())
 					return cr;
 			}
@@ -331,8 +325,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 		    rrset.getType() == Type.CNAME)
 		{
 			CNAMERecord cname = (CNAMERecord) rrset.first();
-			cr = lookupRecords(cname.getTarget(), type, dclass,
-					   minCred);
+			cr = lookupRecords(cname.getTarget(), type, minCred);
 			if (cr.isUnknown())
 				cr.set(SetResponse.PARTIAL, cname);
 			cr.addCNAME(cname);
@@ -356,8 +349,8 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 }
 
 private RRset []
-findRecords(Name name, short type, short dclass, byte minCred) {
-	SetResponse cr = lookupRecords(name, type, dclass, minCred);
+findRecords(Name name, short type, byte minCred) {
+	SetResponse cr = lookupRecords(name, type, minCred);
 	if (cr.isSuccessful())
 		return cr.answers();
 	else
@@ -369,13 +362,12 @@ findRecords(Name name, short type, short dclass, byte minCred) {
  * Unlike lookupRecords, this given no indication of why failure occurred.
  * @param name The name to look up
  * @param type The type to look up
- * @param dclass The class to look up
  * @return An array of RRsets, or null
  * @see Credibility
  */
 public RRset []
-findRecords(Name name, short type, short dclass) {
-	return findRecords(name, type, dclass, Credibility.NONAUTH_ANSWER);
+findRecords(Name name, short type) {
+	return findRecords(name, type, Credibility.NONAUTH_ANSWER);
 }
 
 /**
@@ -383,13 +375,12 @@ findRecords(Name name, short type, short dclass) {
  * lookupRecords, this given no indication of why failure occurred.
  * @param name The name to look up
  * @param type The type to look up
- * @param dclass The class to look up
  * @return An array of RRsets, or null
  * @see Credibility
  */
 public RRset []
-findAnyRecords(Name name, short type, short dclass) {
-	return findRecords(name, type, dclass, Credibility.NONAUTH_ADDITIONAL);
+findAnyRecords(Name name, short type) {
+	return findRecords(name, type, Credibility.NONAUTH_ADDITIONAL);
 }
 
 /**
@@ -411,7 +402,7 @@ addMessage(Message in) {
 	Cache c;
 
 	if (secure)
-		c = new Cache();
+		c = new Cache(dclass);
 	else
 		c = this;
 
@@ -450,7 +441,7 @@ addMessage(Message in) {
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
 			if (ancount == 0)
-				c.addNegative(queryName, queryType, queryClass,
+				c.addNegative(queryName, queryType,
 					      ttl, cred, in);
 			else {
 				Record [] cnames;
@@ -458,7 +449,7 @@ addMessage(Message in) {
 				int last = cnames.length - 1;
 				Name cname;
 				cname = ((CNAMERecord)cnames[last]).getTarget();
-				c.addNegative(cname, queryType, queryClass,
+				c.addNegative(cname, queryType,
 					      ttl, cred, in);
 			}
 		}
@@ -487,11 +478,11 @@ addMessage(Message in) {
 		e = c.names();
 		while (e.hasMoreElements()) {
 			Name name = (Name) e.nextElement();
-			TypeClassMap tcm = c.findName(name);
-			if (tcm == null)
+			TypeMap tm = c.findName(name);
+			if (tm == null)
 				continue;
 			Object [] elements;
-			elements = tcm.getMultiple(Type.ANY, DClass.ANY);
+			elements = tm.getMultiple(Type.ANY);
 			if (elements == null)
 				continue;
 			for (int i = 0; i < elements.length; i++) {
@@ -506,8 +497,7 @@ addMessage(Message in) {
 						verifier.verify(rrset, this));
 				if (rrset.getSecurity() < DNSSEC.Secure)
 					continue;
-				addSet(name, rrset.getType(),
-				       rrset.getDClass(), element);
+				addSet(name, rrset.getType(), element);
 			}
 		}
 	}
@@ -517,15 +507,14 @@ addMessage(Message in) {
  * Flushes an RRset from the cache
  * @param name The name of the records to be flushed
  * @param type The type of the records to be flushed
- * @param dclass The class of the records to be flushed
  * @see RRset
  */
 void
-flushSet(Name name, short type, short dclass) {
-	Element element = (Element) findExactSet(name, type, dclass);
+flushSet(Name name, short type) {
+	Element element = (Element) findExactSet(name, type);
 	if (element == null || element.rrset == null)
 		return;
-	removeSet(name, type, dclass, element);
+	removeSet(name, type, element);
 }
 
 /**

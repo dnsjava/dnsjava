@@ -23,7 +23,7 @@ import java.net.*;
 public final class dns {
 
 private static Resolver res;
-private static Cache cache;
+private static Hashtable caches;
 private static Name [] searchPath;
 private static boolean searchPathSet;
 private static boolean initialized;
@@ -48,8 +48,8 @@ initialize() {
 	}
 	if (!searchPathSet)
 		searchPath = FindServer.searchPath();
-	if (cache == null)
-		cache = new Cache();
+	if (caches == null)
+		caches = new Hashtable();
 }
 
 static boolean
@@ -98,8 +98,7 @@ inaddrString(String s) {
 public static synchronized void
 setResolver(Resolver _res) {
 	res = _res;
-	if (cache != null)
-		cache.clearCache();
+	caches = null;
 }
 
 /**
@@ -132,22 +131,42 @@ setSearchPath(String [] domains) {
 /**
  * Obtains the Cache used by functions in the dns class.  This can be used
  * to perform more specific queries and/or remove elements.
+ *
+ * @param dclass  The dns class of data in the cache
+ */
+public static synchronized Cache
+getCache(short dclass) {
+	initialize();
+	Cache c = (Cache) caches.get(new Short(dclass));
+	if (c == null) {
+		c = new Cache(dclass);
+		caches.put(new Short(dclass), c);
+	}
+	return c;
+}
+
+/**
+ * Obtains the (class IN) Cache used by functions in the dns class.  This
+ * can be used to perform more specific queries and/or remove elements.
+ *
+ * @param dclass  The dns class of data in the cache
  */
 public static synchronized Cache
 getCache() {
-	initialize();
-	return cache;
+	return getCache(DClass.IN);
 }
 
 private static Record []
 lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
+	Cache cache;
 	Record [] answers;
 	int answerCount = 0, n = 0;
 	Enumeration e;
 
 	if (Options.check("verbose"))
 		System.err.println("lookup " + name + " " + Type.string(type));
-	SetResponse cached = cache.lookupRecords(name, type, dclass, cred);
+	cache = getCache(dclass);
+	SetResponse cached = cache.lookupRecords(name, type, cred);
 	if (Options.check("verbose"))
 		System.err.println(cached);
 	if (cached.isSuccessful()) {

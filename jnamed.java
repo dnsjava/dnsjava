@@ -9,7 +9,7 @@ import org.xbill.DNS.utils.*;
 
 public class jnamed {
 
-Cache cache;
+Hashtable caches;
 Hashtable znames;
 Hashtable TSIGs;
 
@@ -25,7 +25,7 @@ jnamed(String conffile) throws IOException {
 		return;
 	}
 
-	cache = null;
+	caches = new Hashtable();
 	znames = new Hashtable();
 	TSIGs = new Hashtable();
 
@@ -46,8 +46,10 @@ jnamed(String conffile) throws IOException {
 			addPrimaryZone(st.nextToken());
 		if (keyword.equals("secondary"))
 			addSecondaryZone(st.nextToken(), st.nextToken());
-		else if (keyword.equals("cache"))
-			cache = new Cache(st.nextToken());
+		else if (keyword.equals("cache")) {
+			Cache cache = new Cache(st.nextToken());
+			caches.put(new Short(DClass.IN), cache);
+		}
 		else if (keyword.equals("key"))
 			addTSIG(st.nextToken(), st.nextToken());
 		else if (keyword.equals("port")) {
@@ -59,8 +61,6 @@ jnamed(String conffile) throws IOException {
 
 	}
 
-	if (cache == null)
-		cache = new Cache();
 	if (!started) {
 		addUDP((short) 53);
 		addTCP((short) 53);
@@ -69,6 +69,7 @@ jnamed(String conffile) throws IOException {
 
 public void
 addPrimaryZone(String zonefile) throws IOException {
+	Cache cache = getCache(DClass.IN);
 	Zone newzone = new Zone(zonefile, cache);
 	znames.put(newzone.getOrigin(), newzone);
 /*System.out.println("Adding zone named <" + newzone.getOrigin() + ">");*/
@@ -76,6 +77,7 @@ addPrimaryZone(String zonefile) throws IOException {
 
 public void
 addSecondaryZone(String zone, String remote) throws IOException {
+	Cache cache = getCache(DClass.IN);
 	Name zname = new Name(zone);
 	Zone newzone = new Zone(zname, DClass.IN, remote, cache);
 	znames.put(zname, newzone);
@@ -85,6 +87,16 @@ addSecondaryZone(String zone, String remote) throws IOException {
 public void
 addTSIG(String name, String key) {
 	TSIGs.put(new Name(name), base64.fromString(key));
+}
+
+public Cache
+getCache(short dclass) {
+	Cache c = (Cache) caches.get(new Short(dclass));
+	if (c == null) {
+		c = new Cache(dclass);
+		caches.put(new Short(dclass), c);
+	}
+	return c;
 }
 
 public Zone
@@ -110,10 +122,11 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 		return zone.findExactMatch(name, type);
 	else {
 		RRset [] rrsets;
+		Cache cache = getCache(dclass);
 		if (glue)
-			rrsets = cache.findAnyRecords(name, type, dclass);
+			rrsets = cache.findAnyRecords(name, type);
 		else 
-			rrsets = cache.findRecords(name, type, dclass);
+			rrsets = cache.findRecords(name, type);
 		if (rrsets == null)
 			return null;
 		else
@@ -178,8 +191,8 @@ addAuthority(Message response, Name name, Zone zone) {
 				nsRecords = zone.getNS();
 			else {
 				RRset [] rrsets;
-				rrsets = cache.findRecords(Name.root, Type.NS,
-							   DClass.IN);
+				Cache cache = getCache(DClass.IN);
+				rrsets = cache.findRecords(Name.root, Type.NS);
 				if (rrsets == null)
 					nsRecords = null;
 				else
@@ -360,7 +373,8 @@ generateReply(Message query, byte [] in, Socket s) {
 	}
 	else {
 		SetResponse cr;
-		cr = cache.lookupRecords(name, type, dclass,
+		Cache cache = getCache(dclass);
+		cr = cache.lookupRecords(name, type,
 					 Credibility.NONAUTH_ANSWER);
 		Vector backtrace = cr.backtrace();
 		if (backtrace != null) {

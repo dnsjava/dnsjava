@@ -37,7 +37,7 @@ class AXFREnumeration implements Enumeration {
 			return null;
 		if (!sentFirstSOA) {
 			sentFirstSOA = true;
-			return (RRset) findExactSet(origin, Type.SOA, dclass);
+			return (RRset) findExactSet(origin, Type.SOA);
 		}
 		if (!sentNS) {
 			sentNS = true;
@@ -46,9 +46,8 @@ class AXFREnumeration implements Enumeration {
 		if (!sentOrigin) {
 			if (currentName == null) {
 				currentName = getOrigin();
-				TypeClassMap tcm = findName(currentName);
-				current = (Object []) tcm.getMultiple(Type.ANY,
-								      dclass);
+				TypeMap tm = findName(currentName);
+				current = (Object []) tm.getMultiple(Type.ANY);
 				count = 0;
 			}
 			while (count < current.length) {
@@ -67,8 +66,8 @@ class AXFREnumeration implements Enumeration {
 			Name currentName = (Name) znames.nextElement();
 			if (currentName.equals(getOrigin()))
 				continue;
-			TypeClassMap tcm = findName(currentName);
-			current = (Object []) tcm.getMultiple(Type.ANY, dclass);
+			TypeMap tm = findName(currentName);
+			current = (Object []) tm.getMultiple(Type.ANY);
 			count = 0;
 			if (count < current.length)
 				return current[count++];
@@ -168,13 +167,13 @@ getOrigin() {
 /** Returns the Zone origin's NS records */
 public RRset
 getNS() {
-	return (RRset) findExactSet(origin, Type.NS, dclass);
+	return (RRset) findExactSet(origin, Type.NS);
 }
 
 /** Returns the Zone's SOA record */
 public SOARecord
 getSOA() {
-	RRset rrset = (RRset) findExactSet(origin, Type.SOA, dclass);
+	RRset rrset = (RRset) findExactSet(origin, Type.SOA);
 	if (rrset == null)
 		return null;
 	Enumeration e = rrset.rrs();
@@ -216,7 +215,7 @@ findRecords(Name name, short type) {
 			return sr;
 		}
 	}
-	Object [] objects = findSets(name, type, dclass);
+	Object [] objects = findSets(name, type);
 	if (objects == null)
 		return new SetResponse(SetResponse.NODATA);
 
@@ -255,7 +254,7 @@ findRecords(Name name, short type) {
  */ 
 public RRset
 findExactMatch(Name name, short type) {
-	return (RRset) findExactSet(name, type, dclass);
+	return (RRset) findExactSet(name, type);
 }
 
 /**
@@ -267,9 +266,9 @@ public void
 addRecord(Record r) {
 	Name name = r.getName();
 	short type = r.getRRsetType();
-	RRset rrset = (RRset) findExactSet (name, type, dclass);
+	RRset rrset = (RRset) findExactSet (name, type);
 	if (rrset == null)
-		addSet(name, type, dclass, rrset = new RRset());
+		addSet(name, type, rrset = new RRset());
 	rrset.addRR(r);
 }
 
