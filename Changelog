@@ -1,3 +1,6 @@
+3/26/1999
+	- moved constants out of dns class into other classes
+
 3/25/1999
 	- 0.2 released
 	- conversion from base64 sometimes added extra zeroes.

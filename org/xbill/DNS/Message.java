@@ -74,12 +74,12 @@ removeRecord(int section, Record r) {
 
 public TSIGRecord
 getTSIG() {
-	int count = header.getCount(dns.ADDITIONAL);
+	int count = header.getCount(Section.ADDITIONAL);
 	if (count == 0)
 		return null;
-	Vector v = sections[dns.ADDITIONAL];
+	Vector v = sections[Section.ADDITIONAL];
 	Record rec = (Record) v.elementAt(count - 1);
-	if (rec.type !=  dns.TSIG)
+	if (rec.type !=  Type.TSIG)
 		return null;
 	return (TSIGRecord) rec;
 }
@@ -136,14 +136,14 @@ sectionToString(int i) {
 
 	Enumeration e = getSection(i);
 	StringBuffer sb = new StringBuffer();
-	sb.append(";; " + dns.longSectionString(i) + ":\n");
+	sb.append(";; " + Section.longString(i) + ":\n");
 
 	while (e.hasMoreElements()) {
 		Record rec = (Record) e.nextElement();
-		if (i == dns.QUESTION) {
+		if (i == Section.QUESTION) {
 			sb.append(";;\t" + rec.name);
-			sb.append(", type = " + dns.typeString(rec.type));
-			sb.append(", class = " + dns.classString(rec.dclass));
+			sb.append(", type = " + Type.string(rec.type));
+			sb.append(", class = " + DClass.string(rec.dclass));
 		}
 		else
 			sb.append(rec);

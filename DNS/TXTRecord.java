@@ -15,7 +15,7 @@ public
 TXTRecord(Name _name, short _dclass, int _ttl, Vector _strings)
 throws IOException
 {
-	super(_name, dns.TXT, _dclass, _ttl);
+	super(_name, Type.TXT, _dclass, _ttl);
 	strings = _strings;
 }
 
@@ -23,7 +23,7 @@ public
 TXTRecord(Name _name, short _dclass, int _ttl, String _string)
 throws IOException
 {
-	super(_name, dns.TXT, _dclass, _ttl);
+	super(_name, Type.TXT, _dclass, _ttl);
 	strings = new Vector();
 	strings.addElement(_string);
 }
@@ -33,7 +33,7 @@ TXTRecord(Name _name, short _dclass, int _ttl,
 	     int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.TXT, _dclass, _ttl);
+	super(_name, Type.TXT, _dclass, _ttl);
 	if (in == null)
 		return;
 	int count = 0;
@@ -52,7 +52,7 @@ TXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException
 {
-	super(_name, dns.TXT, _dclass, _ttl);
+	super(_name, Type.TXT, _dclass, _ttl);
 	strings = new Vector();
 	while (st.hasMoreTokens())
 		strings.addElement(st.nextToken());

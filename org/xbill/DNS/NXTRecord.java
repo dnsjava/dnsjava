@@ -14,7 +14,7 @@ BitSet bitmap;
 
 public
 NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
-	super(_name, dns.NXT, _dclass, _ttl);
+	super(_name, Type.NXT, _dclass, _ttl);
 	next = _next;
 	bitmap = _bitmap;
 }
@@ -24,7 +24,7 @@ NXTRecord(Name _name, short _dclass, int _ttl,
 	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.NXT, _dclass, _ttl);
+	super(_name, Type.NXT, _dclass, _ttl);
 	if (in == null)
 		return;
 	int start = in.getPos();
@@ -44,12 +44,12 @@ NXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException
 {
-	super(_name, dns.NXT, _dclass, _ttl);
+	super(_name, Type.NXT, _dclass, _ttl);
 	Vector types = new Vector();
 	next = new Name(st.nextToken(), origin);
 	bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
-		short t = dns.typeValue(st.nextToken());
+		short t = Type.value(st.nextToken());
 		if (t > 0)
 			bitmap.set(t);
 	}
@@ -63,7 +63,7 @@ toString() {
 		for (int i = 0; i < bitmap.size(); i++)
 			if (bitmap.get(i)) {
 				sb.append(" ");
-				sb.append(dns.typeString(i));
+				sb.append(Type.string(i));
 			}
 	}
 	return sb.toString();

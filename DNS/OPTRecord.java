@@ -11,7 +11,7 @@ public class OPTRecord extends Record {
 
 public
 OPTRecord(Name _name, short _dclass, int _ttl) {
-	super(_name, dns.OPT, _dclass, _ttl);
+	super(_name, Type.OPT, _dclass, _ttl);
 }
 
 public
@@ -19,7 +19,7 @@ OPTRecord(Name _name, short _dclass, int _ttl,
 	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.OPT, _dclass, _ttl);
+	super(_name, Type.OPT, _dclass, _ttl);
 	if (in == null)
 		return;
 	/* for now, skip the rest */

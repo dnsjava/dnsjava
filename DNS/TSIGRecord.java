@@ -23,7 +23,7 @@ TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,
 	   Date _timeSigned, short _fudge, byte [] _signature,
 	   int _originalID, short _error, byte _other[]) throws IOException
 {
-	super(_name, dns.TSIG, _dclass, _ttl);
+	super(_name, Type.TSIG, _dclass, _ttl);
 	alg = _alg;
 	timeSigned = _timeSigned;
 	fudge = _fudge;
@@ -37,7 +37,7 @@ public
 TSIGRecord(Name _name, short _dclass, int _ttl, int length,
 	   CountedDataInputStream in, Compression c) throws IOException
 {
-	super(_name, dns.TSIG, _dclass, _ttl);
+	super(_name, Type.TSIG, _dclass, _ttl);
 	if (in == null)
 		return;
 	alg = new Name(in, c);
@@ -76,13 +76,13 @@ toString() {
 
 	sb.append (timeSigned.getTime() / 1000);
 	sb.append (" ");
-	sb.append (dns.rcodeString(error));
+	sb.append (Rcode.string(error));
 	sb.append ("\n");
 	String s = base64.toString(signature);
 	sb.append (IO.formatBase64String(s, 64, "\t", false));
 	if (other != null) {
 		sb.append("\n\t <");
-		if (error == dns.BADTIME) {
+		if (error == Rcode.BADTIME) {
 			try {
 				ByteArrayInputStream is;
 				is = new ByteArrayInputStream(other);

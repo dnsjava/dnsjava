@@ -20,7 +20,7 @@ public
 KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
 	  int _alg, byte []  _key)
 {
-	super(_name, dns.KEY, _dclass, _ttl);
+	super(_name, Type.KEY, _dclass, _ttl);
 	flags = (short) _flags;
 	proto = (byte) _proto;
 	alg = (byte) _alg;
@@ -32,7 +32,7 @@ KEYRecord(Name _name, short _dclass, int _ttl,
 	     int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.KEY, _dclass, _ttl);
+	super(_name, Type.KEY, _dclass, _ttl);
 	if (in == null)
 		return;
 	flags = in.readShort();
@@ -49,7 +49,7 @@ KEYRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException
 {
-	super(_name, dns.KEY, _dclass, _ttl);
+	super(_name, Type.KEY, _dclass, _ttl);
 	flags = (short) Integer.decode(st.nextToken()).intValue();
 	proto = (byte) Integer.parseInt(st.nextToken());
 	alg = (byte) Integer.parseInt(st.nextToken());

@@ -23,7 +23,7 @@ SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
 	  int _origttl, Date _expire, Date _timeSigned,
 	  int _footprint, Name _signer, byte [] _signature)
 {
-	super(_name, dns.SIG, _dclass, _ttl);
+	super(_name, Type.SIG, _dclass, _ttl);
 	covered = (short) _covered;
 	alg = (byte) _alg;
 	labels = name.labels();
@@ -40,7 +40,7 @@ SIGRecord(Name _name, short _dclass, int _ttl,
 	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.SIG, _dclass, _ttl);
+	super(_name, Type.SIG, _dclass, _ttl);
 	if (in == null)
 		return;
 	int start = in.getPos();
@@ -61,8 +61,8 @@ SIGRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	     Name origin)
 throws IOException
 {
-	super(_name, dns.SIG, _dclass, _ttl);
-	covered = dns.typeValue(st.nextToken());
+	super(_name, Type.SIG, _dclass, _ttl);
+	covered = Type.value(st.nextToken());
 	alg = Byte.parseByte(st.nextToken());
 	labels = name.labels();
 	origttl = Integer.parseInt(st.nextToken());
@@ -78,7 +78,7 @@ public String
 toString() {
 	StringBuffer sb = toStringNoData();
 	if (signature != null) {
-		sb.append (dns.typeString(covered));
+		sb.append (Type.string(covered));
 		sb.append (" ");
 		sb.append (alg);
 		sb.append (" ");

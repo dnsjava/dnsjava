@@ -31,17 +31,21 @@ Record(Name _name, short _type, short _dclass, int _ttl) {
 	ttl = _ttl;
 }
 
+private static Class
+toClass(short type) throws ClassNotFoundException {
+	return Class.forName("DNS." + Type.string(type) + "Record");
+}
+
 static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
 	  CountedDataInputStream in, Compression c) throws IOException
 {
-	String s = dns.typeString(type);
 	Record rec;
 	try {
 		Class rrclass;
 		Constructor m;
 
-		rrclass = Class.forName("DNS." + s + "Record");
+		rrclass = toClass(type);
 		m = rrclass.getConstructor(new Class [] {
 						Name.class,
 						Short.TYPE,
@@ -123,7 +127,7 @@ throws IOException
 	type = in.readShort();
 	dclass = in.readShort();
 
-	if (section == dns.QUESTION)
+	if (section == Section.QUESTION)
 		return newRecord(name, type, dclass);
 
 	ttl = in.readInt();
@@ -140,7 +144,7 @@ throws IOException
 	name.toWire(out, c);
 	out.writeShort(type);
 	out.writeShort(dclass);
-	if (section == dns.QUESTION)
+	if (section == Section.QUESTION)
 		return;
 	out.writeInt(ttl);
 	byte [] data = rrToWire(c);
@@ -166,7 +170,7 @@ toWireCanonical(CountedDataOutputStream out, int section) throws IOException {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
-	if (section == dns.QUESTION)
+	if (section == Section.QUESTION)
 		return;
 	out.writeInt(ttl);
 	byte [] data = rrToWireCanonical();
@@ -184,12 +188,12 @@ toStringNoData() {
 	sb.append(name);
 	sb.append("\t");
 	sb.append(ttl);
-	if (dclass != dns.IN) {
+	if (dclass != DClass.IN) {
 		sb.append("\t");
-		sb.append(dns.classString(dclass));
+		sb.append(DClass.string(dclass));
 	}
 	sb.append("\t");
-	sb.append(dns.typeString(type));
+	sb.append(Type.string(type));
 	sb.append("\t");
 	return sb;
 }
@@ -212,8 +216,7 @@ throws IOException
 		Class rrclass;
 		Constructor m;
 
-		String s = dns.typeString(type);
-		rrclass = Class.forName("DNS." + s + "Record");
+		rrclass = toClass(type);
 		m = rrclass.getConstructor(new Class [] {
 						Name.class,
 						Short.TYPE,

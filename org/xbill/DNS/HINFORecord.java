@@ -14,7 +14,7 @@ String cpu, os;
 public
 HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 {
-	super(_name, dns.HINFO, _dclass, _ttl);
+	super(_name, Type.HINFO, _dclass, _ttl);
 	cpu = _cpu;
 	os = _os;
 }
@@ -24,7 +24,7 @@ HINFORecord(Name _name, short _dclass, int _ttl, int length,
 	    CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.HINFO, _dclass, _ttl);
+	super(_name, Type.HINFO, _dclass, _ttl);
 	if (in == null)
 		return;
 	cpu = in.readString();
@@ -36,7 +36,7 @@ HINFORecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	       Name origin)
 throws IOException
 {
-	super(_name, dns.HINFO, _dclass, _ttl);
+	super(_name, Type.HINFO, _dclass, _ttl);
 	cpu = st.nextToken();
 	os = st.nextToken();
 }

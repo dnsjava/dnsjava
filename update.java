@@ -8,24 +8,24 @@ import DNS.*;
 
 public class update {
 
-static final int ZONE = dns.QUERY;
-static final int PREREQ = dns.ANSWER;
-static final int UPDATE = dns.AUTHORITY;
-static final int ADDITIONAL = dns.ADDITIONAL;
+static final int ZONE = Section.QUESTION;
+static final int PREREQ = Section.ANSWER;
+static final int UPDATE = Section.AUTHORITY;
+static final int ADDITIONAL = Section.ADDITIONAL;
 
 Message query, response;
 Resolver res;
 String server = "localhost";
 Name origin;
 int defaultTTL;
-short defaultClass = dns.IN;
+short defaultClass = DClass.IN;
 
 public
 update(InputStream in) throws IOException {
 	Vector inputs = new Vector();
 
 	query = new Message();
-	query.getHeader().setOpcode(dns.UPDATE);
+	query.getHeader().setOpcode(Opcode.UPDATE);
 
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
@@ -84,7 +84,7 @@ update(InputStream in) throws IOException {
 
 		else if (operation.equals("class")) {
 			String s = st.nextToken();
-			short newClass = dns.classValue(s);
+			short newClass = DClass.value(s);
 			if (newClass > 0)
 				defaultClass = newClass;
 			else
@@ -124,7 +124,7 @@ update(InputStream in) throws IOException {
 				res = new Resolver(server);
 			sendUpdate();
 			query = new Message();
-			query.getHeader().setOpcode(dns.UPDATE);
+			query.getHeader().setOpcode(Opcode.UPDATE);
 		}
 
 		else if (operation.equals("query"))
@@ -162,7 +162,7 @@ sendUpdate() throws IOException {
 			zone = new Name(r.getName(), 1);
 			dclass = r.getDClass();
 		}
-		Record soa = Record.newRecord(zone, dns.SOA, dclass);
+		Record soa = Record.newRecord(zone, Type.SOA, dclass);
 		query.addRecord(ZONE, soa);
 	}
 
@@ -198,10 +198,10 @@ throws IOException
 		ttl = TTLValue;
 	}
 
-	if (dns.classValue(s) >= 0)
+	if (DClass.value(s) >= 0)
 		s = st.nextToken();
 
-	if ((type = dns.typeValue(s)) < 0)
+	if ((type = Type.value(s)) < 0)
 		throw new IOException("Parse error");
 
 	return Record.fromString(name, type, classValue, ttl, st, origin);
@@ -215,7 +215,7 @@ parseSet(MyStringTokenizer st, short classValue) throws IOException {
 	Name name = new Name(st.nextToken(), origin);
 	short type;
 
-	if ((type = dns.typeValue(st.nextToken())) < 0)
+	if ((type = Type.value(st.nextToken())) < 0)
 		throw new IOException("Parse error");
 
 	return Record.newRecord(name, type, classValue, 0);
@@ -229,7 +229,7 @@ Record
 parseName(MyStringTokenizer st, short classValue) throws IOException {
 	Name name = new Name(st.nextToken(), origin);
 
-	return Record.newRecord(name, dns.ANY, classValue, 0);
+	return Record.newRecord(name, Type.ANY, classValue, 0);
 	
 }
 
@@ -241,9 +241,9 @@ doRequire(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r")) 
 		rec = parseRR(st, defaultClass, 0);
 	else if (qualifier.equals("-s"))
-		rec = parseSet(st, dns.ANY);
+		rec = parseSet(st, DClass.ANY);
 	else if (qualifier.equals("-n"))
-		rec = parseName(st, dns.ANY);
+		rec = parseName(st, DClass.ANY);
 	else {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
@@ -262,9 +262,9 @@ doProhibit(MyStringTokenizer st) throws IOException {
 	if (qualifier.equals("-r")) 
 		rec = parseRR(st, defaultClass, 0);
 	else if (qualifier.equals("-s"))
-		rec = parseSet(st, dns.NONE);
+		rec = parseSet(st, DClass.NONE);
 	else if (qualifier.equals("-n"))
-		rec = parseName(st, dns.NONE);
+		rec = parseName(st, DClass.NONE);
 	else {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
@@ -302,11 +302,11 @@ doDelete(MyStringTokenizer st) throws IOException {
 
 	String qualifier = st.nextToken();
 	if (qualifier.equals("-r"))
-		rec = parseRR(st, dns.NONE, 0);
+		rec = parseRR(st, DClass.NONE, 0);
 	else if (qualifier.equals("-s"))
-		rec = parseSet(st, dns.ANY);
+		rec = parseSet(st, DClass.ANY);
 	else if (qualifier.equals("-n"))
-		rec = parseName(st, dns.ANY);
+		rec = parseName(st, DClass.ANY);
 	else {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
@@ -344,12 +344,12 @@ doQuery(MyStringTokenizer st) throws IOException {
 	Message newQuery = new Message();
 
 	rec = parseSet(st, defaultClass);
-	newQuery.getHeader().setFlag(dns.RD);
-	newQuery.getHeader().setOpcode(dns.QUERY);
-	newQuery.addRecord(dns.QUESTION, rec);
+	newQuery.getHeader().setOpcode(Opcode.QUERY);
+	newQuery.getHeader().setFlag(Flags.RD);
+	newQuery.addRecord(Section.QUESTION, rec);
 	if (res == null)
 		res = new Resolver(server);
-	if (rec.getType() == dns.AXFR)
+	if (rec.getType() == Type.AXFR)
 		response = res.sendAXFR(newQuery);
 	else
 		response = res.send(newQuery);
@@ -382,12 +382,12 @@ doAssert(MyStringTokenizer st) {
 
 	if (field.equalsIgnoreCase("rcode")) {
 		short rcode = response.getHeader().getRcode();
-		if (rcode != dns.rcodeValue(expected)) {
-			value = dns.rcodeString(rcode);
+		if (rcode != Rcode.value(expected)) {
+			value = Rcode.string(rcode);
 			flag = false;
 		}
 	}
-	else if ((section = dns.sectionValue(field)) >= 0) {
+	else if ((section = Section.value(field)) >= 0) {
 		short count = response.getHeader().getCount(section);
 		if (count != Short.parseShort(expected)) {
 			value = new Short(count).toString();

@@ -10,8 +10,10 @@ import DNS.utils.*;
 
 public class Resolver {
 
+public static final int PORT		= 53;
+
 InetAddress addr;
-int port = dns.PORT;
+int port = PORT;
 boolean useTCP, useEDNS;
 TSIG tsig;
 int timeoutValue = 60 * 1000;
@@ -129,7 +131,7 @@ send(Message query) throws IOException {
 	}
 
 	if (useEDNS)
-		query.addRecord(dns.ADDITIONAL, EDNS.newOPT(1280));
+		query.addRecord(Section.ADDITIONAL, EDNS.newOPT(1280));
 
 	if (tsig != null)
 		tsig.apply(query);
@@ -161,7 +163,7 @@ send(Message query) throws IOException {
 	}
 
 	s.close();
-	if (response.getHeader().getFlag(dns.TC))
+	if (response.getHeader().getFlag(Flags.TC))
 		return sendTCP(query, out);
 	else
 		return response;
@@ -210,9 +212,9 @@ sendAXFR(Message query) throws IOException {
 			return null;
 		}
 		Message m = new Message(in);
-		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
-		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
-		    m.getHeader().getCount(dns.AUTHORITY) != 0)
+		if (m.getHeader().getCount(Section.QUESTION) != 0 ||
+		    m.getHeader().getCount(Section.ANSWER) <= 0 ||
+		    m.getHeader().getCount(Section.AUTHORITY) != 0)
 		{
 			StringBuffer sb = new StringBuffer();
 			sb.append("Invalid AXFR: ");

@@ -20,7 +20,7 @@ public
 CERTRecord(Name _name, short _dclass, int _ttl, int _certType,
 	      int _keyTag, int _alg, byte []  _cert)
 {
-	super(_name, dns.CERT, _dclass, _ttl);
+	super(_name, Type.CERT, _dclass, _ttl);
 	certType = (short) _certType;
 	keyTag = (short) _keyTag;
 	alg = (byte) _alg;
@@ -32,7 +32,7 @@ CERTRecord(Name _name, short _dclass, int _ttl,
 	      int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.CERT, _dclass, _ttl);
+	super(_name, Type.CERT, _dclass, _ttl);
 	if (in == null)
 		return;
 	certType = in.readShort();
@@ -49,7 +49,7 @@ CERTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	   Name origin)
 throws IOException
 {
-	super(_name, dns.CERT, _dclass, _ttl);
+	super(_name, Type.CERT, _dclass, _ttl);
 	certType = (short) Integer.parseInt(st.nextToken());
 	keyTag = (short) Integer.parseInt(st.nextToken());
 	alg = (byte) Integer.parseInt(st.nextToken());

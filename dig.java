@@ -8,7 +8,7 @@ import DNS.*;
 public class dig {
 
 static Name name = null;
-static short type = dns.A, _class = dns.IN;
+static short type = Type.A, _class = DClass.IN;
 
 static void
 usage() {
@@ -39,14 +39,14 @@ doAXFR(Message query, Resolver res) throws IOException {
 	if (response == null)
 		return;
 
-	Enumeration e = response.getSection(dns.ANSWER);
+	Enumeration e = response.getSection(Section.ANSWER);
 	while (e.hasMoreElements())
 		System.out.println(e.nextElement());
 
 	System.out.print(";; done (");
-	System.out.print(response.getHeader().getCount(dns.ANSWER));
+	System.out.print(response.getHeader().getCount(Section.ANSWER));
 	System.out.print(" records, ");
-	System.out.print(response.getHeader().getCount(dns.ADDITIONAL));
+	System.out.print(response.getHeader().getCount(Section.ADDITIONAL));
 	System.out.println(" additional)");
 }
 
@@ -58,8 +58,8 @@ main(String argv[]) throws IOException {
 	Record rec;
 	Resolver res = null;
 
-	query.getHeader().setFlag(dns.RD);
-	query.getHeader().setOpcode(dns.QUERY);
+	query.getHeader().setFlag(Flags.RD);
+	query.getHeader().setOpcode(Opcode.QUERY);
 
 	if (argv.length < 1) {
 		usage();
@@ -76,15 +76,15 @@ main(String argv[]) throws IOException {
 
 		name = new Name(argv[arg++]);
 
-		type = dns.typeValue(argv[arg]);
+		type = Type.value(argv[arg]);
 		if (type < 0)
-			type = dns.A;
+			type = Type.A;
 		else
 			arg++;
 
-		_class = dns.classValue(argv[arg]);
+		_class = DClass.value(argv[arg]);
 		if (_class < 0)
-			_class = dns.IN;
+			_class = DClass.IN;
 		else
 			arg++;
 
@@ -141,9 +141,9 @@ main(String argv[]) throws IOException {
 	}
 
 	rec = Record.newRecord(name, type, _class);
-	query.addRecord(dns.QUESTION, rec);
+	query.addRecord(Section.QUESTION, rec);
 
-	if (type == dns.AXFR)
+	if (type == Type.AXFR)
 		doAXFR(query, res);
 	else
 		doQuery(query, res);

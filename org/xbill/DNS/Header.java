@@ -148,7 +148,7 @@ printFlags() {
 	StringBuffer sb = new StringBuffer();
 
 	for (int i = 0; i < flags.length; i++)
-		if (getFlag(i) && ((s = dns.flagString(i)) != null)) {
+		if (getFlag(i) && ((s = Flags.string(i)) != null)) {
 			sb.append(s);
 			sb.append(" ");
 		}
@@ -160,15 +160,15 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 
 	sb.append(";; ->>HEADER<<- "); 
-	sb.append("opcode: " + dns.opcodeString(getOpcode()));
-	sb.append(", status: " + dns.rcodeString(getRcode()));
+	sb.append("opcode: " + Opcode.string(getOpcode()));
+	sb.append(", status: " + Rcode.string(getRcode()));
 	sb.append(", id: " + getID());
 	sb.append("\n");
 
 	sb.append(";; flags: " + printFlags());
 	sb.append("; ");
 	for (int i = 0; i < 4; i++)
-		sb.append(dns.sectionString(i) + ": " + getCount(i) + " ");
+		sb.append(Section.string(i) + ": " + getCount(i) + " ");
 	return sb.toString();
 }
 

@@ -15,7 +15,7 @@ Name target;
 public
 MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 {
-	super(_name, dns.MX, _dclass, _ttl);
+	super(_name, Type.MX, _dclass, _ttl);
 	priority = (short) _priority;
 	target = _target;
 }
@@ -25,7 +25,7 @@ MXRecord(Name _name, short _dclass, int _ttl,
 	    int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.MX, _dclass, _ttl);
+	super(_name, Type.MX, _dclass, _ttl);
 	if (in == null)
 		return;
 	priority = (short) in.readUnsignedShort();
@@ -36,7 +36,7 @@ public
 MXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
 throws IOException
 {
-	super(_name, dns.MX, _dclass, _ttl);
+	super(_name, Type.MX, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
 	target = new Name(st.nextToken(), origin);
 }

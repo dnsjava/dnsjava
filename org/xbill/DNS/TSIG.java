@@ -10,6 +10,8 @@ import DNS.utils.*;
 
 public class TSIG {
 
+public static final String HMAC		= "HMAC-MD5.SIG-ALG.REG.INT";
+
 private Name name;
 private byte [] key;
 private hmacSigner axfrSigner = null;
@@ -24,7 +26,7 @@ void apply(Message m) throws IOException {
 	short fudge = 300;
 	hmacSigner h = new hmacSigner(key);
 
-	Name alg = new Name(dns.HMAC);
+	Name alg = new Name(HMAC);
 
 	try {
 		/* Digest the message */
@@ -33,7 +35,7 @@ void apply(Message m) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		CountedDataOutputStream dout = new CountedDataOutputStream(out);
 		name.toWireCanonical(dout);
-		dout.writeShort(dns.ANY);	/* class */
+		dout.writeShort(DClass.ANY);	/* class */
 		dout.writeInt(0);		/* ttl */
 		alg.toWireCanonical(dout);
 		long time = timeSigned.getTime() / 1000;
@@ -51,10 +53,10 @@ void apply(Message m) throws IOException {
 	catch (IOException e) {
 		return;
 	}
-	Record r = new TSIGRecord(name, dns.ANY, 0, alg, timeSigned, fudge,
-				  h.sign(), m.getHeader().getID(), dns.NOERROR,
-				  null);
-	m.addRecord(dns.ADDITIONAL, r);
+	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
+				  h.sign(), m.getHeader().getID(),
+				  Rcode.NOERROR, null);
+	m.addRecord(Section.ADDITIONAL, r);
 }
 
 /*
@@ -71,7 +73,7 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 /*System.out.println("found TSIG");*/
 
 	try {
-		if (old != null && tsig.getError() == dns.NOERROR) {
+		if (old != null && tsig.getError() == Rcode.NOERROR) {
 			ByteArrayOutputStream bs = new ByteArrayOutputStream();
 			CountedDataOutputStream d =
 						new CountedDataOutputStream(bs);
@@ -80,9 +82,9 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 			h.addData(old.getSignature());
 /*System.out.println("digested query TSIG");*/
 		}
-		m.getHeader().decCount(dns.ADDITIONAL);
+		m.getHeader().decCount(Section.ADDITIONAL);
 		byte [] header = m.getHeader().toWire();
-		m.getHeader().incCount(dns.ADDITIONAL);
+		m.getHeader().incCount(Section.ADDITIONAL);
 		h.addData(header);
 
 		int len = b.length - header.length;	
@@ -149,10 +151,10 @@ boolean verifyAXFR(Message m, byte [] b, TSIGRecord old,
 		return verify(m, b, old);
 	try {
 		if (tsig != null)
-			m.getHeader().decCount(dns.ADDITIONAL);
+			m.getHeader().decCount(Section.ADDITIONAL);
 		byte [] header = m.getHeader().toWire();
 		if (tsig != null)
-			m.getHeader().incCount(dns.ADDITIONAL);
+			m.getHeader().incCount(Section.ADDITIONAL);
 		h.addData(header);
 
 		int len = b.length - header.length;	

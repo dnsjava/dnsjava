@@ -14,12 +14,13 @@ Function calls:
 
 - All functions are defined in the DNS package.
 
-- All constants are defined in the dns class.  These include types, classes,
-	flags, rcodes, and opcodes.  In most cases, there are functions to
-	convert between numeric and string representations.
+- All constants are defined in appropriate classes.  These include Type,
+	Dclass, Flags, Rcode, Opcode, and Section.  In most cases, there are
+	functions to convert between numeric and string representations
+	(Type.string(value) and Type.value(string)).
 
 - High Level API:
-	These are static methods in the dns class, and return 'Record []'
+	These are static methods in the dns class that return 'Record []'
 
 	getRecords(Resolver res, String name, short type, short dclass)
 	getRecords(Resolver res, String name, short type)

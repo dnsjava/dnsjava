@@ -16,7 +16,7 @@ public
 ARecord(Name _name, short _dclass, int _ttl, InetAddress _address) 
 throws IOException
 {
-	super(_name, dns.A, _dclass, _ttl);
+	super(_name, Type.A, _dclass, _ttl);
 	address = _address;
 }
 
@@ -24,7 +24,7 @@ public
 ARecord(Name _name, short _dclass, int _ttl, int length,
 	   CountedDataInputStream in, Compression c) throws IOException
 {
-	super(_name, dns.A, _dclass, _ttl);
+	super(_name, Type.A, _dclass, _ttl);
 
 	if (in == null)
 		return;
@@ -47,7 +47,7 @@ public
 ARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
 throws IOException
 {
-	super(_name, dns.A, _dclass, _ttl);
+	super(_name, Type.A, _dclass, _ttl);
 	String s = st.nextToken();
 	if (s.equals("@me@")) {
 		try {

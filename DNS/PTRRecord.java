@@ -13,14 +13,14 @@ public
 PTRRecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException
 {
-        super(_name, dns.PTR, _dclass, _ttl, _target);
+        super(_name, Type.PTR, _dclass, _ttl, _target);
 }
 
 public
 PTRRecord(Name _name, short _dclass, int _ttl, int length,
 	  CountedDataInputStream in, Compression c) throws IOException
 {
-	super(_name, dns.PTR, _dclass, _ttl, length, in, c);
+	super(_name, Type.PTR, _dclass, _ttl, length, in, c);
 }
 
 public
@@ -28,7 +28,7 @@ PTRRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException
 {
-        super(_name, dns.PTR, _dclass, _ttl, st, origin);
+        super(_name, Type.PTR, _dclass, _ttl, st, origin);
 }
 
 }

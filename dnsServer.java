@@ -38,33 +38,33 @@ findBestZone(Name name) {
 
 public Message
 generateReply(Message query) {
-	Enumeration qds = query.getSection(dns.QUESTION);
+	Enumeration qds = query.getSection(Section.QUESTION);
 	Record queryRecord = (Record) qds.nextElement();
 
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
-	response.getHeader().setFlag(dns.AA);
-	response.getHeader().setFlag(dns.QR);
-	response.addRecord(dns.QUESTION, queryRecord);
+	response.getHeader().setFlag(Flags.AA);
+	response.getHeader().setFlag(Flags.QR);
+	response.addRecord(Section.QUESTION, queryRecord);
 
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
 	Zone zone = findBestZone(name);
 	if (zone == null) {
-		response.getHeader().setRcode(dns.SERVFAIL);
+		response.getHeader().setRcode(Rcode.SERVFAIL);
 	}
 	else {
 		Hashtable nameRecords = (Hashtable) zone.findName(name);
 		Short Type = new Short(type);
 		RRset responseRecords = (RRset) nameRecords.get(Type);
 		if (responseRecords == null) {
-			response.getHeader().setRcode(dns.NXDOMAIN);
+			response.getHeader().setRcode(Rcode.NXDOMAIN);
 		}
 		else {
 			Enumeration e = responseRecords.rrs();
 			while (e.hasMoreElements()) {
 				Record r = (Record) e.nextElement();
-				response.addRecord(dns.ANSWER, r);
+				response.addRecord(Section.ANSWER, r);
 			}
 		}
 	}

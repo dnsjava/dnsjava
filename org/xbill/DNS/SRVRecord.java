@@ -16,7 +16,7 @@ public
 SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 	  int _weight, int _port, Name _target)
 {
-	super(_name, dns.SRV, _dclass, _ttl);
+	super(_name, Type.SRV, _dclass, _ttl);
 	priority = (short) _priority;
 	weight = (short) _priority;
 	port = (short) _priority;
@@ -28,7 +28,7 @@ SRVRecord(Name _name, short _dclass, int _ttl,
 	  int length, CountedDataInputStream in, Compression c)
 throws IOException
 {
-	super(_name, dns.SRV, _dclass, _ttl);
+	super(_name, Type.SRV, _dclass, _ttl);
 	if (in == null)
 		return;
 	priority = (short) in.readUnsignedShort();
@@ -42,7 +42,7 @@ SRVRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	  Name origin)
 throws IOException
 {
-	super(_name, dns.SRV, _dclass, _ttl);
+	super(_name, Type.SRV, _dclass, _ttl);
 	priority = Short.parseShort(st.nextToken());
 	weight = Short.parseShort(st.nextToken());
 	port = Short.parseShort(st.nextToken());

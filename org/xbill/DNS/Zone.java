@@ -108,13 +108,13 @@ throws IOException
 			ttl = last.ttl;
 	}
 
-	if ((dclass = dns.classValue(s)) > 0)
+	if ((dclass = DClass.value(s)) > 0)
 		s = st.nextToken();
 	else
-		dclass = dns.IN;
+		dclass = DClass.IN;
 		
 
-	if ((type = dns.typeValue(s)) < 0)
+	if ((type = Type.value(s)) < 0)
 		throw new IOException("Parse error");
 
 	return Record.fromString(name, type, dclass, ttl, st, origin);

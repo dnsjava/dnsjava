@@ -17,7 +17,7 @@ SOARecord(Name _name, short _dclass, int _ttl, Name _host, Name _admin,
 	  int _serial, int _refresh, int _retry, int _expire, int _minimum)
 throws IOException
 {
-	super(_name, dns.SOA, _dclass, _ttl);
+	super(_name, Type.SOA, _dclass, _ttl);
 	host = _host;
 	admin = _admin;
 	serial = _serial;
@@ -31,7 +31,7 @@ public
 SOARecord(Name _name, short _dclass, int _ttl, int length,
 	  CountedDataInputStream in, Compression c) throws IOException
 {
-	super(_name, dns.SOA, _dclass, _ttl);
+	super(_name, Type.SOA, _dclass, _ttl);
 	if (in == null)
 		return;
 	host = new Name(in, c);
@@ -48,7 +48,7 @@ SOARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
 	     Name origin)
 throws IOException
 {
-	super(_name, dns.SOA, _dclass, _ttl);
+	super(_name, Type.SOA, _dclass, _ttl);
 	host = new Name(st.nextToken(), origin);
 	admin = new Name(st.nextToken(), origin);
 	serial = Integer.parseInt(st.nextToken());
