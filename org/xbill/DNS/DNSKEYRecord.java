@@ -19,11 +19,15 @@ public class DNSKEYRecord extends KEYBase {
 private static DNSKEYRecord member = new DNSKEYRecord();
 
 public static class Protocol {
+	private Protocol() {}
+
 	/** Key will be used for DNSSEC */
 	public static final int DNSSEC = 3;
 }
 
 public static class Flags {
+	private Flags() {}
+
 	/** Key is a zone key */
 	public static final int ZONE_KEY = 0x100;
 

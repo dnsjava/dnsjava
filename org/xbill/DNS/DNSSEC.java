@@ -24,6 +24,8 @@ import org.xbill.DNS.utils.*;
 public class DNSSEC {
 
 public static class Algorithm {
+	private Algorithm() {}
+
 	/** RSA/MD5 public key (deprecated) */
 	public static final int RSAMD5 = 1;
 

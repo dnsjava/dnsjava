@@ -18,6 +18,8 @@ public class CERTRecord extends Record {
 public static class CertificateType {
 	/** Certificate type identifiers.  See RFC 2538 for more detail. */
 
+	private CertificateType() {}
+
 	/** PKIX (X.509v3) */
 	public static final int PKIX = 1;
 
