@@ -75,7 +75,7 @@ class Receiver implements ResolverListener {
 	}
 }
 
-private static final int quantum = 20;
+private static final int quantum = 5;
 private static int uniqueID = 0;
 private static final Random random = new Random();
 
