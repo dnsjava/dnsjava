@@ -1,5 +1,6 @@
 5/26/2004
 	- Properly handle text mnemonics in KEY records.
+	- Add support for the APL record type.
 
 5/25/2004
 	- Fix a bug where parsing the text format of an NSEC record
