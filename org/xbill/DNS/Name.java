@@ -357,8 +357,9 @@ toString() {
 					sb.append('\\');
 					sb.append(byteFormat.format(b));
 				}
-				else if (b == '"' || b == '.' || b == ';' ||
-					 b == '\\' || b == '@' || b == '$')
+				else if (b == '"' || b == '(' || b == ')' ||
+					 b == '.' || b == ';' || b == '\\' ||
+					 b == '@' || b == '$')
 				{
 					sb.append('\\');
 					sb.append((char)b);
