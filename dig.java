@@ -20,9 +20,10 @@ usage() {
 }
 
 static void
-doQuery(Message response) throws IOException {
+doQuery(Message response, long ms) throws IOException {
 	System.out.println("; java dig 0.0");
 	System.out.println(response);
+	System.out.println(";; Query time: " + ms + " ms");
 }
 
 static void
@@ -61,6 +62,7 @@ main(String argv[]) throws IOException {
 	Record opt = null;
 	Resolver res = null;
 	boolean printQuery = false;
+	long startTime, endTime;
 
 	if (argv.length < 1) {
 		usage();
@@ -181,12 +183,14 @@ main(String argv[]) throws IOException {
 		query.addRecord(opt, Section.ADDITIONAL);
 	if (printQuery)
 		System.out.println(query);
+	startTime = System.currentTimeMillis();
 	response = res.send(query);
+	endTime = System.currentTimeMillis();
 
 	if (type == Type.AXFR)
 		doAXFR(response);
 	else
-		doQuery(response);
+		doQuery(response, endTime - startTime);
 }
 
 }
