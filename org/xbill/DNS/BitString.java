@@ -21,56 +21,101 @@ byte [] data;
 BitString(String s) throws IOException {
 System.out.println("parsing BitString");
 	if (s.length() < 5 || !s.startsWith("\\[") || !s.endsWith("]"))
-		throw new IOException("Invalid binary label: " + s);
-	int radix, bits;
+		throw new IOException("Invalid encoding: " + s);
+System.out.println("basic encoding ok");
+	int radix;
 	switch (s.charAt(2)) {
-		case 'x': radix = 16; bits = 4; break;
-		case 'o': radix = 8; bits = 3; break;
-		case 'b': radix = 2; bits = 1; break;
-		default: throw new IOException("Invalid binary label: " + s);
-	}
-	int i, j = 0;
-	boolean slash = false;
-	BitSet set = new BitSet();
-		
-	for (i = 3; i < s.length() - 1; i++, j++) {
-		if (s.charAt(i) == '/') {
-			slash = true;
+		case 'x':
+			radix = 16;
 			break;
-		}
-		int x = Character.digit(s.charAt(i), radix);
-		if (x == -1)
-			throw new IOException("Invalid binary label: " + s);
-		switch (radix) {
-			case 2:
-				if (x == 1)
-					set.set(j);
-				nbits++;
-				break;
-			case 8:
-				if ((x & 0x4) != 0)
-					set.set(3 * j);
-				if ((x & 0x2) != 0)
-					set.set(3 * j + 1);
-				if ((x & 0x1) != 0)
-					set.set(3 * j + 2);
-				nbits+=3;
-				break;
-			case 16:
-				if ((x & 0x8) != 0)
-					set.set(4 * j);
-				if ((x & 0x4) != 0)
-					set.set(4 * j + 1);
-				if ((x & 0x2) != 0)
-					set.set(4 * j + 2);
-				if ((x & 0x1) != 0)
-					set.set(4 * j + 3);
-				nbits+=4;
-				break;
+		case 'o':
+			radix = 8;
+			break;
+		case 'b':
+			radix = 2;
+			break;
+		case '0': case '1': case '2': case '3': case '4':
+		case '5': case '6': case '7': case '8': case '9':
+			radix = 0;
+			break;
+		default:
+			throw new IOException("Invalid encoding: " + s);
+	}
+
+	int slash = s.indexOf('/');
+	BitSet set = new BitSet();
+
+	if (radix > 0) {
+		for (int i = 3, j = 0;
+		     i < s.length() - 1 && i != slash;
+		     i++, j++)
+		{
+			int x = Character.digit(s.charAt(i), radix);
+			if (x == -1)
+				throw new IOException("Invalid digit: " +
+						      s.charAt(i));
+			switch (radix) {
+				case 2:
+					if (x == 1)
+						set.set(j);
+					nbits++;
+					break;
+				case 8:
+					if ((x & 0x4) != 0)
+						set.set(3 * j);
+					if ((x & 0x2) != 0)
+						set.set(3 * j + 1);
+					if ((x & 0x1) != 0)
+						set.set(3 * j + 2);
+					nbits+=3;
+					break;
+				case 16:
+					if ((x & 0x8) != 0)
+						set.set(4 * j);
+					if ((x & 0x4) != 0)
+						set.set(4 * j + 1);
+					if ((x & 0x2) != 0)
+						set.set(4 * j + 2);
+					if ((x & 0x1) != 0)
+						set.set(4 * j + 3);
+					nbits+=4;
+					break;
+			}
 		}
 	}
-	if (slash) {
-		String count = s.substring(i + 1, s.length() - 1);
+	else {
+System.out.println("parsing dotted quad");
+		int end;
+		if (slash != -1) {
+			end = slash;
+		}
+		else
+			end = s.length() - 1;
+		end--;
+		StringTokenizer st = new StringTokenizer(s.substring(2, end),
+							 ".");
+		for (int i = 0; i < 4; i++) {
+			if (!st.hasMoreTokens())
+				throw new IOException("Invalid dotted quad");
+			String token = st.nextToken();
+System.out.println("token " + i + " = " + token);
+			try {
+				int x = Integer.parseInt(token);
+				for (int j = 0; j < 8; j++) {
+					if ((x & 1) != 0)
+						set.set(8 * i + 7 - j);
+					x >>= 1;
+				}
+			}
+			catch (NumberFormatException e) {
+				throw new IOException("Invalid dotted quad");
+			}
+		}
+		nbits = 32;
+	}
+
+	if (slash != -1) {
+		String count = s.substring(slash + 1, s.length() - 1);
 		try {
 			int bitcount = Integer.parseInt(count);
 			if (bitcount > nbits || bitcount < 0)
@@ -82,7 +127,7 @@ System.out.println("parsing BitString");
 		}
 	}
 	data = new byte[bytes()];
-	for (i = 0; i < nbits; i++)
+	for (int i = 0; i < nbits; i++)
 		data[i/8] |= ((set.get(i) ? 1 : 0) << (7 - i%8));
 System.out.println("nbits = " + nbits);
 }
