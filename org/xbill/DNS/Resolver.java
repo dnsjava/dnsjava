@@ -27,6 +27,9 @@ void setIgnoreTruncation(boolean flag);
 void setEDNS(int level);
 
 /** Specifies the TSIG key that messages will be signed with */
+void setTSIGKey(Name name, byte [] key);
+
+/** Specifies the TSIG key that messages will be signed with */
 void setTSIGKey(String name, String key);
 
 /**

@@ -96,13 +96,19 @@ setEDNS(int level) {
 
 /** Specifies the TSIG key that messages will be signed with */
 public void
+setTSIGKey(Name name, byte [] key) {
+	tsig = new TSIG(name, key);
+}
+
+/** Specifies the TSIG key that messages will be signed with */
+public void
 setTSIGKey(String name, String key) {
 	byte [] keyArray = base64.fromString(key);
 	if (keyArray == null) {
 		System.err.println("Invalid TSIG key string");
 		return;
 	}
-	tsig = new TSIG(name, keyArray);
+	tsig = new TSIG(new Name(name), keyArray);
 }
 
 /**

@@ -227,7 +227,7 @@ TSIG
 findTSIG(Name name) {
 	byte [] key = (byte []) TSIGs.get(name);
 	if (key != null)
-		return new TSIG(name.toString(), key);
+		return new TSIG(name, key);
 	else
 		return null;
 }

@@ -179,6 +179,13 @@ setEDNS(int level) {
 
 /** Specifies the TSIG key that messages will be signed with */
 public void
+setTSIGKey(Name name, byte [] key) {
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.elementAt(i)).setTSIGKey(name, key);
+}
+
+/** Specifies the TSIG key that messages will be signed with */
+public void
 setTSIGKey(String name, String key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setTSIGKey(name, key);

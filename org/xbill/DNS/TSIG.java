@@ -44,8 +44,8 @@ static {
  * @param key The shared key's data
  */
 public
-TSIG(String name, byte [] key) {
-	this.name = new Name(name);
+TSIG(Name name, byte [] key) {
+	this.name = name;
 	this.alg = HMAC;
 	this.key = key;
 }
