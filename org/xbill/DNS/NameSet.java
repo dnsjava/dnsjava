@@ -92,18 +92,16 @@ lookup(Name name, short type) {
 	olabels = origin.labels();
 
 	for (tlabels = olabels; tlabels <= labels; tlabels++) {
-		boolean isorigin = false;
-		boolean isexact = false;
+		boolean isorigin = (tlabels == olabels);
+		boolean isexact = (tlabels == labels);
 		Name tname;
 		Object typelist;
 
-		if (tlabels == olabels) {
+		if (isorigin)
 			tname = origin;
-			isorigin = true;
-		} else if (tlabels == labels) {
+		else if (isexact)
 			tname = name;
-			isexact = true;
-		} else
+		else
 			tname = new Name(name, labels - tlabels);
 
 		synchronized (this) {
@@ -160,10 +158,7 @@ lookup(Name name, short type) {
 		if (isexact)
 			return NXRRSET;
 	}
-	if (bestns == null)
-		return null;
-	else
-		return bestns;
+	return bestns;
 }
 
 /**
