@@ -1,9 +1,10 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@anomaly.munge.com)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-/* Routines for string/value conversion */
+/* High level API & routines for string/value conversion */
 
-import java.util.Hashtable;
+import java.util.*;
+import java.io.*;
 
 public final class dns {
 
@@ -14,6 +15,8 @@ private static Hashtable opcodes = new Hashtable();
 private static Hashtable flags = new Hashtable();
 private static Hashtable sections = new Hashtable();
 private static Hashtable longSections = new Hashtable();
+
+private static dnsResolver _res;
 
 /* Types */
 static final short A		= 1;
@@ -204,14 +207,18 @@ static {
 	longSections.put(new Byte(ANSWER), "ANSWERS");
 	longSections.put(new Byte(AUTHORITY), "AUTHORITY RECORDS");
 	longSections.put(new Byte(ADDITIONAL), "ADDITIONAL RECORDS");
+
+	_res = new dnsResolver();
 }
 
-static String typeString(int i) {
+static String
+typeString(int i) {
 	String s = (String) types.get(new Short((short)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-static short typeValue(String s) {
+static short
+typeValue(String s) {
 	Short i = (Short) types.get(s.toUpperCase());
 	if (i != null)
 		return i.shortValue();
@@ -223,12 +230,14 @@ static short typeValue(String s) {
 	}
 }
 
-static String classString(int i) {
+static String
+classString(int i) {
 	String s = (String) classes.get(new Short((short)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-static short classValue(String s) {
+static short
+classValue(String s) {
 	Short i = (Short) classes.get(s.toUpperCase());
 	if (i != null)
 		return i.shortValue();
@@ -240,12 +249,14 @@ static short classValue(String s) {
 	}
 }
 
-static String rcodeString(int i) {
+static String
+rcodeString(int i) {
 	String s = (String) rcodes.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-static byte rcodeValue(String s) {
+static byte
+rcodeValue(String s) {
 	Byte i = (Byte) rcodes.get(s.toUpperCase());
 	if (i != null)
 		return i.byteValue();
@@ -257,12 +268,14 @@ static byte rcodeValue(String s) {
 	}
 }
 
-static String opcodeString(int i) {
+static String
+opcodeString(int i) {
 	String s = (String) opcodes.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-static String flagString(int i) {
+static String
+flagString(int i) {
 	/* These values are not flags */
 	if ((i >= 1 && i <= 4) || (i >= 12 && i <= 15))
 		return null;
@@ -270,12 +283,14 @@ static String flagString(int i) {
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-static String sectionString(int i) {
+static String
+sectionString(int i) {
 	String s = (String) sections.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-static byte sectionValue(String s) {
+static byte
+sectionValue(String s) {
 	Byte i = (Byte) sections.get(s.toLowerCase());
 	if (i != null)
 		return i.byteValue();
@@ -287,9 +302,72 @@ static byte sectionValue(String s) {
 	}
 }
 
-static String longSectionString(int i) {
+static String
+longSectionString(int i) {
 	String s = (String) longSections.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
+
+static dnsRecord []
+getRecords(dnsResolver res, String name, short type, short dclass) {
+	dnsMessage query = new dnsMessage();
+	dnsMessage response;
+	dnsRecord question;
+	dnsRecord [] answers;
+	int answerCount = 0, i = 0;
+	Enumeration e;
+
+	query.getHeader().setFlag(dns.RD);
+	query.getHeader().setOpcode(dns.QUERY);
+	question = dnsRecord.newRecord(new dnsName(name), type, dclass);
+	query.addRecord(dns.QUESTION, question);
+
+	try {
+		response = res.send(query);
+	}
+	catch (IOException ioe) {
+		return null;
+	}
+
+	if (response.getHeader().getRcode() != dns.NOERROR)
+		return null;
+
+	e = response.getSection(dns.ANSWER).elements();
+	while (e.hasMoreElements()) {
+		dnsRecord r = (dnsRecord)e.nextElement();
+		if (r.getType() == type)
+			answerCount++;
+	}
+
+	if (answerCount == 0)
+		return null;
+
+	answers = new dnsRecord[answerCount];
+
+	e = response.getSection(dns.ANSWER).elements();
+	while (e.hasMoreElements()) {
+		dnsRecord r = (dnsRecord)e.nextElement();
+		if (r.getType() == type)
+			answers[i++] = r;
+	}
+
+	return answers;
+}
+
+static dnsRecord []
+getRecords(dnsResolver res, String name, short type) {
+	return getRecords(res, name, type, dns.IN);
+}
+
+static dnsRecord []
+getRecords(String name, short type, short dclass) {
+	return getRecords(_res, name, type, dclass);
+}
+
+static dnsRecord []
+getRecords(String name, short type) {
+	return getRecords(_res, name, type, dns.IN);
+}
+
 
 }
