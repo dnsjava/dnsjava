@@ -1,3 +1,7 @@
+11/26/2002
+	- Fix a bug where looking up names without trailing dots
+	  would fail if there was no searchlist.
+
 10/31/2002
 	- Fix a bug in searchlist processing on Windows.
 
