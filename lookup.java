@@ -6,13 +6,14 @@ public class lookup {
 public static void
 printAnswer(String name, Lookup lookup) {
 	System.out.print(name + ":");
+	int result = lookup.getResult();
+	if (result != Lookup.SUCCESSFUL)
+		System.out.print(" " + lookup.getErrorString());
+	System.out.println();
 	if (lookup.getResult() == Lookup.SUCCESSFUL) {
-		System.out.println();
 		Record [] answers = lookup.getAnswers();
 		for (int i = 0; i < answers.length; i++)
 			System.out.println(answers[i]);
-	} else {
-		 System.out.println(" " + lookup.getErrorString());
 	}
 }
 
