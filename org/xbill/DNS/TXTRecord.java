@@ -35,6 +35,7 @@ getMember() {
 /**
  * Creates a TXT Record from the given data
  * @param strings The text strings
+ * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
 TXTRecord(Name name, short dclass, int ttl, List strings) {
@@ -44,19 +45,25 @@ TXTRecord(Name name, short dclass, int ttl, List strings) {
 				("TXTRecord: strings must not be null");
 	this.strings = new ArrayList();
 	Iterator it = strings.iterator();
-	while (it.hasNext())
-		this.strings.add(byteArrayFromString((String)it.next()));
+	try {
+		while (it.hasNext()) {
+			String s = (String) it.next();
+			this.strings.add(byteArrayFromString(s));
+		}
+	}
+	catch (TextParseException e) {
+		throw new IllegalArgumentException(e.getMessage());
+	}
 }
 
 /**
  * Creates a TXT Record from the given data
  * @param strings One text string
+ * @throws IllegalArgumentException The string has invalid escapes
  */
 public
 TXTRecord(Name name, short dclass, int ttl, String string) {
-	this(name, dclass, ttl);
-	this.strings = new ArrayList();
-	this.strings.add(byteArrayFromString(string));
+	this(name, dclass, ttl, Collections.nCopies(1, string));
 }
 
 Record

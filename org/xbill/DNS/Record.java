@@ -332,34 +332,53 @@ remainingStrings(Tokenizer st) throws IOException {
  * Converts a String into a byte array.
  */
 protected static byte []
-byteArrayFromString(String s) {
-	byte [] b = s.getBytes();
+byteArrayFromString(String s) throws TextParseException {
+	byte [] array = s.getBytes();
 	boolean escaped = false;
-	int escapes = 0;
+	boolean hasEscapes = false;
 
-	for (int i = 0; i < b.length; i++) {
-		if (escaped)
-			escaped = false;
-		else if (b[i] == '\\') {
-			escaped = true;
-			escapes++;
+	for (int i = 0; i < array.length; i++) {
+		if (array[i] == '\\') {
+			hasEscapes = true;
+			break;
 		}
 	}
-	if (escapes > 0) {
-		byte [] compact = new byte[b.length - escapes];
-		escaped = false;
-		for (int i = 0, j = 0; i < b.length; i++) {
-			if (escaped)
-				escaped = false;
-			else if (b[i] == '\\') {
-				escaped = true;
-				continue;
+	if (!hasEscapes)
+		return array;
+
+	ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+	int digits = 0;
+	int intval = 0;
+	for (int i = 0; i < array.length; i++) {
+		byte b = array[i];
+		if (escaped) {
+			if (b >= '0' && b <= '9' && digits < 3) {
+				digits++; 
+				intval *= 10;
+				intval += (b - '0');
+				if (intval > 255)
+					throw new TextParseException
+								("bad escape");
+				if (digits < 3)
+					continue;
+				System.out.println("intval = " + intval);
+				b = (byte) intval;
 			}
-			compact[j++] = b[i];
+			else if (digits > 0 && digits < 3)
+				throw new TextParseException("bad escape");
+			os.write(b);
+			escaped = false;
 		}
-		b = compact;
+		else if (array[i] == '\\') {
+			escaped = true;
+			digits = 0;
+			intval = 0;
+		}
+		else
+			os.write(array[i]);
 	}
-	return b;
+	return os.toByteArray();
 }
 
 /**

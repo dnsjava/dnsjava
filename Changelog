@@ -1,3 +1,6 @@
+6/18/2003
+	- Quoted strings didn't handle \ddd escapes.
+
 6/17/2003
 	- Fix an ArrayIndexOutofBoundsException triggered by load balancing
 	  in the ExtendedResolver.

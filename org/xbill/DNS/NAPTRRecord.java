@@ -44,6 +44,7 @@ getMember() {
  * @param regexp The regular/substitution expression.
  * @param replacement The domain-name to query for the next DNS resource
  * record, depending on the value of the flags field.
+ * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
 NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
@@ -52,9 +53,14 @@ NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
 	this(name, dclass, ttl);
 	this.order = (short) order;
 	this.preference = (short) preference;
-	this.flags = byteArrayFromString(flags);
-	this.service = byteArrayFromString(service);
-	this.regexp = byteArrayFromString(regexp);
+	try {
+		this.flags = byteArrayFromString(flags);
+		this.service = byteArrayFromString(service);
+		this.regexp = byteArrayFromString(regexp);
+	}
+	catch (TextParseException e) {
+		throw new IllegalArgumentException(e.getMessage());
+	}
 	if (!replacement.isAbsolute())
 		throw new RelativeNameException(replacement);
 	this.replacement = replacement;

@@ -36,12 +36,18 @@ getMember() {
  * Creates an HINFO Record from the given data
  * @param cpu A string describing the host's CPU
  * @param os A string describing the host's OS
+ * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
 HINFORecord(Name name, short dclass, int ttl, String cpu, String os) {
 	this(name, dclass, ttl);
-	this.cpu = byteArrayFromString(cpu);
-	this.os = byteArrayFromString(os);
+	try {
+		this.cpu = byteArrayFromString(cpu);
+		this.os = byteArrayFromString(os);
+	}
+	catch (TextParseException e) {
+		throw new IllegalArgumentException(e.getMessage());
+	}
 }
 
 Record
