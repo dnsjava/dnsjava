@@ -30,7 +30,6 @@ public final class Options {
 private static Map table;
 
 static {
-	table = new HashMap();
 	String s = System.getProperty("dnsjava.options");
 	if (s != null) {
 		StringTokenizer st = new StringTokenizer(s, ",");
@@ -54,32 +53,40 @@ Options() {}
 /** Sets an option to "true" */
 public static void
 set(String option) {
+	if (table == null)
+		table = new HashMap();
 	table.put(option.toLowerCase(), "true");
 }
 
 /** Sets an option to the the supplied value */
 public static void
 set(String option, String value) {
+	if (table == null)
+		table = new HashMap();
 	table.put(option.toLowerCase(), value.toLowerCase());
 }
 
 /** Removes an option */
 public static void
 unset(String option) {
+	if (table == null)
+		return;
 	table.remove(option.toLowerCase());
 }
 
 /** Checks if an option is defined */
 public static boolean
 check(String option) {
-	if (table.size() == 0)
-		return (false);
+	if (table == null)
+		return false;
 	return (table.get(option.toLowerCase()) != null);
 }
 
 /** Returns the value of an option */
 public static String
 value(String option) {
+	if (table == null)
+		return null;
 	return ((String)table.get(option.toLowerCase()));
 }
 
