@@ -307,6 +307,14 @@ toString() {
 
 /**
  * Builds a new Record from its textual representation
+ * @param name The owner name of the record.
+ * @param type The record's type.
+ * @param dclass The record's class.
+ * @param ttl The record's time to live.
+ * @param st A tokenized version of the textual representation of the rdata.
+ * @param origin The default origin to be appended to relative domain names.
+ * @return The new record
+ * @throws IOException The text format was invalid.
  */
 public static Record
 fromString(Name name, short type, short dclass, int ttl,
@@ -360,6 +368,25 @@ throws IOException
 			System.err.println("from text: " + e);
 		return null;
 	}
+}
+
+/**
+ * Builds a new Record from its textual representation
+ * @param name The owner name of the record.
+ * @param type The record's type.
+ * @param dclass The record's class.
+ * @param ttl The record's time to live.
+ * @param st The textual representation of the rdata.
+ * @param origin The default origin to be appended to relative domain names.
+ * @return The new record
+ * @throws IOException The text format was invalid.
+ */
+public static Record
+fromString(Name name, short type, short dclass, int ttl, String s, Name origin)
+throws IOException
+{
+	return fromString(name, type, dclass, ttl, new MyStringTokenizer(s),
+			  origin);
 }
 
 /**

@@ -1,5 +1,7 @@
 4/24/2002
 	- Reduce the memory usage of the RRset class.
+	- Add a new factory method for creating a Record from a
+	  String, rather than a pre-tokenized String.
 
 4/23/2002
 	- Fix potential race conditions in the RRset class.
