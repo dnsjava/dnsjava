@@ -191,8 +191,8 @@ fromWire(DataByteInputStream in, int section) throws IOException {
 	start = in.getPos();
 
 	name = new Name(in);
-	type = in.readShort();
-	dclass = in.readShort();
+	type = in.readUnsignedShort();
+	dclass = in.readUnsignedShort();
 
 	if (section == Section.QUESTION)
 		return newRecord(name, type, dclass);

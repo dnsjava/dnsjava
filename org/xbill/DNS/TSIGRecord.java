@@ -24,7 +24,7 @@ private static TSIGRecord member = new TSIGRecord();
 
 private Name alg;
 private Date timeSigned;
-private short fudge;
+private int fudge;
 private byte [] signature;
 private int originalID;
 private short error;
@@ -60,12 +60,14 @@ getMember() {
  */
 public
 TSIGRecord(Name name, int dclass, int ttl, Name alg, Date timeSigned,
-	   short fudge, byte [] signature, int originalID, short error,
+	   int fudge, byte [] signature, int originalID, short error,
 	   byte other[])
 {
 	this(name, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
+	if (fudge < 0 || fudge > 0xFFFF)
+		throw new IllegalArgumentException("priority is out of range");
 	this.alg = alg;
 	this.timeSigned = timeSigned;
 	this.fudge = fudge;
@@ -85,12 +87,12 @@ throws IOException
 		return rec;
 	rec.alg = new Name(in);
 
-	short timeHigh = in.readShort();
+	int timeHigh = in.readUnsignedShort();
 	int timeLow = in.readInt();
-	long time = ((long)timeHigh & 0xFFFF) << 32;
+	long time = ((long)timeHigh) << 32;
 	time += (long)timeLow & 0xFFFFFFFF;
 	rec.timeSigned = new Date(time * 1000);
-	rec.fudge = in.readShort();
+	rec.fudge = in.readUnsignedShort();
 
 	int sigLen = in.readUnsignedShort();
 	rec.signature = new byte[sigLen];
@@ -186,7 +188,7 @@ getTimeSigned() {
 }
 
 /** Returns the time fudge factor */
-public short
+public int
 getFudge() {
 	return fudge;
 }
