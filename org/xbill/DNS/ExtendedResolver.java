@@ -76,13 +76,13 @@ class Receiver implements ResolverListener {
 }
 
 private static final int quantum = 20;
-private static final byte retries = 3;
 private static int uniqueID = 0;
 private static final Random random = new Random();
 
 private Vector resolvers;
 private boolean loadBalance = false;
 private int lbStart = 0;
+private int retries = 3;
 
 private void
 init() {
@@ -361,6 +361,12 @@ deleteResolver(Resolver r) {
 public void
 setLoadBalance(boolean flag) {
 	loadBalance = flag;
+}
+
+/** Sets the number of retries sent to each server per query */
+public void
+setRetries(int retries) {
+	this.retries = retries;
 }
 
 }
