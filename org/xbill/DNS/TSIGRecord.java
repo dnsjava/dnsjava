@@ -113,7 +113,7 @@ Record
 rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
-	throw new TextParseException("no text format defined for TSIG");
+	throw st.exception("no text format defined for TSIG");
 }
 
 /** Converts rdata to a String */

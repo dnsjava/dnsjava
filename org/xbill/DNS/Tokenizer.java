@@ -197,14 +197,9 @@ skipWhitespace() throws IOException {
 }
 
 private void
-fail(String s) throws TextParseException {
-	throw new TextParseException(filename + ":" + line + ": " + s);
-}
-
-private void
 checkUnbalancedParens() throws TextParseException {
 	if (multiline > 0)
-		fail("unbalanced parentheses");
+		throw exception("unbalanced parentheses");
 }
 
 /**
@@ -242,7 +237,8 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 		if (c == -1 || delimiters.indexOf(c) != -1) {
 			if (c == -1) {
 				if (quoting)
-					fail("newline in quoted string");
+					throw exception("newline in " +
+							"quoted string");
 				else if (sb.length() == 0)
 					return current.set(EOF, null);
 				else
@@ -255,8 +251,9 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 					continue;
 				} else if (c == ')') {
 					if (multiline <= 0)
-						fail("invalid close " +
-						     "parenthesis");
+						throw exception("invalid " +
+								"close " +
+								"parenthesis");
 					multiline--;
 					skipWhitespace();
 					continue;
@@ -300,7 +297,7 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 		} else if (c == '\\') {
 			c = getChar();
 			if (c == -1)
-				fail("unterminated escape sequence");
+				throw exception("unterminated escape sequence");
 			sb.append('\\');
 		}
 		sb.append((char)c);
@@ -346,7 +343,7 @@ public String
 getString() throws IOException {
 	Token next = get();
 	if (!next.isString()) {
-		fail("expected a string");
+		throw exception("expected a string");
 	}
 	return next.value;
 }
@@ -362,7 +359,7 @@ public String
 getIdentifier() throws IOException {
 	Token next = get();
 	if (next.type != IDENTIFIER) {
-		fail("expected an identifier");
+		throw exception("expected an identifier");
 	}
 	return next.value;
 }
@@ -377,12 +374,11 @@ public long
 getLong() throws IOException {
 	String next = getIdentifier();
 	if (!Character.isDigit(next.charAt(0)))
-		fail("expecting an integer");
+		throw exception("expecting an integer");
 	try {
 		return Long.parseLong(next);
 	} catch (NumberFormatException e) {
-		fail("expecting an integer");
-		return 0;
+		throw exception("expecting an integer");
 	}
 }
 
@@ -398,7 +394,7 @@ public long
 getUInt32() throws IOException {
 	long l = getLong();
 	if (l < 0 || l > 0xFFFFFFFFL)
-		fail("expecting an 32 bit unsigned integer");
+		throw exception("expecting an 32 bit unsigned integer");
 	return l;
 }
 
@@ -414,7 +410,7 @@ public int
 getUInt16() throws IOException {
 	long l = getLong();
 	if (l < 0 || l > 0xFFFFL)
-		fail("expecting an 16 bit unsigned integer");
+		throw exception("expecting an 16 bit unsigned integer");
 	return (int) l;
 }
 
@@ -430,7 +426,7 @@ public int
 getUInt8() throws IOException {
 	long l = getLong();
 	if (l < 0 || l > 0xFFL)
-		fail("expecting an 8 bit unsigned integer");
+		throw exception("expecting an 8 bit unsigned integer");
 	return (int) l;
 }
 
@@ -444,12 +440,11 @@ public double
 getDouble() throws IOException {
 	String next = getIdentifier();
 	if (!Character.isDigit(next.charAt(0)))
-		fail("expecting an integer");
+		throw exception("expecting an integer");
 	try {
 		return Double.parseDouble(next);
 	} catch (NumberFormatException e) {
-		fail("expecting an floating point value");
-		return 0;
+		throw exception("expecting an floating point value");
 	}
 }
 
@@ -468,8 +463,7 @@ getTTL() throws IOException {
 		return TTL.parseTTL(next);
 	}
 	catch (NumberFormatException e) {
-		fail("invalid TTL: " + next);
-		return 0;
+		throw exception("invalid TTL: " + next);
 	}
 }
 
@@ -492,8 +486,7 @@ getName(Name origin) throws IOException {
 		return name;
 	}
 	catch (TextParseException e) {
-		fail(e.getMessage());
-		return null;
+		throw exception(e.getMessage());
 	}
 }
 
@@ -506,8 +499,18 @@ public void
 getEOL() throws IOException {
 	Token next = get();
 	if (next.type != EOL && next.type != EOF) {
-		fail("expecting EOL or EOF");
+		throw exception("expecting EOL or EOF");
 	}
+}
+
+/**
+ * Creates an exception which includes the current state in the error message
+ * @param s The error message to include.
+ * @return The exception to be thrown
+ */
+public TextParseException
+exception(String s) {
+	return new TextParseException(filename + ":" + line + ": " + s);
 }
 
 }

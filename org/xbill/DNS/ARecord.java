@@ -107,12 +107,12 @@ throws IOException
 		}
 	}
 	catch (UnknownHostException e) {
-		throw new TextParseException("invalid address");
+		throw st.exception("invalid address");
 	}
 
 	int [] addr = Address.toArray(s);
 	if (addr == null)
-		throw new TextParseException("invalid dotted quad");
+		throw st.exception("invalid dotted quad");
 	rec.addr = fromBytes((byte)addr[0], (byte)addr[1], (byte)addr[2],
 			     (byte)addr[3]);
 	return rec;

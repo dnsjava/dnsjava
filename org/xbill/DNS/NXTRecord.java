@@ -84,7 +84,7 @@ throws IOException
 			break;
 		short type = Type.value(t.value);
 		if (type <= 0 || type > 128)
-			throw new TextParseException("Invalid type " + t.value);
+			throw st.exception("Invalid type " + t.value);
 		rec.bitmap.set(type);
 	}
 	st.unget();

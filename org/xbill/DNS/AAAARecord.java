@@ -64,7 +64,12 @@ rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	AAAARecord rec = new AAAARecord(name, dclass, ttl);
-	rec.address = new Inet6Address(st.getString());
+	try {
+		rec.address = new Inet6Address(st.getString());
+	}
+	catch (TextParseException e) {
+		throw st.exception(e.getMessage());
+	}
 	return rec;
 }
 

@@ -412,9 +412,8 @@ throws IOException
 		String s = remainingStrings(st);
 		byte [] data = base16.fromString(s);
 		if (length != data.length)
-			throw new TextParseException
-					("Invalid unknown RR encoding: " +
-					 "length mismatch");
+			throw st.exception("invalid unknown RR encoding: " +
+					   "length mismatch");
 		DataByteInputStream in = new DataByteInputStream(data);
 		return newRecord(name, type, dclass, ttl, length, in);
 	}

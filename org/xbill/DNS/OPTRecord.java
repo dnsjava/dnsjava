@@ -87,7 +87,7 @@ Record
 rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
-	throw new TextParseException("no text format defined for OPT");
+	throw st.exception("no text format defined for OPT");
 }
 
 /** Converts rdata to a String */

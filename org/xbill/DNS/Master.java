@@ -110,8 +110,7 @@ nextRecord() throws IOException {
 				 */
 				return nextRecord();
 			} else if (s.charAt(0) == '$') {
-				throw new TextParseException
-						("Invalid directive: " + s);
+				throw st.exception("Invalid directive: " + s);
 			} else {
 				name = Name.fromString(s, origin);
 			}
@@ -124,7 +123,7 @@ nextRecord() throws IOException {
 		}
 		catch (NumberFormatException e) {
 			if (last == null && defaultTTL < 0)
-				throw new TextParseException("missing TTL");
+				throw st.exception("missing TTL");
 			else if (defaultTTL >= 0)
 				ttl = (int) defaultTTL;
 			else
@@ -137,8 +136,7 @@ nextRecord() throws IOException {
 			dclass = DClass.IN;
 		
 		if ((type = Type.value(s)) < 0)
-			throw new TextParseException("Invalid type '" + s +
-						     "'");
+			throw st.exception("Invalid type '" + s + "'");
 
 		last = Record.fromString(name, type, dclass, ttl, st, origin);
 		st.getEOL();

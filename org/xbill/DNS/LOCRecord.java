@@ -101,7 +101,7 @@ throws IOException
 		st.unget();
 	}
 	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
-		throw new TextParseException("Invalid LOC latitude");
+		throw st.exception("Invalid LOC latitude");
 	rec.latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("S"))
 		rec.latitude = -rec.latitude;
@@ -120,7 +120,7 @@ throws IOException
 	}
 	s = st.getString();
 	if (!s.equalsIgnoreCase("W") && !s.equalsIgnoreCase("E"))
-		throw new TextParseException("Invalid LOC longitude");
+		throw st.exception("Invalid LOC longitude");
 	rec.longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("W"))
 		rec.longitude = -rec.longitude;
@@ -140,7 +140,7 @@ throws IOException
 				     100);
 	}
 	catch (NumberFormatException e) {
-		throw new TextParseException("Invalid LOC altitude");
+		throw st.exception("Invalid LOC altitude");
 	}
 	
 	/* Size */
@@ -155,7 +155,7 @@ throws IOException
 		rec.size = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
-		throw new TextParseException("Invalid LOC size");
+		throw st.exception("Invalid LOC size");
 	}
 	
 	/* Horizontal precision */
@@ -170,8 +170,7 @@ throws IOException
 		rec.hPrecision = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
-		throw new TextParseException("Invalid LOC horizontal " +
-					     "precision");
+		throw st.exception("Invalid LOC horizontal precision");
 	}
 	
 	/* Vertical precision */
@@ -186,7 +185,7 @@ throws IOException
 		rec.vPrecision = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
-		throw new TextParseException("Invalid LOC vertical precision");
+		throw st.exception("Invalid LOC vertical precision");
 	}
 	return rec;
 }

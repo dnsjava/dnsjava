@@ -54,7 +54,7 @@ Record
 rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
-	throw new TextParseException("Invalid unknown RR encoding");
+	throw st.exception("invalid unknown RR encoding");
 }
 
 /** Converts this Record to the String "unknown format" */

@@ -80,7 +80,12 @@ throws IOException
 {
 	A6Record rec = new A6Record(name, dclass, ttl);
 	rec.prefixBits = (short) st.getUInt16();
-	rec.suffix = new Inet6Address(st.getString());
+	try {
+		rec.suffix = new Inet6Address(st.getString());
+	}
+	catch (TextParseException e) {
+		throw st.exception(e.getMessage());
+	}
 	if (rec.prefixBits > 0)
 		rec.prefix = st.getName(origin);
 	return rec;
