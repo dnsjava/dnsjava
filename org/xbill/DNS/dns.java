@@ -54,7 +54,7 @@ setResolver(Resolver _res) {
 }
 
 public static Record []
-getRecords(String namestr, short type, short dclass) {
+getRecords(String namestr, short type, short dclass, byte cred) {
 	Message query;
 	Message response;
 	Record question;
@@ -63,6 +63,7 @@ getRecords(String namestr, short type, short dclass) {
 	Enumeration e;
 	Name name = new Name(namestr);
 
+/*System.out.println("lookup of " + name + " " + Type.string(type));*/
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
 
@@ -78,8 +79,8 @@ getRecords(String namestr, short type, short dclass) {
 	if (cache == null)
 		cache = new Cache();
 
-	CacheResponse cached = cache.lookupRecords(name, type,
-						   Credibility.NONAUTH_ANSWER);
+	CacheResponse cached = cache.lookupRecords(name, type, cred);
+/*System.out.println(cached);*/
 	if (cached.isSuccessful()) {
 		RRset rrset = cached.answer();
 		answerCount = rrset.size();
@@ -136,15 +137,35 @@ getRecords(String namestr, short type, short dclass) {
 }
 
 public static Record []
-getRecords(String name, short type) {
-	return getRecords(name, type, DClass.IN);
+getRecords(String namestr, short type, short dclass) {
+	return getRecords(namestr, type, dclass, Credibility.NONAUTH_ANSWER);
 }
 
+public static Record []
+getAnyRecords(String namestr, short type, short dclass) {
+	return getRecords(namestr, type, dclass, Credibility.AUTH_ADDITIONAL);
+}
+
+public static Record []
+getRecords(String name, short type) {
+	return getRecords(name, type, DClass.IN, Credibility.NONAUTH_ANSWER);
+}
+
+public static Record []
+getAnyRecords(String name, short type) {
+	return getRecords(name, type, DClass.IN, Credibility.AUTH_ADDITIONAL);
+}
 
 public static Record []
 getRecordsByAddress(String addr, short type) {
 	String name = inaddrString(addr);
-	return getRecords(name, type, DClass.IN);
+	return getRecords(name, type, DClass.IN, Credibility.NONAUTH_ANSWER);
+}
+
+public static Record []
+getAnyRecordsByAddress(String addr, short type) {
+	String name = inaddrString(addr);
+	return getRecords(name, type, DClass.IN, Credibility.AUTH_ADDITIONAL);
 }
 
 }
