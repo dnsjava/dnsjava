@@ -56,7 +56,8 @@ class Receiver implements ResolverListener {
 	}
 }
 
-private static final int quantum = 20;
+private static final int quantum = 30;
+private static final byte retries = 3;
 private Vector resolvers;
 
 private void
@@ -116,20 +117,13 @@ ExtendedResolver(Resolver [] res) throws UnknownHostException {
 		resolvers.addElement(res[i]);
 }
 
-private boolean
-sendTo(Message query, Receiver receiver, Hashtable idMap, int r, int q) {
-	q -= r;
+private void
+sendTo(Message query, Receiver receiver, Hashtable idMap, int r) {
 	Resolver res = (Resolver) resolvers.elementAt(r);
-	/* Three retries */
-	if (q >= 0 && q < 3) {
-		synchronized (idMap) {
-			int id = res.sendAsync(query, receiver);
-			idMap.put(new Integer(id), new Integer(r));
-		}
+	synchronized (idMap) {
+		int id = res.sendAsync(query, receiver);
+		idMap.put(new Integer(id), new Integer(r));
 	}
-	if (q < 6)
-		return true;
-	return false;
 }
 
 /** Sets the port to communicate with on the servers */
@@ -195,22 +189,30 @@ send(Message query) {
 	int q, r;
 	Message best = null;
 	boolean [] invalid = new boolean[resolvers.size()];
+	byte [] sent = new byte[resolvers.size()];
 	Vector queue = new Vector();
 	Hashtable idMap = new Hashtable();
 	Receiver receiver = new Receiver(queue, idMap);
 
-	for (q = 0; q < 20; q++) {
+	while (true) {
 		Message m;
-		boolean ok = false;
+		boolean waiting = false;
 		synchronized (queue) {
-			for (r = 0; r < resolvers.size(); r++)
-				if (!invalid[r])
-					ok |= sendTo(query, receiver, idMap,
-						     r, q);
-			if (!ok)
+			for (r = 0; r < resolvers.size(); r++) {
+				if (sent[r] == 0) {
+					sendTo(query, receiver, idMap, r);
+					sent[r]++;
+					waiting = true;
+					break;
+				}
+				if (!invalid[r] && sent[r] < retries)
+					waiting = true;
+			}
+			if (!waiting)
 				break;
+
 			try {
-				queue.wait(quantum * 1000);
+				queue.wait();
 			}
 			catch (InterruptedException e) {
 			}
