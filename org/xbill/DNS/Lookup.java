@@ -30,8 +30,8 @@ private Name [] searchPath;
 private Cache cache;
 private byte credibility;
 private Name name;
-private short type;
-private short dclass;
+private int type;
+private int dclass;
 private boolean verbose;
 private int iterations;
 private boolean found;
@@ -102,7 +102,8 @@ setDefaultResolver(Resolver resolver) {
  * @return The default cache for the specified class.
  */
 public static synchronized Cache
-getDefaultCache(short dclass) {
+getDefaultCache(int dclass) {
+	DClass.check(dclass);
 	Cache c = (Cache) defaultCaches.get(DClass.toInteger(dclass));
 	if (c == null) {
 		c = new Cache(dclass);
@@ -118,7 +119,8 @@ getDefaultCache(short dclass) {
  * @param dclass The class whose cache is being set.
  */
 public static synchronized void
-setDefaultCache(Cache cache, short dclass) {
+setDefaultCache(Cache cache, int dclass) {
+	DClass.check(dclass);
 	defaultCaches.put(DClass.toInteger(dclass), cache);
 }
 
@@ -173,7 +175,9 @@ setDefaultSearchPath(String [] domains) throws TextParseException {
  * @see DClass
  */
 public
-Lookup(Name name, short type, short dclass) {
+Lookup(Name name, int type, int dclass) {
+	Type.check(type);
+	DClass.check(dclass);
 	if (!Type.isRR(type) && type != Type.ANY)
 		throw new IllegalArgumentException("Cannot query for " +
 						   "meta-types other than ANY");
@@ -197,10 +201,10 @@ Lookup(Name name, short type, short dclass) {
  * @param name The name of the desired records
  * @param type The type of the desired records
  * @throws IllegalArgumentException The type is a meta type other than ANY.
- * @see #Lookup(Name,short,short)
+ * @see #Lookup(Name,int,int)
  */
 public
-Lookup(Name name, short type) {
+Lookup(Name name, int type) {
 	this(name, type, DClass.IN);
 }
 
@@ -208,7 +212,7 @@ Lookup(Name name, short type) {
  * Create a Lookup object that will find records of type A at the given name
  * in the IN class.
  * @param name The name of the desired records
- * @see #Lookup(Name,short,short)
+ * @see #Lookup(Name,int,int)
  */
 public
 Lookup(Name name) {
@@ -223,10 +227,10 @@ Lookup(Name name) {
  * @param dclass The class of the desired records
  * @throws TextParseException The name is not a valid DNS name
  * @throws IllegalArgumentException The type is a meta type other than ANY.
- * @see #Lookup(Name,short,short)
+ * @see #Lookup(Name,int,int)
  */
 public
-Lookup(String name, short type, short dclass) throws TextParseException {
+Lookup(String name, int type, int dclass) throws TextParseException {
 	this(Name.fromString(name), type, dclass);
 }
 
@@ -237,10 +241,10 @@ Lookup(String name, short type, short dclass) throws TextParseException {
  * @param type The type of the desired records
  * @throws TextParseException The name is not a valid DNS name
  * @throws IllegalArgumentException The type is a meta type other than ANY.
- * @see #Lookup(Name,short,short)
+ * @see #Lookup(Name,int,int)
  */
 public
-Lookup(String name, short type) throws TextParseException {
+Lookup(String name, int type) throws TextParseException {
 	this(Name.fromString(name), type, DClass.IN);
 }
 
@@ -249,7 +253,7 @@ Lookup(String name, short type) throws TextParseException {
  * in the IN class.
  * @param name The name of the desired records
  * @throws TextParseException The name is not a valid DNS name
- * @see #Lookup(Name,short,short)
+ * @see #Lookup(Name,int,int)
  */
 public
 Lookup(String name) throws TextParseException {

@@ -90,7 +90,7 @@ public static final int SECONDARY = 2;
 
 private int type;
 private Name origin;
-private short dclass = DClass.IN;
+private int dclass = DClass.IN;
 private RRset NS;
 private SOARecord SOA;
 private boolean hasWild;
@@ -179,9 +179,13 @@ Zone(String file, Cache cache) throws IOException {
 }
 
 public void
-fromXFR(Name zone, short dclass, String remote)
+fromXFR(Name zone, int dclass, String remote)
 throws IOException, ZoneTransferException
 {
+	if (!zone.isAbsolute())
+		throw new RelativeNameException(zone);
+	DClass.check(dclass);
+
 	origin = zone;
 	this.dclass = dclass;
 	type = SECONDARY;
@@ -205,7 +209,7 @@ throws IOException, ZoneTransferException
  * @see Master
  */
 public
-Zone(Name zone, short dclass, String remote)
+Zone(Name zone, int dclass, String remote)
 throws IOException, ZoneTransferException
 {
 	super(false);
@@ -218,8 +222,9 @@ throws IOException, ZoneTransferException
  * @see Master
  */
 public
-Zone(Name zone, short dclass, String remote, Cache cache) throws IOException {
+Zone(Name zone, int dclass, String remote, Cache cache) throws IOException {
 	super(false);
+	DClass.check(dclass);
 	try {
 		fromXFR(zone, dclass, remote);
 	}
@@ -247,7 +252,7 @@ getSOA() {
 }
 
 /** Returns the Zone's class */
-public short
+public int
 getDClass() {
 	return dclass;
 }
@@ -260,7 +265,7 @@ getDClass() {
  * @see SetResponse
  */ 
 public SetResponse
-findRecords(Name name, short type) {
+findRecords(Name name, int type) {
 	SetResponse zr = null;
 
 	Object o = lookup(name, type);
@@ -330,7 +335,7 @@ findRecords(Name name, short type) {
  * @see RRset
  */ 
 public RRset
-findExactMatch(Name name, short type) {
+findExactMatch(Name name, int type) {
 	return (RRset) findExactSet(name, type);
 }
 
@@ -342,7 +347,7 @@ findExactMatch(Name name, short type) {
 public void
 addRecord(Record r) {
 	Name name = r.getName();
-	short type = r.getRRsetType();
+	int type = r.getRRsetType();
 	RRset rrset = (RRset) findExactSet (name, type);
 	if (rrset == null)
 		addSet(name, type, rrset = new RRset());
@@ -354,7 +359,7 @@ addRecord(Record r) {
  * set is abstract.
  */
 protected void
-addSet(Name name, short type, TypedObject set) {
+addSet(Name name, int type, TypedObject set) {
 	if (!hasWild && name.isWild())
 		hasWild = true;
 	super.addSet(name, type, set);
@@ -368,7 +373,7 @@ addSet(Name name, short type, TypedObject set) {
 public void
 removeRecord(Record r) {
 	Name name = r.getName();
-	short type = r.getRRsetType();
+	int type = r.getRRsetType();
 	RRset rrset = (RRset) findExactSet (name, type);
 	if (rrset != null) {
 		rrset.deleteRR(r);

@@ -30,7 +30,7 @@ private byte [] digest;
 private DSRecord() {}
 
 private
-DSRecord(Name name, short dclass, int ttl) {
+DSRecord(Name name, int dclass, int ttl) {
 	super(name, Type.DS, dclass, ttl);
 }
 
@@ -47,7 +47,7 @@ getMember() {
  * @param digest A hash of the original key.
  */
 public
-DSRecord(Name name, short dclass, int ttl, int footprint, int alg,
+DSRecord(Name name, int dclass, int ttl, int footprint, int alg,
 	 int digestid, byte []  digest)
 {
 	this(name, dclass, ttl);
@@ -58,7 +58,7 @@ DSRecord(Name name, short dclass, int ttl, int footprint, int alg,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -78,7 +78,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	DSRecord rec = new DSRecord(name, dclass, ttl);

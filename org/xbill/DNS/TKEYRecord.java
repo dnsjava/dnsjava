@@ -46,7 +46,7 @@ private
 TKEYRecord() {}
 
 private
-TKEYRecord(Name name, short dclass, int ttl) {
+TKEYRecord(Name name, int dclass, int ttl) {
 	super(name, Type.TKEY, dclass, ttl);
 }
 
@@ -69,7 +69,7 @@ getMember() {
  * responses.
  */
 public
-TKEYRecord(Name name, short dclass, int ttl, Name alg,
+TKEYRecord(Name name, int dclass, int ttl, Name alg,
 	   Date timeInception, Date timeExpire, short mode, short error,
 	   byte [] key, byte other[])
 {
@@ -86,7 +86,7 @@ TKEYRecord(Name name, short dclass, int ttl, Name alg,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -118,7 +118,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	throw st.exception("no text format defined for TKEY");

@@ -24,7 +24,7 @@ private Name replacement;
 private NAPTRRecord() {}
 
 private
-NAPTRRecord(Name name, short dclass, int ttl) {
+NAPTRRecord(Name name, int dclass, int ttl) {
 	super(name, Type.NAPTR, dclass, ttl);
 }
 
@@ -47,7 +47,7 @@ getMember() {
  * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
-NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
+NAPTRRecord(Name name, int dclass, int ttl, int order, int preference,
 	    String flags, String service, String regexp, Name replacement)
 {
 	this(name, dclass, ttl);
@@ -67,7 +67,7 @@ NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -84,7 +84,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);

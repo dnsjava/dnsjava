@@ -121,7 +121,7 @@ getName() {
  * Returns the type of the records
  * @see Type
  */
-public short
+public int
 getType() {
 	Record r = first();
 	if (r == null)
@@ -133,7 +133,7 @@ getType() {
  * Returns the class of the records
  * @see DClass
  */
-public short
+public int
 getDClass() {
 	Record r = first();
 	if (r == null)

@@ -52,12 +52,12 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 			addSecondaryZone(st.nextToken(), st.nextToken());
 		else if (keyword.equals("cache")) {
 			Cache cache = new Cache(st.nextToken());
-			caches.put(new Short(DClass.IN), cache);
+			caches.put(new Integer(DClass.IN), cache);
 		}
 		else if (keyword.equals("key"))
 			addTSIG(st.nextToken(), st.nextToken());
 		else if (keyword.equals("port"))
-			ports.add(Short.valueOf(st.nextToken()));
+			ports.add(Integer.valueOf(st.nextToken()));
 		else if (keyword.equals("address")) {
 			String addr = st.nextToken();
 			addresses.add(InetAddress.getByName(addr));
@@ -69,7 +69,7 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 	}
 
 	if (ports.size() == 0)
-		ports.add(new Short((short)53));
+		ports.add(new Integer(53));
 
 	if (addresses.size() == 0)
 		addresses.add(null);
@@ -79,7 +79,7 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 		InetAddress addr = (InetAddress) iaddr.next();
 		Iterator iport = ports.iterator();
 		while (iport.hasNext()) {
-			short port = ((Short)iport.next()).shortValue();
+			int port = ((Integer)iport.next()).shortValue();
 			String addrString;
 			addUDP(addr, port);
 			addTCP(addr, port);
@@ -120,11 +120,11 @@ addTSIG(String namestr, String key) throws IOException {
 }
 
 public Cache
-getCache(short dclass) {
-	Cache c = (Cache) caches.get(new Short(dclass));
+getCache(int dclass) {
+	Cache c = (Cache) caches.get(new Integer(dclass));
 	if (c == null) {
 		c = new Cache(dclass);
-		caches.put(new Short(dclass), c);
+		caches.put(new Integer(dclass), c);
 	}
 	return c;
 }
@@ -146,7 +146,7 @@ findBestZone(Name name) {
 }
 
 public RRset
-findExactMatch(Name name, short type, short dclass, boolean glue) {
+findExactMatch(Name name, int type, int dclass, boolean glue) {
 	Zone zone = findBestZone(name);
 	if (zone != null)
 		return zone.findExactMatch(name, type);
@@ -240,7 +240,7 @@ addAdditional(Message response, int flags) {
 }
 
 byte
-addAnswer(Message response, Name name, short type, short dclass,
+addAnswer(Message response, Name name, int type, int dclass,
 	  int iterations, int flags)
 {
 	SetResponse sr;
@@ -437,8 +437,8 @@ throws IOException
 	response.addRecord(queryRecord, Section.QUESTION);
 
 	Name name = queryRecord.getName();
-	short type = queryRecord.getType();
-	short dclass = queryRecord.getDClass();
+	int type = queryRecord.getType();
+	int dclass = queryRecord.getDClass();
 	if (type == Type.AXFR && s != null)
 		return doAXFR(name, query, tsig, queryTSIG, s);
 	if (!Type.isRR(type) && type != Type.ANY)
@@ -535,7 +535,7 @@ TCPclient(Socket s) {
 }
 
 public void
-serveTCP(InetAddress addr, short port) {
+serveTCP(InetAddress addr, int port) {
 	try {
 		ServerSocket sock = new ServerSocket(port, 128, addr);
 		while (true) {
@@ -558,7 +558,7 @@ serveTCP(InetAddress addr, short port) {
 }
 
 public void
-serveUDP(InetAddress addr, short port) {
+serveUDP(InetAddress addr, int port) {
 	try {
 		DatagramSocket sock = new DatagramSocket(port, addr);
 		final short udpLength = 512;
@@ -612,7 +612,7 @@ serveUDP(InetAddress addr, short port) {
 }
 
 public void
-addTCP(final InetAddress addr, final short port) {
+addTCP(final InetAddress addr, final int port) {
 	Thread t;
 	t = new Thread(new Runnable() {
 			public void run() {serveTCP(addr, port);}});
@@ -620,7 +620,7 @@ addTCP(final InetAddress addr, final short port) {
 }
 
 public void
-addUDP(final InetAddress addr, final short port) {
+addUDP(final InetAddress addr, final int port) {
 	Thread t;
 	t = new Thread(new Runnable() {
 			public void run() {serveUDP(addr, port);}});

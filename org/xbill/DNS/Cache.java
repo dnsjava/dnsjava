@@ -39,7 +39,7 @@ private abstract static class Element implements TypedObject {
 		return (now >= expire);
 	}
 
-	public abstract short getType();
+	public abstract int getType();
 }
 
 private static class PositiveElement extends Element {
@@ -54,7 +54,7 @@ private static class PositiveElement extends Element {
 		setValues(cred, ttl);
 	}
 
-	public short
+	public int
 	getType() {
 		return rrset.getType();
 	}
@@ -70,12 +70,12 @@ private static class PositiveElement extends Element {
 }
 
 private static class NegativeElement extends Element {
-	short type;
+	int type;
 	Name name;
 	SOARecord soa;
 
 	public
-	NegativeElement(Name name, short type, SOARecord soa, byte cred,
+	NegativeElement(Name name, int type, SOARecord soa, byte cred,
 			long maxttl)
 	{
 		this.name = name;
@@ -90,7 +90,7 @@ private static class NegativeElement extends Element {
 		setValues(cred, cttl);
 	}
 
-	public short
+	public int
 	getType() {
 		return type;
 	}
@@ -167,7 +167,7 @@ private int maxncache = -1;
 private int maxcache = -1;
 private long cleanInterval = 30;
 private CacheCleaner cleaner;
-private short dclass;
+private int dclass;
 
 /**
  * Creates an empty Cache
@@ -176,7 +176,7 @@ private short dclass;
  * @see DClass
  */
 public
-Cache(short dclass) {
+Cache(int dclass) {
 	super(true);
 	cleaner = new CacheCleaner();
 	this.dclass = dclass;
@@ -220,7 +220,7 @@ Cache(String file) throws IOException {
 public void
 addRecord(Record r, byte cred, Object o) {
 	Name name = r.getName();
-	short type = r.getRRsetType();
+	int type = r.getRRsetType();
 	if (!Type.isRR(type))
 		return;
 	boolean addrrset = false;
@@ -249,7 +249,7 @@ public void
 addRRset(RRset rrset, byte cred) {
 	long ttl = ((long) rrset.getTTL()) & 0xFFFFFFFFL;
 	Name name = rrset.getName();
-	short type = rrset.getType();
+	int type = rrset.getType();
 	if (verifier != null)
 		rrset.setSecurity(verifier.verify(rrset, this));
 	if (secure && rrset.getSecurity() < DNSSEC.Secure)
@@ -274,7 +274,7 @@ addRRset(RRset rrset, byte cred) {
  * @param cred The credibility of the negative entry
  */
 public void
-addNegative(Name name, short type, SOARecord soa, byte cred) {
+addNegative(Name name, int type, SOARecord soa, byte cred) {
 	if (verifier != null && secure)
 		return;
 	Element element = (Element) findExactSet(name, type);
@@ -288,7 +288,7 @@ addNegative(Name name, short type, SOARecord soa, byte cred) {
 }
 
 private void
-logLookup(Name name, short type, String msg) {
+logLookup(Name name, int type, String msg) {
 	System.err.println("lookupRecords(" + name + " " +
 			   Type.string(type) + "): " + msg);
 }
@@ -304,7 +304,7 @@ logLookup(Name name, short type, String msg) {
  * @see Credibility
  */
 public SetResponse
-lookupRecords(Name name, short type, byte minCred) {
+lookupRecords(Name name, int type, byte minCred) {
 	SetResponse cr = null;
 	boolean verbose = Options.check("verbosecache");
 	Object o = lookup(name, type);
@@ -404,7 +404,7 @@ lookupRecords(Name name, short type, byte minCred) {
 			}
 		}
 
-		short rtype = rrset.getType();
+		int rtype = rrset.getType();
 		Name rname = rrset.getName();
 		if (name.equals(rname)) {
 			if (type != Type.CNAME && type != Type.ANY &&
@@ -473,7 +473,7 @@ lookupRecords(Name name, short type, byte minCred) {
 }
 
 private RRset []
-findRecords(Name name, short type, byte minCred) {
+findRecords(Name name, int type, byte minCred) {
 	SetResponse cr = lookupRecords(name, type, minCred);
 	if (cr.isSuccessful())
 		return cr.answers();
@@ -490,7 +490,7 @@ findRecords(Name name, short type, byte minCred) {
  * @see Credibility
  */
 public RRset []
-findRecords(Name name, short type) {
+findRecords(Name name, int type) {
 	return findRecords(name, type, Credibility.NORMAL);
 }
 
@@ -503,7 +503,7 @@ findRecords(Name name, short type) {
  * @see Credibility
  */
 public RRset []
-findAnyRecords(Name name, short type) {
+findAnyRecords(Name name, int type) {
 	return findRecords(name, type, Credibility.GLUE);
 }
 
@@ -580,8 +580,8 @@ addMessage(Message in) {
 	Record question = in.getQuestion();
 	Name qname;
 	Name curname;
-	short qtype;
-	short qclass;
+	int qtype;
+	int qclass;
 	byte cred;
 	short rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
@@ -607,7 +607,7 @@ addMessage(Message in) {
 	for (int i = 0; i < answers.length; i++) {
 		if (answers[i].getDClass() != qclass)
 			continue;
-		short type = answers[i].getType();
+		int type = answers[i].getType();
 		Name name = answers[i].getName();
 		cred = getCred(Section.ANSWER, isAuth);
 		if ((type == qtype || qtype == Type.ANY) &&
@@ -661,7 +661,7 @@ addMessage(Message in) {
 	}
 	if (!completed) {
 		/* This is a negative response or a referral. */
-		short cachetype = (rcode == Rcode.NXDOMAIN) ? (short)0 : qtype;
+		int cachetype = (rcode == Rcode.NXDOMAIN) ? 0 : qtype;
 		if (soa != null || ns == null) {
 			/* Negative response */
 			cred = getCred(Section.AUTHORITY, isAuth);
@@ -697,7 +697,7 @@ addMessage(Message in) {
 
 	addl = in.getSectionRRsets(Section.ADDITIONAL);
 	for (int i = 0; i < addl.length; i++) {
-		short type = addl[i].getType();
+		int type = addl[i].getType();
 		if (type != Type.A && type != Type.AAAA && type != Type.A6)
 			continue;
 		Name name = addl[i].getName();
@@ -718,7 +718,7 @@ addMessage(Message in) {
  * @see RRset
  */
 public void
-flushSet(Name name, short type) {
+flushSet(Name name, int type) {
 	Element element = (Element) findExactSet(name, type);
 	if (element == null)
 		return;

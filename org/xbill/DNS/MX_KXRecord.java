@@ -22,12 +22,12 @@ protected
 MX_KXRecord() {}
 
 protected
-MX_KXRecord(Name name, short type, short dclass, int ttl) {
+MX_KXRecord(Name name, int type, int dclass, int ttl) {
 	super(name, type, dclass, ttl);
 }
 
 public
-MX_KXRecord(Name name, short type, short dclass, int ttl, int priority,
+MX_KXRecord(Name name, int type, int dclass, int ttl, int priority,
 	    Name target)
 {
 	super(name, type, dclass, ttl);

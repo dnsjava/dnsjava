@@ -21,12 +21,12 @@ protected
 NS_CNAME_PTRRecord() {}
 
 protected
-NS_CNAME_PTRRecord(Name name, short type, short dclass, int ttl) {
+NS_CNAME_PTRRecord(Name name, int type, int dclass, int ttl) {
 	super(name, type, dclass, ttl);
 }
 
 public
-NS_CNAME_PTRRecord(Name name, short type, short dclass, int ttl, Name target) {
+NS_CNAME_PTRRecord(Name name, int type, int dclass, int ttl, Name target) {
 	super(name, type, dclass, ttl);
 	if (!target.isAbsolute())
 		throw new RelativeNameException(target);

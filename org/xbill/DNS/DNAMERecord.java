@@ -21,7 +21,7 @@ private
 DNAMERecord() {}
 
 private
-DNAMERecord(Name name, short dclass, int ttl) {
+DNAMERecord(Name name, int dclass, int ttl) {
 	super(name, Type.DNAME, dclass, ttl);
 }
 
@@ -35,12 +35,12 @@ getMember() {
  * @param target The name to which the DNAME alias points
  */
 public
-DNAMERecord(Name name, short dclass, int ttl, Name target) {
+DNAMERecord(Name name, int dclass, int ttl, Name target) {
 	super(name, Type.DNAME, dclass, ttl, target);
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -48,7 +48,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	return rdataFromString(new DNAMERecord(name, dclass, ttl), st, origin);

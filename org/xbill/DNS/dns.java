@@ -114,7 +114,7 @@ setSearchPath(String [] domains) {
  * @param dclass The dns class of data in the cache
  */
 public static synchronized Cache
-getCache(short dclass) {
+getCache(int dclass) {
 	return Lookup.getDefaultCache(dclass);
 }
 
@@ -139,7 +139,7 @@ getCache() {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getRecords(String namestr, short type, short dclass, byte cred) {
+getRecords(String namestr, int type, int dclass, byte cred) {
 	try {
 		Lookup lookup = new Lookup(namestr, type, dclass);
 		lookup.setCredibility(cred);
@@ -157,7 +157,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getRecords(String namestr, short type, short dclass) {
+getRecords(String namestr, int type, int dclass) {
 	return getRecords(namestr, type, dclass, Credibility.NORMAL);
 }
 
@@ -169,7 +169,7 @@ getRecords(String namestr, short type, short dclass) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getAnyRecords(String namestr, short type, short dclass) {
+getAnyRecords(String namestr, int type, int dclass) {
 	return getRecords(namestr, type, dclass, Credibility.ANY);
 }
 
@@ -180,7 +180,7 @@ getAnyRecords(String namestr, short type, short dclass) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getRecords(String name, short type) {
+getRecords(String name, int type) {
 	return getRecords(name, type, DClass.IN, Credibility.NORMAL);
 }
 
@@ -191,7 +191,7 @@ getRecords(String name, short type) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getAnyRecords(String name, short type) {
+getAnyRecords(String name, int type) {
 	return getRecords(name, type, DClass.IN, Credibility.ANY);
 }
 
@@ -202,7 +202,7 @@ getAnyRecords(String name, short type) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getRecordsByAddress(String addr, short type) {
+getRecordsByAddress(String addr, int type) {
 	String name = inaddrString(addr);
 	return getRecords(name, type, DClass.IN, Credibility.NORMAL);
 }
@@ -214,7 +214,7 @@ getRecordsByAddress(String addr, short type) {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getAnyRecordsByAddress(String addr, short type) {
+getAnyRecordsByAddress(String addr, int type) {
 	String name = inaddrString(addr);
 	return getRecords(name, type, DClass.IN, Credibility.ANY);
 }

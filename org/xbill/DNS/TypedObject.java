@@ -13,6 +13,6 @@ interface TypedObject {
 /**
  * Gets the type.
  */
-short getType();
+int getType();
 
 }

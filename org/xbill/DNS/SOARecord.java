@@ -24,7 +24,7 @@ private
 SOARecord() {}
 
 private
-SOARecord(Name name, short dclass, int ttl) {
+SOARecord(Name name, int dclass, int ttl) {
 	super(name, Type.SOA, dclass, ttl);
 }
 
@@ -46,7 +46,7 @@ getMember() {
  * @param minimum The minimum TTL for records in the zone
 */
 public
-SOARecord(Name name, short dclass, int ttl, Name host, Name admin,
+SOARecord(Name name, int dclass, int ttl, Name host, Name admin,
 	  int serial, int refresh, int retry, int expire, int minimum)
 {
 	this(name, dclass, ttl);
@@ -64,7 +64,7 @@ SOARecord(Name name, short dclass, int ttl, Name host, Name admin,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -82,7 +82,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SOARecord rec = new SOARecord(name, dclass, ttl);

@@ -23,7 +23,7 @@ public class SIGRecord extends Record {
 
 private static SIGRecord member = new SIGRecord();
 
-private short covered;
+private int covered;
 private byte alg, labels;
 private int origttl;
 private Date expire, timeSigned;
@@ -35,7 +35,7 @@ private
 SIGRecord() {}
 
 private
-SIGRecord(Name name, short dclass, int ttl) {
+SIGRecord(Name name, int dclass, int ttl) {
 	super(name, Type.SIG, dclass, ttl);
 }
 
@@ -57,12 +57,13 @@ getMember() {
  * @param signature Binary data representing the signature
  */
 public
-SIGRecord(Name name, short dclass, int ttl, int covered, int alg, int origttl,
+SIGRecord(Name name, int dclass, int ttl, int covered, int alg, int origttl,
 	  Date expire, Date timeSigned, int footprint, Name signer,
 	  byte [] signature)
 {
 	this(name, dclass, ttl);
-	this.covered = (short) covered;
+	Type.check(covered);
+	this.covered = covered;
 	this.alg = (byte) alg;
 	this.labels = name.labels();
 	this.origttl = origttl;
@@ -76,7 +77,7 @@ SIGRecord(Name name, short dclass, int ttl, int covered, int alg, int origttl,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -84,7 +85,7 @@ throws IOException
 	if (in == null)
 		return rec;
 	int start = in.getPos();
-	rec.covered = in.readShort();
+	rec.covered = in.readUnsignedShort();
 	rec.alg = in.readByte();
 	rec.labels = in.readByte();
 	rec.origttl = in.readInt();
@@ -98,7 +99,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SIGRecord rec = new SIGRecord(name, dclass, ttl);
@@ -106,7 +107,7 @@ throws IOException
 	int covered = Type.value(typeString);
 	if (covered < 0)
 		throw st.exception("Invalid type: " + typeString);
-	rec.covered = (short) covered;
+	rec.covered = covered;
 	rec.alg = (byte) st.getUInt8();
 	rec.labels = (byte) st.getUInt8();
 	rec.origttl = st.getTTL();
@@ -153,7 +154,7 @@ rdataToString() {
 }
 
 /** Returns the RRset type covered by this signature */
-public short
+public int
 getTypeCovered() {
 	return covered;
 }
@@ -217,7 +218,7 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 	if (signature == null)
 		return;
 
-	out.writeShort(covered);
+	out.writeShort((short)covered);
 	out.writeByte(alg);
 	out.writeByte(labels);
 	out.writeInt(origttl);

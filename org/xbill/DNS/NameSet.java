@@ -48,7 +48,7 @@ clear() {
 }
 
 private final Object
-lookupType(Object typelist, short type) {
+lookupType(Object typelist, int type) {
 	if (type == Type.ANY)
 		throw new IllegalArgumentException
 				("type ANY passed to NameSet.lookupType()");
@@ -84,7 +84,7 @@ lookupAll(Object typelist) {
  * Finds all matching sets or something that causes the lookup to stop.
  */
 protected Object
-lookup(Name name, short type) {
+lookup(Name name, int type) {
 	Object bestns = null;
 	Object o;
 	int labels;
@@ -151,7 +151,7 @@ lookup(Name name, short type) {
 		 * NXDOMAIN entry.
 		 */
 		if (isexact && isCache) {
-			o = lookupType(typelist, (short)0);
+			o = lookupType(typelist, 0);
 			if (o != null)
 				return o;
 		}
@@ -171,7 +171,7 @@ lookup(Name name, short type) {
  * Type ANY queries.
  */
 protected Object
-findExactSet(Name name, short type) {
+findExactSet(Name name, int type) {
 	Object typelist;
 	synchronized (this) {
 		typelist = data.get(name);
@@ -208,7 +208,7 @@ findName(Name name) {
  * set is abstract.
  */
 protected void
-addSet(Name name, short type, TypedObject set) {
+addSet(Name name, int type, TypedObject set) {
 	Object typelist;
 	synchronized (this) {
 		typelist = data.get(name);
@@ -251,7 +251,7 @@ addSet(Name name, short type, TypedObject set) {
  * set is abstract.
  */
 protected void
-removeSet(Name name, short type, TypedObject set) {
+removeSet(Name name, int type, TypedObject set) {
 	Object typelist;
 	synchronized (this) {
 		typelist = data.get(name);

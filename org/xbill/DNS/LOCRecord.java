@@ -25,7 +25,7 @@ private
 LOCRecord() {}
 
 private
-LOCRecord(Name name, short dclass, int ttl) {
+LOCRecord(Name name, int dclass, int ttl) {
 	super(name, Type.LOC, dclass, ttl);
 }
 
@@ -44,7 +44,7 @@ getMember() {
  * @param vPrecision The vertical precision of the data, in m.
 */
 public
-LOCRecord(Name name, short dclass, int ttl, double latitude, double longitude,
+LOCRecord(Name name, int dclass, int ttl, double latitude, double longitude,
 	  double altitude, double size, double hPrecision, double vPrecision)
 {
 	this(name, dclass, ttl);
@@ -57,7 +57,7 @@ LOCRecord(Name name, short dclass, int ttl, double latitude, double longitude,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -80,7 +80,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	LOCRecord rec = new LOCRecord(name, dclass, ttl);

@@ -47,7 +47,7 @@ private static final int END		= 7;
 
 private SimpleResolver res;
 private Name zname;
-private short qtype;
+private int qtype;
 private int ixfr_serial;
 private boolean want_fallback;
 
@@ -91,7 +91,7 @@ private
 ZoneTransferIn() {}
 
 private
-ZoneTransferIn(SimpleResolver sres, Name zone, short xfrtype,
+ZoneTransferIn(SimpleResolver sres, Name zone, int xfrtype,
 	       int serial, boolean fallback)
 {
 	res = sres;
@@ -268,7 +268,7 @@ fallback() throws ZoneTransferException {
 private void
 parseRR(Record rec) throws ZoneTransferException {
 	Name name = rec.getName();
-	short type = rec.getType();
+	int type = rec.getType();
 	Delta delta;
 
 	switch (state) {

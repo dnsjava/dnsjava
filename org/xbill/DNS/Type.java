@@ -15,151 +15,151 @@ import org.xbill.DNS.utils.*;
 public final class Type {
 
 /** Address */
-public static final short A		= 1;
+public static final int A		= 1;
 
 /** Name server */
-public static final short NS		= 2;
+public static final int NS		= 2;
 
 /** Mail destination */
-public static final short MD		= 3;
+public static final int MD		= 3;
 
 /** Mail forwarder */
-public static final short MF		= 4;
+public static final int MF		= 4;
 
 /** Canonical name (alias) */
-public static final short CNAME		= 5;
+public static final int CNAME		= 5;
 
 /** Start of authority */
-public static final short SOA		= 6;
+public static final int SOA		= 6;
 
 /** Mailbox domain name */
-public static final short MB		= 7;
+public static final int MB		= 7;
 
 /** Mail group member */
-public static final short MG		= 8;
+public static final int MG		= 8;
 
 /** Mail rename name */
-public static final short MR		= 9;
+public static final int MR		= 9;
 
 /** Null record */
-public static final short NULL		= 10;
+public static final int NULL		= 10;
 
 /** Well known services */
-public static final short WKS		= 11;
+public static final int WKS		= 11;
 
 /** Domain name pointer */
-public static final short PTR		= 12;
+public static final int PTR		= 12;
 
 /** Host information */
-public static final short HINFO		= 13;
+public static final int HINFO		= 13;
 
 /** Mailbox information */
-public static final short MINFO		= 14;
+public static final int MINFO		= 14;
 
 /** Mail routing information */
-public static final short MX		= 15;
+public static final int MX		= 15;
 
 /** Text strings */
-public static final short TXT		= 16;
+public static final int TXT		= 16;
 
 /** Responsible person */
-public static final short RP		= 17;
+public static final int RP		= 17;
 
 /** AFS cell database */
-public static final short AFSDB		= 18;
+public static final int AFSDB		= 18;
 
 /** X_25 calling address */
-public static final short X25		= 19;
+public static final int X25		= 19;
 
 /** ISDN calling address */
-public static final short ISDN		= 20;
+public static final int ISDN		= 20;
 
 /** Router */
-public static final short RT		= 21;
+public static final int RT		= 21;
 
 /** NSAP address */
-public static final short NSAP		= 22;
+public static final int NSAP		= 22;
 
 /** Reverse NSAP address (deprecated) */
-public static final short NSAP_PTR	= 23;
+public static final int NSAP_PTR	= 23;
 
 /** Signature */
-public static final short SIG		= 24;
+public static final int SIG		= 24;
 
 /** Key */
-public static final short KEY		= 25;
+public static final int KEY		= 25;
 
 /** X.400 mail mapping */
-public static final short PX		= 26;
+public static final int PX		= 26;
 
 /** Geographical position (withdrawn) */
-public static final short GPOS		= 27;
+public static final int GPOS		= 27;
 
 /** IPv6 address */
-public static final short AAAA		= 28;
+public static final int AAAA		= 28;
 
 /** Location */
-public static final short LOC		= 29;
+public static final int LOC		= 29;
 
 /** Next valid name in zone */
-public static final short NXT		= 30;
+public static final int NXT		= 30;
 
 /** Endpoint identifier */
-public static final short EID		= 31;
+public static final int EID		= 31;
 
 /** Nimrod locator */
-public static final short NIMLOC	= 32;
+public static final int NIMLOC		= 32;
 
 /** Server selection */
-public static final short SRV		= 33;
+public static final int SRV		= 33;
 
 /** ATM address */
-public static final short ATMA		= 34;
+public static final int ATMA		= 34;
 
 /** Naming authority pointer */
-public static final short NAPTR		= 35;
+public static final int NAPTR		= 35;
 
 /** Key exchange */
-public static final short KX		= 36;
+public static final int KX		= 36;
 
 /** Certificate */
-public static final short CERT		= 37;
+public static final int CERT		= 37;
 
 /** IPv6 address (experimental) */
-public static final short A6		= 38;
+public static final int A6		= 38;
 
 /** Non-terminal name redirection */
-public static final short DNAME		= 39;
+public static final int DNAME		= 39;
 
 /** Options - contains EDNS metadata */
-public static final short OPT		= 41;
+public static final int OPT		= 41;
 
 /** Address Prefix List */
-public static final short APL		= 42;
+public static final int APL		= 42;
 
 /** Delegation Signer */
-public static final short DS		= 43;
+public static final int DS		= 43;
 
 /** Transaction key - used to compute a shared secret or exchange a key */
-public static final short TKEY		= 249;
+public static final int TKEY		= 249;
 
 /** Transaction signature */
-public static final short TSIG		= 250;
+public static final int TSIG		= 250;
 
 /** Incremental zone transfer */
-public static final short IXFR		= 251;
+public static final int IXFR		= 251;
 
 /** Zone transfer */
-public static final short AXFR		= 252;
+public static final int AXFR		= 252;
 
 /** Transfer mailbox records */
-public static final short MAILB		= 253;
+public static final int MAILB		= 253;
 
 /** Transfer mail agent records */
-public static final short MAILA		= 254;
+public static final int MAILA		= 254;
 
 /** Matches any type */
-public static final short ANY		= 255;
+public static final int ANY		= 255;
 
 private static class DoubleHashMap {
 	private HashMap byString, byInteger;
@@ -249,15 +249,20 @@ private
 Type() {
 }
 
+static void
+check(int i) {
+	if (i < 0 || i > 0xFFFF)
+		throw new InvalidTypeException(i);
+}
+
 /**
  * Converts a numeric Type into a String
  * @return The canonical string representation of the type
- * @throws IllegalArgumentException The type is out of range.
+ * @throws InvalidTypeException The type is out of range.
  */
 public static String
 string(int i) {
-	if (i < 0 || i > 0xFFFF)
-		throw new IllegalArgumentException("type out of range: " + i);
+	check(i);
 	String s = types.getString(i);
 	return (s != null) ? s : ("TYPE" + i);
 }

@@ -26,7 +26,7 @@ private
 RPRecord() {}
 
 private
-RPRecord(Name name, short dclass, int ttl) {
+RPRecord(Name name, int dclass, int ttl) {
 	super(name, Type.RP, dclass, ttl);
 }
 
@@ -41,7 +41,7 @@ getMember() {
  * @param textdomain The address where TXT records can be found
  */
 public
-RPRecord(Name name, short dclass, int ttl, Name mailbox, Name textDomain) {
+RPRecord(Name name, int dclass, int ttl, Name mailbox, Name textDomain) {
 	this(name, dclass, ttl);
 	if (!mailbox.isAbsolute())
 		throw new RelativeNameException(mailbox);
@@ -52,7 +52,7 @@ RPRecord(Name name, short dclass, int ttl, Name mailbox, Name textDomain) {
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -65,7 +65,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	RPRecord rec = new RPRecord(name, dclass, ttl);

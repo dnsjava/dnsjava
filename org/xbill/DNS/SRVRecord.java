@@ -26,7 +26,7 @@ private
 SRVRecord() {}
 
 private
-SRVRecord(Name name, short dclass, int ttl) {
+SRVRecord(Name name, int dclass, int ttl) {
 	super(name, Type.SRV, dclass, ttl);
 }
 
@@ -45,7 +45,7 @@ getMember() {
  * @param target The host running the service
  */
 public
-SRVRecord(Name name, short dclass, int ttl, int priority,
+SRVRecord(Name name, int dclass, int ttl, int priority,
 	  int weight, int port, Name target)
 {
 	this(name, dclass, ttl);
@@ -64,7 +64,7 @@ SRVRecord(Name name, short dclass, int ttl, int priority,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -79,7 +79,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SRVRecord rec = new SRVRecord(name, dclass, ttl);

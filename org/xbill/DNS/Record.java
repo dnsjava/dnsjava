@@ -19,7 +19,7 @@ import org.xbill.DNS.utils.*;
 public abstract class Record implements Cloneable, Comparable {
 
 protected Name name;
-protected short type, dclass;
+protected int type, dclass;
 protected int ttl;
 
 private static final Record [] knownRecords = new Record[256];
@@ -35,9 +35,11 @@ static {
 protected
 Record() {}
 
-Record(Name name, short type, short dclass, int ttl) {
+Record(Name name, int type, int dclass, int ttl) {
 	if (!name.isAbsolute())
 		throw new RelativeNameException(name);
+	Type.check(type);
+	DClass.check(dclass);
 	this.name = name;
 	this.type = type;
 	this.dclass = dclass;
@@ -45,7 +47,7 @@ Record(Name name, short type, short dclass, int ttl) {
 }
 
 private static final Record
-getTypedObject(short type) {
+getTypedObject(int type) {
 	if (type < 0 || type > knownRecords.length)
 		return UNKRecord.getMember();
 	if (knownRecords[type] != null)
@@ -84,12 +86,12 @@ getTypedObject(short type) {
 /**
  * Converts the type-specific RR to wire format - must be overriden
  */
-abstract Record rrFromWire(Name name, short type, short dclass, int ttl,
+abstract Record rrFromWire(Name name, int type, int dclass, int ttl,
 			   int length, DataByteInputStream in)
 throws IOException;
 
 private static Record
-newRecord(Name name, short type, short dclass, int ttl, int length,
+newRecord(Name name, int type, int dclass, int ttl, int length,
 	  DataByteInputStream in) throws IOException
 {
 	Record rec;
@@ -117,11 +119,12 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
  * the first length bytes are used.
  */
 public static Record
-newRecord(Name name, short type, short dclass, int ttl, int length,
-	  byte [] data)
-{
+newRecord(Name name, int type, int dclass, int ttl, int length, byte [] data) {
 	if (!name.isAbsolute())
 		throw new RelativeNameException(name);
+	Type.check(type);
+	DClass.check(dclass);
+
 	DataByteInputStream dbs;
 	if (data != null)
 		dbs = new DataByteInputStream(data);
@@ -145,7 +148,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
  * format.
  */
 public static Record
-newRecord(Name name, short type, short dclass, int ttl, byte [] data) {
+newRecord(Name name, int type, int dclass, int ttl, byte [] data) {
 	return newRecord(name, type, dclass, ttl, data.length, data);
 }
 
@@ -158,7 +161,7 @@ newRecord(Name name, short type, short dclass, int ttl, byte [] data) {
  * @return An object of a subclass of Record
  */
 public static Record
-newRecord(Name name, short type, short dclass, int ttl) {
+newRecord(Name name, int type, int dclass, int ttl) {
 	return newRecord(name, type, dclass, ttl, 0, (byte []) null);
 }
 
@@ -172,15 +175,15 @@ newRecord(Name name, short type, short dclass, int ttl) {
  * @return An object of a subclass of Record
  */
 public static Record
-newRecord(Name name, short type, short dclass) {
+newRecord(Name name, int type, int dclass) {
 	return newRecord(name, type, dclass, 0, 0, (byte []) null);
 }
 
 static Record
 fromWire(DataByteInputStream in, int section) throws IOException {
-	short type, dclass;
+	int type, dclass;
 	int ttl;
-	short length;
+	int length;
 	Name name;
 	Record rec;
 	int start;
@@ -195,7 +198,7 @@ fromWire(DataByteInputStream in, int section) throws IOException {
 		return newRecord(name, type, dclass);
 
 	ttl = in.readInt();
-	length = in.readShort();
+	length = in.readUnsignedShort();
 	if (length == 0)
 		return newRecord(name, type, dclass, ttl);
 	rec = newRecord(name, type, dclass, ttl, length, in);
@@ -303,8 +306,7 @@ toString() {
  * Converts the text format of an RR to the internal format - must be overriden
  */
 abstract Record
-rdataFromString(Name name, short dclass, int ttl,
-		Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException;
 
 /**
@@ -418,14 +420,15 @@ byteArrayToString(byte [] array, boolean quote) {
  * @throws IOException The text format was invalid.
  */
 public static Record
-fromString(Name name, short type, short dclass, int ttl, Tokenizer st,
-	   Name origin)
+fromString(Name name, int type, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	Record rec;
 
 	if (!name.isAbsolute())
 		throw new RelativeNameException(name);
+	Type.check(type);
+	DClass.check(dclass);
 
 	Tokenizer.Token t = st.get();
 	if (t.type == Tokenizer.IDENTIFIER && t.value.equals("\\#")) {
@@ -455,7 +458,7 @@ throws IOException
  * @throws IOException The text format was invalid.
  */
 public static Record
-fromString(Name name, short type, short dclass, int ttl, String s, Name origin)
+fromString(Name name, int type, int dclass, int ttl, String s, Name origin)
 throws IOException
 {
 	return fromString(name, type, dclass, ttl, new Tokenizer(s), origin);
@@ -474,7 +477,7 @@ getName() {
  * Returns the record's type
  * @see Type
  */
-public short
+public int
 getType() {
 	return type;
 }
@@ -488,7 +491,7 @@ getType() {
  * @see RRset
  * @see SIGRecord
  */
-public short
+public int
 getRRsetType() {
 	if (type == Type.SIG) {
 		SIGRecord sig = (SIGRecord) this;
@@ -500,7 +503,7 @@ getRRsetType() {
 /**
  * Returns the record's class
  */
-public short
+public int
 getDClass() {
 	return dclass;
 }
@@ -571,7 +574,7 @@ withName(Name name) {
  * class.  This is most useful for dynamic update.
  */
 Record
-withDClass(short dclass) {
+withDClass(int dclass) {
 	Record rec = cloneRecord();
 	rec.dclass = dclass;
 	return rec;

@@ -27,7 +27,7 @@ private
 NXTRecord() {}
 
 private
-NXTRecord(Name name, short dclass, int ttl) {
+NXTRecord(Name name, int dclass, int ttl) {
 	super(name, Type.NXT, dclass, ttl);
 }
 
@@ -42,7 +42,7 @@ getMember() {
  * @param bitmap The set of type for which records exist at this name
 */
 public
-NXTRecord(Name name, short dclass, int ttl, Name next, BitSet bitmap) {
+NXTRecord(Name name, int dclass, int ttl, Name next, BitSet bitmap) {
 	this(name, dclass, ttl);
 	if (!next.isAbsolute())
 		throw new RelativeNameException(next);
@@ -51,7 +51,7 @@ NXTRecord(Name name, short dclass, int ttl, Name next, BitSet bitmap) {
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -72,7 +72,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	NXTRecord rec = new NXTRecord(name, dclass, ttl);

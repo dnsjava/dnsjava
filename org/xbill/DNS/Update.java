@@ -14,7 +14,7 @@ import java.util.*;
 public class Update extends Message {
 
 private Name origin;
-private short dclass;
+private int dclass;
 
 /**
  * Creates an update message.
@@ -22,8 +22,11 @@ private short dclass;
  * @param dclass The class of the zone being updated.
  */
 public
-Update(Name zone, short dclass) {
+Update(Name zone, int dclass) {
 	super();
+	if (!zone.isAbsolute())
+		throw new RelativeNameException(zone);
+	DClass.check(dclass);
         getHeader().setOpcode(Opcode.UPDATE);
 	Record soa = Record.newRecord(zone, Type.SOA, DClass.IN);
 	addRecord(soa, Section.QUESTION);
@@ -64,7 +67,7 @@ present(Name name) {
  * exist records with the given name and type in the zone.
  */
 public void
-present(Name name, short type) {
+present(Name name, int type) {
 	newPrereq(Record.newRecord(name, type, DClass.ANY, 0));
 }
 
@@ -77,7 +80,7 @@ present(Name name, short type) {
  * @throws IOException The record could not be parsed.
  */
 public void
-present(Name name, short type, String record) throws IOException {
+present(Name name, int type, String record) throws IOException {
 	newPrereq(Record.fromString(name, type, dclass, 0, record, origin));
 }
 
@@ -90,7 +93,7 @@ present(Name name, short type, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-present(Name name, short type, Tokenizer tokenizer) throws IOException {
+present(Name name, int type, Tokenizer tokenizer) throws IOException {
 	newPrereq(Record.fromString(name, type, dclass, 0, tokenizer, origin));
 }
 
@@ -119,7 +122,7 @@ absent(Name name) {
  * there are no records with the given name and type in the zone.
  */
 public void
-absent(Name name, short type) {
+absent(Name name, int type) {
 	newPrereq(Record.newRecord(name, type, DClass.NONE, 0));
 }
 
@@ -129,7 +132,7 @@ absent(Name name, short type) {
  * @throws IOException The record could not be parsed.
  */
 public void
-add(Name name, short type, int ttl, String record) throws IOException {
+add(Name name, int type, int ttl, String record) throws IOException {
 	newUpdate(Record.fromString(name, type, dclass, ttl, record, origin));
 }
 
@@ -139,7 +142,7 @@ add(Name name, short type, int ttl, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-add(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException {
+add(Name name, int type, int ttl, Tokenizer tokenizer) throws IOException {
 	newUpdate(Record.fromString(name, type, dclass, ttl, tokenizer,
 				    origin));
 }
@@ -185,7 +188,7 @@ delete(Name name) {
  * from the zone.
  */
 public void
-delete(Name name, short type) {
+delete(Name name, int type) {
 	newUpdate(Record.newRecord(name, type, DClass.ANY, 0));
 }
 
@@ -195,7 +198,7 @@ delete(Name name, short type) {
  * @throws IOException The record could not be parsed.
  */
 public void
-delete(Name name, short type, String record) throws IOException {
+delete(Name name, int type, String record) throws IOException {
 	newUpdate(Record.fromString(name, type, DClass.NONE, 0, record,
 				    origin));
 }
@@ -206,7 +209,7 @@ delete(Name name, short type, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-delete(Name name, short type, Tokenizer tokenizer) throws IOException {
+delete(Name name, int type, Tokenizer tokenizer) throws IOException {
 	newUpdate(Record.fromString(name, type, DClass.NONE, 0, tokenizer,
 				    origin));
 }
@@ -245,7 +248,7 @@ delete(RRset rrset) {
  * @throws IOException The record could not be parsed.
  */
 public void
-replace(Name name, short type, int ttl, String record) throws IOException {
+replace(Name name, int type, int ttl, String record) throws IOException {
 	delete(name, type);
 	add(name, type, ttl, record);
 }
@@ -257,7 +260,7 @@ replace(Name name, short type, int ttl, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-replace(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException
+replace(Name name, int type, int ttl, Tokenizer tokenizer) throws IOException
 {
 	delete(name, type);
 	add(name, type, ttl, tokenizer);

@@ -207,7 +207,7 @@ findRecord(Record r) {
  * @see Section
  */
 public boolean
-findRRset(Name name, short type, int section) {
+findRRset(Name name, int type, int section) {
 	if (sections[section] == null)
 		return false;
 	for (int i = 0; i < sections[section].size(); i++) {
@@ -225,7 +225,7 @@ findRRset(Name name, short type, int section) {
  * @see Section
  */
 public boolean
-findRRset(Name name, short type) {
+findRRset(Name name, int type) {
 	return (findRRset(name, type, Section.ANSWER) ||
 		findRRset(name, type, Section.AUTHORITY) ||
 		findRRset(name, type, Section.ADDITIONAL));

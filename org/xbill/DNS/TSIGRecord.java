@@ -34,7 +34,7 @@ private
 TSIGRecord() {} 
 
 private
-TSIGRecord(Name name, short dclass, int ttl) {
+TSIGRecord(Name name, int dclass, int ttl) {
 	super(name, Type.TSIG, dclass, ttl);
 }
 
@@ -59,7 +59,7 @@ getMember() {
  * @see TSIG
  */
 public
-TSIGRecord(Name name, short dclass, int ttl, Name alg, Date timeSigned,
+TSIGRecord(Name name, int dclass, int ttl, Name alg, Date timeSigned,
 	   short fudge, byte [] signature, int originalID, short error,
 	   byte other[])
 {
@@ -76,7 +76,7 @@ TSIGRecord(Name name, short dclass, int ttl, Name alg, Date timeSigned,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -110,7 +110,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	throw st.exception("no text format defined for TSIG");

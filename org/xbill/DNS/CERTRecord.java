@@ -42,7 +42,7 @@ private
 CERTRecord() {}
 
 private
-CERTRecord(Name name, short dclass, int ttl) {
+CERTRecord(Name name, int dclass, int ttl) {
 	super(name, Type.CERT, dclass, ttl);
 }
 
@@ -59,7 +59,7 @@ getMember() {
  * @param cert Binary data representing the certificate
  */
 public
-CERTRecord(Name name, short dclass, int ttl, int certType, int keyTag,
+CERTRecord(Name name, int dclass, int ttl, int certType, int keyTag,
 	   int alg, byte []  cert)
 {
 	this(name, dclass, ttl);
@@ -70,7 +70,7 @@ CERTRecord(Name name, short dclass, int ttl, int certType, int keyTag,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -88,7 +88,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);

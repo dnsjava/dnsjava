@@ -15,25 +15,25 @@ import org.xbill.DNS.utils.*;
 public final class DClass {
 
 /** Internet */
-public static final short IN		= 1;
+public static final int IN		= 1;
 
 /** Chaos network (MIT) */
-public static final short CH		= 3;
+public static final int CH		= 3;
 
 /** Chaos network (MIT, alternate name) */
-public static final short CHAOS		= 3;
+public static final int CHAOS		= 3;
 
 /** Hesiod name server (MIT) */
-public static final short HS		= 4;
+public static final int HS		= 4;
 
 /** Hesiod name server (MIT, alternate name) */
-public static final short HESIOD	= 4;
+public static final int HESIOD		= 4;
 
 /** Special value used in dynamic update messages */
-public static final short NONE		= 254;
+public static final int NONE		= 254;
 
 /** Matches any class */
-public static final short ANY		= 255;
+public static final int ANY		= 255;
 
 private static Integer [] classcache = new Integer[5];
 
@@ -45,15 +45,20 @@ static {
 private
 DClass() {}
 
+static void
+check(int i) {
+	if (i < 0 || i > 0xFFFF)
+		throw new InvalidDClassException(i);
+}
+
 /**
  * Converts a numeric DClass into a String
  * @return The canonical string representation of the class
- * @throws IllegalArgumentException The class is out of range.
+ * @throws InvalidDClassException The class is out of range.
  */
 public static String
 string(int i) {
-	if (i < 0 || i > 0xFFFF)
-		throw new IllegalArgumentException("class out of range: " + i);
+	check(i);
 	switch (i) {
 	case IN: return "IN";
 	case CH: return "CH";

@@ -23,7 +23,7 @@ private
 TXTRecord() {}
 
 private
-TXTRecord(Name name, short dclass, int ttl) {
+TXTRecord(Name name, int dclass, int ttl) {
 	super(name, Type.TXT, dclass, ttl);
 }
 
@@ -38,7 +38,7 @@ getMember() {
  * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
-TXTRecord(Name name, short dclass, int ttl, List strings) {
+TXTRecord(Name name, int dclass, int ttl, List strings) {
 	this(name, dclass, ttl);
 	if (strings == null)
 		throw new IllegalArgumentException
@@ -62,12 +62,12 @@ TXTRecord(Name name, short dclass, int ttl, List strings) {
  * @throws IllegalArgumentException The string has invalid escapes
  */
 public
-TXTRecord(Name name, short dclass, int ttl, String string) {
+TXTRecord(Name name, int dclass, int ttl, String string) {
 	this(name, dclass, ttl, Collections.nCopies(1, string));
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -85,7 +85,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	TXTRecord rec = new TXTRecord(name, dclass, ttl);

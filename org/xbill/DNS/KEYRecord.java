@@ -63,7 +63,7 @@ private
 KEYRecord() {}
 
 private
-KEYRecord(Name name, short dclass, int ttl) {
+KEYRecord(Name name, int dclass, int ttl) {
 	super(name, Type.KEY, dclass, ttl);
 }
 
@@ -80,7 +80,7 @@ getMember() {
  * @param key Binary data representing the key
  */
 public
-KEYRecord(Name name, short dclass, int ttl, int flags, int proto, int alg,
+KEYRecord(Name name, int dclass, int ttl, int flags, int proto, int alg,
 	  byte []  key)
 {
 	this(name, dclass, ttl);
@@ -91,7 +91,7 @@ KEYRecord(Name name, short dclass, int ttl, int flags, int proto, int alg,
 }
 
 Record
-rrFromWire(Name name, short type, short dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -109,7 +109,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	KEYRecord rec = new KEYRecord(name, dclass, ttl);
