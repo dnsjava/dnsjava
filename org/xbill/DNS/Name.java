@@ -552,6 +552,8 @@ toString() {
 		sb.append('.');
 		pos += (1 + len);
 	}
+	if (!isAbsolute())
+		sb.deleteCharAt(sb.length() - 1);
 	return sb.toString();
 }
 
