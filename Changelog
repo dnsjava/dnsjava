@@ -1,3 +1,12 @@
+3/5/2000
+	- 1.1.4 released
+	- added Cache.setMaxNCache(), which sets the maximum amount of time
+	  that a negative answer is cached.
+
+2/10/2000
+	- update client: add show command, catch socket exception, don't send
+	  empty updates, assert tsig ok/failed/unsigned
+
 2/8/2000
 	- 1.1.3 released
 	- Added lookup program
