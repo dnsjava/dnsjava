@@ -68,7 +68,7 @@ SIGRecord(Name name, int dclass, long ttl, int covered, int alg, int origttl,
 	TTL.check(origttl);
 	checkU16("footprint", footprint);
 	this.covered = covered;
-	this.alg = (byte) alg;
+	this.alg = alg;
 	this.labels = name.labels();
 	this.origttl = origttl;
 	this.expire = expire;

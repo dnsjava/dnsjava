@@ -85,8 +85,8 @@ throws IOException
 {
 	DSRecord rec = new DSRecord(name, dclass, ttl);
 	rec.footprint = st.getUInt16();
-	rec.alg = (byte) st.getUInt8();
-	rec.digestid = (byte) st.getUInt8();
+	rec.alg = st.getUInt8();
+	rec.digestid = st.getUInt8();
 
 	// note that the draft says that the digest is presented as hex,
 	// not base64.
