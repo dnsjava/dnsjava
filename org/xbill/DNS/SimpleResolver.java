@@ -362,7 +362,7 @@ sendAXFR(Message query) throws IOException {
 					("AXFR: too many SOAs");
 			if (tsig == null)
 				continue;
-			byte error = tsig.verifyAXFR(m, in, query.getTSIG(),
+			byte error = tsig.verifyAXFR(m, in, null,
 						     (soacount > 1), false);
 			if (error != Rcode.NOERROR)
 				response.TSIGverified = false;
