@@ -122,11 +122,11 @@ parseV6(String s) {
 	}
 
 	if (parsev4) {
-		int [] v4addr = Address.toArray(tokens[i]);
+		byte [] v4addr = Address.toByteArray(tokens[i], IPv4);
 		if (v4addr == null)
 			return null;
 		for (int k = 0; k < 4; k++)
-			data[j++] = (byte)v4addr[k];
+			data[j++] = v4addr[k];
 	}
 	if (range >= 0) {
 		int left = 16 - j;
@@ -189,7 +189,7 @@ toByteArray(String s, int family) {
  */
 public static boolean
 isDottedQuad(String s) {
-	int [] address = Address.toArray(s);
+	byte [] address = Address.toByteArray(s, IPv4);
 	return (address != null);
 }
 
