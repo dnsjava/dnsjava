@@ -129,8 +129,9 @@ digestSIG(DNSOutput out, SIGRecord sig) {
 }
 
 /**
- * Creates an array containing fields of the SIG record and the RRsets to
- * be signed/verified.
+ * Creates a byte array containing the concatenation of the fields of the
+ * SIG record and the RRsets to be signed/verified.  This does not perform
+ * a cryptographic digest.
  * @param sig The SIG record used to sign/verify the rrset.
  * @param rrset The data to be signed/verified.
  * @return The data to be cryptographically signed or verified.
@@ -162,8 +163,9 @@ digestRRset(SIGRecord sig, RRset rrset) {
 }
 
 /**
- * Creates an array containing fields of the SIG record and the message to
- * be signed.
+ * Creates a byte array containing the concatenation of the fields of the
+ * SIG record and the message to be signed/verified.  This does not perform
+ * a cryptographic digest.
  * @param sig The SIG record used to sign/verify the rrset.
  * @param msg The message to be signed/verified.
  * @param previous If this is a response, the signature from the query.
