@@ -50,8 +50,8 @@ throws IOException
 
 /** Converts the NS, CNAME, or PTR Record to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (target != null)
 		sb.append(target);
 	return sb.toString();

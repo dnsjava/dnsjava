@@ -101,10 +101,10 @@ throws IOException
 		signature = base64.fromString(st.remainingTokens());
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (signature != null) {
 		sb.append (Type.string(covered));
 		sb.append (" ");

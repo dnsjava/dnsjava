@@ -109,11 +109,11 @@ throws IOException
 }
 
 /**
- * Converts to a String
+ * Converts rdata to a String
  */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (key != null || (flags & (FLAG_NOKEY)) == (FLAG_NOKEY) ) {
 		if (!Options.check("nohex")) {
 			sb.append("0x");

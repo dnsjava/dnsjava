@@ -82,10 +82,10 @@ throws IOException
 				   this.toString());
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (replacement != null) {
 		sb.append(order);
 		sb.append(" ");

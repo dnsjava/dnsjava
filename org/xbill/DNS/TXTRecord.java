@@ -72,8 +72,8 @@ throws IOException
 
 /** converts to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (strings != null) {
 		Enumeration e = strings.elements();
 		while (e.hasMoreElements()) {

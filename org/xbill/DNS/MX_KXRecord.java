@@ -52,10 +52,10 @@ throws IOException
 	target = new Name(st.nextToken(), origin);
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (target != null) {
 		sb.append(priority);
 		sb.append(" ");

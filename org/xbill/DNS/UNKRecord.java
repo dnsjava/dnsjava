@@ -44,8 +44,8 @@ UNKRecord(Name _name, short _type, short _dclass, int _ttl,
 
 /** Converts this Record to the String "unknown format" */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (data != null) {
 		sb.append("\\# ");
 		sb.append(data.length);

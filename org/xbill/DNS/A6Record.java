@@ -68,10 +68,10 @@ throws IOException
 		prefix = new Name(st.nextToken(), origin);
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (suffix != null) {
 		sb.append(prefixBits);
 		sb.append(" ");

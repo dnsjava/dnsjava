@@ -57,10 +57,10 @@ throws IOException
 	address = new Inet6Address(st.nextToken());
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (address != null)
 		sb.append(address);
 	return sb.toString();

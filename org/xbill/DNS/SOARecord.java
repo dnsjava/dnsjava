@@ -79,8 +79,8 @@ throws IOException
 
 /** Convert to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (host != null) {
 		sb.append(host);
 		sb.append(" ");

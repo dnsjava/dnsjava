@@ -57,8 +57,8 @@ throws IOException
 
 /** Converts the RP Record to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (mailbox != null && textDomain != null) {
 		sb.append(mailbox);
 		sb.append(" ");

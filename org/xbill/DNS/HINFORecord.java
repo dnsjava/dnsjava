@@ -82,8 +82,8 @@ rrToWire(DataByteOutputStream out, Compression c) {
  * Converts to a string
  */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (cpu != null && os != null) {
 		sb.append("\"");
 		sb.append(cpu);

@@ -72,10 +72,10 @@ throws IOException
 		address = InetAddress.getByName(s);
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (address != null)
 		sb.append(address.getHostAddress());
 	return sb.toString();

@@ -60,9 +60,9 @@ throws IOException
 	}
 }
 
-/** Converts to a String */
+/** Converts rdata to a String */
 public String
-toString() {
+rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(getName());
 	sb.append("\t");

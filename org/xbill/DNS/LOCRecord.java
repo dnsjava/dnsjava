@@ -173,8 +173,8 @@ throws IOException
 
 /** Convert to a String */
 public String
-toString() {
-	StringBuffer sb = toStringNoData();
+rdataToString() {
+	StringBuffer sb = new StringBuffer();
 	if (latitude != 0 || longitude != 0 || altitude != 0) {
 		long temp;
 		char direction;

@@ -239,9 +239,13 @@ toWireCanonical() throws IOException {
 	return out.toByteArray();
 }
 
+abstract String rdataToString();
 
-StringBuffer
-toStringNoData() {
+/**
+ * Converts a Record into a String representation
+ */
+public String
+toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(name);
 	sb.append("\t");
@@ -256,16 +260,8 @@ toStringNoData() {
 	}
 	sb.append(Type.string(type));
 	sb.append("\t\t");
-	return sb;
-}
-
-/**
- * Converts a Record into a String representation
- */
-public String
-toString() {
-	StringBuffer sb = toStringNoData();
-	sb.append("<unknown format>");
+	if (wireLength != 0)
+		sb.append(rdataToString());
 	return sb.toString();
 }
 
