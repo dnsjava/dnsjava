@@ -371,7 +371,7 @@ doAXFR(Name name, Message query, Socket s) {
 			Message response = new Message();
 			Header header = response.getHeader();
 			header.setID(id);
-/*			header.setFlag(Flags.QR);*/
+			header.setFlag(Flags.QR);
 			header.setFlag(Flags.AA);
 			addRRset(rrset.getName(), response, rrset,
 				 Section.ANSWER, FLAG_DNSSECOK);
