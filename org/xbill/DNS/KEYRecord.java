@@ -122,14 +122,14 @@ toString() {
 		else
 			sb.append(flags & 0xFFFF);
 		sb.append(" ");
-		sb.append(proto);
+		sb.append(proto & 0xFF);
 		sb.append(" ");
-		sb.append(alg);
+		sb.append(alg & 0xFF);
 		if (key != null) {
 			sb.append(" (\n");
 			sb.append(base64.formatString(key, 64, "\t", true));
-			sb.append(" ; key_tag= ");
-			sb.append(getFootprint());
+			sb.append(" ; key_tag = ");
+			sb.append(getFootprint() & 0xFFFF);
 		}
 	}
 	return sb.toString();

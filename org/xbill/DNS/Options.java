@@ -22,6 +22,9 @@ import java.util.*;
  * <BR>
  * Valued options:<BR>
  * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<BR>
+ * sig0validity=n - Sets the default SIG(0) validity period (in seconds)<BR>
+ * bind9sig0 - Use the broken BIND 9.0/9.1.0 SIG(0) format<BR>
+ *
  * @author Brian Wellington
  */
 
