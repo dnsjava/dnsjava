@@ -82,7 +82,7 @@ sendTo(Message query, int r, int q) {
 public Message
 send(Message query) {
 	int q, r;
-	Message nx = null;
+	Message best = null;
 	byte rcode;
 
 	for (q = 0; q < 20; q++) {
@@ -114,13 +114,13 @@ send(Message query) {
 			if (rcode == Rcode.NOERROR)
 				return m;
 			else {
-				if (rcode == Rcode.NXDOMAIN && nx == null)
-					nx = m;
+				if (best == null)
+					best = m;
 				invalid[r] = true;
 			}
 		}
 	}
-	return nx;
+	return best;
 }
 
 public Resolver
