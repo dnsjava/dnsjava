@@ -1,3 +1,10 @@
+11/24/2003
+	- SimpleResolver should check that the message id of the response
+	  is the same as the message id of the query.  On a sufficiently
+	  busy client, sockets can be reused fast enough that late responses
+	  can come in, and should be ignored.
+	  (seen by Joseph Shraibman <jks@iname.com>)
+
 11/17/2003
 	- The Lookup code didn't handle CNAMEs pointing at nonexistant names.
 	  (reported by Joseph Shraibman <jks@iname.com>)

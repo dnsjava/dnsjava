@@ -262,6 +262,28 @@ send(Message query) throws IOException {
 				s.close();
 			}
 		}
+		/*
+		 * Check that the response is long enough.
+		 */
+		if (in.length < Header.LENGTH) {
+			throw new WireParseException("invalid DNS header - " +
+						     "too short");
+		}
+		/*
+		 * Check that the response ID matches the query ID.  We want
+		 * to check this before actually parsing the message, so that
+		 * if there's a malformed response that's not ours, it
+		 * doesn't confuse us.
+		 */
+		int id = ((in[0] & 0xFF) << 8) + in[1];
+		int qid = query.getHeader().getID();
+		if (id != qid) {
+			if (Options.check("verbose")) {
+				System.err.println("expected id " + qid +
+						   "; got id " + id);
+			}
+			continue;
+		}
 		Message response = parseMessage(in);
 		verifyTSIG(query, response, in, tsig);
 		if (!tcp && !ignoreTruncation &&
