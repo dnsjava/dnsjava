@@ -79,6 +79,10 @@ void incCount(int field) {
 	counts[field]++;
 }
 
+void decCount(int field) {
+	counts[field]--;
+}
+
 int getCount(int field) {
 	return counts[field];
 }

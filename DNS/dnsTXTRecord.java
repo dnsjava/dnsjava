@@ -12,12 +12,16 @@ public dnsTXTRecord(dnsName rname, short rclass) {
 public dnsTXTRecord(dnsName rname, short rclass, int ttl, Vector strings) {
 	this(rname, rclass);
 	this.rttl = rttl;
-	this.rlength = 4;
+	this.rlength = 0;
+	Enumeration e = strings.elements();
+	while (e.hasMoreElements()) {
+		String s = (String) e.nextElement();
+		this.rlength += (s.length() + 1);
+	}
 	this.strings = strings;
 }
 
 void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	StringBuffer sb = new StringBuffer();
 	int count = 0;
 	strings = new Vector();
 
@@ -34,8 +38,8 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	Enumeration e = strings.elements();
 	while (e.hasMoreElements()) {
 		String s = (String) e.nextElement();
+		out.writeByte(s.getBytes().length);
 		out.write(s.getBytes());
-		out.writeByte((byte)0);
 	}
 }
 

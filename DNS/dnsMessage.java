@@ -38,6 +38,15 @@ void addRecord(int section, dnsRecord r) {
 	header.incCount(section);
 }
 
+boolean removeRecord(int section, dnsRecord r) {
+	if (sections[section].removeElement(r)) {
+		header.decCount(section);
+		return true;
+	}
+	else
+		return false;
+}
+
 Vector getSection(int section) {
 	return sections[section];
 }
