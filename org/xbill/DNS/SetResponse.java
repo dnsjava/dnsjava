@@ -17,45 +17,48 @@ import org.xbill.DNS.utils.*;
 public class SetResponse {
 
 /**
- * The Cache contains no information about the requested name/type/class.
+ * The Cache contains no information about the requested name/type
  */
 static final byte UNKNOWN	= 0;
 
 /**
- * The Cache has determined that there is no information about the
- * requested name/type/class.
+ * The Zone does not contain the requested name, or the Cache has
+ * determined that the name does not exist.
  */
-static final byte NEGATIVE	= 1;
+static final byte NXDOMAIN	= 1;
 
 /**
- * The Zone does not contain the requested name
- * requested name/type/class.
+ * The Zone contains the name, but no data of the requested type,
+ * or the Cache has determined that the name exists and has no data
+ * of the requested type.
  */
-static final byte NXDOMAIN	= 2;
+static final byte NXRRSET	= 2;
 
 /**
- * The Zone contains the name, but no data of the requested type/class
+ * A delegation enclosing the requested name was found.
  */
-static final byte NODATA        = 3;
-
+static final byte DELEGATION	= 3;
 
 /**
- * The Cache/Zone has partially answered the question for the
- * requested name/type/class.  This normally occurs when a CNAME is
- * found that points to data unknown in the Cache or outside of the Zone.
+ * The Cache/Zone found a CNAME when looking for the name.
  * @see CNAMERecord
  */
-static final byte PARTIAL	= 4;
+static final byte CNAME		= 4;
+
+/**
+ * The Cache/Zone found a DNAME when looking for the name.
+ * @see CNAMERecord
+ */
+static final byte DNAME		= 5;
 
 /**
  * The Cache/Zone has successfully answered the question for the
  * requested name/type/class.
  */
-static final byte SUCCESSFUL	= 5;
+static final byte SUCCESSFUL	= 6;
 
 private byte type;
 private Object data;
-private Vector backtrace;
 
 private
 SetResponse() {}
@@ -69,7 +72,7 @@ SetResponse(byte _type) {
 	this(_type, null);
 }
 
-/** Changes the value of a SetResponse without destroying the backtrace */
+/** Changes the value of a SetResponse */
 void
 set(byte _type, Object _data) {
 	type = _type;
@@ -85,10 +88,18 @@ addRRset(RRset rrset) {
 }
 
 void
+addNS(RRset nsset) {
+	data = nsset;
+}
+
+void
 addCNAME(CNAMERecord cname) {
-	if (backtrace == null)
-		backtrace = new Vector();
-	backtrace.insertElementAt(cname, 0);
+	data = cname;
+}
+
+void
+addDNAME(DNAMERecord dname) {
+	data = dname;
 }
 
 /** Is the answer to the query unknown? */
@@ -97,28 +108,34 @@ isUnknown() {
 	return (type == UNKNOWN);
 }
 
-/** Is the answer to the query conclusively negative? */
-public boolean
-isNegative() {
-	return (type == NEGATIVE);
-}
-
 /** Is the answer to the query that the name does not exist? */
 public boolean
 isNXDOMAIN() {
 	return (type == NXDOMAIN);
 }
 
-/** Is the answer to the query that the data does not exist? */
+/** Is the answer to the query that the name exists, but the type does not? */
 public boolean
-isNODATA() {
-	return (type == NODATA);
+isNXRRSET() {
+	return (type == NXRRSET);
 }
 
-/** Did the query partially succeed? */
+/** Is the result of the lookup that the name is below a delegation? */
 public boolean
-isPartial() {
-	return (type == PARTIAL);
+isDelegation() {
+	return (type == DELEGATION);
+}
+
+/** Is the result of the lookup a dangling CNAME? */
+public boolean
+isCNAME() {
+	return (type == CNAME);
+}
+
+/** Is the result of the lookup a dangling DNAME? */
+public boolean
+isDNAME() {
+	return (type == DNAME);
 }
 
 /** Was the query successful? */
@@ -140,7 +157,7 @@ answers() {
 }
 
 /**
- * If the query was partially successful, return the last CNAME found in
+ * If the query was partially successful, return the last CNAME/DNAME found in
  * the lookup process.
  */
 public CNAMERecord
@@ -151,24 +168,40 @@ partial() {
 }
 
 /**
- * If the query involved CNAME traversals, return a Vector containing all
- * CNAMERecords traversed.
+ * If the query encountered CNAME point, return it.
  */
-public Vector
-backtrace() {
-	return backtrace;
+public CNAMERecord
+getCNAME() {
+	return (CNAMERecord) data;
+}
+
+/**
+ * If the query encountered CNAME point, return it.
+ */
+public DNAMERecord
+getDNAME() {
+	return (DNAMERecord) data;
+}
+
+/**
+ * If the query hit a delegation point, return the NS set.
+ */
+public RRset
+getNS() {
+	return (RRset) data;
 }
 
 /** Prints the value of the CacheResponse */
 public String
 toString() {
 	switch (type) {
-		case UNKNOWN:	return "unknown";
-		case NEGATIVE:	return "negative";
-		case NXDOMAIN:	return "NXDOMAIN";
-		case NODATA:	return "NODATA";
-		case PARTIAL:	return "partial: reached " + data;
-		case SUCCESSFUL:return "successful";
+		case UNKNOWN:		return "unknown";
+		case NXDOMAIN:		return "NXDOMAIN";
+		case NXRRSET:		return "NXRRSET";
+		case DELEGATION:	return "delegation: " + data;
+		case CNAME:		return "CNAME: " + data;
+		case DNAME:		return "DNAME: " + data;
+		case SUCCESSFUL:	return "successful";
 		default:	return null;
 	}
 }

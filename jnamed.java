@@ -182,8 +182,11 @@ addRRset(Name name, Message response, RRset rrset, byte section,
 
 
 void
-addAuthority(Message response, Name name, Zone zone) {
-	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == null) {
+addAuthority(Message response, Name name) {
+	Zone zone = findBestZone(name);
+	if (response.getHeader().getRcode() == Rcode.NOERROR ||
+	    zone == null)
+	{
 		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN,
 						 false);
 		if (nsRecords == null) {
@@ -258,6 +261,84 @@ addAdditional(Message response) {
 	addAdditional2(response, Section.AUTHORITY);
 }
 
+byte
+addAnswer(Message response, Name name, short type, short dclass, int iterations)
+{
+	SetResponse sr;
+	boolean sigonly;
+	byte rcode = Rcode.NOERROR;
+
+	if (iterations > 6)
+		return Rcode.SERVFAIL;
+
+	if (type == Type.SIG) {
+		type = Type.ANY;
+		sigonly = true;
+	}
+	else
+		sigonly = false;
+
+	Zone zone = findBestZone(name);
+	if (zone != null) {
+		if (iterations == 0)
+			response.getHeader().setFlag(Flags.AA);
+		sr = zone.findRecords(name, type);
+	}
+	else {
+		Cache cache = getCache(dclass);
+		sr = cache.lookupRecords(name, type,
+					 Credibility.NONAUTH_ANSWER);
+	}
+System.out.println(sr);
+
+	if (sr.isUnknown()) {
+		/* Do nothing, I guess. This should never happen. */
+	}
+	if (sr.isNXDOMAIN()) {
+		response.getHeader().setRcode(Rcode.NXDOMAIN);
+	}
+	else if (sr.isNXRRSET()) {
+		/* do nothing */
+	}
+	else if (sr.isDelegation()) {
+		/* do nothing */
+	}
+	else if (sr.isCNAME()) {
+		RRset rrset = new RRset();
+		CNAMERecord cname = sr.getCNAME();
+		rrset.addRR(cname);
+		addRRset(name, response, rrset, Section.ANSWER, false);
+		rcode = addAnswer(response, cname.getTarget(), type, dclass,
+				  ++iterations);
+	}
+	else if (sr.isDNAME()) {
+		RRset rrset = new RRset();
+		DNAMERecord dname = sr.getDNAME();
+		rrset.addRR(dname);
+		addRRset(name, response, rrset, Section.ANSWER, false);
+		Name newname = name.fromDNAME(dname);
+		if (newname == null)
+			return Rcode.SERVFAIL;
+		rrset = new RRset();
+		try {
+			CNAMERecord cname;
+			cname = new CNAMERecord(name, dclass, 0, newname);
+			rrset.addRR(cname);
+			addRRset(name, response, rrset, Section.ANSWER, false);
+		}
+		catch (IOException e) {}
+		rcode = addAnswer(response, newname, type, dclass,
+				  ++iterations);
+	}
+	else if (sr.isSuccessful()) {
+		RRset [] rrsets = sr.answers();
+		for (int i = 0; i < rrsets.length; i++)
+			addRRset(name, response, rrsets[i],
+				 Section.ANSWER, sigonly);
+	}
+	return rcode;
+}
+
 TSIG
 findTSIG(Name name) {
 	byte [] key = (byte []) TSIGs.get(name);
@@ -309,7 +390,7 @@ generateReply(Message query, byte [] in, Socket s) {
 	boolean badversion;
 	int maxLength;
 	boolean sigonly;
-	boolean partial = false;
+	SetResponse sr;
 
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
 		return errorMessage(query, Rcode.NOTIMPL);
@@ -346,63 +427,12 @@ generateReply(Message query, byte [] in, Socket s) {
 		return doAXFR(name, query, s);
 	if (!Type.isRR(type) && type != Type.ANY)
 		return errorMessage(query, Rcode.NOTIMPL);
-	if (type == Type.SIG) {
-		type = Type.ANY;
-		sigonly = true;
-	}
-	else
-		sigonly = false;
 
-	Zone zone = findBestZone(name);
-	if (zone != null) {
-		response.getHeader().setFlag(Flags.AA);
-		SetResponse zr = zone.findRecords(name, type);
-		if (zr.isNXDOMAIN())
-			response.getHeader().setRcode(Rcode.NXDOMAIN);
-		Vector backtrace = zr.backtrace();
-		if (backtrace != null) {
-			Enumeration e = backtrace.elements();
-			while (e.hasMoreElements()) {
-				Record cname = (Record)e.nextElement();
-				response.addRecord(cname, Section.ANSWER);
-			}
-		}
-		if (zr.isSuccessful()) {
-			RRset [] rrsets = zr.answers();
-			for (int i = 0; i < rrsets.length; i++)
-				addRRset(name, response, rrsets[i],
-					 Section.ANSWER, sigonly);
-		}
-		if (zr.isPartial())
-			partial = true;
-	}
-	else {
-		SetResponse cr;
-		Cache cache = getCache(dclass);
-		cr = cache.lookupRecords(name, type,
-					 Credibility.NONAUTH_ANSWER);
-		Vector backtrace = cr.backtrace();
-		if (backtrace != null) {
-			Enumeration e = backtrace.elements();
-			while (e.hasMoreElements()) {
-				Record cname = (Record)e.nextElement();
-				response.addRecord(cname,
-						   Section.ANSWER);
-			}
-			if (!cr.isSuccessful())
-				response.getHeader().setRcode(Rcode.NXDOMAIN);
-		}
-		if (cr.isSuccessful()) {
-			RRset [] rrsets = cr.answers();
-			for (int i = 0; i < rrsets.length; i++)
-				addRRset(name, response, rrsets[i],
-					 Section.ANSWER, sigonly);
-		}
-		if (cr.isPartial())
-			partial = true;
-	}
-	if (!partial)
-		addAuthority(response, name, zone);
+	byte rcode = addAnswer(response, name, type, dclass, 0);
+	if (rcode != Rcode.NOERROR)
+		return errorMessage(query, rcode);
+
+	addAuthority(response, name);
 	addAdditional(response);
 	if (queryTSIG != null) {
 		try {

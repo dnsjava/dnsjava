@@ -160,7 +160,7 @@ short dclass;
  */
 public
 Cache(short dclass) {
-	super();
+	super(true);
 	cleaner = new CacheCleaner();
 	this.dclass = dclass;
 }
@@ -176,6 +176,7 @@ clearCache() {
  */
 public
 Cache(String file) throws IOException {
+	super(true);
 	cleaner = new CacheCleaner();
 	Master m = new Master(file);
 	Record record;
@@ -240,7 +241,9 @@ addRRset(RRset rrset, byte cred, Object o) {
  * @param o The source of this data
  */
 public void
-addNegative(Name name, short type, int ttl, byte cred, Object o) {
+addNegative(short rcode, Name name, short type, int ttl, byte cred, Object o) {
+	if (rcode == Rcode.NXDOMAIN)
+		type = 0;
 	int src = (o != null) ? o.hashCode() : 0;
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
@@ -260,10 +263,17 @@ addNegative(Name name, short type, int ttl, byte cred, Object o) {
 public SetResponse
 lookupRecords(Name name, short type, byte minCred) {
 	SetResponse cr = null;
-	Object [] objects = findSets(name, type);
+	Object o = findSets(name, type);
 
-	if (objects == null)
+ 	if (o == null || o.getClass() == TypeMap.class) {
+		/*
+		 * The name exists, but the type was not found.  Or, the
+		 * name does not exist and no parent does either.  Punt.
+		 */
 		return new SetResponse(SetResponse.UNKNOWN);
+	}
+
+	Object [] objects = (Object []) findSets(name, type);
 
 	int nelements = 0;
 	for (int i = 0; i < objects.length; i++) {
@@ -284,8 +294,10 @@ lookupRecords(Name name, short type, byte minCred) {
 		else
 			nelements++;
 	}
-	if (nelements == 0)
+	if (nelements == 0) {
+		/* We have data, but can't use it.  Punt. */
 		return new SetResponse(SetResponse.UNKNOWN);
+	}
 
 	Element [] elements = new Element[nelements];
 	for (int i = 0, j = 0; i < objects.length; i++) {
@@ -294,57 +306,74 @@ lookupRecords(Name name, short type, byte minCred) {
 		elements[j++] = (Element) objects[i];
 	}
 
+	/*
+	 * We have something at the name.  It could be the answer,
+	 * a CNAME, DNAME, or NS, or a negative cache entry.
+	 * 
+	 * Ignore wildcards, since it's pretty unlikely that any will be
+	 * cached.  The occasional extra query is easily balanced by the
+	 * reduced number of lookups.
+	 */
+
 	for (int i = 0; i < elements.length; i++) {
 		RRset rrset = elements[i].rrset;
 
 		/* Is this a negatively cached entry? */
 		if (rrset == null) {
 			/*
-			 * If we're looking for ANY, don't return it in
-			 * case we find something better.
+			 * If this is an NXDOMAIN entry, return NXDOMAIN.
 			 */
-			if (type == Type.ANY)
-				continue;
+			if (elements[i].type == 0)
+				return new SetResponse(SetResponse.NXDOMAIN);
+
 			/*
-			 * If not, and we're not looking for a wildcard,
-			 * try that instead.
+			 * If we're not looking for type ANY, return NXRRSET.
+			 * Otherwise ignore this.
 			 */
-			if (!name.isWild()) {
-				cr = lookupRecords(name.wild(1), type, minCred);
-				if (cr.isSuccessful())
-					return cr;
+			if (type != Type.ANY)
+				return new SetResponse(SetResponse.NXRRSET);
+			else
+				continue;
+		}
+
+		if (name.equals(rrset.getName())) {
+			if (type != Type.CNAME && type != Type.ANY &&
+			    rrset.getType() == Type.CNAME)
+			{
+				cr = new SetResponse(SetResponse.CNAME);
+				cr.addCNAME((CNAMERecord) rrset.first());
+				return cr;
 			}
-			return new SetResponse(SetResponse.NEGATIVE);
+			else {
+				if (cr == null)
+					cr = new SetResponse
+						(SetResponse.SUCCESSFUL);
+				cr.addRRset(rrset);
+			}
 		}
-
-		/*
-		 * Found a CNAME when we weren't looking for one.  Time
-		 * to recurse.
-		 */
-		if (type != Type.CNAME && type != Type.ANY &&
-		    rrset.getType() == Type.CNAME)
-		{
-			CNAMERecord cname = (CNAMERecord) rrset.first();
-			cr = lookupRecords(cname.getTarget(), type, minCred);
-			if (cr.isUnknown())
-				cr.set(SetResponse.PARTIAL, cname);
-			cr.addCNAME(cname);
-			return cr;
+		else {
+			if (rrset.getType() == Type.CNAME)
+				return new SetResponse(SetResponse.NXDOMAIN);
+			else if (rrset.getType() == Type.DNAME) {
+				cr = new SetResponse(SetResponse.DNAME);
+				cr.addDNAME((DNAMERecord)rrset.first());
+				return cr;
+			}
+			else if (rrset.getType() == Type.NS) {
+				cr = new SetResponse(SetResponse.DELEGATION);
+				cr.addNS(rrset);
+				return cr;
+			}
 		}
-
-		/* If we found something, save it */
-		if (cr == null)
-			cr = new SetResponse(SetResponse.SUCCESSFUL);
-		cr.addRRset(rrset);	
 	}
 
 	/*
 	 * As far as I can tell, the only time cr will be null is if we
-	 * queried for ANY and only saw negative responses.  So, return
-	 * NEGATIVE.
+	 * queried for ANY and only saw negative responses, but not an
+	 * NXDOMAIN.  Return UNKNOWN.
 	 */
 	if (cr == null && type == Type.ANY)
-		return new SetResponse(SetResponse.NEGATIVE);
+		return new SetResponse(SetResponse.UNKNOWN);
 	return cr;
 }
 
@@ -441,7 +470,7 @@ addMessage(Message in) {
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
 			if (ancount == 0)
-				c.addNegative(queryName, queryType,
+				c.addNegative(rcode, queryName, queryType,
 					      ttl, cred, in);
 			else {
 				Record [] cnames;
@@ -449,7 +478,7 @@ addMessage(Message in) {
 				int last = cnames.length - 1;
 				Name cname;
 				cname = ((CNAMERecord)cnames[last]).getTarget();
-				c.addNegative(cname, queryType,
+				c.addNegative(rcode, cname, queryType,
 					      ttl, cred, in);
 			}
 		}

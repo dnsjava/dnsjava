@@ -157,11 +157,16 @@ getCache() {
 }
 
 private static Record []
-lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
+lookup(Name name, short type, short dclass, byte cred, int iterations,
+       boolean querysent)
+{
 	Cache cache;
 	Record [] answers;
 	int answerCount = 0, n = 0;
 	Enumeration e;
+
+	if (iterations > 6)
+		return null;
 
 	if (Options.check("verbose"))
 		System.err.println("lookup " + name + " " + Type.string(type));
@@ -185,8 +190,18 @@ lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
 			}
 		}
 	}
-	else if (cached.isNegative()) {
+	else if (cached.isNXDOMAIN() || cached.isNXRRSET()) {
 		return null;
+	}
+	else if (cached.isCNAME()) {
+		CNAMERecord cname = cached.getCNAME();
+		return lookup(cname.getTarget(), type, dclass, cred,
+			      ++iterations, false);
+	}
+	else if (cached.isDNAME()) {
+		DNAMERecord dname = cached.getDNAME();
+		return lookup(name.fromDNAME(dname), type, dclass, cred,
+			      ++iterations, false);
 	}
 	else if (querysent) {
 		return null;
@@ -210,7 +225,7 @@ lookup(Name name, short type, short dclass, byte cred, boolean querysent) {
 		if (rcode != Rcode.NOERROR)
 			return null;
 
-		return lookup(name, type, dclass, cred, true);
+		return lookup(name, type, dclass, cred, iterations, true);
 	}
 
 	return answers;
@@ -236,11 +251,11 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 
 	initialize();
 	if (searchPath == null || name.isQualified())
-		answers = lookup(name, type, dclass, cred, false);
+		answers = lookup(name, type, dclass, cred, 0, false);
 	else {
 		for (int i = 0; i < searchPath.length; i++) {
 			answers = lookup(new Name(namestr, searchPath[i]),
-					 type, dclass, cred, false);
+					 type, dclass, cred, 0, false);
 			if (answers != null)
 				break;
 		}

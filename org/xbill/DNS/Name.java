@@ -33,6 +33,10 @@ public static Name root = new Name(".");
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 256;
 
+private
+Name() {
+}
+
 /**
  * Create a new name from a string and an origin
  * @param s  The string to be converted
@@ -224,6 +228,32 @@ wild(int n) {
 	Name wild = new Name(this, n - 1);
 	wild.name[0] = "*";
 	return wild;
+}
+
+/**
+ * Generates a new Name to be used when following a DNAME.
+ * @return The new name, or null if the DNAME is invalid.
+ */
+public Name
+fromDNAME(DNAMERecord dname) {
+	Name dnameowner = dname.getName();
+	Name dnametarget = dname.getTarget();
+	int nlabels;
+	int saved;
+	if (!subdomain(dnameowner))
+		return null;
+	saved = labels - dnameowner.labels;
+	nlabels = saved + dnametarget.labels;
+	if (nlabels > MAXLABELS)
+		return null;
+	Name newname = new Name();
+	newname.labels = (byte)nlabels;
+	newname.name = new Object[labels];
+	System.arraycopy(this.name, 0, newname.name, 0, saved);
+	System.arraycopy(dnametarget.name, 0, newname.name, saved,
+			 dnametarget.labels);
+	newname.qualified = true;
+	return newname;
 }
 
 /**

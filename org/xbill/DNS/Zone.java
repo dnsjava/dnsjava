@@ -105,7 +105,7 @@ validate() throws IOException {
  */
 public
 Zone(String file, Cache cache) throws IOException {
-	super();
+	super(false);
 	type = PRIMARY;
 	Master m = new Master(file);
 	
@@ -114,8 +114,16 @@ Zone(String file, Cache cache) throws IOException {
 	while ((record = m.nextRecord()) != null) {
 		if (origin == null || record.getName().subdomain(origin)) {
 			addRecord(record);
-			if (origin == null && record.getType() == Type.SOA)
-				origin = record.getName();
+			if (origin == null) {
+				if (record.getType() == Type.SOA) {
+					origin = record.getName();
+					setOrigin(origin);
+				}
+				else {
+					String str = "No SOA at the top of the zone in file " + file;
+					throw new IOException(str);
+				}
+			}
 		}
 		else if (cache != null)
 			cache.addRecord(record, Credibility.ZONE_GLUE, m);
@@ -133,6 +141,7 @@ public
 Zone(Name zone, short _dclass, String remote, Cache cache)
 throws IOException
 {
+	super(false);
 	origin = zone;
 	dclass = _dclass;
 	type = SECONDARY;
@@ -197,47 +206,60 @@ public SetResponse
 findRecords(Name name, short type) {
 	SetResponse zr = null;
 
-	if (findName(name) == null) {
+	Object o = findSets(name, type);
+	if (o == null) {
+		/* The name does not exist */
 		if (name.isWild())
 			return new SetResponse(SetResponse.NXDOMAIN);
-		else {
-			int labels = name.labels() - origin.labels();
-			if (labels == 0)
-				return new SetResponse(SetResponse.NXDOMAIN);
-			SetResponse sr;
-			Name tname = name;
-			do {
-				sr = findRecords(tname.wild(1), type);
-				if (sr.isSuccessful())
-					return sr;
-				tname = new Name(tname, 1);
-			} while (labels-- >= 1);
-			return sr;
-		}
+
+		int labels = name.labels() - origin.labels();
+		if (labels == 0)
+			return new SetResponse(SetResponse.NXDOMAIN);
+		SetResponse sr;
+		Name tname = name;
+		do {
+			sr = findRecords(tname.wild(1), type);
+			if (sr.isSuccessful())
+				return sr;
+			tname = new Name(tname, 1);
+		} while (labels-- >= 1);
+		return sr;
 	}
-	Object [] objects = findSets(name, type);
-	if (objects == null)
-		return new SetResponse(SetResponse.NODATA);
+
+	if (o.getClass() == TypeMap.class) {
+		/* The name exists but the type does not. */
+		return new SetResponse(SetResponse.NXRRSET);
+	}
+
+	Object [] objects = (Object []) o;
 
 	RRset [] rrsets = new RRset[objects.length];
 	System.arraycopy(objects, 0, rrsets, 0, objects.length);
 
-	for (int i = 0; i < rrsets.length; i++) {
-		RRset rrset = rrsets[i];
-
+	RRset rrset = rrsets[0];
+	if (name.equals(rrset.getName())) {
 		if (type != Type.CNAME && type != Type.ANY &&
 		    rrset.getType() == Type.CNAME)
 		{
-			CNAMERecord cname = (CNAMERecord) rrset.first();
-			zr = findRecords(cname.getTarget(), type);
-			if (zr.isNODATA() || zr.isNXDOMAIN())
-				zr.set(SetResponse.PARTIAL, cname);
-			zr.addCNAME(cname);
-			return zr;
+			zr = new SetResponse(SetResponse.CNAME);
+			zr.addCNAME((CNAMERecord) rrset.first());
 		}
-		if (zr == null)
+		else {
 			zr = new SetResponse(SetResponse.SUCCESSFUL);
-		zr.addRRset(rrset);
+			for (int i = 0; i < rrsets.length; i++)
+				zr.addRRset(rrsets[i]);
+		}
+	} else {
+		if (rrset.getType() == Type.CNAME)
+			return new SetResponse(SetResponse.NXDOMAIN);
+		else if (rrset.getType() == Type.DNAME) {
+			zr = new SetResponse(SetResponse.DNAME);
+			zr.addDNAME((DNAMERecord) rrset.first());
+		}
+		else if (rrset.getType() == Type.NS) {
+			zr = new SetResponse(SetResponse.DELEGATION);
+			zr.addNS(rrset);
+		}
 	}
 	return zr;
 }

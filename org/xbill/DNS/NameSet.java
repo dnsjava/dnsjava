@@ -1,5 +1,4 @@
-// Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
-// Portions Copyright (c) 1999 Network Associates, Inc.
+// Copyright (c) 1999-2001 Brian Wellington (bwelling@xbill.org)
 
 package org.xbill.DNS;
 
@@ -8,7 +7,7 @@ import org.xbill.DNS.utils.*;
 
 /**
  * The shared superclass of Zone and Cache.  All names are stored in a
- * hashtable.  Each name contains a hashtable indexed on type and class. 
+ * hashtable.  Each name contains a hashtable indexed by type.
  *
  * @author Brian Wellington
  */
@@ -16,11 +15,22 @@ import org.xbill.DNS.utils.*;
 class NameSet {
 
 private Hashtable data;
+private Name origin;
+private boolean isCache;
 
-/** Creates an empty NameSet */
+/** Creates an empty NameSet for use as a Zone or Cache.  The origin is set
+ * to the root.
+ */
 protected
-NameSet() {
+NameSet(boolean isCache) {
 	data = new Hashtable();
+	this.isCache = isCache;
+}
+
+/** Sets the origin of the NameSet */
+protected void
+setOrigin(Name origin) {
+	this.origin = origin;
 }
 
 /** Deletes all sets in a NameSet */
@@ -30,31 +40,93 @@ clear() {
 }
 
 /**
- * Finds all matching sets.  This traverses CNAMEs, and has provisions for 
- * type/class ANY.
+ * Finds all matching sets or something that causes the lookup to stop.
  */
-protected Object []
+protected Object
 findSets(Name name, short type) {
-	Object [] array;
+	Object bestns = null;
 	Object o;
+	Name tname;
+	int labels;
+	int olabels;
+	int tlabels;
 
-	TypeMap nameInfo = findName(name);
-	if (nameInfo == null) 
+	if (!name.subdomain(origin))
 		return null;
-	while (true) {
-		if (type == Type.ANY)
+	labels = name.labels();
+	olabels = origin.labels();
+
+	for (tlabels = olabels; tlabels <= labels; tlabels++) {
+		if (tlabels == olabels)
+			tname = origin;
+		else if (tlabels == labels)
+			tname = name;
+		else
+			tname = new Name(name, labels - tlabels);
+		TypeMap nameInfo = findName(tname);
+		if (nameInfo == null)
+			continue;
+
+		/* If this is an ANY lookup, return everything. */
+		if (tlabels == labels && type == Type.ANY)
 			return nameInfo.getMultiple(type);
-		else {
+
+		/* If this is the name, look for the actual type. */
+		if (tlabels == labels) {
 			o = nameInfo.get(type);
 			if (o != null)
 				return new Object[] {o};
 		}
-		if (type == Type.CNAME)
-			break;
-		else
-			type = Type.CNAME;
+
+		/* Look for a CNAME */
+		o = nameInfo.get(Type.CNAME);
+		if (o != null) {
+			if (labels == tlabels)
+				return new Object[] {o};
+			else
+				return null;
+		}
+
+		/* Look for a DNAME, unless this is the actual name */
+		if (tlabels < labels) {
+			o = nameInfo.get(Type.DNAME);
+			if (o != null)
+				return new Object[] {o};
+		}
+
+		/* Look for an NS */
+		if (tlabels > olabels || isCache) {
+			o = nameInfo.get(Type.NS);
+			if (o != null) {
+				if (isCache)
+					bestns = o;
+				else
+					return new Object[] {o};
+			}
+		}
+
+		/*
+		 * If this is the name and this is a cache, look for an
+		 * NXDOMAIN entry.
+		 */
+		if (tlabels == labels && isCache) {
+			o = nameInfo.get((short)0);
+			if (o != null)
+				return new Object[] {o};
+		}
+
+		/*
+		 * If this is the name and we haven't matched anything,
+		 * just return the name.
+		 */
+		if (tlabels == labels)
+			return nameInfo;
 	}
-	return null;
+
+	if (bestns == null)
+		return null;
+	else
+		return new Object[] {bestns};
 }
 
 /**
@@ -92,7 +164,7 @@ addSet(Name name, short type, Object set) {
 }
 
 /**
- * Removes the given set from the name/type/class.  The data contained in the
+ * Removes the given set with the name and type.  The data contained in the
  * set is abstract.
  */
 protected void
