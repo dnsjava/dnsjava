@@ -225,6 +225,9 @@ update(InputStream in) throws IOException {
 			else
 				print("invalid keyword: " + operation);
 		}
+		catch (TextParseException tpe) {
+			System.out.println(tpe.getMessage());
+		}
 		catch (NullPointerException npe) {
 			System.out.println("Parse error");
 		}
