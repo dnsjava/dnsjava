@@ -275,9 +275,6 @@ byte [] rrToWireCanonical() throws IOException {
 
 public boolean
 equals(Object arg) {
-System.out.println("in Record.equals()");
-System.out.println("1: " + this);
-System.out.println("2: " + arg);
 	if (arg == null || !(arg instanceof Record))
 		return false;
 	Record r = (Record) arg;
@@ -298,7 +295,6 @@ System.out.println("2: " + arg);
 
 public int
 hashCode() {
-System.out.println("in Record.hashcode()");
 	try {
 		byte [] array1 = toWire(Section.ANSWER);
 		return array1.hashCode();
