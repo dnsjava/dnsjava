@@ -16,10 +16,22 @@ import org.xbill.DNS.utils.*;
 
 public class ARecord extends Record {
 
+private static ARecord member = new ARecord();
+
 private byte [] addr;
 
 private
 ARecord() {}
+
+private
+ARecord(Name name, short dclass, int ttl) {
+	super(name, Type.A, dclass, ttl);
+}
+
+static ARecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an A Record from the given data
@@ -33,43 +45,51 @@ throws IOException
 	addr = _address.getAddress();
 }
 
-ARecord(Name _name, short _dclass, int _ttl, int length,
-	DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.A, _dclass, _ttl);
+	ARecord rec = new ARecord(name, dclass, ttl);
 
 	if (in == null)
-		return;
+		return rec;
 
-	addr = new byte[4];
+	rec.addr = new byte[4];
 	in.read(addr);
+	return rec;
 }
 
-ARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.A, _dclass, _ttl);
+	ARecord rec = new ARecord(name, dclass, ttl);
 	String s = st.nextToken();
-	if (s.equals("@me@")) {
-		try {
-			InetAddress address = InetAddress.getLocalHost();
+	try {
+		InetAddress address;
+		if (s.equals("@me@")) {
+			address = InetAddress.getLocalHost();
 			if (address.equals(InetAddress.getByName("127.0.0.1")))
 			{
 				String msg = "InetAddress.getLocalHost() is " +
 					     "broken.  Don't use @me@.";
 				throw new RuntimeException(msg);
 			}
+		} else {
+			if (!Address.isDottedQuad(s)) {
+				String error = "invalid dotted quad";
+				throw new TextParseException(error);
+			}
+			address = Address.getByName(s);
 		}
-		catch (UnknownHostException e) {
-			addr = null;
-		}
+		rec.addr = address.getAddress();
 	}
-	else {
-		if (!Address.isDottedQuad(s))
-			throw new IOException("Invalid dotted quad address");
-		addr = InetAddress.getByName(s).getAddress();
+	catch (UnknownHostException e) {
+		throw new TextParseException("invalid address");
 	}
+	return rec;
 }
 
 /** Converts rdata to a String */

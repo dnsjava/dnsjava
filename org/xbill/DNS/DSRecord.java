@@ -20,12 +20,24 @@ public class DSRecord extends Record {
 
 public static final byte SHA1_DIGEST_ID = 1;
 
+private static DSRecord member = new DSRecord();
+
 private int footprint = -1;
 private byte alg;
 private byte digestid = SHA1_DIGEST_ID;
 private byte [] digest;
 
 private DSRecord() {}
+
+private
+DSRecord(Name name, short dclass, int ttl) {
+	super(name, Type.DS, dclass, ttl);
+}
+
+static DSRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates a DS Record from the given data
@@ -45,37 +57,40 @@ DSRecord(Name _name, short _dclass, int _ttl, int _footprint,
 	digest = _digest;
 }
 
-DSRecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.DS, _dclass, _ttl);
+	DSRecord rec = new DSRecord(name, dclass, ttl);
 	if (in == null)
-		return;
+		return rec;
 
-	footprint = in.readShort() & 0xFFFF;
-	alg = in.readByte();
-	digestid = in.readByte();
+	rec.footprint = in.readShort() & 0xFFFF;
+	rec.alg = in.readByte();
+	rec.digestid = in.readByte();
 
 	if (length > 4) {
-		digest = new byte[length - 4];
-		in.read(digest);
+		rec.digest = new byte[length - 4];
+		in.read(rec.digest);
 	}
+	return rec;
 }
 
-DSRecord(Name _name, short _dclass, int _ttl,
-	 MyStringTokenizer st, Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.DS, _dclass, _ttl);
-
-	footprint = Integer.decode(st.nextToken()).intValue();
-	alg = (byte) Integer.parseInt(st.nextToken());
-	digestid = (byte) Integer.parseInt(st.nextToken());
+        DSRecord rec = new DSRecord(name, dclass, ttl);
+	rec.footprint = Integer.decode(st.nextToken()).intValue();
+	rec.alg = (byte) Integer.parseInt(st.nextToken());
+	rec.digestid = (byte) Integer.parseInt(st.nextToken());
 
 	// note that the draft says that the digest is presented as hex,
 	// not base64.
-	digest = base16.fromString(st.remainingTokens());
+	rec.digest = base16.fromString(st.remainingTokens());
+	return rec;
 }
 
 /**

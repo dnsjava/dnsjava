@@ -16,12 +16,24 @@ import org.xbill.DNS.utils.*;
 
 public class A6Record extends Record {
 
+private static A6Record member = new A6Record();
+
 private short prefixBits;
 private Inet6Address suffix;
 private Name prefix;
 
 private
 A6Record() {}
+
+private
+A6Record(Name name, short dclass, int ttl) {
+        super(name, Type.A6, dclass, ttl);
+}
+
+static A6Record
+getMember() {
+        return member;
+}
 
 /**
  * Creates an A6 Record from the given data
@@ -40,33 +52,38 @@ throws IOException
 	prefix = _prefix;
 }
 
-A6Record(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.A6, _dclass, _ttl);
+	A6Record rec = new A6Record(name, dclass, ttl);
 
 	if (in == null)
-		return;
+		return rec;
 
-	prefixBits = in.readByte();
+	rec.prefixBits = in.readByte();
 	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
 	byte [] data = new byte[suffixbytes];
 	in.read(data);
-	suffix = new Inet6Address(128 - prefixBits, data);
-	if (prefixBits > 0)
-		prefix = new Name(in);
+	rec.suffix = new Inet6Address(128 - prefixBits, data);
+	if (rec.prefixBits > 0)
+		rec.prefix = new Name(in);
+	return rec;
 }
 
-A6Record(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.A6, _dclass, _ttl);
-	prefixBits = Short.parseShort(st.nextToken());
-	suffix = new Inet6Address(st.nextToken());
-	if (prefixBits > 0)
-		prefix = Name.fromString(st.nextToken(), origin);
+	A6Record rec = new A6Record(name, dclass, ttl);
+	rec.prefixBits = Short.parseShort(st.nextToken());
+	rec.suffix = new Inet6Address(st.nextToken());
+	if (rec.prefixBits > 0)
+		rec.prefix = Name.fromString(st.nextToken(), origin);
+	return rec;
 }
 
 /** Converts rdata to a String */

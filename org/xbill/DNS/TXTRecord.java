@@ -15,7 +15,22 @@ import org.xbill.DNS.utils.*;
 
 public class TXTRecord extends Record {
 
+private static TXTRecord member = new TXTRecord();
+
 private List strings;
+
+private
+TXTRecord() {}
+
+private
+TXTRecord(Name name, short dclass, int ttl) {
+        super(name, Type.TXT, dclass, ttl);
+}
+
+static TXTRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates a TXT Record from the given data
@@ -42,32 +57,36 @@ throws IOException
 	strings.add(_string);
 }
 
-TXTRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.TXT, _dclass, _ttl);
+        TXTRecord rec = new TXTRecord(name, dclass, ttl);
 	if (in == null)
-		return;
+		return rec;
 	int count = 0;
-	strings = new ArrayList();
+	rec.strings = new ArrayList();
         while (count < length) {
                 int len = in.readByte();
                 byte [] b = new byte[len];
                 in.read(b);
                 count += (len + 1);
-                strings.add(new String(b));
+                rec.strings.add(new String(b));
         }
+	return rec;
 }
 
-TXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	  Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.TXT, _dclass, _ttl);
-	strings = new ArrayList();
+	TXTRecord rec = new TXTRecord(name, dclass, ttl);
+	rec.strings = new ArrayList();
 	while (st.hasMoreTokens())
-		strings.add(st.nextToken());
+		rec.strings.add(st.nextToken());
+	return rec;
 }
 
 /** converts to a String */
@@ -80,8 +99,9 @@ rdataToString() {
 			String s = (String) it.next();
 			sb.append("\"");
 			sb.append(s);
+			sb.append("\"");
 			if (it.hasNext())
-				sb.append("\" ");
+				sb.append(" ");
 		}
 	}
 	return sb.toString();

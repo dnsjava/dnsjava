@@ -18,6 +18,8 @@ import org.xbill.DNS.utils.*;
 
 public class TKEYRecord extends Record {
 
+private static TKEYRecord member = new TKEYRecord();
+
 private Name alg;
 private Date timeInception;
 private Date timeExpire;
@@ -39,6 +41,19 @@ public static final short RESOLVERASSIGNED	= 4;
 
 /** The key should be deleted */
 public static final short DELETE		= 5;
+
+private
+TKEYRecord() {}
+
+private
+TKEYRecord(Name name, short dclass, int ttl) {
+        super(name, Type.TKEY, dclass, ttl);
+}
+
+static TKEYRecord
+getMember() {
+        return member;
+}
 
 /**
  * Creates a TKEY Record from the given data.
@@ -68,33 +83,44 @@ TKEYRecord(Name _name, short _dclass, int _ttl, Name _alg,
 	other = _other;
 }
 
-TKEYRecord(Name _name, short _dclass, int _ttl, int length,
-	   DataByteInputStream in) throws IOException
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
+throws IOException
 {
-	super(_name, Type.TKEY, _dclass, _ttl);
+	TKEYRecord rec = new TKEYRecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	alg = new Name(in);
-	timeInception = new Date(1000 * (long)in.readInt());
-	timeExpire = new Date(1000 * (long)in.readInt());
-	mode = in.readShort();
-	error = in.readShort();
+		return rec;
+	rec.alg = new Name(in);
+	rec.timeInception = new Date(1000 * (long)in.readInt());
+	rec.timeExpire = new Date(1000 * (long)in.readInt());
+	rec.mode = in.readShort();
+	rec.error = in.readShort();
 
 	int keylen = in.readUnsignedShort();
 	if (keylen > 0) {
-		key = new byte[keylen];
-		in.read(key);
+		rec.key = new byte[keylen];
+		in.read(rec.key);
 	}
 	else
-		key = null;
+		rec.key = null;
 
 	int otherlen = in.readUnsignedShort();
 	if (otherlen > 0) {
-		other = new byte[otherlen];
-		in.read(other);
+		rec.other = new byte[otherlen];
+		in.read(rec.other);
 	}
 	else
-		other = null;
+		rec.other = null;
+	return rec;
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+                Name origin)
+throws TextParseException
+{
+	throw new TextParseException("no text format defined for TKEY");
 }
 
 protected String

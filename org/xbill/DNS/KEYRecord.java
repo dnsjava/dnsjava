@@ -17,6 +17,8 @@ import org.xbill.DNS.utils.*;
 
 public class KEYRecord extends Record {
 
+private static KEYRecord member = new KEYRecord();
+
 private short flags;
 private byte proto, alg;
 private byte [] key;
@@ -60,6 +62,16 @@ public static final int PROTOCOL_ANY = 255;
 private
 KEYRecord() {}
 
+private
+KEYRecord(Name name, short dclass, int ttl) {
+	super(name, Type.KEY, dclass, ttl);
+}
+
+static KEYRecord
+getMember() {
+	return member;
+}
+
 /**
  * Creates a KEY Record from the given data
  * @param flags Flags describing the key's properties
@@ -78,35 +90,39 @@ KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
 	key = _key;
 }
 
-KEYRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.KEY, _dclass, _ttl);
+	KEYRecord rec = new KEYRecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	flags = in.readShort();
-	proto = in.readByte();
-	alg = in.readByte();
+		return rec;
+	rec.flags = in.readShort();
+	rec.proto = in.readByte();
+	rec.alg = in.readByte();
 	if (length > 4) {
-		key = new byte[length - 4];
-		in.read(key);
+		rec.key = new byte[length - 4];
+		in.read(rec.key);
 	}
+	return rec;
 }
 
-KEYRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	  Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.KEY, _dclass, _ttl);
-	flags = (short) Integer.decode(st.nextToken()).intValue();
-	proto = (byte) Integer.parseInt(st.nextToken());
-	alg = (byte) Integer.parseInt(st.nextToken());
+	KEYRecord rec = new KEYRecord(name, dclass, ttl);
+	rec.flags = (short) Integer.decode(st.nextToken()).intValue();
+	rec.proto = (byte) Integer.parseInt(st.nextToken());
+	rec.alg = (byte) Integer.parseInt(st.nextToken());
 	/* If this is a null key, there's no key data */
 	if (!((flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
-		key = base64.fromString(st.remainingTokens());
+		rec.key = base64.fromString(st.remainingTokens());
 	else
-		key = null;
+		rec.key = null;
+	return rec;
 }
 
 /**

@@ -15,8 +15,20 @@ import org.xbill.DNS.utils.*;
 
 public class DNAMERecord extends NS_CNAME_PTRRecord {
 
+private static DNAMERecord member = new DNAMERecord();
+
 private
 DNAMERecord() {}
+
+private
+DNAMERecord(Name name, short dclass, int ttl) {
+	super(name, Type.DNAME, dclass, ttl);
+}
+
+static DNAMERecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates a new DNAMERecord with the given data
@@ -29,17 +41,20 @@ throws IOException
         super(_name, Type.DNAME, _dclass, _ttl, _target);
 }
 
-DNAMERecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in) throws IOException
-{
-	super(_name, Type.DNAME, _dclass, _ttl, length, in);
-}
-
-DNAMERecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	       Name origin)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.DNAME, _dclass, _ttl, st, origin);
+	return rrFromWire(new DNAMERecord(name, dclass, ttl), in);
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+                Name origin)
+throws TextParseException
+{
+	return rdataFromString(new DNAMERecord(name, dclass, ttl), st, origin);
 }
 
 }

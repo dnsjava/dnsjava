@@ -16,30 +16,46 @@ import org.xbill.DNS.utils.*;
 
 public class UNKRecord extends Record {
 
+private static UNKRecord member = new UNKRecord();
+
 private byte [] data;
 
 private
 UNKRecord() {}
 
-UNKRecord(Name _name, short _type, short _dclass, int _ttl, int length,
-	  DataByteInputStream in) throws IOException
-{
-	super(_name, _type, _dclass, _ttl);
-	if (in == null)
-		return;
-	if (length > 0) {
-		data = new byte[length];
-		in.read(data);
-	}
-	else
-		data = null;
+private
+UNKRecord(Name name, short type, short dclass, int ttl) {
+	super(name, type, dclass, ttl);
 }
 
-UNKRecord(Name _name, short _type, short _dclass, int _ttl,
-	  MyStringTokenizer st, Name origin) throws IOException
+static UNKRecord
+getMember() {
+        return member;
+}
+
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
+throws IOException
 {
-	super(_name, _type, _dclass, _ttl);
-	throw new IOException("Invalid unknown RR encoding");
+	UNKRecord rec = new UNKRecord(name, type, dclass, ttl);
+	if (in == null)
+		return rec;
+	if (length > 0) {
+		rec.data = new byte[length];
+		in.read(rec.data);
+	}
+	else
+		rec.data = null;
+	return rec;
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
+{
+	throw new TextParseException("Invalid unknown RR encoding");
 }
 
 /** Converts this Record to the String "unknown format" */

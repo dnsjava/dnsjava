@@ -20,6 +20,8 @@ import org.xbill.DNS.utils.*;
 
 public class TSIGRecord extends Record {
 
+private static TSIGRecord member = new TSIGRecord();
+
 private Name alg;
 private Date timeSigned;
 private short fudge;
@@ -27,6 +29,19 @@ private byte [] signature;
 private int originalID;
 private short error;
 private byte [] other;
+
+private
+TSIGRecord() {} 
+
+private
+TSIGRecord(Name name, short dclass, int ttl) {
+        super(name, Type.TSIG, dclass, ttl);
+}
+
+static TSIGRecord
+getMember() {
+        return member;
+}
 
 /**
  * Creates a TSIG Record from the given data.  This is normally called by
@@ -58,35 +73,46 @@ TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,
 	other = _other;
 }
 
-TSIGRecord(Name _name, short _dclass, int _ttl, int length,
-	   DataByteInputStream in) throws IOException
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
+throws IOException
 {
-	super(_name, Type.TSIG, _dclass, _ttl);
+	TSIGRecord rec = new TSIGRecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	alg = new Name(in);
+		return rec;
+	rec.alg = new Name(in);
 
 	short timeHigh = in.readShort();
 	int timeLow = in.readInt();
 	long time = ((long)timeHigh & 0xFFFF) << 32;
 	time += (long)timeLow & 0xFFFFFFFF;
-	timeSigned = new Date(time * 1000);
-	fudge = in.readShort();
+	rec.timeSigned = new Date(time * 1000);
+	rec.fudge = in.readShort();
 
 	int sigLen = in.readUnsignedShort();
-	signature = new byte[sigLen];
-	in.read(signature);
+	rec.signature = new byte[sigLen];
+	in.read(rec.signature);
 
-	originalID = in.readUnsignedShort();
-	error = in.readShort();
+	rec.originalID = in.readUnsignedShort();
+	rec.error = in.readShort();
 
 	int otherLen = in.readUnsignedShort();
 	if (otherLen > 0) {
-		other = new byte[otherLen];
-		in.read(other);
+		rec.other = new byte[otherLen];
+		in.read(rec.other);
 	}
 	else
-		other = null;
+		rec.other = null;
+	return rec;
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+                Name origin)
+throws TextParseException
+{
+	throw new TextParseException("no text format defined for TSIG");
 }
 
 /** Converts rdata to a String */

@@ -13,13 +13,18 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class MX_KXRecord extends Record {
+abstract public class MX_KXRecord extends Record {
 
 private short priority;
 private Name target;
 
 protected
 MX_KXRecord() {}
+
+protected
+MX_KXRecord(Name name, short type, short dclass, int ttl) {
+        super(name, type, dclass, ttl);
+}
 
 public
 MX_KXRecord(Name _name, short _type, short _dclass, int _ttl, int _priority,
@@ -30,26 +35,24 @@ MX_KXRecord(Name _name, short _type, short _dclass, int _ttl, int _priority,
 	target = _target;
 }
 
-protected
-MX_KXRecord(Name _name, short _type, short _dclass, int _ttl,
-	    int length, DataByteInputStream in)
+protected Record
+rrFromWire(MX_KXRecord rec, DataByteInputStream in)
 throws IOException
 {
-	super(_name, _type, _dclass, _ttl);
 	if (in == null)
-		return;
-	priority = (short) in.readUnsignedShort();
-	target = new Name(in);
+		return rec;
+	rec.priority = (short) in.readUnsignedShort();
+	rec.target = new Name(in);
+	return rec;
 }
 
-protected
-MX_KXRecord(Name _name, short _type, short _dclass, int _ttl,
-	    MyStringTokenizer st, Name origin)
-throws IOException
+protected Record
+rdataFromString(MX_KXRecord rec, MyStringTokenizer st, Name origin)
+throws TextParseException
 {
-	super(_name, _type, _dclass, _ttl);
-	priority = Short.parseShort(st.nextToken());
-	target = Name.fromString(st.nextToken(), origin);
+	rec.priority = Short.parseShort(st.nextToken());
+	rec.target = Name.fromString(st.nextToken(), origin);
+	return rec;
 }
 
 /** Converts rdata to a String */

@@ -21,6 +21,8 @@ import org.xbill.DNS.utils.*;
 
 public class SIGRecord extends Record {
 
+private static SIGRecord member = new SIGRecord();
+
 private short covered;
 private byte alg, labels;
 private int origttl;
@@ -31,6 +33,16 @@ private byte [] signature;
 
 private
 SIGRecord() {}
+
+private
+SIGRecord(Name name, short dclass, int ttl) {
+	super(name, Type.SIG, dclass, ttl);
+}
+
+static SIGRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an SIG Record from the given data
@@ -61,44 +73,48 @@ SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
 	signature = _signature;
 }
 
-SIGRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.SIG, _dclass, _ttl);
+	SIGRecord rec = new SIGRecord(name, dclass, ttl);
 	if (in == null)
-		return;
+		return rec;
 	int start = in.getPos();
-	covered = in.readShort();
-	alg = in.readByte();
-	labels = in.readByte();
-	origttl = in.readInt();
-	expire = new Date(1000 * (long)in.readInt());
-	timeSigned = new Date(1000 * (long)in.readInt());
-	footprint = in.readShort();
-	signer = new Name(in);
-	signature = new byte[length - (in.getPos() - start)];
-	in.read(signature);
+	rec.covered = in.readShort();
+	rec.alg = in.readByte();
+	rec.labels = in.readByte();
+	rec.origttl = in.readInt();
+	rec.expire = new Date(1000 * (long)in.readInt());
+	rec.timeSigned = new Date(1000 * (long)in.readInt());
+	rec.footprint = in.readShort();
+	rec.signer = new Name(in);
+	rec.signature = new byte[length - (in.getPos() - start)];
+	in.read(rec.signature);
+	return rec;
 }
 
-SIGRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.SIG, _dclass, _ttl);
-	covered = Type.value(st.nextToken());
-	alg = Byte.parseByte(st.nextToken());
+        SIGRecord rec = new SIGRecord(name, dclass, ttl);
+	rec.covered = Type.value(st.nextToken());
+	rec.alg = Byte.parseByte(st.nextToken());
 	if (Options.check("2065sig"))
-		labels = name.labels();
+		rec.labels = name.labels();
 	else
-		labels = Byte.parseByte(st.nextToken());
-	origttl = TTL.parseTTL(st.nextToken());
-	expire = parseDate(st.nextToken());
-	timeSigned = parseDate(st.nextToken());
-	footprint = (short) Integer.parseInt(st.nextToken());
-	signer = Name.fromString(st.nextToken(), origin);
+		rec.labels = Byte.parseByte(st.nextToken());
+	rec.origttl = TTL.parseTTL(st.nextToken());
+	rec.expire = parseDate(st.nextToken());
+	rec.timeSigned = parseDate(st.nextToken());
+	rec.footprint = (short) Integer.parseInt(st.nextToken());
+	rec.signer = Name.fromString(st.nextToken(), origin);
 	if (st.hasMoreTokens())
-		signature = base64.fromString(st.remainingTokens());
+		rec.signature = base64.fromString(st.remainingTokens());
+	return rec;
 }
 
 /** Converts rdata to a String */

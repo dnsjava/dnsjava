@@ -24,10 +24,22 @@ import org.xbill.DNS.utils.*;
 
 public class OPTRecord extends Record {
 
+private static OPTRecord member = new OPTRecord();
+
 private Map options;
 
 private
 OPTRecord() {}
+
+private
+OPTRecord(Name name, short dclass, int ttl) {
+	super(name, Type.OPT, dclass, ttl);
+}
+
+static OPTRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an OPT Record with no data.  This is normally called by
@@ -49,13 +61,14 @@ OPTRecord(short payloadSize, byte xrcode, byte version) {
 	this(payloadSize, xrcode, version, 0);
 }
 
-OPTRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.OPT, _dclass, _ttl);
+	OPTRecord rec = new OPTRecord(name, dclass, ttl);
 	if (in == null)
-		return;
+		return rec;
 	int count = 0;
 	if (count < length)
 		options = new HashMap();
@@ -67,6 +80,15 @@ throws IOException
 		count += (4 + len);
 		options.put(new Integer(code), data);
 	}
+	return rec;
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+                Name origin)
+throws TextParseException
+{
+	throw new TextParseException("no text format defined for OPT");
 }
 
 /** Converts rdata to a String */

@@ -18,11 +18,23 @@ import org.xbill.DNS.utils.*;
 
 public class NXTRecord extends Record {
 
+private static NXTRecord member = new NXTRecord();
+
 private Name next;
 private BitSet bitmap;
 
 private
 NXTRecord() {}
+
+private
+NXTRecord(Name name, short dclass, int ttl) {
+	super(name, Type.NXT, dclass, ttl);
+}
+
+static NXTRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an NXT Record from the given data
@@ -36,37 +48,41 @@ NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
 	bitmap = _bitmap;
 }
 
-NXTRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.NXT, _dclass, _ttl);
+	NXTRecord rec = new NXTRecord(name, dclass, ttl);
 	if (in == null)
-		return;
+		return rec;
 	int start = in.getPos();
-	next = new Name(in);
-	bitmap = new BitSet();
+	rec.next = new Name(in);
+	rec.bitmap = new BitSet();
 	int bitmapLength = length - (in.getPos() - start);
 	for (int i = 0; i < bitmapLength; i++) {
 		int t = in.readUnsignedByte();
 		for (int j = 0; j < 8; j++)
 			if ((t & (1 << (7 - j))) != 0)
-				bitmap.set(i * 8 + j);
+				rec.bitmap.set(i * 8 + j);
 	}
+	return rec;
 }
 
-NXTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	  Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.NXT, _dclass, _ttl);
-	next = Name.fromString(st.nextToken(), origin);
-	bitmap = new BitSet();
+	NXTRecord rec = new NXTRecord(name, dclass, ttl);
+	rec.next = Name.fromString(st.nextToken(), origin);
+	rec.bitmap = new BitSet();
 	while (st.hasMoreTokens()) {
 		short t = Type.value(st.nextToken());
 		if (t > 0)
-			bitmap.set(t);
+			rec.bitmap.set(t);
 	}
+	return rec;
 }
 
 /** Converts rdata to a String */

@@ -15,11 +15,23 @@ import org.xbill.DNS.utils.*;
 
 public class NAPTRRecord extends Record {
 
+private static NAPTRRecord member = new NAPTRRecord();
+
 private short order, preference;
 private String flags, service, regexp;
 private Name replacement;
 
 private NAPTRRecord() {}
+
+private
+NAPTRRecord(Name name, short dclass, int ttl) {
+	super(name, Type.NAPTR, dclass, ttl);
+}
+
+static NAPTRRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an NAPTR Record from the given data
@@ -49,34 +61,36 @@ NAPTRRecord(Name _name, short _dclass, int _ttl, int _order, int _preference,
 				   this.toString());
 }
 
-NAPTRRecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.NAPTR, _dclass, _ttl);
-	if (in == null) return;
-	order = (short) in.readUnsignedShort();
-	preference = (short) in.readUnsignedShort();
-	flags = in.readString();
-	service = in.readString();
-	regexp = in.readString();
-	replacement = new Name(in);
+        NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
+	if (in == null)
+		return rec;
+	rec.order = (short) in.readUnsignedShort();
+	rec.preference = (short) in.readUnsignedShort();
+	rec.flags = in.readString();
+	rec.service = in.readString();
+	rec.regexp = in.readString();
+	rec.replacement = new Name(in);
+	return rec;
 }
 
-NAPTRRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	    Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.NAPTR, _dclass, _ttl);
-	order = Short.parseShort(st.nextToken());
-	preference = Short.parseShort(st.nextToken());
-	flags = st.nextToken();
-	service = st.nextToken();
-	regexp = st.nextToken();
-	replacement = Name.fromString(st.nextToken(), origin);
-	if (Options.check("verbose"))
-		System.err.println(" NAPTR MyStringTokenizer Constructor: " +
-				   this.toString());
+	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
+	rec.order = Short.parseShort(st.nextToken());
+	rec.preference = Short.parseShort(st.nextToken());
+	rec.flags = st.nextToken();
+	rec.service = st.nextToken();
+	rec.regexp = st.nextToken();
+	rec.replacement = Name.fromString(st.nextToken(), origin);
+	return rec;
 }
 
 /** Converts rdata to a String */

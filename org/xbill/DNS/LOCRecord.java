@@ -16,11 +16,23 @@ import org.xbill.DNS.utils.*;
 
 public class LOCRecord extends Record {
 
+private static LOCRecord member = new LOCRecord();
+
 private long size, hPrecision, vPrecision;
 private int latitude, longitude, altitude;
 
 private
 LOCRecord() {}
+
+private
+LOCRecord(Name name, short dclass, int ttl) {
+	super(name, Type.LOC, dclass, ttl);
+}
+
+static LOCRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an LOC Record from the given data
@@ -46,32 +58,35 @@ throws IOException
 	vPrecision = (long)(_vPrecision * 100);
 }
 
-LOCRecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.LOC, _dclass, _ttl);
+	LOCRecord rec = new LOCRecord(name, dclass, ttl);
 	if (in == null)
-		return;
+		return rec;
 	int version, temp;
 
 	version = in.readByte();
 	if (version != 0)
 		throw new WireParseException("Invalid LOC version");
 
-	size = parseLOCformat(in.readUnsignedByte());
-	hPrecision = parseLOCformat(in.readUnsignedByte());
-	vPrecision = parseLOCformat(in.readUnsignedByte());
-	latitude = in.readInt();
-	longitude = in.readInt();
-	altitude = in.readInt();
+	rec.size = parseLOCformat(in.readUnsignedByte());
+	rec.hPrecision = parseLOCformat(in.readUnsignedByte());
+	rec.vPrecision = parseLOCformat(in.readUnsignedByte());
+	rec.latitude = in.readInt();
+	rec.longitude = in.readInt();
+	rec.altitude = in.readInt();
+	return rec;
 }
 
-LOCRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.LOC, _dclass, _ttl);
+	LOCRecord rec = new LOCRecord(name, dclass, ttl);
 
 	String s = null;
 	int deg, min;
@@ -92,11 +107,11 @@ throws IOException
 	catch (NumberFormatException e) {
 	}
 	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
-		throw new WireParseException("Invalid LOC latitude");
-	latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
+		throw new TextParseException("Invalid LOC latitude");
+	rec.latitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("S"))
-		latitude = -latitude;
-	latitude += (1 << 31);
+		rec.latitude = -rec.latitude;
+	rec.latitude += (1 << 31);
 	
 	/* Longitude */
 	deg = min = 0;
@@ -113,63 +128,66 @@ throws IOException
 	catch (NumberFormatException e) {
 	}
 	if (!s.equalsIgnoreCase("W") && !s.equalsIgnoreCase("E"))
-		throw new WireParseException("Invalid LOC longitude");
-	longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
+		throw new TextParseException("Invalid LOC longitude");
+	rec.longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
 	if (s.equalsIgnoreCase("W"))
-		longitude = -longitude;
-	longitude += (1 << 31);
+		rec.longitude = -rec.longitude;
+	rec.longitude += (1 << 31);
 
 	/* Altitude */
 	if (!st.hasMoreTokens())
-		return;
+		return rec;
 	s = st.nextToken();
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		altitude = (int)((new Double(s).doubleValue() + 100000) * 100);
+		rec.altitude = (int)((new Double(s).doubleValue() + 100000) *
+				     100);
 	}
 	catch (NumberFormatException e) {
-		throw new WireParseException("Invalid LOC altitude");
+		throw new TextParseException("Invalid LOC altitude");
 	}
 	
 	/* Size */
 	if (!st.hasMoreTokens())
-		return;
+		return rec;
 	s = st.nextToken();
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		size = (int) (100 * new Double(s).doubleValue());
+		rec.size = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
-		throw new WireParseException("Invalid LOC size");
+		throw new TextParseException("Invalid LOC size");
 	}
 	
 	/* Horizontal precision */
 	if (!st.hasMoreTokens())
-		return;
+		return rec;
 	s = st.nextToken();
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		hPrecision = (int) (100 * new Double(s).doubleValue());
+		rec.hPrecision = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
-		throw new WireParseException("Invalid LOC horizontal precision");
+		throw new TextParseException("Invalid LOC horizontal " +
+					     "precision");
 	}
 	
 	/* Vertical precision */
 	if (!st.hasMoreTokens())
-		return;
+		return rec;
 	s = st.nextToken();
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
-		vPrecision = (int) (100 * new Double(s).doubleValue());
+		rec.vPrecision = (int) (100 * new Double(s).doubleValue());
 	}
 	catch (NumberFormatException e) {
-		throw new WireParseException("Invalid LOC vertical precision");
+		throw new TextParseException("Invalid LOC vertical precision");
 	}
+	return rec;
 }
 
 /** Convert to a String */

@@ -17,11 +17,23 @@ import org.xbill.DNS.utils.*;
 
 public class SRVRecord extends Record {
 
+private static SRVRecord member = new SRVRecord();
+
 private short priority, weight, port;
 private Name target;
 
 private
 SRVRecord() {}
+
+private
+SRVRecord(Name name, short dclass, int ttl) {
+	super(name, Type.SRV, dclass, ttl);
+}
+
+static SRVRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an SRV Record from the given data
@@ -43,28 +55,32 @@ SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 	target = _target;
 }
 
-SRVRecord(Name _name, short _dclass, int _ttl,
-	  int length, DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.SRV, _dclass, _ttl);
+	SRVRecord rec = new SRVRecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	priority = (short) in.readUnsignedShort();
-	weight = (short) in.readUnsignedShort();
-	port = (short) in.readUnsignedShort();
-	target = new Name(in);
+		return rec;
+	rec.priority = (short) in.readUnsignedShort();
+	rec.weight = (short) in.readUnsignedShort();
+	rec.port = (short) in.readUnsignedShort();
+	rec.target = new Name(in);
+	return rec;
 }
 
-SRVRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	  Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.SRV, _dclass, _ttl);
-	priority = Short.parseShort(st.nextToken());
-	weight = Short.parseShort(st.nextToken());
-	port = Short.parseShort(st.nextToken());
-	target = Name.fromString(st.nextToken(), origin);
+	SRVRecord rec = new SRVRecord(name, dclass, ttl);
+	rec.priority = Short.parseShort(st.nextToken());
+	rec.weight = Short.parseShort(st.nextToken());
+	rec.port = Short.parseShort(st.nextToken());
+	rec.target = Name.fromString(st.nextToken(), origin);
+	return rec;
 }
 
 /** Converts rdata to a String */

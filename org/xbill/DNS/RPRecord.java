@@ -17,11 +17,23 @@ import org.xbill.DNS.utils.*;
 
 public class RPRecord extends Record {
 
+private static RPRecord member = new RPRecord();
+
 private Name mailbox;
 private Name textDomain;
 
 private
 RPRecord() {}
+
+private
+RPRecord(Name name, short dclass, int ttl) {
+        super(name, Type.RP, dclass, ttl);
+}
+
+static RPRecord
+getMember() {
+        return member;
+}
 
 /**
  * Creates an RP Record from the given data
@@ -35,24 +47,28 @@ RPRecord(Name _name, short _dclass, int _ttl, Name _mailbox, Name _textDomain) {
 	textDomain = _textDomain;
 }
 
-RPRecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.RP, _dclass, _ttl);
+	RPRecord rec = new RPRecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	mailbox = new Name(in);
-	textDomain = new Name(in);
+		return rec;
+	rec.mailbox = new Name(in);
+	rec.textDomain = new Name(in);
+	return rec;
 }
 
-RPRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	 Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-        super(_name, Type.RP, _dclass, _ttl);
+        RPRecord rec = new RPRecord(name, dclass, ttl);
         mailbox = Name.fromString(st.nextToken(), origin);
         textDomain = Name.fromString(st.nextToken(), origin);
+	return rec;
 }
 
 /** Converts the RP Record to a String */

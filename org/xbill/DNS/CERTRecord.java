@@ -32,12 +32,24 @@ public static final int URL = 253;
 /** Object ID (private) */
 public static final int OID = 254;
 
+private static CERTRecord member = new CERTRecord();
+
 private short certType, keyTag;
 private byte alg;
 private byte [] cert;
 
 private
 CERTRecord() {}
+
+private
+CERTRecord(Name name, short dclass, int ttl) {
+	super(name, Type.CERT, dclass, ttl);
+}
+
+static CERTRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates a CERT Record from the given data
@@ -57,31 +69,35 @@ CERTRecord(Name _name, short _dclass, int _ttl, int _certType,
 	cert = _cert;
 }
 
-CERTRecord(Name _name, short _dclass, int _ttl, int length,
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.CERT, _dclass, _ttl);
+	CERTRecord rec = new CERTRecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	certType = in.readShort();
-	keyTag = (short) in.readUnsignedShort();
-	alg = in.readByte();
+		return rec;
+	rec.certType = in.readShort();
+	rec.keyTag = (short) in.readUnsignedShort();
+	rec.alg = in.readByte();
 	if (length > 5) {
-		cert = new byte[length - 5];
-		in.read(cert);
+		rec.cert = new byte[length - 5];
+		in.read(rec.cert);
 	}
+	return rec;
 }
 
-CERTRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	   Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+ 		Name origin)
+throws TextParseException
 {
-	super(_name, Type.CERT, _dclass, _ttl);
-	certType = (short) Integer.parseInt(st.nextToken());
-	keyTag = (short) Integer.parseInt(st.nextToken());
-	alg = (byte) Integer.parseInt(st.nextToken());
-	cert = base64.fromString(st.remainingTokens());
+	CERTRecord rec = new CERTRecord(name, dclass, ttl);
+	rec.certType = (short) Integer.parseInt(st.nextToken());
+	rec.keyTag = (short) Integer.parseInt(st.nextToken());
+	rec.alg = (byte) Integer.parseInt(st.nextToken());
+	rec.cert = base64.fromString(st.remainingTokens());
+	return rec;
 }
 
 /**

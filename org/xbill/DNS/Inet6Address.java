@@ -46,7 +46,7 @@ Inet6Address(int bits, byte [] data) throws IOException
  * Creates an Inet6Address from text format
  */
 public
-Inet6Address(String s) throws IOException
+Inet6Address(String s) throws TextParseException
 {
 	boolean parsev4 = false;
 	List l = new ArrayList();
@@ -67,7 +67,7 @@ Inet6Address(String s) throws IOException
 		if (tokens[i].equals(":")) {
 			if (tokens[i+1].equals(":")) {
 				if (tokens[i+2].equals(":") || range > 0)
-					throw new IOException
+					throw new TextParseException
 						("Invalid IPv6 address");
 				range = j;
 				if (tokens[i+2].equals(""))
@@ -80,21 +80,25 @@ Inet6Address(String s) throws IOException
 		if (tokens[i].indexOf('.') >= 0) {
 			parsev4 = true;
 			if (!tokens[i+1].equals(""))
-				throw new IOException("Invalid IPv6 address");
+				throw new TextParseException
+						("Invalid IPv6 address");
 			break;
 		}
 
 		try {
 			int x = Integer.parseInt(tokens[i], 16);
 			if (x > 0xFFFF)
-				throw new IOException("Invalid IPv6 address");
+				throw new TextParseException
+						("Invalid IPv6 address");
 			if (j > 16 - 2)
-				throw new IOException("Invalid IPv6 address");
+				throw new TextParseException
+						("Invalid IPv6 address");
 			data[j++] = (byte) (x >>> 8);
 			data[j++] = (byte) (x & 0xFF);
 		}
 		catch (NumberFormatException e) {
-			throw new IOException("Invalid IPv6 address");
+			throw new TextParseException
+					("Invalid IPv6 address");
 		}
 		i++;
 	}
@@ -103,13 +107,15 @@ Inet6Address(String s) throws IOException
 		st = new StringTokenizer(tokens[i], ".");
 		for (int k = 0; k < 4; k++) {
 			if (!st.hasMoreTokens())
-				throw new IOException("Invalid IPv6 address");
+				throw new TextParseException
+						("Invalid IPv6 address");
 			String token = st.nextToken();
 			try {
 				data[j++] = (byte) Integer.parseInt(token);
 			}
 			catch (NumberFormatException e) {
-				throw new IOException("Invalid IPv6 address");
+				throw new TextParseException
+						("Invalid IPv6 address");
 			}
 			
 		}
@@ -122,7 +128,7 @@ Inet6Address(String s) throws IOException
 		for (int k = range; k < range + left; k++)
 			data[k] = 0;
 	} else if (j < 16)
-		throw new IOException("Invalid IPv6 address");
+		throw new TextParseException("Invalid IPv6 address");
 }
 
 public byte[]

@@ -15,8 +15,20 @@ import org.xbill.DNS.utils.*;
 
 public class NSRecord extends NS_CNAME_PTRRecord {
 
+private static NSRecord member = new NSRecord();
+
 private
 NSRecord() {}
+
+private
+NSRecord(Name name, short dclass, int ttl) {
+        super(name, Type.NS, dclass, ttl);
+}
+
+static NSRecord
+getMember() {
+        return member;
+}
 
 /** 
  * Creates a new NS Record with the given data
@@ -29,16 +41,20 @@ throws IOException
         super(_name, Type.NS, _dclass, _ttl, _target);
 }
 
-NSRecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in) throws IOException
-{
-	super(_name, Type.NS, _dclass, _ttl, length, in);
-}
-
-NSRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.NS, _dclass, _ttl, st, origin);
+        return rrFromWire(new NSRecord(name, dclass, ttl), in);
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+                Name origin)
+throws TextParseException
+{
+        return rdataFromString(new NSRecord(name, dclass, ttl), st, origin);
 }
 
 }

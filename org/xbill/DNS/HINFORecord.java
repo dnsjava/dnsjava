@@ -15,10 +15,22 @@ import org.xbill.DNS.utils.*;
 
 public class HINFORecord extends Record {
 
+private static HINFORecord member = new HINFORecord();
+
 private String cpu, os;
 
 private
 HINFORecord() {}
+
+private
+HINFORecord(Name name, short dclass, int ttl) {
+	super(name, Type.HINFO, dclass, ttl);
+}
+
+static HINFORecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an HINFO Record from the given data
@@ -33,24 +45,28 @@ HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 	os = _os;
 }
 
-HINFORecord(Name _name, short _dclass, int _ttl, int length,
-	    DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.HINFO, _dclass, _ttl);
+	HINFORecord rec = new HINFORecord(name, dclass, ttl);
 	if (in == null)
-		return;
-	cpu = in.readString();
-	os = in.readString();
+		return rec;
+	rec.cpu = in.readString();
+	rec.os = in.readString();
+	return rec;
 }
 
-HINFORecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	       Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.HINFO, _dclass, _ttl);
-	cpu = st.nextToken();
-	os = st.nextToken();
+	HINFORecord rec = new HINFORecord(name, dclass, ttl);
+	rec.cpu = st.nextToken();
+	rec.os = st.nextToken();
+	return rec;
 }
 
 /**

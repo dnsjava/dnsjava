@@ -13,12 +13,17 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class NS_CNAME_PTRRecord extends Record {
+abstract public class NS_CNAME_PTRRecord extends Record {
 
 private Name target;
 
 protected
 NS_CNAME_PTRRecord() {}
+
+protected
+NS_CNAME_PTRRecord(Name name, short type, short dclass, int ttl) {
+	super(name, type, dclass, ttl);
+}
 
 public
 NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
@@ -28,24 +33,22 @@ NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
 	target = _target;
 }
 
-protected
-NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
-		   int length, DataByteInputStream in)
+protected Record
+rrFromWire(NS_CNAME_PTRRecord rec, DataByteInputStream in)
 throws IOException
 {
-	super(_name, _type, _dclass, _ttl);
 	if (in == null)
-		return;
-	target = new Name(in);
+		return rec;
+	rec.target = new Name(in);
+	return rec;
 }
 
-protected
-NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
-		   MyStringTokenizer st, Name origin)
-throws IOException
+protected Record
+rdataFromString(NS_CNAME_PTRRecord rec, MyStringTokenizer st, Name origin)
+throws TextParseException
 {
-        super(_name, _type, _dclass, _ttl);
-        target = Name.fromString(st.nextToken(), origin);
+        rec.target = Name.fromString(st.nextToken(), origin);
+	return rec;
 }
 
 /** Converts the NS, CNAME, or PTR Record to a String */

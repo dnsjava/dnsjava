@@ -15,8 +15,20 @@ import org.xbill.DNS.utils.*;
 
 public class MXRecord extends MX_KXRecord {
 
+private static MXRecord member = new MXRecord();
+
 private
 MXRecord() {}
+
+private
+MXRecord(Name name, short dclass, int ttl) {
+	super(name, Type.MX, dclass, ttl);
+}
+
+static MXRecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an MX Record from the given data
@@ -30,17 +42,20 @@ MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 	super(_name, Type.MX, _dclass, _ttl, _priority, _target);
 }
 
-MXRecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.MX, _dclass, _ttl, length, in);
+	return rrFromWire(new MXRecord(name, dclass, ttl), in);
 }
 
-MXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+ 		Name origin)
+throws TextParseException
 {
-	super(_name, Type.MX, _dclass, _ttl, st, origin);
+	return rdataFromString(new MXRecord(name, dclass, ttl), st, origin);
 }
 
 }

@@ -9,12 +9,14 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * (old) IPv6 Address Record - maps a domain name to an IPv6 address
+ * IPv6 Address Record - maps a domain name to an IPv6 address
  *
  * @author Brian Wellington
  */
 
 public class AAAARecord extends Record {
+
+private static AAAARecord member = new AAAARecord();
 
 private short prefixBits;
 private Inet6Address address;
@@ -22,6 +24,16 @@ private Name prefix;
 
 private
 AAAARecord() {}
+
+private
+AAAARecord(Name name, short dclass, int ttl) {
+	super(name, Type.AAAA, dclass, ttl);
+}
+
+static AAAARecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an AAAA Record from the given data
@@ -36,25 +48,30 @@ throws IOException
 	address = _address;
 }
 
-AAAARecord(Name _name, short _dclass, int _ttl, int length,
-	 DataByteInputStream in) throws IOException
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
+throws IOException
 {
-	super(_name, Type.AAAA, _dclass, _ttl);
+	AAAARecord rec = new AAAARecord(name, dclass, ttl);
 
 	if (in == null)
-		return;
+		return rec;
 
 	byte [] data = new byte[16];
 	in.read(data);
-	address = new Inet6Address(data);
+	rec.address = new Inet6Address(data);
+	return rec;
 }
 
-AAAARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	   Name origin)
-throws IOException
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
 {
-	super(_name, Type.AAAA, _dclass, _ttl);
-	address = new Inet6Address(st.nextToken());
+	AAAARecord rec = new AAAARecord(name, dclass, ttl);
+	rec.address = new Inet6Address(st.nextToken());
+	return rec;
 }
 
 /** Converts rdata to a String */

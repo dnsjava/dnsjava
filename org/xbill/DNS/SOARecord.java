@@ -15,11 +15,23 @@ import org.xbill.DNS.utils.*;
 
 public class SOARecord extends Record {
 
+private static SOARecord member = new SOARecord();
+
 private Name host, admin;
 private int serial, refresh, retry, expire, minimum;
 
 private
 SOARecord() {}
+
+private
+SOARecord(Name name, short dclass, int ttl) {
+	super(name, Type.SOA, dclass, ttl);
+}
+
+static SOARecord
+getMember() {
+	return member;
+}
 
 /**
  * Creates an SOA Record from the given data
@@ -48,33 +60,38 @@ throws IOException
 	minimum = _minimum;
 }
 
-SOARecord(Name _name, short _dclass, int _ttl, int length,
-	  DataByteInputStream in) throws IOException
-{
-	super(_name, Type.SOA, _dclass, _ttl);
-	if (in == null)
-		return;
-	host = new Name(in);
-	admin = new Name(in);
-	serial = in.readInt();
-	refresh = in.readInt();
-	retry = in.readInt();
-	expire = in.readInt();
-	minimum = in.readInt();
-}
-
-SOARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
-	     Name origin)
+Record
+rrFromWire(Name name, short type, short dclass, int ttl, int length,
+	   DataByteInputStream in)
 throws IOException
 {
-	super(_name, Type.SOA, _dclass, _ttl);
-	host = Name.fromString(st.nextToken(), origin);
-	admin = Name.fromString(st.nextToken(), origin);
-	serial = Integer.parseInt(st.nextToken());
-	refresh = TTL.parseTTL(st.nextToken());
-	retry = TTL.parseTTL(st.nextToken());
-	expire = TTL.parseTTL(st.nextToken());
-	minimum = TTL.parseTTL(st.nextToken());
+	SOARecord rec = new SOARecord(name, dclass, ttl);
+	if (in == null)
+		return rec;
+	rec.host = new Name(in);
+	rec.admin = new Name(in);
+	rec.serial = in.readInt();
+	rec.refresh = in.readInt();
+	rec.retry = in.readInt();
+	rec.expire = in.readInt();
+	rec.minimum = in.readInt();
+	return rec;
+}
+
+Record
+rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
+		Name origin)
+throws TextParseException
+{
+	SOARecord rec = new SOARecord(name, dclass, ttl);
+	rec.host = Name.fromString(st.nextToken(), origin);
+	rec.admin = Name.fromString(st.nextToken(), origin);
+	rec.serial = Integer.parseInt(st.nextToken());
+	rec.refresh = TTL.parseTTL(st.nextToken());
+	rec.retry = TTL.parseTTL(st.nextToken());
+	rec.expire = TTL.parseTTL(st.nextToken());
+	rec.minimum = TTL.parseTTL(st.nextToken());
+	return rec;
 }
 
 /** Convert to a String */

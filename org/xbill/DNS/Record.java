@@ -21,20 +21,9 @@ protected short type, dclass;
 protected int ttl;
 protected int wireLength = -1;
 
-private static final Class [] knownTypes = new Class[256];
-
-private static final Class [] fromWireList =
-				new Class [] {Name.class,
-					      Short.TYPE,
-					      Integer.TYPE,
-					      Integer.TYPE,
-					      DataByteInputStream.class};
-private static final Class [] fromTextList =
-				new Class [] {Name.class,
-					      Short.TYPE,
-					      Integer.TYPE,
-					      MyStringTokenizer.class,
-					      Name.class};
+private static final Record [] knownRecords = new Record[256];
+private static final Class [] emptyClassArray = new Class[0];
+private static final Object [] emptyObjectArray = new Object[0];
 
 protected
 Record() {}
@@ -46,25 +35,46 @@ Record(Name _name, short _type, short _dclass, int _ttl) {
 	ttl = _ttl;
 }
 
-private static final Class
-toClass(short type) throws ClassNotFoundException {
-	/*
-	 * First, see if we've already found this type.
-	 */
-	if (type < 0 || type > 255)
-		throw new ClassNotFoundException();
-	if (knownTypes[type] != null)
-		return knownTypes[type];
-
-	String s = Record.class.toString();
-	/*
-	 * Remove "class " from the beginning, and "Record" from the end.
-	 * Then construct the new class name.
-	 */
-	knownTypes[type] = Class.forName(s.substring(6, s.length() - 6) +
-					 Type.string(type) + "Record");
-	return knownTypes[type];
+private static final Record
+getTypedObject(short type) {
+	if (type < 0 || type > knownRecords.length)
+		return UNKRecord.getMember();
+	if (knownRecords[type] != null)
+		return knownRecords[type];
+	try {
+		String s = Record.class.toString();
+		/*
+		 * Remove "class " from the beginning and "Record" from the end.
+		 * Then construct the new class name.
+		 */
+		Class c = Class.forName(s.substring(6, s.length() - 6) +
+					Type.string(type) + "Record");
+		Method m = c.getDeclaredMethod("getMember", emptyClassArray);
+		knownRecords[type] = (Record) m.invoke(null, emptyObjectArray);
+	}
+	catch (ClassNotFoundException e) {
+		System.out.println(e);
+	}
+	catch (InvocationTargetException e) {
+		System.out.println(e);
+	}
+	catch (NoSuchMethodException e) {
+		System.out.println(e);
+	}
+	catch (IllegalAccessException e) {
+		System.out.println(e);
+	}
+	if (knownRecords[type] == null)
+		knownRecords[type] = UNKRecord.getMember();
+	return knownRecords[type];
 }
+
+/**
+ * Converts the type-specific RR to wire format - must be overriden
+ */
+abstract Record rrFromWire(Name name, short type, short dclass, int ttl,
+			   int length, DataByteInputStream in)
+throws IOException;
 
 private static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
@@ -77,37 +87,8 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	else
 		recstart = in.getPos();
 
-	try {
-		Class rrclass;
-		Constructor m;
-
-		rrclass = toClass(type);
-		m = rrclass.getDeclaredConstructor(fromWireList);
-		rec = (Record) m.newInstance(new Object [] {
-							name,
-							DClass.toShort(dclass),
-							new Integer(ttl),
-							new Integer(length),
-							in
-						});
-	}
-	catch (ClassNotFoundException e) {
-		rec = new UNKRecord(name, type, dclass, ttl, length, in);
-	}
-	catch (InvocationTargetException e) {
-		if (e.getTargetException() instanceof IOException)
-			throw (IOException) e.getTargetException();
-		if (Options.check("verbose")) {
-			System.err.println("new record: " + e);
-			System.err.println(e.getTargetException());
-		}
-		return null;
-	}
-	catch (Exception e) {
-		if (Options.check("verbose"))
-			System.err.println("new record: " + e);
-		return null;
-	}
+	rec = getTypedObject(type);
+	rec = rec.rrFromWire(name, type, dclass, ttl, length, in);
 	if (in != null && in.getPos() - recstart != length)
 		throw new IOException("Invalid record length");
 	rec.wireLength = length;
@@ -308,6 +289,14 @@ toString() {
 }
 
 /**
+ * Converts the text format of an RR to the internal format - must be overriden
+ */
+abstract Record
+rdataFromString(Name name, short dclass, int ttl,
+	        MyStringTokenizer st, Name origin)
+throws TextParseException;
+
+/**
  * Builds a new Record from its textual representation
  * @param name The owner name of the record.
  * @param type The record's type.
@@ -340,36 +329,8 @@ throws IOException
 	}
 	st.putBackToken(s);
 
-	try {
-		Class rrclass;
-		Constructor m;
-
-		rrclass = toClass(type);
-		m = rrclass.getDeclaredConstructor(fromTextList);
-		rec = (Record) m.newInstance(new Object [] {
-						name,
-						DClass.toShort(dclass),
-						new Integer(ttl),
-						st, origin
-					     });
-		return rec;
-	}
-	catch (ClassNotFoundException e) {
-		rec = new UNKRecord(name, type, dclass, ttl, st, origin);
-		return rec;
-	}
-	catch (InvocationTargetException e) {
-		if (Options.check("verbose")) {
-			System.err.println("from text: " + e);
-			System.err.println(e.getTargetException());
-		}
-		return null;
-	}
-	catch (Exception e) {
-		if (Options.check("verbose"))
-			System.err.println("from text: " + e);
-		return null;
-	}
+	rec = getTypedObject(type);
+	return rec.rdataFromString(name, dclass, ttl, st, origin);
 }
 
 /**
