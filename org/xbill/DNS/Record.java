@@ -589,7 +589,7 @@ Record
 withDClass(int dclass, int ttl) {
 	Record rec = cloneRecord();
 	rec.dclass = dclass;
-	rec.ttl = 0;
+	rec.ttl = ttl;
 	return rec;
 }
 
