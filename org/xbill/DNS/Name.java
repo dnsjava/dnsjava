@@ -494,7 +494,6 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 			out.writeString((byte []) name[i]);
 		}
 	}
-	out.writeByte(0);
 }
 
 /**
