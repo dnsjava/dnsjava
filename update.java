@@ -8,11 +8,6 @@ import DNS.*;
 
 public class update {
 
-static final int ZONE = Section.QUESTION;
-static final int PREREQ = Section.ANSWER;
-static final int UPDATE = Section.AUTHORITY;
-static final int ADDITIONAL = Section.ADDITIONAL;
-
 Message query, response;
 Resolver res;
 String server = "localhost";
@@ -180,11 +175,11 @@ update(InputStream in) throws IOException {
 
 void
 sendUpdate() throws IOException {
-	if (query.getHeader().getCount(ZONE) == 0) {
+	if (query.getHeader().getCount(Section.ZONE) == 0) {
 		Name zone = origin;
 		short dclass = defaultClass;
 		if (zone == null) {
-			Enumeration updates = query.getSection(UPDATE);
+			Enumeration updates = query.getSection(Section.UPDATE);
 			if (updates == null) {
 				print("Invalid update");
 				return;
@@ -194,7 +189,7 @@ sendUpdate() throws IOException {
 			dclass = r.getDClass();
 		}
 		Record soa = Record.newRecord(zone, Type.SOA, dclass);
-		query.addRecord(ZONE, soa);
+		query.addRecord(Section.ZONE, soa);
 	}
 
 	response = res.send(query);
@@ -277,7 +272,7 @@ doRequire(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(PREREQ, rec);
+		query.addRecord(Section.PREREQ, rec);
 		print(rec);
 	}
 }
@@ -298,7 +293,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(PREREQ, rec);
+		query.addRecord(Section.PREREQ, rec);
 		print(rec);
 	}
 }
@@ -319,7 +314,7 @@ doAdd(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(UPDATE, rec);
+		query.addRecord(Section.UPDATE, rec);
 		print(rec);
 	}
 }
@@ -340,7 +335,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(UPDATE, rec);
+		query.addRecord(Section.UPDATE, rec);
 		print(rec);
 	}
 }
@@ -361,7 +356,7 @@ doGlue(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(ADDITIONAL, rec);
+		query.addRecord(Section.ADDITIONAL, rec);
 		print(rec);
 	}
 }

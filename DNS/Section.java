@@ -16,6 +16,11 @@ public static final byte ANSWER		= 1;
 public static final byte AUTHORITY	= 2;
 public static final byte ADDITIONAL	= 3;
 
+/* Aliases for dynamic update */
+public static final byte ZONE		= 0;
+public static final byte PREREQ		= 1;
+public static final byte UPDATE		= 2;
+
 static {
 	sections.put2(QUESTION, "qd");
 	sections.put2(ANSWER, "an");
