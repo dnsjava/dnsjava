@@ -13,14 +13,12 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
+/*
+ * Note: this currently uses the same constants as the Address class;
+ * this could change if more constants are defined for APL records.
+ */
+
 public class APLRecord extends Record {
-
-public static class AddressFamily {
-	private AddressFamily() {}
-
-	public static final int IPv4 = 1;
-	public static final int IPv6 = 2;
-}
 
 public static class Element {
 	public final int family;
@@ -51,7 +49,7 @@ public static class Element {
 	 */
 	public
 	Element(boolean negative, InetAddress address, int prefixLength) {
-		this(AddressFamily.IPv4, negative, address, prefixLength);
+		this(Address.IPv4, negative, address, prefixLength);
 	}
 
 	/**
@@ -63,7 +61,7 @@ public static class Element {
 	 */
 	public
 	Element(boolean negative, Inet6Address address, int prefixLength) {
-		this(AddressFamily.IPv6, negative, address, prefixLength);
+		this(Address.IPv6, negative, address, prefixLength);
 	}
 	
 	public String
@@ -73,9 +71,9 @@ public static class Element {
 			sb.append("!");
 		sb.append(family);
 		sb.append(":");
-		if (family == AddressFamily.IPv4)
+		if (family == Address.IPv4)
 			sb.append(((InetAddress) address).getHostAddress());
-		else if (family == AddressFamily.IPv6)
+		else if (family == Address.IPv6)
 			sb.append((Inet6Address) address);
 		else
 			sb.append(base16.toString((byte []) address));
@@ -98,8 +96,8 @@ private static boolean
 validatePrefixLength(int family, int prefixLength) {
 	if (prefixLength < 0 || prefixLength >= 256)
 		return false;
-	if ((family == AddressFamily.IPv4 && prefixLength > 32) ||
-	    (family == AddressFamily.IPv6 && prefixLength > 128))
+	if ((family == Address.IPv4 && prefixLength > 32) ||
+	    (family == Address.IPv6 && prefixLength > 128))
 		return false;
 	return true;
 }
@@ -118,8 +116,8 @@ APLRecord(Name name, int dclass, long ttl, List elements) {
 			throw new IllegalArgumentException("illegal element");
 		}
 		Element element = (Element) o;
-		if (element.family != AddressFamily.IPv4 &&
-		    element.family != AddressFamily.IPv6)
+		if (element.family != Address.IPv4 &&
+		    element.family != Address.IPv6)
 		{
 			throw new IllegalArgumentException("unknown family");
 		}
@@ -155,13 +153,15 @@ rrFromWire(DNSInput in) throws IOException {
 			throw new WireParseException("invalid prefix length");
 		}
 
-		if (family == AddressFamily.IPv4) {
-			data = parseAddress(data, 4);
+		if (family == Address.IPv4) {
+			data = parseAddress(data,
+					    Address.addressLength(family));
 			String s = Address.toDottedQuad(data);
 			InetAddress addr = Address.getByName(s);
 			element = new Element(negative, addr, prefix);
-		} else if (family == AddressFamily.IPv6) {
-			data = parseAddress(data, 16);
+		} else if (family == Address.IPv6) {
+			data = parseAddress(data,
+					    Address.addressLength(family));
 			Inet6Address addr = new Inet6Address(data);
 			element = new Element(negative, addr, prefix);
 		} else {
@@ -222,14 +222,14 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 			throw st.exception("invalid prefix length");
 		}
 
-		if (family == AddressFamily.IPv4) {
+		if (family == Address.IPv4) {
 			if (!Address.isDottedQuad(addressString)) {
 				throw st.exception("invalid IPv4 address " +
 						   addressString);
 			}
 			InetAddress address = Address.getByName(addressString);
 			elements.add(new Element(negative, address, prefix));
-		} else if (family == AddressFamily.IPv6) {
+		} else if (family == Address.IPv6) {
 			Inet6Address address = null;
 			try {
 				address = new Inet6Address(addressString);
@@ -277,11 +277,11 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 		Element element = (Element) it.next();
 		int length = 0;
 		byte [] data;
-		if (element.family == AddressFamily.IPv4) {
+		if (element.family == Address.IPv4) {
 			InetAddress addr = (InetAddress) element.address;
 			data = addr.getAddress();
 			length = addressLength(data);
-		} else if (element.family == AddressFamily.IPv6) {
+		} else if (element.family == Address.IPv6) {
 			Inet6Address addr = (Inet6Address) element.address;
 			data = addr.toBytes();
 			length = addressLength(data);
