@@ -80,6 +80,41 @@ toString() {
 	return sb.toString();
 }
 
+public dnsName
+getHost() {  
+	return host;
+}       
+
+public dnsName
+getAdmin() {  
+	return admin;
+}       
+
+public int
+getSerial() {  
+	return serial;
+}       
+
+public int
+getRefresh() {  
+	return refresh;
+}       
+
+public int
+getRetry() {  
+	return retry;
+}       
+
+public int
+getExpire() {  
+	return expire;
+}       
+
+public int
+getMinimum() {  
+	return minimum;
+}       
+
 byte []
 rrToWire(dnsCompression c) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
