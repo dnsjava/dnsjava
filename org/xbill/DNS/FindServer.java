@@ -192,7 +192,8 @@ findWin(InputStream in) {
 				}
 				if (name.labels() == 1)
 					continue;
-				name = new Name(name, 1);
+				name = Name.concatenate(new Name(name, 1),
+							Name.root);
 				if (searchlist == null)
 					searchlist = new Name[] {name};
 			}

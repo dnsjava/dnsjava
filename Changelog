@@ -1,3 +1,6 @@
+10/31/2002
+	- Fix a bug in searchlist processing on Windows.
+
 10/20/2002
 	- Record.toWire() and Record.toWireCanonical() do not need to
 	  be declared as throwing IOException, since there's no
