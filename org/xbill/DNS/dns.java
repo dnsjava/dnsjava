@@ -23,7 +23,7 @@ import java.net.*;
 public final class dns {
 
 private static Resolver res;
-private static Hashtable caches;
+private static Map caches;
 private static Name [] searchPath;
 private static boolean searchPathSet;
 private static boolean initialized;
@@ -38,9 +38,9 @@ dns() {}
 
 synchronized private static void
 clearCaches() {
-	Enumeration e = caches.elements();
-	while (e.hasMoreElements()) {
-		Cache c = (Cache)e.nextElement();
+	Iterator it = caches.entrySet().iterator();
+	while (it.hasNext()) {
+		Cache c = (Cache)it.next();
 		c.clearCache();
 	}
 }
