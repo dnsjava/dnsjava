@@ -8,7 +8,7 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * Implements NS, CNAME, and PTR records, which have identical formats 
+ * Implements NS, CNAME, PTR, and DNAME records, which have identical formats 
  *
  * @author Brian Wellington
  */
@@ -68,7 +68,10 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (target == null)
 		return;
 
-	target.toWire(out, c);
+	if (type == Type.DNAME)
+		target.toWire(out, null);
+	else
+		target.toWire(out, c);
 }
 
 void
