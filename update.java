@@ -472,7 +472,7 @@ doAssert(MyStringTokenizer st) {
 		else {
 			SOARecord soa = (SOARecord) answers[0];
 			int serial = soa.getSerial();
-			if (serial != new Integer(expected).intValue()) {
+			if (serial != Integer.parseInt(expected)) {
 				value = new Integer(serial).toString();
 				flag = false;
 			}

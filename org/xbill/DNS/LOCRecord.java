@@ -81,11 +81,11 @@ throws IOException
 	sec = 0.0;
 	try {
 		s = st.nextToken();
-		deg = new Integer(s).intValue();
+		deg = Integer.parseInt(s);
 		s = st.nextToken();
-		min = new Integer(s).intValue();
+		min = Integer.parseInt(s);
 		s = st.nextToken();
-		sec = new Double(s).doubleValue();
+		sec = Double.parseDouble(s);
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {
@@ -102,11 +102,11 @@ throws IOException
 	sec = 0.0;
 	try {
 		s = st.nextToken();
-		deg = new Integer(s).intValue();
+		deg = Integer.parseInt(s);
 		s = st.nextToken();
-		min = new Integer(s).intValue();
+		min = Integer.parseInt(s);
 		s = st.nextToken();
-		sec = new Double(s).doubleValue();
+		sec = Double.parseDouble(s);
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {
