@@ -4,13 +4,16 @@ import org.xbill.DNS.*;
 public class lookup {
 
 public static void
-printAnswer(String name, Record [] answer) {
-	System.out.println(name + ":");
-	if (answer == null)
-		System.out.println("null");
-	else
-		for (int i = 0; i < answer.length; i++)
-			System.out.println(answer[i]);
+printAnswer(String name, Lookup lookup) {
+	System.out.print(name + ":");
+	if (lookup.getResult() == Lookup.SUCCESSFUL) {
+		System.out.println();
+		Record [] answers = lookup.getAnswers();
+		for (int i = 0; i < answers.length; i++)
+			System.out.println(answers[i]);
+	} else {
+		 System.out.println(" " + lookup.getErrorString());
+	}
 }
 
 public static void
@@ -23,8 +26,11 @@ main(String [] args) throws Exception {
 			throw new IllegalArgumentException("invalid type");
 		start = 2;
 	}
-	for (int i = start; i < args.length; i++)
-		printAnswer(args[i], dns.getRecords(args[i], type));
+	for (int i = start; i < args.length; i++) {
+		Lookup l = new Lookup(args[i], type);
+		l.run();
+		printAnswer(args[i], l);
+	}
 }
 
 }
