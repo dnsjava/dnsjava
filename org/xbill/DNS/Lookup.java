@@ -455,10 +455,6 @@ run() {
 			if (done)
 				return answers;
 		}
-
-		if (name.labels() <= 1) {
-			resolve(name, Name.root);
-		}
 	}
 	if (!done) {
 		if (badresponse) {

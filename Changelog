@@ -1,3 +1,10 @@
+8/13/2003
+	- When looking up a one label unqualified name which fails to match
+	  all searchlist entries, don't append the root label and try again.
+	  This is recommended by RFC 1536, section 6: "Only if the name, so
+	  generated, returns an NXDOMAIN is the original name tried as a Fully
+	  Qualified Domain Name. And only if it contains at least one period."
+
 7/18/2003
 	- Remove lots of unused imports. (Jared Richardson <jaredr@nc.rr.com>)
 
