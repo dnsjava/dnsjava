@@ -144,7 +144,7 @@ throws IOException, SignatureException, InvalidKeyException,
 		signature = DSASignature.create(dsakey.getParams(), signature);
 	}
 	
-	SIGRecord r = new SIGRecord(new Name("."), DClass.ANY, 0,
+	SIGRecord r = new SIGRecord(Name.root, DClass.ANY, 0,
 				    0, algorithm,
 				    0, timeExpires, timeSigned,
 				    footprint,
