@@ -1,3 +1,7 @@
+1/16/2004
+	- The master file reader should propagate TTLs through $INCLUDE
+	  statements. (David Blacka <davidb@verisignlabs.com>)
+
 1/12/2004
 	- Add a MANIFEST to the jar file containing implementation name and
 	  version. (Harel Efraim <harel.efraim@nominum.com>)

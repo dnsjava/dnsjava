@@ -17,40 +17,81 @@ public class Master {
 private Name origin;
 private File file;
 private Record last = null;
-private long defaultTTL = -1;
+private long defaultTTL;
 private Master included = null;
 private Tokenizer st;
 
-Master(File file, Name defaultOrigin) throws IOException {
+Master(File file, Name initialOrigin, long initialTTL) throws IOException {
 	FileInputStream fis;
 	this.file = file;
 	st = new Tokenizer(file);
-	origin = defaultOrigin;
+	origin = initialOrigin;
+	defaultTTL = initialTTL;
 }
 
-/** Begins parsing the specified file with an initial origin */
+/**
+ * Initializes the master file reader and opens the specified master file.
+ * @param filename The master file.
+ * @param origin The initial origin to append to relative names.
+ * @param ttl The initial default TTL.
+ * @throws IOException The master file could not be opened.
+ */
+public
+Master(String filename, Name origin, long ttl) throws IOException {
+	this(new File(filename), origin, ttl);
+}
+
+/**
+ * Initializes the master file reader and opens the specified master file.
+ * @param filename The master file.
+ * @param origin The initial origin to append to relative names.
+ * @throws IOException The master file could not be opened.
+ */
 public
 Master(String filename, Name origin) throws IOException {
-	this(new File(filename), origin);
+	this(new File(filename), origin, -1);
 }
 
-/** Begins parsing the specified file */
+/**
+ * Initializes the master file reader and opens the specified master file.
+ * @param filename The master file.
+ * @throws IOException The master file could not be opened.
+ */
 public
 Master(String filename) throws IOException {
-	this(new File(filename), null);
+	this(new File(filename), null, -1);
 }
 
-/** Begins parsing from an input stream with an initial origin */
+/**
+ * Initializes the master file reader.
+ * @param in The input stream containing a master file.
+ * @param origin The initial origin to append to relative names.
+ * @param ttl The initial default TTL.
+ */
 public
-Master(InputStream in, Name defaultOrigin) {
+Master(InputStream in, Name origin, long ttl) {
 	st = new Tokenizer(in);
-	origin = defaultOrigin;
+	this.origin = origin;
+	defaultTTL = ttl;
 }
 
-/** Begins parsing from an input reader */
+/**
+ * Initializes the master file reader.
+ * @param in The input stream containing a master file.
+ * @param origin The initial origin to append to relative names.
+ */
+public
+Master(InputStream in, Name origin) {
+	this(in, origin, -1);
+}
+
+/**
+ * Initializes the master file reader.
+ * @param in The input stream containing a master file.
+ */
 public
 Master(InputStream in) {
-	this(in, null);
+	this(in, null, -1);
 }
 
 private Name
@@ -63,7 +104,13 @@ parseName(String s, Name origin) throws TextParseException {
 	}
 }
 
-/** Returns the next record in the master file */
+/**
+ * Returns the next record in the master file.  This will process any
+ * directives before the next record.
+ * @return The next record.
+ * @throws IOException The master file could not be read, or was syntactically
+ * invalid.
+ */
 public Record
 nextRecord() throws IOException {
 	Tokenizer.Token token;
@@ -120,7 +167,8 @@ nextRecord() throws IOException {
 							      Name.root);
 					st.getEOL();
 				}
-				included = new Master(newfile, incorigin);
+				included = new Master(newfile, incorigin,
+						      defaultTTL);
 				/*
 				 * If we continued, we wouldn't be looking in
 				 * the new file.  Recursing works better.
