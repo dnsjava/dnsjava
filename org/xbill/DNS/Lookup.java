@@ -522,7 +522,8 @@ getAnswers() {
 
 /**
  * Returns all known aliases for this name.  Whenever a CNAME/DNAME is
- * followed, an alias is added.
+ * followed, an alias is added to this array.  The last element in this
+ * array will be the owner name for records in the answer, if there are any.
  * @return The aliases.
  * @throws IllegalStateException The lookup has not completed.
  */
