@@ -5,6 +5,7 @@ public class dnsMessage {
 
 private dnsHeader header;
 private Vector [] sections;
+private int size;
 
 dnsMessage() {
 	sections = new Vector[4];
@@ -15,6 +16,7 @@ dnsMessage() {
 
 dnsMessage(CountedDataInputStream in) throws IOException {
 	this();
+	int startpos = in.pos();
 	dnsCompression c = new dnsCompression();
 	header = new dnsHeader(in);
 	for (int i = 0; i < 4; i++) {
@@ -23,6 +25,7 @@ dnsMessage(CountedDataInputStream in) throws IOException {
 			sections[i].addElement(rec);
 		}
 	}
+	size = in.pos() - startpos;
 }
 
 void setHeader(dnsHeader h) {
@@ -73,6 +76,10 @@ void toCanonicalBytes(DataOutputStream out) throws IOException {
 			rec.toCanonicalBytes(out, i);
 		}
 	}
+}
+
+int getNumBytes() {
+	return size;
 }
 
 }

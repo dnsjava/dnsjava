@@ -63,7 +63,7 @@ static void doQuery(dnsMessage query, dnsResolver res) throws IOException {
 		}
 		System.out.println();
 	}
-	System.out.println(";; done");
+	System.out.println(";; done (" + response.getNumBytes() + " bytes)");
 }
 
 static void doAXFR(dnsMessage query, dnsResolver res) throws IOException {
