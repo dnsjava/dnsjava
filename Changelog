@@ -5,6 +5,10 @@
 	  Add the ability to refresh the current ResolverConfig, and
 	  make FindServer use ResolverConfig.
 	- Add Lookup.refreshDefault (based on a patch from Th Kuhne)
+	- Truncated messages aren't guaranteed to parse properly, so shouldn't
+	  throw exceptions. (reported by Caleb Richardson <caleb@everyone.net>)
+	- Work around a TCP bug in whatever broken nameserver Enom is using.
+	  (reported by Caleb Richardson <caleb@everyone.net>)
 
 2/4/2004
 	- 1.6.5 released.

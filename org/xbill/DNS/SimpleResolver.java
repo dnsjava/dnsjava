@@ -155,13 +155,14 @@ readTCP(Socket s) throws IOException {
 
 private void
 writeTCP(Socket s, byte [] out) throws IOException {
-	DataOutputStream dataOut;
-
 	if (Options.check("verbosemsg"))
 		System.err.println(hexdump.dump("TCP write", out));
-	dataOut = new DataOutputStream(s.getOutputStream());
-	dataOut.writeShort(out.length);
-	dataOut.write(out);
+	OutputStream outStream = s.getOutputStream();
+	byte [] lengthArray = new byte[2];
+	lengthArray[0] = (byte)(out.length >>> 8);
+	lengthArray[1] = (byte)(out.length & 0xFF);
+	outStream.write(lengthArray);
+	outStream.write(out);
 }
 
 private Message
