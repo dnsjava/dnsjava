@@ -61,6 +61,25 @@ grow() {
 	grow(labels * 2);
 }
 
+private final void
+compact() {
+	for (int i = labels - 1; i > 0; i--) {
+		if (!(name[i] instanceof BitString) ||
+		    !(name[i - 1] instanceof BitString))
+		    	continue;
+		BitString bs = (BitString) name[i];
+		BitString bs2 = (BitString) name[i - 1];
+		if (bs.nbits == 256)
+			continue;
+		int nbits = bs.nbits + bs2.nbits;
+		bs.join(bs2);
+		if (nbits <= 256) {
+			System.arraycopy(name, i, name, i - 1, labels - i);
+			labels--;
+		}
+	}
+}
+
 /**
  * Create a new name from a string and an origin
  * @param s  The string to be converted
@@ -68,6 +87,8 @@ grow() {
  */
 public
 Name(String s, Name origin) {
+	boolean seenBitString = false;
+
 	labels = 0;
 	name = new Object[STARTLABELS];
 
@@ -83,9 +104,10 @@ Name(String s, Name origin) {
 			String token = st.nextToken();
 			if (labels == name.length)
 				grow();
-			if (token.charAt(0) == '[')
+			if (token.charAt(0) == '[') {
 				name[labels++] = new BitString(token);
-			else
+				seenBitString = true;
+			} else
 				name[labels++] = token.getBytes();
 		}
 
@@ -124,6 +146,8 @@ Name(String s, Name origin) {
 		name = null;
 		labels = 0;
 	}
+	if (seenBitString)
+		compact();
 }
 
 /**
@@ -145,6 +169,7 @@ public
 Name(DataByteInputStream in, Compression c) throws IOException {
 	int len, start, pos, count = 0;
 	Name name2;
+	boolean seenBitString = false;
 
 	labels = 0;
 	name = new Object[STARTLABELS];
@@ -192,6 +217,7 @@ loop:
 					grow();
 				name[labels++] = new BitString(bits, data);
 				count++;
+				seenBitString = true;
 				break;
 			default:
 				throw new WireParseException(
@@ -218,6 +244,9 @@ loop:
 		}
 	}
 	qualified = true;
+
+	if (seenBitString)
+		compact();
 }
 
 /**
@@ -269,6 +298,7 @@ fromDNAME(DNAMERecord dname) {
 	System.arraycopy(dnametarget.name, 0, newname.name, saved,
 			 dnametarget.labels);
 	newname.qualified = true;
+	newname.compact();
 	return newname;
 }
 
@@ -301,6 +331,7 @@ append(Name d) {
 	System.arraycopy(d.name, 0, name, labels, d.labels);
 	labels += d.labels;
 	qualified = d.qualified;
+	compact();
 }
 
 /**

@@ -150,7 +150,7 @@ wireBits() {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append("[x");
+	sb.append("\\[x");
 	for (int i = 0; i < bytes(); i++) {
 		int value = (int)(data[i] & 0xFF);
 		int high = value >> 4;
@@ -178,6 +178,19 @@ equals(Object o) {
 	return true;
 }
 
+private static final int
+getBit(byte [] data, int n) {
+	return ((data[n / 8] & 0xFF) >> (7 - n % 8)) & 0x1;
+}
+
+private static final void
+setBit(byte [] data, int n, int val) {
+	if (val == 0)
+		data[n / 8] &= ~(1 << (7 - n % 8));
+	else
+		data[n / 8] |= (1 << (7 - n % 8));
+}
+
 /** Compare two bitstrings. */
 int
 compareBits(BitString b, int n) {
@@ -186,8 +199,8 @@ compareBits(BitString b, int n) {
 
 
 	for (int i = 0; i < n; i++) {
-		int bit = ((data[i / 8] & 0xFF) >> (7 - i)) & 0x1;
-		int bbit = ((b.data[i / 8] & 0xFF) >> (7 - i)) & 0x1;
+		int bit = getBit(data, i);
+		int bbit = getBit(b.data, i);
 		if (bit != bbit)
 			return (bit - bbit);
 	}
@@ -204,6 +217,41 @@ compareTo(Object o) {
 	if (ret != 0)
 		return ret;
 	return nbits - b.nbits;
+}
+
+/** Joins a BitString with a less-significant BitString. */
+void
+join(BitString b) {
+	if (nbits == 256)
+		return;
+	int total = nbits + b.nbits;
+	int i;
+	byte [] newdata;
+
+	if (total <= 256) {
+		newdata = new byte[(total + 7) / 8];
+		for (i = nbits - 1; i >= 0; i--)
+			setBit(newdata, i + b.nbits, getBit(data, i));
+		for (i = 0; i < b.nbits; i++)
+			setBit(newdata, i, getBit(b.data, i));
+		nbits = total;
+		data = newdata;
+		b.nbits = 0;
+		b.data = null;
+	} else {
+		newdata = new byte[32];
+		byte [] newbdata = new byte[(total - 256 + 7) / 8];
+		for (i = nbits; i >= 0; i--)
+			setBit(newdata, 255 - i, getBit(data, nbits - i - 1));
+		for (i = 0; i < 256 - nbits; i++)
+			setBit(newdata, 255 - nbits - i,
+			       getBit(b.data, b.nbits - i - 1));
+		nbits = 256;
+		data = newdata;
+		b.nbits = total - 256;
+		System.arraycopy(b.data, 0, newbdata, 0, newbdata.length);
+		b.data = newbdata;
+	}
 }
 
 }
