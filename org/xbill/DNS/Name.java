@@ -169,13 +169,20 @@ append(byte [] array, int start, int n) throws NameTooLongException {
 	setlabels((byte) newlabels);
 }
 
+private static TextParseException
+parseException(String str, String message) {
+	return new TextParseException("'" + str + "': " + message);
+}
+
 private final void
-appendFromString(byte [] array, int start, int n) throws TextParseException {
+appendFromString(String fullName, byte [] array, int start, int n)
+throws TextParseException
+{
 	try {
 		append(array, start, n);
 	}
 	catch (NameTooLongException e) {
-		throw new TextParseException("Name too long");
+		throw parseException(fullName, "Name too long");
 	}
 }
 
@@ -243,7 +250,7 @@ fromString(String s, Name origin) throws TextParseException {
 	Name name = new Name();
 
 	if (s.equals(""))
-		throw new TextParseException("empty name");
+		throw parseException(s, "empty name");
 	else if (s.equals("@")) {
 		if (origin == null)
 			return name;
@@ -265,16 +272,15 @@ fromString(String s, Name origin) throws TextParseException {
 				intval *= 10;
 				intval += (b - '0');
 				if (intval > 255)
-					throw new TextParseException
-								("bad escape");
+					throw parseException(s, "bad escape");
 				if (digits < 3)
 					continue;
 				b = (byte) intval;
 			}
 			else if (digits > 0 && digits < 3)
-				throw new TextParseException("bad escape");
+				throw parseException(s, "bad escape");
 			if (pos >= MAXLABEL)
-				throw new TextParseException("label too long");
+				throw parseException(s, "label too long");
 			labelstart = pos;
 			label[pos++] = b;
 			escaped = false;
@@ -284,31 +290,30 @@ fromString(String s, Name origin) throws TextParseException {
 			intval = 0;
 		} else if (b == '.') {
 			if (labelstart == -1)
-				throw new TextParseException
-							("invalid empty label");
+				throw parseException(s, "invalid empty label");
 			label[0] = (byte)(pos - 1);
-			name.appendFromString(label, 0, 1);
+			name.appendFromString(s, label, 0, 1);
 			labelstart = -1;
 			pos = 1;
 		} else {
 			if (labelstart == -1)
 				labelstart = i;
 			if (pos >= MAXLABEL)
-				throw new TextParseException("label too long");
+				throw parseException(s, "label too long");
 			label[pos++] = b;
 		}
 	}
 	if (digits > 0 && digits < 3)
-		throw new TextParseException("bad escape");
+		throw parseException(s, "bad escape");
 	if (labelstart == -1) {
-		name.appendFromString(emptyLabel, 0, 1);
+		name.appendFromString(s, emptyLabel, 0, 1);
 		absolute = true;
 	} else {
 		label[0] = (byte)(pos - 1);
-		name.appendFromString(label, 0, 1);
+		name.appendFromString(s, label, 0, 1);
 	}
 	if (origin != null && !absolute)
-		name.appendFromString(origin.name, 0, origin.getlabels());
+		name.appendFromString(s, origin.name, 0, origin.getlabels());
 	return (name);
 }
 
