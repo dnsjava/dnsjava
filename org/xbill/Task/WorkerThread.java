@@ -32,7 +32,7 @@ WorkerThread() {
  * will remain on the idle list for this much time before exiting.  This
  * does not affect WorkerThreads currently idling.
  */
-synchronized static void
+synchronized public static void
 setLifetime(long time) {
 	lifetime = time;
 }
@@ -42,7 +42,7 @@ setLifetime(long time) {
  * time.  If this value is decreased below the current number of
  * WorkerThreads, this will not take effect immediately.
  */
-synchronized static void
+synchronized public static void
 setMaxThreads(int maxThreads) {
 	max = maxThreads;
 }
@@ -54,7 +54,7 @@ setMaxThreads(int maxThreads) {
  * a new WorkerThread is created.  If the maximum number has been reached,
  * this blocks until a WorkerThread is free.
  */
-static WorkerThread
+static public WorkerThread
 getThread() {
 	WorkerThread t;
 	synchronized (list) {
