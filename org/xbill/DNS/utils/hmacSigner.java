@@ -7,6 +7,8 @@ import java.io.*;
 
 /**
  * A pure java implementation of the HMAC-MD5 secure hash algorithm
+ *
+ * @author Brian Wellington
  */
 
 public class hmacSigner {

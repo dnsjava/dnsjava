@@ -14,6 +14,8 @@ package org.xbill.DNS;
  * @see SIGRecord
  * @see KEYRecord
  * @see RRset
+ *
+ * @author Brian Wellington
  */
 
 

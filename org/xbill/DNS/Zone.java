@@ -9,6 +9,8 @@ import java.util.*;
 /**
  * A DNS Zone.  This encapsulates all data related to a Zone, and provides
  * convienient lookup methods.
+ *
+ * @author Brian Wellington
  */
 
 public class Zone extends NameSet {

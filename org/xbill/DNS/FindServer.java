@@ -12,7 +12,10 @@ import java.util.*;
  * appropriate properties are set, or the OS has a unix-like /etc/resolv.conf.
  * There is no reason for these routines to be called directly except
  * curiosity.
+ *
+ * @author Brian Wellington
  */
+
 public class FindServer {
 
 private static String [] server = null;

@@ -8,6 +8,8 @@ import java.util.Hashtable;
 /**
  * A table used for storing mappings between Strings and constant values
  * and lookups in either direction.
+ *
+ * @author Brian Wellington
  */
 
 public class StringValueTable {

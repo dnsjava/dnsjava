@@ -7,8 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** A class implementing Records of unknown and/or unimplemented types.  This
+/**
+ * A class implementing Records of unknown and/or unimplemented types.  This
  * class can only be initialized using static Record initializers.
+ *
+ * @author Brian Wellington
  */
 
 public class UNKRecord extends Record {

@@ -5,7 +5,11 @@ package org.xbill.DNS;
 
 import org.xbill.DNS.utils.*;
 
-/** Constants and functions relating to DNS opcodes */
+/**
+ * Constants and functions relating to DNS opcodes
+ *
+ * @author Brian Wellington
+ */
 
 public final class Opcode {
 

@@ -10,6 +10,8 @@ import org.xbill.DNS.utils.*;
 /**
  * A DNS message header
  * @see Message
+ *
+ * @author Brian Wellington
  */
 
 public class Header {

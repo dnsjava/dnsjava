@@ -6,7 +6,11 @@ package org.xbill.DNS;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Constants and functions relating to DNS message sections */
+/**
+ * Constants and functions relating to DNS message sections
+ *
+ * @author Brian Wellington
+ */
 
 public final class Section {
 

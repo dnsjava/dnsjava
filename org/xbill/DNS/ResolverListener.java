@@ -8,6 +8,8 @@ import java.util.EventListener;
 /**
  * An interface to the asynchronous resolver.
  * @see Resolver
+ *
+ * @author Brian Wellington
  */
 
 public interface ResolverListener extends EventListener {

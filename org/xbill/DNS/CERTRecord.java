@@ -11,6 +11,8 @@ import org.xbill.DNS.utils.*;
  * Certificate Record  - Stores a certificate associated with a name.  The
  * certificate might also be associated with a KEYRecord.
  * @see KEYRecord
+ *
+ * @author Brian Wellington
  */
 
 public class CERTRecord extends Record {

@@ -8,6 +8,8 @@ import java.util.*;
 /**
  * An extension of a Thread that uses threads from a pool, rather than
  * allocating a new thread for each assigned task.
+ *
+ * @author Brian Wellington
  */
 
 public class WorkerThread extends Thread {

@@ -8,6 +8,8 @@ import java.net.*;
 
 /**
  * Interface describing a resolver.
+ *
+ * @author Brian Wellington
  */
 
 public interface Resolver {

@@ -3,7 +3,11 @@
 
 package org.xbill.DNS;
 
-/** A type/class pair.  Used for lookup purposes */
+/**
+ * A type/class pair.  Used for lookup purposes.
+ *
+ * @author Brian Wellington
+ */
 
 class TypeClass {
 

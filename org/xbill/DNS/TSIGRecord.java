@@ -14,6 +14,8 @@ import org.xbill.DNS.utils.*;
  * sender and receiver of a message, using a shared key.
  * @see Resolver
  * @see TSIG
+ *
+ * @author Brian Wellington
  */
 
 public class TSIGRecord extends Record {

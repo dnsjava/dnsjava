@@ -10,6 +10,8 @@ import java.math.*;
  * An extension of ByteArrayOutputStream to support directly writing types
  * used by DNS routines.
  * @see DataByteInputStream
+ *
+ * @author Brian Wellington
  */
 
 

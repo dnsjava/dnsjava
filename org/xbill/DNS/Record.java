@@ -10,6 +10,8 @@ import org.xbill.DNS.utils.*;
 
 /**
  * The base class that all records are derived from.
+ *
+ * @author Brian Wellington
  */
 
 abstract public class Record {

@@ -7,6 +7,8 @@ package org.xbill.DNS;
  * Routines for parsing BIND-style TTL values.  These values consist of
  * numbers followed by 1 letter units of time (W - week, D - day, H - hour,
  * M - minute, S - second).
+ *
+ * @author Brian Wellington
  */
 
 public final class TTL {

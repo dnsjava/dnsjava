@@ -12,6 +12,8 @@ import org.xbill.Task.*;
  * An implementation of Resolver that can send queries to multiple servers,
  * sending the queries multiple times if necessary.
  * @see Resolver
+ *
+ * @author Brian Wellington
  */
 
 public class ExtendedResolver implements Resolver {

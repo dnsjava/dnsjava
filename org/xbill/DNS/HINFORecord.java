@@ -7,7 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Host Information - describes the CPU and OS of a host */
+/**
+ * Host Information - describes the CPU and OS of a host
+ *
+ * @author Brian Wellington
+ */
 
 public class HINFORecord extends Record {
 

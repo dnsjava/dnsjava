@@ -9,7 +9,9 @@ import org.xbill.DNS.utils.*;
 
 /**
  * Pointer Record  - maps a domain name representing an Internet Address to
- * a hostname
+ * a hostname.
+ *
+ * @author Brian Wellington
  */
 
 public class PTRRecord extends NS_CNAME_PTRRecord {

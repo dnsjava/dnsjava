@@ -7,12 +7,24 @@ import java.util.*;
 import java.io.*;
 import org.xbill.DNS.utils.*;
 
+/**
+ * A DNS master file parser.  This incrementally parses the file, returning
+ * one record at a time.  When directives are seen, they are added to the
+ * state and used when parsing future records.
+ *
+ * Should support INCLUDE
+ * 
+ * @author Brian Wellington
+ */
+
 public class Master {
 
 private Name origin = null;
 private BufferedReader br;
 private Record last = null;
+private int defaultTTL = 3600;
 
+/** Begins parsing the specified file */
 public
 Master(String file) throws IOException {
 	FileInputStream fis;
@@ -25,6 +37,7 @@ Master(String file) throws IOException {
 	br = new BufferedReader(new InputStreamReader(fis));
 }
 
+/** Returns the next record in the master file */
 public Record
 nextRecord() throws IOException {
 	String line;
@@ -45,6 +58,12 @@ nextRecord() throws IOException {
 			origin = parseOrigin(st);
 			continue;
 		}
+		if (s.equals("$TTL")) {
+			defaultTTL = parseTTL(st);
+			continue;
+		}
+		else if (s.charAt[0] == '$')
+			throw new IOException("Invalid directive");
 		st.putBackToken(s);
 		return (last = parseRR(st, space, last, origin));
 	}
@@ -52,7 +71,16 @@ nextRecord() throws IOException {
 
 private Name
 parseOrigin(MyStringTokenizer st) throws IOException {
+	if (!st.hasMoreTokens())
+		throw new IOException ("Missing ORIGIN");
 	return new Name(st.nextToken());
+}
+
+private int
+parseTTL(MyStringTokenizer st) throws IOException {
+	if (!st.hasMoreTokens())
+		throw new IOException ("Missing TTL");
+	return Integer(st.nextToken().intValue());
 }
 
 private Record
@@ -76,7 +104,7 @@ throws IOException
 	}
 	catch (NumberFormatException e) {
 		if (!useLast || last == null)
-			ttl = 3600;
+			ttl = defaultTTL;
 		else
 			ttl = last.getTTL();
 	}

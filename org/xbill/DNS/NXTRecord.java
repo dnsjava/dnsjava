@@ -11,7 +11,9 @@ import org.xbill.DNS.utils.*;
  * Next name - this record contains the following name in an ordered list
  * of names in the zone, and a set of types for which records exist for
  * this name.  The presence of this record in a response signifies a
- * failed query for data in a DNSSEC-signed zone.
+ * failed query for data in a DNSSEC-signed zone. 
+ *
+ * @author Brian Wellington
  */
 
 public class NXTRecord extends Record {

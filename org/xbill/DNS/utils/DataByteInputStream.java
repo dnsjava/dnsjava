@@ -10,6 +10,8 @@ import java.math.BigInteger;
  * An extension of ByteArrayInputStream to support directly reading types
  * used by DNS routines.
  * @see DataByteOutputStream
+ *
+ * @author Brian Wellington
  */
 
 public class DataByteInputStream extends ByteArrayInputStream {

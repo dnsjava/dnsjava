@@ -16,6 +16,8 @@ import org.xbill.Task.*;
  * @see Resolver
  * @see TSIG
  * @see EDNS
+ *
+ * @author Brian Wellington
  */
 
 

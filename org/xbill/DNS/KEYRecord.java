@@ -11,6 +11,8 @@ import org.xbill.DNS.utils.*;
  * Key - contains a cryptographic public key.  The data can be converted
  * to objects implementing java.security.interfaces.PublicKey
  * @see DNSSEC
+ *
+ * @author Brian Wellington
  */
 
 public class KEYRecord extends Record {

@@ -7,7 +7,11 @@ import java.io.*;
 import java.net.*;
 import org.xbill.DNS.utils.*;
 
-/** A simple clone of the java.net.InetAddress class, using dnsjava routines */
+/**
+ * A simple clone of the java.net.InetAddress class, using dnsjava routines.
+ *
+ * @author Brian Wellington
+ */
 
 public final class Address {
 

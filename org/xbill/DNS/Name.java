@@ -8,7 +8,9 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * A representation of a domain name.
+ * A representation of a domain name. 
+ *
+ * @author Brian Wellington
  */
 
 

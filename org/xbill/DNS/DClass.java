@@ -8,6 +8,8 @@ import org.xbill.DNS.utils.*;
 /**
  * Constants and functions relating to DNS classes.  This is called DClass
  * since Class was already taken.
+ *
+ * @author Brian Wellington
  */
 
 public final class DClass {

@@ -5,7 +5,11 @@ package org.xbill.DNS;
 
 import java.io.*;
 
-/** Constants and functions relating to DNS message sections */
+/**
+ * Constants and functions relating to DNS message sections
+ *
+ * @author Brian Wellington
+ */
 
 public class WireParseException extends IOException {
 

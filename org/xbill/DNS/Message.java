@@ -14,6 +14,8 @@ import org.xbill.DNS.utils.*;
  * @see Resolver
  * @see Header
  * @see Section
+ *
+ * @author Brian Wellington
  */
 
 public class Message implements Cloneable {

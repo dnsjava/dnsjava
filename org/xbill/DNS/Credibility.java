@@ -9,6 +9,8 @@ package org.xbill.DNS;
  * credible.
  * @see Cache
  * @see Section
+ *
+ * @author Brian Wellington
  */
 
 public final class Credibility {

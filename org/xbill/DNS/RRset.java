@@ -11,6 +11,8 @@ import java.io.*;
  * are all SIG records signing the data records.
  * @see Record
  * @see SIGRecord
+ *
+ * @author Brian Wellington
  */
 
 public class RRset {

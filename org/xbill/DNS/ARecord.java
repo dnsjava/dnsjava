@@ -8,7 +8,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Address Record  - maps a domain name to an Internet address */
+/**
+ * Address Record - maps a domain name to an Internet address
+ *
+ * @author Brian Wellington
+ */
 
 public class ARecord extends Record {
 

@@ -7,9 +7,12 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Server Selection Record  - finds hosts running services in a domain.  An
+/**
+ * Server Selection Record  - finds hosts running services in a domain.  An
  * SRV record will normally be named <service>.<protocol>.domain - an
  * example would be http.tcp.example.com (if HTTP used SRV records)
+ *
+ * @author Brian Wellington
  */
 
 public class SRVRecord extends Record {

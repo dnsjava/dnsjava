@@ -6,10 +6,13 @@ package org.xbill.DNS.utils;
 import java.io.*;
 import java.util.*;
 
-/** A class similar to StringTokenizer, with a few differences making it more
+/**
+ * A class similar to StringTokenizer, with a few differences making it more
  * suitable.  The \ character is used as an escape character, allowing
  * delimiters to be escaped and \xxx decimal value to be used.  Quoted
  * strings (delimited by double quotes) are treated as one token.
+ *
+ * @author Brian Wellington
  */
 
 public class MyStringTokenizer implements Enumeration {

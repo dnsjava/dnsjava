@@ -9,6 +9,8 @@ import org.xbill.DNS.utils.*;
 
 /**
  * Start of Authority - describes properties of a zone.
+ *
+ * @author Brian Wellington
  */
 
 public class SOARecord extends Record {

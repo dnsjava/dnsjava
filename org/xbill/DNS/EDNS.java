@@ -8,6 +8,8 @@ package org.xbill.DNS;
  * providing backwards compatibility and not significantly chaning
  * the protocol.  This implementation of EDNS0 is partially complete.
  * @see OPTRecord
+ *
+ * @author Brian Wellington
  */
 
 public class EDNS {

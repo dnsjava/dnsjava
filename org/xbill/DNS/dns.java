@@ -16,6 +16,8 @@ import java.net.*;
  * by FindServer, which allows lookups of unqualified names.
  * @see Resolver
  * @see FindServer
+ *
+ * @author Brian Wellington
  */
 
 public final class dns {

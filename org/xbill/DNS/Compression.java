@@ -8,6 +8,8 @@ import java.util.Hashtable;
 /**
  * DNS Compression object.  Name compression and decompression are supported.
  * @see Name
+ *
+ * @author Brian Wellington
  */
 
 class Compression {

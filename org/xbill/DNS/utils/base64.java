@@ -9,6 +9,8 @@ import java.util.*;
 /**
  * Routines for converting between Strings of base64-encoded data and arrays of
  * binary data.
+ *
+ * @author Brian Wellington
  */
 
 public class base64 {

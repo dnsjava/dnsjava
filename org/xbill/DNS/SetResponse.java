@@ -10,6 +10,8 @@ import org.xbill.DNS.utils.*;
  * The Response from a query to Cache.lookupRecords() or Zone.findRecords()
  * @see Cache
  * @see Zone
+ *
+ * @author Brian Wellington
  */
 
 public class SetResponse {

@@ -7,7 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Text - stores text strings */
+/**
+ * Text - stores text strings
+ *
+ * @author Brian Wellington
+ */
 
 public class TXTRecord extends Record {
 

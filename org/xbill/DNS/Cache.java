@@ -15,6 +15,8 @@ import org.xbill.DNS.utils.*;
  * and lookups can specify the minimum credibility of data they are requesting.
  * @see RRset
  * @see Credibility
+ *
+ * @author Brian Wellington
  */
 
 public class Cache extends NameSet {

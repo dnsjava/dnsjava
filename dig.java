@@ -5,6 +5,8 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.*;
 
+/** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
+
 public class dig {
 
 static Name name = null;

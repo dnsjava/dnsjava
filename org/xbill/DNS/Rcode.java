@@ -5,7 +5,11 @@ package org.xbill.DNS;
 
 import org.xbill.DNS.utils.*;
 
-/** Constants and functions relating to DNS rcodes (error values) */
+/**
+ * Constants and functions relating to DNS rcodes (error values)
+ *
+ * @author Brian Wellington
+ */
 
 public final class Rcode {
 

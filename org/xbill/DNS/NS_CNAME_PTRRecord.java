@@ -7,7 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Implements NS, CNAME, and PTR records, which have identical formats */
+/**
+ * Implements NS, CNAME, and PTR records, which have identical formats 
+ *
+ * @author Brian Wellington
+ */
 
 public class NS_CNAME_PTRRecord extends Record {
 

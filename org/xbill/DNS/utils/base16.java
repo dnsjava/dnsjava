@@ -9,6 +9,8 @@ import java.util.*;
 /**
  * Routines for converting between Strings of hex-encoded data and arrays of
  * binary data.  This is not actually used by DNS.
+ *
+ * @author Brian Wellington
  */
 
 public class base16 {

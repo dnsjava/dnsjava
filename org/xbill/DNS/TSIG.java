@@ -12,6 +12,8 @@ import org.xbill.DNS.utils.*;
  * Transaction signature handling.  This class generates and verifies
  * TSIG records on messages, which provide transaction security,
  * @see TSIGRecord
+ *
+ * @author Brian Wellington
  */
 
 public class TSIG {

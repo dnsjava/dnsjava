@@ -8,7 +8,9 @@ import org.xbill.DNS.utils.*;
 
 /**
  * The shared superclass of Zone and Cache.  All names are stored in a
- * hashtable.  Each name contains a hashtable indexed on type and class.
+ * hashtable.  Each name contains a hashtable indexed on type and class. 
+ *
+ * @author Brian Wellington
  */
 
 class NameSet {

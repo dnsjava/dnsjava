@@ -7,6 +7,8 @@ import java.io.*;
 
 /**
  * A pure java implementation of the MD5 digest algorithm
+ *
+ * @author Brian Wellington
  */
 
 public final class md5 {

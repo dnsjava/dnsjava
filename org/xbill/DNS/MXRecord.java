@@ -7,7 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Mail Exchange - specifies where mail to a domain is sent */
+/**
+ * Mail Exchange - specifies where mail to a domain is sent
+ *
+ * @author Brian Wellington
+ */
 
 public class MXRecord extends Record {
 

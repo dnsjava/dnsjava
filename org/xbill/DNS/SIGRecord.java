@@ -15,6 +15,8 @@ import org.xbill.DNS.utils.*;
  * @see RRset
  * @see DNSSEC
  * @see KEYRecord
+ *
+ * @author Brian Wellington
  */
 
 public class SIGRecord extends Record {

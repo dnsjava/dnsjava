@@ -13,6 +13,8 @@ import org.xbill.Task.*;
  * ExtendedResolver) to perform asynchronous queries.  Once started, a
  * WorkerThread never exits.  After completing a task, it blocks until
  * another task is assigned.
+ *
+ * @author Brian Wellington
  */
 
 class ResolveThread implements Runnable {

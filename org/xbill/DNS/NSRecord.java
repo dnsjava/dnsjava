@@ -7,7 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** Name Server Record  - contains the name server serving the named zone */
+/**
+ * Name Server Record  - contains the name server serving the named zone
+ *
+ * @author Brian Wellington
+ */
 
 public class NSRecord extends NS_CNAME_PTRRecord {
 

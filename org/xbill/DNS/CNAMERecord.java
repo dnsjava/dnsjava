@@ -7,7 +7,11 @@ import java.io.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
-/** CNAME Record  - maps an alias to its real name */
+/**
+ * CNAME Record  - maps an alias to its real name
+ *
+ * @author Brian Wellington
+ */
 
 public class CNAMERecord extends NS_CNAME_PTRRecord {
 
