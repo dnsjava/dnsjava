@@ -88,11 +88,11 @@ getAddress() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (address == null)
 		return;
 
-	dbs.write(address.getAddress());
+	out.write(address.getAddress());
 }
 
 }

@@ -91,14 +91,14 @@ getStrings() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (strings == null)
 		return;
 
 	Enumeration e = strings.elements();
 	while (e.hasMoreElements()) {
 		String s = (String) e.nextElement();
-		dbs.writeString(s);
+		out.writeString(s);
 	}
 }
 

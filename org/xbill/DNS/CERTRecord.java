@@ -137,14 +137,14 @@ getCert() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (cert == null)
 		return;
 
-	dbs.writeShort(certType);
-	dbs.writeShort(keyTag);
-	dbs.writeByte(alg);
-	dbs.write(cert);
+	out.writeShort(certType);
+	out.writeShort(keyTag);
+	out.writeByte(alg);
+	out.write(cert);
 }
 
 }

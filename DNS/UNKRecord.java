@@ -50,9 +50,9 @@ toString() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (data != null)
-		dbs.write(data);
+		out.write(data);
 }
 
 }

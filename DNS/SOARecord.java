@@ -143,17 +143,31 @@ getMinimum() {
 }       
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (host == null)
 		return;
 
-	host.toWire(dbs, c);
-	admin.toWire(dbs, c);
-	dbs.writeInt(serial);
-	dbs.writeInt(refresh);
-	dbs.writeInt(retry);
-	dbs.writeInt(expire);
-        dbs.writeInt(minimum);
+	host.toWire(out, c);
+	admin.toWire(out, c);
+	out.writeInt(serial);
+	out.writeInt(refresh);
+	out.writeInt(retry);
+	out.writeInt(expire);
+        out.writeInt(minimum);
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (host == null)
+		return;
+
+	host.toWireCanonical(out);
+	admin.toWireCanonical(out);
+	out.writeInt(serial);
+	out.writeInt(refresh);
+	out.writeInt(retry);
+	out.writeInt(expire);
+        out.writeInt(minimum);
 }
 
 }

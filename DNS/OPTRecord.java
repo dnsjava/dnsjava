@@ -86,18 +86,23 @@ getVersion() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (options == null)
 		return;
 	Enumeration e = options.keys();
 	while (e.hasMoreElements()) {
 		Integer i = (Integer) e.nextElement();
 		short key = i.shortValue();
-		dbs.writeShort(key);
+		out.writeShort(key);
 		byte [] data = (byte []) options.get(i);
-		dbs.writeShort(data.length);
-		dbs.write(data);
+		out.writeShort(data.length);
+		out.write(data);
 	}
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	throw new IOException("An OPT should never be converted to canonical");
 }
 
 }

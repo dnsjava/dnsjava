@@ -77,12 +77,21 @@ getPriority() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (target == null)
 		return;
 
-	dbs.writeShort(priority);
-	target.toWire(dbs, null);
+	out.writeShort(priority);
+	target.toWire(out, null);
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (target == null)
+		return;
+
+	out.writeShort(priority);
+	target.toWireCanonical(out);
 }
 
 }

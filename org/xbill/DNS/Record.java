@@ -177,24 +177,29 @@ toWire(int section) throws IOException {
 	return out.toByteArray();
 }
 
-/**
- * Converts a Record into canonical DNS uncompressed wire format (all names are
- * converted to lowercase).
- */
-public void /* XXX - shouldn't be public */
+void
 toWireCanonical(DataByteOutputStream out) throws IOException {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
 	out.writeInt(ttl);
-	byte [] data = rrToWireCanonical();
-	if (data == null)
-		out.writeShort(0);
-	else {
-		out.writeShort(data.length);
-		out.write(data);
-	}
+	int lengthPosition = out.getPos();
+	out.writeShort(0); /* until we know better */
+	rrToWireCanonical(out);
+	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
 }
+
+/**
+ * Converts a Record into canonical DNS uncompressed wire format (all names are
+ * converted to lowercase).
+ */
+public byte []
+toWireCanonical(int section) throws IOException {
+	DataByteOutputStream out = new DataByteOutputStream();
+	toWireCanonical(out);
+	return out.toByteArray();
+}
+
 
 StringBuffer
 toStringNoData() {
@@ -329,13 +334,19 @@ getWireLength() {
 	return (short) wireLength;
 }
 
+/**
+ * Converts the type-specific RR to wire format - must be overriden
+ */
 abstract void rrToWire(DataByteOutputStream out, Compression c) throws IOException;
 
+/**
+ * Converts the type-specific RR to canonical wire format - must be overriden
+ * if the type-specific RR data includes a Name
+ * @see Name
+ */
 byte []
-rrToWireCanonical() throws IOException {
-	DataByteOutputStream dbs = new DataByteOutputStream();
-	rrToWire(dbs, null);
-	return dbs.toByteArray();
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	rrToWire(out, null);
 }
 
 /**

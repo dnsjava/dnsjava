@@ -107,14 +107,25 @@ getTarget() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (target == null)
 		return;
 
-	dbs.writeShort(priority);
-	dbs.writeShort(weight);
-	dbs.writeShort(port);
-	target.toWire(dbs, null);
+	out.writeShort(priority);
+	out.writeShort(weight);
+	out.writeShort(port);
+	target.toWire(out, null);
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (target == null)
+		return;
+
+	out.writeShort(priority);
+	out.writeShort(weight);
+	out.writeShort(port);
+	target.toWireCanonical(out, null);
 }
 
 }

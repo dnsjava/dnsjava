@@ -68,12 +68,12 @@ getOS() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (cpu == null || os == null)
 		return;
 
-	dbs.writeString(cpu);
-	dbs.writeString(os);
+	out.writeString(cpu);
+	out.writeString(os);
 }
 
 /**

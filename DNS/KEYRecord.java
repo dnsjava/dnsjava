@@ -155,15 +155,15 @@ getKey() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
 		return;
 
-	dbs.writeShort(flags);
-	dbs.writeByte(proto);
-	dbs.writeByte(alg);
+	out.writeShort(flags);
+	out.writeByte(proto);
+	out.writeByte(alg);
 	if (key != null)
-		dbs.write(key);
+		out.write(key);
 }
 
 }

@@ -183,19 +183,35 @@ getSignature() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (signature == null)
 		return;
 
-	dbs.writeShort(covered);
-	dbs.writeByte(alg);
-	dbs.writeByte(labels);
-	dbs.writeInt(origttl);
-	dbs.writeInt((int)(expire.getTime() / 1000));
-	dbs.writeInt((int)(timeSigned.getTime() / 1000));
-	dbs.writeShort(footprint);
-	signer.toWire(dbs, null);
-	dbs.write(signature);
+	out.writeShort(covered);
+	out.writeByte(alg);
+	out.writeByte(labels);
+	out.writeInt(origttl);
+	out.writeInt((int)(expire.getTime() / 1000));
+	out.writeInt((int)(timeSigned.getTime() / 1000));
+	out.writeShort(footprint);
+	signer.toWire(out, null);
+	out.write(signature);
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (signature == null)
+		return;
+
+	out.writeShort(covered);
+	out.writeByte(alg);
+	out.writeByte(labels);
+	out.writeInt(origttl);
+	out.writeInt((int)(expire.getTime() / 1000));
+	out.writeInt((int)(timeSigned.getTime() / 1000));
+	out.writeShort(footprint);
+	signer.toWireCanonical(out, null);
+	out.write(signature);
 }
 
 private String

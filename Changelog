@@ -1,4 +1,14 @@
+4/16/1999
+	- jnamed wasn't looking up non-ANY queries correctly in a zone
+	- SimpleResolver should use TCP if query length is longer than UDP
+		packet size
+	- More javadoc-ed classes in DNS.*
+	- MyStringTokenizer moved to DNS.utils
+
 4/15/1999
+	- More javadoc-ed classes in DNS.*
+	- Moved functions from DNS.IO to DNS.utils.base64 and DNS.Master
+	- Implemented search path for dns.getRecords functions
 	- 0.8.3 released
 	- Restrict number of WorkerThreads to 10
 	- ExtendedResolver timer code fixes

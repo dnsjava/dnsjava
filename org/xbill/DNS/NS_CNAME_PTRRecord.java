@@ -60,11 +60,19 @@ getTarget() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (target == null)
 		return;
 
-	target.toWire(dbs, c);
+	target.toWire(out, c);
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (target == null)
+		return;
+
+	target.toWireCanonical(out);
 }
 
 }

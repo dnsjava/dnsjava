@@ -168,31 +168,36 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (alg == null)
 		return;
 
-	alg.toWire(dbs, null);
+	alg.toWire(out, null);
 
 	long time = timeSigned.getTime() / 1000;
 	short timeHigh = (short) (time >> 32);
 	int timeLow = (int) (time);
-	dbs.writeShort(timeHigh);
-	dbs.writeInt(timeLow);
-	dbs.writeShort(fudge);
+	out.writeShort(timeHigh);
+	out.writeInt(timeLow);
+	out.writeShort(fudge);
 
-	dbs.writeShort((short)signature.length);
-	dbs.write(signature);
+	out.writeShort((short)signature.length);
+	out.write(signature);
 
-	dbs.writeShort(originalID);
-	dbs.writeShort(error);
+	out.writeShort(originalID);
+	out.writeShort(error);
 
 	if (other != null) {
-		dbs.writeShort((short)other.length);
-		dbs.write(other);
+		out.writeShort((short)other.length);
+		out.write(other);
 	}
 	else
-		dbs.writeShort(0);
+		out.writeShort(0);
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	throw new IOException("A TSIG should never be converted to canonical");
 }
 
 }

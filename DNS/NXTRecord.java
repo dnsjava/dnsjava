@@ -98,15 +98,30 @@ getBitmap() {
 }
 
 void
-rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (next == null)
 		return;
 
-	next.toWire(dbs, null);
+	next.toWire(out, null);
 	for (int i = 0, t = 0; i < bitmap.size(); i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
 		if (i % 8 == 7 || i == bitmap.size() - 1) {
-			dbs.writeByte(t);
+			out.writeByte(t);
+			t = 0;
+		}
+	}
+}
+
+void
+rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (next == null)
+		return;
+
+	next.toWireCanonical(out);
+	for (int i = 0, t = 0; i < bitmap.size(); i++) {
+		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
+		if (i % 8 == 7 || i == bitmap.size() - 1) {
+			out.writeByte(t);
 			t = 0;
 		}
 	}
