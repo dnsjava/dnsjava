@@ -18,6 +18,11 @@ static void printByteString(String s, byte [] b, int offset, int length) {
 
 public hmacSigner(byte [] key) {
 	int i;
+	if (key.length > PADLEN) {
+		md5 mdc = new md5(key);
+		mdc.calc();
+		key = mdc.toBytes();
+	}
 	ipad = new byte[PADLEN];
 	opad = new byte[PADLEN];
 	for (i = 0; i < key.length; i++) {
