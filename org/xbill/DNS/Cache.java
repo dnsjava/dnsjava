@@ -246,44 +246,42 @@ allElements(Object types) {
 }
 
 private synchronized Element
-oneElement(Object types, int type) {
+oneElement(Name name, Object types, int type, int minCred) {
+	Element found = null;
+
 	if (type == Type.ANY)
 		throw new IllegalArgumentException("oneElement(ANY)");
 	if (types instanceof List) {
 		List list = (List) types;
 		for (int i = 0; i < list.size(); i++) {
 			Element set = (Element) list.get(i);
-			if (set.getType() == type)
-				return set;
+			if (set.getType() == type) {
+				found = set;
+				break;
+			}
 		}
 	} else {
 		Element set = (Element) types;
 		if (set.getType() == type)
-			return set;
+			found = set;
 	}
-	return null;
-}
-
-private synchronized Element
-oneElementWithCheck(Name name, Object types, int type, int minCred) {
-	Element element = oneElement(types, type);
-	if (element == null)
+	if (found == null)
 		return null;
-	if (element.expired()) {
+	if (found.expired()) {
 		removeElement(name, type);
 		return null;
 	}
-	if (element.credibility < minCred)
+	if (found.credibility < minCred)
 		return null;
-	return element;
+	return found;
 }
 
 private synchronized Element
-findElement(Name name, int type) {
+findElement(Name name, int type, int minCred) {
 	Object types = exactName(name);
 	if (types == null)
 		return null;
-	return oneElement(types, type);
+	return oneElement(name, types, type, minCred);
 }
 
 private synchronized void
@@ -363,13 +361,12 @@ addRecord(Record r, int cred, Object o) {
 	int type = r.getRRsetType();
 	if (!Type.isRR(type))
 		return;
-	Element element = findElement(name, type);
-	if (element == null || cred > element.credibility) {
+	Element element = findElement(name, type, cred);
+	if (element == null) {
 		RRset rrset = new RRset();
 		rrset.addRR(r);
 		addRRset(rrset, cred);
-	}
-	else if (cred == element.credibility) {
+	} else if (cred == element.credibility) {
 		if (element instanceof PositiveElement) {
 			PositiveElement pe = (PositiveElement) element;
 			pe.rrset.addRR(r);
@@ -388,12 +385,12 @@ addRRset(RRset rrset, int cred) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
-	Element element = findElement(name, type);
+	Element element = findElement(name, type, cred);
 	if (ttl == 0) {
-		if (element != null && cred >= element.credibility)
+		if (element != null && cred > element.credibility)
 			removeElement(name, type);
 	} else {
-		if (element == null || cred >= element.credibility)
+		if (element == null)
 			addElement(name,
 				   new PositiveElement(rrset, cred, maxcache));
 	}
@@ -409,20 +406,19 @@ addRRset(RRset rrset, int cred) {
  */
 public void
 addNegative(Name name, int type, SOARecord soa, int cred) {
-	Element element = findElement(name, type);
-	if (soa == null || soa.getTTL() == 0) {
-		if (element != null && cred >= element.credibility)
+	long ttl = 0;
+	if (soa != null)
+		ttl = soa.getTTL();
+	Element element = findElement(name, type, cred);
+	if (ttl == 0) {
+		if (element != null && cred > element.credibility)
 			removeElement(name, type);
+	} else {
+		if (element == null)
+			addElement(name,
+				   new NegativeElement(name, type, soa, cred,
+						       maxncache));
 	}
-	if (element == null || cred >= element.credibility)
-		addElement(name, new NegativeElement(name, type, soa, cred,
-						     maxncache));
-}
-
-private void
-logLookup(Name name, int type, String msg) {
-	System.err.println("lookupRecords(" + name + " " +
-			   Type.string(type) + "): " + msg);
 }
 
 /**
@@ -480,7 +476,7 @@ lookup(Name name, int type, int minCred) {
 		}
 
 		/* Look for an NS */
-		element = oneElementWithCheck(tname, types, Type.NS, minCred);
+		element = oneElement(tname, types, Type.NS, minCred);
 		if (element != null && element instanceof PositiveElement) {
 			pe = (PositiveElement) element;
 			return new SetResponse(SetResponse.DELEGATION,
@@ -492,8 +488,7 @@ lookup(Name name, int type, int minCred) {
 		 * Otherwise, look for a DNAME.
 		 */
 		if (isExact) {
-			element = oneElementWithCheck(tname, types, type,
-						      minCred);
+			element = oneElement(tname, types, type, minCred);
 			if (element != null &&
 			    element instanceof PositiveElement)
 			{
@@ -506,8 +501,7 @@ lookup(Name name, int type, int minCred) {
 				return sr;
 			}
 
-			element = oneElementWithCheck(tname, types, Type.CNAME,
-						      minCred);
+			element = oneElement(tname, types, Type.CNAME, minCred);
 			if (element != null &&
 			    element instanceof PositiveElement)
 			{
@@ -516,8 +510,7 @@ lookup(Name name, int type, int minCred) {
 						       pe.rrset);
 			}
 		} else {
-			element = oneElementWithCheck(tname, types, Type.DNAME,
-						      minCred);
+			element = oneElement(tname, types, Type.DNAME, minCred);
 			if (element != null &&
 			    element instanceof PositiveElement)
 			{
@@ -529,7 +522,7 @@ lookup(Name name, int type, int minCred) {
 
 		/* Check for the special NXDOMAIN element. */
 		if (isExact) {
-			element = oneElementWithCheck(tname, types, 0, minCred);
+			element = oneElement(tname, types, 0, minCred);
 			if (element != null)
 				return SetResponse.ofType(SetResponse.NXDOMAIN);
 		}
