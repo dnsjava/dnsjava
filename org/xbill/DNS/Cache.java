@@ -21,11 +21,11 @@ import java.lang.ref.*;
 public class Cache extends NameSet {
 
 private abstract static class Element implements TypedObject {
-	byte credibility;
+	int credibility;
 	int expire;
 
 	protected void
-	setValues(byte credibility, long ttl) {
+	setValues(int credibility, long ttl) {
 		this.credibility = credibility;
 		this.expire = (int)((System.currentTimeMillis() / 1000) + ttl);
 		if (this.expire < 0 || this.expire > Integer.MAX_VALUE)
@@ -45,7 +45,7 @@ private static class PositiveElement extends Element {
 	RRset rrset;
 
 	public
-	PositiveElement(RRset r, byte cred, long maxttl) {
+	PositiveElement(RRset r, int cred, long maxttl) {
 		rrset = r;
 		long ttl = r.getTTL();
 		if (maxttl >= 0 && maxttl < ttl)
@@ -74,7 +74,7 @@ private static class NegativeElement extends Element {
 	SOARecord soa;
 
 	public
-	NegativeElement(Name name, int type, SOARecord soa, byte cred,
+	NegativeElement(Name name, int type, SOARecord soa, int cred,
 			long maxttl)
 	{
 		this.name = name;
@@ -237,7 +237,7 @@ Cache(String file) throws IOException {
  * @see Record
  */
 public void
-addRecord(Record r, byte cred, Object o) {
+addRecord(Record r, int cred, Object o) {
 	Name name = r.getName();
 	int type = r.getRRsetType();
 	if (!Type.isRR(type))
@@ -264,7 +264,7 @@ addRecord(Record r, byte cred, Object o) {
  * @see RRset
  */
 public void
-addRRset(RRset rrset, byte cred) {
+addRRset(RRset rrset, int cred) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
@@ -292,7 +292,7 @@ addRRset(RRset rrset, byte cred) {
  * @param cred The credibility of the negative entry
  */
 public void
-addNegative(Name name, int type, SOARecord soa, byte cred) {
+addNegative(Name name, int type, SOARecord soa, int cred) {
 	if (verifier != null && secure)
 		return;
 	Element element = (Element) findExactSet(name, type);
@@ -322,7 +322,7 @@ logLookup(Name name, int type, String msg) {
  * @see Credibility
  */
 public SetResponse
-lookupRecords(Name name, int type, byte minCred) {
+lookupRecords(Name name, int type, int minCred) {
 	SetResponse cr = null;
 	boolean verbose = Options.check("verbosecache");
 	Object o = lookup(name, type);
@@ -491,7 +491,7 @@ lookupRecords(Name name, int type, byte minCred) {
 }
 
 private RRset []
-findRecords(Name name, int type, byte minCred) {
+findRecords(Name name, int type, int minCred) {
 	SetResponse cr = lookupRecords(name, type, minCred);
 	if (cr.isSuccessful())
 		return cr.answers();
@@ -551,7 +551,7 @@ verifyRecords(Cache tcache) {
 	}
 }
 
-private final byte
+private final int
 getCred(int section, boolean isAuth) {
 	if (section == Section.ANSWER) {
 		if (isAuth)
@@ -600,7 +600,7 @@ addMessage(Message in) {
 	Name curname;
 	int qtype;
 	int qclass;
-	byte cred;
+	int cred;
 	int rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
 	boolean completed = false;
@@ -688,7 +688,7 @@ addMessage(Message in) {
 				soarec = (SOARecord) soa.first();
 			addNegative(curname, cachetype, soarec, cred);
 			if (response == null) {
-				byte responseType;
+				int responseType;
 				if (rcode == Rcode.NXDOMAIN)
 					responseType = SetResponse.NXDOMAIN;
 				else

@@ -30,7 +30,7 @@ private static Map defaultCaches;
 private Resolver resolver;
 private Name [] searchPath;
 private Cache cache;
-private byte credibility;
+private int credibility;
 private Name name;
 private int type;
 private int dclass;
@@ -321,7 +321,7 @@ setCache(Cache cache) {
  * @param credibility The minimum credibility level.
  */
 public void
-setCredibility(byte credibility) {
+setCredibility(int credibility) {
 	this.credibility = credibility;
 }
 

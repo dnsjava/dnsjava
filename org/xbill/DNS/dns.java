@@ -123,7 +123,7 @@ getCache() {
  * @return The matching records, or null if none are found
  */
 public static Record []
-getRecords(String namestr, int type, int dclass, byte cred) {
+getRecords(String namestr, int type, int dclass, int cred) {
 	try {
 		Lookup lookup = new Lookup(namestr, type, dclass);
 		lookup.setCredibility(cred);

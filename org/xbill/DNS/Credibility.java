@@ -18,33 +18,33 @@ private
 Credibility() {}
 
 /** A hint or cache file on disk. */
-public static final byte HINT			= 0;
+public static final int HINT			= 0;
 
 /** The additional section of a response. */
-public static final byte ADDITIONAL	= 1;
+public static final int ADDITIONAL		= 1;
 
 /** The additional section of a response. */
-public static final byte GLUE		= 2;
+public static final int GLUE			= 2;
 
 /** The authority section of a nonauthoritative response. */
-public static final byte NONAUTH_AUTHORITY	= 3;
+public static final int NONAUTH_AUTHORITY	= 3;
 
 /** The answer section of a nonauthoritative response. */
-public static final byte NONAUTH_ANSWER		= 3;
+public static final int NONAUTH_ANSWER		= 3;
 
 /** The authority section of an authoritative response. */
-public static final byte AUTH_AUTHORITY		= 4;
+public static final int AUTH_AUTHORITY		= 4;
 
 /** The answer section of a authoritative response. */
-public static final byte AUTH_ANSWER		= 4;
+public static final int AUTH_ANSWER		= 4;
 
 /** A zone. */
-public static final byte ZONE			= 5;
+public static final int ZONE			= 5;
 
 /** Credible data. */
-public static final byte NORMAL			= 3;
+public static final int NORMAL			= 3;
 
 /** Data not required to be credible. */
-public static final byte ANY			= 1;
+public static final int ANY			= 1;
 
 }

@@ -17,62 +17,62 @@ public class SetResponse {
 /**
  * The Cache contains no information about the requested name/type
  */
-static final byte UNKNOWN	= 0;
+static final int UNKNOWN	= 0;
 
 /**
  * The Zone does not contain the requested name, or the Cache has
  * determined that the name does not exist.
  */
-static final byte NXDOMAIN	= 1;
+static final int NXDOMAIN	= 1;
 
 /**
  * The Zone contains the name, but no data of the requested type,
  * or the Cache has determined that the name exists and has no data
  * of the requested type.
  */
-static final byte NXRRSET	= 2;
+static final int NXRRSET	= 2;
 
 /**
  * A delegation enclosing the requested name was found.
  */
-static final byte DELEGATION	= 3;
+static final int DELEGATION	= 3;
 
 /**
  * The Cache/Zone found a CNAME when looking for the name.
  * @see CNAMERecord
  */
-static final byte CNAME		= 4;
+static final int CNAME		= 4;
 
 /**
  * The Cache/Zone found a DNAME when looking for the name.
  * @see DNAMERecord
  */
-static final byte DNAME		= 5;
+static final int DNAME		= 5;
 
 /**
  * The Cache/Zone has successfully answered the question for the
  * requested name/type/class.
  */
-static final byte SUCCESSFUL	= 6;
+static final int SUCCESSFUL	= 6;
 
 private static final SetResponse unknown = new SetResponse(UNKNOWN);
 private static final SetResponse nxdomain = new SetResponse(NXDOMAIN);
 private static final SetResponse nxrrset = new SetResponse(NXRRSET);
 
-private byte type;
+private int type;
 private Object data;
 
 private
 SetResponse() {}
 
-SetResponse(byte type, RRset rrset) {
+SetResponse(int type, RRset rrset) {
 	if (type < 0 || type > 6)
 		throw new IllegalArgumentException("invalid type");
 	this.type = type;
 	this.data = rrset;
 }
 
-SetResponse(byte type) {
+SetResponse(int type) {
 	if (type < 0 || type > 6)
 		throw new IllegalArgumentException("invalid type");
 	this.type = type;
@@ -80,7 +80,7 @@ SetResponse(byte type) {
 }
 
 static SetResponse
-ofType(byte type) {
+ofType(int type) {
 	switch (type) {
 		case UNKNOWN:
 			return unknown;
