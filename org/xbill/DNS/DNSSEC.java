@@ -37,15 +37,8 @@ public static final byte Failed = -1;
 public static final byte Insecure = 0;
 public static final byte Secure = 1;
 
-/* 
- * Creates an array containing fields of the SIG record and the RRsets to
- * be signed.  The output of this should be cryptographically signed or
- * verified.
- */
-public static byte []
-digestRRset(SIGRecord sig, RRset rrset) {
-	DataByteOutputStream out = new DataByteOutputStream();
-
+private static void
+digestSIG(DataByteOutputStream out, SIGRecord sig) {
 	out.writeShort(sig.getTypeCovered());
 	out.writeByte(sig.getAlgorithm());
 	out.writeByte(sig.getLabels());
@@ -54,6 +47,19 @@ digestRRset(SIGRecord sig, RRset rrset) {
 	out.writeInt((int) (sig.getTimeSigned().getTime() / 1000));
 	out.writeShort(sig.getFootprint());
 	sig.getSigner().toWireCanonical(out);
+}
+
+/**
+ * Creates an array containing fields of the SIG record and the RRsets to
+ * be signed/verified.
+ * @param sig The SIG record used to sign/verify the rrset.
+ * @param rrset The data to be signed/verified.
+ * @return The data to be cryptographically signed or verified.
+ */
+public static byte []
+digestRRset(SIGRecord sig, RRset rrset) {
+	DataByteOutputStream out = new DataByteOutputStream();
+	digestSIG(out, sig);
 
 	int size = rrset.size();
 	byte [][] records = new byte[size][];
@@ -72,6 +78,26 @@ digestRRset(SIGRecord sig, RRset rrset) {
 	Arrays.sort(records);
 	for (int i = 0; i < records.length; i++)
 		out.writeArray(records[i]);
+	return out.toByteArray();
+}
+
+/**
+ * Creates an array containing fields of the SIG record and the message to
+ * be signed.
+ * @param sig The SIG record used to sign/verify the rrset.
+ * @param msg The message to be signed/verified.
+ * @param previous If this is a response, the signature from the query.
+ * @return The data to be cryptographically signed or verified.
+ */
+public static byte []
+digestMessage(SIGRecord sig, Message msg, byte [] previous) {
+	DataByteOutputStream out = new DataByteOutputStream();
+	digestSIG(out, sig);
+
+	if (previous != null)
+		out.writeArray(previous);
+	
+	msg.toWire(out);
 	return out.toByteArray();
 }
 
