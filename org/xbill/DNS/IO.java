@@ -6,9 +6,13 @@ package DNS;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Routines to perform various input/output operations
+ */
+
 public class IO {
 
-static String
+private static String
 stripTrailing(String s) {
 	if (s == null)
 		return null;
@@ -25,6 +29,12 @@ stripTrailing(String s) {
 	return "";
 }
 
+/**
+ * Reads a line using the master file format.  Removes all data following
+ * a semicolon and uses parentheses as line continuation markers.
+ * @param br The BufferedReader supplying the data
+ * @return A String representing the normalized line
+ */
 public static String
 readExtendedLine(BufferedReader br) throws IOException {
 	String s = stripTrailing(br.readLine());
@@ -47,6 +57,14 @@ readExtendedLine(BufferedReader br) throws IOException {
 	return sb.toString();
 }
 
+/**
+ * Formats a base64-encoded String into presentable output
+ * @param s The base64-encoded String
+ * @param lineLength The number of characters per line
+ * @param prefix A string prefixing the characters on each line
+ * @param addClose Whether to add a close parenthesis or not
+ * @return A String representing the formatted output
+ */
 public static String
 formatBase64String(String s, int lineLength, String prefix, boolean addClose) {
 	StringBuffer sb = new StringBuffer();
