@@ -5,27 +5,54 @@ package DNS;
 
 import DNS.utils.*;
 
+/** Constants and functions relating to DNS rcodes (error values) */
+
 public final class Rcode {
 
 private static StringValueTable rcodes = new StringValueTable();
 
+/** No error */
 public static final byte NOERROR	= 0;
+
+/** Format error */
 public static final byte FORMERR	= 1;
+
+/** Server failure */
 public static final byte SERVFAIL	= 2;
+
+/** The name does not exist */
 public static final byte NXDOMAIN	= 3;
+
+/** The operation requested is not implemented */
 public static final byte NOTIMPL	= 4;
+
+/** The operation was refused by the server */
 public static final byte REFUSED	= 5;
+
+/** The name exists */
 public static final byte YXDOMAIN	= 6;
+
+/** The RRset (name, type) exists */
 public static final byte YXRRSET	= 7;
+
+/** The RRset (name, type) does not exist */
 public static final byte NXRRSET	= 8;
+
+/** The requestor is not authorized to perform this operation */
 public static final byte NOTAUTH	= 9;
+
+/** The zone specified is not a zone */
 public static final byte NOTZONE	= 10;
 
 /* TSIG only rcodes */
+/** The signature is invalid (TSIG extended error) */
 public static final byte BADSIG		= 16;
+
+/** The key is invalid (TSIG extended error) */
 public static final byte BADKEY		= 17;
+
+/** The time is out of range (TSIG extended error) */
 public static final byte BADTIME	= 18;
-public static final byte BADID          = 19;
 
 static {
 	rcodes.put2(NOERROR, "NOERROR");
@@ -42,15 +69,19 @@ static {
 	rcodes.put2(BADSIG, "BADSIG");
 	rcodes.put2(BADKEY, "BADKEY");
 	rcodes.put2(BADTIME, "BADTIME");
-	rcodes.put2(BADID, "BADID");
 }
 
+private
+Rcode() {}
+
+/** Converts a numeric Rcode into a String */
 public static String
 string(int i) {
 	String s = rcodes.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+/** Converts a String represntation of an Rcode into its numeric value */
 public static byte
 value(String s) {
 	byte i = (byte) rcodes.getValue(s.toUpperCase());
