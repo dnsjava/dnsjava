@@ -14,8 +14,20 @@ import org.xbill.DNS.utils.*;
 
 public class LOCRecord extends Record {
 
+private static NumberFormat w2, w3;
+
 private long size, hPrecision, vPrecision;
 private long latitude, longitude, altitude;
+
+static {
+	w2 = new DecimalFormat();
+	w2.setMaximumFractionDigits(2);
+	w2.setGroupingUsed(false);
+
+	w3 = new DecimalFormat();
+	w3.setMaximumFractionDigits(3);
+	w3.setGroupingUsed(false);
+}
 
 LOCRecord() {}
 
@@ -147,7 +159,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 private String
-positionToString(NumberFormat nf, long value, char pos, char neg) {
+positionToString(long value, char pos, char neg) {
 	StringBuffer sb = new StringBuffer();
 	char direction;
 
@@ -166,7 +178,7 @@ positionToString(NumberFormat nf, long value, char pos, char neg) {
 	temp = temp % (60 * 1000);
 	sb.append(" ");
 
-	sb.append(nf.format(((double)temp) / 1000)); /* seconds */
+	sb.append(w3.format(((double)temp) / 1000)); /* seconds */
 	sb.append(" ");
 
 	sb.append(direction);
@@ -181,34 +193,29 @@ rrToString() {
 	StringBuffer sb = new StringBuffer();
 	long temp;
 	char direction;
-	NumberFormat nf = new DecimalFormat();
-	nf.setMaximumFractionDigits(3);
-	nf.setGroupingUsed(false);
 
 	/* Latitude */
-	sb.append(positionToString(nf, latitude, 'N', 'S'));
+	sb.append(positionToString(latitude, 'N', 'S'));
 	sb.append(" ");
 
 	/* Latitude */
-	sb.append(positionToString(nf, longitude, 'E', 'W'));
+	sb.append(positionToString(longitude, 'E', 'W'));
 	sb.append(" ");
-
-	nf.setMaximumFractionDigits(2);
 
 	/* Altitude */
-	sb.append(nf.format((double)(altitude - 10000000)/100));
+	sb.append(w2.format((double)(altitude - 10000000)/100));
 	sb.append("m ");
 
 	/* Size */
-	sb.append(nf.format((double)size/100));
+	sb.append(w2.format((double)size/100));
 	sb.append("m ");
 
 	/* Horizontal precision */
-	sb.append(nf.format((double)hPrecision/100));
+	sb.append(w2.format((double)hPrecision/100));
 	sb.append("m ");
 
 	/* Vertical precision */
-	sb.append(nf.format((double)vPrecision/100));
+	sb.append(w2.format((double)vPrecision/100));
 	sb.append("m");
 
 	return sb.toString();
