@@ -7,11 +7,30 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * Start of Authority - describes properties of a zone.
+ */
+
 public class SOARecord extends Record {
 
-Name host, admin;
-int serial, refresh, retry, expire, minimum;
+private Name host, admin;
+private int serial, refresh, retry, expire, minimum;
 
+private
+SOARecord() {}
+
+/**
+ * Creates an SOA Record from the given data
+ * @param host The primary nameserver for the zone
+ * @param admin The zone administrator's address
+ * @param serial The zone's serial number
+ * @param refresh The amount of time until a secondary checks for a new serial
+ * number
+ * @param retry The amount of time between a secondary's checks for a new
+ * serial number
+ * @param expire The amount of time until a secondary expires a zone
+ * @param minimum The minimum TTL for records in the zone
+*/
 public
 SOARecord(Name _name, short _dclass, int _ttl, Name _host, Name _admin,
 	  int _serial, int _refresh, int _retry, int _expire, int _minimum)
@@ -58,7 +77,7 @@ throws IOException
 	minimum = TTL.parseTTL(st.nextToken());
 }
 
-
+/** Convert to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -81,36 +100,43 @@ toString() {
 	return sb.toString();
 }
 
+/** Returns the primary nameserver */
 public Name
 getHost() {  
 	return host;
 }       
 
+/** Returns the zone administrator's address */
 public Name
 getAdmin() {  
 	return admin;
 }       
 
+/** Returns the zone's serial number */
 public int
 getSerial() {  
 	return serial;
 }       
 
+/** Returns the zone refresh interval */
 public int
 getRefresh() {  
 	return refresh;
 }       
 
+/** Returns the zone retry interval */
 public int
 getRetry() {  
 	return retry;
 }       
 
+/** Returns the time until a secondary expires a zone */
 public int
 getExpire() {  
 	return expire;
 }       
 
+/** Returns the minimum TTL for records in the zone */
 public int
 getMinimum() {  
 	return minimum;

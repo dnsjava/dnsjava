@@ -7,11 +7,22 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Mail Exchange - specifies where mail to a domain is sent */
+
 public class MXRecord extends Record {
 
-short priority;
-Name target;
+private short priority;
+private Name target;
 
+private
+MXRecord() {}
+
+/**
+ * Creates an MX Record from the given data
+ * @param priority The priority of this MX.  Records with lower priority
+ * are preferred.
+ * @param target The host that mail is sent to
+ */
 public
 MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 {
@@ -41,6 +52,7 @@ throws IOException
 	target = new Name(st.nextToken(), origin);
 }
 
+/** Converts to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -52,11 +64,13 @@ toString() {
 	return sb.toString();
 }
 
+/** Returns the host that mail is sent to */
 public Name
 getTarget() {
 	return target;
 }
 
+/** Returns the priority of this MX */
 public short
 getPriority() {
 	return priority;

@@ -119,7 +119,7 @@ public static final short NAPTR		= 35;
 /** Certificate */
 public static final short CERT		= 37;
 
-/** OPT record - contains EDNS metadata */
+/** Options - contains EDNS metadata */
 public static final short OPT		= 249;
 
 /** Transaction signature */

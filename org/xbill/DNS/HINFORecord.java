@@ -7,10 +7,20 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Host Information - describes the CPU and OS of a host */
+
 public class HINFORecord extends Record {
 
-String cpu, os;
+private String cpu, os;
 
+private
+HINFORecord() {}
+
+/**
+ * Creates an HINFO Record from the given data
+ * @param cpu A string describing the host's CPU
+ * @param os A string describing the host's OS
+ */
 public
 HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
 {
@@ -41,12 +51,17 @@ throws IOException
 	os = st.nextToken();
 }
 
-
+/**
+ * Returns the host's CPU
+ */
 public String
 getCPU() {
 	return cpu;
 }
 
+/**
+ * Returns the host's OS
+ */
 public String
 getOS() {
 	return os;
@@ -61,6 +76,9 @@ rrToWire(DataByteOutputStream dbs, Compression c) {
 	dbs.writeString(os);
 }
 
+/**
+ * Converts to a string
+ */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();

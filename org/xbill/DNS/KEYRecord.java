@@ -7,16 +7,60 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * Key - contains a cryptographic public key.  The data can be converted
+ * to objects implementing java.security.interfaces.PublicKey
+ * @see DNSSEC
+ */
+
 public class KEYRecord extends Record {
 
-short flags;
-byte proto, alg;
-byte [] key;
+private short flags;
+private byte proto, alg;
+private byte [] key;
 
 /* flags */
+/** This key cannot be used for confidentiality (encryption) */
 public static final int NOCONF = 0x8000;
+
+/** This key cannot be used for authentication */
 public static final int NOAUTH = 0x4000;
 
+/** A zone key */
+public static final int ZONE = 0x1000;
+
+/** A host/end entity key */
+public static final int HOST = 0x2000;
+
+/** A user key */
+public static final int USER = 0x0000;
+
+/* protocols */
+/** Key was created for use with transaction level security */
+public static final int TLS = 1;
+
+/** Key was created for use with email */
+public static final int EMAIL = 2;
+
+/** Key was created for use with DNSSEC */
+public static final int DNSSEC = 3;
+
+/** Key was created for use with IPSEC */
+public static final int IPSEC = 4;
+
+/** Key was created for use with any protocol */
+public static final int ANY = 255;
+
+private
+KEYRecord() {}
+
+/**
+ * Creates a KEY Record from the given data
+ * @param flags Flags describing the key's properties
+ * @param proto The protocol that the key was created for
+ * @param alg The key's algorithm
+ * @param key Binary data representing the key
+ */
 public
 KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
 	  int _alg, byte []  _key)
@@ -57,6 +101,9 @@ throws IOException
 	key = base64.fromString(st.nextToken());
 }
 
+/**
+ * Converts to a String
+ */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -76,21 +123,33 @@ toString() {
 	return sb.toString();
 }
 
+/**
+ * Returns the flags describing the key's properties
+ */
 public short
 getFlags() {
 	return flags;
 }
 
+/**
+ * Returns the protocol that the key was created for
+ */
 public byte
 getProtocol() {
 	return proto;
 }
 
+/**
+ * Returns the key's algorithm
+ */
 public byte
 getAlgorithm() {
 	return alg;
 }
 
+/**
+ * Returns the binary data representing the key
+ */
 public byte []
 getKey() {
 	return key;

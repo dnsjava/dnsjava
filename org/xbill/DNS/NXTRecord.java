@@ -7,11 +7,26 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * Next name - this record contains the following name in an ordered list
+ * of names in the zone, and a set of types for which records exist for
+ * this name.  The presence of this record in a response signifies a
+ * failed query for data in a DNSSEC-signed zone.
+ */
+
 public class NXTRecord extends Record {
 
-Name next;
-BitSet bitmap;
+private Name next;
+private BitSet bitmap;
 
+private
+NXTRecord() {}
+
+/**
+ * Creates an NXT Record from the given data
+ * @param next The following name in an ordered list of the zone
+ * @param bitmap The set of type for which records exist at this name
+*/
 public
 NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
 	super(_name, Type.NXT, _dclass, _ttl);
@@ -55,6 +70,7 @@ throws IOException
 	}
 }
 
+/** Converts to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -69,11 +85,13 @@ toString() {
 	return sb.toString();
 }
 
+/** Returns the next name */
 public Name
 getNext() {
 	return next;
 }
 
+/** Returns the set of types defined for this name */
 public BitSet
 getBitmap() {
 	return bitmap;
