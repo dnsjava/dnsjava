@@ -191,7 +191,7 @@ nextRecord() throws IOException {
 			if (last == null && defaultTTL < 0)
 				throw st.exception("missing TTL");
 			else if (defaultTTL >= 0)
-				ttl = (int) defaultTTL;
+				ttl = defaultTTL;
 			else
 				ttl = last.getTTL();
 		}
