@@ -23,6 +23,7 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.net.*;
+import java.nio.channels.*;
 import java.util.*;
 
 /**
@@ -45,13 +46,17 @@ private static final int IXFR_ADD	= 5;
 private static final int AXFR		= 6;
 private static final int END		= 7;
 
-private SimpleResolver res;
 private Name zname;
 private int qtype;
 private long ixfr_serial;
 private boolean want_fallback;
 
-private SimpleResolver.Stream stream;
+private SocketAddress address;
+private SelectionKey key;
+private TSIG tsig;
+private TSIG.StreamVerifier verifier;
+private long timeout = 900 * 1000;
+private long endTime;
 
 private int state;
 private long end_serial;
@@ -91,10 +96,11 @@ private
 ZoneTransferIn() {}
 
 private
-ZoneTransferIn(SimpleResolver sres, Name zone, int xfrtype,
-	       long serial, boolean fallback)
+ZoneTransferIn(Name zone, int xfrtype, long serial, boolean fallback,
+	       InetSocketAddress address, TSIG key)
 {
-	res = sres;
+	this.address = address;
+	this.tsig = key;
 	if (zone.isAbsolute())
 		zname = zone;
 	else {
@@ -112,27 +118,6 @@ ZoneTransferIn(SimpleResolver sres, Name zone, int xfrtype,
 	state = INITIALSOA;
 }
 
-private static SimpleResolver
-newResolver(String host, int port, TSIG key) throws UnknownHostException {
-	SimpleResolver sres = new SimpleResolver(host);
-	if (port != 0)
-		sres.setPort(port);
-	if (key != null)
-		sres.setTSIGKey(key);
-	return sres;
-}
-
-/**
- * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
- * @param zone The zone to transfer.
- * @param res The resolver to use when doing the transfer.
- * @return The ZoneTransferIn object.
- */
-public static ZoneTransferIn
-newAXFR(Name zone, SimpleResolver res) {
-	return new ZoneTransferIn(res, zone, Type.AXFR, 0, false);
-}
-
 /**
  * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
  * @param zone The zone to transfer.
@@ -146,7 +131,23 @@ public static ZoneTransferIn
 newAXFR(Name zone, String host, int port, TSIG key)
 throws UnknownHostException
 {
-	return newAXFR(zone, newResolver(host, port, key));
+	return new ZoneTransferIn(zone, Type.AXFR, 0, false,
+				  new InetSocketAddress(host, port), key);
+}
+
+/**
+ * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
+ * @param zone The zone to transfer.
+ * @param res The resolver to use when doing the transfer.
+ * @return The ZoneTransferIn object.
+ */
+public static ZoneTransferIn
+newAXFR(Name zone, SimpleResolver res) {
+	ZoneTransferIn xfrin = new ZoneTransferIn(zone, Type.AXFR, 0, false,
+						  res.getAddress(),
+						  res.getTSIGKey());
+	xfrin.timeout = res.getTimeout() * 1000L;
+	return xfrin;
 }
 
 /**
@@ -161,21 +162,7 @@ public static ZoneTransferIn
 newAXFR(Name zone, String host, TSIG key)
 throws UnknownHostException
 {
-	return newAXFR(zone, newResolver(host, 0, key));
-}
-
-/**
- * Instantiates a ZoneTransferIn object to do an IXFR (incremental zone
- * transfer).
- * @param zone The zone to transfer.
- * @param serial The existing serial number.
- * @param fallback If true, fall back to AXFR if IXFR is not supported.
- * @param res The resolver to use when doing the transfer.
- * @return The ZoneTransferIn object.
- */
-public static ZoneTransferIn
-newIXFR(Name zone, long serial, boolean fallback, SimpleResolver res) {
-	return new ZoneTransferIn(res, zone, Type.IXFR, serial, fallback);
+	return newAXFR(zone, host, 0, key);
 }
 
 /**
@@ -195,7 +182,27 @@ newIXFR(Name zone, long serial, boolean fallback,
 	String host, int port, TSIG key)
 throws UnknownHostException
 {
-	return newIXFR(zone, serial, fallback, newResolver(host, port, key));
+	return new ZoneTransferIn(zone, Type.IXFR, serial, fallback,
+				  new InetSocketAddress(host, port), key);
+}
+
+/**
+ * Instantiates a ZoneTransferIn object to do an IXFR (incremental zone
+ * transfer).
+ * @param zone The zone to transfer.
+ * @param serial The existing serial number.
+ * @param fallback If true, fall back to AXFR if IXFR is not supported.
+ * @param res The resolver to use when doing the transfer.
+ * @return The ZoneTransferIn object.
+ */
+public static ZoneTransferIn
+newIXFR(Name zone, long serial, boolean fallback, SimpleResolver res) {
+	ZoneTransferIn xfrin = new ZoneTransferIn(zone, Type.IXFR, serial,
+						  fallback,
+						  res.getAddress(),
+						  res.getTSIGKey());
+	xfrin.timeout = res.getTimeout() * 1000L;
+	return xfrin;
 }
 
 /**
@@ -213,12 +220,14 @@ public static ZoneTransferIn
 newIXFR(Name zone, long serial, boolean fallback, String host, TSIG key)
 throws UnknownHostException
 {
-	return newIXFR(zone, serial, fallback, newResolver(host, 0, key));
+	return newIXFR(zone, serial, fallback, host, 0, key);
 }
 
 private void
 openConnection() throws IOException {
-	stream = new SimpleResolver.Stream(res);
+	key = TCPClient.initialize();
+	endTime = System.currentTimeMillis() + timeout;
+	TCPClient.connect(key, address, endTime);
 }
 
 private void
@@ -234,7 +243,12 @@ sendQuery() throws IOException {
 					   0, 0, 0, 0);
 		query.addRecord(soa, Section.AUTHORITY);
 	}
-	stream.send(query);
+	if (tsig != null) {
+		tsig.apply(query, null);
+		verifier = new TSIG.StreamVerifier(tsig, query.getTSIG());
+	}
+	byte [] out = query.toWire(Message.MAXLENGTH);
+	TCPClient.send(key, out, endTime);
 }
 
 private long
@@ -374,22 +388,46 @@ parseRR(Record rec) throws ZoneTransferException {
 
 private void
 closeConnection() {
-	stream.close();
+	try {
+		TCPClient.cleanup(key);
+	}
+	catch (IOException e) {
+	}
+}
+
+private Message
+parseMessage(byte [] b) throws WireParseException {
+	try {
+		return new Message(b);
+	}
+	catch (IOException e) {
+		if (e instanceof WireParseException)
+			throw (WireParseException) e;
+		throw new WireParseException("Error parsing message");
+	}
 }
 
 private void
 doxfr() throws IOException, ZoneTransferException {
 	sendQuery();
 	while (state != END) {
-		Message response;
-		Record [] answers;
+		byte [] in = TCPClient.recv(key, endTime);
+		Message response =  parseMessage(in);
+		if (response.getHeader().getRcode() == Rcode.NOERROR &&
+		    verifier != null)
+		{
+			TSIGRecord tsigrec = response.getTSIG();
 
-		response = stream.next();
-		if (response.tsigState == Message.TSIG_FAILED) {
-			fail("TSIG failure");
+			int error = verifier.verify(response, in);
+			if (error == Rcode.NOERROR && tsigrec != null)
+				response.tsigState = Message.TSIG_VERIFIED;
+			else if (error == Rcode.NOERROR)
+				response.tsigState = Message.TSIG_INTERMEDIATE;
+			else
+				fail("TSIG failure");
 		}
 
-		answers = response.getSectionArray(Section.ANSWER);
+		Record [] answers = response.getSectionArray(Section.ANSWER);
 
 		if (state == INITIALSOA) {
 			int rcode = response.getRcode();

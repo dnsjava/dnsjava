@@ -66,6 +66,11 @@ SimpleResolver() throws UnknownHostException {
 	this(null);
 }
 
+InetSocketAddress
+getAddress() {
+	return new InetSocketAddress(addr, port);
+}
+
 /** Sets the default host (initially localhost) to query */
 public static void
 setDefaultResolver(String hostname) {
@@ -115,54 +120,19 @@ setTSIGKey(String key) throws UnknownHostException {
 	setTSIGKey(InetAddress.getLocalHost().getHostName(), key);
 }
 
+TSIG
+getTSIGKey() {
+	return tsig;
+}
+
 public void
 setTimeout(int secs) {
 	timeoutValue = secs * 1000;
 }
 
-private byte []
-readUDP(DatagramSocket s, int max) throws IOException {
-	DatagramPacket dp = new DatagramPacket(new byte[max], max);
-	s.receive(dp);
-	byte [] in = new byte[dp.getLength()];
-	System.arraycopy(dp.getData(), 0, in, 0, in.length);
-	if (Options.check("verbosemsg"))
-		System.err.println(hexdump.dump("UDP read", in));
-	return (in);
-}
-
-private void
-writeUDP(DatagramSocket s, byte [] out, InetAddress addr, int port)
-throws IOException
-{
-	if (Options.check("verbosemsg"))
-		System.err.println(hexdump.dump("UDP write", out));
-	s.send(new DatagramPacket(out, out.length, addr, port));
-}
-
-private byte []
-readTCP(Socket s) throws IOException {
-	DataInputStream dataIn;
-
-	dataIn = new DataInputStream(s.getInputStream());
-	int inLength = dataIn.readUnsignedShort();
-	byte [] in = new byte[inLength];
-	dataIn.readFully(in);
-	if (Options.check("verbosemsg"))
-		System.err.println(hexdump.dump("TCP read", in));
-	return (in);
-}
-
-private void
-writeTCP(Socket s, byte [] out) throws IOException {
-	if (Options.check("verbosemsg"))
-		System.err.println(hexdump.dump("TCP write", out));
-	OutputStream outStream = s.getOutputStream();
-	byte [] lengthArray = new byte[2];
-	lengthArray[0] = (byte)(out.length >>> 8);
-	lengthArray[1] = (byte)(out.length & 0xFF);
-	outStream.write(lengthArray);
-	outStream.write(out);
+int
+getTimeout() {
+	return timeoutValue / 1000;
 }
 
 private Message
@@ -237,34 +207,18 @@ send(Message query) throws IOException {
 	int udpSize = maxUDPSize(query);
 	boolean tcp = false;
 	boolean nowrite = false;
+	SocketAddress sa = new InetSocketAddress(addr, port);
+	long endTime = System.currentTimeMillis() + timeoutValue;
 	do {
 		byte [] in;
 
 		if (useTCP || out.length > udpSize)
 			tcp = true;
-		if (tcp) {
-			Socket s = new Socket(addr, port);
-			s.setSoTimeout(timeoutValue);
-			try {
-				writeTCP(s, out);
-				in = readTCP(s);
-			}
-			finally {
-				s.close();
-			}
-		} else {
-			DatagramSocket s = new DatagramSocket();
-			s.setSoTimeout(timeoutValue);
-			try {
-				if (!nowrite) {
-					writeUDP(s, out, addr, port);
-				}
-				in = readUDP(s, udpSize);
-			}
-			finally {
-				s.close();
-			}
-		}
+		if (tcp)
+			in = TCPClient.sendrecv(sa, out, endTime);
+		else
+			in = UDPClient.sendrecv(sa, out, udpSize, endTime);
+
 		/*
 		 * Check that the response is long enough.
 		 */
@@ -353,60 +307,6 @@ sendAXFR(Message query) throws IOException {
 	while (it.hasNext())
 		response.addRecord((Record)it.next(), Section.ANSWER);
 	return response;
-}
-
-static class Stream {
-	SimpleResolver res;
-	Socket sock;
-	TSIG tsig;
-	TSIG.StreamVerifier verifier;
-
-	Stream(SimpleResolver res) throws IOException {
-		this.res = res;
-		sock = new Socket(res.addr, res.port);
-		sock.setSoTimeout(res.timeoutValue);
-		tsig = res.tsig;
-	}
-
-	void
-	send(Message query) throws IOException {
-		if (tsig != null) {
-			tsig.apply(query, null);
-			verifier = new TSIG.StreamVerifier(tsig,
-							   query.getTSIG());
-		}
-
-		byte [] out = query.toWire(Message.MAXLENGTH);
-		res.writeTCP(sock, out);
-	}
-
-	Message
-	next() throws IOException {
-		byte [] in = res.readTCP(sock);
-		Message response =  res.parseMessage(in);
-		if (response.getHeader().getRcode() != Rcode.NOERROR)
-			return response;
-		if (verifier != null) {
-			TSIGRecord tsigrec = response.getTSIG();
-
-			int error = verifier.verify(response, in);
-			if (error == Rcode.NOERROR && tsigrec != null)
-				response.tsigState = Message.TSIG_VERIFIED;
-			else if (error == Rcode.NOERROR)
-				response.tsigState = Message.TSIG_INTERMEDIATE;
-			else
-				response.tsigState = Message.TSIG_FAILED;
-		}
-		return response;
-	}
-
-	void
-	close() {
-		try {
-			sock.close();
-		}
-		catch (IOException e) {}
-	}
 }
 
 }
