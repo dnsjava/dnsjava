@@ -126,16 +126,16 @@ main(String argv[]) throws IOException {
 				break;
 
 			    case 't':
-					res.setTCP(true);
-					break;
+				res.setTCP(true);
+				break;
 
 			    case 'i':
-					res.setIgnoreTruncation(true);
-					break;
+				res.setIgnoreTruncation(true);
+				break;
 
 			    case 'e':
-					res.setEDNS(0);
-					break;
+				res.setEDNS(0);
+				break;
 
 			    default:
 				System.out.print("Invalid option");
