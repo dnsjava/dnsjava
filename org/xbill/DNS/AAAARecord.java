@@ -3,7 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
+import java.net.*;
 
 /**
  * IPv6 Address Record - maps a domain name to an IPv6 address
@@ -13,7 +13,7 @@ import org.xbill.DNS.utils.*;
 
 public class AAAARecord extends Record {
 
-private Inet6Address address;
+private InetAddress address;
 
 AAAARecord() {}
 
@@ -27,42 +27,41 @@ getObject() {
  * @param address The address suffix
  */
 public
-AAAARecord(Name name, int dclass, long ttl, Inet6Address address) {
+AAAARecord(Name name, int dclass, long ttl, InetAddress address) {
 	super(name, Type.AAAA, dclass, ttl);
+	if (Address.familyOf(address) != Address.IPv6)
+		throw new IllegalArgumentException("invalid IPv6 address");
 	this.address = address;
 }
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	address = new Inet6Address(in.readByteArray(16));
+	address = InetAddress.getByAddress(in.readByteArray(16));
 }
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	try {
-		address = new Inet6Address(st.getString());
-	}
-	catch (TextParseException e) {
-		throw st.exception(e.getMessage());
-	}
+	byte [] bytes = Address.toByteArray(st.getString(), Address.IPv6);
+	if (bytes == null)
+		throw st.exception("invalid IPv6 address");
+	address = InetAddress.getByAddress(bytes);
 }
 
 /** Converts rdata to a String */
 String
 rrToString() {
-	return address.toString();
+	return address.getHostAddress();
 }
 
 /** Returns the address */
-public Inet6Address
+public InetAddress
 getAddress() {
 	return address;
 }
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	byte [] b = address.toBytes();
-	out.writeByteArray(b);
+	out.writeByteArray(address.getAddress());
 }
 
 }

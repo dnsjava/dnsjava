@@ -3,7 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
+import java.net.*;
 
 /**
  * A6 Record - maps a domain name to an IPv6 address (experimental)
@@ -14,7 +14,7 @@ import org.xbill.DNS.utils.*;
 public class A6Record extends Record {
 
 private int prefixBits;
-private Inet6Address suffix;
+private InetAddress suffix;
 private Name prefix;
 
 A6Record() {}
@@ -32,10 +32,12 @@ getObject() {
  */
 public
 A6Record(Name name, int dclass, long ttl, int prefixBits,
-	 Inet6Address suffix, Name prefix)
+	 InetAddress suffix, Name prefix)
 {
 	super(name, Type.A6, dclass, ttl);
 	this.prefixBits = checkU8("prefixBits", prefixBits);
+	if (suffix != null && Address.familyOf(suffix) != Address.IPv6)
+		throw new IllegalArgumentException("invalid IPv6 address");
 	this.suffix = suffix;
 	if (prefix != null)
 		this.prefix = checkName("prefix", prefix);
@@ -47,8 +49,9 @@ rrFromWire(DNSInput in) throws IOException {
 	int suffixbits = 128 - prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
 	if (prefixBits < 128) {
-		suffix = new Inet6Address(128 - prefixBits,
-					  in.readByteArray(suffixbytes));
+		byte [] bytes = new byte[16];
+		in.readByteArray(bytes, 16 - suffixbytes, suffixbytes);
+		suffix = InetAddress.getByAddress(bytes);
 	}
 	if (prefixBits > 0)
 		prefix = new Name(in);
@@ -60,12 +63,11 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	if (prefixBits > 128) {
 		throw st.exception("prefix bits must be [0..128]");
 	} else if (prefixBits < 128) {
-		try {
-			suffix = new Inet6Address(st.getString());
-		}
-		catch (TextParseException e) {
-			throw st.exception(e.getMessage());
-		}
+		byte [] bytes = Address.toByteArray(st.getString(),
+						    Address.IPv6);
+		if (bytes == null)
+			throw st.exception("invalid IPv6 address");
+		suffix = InetAddress.getByAddress(bytes);
 	}
 	if (prefixBits > 0)
 		prefix = st.getName(origin);
@@ -78,7 +80,7 @@ rrToString() {
 	sb.append(prefixBits);
 	if (suffix != null) {
 		sb.append(" ");
-		sb.append(suffix);
+		sb.append(suffix.getHostAddress());
 	}
 	if (prefix != null) {
 		sb.append(" ");
@@ -94,7 +96,7 @@ getPrefixBits() {
 }
 
 /** Returns the address suffix */
-public Inet6Address
+public InetAddress
 getSuffix() {
 	return suffix;
 }
@@ -111,7 +113,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (suffix != null) {
 		int suffixbits = 128 - prefixBits;
 		int suffixbytes = (suffixbits + 7) / 8;
-		byte [] data = suffix.toBytes();
+		byte [] data = suffix.getAddress();
 		out.writeByteArray(data, 16 - suffixbytes, suffixbytes);
 	}
 	if (prefix != null)
