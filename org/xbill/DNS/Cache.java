@@ -555,10 +555,11 @@ getCred(short section, boolean isAuth) {
 public SetResponse
 addMessage(Message in) {
 	boolean isAuth = in.getHeader().getFlag(Flags.AA);
-	Name qname = in.getQuestion().getName();
-	Name curname = qname;
-	short qtype = in.getQuestion().getType();
-	short qclass = in.getQuestion().getDClass();
+	Record question = in.getQuestion();
+	Name qname;
+	Name curname;
+	short qtype;
+	short qclass;
 	byte cred;
 	short rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
@@ -568,8 +569,15 @@ addMessage(Message in) {
 	SetResponse response = null;
 	boolean verbose = Options.check("verbosecache");
 
-	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
+	if ((rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) ||
+	    question == null)
 		return null;
+
+	qname = question.getName();
+	qtype = question.getType();
+	qclass = question.getDClass();
+
+	curname = qname;
 
 	answers = in.getSectionRRsets(Section.ANSWER);
 	for (int i = 0; i < answers.length; i++) {
