@@ -119,6 +119,22 @@ Function calls:
 			Resolver.setIgnoreTruncation(flag)
 		See the dig client for a sample use of the resolver.
 
+		SimpleResolver can be initialized by SimpleResolver() to use
+		a default server or SimpleResolver(String) to specify the
+		server.
+
+		ExtendedResolver can be initialized by ExtendedResolver() to
+		use default servers, or ExtendedResolver(String []) or
+		ExtendedResolver(resolver []) to specify servers or resolvers.
+
+		ExtendedResolver.addResolver(resolver) and
+		ExtendedResolver.deleteResolver(resolver) modify the set
+		of Resolvers used by an Extended Resolver.
+
+		ExtendedResolver.getResolvers() and
+		ExtendedResolver.getResolver(i) are used to obtain its
+		resolver(s).
+
 	Cache:
 		Records are added with:
 			addRecord(Record r, byte cred, Object src)
