@@ -8,65 +8,72 @@ import java.io.*;
 import java.net.*;
 import DNS.utils.*;
 
-public class Cache {
+public class Cache extends NameSet {
 
-private class Set {
+private class CacheElement {
 	RRset rrset;
 	byte credibility;
 
 	public
-	Set(Record r, byte cred) {
+	CacheElement(Record r, byte cred) {
 		rrset = new RRset();
 		rrset.addRR(r);
 		credibility = cred;
 	}
 
 	public void
-	update(Record r, byte cred) {
+	update(Record r) {
 		rrset.addRR(r);
-		credibility = cred;
+	}
+
+	public String
+	toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(rrset);
+		sb.append(" cl = ");
+		sb.append(credibility);
+		return sb.toString();
 	}
 }
 
-private Hashtable data;
-
-static String defaultResolver = "localhost";
-
 public
-Cache() {
-	data = new Hashtable();
+Cache(String file) throws IOException {
+	Master m = new Master(file);
+	Record record;
+	while ((record = m.nextRecord()) != null) {
+		addRecord(record, Credibility.CACHE);
+	}
 }
 
-void
+public void
 addRecord(Record r, byte cred) {
 	Name name = r.getName();
 	short type = r.getRRsetType();
-	Hashtable nameInfo = (Hashtable) data.get(name);
-	if (nameInfo == null)
-		data.put(name, nameInfo = new Hashtable());
-	Set set = (Set) nameInfo.get(new Short(type));
-	if (set == null) {
-		nameInfo.put(new Short(type), set = new Set(r, cred));
-	}
-	else {
-		if (cred < set.credibility)
-			return;
-		if (cred > set.credibility)
-			set.rrset.clear();
-		set.update(r, cred);
-	}
+	CacheElement element = (CacheElement) findSet(name, type);
+	if (element == null || cred > element.credibility)
+		addSet(name, type, element = new CacheElement(r, cred));
+	else if (cred == element.credibility)
+		element.update(r);
 }
+
+private RRset
+findRecords(Name name, short type, byte minCred) {
+	CacheElement element = (CacheElement) findSet(name, type);
+	if (element.credibility >= minCred)
+		return element.rrset;
+	else
+		return null;
+}	
 
 public RRset
 findRecords(Name name, short type) {
-	Hashtable nameInfo = (Hashtable) data.get(name);
-	if (nameInfo == null)
-		return null;
-	Set set = (Set) nameInfo.get(new Short(type));
-	if (set == null)
-		return null;
-	return set.rrset;
-}	
+	return findRecords(name, type, Credibility.NONAUTH_ANSWER);
+}
+
+public RRset
+findAnyRecords(Name name, short type) {
+	return findRecords(name, type, Credibility.NONAUTH_ADDITIONAL);
+}
 
 public void
 addMessage(Message in) {
@@ -106,31 +113,4 @@ addMessage(Message in) {
 	}
 }
 
-public String
-toString() {
-	StringBuffer sb = new StringBuffer();
-	Enumeration e = data.elements();
-	while (e.hasMoreElements()) {
-		Hashtable nameInfo = (Hashtable) e.nextElement();
-		Enumeration e2 = nameInfo.elements();
-		while (e2.hasMoreElements()) {
-			Set s = (Set) e2.nextElement();
-			sb.append(s.rrset.getName() + " " +
-				  Type.string(s.rrset.getType()) +
-				  " cl = " + s.credibility + "\n");
-			Enumeration e3 = s.rrset.rrs();
-			while (e3.hasMoreElements()) {
-				sb.append(e3.nextElement());
-				sb.append("\n");
-			}
-			e3 = s.rrset.sigs();
-			while (e3.hasMoreElements()) {
-				sb.append(e3.nextElement());
-				sb.append("\n");
-			}
-		}
-	}
-	return sb.toString();
-}
-	
 }
