@@ -5,6 +5,7 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.util.*;
+import java.lang.ref.*;
 
 /**
  * A cache of DNS records.  The cache obeys TTLs, so items are purged after
@@ -107,19 +108,22 @@ private static class NegativeElement extends Element {
 	}
 }
 
-private class CacheCleaner extends Thread {
-	public boolean done;
+private static class CacheCleaner extends Thread {
+	private Reference cacheref;
+	private long interval;
 
 	public
-	CacheCleaner() {
+	CacheCleaner(Cache cache, long cleanInterval) {
+		this.cacheref = new WeakReference(cache);
+		this.interval = cleanInterval;
 		setDaemon(true);
 		setName("org.xbill.DNS.Cache.CacheCleaner");
 		start();
 	}
 
-	public boolean
-	clean() {
-		Iterator it = names();
+	private boolean
+	clean(Cache cache) {
+		Iterator it = cache.names();
 		while (it.hasNext()) {
 			Name name;
 			try {
@@ -127,12 +131,13 @@ private class CacheCleaner extends Thread {
 			} catch (ConcurrentModificationException e) {
 				return false;
 			}
-			Object [] elements = findExactSets(name);
+			Object [] elements = cache.findExactSets(name);
 			for (int i = 0; i < elements.length; i++) {
 				Element element = (Element) elements[i];
 				if (element.expired())
-					removeSet(name, element.getType(),
-						  element);
+					cache.removeSet(name,
+							element.getType(),
+							element);
 			}
 		}
 		return true;
@@ -142,19 +147,22 @@ private class CacheCleaner extends Thread {
 	run() {
 		while (true) {
 			long now = System.currentTimeMillis();
-			long next = now + cleanInterval * 60 * 1000;
+			long next = now + (interval * 60 * 1000);
 			while (now < next) {
 				try {
 					Thread.sleep(next - now);
 				}
 				catch (InterruptedException e) {
-					if (done)
-						return;
+					return;
 				}
 				now = System.currentTimeMillis();
 			}
+			Cache cache = (Cache) cacheref.get();
+			if (cache == null) {
+				return;
+			}
 			for (int i = 0; i < 4; i++)
-				if (clean())
+				if (clean(cache))
 					break;
 		}
 	}
@@ -177,7 +185,7 @@ private int dclass;
 public
 Cache(int dclass) {
 	super(true);
-	cleaner = new CacheCleaner();
+	cleaner = new CacheCleaner(this, cleanInterval);
 	this.dclass = dclass;
 }
 
@@ -202,7 +210,7 @@ clearCache() {
 public
 Cache(String file) throws IOException {
 	super(true);
-	cleaner = new CacheCleaner();
+	cleaner = new CacheCleaner(this, cleanInterval);
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null)
@@ -780,11 +788,15 @@ public void
 setCleanInterval(int minutes) {
 	cleanInterval = minutes;
 	if (cleaner != null) {
-		cleaner.done = true;
 		cleaner.interrupt();
 	}
 	if (cleanInterval > 0)
-		cleaner = new CacheCleaner();
+		cleaner = new CacheCleaner(this, cleanInterval);
+}
+
+protected void
+finalize() {
+	setCleanInterval(0);
 }
 
 }

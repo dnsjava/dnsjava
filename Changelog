@@ -1,3 +1,8 @@
+11/11/2003
+	- Store a weak reference to the Cache in the CacheCleaner thread, and
+	  kill the thread when the Cache is finalized.
+	  (suggested by Joseph Shraibman <jks@iname.com>
+
 10/31/2003
 	- Record.hashCode() didn't return consistent hash codes, and didn't
 	  ignore the TTL (which it should, and which Record.equals() does).
