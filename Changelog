@@ -1,3 +1,7 @@
+4/23/2002
+	- Fix potential race conditions in the RRset class.
+	  (David Esposito <esposito@newnetco.com>)
+
 4/22/2002
 	- Improve name decompression by not requiring a decompression context.
 

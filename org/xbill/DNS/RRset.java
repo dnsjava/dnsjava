@@ -129,9 +129,9 @@ size() {
  */
 public Name
 getName() {
-	if (rrs.size() == 0)
+	Record r = first();
+	if (r == null)
 		return null;
-	Record r =  (Record) rrs.elementAt(0);
 	return r.getName();
 }
 
@@ -141,9 +141,9 @@ getName() {
  */
 public short
 getType() {
-	if (rrs.size() == 0)
+	Record r = first();
+	if (r == null)
 		return 0;
-	Record r =  (Record) rrs.elementAt(0);
 	return r.getType();
 }
 
@@ -153,19 +153,20 @@ getType() {
  */
 public short
 getDClass() {
-	if (rrs.size() == 0)
+	Record r = first();
+	if (r == null)
 		return 0;
-	Record r =  (Record) rrs.elementAt(0);
 	return r.getDClass();
 }
 
 /** Returns the ttl of the records */
 public int
 getTTL() {
-	if (rrs.size() == 0)
-		return 0;
-	int ttl = Integer.MAX_VALUE;
 	Enumeration e = rrs();
+	if (!e.hasMoreElements())
+		return 0;
+
+	int ttl = Integer.MAX_VALUE;
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
 		if (r.getTTL() < ttl)
@@ -177,9 +178,12 @@ getTTL() {
 /** Returns the first record */
 public Record
 first() {
-	if (rrs.size() == 0)
+	try {
+		return (Record) rrs.elementAt(0);
+	}
+	catch (ArrayIndexOutOfBoundsException e) {
 		return null;
-	return (Record) rrs.elementAt(0);
+	}
 }
 
 /** Sets the DNSSEC security of the RRset. */
