@@ -21,8 +21,8 @@ private class Entry {
 }
 
 private static final int TABLE_SIZE = 17;
-
 private Entry [] table;
+private boolean verbose = Options.check("verbosecompression");
 
 /**
  * Creates a new Compression object.
@@ -41,6 +41,8 @@ add(int pos, Name name) {
 	entry.pos = pos;
 	entry.next = table[row];
 	table[row] = entry;
+	if (verbose)
+		System.err.println("Adding " + name + " at " + pos);
 }
 
 /**
@@ -50,11 +52,14 @@ add(int pos, Name name) {
 public int
 get(Name name) {
 	int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;
+	int pos = -1;
 	for (Entry entry = table[row]; entry != null; entry = entry.next) {
 		if (entry.name.equals(name))
-			return (entry.pos);
+			pos = entry.pos;
 	}
-	return (-1);
+	if (verbose)
+		System.err.println("Looking for " + name + ", found " + pos);
+	return pos;
 }
 
 }

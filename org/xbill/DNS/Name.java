@@ -554,7 +554,6 @@ getLabelString(int n) {
  */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
-	boolean log = (c != null && Options.check("verbosecompression"));
 	for (int i = offset; i < labels + offset; i++) {
 		Name tname;
 		if (i == offset)
@@ -562,25 +561,16 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 		else
 			tname = new Name(this, i);
 		int pos = -1;
-		if (c != null) {
+		if (c != null)
 			pos = c.get(tname);
-			if (log)
-				System.err.println("Looking for " + tname +
-						   ", found " + pos);
-		}
 		if (pos >= 0) {
 			pos |= (LABEL_MASK << 8);
 			out.writeShort(pos);
 			return;
 		}
 		else {
-			if (c != null) {
+			if (c != null)
 				c.add(out.getPos(), tname);
-				if (log)
-					System.err.println("Adding " + tname +
-							   " at " +
-							   out.getPos());
-			}
 			if (name[i] instanceof BitString) {
 				out.writeByte(LABEL_EXTENDED |
 					      EXT_LABEL_BITSTRING);
