@@ -47,6 +47,7 @@ private static final int END		= 7;
 
 private Name zname;
 private int qtype;
+private int dclass;
 private long ixfr_serial;
 private boolean want_fallback;
 
@@ -111,6 +112,7 @@ ZoneTransferIn(Name zone, int xfrtype, long serial, boolean fallback,
 		}
 	}
 	qtype = xfrtype;
+	dclass = DClass.IN;
 	ixfr_serial = serial;
 	want_fallback = fallback;
 	state = INITIALSOA;
@@ -256,6 +258,22 @@ throws UnknownHostException
 }
 
 /**
+ * Gets the name of the zone being transferred.
+ */
+public Name
+getName() {
+	return zname;
+}
+
+/**
+ * Gets the type of zone transfer (either AXFR or IXFR).
+ */
+public int
+getType() {
+	return qtype;
+}
+
+/**
  * Sets a timeout on this zone transfer.  The default is 900 seconds (15
  * minutes).
  * @param secs The maximum amount of time that this zone transfer can take.
@@ -267,6 +285,16 @@ setTimeout(int secs) {
 	timeout = 1000L * secs;
 }
 
+/**
+ * Sets an alternate DNS class for this zone transfer.
+ * @param dclass The class to use instead of class IN.
+ */
+public void
+setDClass(int dclass) {
+	DClass.check(dclass);
+	this.dclass = dclass;
+}
+
 private void
 openConnection() throws IOException {
 	long endTime = System.currentTimeMillis() + timeout;
@@ -276,13 +304,13 @@ openConnection() throws IOException {
 
 private void
 sendQuery() throws IOException {
-	Record question = Record.newRecord(zname, qtype, DClass.IN);
+	Record question = Record.newRecord(zname, qtype, dclass);
 
 	Message query = new Message();
 	query.getHeader().setOpcode(Opcode.QUERY);
 	query.addRecord(question, Section.QUESTION);
 	if (qtype == Type.IXFR) {
-		Record soa = new SOARecord(zname, DClass.IN, 0, Name.root,
+		Record soa = new SOARecord(zname, dclass, 0, Name.root,
 					   Name.root, ixfr_serial,
 					   0, 0, 0, 0);
 		query.addRecord(soa, Section.AUTHORITY);
@@ -411,7 +439,7 @@ parseRR(Record rec) throws ZoneTransferException {
 
 	case AXFR:
 		// Old BINDs sent cross class A records for non IN classes.
-		if (type == Type.A && rec.getDClass() != DClass.IN)
+		if (type == Type.A && rec.getDClass() != dclass)
 			break;
 		axfr.add(rec);
 		if (type == Type.SOA) {
