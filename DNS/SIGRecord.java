@@ -98,6 +98,51 @@ toString() {
 	return sb.toString();
 }
 
+public short
+getTypeCovered() {
+	return covered;
+}
+
+public byte
+getAlgorithm() {
+	return alg;
+}
+
+public byte
+getLabels() {
+	return labels;
+}
+
+public int
+getOrigTTL() {
+	return origttl;
+}
+
+public Date
+getExpire() {
+	return expire;
+}
+
+public Date
+getTimeSigned() {
+	return timeSigned;
+}
+
+public short
+getFootprint() {
+	return footprint;
+}
+
+public Name
+getSigner() {
+	return signer;
+}
+
+public byte []
+getSignature() {
+	return signature;
+}
+
 byte []
 rrToWire(Compression c) throws IOException {
 	if (signature == null)
