@@ -47,16 +47,9 @@ private static class PositiveElement extends Element {
 	int srcid;
 
 	public
-	PositiveElement(Record r, byte cred, int src) {
-		rrset = new RRset();
-		rrset.addRR(r);
-		srcid = src;
-		setValues(cred, r.getTTL());
-	}
-
-	public
 	PositiveElement(RRset r, byte cred, int src) {
 		rrset = r;
+		srcid = src;
 		setValues(cred, r.getTTL());
 	}
 
@@ -216,20 +209,24 @@ addRecord(Record r, byte cred, Object o) {
 	short type = r.getRRsetType();
 	if (!Type.isRR(type))
 		return;
-	int src = (o != null) ? o.hashCode() : 0;
+	boolean addrrset = false;
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, new PositiveElement(r, cred, src));
+		addrrset = true;
 	else if (cred == element.credibility) {
 		if (element instanceof PositiveElement) {
 			PositiveElement pe = (PositiveElement) element;
-			if (pe.srcid != src) {
-				RRset rrset = new RRset();
-				rrset.addRR(r);
-				addRRset(rrset, cred, o);
-			} else
+			int src = (o != null) ? o.hashCode() : 0;
+			if (pe.srcid != src)
+				addrrset = true;
+			else
 				pe.rrset.addRR(r);
 		}
+	}
+	if (addrrset) {
+		RRset rrset = new RRset();
+		rrset.addRR(r);
+		addRRset(rrset, cred, o);
 	}
 }
 
