@@ -272,6 +272,12 @@ addNegative(short rcode, Name name, short type, long ttl, byte cred, Object o) {
 		addSet(name, type, new Element(name, ttl, cred, src, type));
 }
 
+private void
+logLookup(Name name, short type, String msg) {
+	System.err.println("lookupRecords(" + name + " " +
+			   Type.string(type) + "): " + msg);
+}
+
 /**
  * Looks up Records in the Cache.  This follows CNAMEs and handles negatively
  * cached data.
@@ -285,13 +291,19 @@ addNegative(short rcode, Name name, short type, long ttl, byte cred, Object o) {
 public SetResponse
 lookupRecords(Name name, short type, byte minCred) {
 	SetResponse cr = null;
+	boolean verbose = Options.check("verbosecache");
 	Object o = findSets(name, type);
+
+	if (verbose)
+		logLookup(name, type, "Starting");
 
  	if (o == null || o instanceof TypeMap) {
 		/*
 		 * The name exists, but the type was not found.  Or, the
 		 * name does not exist and no parent does either.  Punt.
 		 */
+		if (verbose)
+			logLookup(name, type, "no information found");
 		return new SetResponse(SetResponse.UNKNOWN);
 	}
 
@@ -309,13 +321,25 @@ lookupRecords(Name name, short type, byte minCred) {
 			nelements++;
 		}
 		else if (element.TTL0NotOurs()) {
+			if (verbose) {
+				logLookup(name, type, element.toString());
+				logLookup(name, type, "0 TTL: ignoring");
+			}
 			objects[i] = null;
 		}
 		else if (element.expiredTTL()) {
+			if (verbose) {
+				logLookup(name, type, element.toString());
+				logLookup(name, type, "expired: ignoring");
+			}
 			removeSet(name, type, element);
 			objects[i] = null;
 		}
 		else if (element.credibility < minCred) {
+			if (verbose) {
+				logLookup(name, type, element.toString());
+				logLookup(name, type, "not credible: ignoring");
+			}
 			objects[i] = null;
 		}
 		else {
@@ -324,6 +348,8 @@ lookupRecords(Name name, short type, byte minCred) {
 	}
 	if (nelements == 0) {
 		/* We have data, but can't use it.  Punt. */
+		if (verbose)
+			logLookup(name, type, "no useful data found");
 		return new SetResponse(SetResponse.UNKNOWN);
 	}
 
@@ -340,6 +366,8 @@ lookupRecords(Name name, short type, byte minCred) {
 		if (objects[i] == null)
 			continue;
 		Element element = (Element) objects[i];
+		if (verbose)
+			logLookup(name, type, element.toString());
 		RRset rrset = element.rrset;
 
 		/* Is this a negatively cached entry? */
@@ -347,31 +375,50 @@ lookupRecords(Name name, short type, byte minCred) {
 			/*
 			 * If this is an NXDOMAIN entry, return NXDOMAIN.
 			 */
-			if (element.type == 0)
+			if (element.type == 0) {
+				if (verbose)
+					logLookup(name, type, "NXDOMAIN");
 				return new SetResponse(SetResponse.NXDOMAIN);
+			}
 
 			/*
 			 * If we're not looking for type ANY, return NXRRSET.
 			 * Otherwise ignore this.
 			 */
-			if (type != Type.ANY)
+			if (type != Type.ANY) {
+				if (verbose)
+					logLookup(name, type, "NXRRSET");
 				return new SetResponse(SetResponse.NXRRSET);
-			else
+			} else {
+				if (verbose)
+					logLookup(name, type,
+						  "ANY query; " +
+						  "ignoring NXRRSET");
 				continue;
+			}
 		}
 
-		int rtype = rrset.getType();
+		short rtype = rrset.getType();
 		Name rname = rrset.getName();
 		if (name.equals(rname)) {
 			if (type != Type.CNAME && type != Type.ANY &&
 			    rtype == Type.CNAME)
+			{
+				if (verbose)
+					logLookup(name, type, "cname");
 				return new SetResponse(SetResponse.CNAME,
 						       rrset);
-			else if (type != Type.NS && type != Type.ANY &&
-				 rtype == Type.NS)
+			} else if (type != Type.NS && type != Type.ANY &&
+				   rtype == Type.NS)
+			{
+				if (verbose)
+					logLookup(name, type,
+						  "exact delegation");
 				return new SetResponse(SetResponse.DELEGATION,
 						       rrset);
-			else {
+			} else {
+				if (verbose)
+					logLookup(name, type, "exact match");
 				if (cr == null)
 					cr = new SetResponse
 						(SetResponse.SUCCESSFUL);
@@ -379,12 +426,29 @@ lookupRecords(Name name, short type, byte minCred) {
 			}
 		}
 		else if (name.subdomain(rname)) {
-			if (rtype == Type.DNAME)
+			if (rtype == Type.DNAME) {
+				if (verbose)
+					logLookup(name, type, "dname");
 				return new SetResponse(SetResponse.DNAME,
 						       rrset);
-			else if (rtype == Type.NS)
+			} else if (rtype == Type.NS) {
+				if (verbose)
+					logLookup(name, type,
+						  "parent delegation");
 				return new SetResponse(SetResponse.DELEGATION,
 						       rrset);
+			} else {
+				if (verbose)
+					logLookup(name, type,
+						  "ignoring rrset (" +
+						  rname + " " +
+						  Type.string(rtype) + ")");
+			}
+		} else {
+			if (verbose)
+				logLookup(name, type,
+					  "ignoring rrset (" + rname + " " +
+					  Type.string(rtype) + ")");
 		}
 	}
 
@@ -395,6 +459,10 @@ lookupRecords(Name name, short type, byte minCred) {
 	 */
 	if (cr == null && type == Type.ANY)
 		return new SetResponse(SetResponse.UNKNOWN);
+	else if (cr == null)
+		throw new IllegalStateException("looking up (" + name + " " +
+						Type.string(type) + "): " +
+						"cr == null.");
 	return cr;
 }
 

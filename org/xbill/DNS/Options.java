@@ -17,6 +17,7 @@ import java.util.*;
  * verbosecompression - Print messages related to name compression<BR>
  * verbosebitstring - Print messages related to bitstring labels<BR>
  * verbosesec - Print messages related to signature verification<BR>
+ * verbosecache - Print messages related to cache lookups<BR>
  * <BR>
  * Valued options:<BR>
  * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<BR>
