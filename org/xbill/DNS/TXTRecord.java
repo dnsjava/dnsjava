@@ -54,7 +54,7 @@ TXTRecord(Name name, int dclass, long ttl, List strings) {
  */
 public
 TXTRecord(Name name, int dclass, long ttl, String string) {
-	this(name, dclass, ttl, Collections.nCopies(1, string));
+	this(name, dclass, ttl, Collections.singletonList(string));
 }
 
 void
