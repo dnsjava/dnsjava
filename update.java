@@ -163,7 +163,9 @@ sendUpdate() throws IOException {
  * Ignore the class, if present.
  */
 dnsRecord
-parseRR(MyStringTokenizer st, short classValue) throws IOException {
+parseRR(MyStringTokenizer st, short classValue, int TTLValue)
+throws IOException
+{
 	dnsName name = new dnsName(st.nextToken(), origin);
 	int ttl;
 	short type;
@@ -175,7 +177,7 @@ parseRR(MyStringTokenizer st, short classValue) throws IOException {
 		s = st.nextToken();
 	}
 	catch (NumberFormatException e) {
-		ttl = defaultTTL;
+		ttl = TTLValue;
 	}
 
 	if (dns.classValue(s) >= 0)
@@ -219,7 +221,7 @@ doRequire(MyStringTokenizer st) throws IOException {
 
 	String qualifier = st.nextToken();
 	if (qualifier.equals("-r")) 
-		rec = parseRR(st, defaultClass);
+		rec = parseRR(st, defaultClass, 0);
 	else if (qualifier.equals("-s"))
 		rec = parseRRExistence(st, dns.ANY);
 	else if (qualifier.equals("-n"))
@@ -240,7 +242,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 
 	String qualifier = st.nextToken();
 	if (qualifier.equals("-r")) 
-		rec = parseRR(st, defaultClass);
+		rec = parseRR(st, defaultClass, 0);
 	else if (qualifier.equals("-s"))
 		rec = parseRRExistence(st, dns.NONE);
 	else if (qualifier.equals("-n"))
@@ -265,7 +267,7 @@ doAdd(MyStringTokenizer st) throws IOException {
 		qualifier = "-r";
 	}
 	if (qualifier.equals("-r"))
-		rec = parseRR(st, defaultClass);
+		rec = parseRR(st, defaultClass, defaultTTL);
 	else {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
@@ -281,10 +283,8 @@ doDelete(MyStringTokenizer st) throws IOException {
 	dnsRecord rec;
 
 	String qualifier = st.nextToken();
-	if (qualifier.equals("-r")) {
-		rec = parseRR(st, dns.NONE);
-		rec.ttl = 0;
-	}
+	if (qualifier.equals("-r"))
+		rec = parseRR(st, dns.NONE, 0);
 	else if (qualifier.equals("-s"))
 		rec = parseRRExistence(st, dns.ANY);
 	else if (qualifier.equals("-n"))
@@ -309,7 +309,7 @@ doGlue(MyStringTokenizer st) throws IOException {
 		qualifier = "-r";
 	}
 	if (qualifier.equals("-r"))
-		rec = parseRR(st, defaultClass);
+		rec = parseRR(st, defaultClass, defaultTTL);
 	else {
 		System.out.println("qualifier " + qualifier + " not supported");
 		return;
