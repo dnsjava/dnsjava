@@ -134,7 +134,7 @@ addRR(Record record) {
 	if (nametable == null) {
 		nametable = new Hashtable();
 		data.put(record.name, nametable);
-System.out.println("Adding name <" + record.name + "> to [" + origin + "]");
+/*System.out.println("Adding name <" + record.name + "> to [" + origin + "]");*/
 	}
 	RRset rrset = (RRset) nametable.get(new Short(record.getType()));
 	if (rrset == null) {
