@@ -87,67 +87,138 @@ compact() {
  */
 public
 Name(String s, Name origin) {
-	boolean seenBitString = false;
-
-	labels = 0;
-	name = new Object[STARTLABELS];
-
-	if (s.equals("@") && origin != null) {
-		append(origin);
-		qualified = true;
-		return;
-	}
+	Name n;
 	try {
-		MyStringTokenizer st = new MyStringTokenizer(s, ".");
-
-		while (st.hasMoreTokens()) {
-			String token = st.nextToken();
-			if (labels == name.length)
-				grow();
-			if (token.charAt(0) == '[') {
-				name[labels++] = new BitString(token);
-				seenBitString = true;
-			} else
-				name[labels++] = token.getBytes();
-		}
-
-		if (st.hasMoreDelimiters())
-			qualified = true;
-		else {
-			if (origin != null) {
-				append(origin);
-				qualified = true;
-			}
-			else {
-				/* This isn't exactly right, but it's close.
-				 * Partially qualified names are evil.
-				 */
-				if (Options.check("pqdn"))
-					qualified = false;
-				else
-					qualified = (labels > 1);
-			}
-		}
+		n = Name.fromString(s, origin);
 	}
-	catch (Exception e) {
+	catch (TextParseException e) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(s);
 		if (origin != null) {
 			sb.append(".");
 			sb.append(origin);
 		}
-		if (e instanceof ArrayIndexOutOfBoundsException)
-			sb.append(" has too many labels");
-		else if (e instanceof IOException)
-			sb.append(" contains an invalid binary label");
-		else
-			sb.append(" is invalid");
+		sb.append(": ");
+		sb.append(e.getMessage());
 		System.err.println(sb.toString());
 		name = null;
 		labels = 0;
+		return;
 	}
+	labels = n.labels;
+	name = n.name;
+	qualified = n.qualified;
+	if (!qualified) {
+		/*
+		 * This isn't exactly right, but it's close.
+		 * Partially qualified names are evil.
+		 */
+		if (Options.check("pqdn"))
+			qualified = false;
+		else
+			qualified = (labels > 1);
+	}
+}
+
+/**
+ * Create a new name from a string and an origin
+ * @param s  The string to be converted
+ * @param origin  If the name is unqualified, the origin to be appended.
+ * @throws TextParseException The name is invalid.
+ */
+public static Name
+fromString(String s, Name origin) throws TextParseException {
+	Name name = new Name();
+	name.labels = 0;
+	name.name = new Object[1];
+	boolean seenBitString = false;
+
+	if (s.equals("@")) {
+		if (origin != null)
+			name.append(origin);
+		name.qualified = true;
+		return name;
+	} else if (s.equals(".")) {
+		name.qualified = true;
+		return name;
+	}
+	int labelstart = -1;
+	int pos = 0;
+	byte [] label = new byte[64];
+	boolean escaped = false;
+	int digits = 0;
+	int intval = 0;
+	boolean bitstring = false;
+	for (int i = 0; i < s.length(); i++) {
+		byte b = (byte) s.charAt(i);
+		if (escaped) {
+			if (pos == 0 && b == '[')
+				bitstring = true;
+			if (b >= '0' && b <= '9' && digits < 3) {
+				digits++;
+				intval *= 10 + (b - '0');
+				intval += (b - '0');
+				if (digits < 3)
+					continue;
+				b = (byte) intval;
+			}
+			else if (digits > 0 && digits < 3)
+				throw new TextParseException("bad escape");
+			if (pos >= label.length)
+				throw new TextParseException("label too long");
+			label[pos++] = b;
+			escaped = false;
+		} else if (b == '\\') {
+			escaped = true;
+			digits = 0;
+			intval = 0;
+		} else if (b == '.') {
+			if (labelstart == -1)
+				throw new TextParseException("invalid label");
+			byte [] newlabel = new byte[pos];
+			System.arraycopy(label, 0, newlabel, 0, pos);
+			if (name.labels == MAXLABELS)
+				throw new TextParseException("too many labels");
+			if (name.labels == name.name.length)
+				name.grow();
+			if (bitstring) {
+				bitstring = false;
+				name.name[name.labels++] =
+						new BitString(newlabel);
+			}
+			else
+				name.name[name.labels++] = newlabel;
+			labelstart = -1;
+			pos = 0;
+		} else {
+			if (labelstart == -1)
+				labelstart = i;
+			if (pos >= label.length)
+				throw new TextParseException("label too long");
+			label[pos++] = b;
+		}
+	}
+	if (labelstart == -1)
+		name.qualified = true;
+	else {
+		byte [] newlabel = new byte[pos];
+		System.arraycopy(label, 0, newlabel, 0, pos);
+		if (name.labels == MAXLABELS)
+			throw new TextParseException("too many labels");
+		if (name.labels == name.name.length)
+			name.grow();
+		if (bitstring) {
+			bitstring = false;
+			name.name[name.labels++] = new BitString(newlabel);
+		}
+		else
+			name.name[name.labels++] = newlabel;
+	}
+	if (!name.qualified && origin != null)
+		name.append(origin);
 	if (seenBitString)
-		compact();
+		name.compact();
+	return (name);
 }
 
 /**

@@ -1,3 +1,7 @@
+5/28/2002
+	- fix some limitations of name parsing.
+	  (reported by Tasos Kotsikonas <tasos@boldfish.com>)
+
 5/4/2002
 	- added the 'sleep' and 'date' commands to the update client.
 	  (Olafur Gudmundsson <ogud@ogud.com>)

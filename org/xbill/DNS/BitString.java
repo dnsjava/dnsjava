@@ -18,11 +18,11 @@ class BitString {
 int nbits;
 byte [] data;
 
-BitString(String s) throws IOException {
+BitString(String s) throws TextParseException {
 	if (Options.check("verbosebitstring"))
 		System.err.println("parsing BitString" + s);
 	if (s.length() < 4 || !s.startsWith("[") || !s.endsWith("]"))
-		throw new IOException("Invalid encoding: " + s);
+		throw new TextParseException("Invalid encoding: " + s);
 	if (Options.check("verbosebitstring"))
 		System.err.println("basic encoding ok");
 	int radix;
@@ -41,7 +41,7 @@ BitString(String s) throws IOException {
 			radix = 0;
 			break;
 		default:
-			throw new IOException("Invalid encoding: " + s);
+			throw new TextParseException("Invalid encoding: " + s);
 	}
 	if (Options.check("verbosebitstring"))
 		System.err.println("radix = " + radix);
@@ -56,8 +56,8 @@ BitString(String s) throws IOException {
 		{
 			int x = Character.digit(s.charAt(i), radix);
 			if (x == -1)
-				throw new IOException("Invalid digit: " +
-						      s.charAt(i));
+				throw new TextParseException("Invalid digit: " +
+							     s.charAt(i));
 			switch (radix) {
 				case 2:
 					if (x == 1)
@@ -98,7 +98,8 @@ BitString(String s) throws IOException {
 		StringTokenizer st = new StringTokenizer(quad, ".");
 		for (int i = 0; i < 4; i++) {
 			if (!st.hasMoreTokens())
-				throw new IOException("Invalid dotted quad");
+				throw new TextParseException("Invalid dotted " +
+							     "quad");
 			String token = st.nextToken();
 			try {
 				int x = Integer.parseInt(token);
@@ -109,7 +110,8 @@ BitString(String s) throws IOException {
 				}
 			}
 			catch (NumberFormatException e) {
-				throw new IOException("Invalid dotted quad");
+				throw new TextParseException("Invalid dotted " +
+							     "quad");
 			}
 		}
 		nbits = 32;
@@ -124,12 +126,17 @@ BitString(String s) throws IOException {
 			nbits = bitcount;
 		}
 		catch (Exception e) {
-			throw new IOException("Invalid binary label: " + s);
+			throw new TextParseException("Invalid binary label: " +
+						     s);
 		}
 	}
 	data = new byte[bytes()];
 	for (int i = 0; i < nbits; i++)
 		data[i/8] |= ((set.get(i) ? 1 : 0) << (7 - i%8));
+}
+
+BitString(byte [] b) throws TextParseException {
+	this(new String(b));
 }
 
 BitString(int _nbits, byte [] _data) {
