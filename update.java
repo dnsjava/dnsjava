@@ -28,8 +28,8 @@ print(Object o) {
 
 public
 update(InputStream in) throws IOException {
-	Vector inputs = new Vector();
-	Vector istreams = new Vector();
+	List inputs = new ArrayList();
+	List istreams = new ArrayList();
 
 	query = new Message();
 	query.getHeader().setOpcode(Opcode.UPDATE);
@@ -37,16 +37,18 @@ update(InputStream in) throws IOException {
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
 
-	inputs.addElement(br);
-	istreams.addElement(in);
+	inputs.add(br);
+	istreams.add(in);
 
 	while (true) {
 		try {
 			String line = null;
 			do {
 				InputStream is;
-				is = (InputStream) istreams.lastElement();
-				br = (BufferedReader)inputs.lastElement();
+				is = (InputStream)istreams.get(istreams.size()
+							       - 1);
+				br = (BufferedReader)inputs.get(inputs.size()
+								- 1);
 
 				if (is == System.in)
 					System.out.print("> ");
@@ -54,8 +56,8 @@ update(InputStream in) throws IOException {
 				line = Master.readExtendedLine(br);
 				if (line == null) {
 					br.close();
-					inputs.removeElement(br);
-					istreams.removeElement(is);
+					inputs.remove(br);
+					istreams.remove(is);
 					if (inputs.isEmpty())
 						return;
 				}
@@ -182,10 +184,10 @@ update(InputStream in) throws IOException {
 			{
 				if (log != null)
 					log.close();
-				Enumeration e = inputs.elements();
-				while (e.hasMoreElements()) {
+				Iterator it = inputs.iterator();
+				while (it.hasNext()) {
 					BufferedReader tbr;
-					tbr = (BufferedReader) e.nextElement();
+					tbr = (BufferedReader) it.next();
 					tbr.close();
 				}
 				System.exit(0);
@@ -249,20 +251,15 @@ sendUpdate() throws IOException {
 		updzone = zone;
 		short dclass = defaultClass;
 		if (updzone == null) {
-			Enumeration updates = query.getSection(Section.UPDATE);
-			if (updates == null) {
-				print("Invalid update");
-				return;
-			}
-			Record r = null;
-			while (updates.hasMoreElements()) {
-				r = (Record) updates.nextElement();
+			Record [] recs = query.getSectionArray(Section.UPDATE);
+			for (int i = 0; i < recs.length; i++) {
 				if (updzone == null)
-					updzone = new Name(r.getName(), 1);
-				if (r.getDClass() != DClass.NONE &&
-				    r.getDClass() != DClass.ANY)
+					updzone = new Name(recs[i].getName(),
+							   1);
+				if (recs[i].getDClass() != DClass.NONE &&
+				    recs[i].getDClass() != DClass.ANY)
 				{
-					dclass = r.getDClass();
+					dclass = recs[i].getDClass();
 					break;
 				}
 			}
@@ -470,21 +467,21 @@ doQuery(MyStringTokenizer st) throws IOException {
 }
 
 void
-doFile(MyStringTokenizer st, Vector inputs, Vector istreams) {
+doFile(MyStringTokenizer st, List inputs, List istreams) {
 	String s = st.nextToken();
 	try {
 		InputStreamReader isr2;
 		if (!s.equals("-")) {
 			FileInputStream fis = new FileInputStream(s);
 			isr2 = new InputStreamReader(fis);
-			istreams.addElement(fis);
+			istreams.add(fis);
 		}
 		else {
 			isr2 = new InputStreamReader(System.in);
-			istreams.addElement(System.in);
+			istreams.add(System.in);
 		}
 		BufferedReader br2 = new BufferedReader(isr2);
-		inputs.addElement(br2);
+		inputs.add(br2);
 	}
 	catch (FileNotFoundException e) {
 		print(s + "not found");
