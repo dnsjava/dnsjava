@@ -30,7 +30,7 @@ private boolean qualified;
 public static Name root = new Name(".");
 
 /** The maximum number of labels in a Name */
-static final int MAXLABELS = 256;
+static final int MAXLABELS = 128;
 
 private
 Name() {
