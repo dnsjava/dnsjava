@@ -10,7 +10,7 @@ import org.xbill.DNS.utils.*;
 
 /**
  * Transaction signature handling.  This class generates and verifies
- * TSIG records on messages, which provide transaction security,
+ * TSIG records on messages, which provide transaction security.
  * @see TSIGRecord
  *
  * @author Brian Wellington
@@ -51,7 +51,7 @@ TSIG(Name name, byte [] key) {
 }
 
 /**
- * Generates a TSIG record with a specific error for a message and adds it'
+ * Generates a TSIG record with a specific error for a message and adds it
  * to the message.
  * @param m The message
  * @param error The error
