@@ -249,7 +249,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			 * try that instead.
 			 */
 			if (!name.isWild()) {
-				cr = lookupRecords(name.wild(), type, dclass,
+				cr = lookupRecords(name.wild(1), type, dclass,
 						   minCred);
 				if (cr.isSuccessful())
 					return cr;

@@ -93,7 +93,7 @@ findRecords(Name name, short type) {
 		if (name.isWild())
 			return new SetResponse(SetResponse.NXDOMAIN);
 		else
-			return findRecords(name.wild(), type);
+			return findRecords(name.wild(1), type);
 	}
 	Object [] objects = findSets(name, type, dclass);
 	if (objects == null)

@@ -119,6 +119,12 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 		Enumeration e = set.rrs();
 		while (e.hasMoreElements()) {
 			Record rec = (Record) e.nextElement();
+			if (rec.getName().labels() > sigrec.getLabels()) {
+				Name name = rec.getName();
+				Name wild = name.wild(name.labels() -
+						      sigrec.getLabels());
+				rec = rec.withName(wild);
+			}
 			byte [] data = rec.toWireCanonical();
 			out.write(data);
 		}

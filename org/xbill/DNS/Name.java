@@ -220,12 +220,12 @@ Name(Name d, int n) {
 }
 
 /**
- * Generates a new Name with the first label replaced by a wildcard 
+ * Generates a new Name with the first n labels replaced by a wildcard 
  * @return The wildcard name
  */
 public Name
-wild() {
-	Name wild = new Name(this, 0);
+wild(int n) {
+	Name wild = new Name(this, n - 1);
 	wild.name[0] = "*";
 	return wild;
 }
