@@ -416,10 +416,9 @@ throws IOException
 					("Invalid unknown RR encoding: " +
 					 "length mismatch");
 		DataByteInputStream in = new DataByteInputStream(data);
-		rec = newRecord(name, type, dclass, ttl, length, in);
+		return newRecord(name, type, dclass, ttl, length, in);
 	}
 	st.unget();
-
 	rec = getTypedObject(type);
 	return rec.rdataFromString(name, dclass, ttl, st, origin);
 }
