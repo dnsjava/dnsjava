@@ -95,6 +95,7 @@ private Name origin;
 private short dclass = DClass.IN;
 private RRset NS;
 private SOARecord SOA;
+private boolean hasWild;
 
 private void
 validate() throws IOException {
@@ -259,15 +260,18 @@ findRecords(Name name, short type) {
 		int labels = name.labels() - origin.labels();
 		if (labels == 0)
 			return new SetResponse(SetResponse.NXDOMAIN);
-		SetResponse sr;
-		Name tname = name;
-		do {
-			sr = findRecords(tname.wild(1), type);
-			if (sr.isSuccessful())
-				return sr;
-			tname = new Name(tname, 1);
-		} while (labels-- >= 1);
-		return sr;
+		if (hasWild) {
+			SetResponse sr;
+			Name tname = name;
+			do {
+				sr = findRecords(tname.wild(1), type);
+				if (!sr.isNXDOMAIN())
+					return sr;
+				tname = new Name(tname, 1);
+			} while (labels-- >= 1);
+			return sr;
+		} else
+			return new SetResponse(SetResponse.NXDOMAIN);
 	}
 
 	if (o instanceof TypeMap) {
@@ -340,6 +344,17 @@ addRecord(Record r) {
 	if (rrset == null)
 		addSet(name, type, rrset = new RRset());
 	rrset.addRR(r);
+}
+
+/**
+ * Adds a set associated with a name/type.  The data contained in the
+ * set is abstract.
+ */
+protected void
+addSet(Name name, short type, Object set) {
+	if (!hasWild && name.isWild())
+		hasWild = true;
+	super.addSet(name, type, set);
 }
 
 /**
