@@ -21,44 +21,16 @@ import org.xbill.DNS.utils.*;
 
 public class Cache extends NameSet {
 
-private class Element {
-	Name name;
-	RRset rrset;
-	short type;
+private static abstract class Element {
 	byte credibility;
 	int expire;
-	int srcid;
 
-	private void
-	setValues(Name name, RRset rrset, short type, byte credibility,
-		  long ttl, int srcid)
-	{
-		this.name = name;
-		this.rrset = rrset;
-		this.type = type;
+	protected void
+	setValues(byte credibility, long ttl) {
 		this.credibility = credibility;
 		this.expire = (int)((System.currentTimeMillis() / 1000) + ttl);
 		if (this.expire  < 0)
 			this.expire = Integer.MAX_VALUE;
-		this.srcid = srcid;
-	}
-
-	public
-	Element(Name name, long ttl, byte cred, short type) {
-		setValues(name, null, type, cred, ttl, 0);
-	}
-
-	public
-	Element(Record r, byte cred, int src) {
-		RRset set = new RRset();
-		set.addRR(r);
-		setValues(r.getName(), set, r.getRRsetType(), cred, r.getTTL(),
-			  src);
-	}
-
-	public
-	Element(RRset r, byte cred, int src) {
-		setValues(r.getName(), r, r.getType(), cred, r.getTTL(), src);
 	}
 
 	public final boolean
@@ -67,12 +39,62 @@ private class Element {
 		return (now > expire);
 	}
 
-	public final String
+	public abstract short getType();
+}
+
+private static class PositiveElement extends Element {
+	RRset rrset;
+	int srcid;
+
+	public
+	PositiveElement(Record r, byte cred, int src) {
+		rrset = new RRset();
+		rrset.addRR(r);
+		srcid = src;
+		setValues(cred, r.getTTL());
+	}
+
+	public
+	PositiveElement(RRset r, byte cred, int src) {
+		rrset = r;
+		setValues(cred, r.getTTL());
+	}
+
+	public short
+	getType() {
+		return rrset.getType();
+	}
+
+	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
-		if (rrset != null)
-			sb.append(rrset);
-		else if (type == 0)
+		sb.append(rrset);
+		sb.append(" cl = ");
+		sb.append(credibility);
+		return sb.toString();
+	}
+}
+
+private class NegativeElement extends Element {
+	short type;
+	Name name;
+
+	public
+	NegativeElement(Name name, long ttl, byte cred, short type) {
+		this.name = name;
+		this.type = type;
+		setValues(cred, ttl);
+	}
+
+	public short
+	getType() {
+		return type;
+	}
+
+	public String
+	toString() {
+		StringBuffer sb = new StringBuffer();
+		if (type == 0)
 			sb.append("NXDOMAIN " + name);
 		else
 			sb.append("NXRRSET " + name + " " + Type.string(type));
@@ -107,7 +129,8 @@ private class CacheCleaner extends Thread {
 			for (int i = 0; i < elements.length; i++) {
 				Element element = (Element) elements[i];
 				if (element.expired())
-					removeSet(name, element.type, element);
+					removeSet(name, element.getType(),
+						  element);
 			}
 		}
 	}
@@ -196,14 +219,17 @@ addRecord(Record r, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, element = new Element(r, cred, src));
+		addSet(name, type, new PositiveElement(r, cred, src));
 	else if (cred == element.credibility) {
-		if (element.srcid != src) {
-			RRset rrset = new RRset();
-			rrset.addRR(r);
-			addRRset(rrset, cred, o);
-		} else if (element.rrset != null)
-			element.rrset.addRR(r);
+		if (element instanceof PositiveElement) {
+			PositiveElement pe = (PositiveElement) element;
+			if (pe.srcid != src) {
+				RRset rrset = new RRset();
+				rrset.addRR(r);
+				addRRset(rrset, cred, o);
+			} else
+				pe.rrset.addRR(r);
+		}
 	}
 }
 
@@ -225,7 +251,7 @@ addRRset(RRset rrset, byte cred, Object o) {
 		return;
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, new Element(rrset, cred, src));
+		addSet(name, type, new PositiveElement(rrset, cred, src));
 }
 
 /**
@@ -239,7 +265,7 @@ public void
 addNegative(Name name, short type, long ttl, byte cred) {
 	Element element = (Element) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, new Element(name, ttl, cred, type));
+		addSet(name, type, new NegativeElement(name, ttl, cred, type));
 }
 
 private void
@@ -327,14 +353,16 @@ lookupRecords(Name name, short type, byte minCred) {
 		Element element = (Element) objects[i];
 		if (verbose)
 			logLookup(name, type, element.toString());
-		RRset rrset = element.rrset;
+		RRset rrset = null;
+		if (element instanceof PositiveElement)
+			rrset = ((PositiveElement) element).rrset;
 
 		/* Is this a negatively cached entry? */
 		if (rrset == null) {
 			/*
 			 * If this is an NXDOMAIN entry, return NXDOMAIN.
 			 */
-			if (element.type == 0) {
+			if (element.getType() == 0) {
 				if (verbose)
 					logLookup(name, type, "NXDOMAIN");
 				return SetResponse.ofType(SetResponse.NXDOMAIN);
@@ -476,7 +504,9 @@ verifyRecords(Cache tcache) {
 			continue;
 		for (int i = 0; i < elements.length; i++) {
 			Element element = (Element) elements[i];
-			RRset rrset = element.rrset;
+			if (element instanceof PositiveElement)
+				continue;
+			RRset rrset = ((PositiveElement) element).rrset;
 
 			/* for now, ignore negative cache entries */
 			if (rrset == null)
