@@ -85,11 +85,17 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 	Zone zone = findBestZone(name);
 	if (zone != null)
 		return zone.findRecords(name, type);
-	else if (glue)
-		return cache.findAnyRecords(name, type, dclass);
-	else 
-		return cache.findRecords(name, type, dclass);
-	
+	else {
+		RRset [] rrsets;
+		if (glue)
+			rrsets = cache.findAnyRecords(name, type, dclass);
+		else 
+			rrsets = cache.findRecords(name, type, dclass);
+		if (rrsets == null)
+			return null;
+		else
+			return rrsets[0]; /* not quite right */
+	}
 }
 
 void
@@ -104,18 +110,24 @@ addRRset(Message response, RRset rrset) {
 
 void
 addAuthority(Message response, Name name, Zone zone) {
-	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == null)
-	{
+	if (response.getHeader().getCount(Section.ANSWER) > 0 || zone == null) {
 		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN,
 						 false);
 		if (nsRecords == null) {
 			if (zone != null)
 				nsRecords = zone.getNS();
-			else
-				nsRecords = cache.findRecords(Name.root,
-							      Type.NS,
-							      DClass.IN);
+			else {
+				RRset [] rrsets;
+				rrsets = cache.findRecords(Name.root, Type.NS,
+							   DClass.IN);
+				if (rrsets == null)
+					nsRecords = null;
+				else
+					nsRecords = rrsets[0];
+			}
 		}
+		if (nsRecords == null)
+			return;
 		Enumeration e = nsRecords.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();

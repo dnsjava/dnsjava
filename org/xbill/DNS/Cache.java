@@ -10,7 +10,7 @@ import DNS.utils.*;
 
 public class Cache extends NameSet {
 
-private class CacheElement {
+private class Element {
 	RRset rrset;
 	byte credibility;
 	long timeIn;
@@ -18,7 +18,7 @@ private class CacheElement {
 	int srcid;
 
 	public
-	CacheElement(int _ttl, byte cred, int src) {
+	Element(int _ttl, byte cred, int src) {
 		rrset = null;
 		credibility = cred;
 		ttl = _ttl;
@@ -26,7 +26,7 @@ private class CacheElement {
 		timeIn = System.currentTimeMillis();
 	}
 	public
-	CacheElement(Record r, byte cred, int src) {
+	Element(Record r, byte cred, int src) {
 		rrset = new RRset();
 		credibility = cred;
 		ttl = -1;
@@ -35,7 +35,7 @@ private class CacheElement {
 	}
 
 	public
-	CacheElement(RRset r, byte cred, int src) {
+	Element(RRset r, byte cred, int src) {
 		rrset = r;
 		credibility = cred;
 		ttl = -1;
@@ -91,10 +91,10 @@ addRecord(Record r, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
 	if (r.getTTL() == 0)
 		return;
-	CacheElement element = (CacheElement) findExactSet(name, type, dclass);
+	Element element = (Element) findExactSet(name, type, dclass);
 	if (element == null || cred > element.credibility)
 		addSet(name, type, dclass,
-		       element = new CacheElement(r, cred, src));
+		       element = new Element(r, cred, src));
 	else if (cred == element.credibility) {
 		if (element.srcid != src)
 			element.rrset.clear();
@@ -110,36 +110,64 @@ addRRset(RRset rrset, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
 	if (rrset.getTTL() == 0)
 		return;
-	CacheElement element = (CacheElement) findSet(name, type, dclass);
+	Element element = (Element) findExactSet(name, type, dclass);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, dclass, new CacheElement(rrset, cred, src));
+		addSet(name, type, dclass, new Element(rrset, cred, src));
 }
 
 public void
 addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
-	CacheElement element = (CacheElement) findSet(name, type, dclass);
+	Element element = (Element) findExactSet(name, type, dclass);
 	if (element == null || cred > element.credibility)
-		addSet(name, type, dclass, new CacheElement(ttl, cred, src));
+		addSet(name, type, dclass, new Element(ttl, cred, src));
 }
 
 public CacheResponse
 lookupRecords(Name name, short type, short dclass, byte minCred) {
-	CacheElement element = (CacheElement) findSet(name, type, dclass);
-	if (element == null)
+	CacheResponse cr = null;
+	Object [] objects = findSets(name, type, dclass);
+
+	if (objects == null)
 		return new CacheResponse(CacheResponse.UNKNOWN);
-	if (element.expiredTTL()) {
-		removeSet(name, type, dclass, element);
-		return new CacheResponse(CacheResponse.UNKNOWN);
+
+	int nelements = 0;
+	for (int i = 0; i < objects.length; i++) {
+		Element element = (Element) objects[i];
+		if (element.expiredTTL()) {
+			removeSet(name, type, dclass, element);
+			objects[i] = null;
+		}
+		else if (element.credibility < minCred)
+			objects[i] = null;
+		else
+			nelements++;
 	}
-	if (element.credibility >= minCred) {
-		RRset rrset = element.rrset;
-		if (rrset == null)
+	if (nelements == 0)
+		return new CacheResponse(CacheResponse.UNKNOWN);
+
+	Element [] elements = new Element[nelements];
+	for (int i = 0, j = 0; i < objects.length; i++) {
+		if (objects[i] == null)
+			continue;
+		elements[j++] = (Element) objects[i];
+	}
+
+	for (int i = 0; i < elements.length; i++) {
+		if (elements[i] == null)
+			continue;
+
+		RRset rrset = elements[i].rrset;
+		if (rrset == null) {
+			if (type == Type.ANY)
+				continue;
 			return new CacheResponse(CacheResponse.NEGATIVE);
-		if (type != Type.CNAME && rrset.getType() == Type.CNAME) {
-			CNAMERecord cname;
-			cname = (CNAMERecord) rrset.rrs().nextElement();
-			CacheResponse cr;
+		}
+
+		if (type != Type.CNAME && type != Type.ANY &&
+		    rrset.getType() == Type.CNAME)
+		{
+			CNAMERecord cname = (CNAMERecord) rrset.first();
 			cr = lookupRecords(cname.getTarget(), type, dclass,
 					   minCred);
 			if (!cr.isUnknown())
@@ -148,29 +176,28 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 				return new CacheResponse(CacheResponse.PARTIAL,
 							 cname.getTarget());
 		}
-		else
-			return new CacheResponse(CacheResponse.SUCCESSFUL,
-						 rrset);
+		if (cr == null)
+			cr = new CacheResponse(CacheResponse.SUCCESSFUL);
+		cr.add(rrset);	
 	}
-	else
-		return new CacheResponse(CacheResponse.UNKNOWN);
+	return cr;
 }
 
-RRset
+RRset []
 findRecords(Name name, short type, short dclass, byte minCred) {
 	CacheResponse cr = lookupRecords(name, type, dclass, minCred);
 	if (cr.isSuccessful())
-		return cr.answer();
+		return cr.answers();
 	else
 		return null;
 }
 
-public RRset
+public RRset []
 findRecords(Name name, short type, short dclass) {
 	return findRecords(name, type, dclass, Credibility.NONAUTH_ANSWER);
 }
 
-public RRset
+public RRset []
 findAnyRecords(Name name, short type, short dclass) {
 	return findRecords(name, type, dclass, Credibility.NONAUTH_ADDITIONAL);
 }

@@ -42,12 +42,12 @@ getOrigin() {
 
 public RRset
 getNS() {
-	return (RRset) findSet(origin, Type.NS, dclass);
+	return (RRset) findExactSet(origin, Type.NS, dclass);
 }
 
 public SOARecord
 getSOA() {
-	RRset rrset = (RRset) findSet(origin, Type.SOA, dclass);
+	RRset rrset = (RRset) findExactSet(origin, Type.SOA, dclass);
 	if (rrset == null)
 		return null;
 	Enumeration e = rrset.rrs();
@@ -61,7 +61,7 @@ getDClass() {
 
 public RRset
 findRecords(Name name, short type) {
-	return (RRset) findSet(name, type, dclass);
+	return (RRset) findExactSet(name, type, dclass);
 }
 
 public Hashtable
@@ -73,7 +73,7 @@ public void
 addRR(Record record) {
 	Name name = record.getName();
 	short type = record.getType();
-	RRset rrset = (RRset) findSet (name, type, dclass);
+	RRset rrset = (RRset) findExactSet (name, type, dclass);
 	if (rrset == null)
 		addSet(name, type, dclass, rrset = new RRset());
 	rrset.addRR(record);

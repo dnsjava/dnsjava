@@ -23,7 +23,11 @@ equals(Object arg) {
 	if (arg == null || !(arg instanceof TypeClass))
 		return false;
 	TypeClass tc = (TypeClass) arg;
-	return (type == tc.type && dclass == tc.dclass);
+	boolean typeOK = (type == Type.ANY || tc.type == Type.ANY ||
+			  type == tc.type);
+	boolean classOK = (dclass == DClass.ANY || tc.dclass == DClass.ANY ||
+			   dclass == tc.dclass);
+	return (typeOK && classOK);
 }
 
 public int

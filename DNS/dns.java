@@ -104,13 +104,23 @@ lookup(Name name, short type, short dclass, byte cred) {
 	CacheResponse cached = cache.lookupRecords(name, type, dclass, cred);
 /*System.out.println(cached);*/
 	if (cached.isSuccessful()) {
-		RRset rrset = cached.answer();
-		answerCount = rrset.size();
-		e = rrset.rrs();
+		RRset [] rrsets = cached.answers();
+		answerCount = 0;
+		for (int i = 0; i < rrsets.length; i++)
+			answerCount += rrsets[i].size();
+
+		answers = new Record[answerCount];
+
+		for (int i = 0; i < rrsets.length; i++) {
+			e = rrsets[i].rrs();
+			while (e.hasMoreElements()) {
+				Record r = (Record)e.nextElement();
+				answers[n++] = r;
+			}
+		}
 	}
 	else if (cached.isNegative()) {
-		answerCount = 0;
-		e = null;
+		return null;
 	}
 	else {
 		Record question = Record.newRecord(name, type, dclass);
@@ -130,22 +140,21 @@ lookup(Name name, short type, short dclass, byte cred) {
 			Record r = (Record)e.nextElement();
 			if (matchType(r.getType(), type))
 				answerCount++;
-
 		}
+		if (answerCount == 0)
+			return null;
+
+		answers = new Record[answerCount];
 
 		e = response.getSection(Section.ANSWER);
+		while (e.hasMoreElements()) {
+			Record r = (Record)e.nextElement();
+			if (matchType(r.getType(), type))
+				answers[n++] = r;
+		}
 	}
 
-	if (answerCount == 0)
-		return null;
 
-	answers = new Record[answerCount];
-
-	while (e.hasMoreElements()) {
-		Record r = (Record)e.nextElement();
-		if (matchType(r.getType(), type))
-			answers[n++] = r;
-	}
 
 	return answers;
 }

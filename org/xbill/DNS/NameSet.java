@@ -17,15 +17,39 @@ NameSet() {
 	data = new Hashtable();
 }
 
-protected Object
-findSet(Name name, short type, short dclass) {
+protected Object []
+findSets(Name name, short type, short dclass) {
+	Object [] array;
+	Object o;
+
 	Hashtable nameInfo = findName(name);
 	if (nameInfo == null) 
 		return null;
-	Object o = nameInfo.get(new TypeClass(type, dclass));
-	if (o != null || type == Type.CNAME)
-		return o;
-	return nameInfo.get(new TypeClass(Type.CNAME, dclass));
+	if (type == Type.ANY) {
+		array = new Object[nameInfo.size()];
+		int i = 0;
+		Enumeration e = nameInfo.elements();
+		while (e.hasMoreElements())
+			array[i++] = e.nextElement();
+		return array;
+	}
+	o = nameInfo.get(new TypeClass(type, dclass));
+	if (o != null) {
+		array = new Object[1];
+		array[0] = o;
+		return array;
+	}
+	if (type != Type.CNAME) {
+		o = nameInfo.get(new TypeClass(Type.CNAME, dclass));
+		if (o == null)
+			return null;
+		else {
+			array = new Object[1];
+			array[0] = o;
+			return array;
+		}
+	}
+	return null;
 }
 
 protected Object

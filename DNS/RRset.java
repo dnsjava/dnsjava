@@ -114,6 +114,14 @@ getTTL() {
 	return ttl;
 }
 
+/** Returns the first record */
+public Record
+first() {
+	if (rrs.size() == 0)
+		return null;
+	return (Record) rrs.elementAt(0);
+}
+
 /** Converts the RRset to a String */
 public String
 toString() {

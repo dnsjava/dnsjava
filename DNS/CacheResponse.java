@@ -55,6 +55,14 @@ CacheResponse(byte _type) {
 	this(_type, null);
 }
 
+void
+add(RRset rrset) {
+	if (data == null)
+		data = new Vector();
+	Vector v = (Vector) data;
+	v.addElement(rrset);
+}
+
 /** Is the answer to the query unknown? */
 public boolean
 isUnknown() {
@@ -79,12 +87,16 @@ isSuccessful() {
 	return (type == SUCCESSFUL);
 }
 
-/** If the query was successful, return the answer */
-public RRset
-answer() {
+/** If the query was successful, return the answers */
+public RRset []
+answers() {
 	if (type != SUCCESSFUL)
 		return null;
-	return (RRset) data;
+	Vector v = (Vector) data;
+	RRset [] rrsets = new RRset[v.size()];
+	for (int i = 0; i < rrsets.length; i++)
+		rrsets[i] = (RRset) v.elementAt(i);
+	return rrsets;
 }
 
 /**
