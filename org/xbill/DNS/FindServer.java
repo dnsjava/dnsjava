@@ -33,7 +33,7 @@ FindServer() {}
 private static void
 findProperty() {
 	String s, prop;
-	Vector v = null;
+	List l = new ArrayList(0);
 	StringTokenizer st;
 
 	prop = System.getProperty("dns.server");
@@ -41,35 +41,25 @@ findProperty() {
 		st = new StringTokenizer(prop, ",");
 		while (st.hasMoreTokens()) {
 			s = st.nextToken();
-			if (v == null)
-				v = new Vector();
-			v.addElement(s);
+			l.add(s);
 		}
-		if (v != null) {
-			server = new String[v.size()];
-			for (int i = 0; i < v.size(); i++)
-				server[i] = (String) v.elementAt(i);
-		}
+		if (l.size() > 0)
+			server = (String []) l.toArray(new String[l.size()]);
 	}
 
-	v = null;
+	l.clear();
 	prop = System.getProperty("dns.search");
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
 		while (st.hasMoreTokens()) {
 			s = st.nextToken();
-			if (v == null)
-				v = new Vector();
 			try {
-				v.addElement(Name.fromString(s, Name.root));
+				l.add(Name.fromString(s, Name.root));
 			}
 			catch (TextParseException e) {}
 		}
-		if (v != null && v.size() > 0) {
-			search = new Name[v.size()];
-			for (int i = 0; i < v.size(); i++)
-				search[i] = (Name)v.elementAt(i);
-		}
+		if (l.size() > 0)
+			search = (Name []) l.toArray(new Name[l.size()]);
 	}
 }
 
@@ -89,39 +79,33 @@ findUnix() {
 	}
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
-	Vector vserver = null;
-	Vector vsearch = null;
+	List lserver = new ArrayList(0);
+	List lsearch = new ArrayList(0);
 	try {
 		String line;
 		while ((line = br.readLine()) != null) {
 			if (line.startsWith("nameserver")) {
-				if (vserver == null)
-					vserver = new Vector();
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip nameserver */
-				vserver.addElement(st.nextToken());
+				lserver.add(st.nextToken());
 			}
 			else if (line.startsWith("domain")) {
-				if (vsearch == null)
-					vsearch = new Vector();
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip domain */
 				if (!st.hasMoreTokens())
 					continue;
 				String s = st.nextToken();
-				if (!vsearch.contains(s))
-					vsearch.addElement(s);
+				if (!lsearch.contains(s))
+					lsearch.add(s);
 			}
 			else if (line.startsWith("search")) {
-				if (vsearch == null)
-					vsearch = new Vector();
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip search */
 				String s;
 				while (st.hasMoreTokens()) {
 					s = st.nextToken();
-					if (!vsearch.contains(s))
-						vsearch.addElement(s);
+					if (!lsearch.contains(s))
+						lsearch.add(s);
 				}
 			}
 		}
@@ -129,24 +113,21 @@ findUnix() {
 	}
 	catch (IOException e) {
 	}
-	if (server == null && vserver != null) {
-		server = new String[vserver.size()];
-		for (int i = 0; i < vserver.size(); i++)
-			server[i] = (String) vserver.elementAt(i);
-	}
-	if (search == null && vsearch != null) {
-		Vector v = new Vector();
-		for (int i = 0; i < vsearch.size(); i++) {
-			String s = (String)vsearch.elementAt(i);
+
+	if (server == null && lserver.size() > 0)
+		server = (String [])lserver.toArray(new String[lserver.size()]);
+
+	if (search == null && lsearch.size() > 0) {
+		List l = new ArrayList();
+		for (int i = 0; i < lsearch.size(); i++) {
+			String s = (String)lsearch.get(i);
 			try {
-				v.addElement(Name.fromString(s, Name.root));
+				l.add(Name.fromString(s, Name.root));
 			}
 			catch (TextParseException e) {
 			}
 		}
-		search = new Name[v.size()];
-		for (int i = 0; i < v.size(); i++)
-			search[i] = (Name)v.elementAt(i);
+		search = (Name [])l.toArray(new Name[l.size()]);
 	}
 }
 
@@ -157,7 +138,7 @@ private static void
 findWin(InputStream in) {
 	BufferedReader br = new BufferedReader(new InputStreamReader(in));
 	try {
-		Vector vserver = null;
+		List lserver = new ArrayList();
 		String line = null;
 		boolean readingServers = false;
 		while ((line = br.readLine()) != null) {
@@ -193,18 +174,14 @@ findWin(InputStream in) {
 					s = st.nextToken();
 				if (s.equals(":"))
 					continue;
-				if (vserver == null)
-					vserver = new Vector();
-				vserver.addElement(s);
+				lserver.add(s);
 				readingServers = true;
 			}
 		}
 		
-		if (server == null && vserver != null) {
-			server = new String[vserver.size()];
-			for (int i = 0; i < vserver.size(); i++)
-				server[i] = (String) vserver.elementAt(i);
-		}
+		if (server == null && lserver.size() > 0)
+			server = (String [])lserver.toArray
+						(new String[lserver.size()]);
 	}
 	catch (IOException e) {
 	}
