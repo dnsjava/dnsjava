@@ -245,7 +245,7 @@ toStringNoData() {
 	if (Options.check("BINDTTL"))
 		sb.append(TTL.format(ttl));
 	else
-		sb.append(ttl);
+		sb.append((long)ttl & 0xFFFFFFFFL);
 	sb.append(" ");
 	if (dclass != DClass.IN || !Options.check("noPrintIN")) {
 		sb.append(DClass.string(dclass));
