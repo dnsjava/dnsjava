@@ -1,7 +1,4 @@
-// Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
-// Portions Copyright (c) 1999 Network Associates, Inc.
-
-/* High level API */
+// Copyright (c) 2003 Brian Wellington (bwelling@xbill.org)
 
 package org.xbill.DNS;
 
