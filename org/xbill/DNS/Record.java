@@ -10,7 +10,8 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * The base class that all records are derived from.
+ * A generic DNS resource record.  The specific record types extend this class.
+ * A record contains a name, type, class, and rdata.
  *
  * @author Brian Wellington
  */

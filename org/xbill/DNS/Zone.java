@@ -202,7 +202,6 @@ throws IOException, ZoneTransferException
 
 /**
  * Creates a Zone by performing a zone transfer to the specified host.
- * @see Cache
  * @see Master
  */
 public
