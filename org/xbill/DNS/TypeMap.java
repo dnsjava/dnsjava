@@ -23,20 +23,9 @@ TypeMap() {
  */
 Object
 get(short type) {
-	Object [] out = getMultiple(type);
-	if (out == null || out.length == 0)
-		return null;
-	if (out.length == 1)
-		return out[0];
-	else
-		throw new RuntimeException("TypeMap error: " + out.length);
-}
-
-private int
-fill(Object [] array, int start, Enumeration e) {
-	while (e.hasMoreElements()) 
-		array[start++] = e.nextElement();
-	return start;
+	if (type == Type.ANY)
+		throw new RuntimeException("called TypeMap.get() with ANY");
+	return data.get(new Short(type));
 }
 
 /**
@@ -45,42 +34,25 @@ fill(Object [] array, int start, Enumeration e) {
 Object []
 getMultiple(short type) {
 	Object [] out;
-	Vector v;
 	int n;
 
 	if (type != Type.ANY) {
-		v = (Vector) data.get(new Short(type));
-		if (v == null)
+		Object o = get(type);
+		if (o == null)
 			return null;
-		synchronized (v) {
-			out = new Object[v.size()];
-			n = fill(out, 0, v.elements());
-		}
+		out = new Object[1];
+		out[0] = o;
+		return out;
 	}
 	else {
 		synchronized (data) {
 			int size = data.size();
-			while (true) {
-				try {
-					out = new Object[size];
-					Enumeration e = data.elements();
-					n = 0;
-					while (e.hasMoreElements()) {
-						v = (Vector) e.nextElement();
-						n = fill(out, n, v.elements());
-					}
-					break;
-				}
-				catch (ArrayIndexOutOfBoundsException e) {
-					size *= 2;
-				}
-			}
+			out = new Object[size];
+			Enumeration e = data.elements();
+			n = 0;
+			while (e.hasMoreElements())
+				out[n++] = e.nextElement();
 		}
-	}
-	if (n != out.length) {
-		Object [] out2 = out;
-		out = new Object[n];
-		System.arraycopy(out2, 0, out, 0, n);
 	}
 	return out;
 }
@@ -90,16 +62,8 @@ getMultiple(short type) {
  */
 void
 put(short type, Object value) {
-	Short T = new Short(type);
-	Vector v = (Vector) data.get(T);
-	if (v == null) {
-		synchronized (data) {
-			data.put(T, v = new Vector());
-		}
-	}
-	synchronized (v) {
-		v.removeElement(value);
-		v.addElement(value);
+	synchronized (data) {
+		data.put(new Short(type), value);
 	}
 }
 
@@ -108,13 +72,7 @@ put(short type, Object value) {
  */
 void
 remove(short type) {
-	Short T = new Short(type);
-	Vector v = (Vector) data.get(T);
-	if (v == null)
-		return;
-	synchronized (data) {
-		data.remove(T);
-	}
+	data.remove(new Short(type));
 }
 
 /**
