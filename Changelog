@@ -1,3 +1,27 @@
+11/7/1999
+	- Added EDNS support to update client
+
+11/2/1999
+	- A key starting with ':' is parsed as hex
+
+10/28/1999
+	- minor TKEY fixes and TSIG updates
+
+10/5/1999
+	- misc. small fixes
+
+10/4/1999
+	- Missed TKEY in the type map
+
+9/26/1999
+	- Added TKEY record
+
+9/25/1999
+	- Diffie-Hellman key updates
+
+9/23/1999
+	- dns.server and dns.search are now comma-delimited strings
+
 9/20/1999
 	- 1.1 released (finally)
 	- Change OPT to type 41 and fixed related stuff
