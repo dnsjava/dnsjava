@@ -344,6 +344,13 @@ lookupRecords(Name name, short type, byte minCred) {
 				cr.addCNAME((CNAMERecord) rrset.first());
 				return cr;
 			}
+			else if (type != Type.NS && type != Type.ANY &&
+				 rrset.getType() == Type.NS)
+			{
+				cr = new SetResponse(SetResponse.DELEGATION);
+				cr.addNS(rrset);
+				return cr;
+			}
 			else {
 				if (cr == null)
 					cr = new SetResponse

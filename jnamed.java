@@ -180,43 +180,18 @@ addRRset(Name name, Message response, RRset rrset, byte section,
 	}
 }
 
+private void
+addSOA(Message response, Zone zone) {
+	response.addRecord(zone.getSOA(), Section.AUTHORITY);
+}
 
-void
-addAuthority(Message response, Name name) {
-	Zone zone = findBestZone(name);
-	if (response.getHeader().getRcode() == Rcode.NOERROR ||
-	    zone == null)
-	{
-		RRset nsRecords = findExactMatch(name, Type.NS, DClass.IN,
-						 false);
-		if (nsRecords == null) {
-			if (zone != null)
-				nsRecords = zone.getNS();
-			else {
-				RRset [] rrsets;
-				Cache cache = getCache(DClass.IN);
-				rrsets = cache.findRecords(Name.root, Type.NS);
-				if (rrsets == null)
-					nsRecords = null;
-				else
-					nsRecords = rrsets[0];
-			}
-		}
-		if (nsRecords == null)
-			return;
-		addRRset(nsRecords.getName(), response, nsRecords,
-			 Section.AUTHORITY, false);
-	}
-	else {
-		RRset nsRecords = findDelegation(name, DClass.IN);
-		if (nsRecords != null) {
-			addRRset(nsRecords.getName(), response, nsRecords,
-				 Section.AUTHORITY, false);
-		}
-		else {
-			SOARecord soa = (SOARecord) zone.getSOA();
-			response.addRecord(soa, Section.AUTHORITY);
-		}
+private void
+addNS(Message response, Zone zone) {
+	RRset nsRecords = zone.getNS();
+	Enumeration e = nsRecords.rrs();
+	while (e.hasMoreElements()) {
+		Record r = (Record) e.nextElement();
+		response.addRecord(r, Section.AUTHORITY);
 	}
 }
 
@@ -242,17 +217,29 @@ addAdditional2(Message response, int section) {
 	Enumeration e = response.getSection(section);
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		try {
-			Method m = r.getClass().getMethod("getTarget", null);
-			if (m != null && r.getType() != Type.CNAME) {
-				Name glueName = (Name) m.invoke(r, null);
-				addGlue(response, glueName);
-			}
+		Name glueName = null;
+		switch (r.getType()) {
+			case Type.MX:
+				glueName = ((MXRecord)r).getTarget();
+				break;
+			case Type.NS:
+				glueName = ((NSRecord)r).getTarget();
+				break;
+			case Type.KX:
+				glueName = ((KXRecord)r).getTarget();
+				break;
+			case Type.NAPTR:
+				glueName = ((NAPTRRecord)r).getReplacement();
+				break;
+			case Type.SRV:
+				glueName = ((SRVRecord)r).getTarget();
+				break;
+			default:
+				break;
 		}
-		catch (Exception ex) {
-		}
+		if (glueName != null)
+			addGlue(response, glueName);
 	}
-	
 }
 
 void
@@ -289,25 +276,31 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 		sr = cache.lookupRecords(name, type,
 					 Credibility.NONAUTH_ANSWER);
 	}
-System.out.println(sr);
 
 	if (sr.isUnknown()) {
 		/* Do nothing, I guess. This should never happen. */
 	}
 	if (sr.isNXDOMAIN()) {
 		response.getHeader().setRcode(Rcode.NXDOMAIN);
+		if (zone != null && iterations == 0)
+			addSOA(response, zone);
 	}
 	else if (sr.isNXRRSET()) {
-		/* do nothing */
+		if (zone != null && iterations == 0)
+			addSOA(response, zone);
 	}
 	else if (sr.isDelegation()) {
-		/* do nothing */
+		RRset nsRecords = sr.getNS();
+		addRRset(nsRecords.getName(), response, nsRecords,
+			 Section.AUTHORITY, false);
 	}
 	else if (sr.isCNAME()) {
 		RRset rrset = new RRset();
 		CNAMERecord cname = sr.getCNAME();
 		rrset.addRR(cname);
 		addRRset(name, response, rrset, Section.ANSWER, false);
+		if (zone != null && iterations == 0)
+			addNS(response, zone);
 		rcode = addAnswer(response, cname.getTarget(), type, dclass,
 				  ++iterations);
 	}
@@ -319,14 +312,14 @@ System.out.println(sr);
 		Name newname = name.fromDNAME(dname);
 		if (newname == null)
 			return Rcode.SERVFAIL;
-		rrset = new RRset();
 		try {
-			CNAMERecord cname;
-			cname = new CNAMERecord(name, dclass, 0, newname);
-			rrset.addRR(cname);
+			rrset = new RRset();
+			rrset.addRR(new CNAMERecord(name, dclass, 0, newname));
 			addRRset(name, response, rrset, Section.ANSWER, false);
 		}
 		catch (IOException e) {}
+		if (zone != null && iterations == 0)
+			addNS(response, zone);
 		rcode = addAnswer(response, newname, type, dclass,
 				  ++iterations);
 	}
@@ -335,6 +328,8 @@ System.out.println(sr);
 		for (int i = 0; i < rrsets.length; i++)
 			addRRset(name, response, rrsets[i],
 				 Section.ANSWER, sigonly);
+		if (zone != null && iterations == 0)
+			addNS(response, zone);
 	}
 	return rcode;
 }
@@ -432,7 +427,6 @@ generateReply(Message query, byte [] in, Socket s) {
 	if (rcode != Rcode.NOERROR)
 		return errorMessage(query, rcode);
 
-	addAuthority(response, name);
 	addAdditional(response);
 	if (queryTSIG != null) {
 		try {

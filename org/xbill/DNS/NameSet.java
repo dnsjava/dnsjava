@@ -71,6 +71,17 @@ findSets(Name name, short type) {
 		if (tlabels == labels && type == Type.ANY)
 			return nameInfo.getMultiple(type);
 
+		/* Look for an NS */
+		if (tlabels > olabels || isCache) {
+			o = nameInfo.get(Type.NS);
+			if (o != null) {
+				if (isCache)
+					bestns = o;
+				else
+					return new Object[] {o};
+			}
+		}
+
 		/* If this is the name, look for the actual type. */
 		if (tlabels == labels) {
 			o = nameInfo.get(type);
@@ -92,17 +103,6 @@ findSets(Name name, short type) {
 			o = nameInfo.get(Type.DNAME);
 			if (o != null)
 				return new Object[] {o};
-		}
-
-		/* Look for an NS */
-		if (tlabels > olabels || isCache) {
-			o = nameInfo.get(Type.NS);
-			if (o != null) {
-				if (isCache)
-					bestns = o;
-				else
-					return new Object[] {o};
-			}
 		}
 
 		/*

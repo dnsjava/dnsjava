@@ -244,6 +244,12 @@ findRecords(Name name, short type) {
 			zr = new SetResponse(SetResponse.CNAME);
 			zr.addCNAME((CNAMERecord) rrset.first());
 		}
+		else if (type != Type.NS && type != Type.ANY &&
+			 rrset.getType() == Type.NS)
+		{
+			zr = new SetResponse(SetResponse.DELEGATION);
+			zr.addNS(rrset);
+		}
 		else {
 			zr = new SetResponse(SetResponse.SUCCESSFUL);
 			for (int i = 0; i < rrsets.length; i++)
