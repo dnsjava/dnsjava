@@ -26,19 +26,19 @@ private byte [] key;
 private byte [] other;
 
 /** The key is assigned by the server (unimplemented) */
-public static short SERVERASSIGNED	= 1;
+public static final short SERVERASSIGNED	= 1;
 
 /** The key is computed using a Diffie-Hellman key exchange */
-public static short DIFFIEHELLMAN	= 2;
+public static final short DIFFIEHELLMAN		= 2;
 
 /** The key is computed using GSS_API (unimplemented) */
-public static short GSSAPI		= 3;
+public static final short GSSAPI		= 3;
 
 /** The key is assigned by the resolver (unimplemented) */
-public static short RESOLVERASSIGNED	= 4;
+public static final short RESOLVERASSIGNED	= 4;
 
 /** The key should be deleted */
-public static short DELETE		= 5;
+public static final short DELETE		= 5;
 
 /**
  * Creates a TKEY Record from the given data.
@@ -97,6 +97,18 @@ TKEYRecord(Name _name, short _dclass, int _ttl, int length,
 		other = null;
 }
 
+protected String
+modeString() {
+	switch (mode) {
+		case SERVERASSIGNED:	return "SERVERASSIGNED";
+		case DIFFIEHELLMAN:	return "DIFFIEHELLMAN";
+		case GSSAPI:		return "GSSAPRESOLVERASSIGNED";
+		case RESOLVERASSIGNED:	return "RESOLVERASSIGNED";
+		case DELETE:		return "DELETE";
+		default:		return new Short(mode).toString();
+	}
+}
+
 /** Converts to a String */
 public String
 toString() {
@@ -111,7 +123,7 @@ toString() {
 	sb.append (" ");
 	sb.append(SIGRecord.formatDate(timeExpire));
 	sb.append (" ");
-	sb.append (mode);
+	sb.append (modeString());
 	sb.append (" ");
 	sb.append (Rcode.TSIGstring(error));
 	sb.append ("\n");
