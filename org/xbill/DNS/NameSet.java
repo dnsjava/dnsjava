@@ -24,6 +24,7 @@ private boolean isCache;
 protected
 NameSet(boolean isCache) {
 	data = new Hashtable();
+	origin = Name.root;
 	this.isCache = isCache;
 }
 
@@ -122,7 +123,6 @@ findSets(Name name, short type) {
 		if (tlabels == labels)
 			return nameInfo;
 	}
-
 	if (bestns == null)
 		return null;
 	else

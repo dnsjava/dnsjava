@@ -398,6 +398,8 @@ public boolean
 equals(Object arg) {
 	if (arg == null || !(arg instanceof Name))
 		return false;
+	if (arg == this)
+		return true;
 	Name d = (Name) arg;
 	if (d.labels != labels)
 		return false;

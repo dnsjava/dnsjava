@@ -289,10 +289,12 @@ lookupRecords(Name name, short type, byte minCred) {
 			removeSet(name, type, element);
 			objects[i] = null;
 		}
-		else if (element.credibility < minCred)
+		else if (element.credibility < minCred) {
 			objects[i] = null;
-		else
+		}
+		else {
 			nelements++;
+		}
 	}
 	if (nelements == 0) {
 		/* We have data, but can't use it.  Punt. */
@@ -347,6 +349,7 @@ lookupRecords(Name name, short type, byte minCred) {
 			else if (type != Type.NS && type != Type.ANY &&
 				 rrset.getType() == Type.NS)
 			{
+				/* XXX */
 				cr = new SetResponse(SetResponse.DELEGATION);
 				cr.addNS(rrset);
 				return cr;

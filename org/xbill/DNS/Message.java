@@ -178,7 +178,7 @@ public boolean
 findRRset(Name name, short type, int section) {
 	for (int i = 0; i < sections[section].size(); i++) {
 		Record r = (Record) sections[section].elementAt(i);
-		if (r.getType() == type || name.equals(r.getName()))
+		if (r.getType() == type && name.equals(r.getName()))
 			return true;
 	}
 	return false;
