@@ -1,3 +1,13 @@
+4/15/1999
+	- 0.8.3 released
+	- ExtendedResolver timer code fixes
+
+4/14/1999
+	- ExtendedResolver reentrancy fixes
+	- Names are marked as qualified/unqualified
+	- FindServer looks for search path from -Ddns.search1, etc.
+		and in /etc/resolv.conf
+
 4/13/1999
 	- 0.8.2 released
 	- More javadoc-ed classes in DNS.*
