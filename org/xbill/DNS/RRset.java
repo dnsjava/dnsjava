@@ -181,29 +181,34 @@ getSecurity() {
 	return securityStatus;
 }
 
+private String
+iteratorToString(Iterator it) {
+	StringBuffer sb = new StringBuffer();
+	while (it.hasNext()) {
+		Record rr = (Record) it.next();
+		sb.append("[");
+		sb.append(rr.rdataToString());
+		sb.append("]");
+		if (it.hasNext())
+			sb.append(" ");
+	}
+	return sb.toString();
+}
+
 /** Converts the RRset to a String */
 public String
 toString() {
+	if (rrs == null)
+		return ("{empty}");
 	StringBuffer sb = new StringBuffer();
-	sb.append("{ [");
-	Iterator it = rrs.iterator();
-	while (it.hasNext()) {
-		Record rr = (Record) it.next();
-		sb.append(rr);
-		if (it.hasNext())
-			sb.append("<>");
-	}
-	sb.append("]");
+	sb.append("{ ");
+	sb.append(getName() + " ");
+	sb.append(DClass.string(getDClass()) + " ");
+	sb.append(Type.string(getType()) + " ");
+	sb.append(iteratorToString(rrs.iterator()));
 	if (sigs != null) {
-		sb.append(" [");
-		it = sigs.iterator();
-		while (it.hasNext()) {
-			Record rr = (Record) it.next();
-			sb.append(rr);
-			if (it.hasNext())
-				sb.append("<>");
-		}
-		sb.append("]");
+		sb.append(" sigs: ");
+		sb.append(iteratorToString(sigs.iterator()));
 	}
 	sb.append(" }");
 	return sb.toString();
