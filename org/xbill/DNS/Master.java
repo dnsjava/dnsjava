@@ -49,14 +49,14 @@ Master(String filename) throws IOException {
 	this(new File(filename), null);
 }
 
-/** Begins parsing from an input reader */
+/** Begins parsing from an input reader with an initial origin */
 public
 Master(BufferedReader in, Name defaultOrigin) {
 	br = in;
 	origin = defaultOrigin;
 }
 
-/** Begins parsing from an input reader with an initial origin */
+/** Begins parsing from an input reader */
 public
 Master(BufferedReader in) {
 	this(in, null);
@@ -126,18 +126,13 @@ private void
 parseInclude(MyStringTokenizer st) throws IOException {
 	if (!st.hasMoreTokens())
 		throw new IOException ("Missing file to include");
-	File newfile;
 	String filename = st.nextToken();
-	if (file.getParent() == null)
-		newfile = new File(filename);
-	else
-		newfile = new File(file.getParent(), filename);
+	String parent = file.getParent();
+	File newfile = new File(file.getParent(), filename);
+	Name incorigin = origin;
 	if (st.hasMoreTokens())
-		included = new Master(newfile,
-				      Name.fromString(st.nextToken(),
-				      		      Name.root));
-	else
-		included = new Master(newfile, origin);
+		incorigin = Name.fromString(st.nextToken(), Name.root);
+	included = new Master(newfile, incorigin);
 }
 
 private Record
@@ -218,8 +213,7 @@ readExtendedLine(BufferedReader br) throws IOException {
 			sb.append(s.substring(0, s.length() - 1));
 			break;
 		}
-		else
-			sb.append(s);
+		sb.append(s);
 	}
 	return sb.toString();
 }
