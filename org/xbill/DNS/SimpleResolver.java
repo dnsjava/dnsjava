@@ -327,10 +327,8 @@ sendAXFR(Message query) throws IOException {
 static class Stream {
 	SimpleResolver res;
 	Socket sock;
-	int nresponses;
 	TSIG tsig;
 	TSIG.StreamVerifier verifier;
-	Message lastResponse;
 
 	Stream(SimpleResolver res) throws IOException {
 		this.res = res;
@@ -355,14 +353,9 @@ static class Stream {
 	next() throws IOException {
 		byte [] in = res.readTCP(sock);
 		Message response =  res.parseMessage(in);
-		lastResponse = response;
-		nresponses++;
 		if (response.getHeader().getRcode() != Rcode.NOERROR)
 			return response;
 		if (verifier != null) {
-			boolean first = (nresponses == 1);
-			boolean required = (nresponses % 100 == 0);
-
 			TSIGRecord tsigrec = response.getTSIG();
 
 			byte error = verifier.verify(response, in);
