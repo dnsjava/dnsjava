@@ -82,18 +82,25 @@ class AXFREnumeration implements Enumeration {
 /** A primary zone */
 public static final int PRIMARY = 1;
 
-/** A secondary zone (unimplemented) */
+/** A secondary zone */
 public static final int SECONDARY = 2;
 
 private int type;
 private Name origin;
 private short dclass = DClass.IN;
+private RRset NS;
+private SOARecord SOA;
 
 private void
 validate() throws IOException {
-	if (getSOA() == null)
-		throw new IOException(origin + ": no SOA specified");
-	if (getNS() == null)
+	RRset rrset = (RRset) findExactSet(origin, Type.SOA);
+	if (rrset == null || rrset.size() != 1)
+		throw new IOException(origin +
+				      ": exactly 1 SOA must be specified");
+	Enumeration e = rrset.rrs();
+	SOA = (SOARecord) e.nextElement();
+	NS = (RRset) findExactSet(origin, Type.NS);
+	if (NS == null)
 		throw new IOException(origin + ": no NS set specified");
 }
 
@@ -176,17 +183,13 @@ getOrigin() {
 /** Returns the Zone origin's NS records */
 public RRset
 getNS() {
-	return (RRset) findExactSet(origin, Type.NS);
+	return NS;
 }
 
 /** Returns the Zone's SOA record */
 public SOARecord
 getSOA() {
-	RRset rrset = (RRset) findExactSet(origin, Type.SOA);
-	if (rrset == null)
-		return null;
-	Enumeration e = rrset.rrs();
-	return (SOARecord) e.nextElement();
+	return SOA;
 }
 
 /** Returns the Zone's class */
@@ -226,7 +229,7 @@ findRecords(Name name, short type) {
 		return sr;
 	}
 
-	if (o.getClass() == TypeMap.class) {
+	if (o instanceof TypeMap) {
 		/* The name exists but the type does not. */
 		return new SetResponse(SetResponse.NXRRSET);
 	}
