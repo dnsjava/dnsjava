@@ -89,6 +89,12 @@ update(InputStream in) throws IOException {
 				res.setTSIGKey(keyname, keydata);
 			}
 
+			else if (operation.equals("edns")) {
+				if (res == null)
+					res = new SimpleResolver(server);
+				res.setEDNS(Short.parseShort(st.nextToken()));
+			}
+
 			else if (operation.equals("port")) {
 				if (res == null)
 					res = new SimpleResolver(server);
@@ -503,10 +509,10 @@ help(String topic) {
 	System.out.println();
 	if (topic == null)
 		System.out.println("The following are supported commands:\n" +
-			"add      assert   class    delete   echo     file\n" +
-			"glue     help     log      key      origin   port\n" +
-			"prohibit q        query    quit     require  send\n" +
-			"server   tcp      ttl      zone     #\n");
+		      "add      assert   class    delete   echo     file\n" +
+		      "glue     help     log      key      edns     origin\n" +
+		      "port     prohibit query    quit     require  send\n" +
+		      "server   tcp      ttl      zone     #\n");
 
 	else if (topic.equalsIgnoreCase("add"))
 		System.out.println(
@@ -558,6 +564,10 @@ help(String topic) {
 		System.out.println(
 			"key <name> <data>\n\n" +
 			"TSIG key used to sign messages\n");
+	else if (topic.equalsIgnoreCase("edns"))
+		System.out.println(
+			"edns <level>\n\n" +
+			"EDNS level specified when sending messages\n");
 	else if (topic.equalsIgnoreCase("origin"))
 		System.out.println(
 			"origin <origin>\n\n" +
