@@ -173,8 +173,8 @@ findExactMatch(Name name, int type, int dclass, boolean glue) {
 }
 
 void
-addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
-	for (byte s = 1; s <= section; s++)
+addRRset(Name name, Message response, RRset rrset, int section, int flags) {
+	for (int s = 1; s <= section; s++)
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
 	if ((flags & FLAG_SIGONLY) == 0) {
