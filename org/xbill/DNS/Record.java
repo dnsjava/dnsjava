@@ -260,6 +260,19 @@ throws IOException
 {
 	Record rec;
 
+	String s = st.nextToken();
+	/* the string tokenizer loses the \\. */
+	if (s.equals("#")) {
+		s = st.nextToken();
+		short length = Short.parseShort(s);
+		s = st.remainingTokens();
+		byte [] data = base16.fromString(s);
+		if (length != data.length)
+			throw new IOException("Invalid unknown RR encoding: length mismatch");
+		return newRecord(name, type, dclass, ttl, length, data);
+	}
+	st.putBackToken(s);
+
 	try {
 		Class rrclass;
 		Constructor m;

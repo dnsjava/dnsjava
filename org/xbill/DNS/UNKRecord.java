@@ -39,16 +39,19 @@ UNKRecord(Name _name, short _type, short _dclass, int _ttl,
 	  MyStringTokenizer st, Name origin) throws IOException
 {
 	super(_name, _type, _dclass, _ttl);
-	System.err.println("Unknown type: " + type);
-	System.exit(-1);
+	throw new IOException("Invalid unknown RR encoding");
 }
 
 /** Converts this Record to the String "unknown format" */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
-	if (data != null)
-		sb.append("<unknown format>");
+	if (data != null) {
+		sb.append("\\# ");
+		sb.append(data.length);
+		sb.append(" ");
+		sb.append(base16.toString(data));
+	}
 	return sb.toString();
 }
 

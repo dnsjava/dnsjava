@@ -46,7 +46,7 @@ DClass() {}
 public static String
 string(int i) {
 	String s = classes.getString(i);
-	return (s != null) ? s : new Integer(i).toString();
+	return (s != null) ? s : ("CLASS" + i);
 }
 
 /** Converts a String representation of an Class into its numeric value */
@@ -56,7 +56,10 @@ value(String s) {
 	if (i >= 0)
 		return i;
 	try {
-		return Short.parseShort(s);
+		if (s.toUpperCase().startsWith("CLASS"))
+			return (Short.parseShort(s.substring(5)));
+		else
+			return Short.parseShort(s);
 	}
 	catch (Exception e) {
 		return (-1);
