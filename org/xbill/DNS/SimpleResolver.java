@@ -201,7 +201,6 @@ send(Message query) throws IOException {
 	byte [] out = query.toWire(Message.MAXLENGTH);
 	int udpSize = maxUDPSize(query);
 	boolean tcp = false;
-	boolean nowrite = false;
 	SocketAddress sa = new InetSocketAddress(addr, port);
 	long endTime = System.currentTimeMillis() + timeoutValue;
 	do {
@@ -238,7 +237,6 @@ send(Message query) throws IOException {
 				if (Options.check("verbose")) {
 					System.err.println(error);
 				}
-				nowrite = true;
 				continue;
 			}
 		}
