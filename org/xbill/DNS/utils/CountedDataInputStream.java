@@ -88,6 +88,11 @@ skipBytes(int n) throws IOException {
 }
 
 public int
+available() throws IOException {
+	return in.available();
+}
+
+public int
 getPos() {
 	return counter;
 }
