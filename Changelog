@@ -1,5 +1,6 @@
 9/25/2002
 	- Add the verbosecache option.
+	- Significant memory usage improvements to the Name class.
 
 9/23/2002
 	- Memory usage improvements to the ARecord class.
