@@ -53,4 +53,20 @@ byte [] sign() {
 	return mdc.toBytes();
 }
 
+boolean verify(byte [] signature) {
+	md5 mdc = new md5(bytes.toByteArray());
+	mdc.calc();
+	byte [] output = mdc.toBytes();
+	bytes = new ByteArrayOutputStream();
+	try {
+		bytes.write(opad);
+		bytes.write(output);
+	}
+	catch (IOException e) {
+	}
+	mdc = new md5(bytes.toByteArray());
+	mdc.calc();
+	return (signature.equals(mdc.toBytes()));
+}
+
 }
