@@ -116,7 +116,7 @@ throws IOException
 	short length;
 	Name name;
 	Record rec;
-	int start;
+	int start, datastart;
 
 	start = in.getPos();
 
@@ -130,7 +130,10 @@ throws IOException
 
 	ttl = in.readInt();
 	length = in.readShort();
+	datastart = in.getPos();
 	rec = newRecord(name, type, dclass, ttl, length, in, c);
+	if (in.getPos() - datastart != length)
+		throw new IOException("Invalid record length");
 	rec.wireLength = in.getPos() - start;
 	return rec;
 }
