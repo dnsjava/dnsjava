@@ -31,7 +31,7 @@ private int port = DEFAULT_PORT;
 private boolean useTCP, ignoreTruncation;
 private byte EDNSlevel = -1;
 private TSIG tsig;
-private int timeoutValue = 60 * 1000;
+private int timeoutValue = 10 * 1000;
 
 private static String defaultResolver = "localhost";
 private static int uniqueID = 0;
