@@ -101,19 +101,10 @@ validate() throws IOException {
 }
 
 private final void
-maybeAddRecord(Record record, Cache cache, Object source) throws IOException {
+maybeAddRecord(Record record) throws IOException {
 	int type = record.getType();
 	Name name = record.getName();
 
-	if (origin == null) {
-		if (type == Type.SOA) {
-			origin = name;
-			setOrigin(origin);
-		} else {
-			throw new IOException("non-SOA record seen at " +
-					      name + " with no origin set");
-		}
-	}
 	if (type == Type.SOA && !name.equals(origin)) {
 		throw new IOException("SOA owner " + name +
 				      " does not match zone origin " +
@@ -121,116 +112,91 @@ maybeAddRecord(Record record, Cache cache, Object source) throws IOException {
 	}
 	if (name.subdomain(origin))
 		addRecord(record);
-	else if (cache != null)
-		cache.addRecord(record, Credibility.GLUE, source);
 }
 
 /**
- * Creates a Zone from the records in the specified master file.  All
- * records that do not belong in the Zone are added to the specified Cache,
- * if the Cache is not null.
- * @see Cache
+ * Creates a Zone from the records in the specified master file.
+ * @param zone The name of the zone.
+ * @param file The master file to read from.
  * @see Master
  */
 public
-Zone(String file, Cache cache, Name initialOrigin) throws IOException {
+Zone(Name zone, String file) throws IOException {
 	super(false);
-	Master m = new Master(file, initialOrigin);
+	type = PRIMARY;
+
+	if (zone == null)
+		throw new IllegalArgumentException("no zone name specified");
+	Master m = new Master(file, zone);
 	Record record;
-
-	origin = initialOrigin;
-	if (origin != null)
-		setOrigin(origin);
-	while ((record = m.nextRecord()) != null)
-		maybeAddRecord(record, cache, file);
-	validate();
-}
-
-/**
- * Creates a Zone from an array of records.  All records that do not belong
- * in the Zone are added to the specified Cache, if the Cache is not null.
- * @see Cache
- * @see Master
- */
-public
-Zone(Record [] records, Cache cache, Name initialOrigin) throws IOException {
-	super(false);
-
-	origin = initialOrigin;
-	if (origin != null)
-		setOrigin(origin);
-	for (int i = 0; i < records.length; i++) {
-		maybeAddRecord(records[i], cache, records);
-	}
-	validate();
-}
-
-/**
- * Creates a Zone from the records in the specified master file.  All
- * records that do not belong in the Zone are added to the specified Cache,
- * if the Cache is not null.
- * @see Cache
- * @see Master
- */
-public
-Zone(String file, Cache cache) throws IOException {
-	this(file, cache, null);
-}
-
-public void
-fromXFR(Name zone, int dclass, String remote)
-throws IOException, ZoneTransferException
-{
-	if (!zone.isAbsolute())
-		throw new RelativeNameException(zone);
-	DClass.check(dclass);
 
 	origin = zone;
 	setOrigin(origin);
-	this.dclass = dclass;
+	while ((record = m.nextRecord()) != null)
+		maybeAddRecord(record);
+	validate();
+}
+
+/**
+ * Creates a Zone from an array of records.
+ * @param zone The name of the zone.
+ * @param records The records to add to the zone.
+ * @see Master
+ */
+public
+Zone(Name zone, Record [] records) throws IOException {
+	super(false);
+	type = PRIMARY;
+
+	if (zone == null)
+		throw new IllegalArgumentException("no zone name specified");
+	origin = zone;
+	setOrigin(origin);
+	for (int i = 0; i < records.length; i++)
+		maybeAddRecord(records[i]);
+	validate();
+}
+
+private void
+fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
 	type = SECONDARY;
-	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(zone, remote, null);
+
+	if (xfrin.getType() != Type.AXFR)
+		throw new IllegalArgumentException("zones can only be " +
+						   "created from AXFRs");
+	origin = xfrin.getName();
+	setOrigin(origin);
 	List records = xfrin.run();
 	for (Iterator it = records.iterator(); it.hasNext(); ) {
-		Record rec = (Record) it.next();
-		if (!rec.getName().subdomain(origin)) {
-			if (Options.check("verbose"))
-				System.err.println(rec.getName() +
-						   "is not in zone " + origin);
-			continue;
-		}
-		addRecord(rec);
+		Record record = (Record) it.next();
+		maybeAddRecord(record);
 	}
 	validate();
+}
+
+/**
+ * Creates a Zone by doing the specified zone transfer.
+ * @param xfrin The incoming zone transfer to execute.
+ * @see ZoneTransferIn
+ */
+public
+Zone(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
+	super(false);
+	fromXFR(xfrin);
 }
 
 /**
  * Creates a Zone by performing a zone transfer to the specified host.
- * @see Master
+ * @see ZoneTransferIn
  */
 public
 Zone(Name zone, int dclass, String remote)
 throws IOException, ZoneTransferException
 {
 	super(false);
-	fromXFR(zone, dclass, remote);
-}
-
-/**
- * Creates a Zone by performing a zone transfer to the specified host.
- * The cache is unused.
- * @see Master
- */
-public
-Zone(Name zone, int dclass, String remote, Cache cache) throws IOException {
-	super(false);
-	DClass.check(dclass);
-	try {
-		fromXFR(zone, dclass, remote);
-	}
-	catch (ZoneTransferException e) {
-		throw new IOException(e.getMessage());
-	}
+	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(zone, remote, null);
+	xfrin.setDClass(dclass);
+	fromXFR(xfrin);
 }
 
 /** Returns the Zone's origin */

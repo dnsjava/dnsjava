@@ -7,6 +7,7 @@
 	- Remove Cache.setVerifier() and Cache.setSecurePolicy().  There
 	  should be a way of enabling DNSSEC, but the existing code doesn't
 	  work.
+	- Change the Zone constructors/factory methods to be consistent.
 
 3/29/2005
 	- Use java.net.InetAddress for IPv6 addresses rather than a custom
