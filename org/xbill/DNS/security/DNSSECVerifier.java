@@ -107,34 +107,7 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 		System.err.println("Outside of validity period");
 		return DNSSEC.Failed;
 	}
-	try {
-		out.writeShort(sigrec.getTypeCovered());
-		out.writeByte(sigrec.getAlgorithm());
-		out.writeByte(sigrec.getLabels());
-		out.writeInt(sigrec.getOrigTTL());
-		out.writeInt((int) (sigrec.getExpire().getTime() / 1000));
-		out.writeInt((int) (sigrec.getTimeSigned().getTime() / 1000));
-		out.writeShort(sigrec.getFootprint());
-		sigrec.getSigner().toWireCanonical(out);
-		Iterator it = set.rrs();
-		int size = set.size();
-		byte [][] records = new byte[size][];
-		Name wild = null;
-		if (set.getName().labels > sigrec.getLabels())
-			wild = name.wild(name.labels() - sigrec.getLabels());
-		while (it.hasNext()) {
-			Record rec = (Record) it.next();
-			if (wild != null)
-				rec = rec.withName(wild);
-			records[--size] = rec.toWireCanonical();
-		}
-		Arrays.sort(records);
-		for (int i = 0; i < records.length; i++)
-			out.write(records[i]);
-	}
-	catch (IOException ioe) {
-	}
-	byte [] data = out.toByteArray();
+	byte [] data = DNSSEC.digestRRset(sigrec, set);
 
 	byte [] sig;
 	String algString;
