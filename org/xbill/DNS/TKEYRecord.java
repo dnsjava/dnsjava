@@ -69,18 +69,18 @@ getMember() {
  * responses.
  */
 public
-TKEYRecord(Name _name, short _dclass, int _ttl, Name _alg,
-	   Date _timeInception, Date _timeExpire, short _mode, short _error,
-	   byte [] _key, byte _other[]) throws IOException
+TKEYRecord(Name name, short dclass, int ttl, Name alg,
+	   Date timeInception, Date timeExpire, short mode, short error,
+	   byte [] key, byte other[]) throws IOException
 {
-	super(_name, Type.TKEY, _dclass, _ttl);
-	alg = _alg;
-	timeInception = _timeInception;
-	timeExpire = _timeExpire;
-	mode = _mode;
-	error = _error;
-	key = _key;
-	other = _other;
+	this(name, dclass, ttl);
+	this.alg = alg;
+	this.timeInception = timeInception;
+	this.timeExpire = timeExpire;
+	this.mode = mode;
+	this.error = error;
+	this.key = key;
+	this.other = other;
 }
 
 Record

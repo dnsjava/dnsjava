@@ -37,11 +37,9 @@ getMember() {
  * @param strings The text strings
  */
 public
-TXTRecord(Name _name, short _dclass, int _ttl, List _strings)
-throws IOException
-{
-	super(_name, Type.TXT, _dclass, _ttl);
-	strings = _strings;
+TXTRecord(Name name, short dclass, int ttl, List strings) {
+	this(name, dclass, ttl);
+	this.strings = strings;
 }
 
 /**
@@ -49,12 +47,10 @@ throws IOException
  * @param strings One text string
  */
 public
-TXTRecord(Name _name, short _dclass, int _ttl, String _string)
-throws IOException
-{
-	super(_name, Type.TXT, _dclass, _ttl);
-	strings = new ArrayList();
-	strings.add(_string);
+TXTRecord(Name name, short dclass, int ttl, String string) {
+	this(name, dclass, ttl);
+	this.strings = new ArrayList();
+	this.strings.add(string);
 }
 
 Record

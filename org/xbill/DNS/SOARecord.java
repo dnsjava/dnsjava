@@ -46,18 +46,18 @@ getMember() {
  * @param minimum The minimum TTL for records in the zone
 */
 public
-SOARecord(Name _name, short _dclass, int _ttl, Name _host, Name _admin,
-	  int _serial, int _refresh, int _retry, int _expire, int _minimum)
+SOARecord(Name name, short dclass, int ttl, Name host, Name admin,
+	  int serial, int refresh, int retry, int expire, int minimum)
 throws IOException
 {
-	super(_name, Type.SOA, _dclass, _ttl);
-	host = _host;
-	admin = _admin;
-	serial = _serial;
-	refresh = _refresh;
-	retry = _retry;
-	expire = _expire;
-	minimum = _minimum;
+	this(name, dclass, ttl);
+	this.host = host;
+	this.admin = admin;
+	this.serial = serial;
+	this.refresh = refresh;
+	this.retry = retry;
+	this.expire = expire;
+	this.minimum = minimum;
 }
 
 Record

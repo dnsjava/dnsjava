@@ -47,14 +47,14 @@ getMember() {
  * @param digest A hash of the original key.
  */
 public
-DSRecord(Name _name, short _dclass, int _ttl, int _footprint,
-	 int _alg, int _digestid, byte []  _digest)
+DSRecord(Name name, short dclass, int ttl, int footprint, int alg,
+	 int digestid, byte []  digest)
 {
-	super(_name, Type.DS, _dclass, _ttl);
-	footprint = _footprint;
-	alg = (byte) _alg;
-	digestid = (byte) _digestid;
-	digest = _digest;
+	this(name, dclass, ttl);
+	this.footprint = footprint;
+	this.alg = (byte) alg;
+	this.digestid = (byte) digestid;
+	this.digest = digest;
 }
 
 Record

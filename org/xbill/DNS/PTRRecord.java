@@ -36,10 +36,10 @@ getMember() {
  * @param target The name of the machine with this address
  */
 public
-PTRRecord(Name _name, short _dclass, int _ttl, Name _target)
+PTRRecord(Name name, short dclass, int ttl, Name target)
 throws IOException
 {
-        super(_name, Type.PTR, _dclass, _ttl, _target);
+        super(name, Type.PTR, dclass, ttl, target);
 }
 
 Record

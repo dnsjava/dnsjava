@@ -46,19 +46,16 @@ getMember() {
  * record, depending on the value of the flags field.
  */
 public
-NAPTRRecord(Name _name, short _dclass, int _ttl, int _order, int _preference,
-	    String _flags, String _service, String _regexp, Name _replacement)
+NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
+	    String flags, String service, String regexp, Name replacement)
 {
-	super(_name, Type.NAPTR, _dclass, _ttl);
-	order = (short) _order;
-	preference = (short) _preference;
-	flags = _flags;
-	service = _service;
-	regexp = _regexp;
-	replacement = _replacement;
-	if (Options.check("verbose"))
-		System.err.println(" NAPTR Set Member Constructor: " +
-				   this.toString());
+	this(name, dclass, ttl);
+	this.order = (short) order;
+	this.preference = (short) preference;
+	this.flags = flags;
+	this.service = service;
+	this.regexp = regexp;
+	this.replacement = replacement;
 }
 
 Record

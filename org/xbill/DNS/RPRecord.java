@@ -41,10 +41,10 @@ getMember() {
  * @param textdomain The address where TXT records can be found
  */
 public
-RPRecord(Name _name, short _dclass, int _ttl, Name _mailbox, Name _textDomain) {
-	super(_name, Type.RP, _dclass, _ttl);
-	mailbox = _mailbox;
-	textDomain = _textDomain;
+RPRecord(Name name, short dclass, int ttl, Name mailbox, Name textDomain) {
+	this(name, dclass, ttl);
+	this.mailbox = mailbox;
+	this.textDomain = textDomain;
 }
 
 Record

@@ -40,12 +40,12 @@ getMember() {
  * @param address The address suffix
  */
 public
-AAAARecord(Name _name, short _dclass, int _ttl, int _prefixBits,
-	 Inet6Address _address, Name _prefix)
+AAAARecord(Name name, short dclass, int ttl, int prefixBits,
+	   Inet6Address address, Name prefix)
 throws IOException
 {
-	super(_name, Type.AAAA, _dclass, _ttl);
-	address = _address;
+	this(name, dclass, ttl);
+	this.address = address;
 }
 
 Record

@@ -38,11 +38,10 @@ getMember() {
  * @param os A string describing the host's OS
  */
 public
-HINFORecord(Name _name, short _dclass, int _ttl, String _cpu, String _os)
-{
-	super(_name, Type.HINFO, _dclass, _ttl);
-	cpu = _cpu;
-	os = _os;
+HINFORecord(Name name, short dclass, int ttl, String cpu, String os) {
+	this(name, dclass, ttl);
+	this.cpu = cpu;
+	this.os = os;
 }
 
 Record

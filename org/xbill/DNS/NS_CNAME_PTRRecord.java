@@ -26,11 +26,9 @@ NS_CNAME_PTRRecord(Name name, short type, short dclass, int ttl) {
 }
 
 public
-NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
-		   Name _target)
-{
-	super(_name, _type, _dclass, _ttl);
-	target = _target;
+NS_CNAME_PTRRecord(Name name, short type, short dclass, int ttl, Name target) {
+	super(_name, type, dclass, ttl);
+	this.target = target;
 }
 
 protected Record

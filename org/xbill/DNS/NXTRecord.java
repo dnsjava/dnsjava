@@ -42,10 +42,10 @@ getMember() {
  * @param bitmap The set of type for which records exist at this name
 */
 public
-NXTRecord(Name _name, short _dclass, int _ttl, Name _next, BitSet _bitmap) {
-	super(_name, Type.NXT, _dclass, _ttl);
-	next = _next;
-	bitmap = _bitmap;
+NXTRecord(Name name, short dclass, int ttl, Name next, BitSet bitmap) {
+	this(name, dclass, ttl);
+	this.next = next;
+	this.bitmap = bitmap;
 }
 
 Record

@@ -27,12 +27,12 @@ MX_KXRecord(Name name, short type, short dclass, int ttl) {
 }
 
 public
-MX_KXRecord(Name _name, short _type, short _dclass, int _ttl, int _priority,
-	    Name _target)
+MX_KXRecord(Name name, short type, short dclass, int ttl, int priority,
+	    Name target)
 {
-	super(_name, _type, _dclass, _ttl);
-	priority = (short) _priority;
-	target = _target;
+	super(name, type, dclass, ttl);
+	this.priority = (short) priority;
+	this.target = target;
 }
 
 protected Record

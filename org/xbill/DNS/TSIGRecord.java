@@ -59,18 +59,19 @@ getMember() {
  * @see TSIG
  */
 public
-TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,
-	   Date _timeSigned, short _fudge, byte [] _signature,
-	   int _originalID, short _error, byte _other[]) throws IOException
+TSIGRecord(Name name, short dclass, int ttl, Name alg, Date timeSigned,
+	   short fudge, byte [] signature, int originalID, short error,
+	   byte other[])
+throws IOException
 {
-	super(_name, Type.TSIG, _dclass, _ttl);
-	alg = _alg;
-	timeSigned = _timeSigned;
-	fudge = _fudge;
-	signature = _signature;
-	originalID = _originalID;
-	error = _error;
-	other = _other;
+	this(name, dclass, ttl);
+	this.alg = alg;
+	this.timeSigned = timeSigned;
+	this.fudge = fudge;
+	this.signature = signature;
+	this.originalID = originalID;
+	this.error = error;
+	this.other = other;
 }
 
 Record

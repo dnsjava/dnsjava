@@ -59,14 +59,14 @@ getMember() {
  * @param cert Binary data representing the certificate
  */
 public
-CERTRecord(Name _name, short _dclass, int _ttl, int _certType,
-	      int _keyTag, int _alg, byte []  _cert)
+CERTRecord(Name name, short dclass, int ttl, int certType, int keyTag,
+	   int alg, byte []  cert)
 {
-	super(_name, Type.CERT, _dclass, _ttl);
-	certType = (short) _certType;
-	keyTag = (short) _keyTag;
-	alg = (byte) _alg;
-	cert = _cert;
+	this(name, dclass, ttl);
+	this.certType = (short) certType;
+	this.keyTag = (short) keyTag;
+	this.alg = (byte) alg;
+	this.cert = cert;
 }
 
 Record

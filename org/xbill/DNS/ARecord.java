@@ -38,11 +38,11 @@ getMember() {
  * @param address The address that the name refers to
  */
 public
-ARecord(Name _name, short _dclass, int _ttl, InetAddress _address) 
+ARecord(Name name, short dclass, int ttl, InetAddress address) 
 throws IOException
 {
-	super(_name, Type.A, _dclass, _ttl);
-	addr = _address.getAddress();
+	this(name, dclass, ttl);
+	this.addr = address.getAddress();
 }
 
 Record

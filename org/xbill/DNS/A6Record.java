@@ -42,14 +42,14 @@ getMember() {
  * @param prefix The name of the prefix
  */
 public
-A6Record(Name _name, short _dclass, int _ttl, int _prefixBits,
-	 Inet6Address _suffix, Name _prefix)
+A6Record(Name name, short dclass, int ttl, int prefixBits,
+	 Inet6Address suffix, Name prefix)
 throws IOException
 {
-	super(_name, Type.A6, _dclass, _ttl);
-	prefixBits = (short) _prefixBits;
-	suffix = _suffix;
-	prefix = _prefix;
+	this(name, dclass, ttl);
+	this.prefixBits = (short) prefixBits;
+	this.suffix = suffix;
+	this.prefix = prefix;
 }
 
 Record

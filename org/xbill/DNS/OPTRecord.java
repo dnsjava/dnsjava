@@ -47,7 +47,7 @@ getMember() {
  */
 public
 OPTRecord(short payloadSize, byte xrcode, byte version, int flags) {
-	super(Name.root, Type.OPT, payloadSize,
+	this(Name.root, payloadSize,
 	      ((int)xrcode << 24) + ((int)version << 16) + flags);
 	options = null;
 }

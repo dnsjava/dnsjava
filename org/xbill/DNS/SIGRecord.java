@@ -57,20 +57,20 @@ getMember() {
  * @param signature Binary data representing the signature
  */
 public
-SIGRecord(Name _name, short _dclass, int _ttl, int _covered, int _alg,
-	  int _origttl, Date _expire, Date _timeSigned,
-	  int _footprint, Name _signer, byte [] _signature)
+SIGRecord(Name name, short dclass, int ttl, int covered, int alg, int origttl,
+	  Date expire, Date timeSigned, int footprint, Name signer,
+	  byte [] signature)
 {
-	super(_name, Type.SIG, _dclass, _ttl);
-	covered = (short) _covered;
-	alg = (byte) _alg;
-	labels = name.labels();
-	origttl = _origttl;
-	expire = _expire;
-	timeSigned = _timeSigned;
-	footprint = (short) _footprint;
-	signer = _signer;
-	signature = _signature;
+	this(name, dclass, ttl);
+	this.covered = (short) covered;
+	this.alg = (byte) alg;
+	this.labels = name.labels();
+	this.origttl = origttl;
+	this.expire = expire;
+	this.timeSigned = timeSigned;
+	this.footprint = (short) footprint;
+	this.signer = signer;
+	this.signature = signature;
 }
 
 Record

@@ -80,14 +80,14 @@ getMember() {
  * @param key Binary data representing the key
  */
 public
-KEYRecord(Name _name, short _dclass, int _ttl, int _flags, int _proto,
-	  int _alg, byte []  _key)
+KEYRecord(Name name, short dclass, int ttl, int flags, int proto, int alg,
+	  byte []  key)
 {
-	super(_name, Type.KEY, _dclass, _ttl);
-	flags = (short) _flags;
-	proto = (byte) _proto;
-	alg = (byte) _alg;
-	key = _key;
+	this(name, dclass, ttl);
+	this.flags = (short) flags;
+	this.proto = (byte) proto;
+	this.alg = (byte) alg;
+	this.key = key;
 }
 
 Record

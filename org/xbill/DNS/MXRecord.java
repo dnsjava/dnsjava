@@ -37,9 +37,9 @@ getMember() {
  * @param target The host that mail is sent to
  */
 public
-MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
+MXRecord(Name name, short dclass, int ttl, int priority, Name target)
 {
-	super(_name, Type.MX, _dclass, _ttl, _priority, _target);
+	super(name, Type.MX, dclass, ttl, priority, target);
 }
 
 Record

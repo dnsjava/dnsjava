@@ -35,10 +35,10 @@ getMember() {
  * @param target The name to which the CNAME alias points
  */
 public
-CNAMERecord(Name _name, short _dclass, int _ttl, Name _target)
+CNAMERecord(Name name, short dclass, int ttl, Name target)
 throws IOException
 {
-        super(_name, Type.CNAME, _dclass, _ttl, _target);
+        super(name, Type.CNAME, dclass, ttl, target);
 }
 
 Record

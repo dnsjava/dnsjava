@@ -37,9 +37,8 @@ getMember() {
  * @param target The host that authority is delegated to
  */
 public
-KXRecord(Name _name, short _dclass, int _ttl, int _preference, Name _target)
-{
-	super(_name, Type.KX, _dclass, _ttl, _preference, _target);
+KXRecord(Name name, short dclass, int ttl, int preference, Name target) {
+	super(name, Type.KX, dclass, ttl, preference, target);
 }
 
 Record

@@ -45,14 +45,14 @@ getMember() {
  * @param target The host running the service
  */
 public
-SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
-	  int _weight, int _port, Name _target)
+SRVRecord(Name name, short dclass, int ttl, int priority,
+	  int weight, int port, Name target)
 {
-	super(_name, Type.SRV, _dclass, _ttl);
-	priority = (short) _priority;
-	weight = (short) _weight;
-	port = (short) _port;
-	target = _target;
+	this(name, dclass, ttl);
+	this.priority = (short) priority;
+	this.weight = (short) weight;
+	this.port = (short) port;
+	this.target = target;
 }
 
 Record

@@ -44,18 +44,17 @@ getMember() {
  * @param vPrecision The vertical precision of the data, in m.
 */
 public
-LOCRecord(Name _name, short _dclass, int _ttl, double _latitude,
-	  double _longitude, double _altitude, double _size,
-	  double _hPrecision, double _vPrecision)
+LOCRecord(Name name, short dclass, int ttl, double latitude, double longitude,
+	  double altitude, double size, double hPrecision, double vPrecision)
 throws IOException
 {
-	super(_name, Type.LOC, _dclass, _ttl);
-	latitude = (int)(_latitude * 3600 * 1000 + (1 << 31));
-	longitude = (int)(_longitude * 3600 * 1000 + (1 << 31));
-	altitude = (int)((_altitude + 100000) * 100);
-	size = (long)(_size * 100);
-	hPrecision = (long)(_hPrecision * 100);
-	vPrecision = (long)(_vPrecision * 100);
+	this(name, dclass, ttl);
+	this.latitude = (int)(latitude * 3600 * 1000 + (1 << 31));
+	this.longitude = (int)(longitude * 3600 * 1000 + (1 << 31));
+	this.altitude = (int)((altitude + 100000) * 100);
+	this.size = (long)(size * 100);
+	this.hPrecision = (long)(hPrecision * 100);
+	this.vPrecision = (long)(vPrecision * 100);
 }
 
 Record
