@@ -76,7 +76,7 @@ toString() {
 	StringBuffer sb = toStringNoData();
 	if (next != null) {
 		sb.append(next);
-		for (int i = 0; i < bitmap.size(); i++)
+		for (int i = 0; i < bitmap.length(); i++)
 			if (bitmap.get(i)) {
 				sb.append(" ");
 				sb.append(Type.string(i));
@@ -103,9 +103,9 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 		return;
 
 	next.toWire(out, null);
-	for (int i = 0, t = 0; i < bitmap.size(); i++) {
+	for (int i = 0, t = 0; i < bitmap.length(); i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
-		if (i % 8 == 7 || i == bitmap.size() - 1) {
+		if (i % 8 == 7 || i == bitmap.length() - 1) {
 			out.writeByte(t);
 			t = 0;
 		}
@@ -118,9 +118,9 @@ rrToWireCanonical(DataByteOutputStream out) throws IOException {
 		return;
 
 	next.toWireCanonical(out);
-	for (int i = 0, t = 0; i < bitmap.size(); i++) {
+	for (int i = 0, t = 0; i < bitmap.length(); i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
-		if (i % 8 == 7 || i == bitmap.size() - 1) {
+		if (i % 8 == 7 || i == bitmap.length() - 1) {
 			out.writeByte(t);
 			t = 0;
 		}
