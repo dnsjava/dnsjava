@@ -535,9 +535,11 @@ getCred(short section, boolean isAuth) {
  * Adds all data from a Message into the Cache.  Each record is added with
  * the appropriate credibility, and negative answers are cached as such.
  * @param in The Message to be added
+ * @return A SetResponse that reflects what would be returned from a cache
+ * lookup, or null if nothing useful could be cached from the message.
  * @see Message
  */
-public void
+public SetResponse
 addMessage(Message in) {
 	boolean isAuth = in.getHeader().getFlag(Flags.AA);
 	Name qname = in.getQuestion().getName();
@@ -550,15 +552,17 @@ addMessage(Message in) {
 	boolean completed = false;
 	boolean restart = false;
 	RRset [] answers, auth, addl;
+	SetResponse response = null;
 
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
-		return;
+		return null;
 
 	if (secure) {
 		Cache c = new Cache(dclass);
 		c.addMessage(in);
 		verifyRecords(c);
-		return;
+		// The DNSSEC code needs to be fixed or removed.
+		return null;
 	}
 
 	answers = in.getSectionRRsets(Section.ANSWER);
@@ -571,6 +575,9 @@ addMessage(Message in) {
 		if (type == Type.CNAME && name.equals(curname)) {
 			CNAMERecord cname;
 			addRRset(answers[i], cred);
+			if (curname == qname)
+				response = new SetResponse(SetResponse.CNAME,
+							   answers[i]);
 			cname = (CNAMERecord) answers[i].first();
 			curname = cname.getTarget();
 			restart = true;
@@ -578,6 +585,9 @@ addMessage(Message in) {
 		} else if (type == Type.DNAME && curname.subdomain(name)) {
 			DNAMERecord dname;
 			addRRset(answers[i], cred);
+			if (curname == qname)
+				response = new SetResponse(SetResponse.DNAME,
+							   answers[i]);
 			dname = (DNAMERecord) answers[i].first();
 			try {
 				curname = curname.fromDNAME(dname);
@@ -593,6 +603,12 @@ addMessage(Message in) {
 			addRRset(answers[i], cred);
 			completed = true;
 			haveAnswer = true;
+			if (curname == qname) {
+				if (response == null)
+					response = new SetResponse(
+							SetResponse.SUCCESSFUL);
+				response.addRRset(answers[i]);
+			}
 		}
 		if (restart) {
 			restart = false;
@@ -620,11 +636,23 @@ addMessage(Message in) {
 			if (soa != null)
 				soarec = (SOARecord) soa.first();
 			addNegative(curname, cachetype, soarec, cred);
+			if (response == null) {
+				byte responseType;
+				if (rcode == Rcode.NXDOMAIN)
+					responseType = SetResponse.NXDOMAIN;
+				else
+					responseType = SetResponse.NXRRSET;
+				response = SetResponse.ofType(responseType);
+			}
 			/* NXT records are not cached yet. */
-		} else {
+		} else if (ns != null) {
 			/* Referral response */
 			cred = getCred(Section.AUTHORITY, isAuth);
 			addRRset(ns, cred);
+			if (response == null)
+				response = new SetResponse(
+							SetResponse.DELEGATION,
+							ns);
 		}
 	}
 
@@ -638,6 +666,7 @@ addMessage(Message in) {
 		cred = getCred(Section.ADDITIONAL, isAuth);
 		addRRset(addl[i], cred);
 	}
+	return (response);
 }
 
 /**
