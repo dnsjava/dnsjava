@@ -15,20 +15,72 @@ import org.xbill.DNS.utils.*;
 
 public class CERTRecord extends Record {
 
+public static class CertificateType {
+	/** Certificate type identifiers.  See RFC 2538 for more detail. */
+
+	/** PKIX (X.509v3) */
+	public static final int PKIX = 1;
+
+	/** Simple Public Key Infrastructure */
+	public static final int SPKI = 2;
+
+	/** Pretty Good Privacy */
+	public static final int PGP = 3;
+
+	/** Certificate format defined by URI */
+	public static final int URI = 253;
+
+	/** Certificate format defined by OID */
+	public static final int OID = 254;
+
+	private static Mnemonic types = new Mnemonic("Certificate type",
+						     Mnemonic.CASE_UPPER);
+
+	static {
+		types.setMaximum(0xFFFF);
+		types.setNumericAllowed(true);
+
+		types.add(PKIX, "PKIX");
+		types.add(SPKI, "SPKI");
+		types.add(PGP, "PGP");
+		types.add(URI, "URI");
+		types.add(OID, "OID");
+	}
+
+	/**
+	 * Converts a certificate type into its textual representation
+	 */
+	public static String
+	string(int type) {
+		return types.getText(type);
+	}
+
+	/**
+	 * Converts a textual representation of an certificate type into its
+	 * numeric code.  Integers in the range 0..65535 are also accepted.
+	 * @param s The textual representation of the algorithm
+	 * @return The algorithm code, or -1 on error.
+	 */
+	public static int
+	value(String s) {
+		return types.getValue(s);
+	}
+}
+
 /** PKIX (X.509v3) */
-public static final int PKIX = 1;
+public static final int PKIX = CertificateType.PKIX;
 
 /** Simple Public Key Infrastructure  */
-public static final int SPKI = 2;
+public static final int SPKI = CertificateType.SPKI;
 
 /** Pretty Good Privacy */
-public static final int PGP = 3;
+public static final int PGP = CertificateType.PGP;
 
-/** Certificate stored in a URL */
-public static final int URL = 253;
+/** Certificate format defined by URI */
+public static final int URI = CertificateType.URI;
 
-/** Object ID (private) */
-public static final int OID = 254;
+/** Certificate format defined by IOD */
+public static final int OID = CertificateType.OID;
 
 private static CERTRecord member = new CERTRecord();
 
@@ -93,7 +145,12 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
-	rec.certType = st.getUInt16();
+	String certTypeString = st.getString();
+	int certType = CertificateType.value(certTypeString);
+	if (certType < 0)
+		throw st.exception("Invalid certificate type: " +
+				   certTypeString);
+	rec.certType = certType;
 	rec.keyTag = st.getUInt16();
 	String algString = st.getString();
 	int alg = DNSSEC.Algorithm.value(algString);
