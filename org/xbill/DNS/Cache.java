@@ -42,6 +42,7 @@ private class Element {
 		timeIn = System.currentTimeMillis();
 		tid = Thread.currentThread();
 	}
+
 	public
 	Element(Record r, byte cred, int src) {
 		name = r.getName();
@@ -199,9 +200,8 @@ Cache(String file) throws IOException {
 	cleaner = new CacheCleaner();
 	Master m = new Master(file);
 	Record record;
-	while ((record = m.nextRecord()) != null) {
+	while ((record = m.nextRecord()) != null)
 		addRecord(record, Credibility.HINT, m);
-	}
 }
 
 /**
@@ -209,7 +209,7 @@ Cache(String file) throws IOException {
  * @param r The record to be added
  * @param cred The credibility of the record
  * @param o The source of the record (this could be a Message, for example)
- @ @see Record
+ * @see Record
  */
 public void
 addRecord(Record r, byte cred, Object o) {
