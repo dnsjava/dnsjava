@@ -21,7 +21,7 @@ import org.xbill.DNS.utils.*;
 
 public class Cache extends NameSet {
 
-private static abstract class Element implements TypedObject {
+private abstract static class Element implements TypedObject {
 	byte credibility;
 	int expire;
 

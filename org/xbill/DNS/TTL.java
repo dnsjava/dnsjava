@@ -19,9 +19,10 @@ TTL() {}
 /**
  * Parses a BIND-stype TTL
  * @return The TTL as a number of seconds
+ * @throws NumberFormatException The TTL was not a valid number
  */
 public static int
-parseTTL(String s) throws NumberFormatException {
+parseTTL(String s) {
 	if (s == null || !Character.isDigit(s.charAt(0)))
 		throw new NumberFormatException();
 	int value = 0, ttl = 0;
