@@ -153,6 +153,25 @@ add(Record record) {
 }
 
 /**
+ * Indicates that the records should be inserted into the zone.
+ */
+public void
+add(Record [] records) {
+	for (int i = 0; i < records.length; i++)
+		add(records[i]);
+}
+
+/**
+ * Indicates that all of the records in the rrset should be inserted into the
+ * zone.
+ */
+public void
+add(RRset rrset) {
+	for (Iterator it = rrset.rrs(); it.hasNext(); )
+		add((Record) it.next());
+}
+
+/**
  * Indicates that all records with the given name should be deleted from
  * the zone.
  */
@@ -197,7 +216,26 @@ delete(Name name, short type, Tokenizer tokenizer) throws IOException {
  */
 public void
 delete(Record record) {
-	newUpdate(record);
+	newUpdate(record.withDClass(DClass.NONE));
+}
+
+/**
+ * Indicates that the records should be deleted from the zone.
+ */
+public void
+delete(Record [] records) {
+	for (int i = 0; i < records.length; i++)
+		delete(records[i]);
+}
+
+/**
+ * Indicates that all of the records in the rrset should be deleted from the
+ * zone.
+ */
+public void
+delete(RRset rrset) {
+	for (Iterator it = rrset.rrs(); it.hasNext(); )
+		delete((Record) it.next());
 }
 
 /**
@@ -209,7 +247,7 @@ delete(Record record) {
 public void
 replace(Name name, short type, int ttl, String record) throws IOException {
 	delete(name, type);
-	newUpdate(Record.fromString(name, type, dclass, ttl, record, origin));
+	add(name, type, ttl, record);
 }
 
 /**
@@ -222,8 +260,7 @@ public void
 replace(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException
 {
 	delete(name, type);
-	newUpdate(Record.fromString(name, type, dclass, ttl, tokenizer,
-				    origin));
+	add(name, type, ttl, tokenizer);
 }
 
 /**
@@ -233,9 +270,28 @@ replace(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException
 public void
 replace(Record record) {
 	delete(record.getName(), record.getType());
-	newUpdate(record);
+	add(record);
 }
 
+/**
+ * Indicates that the records should be inserted into the zone replacing any
+ * other records with the same name and type as each one.
+ */
+public void
+replace(Record [] records) {
+	for (int i = 0; i < records.length; i++)
+		replace(records[i]);
+}
 
+/**
+ * Indicates that all of the records in the rrset should be inserted into the
+ * zone replacing any other records with the same name and type.
+ */
+public void
+replace(RRset rrset) {
+	delete(rrset.getName(), rrset.getType());
+	for (Iterator it = rrset.rrs(); it.hasNext(); )
+		add((Record) it.next());
+}
 
 }
