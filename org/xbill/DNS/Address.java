@@ -38,7 +38,7 @@ isDottedQuad(String s) {
 /**
  * Determines the IP address of a host
  * @param name The hostname to look up
- * @return name The first matching IP address
+ * @return The first matching IP address
  * @exception UnknownHostException The hostname does not have any addresses
  */
 public static InetAddress
@@ -55,7 +55,7 @@ getByName(String name) throws UnknownHostException {
 /**
  * Determines all IP address of a host
  * @param name The hostname to look up
- * @return name All matching IP addresses
+ * @return All matching IP addresses
  * @exception UnknownHostException The hostname does not have any addresses
  */
 public static InetAddress []
@@ -76,7 +76,7 @@ getAllByName(String name) throws UnknownHostException {
 /**
  * Determines the hostname for an address
  * @param addr The address to look up
- * @return name The associated host name
+ * @return The associated host name
  * @exception UnknownHostException There is no hostname for the address
  */
 public static String
