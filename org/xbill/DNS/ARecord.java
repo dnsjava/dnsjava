@@ -16,7 +16,7 @@ import org.xbill.DNS.utils.*;
 
 public class ARecord extends Record {
 
-private InetAddress address;
+private byte [] addr;
 
 private
 ARecord() {}
@@ -30,7 +30,7 @@ ARecord(Name _name, short _dclass, int _ttl, InetAddress _address)
 throws IOException
 {
 	super(_name, Type.A, _dclass, _ttl);
-	address = _address;
+	addr = _address.getAddress();
 }
 
 ARecord(Name _name, short _dclass, int _ttl, int length,
@@ -42,13 +42,8 @@ throws IOException
 	if (in == null)
 		return;
 
-	byte [] data = new byte[4];
-	in.read(data);
-
-	String s;
-	s = (data[0] & 0xFF) + "." + (data[1] & 0xFF) + "." +
-	    (data[2] & 0xFF)  + "." + (data[3] & 0xFF);
-	address = InetAddress.getByName(s);
+	addr = new byte[4];
+	in.read(addr);
 }
 
 ARecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
@@ -58,42 +53,59 @@ throws IOException
 	String s = st.nextToken();
 	if (s.equals("@me@")) {
 		try {
-			address = InetAddress.getLocalHost();
+			InetAddress address = InetAddress.getLocalHost();
 			if (address.equals(InetAddress.getByName("127.0.0.1")))
 			{
-				System.err.println("InetAddress.getLocalHost() is broken.  For now, don't use @me@");
-				System.exit(-1);
+				String msg = "InetAddress.getLocalHost() is " +
+					     "broken.  Don't use @me@.";
+				throw new RuntimeException(msg);
 			}
 		}
 		catch (UnknownHostException e) {
-			address = null;
+			addr = null;
 		}
 	}
-	else
-		address = InetAddress.getByName(s);
+	else {
+		if (!Address.isDottedQuad(s))
+			throw new IOException("Invalid dotted quad address");
+		addr = InetAddress.getByName(s).getAddress();
+	}
 }
 
 /** Converts rdata to a String */
 public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
-	if (address != null)
-		sb.append(address.getHostAddress());
+	if (addr != null) {
+		for (int i = 0; i < addr.length; i++) {
+			sb.append(addr[i] & 0xFF);
+			if (i < addr.length - 1)
+				sb.append(".");
+		}
+	}
 	return sb.toString();
 }
 
 /** Returns the Internet address */
 public InetAddress
 getAddress() {
-	return address;
+	String s;
+	s = (addr[0] & 0xFF) + "." + (addr[1] & 0xFF) + "." +
+	    (addr[2] & 0xFF) + "." + (addr[3] & 0xFF);
+	try {
+		return InetAddress.getByName(s);
+	}
+	catch (UnknownHostException e) {
+		return null;
+	}
 }
 
 void
 rrToWire(DataByteOutputStream out, Compression c) throws IOException {
-	if (address == null)
+	if (addr == null)
 		return;
 
-	out.write(address.getAddress());
+	out.write(addr);
 }
 
 }
