@@ -6,14 +6,15 @@ import java.util.*;
 
 /* This should be compatible with StringTokenizer, with the following
  * exceptions:
- *   - \ is an escape character.  This allows escaping delimiters.
+ *   - \ is an escape character.  This allows escaping delimiters and \xxx
+ *     decimal values.
  *   - quoted strings are treated as one token ("one token")
  *   - no support for changing delimiters on the fly
  *
  * These should probably be optional.
  *
  * This could do multiline handling, but I think I should leave that in
- *    dnsIO.readExtendedLine.  This could also do octal number handling.
+ *    dnsIO.readExtendedLine.
  */
 
 public class MyStringTokenizer implements Enumeration {
@@ -93,7 +94,15 @@ nextToken() {
 		if (current == string.length)
 			break;
 		if (escaped) {
-			sb.append(string[current]);
+			if (Character.digit(string[current], 10) >= 0) {
+				String s = new String(string, current, 3);
+				int i = Integer.parseInt(s);
+				sb.append((char)i);
+				current += 2;
+			}
+			else
+				sb.append(string[current]);
+			escaped = false;
 		}
 		else if (quoted) {
 			if (string[current] == '"') {
