@@ -194,7 +194,7 @@ hashCode() {
 	int code = labels;
 	for (int i = 0; i < labels; i++) {
 		for (int j = 0; j < name[i].length(); j++)
-			code += name[i].charAt(j);
+			code += Character.toLowerCase(name[i].charAt(j));
 	}
 	return code;
 }
