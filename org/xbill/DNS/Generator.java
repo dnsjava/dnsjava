@@ -68,6 +68,7 @@ supportedType(int type) {
  * @param origin The origin to append to relative names.
  * @throws IllegalArgumentException The range is invalid.
  * @throws IllegalArgumentException The type does not support generation.
+ * @throws IllegalArgumentException The dclass is not a valid class.
  */
 public
 Generator(long start, long end, long step, String namePattern,
@@ -78,6 +79,7 @@ Generator(long start, long end, long step, String namePattern,
 				("invalid range specification");
 	if (!supportedType(type))
 		throw new IllegalArgumentException("unsupported type");
+	DClass.check(dclass);
 
 	this.start = start;
 	this.end = end;
