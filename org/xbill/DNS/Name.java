@@ -327,7 +327,10 @@ toString() {
 	if (labels == 0)
 		sb.append(".");
 	for (int i = 0; i < labels; i++) {
-		sb.append(name[i]);
+		if (name[i] instanceof BitString)
+			sb.append(name[i]);
+		else
+			sb.append(new String((byte []) name[i]));
 		if (qualified || i < labels - 1)
 			sb.append(".");
 	}
