@@ -431,12 +431,12 @@ hashCode() {
 		if (name[i] instanceof String) {
 			String s = (String) name[i];
 			for (int j = 0; j < s.length(); j++)
-				code += Character.toLowerCase(s.charAt(j));
+				code += ((code << 3) + Character.toLowerCase(s.charAt(j)));
 		}
 		else {
 			BitString b = (BitString) name[i];
 			for (int j = 0; j < b.bytes(); j++)
-				code += b.data[i];
+				code += ((code << 3) + b.data[i]);
 		}
 	}
 	return code;
