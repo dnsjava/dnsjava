@@ -317,7 +317,7 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeInt(altitude);
 }
 
-private long
+private static long
 parseLOCformat(int b) throws WireParseException {
 	long out = b >> 4;
 	int exp = b & 0xF;
