@@ -507,7 +507,6 @@ getCred(Name recordName, Name queryName, short section, boolean isAuth) {
  */
 public void
 addMessage(Message in) {
-	Enumeration e;
 	boolean isAuth = in.getHeader().getFlag(Flags.AA);
 	Name queryName = in.getQuestion().getName();
 	Name lookupName = queryName;
