@@ -114,6 +114,7 @@ findUnix() {
 				}
 			}
 		}
+		br.close();
 	}
 	catch (IOException e) {
 	}
@@ -129,7 +130,7 @@ findUnix() {
 	}
 }
 
-private static void
+synchronized private static void
 probe() {
 	if (probed)
 		return;
