@@ -18,6 +18,8 @@ private Map data;
 private Name origin;
 private boolean isCache;
 
+protected static Object NXRRSET = new Object();
+
 /** Creates an empty NameSet for use as a Zone or Cache.  The origin is set
  * to the root.
  */
@@ -40,14 +42,46 @@ clear() {
 	data = new HashMap();
 }
 
+private final Object
+lookupType(Object typelist, short type) {
+	if (type == Type.ANY)
+		throw new IllegalArgumentException
+				("type ANY passed to NameSet.lookupType()");
+	synchronized (typelist) {
+		if (typelist instanceof LinkedList) {
+			LinkedList list = (LinkedList) typelist;
+			for (int i = 0; i < list.size(); i++) {
+				TypedObject obj = (TypedObject) list.get(i);
+				if (obj.getType() == type)
+					return (obj);
+			}
+			return (null);
+		} else {
+			TypedObject obj = (TypedObject) typelist;
+			if (obj.getType() == type)
+				return (obj);
+			return (null);
+		}
+	}
+}
+
+private final Object []
+lookupAll(Object typelist) {
+	synchronized (typelist) {
+		if (typelist instanceof LinkedList)
+			return ((LinkedList) typelist).toArray();
+		else
+			return (new Object[] {typelist});
+	}
+}
+
 /**
  * Finds all matching sets or something that causes the lookup to stop.
  */
 protected Object
-findSets(Name name, short type) {
+lookup(Name name, short type) {
 	Object bestns = null;
 	Object o;
-	Name tname;
 	int labels;
 	int olabels;
 	int tlabels;
@@ -58,23 +92,33 @@ findSets(Name name, short type) {
 	olabels = origin.labels();
 
 	for (tlabels = olabels; tlabels <= labels; tlabels++) {
-		if (tlabels == olabels)
+		boolean isorigin = false;
+		boolean isexact = false;
+		Name tname;
+		Object typelist;
+
+		if (tlabels == olabels) {
 			tname = origin;
-		else if (tlabels == labels)
+			isorigin = true;
+		} else if (tlabels == labels) {
 			tname = name;
-		else
+			isexact = true;
+		} else
 			tname = new Name(name, labels - tlabels);
-		TypeMap nameInfo = findName(tname);
-		if (nameInfo == null)
+
+		synchronized (this) {
+			typelist = data.get(tname);
+		}
+		if (typelist == null)
 			continue;
 
 		/* If this is an ANY lookup, return everything. */
-		if (tlabels == labels && type == Type.ANY)
-			return nameInfo.getAll();
+		if (isexact && type == Type.ANY)
+			return lookupAll(typelist);
 
 		/* Look for an NS */
-		if (tlabels > olabels || isCache) {
-			o = nameInfo.get(Type.NS);
+		if (!isorigin || isCache) {
+			o = lookupType(typelist, Type.NS);
 			if (o != null) {
 				if (isCache)
 					bestns = o;
@@ -83,23 +127,18 @@ findSets(Name name, short type) {
 			}
 		}
 
-		/* If this is the name, look for the actual type. */
-		if (tlabels == labels) {
-			o = nameInfo.get(type);
+		/*
+		 * If this is the name, look for the actual type or a CNAME.
+		 * Otherwise, look for a DNAME.
+		 */
+		if (isexact) {
+			o = lookupType(typelist, type);
+			if (o == null)
+				o = lookupType(typelist, Type.CNAME);
 			if (o != null)
 				return o;
-		}
-
-		/* If this is the name, look for a CNAME */
-		if (tlabels == labels) {
-			o = nameInfo.get(Type.CNAME);
-			if (o != null)
-				return o;
-		}
-
-		/* Look for a DNAME, unless this is the actual name */
-		if (tlabels < labels) {
-			o = nameInfo.get(Type.DNAME);
+		} else {
+			o = lookupType(typelist, Type.DNAME);
 			if (o != null)
 				return o;
 		}
@@ -108,18 +147,18 @@ findSets(Name name, short type) {
 		 * If this is the name and this is a cache, look for an
 		 * NXDOMAIN entry.
 		 */
-		if (tlabels == labels && isCache) {
-			o = nameInfo.get((short)0);
+		if (isexact && isCache) {
+			o = lookupType(typelist, (short)0);
 			if (o != null)
 				return o;
 		}
 
 		/*
 		 * If this is the name and we haven't matched anything,
-		 * just return the name.
+		 * return the special NXRRSET object.
 		 */
-		if (tlabels == labels)
-			return nameInfo;
+		if (isexact)
+			return NXRRSET;
 	}
 	if (bestns == null)
 		return null;
@@ -133,18 +172,35 @@ findSets(Name name, short type) {
  */
 protected Object
 findExactSet(Name name, short type) {
-	TypeMap nameInfo = findName(name);
-	if (nameInfo == null)
-		return null;
-	return nameInfo.get(type);
+	Object typelist;
+	synchronized (this) {
+		typelist = data.get(name);
+	}
+	if (typelist == null)
+		return (null);
+	return lookupType(typelist, type);
+}
+
+/**
+ * Finds all sets at a name.
+ */
+protected Object []
+findExactSets(Name name) {
+	Object typelist;
+	synchronized (this) {
+		typelist = data.get(name);
+	}
+	if (typelist == null)
+		return (new Object[0]);
+	return lookupAll(typelist);
 }
 
 /**
  * Finds all records for a given name, if the name exists.
  */
-protected TypeMap
+private Object
 findName(Name name) {
-	return (TypeMap) data.get(name);
+	return data.get(name);
 }
 
 /**
@@ -153,11 +209,40 @@ findName(Name name) {
  */
 protected void
 addSet(Name name, short type, TypedObject set) {
-	TypeMap nameInfo = findName(name);
-	if (nameInfo == null)
-		data.put(name, nameInfo = new TypeMap());
-	synchronized (nameInfo) {
-		nameInfo.put(type, set);
+	Object typelist;
+	synchronized (this) {
+		typelist = data.get(name);
+
+		if (typelist == null) {
+			/* No types are present. */
+			data.put(name, set);
+			return;
+		} else if (!(typelist instanceof LinkedList)) {
+			/* One type is present */
+			TypedObject obj = (TypedObject) typelist;
+			if (obj.getType() == type) {
+				/* We're replacing it */
+				data.put(name, set);
+			} else {
+				LinkedList list = new LinkedList();
+				list.add(typelist);
+				list.add(set);
+				data.put(name, list);
+			}
+			return;
+		}
+	}
+	/* More than one type is present */
+	synchronized (typelist) {
+		LinkedList list = (LinkedList) typelist;
+		for (int i = 0; i < list.size(); i++) {
+			TypedObject obj = (TypedObject) list.get(i);
+			if (obj.getType() == type) {
+				list.set(i, set);
+				return;
+			}
+		}
+		list.add(set);
 	}
 }
 
@@ -167,20 +252,25 @@ addSet(Name name, short type, TypedObject set) {
  */
 protected void
 removeSet(Name name, short type, TypedObject set) {
-	TypeMap nameInfo = findName(name);
-	if (nameInfo == null)
-		return;
-	Object o = nameInfo.get(type);
-	if (o != set && type != Type.CNAME) {
-		type = Type.CNAME;
-		o = nameInfo.get(type);
-	}
-	if (o == set) {
-		synchronized (nameInfo) {
-			nameInfo.remove(type);
+	Object typelist;
+	synchronized (this) {
+		typelist = data.get(name);
+		if (typelist == null)
+			return;
+		else if (!(typelist instanceof LinkedList)) {
+			if (typelist == set)
+				data.remove(name);
+			return;
 		}
-		if (nameInfo.isEmpty())
-			data.remove(name);
+	}
+	synchronized (typelist) {
+		LinkedList list = (LinkedList) typelist;
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i) == set) {
+				list.remove(i);
+				return;
+			}
+		}
 	}
 }
 
@@ -189,7 +279,9 @@ removeSet(Name name, short type, TypedObject set) {
  */
 protected void
 removeName(Name name) {
-	data.remove(name);
+	synchronized (this) {
+		data.remove(name);
+	}
 }
 
 /**
@@ -204,15 +296,15 @@ names() {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	Iterator it = data.values().iterator();
-	while (it.hasNext()) {
-		TypeMap nameInfo = (TypeMap) it.next();
-		Object [] elements = nameInfo.getAll();
-		if (elements == null)
-			continue;
-		for (int i = 0; i < elements.length; i++) {
-			sb.append(elements[i]);
-			sb.append("\n");
+	synchronized (this) {
+		Iterator it = data.values().iterator();
+		while (it.hasNext()) {
+			Object typelist = it.next();
+			Object [] elements = lookupAll(typelist);
+			for (int i = 0; i < elements.length; i++) {
+				sb.append(elements[i]);
+				sb.append("\n");
+			}
 		}
 	}
 	return sb.toString();

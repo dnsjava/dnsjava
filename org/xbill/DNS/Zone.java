@@ -46,8 +46,7 @@ class AXFRIterator implements Iterator {
 		if (!sentOrigin) {
 			if (currentName == null) {
 				currentName = getOrigin();
-				TypeMap tm = findName(currentName);
-				current = (Object []) tm.getAll();
+				current = findExactSets(currentName);
 				count = 0;
 			}
 			while (count < current.length) {
@@ -66,8 +65,7 @@ class AXFRIterator implements Iterator {
 			Name currentName = (Name) znames.next();
 			if (currentName.equals(getOrigin()))
 				continue;
-			TypeMap tm = findName(currentName);
-			current = (Object []) tm.getAll();
+			current = findExactSets(currentName);
 			count = 0;
 			if (count < current.length)
 				return current[count++];
@@ -251,7 +249,7 @@ public SetResponse
 findRecords(Name name, short type) {
 	SetResponse zr = null;
 
-	Object o = findSets(name, type);
+	Object o = lookup(name, type);
 	if (o == null) {
 		/* The name does not exist */
 		if (name.isWild())
@@ -272,9 +270,7 @@ findRecords(Name name, short type) {
 			return sr;
 		} else
 			return SetResponse.ofType(SetResponse.NXDOMAIN);
-	}
-
-	if (o instanceof TypeMap) {
+	} else if (o == NXRRSET) {
 		/* The name exists but the type does not. */
 		return SetResponse.ofType(SetResponse.NXRRSET);
 	}
@@ -392,8 +388,7 @@ toMasterFile() {
 	StringBuffer sb = new StringBuffer();
 	while (znames.hasNext()) {
 		Name name = (Name) znames.next();
-		TypeMap tm = findName(name);
-		Object [] sets = tm.getAll();
+		Object [] sets = findExactSets(name);
 		for (int i = 0; i < sets.length; i++) {
 			RRset rrset = (RRset) sets[i];
 			Iterator it = rrset.rrs();

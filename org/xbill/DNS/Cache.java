@@ -123,13 +123,7 @@ private class CacheCleaner extends Thread {
 			} catch (ConcurrentModificationException e) {
 				return false;
 			}
-			TypeMap tm = findName(name);
-			if (tm == null)
-				continue;
-			Object [] elements;
-			elements = tm.getAll();
-			if (elements == null)
-				continue;
+			Object [] elements = findExactSets(name);
 			for (int i = 0; i < elements.length; i++) {
 				Element element = (Element) elements[i];
 				if (element.expired())
@@ -293,12 +287,12 @@ public SetResponse
 lookupRecords(Name name, short type, byte minCred) {
 	SetResponse cr = null;
 	boolean verbose = Options.check("verbosecache");
-	Object o = findSets(name, type);
+	Object o = lookup(name, type);
 
 	if (verbose)
 		logLookup(name, type, "Starting");
 
- 	if (o == null || o instanceof TypeMap) {
+ 	if (o == null || o == NXRRSET) {
 		/*
 		 * The name exists, but the type was not found.  Or, the
 		 * name does not exist and no parent does either.  Punt.
@@ -500,13 +494,7 @@ verifyRecords(Cache tcache) {
 	it = tcache.names();
 	while (it.hasNext()) {
 		Name name = (Name) it.next();
-		TypeMap tm = tcache.findName(name);
-		if (tm == null)
-			continue;
-		Object [] elements;
-		elements = tm.getAll();
-		if (elements == null)
-			continue;
+		Object [] elements = findExactSets(name);
 		for (int i = 0; i < elements.length; i++) {
 			Element element = (Element) elements[i];
 			if (element instanceof PositiveElement)
