@@ -380,9 +380,7 @@ isWild() {
  */
 public boolean
 isQualified() {
-	if (labels == 0)
-		return false;
-	return (name[offset + labels - 1] == emptyLabel);
+	return (isAbsolute());
 }
 
 /**
@@ -547,10 +545,8 @@ equals(Object arg) {
 	if (d.labels != labels)
 		return false;
 	for (int i = 0; i < labels; i++) {
-		Object nobj = name[offset + i];
-		Object dnobj = d.name[d.offset + i];
-		byte [] b1 = (byte []) nobj;
-		byte [] b2 = (byte []) dnobj;
+		byte [] b1 = (byte []) name[offset + i];
+		byte [] b2 = (byte []) d.name[d.offset + i];
 		if (b1.length != b2.length)
 			return false;
 		for (int j = 0; j < b1.length; j++) {
@@ -597,11 +593,8 @@ compareTo(Object o) {
 	int compares = labels > arg.labels ? arg.labels : labels;
 
 	for (int i = 1; i <= compares; i++) {
-		Object label = name[labels - i + offset];
-		Object alabel = arg.name[arg.labels - i + arg.offset];
-
-		byte [] b = (byte []) label;
-		byte [] ab = (byte []) alabel;
+		byte [] b = (byte []) name[labels - i + offset];
+		byte [] ab = (byte []) arg.name[arg.labels - i + arg.offset];
 		for (int j = 0; j < b.length && j < ab.length; j++) {
 			int n = lowercase[b[j]] - lowercase[ab[j]];
 			if (n != 0)
