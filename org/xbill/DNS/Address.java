@@ -19,32 +19,66 @@ private
 Address() {}
 
 /**
+ * Convert a string containing an IP address to an array of 4 integers.
+ * @param s The string
+ * @return The address
+ */
+/**
+ * Determines if a string contains a valid IP address.
+ * @param s The string
+ * @return Whether the string contains a valid IP address
+ */
+public static int []
+toArray(String s) {
+	int numDigits;
+	int currentOctet;
+	int [] values = new int[4];
+	int length = s.length();
+
+	currentOctet = 0;
+	numDigits = 0;
+	for (int i = 0; i < length; i++) {
+		char c = s.charAt(i);
+		if(c >= '0' && c <= '9') {
+			/* Can't have more than 3 digits per octet. */
+			if (numDigits == 3)
+				return null;
+			numDigits++;
+			values[currentOctet] *= 10;
+			values[currentOctet] += (c - '0');
+			/* 255 is the maximum value for an octet. */
+			if (values[currentOctet] > 255)
+				return null;
+		} else if (c == '.') {
+			/* Can't have more than 3 dots. */
+			if (currentOctet == 3)
+				return null;
+			/* Two consecutive dots are bad. */
+			if (numDigits == 0)
+				return null;
+			currentOctet++;
+			numDigits = 0;
+		} else
+			return null;
+	}
+	/* Must have 4 octets. */
+	if (currentOctet != 3)
+		return null;
+	/* The fourth octet can't be empty. */
+	if (numDigits == 0)
+		return null;
+	return values;
+}
+
+/**
  * Determines if a string contains a valid IP address.
  * @param s The string
  * @return Whether the string contains a valid IP address
  */
 public static boolean
 isDottedQuad(String s) {
-	MyStringTokenizer st = new MyStringTokenizer(s, ".");
-	int labels = 0;
-	int i;
-	int [] values = new int[4];
-	for (i = 0; i < 4; i++) {
-		if (st.hasMoreTokens() == false)
-			break;
-		try {
-			values[i] = Integer.parseInt(st.nextToken());
-		}
-		catch (NumberFormatException e) {
-			break;
-		}
-		if (values[i] < 0 || values[i] > 255)
-			break;
-	}
-	if (i == 4 && !st.hasMoreDelimiters())
-		return true;
-	else
-		return false;
+	int [] address = Address.toArray(s);
+	return (address != null);
 }
 
 /**
