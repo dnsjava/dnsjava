@@ -1,3 +1,7 @@
+12/15/2003
+	- TTLs weren't handled properly in the master file parser.
+	  (Jack Tavares <tavares@drizzle.com>)
+
 12/11/2003
 	- 1.5.0 released.
 
