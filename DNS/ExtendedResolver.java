@@ -43,10 +43,11 @@ class Receiver implements ResolverListener {
 
 static final int quantum = 20;
 
-Vector resolvers;
-Receiver receiver;
-Vector queue;
-Hashtable idMap;
+private Vector resolvers;
+private Receiver receiver;
+private Vector queue;
+private Hashtable idMap;
+private Name [] searchPath;
 
 private void
 init() {
@@ -66,6 +67,7 @@ ExtendedResolver() throws UnknownHostException {
 	}
 	else
 		resolvers.addElement(new SimpleResolver());
+	searchPath = FindServer.searchPath();
 }
 
 public
@@ -238,6 +240,18 @@ addResolver(Resolver r) {
 public void
 deleteResolver(Resolver r) {
 	resolvers.removeElement(r);
+}
+
+public void
+setSearchPath(String [] domains) {
+	searchPath = new Name[domains.length];
+	for (int i = 0; i < domains.length; i++)
+		searchPath[i] = new Name(domains[i]);
+}
+
+Name []
+getSearchPath() {
+	return searchPath;
 }
 
 }
