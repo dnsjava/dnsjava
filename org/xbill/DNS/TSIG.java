@@ -24,9 +24,19 @@ public class TSIG {
  */
 public static final String HMAC		= "HMAC-MD5.SIG-ALG.REG.INT";
 
+/** The default fudge value for outgoing packets.  Can be overriden by the
+ * tsigfudge option.
+ */
+public static final short FUDGE		= 300;
+
 private Name name;
 private byte [] key;
 private hmacSigner axfrSigner = null;
+
+static {
+	if (Options.check("verbosehmac"))
+		hmacSigner.verbose = true;
+}
 
 /**
  * Creates a new TSIG object, which can be used to sign or verify a message.
@@ -47,10 +57,22 @@ TSIG(String name, byte [] key) {
 public void
 apply(Message m, TSIGRecord old) throws IOException {
 	Date timeSigned = new Date();
-	short fudge = 300;
+	short fudge;
 	hmacSigner h = new hmacSigner(key);
 
 	Name alg = new Name(HMAC);
+
+	if (Options.check("tsigfudge")) {
+		String s = Options.value("tsigfudge");
+		try {
+			fudge = Short.parseShort(s);
+		}
+		catch (NumberFormatException e) {
+			fudge = FUDGE;
+		}
+	}
+	else
+		fudge = FUDGE;
 
 	try {
 		if (old != null) {
