@@ -32,6 +32,14 @@ findSet(Name name, short type) {
 	return nameInfo.get(new Short(Type.CNAME));
 }
 
+protected Object
+findExactSet(Name name, short type) {
+	Hashtable nameInfo = findName(name);
+	if (nameInfo == null)
+		return null;
+	return nameInfo.get(new Short(type));
+}
+
 protected Hashtable
 findName(Name name) {
 	return (Hashtable) data.get(name);
