@@ -25,57 +25,6 @@ private static final int EXT_LABEL_COMPRESSION = 0;
 private static final int EXT_LABEL_BITSTRING = 1;
 private static final int EXT_LABEL_LOCAL_COMPRESSION = 2;
 
-class BitString {
-	int nbits;
-	byte [] data;
-
-	BitString(int _nbits, byte [] _data) {
-		nbits = _nbits;
-		data = _data;
-	}
-
-	int
-	bytes() {
-		return (nbits + 7) & ~7;
-	}
-
-	int
-	wireBits() {
-		return (nbits == 256 ? 0 : nbits);
-	}
-
-	public String
-	toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("\\[x");
-		int count = nbits;
-		for (int i = 0; i < bytes(); i++) {
-			int high = data[i] >>> 4;
-			int low = data[i] & 0xf;
-			sb.append(Integer.toHexString(high));
-			if (low > 0 || i < bytes() - 1)
-				sb.append(Integer.toHexString(low));
-		}
-		sb.append("/");
-		sb.append(count);
-		sb.append("]");
-		return sb.toString();
-	}
-
-	public boolean
-	equals(Object o) {
-		if (!(o instanceof BitString))
-			return false;
-		BitString b = (BitString) o;
-		if (nbits != b.nbits)
-			return false;
-		for (int i = 0; i < bytes(); i++)
-			if (data[i] != b.data[i])
-				return false;
-		return true;
-	}
-}
-
 private Object [] name;
 private byte labels;
 private boolean qualified;
@@ -104,8 +53,13 @@ Name(String s, Name origin) {
 	try {
 		MyStringTokenizer st = new MyStringTokenizer(s, ".");
 
-		while (st.hasMoreTokens())
-			name[labels++] = st.nextToken();
+		while (st.hasMoreTokens()) {
+			String token = st.nextToken();
+			if (token.charAt(0) == '\\')
+				name[labels++] = new BitString(token);
+			else
+				name[labels++] = token;
+		}
 
 		if (st.hasMoreDelimiters())
 			qualified = true;
@@ -125,19 +79,23 @@ Name(String s, Name origin) {
 			}
 		}
 	}
-	catch (ArrayIndexOutOfBoundsException e) {
+	catch (Exception e) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(s);
 		if (origin != null) {
 			sb.append(".");
 			sb.append(origin);
 		}
-		sb.append(" has too many labels");
+		if (e instanceof ArrayIndexOutOfBoundsException)
+			sb.append(" has too many labels");
+		else if (e instanceof IOException)
+			sb.append(" contains an invalid binary label");
+		else
+			sb.append(" is invalid");
 		System.err.println(sb.toString());
 		name = null;
 		labels = 0;
 	}
-	
 }
 
 /**
