@@ -181,9 +181,6 @@ equals(Object o) {
 /** Compare two bitstrings. */
 public int
 compareTo(Object o) {
-	if (!(o instanceof BitString))
-		throw new IllegalArgumentException();
-
 	BitString b = (BitString) o;
 
 	for (int i = 0; i < data.length && i < b.data.length; i++)

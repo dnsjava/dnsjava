@@ -499,9 +499,6 @@ hashCode() {
 
 public int
 compareTo(Object o) {
-	if (!(o instanceof Name))
-		throw new IllegalArgumentException();
-
 	Name arg = (Name) o;
 
 	int compares = labels > arg.labels ? arg.labels : labels;
