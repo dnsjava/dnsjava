@@ -1,6 +1,8 @@
 4/15/1999
 	- 0.8.3 released
+	- Restrict number of WorkerThreads to 10
 	- ExtendedResolver timer code fixes
+	- ExtendedResolver race condition fix
 
 4/14/1999
 	- ExtendedResolver reentrancy fixes
