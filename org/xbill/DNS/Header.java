@@ -18,7 +18,7 @@ public class Header {
 private int id; 
 private boolean [] flags;
 private short rcode;
-private byte opcode;
+private int opcode;
 private int [] counts;
 
 private static Random random = new Random();
@@ -158,7 +158,10 @@ getRcode() {
  * @see Opcode
  */
 public void
-setOpcode(byte value) {
+setOpcode(int value) {
+	if (opcode > 0xF)
+		throw new IllegalArgumentException("DNS Opcode " + value +
+						   "is out of range");
 	opcode = value;
 }
 
@@ -166,7 +169,7 @@ setOpcode(byte value) {
  * Retrieves the mesasge's opcode
  * @see Opcode
  */
-public byte
+public int
 getOpcode() {
 	return opcode;
 }
