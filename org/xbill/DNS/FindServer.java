@@ -158,7 +158,7 @@ findWin(InputStream in) {
 				search = new Name[1];
 				search[0] = name;
 			}
-			else if (line.indexOf("DNS") != -1)
+			else if (line.indexOf("DNS Servers") != -1)
 				break;
 		}
 		
@@ -238,7 +238,7 @@ probe() {
 	if (server == null || search == null) {
 		String OS = System.getProperty("os.name");
 		if (OS.indexOf("Windows") != -1) {
-			if (OS.indexOf("NT") != -1)
+			if ((OS.indexOf("NT") != -1) || (OS.indexOf("2000") != -1))
 				findNT();
 			else
 				find95();
