@@ -17,6 +17,7 @@ protected
 Client(SelectableChannel channel, long endTime) throws IOException {
 	boolean done = false;
 	Selector selector = null;
+	this.endTime = endTime;
 	try {
 		selector = Selector.open();
 		channel.configureBlocking(false);
