@@ -1,3 +1,17 @@
+8/2/1999
+	- 1.0.2 released
+	- WorkerThread obscure race conditions fixed (patches provided by
+	  Tom May <tom@go2net.com>)
+
+8/1/1999
+	- Added getResolver/getCache to dns class
+	- RRset now has deleteRR and is better synchronized
+	- Cache now has flushName/flushSet
+	- Resolver.sendAsync returns an Object instead of an int
+	- Socket cleanup (patches provided by Tom May <tom@go2net.com>)
+	- WorkerThread's idle lifetime and max threads are now configurable
+	- HMAC-MD5 logic bug
+
 7/5/1999
 	- 1.01 released
 	- fixed a hang with ExtendedResolver and Exceptions
