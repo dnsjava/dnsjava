@@ -134,7 +134,20 @@ main(String argv[]) throws IOException {
 				break;
 
 			    case 'e':
-				res.setEDNS(0);
+				String ednsStr;
+				int edns;
+				if (argv[arg].length() > 2)
+					ednsStr = argv[arg].substring(2);
+				else
+					ednsStr = argv[++arg];
+				edns = Integer.parseInt(ednsStr);
+				if (edns < 0 || edns > 1) {
+					System.out.println("Unsupported " +
+							   "EDNS level " +
+							   edns);
+					return;
+				}
+				res.setEDNS(edns);
 				break;
 
 			    default:
