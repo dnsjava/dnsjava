@@ -97,6 +97,8 @@ inaddrString(String s) {
 public static synchronized void
 setResolver(Resolver _res) {
 	res = _res;
+	if (cache != null)
+		cache.clearCache();
 }
 
 /**

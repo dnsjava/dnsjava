@@ -23,6 +23,12 @@ NameSet() {
 	data = new Hashtable();
 }
 
+/** Deletes all sets in a NameSet */
+protected void
+clear() {
+	data = new Hashtable();
+}
+
 /**
  * Finds all matching sets.  This traverses CNAMEs, and has provisions for 
  * type/class ANY.

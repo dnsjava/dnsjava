@@ -108,6 +108,12 @@ Cache() {
 	super();
 }
 
+/** Creates an empty Cache */
+public void
+clearCache() {
+	clear();
+}
+
 /**
  * Creates a Cache which initially contains all records in the specified file
  */
