@@ -2,7 +2,7 @@ JAVAC=javac
 JFLAGS=-g
 JAR = jar
 
-JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.2/docs/api
+JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.3/docs/api
 
 all:
 	${JAVAC} ${JFLAGS} *.java org/xbill/Task/*.java org/xbill/DNS/*.java org/xbill/DNS/utils/*.java
