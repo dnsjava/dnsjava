@@ -1,0 +1,170 @@
+// Copyright (c) 2000 Brian Wellington (bwelling@xbill.org)
+
+package org.xbill.DNS;
+
+import java.io.*;
+import java.util.*;
+import org.xbill.DNS.utils.*;
+
+/**
+ * Name Authority Pointer Record  - specifies rewrite rule, that when applied
+ * to an existing string will produce a new domain.
+ *
+ * @author Chuck Santos
+ */
+
+public class NAPTRRecord extends Record {
+
+private short order, preference;
+private String flags, service, regexp;
+private Name replacement;
+
+private NAPTRRecord() {}
+
+/**
+ * Creates an NAPTR Record from the given data
+ * @param order The order of this NAPTR.  Records with lower order are
+ * preferred.
+ * @param preference The preference, used to select between records at the
+ * same order.
+ * @param flags The control aspects of the NAPTRRecord.
+ * @param service The service or protocol available down the rewrite path.
+ * @param regexp The regular/substitution expression.
+ * @param replacement The domain-name to query for the next DNS resource
+ * record, depending on the value of the flags field.
+ */
+public
+NAPTRRecord(Name _name, short _dclass, int _ttl, int _order, int _preference,
+	    String _flags, String _service, String _regexp, Name _replacement)
+{
+	super(_name, Type.NAPTR, _dclass, _ttl);
+	order = (short) _order;
+	preference = (short) _preference;
+	flags = _flags;
+	service = _service;
+	regexp = _regexp;
+	replacement = _replacement;
+	if (Options.check("verbose"))
+		System.err.println(" NAPTR Set Member Constructor: " +
+				   this.toString());
+}
+
+NAPTRRecord(Name _name, short _dclass, int _ttl, int length,
+	    DataByteInputStream in, Compression c)
+throws IOException
+{
+	super(_name, Type.NAPTR, _dclass, _ttl);
+	if (in == null) return;
+	order = (short) in.readUnsignedShort();
+	preference = (short) in.readUnsignedShort();
+	flags = in.readString();
+	service = in.readString();
+	regexp = in.readString();
+	replacement = new Name(in, c);
+	if (Options.check("verbose"))
+	System.err.println(" NAPTR DataByteInputStream Constructor: " +
+			   this.toString());
+}
+
+NAPTRRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st,
+	    Name origin)
+throws IOException
+{
+	super(_name, Type.NAPTR, _dclass, _ttl);
+	order = Short.parseShort(st.nextToken());
+	preference = Short.parseShort(st.nextToken());
+	flags = st.nextToken();
+	service = st.nextToken();
+	regexp = st.nextToken();
+	replacement = new Name(st.nextToken(), origin);
+	if (Options.check("verbose"))
+		System.err.println(" NAPTR MyStringTokenizer Constructor: " +
+				   this.toString());
+}
+
+/** Converts to a String */
+public String
+toString() {
+	StringBuffer sb = toStringNoData();
+	if (replacement != null) {
+		sb.append(order);
+		sb.append(" ");
+		sb.append(preference);
+		sb.append(" ");
+		sb.append(flags);
+		sb.append(" ");
+		sb.append(service);
+		sb.append(" ");
+		sb.append(regexp);
+		sb.append(" ");
+		sb.append(replacement);
+	}
+	if (Options.check("verbose"))
+		System.err.println(" NAPTR toString(): : " + sb.toString());
+	return sb.toString();
+}
+
+/** Returns the order */
+public short
+getOrder() {
+	return order;
+}
+
+/** Returns the preference */
+public short
+getPreference() {
+	return preference;
+}
+
+/** Returns flags */
+public String
+getFlags() {
+	return flags;
+}
+
+/** Returns service */
+public String
+getService() {
+	return service;
+}
+
+/** Returns regexp */
+public String
+getRegexp() {
+	return regexp;
+}
+
+/** Returns the replacement domain-name */
+public Name
+getReplacement() {
+	return replacement;
+}
+
+void rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+	if (replacement == null && regexp == null)
+		return;
+	out.writeShort(order);
+	out.writeShort(preference);
+	out.writeString(flags);
+	out.writeString(service);
+	out.writeString(regexp);
+	replacement.toWire(out, null);
+	if (Options.check("verbose"))
+		System.err.println(" NAPTR rrToWire(): " + this.toString());
+}
+
+void rrToWireCanonical(DataByteOutputStream out) throws IOException {
+	if (replacement == null && regexp == null)
+		return;
+	out.writeShort(order);
+	out.writeShort(preference);
+	out.writeString(flags);
+	out.writeString(service);
+	out.writeString(regexp);
+	replacement.toWireCanonical(out);
+	if (Options.check("verbose"))
+		System.err.println(" NAPTR rrToWireCanonical(): " +
+				   this.toString());
+}
+
+}
