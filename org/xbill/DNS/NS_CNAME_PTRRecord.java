@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
-class NS_CNAME_PTRRecord extends Record {
+public class NS_CNAME_PTRRecord extends Record {
 
 Name target;
 
