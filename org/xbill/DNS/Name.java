@@ -52,8 +52,12 @@ Name(String s, Name origin) {
 				append(origin);
 				qualified = true;
 			}
-			else
-				qualified = false;
+			else {
+				/* This isn't exactly right, but it's close.
+				 * Partially qualified names are evil.
+				 */
+				qualified = (labels > 1);
+			}
 		}
 	}
 	catch (ArrayIndexOutOfBoundsException e) {
