@@ -201,6 +201,24 @@ update(InputStream in) throws IOException {
 					return;
 			}
 
+			else if (operation.equals("sleep")) {
+				int interval = Integer.parseInt(st.nextToken());
+				try {
+					Thread.sleep(interval);
+				}
+				catch (InterruptedException e) {
+				}
+			}
+
+			else if (operation.equals("date")) {
+				Date now = new Date();
+				if (st.hasMoreTokens() &&
+				    st.nextToken().equals("-ms"))
+					print(Long.toString(now.getTime()));
+				else
+					print(now);
+			}
+
 			else
 				print("invalid keyword: " + operation);
 		}
@@ -556,11 +574,11 @@ help(String topic) {
 	System.out.println();
 	if (topic == null)
 		System.out.println("The following are supported commands:\n" +
-		    "add      assert   class    clear    delete   echo\n" +
-		    "file     glue     help     log      key      edns\n" +
-		    "origin   port     prohibit query    quit     require\n" +
-		    "send     server   show     tcp      ttl      zone\n" +
-		    "#\n");
+		    "add      assert   class    clear    date     delete\n" +
+		    "echo     file     glue     help     log      key\n" +
+		    "edns     origin   port     prohibit query    quit\n" +
+		    "require  send     server   show     sleep    tcp\n" +
+		    "ttl      zone     #\n");
 
 	else if (topic.equalsIgnoreCase("add"))
 		System.out.println(
@@ -582,6 +600,12 @@ help(String topic) {
 		System.out.println(
 			"clear\n\n" +
 			"clears the current update packet\n");
+	else if (topic.equalsIgnoreCase("date"))
+		System.out.println(
+			"date [-ms]\n\n" +
+			"prints the current date and time in human readable\n" +
+			"format or as the number of milliseconds since the\n" +
+			"epoch");
 	else if (topic.equalsIgnoreCase("delete"))
 		System.out.println(
 			"delete <name> [ttl] [class] <type> <data> \n" +
@@ -660,6 +684,10 @@ help(String topic) {
 		System.out.println(
 			"show\n\n" +
 			"shows the current update packet\n");
+	else if (topic.equalsIgnoreCase("sleep"))
+		System.out.println(
+			"sleep <milliseconds>\n\n" +
+			"pause for interval before next command\n");
 	else if (topic.equalsIgnoreCase("tcp"))
 		System.out.println(
 			"tcp\n\n" +
@@ -677,7 +705,7 @@ help(String topic) {
 			"# <text>\n\n" +
 			"a comment\n");
 	else
-		System.out.println ("Topic " + topic + " unrecognized\n");
+		System.out.println ("Topic '" + topic + "' unrecognized\n");
 }
 
 public static void
