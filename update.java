@@ -39,138 +39,144 @@ update(InputStream in) throws IOException {
 	istreams.addElement(in);
 
 	while (true) {
-		String line = null;
-		do {
-			InputStream is = (InputStream) istreams.lastElement();
-			br = (BufferedReader)inputs.lastElement();
+		try {
+			String line = null;
+			do {
+				InputStream is;
+				is = (InputStream) istreams.lastElement();
+				br = (BufferedReader)inputs.lastElement();
 
-			if (is == System.in)
-				System.out.print("> ");
+				if (is == System.in)
+					System.out.print("> ");
 
-			line = Master.readExtendedLine(br);
-			if (line == null) {
-				br.close();
-				inputs.removeElement(br);
-				istreams.removeElement(is);
-				if (inputs.isEmpty())
+				line = Master.readExtendedLine(br);
+				if (line == null) {
+					br.close();
+					inputs.removeElement(br);
+					istreams.removeElement(is);
+					if (inputs.isEmpty())
+						return;
+				}
+			} while (line == null);
+
+			if (log != null)
+				log.println("> " + line);
+
+			if (line.length() == 0 || line.charAt(0) == '#')
+				continue;
+
+			MyStringTokenizer st = new MyStringTokenizer(line);
+			if (!st.hasMoreTokens())
+				continue;
+			String operation = st.nextToken();
+
+			if (operation.equals("server")) {
+				server = st.nextToken();
+				res = new SimpleResolver(server);
+			}
+
+			else if (operation.equals("key")) {
+				String keyname = st.nextToken();
+				String keydata = st.nextToken();
+				if (res == null)
+					res = new SimpleResolver(server);
+				res.setTSIGKey(keyname, keydata);
+			}
+
+			else if (operation.equals("port")) {
+				if (res == null)
+					res = new SimpleResolver(server);
+				res.setPort(Short.parseShort(st.nextToken()));
+			}
+
+			else if (operation.equals("tcp")) {
+				if (res == null)
+					res = new SimpleResolver(server);
+				res.setTCP(true);
+			}
+
+			else if (operation.equals("class")) {
+				String s = st.nextToken();
+				short newClass = DClass.value(s);
+				if (newClass > 0)
+					defaultClass = newClass;
+				else
+					print("Invalid class " + newClass);
+			}
+
+			else if (operation.equals("ttl"))
+				defaultTTL = TTL.parseTTL(st.nextToken());
+
+			else if (operation.equals("origin"))
+				origin = new Name(st.nextToken());
+
+			else if (operation.equals("require"))
+				doRequire(st);
+
+			else if (operation.equals("prohibit"))
+				doProhibit(st);
+
+			else if (operation.equals("add"))
+				doAdd(st);
+
+			else if (operation.equals("delete"))
+				doDelete(st);
+
+			else if (operation.equals("glue"))
+				doGlue(st);
+
+			else if (operation.equals("help")) {
+				if (st.hasMoreTokens())
+					help(st.nextToken());
+				else
+					help(null);
+			}
+
+			else if (operation.equals("echo"))
+				print(line.substring(4).trim());
+
+			else if (operation.equals("send")) {
+				if (res == null)
+					res = new SimpleResolver(server);
+				sendUpdate();
+				query = new Message();
+				query.getHeader().setOpcode(Opcode.UPDATE);
+			}
+
+			else if (operation.equals("query"))
+				doQuery(st);
+
+			else if (operation.equals("quit") ||
+				 operation.equals("q"))
+			{
+				if (log != null)
+					log.close();
+				Enumeration e = inputs.elements();
+				while (e.hasMoreElements()) {
+					BufferedReader tbr;
+					tbr = (BufferedReader) e.nextElement();
+					tbr.close();
+				}
+				System.exit(0);
+			}
+
+			else if (operation.equals("file"))
+				doFile(st, inputs, istreams);
+
+			else if (operation.equals("log"))
+				doLog(st);
+
+			else if (operation.equals("assert")) {
+				if (doAssert(st) == false)
 					return;
 			}
-		} while (line == null);
 
-		if (log != null)
-			log.println("> " + line);
-
-		if (line.length() == 0 || line.charAt(0) == '#')
-			continue;
-
-		MyStringTokenizer st = new MyStringTokenizer(line);
-		if (!st.hasMoreTokens())
-			continue;
-		String operation = st.nextToken();
-
-		if (operation.equals("server")) {
-			server = st.nextToken();
-			res = new SimpleResolver(server);
-		}
-
-		else if (operation.equals("key")) {
-			String keyname = st.nextToken();
-			String keydata = st.nextToken();
-			if (res == null)
-				res = new SimpleResolver(server);
-			res.setTSIGKey(keyname, keydata);
-		}
-
-		else if (operation.equals("port")) {
-			if (res == null)
-				res = new SimpleResolver(server);
-			res.setPort(Short.parseShort(st.nextToken()));
-		}
-
-		else if (operation.equals("tcp")) {
-			if (res == null)
-				res = new SimpleResolver(server);
-			res.setTCP(true);
-		}
-
-		else if (operation.equals("class")) {
-			String s = st.nextToken();
-			short newClass = DClass.value(s);
-			if (newClass > 0)
-				defaultClass = newClass;
 			else
-				print("Invalid class " + newClass);
+				print("invalid keyword: " + operation);
 		}
-
-		else if (operation.equals("ttl"))
-			defaultTTL = TTL.parseTTL(st.nextToken());
-
-		else if (operation.equals("origin"))
-			origin = new Name(st.nextToken());
-
-		else if (operation.equals("require"))
-			doRequire(st);
-
-		else if (operation.equals("prohibit"))
-			doProhibit(st);
-
-		else if (operation.equals("add"))
-			doAdd(st);
-
-		else if (operation.equals("delete"))
-			doDelete(st);
-
-		else if (operation.equals("glue"))
-			doGlue(st);
-
-		else if (operation.equals("help")) {
-			if (st.hasMoreTokens())
-				help(st.nextToken());
-			else
-				help(null);
+		catch (NullPointerException npe) {
+			System.out.println("Parse error");
 		}
-
-		else if (operation.equals("echo"))
-			print(line.substring(5));
-
-		else if (operation.equals("send")) {
-			if (res == null)
-				res = new SimpleResolver(server);
-			sendUpdate();
-			query = new Message();
-			query.getHeader().setOpcode(Opcode.UPDATE);
-		}
-
-		else if (operation.equals("query"))
-			doQuery(st);
-
-		else if (operation.equals("quit") ||
-			 operation.equals("q"))
-		{
-			if (log != null)
-				log.close();
-			Enumeration e = inputs.elements();
-			while (e.hasMoreElements()) {
-				BufferedReader tbr;
-				tbr = (BufferedReader) e.nextElement();
-				tbr.close();
-			}
-			System.exit(0);
-		}
-
-		else if (operation.equals("file"))
-			doFile(st, inputs, istreams);
-
-		else if (operation.equals("log"))
-			doLog(st);
-
-		else if (operation.equals("assert")) {
-			if (doAssert(st) == false)
-				return;
-		}
-
-		else
-			print("invalid keyword: " + operation);
 	}
 }
 

@@ -82,12 +82,16 @@ nextToken() {
 		return s;
 	}
 	int start = current;
+	if (current >= string.length)
+		return null;
 	if (isDelim(current)) {
 		/* This is whitespace */
 		while (current < string.length && isDelim(current))
 			current++;
 		if (returnTokens)
 			return new String(string, start, current - start);
+		else if (current >= string.length)
+			return null;
 	}
 	boolean quoted = false;
 	boolean escaped = false;
