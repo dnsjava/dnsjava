@@ -42,7 +42,7 @@ TXTRecord(Name name, int dclass, long ttl, List strings) {
 	if (strings == null)
 		throw new IllegalArgumentException
 				("TXTRecord: strings must not be null");
-	this.strings = new ArrayList();
+	this.strings = new ArrayList(strings.size());
 	Iterator it = strings.iterator();
 	try {
 		while (it.hasNext()) {
@@ -74,7 +74,7 @@ throws IOException
 	if (in == null)
 		return rec;
 	int count = 0;
-	rec.strings = new ArrayList();
+	rec.strings = new ArrayList(2);
 	while (count < length) {
 		byte [] b = in.readStringIntoArray();
 		count += (b.length + 1);
@@ -88,7 +88,7 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	TXTRecord rec = new TXTRecord(name, dclass, ttl);
-	rec.strings = new ArrayList();
+	rec.strings = new ArrayList(2);
 	while (true) {
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
