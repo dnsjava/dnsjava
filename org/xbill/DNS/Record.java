@@ -21,18 +21,20 @@ protected short type, dclass;
 protected int ttl;
 protected int wireLength = -1;
 
-private	static Class [] knownTypes = new Class[256];
+private static final Class [] knownTypes = new Class[256];
 
-private static Class [] fromWireList = new Class [] {Name.class,
-                                                     Short.TYPE,
-                                                     Integer.TYPE,
-                                                     Integer.TYPE,
-                                                     DataByteInputStream.class};
-private static Class [] fromTextList = new Class [] {Name.class,
-						     Short.TYPE,
-						     Integer.TYPE,
-						     MyStringTokenizer.class,
-						     Name.class};
+private static final Class [] fromWireList =
+				new Class [] {Name.class,
+					      Short.TYPE,
+					      Integer.TYPE,
+					      Integer.TYPE,
+					      DataByteInputStream.class};
+private static final Class [] fromTextList =
+				new Class [] {Name.class,
+					      Short.TYPE,
+					      Integer.TYPE,
+					      MyStringTokenizer.class,
+					      Name.class};
 
 protected
 Record() {}
