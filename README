@@ -5,7 +5,7 @@ http://www.xbill.org/dnsjava
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-March 10, 2001
+August 22, 2001
 
 Overview:
 
@@ -61,6 +61,9 @@ Not all of the record types are supported.  Most types that are not supported
 are either deprecated or rarely used.  Adding support for a new type is not
 difficult, and requires no changes to any existing files.  If you want to see
 a new type supported, send a patch or just ask.
+
+The underlying platform must use an ASCII encoding of characters.  This means
+that dnsjava will not work on OS/390, for example.
 
 
 Additional documentation:
