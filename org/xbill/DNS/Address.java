@@ -15,7 +15,13 @@ import org.xbill.DNS.utils.*;
 
 public final class Address {
 
-private static boolean
+/**
+ * Determines if a string contains a valid IP address.
+ * @param s The string
+ * @return Whether the string contains a valid IP address
+ * @exception UnknownHostException The hostname does not have any addresses
+ */
+public static boolean
 isDottedQuad(String s) {
 	MyStringTokenizer st = new MyStringTokenizer(s, ".");
 	int labels = 0;
