@@ -31,7 +31,12 @@ public final class Options {
 private static Map table;
 
 static {
-	String s = System.getProperty("dnsjava.options");
+	String s = null;
+	try {
+		s = System.getProperty("dnsjava.options");
+	}
+	catch (SecurityException e) {
+	}
 	if (s != null) {
 		StringTokenizer st = new StringTokenizer(s, ",");
 		while (st.hasMoreTokens()) {
