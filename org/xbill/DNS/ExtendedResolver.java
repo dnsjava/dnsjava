@@ -25,7 +25,7 @@ private static class Resolution implements ResolverListener {
 	boolean done;
 	Message query;
 	Message response;
-	Exception exception;
+	Throwable thrown;
 	ResolverListener listener;
 
 	public
@@ -62,7 +62,17 @@ private static class Resolution implements ResolverListener {
 	send(int n) {
 		sent[n]++;
 		outstanding++;
-		inprogress[n] = resolvers[n].sendAsync(query, this);
+		try {
+			inprogress[n] = resolvers[n].sendAsync(query, this);
+		}
+		catch (Throwable t) {
+			thrown = t;
+			done = true;
+			if (listener == null) {
+				notifyAll();
+				return;
+			}
+		}
 	}
 
 	/* Start a synchronous resolution */
@@ -107,12 +117,15 @@ private static class Resolution implements ResolverListener {
 		/* Return the response or throw an exception */
 		if (response != null)
 			return response;
-		else if (exception instanceof IOException)
-			throw (IOException) exception;
-		else if (exception instanceof RuntimeException)
-			throw (RuntimeException) exception;
+		else if (thrown instanceof IOException)
+			throw (IOException) thrown;
+		else if (thrown instanceof RuntimeException)
+			throw (RuntimeException) thrown;
+		else if (thrown instanceof Error)
+			throw (Error) thrown;
 		else
-			throw new RuntimeException("ExtendedResolver failure");
+			throw new IllegalStateException
+						("ExtendedResolver failure");
 	}
 
 	/* Start an asynchronous resolution */
@@ -175,22 +188,22 @@ private static class Resolution implements ResolverListener {
 				/* Got a timeout; resend */
 				if (sent[n] < retries)
 					send(n);
-				if (exception == null)
-					exception = e;
+				if (thrown == null)
+					thrown = e;
 			} else if (e instanceof SocketException) {
 				/*
 				 * Problem with the socket; don't resend
 				 * on it
 				 */
-				if (exception == null ||
-				    exception instanceof InterruptedIOException)
-					exception = e;
+				if (thrown == null ||
+				    thrown instanceof InterruptedIOException)
+					thrown = e;
 			} else {
 				/*
 				 * Problem with the response; don't resend
 				 * on the same socket.
 				 */
-				exception = e;
+				thrown = e;
 			}
 			if (startnext)
 				send(n + 1);
@@ -209,7 +222,9 @@ private static class Resolution implements ResolverListener {
 				return;
 		}
 		/* If we're done and this is asynchronous, call the callback. */
-		listener.handleException(this, exception);
+		if (!(thrown instanceof Exception))
+			thrown = new RuntimeException(thrown.getMessage());
+		listener.handleException(this, (Exception) thrown);
 	}
 }
 

@@ -1,3 +1,8 @@
+1/28/2004
+	- Attempt to better deal with OutOfMemoryErrors when creating
+	  threads during the resolution process.
+	  (reported by Joseph Shraibman <jks@iname.com>)
+
 1/27/2004
 	- Change the representation of a TSIG error from a byte to an int.
 	- Improve error messages from failed Lookups; treat SERVFAIL
