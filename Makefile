@@ -1,5 +1,5 @@
 all:
-	jikes -g *.java
+	jikes -g *.java DNS/*.java
 
 clean:
-	rm -f *.class
+	rm -f *.class DNS/*.class
