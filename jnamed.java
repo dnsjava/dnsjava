@@ -106,9 +106,9 @@ findBestZone(Name name) {
 	foundzone = (Zone) znames.get(name);
 	if (foundzone != null)
 		return foundzone;
-	Name tname = name;
-	while (!tname.equals(Name.root)) {
-		tname = new Name(tname, 1);
+	int labels = name.labels();
+	for (int i = 1; i < labels; i++) {
+		Name tname = new Name(name, i);
 		foundzone = (Zone) znames.get(tname);
 		if (foundzone != null)
 			return foundzone;
