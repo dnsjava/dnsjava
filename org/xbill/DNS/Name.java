@@ -97,8 +97,11 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 	name = new String[MAXLABELS];
 
 	start = in.getPos();
+loop:
 	while ((len = in.readUnsignedByte()) != 0) {
-		if ((len & 0xC0) != 0) {
+		switch(len & 0xC0) {
+		case 0xC0:
+		{
 			int pos = in.readUnsignedByte();
 			pos += ((len & ~0xC0) << 8);
 			Name name2 = (c == null) ? null : c.get(pos);
@@ -110,12 +113,39 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 						 name2.labels);
 				labels += name2.labels;
 			}
+			break loop;
+		}
+		case 0:
+		{
+			byte [] b = new byte[len];
+			in.read(b);
+			name[labels++] = new String(b);
+			count++;
 			break;
 		}
-		byte [] b = new byte[len];
-		in.read(b);
-		name[labels++] = new String(b);
-		count++;
+		case 0x40:
+		{
+			int type = len & 0x3F;
+			switch (type) {
+			case 0:
+				throw new IOException("Long compression");
+			case 1:
+			{
+				int bits = in.readUnsignedByte();
+				int bytes = (bits + 7) & 7;
+				byte [] data = new byte[bytes];
+				in.read(data);
+				throw new IOException("Binary label format");
+			}
+			case 2:
+				throw new IOException("Long local compression");
+			default:
+				throw new IOException("Unknown name format");
+			} /* switch */
+		}
+		case 0x80:
+			throw new IOException("Local compression");
+		} /* switch */
 	}
 	if (c != null) 
 		for (int i = 0, pos = start; i < count; i++) {
