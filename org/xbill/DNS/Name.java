@@ -8,7 +8,8 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * A representation of a domain name. 
+ * A representation of a domain name.  It may either be absolute (fully
+ * qualified) or relative.
  *
  * @author Brian Wellington
  */
@@ -40,7 +41,7 @@ public static final Name root;
 /** The maximum length of a Name */
 private static final int MAXNAME = 255;
 
-/** The maximum length of labels a label a Name */
+/** The maximum length of a label a Name */
 private static final int MAXLABEL = 63;
 
 /** The maximum number of labels in a Name */
@@ -424,6 +425,26 @@ concatenate(Name prefix, Name suffix) throws NameTooLongException {
 	Name newname = new Name();
 	copy(prefix, newname);
 	newname.append(suffix.name, suffix.offset(0), suffix.getlabels());
+	return newname;
+}
+
+/**
+ * If this name is a subdomain of origin, return a new name relative to
+ * origin with the same value. Otherwise, return the existing name.
+ * @param origin The origin to remove.
+ * @return The possibly relativized name.
+ */
+public Name
+relativize(Name origin) {
+	if (origin == null || !subdomain(origin))
+		return this;
+	Name newname = new Name();
+	copy(this, newname);
+	int length = length() - origin.length();
+	int labels = newname.labels() - origin.labels();
+	newname.setlabels((byte)labels);
+	newname.name = new byte[length];
+	System.arraycopy(name, offset(0), newname.name, 0, length);
 	return newname;
 }
 
