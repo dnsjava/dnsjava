@@ -90,15 +90,10 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 		question = Record.newRecord(name, type, dclass);
 		query = Message.newQuery(question);
 
-		try {
-			if (res != null)
-				response = res.send(query);
-			else
-				response = eres.send(query);
-		}
-		catch (IOException ioe) {
-			return null;
-		}
+		if (res != null)
+			response = res.send(query);
+		else
+			response = eres.send(query);
 
 		short rcode = response.getHeader().getRcode();
 		if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)

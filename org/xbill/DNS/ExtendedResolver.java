@@ -199,7 +199,7 @@ sendAsync(final Message query, final ResolverListener listener) {
 }
 
 public
-Message sendAXFR(Message query) throws IOException {
+Message sendAXFR(Message query) {
 	return resolvers[0].sendAXFR(query);
 }
 

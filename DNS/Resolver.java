@@ -14,8 +14,8 @@ public void setEDNS(int level);
 public void setTSIGKey(String name, String key);
 public void setTSIGKey(String key);
 public void setTimeout(int secs);
-public Message send(Message query) throws IOException;
+public Message send(Message query);
 public int sendAsync(final Message query, final ResolverListener listener);
-public Message sendAXFR(Message query) throws IOException;
+public Message sendAXFR(Message query);
 
 }

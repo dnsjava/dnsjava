@@ -115,7 +115,7 @@ sendTCP(Message query, byte [] out) throws IOException {
 		in = new byte[inLength];
 		dataIn.readFully(in);
 	}
-	catch (InterruptedIOException e) {
+	catch (IOException e) {
 		s.close();
 		System.out.println(";; No response");
 		return null;
@@ -131,7 +131,7 @@ sendTCP(Message query, byte [] out) throws IOException {
 }
 
 public Message
-send(Message query) throws IOException {
+send(Message query) {
 	byte [] out, in;
 	Message response;
 	DatagramSocket s;
@@ -139,53 +139,59 @@ send(Message query) throws IOException {
 	int udpLength = 512;
 
 	try {
-		s = new DatagramSocket();
-	}
-	catch (SocketException e) {
-		System.out.println(e);
-		return null;
-	}
+		try {
+			s = new DatagramSocket();
+		}
+		catch (SocketException e) {
+			System.out.println(e);
+			return null;
+		}
 
-	query = (Message) query.clone();
-	if (EDNSlevel >= 0) {
-		udpLength = 1280;
-		query.addRecord(Section.ADDITIONAL, EDNS.newOPT(udpLength));
-	}
+		query = (Message) query.clone();
+		if (EDNSlevel >= 0) {
+			udpLength = 1280;
+			query.addRecord(Section.ADDITIONAL,
+					EDNS.newOPT(udpLength));
+		}
 
-	if (tsig != null)
-		tsig.apply(query, null);
+		if (tsig != null)
+			tsig.apply(query, null);
 
 
-	out = query.toWire();
+		out = query.toWire();
 
-	if (useTCP)
-		return sendTCP(query, out);
+		if (useTCP)
+			return sendTCP(query, out);
 
-	s.send(new DatagramPacket(out, out.length, addr, port));
+		s.send(new DatagramPacket(out, out.length, addr, port));
 
-	dp = new DatagramPacket(new byte[udpLength], udpLength);
-	s.setSoTimeout(timeoutValue);
-	try {
-		s.receive(dp);
-	}
-	catch (InterruptedIOException e) {
+		dp = new DatagramPacket(new byte[udpLength], udpLength);
+		s.setSoTimeout(timeoutValue);
+		try {
+			s.receive(dp);
+		}
+		catch (InterruptedIOException e) {
+			s.close();
+			System.out.println(";; No response");
+			return null;
+		}
+		in = new byte [dp.getLength()];
+		System.arraycopy(dp.getData(), 0, in, 0, in.length);
+		response = new Message(in);
+		if (tsig != null) {
+			boolean ok = tsig.verify(response, in, query.getTSIG());
+			System.out.println(";; TSIG verify: " + ok);
+		}
+
 		s.close();
-		System.out.println(";; No response");
+		if (response.getHeader().getFlag(Flags.TC) && !ignoreTruncation)
+			return sendTCP(query, out);
+		else
+			return response;
+	}
+	catch (IOException e) {
 		return null;
 	}
-	in = new byte [dp.getLength()];
-	System.arraycopy(dp.getData(), 0, in, 0, in.length);
-	response = new Message(in);
-	if (tsig != null) {
-		boolean ok = tsig.verify(response, in, query.getTSIG());
-		System.out.println(";; TSIG verify: " + ok);
-	}
-
-	s.close();
-	if (response.getHeader().getFlag(Flags.TC) && !ignoreTruncation)
-		return sendTCP(query, out);
-	else
-		return response;
 }
 
 private int
@@ -221,7 +227,7 @@ sendAsync(final Message query, final ResolverListener listener) {
 }
 
 public Message
-sendAXFR(Message query) throws IOException {
+sendAXFR(Message query) {
 	byte [] out, in;
 	Socket s;
 	int inLength;
@@ -231,79 +237,85 @@ sendAXFR(Message query) throws IOException {
 	boolean first = true;
 
 	try {
-		s = new Socket(addr, port);
+		try {
+			s = new Socket(addr, port);
+		}
+		catch (SocketException e) {
+			System.out.println(e);
+			return null;
+		}
+
+		query = (Message) query.clone();
+		if (tsig != null)
+			tsig.apply(query, null);
+
+		out = query.toWire();
+		OutputStream sOut = s.getOutputStream();
+		new DataOutputStream(sOut).writeShort(out.length);
+		sOut.write(out);
+		s.setSoTimeout(timeoutValue);
+
+		response = new Message();
+		response.getHeader().setID(query.getHeader().getID());
+		if (tsig != null)
+			tsig.verifyAXFRStart();
+		while (soacount < 2) {
+			try {
+				InputStream sIn = s.getInputStream();
+				dataIn = new DataInputStream(sIn);
+				inLength = dataIn.readUnsignedShort();
+				in = new byte[inLength];
+				dataIn.readFully(in);
+			}
+			catch (IOException e) {
+				s.close();
+				System.out.println(";; No response");
+				return null;
+			}
+			Message m = new Message(in);
+			if (m.getHeader().getCount(Section.QUESTION) != 0 ||
+			    m.getHeader().getCount(Section.ANSWER) <= 0 ||
+			    m.getHeader().getCount(Section.AUTHORITY) != 0)
+			{
+				StringBuffer sb = new StringBuffer();
+				sb.append("Invalid AXFR: ");
+				for (int i=0; i < 4; i++) {
+					Enumeration e = m.getSection(i);
+					System.out.println("--");
+					while (e.hasMoreElements()) {
+						Record r;
+						r = (Record)e.nextElement();
+						System.out.println(r);
+					}
+					System.out.println();
+				}
+				System.out.println(sb.toString());
+				s.close();
+				return null;
+			}
+			for (int i = 1; i < 4; i++) {
+				Enumeration e = m.getSection(i);
+				while (e.hasMoreElements()) {
+					Record r = (Record)e.nextElement();
+					response.addRecord(i, r);
+					if (r instanceof SOARecord)
+						soacount++;
+				}
+			}
+			if (tsig != null) {
+				boolean required = (soacount > 1 || first);
+				boolean ok = tsig.verifyAXFR(m, in, query.getTSIG(),
+							     required, first);
+				System.out.println("TSIG verify: " + ok);
+			}
+			first = false;
+		}
+		s.close();
+		return response;
 	}
-	catch (SocketException e) {
-		System.out.println(e);
+	catch (IOException e) {
 		return null;
 	}
-
-	query = (Message) query.clone();
-	if (tsig != null)
-		tsig.apply(query, null);
-
-	out = query.toWire();
-	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
-	s.getOutputStream().write(out);
-	s.setSoTimeout(timeoutValue);
-
-	response = new Message();
-	response.getHeader().setID(query.getHeader().getID());
-	if (tsig != null)
-		tsig.verifyAXFRStart();
-	while (soacount < 2) {
-		try {
-			dataIn = new DataInputStream(s.getInputStream());
-			inLength = dataIn.readUnsignedShort();
-			in = new byte[inLength];
-			dataIn.readFully(in);
-		}
-		catch (InterruptedIOException e) {
-			s.close();
-			System.out.println(";; No response");
-			return null;
-		}
-		Message m = new Message(in);
-		if (m.getHeader().getCount(Section.QUESTION) != 0 ||
-		    m.getHeader().getCount(Section.ANSWER) <= 0 ||
-		    m.getHeader().getCount(Section.AUTHORITY) != 0)
-		{
-			StringBuffer sb = new StringBuffer();
-			sb.append("Invalid AXFR: ");
-			for (int i=0; i < 4; i++) {
-				Enumeration e = m.getSection(i);
-				System.out.println("--");
-				while (e.hasMoreElements()) {
-					Record r;
-					r = (Record)e.nextElement();
-					System.out.println(r);
-				}
-				System.out.println();
-			}
-			System.out.println(sb.toString());
-			s.close();
-			return null;
-		}
-		for (int i = 1; i < 4; i++) {
-			Enumeration e = m.getSection(i);
-			while (e.hasMoreElements()) {
-				Record r = (Record)e.nextElement();
-				response.addRecord(i, r);
-				if (r instanceof SOARecord)
-					soacount++;
-			}
-		}
-		if (tsig != null) {
-			boolean required = (soacount > 1 || first);
-			boolean ok = tsig.verifyAXFR(m, in, query.getTSIG(),
-						     required, first);
-			System.out.println("TSIG verify: " + ok);
-		}
-		first = false;
-	}
-
-	s.close();
-	return response;
 }
 
 }
