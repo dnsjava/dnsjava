@@ -66,7 +66,7 @@ Inet6Address(String s) throws TextParseException
 	while (i < tokens.length - 2) {
 		if (tokens[i].equals(":")) {
 			if (tokens[i+1].equals(":")) {
-				if (tokens[i+2].equals(":") || range > 0)
+				if (tokens[i+2].equals(":") || range >= 0)
 					throw new TextParseException
 						("Invalid IPv6 address");
 				range = j;
@@ -104,29 +104,20 @@ Inet6Address(String s) throws TextParseException
 	}
 
 	if (parsev4) {
-		st = new StringTokenizer(tokens[i], ".");
-		for (int k = 0; k < 4; k++) {
-			if (!st.hasMoreTokens())
-				throw new TextParseException
-						("Invalid IPv6 address");
-			String token = st.nextToken();
-			try {
-				data[j++] = (byte) Integer.parseInt(token);
-			}
-			catch (NumberFormatException e) {
-				throw new TextParseException
-						("Invalid IPv6 address");
-			}
-			
-		}
+		int [] v4addr = Address.toArray(tokens[i]);
+		if (v4addr == null)
+			throw new TextParseException("Invalid IPv6 address");
+		for (int k = 0; k < 4; k++)
+			data[j++] = (byte) v4addr[k];
 	}
 	if (range >= 0) {
 		int left = 16 - j;
-		for (int k = 0; k < j; k++) {
-			data[15 - k] = data[15 - k - left];
+		for (int k = 15; k >= 0; k--) {
+			if (k >= range + left)
+				data[k] = data[k - left];
+			else if (k >= range)
+				data[k] = 0;
 		}
-		for (int k = range; k < range + left; k++)
-			data[k] = 0;
 	} else if (j < 16)
 		throw new TextParseException("Invalid IPv6 address");
 }

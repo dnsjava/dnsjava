@@ -1,3 +1,7 @@
+4/10/2003
+	- The Inet6Address class incorrectly parsed some addresses.
+	  (reported by steve weiland <steve@widge.net>)
+
 4/7/2003
 	- Records were not sorted properly (reported by
 	  Joseph K Shraibman <jks@akula.com>)
