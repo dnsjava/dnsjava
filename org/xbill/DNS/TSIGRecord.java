@@ -130,7 +130,7 @@ toString() {
 
 /** Returns the shared key's algorithm */
 public Name
-getAlg() {
+getAlgorithm() {
 	return alg;
 }
 
