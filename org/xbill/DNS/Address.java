@@ -6,7 +6,8 @@ package org.xbill.DNS;
 import java.net.*;
 
 /**
- * A simple clone of the java.net.InetAddress class, using dnsjava routines.
+ * Routines dealing with IP addresses.  Includes functions similar to
+ * those in the java.net.InetAddress class.
  *
  * @author Brian Wellington
  */
@@ -86,6 +87,19 @@ toDottedQuad(byte [] addr) {
 
 }
 
+private static Record []
+lookupHostName(String name) throws UnknownHostException {
+	try {
+		Record [] records = new Lookup(name).run();
+		if (records == null)
+			throw new UnknownHostException("unknown host");
+		return records;
+	}
+	catch (TextParseException e) {
+		throw new UnknownHostException("invalid name");
+	}
+}
+
 /**
  * Determines the IP address of a host
  * @param name The hostname to look up
@@ -96,9 +110,7 @@ public static InetAddress
 getByName(String name) throws UnknownHostException {
 	if (isDottedQuad(name))
 		return InetAddress.getByName(name);
-	Record [] records = dns.getRecords(name, Type.A);
-	if (records == null)
-		throw new UnknownHostException("unknown host");
+	Record [] records = lookupHostName(name);
 	ARecord a = (ARecord) records[0];
 	return a.getAddress();
 }
@@ -113,9 +125,7 @@ public static InetAddress []
 getAllByName(String name) throws UnknownHostException {
 	if (isDottedQuad(name))
 		return InetAddress.getAllByName(name);
-	Record [] records = dns.getRecords(name, Type.A);
-	if (records == null)
-		throw new UnknownHostException("unknown host");
+	Record [] records = lookupHostName(name);
 	InetAddress [] addrs = new InetAddress[records.length];
 	for (int i = 0; i < records.length; i++) {
 		ARecord a = (ARecord) records[i];
@@ -132,8 +142,8 @@ getAllByName(String name) throws UnknownHostException {
  */
 public static String
 getHostName(InetAddress addr) throws UnknownHostException {
-	Record [] records = dns.getRecordsByAddress(addr.getHostAddress(),
-						    Type.PTR);
+	Name name = ReverseMap.fromAddress(addr);
+	Record [] records = new Lookup(name, Type.PTR).run();
 	if (records == null)
 		throw new UnknownHostException("unknown address");
 	PTRRecord ptr = (PTRRecord) records[0];
