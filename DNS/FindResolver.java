@@ -8,17 +8,41 @@ import java.util.*;
 
 class FindResolver {
 
-static String server = null;
+static String [] server = null;
 static boolean searched = false;
 
-static String
+static String []
 findProperty() {
-	return System.getProperty("dns.resolver");
+	String s;
+	String [] array;
+	s = System.getProperty("dns.resolver");
+	if (s != null) {
+		array = new String[1];
+		array[0] = s;
+	}
+	else {
+		Vector v = null;
+		for (int i = 1; i <= 3; i++) {
+			s = System.getProperty("dns.server" + i);
+			if (s == null)
+				break;
+			if (v == null)
+				v = new Vector();
+			v.addElement(s);
+		}
+		if (v == null)
+			return null;
+		array = new String[v.size()];
+		for (int i = 0; i < v.size(); i++)
+			array[i] = (String) v.elementAt(i);
+	}
+	return array;
 }
 
-static String
+static String []
 findUnix() {
 	InputStream in = null;
+	String [] array;
 	try {
 		in = new FileInputStream("/etc/resolv.conf");
 	}
@@ -27,6 +51,7 @@ findUnix() {
 	}
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
+	Vector v = null;
 	try {
 		while (true) {
 			String line = br.readLine();
@@ -34,17 +59,24 @@ findUnix() {
 				return null;
 			if (!line.startsWith("nameserver "))
 				continue;
+			if (v == null)
+				v = new Vector();
 			StringTokenizer st = new StringTokenizer(line);
 			st.nextToken(); /* skip nameserver */
-			return st.nextToken();
+			v.addElement(st.nextToken());
 		}
 	}
 	catch (IOException e) {
 	}
+	if (v == null)
+		return null;
+	array = new String[v.size()];
+	for (int i = 0; i < v.size(); i++)
+		array[i] = (String) v.elementAt(i);
 	return null;
 }
 
-public static String
+public static String []
 find() {
 	if (server != null || searched)
 		return server;
@@ -59,6 +91,15 @@ find() {
 		return server;
 
 	return null;
+}
+
+public static String
+find1() {
+	String [] array = find();
+	if (array == null)
+		return null;
+	else
+		return array[0];
 }
 
 }
