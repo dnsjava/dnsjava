@@ -46,7 +46,7 @@ getObject() {
  */
 public
 SSHFPRecord(Name name, int dclass, long ttl, int alg, int digestType,
-	    byte [] fingetprint)
+	    byte [] fingerprint)
 {
 	super(name, Type.SSHFP, dclass, ttl);
 	this.alg = checkU8("alg", alg);
