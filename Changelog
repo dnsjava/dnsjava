@@ -1,3 +1,9 @@
+10/27/2003
+	- DNS TTLs and other 32 bit unsigned values are now represented as
+	  longs, not ints.  This is an API change, but allows the full range
+	  to be used.
+	- Add the Serial class for serial arithmetic.
+
 9/30/2003
 	- 1.4.3 released.
 	- Fix a bit of code that required Java 1.4.
