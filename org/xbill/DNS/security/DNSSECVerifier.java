@@ -86,7 +86,7 @@ findTrustedKey(Name name, int algorithm, int footprint) {
 
 private PublicKey
 findCachedKey(Cache cache, Name name, int algorithm, int footprint) {
-	RRset [] keysets = cache.findAnyRecords(name, Type.KEY, DClass.ANY);
+	RRset [] keysets = cache.findAnyRecords(name, Type.KEY);
 	if (keysets == null)
 		return null;
 	RRset keys = keysets[0];
