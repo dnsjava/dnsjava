@@ -1,5 +1,8 @@
+JAVAC=javac
+JFLAGS=-g
+
 all:
-	jikes -g *.java DNS/*.java
+	${JAVAC} ${JFLAGS} *.java DNS/*.java
 
 clean:
 	rm -f *.class DNS/*.class
