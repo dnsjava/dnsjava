@@ -45,10 +45,10 @@ private static class Resolution implements ResolverListener {
 				eres.lbStart %= nresolvers;
 			if (start > 0) {
 				Resolver [] shuffle = new Resolver[nresolvers];
-				for (int i = 0; i <= start; i++)
-					shuffle[i + start] = resolvers[i];
-				for (int i = start; i < nresolvers; i++)
-					shuffle[i - start] = resolvers[i];
+				for (int i = 0; i < nresolvers; i++) {
+					int pos = (i + start) % nresolvers;
+					shuffle[i] = resolvers[pos];
+				}
 				resolvers = shuffle;
 			}
 		}

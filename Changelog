@@ -1,3 +1,8 @@
+6/17/2003
+	- Fix an ArrayIndexOutofBoundsException triggered by load balancing
+	  in the ExtendedResolver.
+	  (reported by Norbert Desautels <ndesautels@gdgsystems.com>)
+
 6/1/2003
 	- Add the Name.relativize() method to convert an absolute name to
 	  a name relative to a specified origin.
