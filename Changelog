@@ -1,3 +1,6 @@
+4/29/2002
+	- 1.2.4 released
+
 4/25/2002
 	- Add a constructor for building a zone from an array of records.
 	  (based on code from Adam Cassar <adam.cassar@netregistry.com.au>)
