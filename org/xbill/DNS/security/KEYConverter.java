@@ -22,6 +22,10 @@ import org.xbill.DNS.utils.*;
 
 public class KEYConverter {
 
+private static final BigInteger DHPRIME768 = new BigInteger("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A63A3620FFFFFFFFFFFFFFFF", 16);
+private static final BigInteger DHPRIME1024 = new BigInteger("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF", 16);
+private static final BigInteger TWO = new BigInteger("2", 16);
+
 static int
 BigIntegerLength(BigInteger i) {
 	byte [] b = i.toByteArray();
@@ -44,13 +48,36 @@ parseRSA(DataByteInputStream in) throws IOException {
 
 static DHPublicKey
 parseDH(DataByteInputStream in) throws IOException {
+	int special = 0;
 	int pLength = in.readUnsignedShort();
-	if (pLength < 16)
+	if (pLength < 16 && pLength != 1 && pLength != 2)
 		return null;
-	BigInteger p = in.readBigInteger(pLength);
+	BigInteger p;
+	if (pLength == 1 || pLength == 2) {
+		if (pLength == 1)
+			special = in.readUnsignedByte();
+		else
+			special = in.readUnsignedShort();
+		if (special != 1 && special != 2)
+			return null;
+		if (special == 1)
+			p = DHPRIME768;
+		else
+			p = DHPRIME1024;
+	}
+	else
+		p = in.readBigInteger(pLength);
 
 	int gLength = in.readUnsignedShort();
-	BigInteger g = in.readBigInteger(gLength);
+	BigInteger g;
+	if (gLength == 0) {
+		if (special != 0)
+			g = TWO;
+		else
+			return null;
+	}
+	else
+		g = in.readBigInteger(gLength);
 
 	int yLength = in.readUnsignedShort();
 	BigInteger y = in.readBigInteger(yLength);
@@ -121,14 +148,30 @@ buildDH(DHPublicKey key) {
 	BigInteger p = key.getParams().getP();
 	BigInteger g = key.getParams().getG();
 	BigInteger y = key.getY();
-	int pLength = BigIntegerLength(p);
-	int gLength = BigIntegerLength(g);
-	int yLength = BigIntegerLength(y);
+
+	int pLength, gLength, yLength;
+	if (g.equals(TWO) && (p.equals(DHPRIME768) || p.equals(DHPRIME1024))) {
+		pLength = 1;
+		gLength = 0;
+	}
+	else {
+		pLength = BigIntegerLength(p);
+		gLength = BigIntegerLength(g);
+	}
+	yLength = BigIntegerLength(y);
 
 	out.writeShort(pLength);
-	out.writeBigInteger(p);
+	if (pLength == 1) {
+		if (p.bitLength() == 768)
+			out.writeByte((byte)1);
+		else
+			out.writeByte((byte)2);
+	}
+	else
+		out.writeBigInteger(p);
 	out.writeShort(gLength);
-	out.writeBigInteger(g);
+	if (gLength > 0)
+		out.writeBigInteger(g);
 	out.writeShort(yLength);
 	out.writeBigInteger(y);
 

@@ -63,4 +63,16 @@ getEncoded() {
 	return null;
 }
 
+public String
+toString() {
+	StringBuffer sb = new StringBuffer();
+	sb.append("P = ");
+	sb.append(params.getP());
+	sb.append("\nG = ");
+	sb.append(params.getG());
+	sb.append("\nY = ");
+	sb.append(Y);
+	return sb.toString();
+}
+
 }
