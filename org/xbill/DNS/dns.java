@@ -102,6 +102,7 @@ setResolver(Resolver _res) {
  */
 public static synchronized Resolver
 getResolver() {
+	initialize();
 	return res;
 }
 
@@ -128,6 +129,7 @@ setSearchPath(String [] domains) {
  */
 public static synchronized Cache
 getCache() {
+	initialize();
 	return cache;
 }
 
