@@ -371,14 +371,12 @@ sendAXFR(Message query) throws IOException {
 			if (m.getHeader().getRcode() != Rcode.NOERROR) {
 				if (soacount == 0)
 					return m;
-				else {
-					if (Options.check("verbosemsg")) {
-						System.err.println("Invalid AXFR packet: ");
-						System.err.println(m);
-					}
-					throw new WireParseException
-						("Invalid AXFR message");
+				if (Options.check("verbosemsg")) {
+					System.err.println("Invalid AXFR packet: ");
+					System.err.println(m);
 				}
+				throw new WireParseException
+					("Invalid AXFR message");
 			}
 			if (m.getHeader().getCount(Section.QUESTION) > 1 ||
 			    m.getHeader().getCount(Section.ANSWER) <= 0 ||
@@ -392,11 +390,10 @@ sendAXFR(Message query) throws IOException {
 						("Invalid AXFR message");
 			}
 			for (int i = 1; i < 4; i++) {
-				Enumeration e = m.getSection(i);
-				while (e.hasMoreElements()) {
-					Record r = (Record)e.nextElement();
-					response.addRecord(r, i);
-					if (r instanceof SOARecord)
+				Record [] records = m.getSectionArray(i);
+				for (int j = 0; j < records.length; j++) {
+					response.addRecord(records[j], i);
+					if (records[j] instanceof SOARecord)
 						soacount++;
 				}
 			}
