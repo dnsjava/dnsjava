@@ -1,3 +1,6 @@
+8/10/2002
+	- Add Ant build script (Blake Ramsdell <blake@brutesquadlabs.com>)
+
 8/6/2002
 	- The AAAARecord constructor was broken.
 	- The Record class now implements Comparable.
