@@ -20,16 +20,39 @@ import java.lang.ref.*;
 
 public class Cache {
 
-private abstract static class Element implements TypedObject {
+private abstract static interface Element extends TypedObject {
+	public boolean expired();
+	public int compareCredibility(int cred);
+	public int getType();
+}
+
+private static int
+limitExpire(long ttl, long maxttl) {
+	if (maxttl >= 0 && maxttl < ttl)
+		ttl = maxttl;
+	int expire = (int)((System.currentTimeMillis() / 1000) + ttl);
+	if (expire < 0 || expire > Integer.MAX_VALUE)
+		return Integer.MAX_VALUE;
+	return expire;
+}
+
+private static class CacheRRset extends RRset implements Element {
 	int credibility;
 	int expire;
 
-	protected void
-	setValues(int credibility, long ttl) {
-		this.credibility = credibility;
-		this.expire = (int)((System.currentTimeMillis() / 1000) + ttl);
-		if (this.expire < 0 || this.expire > Integer.MAX_VALUE)
-			this.expire = Integer.MAX_VALUE;
+	public
+	CacheRRset(Record rec, int cred, long maxttl) {
+		super();
+		this.credibility = cred;
+		this.expire = limitExpire(rec.getTTL(), maxttl);
+		addRR(rec);
+	}
+
+	public
+	CacheRRset(RRset rrset, int cred, long maxttl) {
+		super(rrset);
+		this.credibility = cred;
+		this.expire = limitExpire(rrset.getTTL(), maxttl);
 	}
 
 	public final boolean
@@ -38,40 +61,27 @@ private abstract static class Element implements TypedObject {
 		return (now >= expire);
 	}
 
-	public abstract int getType();
-}
-
-private static class PositiveElement extends Element {
-	RRset rrset;
-
-	public
-	PositiveElement(RRset r, int cred, long maxttl) {
-		rrset = r;
-		long ttl = r.getTTL();
-		if (maxttl >= 0 && maxttl < ttl)
-			ttl = maxttl;
-		setValues(cred, ttl);
-	}
-
-	public int
-	getType() {
-		return rrset.getType();
+	public final int
+	compareCredibility(int cred) {
+		return credibility - cred;
 	}
 
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(rrset);
+		sb.append(super.toString());
 		sb.append(" cl = ");
 		sb.append(credibility);
 		return sb.toString();
 	}
 }
 
-private static class NegativeElement extends Element {
+private static class NegativeElement implements Element {
 	int type;
 	Name name;
 	SOARecord soa;
+	int credibility;
+	int expire;
 
 	public
 	NegativeElement(Name name, int type, SOARecord soa, int cred,
@@ -81,17 +91,26 @@ private static class NegativeElement extends Element {
 		this.type = type;
 		this.soa = soa;
 		long cttl = 0;
-		if (soa != null) {
+		if (soa != null)
 			cttl = soa.getMinimum();
-			if (maxttl >= 0 && maxttl < cttl)
-				cttl = maxttl;
-		}
-		setValues(cred, cttl);
+		this.credibility = cred;
+		this.expire = limitExpire(cttl, maxttl);
 	}
 
 	public int
 	getType() {
 		return type;
+	}
+
+	public final boolean
+	expired() {
+		int now = (int)(System.currentTimeMillis() / 1000);
+		return (now >= expire);
+	}
+
+	public final int
+	compareCredibility(int cred) {
+		return credibility - cred;
 	}
 
 	public String
@@ -233,7 +252,7 @@ oneElement(Name name, Object types, int type, int minCred) {
 		removeElement(name, type);
 		return null;
 	}
-	if (found.credibility < minCred)
+	if (found.compareCredibility(minCred) < 0)
 		return null;
 	return found;
 }
@@ -325,13 +344,12 @@ addRecord(Record r, int cred, Object o) {
 		return;
 	Element element = findElement(name, type, cred);
 	if (element == null) {
-		RRset rrset = new RRset();
-		rrset.addRR(r);
-		addRRset(rrset, cred);
-	} else if (cred == element.credibility) {
-		if (element instanceof PositiveElement) {
-			PositiveElement pe = (PositiveElement) element;
-			pe.rrset.addRR(r);
+		CacheRRset crrset = new CacheRRset(r, cred, maxcache);
+		addRRset(crrset, cred);
+	} else if (element.compareCredibility(cred) == 0) {
+		if (element instanceof CacheRRset) {
+			CacheRRset crrset = (CacheRRset) element;
+			crrset.addRR(r);
 		}
 	}
 }
@@ -349,12 +367,17 @@ addRRset(RRset rrset, int cred) {
 	int type = rrset.getType();
 	Element element = findElement(name, type, cred);
 	if (ttl == 0) {
-		if (element != null && cred > element.credibility)
+		if (element != null && element.compareCredibility(cred) < 0)
 			removeElement(name, type);
 	} else {
-		if (element == null)
-			addElement(name,
-				   new PositiveElement(rrset, cred, maxcache));
+		if (element == null) {
+			CacheRRset crrset;
+			if (rrset instanceof CacheRRset)
+				crrset = (CacheRRset) rrset;
+			else
+				crrset = new CacheRRset(rrset, cred, maxcache);
+			addElement(name, crrset);
+		}
 	}
 }
 
@@ -373,7 +396,7 @@ addNegative(Name name, int type, SOARecord soa, int cred) {
 		ttl = soa.getTTL();
 	Element element = findElement(name, type, cred);
 	if (ttl == 0) {
-		if (element != null && cred > element.credibility)
+		if (element != null && element.compareCredibility(cred) < 0)
 			removeElement(name, type);
 	} else {
 		if (element == null)
@@ -391,7 +414,7 @@ lookup(Name name, int type, int minCred) {
 	int labels;
 	int tlabels;
 	Element element;
-	PositiveElement pe;
+	CacheRRset crrset;
 	Name tname;
 	Object types;
 	SetResponse sr;
@@ -424,12 +447,11 @@ lookup(Name name, int type, int minCred) {
 					removeElement(tname, element.getType());
 					continue;
 				}
-				if (element instanceof NegativeElement)
+				if (!(element instanceof CacheRRset))
 					continue;
-				if (element.credibility < minCred)
+				if (element.compareCredibility(minCred) < 0)
 					continue;
-				pe = (PositiveElement) element;
-				sr.addRRset(pe.rrset);
+				sr.addRRset((CacheRRset)element);
 				added++;
 			}
 			/* There were positive entries */
@@ -439,11 +461,9 @@ lookup(Name name, int type, int minCred) {
 
 		/* Look for an NS */
 		element = oneElement(tname, types, Type.NS, minCred);
-		if (element != null && element instanceof PositiveElement) {
-			pe = (PositiveElement) element;
+		if (element != null && element instanceof CacheRRset)
 			return new SetResponse(SetResponse.DELEGATION,
-					       pe.rrset);
-		}
+					       (CacheRRset) element);
 
 		/*
 		 * If this is the name, look for the actual type or a CNAME.
@@ -452,11 +472,10 @@ lookup(Name name, int type, int minCred) {
 		if (isExact) {
 			element = oneElement(tname, types, type, minCred);
 			if (element != null &&
-			    element instanceof PositiveElement)
+			    element instanceof CacheRRset)
 			{
-				pe = (PositiveElement) element;
 				sr = new SetResponse(SetResponse.SUCCESSFUL);
-				sr.addRRset(pe.rrset);
+				sr.addRRset((CacheRRset) element);
 				return sr;
 			} else if (element != null) {
 				sr = new SetResponse(SetResponse.NXRRSET);
@@ -465,20 +484,18 @@ lookup(Name name, int type, int minCred) {
 
 			element = oneElement(tname, types, Type.CNAME, minCred);
 			if (element != null &&
-			    element instanceof PositiveElement)
+			    element instanceof CacheRRset)
 			{
-				pe = (PositiveElement) element;
 				return new SetResponse(SetResponse.CNAME,
-						       pe.rrset);
+						       (CacheRRset) element);
 			}
 		} else {
 			element = oneElement(tname, types, Type.DNAME, minCred);
 			if (element != null &&
-			    element instanceof PositiveElement)
+			    element instanceof CacheRRset)
 			{
-				pe = (PositiveElement) element;
 				return new SetResponse(SetResponse.DNAME,
-						       pe.rrset);
+						       (CacheRRset) element);
 			}
 		}
 
