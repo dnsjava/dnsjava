@@ -19,7 +19,6 @@ public abstract class Record implements Cloneable, Comparable {
 protected Name name;
 protected short type, dclass;
 protected int ttl;
-protected int wireLength = -1;
 
 private static final Record [] knownRecords = new Record[256];
 private static final Class [] emptyClassArray = new Class[0];
@@ -94,7 +93,6 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	rec = rec.rrFromWire(name, type, dclass, ttl, length, in);
 	if (in != null && in.getPos() - recstart != length)
 		throw new IOException("Invalid record length");
-	rec.wireLength = length;
 	return rec;
 }
 
@@ -189,7 +187,6 @@ fromWire(DataByteInputStream in, int section) throws IOException {
 	if (length == 0)
 		return newRecord(name, type, dclass, ttl);
 	rec = newRecord(name, type, dclass, ttl, length, in);
-	rec.wireLength = in.getPos() - start;
 	return rec;
 }
 
@@ -215,7 +212,6 @@ toWire(DataByteOutputStream out, int section, Compression c) {
 	out.writeShort(0); /* until we know better */
 	rrToWire(out, c, false);
 	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
-	wireLength = out.getPos() - start;
 }
 
 /**
@@ -283,8 +279,7 @@ toString() {
 	}
 	sb.append(Type.string(type));
 	sb.append("\t\t");
-	if (wireLength != 0)
-		sb.append(rdataToString());
+	sb.append(rdataToString());
 	return sb.toString();
 }
 
@@ -402,18 +397,6 @@ getDClass() {
 public int
 getTTL() {
 	return ttl;
-}
-
-/**
- * Returns the length of this record in wire format, based on the last time
- * this record was parsed from data or converted to data.  The wire format
- * may or may not be compressed
- * @return The last known length, or -1 if the record has never been in wire
- * format
- */
-public short
-getWireLength() {
-	return (short) wireLength;
 }
 
 /**

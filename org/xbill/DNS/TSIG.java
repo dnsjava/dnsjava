@@ -246,8 +246,7 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		m.getHeader().incCount(Section.ADDITIONAL);
 		h.addData(header);
 
-		int len = length - header.length;	
-		len -= tsig.wireLength;
+		int len = m.tsigstart - header.length;	
 		h.addData(b, header.length, len);
 
 		DataByteOutputStream out = new DataByteOutputStream();
@@ -342,9 +341,11 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 		m.getHeader().incCount(Section.ADDITIONAL);
 	h.addData(header);
 
-	int len = b.length - header.length;
-	if (tsig != null)
-		len -= tsig.wireLength;
+	int len;
+	if (tsig == null)
+		len = b.length - header.length;
+	else
+		len = m.tsigstart - header.length;
 	h.addData(b, header.length, len);
 
 	if (tsig == null) {

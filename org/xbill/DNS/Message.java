@@ -28,6 +28,8 @@ private boolean frozen;
 private TSIG tsigkey;
 private TSIGRecord querytsig;
 private byte tsigerror;
+
+int tsigstart;
 boolean TSIGsigned, TSIGverified;
 
 private static Record [] emptyRecordArray = new Record[0];
@@ -85,10 +87,13 @@ Message(DataByteInputStream in) throws IOException {
 	this(new Header(in));
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < header.getCount(i); j++) {
+			int pos = in.getPos();
 			Record rec = Record.fromWire(in, i);
 			if (sections[i] == null)
 				sections[i] = new LinkedList();
 			sections[i].add(rec);
+			if (rec.getType() == Type.TSIG)
+				tsigstart = pos;
 		}
 	}
 	size = in.getPos();
