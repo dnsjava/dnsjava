@@ -204,7 +204,7 @@ send(Message query) throws IOException {
 	DatagramPacket dp;
 	short udpLength = 512;
 
-	if (Options.check("verbosemsg"))
+	if (Options.check("verbose"))
 		System.err.println("Sending to " + addr.getHostAddress() +
 				   ":" + port);
 
