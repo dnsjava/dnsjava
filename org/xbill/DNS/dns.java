@@ -206,7 +206,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 }
 
 /**
- * Finds credible records with the given name, type, and class with
+ * Finds credible records with the given name, type, and class
  * @param namestr  The name of the desired records
  * @param type  The type of the desired records
  * @param dclass  The class of the desired records
