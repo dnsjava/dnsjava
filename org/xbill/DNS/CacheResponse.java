@@ -8,15 +8,43 @@ import java.io.*;
 import java.net.*;
 import DNS.utils.*;
 
+/**
+ * The Response from a query to Cache.lookupRecords().
+ * @see Cache
+ */
+
 public class CacheResponse {
 
+/**
+ * The Cache contains no information about the requested name/type/class.
+ */
 static final byte UNKNOWN	= 0;
+
+/**
+ * The Cache has determined that there is no information about the
+ * requested name/type/class.
+ */
 static final byte NEGATIVE	= 1;
+
+/**
+ * The Cache has partially answered the question for the
+ * requested name/type/class.  This normally occurs when a CNAME is
+ * found, but type/class information for the CNAME's taget is unknown.
+ * @see CNAME
+ */
 static final byte PARTIAL	= 2;
+
+/**
+ * The Cache has successfully answered the question for the
+ * requested name/type/class.
+ */
 static final byte SUCCESSFUL	= 3;
 
-byte type;
-Object data;
+private byte type;
+private Object data;
+
+private
+CacheResponse() {}
 
 CacheResponse(byte _type, Object _data) {
 	type = _type;
@@ -27,26 +55,31 @@ CacheResponse(byte _type) {
 	this(_type, null);
 }
 
+/** Is the answer to the query unknown? */
 public boolean
 isUnknown() {
 	return (type == UNKNOWN);
 }
 
+/** Is the answer to the query conclusively negative? */
 public boolean
 isNegative() {
 	return (type == NEGATIVE);
 }
 
+/** Did the query partially succeed? */
 public boolean
 isPartial() {
 	return (type == PARTIAL);
 }
 
+/** Was the query successful? */
 public boolean
 isSuccessful() {
 	return (type == SUCCESSFUL);
 }
 
+/** If the query was successful, return the answer */
 public RRset
 answer() {
 	if (type != SUCCESSFUL)
@@ -54,6 +87,10 @@ answer() {
 	return (RRset) data;
 }
 
+/**
+ * If the query was partially successful, return the last name found in
+ * the lookup process.
+ */
 public Name
 partial() {
 	if (type != SUCCESSFUL)
@@ -61,6 +98,7 @@ partial() {
 	return (Name) data;
 }
 
+/** Prints the value of the CacheResponse */
 public String
 toString() {
 	switch (type) {

@@ -5,8 +5,8 @@ package DNS;
 
 class TypeClass {
 
-short type;
-short dclass;
+private short type;
+private short dclass;
 
 TypeClass(short _type, short _dclass) {
 	type = _type;

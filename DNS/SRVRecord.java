@@ -7,11 +7,28 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Server Selection Record  - finds hosts running services in a domain.  An
+ * SRV record will normally be named <service>.<protocol>.domain - an
+ * example would be http.tcp.example.com (if HTTP used SRV records)
+ */
+
 public class SRVRecord extends Record {
 
-short priority, weight, port;
-Name target;
+private short priority, weight, port;
+private Name target;
 
+private
+SRVRecord() {}
+
+/**
+ * Creates an SRV Record from the given data
+ * @param priority The priority of this SRV.  Records with lower priority
+ * are preferred.
+ * @param weight The weight, used to select between records at the same
+ * priority.
+ * @param port The TCP/UDP port that the service uses
+ * @param target The host running the service
+ */
 public
 SRVRecord(Name _name, short _dclass, int _ttl, int _priority,
 	  int _weight, int _port, Name _target)
@@ -49,6 +66,7 @@ throws IOException
 	target = new Name(st.nextToken(), origin);
 }
 
+/** Converts to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -64,21 +82,25 @@ toString() {
 	return sb.toString();
 }
 
+/** Returns the priority */
 public short
 getPriority() {
 	return priority;
 }
 
+/** Returns the weight */
 public short
 getWeight() {
 	return weight;
 }
 
+/** Returns the port that the service runs on */
 public short
 getPort() {
 	return port;
 }
 
+/** Returns the host running that the service */
 public Name
 getTarget() {
 	return target;

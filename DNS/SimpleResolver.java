@@ -12,12 +12,12 @@ public class SimpleResolver implements Resolver {
 
 public static final int PORT = 53;
 
-InetAddress addr;
-int port = PORT;
-boolean useTCP, ignoreTruncation;
-int EDNSlevel = -1;
-TSIG tsig;
-int timeoutValue = 60 * 1000;
+private InetAddress addr;
+private int port = PORT;
+private boolean useTCP, ignoreTruncation;
+private int EDNSlevel = -1;
+private TSIG tsig;
+private int timeoutValue = 60 * 1000;
 
 static String defaultResolver = "localhost";
 

@@ -5,9 +5,9 @@ package DNS;
 
 import java.util.Hashtable;
 
-public class Compression {
+class Compression {
 
-Hashtable h;
+private Hashtable h;
 
 public
 Compression() {

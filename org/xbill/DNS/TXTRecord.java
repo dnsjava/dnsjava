@@ -7,10 +7,16 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Text - stores text strings */
+
 public class TXTRecord extends Record {
 
-Vector strings;
+private Vector strings;
 
+/**
+ * Creates a TXT Record from the given data
+ * @param strings The text strings
+ */
 public
 TXTRecord(Name _name, short _dclass, int _ttl, Vector _strings)
 throws IOException
@@ -19,6 +25,10 @@ throws IOException
 	strings = _strings;
 }
 
+/**
+ * Creates a TXT Record from the given data
+ * @param strings One text string
+ */
 public
 TXTRecord(Name _name, short _dclass, int _ttl, String _string)
 throws IOException
@@ -58,6 +68,7 @@ throws IOException
 		strings.addElement(st.nextToken());
 }
 
+/** converts to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -73,6 +84,7 @@ toString() {
 	return sb.toString();
 }
 
+/** Returns the text strings */
 public Vector
 getStrings() {
 	return strings;
