@@ -84,7 +84,7 @@ public RRset
 findExactMatch(Name name, short type, short dclass, boolean glue) {
 	Zone zone = findBestZone(name);
 	if (zone != null)
-		return zone.findRecords(name, type);
+		return zone.findExactMatch(name, type);
 	else {
 		RRset [] rrsets;
 		if (glue)
@@ -174,7 +174,6 @@ addAdditional(Message response) {
 	addAdditional2(response, Section.AUTHORITY);
 }
 
-/* FIX ME */
 TSIG
 findTSIG(Name name) {
 	byte [] key = (byte []) TSIGs.get(name);
@@ -205,24 +204,45 @@ generateReply(Message query, byte [] in, int maxLength) {
 
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
+	short dclass = queryRecord.getDClass();
 	Zone zone = findBestZone(name);
-/*System.out.println("Looking up name <" + name + "> in [" + zone.getOrigin() + "]");*/
-	Hashtable nameRecords = (Hashtable) zone.findName(name);
-	if (nameRecords == null) {
-		response.getHeader().setRcode(Rcode.NXDOMAIN);
-	}
-	else {
-		if (type == Type.ANY) {
-			Enumeration e = nameRecords.elements();
+	if (zone != null) {
+		ZoneResponse zr = zone.findRecords(name, type);
+		if (zr.isNXDOMAIN())
+			response.getHeader().setRcode(Rcode.NXDOMAIN);
+		Vector backtrace = zr.backtrace();
+		if (backtrace != null) {
+			Enumeration e = backtrace.elements();
 			while (e.hasMoreElements()) {
-				RRset rrset = (RRset) e.nextElement();
-				addRRset(response, rrset);
+				Record cname = (Record)e.nextElement();
+				response.addRecord(cname, Section.ANSWER);
 			}
 		}
-		else {
-			RRset rrset = zone.findRecords(name, type);
-			if (rrset != null)
-				addRRset(response, rrset);
+		if (zr.isSuccessful()) {
+			RRset [] rrsets = zr.answers();
+			for (int i = 0; i < rrsets.length; i++)
+				addRRset(response, rrsets[i]);
+		}
+	}
+	else {
+		CacheResponse cr;
+		cr = cache.lookupRecords(name, type, dclass,
+					 Credibility.NONAUTH_ANSWER);
+		Vector backtrace = cr.backtrace();
+		if (backtrace != null) {
+			Enumeration e = backtrace.elements();
+			while (e.hasMoreElements()) {
+				Record cname = (Record)e.nextElement();
+				response.addRecord(cname,
+						   Section.ANSWER);
+			}
+			if (!cr.isSuccessful())
+				response.getHeader().setRcode(Rcode.NXDOMAIN);
+		}
+		if (cr.isSuccessful()) {
+			RRset [] rrsets = cr.answers();
+			for (int i = 0; i < rrsets.length; i++)
+				addRRset(response, rrsets[i]);
 		}
 	}
 	addAuthority(response, name, zone);

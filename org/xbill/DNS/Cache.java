@@ -170,15 +170,14 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			CNAMERecord cname = (CNAMERecord) rrset.first();
 			cr = lookupRecords(cname.getTarget(), type, dclass,
 					   minCred);
-			if (!cr.isUnknown())
-				return cr;
-			else
-				return new CacheResponse(CacheResponse.PARTIAL,
-							 cname.getTarget());
+			if (cr.isUnknown())
+				cr.set(CacheResponse.PARTIAL, cname);
+			cr.addCNAME(cname);
+			return cr;
 		}
 		if (cr == null)
 			cr = new CacheResponse(CacheResponse.SUCCESSFUL);
-		cr.add(rrset);	
+		cr.addRRset(rrset);	
 	}
 	return cr;
 }

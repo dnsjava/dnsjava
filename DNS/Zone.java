@@ -59,14 +59,45 @@ getDClass() {
 	return dclass;
 }
 
-public RRset
+public ZoneResponse
 findRecords(Name name, short type) {
-	return (RRset) findExactSet(name, type, dclass);
+	ZoneResponse zr = null;
+
+	if (findName(name) == null)
+		return new ZoneResponse(ZoneResponse.NXDOMAIN);
+	Object [] objects = findSets(name, type, dclass);
+	if (objects == null)
+		return new ZoneResponse(ZoneResponse.NODATA);
+
+	RRset [] rrsets = new RRset[objects.length];
+	System.arraycopy(objects, 0, rrsets, 0, objects.length);
+
+	for (int i = 0; i < rrsets.length; i++) {
+		RRset rrset = rrsets[i];
+
+		if (type != Type.CNAME && type != Type.ANY &&
+		    rrset.getType() == Type.CNAME)
+		{
+			CNAMERecord cname = (CNAMERecord) rrset.first();
+			zr = findRecords(cname.getTarget(), type);
+			if (zr.isNODATA())
+				zr.set(ZoneResponse.PARTIAL, cname);
+			else if (zr.isNXDOMAIN() &&
+				 !cname.getTarget().subdomain(origin))
+				zr.set(ZoneResponse.PARTIAL, cname);
+			zr.addCNAME(cname);
+			return zr;
+		}
+		if (zr == null)
+			zr = new ZoneResponse(ZoneResponse.SUCCESSFUL);
+		zr.addRRset(rrset);
+	}
+	return zr;
 }
 
-public Hashtable
-findName(Name name) {
-        return (Hashtable) super.findName(name);
+public RRset
+findExactMatch(Name name, short type) {
+	return (RRset) findExactSet(name, type, dclass);
 }
 
 public void

@@ -4,8 +4,6 @@
 package DNS;
 
 import java.util.*;
-import java.io.*;
-import java.net.*;
 import DNS.utils.*;
 
 /**
@@ -30,7 +28,7 @@ static final byte NEGATIVE	= 1;
  * The Cache has partially answered the question for the
  * requested name/type/class.  This normally occurs when a CNAME is
  * found, but type/class information for the CNAME's taget is unknown.
- * @see CNAME
+ * @see CNAMERecord
  */
 static final byte PARTIAL	= 2;
 
@@ -42,6 +40,7 @@ static final byte SUCCESSFUL	= 3;
 
 private byte type;
 private Object data;
+private Vector backtrace;
 
 private
 CacheResponse() {}
@@ -55,12 +54,29 @@ CacheResponse(byte _type) {
 	this(_type, null);
 }
 
+/**
+ * Sets a CacheResponse to have a different value without destroying the 
+ * backtrace
+ */
 void
-add(RRset rrset) {
+set(byte _type, Object _data) {
+	type = _type;
+	data = _data;
+}
+
+void
+addRRset(RRset rrset) {
 	if (data == null)
 		data = new Vector();
 	Vector v = (Vector) data;
 	v.addElement(rrset);
+}
+
+void
+addCNAME(CNAMERecord cname) {
+	if (backtrace == null)
+		backtrace = new Vector();
+	backtrace.addElement(cname);
 }
 
 /** Is the answer to the query unknown? */
@@ -100,14 +116,23 @@ answers() {
 }
 
 /**
- * If the query was partially successful, return the last name found in
+ * If the query was partially successful, return the last CNAME found in
  * the lookup process.
  */
-public Name
+public CNAMERecord
 partial() {
 	if (type != SUCCESSFUL)
 		return null;
-	return (Name) data;
+	return (CNAMERecord) data;
+}
+
+/**
+ * If the query involved CNAME traversals, return a Vector containing all
+ * CNAMERecords traversed.
+ */
+public Vector
+backtrace() {
+	return backtrace;
 }
 
 /** Prints the value of the CacheResponse */

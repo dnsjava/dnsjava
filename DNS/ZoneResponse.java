@@ -7,34 +7,32 @@ import java.util.*;
 import DNS.utils.*;
 
 /**
- * The Response from a query to Cache.lookupRecords().
- * @see Cache
+ * The Response from a query to Zone.findRecords().
+ * @see Zone
  */
 
-public class CacheResponse {
+public class ZoneResponse {
 
 /**
- * The Cache contains no information about the requested name/type/class.
+ * The Zone does not that name
  */
-static final byte UNKNOWN	= 0;
+static final byte NXDOMAIN	= 0;
 
 /**
- * The Cache has determined that there is no information about the
- * requested name/type/class.
+ * The Zone contains the name, but no data of the requested type
  */
-static final byte NEGATIVE	= 1;
+static final byte NODATA	= 1;
 
 /**
- * The Cache has partially answered the question for the
- * requested name/type/class.  This normally occurs when a CNAME is
- * found, but type/class information for the CNAME's taget is unknown.
+ * The Zone contains information that has allowed a partial lookup.
+ * This normally occurs when a CNAME is found that points to data outside
+ * of the Zone.
  * @see CNAMERecord
  */
 static final byte PARTIAL	= 2;
 
 /**
- * The Cache has successfully answered the question for the
- * requested name/type/class.
+ * The Zone has successfully found the requested data.
  */
 static final byte SUCCESSFUL	= 3;
 
@@ -43,19 +41,19 @@ private Object data;
 private Vector backtrace;
 
 private
-CacheResponse() {}
+ZoneResponse() {}
 
-CacheResponse(byte _type, Object _data) {
+ZoneResponse(byte _type, Object _data) {
 	type = _type;
 	data = _data;
 }
 
-CacheResponse(byte _type) {
+ZoneResponse(byte _type) {
 	this(_type, null);
 }
 
 /**
- * Sets a CacheResponse to have a different value without destroying the 
+ * Sets a ZoneResponse to have a different value without destroying the 
  * backtrace
  */
 void
@@ -79,16 +77,16 @@ addCNAME(CNAMERecord cname) {
 	backtrace.addElement(cname);
 }
 
-/** Is the answer to the query unknown? */
+/** Is the answer to the query that the name does not exist? */
 public boolean
-isUnknown() {
-	return (type == UNKNOWN);
+isNXDOMAIN() {
+	return (type == NXDOMAIN);
 }
 
-/** Is the answer to the query conclusively negative? */
+/** Is the answer to the query that the data does not exist? */
 public boolean
-isNegative() {
-	return (type == NEGATIVE);
+isNODATA() {
+	return (type == NODATA);
 }
 
 /** Did the query partially succeed? */
@@ -135,12 +133,12 @@ backtrace() {
 	return backtrace;
 }
 
-/** Prints the value of the CacheResponse */
+/** Prints the value of the ZoneResponse */
 public String
 toString() {
 	switch (type) {
-		case UNKNOWN:	return "unknown";
-		case NEGATIVE:	return "negative";
+		case NXDOMAIN:	return "NXDOMAIN";
+		case NODATA:	return "NODATA";
 		case PARTIAL:	return "partial: reached " + data;
 		case SUCCESSFUL:return "successful";
 		default:	return null;
