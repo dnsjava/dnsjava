@@ -14,20 +14,32 @@ import java.util.*;
 
 public class Zone extends NameSet {
 
-class AXFRIterator implements Iterator {
+class ZoneIterator implements Iterator {
 	private Iterator znames;
-	private Name currentName;
+	private Name nextName;
 	private Object [] current;
 	int count;
-	boolean sentFirstSOA, sentNS, sentOrigin, sentLastSOA;
+	boolean wantLastSOA;
 
-	AXFRIterator() {
+	ZoneIterator(boolean axfr) {
 		znames = names();
+		wantLastSOA = axfr;
+		Object [] sets = findExactSets(origin);
+		current = new Object[sets.length];
+		for (int i = 0, j = 2; i < sets.length; i++) {
+			int type = ((RRset) sets[i]).getType();
+			if (type == Type.SOA)
+				current[0] = sets[i];
+			else if (type == Type.NS)
+				current[1] = sets[i];
+			else
+				current[j++] = sets[i];
+		}
 	}
 
 	public boolean
 	hasNext() {
-		return (!sentLastSOA);
+		return (current != null || wantLastSOA);
 	}
 
 	public Object
@@ -35,43 +47,28 @@ class AXFRIterator implements Iterator {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
-		if (!sentFirstSOA) {
-			sentFirstSOA = true;
+		if (current == null && wantLastSOA) {
+			wantLastSOA = false;
 			return (RRset) findExactSet(origin, Type.SOA);
 		}
-		if (!sentNS) {
-			sentNS = true;
-			return getNS();
-		}
-		if (!sentOrigin) {
-			if (currentName == null) {
-				currentName = getOrigin();
-				current = findExactSets(currentName);
-				count = 0;
-			}
-			while (count < current.length) {
-				RRset rrset = (RRset) current[count];
-				if (rrset.getType() != Type.SOA &&
-				    rrset.getType() != Type.NS)
-					return current[count++];
-				count++;
-			}
+		Object set = current[count++];
+		if (count == current.length) {
+			nextName = null;
 			current = null;
-			sentOrigin = true;
+			while (znames.hasNext()) {
+				Name name = (Name) znames.next();
+				if (name.equals(origin))
+					continue;
+				Object [] sets = findExactSets(name);
+				if (sets.length == 0)
+					continue;
+				nextName = name;
+				current = sets;
+				count = 0;
+				break;
+			}
 		}
-		if (current != null && count < current.length)
-			return current[count++];
-		while (znames.hasNext()) {
-			Name currentName = (Name) znames.next();
-			if (currentName.equals(getOrigin()))
-				continue;
-			current = findExactSets(currentName);
-			count = 0;
-			if (count < current.length)
-				return current[count++];
-		}
-		sentLastSOA = true;
-		return (RRset) findExactSet(origin, Type.SOA);
+		return set;
 	}
 
 	public void
@@ -382,12 +379,21 @@ removeRecord(Record r) {
 }
 
 /**
- * Returns an Iterator containing the RRsets of the zone that can be used
- * to construct an AXFR.
+ * Returns an Iterator over the RRsets in the zone.
+ */
+public Iterator
+iterator() {
+	return new ZoneIterator(false);
+}
+
+/**
+ * Returns an Iterator over the RRsets in the zone that can be used to
+ * construct an AXFR response.  This is identical to {@link #iterator} except
+ * that the SOA is returned at the end as well as the beginning.
  */
 public Iterator
 AXFR() {
-	return new AXFRIterator();
+	return new ZoneIterator(true);
 }
 
 /**
