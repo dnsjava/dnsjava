@@ -26,10 +26,8 @@ private class Element {
 	RRset rrset;
 	short type;
 	byte credibility;
-	long timeIn;
-	long ttl;
+	int expire;
 	int srcid;
-	Thread tid;
 
 	private void
 	setValues(Name name, RRset rrset, short type, byte credibility,
@@ -39,10 +37,10 @@ private class Element {
 		this.rrset = rrset;
 		this.type = type;
 		this.credibility = credibility;
-		this.timeIn = System.currentTimeMillis();
-		this.ttl = ttl;
+		this.expire = (int)((System.currentTimeMillis() / 1000) + ttl);
+		if (this.expire  < 0)
+			this.expire = Integer.MAX_VALUE;
 		this.srcid = srcid;
-		this.tid = Thread.currentThread();
 	}
 
 	public
@@ -66,9 +64,6 @@ private class Element {
 	public final void
 	update(Record r) {
 		rrset.addRR(r);
-		timeIn = System.currentTimeMillis();
-		if (ttl < 0)
-			ttl = (long)r.getTTL() & 0xFFFFFFFFL;
 	}
 
 	public void
@@ -77,20 +72,9 @@ private class Element {
 	}
 
 	public final boolean
-	expiredTTL() {
-		long now = System.currentTimeMillis();
-		long expire = timeIn + (1000 * ttl);
+	expired() {
+		int now = (int)(System.currentTimeMillis() / 1000);
 		return (now > expire);
-	}
-
-	public final boolean
-	TTL0Ours() {
-		return (ttl == 0 && tid == Thread.currentThread());
-	}
-
-	public final boolean
-	TTL0NotOurs() {
-		return (ttl == 0 && tid != Thread.currentThread());
 	}
 
 	public final String
@@ -116,6 +100,26 @@ private class CacheCleaner extends Thread {
 	}
 
 	public void
+	clean() {
+		Iterator it = names();
+		while (it.hasNext()) {
+			Name name = (Name) it.next();
+			TypeMap tm = findName(name);
+			if (tm == null)
+				continue;
+			Object [] elements;
+			elements = tm.getAll();
+			if (elements == null)
+				continue;
+			for (int i = 0; i < elements.length; i++) {
+				Element element = (Element) elements[i];
+				if (element.expired())
+					removeSet(name, element.type, element);
+			}
+		}
+	}
+
+	public void
 	run() {
 		while (true) {
 			long now = System.currentTimeMillis();
@@ -128,27 +132,7 @@ private class CacheCleaner extends Thread {
 					now = System.currentTimeMillis();
 				}
 			}
-
-			Iterator it = names();
-			while (it.hasNext()) {
-				Name name = (Name) it.next();
-				TypeMap tm = findName(name);
-				if (tm == null)
-					continue;
-				Object [] elements;
-				elements = tm.getAll();
-				if (elements == null)
-					continue;
-				for (int i = 0; i < elements.length; i++) {
-					Element element = (Element) elements[i];
-					if (element.ttl == 0 &&
-					    element.timeIn >= now)
-						continue;
-					if (element.expiredTTL())
-						removeSet(name, element.type,
-							  element);
-				}
-			}
+			clean();
 		}
 	}
 }
@@ -257,7 +241,7 @@ addRRset(RRset rrset, byte cred, Object o) {
  * @param o The source of this data
  */
 public void
-addNegative(short rcode, Name name, short type, long ttl, byte cred, Object o) {
+addNegative(short rcode, Name name, short type, int ttl, byte cred, Object o) {
 	if (rcode == Rcode.NXDOMAIN)
 		type = 0;
 	int src = (o != null) ? o.hashCode() : 0;
@@ -310,18 +294,7 @@ lookupRecords(Name name, short type, byte minCred) {
 	int nelements = 0;
 	for (int i = 0; i < objects.length; i++) {
 		Element element = (Element) objects[i];
-		if (element.TTL0Ours()) {
-			removeSet(name, type, element);
-			nelements++;
-		}
-		else if (element.TTL0NotOurs()) {
-			if (verbose) {
-				logLookup(name, type, element.toString());
-				logLookup(name, type, "0 TTL: ignoring");
-			}
-			objects[i] = null;
-		}
-		else if (element.expiredTTL()) {
+		if (element.expired()) {
 			if (verbose) {
 				logLookup(name, type, element.toString());
 				logLookup(name, type, "expired: ignoring");
@@ -649,10 +622,10 @@ addMessage(Message in) {
 				       Section.AUTHORITY, isAuth);
 			if (rcode == Rcode.NXDOMAIN)
 				addNegative(rcode, lookupName, (short)0,
-					    ttl, cred, in);
+					    (int)ttl, cred, in);
 			else
 				addNegative(rcode, lookupName, queryType,
-					    ttl, cred, in);
+					    (int)ttl, cred, in);
 		}
 	}
 
@@ -687,10 +660,10 @@ addMessage(Message in) {
  * @param type The type of the records to be flushed
  * @see RRset
  */
-void
+public void
 flushSet(Name name, short type) {
 	Element element = (Element) findExactSet(name, type);
-	if (element == null || element.rrset == null)
+	if (element == null)
 		return;
 	removeSet(name, type, element);
 }
@@ -700,7 +673,7 @@ flushSet(Name name, short type) {
  * @param name The name of the records to be flushed
  * @see RRset
  */
-void
+public void
 flushName(Name name) {
 	removeName(name);
 }
