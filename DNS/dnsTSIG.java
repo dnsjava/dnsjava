@@ -4,15 +4,13 @@ import java.util.*;
 
 public class dnsTSIG {
 
-private byte [] key;
+private hmacSigner h;
 
 dnsTSIG(byte [] key) {
-	this.key = key;
+	h = new hmacSigner(key);
 }
 
 void apply(dnsMessage m) {
-	hmacSigner h = new hmacSigner(key);
-
 	Date timeSigned = new Date();
 	short fudge = 300;
 	String local;
@@ -26,7 +24,11 @@ void apply(dnsMessage m) {
 	dnsName alg = new dnsName(dns.HMAC);
 
 	try {
+		/* Digest the message after zeroing out the id */
+		int id = m.getHeader().getID();
+		m.getHeader().setID(0);
 		h.addData(m.toBytes());
+		m.getHeader().setID(id);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
@@ -66,15 +68,17 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 		return false;
 /*System.out.println("found TSIG");*/
 
-	hmacSigner h = new hmacSigner(key);
 	try {
 		if (old != null && tsig.error == dns.NOERROR) {
 			h.addData(old.signature);
 /*System.out.println("digested query TSIG");*/
 		}
 		m.getHeader().decCount(dns.ADDITIONAL);
+		int id = m.getHeader().getID();
+		m.getHeader().setID(0);
 		byte [] header = m.getHeader().toBytes();
 		m.getHeader().incCount(dns.ADDITIONAL);
+		m.getHeader().setID(id);
 		h.addData(header);
 
 		int len = b.length - header.length;	
@@ -113,6 +117,53 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 		return true;
 	else
 		return false;
+}
+
+boolean verifyAXFR(dnsMessage m, byte [] b) {
+	dnsTSIGRecord tsig = m.getTSIG();
+	if (tsig == null) {
+System.out.println("Found no TSIG - ok");
+		h.addData(b);
+		return true;
+	}
+	
+	try {
+		m.getHeader().decCount(dns.ADDITIONAL);
+		int id = m.getHeader().getID();
+		m.getHeader().setID(0);
+		byte [] header = m.getHeader().toBytes();
+		m.getHeader().incCount(dns.ADDITIONAL);
+		m.getHeader().setID(id);
+		h.addData(header);
+
+		int len = b.length - header.length;	
+		len -= tsig.toBytes(dns.ADDITIONAL).length;
+		h.addData(b, header.length, len);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		DataOutputStream dout = new DataOutputStream(out);
+		long time = tsig.timeSigned.getTime() / 1000;
+		short timeHigh = (short) (time >> 32);
+		int timeLow = (int) (time);
+		dout.writeShort(timeHigh);
+		dout.writeInt(timeLow);
+		dout.writeShort(tsig.fudge);
+		h.addData(out.toByteArray());
+	}
+	catch (IOException e) {
+		return false;
+	}
+
+	if (h.verify(tsig.signature) == false) {
+System.out.println("TSIG failed verification");
+		return false;
+	}
+
+System.out.println("TSIG passed verification");
+	h.clear();
+	h.addData(tsig.signature);
+
+	return true;
 }
 
 }

@@ -78,6 +78,10 @@ boolean verify(byte [] signature) {
 	return (byteArrayCompare(signature, sign()));
 }
 
+void clear() {
+	bytes = new ByteArrayOutputStream();
+}
+
 static boolean byteArrayCompare(byte [] b1, byte [] b2) {
 	if (b1.length != b2.length)
 		return false;

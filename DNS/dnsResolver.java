@@ -110,33 +110,38 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 		return null;
 	}
 
+	if (TSIG != null)
+		TSIG.apply(query);
+
 	out = query.toBytes();
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
 
 	response = new dnsMessage();
 	response.getHeader().setID(query.getHeader().getID());
-	while (true) {
+	while (soacount < 2) {
 		dataIn = new DataInputStream(s.getInputStream());
 		inLength = dataIn.readUnsignedShort();
 		in = new byte[inLength];
 		dataIn.readFully(in);
 		dnsMessage m = new dnsMessage(in);
+		if (TSIG != null) {
+			boolean ok = TSIG.verifyAXFR(response, in);
+			System.out.println("TSIG verify: " + ok);
+		}
 		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
 		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
-		    m.getHeader().getCount(dns.AUTHORITY) != 0 ||
-		    m.getHeader().getCount(dns.ADDITIONAL) != 0)
+		    m.getHeader().getCount(dns.AUTHORITY) != 0)
 			throw new IOException("Invalid AXFR message");
-		Vector v = m.getSection(dns.ANSWER);
-		Enumeration e = v.elements();
-		while (e.hasMoreElements()) {
-			dnsRecord r = (dnsRecord)e.nextElement();
-			response.addRecord(dns.ANSWER, r);
-			if (r instanceof dnsSOARecord)
-				soacount++;
+		for (int i = 1; i < 4; i++) {
+			Enumeration e = m.getSection(i).elements();
+			while (e.hasMoreElements()) {
+				dnsRecord r = (dnsRecord)e.nextElement();
+				response.addRecord(i, r);
+				if (r instanceof dnsSOARecord)
+					soacount++;
+			}
 		}
-		if (soacount > 1)
-			break;
 	}
 
 	s.close();

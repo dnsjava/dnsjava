@@ -77,7 +77,11 @@ static void doAXFR(dnsMessage query, dnsResolver res) throws IOException {
 	while (e.hasMoreElements())
 		System.out.println(e.nextElement());
 
-	System.out.println(";; done");
+	System.out.print(";; done (");
+	System.out.print(response.getSection(dns.ANSWER).size());
+	System.out.print(" records, ");
+	System.out.print(response.getSection(dns.ADDITIONAL).size());
+	System.out.println(" additional)");
 }
 
 public static void main(String argv[]) throws IOException {
