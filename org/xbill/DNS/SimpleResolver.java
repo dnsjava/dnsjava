@@ -178,6 +178,24 @@ send(Message query) throws IOException {
 		return response;
 }
 
+public int
+sendAsync(final Message query, final ResolverListener listener) {
+	final int id = query.getHeader().getID();
+	Thread t;
+	t = new Thread(new Runnable() {
+			public void run() {
+				Message response = null;
+				try {
+					response = send(query);
+				}
+				catch (IOException e) {
+				}
+				listener.receiveMessage(id, response);
+			}});
+	t.start();
+	return id;
+}
+
 public Message
 sendAXFR(Message query) throws IOException {
 	byte [] out, in;
