@@ -4,6 +4,7 @@
 package DNS.utils;
 
 import java.io.*;
+import java.math.*;
 
 public class DataByteOutputStream extends ByteArrayOutputStream {
 
@@ -54,6 +55,19 @@ writeString(String s) {
 		byte [] b = s.getBytes();
 		write(b.length);
 		write(b);
+	}
+	catch (IOException e) {
+	}
+}
+
+public void
+writeBigInteger(BigInteger i) {
+	byte [] b = i.toByteArray();
+	try {
+		if (b[0] == 0)
+			write(b, 1, b.length - 1);
+		else
+			write(b);
 	}
 	catch (IOException e) {
 	}
