@@ -79,9 +79,9 @@ getTSIG() {
 	return (dnsTSIGRecord) rec;
 }
 
-Vector
+Enumeration
 getSection(int section) {
-	return sections[section];
+	return sections[section].elements();
 }
 
 void
@@ -129,7 +129,7 @@ sectionToString(int i) {
 	if (i > 3)
 		return null;
 
-	Enumeration e = getSection(i).elements();
+	Enumeration e = getSection(i);
 	StringBuffer sb = new StringBuffer();
 	sb.append(";; " + dns.longSectionString(i) + ":\n");
 

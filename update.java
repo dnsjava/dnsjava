@@ -152,12 +152,12 @@ sendUpdate() throws IOException {
 		dnsName zone = origin;
 		short dclass = defaultClass;
 		if (zone == null) {
-			Vector updates = query.getSection(UPDATE);
+			Enumeration updates = query.getSection(UPDATE);
 			if (updates == null) {
 				System.out.println("Invalid update");
 				return;
 			}
-			dnsRecord r = (dnsRecord) updates.elementAt(0);
+			dnsRecord r = (dnsRecord) updates.nextElement();
 			zone = new dnsName(r.getName(), 1);
 			dclass = r.dclass;
 		}

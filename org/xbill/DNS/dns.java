@@ -338,7 +338,7 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 	if (response.getHeader().getRcode() != dns.NOERROR)
 		return null;
 
-	e = response.getSection(dns.ANSWER).elements();
+	e = response.getSection(dns.ANSWER);
 	while (e.hasMoreElements()) {
 		dnsRecord r = (dnsRecord)e.nextElement();
 		if (matchType(r.getType(), type))
@@ -350,7 +350,7 @@ getRecords(dnsResolver res, String name, short type, short dclass) {
 
 	answers = new dnsRecord[answerCount];
 
-	e = response.getSection(dns.ANSWER).elements();
+	e = response.getSection(dns.ANSWER);
 	while (e.hasMoreElements()) {
 		dnsRecord r = (dnsRecord)e.nextElement();
 		if (matchType(r.getType(), type))

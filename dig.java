@@ -38,14 +38,14 @@ doAXFR(dnsMessage query, dnsResolver res) throws IOException {
 	if (response == null)
 		return;
 
-	Enumeration e = response.getSection(dns.ANSWER).elements();
+	Enumeration e = response.getSection(dns.ANSWER);
 	while (e.hasMoreElements())
 		System.out.println(e.nextElement());
 
 	System.out.print(";; done (");
-	System.out.print(response.getSection(dns.ANSWER).size());
+	System.out.print(response.getHeader().getCount(dns.ANSWER));
 	System.out.print(" records, ");
-	System.out.print(response.getSection(dns.ADDITIONAL).size());
+	System.out.print(response.getHeader().getCount(dns.ADDITIONAL));
 	System.out.println(" additional)");
 }
 

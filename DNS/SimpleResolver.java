@@ -209,7 +209,7 @@ sendAXFR(dnsMessage query) throws IOException {
 			StringBuffer sb = new StringBuffer();
 			sb.append("Invalid AXFR: ");
 			for (int i=0; i < 4; i++) {
-				Enumeration e = m.getSection(i).elements();
+				Enumeration e = m.getSection(i);
 				System.out.println("--");
 				while (e.hasMoreElements()) {
 					dnsRecord r;
@@ -223,7 +223,7 @@ sendAXFR(dnsMessage query) throws IOException {
 			return null;
 		}
 		for (int i = 1; i < 4; i++) {
-			Enumeration e = m.getSection(i).elements();
+			Enumeration e = m.getSection(i);
 			while (e.hasMoreElements()) {
 				dnsRecord r = (dnsRecord)e.nextElement();
 				response.addRecord(i, r);

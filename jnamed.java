@@ -37,8 +37,8 @@ findBestZone(dnsName name) {
 
 public dnsMessage
 generateReply(dnsMessage query) {
-	Vector qds = query.getSection(dns.QUESTION);
-	dnsRecord queryRecord = (dnsRecord) qds.elementAt(0);
+	Enumeration qds = query.getSection(dns.QUESTION);
+	dnsRecord queryRecord = (dnsRecord) qds.nextElement();
 
 	dnsMessage response = new dnsMessage();
 	response.getHeader().setID(query.getHeader().getID());
