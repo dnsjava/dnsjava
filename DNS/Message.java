@@ -23,7 +23,7 @@ Message(int id) {
 
 public
 Message() {
-	this(-1);
+	this(Header.randomID());
 }
 
 public static Message

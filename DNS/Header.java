@@ -23,7 +23,7 @@ Header(int _id) {
 
 public
 Header() {
-	this(-1);
+	this(randomID());
 }
 
 public
@@ -36,10 +36,7 @@ Header(DataByteInputStream in) throws IOException {
 
 public void
 toWire(DataByteOutputStream out) throws IOException {
-	if (id < 0)
-		out.writeShort(randomID());
-	else
-		out.writeShort(id);
+	out.writeShort(getID());
 	writeFlags(out);
 	for (int i=0; i<counts.length; i++)
 		out.writeShort(counts[i]);
@@ -79,8 +76,6 @@ getFlags() {
 
 public int
 getID() {
-	if (id < 0)
-		id = randomID();
 	return id & 0xFFFF;
 }
 
