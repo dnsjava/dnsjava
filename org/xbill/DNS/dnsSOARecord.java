@@ -70,7 +70,7 @@ toString() {
 		sb.append("\t; refresh\n\t\t\t\t\t");
 		sb.append(retry);
 		sb.append("\t; retry\n\t\t\t\t\t");
-		sb.append(refresh);
+		sb.append(expire);
 		sb.append("\t; refresh\n\t\t\t\t\t");
 		sb.append(minimum);
 		sb.append(")\t; minimum");
