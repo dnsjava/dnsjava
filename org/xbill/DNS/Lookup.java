@@ -11,15 +11,15 @@ import java.net.*;
  * of a name, an optional type, and an optional class.  Caching is enabled
  * by default and used when possible to reduce the number of DNS requests.
  * A Resolver, which defaults to an ExtendedResolver initialized with the
- * resolvers located by the FindServer class, performs the queries.  A search
- * path of domain suffixes is used to resolve relative names, and is also
- * determined by the FindServer class.
+ * resolvers located by the ResolverConfig class, performs the queries.  A
+ * search path of domain suffixes is used to resolve relative names, and is
+ * also determined by the ResolverConfig class.
  *
  * A Lookup object may be reused, but should not be used by multiple threads.
  *
  * @see Cache
  * @see Resolver
- * @see FindServer
+ * @see ResolverConfig
  *
  * @author Brian Wellington
  */
@@ -218,8 +218,8 @@ Lookup(Name name, int type, int dclass) {
 	this.type = type;
 	this.dclass = dclass;
 	synchronized (Lookup.class) {
-		this.resolver = defaultResolver;
-		this.searchPath = defaultSearchPath;
+		this.resolver = getDefaultResolver();
+		this.searchPath = getDefaultSearchPath();
 		this.cache = getDefaultCache(dclass);
 	}
 	this.credibility = Credibility.NORMAL;

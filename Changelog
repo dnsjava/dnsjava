@@ -1,5 +1,9 @@
 2/7/2004
 	- Add Options.refresh() (based on a patch from Th Kuhne)
+	- Add the ResolverConfig class, which is largely based on the
+	  FindServer class, except that it's not all static methods.
+	  Add the ability to refresh the current ResolverConfig, and
+	  make FindServer use ResolverConfig.
 
 2/4/2004
 	- 1.6.5 released.
