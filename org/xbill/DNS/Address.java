@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.net.*;
+import java.net.Inet6Address;
 
 /**
  * Routines dealing with IP addresses.  Includes functions similar to
@@ -12,6 +13,9 @@ import java.net.*;
  */
 
 public final class Address {
+
+public static final int IPv4 = 1;
+public static final int IPv6 = 2;
 
 private
 Address() {}
@@ -64,6 +68,22 @@ toArray(String s) {
 	if (numDigits == 0)
 		return null;
 	return values;
+}
+
+/**
+ * Convert a string containing an IP address to an array of 4 integers.
+ * @param s The string
+ * @return The address
+ */
+public static byte []
+toByteArray(String s) {
+	int [] intArray = toArray(s);
+	if (intArray == null)
+		return null;
+	byte [] byteArray = new byte[intArray.length];
+	for (int i = 0; i < intArray.length; i++)
+		byteArray[i] = (byte) intArray[i];
+	return byteArray;
 }
 
 /**
@@ -159,6 +179,34 @@ getHostName(InetAddress addr) throws UnknownHostException {
 		throw new UnknownHostException("unknown address");
 	PTRRecord ptr = (PTRRecord) records[0];
 	return ptr.getTarget().toString();
+}
+
+/**
+ * Returns the family of an InetAddress.
+ * @param address The supplied address.
+ * @return The family, either IPv4 or IPv6.
+ */
+public static int
+familyOf(InetAddress address) {
+	if (address instanceof Inet4Address)
+		return IPv4;
+	if (address instanceof Inet6Address)
+		return IPv6;
+	throw new IllegalArgumentException("unknown address family");
+}
+
+/**
+ * Returns the family of an InetAddress.
+ * @param address The address family, either IPv4 or IPv6.
+ * @return The length of addresses in that family.
+ */
+public static int
+addressLength(int family) {
+	if (family == IPv4)
+		return 4;
+	if (family == IPv6)
+		return 16;
+	throw new IllegalArgumentException("unknown address family");
 }
 
 }
