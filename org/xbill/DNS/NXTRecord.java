@@ -96,7 +96,7 @@ rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (next != null) {
 		sb.append(next);
-		int length = BitSetLength(bitmap);
+		int length = bitmap.length();
 		for (short i = 0; i < length; i++)
 			if (bitmap.get(i)) {
 				sb.append(" ");
@@ -124,7 +124,7 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 		return;
 
 	next.toWire(out, null, canonical);
-	int length = BitSetLength(bitmap);
+	int length = bitmap.length();
 	for (int i = 0, t = 0; i < length; i++) {
 		t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
 		if (i % 8 == 7 || i == length - 1) {
@@ -132,14 +132,6 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 			t = 0;
 		}
 	}
-}
-
-private int
-BitSetLength(BitSet b) {
-	for (int i = b.size() - 1; i >= 0; i--)
-		if (b.get(i))
-			return i + 1;
-	return (-1);
 }
 
 }
