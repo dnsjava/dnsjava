@@ -35,7 +35,7 @@ MX_KXRecord(Name name, short type, short dclass, int ttl, int priority,
 	this.target = target;
 }
 
-protected Record
+protected static Record
 rrFromWire(MX_KXRecord rec, DataByteInputStream in)
 throws IOException
 {
@@ -46,7 +46,7 @@ throws IOException
 	return rec;
 }
 
-protected Record
+protected static Record
 rdataFromString(MX_KXRecord rec, MyStringTokenizer st, Name origin)
 throws TextParseException
 {

@@ -31,7 +31,7 @@ NS_CNAME_PTRRecord(Name name, short type, short dclass, int ttl, Name target) {
 	this.target = target;
 }
 
-protected Record
+protected static Record
 rrFromWire(NS_CNAME_PTRRecord rec, DataByteInputStream in)
 throws IOException
 {
@@ -41,7 +41,7 @@ throws IOException
 	return rec;
 }
 
-protected Record
+protected static Record
 rdataFromString(NS_CNAME_PTRRecord rec, MyStringTokenizer st, Name origin)
 throws TextParseException
 {
