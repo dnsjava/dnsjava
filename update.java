@@ -67,6 +67,10 @@ update(InputStream in) throws IOException {
 			if (line.length() == 0 || line.charAt(0) == '#')
 				continue;
 
+			/* Allows cut and paste from other update sessions */
+			if (line.charAt(0) == '>')
+				line = line.substring(1);
+
 			MyStringTokenizer st = new MyStringTokenizer(line);
 			if (!st.hasMoreTokens())
 				continue;
