@@ -310,7 +310,7 @@ _nextRecord() throws IOException {
 			} else  if (s.equalsIgnoreCase("$INCLUDE")) {
 				String filename = st.getString();
 				String parent = file.getParent();
-				File newfile = new File(filename);
+				File newfile = new File(parent, filename);
 				Name incorigin = origin;
 				token = st.get();
 				if (token.isString()) {
