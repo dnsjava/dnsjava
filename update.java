@@ -69,26 +69,26 @@ update(InputStream in) throws IOException {
 
 		else if (operation.equals("server")) {
 			server = st.nextToken();
-			res = new Resolver(server);
+			res = new SimpleResolver(server);
 		}
 
 		else if (operation.equals("key")) {
 			String keyname = st.nextToken();
 			String keydata = st.nextToken();
 			if (res == null)
-				res = new Resolver(server);
+				res = new SimpleResolver(server);
 			res.setTSIGKey(keyname, keydata);
 		}
 
 		else if (operation.equals("port")) {
 			if (res == null)
-				res = new Resolver(server);
+				res = new SimpleResolver(server);
 			res.setPort(Short.parseShort(st.nextToken()));
 		}
 
 		else if (operation.equals("tcp")) {
 			if (res == null)
-				res = new Resolver(server);
+				res = new SimpleResolver(server);
 			res.setTCP(true);
 		}
 
@@ -134,7 +134,7 @@ update(InputStream in) throws IOException {
 
 		else if (operation.equals("send")) {
 			if (res == null)
-				res = new Resolver(server);
+				res = new SimpleResolver(server);
 			sendUpdate();
 			query = new Message();
 			query.getHeader().setOpcode(Opcode.UPDATE);
@@ -368,7 +368,7 @@ doQuery(MyStringTokenizer st) throws IOException {
 	rec = parseSet(st, defaultClass);
 	Message newQuery = Message.newQuery(rec);
 	if (res == null)
-		res = new Resolver(server);
+		res = new SimpleResolver(server);
 	if (rec.getType() == Type.AXFR)
 		response = res.sendAXFR(newQuery);
 	else

@@ -66,10 +66,10 @@ main(String argv[]) throws IOException {
 		arg = 0;
 		if (argv[arg].startsWith("@")) {
 			server = argv[arg++].substring(1);
-			res = new Resolver(server);
+			res = new SimpleResolver(server);
 		}
 		else
-			res = new Resolver();
+			res = new ExtendedResolver();
 
 		String nameString = argv[arg++];
 		if (nameString.equals("-x")) {
