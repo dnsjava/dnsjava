@@ -80,11 +80,18 @@ jnamed(String conffile) throws IOException {
 		Enumeration eport = ports.elements();
 		while (eport.hasMoreElements()) {
 			short port = ((Short)eport.nextElement()).shortValue();
+			String addrString;
 			addUDP(addr, port);
 			addTCP(addr, port);
+			if (addr == null)
+				addrString = "0.0.0.0";
+			else
+				addrString = addr.getHostAddress();
+			System.out.println("jnamed: listening on " +
+					   addrString + "#" + port);
 		}
 	}
-	System.out.println("running");
+	System.out.println("jnamed: running");
 }
 
 public void
