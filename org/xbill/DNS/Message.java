@@ -89,6 +89,16 @@ findRecord(Record r) {
 		sections[Section.ADDITIONAL].contains(r));
 }
 
+public Record
+getQuestion() {
+	try {
+		return getSectionArray(Section.QUESTION)[0];
+	}
+	catch (Exception e) {
+		return null;
+	}
+}
+
 public TSIGRecord
 getTSIG() {
 	int count = header.getCount(Section.ADDITIONAL);
