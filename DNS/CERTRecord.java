@@ -38,8 +38,8 @@ throws IOException
 	certType = in.readShort();
 	keyTag = in.readShort();
 	alg = in.readByte();
-	if (length > 4) {
-		cert = new byte[length - 4];
+	if (length > 5) {
+		cert = new byte[length - 5];
 		in.read(cert);
 	}
 }
