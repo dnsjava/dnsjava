@@ -6,6 +6,7 @@ public class dnsRecord {
 dnsName rname;
 short rtype, rclass, rlength;
 int rttl;
+private short msgLength = 0;
 
 byte [] data;
 
@@ -51,6 +52,7 @@ static dnsRecord buildRecord(CountedDataInputStream in, int section,
 	dnsName name;
 	dnsRecord rec;
 
+	int startpos = in.pos();
 	name = new dnsName(in, c);
 
 	type = in.readShort();
@@ -63,6 +65,7 @@ static dnsRecord buildRecord(CountedDataInputStream in, int section,
 	rec.rttl = in.readInt();
 	rec.rlength = in.readShort();
 	rec.parse(in, c);
+	rec.msgLength = (short)(in.pos() - startpos);
 	return rec;
 }
 
@@ -133,6 +136,11 @@ public String toString() {
 
 String rrToString() {
 	return null;
+}
+
+short
+rrLength() {
+	return msgLength;
 }
 
 }

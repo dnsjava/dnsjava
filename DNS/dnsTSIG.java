@@ -4,16 +4,19 @@ import java.util.*;
 
 public class dnsTSIG {
 
-private hmacSigner h;
+private byte [] key;
+private hmacSigner axfrSigner;
 
 dnsTSIG(byte [] key) {
-	h = new hmacSigner(key);
+	this.key = key;
 }
 
 void apply(dnsMessage m) {
 	Date timeSigned = new Date();
 	short fudge = 300;
 	String local;
+	hmacSigner h = new hmacSigner(key);
+
 	try {
 		local = InetAddress.getLocalHost().getHostName();
 	}
@@ -64,6 +67,7 @@ void apply(dnsMessage m) {
  */
 boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 	dnsTSIGRecord tsig = m.getTSIG();
+	hmacSigner h = new hmacSigner(key);
 	if (tsig == null)
 		return false;
 /*System.out.println("found TSIG");*/
@@ -119,26 +123,36 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 		return false;
 }
 
-boolean verifyAXFR(dnsMessage m, byte [] b) {
+void verifyAXFRStart() {
+	axfrSigner = new hmacSigner(key);
+}
+
+boolean verifyAXFR(dnsMessage m, byte [] b, boolean required) {
 	dnsTSIGRecord tsig = m.getTSIG();
-	if (tsig == null) {
-System.out.println("Found no TSIG - ok");
-		h.addData(b);
-		return true;
-	}
+	hmacSigner h = axfrSigner;
 	
 	try {
-		m.getHeader().decCount(dns.ADDITIONAL);
+		if (tsig != null)
+			m.getHeader().decCount(dns.ADDITIONAL);
 		int id = m.getHeader().getID();
 		m.getHeader().setID(0);
 		byte [] header = m.getHeader().toBytes();
-		m.getHeader().incCount(dns.ADDITIONAL);
+		if (tsig != null)
+			m.getHeader().incCount(dns.ADDITIONAL);
 		m.getHeader().setID(id);
 		h.addData(header);
 
 		int len = b.length - header.length;	
-		len -= tsig.toBytes(dns.ADDITIONAL).length;
+		if (tsig != null)
+			len -= tsig.rrLength();
 		h.addData(b, header.length, len);
+
+		if (tsig == null) {
+			if (required)
+				return false;
+			else
+				return true;
+		}
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
@@ -155,11 +169,9 @@ System.out.println("Found no TSIG - ok");
 	}
 
 	if (h.verify(tsig.signature) == false) {
-System.out.println("TSIG failed verification");
 		return false;
 	}
 
-System.out.println("TSIG passed verification");
 	h.clear();
 	h.addData(tsig.signature);
 

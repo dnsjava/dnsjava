@@ -11,11 +11,8 @@ static final byte PADLEN = 64;
 
 static void printByteString(String s, byte [] b, int offset, int length) {
 	System.out.print(length + " bytes (" + s + "): ");
-	for (int i=offset; i<offset+length; i++) {
-		System.out.print("0x");
+	for (int i=offset; i<offset+length; i++)
 		System.out.print(Integer.toHexString((int)b[i] & 0xFF) + " ");
-		System.out.print(" ");
-	}
 	System.out.println();
 }
 
@@ -80,6 +77,11 @@ boolean verify(byte [] signature) {
 
 void clear() {
 	bytes = new ByteArrayOutputStream();
+	try {
+		bytes.write(ipad);
+	}
+	catch (IOException e) {
+	}
 }
 
 static boolean byteArrayCompare(byte [] b1, byte [] b2) {

@@ -119,16 +119,13 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 
 	response = new dnsMessage();
 	response.getHeader().setID(query.getHeader().getID());
+	TSIG.verifyAXFRStart();
 	while (soacount < 2) {
 		dataIn = new DataInputStream(s.getInputStream());
 		inLength = dataIn.readUnsignedShort();
 		in = new byte[inLength];
 		dataIn.readFully(in);
 		dnsMessage m = new dnsMessage(in);
-		if (TSIG != null) {
-			boolean ok = TSIG.verifyAXFR(response, in);
-			System.out.println("TSIG verify: " + ok);
-		}
 		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
 		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
 		    m.getHeader().getCount(dns.AUTHORITY) != 0)
@@ -141,6 +138,11 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 				if (r instanceof dnsSOARecord)
 					soacount++;
 			}
+		}
+		if (TSIG != null) {
+			boolean required = (soacount > 1);
+			boolean ok = TSIG.verifyAXFR(m, in, required);
+			System.out.println("TSIG verify: " + ok);
 		}
 	}
 
