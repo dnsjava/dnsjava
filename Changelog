@@ -2,6 +2,7 @@
 	- Replace org.xbill.DNS.utils.MyStringTokenizer with
 	  org.xbill.DNS.Tokenizer, which is a far more robust and correct
 	  DNS tokenizer.  Convert everything to use it.
+	- Fix text format of TXT, NAPTR, and HINFO records.
 
 5/28/2003
 	- When constructing a record, check that all names are absolute.

@@ -365,23 +365,23 @@ byteArrayFromString(String s) {
  * Converts a byte array into a String.
  */
 protected static String
-byteArrayToString(byte [] array) {
+byteArrayToString(byte [] array, boolean quote) {
 	StringBuffer sb = new StringBuffer();
+	if (quote)
+		sb.append('"');
 	for (int i = 0; i < array.length; i++) {
 		short b = (short)(array[i] & 0xFF);
-		if (b <= 0x20 || b >= 0x7f) {
+		if (b < 0x20 || b >= 0x7f) {
 			sb.append('\\');
 			sb.append(byteFormat.format(b));
-		}
-		else if (b == '"' || b == '(' || b == ')' || b == ';' ||
-			 b == '\\')
-		{
+		} else if (b == '"' || b == ';' || b == '\\') {
 			sb.append('\\');
 			sb.append((char)b);
-		} 
-		else
+		} else
 			sb.append((char)b);
 	}
+	if (quote)
+		sb.append('"');
 	return sb.toString();
 }
 

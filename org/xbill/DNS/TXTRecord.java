@@ -100,10 +100,8 @@ rdataToString() {
 	if (strings != null) {
 		Iterator it = strings.iterator();
 		while (it.hasNext()) {
-			String s = byteArrayToString((byte []) it.next());
-			sb.append("\"");
-			sb.append(s);
-			sb.append("\"");
+			byte [] array = (byte []) it.next();
+			sb.append(byteArrayToString(array, true));
 			if (it.hasNext())
 				sb.append(" ");
 		}

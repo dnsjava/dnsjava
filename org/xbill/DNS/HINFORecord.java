@@ -72,7 +72,7 @@ throws IOException
  */
 public String
 getCPU() {
-	return byteArrayToString(cpu);
+	return byteArrayToString(cpu, false);
 }
 
 /**
@@ -80,7 +80,7 @@ getCPU() {
  */
 public String
 getOS() {
-	return byteArrayToString(os);
+	return byteArrayToString(os, false);
 }
 
 void
@@ -99,11 +99,9 @@ public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (cpu != null && os != null) {
-		sb.append("\"");
-		sb.append(byteArrayToString(cpu));
-		sb.append("\" \"");
-		sb.append(byteArrayToString(os));
-		sb.append("\"");
+		sb.append(byteArrayToString(cpu, true));
+		sb.append(" ");
+		sb.append(byteArrayToString(os, true));
 	}
 	return sb.toString();
 }

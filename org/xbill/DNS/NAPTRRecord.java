@@ -100,11 +100,11 @@ rdataToString() {
 		sb.append(" ");
 		sb.append(preference);
 		sb.append(" ");
-		sb.append(byteArrayToString(flags));
+		sb.append(byteArrayToString(flags, true));
 		sb.append(" ");
-		sb.append(byteArrayToString(service));
+		sb.append(byteArrayToString(service, true));
 		sb.append(" ");
-		sb.append(byteArrayToString(regexp));
+		sb.append(byteArrayToString(regexp, true));
 		sb.append(" ");
 		sb.append(replacement);
 	}
@@ -126,19 +126,19 @@ getPreference() {
 /** Returns flags */
 public String
 getFlags() {
-	return byteArrayToString(flags);
+	return byteArrayToString(flags, false);
 }
 
 /** Returns service */
 public String
 getService() {
-	return byteArrayToString(service);
+	return byteArrayToString(service, false);
 }
 
 /** Returns regexp */
 public String
 getRegexp() {
-	return byteArrayToString(regexp);
+	return byteArrayToString(regexp, false);
 }
 
 /** Returns the replacement domain-name */
