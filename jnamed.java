@@ -393,14 +393,21 @@ doAXFR(Name name, Message query, Socket s) {
  */
 Message
 generateReply(Message query, byte [] in, Socket s) {
+	Header header;
 	boolean badversion;
 	int maxLength;
 	boolean sigonly;
 	SetResponse sr;
 	int flags = 0;
 
-	if (query.getHeader().getOpcode() != Opcode.QUERY)
+	header = query.getHeader();
+	if (header.getFlag(Flags.QR))
+		return null;
+	if (header.getRcode() != Rcode.NOERROR)
+		return errorMessage(query, Rcode.FORMERR);
+	if (header.getOpcode() != Opcode.QUERY)
 		return errorMessage(query, Rcode.NOTIMPL);
+
 	Record queryRecord = query.getQuestion();
 
 	TSIGRecord queryTSIG = query.getTSIG();
