@@ -33,6 +33,15 @@ private
 dns() {}
 
 synchronized private static void
+clearCaches() {
+	Enumeration e = caches.elements();
+	while (e.hasMoreElements()) {
+		Cache c = (Cache)e.nextElement();
+		c.clearCache();
+	}
+}
+
+synchronized private static void
 initialize() {
 	if (initialized)
 		return;
@@ -48,8 +57,11 @@ initialize() {
 	}
 	if (!searchPathSet)
 		searchPath = FindServer.searchPath();
+	
 	if (caches == null)
 		caches = new Hashtable();
+	else
+		clearCaches();
 }
 
 static boolean
@@ -97,8 +109,8 @@ inaddrString(String s) {
  */
 public static synchronized void
 setResolver(Resolver _res) {
+	initialize();
 	res = _res;
-	caches = null;
 }
 
 /**
