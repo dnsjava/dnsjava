@@ -37,22 +37,22 @@ class ByteArrayComparator implements Comparator {
 	}
 }
 
-private Hashtable trustedKeys;
+private Map trustedKeys;
 
 /** Creates a new DNSSECVerifier */
 public
 DNSSECVerifier() {
-	trustedKeys = new Hashtable();
+	trustedKeys = new HashMap();
 }
 
 /** Adds the specified key to the set of trusted keys */
 public synchronized void
 addTrustedKey(KEYRecord key) {
 	Name name = key.getName();
-	Vector list = (Vector) trustedKeys.get(name);
+	List list = (List) trustedKeys.get(name);
 	if (list == null)
-		trustedKeys.put(name, list = new Vector());
-	list.addElement(key);
+		trustedKeys.put(name, list = new LinkedList());
+	list.add(key);
 }
 
 /** Adds the specified key to the set of trusted keys */
@@ -66,9 +66,9 @@ addTrustedKey(Name name, PublicKey key) {
 }
 
 private PublicKey
-findMatchingKey(Enumeration e, int algorithm, int footprint) {
-	while (e.hasMoreElements()) {
-		KEYRecord keyrec = (KEYRecord) e.nextElement();
+findMatchingKey(Iterator it, int algorithm, int footprint) {
+	while (it.hasNext()) {
+		KEYRecord keyrec = (KEYRecord) it.next();
 		if (keyrec.getAlgorithm() == algorithm &&
 		    keyrec.getFootprint() == footprint)
 			return KEYConverter.parseRecord(keyrec);
@@ -78,10 +78,10 @@ findMatchingKey(Enumeration e, int algorithm, int footprint) {
 
 private synchronized PublicKey
 findTrustedKey(Name name, int algorithm, int footprint) {
-	Vector list = (Vector) trustedKeys.get(name);
+	List list = (List) trustedKeys.get(name);
 	if (list == null)
 		return null;
-	return findMatchingKey(list.elements(), algorithm, footprint);
+	return findMatchingKey(list.iterator(), algorithm, footprint);
 }
 
 private PublicKey
@@ -128,11 +128,11 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 		out.writeInt((int) (sigrec.getTimeSigned().getTime() / 1000));
 		out.writeShort(sigrec.getFootprint());
 		sigrec.getSigner().toWireCanonical(out);
-		Enumeration e = set.rrs();
+		Iterator it = set.rrs();
 		int size = set.size();
 		byte [][] records = new byte[size][];
-		while (e.hasMoreElements()) {
-			Record rec = (Record) e.nextElement();
+		while (it.hasNext()) {
+			Record rec = (Record) it.next();
 			if (rec.getName().labels() > sigrec.getLabels()) {
 				Name name = rec.getName();
 				Name wild = name.wild(name.labels() -
@@ -191,17 +191,17 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
  */
 public byte
 verify(RRset set, Cache cache) {
-	Enumeration sigs = set.sigs();
+	Iterator sigs = set.sigs();
 	if (Options.check("verbosesec"))
 		System.out.print("Verifying " + set.getName() + "/" +
 				 Type.string(set.getType()) + ": ");
-	if (!sigs.hasMoreElements()) {
+	if (!sigs.hasNext()) {
 		if (Options.check("verbosesec"))
 			System.out.println("Insecure");
 		return DNSSEC.Insecure;
 	}
-	while (sigs.hasMoreElements()) {
-		SIGRecord sigrec = (SIGRecord) sigs.nextElement();
+	while (sigs.hasNext()) {
+		SIGRecord sigrec = (SIGRecord) sigs.next();
 		if (verifySIG(set, sigrec, cache) == DNSSEC.Secure) {
 			if (Options.check("verbosesec"))
 				System.out.println("Secure");
