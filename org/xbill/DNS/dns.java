@@ -63,7 +63,7 @@ initialize() {
 		searchPath = FindServer.searchPath();
 	
 	if (caches == null)
-		caches = new Hashtable();
+		caches = new HashMap();
 	else
 		clearCaches();
 }
