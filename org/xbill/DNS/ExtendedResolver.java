@@ -53,12 +53,10 @@ class Receiver implements ResolverListener {
 static final int quantum = 20;
 
 private Vector resolvers;
-private Name [] searchPath;
 
 private void
 init() {
 	resolvers = new Vector();
-	searchPath = FindServer.searchPath();
 }
 
 public
@@ -246,18 +244,6 @@ addResolver(Resolver r) {
 public void
 deleteResolver(Resolver r) {
 	resolvers.removeElement(r);
-}
-
-public void
-setSearchPath(String [] domains) {
-	searchPath = new Name[domains.length];
-	for (int i = 0; i < domains.length; i++)
-		searchPath[i] = new Name(domains[i]);
-}
-
-Name []
-getSearchPath() {
-	return searchPath;
 }
 
 }
