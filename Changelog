@@ -1,3 +1,6 @@
+4/18/2004
+	- Add support for the SSHFP record type.
+
 4/10/2004
 	- When parsing paster files, handle the fact that class and ttl may
 	  be in either order.
