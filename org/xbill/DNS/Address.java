@@ -19,7 +19,6 @@ public final class Address {
  * Determines if a string contains a valid IP address.
  * @param s The string
  * @return Whether the string contains a valid IP address
- * @exception UnknownHostException The hostname does not have any addresses
  */
 public static boolean
 isDottedQuad(String s) {
