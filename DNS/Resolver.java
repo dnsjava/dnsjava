@@ -50,6 +50,55 @@ private dnsMessage parse(byte [] in) throws IOException {
 }
 
 
+void apply_tsig(dnsMessage m) {
+	if (TSIGKey == null)
+		return;
+
+	hmacSigner h = new hmacSigner(TSIGKey);
+	try {
+		h.addData(toCanonicalBytes(m));
+	}
+	catch (IOException e) {
+		return;
+	}
+	try {
+		String local = InetAddress.getLocalHost().getHostName();
+		dnsRecord r;
+		r = new dnsTSIGRecord(new dnsName(local), dns.IN, 0,
+				      new dnsName(dns.HMAC), new Date(),
+				      (short)300, h.sign(), dns.NOERROR, null);
+		m.addRecord(dns.ADDITIONAL, r);
+	}
+	catch (UnknownHostException e) {
+	}
+}
+
+
+int verify_tsig(dnsMessage m) {
+	int count = m.getHeader().getCount(dns.ADDITIONAL);
+	if (count == 0)
+		return 0;
+	Vector v = m.getSection(dns.ADDITIONAL);
+	dnsRecord rec = (dnsRecord) v.elementAt(count - 1);
+	if (!(rec instanceof dnsTSIGRecord))
+		return 0;
+	dnsTSIGRecord tsig = (dnsTSIGRecord) rec;
+	m.removeRecord(dns.ADDITIONAL, tsig);
+
+	hmacSigner h = new hmacSigner(TSIGKey);
+	try {
+		h.addData(toCanonicalBytes(m));
+	}
+	catch (IOException e) {
+		return -1;
+	}
+
+	if (h.verify(tsig.signature))
+		return 1;
+	else
+		return -1;
+}
+
 dnsMessage sendTCP(byte [] out) throws IOException {
 	byte [] in;
 	Socket s;
@@ -73,7 +122,9 @@ dnsMessage sendTCP(byte [] out) throws IOException {
 	dataIn.readFully(in);
 
 	s.close();
-	return parse(in);
+	dnsMessage response = parse(in);
+	verify_tsig(response);
+	return response;
 }
 
 public dnsMessage send(dnsMessage query) throws IOException {
@@ -89,21 +140,7 @@ public dnsMessage send(dnsMessage query) throws IOException {
 		return null;
 	}
 
-	if (TSIGKey != null) {
-		hmacSigner h = new hmacSigner(TSIGKey);
-		h.addData(toCanonicalBytes(query));
-		try {
-			String local = InetAddress.getLocalHost().getHostName();
-			dnsRecord r;
-			r = new dnsTSIGRecord(new dnsName(local), dns.IN, 0,
-					      new dnsName(dns.HMAC), new Date(),
-					      (short)300, h.sign(),
-					      dns.NOERROR, null);
-			query.addRecord(dns.ADDITIONAL, r);
-		}
-		catch (UnknownHostException e) {
-		}
-	}
+	apply_tsig(query);
 
 	out = toBytes(query);
 	s.send(new DatagramPacket(out, out.length, addr, port));
@@ -111,6 +148,8 @@ public dnsMessage send(dnsMessage query) throws IOException {
 	in = new byte[512];
 	s.receive(new DatagramPacket(in, in.length));
 	response = parse(in);
+	verify_tsig(response);
+
 	s.close();
 	if (response.getHeader().getFlag(dns.TC))
 		return sendTCP(out);
