@@ -125,10 +125,14 @@ lookup(Name name, short type, short dclass, byte cred) {
 	else {
 		Record question = Record.newRecord(name, type, dclass);
 		Message query = Message.newQuery(question);
+		Message response;
 
-		Message response = res.send(query);
-		if (response == null)
+		try {
+			response = res.send(query);
+		}
+		catch (Exception ex) {
 			return null;
+		}
 
 		short rcode = response.getHeader().getRcode();
 		if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)

@@ -17,12 +17,12 @@ import org.xbill.Task.*;
 public class ExtendedResolver implements Resolver {
 
 class QElement {
-	Message m;
+	Object obj;
 	int res;
 
 	public
-	QElement(Message _m, int _res) {
-		m = _m;
+	QElement(Object _obj, int _res) {
+		obj = _obj;
 		res = _res;
 	}
 }
@@ -38,7 +38,7 @@ class Receiver implements ResolverListener {
 	}
 
 	public void
-	receiveMessage(int id, Message m) {
+	enqueueInfo(int id, Object obj) {
 		Integer ID, R;
 		int r;
 		synchronized (idMap) {
@@ -50,10 +50,22 @@ class Receiver implements ResolverListener {
 			idMap.remove(ID);
 		}
 		synchronized (queue) {
-			QElement qe = new QElement(m, r);
+			QElement qe = new QElement(obj, r);
 			queue.addElement(qe);
 			queue.notify();
 		}
+	}
+
+
+	public void
+	receiveMessage(int id, Message m) {
+		enqueueInfo(id, m);
+	}
+
+	public void
+	handleException(int id, Exception e) {
+		System.out.println("got an exception: " + e);
+		enqueueInfo(id, e);
 	}
 }
 
@@ -186,9 +198,10 @@ setTimeout(int secs) {
  * @return The response
  */
 public Message
-send(Message query) {
+send(Message query) throws IOException {
 	int q, r;
 	Message best = null;
+	IOException bestException = null;
 	boolean [] invalid = new boolean[resolvers.size()];
 	byte [] sent = new byte[resolvers.size()];
 	Vector queue = new Vector();
@@ -198,6 +211,7 @@ send(Message query) {
 	while (true) {
 		Message m;
 		boolean waiting = false;
+		QElement qe;
 		synchronized (queue) {
 			for (r = 0; r < resolvers.size(); r++) {
 				if (sent[r] == 0) {
@@ -219,13 +233,21 @@ send(Message query) {
 			}
 			if (queue.size() == 0)
 				continue;
-			QElement qe = (QElement) queue.firstElement();
+			qe = (QElement) queue.firstElement();
 			queue.removeElement(qe);
-			m = qe.m;
+			if (qe.obj instanceof Message)
+				m = (Message) qe.obj;
+			else
+				m = null;
 			r = qe.res;
 		}
-		if (m == null)
-			invalid[r] = true;
+		if (m == null) {
+			IOException e = (IOException) qe.obj;
+			if (!(e instanceof InterruptedIOException))
+				invalid[r] = true;
+			if (bestException == null)
+				bestException = e;
+		}
 		else {
 			byte rcode = m.getHeader().getRcode();
 			if (rcode == Rcode.NOERROR)
@@ -244,7 +266,9 @@ send(Message query) {
 			}
 		}
 	}
-	return best;
+	if (best != null)
+		return best;
+	throw bestException;
 }
 
 private int
@@ -275,7 +299,7 @@ sendAsync(final Message query, final ResolverListener listener) {
  * @return The response
  */
 public
-Message sendAXFR(Message query) {
+Message sendAXFR(Message query) throws IOException {
 	return ((Resolver)resolvers.elementAt(0)).sendAXFR(query);
 }
 

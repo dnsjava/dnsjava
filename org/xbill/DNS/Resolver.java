@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.net.*;
 
 /**
  * Interface describing a resolver.
@@ -39,7 +40,7 @@ public void setTimeout(int secs);
  * Sends a message, and waits for a response
  * @return The response
  */
-public Message send(Message query);
+public Message send(Message query) throws IOException;
 
 /**
  * Asynchronously sends a message, registering a listener to receive a callback.
@@ -52,6 +53,6 @@ public int sendAsync(final Message query, final ResolverListener listener);
  * Sends a zone transfer message, and waits for a response
  * @return The response
  */
-public Message sendAXFR(Message query);
+public Message sendAXFR(Message query) throws IOException;
 
 }

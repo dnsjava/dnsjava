@@ -44,8 +44,13 @@ ResolveThread(Resolver _res, Message _query, int _id,
  */
 public void
 run() {
-	Message response = res.send(query);
-	listener.receiveMessage(id, response);
+	try {
+		Message response = res.send(query);
+		listener.receiveMessage(id, response);
+	}
+	catch (Exception e) {
+		listener.handleException(id, e);
+	}
 }
 
 }

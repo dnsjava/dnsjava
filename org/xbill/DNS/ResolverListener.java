@@ -13,10 +13,17 @@ import java.util.EventListener;
 public interface ResolverListener extends EventListener {
 
 /**
- * The callback used by the asynchronous resolver
+ * The callback used by an asynchronous resolver
  * @param id The identifier returned by Resolver.sendAsync()
  * @param m The response message as returned by the Resolver
  */
 public void receiveMessage(int id, Message m);
+
+/**
+ * The callback used by an asynchronous resolver when an exception is thrown
+ * @param id The identifier returned by Resolver.sendAsync()
+ * @param e The thrown exception
+ */
+public void handleException(int id, Exception e);
 
 }

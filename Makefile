@@ -1,17 +1,17 @@
-JAVAC=jikes
+JAVAC=javac
 JFLAGS=-g
 
-JAVADOC=/usr/local/jdk1.2/bin/javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.2/docs/api
+JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.2/docs/api
 
 all:
-	${JAVAC} ${JFLAGS} *.java DNS/*.java DNS/utils/*.java
+	${JAVAC} ${JFLAGS} *.java org/xbill/Task/*.java org/xbill/DNS/*.java org/xbill/DNS/utils/*.java
 
 clean:
-	rm -f *.class DNS/*.class DNS/utils/*.class
+	rm -f *.class org/xbill/Task/*.class org/xbill/DNS/*.class org/xbill/DNS/utils/*.class
 
 docs:
 	if test ! -d doc ; then mkdir doc ; fi
-	${JAVADOC} DNS DNS.utils
+	${JAVADOC} org.xbill.Task org.xbill.DNS org.xbill.DNS.utils
 
 docsclean:	
 	rm -f doc/*
