@@ -27,15 +27,20 @@ private byte [] wireFormat;
 private boolean frozen;
 boolean TSIGsigned, TSIGverified;
 
+private
+Message(Header header) {
+	sections = new List[4];
+	for (int i = 0; i < 4; i++)
+		sections[i] = new LinkedList();
+	this.header = header;
+	wireFormat = null;
+	frozen = false;
+}
+
 /** Creates a new Message with the specified Message ID */
 public
 Message(int id) {
-	sections = new List[4];
-	for (int i=0; i<4; i++)
-		sections[i] = new LinkedList();
-	header = new Header(id);
-	wireFormat = null;
-	frozen = false;
+	this(new Header(id));
 }
 
 /** Creates a new Message with a random Message ID */
@@ -73,8 +78,7 @@ newUpdate(Name zone) {
 }
 
 Message(DataByteInputStream in) throws IOException {
-	this();
-	header = new Header(in);
+	this(new Header(in));
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < header.getCount(i); j++) {
 			Record rec = Record.fromWire(in, i);
