@@ -1,3 +1,9 @@
+4/13/2001
+	- Converting a Name to a String does proper character escaping.
+
+4/7/2001
+	- 1.2.0 released
+
 3/21/2001
 	- Only cache relevant data from answers.
 	- Cache negative responses more correctly.
