@@ -204,6 +204,10 @@ send(Message query) throws IOException {
 	DatagramPacket dp;
 	short udpLength = 512;
 
+	if (Options.check("verbosemsg"))
+		System.err.println("Sending to " + addr.getHostAddress() +
+				   ":" + port);
+
 	if (query.getQuestion().getType() == Type.AXFR)
 		return sendAXFR(query);
 
