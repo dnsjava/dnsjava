@@ -601,7 +601,7 @@ addMessage(Message in) {
 	int qtype;
 	int qclass;
 	byte cred;
-	short rcode = in.getHeader().getRcode();
+	int rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
 	boolean completed = false;
 	RRset [] answers, auth, addl;

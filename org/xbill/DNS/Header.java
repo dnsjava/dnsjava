@@ -17,7 +17,7 @@ public class Header {
 
 private int id; 
 private boolean [] flags;
-private short rcode;
+private int rcode;
 private int opcode;
 private int [] counts;
 
@@ -69,7 +69,7 @@ toWire(DataByteOutputStream out) {
 	out.writeShort(getID());
 	writeFlags(out);
 	for (int i = 0; i < counts.length; i++)
-		out.writeShort((short)counts[i]);
+		out.writeShort(counts[i]);
 }
 
 public byte []
@@ -124,15 +124,18 @@ getID() {
  */
 public void
 setID(int id) {
+	if (opcode > 0xFF)
+		throw new IllegalArgumentException("DNS message ID " + id +
+						   "is out of range");
 	this.id = id;
 }
 
 /**
  * Generates a random number suitable for use as a message ID
  */
-static short
+static int
 randomID() {
-	return (short) (random.nextInt(0xffff));
+	return (random.nextInt(0xffff));
 }
 
 /**
@@ -140,7 +143,10 @@ randomID() {
  * @see Rcode
  */
 public void
-setRcode(short value) {
+setRcode(int value) {
+	if (opcode > 0xF)
+		throw new IllegalArgumentException("DNS Rcode " + value +
+						   "is out of range");
 	rcode = value;
 }
 
@@ -148,7 +154,7 @@ setRcode(short value) {
  * Retrieves the mesasge's rcode
  * @see Rcode
  */
-public short
+public int
 getRcode() {
 	return rcode;
 }
@@ -176,6 +182,10 @@ getOpcode() {
 
 void
 setCount(int field, int value) {
+	if (value > 0xFF)
+		throw new IllegalArgumentException("DNS section count " +
+						   value +
+						   "is out of range");
 	counts[field] = value;
 }
 
@@ -200,7 +210,7 @@ getCount(int field) {
 
 private void
 writeFlags(DataByteOutputStream out) {
-	short flags1 = 0, flags2 = 0;
+	int flags1 = 0, flags2 = 0;
 	for (int i = 0; i < 8; i++) {
 		if (flags[i])	flags1 |= (1 << (7-i));
 		if (flags[i+8])	flags2 |= (1 << (7-i));
@@ -213,8 +223,8 @@ writeFlags(DataByteOutputStream out) {
 
 private void
 readFlags(DataByteInputStream in) throws IOException {
-	short flags1 = (short)in.readUnsignedByte();
-	short flags2 = (short)in.readUnsignedByte();
+	int flags1 = in.readUnsignedByte();
+	int flags2 = in.readUnsignedByte();
 	for (int i = 0; i < 8; i++) {
 		flags[i] =	((flags1 & (1 << (7-i))) != 0);
 		flags[i+8] =	((flags2 & (1 << (7-i))) != 0);
@@ -238,7 +248,7 @@ printFlags() {
 }
 
 String
-toStringWithRcode(short newrcode) {
+toStringWithRcode(int newrcode) {
 	StringBuffer sb = new StringBuffer();
 
 	sb.append(";; ->>HEADER<<- "); 

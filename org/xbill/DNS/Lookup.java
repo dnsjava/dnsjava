@@ -416,7 +416,7 @@ lookup(Name current) {
 			networkerror = true;
 		return;
 	}
-	short rcode = response.getHeader().getRcode();
+	int rcode = response.getHeader().getRcode();
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
 		// The server we contacted is broken or otherwise unhelpful.
 		// Press on.

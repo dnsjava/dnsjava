@@ -483,7 +483,7 @@ doAssert(Tokenizer st) throws IOException {
 		return true;
 	}
 	if (field.equalsIgnoreCase("rcode")) {
-		short rcode = response.getHeader().getRcode();
+		int rcode = response.getHeader().getRcode();
 		if (rcode != Rcode.value(expected)) {
 			value = Rcode.string(rcode);
 			flag = false;

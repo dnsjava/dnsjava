@@ -45,13 +45,13 @@ getMember() {
  * SimpleResolver, but can also be called by a server.
  */
 public
-OPTRecord(int payloadSize, byte xrcode, byte version, int flags) {
-	this(Name.root, payloadSize,
-	      ((int)xrcode << 24) + ((int)version << 16) + flags);
+OPTRecord(int payloadSize, int xrcode, int version, int flags) {
+	this(Name.root, payloadSize, 0);
 	checkU16("payloadSize", payloadSize);
 	checkU8("xrcode", xrcode);
 	checkU8("version", version);
 	checkU16("flags", flags);
+	ttl = ((long)xrcode << 24) + ((long)version << 16) + flags;
 	options = null;
 }
 
@@ -60,7 +60,7 @@ OPTRecord(int payloadSize, byte xrcode, byte version, int flags) {
  * SimpleResolver, but can also be called by a server.
  */
 public
-OPTRecord(int payloadSize, byte xrcode, byte version) {
+OPTRecord(int payloadSize, int xrcode, int version) {
 	this(payloadSize, xrcode, version, 0);
 }
 

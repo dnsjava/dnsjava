@@ -470,7 +470,7 @@ throws IOException
 }
 
 byte []
-buildErrorMessage(Header header, short rcode, Record question) {
+buildErrorMessage(Header header, int rcode, Record question) {
 	Message response = new Message();
 	response.setHeader(header);
 	for (int i = 0; i < 4; i++)
@@ -494,7 +494,7 @@ formerrMessage(byte [] in) {
 }
 
 public byte []
-errorMessage(Message query, short rcode) {
+errorMessage(Message query, int rcode) {
 	return buildErrorMessage(query.getHeader(), rcode,
 				 query.getQuestion());
 }

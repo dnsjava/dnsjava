@@ -175,7 +175,7 @@ removeRecord(Record r, int section) {
 public void
 removeAllRecords(int section) {
 	sections[section] = null;
-	header.setCount(section, (short)0);
+	header.setCount(section, 0);
 }
 
 /**
@@ -305,12 +305,12 @@ getOPT() {
  * Returns the message's rcode (error code).  This incorporates the EDNS
  * extended rcode.
  */
-public short
+public int
 getRcode() {
-	short rcode = header.getRcode();
+	int rcode = header.getRcode();
 	OPTRecord opt = getOPT();
 	if (opt != null)
-		rcode += (short)(opt.getExtendedRcode() << 4);
+		rcode += (opt.getExtendedRcode() << 4);
 	return rcode;
 }
 

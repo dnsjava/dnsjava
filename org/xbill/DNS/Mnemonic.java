@@ -150,6 +150,17 @@ addAlias(int val, String str) {
 }
 
 /**
+ * Copies all mnemonics from one table into another.
+ * @param val The numeric value
+ * @param string The text string
+ */
+public void
+addAll(Mnemonic source) {
+	strings.putAll(source.strings);
+	values.putAll(source.values);
+}
+
+/**
  * Gets the text mnemonic corresponding to a numeric value.
  * @param val The numeric value
  * @return The corresponding text mnemonic.
