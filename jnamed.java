@@ -59,10 +59,8 @@ jnamed(String conffile) throws IOException {
 
 	}
 
-	if (cache == null) {
-		System.out.println("no cache specified");
-		System.exit(-1);
-	}
+	if (cache == null)
+		cache = new Cache();
 	if (!started) {
 		addUDP((short) 53);
 		addTCP((short) 53);
