@@ -40,13 +40,14 @@ static final int MAXLABELS = 128;
 private static final int STARTLABELS = 4;
 
 /* Used for printing non-printable characters */
-private static DecimalFormat byteFormat = new DecimalFormat();
+private static final DecimalFormat byteFormat = new DecimalFormat();
 
 /* Used to efficiently convert bytes to lowercase */
-private static byte lowercase[] = new byte[256];
+private static final byte lowercase[] = new byte[256];
 
 /* Used in wildcard names. */
-private static byte wildcardLabel[] = new byte[] {(byte)'*'};
+private static final Name wildcardName = Name.fromConstantString("*");
+private static final byte wildcardLabel[] = (byte []) wildcardName.name[0];
 
 static {
 	byteFormat.setMinimumIntegerDigits(3);
@@ -353,16 +354,42 @@ loop:
 
 /**
  * Create a new name by removing labels from the beginning of an existing Name
- * @param d  An existing Name
- * @param n  The number of labels to remove from the beginning in the copy
+ * @param src An existing Name
+ * @param n The number of labels to remove from the beginning in the copy
  */
-/* Skips n labels and creates a new name */
 public
-Name(Name d, int n) {
-	name = d.name;
-	offset = (byte)(d.offset + n);
-	labels = (byte)(d.labels - n);
-	qualified = d.qualified;
+Name(Name src, int n) {
+	name = src.name;
+	offset = (byte)(src.offset + n);
+	labels = (byte)(src.labels - n);
+	qualified = src.qualified;
+}
+
+/**
+ * Creates a new name by concatenating two existing names.
+ * @param prefix The prefix name.
+ * @param suffix The suffix name.
+ * @returns The concatenated name.
+ */
+public static Name
+concatenate(Name prefix, Name suffix) {
+	if (prefix.qualified)
+		return (prefix);
+	int nlabels = prefix.labels + suffix.labels;
+	if (nlabels > MAXLABELS)
+		return null;
+	Name newname = new Name();
+	newname.labels = (byte)nlabels;
+	newname.name = new Object[nlabels];
+	System.arraycopy(prefix.name, prefix.offset, newname.name,
+			 0, prefix.labels);
+	System.arraycopy(suffix.name, suffix.offset, newname.name,
+			 prefix.labels, suffix.labels);
+	newname.qualified = suffix.qualified;
+	newname.hasBitString = (prefix.hasBitString || suffix.hasBitString);
+	if (newname.hasBitString)
+		newname.compact();
+	return newname;
 }
 
 /**
@@ -371,9 +398,7 @@ Name(Name d, int n) {
  */
 public Name
 wild(int n) {
-	Name wild = new Name(this, n - 1);
-	wild.name[0] = wildcardLabel;
-	return wild;
+	return concatenate(wildcardName, new Name(this, n));
 }
 
 /**
