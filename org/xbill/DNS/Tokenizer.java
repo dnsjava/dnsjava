@@ -228,8 +228,11 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 		} else if (current.type == COMMENT) {
 			if (wantComment)
 				return current;
-		} else
+		} else {
+			if (current.type == EOL)
+				line++;
 			return current;
+		}
 	}
 	int skipped = skipWhitespace();
 	if (skipped > 0 && wantWhitespace)
@@ -338,6 +341,8 @@ unget() {
 	if (ungottenToken)
 		throw new IllegalStateException
 				("Cannot unget multiple tokens");
+	if (current.type == EOL)
+		line--;
 	ungottenToken = true;
 }
 
