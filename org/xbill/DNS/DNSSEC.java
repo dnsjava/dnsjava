@@ -34,17 +34,21 @@ public static class Algorithm {
 	public static final int PRIVATEDNS = 253;
 	public static final int PRIVATEOID = 254;
 
-	private static StringValueTable algs = new StringValueTable();
+	private static Mnemonic algs = new Mnemonic("DNSSEC algorithm",
+						    Mnemonic.CASE_UPPER);
 
 	static {
-		algs.put2(RSAMD5, "RSAMD5");
-		algs.put2(DH, "DH");
-		algs.put2(DSA, "DSA");
-		algs.put2(ECC, "ECC");
-		algs.put2(RSASHA1, "RSASHA1");
-		algs.put2(INDIRECT, "INDIRECT");
-		algs.put2(PRIVATEDNS, "PRIVATEDNS");
-		algs.put2(PRIVATEOID, "PRIVATEOID");
+		algs.setMaximum(0xFF);
+		algs.setNumericAllowed(true);
+
+		algs.add(RSAMD5, "RSAMD5");
+		algs.add(DH, "DH");
+		algs.add(DSA, "DSA");
+		algs.add(ECC, "ECC");
+		algs.add(RSASHA1, "RSASHA1");
+		algs.add(INDIRECT, "INDIRECT");
+		algs.add(PRIVATEDNS, "PRIVATEDNS");
+		algs.add(PRIVATEOID, "PRIVATEOID");
 	}
 
 	/**
@@ -52,12 +56,7 @@ public static class Algorithm {
 	 */
 	public static String
 	string(int alg) {
-		if (alg < 0 || alg > 0xFF)
-			throw new IllegalArgumentException("DNSSEC algorithm " +
-							   alg + " is out of " +
-							   "range");
-		String s = algs.getString(alg);
-		return (s != null) ? s : Integer.toString(alg);
+		return algs.getText(alg);
 	}
 
 	/**
@@ -68,19 +67,7 @@ public static class Algorithm {
 	 */
 	public static int
 	value(String s) {
-		s = s.toUpperCase();
-		int alg = algs.getValue(s);
-		if (alg >= 0)
-			return alg;
-		try {
-			alg = Integer.parseInt(s);
-			if (alg < 0 || alg > 0xFF)
-				return -1;
-			return alg;
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
+		return algs.getValue(s);
 	}
 }
 
