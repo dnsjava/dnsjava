@@ -103,16 +103,6 @@ throws IOException, SignatureException, InvalidKeyException,
 	
 	DataByteOutputStream out = new DataByteOutputStream();
 	
-	/*
-	 * BIND 9.0 and 9.1.0 compute and verify SIG(0) records incorrectly.
-	 * This will be fixed in a future version of BIND.
-	 */
-	if (Options.check("bind9sig0")) {
-		if (old != null)
-			out.write(old);
-		out.write(m.toWire());
-	}
-	
 	out.writeShort(0); // type covered
 	out.writeByte(algorithm); // algorithm
 	out.writeByte(0); // labels
@@ -122,11 +112,9 @@ throws IOException, SignatureException, InvalidKeyException,
 	out.writeShort(footprint); // key tag
 	name.toWireCanonical(out); // name
 	
-	if (!Options.check("bind9sig0")) {
-		if (old != null)
-			out.write(old);
-		out.write(m.toWire());
-	}
+	if (old != null)
+		out.write(old);
+	out.write(m.toWire());
 	
 	byte[] outBytes = out.toByteArray();
 	
