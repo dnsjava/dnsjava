@@ -77,13 +77,6 @@ SetResponse(byte type) {
 	this.data = null;
 }
 
-/** Changes the value of a SetResponse */
-void
-set(byte type, Object data) {
-	this.type = type;
-	this.data = data;
-}
-
 void
 addRRset(RRset rrset) {
 	if (data == null)
