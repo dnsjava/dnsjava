@@ -79,7 +79,7 @@ findSets(Name name, short type) {
 				if (isCache)
 					bestns = o;
 				else
-					return new Object[] {o};
+					return o;
 			}
 		}
 
@@ -87,14 +87,14 @@ findSets(Name name, short type) {
 		if (tlabels == labels) {
 			o = nameInfo.get(type);
 			if (o != null)
-				return new Object[] {o};
+				return o;
 		}
 
 		/* Look for a CNAME */
 		o = nameInfo.get(Type.CNAME);
 		if (o != null) {
 			if (labels == tlabels)
-				return new Object[] {o};
+				return o;
 			else
 				return null;
 		}
@@ -103,7 +103,7 @@ findSets(Name name, short type) {
 		if (tlabels < labels) {
 			o = nameInfo.get(Type.DNAME);
 			if (o != null)
-				return new Object[] {o};
+				return o;
 		}
 
 		/*
@@ -113,7 +113,7 @@ findSets(Name name, short type) {
 		if (tlabels == labels && isCache) {
 			o = nameInfo.get((short)0);
 			if (o != null)
-				return new Object[] {o};
+				return o;
 		}
 
 		/*
@@ -126,7 +126,7 @@ findSets(Name name, short type) {
 	if (bestns == null)
 		return null;
 	else
-		return new Object[] {bestns};
+		return bestns;
 }
 
 /**

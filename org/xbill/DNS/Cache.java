@@ -275,7 +275,7 @@ lookupRecords(Name name, short type, byte minCred) {
 	SetResponse cr = null;
 	Object o = findSets(name, type);
 
- 	if (o == null || o.getClass() == TypeMap.class) {
+ 	if (o == null || o instanceof TypeMap) {
 		/*
 		 * The name exists, but the type was not found.  Or, the
 		 * name does not exist and no parent does either.  Punt.
@@ -283,8 +283,12 @@ lookupRecords(Name name, short type, byte minCred) {
 		return new SetResponse(SetResponse.UNKNOWN);
 	}
 
-	Object [] objects = (Object []) findSets(name, type);
-
+	Object [] objects;
+	if (o instanceof Element)
+		objects = new Object[] {o};
+	else
+		objects = (Object[]) o;
+		
 	int nelements = 0;
 	for (int i = 0; i < objects.length; i++) {
 		Element element = (Element) objects[i];

@@ -234,9 +234,18 @@ findRecords(Name name, short type) {
 		return new SetResponse(SetResponse.NXRRSET);
 	}
 
-	Object [] objects = (Object []) o;
+	Object [] objects;
+	RRset rrset;
 
-	RRset rrset = (RRset) objects[0];
+	if (o instanceof RRset) {
+		objects = null;
+		rrset = (RRset) o;
+	}
+	else {
+		objects = (Object []) o;
+		rrset = (RRset) objects[0];
+	}
+
 	if (name.equals(rrset.getName())) {
 		if (type != Type.CNAME && type != Type.ANY &&
 		    rrset.getType() == Type.CNAME)
@@ -250,8 +259,11 @@ findRecords(Name name, short type) {
 		}
 		else {
 			zr = new SetResponse(SetResponse.SUCCESSFUL);
-			for (int i = 0; i < objects.length; i++)
-				zr.addRRset((RRset)objects[i]);
+			zr.addRRset(rrset);
+			if (objects != null) {
+				for (int i = 1; i < objects.length; i++)
+					zr.addRRset((RRset)objects[i]);
+			}
 		}
 	} else {
 		if (rrset.getType() == Type.CNAME)
