@@ -34,8 +34,6 @@ run() {
 	while (true) {
 		Message response = null;
 		response = resolver.send(query);
-		if (response == null)
-			continue;
 		listener.receiveMessage(id, response);
 		synchronized (list) {
 			list.addElement(this);
