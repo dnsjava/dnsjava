@@ -9,13 +9,18 @@ import java.util.*;
 /**
  * A helper class that tries to locate name servers and the search path to
  * be appended to unqualified names.  Currently, this works if either the
- * appropriate properties are set, or the OS has a unix-like /etc/resolv.conf
+ * appropriate properties are set, or the OS has a unix-like /etc/resolv.conf.
+ * There is no reason for these routines to be called directly except
+ * curiosity.
  */
-class FindServer {
+public class FindServer {
 
 private static String [] server = null;
 private static Name [] search = null;
 private static boolean probed = false;
+
+private
+FindServer() {}
 
 /**
  * Looks in the system properties to find servers and a search path.
