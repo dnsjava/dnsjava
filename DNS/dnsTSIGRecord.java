@@ -30,7 +30,7 @@ public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
 	this.originalID = originalID;
 	this.error = error;
 	this.other = other;
-	this.rlength = (short) (14 + alg.length() + signature.length);
+	this.rlength = (short) (16 + alg.length() + signature.length);
 	if (other != null)
 		this.rlength += other.length;
 }

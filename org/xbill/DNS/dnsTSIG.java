@@ -21,7 +21,7 @@ void apply(dnsMessage m) {
 	dnsName alg = new dnsName(dns.HMAC);
 
 	try {
-		/* Digest the message after zeroing out the id */
+		/* Digest the message */
 		h.addData(m.toBytes());
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

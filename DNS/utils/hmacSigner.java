@@ -39,6 +39,7 @@ public hmacSigner(byte [] key) {
 	}
 	catch (IOException e) {
 	}
+/*	printByteString("key", key, 0, key.length);*/
 }
 
 void addData(byte [] b, int offset, int length) {
