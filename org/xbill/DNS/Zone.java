@@ -374,6 +374,10 @@ removeRecord(Record r) {
 	}
 }
 
+/**
+ * Returns an Iterator containing the RRsets of the zone that can be used
+ * to construct an AXFR.
+ */
 public Iterator
 AXFR() {
 	return new AXFRIterator();
