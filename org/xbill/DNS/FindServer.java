@@ -208,6 +208,7 @@ findWin(InputStream in) {
 				if (s.equals(":"))
 					continue;
 				addSearch(s, lsearch);
+				readingSearches = true;
 			} else if (readingSearches ||
 				   line.indexOf("DNS Suffix") != -1)
 			{
@@ -216,6 +217,7 @@ findWin(InputStream in) {
 				if (s.equals(":"))
 					continue;
 				addSearch(s, lsearch);
+				readingSearches = true;
 			} else if (readingServers ||
 				   line.indexOf("DNS Servers") != -1)
 			{
