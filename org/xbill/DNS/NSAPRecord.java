@@ -72,7 +72,7 @@ NSAPRecord(Name name, int dclass, long ttl, String address) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	address = in.readCountedString();
+	address = in.readByteArray();
 }
 
 void
@@ -93,7 +93,7 @@ getAddress() {
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	out.writeCountedString(address);
+	out.writeByteArray(address);
 }
 
 String
