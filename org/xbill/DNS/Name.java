@@ -18,12 +18,10 @@ public class Name {
 private static final int LABEL_NORMAL = 0;
 private static final int LABEL_COMPRESSION = 0xC0;
 private static final int LABEL_EXTENDED = 0x40;
-private static final int LABEL_LOCAL_COMPRESSION = 0x80;
 private static final int LABEL_MASK = 0xC0;
 
 private static final int EXT_LABEL_COMPRESSION = 0;
 private static final int EXT_LABEL_BITSTRING = 1;
-private static final int EXT_LABEL_LOCAL_COMPRESSION = 2;
 
 private Object [] name;
 private byte labels;
@@ -175,16 +173,11 @@ loop:
 				name[labels++] = new BitString(bits, data);
 				count++;
 				break;
-			case EXT_LABEL_LOCAL_COMPRESSION:
-				throw new WireParseException(
-						"Long local compression");
 			default:
 				throw new WireParseException(
 						"Unknown name format");
 			} /* switch */
 			break;
-		case LABEL_LOCAL_COMPRESSION:
-			throw new WireParseException("Local compression");
 		} /* switch */
 	}
 	if (c != null) {

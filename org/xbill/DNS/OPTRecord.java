@@ -14,8 +14,7 @@ import org.xbill.DNS.utils.*;
  *
  * EDNS is a method to extend the DNS protocol while providing backwards
  * compatibility and not significantly changing the protocol.  This
- * implementation of EDNS is mostly complete at level 0 and partially
- * complete at level 1.
+ * implementation of EDNS is mostly complete at level 0.
  *
  * @see Message
  * @see Resolver 

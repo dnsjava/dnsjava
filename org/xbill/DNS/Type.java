@@ -132,9 +132,6 @@ public static final short A6		= 38;
 /** Non-terminal name redirection */
 public static final short DNAME		= 39;
 
-/** Kitchen sink record - free form binary record (and a bad idea) */
-public static final short SINK		= 40;
-
 /** Options - contains EDNS metadata */
 public static final short OPT		= 41;
 
@@ -201,7 +198,6 @@ static {
 	types.put2(CERT, "CERT");
 	types.put2(A6, "A6");
 	types.put2(DNAME, "DNAME");
-	types.put2(SINK, "SINK");
 	types.put2(OPT, "OPT");
 	types.put2(TKEY, "TKEY");
 	types.put2(TSIG, "TSIG");
