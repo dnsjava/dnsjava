@@ -1,3 +1,7 @@
+8/20/2003
+	- Add the ReverseMap class, which contains functions to construct
+	  names to be used in reverse map zones.
+
 8/13/2003
 	- When looking up a one label unqualified name which fails to match
 	  all searchlist entries, don't append the root label and try again.

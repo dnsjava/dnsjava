@@ -35,14 +35,7 @@ dns() {}
  */
 public static String
 inaddrString(InetAddress addr) {
-	byte [] address = addr.getAddress();
-	StringBuffer sb = new StringBuffer();
-	for (int i = 3; i >= 0; i--) {
-		sb.append(address[i] & 0xFF);
-		sb.append(".");
-	}
-	sb.append("IN-ADDR.ARPA.");
-	return sb.toString();
+	return ReverseMap.fromAddress(addr).toString();
 }
 
 /**
@@ -53,14 +46,12 @@ inaddrString(InetAddress addr) {
  */
 public static String
 inaddrString(String s) {
-	InetAddress address;
 	try {
-		address = InetAddress.getByName(s);
+		return ReverseMap.fromAddress(s).toString();
 	}
 	catch (UnknownHostException e) {
 		return null;
 	}
-	return inaddrString(address);
 }
 
 /**

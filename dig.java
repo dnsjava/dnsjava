@@ -78,8 +78,7 @@ main(String argv[]) throws IOException {
 
 		String nameString = argv[arg++];
 		if (nameString.equals("-x")) {
-			name = Name.fromString(dns.inaddrString(argv[arg++]),
-					       Name.root);
+			name = ReverseMap.fromAddress(argv[arg++]);
 			type = Type.PTR;
 			dclass = DClass.IN;
 		}
