@@ -19,7 +19,6 @@ private static Vector list = new Vector();
 
 WorkerThread() {
 	setDaemon(true);
-	start();
 }
 
 static WorkerThread
@@ -44,8 +43,9 @@ assignThread(Resolver _res, Message _query, int _id,
 	t.query = _query;
 	t.id = _id;
 	t.listener = _listener;
-	Thread.yield();
 	synchronized (t) {
+		if (!t.isAlive())
+			t.start();
 		t.notify();
 	}
 }
@@ -53,17 +53,17 @@ assignThread(Resolver _res, Message _query, int _id,
 public void
 run() {
 	while (true) {
+		Message response = resolver.send(query);
+		listener.receiveMessage(id, response);
+		synchronized (list) {
+			list.addElement(this);
+		}
 		synchronized (this) {
 			try {
 				wait();
 			}
 			catch (InterruptedException e) {
 			}
-		}
-		Message response = resolver.send(query);
-		listener.receiveMessage(id, response);
-		synchronized (list) {
-			list.addElement(this);
 		}
 	}
 }
