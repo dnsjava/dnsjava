@@ -21,7 +21,7 @@ private static final int LABEL_MASK = 0xC0;
 
 private byte [] name;
 private byte labels;
-private int offsets;
+private long offsets;
 private int hashcode;
 
 private static final byte [] emptyLabel = new byte[] {(byte)0};
@@ -61,8 +61,8 @@ static {
 	}
 	root = new Name();
 	wild = new Name();
-	root.appendSafe(emptyLabel, 1);
-	wild.appendSafe(wildLabel, 1);
+	root.appendSafe(emptyLabel, 0, 1);
+	wild.appendSafe(wildLabel, 0, 1);
 }
 
 private
@@ -83,7 +83,7 @@ dump(String prefix) {
 		System.out.print(offset(i) + " ");
 	System.out.println("");
 
-	for (int i = 0; i < name.length; i++)
+	for (int i = 0; name != null && i < name.length; i++)
 		System.out.print((name[i] & 0xFF) + " ");
 	System.out.println("");
 }
@@ -118,10 +118,10 @@ copy(Name src, Name dst) {
 }
 
 private final void
-append(byte [] array, int n) throws NameTooLongException {
+append(byte [] array, int start, int n) throws NameTooLongException {
 	int length = (name == null ? 0 : (name.length - offset(0)));
 	int alength = 0;
-	for (int i = 0, pos = 0; i < n; i++) {
+	for (int i = 0, pos = start; i < n; i++) {
 		int len = array[pos];
 		if (len > MAXLABEL)
 			throw new IllegalStateException("invalid label");
@@ -138,7 +138,7 @@ append(byte [] array, int n) throws NameTooLongException {
 	byte [] newname = new byte[newlength];
 	if (length != 0)
 		System.arraycopy(name, offset(0), newname, 0, length);
-	System.arraycopy(array, 0, newname, length, alength);
+	System.arraycopy(array, start, newname, length, alength);
 	name = newname;
 	for (int i = 0, pos = length; i < n; i++) {
 		setoffset(labels + i, pos);
@@ -148,9 +148,9 @@ append(byte [] array, int n) throws NameTooLongException {
 }
 
 private final void
-appendFromString(byte [] array, int n) throws TextParseException {
+appendFromString(byte [] array, int start, int n) throws TextParseException {
 	try {
-		append(array, n);
+		append(array, start, n);
 	}
 	catch (NameTooLongException e) {
 		throw new TextParseException("Name too long");
@@ -158,9 +158,9 @@ appendFromString(byte [] array, int n) throws TextParseException {
 }
 
 private final void
-appendSafe(byte [] array, int n) {
+appendSafe(byte [] array, int start, int n) {
 	try {
-		append(array, n);
+		append(array, start, n);
 	}
 	catch (NameTooLongException e) {
 	}
@@ -193,7 +193,7 @@ Name(String s, Name origin) {
 		 * This isn't exactly right, but it's close.
 		 * Partially qualified names are evil.
 		 */
-		n.appendSafe(emptyLabel, 1);
+		n.appendSafe(emptyLabel, 0, 1);
 	}
 	copy(n, this);
 }
@@ -261,7 +261,7 @@ fromString(String s, Name origin) throws TextParseException {
 			if (labelstart == -1)
 				throw new TextParseException("invalid label");
 			label[0] = (byte)(pos - 1);
-			name.appendFromString(label, 1);
+			name.appendFromString(label, 0, 1);
 			labelstart = -1;
 			pos = 1;
 		} else {
@@ -273,14 +273,14 @@ fromString(String s, Name origin) throws TextParseException {
 		}
 	}
 	if (labelstart == -1) {
-		name.appendFromString(emptyLabel, 1);
+		name.appendFromString(emptyLabel, 0, 1);
 		absolute = true;
 	} else {
 		label[0] = (byte)(pos - 1);
-		name.appendFromString(label, 1);
+		name.appendFromString(label, 0, 1);
 	}
 	if (origin != null && !absolute)
-		name.appendFromString(origin.name, origin.labels);
+		name.appendFromString(origin.name, 0, origin.labels);
 	return (name);
 }
 
@@ -329,12 +329,12 @@ Name(DataByteInputStream in) throws IOException {
 			if (labels >= MAXLABELS)
 				throw new WireParseException("too many labels");
 			if (len == 0) {
-				append(emptyLabel, 1);
+				append(emptyLabel, 0, 1);
 				done = true;
 			} else {
 				label[0] = (byte)len;
 				in.readArray(label, 1, len);
-				append(label, 1);
+				append(label, 0, 1);
 			}
 			break;
 		case LABEL_COMPRESSION:
@@ -356,7 +356,7 @@ Name(DataByteInputStream in) throws IOException {
 			finally {
 				in.setPos(savedpos);
 			}
-			append(name2.name, name2.labels);
+			append(name2.name, 0, name2.labels);
 			done = true;
 			break;
 		}
@@ -392,7 +392,7 @@ concatenate(Name prefix, Name suffix) throws NameTooLongException {
 		return (prefix);
 	Name newname = new Name();
 	copy(prefix, newname);
-	newname.append(suffix.name, suffix.labels);
+	newname.append(suffix.name, suffix.offset(0), suffix.labels);
 	return newname;
 }
 
@@ -406,7 +406,10 @@ wild(int n) {
 		throw new IllegalArgumentException("must replace 1 or more " +
 						   "labels");
 	try {
-		return concatenate(wild, new Name(this, n));
+		Name newname = new Name();
+		copy(wild, newname);
+		newname.append(name, offset(n), labels - n);
+		return newname;
 	}
 	catch (NameTooLongException e) {
 		throw new IllegalStateException
