@@ -23,14 +23,17 @@ static String defaultResolver = "localhost";
 
 public
 Resolver(String hostname) throws UnknownHostException {
-	if (hostname == null)
-		hostname = defaultResolver;
+	if (hostname == null) {
+		hostname = FindResolver.find();
+		if (hostname == null)
+			hostname = defaultResolver;
+	}
 	addr = InetAddress.getByName(hostname);
 }
 
 public
 Resolver() throws UnknownHostException {
-	this(FindResolver.find());
+	this(null);
 }
 
 public static void
