@@ -118,7 +118,7 @@ throws TextParseException
 	rec.proto = (byte) Integer.parseInt(st.nextToken());
 	rec.alg = (byte) Integer.parseInt(st.nextToken());
 	/* If this is a null key, there's no key data */
-	if (!((flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
+	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
 		rec.key = base64.fromString(st.remainingTokens());
 	else
 		rec.key = null;

@@ -56,7 +56,7 @@ throws IOException
 		return rec;
 
 	rec.addr = new byte[4];
-	in.read(addr);
+	in.read(rec.addr);
 	return rec;
 }
 

@@ -63,11 +63,11 @@ throws IOException
 		return rec;
 
 	rec.prefixBits = in.readByte();
-	int suffixbits = 128 - prefixBits;
+	int suffixbits = 128 - rec.prefixBits;
 	int suffixbytes = (suffixbits + 7) / 8;
 	byte [] data = new byte[suffixbytes];
 	in.read(data);
-	rec.suffix = new Inet6Address(128 - prefixBits, data);
+	rec.suffix = new Inet6Address(128 - rec.prefixBits, data);
 	if (rec.prefixBits > 0)
 		rec.prefix = new Name(in);
 	return rec;

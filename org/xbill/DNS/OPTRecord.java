@@ -71,14 +71,14 @@ throws IOException
 		return rec;
 	int count = 0;
 	if (count < length)
-		options = new HashMap();
+		rec.options = new HashMap();
 	while (count < length) {
 		int code = in.readUnsignedShort();
 		int len = in.readUnsignedShort();
 		byte [] data = new byte[len];
 		in.read(data);
 		count += (4 + len);
-		options.put(new Integer(code), data);
+		rec.options.put(new Integer(code), data);
 	}
 	return rec;
 }
