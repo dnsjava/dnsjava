@@ -4,7 +4,8 @@ Command line programs:
 
 - dig:
 	A clone of dig (as distributed with BIND)
-	dig @server [-x] name type [class] [-p port] [-k name/secret] [-t] [-i]
+	dig @server [-x] name type [class] [-p port] [-k name/secret] [-t] \
+	[-i] [-e n]
 		-x  : reverse lookup, name must be a dotted quad
 		-k  : use TSIG transaction security
 		-t  : use TCP by default
@@ -19,10 +20,8 @@ Command line programs:
 	
 
 - jnamed:
-	A basic non-caching, non-recursive server.  Not very good, or useful
-	at all, but it runs.  This is purely a proof of concept - I strongly
-	recommend that no one use this for anything other than testing
-	or informational purposes.
+	A basic authoritative only (non-caching, non-recursive) server.  It's
+	not very good, but it's also a whole lot better than it used to be.
 
 	The config file (jnamed.conf by default) specifies "primary file",
 	"secondary zone address, "cache file", "key name data", and
@@ -51,10 +50,10 @@ DNS and DNS.utils packages:
 
 - High Level API:
 
-	A number of static methods in DNS.dns and DNS.Address that
-	provide cached DNS lookups.
+	A number of static methods in dns and Address that perform DNS lookups
+	and cache the results.
 
-- Lower Level API
+- Low Level API
 
 	Name:
 		Names are normally represented by Name objects, which
@@ -69,7 +68,8 @@ DNS and DNS.utils packages:
 		Record.newRecord() to create records in a general way.
 
 	RRset:
-		A collection of records.  The important function is rrs().
+		A set of records with the same Name and type.  The important
+		function is rrs(), which creates an Enumeration.
 
 	Messages:
 		A Header and a collection of records comprising the message.

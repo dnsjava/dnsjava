@@ -1,28 +1,29 @@
-dnsjava v1.1
+dnsjava v1.2
 
 http://www.xbill.org/dnsjava
 
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-September 20, 1999
+March 10, 2001
 
 Overview:
 
 dnsjava is an implementation of DNS in Java.  It supports all of the common
 record types and the DNSSEC types.  It can be used for queries, zone transfers,
-and dynamic updates.  It includes a cache which can be used by clients, and a
-minimal implementation of a server.  It supports TSIG authenticated messages ,
-partial DNSSEC verification, and EDNS0.
+and dynamic updates.  It includes a cache which can be used by clients, and an
+authoritative only server.  It supports TSIG authenticated messages, partial
+DNSSEC verification, and EDNS0.
 
 dnsjava provides functionality above and beyond that of the InetAddress class.
-Since it is written in pure Java, dnsjava is fully threadable.
+Since it is written in pure Java, dnsjava is fully threadsafe.
 
 dnsjava was started as an excuse to learn Java.  It was useful for testing new
 features in BIND without rewriting the C resolver.  It was then cleaned up and
 extended in order to be used as a testing framework for DNS interoperability
 testing.  The high level API and caching resolver were added to make it useful
-to a wider audience.
+to a wider audience.  The authoritative only server was added as proof of
+concept.
 
 
 Getting started:
@@ -32,7 +33,8 @@ required.  If using JDK 1.1, ignore the deprecation warning.
 
 To compile dnssec support (org.xbill.DNS.security), JDK 1.2 or higher and the
 Java Cryptography Extensions are required.  Run 'make dnssec' to compile this
-package.  This does not include TSIG support, which does not require 1.2.
+package.  TSIG support is separate from dnssec support, and does not require
+'make dnssec'.
 
 Limitations:
 
@@ -43,21 +45,22 @@ using Java's built in DNS support).  If the underlying OS is unix-based, the
 dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
 the underlying OS is Windows, winipcfg/ipconfig can be called and the output
 parsed.  Otherwise, or if these attempts fail, the default nameserver is
-"localhost".  This is very bad.  Unfortunately, I have no idea how to determine
-the nameserver under MacOS or any other OSes.  Contributions of code are
-welcome (see org/xbill/DNS/FindServer.java for the basic structure).
+"localhost".  This is unavoidable.  Unfortunately, I have no idea how to
+determine the nameserver under MacOS or any other OSes.  Contributions of code
+are welcome (see org/xbill/DNS/FindServer.java for the basic structure).
 
 One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
-a dynamic address and its hostname is not in DNS.  If the @me@ variable
-is present in the textual form of an A record and InetAddress.getLocalHost()
+a dynamic address and its hostname is not in DNS.  This breaks the (mostly
+undocumented) feature that the @me@ variable can be used in the textual form
+of an A record to indicate the local address.  If InetAddress.getLocalHost()
 doesn't work, dnsjava will print an error and die.  I don't know of a way to
 fix this without using JNI.
 
-Not all of the record types are supported.  Most unsupported types are
-deprecated or rarely used.  Adding support for a new type is not difficult,
-and requires no changes to any existing files.  If you want to see a new type
-supported, send a patch or just ask.
+Not all of the record types are supported.  Most types that are not supported
+are either deprecated or rarely used.  Adding support for a new type is not
+difficult, and requires no changes to any existing files.  If you want to see
+a new type supported, send a patch or just ask.
 
 
 Additional documentation:
