@@ -3,6 +3,7 @@
 
 package org.xbill.DNS;
 
+import java.util.HashMap;
 import org.xbill.DNS.utils.*;
 
 /**
@@ -12,8 +13,6 @@ import org.xbill.DNS.utils.*;
  */
 
 public final class Type {
-
-private static StringValueTable types = new StringValueTable();
 
 /** Address */
 public static final short A		= 1;
@@ -135,6 +134,9 @@ public static final short DNAME		= 39;
 /** Options - contains EDNS metadata */
 public static final short OPT		= 41;
 
+/** Address Prefix List */
+public static final short APL		= 42;
+
 /** Delegation Signer */
 public static final short DS		= 43;
 
@@ -159,57 +161,88 @@ public static final short MAILA		= 254;
 /** Matches any type */
 public static final short ANY           = 255;
 
-/** Address */
+private static class DoubleHashMap {
+	private HashMap v2s, s2v;
+
+	public
+	DoubleHashMap() {
+		v2s = new HashMap();
+		s2v = new HashMap();
+	}
+
+	public void
+	put(short value, String string) {
+		Short s = Type.toShort(value);
+		v2s.put(s, string);
+		s2v.put(string, s);
+	}
+
+	public Short
+	getValue(String string) {
+		return (Short) s2v.get(string);
+	}
+
+	public String
+	getString(short value) {
+		return (String) v2s.get(Type.toShort(value));
+	}
+}
+
+private static DoubleHashMap types = new DoubleHashMap();
+private static Short [] typecache = new Short [43];
 
 static {
-	types.put2(A, "A");
-	types.put2(NS, "NS");
-	types.put2(MD, "MD");
-	types.put2(MF, "MF");
-	types.put2(CNAME, "CNAME");
-	types.put2(SOA, "SOA");
-	types.put2(MB, "MB");
-	types.put2(MG, "MG");
-	types.put2(MR, "MR");
-	types.put2(NULL, "NULL");
-	types.put2(WKS, "WKS");
-	types.put2(PTR, "PTR");
-	types.put2(HINFO, "HINFO");
-	types.put2(MINFO, "MINFO");
-	types.put2(MX, "MX");
-	types.put2(TXT, "TXT");
-	types.put2(RP, "RP");
-	types.put2(AFSDB, "AFSDB");
-	types.put2(X25, "X25");
-	types.put2(ISDN, "ISDN");
-	types.put2(RT, "RT");
-	types.put2(NSAP, "NSAP");
-	types.put2(NSAP_PTR, "NSAP_PTR");
-	types.put2(SIG, "SIG");
-	types.put2(KEY, "KEY");
-	types.put2(PX, "PX");
-	types.put2(GPOS, "GPOS");
-	types.put2(AAAA, "AAAA");
-	types.put2(LOC, "LOC");
-	types.put2(NXT, "NXT");
-	types.put2(EID, "EID");
-	types.put2(NIMLOC, "NIMLOC");
-	types.put2(SRV, "SRV");
-	types.put2(ATMA, "ATMA");
-	types.put2(NAPTR, "NAPTR");
-	types.put2(KX, "KX");
-	types.put2(CERT, "CERT");
-	types.put2(A6, "A6");
-	types.put2(DNAME, "DNAME");
-	types.put2(OPT, "OPT");
-	types.put2(DS, "DS");
-	types.put2(TKEY, "TKEY");
-	types.put2(TSIG, "TSIG");
-	types.put2(IXFR, "IXFR");
-	types.put2(AXFR, "AXFR");
-	types.put2(MAILB, "MAILB");
-	types.put2(MAILA, "MAILA");
-	types.put2(ANY, "ANY");
+	for (short i = 0; i < typecache.length; i++)
+		typecache[i] = new Short(i);
+	types.put(A, "A");
+	types.put(NS, "NS");
+	types.put(MD, "MD");
+	types.put(MF, "MF");
+	types.put(CNAME, "CNAME");
+	types.put(SOA, "SOA");
+	types.put(MB, "MB");
+	types.put(MG, "MG");
+	types.put(MR, "MR");
+	types.put(NULL, "NULL");
+	types.put(WKS, "WKS");
+	types.put(PTR, "PTR");
+	types.put(HINFO, "HINFO");
+	types.put(MINFO, "MINFO");
+	types.put(MX, "MX");
+	types.put(TXT, "TXT");
+	types.put(RP, "RP");
+	types.put(AFSDB, "AFSDB");
+	types.put(X25, "X25");
+	types.put(ISDN, "ISDN");
+	types.put(RT, "RT");
+	types.put(NSAP, "NSAP");
+	types.put(NSAP_PTR, "NSAP_PTR");
+	types.put(SIG, "SIG");
+	types.put(KEY, "KEY");
+	types.put(PX, "PX");
+	types.put(GPOS, "GPOS");
+	types.put(AAAA, "AAAA");
+	types.put(LOC, "LOC");
+	types.put(NXT, "NXT");
+	types.put(EID, "EID");
+	types.put(NIMLOC, "NIMLOC");
+	types.put(SRV, "SRV");
+	types.put(ATMA, "ATMA");
+	types.put(NAPTR, "NAPTR");
+	types.put(KX, "KX");
+	types.put(CERT, "CERT");
+	types.put(A6, "A6");
+	types.put(DNAME, "DNAME");
+	types.put(OPT, "OPT");
+	types.put(APL, "APL");
+	types.put(DS, "DS");
+	types.put(TKEY, "TKEY");
+	types.put(TSIG, "TSIG");
+	types.put(IXFR, "IXFR");
+	types.put(AXFR, "AXFR");
+	types.put(MAILB, "MAILB");
+	types.put(MAILA, "MAILA");
+	types.put(ANY, "ANY");
 }
 
 private
@@ -218,7 +251,7 @@ Type() {
 
 /** Converts a numeric Type into a String */
 public static String
-string(int i) {
+string(short i) {
 	String s = types.getString(i);
 	return (s != null) ? s : ("TYPE" + i);
 }
@@ -226,9 +259,9 @@ string(int i) {
 /** Converts a String representation of an Type into its numeric value */
 public static short
 value(String s) {
-	short i = (short) types.getValue(s.toUpperCase());
-	if (i >= 0)
-		return i;
+	Short val = types.getValue(s.toUpperCase());
+	if (val != null)
+		return val.shortValue();
 	try {
 		if (s.toUpperCase().startsWith("TYPE"))
 			return (Short.parseShort(s.substring(4)));
@@ -256,6 +289,14 @@ isRR(int type) {
 		default:
 			return true;
 	}
+}
+
+/* Converts a type into a Short, for use in Hashmaps, etc. */
+static Short
+toShort(short type) {
+	if (type < typecache.length)
+		return (typecache[type]);
+	return new Short(type);
 }
 
 }

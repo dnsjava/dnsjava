@@ -25,7 +25,7 @@ Object
 get(short type) {
 	if (type == Type.ANY)
 		throw new RuntimeException("called TypeMap.get() with ANY");
-	return data.get(new Short(type));
+	return data.get(Type.toShort(type));
 }
 
 /**
@@ -53,7 +53,7 @@ getAll() {
 void
 put(short type, Object value) {
 	synchronized (data) {
-		data.put(new Short(type), value);
+		data.put(Type.toShort(type), value);
 	}
 }
 
@@ -62,7 +62,7 @@ put(short type, Object value) {
  */
 void
 remove(short type) {
-	data.remove(new Short(type));
+	data.remove(Type.toShort(type));
 }
 
 /**
