@@ -496,6 +496,18 @@ doAssert(MyStringTokenizer st) {
 			}
 		}
 	}
+	else if (field.equalsIgnoreCase("tsig")) {
+		if (response.isSigned()) {
+			if (response.isVerified())
+				value = "ok";
+			else
+				value = "failed";
+		}
+		else
+			value = "unsigned";
+		if (!value.equalsIgnoreCase(expected))
+			flag = false;
+	}
 	else if ((section = Section.value(field)) >= 0) {
 		int count = response.getHeader().getCount(section);
 		if (count != Integer.parseInt(expected)) {
@@ -536,7 +548,7 @@ help(String topic) {
 			"response matches the value specified.  If not,\n" +
 			"the message is printed (if present) and the\n" +
 			"program exits.  The field may be any of <rcode>,\n" +
-			"<serial>, <qu>, <an>, <au>, or <ad>.\n");
+			"<serial>, <tsig>, <qu>, <an>, <au>, or <ad>.\n");
 	else if (topic.equalsIgnoreCase("class"))
 		System.out.println(
 			"class <class>\n\n" +
