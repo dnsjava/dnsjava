@@ -13,7 +13,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-abstract class NameSet {
+class NameSet {
 
 private Hashtable data;
 
@@ -22,10 +22,6 @@ protected
 NameSet() {
 	data = new Hashtable();
 }
-
-/** Does this object match this class and type? */
-abstract boolean
-match(Object o, short type, short dclass);
 
 /**
  * Finds all matching sets.  This traverses CNAMEs, and has provisions for 
@@ -36,36 +32,24 @@ findSets(Name name, short type, short dclass) {
 	Object [] array;
 	Object o;
 
-	Hashtable nameInfo = findName(name);
+	TypeClassMap nameInfo = findName(name);
 	if (nameInfo == null) 
 		return null;
-	if (type == Type.ANY) {
-		synchronized (nameInfo) {
-			array = new Object[nameInfo.size()];
-			int i = 0;
-			Enumeration e = nameInfo.elements();
-			while (e.hasMoreElements())
-				array[i++] = e.nextElement();
+	while (true) {
+		if (type == Type.ANY || dclass == DClass.ANY) {
+			array = nameInfo.getMultiple(type, dclass);
+			if (array != null)
+				return array;
 		}
-		return array;
-	}
-	if (dclass == DClass.ANY)
-		dclass = DClass.IN; /* hack */
-	o = nameInfo.get(new TypeClass(type, dclass));
-	if (o != null) {
-		array = new Object[1];
-		array[0] = o;
-		return array;
-	}
-	if (type != Type.CNAME) {
-		o = nameInfo.get(new TypeClass(Type.CNAME, dclass));
-		if (o == null)
-			return null;
 		else {
-			array = new Object[1];
-			array[0] = o;
-			return array;
+			o = nameInfo.get(type, dclass);
+			if (o != null)
+				return new Object[] {o};
 		}
+		if (type == Type.CNAME)
+			break;
+		else
+			type = Type.CNAME;
 	}
 	return null;
 }
@@ -76,18 +60,18 @@ findSets(Name name, short type, short dclass) {
  */
 protected Object
 findExactSet(Name name, short type, short dclass) {
-	Hashtable nameInfo = findName(name);
+	TypeClassMap nameInfo = findName(name);
 	if (nameInfo == null)
 		return null;
-	return nameInfo.get(new TypeClass(type, dclass));
+	return nameInfo.get(type, dclass);
 }
 
 /**
  * Finds all records for a given name, if the name exists.
  */
-protected Hashtable
+protected TypeClassMap
 findName(Name name) {
-	return (Hashtable) data.get(name);
+	return (TypeClassMap) data.get(name);
 }
 
 /**
@@ -96,11 +80,11 @@ findName(Name name) {
  */
 protected void
 addSet(Name name, short type, short dclass, Object set) {
-	Hashtable nameInfo = findName(name);
+	TypeClassMap nameInfo = findName(name);
 	if (nameInfo == null)
-		data.put(name, nameInfo = new Hashtable());
+		data.put(name, nameInfo = new TypeClassMap());
 	synchronized (nameInfo) {
-		nameInfo.put(new TypeClass(type, dclass), set);
+		nameInfo.put(type, dclass, set);
 	}
 }
 
@@ -110,17 +94,17 @@ addSet(Name name, short type, short dclass, Object set) {
  */
 protected void
 removeSet(Name name, short type, short dclass, Object set) {
-	Hashtable nameInfo = findName(name);
+	TypeClassMap nameInfo = findName(name);
 	if (nameInfo == null)
 		return;
-	Object o = nameInfo.get(new TypeClass(type, dclass));
+	Object o = nameInfo.get(type, dclass);
 	if (o != set && type != Type.CNAME) {
 		type = Type.CNAME;
-		o = nameInfo.get(new TypeClass(type, dclass));
+		o = nameInfo.get(type, dclass);
 	}
 	if (o == set) {
 		synchronized (nameInfo) {
-			nameInfo.remove(new TypeClass(type, dclass));
+			nameInfo.remove(type, dclass);
 		}
 		if (nameInfo.isEmpty())
 			data.remove(name);

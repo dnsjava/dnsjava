@@ -78,13 +78,6 @@ getDClass() {
 	return dclass;
 }
 
-/** Does this object match this class and type? */
-boolean
-match(Object o, short type, short dclass) {
-	RRset rrset = (RRset) o;
-	return (rrset.getType() == type && rrset.getDClass() == dclass);
-}
-
 /**     
  * Looks up Records in the Zone.  This follows CNAMEs.
  * @param name The name to look up
