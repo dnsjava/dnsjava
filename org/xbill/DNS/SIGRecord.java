@@ -246,7 +246,7 @@ parseDate(String s) {
 	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 
 	int year = Integer.parseInt(s.substring(0, 4));
-	int month = Integer.parseInt(s.substring(4, 6));
+	int month = Integer.parseInt(s.substring(4, 6)) - 1;
 	int date = Integer.parseInt(s.substring(6, 8));
 	int hour = Integer.parseInt(s.substring(8, 10));
 	int minute = Integer.parseInt(s.substring(10, 12));
