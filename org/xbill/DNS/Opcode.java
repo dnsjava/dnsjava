@@ -35,6 +35,7 @@ private static Mnemonic opcodes = new Mnemonic("DNS Opcode",
 static {
 	opcodes.setMaximum(0xF);
 	opcodes.setPrefix("RESERVED");
+	opcodes.setNumericAllowed(true);
 
 	opcodes.add(QUERY, "QUERY");
 	opcodes.add(IQUERY, "IQUERY");

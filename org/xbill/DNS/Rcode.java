@@ -71,6 +71,7 @@ public static final int BADMODE		= 19;
 static {
 	rcodes.setMaximum(0xFFF);
 	rcodes.setPrefix("RESERVED");
+	rcodes.setNumericAllowed(true);
 
 	rcodes.add(NOERROR, "NOERROR");
 	rcodes.add(FORMERR, "FORMERR");
@@ -87,6 +88,7 @@ static {
 
 	tsigrcodes.setMaximum(0xFFFF);
 	tsigrcodes.setPrefix("RESERVED");
+	tsigrcodes.setNumericAllowed(true);
 	tsigrcodes.addAll(rcodes);
 
 	tsigrcodes.add(BADSIG, "BADSIG");
