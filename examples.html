@@ -59,10 +59,10 @@ Update update = new Update(zone);
 update.replace(host, Type.A, 3600, args[1]);
 
 Resolver res = new SimpleResolver("10.0.0.1");
-res.setTSIGKey(host, "1234");
-res.setTCP();
+res.setTSIGKey(host, base64.fromString("1234"));
+res.setTCP(true);
 
-Message response = res.send(update.getMessage());
+Message response = res.send(update);
 </code></pre>
 
 <br>
