@@ -12,7 +12,7 @@ private Vector rrs;
 private Name name;
 private short type;
 
-public RRset(Name _name, short _type) throws IOException {
+public RRset(Name _name, short _type) {
 	rrs = new Vector();
 	name = _name;
 	type = _type;
