@@ -230,10 +230,7 @@ findRecords(Name name, short type) {
 		{
 			CNAMERecord cname = (CNAMERecord) rrset.first();
 			zr = findRecords(cname.getTarget(), type);
-			if (zr.isNODATA())
-				zr.set(SetResponse.PARTIAL, cname);
-			else if (zr.isNXDOMAIN() &&
-				 !cname.getTarget().subdomain(origin))
+			if (zr.isNODATA() || zr.isNXDOMAIN())
 				zr.set(SetResponse.PARTIAL, cname);
 			zr.addCNAME(cname);
 			return zr;
