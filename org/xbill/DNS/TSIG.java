@@ -130,7 +130,9 @@ verify(Message m, byte [] b, TSIGRecord old) {
 /*System.out.println("found TSIG");*/
 
 	try {
-		if (old != null && tsig.getError() == Rcode.NOERROR) {
+		if (old != null && tsig.getError() != Rcode.BADKEY &&
+		    tsig.getError() != Rcode.BADSIG)
+		{
 			DataByteOutputStream dbs = new DataByteOutputStream();
 			dbs.writeShort((short)old.getSignature().length);
 			h.addData(dbs.toByteArray());
