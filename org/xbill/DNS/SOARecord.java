@@ -40,20 +40,13 @@ SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 	  long serial, long refresh, long retry, long expire, long minimum)
 {
 	super(name, Type.SOA, dclass, ttl);
-	checkName("host", host);
-	this.host = host;
-	checkName("admin", admin);
-	checkU32("serial", serial);
-	checkU32("refresh", refresh);
-	checkU32("retry", retry);
-	checkU32("expire", expire);
-	checkU32("minimum", minimum);
-	this.admin = admin;
-	this.serial = serial;
-	this.refresh = refresh;
-	this.retry = retry;
-	this.expire = expire;
-	this.minimum = minimum;
+	this.host = checkName("host", host);
+	this.admin = checkName("admin", admin);
+	this.serial = checkU32("serial", serial);
+	this.refresh = checkU32("refresh", refresh);
+	this.retry = checkU32("retry", retry);
+	this.expire = checkU32("expire", expire);
+	this.minimum = checkU32("minimum", minimum);
 }
 
 void

@@ -64,14 +64,11 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	   byte [] key, byte other[])
 {
 	super(name, Type.TKEY, dclass, ttl);
-	checkName("alg", alg);
-	checkU16("mode", mode);
-	checkU16("error", error);
-	this.alg = alg;
+	this.alg = checkName("alg", alg);
 	this.timeInception = timeInception;
 	this.timeExpire = timeExpire;
-	this.mode = mode;
-	this.error = error;
+	this.mode = checkU16("mode", mode);
+	this.error = checkU16("error", error);
 	this.key = key;
 	this.other = other;
 }

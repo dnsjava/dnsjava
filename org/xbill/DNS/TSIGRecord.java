@@ -54,15 +54,12 @@ TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 	   byte other[])
 {
 	super(name, Type.TSIG, dclass, ttl);
-	checkName("alg", alg);
-	checkU16("fudge", fudge);
-	checkU16("error", error);
-	this.alg = alg;
+	this.alg = checkName("alg", alg);
 	this.timeSigned = timeSigned;
-	this.fudge = fudge;
+	this.fudge = checkU16("fudge", fudge);
 	this.signature = signature;
-	this.originalID = originalID;
-	this.error = error;
+	this.originalID = checkU16("originalID", originalID);
+	this.error = checkU16("error", error);
 	this.other = other;
 }
 

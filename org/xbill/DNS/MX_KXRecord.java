@@ -29,10 +29,8 @@ MX_KXRecord(Name name, int type, int dclass, long ttl, int priority,
 	    Name target)
 {
 	super(name, type, dclass, ttl);
-	checkU16("priority", priority);
-	this.priority = priority;
-	checkName("target", target);
-	this.target = target;
+	this.priority = checkU16("priority", priority);
+	this.target = checkName("target", target);
 }
 
 void

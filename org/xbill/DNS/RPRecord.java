@@ -34,10 +34,8 @@ public
 RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
 	super(name, Type.RP, dclass, ttl);
 
-	checkName("mailbox", mailbox);
-	this.mailbox = mailbox;
-	checkName("textDomain", textDomain);
-	this.textDomain = textDomain;
+	this.mailbox = checkName("mailbox", mailbox);
+	this.textDomain = checkName("textDomain", textDomain);
 }
 
 void

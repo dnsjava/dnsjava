@@ -36,12 +36,9 @@ PXRecord(Name name, int dclass, long ttl, int preference,
 {
 	super(name, Type.PX, dclass, ttl);
 
-	checkU16("preference", preference);
-	this.preference = preference;
-	checkName("map822", map822);
-	this.map822 = map822;
-	checkName("mapX400", mapX400);
-	this.mapX400 = mapX400;
+	this.preference = checkU16("preference", preference);
+	this.map822 = checkName("map822", map822);
+	this.mapX400 = checkName("mapX400", mapX400);
 }
 
 void

@@ -38,11 +38,10 @@ getObject() {
 public
 NSECRecord(Name name, int dclass, long ttl, Name next, int [] types) {
 	super(name, Type.NSEC, dclass, ttl);
-	checkName("next", next);
+	this.next = checkName("next", next);
 	for (int i = 0; i < types.length; i++) {
 		Type.check(types[i]);
 	}
-	this.next = next;
 	this.types = new int[types.length];
 	System.arraycopy(types, 0, this.types, 0, types.length);
 	Arrays.sort(this.types);

@@ -35,12 +35,10 @@ A6Record(Name name, int dclass, long ttl, int prefixBits,
 	 Inet6Address suffix, Name prefix)
 {
 	super(name, Type.A6, dclass, ttl);
-	checkU8("prefixBits", prefixBits);
-	this.prefixBits = prefixBits;
+	this.prefixBits = checkU8("prefixBits", prefixBits);
 	this.suffix = suffix;
 	if (prefix != null)
-		checkName("prefix", prefix);
-	this.prefix = prefix;
+		this.prefix = checkName("prefix", prefix);
 }
 
 void

@@ -39,14 +39,10 @@ SRVRecord(Name name, int dclass, long ttl, int priority,
 	  int weight, int port, Name target)
 {
 	super(name, Type.SRV, dclass, ttl);
-	checkU16("priority", priority);
-	checkU16("weight", weight);
-	checkU16("port", port);
-	this.priority = priority;
-	this.weight = weight;
-	this.port = port;
-	checkName("target", target);
-	this.target = target;
+	this.priority = checkU16("priority", priority);
+	this.weight = checkU16("weight", weight);
+	this.port = checkU16("port", port);
+	this.target = checkName("target", target);
 }
 
 void

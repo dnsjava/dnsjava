@@ -42,12 +42,9 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 	 int digestid, byte []  digest)
 {
 	super(name, Type.DS, dclass, ttl);
-	checkU16("footprint", footprint);
-	checkU8("alg", alg);
-	checkU8("digestid", digestid);
-	this.footprint = footprint;
-	this.alg = alg;
-	this.digestid = digestid;
+	this.footprint = checkU16("footprint", footprint);
+	this.alg = checkU8("alg", alg);
+	this.digestid = checkU8("digestid", digestid);
 	this.digest = digest;
 }
 

@@ -38,10 +38,9 @@ MINFORecord(Name name, int dclass, long ttl,
 {
 	super(name, Type.MINFO, dclass, ttl);
 
-	checkName("responsibleAddress", responsibleAddress);
-	this.responsibleAddress = responsibleAddress;
-	checkName("errorAddress", errorAddress);
-	this.errorAddress = errorAddress;
+	this.responsibleAddress = checkName("responsibleAddress",
+					    responsibleAddress);
+	this.errorAddress = checkName("errorAddress", errorAddress);
 }
 
 void

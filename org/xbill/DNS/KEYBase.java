@@ -26,9 +26,9 @@ KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
 	int alg, byte [] key)
 {
 	super(name, type, dclass, ttl);
-	checkU16("flags", flags);
-	checkU8("proto", proto);
-	checkU8("alg", alg);
+	this.flags = checkU16("flags", flags);
+	this.proto = checkU8("proto", proto);
+	this.alg = checkU8("alg", alg);
 	this.key = key;
 }
 

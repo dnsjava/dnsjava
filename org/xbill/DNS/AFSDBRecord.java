@@ -34,10 +34,8 @@ public
 AFSDBRecord(Name name, int dclass, long ttl, int subtype, Name host) {
 	super(name, Type.AFSDB, dclass, ttl);
 
-	checkU16("subtype", subtype);
-	this.subtype = subtype;
-	checkName("host", host);
-	this.host = host;
+	this.subtype = checkU16("subtype", subtype);
+	this.host = checkName("host", host);
 }
 
 void

@@ -107,12 +107,9 @@ CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 	   int alg, byte []  cert)
 {
 	super(name, Type.CERT, dclass, ttl);
-	checkU16("certType", certType);
-	checkU16("keyTag", keyTag);
-	checkU8("alg", alg);
-	this.certType = certType;
-	this.keyTag = keyTag;
-	this.alg = alg;
+	this.certType = checkU16("certType", certType);
+	this.keyTag = checkU16("keyTag", keyTag);
+	this.alg = checkU8("alg", alg);
 	this.cert = cert;
 }
 

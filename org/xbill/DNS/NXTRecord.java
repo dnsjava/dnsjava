@@ -35,8 +35,7 @@ getObject() {
 public
 NXTRecord(Name name, int dclass, long ttl, Name next, BitSet bitmap) {
 	super(name, Type.NXT, dclass, ttl);
-	checkName("next", next);
-	this.next = next;
+	this.next = checkName("next", next);
 	this.bitmap = bitmap;
 }
 

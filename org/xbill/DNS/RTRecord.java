@@ -35,10 +35,8 @@ RTRecord(Name name, int dclass, long ttl, int preference,
 {
 	super(name, Type.RT, dclass, ttl);
 
-	checkU16("preference", preference);
-	this.preference = preference;
-	checkName("intermediateHost", intermediateHost);
-	this.intermediateHost = intermediateHost;
+	this.preference = checkU16("preference", preference);
+	this.intermediateHost = checkName("intermediateHost", intermediateHost);
 }
 
 void

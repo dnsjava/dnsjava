@@ -43,10 +43,8 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	    String flags, String service, String regexp, Name replacement)
 {
 	super(name, Type.NAPTR, dclass, ttl);
-	checkU16("order", order);
-	checkU16("preference", preference);
-	this.order = order;
-	this.preference = order;
+	this.order = checkU16("order", order);
+	this.preference = checkU16("preference", preference);
 	try {
 		this.flags = byteArrayFromString(flags);
 		this.service = byteArrayFromString(service);
@@ -55,8 +53,7 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	catch (TextParseException e) {
 		throw new IllegalArgumentException(e.getMessage());
 	}
-	checkName("replacement", replacement);
-	this.replacement = replacement;
+	this.replacement = checkName("replacement", replacement);
 }
 
 void

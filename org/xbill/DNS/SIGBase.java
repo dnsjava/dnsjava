@@ -32,19 +32,15 @@ SIGBase(Name name, int type, int dclass, long ttl, int covered, int alg,
 {
 	super(name, type, dclass, ttl);
 	Type.check(covered);
-	checkU8("alg", alg);
-	checkU8("labels", labels);
 	TTL.check(origttl);
-	checkU16("footprint", footprint);
 	this.covered = covered;
-	this.alg = alg;
+	this.alg = checkU8("alg", alg);
 	this.labels = name.labels();
 	this.origttl = origttl;
 	this.expire = expire;
 	this.timeSigned = timeSigned;
-	this.footprint = footprint;
-	checkName("signer", signer);
-	this.signer = signer;
+	this.footprint = checkU16("footprint", footprint);
+	this.signer = checkName("signer", signer);
 	this.signature = signature;
 }
 
