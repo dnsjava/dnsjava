@@ -187,7 +187,7 @@ apply(Message m, TSIGRecord old) {
  * @param old If this message is a response, the TSIG from the request
  */
 public void
-applyAXFR(Message m, TSIGRecord old, boolean first) {
+applyStream(Message m, TSIGRecord old, boolean first) {
 	if (first) {
 		apply(m, old);
 		return;
@@ -349,9 +349,9 @@ verifyStreamStart() {
  * the caller).
  * @param m The message
  * @param b The message in unparsed form
- * @param old The TSIG from the AXFR request
+ * @param old The TSIG from the request
  * @param required True if this message is required to include a TSIG.
- * @param first True if this message is the first message of the AXFR
+ * @param first True if this message is the first message of the stream
  * @return The result of the verification (as an Rcode)
  * @see Rcode
  */

@@ -360,7 +360,7 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 			addRRset(rrset.getName(), response, rrset,
 				 Section.ANSWER, FLAG_DNSSECOK);
 			if (tsig != null) {
-				tsig.applyAXFR(response, qtsig, first);
+				tsig.applyStream(response, qtsig, first);
 				qtsig = response.getTSIG();
 			}
 			first = false;
