@@ -1,3 +1,9 @@
+6/1/2003
+	- Add the Name.relativize() method to convert an absolute name to
+	  a name relative to a specified origin.
+	- Add the Update class, which contains helper routines used to
+	  construct dynamic update messages.
+
 5/28/2003
 	- Replace org.xbill.DNS.utils.MyStringTokenizer with
 	  org.xbill.DNS.Tokenizer, which is a far more robust and correct
