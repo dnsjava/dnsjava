@@ -9,9 +9,14 @@ import java.util.*;
 import java.net.*;
 
 /**
- * A high level API for mapping queries to DNS Records.  This is basically
- * a wrapper around the Lookup class.
+ * A high level API for mapping queries to DNS Records.
+ * <P>
+ * As of dnsjava 1.4.0, all functions in this class are wrappers
+ * around functions in the Lookup and ReverseMap class, and those should be
+ * used instead.
+ *
  * @see Lookup
+ * @see ReverseMap
  *
  * @author Brian Wellington
  */
