@@ -20,12 +20,8 @@ NameSet() {
 protected Object
 findSet(Name name, short type, short dclass) {
 	Hashtable nameInfo = findName(name);
-	if (nameInfo == null) {
-		if (!name.isWild())
-			nameInfo = findName(name.wild());
-		if (nameInfo == null)
-			return null;
-	}
+	if (nameInfo == null) 
+		return null;
 	Object o = nameInfo.get(new TypeClass(type, dclass));
 	if (o != null || type == Type.CNAME)
 		return o;
@@ -56,14 +52,8 @@ addSet(Name name, short type, short dclass, Object set) {
 protected void
 removeSet(Name name, short type, short dclass, Object set) {
 	Hashtable nameInfo = findName(name);
-	if (nameInfo == null) {
-		if (!name.isWild()) {
-			name = name.wild();
-			nameInfo = findName(name);
-		}
-		if (nameInfo == null)
-			return;
-	}
+	if (nameInfo == null)
+		return;
 	Object o = nameInfo.get(new TypeClass(type, dclass));
 	if (o != set && type != Type.CNAME) {
 		type = Type.CNAME;
