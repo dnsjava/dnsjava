@@ -525,9 +525,9 @@ compareTo(Object o) {
 
 		if (label.getClass() != alabel.getClass()) {
 			if (label instanceof BitString)
-				return (1);
-			else
 				return (-1);
+			else
+				return (1);
 		}
 		if (label instanceof BitString) {
 			BitString bs = (BitString)label;
