@@ -11,6 +11,8 @@ import java.util.*;
  * noprintin - Don't print the class of a record if it's IN
  * nohex - Don't print anything in hex (KEY flags, for example)
  * pqdn - Allow partially qualified domain names
+ * 2065sig - Omit the labels field from the SIG record's text format, as
+ *	specified in RFC 2065 and changed in RFC 2535
  *
  * @author Brian Wellington
  */

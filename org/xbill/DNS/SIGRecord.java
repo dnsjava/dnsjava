@@ -88,7 +88,10 @@ throws IOException
 	super(_name, Type.SIG, _dclass, _ttl);
 	covered = Type.value(st.nextToken());
 	alg = Byte.parseByte(st.nextToken());
-	labels = name.labels();
+	if (Options.check("2065sig"))
+		labels = name.labels();
+	else
+		labels = Byte.parseByte(st.nextToken());
 	origttl = TTL.parseTTL(st.nextToken());
 	expire = parseDate(st.nextToken());
 	timeSigned = parseDate(st.nextToken());
@@ -107,6 +110,10 @@ toString() {
 		sb.append (" ");
 		sb.append (alg);
 		sb.append (" ");
+		if (!Options.check("2065sig")) {
+			sb.append (labels);
+			sb.append (" ");
+		}
 		sb.append (origttl);
 		sb.append (" (\n\t");
 		sb.append (formatDate(expire));
