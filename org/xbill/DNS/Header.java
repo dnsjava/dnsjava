@@ -18,7 +18,8 @@ public class Header {
 
 private int id; 
 private boolean [] flags;
-private byte rcode, opcode;
+private short rcode;
+private byte opcode;
 private int [] counts;
 
 /**
@@ -129,7 +130,7 @@ randomID() {
  * @see Rcode
  */
 public void
-setRcode(byte value) {
+setRcode(short value) {
 	rcode = value;
 }
 
@@ -137,7 +138,7 @@ setRcode(byte value) {
  * Retrieves the mesasge's rcode
  * @see Rcode
  */
-public byte
+public short
 getRcode() {
 	return rcode;
 }
