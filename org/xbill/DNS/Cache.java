@@ -269,6 +269,8 @@ addRRset(RRset rrset, byte cred) {
  */
 public void
 addNegative(Name name, short type, SOARecord soa, byte cred) {
+	if (verifier != null && secure)
+		return;
 	Element element = (Element) findExactSet(name, type);
 	if (soa.getTTL() == 0) {
 		if (element != null && cred >= element.credibility)
@@ -567,14 +569,6 @@ addMessage(Message in) {
 
 	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return null;
-
-	if (secure) {
-		Cache c = new Cache(dclass);
-		c.addMessage(in);
-		verifyRecords(c);
-		// The DNSSEC code needs to be fixed or removed.
-		return null;
-	}
 
 	answers = in.getSectionRRsets(Section.ANSWER);
 	for (int i = 0; i < answers.length; i++) {
