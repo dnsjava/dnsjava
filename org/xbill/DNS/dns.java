@@ -25,12 +25,15 @@ init(String defaultResolver) {
 
 public static Record []
 getRecords(Resolver res, String name, short type, short dclass) {
-	Message query = new Message();
+	Message query;
 	Message response;
 	Record question;
 	Record [] answers;
 	int answerCount = 0, i = 0;
 	Enumeration e;
+
+	if (!Type.isRR(type) && type != Type.ANY)
+		return null;
 
 	if (res == _res && _res == null) {
 		try {
@@ -42,6 +45,7 @@ getRecords(Resolver res, String name, short type, short dclass) {
 		}
 	}
 
+	query = new Message();
 	query.getHeader().setOpcode(Opcode.QUERY);
 	query.getHeader().setFlag(Flags.RD);
 	question = Record.newRecord(new Name(name), type, dclass);
