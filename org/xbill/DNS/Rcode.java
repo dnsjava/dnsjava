@@ -14,6 +14,7 @@ import org.xbill.DNS.utils.*;
 public final class Rcode {
 
 private static StringValueTable rcodes = new StringValueTable();
+private static StringValueTable tsigrcodes = new StringValueTable();
 
 /** No error */
 public static final byte NOERROR	= 0;
@@ -48,6 +49,10 @@ public static final byte NOTAUTH	= 9;
 /** The zone specified is not a zone */
 public static final byte NOTZONE	= 10;
 
+/* EDNS extended rcodes */
+/** Unsupported EDNS level */
+public static final byte BADVERS	= 16;
+
 /* TSIG only rcodes */
 /** The signature is invalid (TSIG extended error) */
 public static final byte BADSIG		= 16;
@@ -70,9 +75,11 @@ static {
 	rcodes.put2(NXRRSET, "NXRRSET");
 	rcodes.put2(NOTAUTH, "NOTAUTH");
 	rcodes.put2(NOTZONE, "NOTZONE");
-	rcodes.put2(BADSIG, "BADSIG");
-	rcodes.put2(BADKEY, "BADKEY");
-	rcodes.put2(BADTIME, "BADTIME");
+	rcodes.put2(BADVERS, "BADVERS");
+
+	tsigrcodes.put2(BADSIG, "BADSIG");
+	tsigrcodes.put2(BADKEY, "BADKEY");
+	tsigrcodes.put2(BADTIME, "BADTIME");
 }
 
 private
@@ -82,6 +89,16 @@ Rcode() {}
 public static String
 string(int i) {
 	String s = rcodes.getString(i);
+	return (s != null) ? s : new Integer(i).toString();
+}
+
+/** Converts a numeric TSIG extended Rcode into a String */
+public static String
+TSIGstring(int i) {
+	String s = tsigrcodes.getString(i);
+	if (s != null)
+		return s;
+	s = rcodes.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 

@@ -224,14 +224,13 @@ printFlags() {
 	return sb.toString();
 }
 
-/** Converts the header into a String */
-public String
-toString() {
+String
+toStringWithRcode(short newrcode) {
 	StringBuffer sb = new StringBuffer();
 
 	sb.append(";; ->>HEADER<<- "); 
 	sb.append("opcode: " + Opcode.string(getOpcode()));
-	sb.append(", status: " + Rcode.string(getRcode()));
+	sb.append(", status: " + Rcode.string(newrcode));
 	sb.append(", id: " + getID());
 	sb.append("\n");
 
@@ -240,6 +239,12 @@ toString() {
 	for (int i = 0; i < 4; i++)
 		sb.append(Section.string(i) + ": " + getCount(i) + " ");
 	return sb.toString();
+}
+
+/** Converts the header into a String */
+public String
+toString() {
+	return toStringWithRcode(getRcode());
 }
 
 /* Creates a new Header identical to the current one */

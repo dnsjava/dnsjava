@@ -332,12 +332,8 @@ public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	OPTRecord opt = getOPT();
-	if (opt != null) {
-		short rcode = header.getRcode();
-		header.setRcode(getRcode());
-		sb.append(header + "\n");
-		header.setRcode(rcode);
-	}
+	if (opt != null)
+		sb.append(header.toStringWithRcode(getRcode()) + "\n");
 	else
 		sb.append(header + "\n");
 	if (isSigned()) {
