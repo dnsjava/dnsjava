@@ -290,7 +290,7 @@ getRecords(String namestr, short type, short dclass, byte cred) {
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
 
-	if (name.isQualified())
+	if (name.isAbsolute())
 		answers = lookup(name, type, dclass, cred, 0, false);
 	else if (searchPath == null) {
 		answers = lookupAppend(name, Name.root, type, dclass,
