@@ -236,12 +236,11 @@ readFlags(DataByteInputStream in) throws IOException {
 /** Converts the header's flags into a String */
 public String
 printFlags() {
-	String s;
 	StringBuffer sb = new StringBuffer();
 
 	for (int i = 0; i < flags.length; i++)
-		if (getFlag(i) && ((s = Flags.string(i)) != null)) {
-			sb.append(s);
+		if (Flags.isFlag(i) && getFlag(i)) {
+			sb.append(Flags.string(i));
 			sb.append(" ");
 		}
 	return sb.toString();

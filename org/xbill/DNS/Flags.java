@@ -5,14 +5,15 @@ package org.xbill.DNS;
 import org.xbill.DNS.utils.*;
 
 /**
- * Constants and functions relating to DNS flags
+ * Constants and functions relating to flags in the DNS header.
  *
  * @author Brian Wellington
  */
 
 public final class Flags {
 
-private static StringValueTable flags = new StringValueTable();
+private static Mnemonic flags = new Mnemonic("DNS Header Flag",
+					     Mnemonic.CASE_LOWER);
 
 /** query/response */
 public static final byte QR		= 0;
@@ -36,17 +37,20 @@ public static final byte AD		= 10;
 public static final byte CD		= 11;
 
 /** dnssec ok (extended) */
-public static final int DO		= 0x8000;
+public static final int DO		= ExtendedFlags.DO;
 
 static {
-	flags.put2(QR, "qr");
-	flags.put2(AA, "aa");
-	flags.put2(TC, "tc");
-	flags.put2(RD, "rd");
-	flags.put2(RA, "ra");
-	flags.put2(AD, "ad");
-	flags.put2(CD, "cd");
-	flags.put2(DO, "do");
+	flags.setMaximum(0xF);
+	flags.setPrefix("FLAG");
+	flags.setNumericAllowed(true);
+
+	flags.add(QR, "qr");
+	flags.add(AA, "aa");
+	flags.add(TC, "tc");
+	flags.add(RD, "rd");
+	flags.add(RA, "ra");
+	flags.add(AD, "ad");
+	flags.add(CD, "cd");
 }
 
 private
@@ -55,24 +59,25 @@ Flags() {}
 /** Converts a numeric Flag into a String */
 public static String
 string(int i) {
-	if ((i >= 1 && i <= 4) || (i >= 12 && i <= 15))
-		return null;
-	String s = flags.getString(i);
-	return (s != null) ? s : Integer.toString(i);
+	return flags.getText(i);
 }
 
 /** Converts a String representation of an Flag into its numeric value */
-public static byte
+public static int
 value(String s) {
-	byte i = (byte) flags.getValue(s.toLowerCase());
-	if (i >= 0)
-		return i;
-	try {
-		return Byte.parseByte(s);
-	}
-	catch (Exception e) {
-		return (-1);
-	}
+	return flags.getValue(s);
+}
+
+/**
+ * Indicates if a bit in the flags field is a flag or not.  If it's part of
+ * the rcode or opcode, it's not.
+ */
+public static boolean
+isFlag(int index) {
+	flags.check(index);
+	if ((index >= 1 && index <= 4) || (index >= 12))
+		return false;
+	return true;
 }
 
 }
