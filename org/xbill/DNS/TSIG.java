@@ -4,34 +4,36 @@ import java.util.*;
 
 public class dnsTSIG {
 
+private dnsName name;
 private byte [] key;
-private hmacSigner axfrSigner;
+private hmacSigner axfrSigner = null;
+
+dnsTSIG(String name, byte [] key) {
+	this.name = new dnsName(name);
+	this.key = key;
+}
 
 dnsTSIG(byte [] key) {
+	try {
+		String s = InetAddress.getLocalHost().getHostName();
+		this.name = new dnsName(s);
+	}
+	catch (UnknownHostException e) {
+		System.out.println("getLocalHost failed");
+	}
 	this.key = key;
 }
 
 void apply(dnsMessage m) {
 	Date timeSigned = new Date();
 	short fudge = 300;
-	String local;
 	hmacSigner h = new hmacSigner(key);
 
-	try {
-		local = InetAddress.getLocalHost().getHostName();
-	}
-	catch (UnknownHostException e) {
-		return;
-	}
-	dnsName name = new dnsName(local);
 	dnsName alg = new dnsName(dns.HMAC);
 
 	try {
 		/* Digest the message after zeroing out the id */
-		int id = m.getHeader().getID();
-		m.getHeader().setID(0);
 		h.addData(m.toBytes());
-		m.getHeader().setID(id);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
@@ -55,7 +57,8 @@ void apply(dnsMessage m) {
 		return;
 	}
 	dnsRecord r = new dnsTSIGRecord(name, dns.ANY, 0, alg, timeSigned,
-					fudge, h.sign(), dns.NOERROR, null);
+					fudge, h.sign(), m.getHeader().getID(),
+					dns.NOERROR, null);
 	m.addRecord(dns.ADDITIONAL, r);
 }
 
@@ -74,19 +77,20 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 
 	try {
 		if (old != null && tsig.error == dns.NOERROR) {
+			ByteArrayOutputStream bs = new ByteArrayOutputStream();
+			DataOutputStream d = new DataOutputStream(bs);
+			d.writeShort((short)old.signature.length);
+			h.addData(bs.toByteArray());
 			h.addData(old.signature);
 /*System.out.println("digested query TSIG");*/
 		}
 		m.getHeader().decCount(dns.ADDITIONAL);
-		int id = m.getHeader().getID();
-		m.getHeader().setID(0);
 		byte [] header = m.getHeader().toBytes();
 		m.getHeader().incCount(dns.ADDITIONAL);
-		m.getHeader().setID(id);
 		h.addData(header);
 
 		int len = b.length - header.length;	
-		len -= tsig.toBytes(dns.ADDITIONAL).length;
+		len -= tsig.rrLength();
 		h.addData(b, header.length, len);
 /*System.out.println("digested message");*/
 
@@ -117,30 +121,41 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 		return false;
 	}
 
+	if (axfrSigner != null) {
+		try {
+			ByteArrayOutputStream bs = new ByteArrayOutputStream();
+			DataOutputStream d = new DataOutputStream(bs);
+			d.writeShort((short)tsig.signature.length);
+			axfrSigner.addData(bs.toByteArray());
+			axfrSigner.addData(tsig.signature);
+		}
+		catch (IOException e) {
+		}
+	}
 	if (h.verify(tsig.signature))
 		return true;
 	else
 		return false;
 }
 
-void verifyAXFRStart(dnsTSIGRecord old) {
+void verifyAXFRStart() {
 	axfrSigner = new hmacSigner(key);
-	axfrSigner.addData(old.signature);
 }
 
-boolean verifyAXFR(dnsMessage m, byte [] b, boolean required) {
+boolean verifyAXFR(dnsMessage m, byte [] b, dnsTSIGRecord old,
+		   boolean required, boolean first)
+{
 	dnsTSIGRecord tsig = m.getTSIG();
 	hmacSigner h = axfrSigner;
 	
+	if (first)
+		return verify(m, b, old);
 	try {
 		if (tsig != null)
 			m.getHeader().decCount(dns.ADDITIONAL);
-		int id = m.getHeader().getID();
-		m.getHeader().setID(0);
 		byte [] header = m.getHeader().toBytes();
 		if (tsig != null)
 			m.getHeader().incCount(dns.ADDITIONAL);
-		m.getHeader().setID(id);
 		h.addData(header);
 
 		int len = b.length - header.length;	

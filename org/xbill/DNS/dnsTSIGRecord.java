@@ -9,6 +9,7 @@ dnsName alg;
 Date timeSigned;
 short fudge;
 byte [] signature;
+int originalID;
 short error;
 byte [] other;
 
@@ -18,7 +19,7 @@ public dnsTSIGRecord(dnsName rname, short rclass) {
 
 public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
 		     Date timeSigned, short fudge, byte [] signature,
-		     short error, byte other[])
+		     int originalID, short error, byte other[])
 {
 	this(rname, rclass);
 	this.rttl = rttl;
@@ -26,6 +27,7 @@ public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
 	this.timeSigned = timeSigned;
 	this.fudge = fudge;
 	this.signature = signature;
+	this.originalID = originalID;
 	this.error = error;
 	this.other = other;
 	this.rlength = (short) (14 + alg.length() + signature.length);
@@ -47,6 +49,7 @@ void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
 	signature = new byte[sigLen];
 	in.read(signature);
 
+	originalID = in.readUnsignedShort();
 	error = in.readShort();
 
 	int otherLen = in.readUnsignedShort();
@@ -70,6 +73,7 @@ void rrToBytes(DataOutputStream out) throws IOException {
 	out.writeShort((short)signature.length);
 	out.write(signature);
 
+	out.writeShort(originalID);
 	out.writeShort(error);
 
 	if (other != null) {
@@ -92,6 +96,7 @@ void rrToCanonicalBytes(DataOutputStream out) throws IOException {
 	out.writeShort((short)signature.length);
 	out.write(signature);
 
+	out.writeShort((int)originalID & 0xFFFF);
 	out.writeShort(error);
 
 	if (other != null) {

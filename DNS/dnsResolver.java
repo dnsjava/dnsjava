@@ -121,7 +121,7 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 	response = new dnsMessage();
 	response.getHeader().setID(query.getHeader().getID());
 	if (TSIG != null)
-		TSIG.verifyAXFRStart(query.getTSIG());
+		TSIG.verifyAXFRStart();
 	while (soacount < 2) {
 		dataIn = new DataInputStream(s.getInputStream());
 		inLength = dataIn.readUnsignedShort();
@@ -158,7 +158,8 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 		}
 		if (TSIG != null) {
 			boolean required = (soacount > 1 || first);
-			boolean ok = TSIG.verifyAXFR(m, in, required);
+			boolean ok = TSIG.verifyAXFR(m, in, query.getTSIG(),
+						     required, first);
 			System.out.println("TSIG verify: " + ok);
 		}
 		first = false;
