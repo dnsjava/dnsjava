@@ -88,7 +88,7 @@ addRecord(Record r, byte cred, Object o) {
 	int src = (o != null) ? o.hashCode() : 0;
 	if (r.getTTL() == 0)
 		return;
-	CacheElement element = (CacheElement) findSet(name, type);
+	CacheElement element = (CacheElement) findExactSet(name, type);
 	if (element == null || cred > element.credibility)
 		addSet(name, type, element = new CacheElement(r, cred, src));
 	else if (cred == element.credibility) {
