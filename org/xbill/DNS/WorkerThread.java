@@ -25,6 +25,7 @@ private Resolver res;
 private static int nactive = 0;
 private static Vector list = new Vector();
 private static final int max = 10;
+private static final long lifetime = 900 * 1000;
 
 WorkerThread() {
 	setDaemon(true);
@@ -103,12 +104,15 @@ run() {
 				list.notify();
 			nactive--;
 		}
+		res = null;
 		synchronized (this) {
 			try {
-				wait();
+				wait(lifetime);
 			}
 			catch (InterruptedException e) {
 			}
+			if (res == null)
+				return;
 		}
 	}
 }
