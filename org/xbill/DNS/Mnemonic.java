@@ -119,9 +119,8 @@ parseNumeric(String s) {
 	return -1;
 }
 
-
 /**
- * Defines a text/number pair.
+ * Defines the text representation of a numeric value.
  * @param val The numeric value
  * @param string The text string
  */
@@ -132,6 +131,20 @@ add(int val, String str) {
 	str = sanitize(str);
 	strings.put(str, value);
 	values.put(value, str);
+}
+
+/**
+ * Defines an additional text representation of a numeric value.  This will
+ * be used by getValue(), but not getText().
+ * @param val The numeric value
+ * @param string The text string
+ */
+public void
+addAlias(int val, String str) {
+	check(val);
+	Integer value = toInteger(val);
+	str = sanitize(str);
+	strings.put(str, value);
 }
 
 /**
