@@ -152,8 +152,8 @@ rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 	dbs.writeByte(alg);
 	dbs.writeByte(labels);
 	dbs.writeInt(origttl);
-	dbs.writeInt((int)expire.getTime() / 1000);
-	dbs.writeInt((int)timeSigned.getTime() / 1000);
+	dbs.writeInt((int)(expire.getTime() / 1000));
+	dbs.writeInt((int)(timeSigned.getTime() / 1000));
 	dbs.writeShort(footprint);
 	signer.toWire(dbs, null);
 	dbs.write(signature);
