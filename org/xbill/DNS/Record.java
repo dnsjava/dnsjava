@@ -240,6 +240,17 @@ toWireCanonical() throws IOException {
 	return out.toByteArray();
 }
 
+/**
+ * Converts the rdata in a Record into canonical DNS uncompressed wire format
+ * (all names are converted to lowercase).
+ */
+public byte []
+rdataToWireCanonical() throws IOException {
+	DataByteOutputStream out = new DataByteOutputStream();
+	rrToWireCanonical(out);
+	return out.toByteArray();
+}
+
 public abstract String rdataToString();
 
 /**
