@@ -162,38 +162,38 @@ public static final short MAILA		= 254;
 public static final short ANY		= 255;
 
 private static class DoubleHashMap {
-	private HashMap v2s, s2v;
+	private HashMap byString, byInteger;
 
 	public
 	DoubleHashMap() {
-		v2s = new HashMap();
-		s2v = new HashMap();
+		byString = new HashMap();
+		byInteger = new HashMap();
 	}
 
 	public void
-	put(short value, String string) {
-		Short s = Type.toShort(value);
-		v2s.put(s, string);
-		s2v.put(string, s);
+	put(int value, String string) {
+		Integer i = Type.toInteger(value);
+		byInteger.put(i, string);
+		byString.put(string, i);
 	}
 
-	public Short
+	public Integer
 	getValue(String string) {
-		return (Short) s2v.get(string);
+		return (Integer) byString.get(string);
 	}
 
 	public String
-	getString(short value) {
-		return (String) v2s.get(Type.toShort(value));
+	getString(int value) {
+		return (String) byInteger.get(Type.toInteger(value));
 	}
 }
 
 private static DoubleHashMap types = new DoubleHashMap();
-private static Short [] typecache = new Short [44];
+private static Integer [] typecache = new Integer[44];
 
 static {
-	for (short i = 0; i < typecache.length; i++)
-		typecache[i] = new Short(i);
+	for (int i = 0; i < typecache.length; i++)
+		typecache[i] = new Integer(i);
 	types.put(A, "A");
 	types.put(NS, "NS");
 	types.put(MD, "MD");
@@ -249,9 +249,15 @@ private
 Type() {
 }
 
-/** Converts a numeric Type into a String */
+/**
+ * Converts a numeric Type into a String
+ * @return The canonical string representation of the type
+ * @throws IllegalArgumentException The type is out of range.
+ */
 public static String
-string(short i) {
+string(int i) {
+	if (i < 0 || i > 0xFFFF)
+		throw new IllegalArgumentException("type out of range: " + i);
 	String s = types.getString(i);
 	return (s != null) ? s : ("TYPE" + i);
 }
@@ -263,9 +269,9 @@ string(short i) {
 public static int
 value(String s) {
 	s = s.toUpperCase();
-	Short val = types.getValue(s);
+	Integer val = types.getValue(s);
 	if (val != null)
-		return val.shortValue();
+		return val.intValue();
 	if (s.startsWith("TYPE")) {
 		try {
 			int type = Integer.parseInt(s.substring(4));
@@ -298,12 +304,12 @@ isRR(int type) {
 	}
 }
 
-/* Converts a type into a Short, for use in HashMaps, etc. */
-static Short
-toShort(short type) {
-	if (type < typecache.length)
+/* Converts a type into an Integer, for use in HashMaps, etc. */
+static Integer
+toInteger(int type) {
+	if (type >= 0 && type < typecache.length)
 		return (typecache[type]);
-	return new Short(type);
+	return new Integer(type);
 }
 
 }

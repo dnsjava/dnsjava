@@ -14,8 +14,6 @@ import org.xbill.DNS.utils.*;
 
 public final class DClass {
 
-private static StringValueTable classes = new StringValueTable();
-
 /** Internet */
 public static final short IN		= 1;
 
@@ -26,6 +24,9 @@ public static final short CH		= 3;
 public static final short CHAOS		= 3;
 
 /** Hesiod name server (MIT) */
+public static final short HS		= 4;
+
+/** Hesiod name server (MIT, alternate name) */
 public static final short HESIOD	= 4;
 
 /** Special value used in dynamic update messages */
@@ -34,27 +35,33 @@ public static final short NONE		= 254;
 /** Matches any class */
 public static final short ANY		= 255;
 
-private static Short [] classcache = new Short [5];
+private static Integer [] classcache = new Integer[5];
 
 static {
-	for (short i = 0; i < classcache.length; i++)
-		classcache[i] = new Short(i);
-	classes.put2(IN, "IN");
-	classes.put2(CHAOS, "CHAOS");
-	classes.put2(CH, "CH");
-	classes.put2(HESIOD, "HESIOD");
-	classes.put2(NONE, "NONE");
-	classes.put2(ANY, "ANY");
+	for (int i = 0; i < classcache.length; i++)
+		classcache[i] = new Integer(i);
 }
 
 private
 DClass() {}
 
-/** Converts a numeric Class into a String */
+/**
+ * Converts a numeric DClass into a String
+ * @return The canonical string representation of the class
+ * @throws IllegalArgumentException The class is out of range.
+ */
 public static String
 string(int i) {
-	String s = classes.getString(i);
-	return (s != null) ? s : ("CLASS" + i);
+	if (i < 0 || i > 0xFFFF)
+		throw new IllegalArgumentException("class out of range: " + i);
+	switch (i) {
+	case IN: return "IN";
+	case CH: return "CH";
+	case HS: return "HS";
+	case NONE: return "NONE";
+	case ANY: return "ANY";
+	default: return "CLASS" + i;
+	}
 }
 
 /**
@@ -64,9 +71,16 @@ string(int i) {
 public static int
 value(String s) {
 	s = s.toUpperCase();
-	int i = classes.getValue(s);
-	if (i >= 0)
-		return i;
+	if (s.equals("IN"))
+		return IN;
+	else if (s.equals("CH") || s.equals("CHAOS"))
+		return CH;
+	else if (s.equals("HS") || s.equals("HESIOS"))
+		return HS;
+	else if (s.equals("NONE"))
+		return NONE;
+	else if (s.equals("ANY"))
+		return ANY;
 	if (s.startsWith("CLASS")) {
 		try {
 			int dclass = Integer.parseInt(s.substring(5));
@@ -81,12 +95,12 @@ value(String s) {
 	return -1;
 }
 
-/* Converts a class into a Short, for use in Hashmaps, etc. */
-static Short
-toShort(short dclass) {
-	if (dclass < classcache.length)
+/* Converts a class into an Integer, for use in Hashmaps, etc. */
+static Integer
+toInteger(int dclass) {
+	if (dclass >= 0 && dclass < classcache.length)
 		return (classcache[dclass]);
-	return new Short(dclass);
+	return new Integer(dclass);
 }
 
 }
