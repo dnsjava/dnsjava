@@ -36,7 +36,7 @@
     <target name="docs" description="Makes Javadoc documentation">
         <javadoc destdir="${doc_dir}"
                  sourcepath="${src_dir}"
-                 packagenames="org.xbill.Task,org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security"
+                 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security"
                  windowtitle="dnsjava documentation">
 
             <link href="http://java.sun.com/products/jdk/1.4/docs/api"/>
