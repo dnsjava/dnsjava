@@ -11,7 +11,8 @@ import java.net.*;
 
 public final class dns {
 
-private static Resolver _res;
+private static Resolver res;
+private static Cache cache;
 
 static boolean
 matchType(short type1, short type2) {
@@ -48,53 +49,76 @@ init(String defaultResolver) {
 }
 
 public static void
-setResolver(Resolver res) {
-	_res = res;
+setResolver(Resolver _res) {
+	res = _res;
 }
 
 public static Record []
-getRecords(String name, short type, short dclass) {
+getRecords(String namestr, short type, short dclass) {
 	Message query;
 	Message response;
 	Record question;
 	Record [] answers;
 	int answerCount = 0, i = 0;
 	Enumeration e;
+	Name name = new Name(namestr);
 
 	if (!Type.isRR(type) && type != Type.ANY)
 		return null;
 
-	if (_res == null) {
+	if (res == null) {
 		try {
-			_res = new Resolver();
+			res = new Resolver();
 		}
 		catch (UnknownHostException uhe) {
 			System.out.println("Failed to initialize resolver");
 			System.exit(-1);
 		}
 	}
+	if (cache == null)
+		cache = new Cache();
 
-	query = new Message();
-	query.getHeader().setOpcode(Opcode.QUERY);
-	query.getHeader().setFlag(Flags.RD);
-	question = Record.newRecord(new Name(name), type, dclass);
-	query.addRecord(Section.QUESTION, question);
-
-	try {
-		response = _res.send(query);
+	CacheResponse cached = cache.lookupRecords(name, type,
+						   Credibility.NONAUTH_ANSWER);
+	if (cached.isSuccessful()) {
+		RRset rrset = cached.answer();
+		answerCount = rrset.size();
+		e = rrset.rrs();
 	}
-	catch (IOException ioe) {
-		return null;
+	else if (cached.isNegative()) {
+		answerCount = 0;
+		e = null;
 	}
+	else {
+		query = new Message();
+		query.getHeader().setOpcode(Opcode.QUERY);
+		query.getHeader().setFlag(Flags.RD);
+		question = Record.newRecord(name, type, dclass);
+		query.addRecord(Section.QUESTION, question);
 
-	if (response.getHeader().getRcode() != Rcode.NOERROR)
-		return null;
+		try {
+			response = res.send(query);
+		}
+		catch (IOException ioe) {
+			return null;
+		}
 
-	e = response.getSection(Section.ANSWER);
-	while (e.hasMoreElements()) {
-		Record r = (Record)e.nextElement();
-		if (matchType(r.getType(), type))
-			answerCount++;
+		short rcode = response.getHeader().getRcode();
+		if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)
+			cache.addMessage(response);
+
+		if (rcode != Rcode.NOERROR)
+			return null;
+
+		e = response.getSection(Section.ANSWER);
+		while (e.hasMoreElements()) {
+			Record r = (Record)e.nextElement();
+			if (matchType(r.getType(), type))
+				answerCount++;
+
+		}
+
+		e = response.getSection(Section.ANSWER);
 	}
 
 	if (answerCount == 0)
@@ -102,7 +126,6 @@ getRecords(String name, short type, short dclass) {
 
 	answers = new Record[answerCount];
 
-	e = response.getSection(Section.ANSWER);
 	while (e.hasMoreElements()) {
 		Record r = (Record)e.nextElement();
 		if (matchType(r.getType(), type))
