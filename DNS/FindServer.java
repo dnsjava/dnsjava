@@ -6,7 +6,7 @@ package DNS;
 import java.io.*;
 import java.util.*;
 
-class FindResolver {
+class FindServer {
 
 static String [] server = null;
 static boolean searched = false;

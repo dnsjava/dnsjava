@@ -62,7 +62,7 @@ static String defaultResolver = "localhost";
 public
 Resolver(String hostname) throws UnknownHostException {
 	if (hostname == null) {
-		hostname = FindResolver.find1();
+		hostname = FindServer.find1();
 		if (hostname == null)
 			hostname = defaultResolver;
 	}
