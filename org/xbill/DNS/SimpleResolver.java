@@ -174,6 +174,8 @@ sendTCP(Message query, byte [] out) throws IOException {
 	if (tsig != null) {
 		response.TSIGsigned = true;
 		boolean ok = tsig.verify(response, in, query.getTSIG());
+		if (Options.check("verbose"))
+			System.err.println("TSIG verify: " + ok);
 		response.TSIGverified = ok;
 	}
 	return response;
@@ -248,6 +250,8 @@ send(Message query) throws IOException {
 	if (tsig != null) {
 		response.TSIGsigned = true;
 		boolean ok = tsig.verify(response, in, query.getTSIG());
+		if (Options.check("verbose"))
+			System.err.println("TSIG verify: " + ok);
 		response.TSIGverified = ok;
 	}
 
@@ -304,6 +308,7 @@ sendAXFR(Message query) throws IOException {
 		response.getHeader().setID(query.getHeader().getID());
 		if (tsig != null) {
 			tsig.verifyAXFRStart();
+			response.TSIGsigned = true;
 			response.TSIGverified = true;
 		}
 		while (soacount < 2) {
@@ -369,6 +374,23 @@ sendAXFR(Message query) throws IOException {
 							     required, first);
 				if (!ok)
 					response.TSIGverified = false;
+				if (Options.check("verbose")) {
+					String status;
+					if (m.getTSIG() == null) {
+						if (!ok)
+							status = "expected";
+						else
+							status = "<>";
+					}
+					else {
+						if (!ok)
+							status = "failed";
+						else
+							status = "ok";
+					}
+					System.err.println("TSIG verify: " +
+							   status);
+				}
 			}
 			first = false;
 		}
