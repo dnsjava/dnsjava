@@ -9,11 +9,9 @@ import java.util.*;
  * bindttl - Print TTLs in BIND format<BR>
  * multiline - Print records in multiline format<BR>
  * noprintin - Don't print the class of a record if it's IN<BR>
- * pqdn - Allow partially qualified domain names<BR>
  * verbose - Turn on general debugging statements<BR>
  * verbosemsg - Print all messages sent or received by SimpleResolver<BR>
  * verbosecompression - Print messages related to name compression<BR>
- * verbosebitstring - Print messages related to bitstring labels<BR>
  * verbosesec - Print messages related to signature verification<BR>
  * verbosecache - Print messages related to cache lookups<BR>
  * <BR>
