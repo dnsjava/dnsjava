@@ -161,7 +161,7 @@ private boolean secure;
 private int maxncache = -1;
 private long cleanInterval = 30;
 private Thread cleaner;
-short dclass;
+private short dclass;
 
 /**
  * Creates an empty Cache
