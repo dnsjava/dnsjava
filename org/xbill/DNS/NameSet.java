@@ -119,6 +119,14 @@ removeName(Name name) {
 	data.remove(name);
 }
 
+/**
+ * Returns a list of all names stored in this NameSet.
+ */
+Enumeration
+names() {
+	return data.keys();
+}
+
 /** Converts the NameSet to a String */
 public String
 toString() {

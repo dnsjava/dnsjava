@@ -55,6 +55,7 @@ class Enumerator implements Enumeration {
 private Vector rrs;
 private Vector sigs;
 private int start;
+private byte securityStatus;
 
 /** Creates an empty RRset */
 public
@@ -62,6 +63,7 @@ RRset() {
 	rrs = new Vector();
 	sigs = new Vector();
 	start = 0;
+	securityStatus = DNSSEC.Insecure;
 }
 
 /** Adds a Record to an RRset */
@@ -124,7 +126,7 @@ size() {
 
 /**
  * Returns the name of the records
- * see @Name
+ * @see Name
  */
 public Name
 getName() {
@@ -136,7 +138,7 @@ getName() {
 
 /**
  * Returns the type of the records
- * see @Type
+ * @see Type
  */
 public short
 getType() {
@@ -148,7 +150,7 @@ getType() {
 
 /**
  * Returns the class of the records
- * see @DClass
+ * @see DClass
  */
 public short
 getDClass() {
@@ -179,6 +181,18 @@ first() {
 	if (rrs.size() == 0)
 		return null;
 	return (Record) rrs.elementAt(0);
+}
+
+/** Sets the DNSSEC security of the RRset. */
+void
+setSecurity(byte status) {
+	securityStatus = status;
+}
+
+/** Returns the DNSSEC security of the RRset. */
+public byte
+getSecurity() {
+	return securityStatus;
 }
 
 /** Converts the RRset to a String */
