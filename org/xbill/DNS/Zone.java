@@ -451,9 +451,9 @@ findExactMatch(Name name, int type) {
 }
 
 /**
- * Adds a record to the Zone
- * @param r The record to be added
- * @see Record
+ * Adds an RRset to the Zone
+ * @param rrset The RRset to be added
+ * @see RRset
  */
 public void
 addRRset(RRset rrset) {
@@ -462,7 +462,7 @@ addRRset(RRset rrset) {
 }
 
 /**
- * Adds a record to the Zone
+ * Adds a Record to the Zone
  * @param r The record to be added
  * @see Record
  */

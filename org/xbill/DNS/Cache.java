@@ -790,7 +790,7 @@ getMaxEntries() {
  *
  * The default maximum number of entries is 50000.
  *
- * @param The maximum number of entries in the Cache.
+ * @param entries The maximum number of entries in the Cache.
  */
 public void
 setMaxEntries(int entries) {
