@@ -7,31 +7,28 @@ import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 
-final class UDPClient extends Client{
+final class UDPClient extends Client {
 
-private
-UDPClient() {}
-
-static SelectionKey
-initialize() throws IOException {
-	return initializeHelper(DatagramChannel.open());
+public
+UDPClient(long endTime) throws IOException {
+	super(DatagramChannel.open(), endTime);
 }
 
-static void
-connect(SelectionKey key, SocketAddress addr, long endTime) throws IOException {
+void
+connect(SocketAddress addr) throws IOException {
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	channel.connect(addr);
 }
 
-static void
-send(SelectionKey key, byte [] data, long endTime) throws IOException {
+void
+send(byte [] data) throws IOException {
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	verboseLog("UDP write", data);
 	channel.write(ByteBuffer.wrap(data));
 }
 
-static byte []
-recv(SelectionKey key, int max, long endTime) throws IOException {
+byte []
+recv(int max) throws IOException {
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	byte [] temp = new byte[max];
 	key.interestOps(SelectionKey.OP_READ);
@@ -57,14 +54,14 @@ static byte []
 sendrecv(SocketAddress addr, byte [] data, int max, long endTime)
 throws IOException
 {
-	SelectionKey key = initialize();
+	UDPClient client = new UDPClient(endTime);
 	try {
-		connect(key, addr, endTime);
-		send(key, data, endTime);
-		return recv(key, max, endTime);
+		client.connect(addr);
+		client.send(data);
+		return client.recv(max);
 	}
 	finally {
-		cleanup(key);
+		client.cleanup();
 	}
 }
 

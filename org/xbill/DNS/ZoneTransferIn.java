@@ -52,11 +52,10 @@ private long ixfr_serial;
 private boolean want_fallback;
 
 private SocketAddress address;
-private SelectionKey key;
+private TCPClient client;
 private TSIG tsig;
 private TSIG.StreamVerifier verifier;
 private long timeout = 900 * 1000;
-private long endTime;
 
 private int state;
 private long end_serial;
@@ -271,9 +270,9 @@ setTimeout(int secs) {
 
 private void
 openConnection() throws IOException {
-	key = TCPClient.initialize();
-	endTime = System.currentTimeMillis() + timeout;
-	TCPClient.connect(key, address, endTime);
+	long endTime = System.currentTimeMillis() + timeout;
+	client = new TCPClient(endTime);
+	client.connect(address);
 }
 
 private void
@@ -294,7 +293,7 @@ sendQuery() throws IOException {
 		verifier = new TSIG.StreamVerifier(tsig, query.getTSIG());
 	}
 	byte [] out = query.toWire(Message.MAXLENGTH);
-	TCPClient.send(key, out, endTime);
+	client.send(out);
 }
 
 private long
@@ -434,7 +433,7 @@ parseRR(Record rec) throws ZoneTransferException {
 private void
 closeConnection() {
 	try {
-		TCPClient.cleanup(key);
+		client.cleanup();
 	}
 	catch (IOException e) {
 	}
@@ -456,7 +455,7 @@ private void
 doxfr() throws IOException, ZoneTransferException {
 	sendQuery();
 	while (state != END) {
-		byte [] in = TCPClient.recv(key, endTime);
+		byte [] in = client.recv();
 		Message response =  parseMessage(in);
 		if (response.getHeader().getRcode() == Rcode.NOERROR &&
 		    verifier != null)

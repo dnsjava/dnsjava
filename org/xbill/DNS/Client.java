@@ -10,8 +10,26 @@ import org.xbill.DNS.utils.hexdump;
 
 class Client {
 
+protected long endTime;
+protected SelectionKey key;
+
 protected
-Client() {}
+Client(SelectableChannel channel, long endTime) throws IOException {
+	boolean done = false;
+	Selector selector = null;
+	try {
+		selector = Selector.open();
+		channel.configureBlocking(false);
+		key = channel.register(selector, 0);
+		done = true;
+	}
+	finally {
+		if (!done && selector != null)
+			selector.close();
+		if (!done)
+			channel.close();
+	}
+}
 
 static protected void
 blockUntil(SelectionKey key, long endTime) throws IOException {
@@ -26,27 +44,8 @@ verboseLog(String prefix, byte [] data) {
 		System.err.println(hexdump.dump(prefix, data));
 }
 
-static protected SelectionKey
-initializeHelper(SelectableChannel channel) throws IOException {
-	boolean done = false;
-	Selector selector = null;
-	try {
-		selector = Selector.open();
-		channel.configureBlocking(false);
-		SelectionKey key = channel.register(selector, 0);
-		done = true;
-		return key;
-	}
-	finally {
-		if (!done && selector != null)
-			selector.close();
-		if (!done)
-			channel.close();
-	}
-}
-
-static void
-cleanup(SelectionKey key) throws IOException {
+void
+cleanup() throws IOException {
 	key.selector().close();
 	key.channel().close();
 }

@@ -9,16 +9,13 @@ import java.nio.channels.*;
 
 final class TCPClient extends Client {
 
-private
-TCPClient() {}
-
-static SelectionKey
-initialize() throws IOException {
-	return initializeHelper(SocketChannel.open());
+public
+TCPClient(long endTime) throws IOException {
+	super(SocketChannel.open(), endTime);
 }
 
-static void
-connect(SelectionKey key, SocketAddress addr, long endTime) throws IOException {
+void
+connect(SocketAddress addr) throws IOException {
 	SocketChannel channel = (SocketChannel) key.channel();
 	if (channel.connect(addr))
 		return;
@@ -35,8 +32,8 @@ connect(SelectionKey key, SocketAddress addr, long endTime) throws IOException {
 	}
 }
 
-static void
-send(SelectionKey key, byte [] data, long endTime) throws IOException {
+void
+send(byte [] data) throws IOException {
 	SocketChannel channel = (SocketChannel) key.channel();
 	verboseLog("TCP write", data);
 	byte [] lengthArray = new byte[2];
@@ -64,8 +61,8 @@ send(SelectionKey key, byte [] data, long endTime) throws IOException {
 	}
 }
 
-static private byte []
-_recv(SelectionKey key, int length, long endTime) throws IOException {
+private byte []
+_recv(int length) throws IOException {
 	SocketChannel channel = (SocketChannel) key.channel();
 	int nrecvd = 0;
 	byte [] data = new byte[length];
@@ -89,25 +86,25 @@ _recv(SelectionKey key, int length, long endTime) throws IOException {
 	return data;
 }
 
-static byte []
-recv(SelectionKey key, long endTime) throws IOException {
-	byte [] buf = _recv(key, 2, endTime);
+byte []
+recv() throws IOException {
+	byte [] buf = _recv(2);
 	int length = ((buf[0] & 0xFF) << 8) + (buf[1] & 0xFF);
-	byte [] data = _recv(key, length, endTime);
+	byte [] data = _recv(length);
 	verboseLog("TCP read", data);
 	return data;
 }
 
 static byte []
 sendrecv(SocketAddress addr, byte [] data, long endTime) throws IOException {
-	SelectionKey key = initialize();
+	TCPClient client = new TCPClient(endTime);
 	try {
-		connect(key, addr, endTime);
-		send(key, data, endTime);
-		return recv(key, endTime);
+		client.connect(addr);
+		client.send(data);
+		return client.recv();
 	}
 	finally {
-		cleanup(key);
+		client.cleanup();
 	}
 }
 
