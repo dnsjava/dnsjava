@@ -115,7 +115,7 @@ throws IOException
 	rec.alg = st.getUInt8();
 	/* If this is a null key, there's no key data */
 	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
-		rec.key = base64.fromString(remainingStrings(st));
+		rec.key = st.getBase64();
 	else
 		rec.key = null;
 	return rec;

@@ -96,7 +96,7 @@ throws IOException
 	rec.certType = st.getUInt16();
 	rec.keyTag = st.getUInt16();
 	rec.alg = st.getUInt8();
-	rec.cert = base64.fromString(remainingStrings(st));
+	rec.cert = st.getBase64();
 	return rec;
 }
 

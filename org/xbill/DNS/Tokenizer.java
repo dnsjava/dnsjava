@@ -20,6 +20,8 @@ package org.xbill.DNS;
 import java.io.*;
 import java.util.*;
 
+import org.xbill.DNS.utils.*;
+
 /**
  * Tokenizer is used to parse DNS records and zones from text format,
  *
@@ -505,6 +507,64 @@ getEOL() throws IOException {
 	if (next.type != EOL && next.type != EOF) {
 		throw exception("expecting EOL or EOF");
 	}
+}
+
+/**
+ * Returns a concatenation of the remaining strings from a Tokenizer.
+ */
+private String
+remainingStrings() throws IOException {
+        StringBuffer sb = null;
+        while (true) {
+                Tokenizer.Token t = get();
+                if (!t.isString())
+                        break;
+                if (sb == null)
+                        sb = new StringBuffer();
+                sb.append(t.value);
+        }
+        unget();
+        if (sb == null)
+                return null;
+        return sb.toString();
+}
+
+/**
+ * Gets the remaining string tokens until an EOL/EOF is seen, concatenates
+ * them together, and converts the base64 encoded data to a byte array.
+ * @return The byte array containing the decoded strings, or null if there
+ * were no strings to decode.
+ * @throws TextParseException The input was invalid or not an EOL or EOF token.
+ * @throws IOException An I/O error occurred.
+ */
+public byte []
+getBase64() throws IOException {
+	String s = remainingStrings();
+	if (s == null)
+		return null;
+	byte [] array = base64.fromString(s);
+	if (array == null)
+		throw exception("invalid base64 encoding");
+	return array;
+}
+
+/**
+ * Gets the remaining string tokens until an EOL/EOF is seen, concatenates
+ * them together, and converts the hex encoded data to a byte array.
+ * @return The byte array containing the decoded strings, or null if there
+ * were no strings to decode.
+ * @throws TextParseException The input was invalid or not an EOL or EOF token.
+ * @throws IOException An I/O error occurred.
+ */
+public byte []
+getHex() throws IOException {
+	String s = remainingStrings();
+	if (s == null)
+		return null;
+	byte [] array = base16.fromString(s);
+	if (array == null)
+		throw exception("invalid hex encoding");
+	return array;
 }
 
 /**

@@ -332,27 +332,6 @@ rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException;
 
 /**
- * Returns a concatenation of the remaining strings from a Tokenizer,
- * or throws an IOException.
- */
-protected static String
-remainingStrings(Tokenizer st) throws IOException {
-	StringBuffer sb = null;
-	while (true) {
-		Tokenizer.Token t = st.get();
-		if (!t.isString())
-			break;
-		if (sb == null)
-			sb = new StringBuffer();
-		sb.append(t.value);
-	}
-	st.unget();
-	if (sb == null)
-		return null;
-	return sb.toString();
-}
-
-/**
  * Converts a String into a byte array.
  */
 protected static byte []
@@ -456,8 +435,7 @@ throws IOException
 	Tokenizer.Token t = st.get();
 	if (t.type == Tokenizer.IDENTIFIER && t.value.equals("\\#")) {
 		int length = st.getUInt16();
-		String s = remainingStrings(st);
-		byte [] data = base16.fromString(s);
+		byte [] data = st.getHex();
 		if (length != data.length)
 			throw st.exception("invalid unknown RR encoding: " +
 					   "length mismatch");

@@ -86,10 +86,7 @@ throws IOException
 	rec.footprint = st.getUInt16();
 	rec.alg = st.getUInt8();
 	rec.digestid = st.getUInt8();
-
-	// note that the draft says that the digest is presented as hex,
-	// not base64.
-	rec.digest = base16.fromString(remainingStrings(st));
+	rec.digest = st.getHex();
 	return rec;
 }
 

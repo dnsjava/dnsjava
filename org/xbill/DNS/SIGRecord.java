@@ -118,7 +118,7 @@ throws IOException
 	rec.timeSigned = FormattedTime.parse(st.getString());
 	rec.footprint = st.getUInt16();
 	rec.signer = st.getName(origin);
-	rec.signature = base64.fromString(remainingStrings(st));
+	rec.signature = st.getBase64();
 	return rec;
 }
 
