@@ -23,11 +23,6 @@ Address() {}
  * @param s The string
  * @return The address
  */
-/**
- * Determines if a string contains a valid IP address.
- * @param s The string
- * @return Whether the string contains a valid IP address
- */
 public static int []
 toArray(String s) {
 	int numDigits;
