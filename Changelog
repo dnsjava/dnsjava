@@ -1,4 +1,5 @@
 3/16/2004
+	- 1.6.0 released.
 	- When loading master files with $INCLUDE statements, the included
 	  files should be opened relative to the current directory, not
 	  the directory of the parent file.
