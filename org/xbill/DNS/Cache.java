@@ -696,7 +696,7 @@ addMessage(Message in) {
 				response = SetResponse.ofType(responseType);
 			}
 			/* NXT records are not cached yet. */
-		} else if (ns != null) {
+		} else {
 			/* Referral response */
 			cred = getCred(Section.AUTHORITY, isAuth);
 			addRRset(ns, cred);
