@@ -34,7 +34,12 @@ Client(SelectableChannel channel, long endTime) throws IOException {
 static protected void
 blockUntil(SelectionKey key, long endTime) throws IOException {
 	long timeout = endTime - System.currentTimeMillis();
-	if (timeout < 0 || key.selector().select(timeout) == 0)
+	int nkeys = 0;
+	if (timeout > 0)
+		nkeys = key.selector().select(timeout);
+	else if (timeout == 0)
+		nkeys = key.selector().selectNow();
+	if (nkeys == 0)
 		throw new SocketTimeoutException();
 }
 
