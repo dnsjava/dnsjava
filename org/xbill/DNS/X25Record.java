@@ -79,7 +79,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 
 String
 rrToString() {
-	return byteArrayToString(address, false);
+	return byteArrayToString(address, true);
 }
 
 }

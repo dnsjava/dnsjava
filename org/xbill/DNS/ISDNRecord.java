@@ -93,10 +93,10 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append(byteArrayToString(address, false));
+	sb.append(byteArrayToString(address, true));
 	if (subAddress != null) {
 		sb.append(" ");
-		sb.append(byteArrayToString(subAddress, false));
+		sb.append(byteArrayToString(subAddress, true));
 	}
 	return sb.toString();
 }
