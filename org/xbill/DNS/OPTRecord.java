@@ -24,6 +24,8 @@ import org.xbill.DNS.utils.*;
 
 public class OPTRecord extends Record {
 
+public static final int FLAG_DNSSEC_OK = 0x8000;
+
 private Hashtable options;
 
 private
@@ -34,10 +36,19 @@ OPTRecord() {}
  * SimpleResolver, but can also be called by a server.
  */
 public
-OPTRecord(short payloadSize, byte xrcode, byte version) {
+OPTRecord(short payloadSize, byte xrcode, byte version, int flags) {
 	super(Name.root, Type.OPT, payloadSize,
-	      ((int)xrcode << 24) + ((int)version << 16));
+	      ((int)xrcode << 24) + ((int)version << 16) + flags);
 	options = null;
+}
+
+/**
+ * Creates an OPT Record with no data.  This is normally called by
+ * SimpleResolver, but can also be called by a server.
+ */
+public
+OPTRecord(short payloadSize, byte xrcode, byte version) {
+	this(payloadSize, xrcode, version, 0);
 }
 
 OPTRecord(Name _name, short _dclass, int _ttl, int length,
@@ -102,6 +113,12 @@ getExtendedRcode() {
 public short
 getVersion() {
 	return (short) ((ttl >>> 16) & 0xFF);
+}
+
+/** Returns the EDNS flags */
+public int
+getFlags() {
+	return (int) (ttl & 0xFFFF);
 }
 
 void

@@ -4,6 +4,7 @@
 	  source (David Blacka)
 	- base64.formatString() didn't work if lineLength wasn't 64.
 	  (David Blacka)
+	- Add support for the DNSSEC OK extended flag (David Blacka)
 
 5/23/2001
 	- Automatically determining name servers didn't work on Windows 2000.
