@@ -55,8 +55,9 @@ getTypedObject(int type) {
 		return knownRecords[type];
 
 	/* Construct the class name by putting the type before "Record". */
-	StringBuffer sb = new StringBuffer(Record.class.getName());
-	sb.insert(sb.lastIndexOf("Record"), Type.string(type));
+	String s = Record.class.getName();
+	StringBuffer sb = new StringBuffer(s);
+	sb.insert(s.lastIndexOf("Record"), Type.string(type));
 
 	try {
 		Class c = Class.forName(sb.toString());
