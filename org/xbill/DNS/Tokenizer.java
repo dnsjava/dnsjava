@@ -301,6 +301,7 @@ get(boolean wantWhitespace, boolean wantComment) throws IOException {
 			c = getChar();
 			if (c == -1)
 				fail("unterminated escape sequence");
+			sb.append('\\');
 		}
 		sb.append((char)c);
 	}
