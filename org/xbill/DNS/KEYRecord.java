@@ -115,15 +115,19 @@ public String
 toString() {
 	StringBuffer sb = toStringNoData();
 	if (key != null || (flags & (FLAG_NOKEY)) == (FLAG_NOKEY) ) {
-		sb.append ("0x");
-		sb.append (Integer.toHexString(flags & 0xFFFF));
-		sb.append (" ");
-		sb.append (proto);
-		sb.append (" ");
-		sb.append (alg);
+		if (!Options.check("nohex")) {
+			sb.append("0x");
+			sb.append(Integer.toHexString(flags & 0xFFFF));
+		}
+		else
+			sb.append(flags & 0xFFFF);
+		sb.append(" ");
+		sb.append(proto);
+		sb.append(" ");
+		sb.append(alg);
 		if (key != null) {
-			sb.append (" (\n");
-			sb.append (base64.formatString(key, 64, "\t", true));
+			sb.append(" (\n");
+			sb.append(base64.formatString(key, 64, "\t", true));
 		}
 	}
 	return sb.toString();

@@ -58,7 +58,10 @@ Name(String s, Name origin) {
 				/* This isn't exactly right, but it's close.
 				 * Partially qualified names are evil.
 				 */
-				qualified = (labels > 1);
+				if (Options.check("pqdn"))
+					qualified = false;
+				else
+					qualified = (labels > 1);
 			}
 		}
 	}

@@ -223,12 +223,17 @@ toStringNoData() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(name);
 	sb.append("\t");
-	sb.append(ttl);
-	sb.append("\t");
-	sb.append(DClass.string(dclass));
-	sb.append("\t");
+	if (Options.check("BINDTTL"))
+		sb.append(TTL.format(ttl));
+	else
+		sb.append(ttl);
+	sb.append(" ");
+	if (dclass != DClass.IN || !Options.check("noPrintIN")) {
+		sb.append(DClass.string(dclass));
+		sb.append(" ");
+	}
 	sb.append(Type.string(type));
-	sb.append("\t");
+	sb.append("\t\t");
 	return sb;
 }
 
