@@ -177,6 +177,19 @@ addNS(Message response, Zone zone) {
 }
 
 private void
+addCacheNS(Message response, Cache cache, Name name) {
+	SetResponse sr = cache.lookupRecords(name, Type.NS, Credibility.HINT);
+	if (!sr.isDelegation())
+		return;
+	RRset nsRecords = sr.getNS();
+	Enumeration e = nsRecords.rrs();
+	while (e.hasMoreElements()) {
+		Record r = (Record) e.nextElement();
+		response.addRecord(r, Section.AUTHORITY);
+	}
+}
+
+private void
 addGlue(Message response, Name name) {
 	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
 	if (a == null)
@@ -249,11 +262,8 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 		sigonly = false;
 
 	Zone zone = findBestZone(name);
-	if (zone != null) {
-		if (iterations == 0)
-			response.getHeader().setFlag(Flags.AA);
+	if (zone != null)
 		sr = zone.findRecords(name, type);
-	}
 	else {
 		Cache cache = getCache(dclass);
 		sr = cache.lookupRecords(name, type,
@@ -261,16 +271,23 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 	}
 
 	if (sr.isUnknown()) {
-		/* Do nothing, I guess. This should never happen. */
+		addCacheNS(response, getCache(dclass), name);
 	}
 	if (sr.isNXDOMAIN()) {
 		response.getHeader().setRcode(Rcode.NXDOMAIN);
-		if (zone != null && iterations == 0)
+		if (zone != null) {
 			addSOA(response, zone);
+			if (iterations == 0)
+				response.getHeader().setFlag(Flags.AA);
+		}
+		rcode = Rcode.NXDOMAIN;
 	}
 	else if (sr.isNXRRSET()) {
-		if (zone != null && iterations == 0)
+		if (zone != null) {
 			addSOA(response, zone);
+			if (iterations == 0)
+				response.getHeader().setFlag(Flags.AA);
+		}
 	}
 	else if (sr.isDelegation()) {
 		RRset nsRecords = sr.getNS();
@@ -283,9 +300,11 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 		rrset.addRR(cname);
 		addRRset(name, response, rrset, Section.ANSWER, false);
 		if (zone != null && iterations == 0)
-			addNS(response, zone);
-		rcode = addAnswer(response, cname.getTarget(), type, dclass,
-				  ++iterations);
+			response.getHeader().setFlag(Flags.AA);
+		if (name.equals(cname.getTarget()))
+			return Rcode.NOERROR;
+		rcode = addAnswer(response, cname.getTarget(),
+				  type, dclass, iterations + 1);
 	}
 	else if (sr.isDNAME()) {
 		RRset rrset = new RRset();
@@ -302,17 +321,24 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 		}
 		catch (IOException e) {}
 		if (zone != null && iterations == 0)
-			addNS(response, zone);
+			response.getHeader().setFlag(Flags.AA);
+		if (dname.getName().equals(dname.getTarget()))
+			return Rcode.NOERROR;
 		rcode = addAnswer(response, newname, type, dclass,
-				  ++iterations);
+				  iterations + 1);
 	}
 	else if (sr.isSuccessful()) {
 		RRset [] rrsets = sr.answers();
 		for (int i = 0; i < rrsets.length; i++)
 			addRRset(name, response, rrsets[i],
 				 Section.ANSWER, sigonly);
-		if (zone != null && iterations == 0)
+		if (zone != null) {
 			addNS(response, zone);
+			if (iterations == 0)
+				response.getHeader().setFlag(Flags.AA);
+		}
+		else
+			addCacheNS(response, getCache(dclass), name);
 	}
 	return rcode;
 }
@@ -396,6 +422,8 @@ generateReply(Message query, byte [] in, Socket s) {
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(Flags.QR);
+	if (query.getHeader().getFlag(Flags.RD));
+		response.getHeader().setFlag(Flags.RD);
 	response.addRecord(queryRecord, Section.QUESTION);
 
 	Name name = queryRecord.getName();
@@ -407,7 +435,7 @@ generateReply(Message query, byte [] in, Socket s) {
 		return errorMessage(query, Rcode.NOTIMPL);
 
 	byte rcode = addAnswer(response, name, type, dclass, 0);
-	if (rcode != Rcode.NOERROR)
+	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN)
 		return errorMessage(query, rcode);
 
 	addAdditional(response);
@@ -508,6 +536,8 @@ errorMessage(Message query, short rcode) {
 	response.setHeader(header);
 	for (int i = 0; i < 4; i++)
 		response.removeAllRecords(i);
+	if (rcode == Rcode.SERVFAIL)
+		response.addRecord(query.getQuestion(), Section.QUESTION);
 	header.setRcode(rcode);
 	return response;
 }
