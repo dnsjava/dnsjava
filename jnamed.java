@@ -4,14 +4,14 @@ import java.net.*;
 import java.util.*;
 import DNS.*;
 
-public class dnsServer {
+public class jnamed {
 
 Zone [] zones;
 int zcount;
 Hashtable znames;
 
 public
-dnsServer() {
+jnamed() {
 	zones = new Zone[20];
 	zcount = 0;
 	znames = new Hashtable();
