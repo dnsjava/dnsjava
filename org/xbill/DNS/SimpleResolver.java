@@ -182,7 +182,7 @@ private void
 verifyTSIG(Message query, Message response, byte [] b, TSIG tsig) {
 	if (tsig == null)
 		return;
-	byte error = tsig.verify(response, b, query.getTSIG());
+	int error = tsig.verify(response, b, query.getTSIG());
 	if (error == Rcode.NOERROR)
 		response.tsigState = Message.TSIG_VERIFIED;
 	else
@@ -388,7 +388,7 @@ static class Stream {
 		if (verifier != null) {
 			TSIGRecord tsigrec = response.getTSIG();
 
-			byte error = verifier.verify(response, in);
+			int error = verifier.verify(response, in);
 			if (error == Rcode.NOERROR && tsigrec != null)
 				response.tsigState = Message.TSIG_VERIFIED;
 			else if (error == Rcode.NOERROR)

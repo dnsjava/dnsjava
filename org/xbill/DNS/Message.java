@@ -27,7 +27,7 @@ private List [] sections;
 private int size;
 private TSIG tsigkey;
 private TSIGRecord querytsig;
-private byte tsigerror;
+private int tsigerror;
 
 int tsigstart;
 int tsigState;
@@ -510,7 +510,7 @@ toWire(int maxLength) {
  * @param querytsig If this is a response, the TSIG from the request.
  */
 public void
-setTSIG(TSIG key, byte error, TSIGRecord querytsig) {
+setTSIG(TSIG key, int error, TSIGRecord querytsig) {
 	this.tsigkey = key;
 	this.tsigerror = error;
 	this.querytsig = querytsig;

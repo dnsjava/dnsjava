@@ -87,7 +87,7 @@ TSIG(String name, String key) {
  * @return The TSIG record to be added to the message
  */
 public TSIGRecord
-generate(Message m, byte [] b, byte error, TSIGRecord old) {
+generate(Message m, byte [] b, int error, TSIGRecord old) {
 	Date timeSigned;
 	if (error != Rcode.BADTIME)
 		timeSigned = new Date();
@@ -162,7 +162,7 @@ generate(Message m, byte [] b, byte error, TSIGRecord old) {
  * @param old If this message is a response, the TSIG from the request
  */
 public void
-apply(Message m, byte error, TSIGRecord old) {
+apply(Message m, int error, TSIGRecord old) {
 	Record r = generate(m, m.toWire(), error, old);
 	m.addRecord(r, Section.ADDITIONAL);
 }
@@ -320,7 +320,7 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
  * @return The result of the verification (as an Rcode)
  * @see Rcode
  */
-public byte
+public int
 verify(Message m, byte [] b, TSIGRecord old) {
 	return verify(m, b, b.length, old);
 }
@@ -369,14 +369,14 @@ public static class StreamVerifier {
 	 * @return The result of the verification (as an Rcode)
 	 * @see Rcode
 	 */
-	public byte
+	public int
 	verify(Message m, byte [] b) {
 		TSIGRecord tsig = m.getTSIG();
 	
 		nresponses++;
 
 		if (nresponses == 1) {
-			byte result = key.verify(m, b, lastTSIG);
+			int result = key.verify(m, b, lastTSIG);
 			if (result == Rcode.NOERROR) {
 				DataByteOutputStream dbs;
 				byte [] signature;
