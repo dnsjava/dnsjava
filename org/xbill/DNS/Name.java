@@ -242,10 +242,10 @@ fromString(String s, Name origin) throws TextParseException {
 		else
 			name.name[name.labels++] = newlabel;
 	}
-	if (!name.qualified && origin != null)
-		name.append(origin);
 	if (name.hasBitString)
 		name.compact();
+	if (origin != null)
+		return concatenate(name, origin);
 	return (name);
 }
 
@@ -459,20 +459,6 @@ isWild() {
 public boolean
 isQualified() {
 	return qualified;
-}
-
-/**
- * Appends the specified name to the end of the current Name
- */
-private void
-append(Name d) {
-	if (labels + d.labels > name.length)
-		grow(labels + d.labels);
-	System.arraycopy(d.name, 0, name, labels, d.labels);
-	labels += d.labels;
-	qualified = d.qualified;
-	if (hasBitString || d.hasBitString)
-		compact();
 }
 
 /**
