@@ -14,7 +14,7 @@ public class update {
 Message query, response;
 Resolver res;
 String server = null;
-Name origin;
+Name origin, zone;
 int defaultTTL;
 short defaultClass = DClass.IN;
 PrintStream log = null;
@@ -112,6 +112,9 @@ update(InputStream in) throws IOException {
 			else if (operation.equals("origin"))
 				origin = new Name(st.nextToken());
 
+			else if (operation.equals("zone"))
+				zone = new Name(st.nextToken());
+
 			else if (operation.equals("require"))
 				doRequire(st);
 
@@ -188,19 +191,23 @@ update(InputStream in) throws IOException {
 void
 sendUpdate() throws IOException {
 	if (query.getHeader().getCount(Section.ZONE) == 0) {
-		Name zone = origin;
+		Name updzone;
+		if (zone != null)
+			updzone = zone;
+		else
+			updzone = origin;
 		short dclass = defaultClass;
-		if (zone == null) {
+		if (updzone == null) {
 			Enumeration updates = query.getSection(Section.UPDATE);
 			if (updates == null) {
 				print("Invalid update");
 				return;
 			}
 			Record r = (Record) updates.nextElement();
-			zone = new Name(r.getName(), 1);
+			updzone = new Name(r.getName(), 1);
 			dclass = r.getDClass();
 		}
-		Record soa = Record.newRecord(zone, Type.SOA, dclass);
+		Record soa = Record.newRecord(updzone, Type.SOA, dclass);
 		query.addRecord(soa, Section.ZONE);
 	}
 
@@ -487,7 +494,10 @@ helpAttributes() {
 	  "ttl of an added record, if unspecified (default: 0)\n" +
 
 	  "    origin <origin>\t" +
-	  "default origin of each record name (default: .)\n"
+	  "default origin of each record name (default: .)\n" +
+
+	  "    zone <zone>\t" +
+	  "zone to update (default: value of <origin>)\n"
 	);
 };
 
