@@ -140,8 +140,10 @@ addRecord(Record r, byte cred, Object o) {
 		addSet(name, type, dclass,
 		       element = new Element(r, cred, src));
 	else if (cred == element.credibility) {
-		if (element.srcid != src)
+		if (element.srcid != src) {
 			element.rrset.clear();
+			element.srcid = src;
+		}
 		element.update(r);
 	}
 }
