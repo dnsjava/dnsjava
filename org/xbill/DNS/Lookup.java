@@ -34,13 +34,15 @@ private short type;
 private short dclass;
 private boolean verbose;
 private int iterations;
+private boolean found;
 private boolean done;
+private List aliases;
 private Record [] answers;
 private int result;
 private String error;
-private boolean nxdomain;
-private boolean badresponse;
-private boolean networkerror;
+private boolean nxdomain, current_nxdomain;
+private boolean badresponse, current_badresponse;
+private boolean networkerror, current_networkerror;
 
 /** The lookup was successful. */
 public static final int SUCCESSFUL = 0;
@@ -185,6 +187,7 @@ Lookup(Name name, short type, short dclass) {
 	this.credibility = Credibility.NORMAL;
 	this.verbose = Options.check("verbose");
 	this.result = -1;
+	this.aliases = new ArrayList();
 }
 
 /**
@@ -307,7 +310,20 @@ setCredibility(byte credibility) {
 }
 
 private void
-processResponse(SetResponse response) {
+follow(Name name, Name oldname) {
+	found = true;
+	iterations++;
+	if (iterations >= 6 || name.equals(oldname)) {
+		result = UNRECOVERABLE;
+		error = "CNAME loop";
+		return;
+	}
+	aliases.add(name);
+	lookup(name);
+}
+
+private void
+processResponse(Name name, SetResponse response) {
 	if (response.isSuccessful()) {
 		RRset [] rrsets = response.answers();
 		List l = new ArrayList();
@@ -324,43 +340,71 @@ processResponse(SetResponse response) {
 		answers = (Record []) l.toArray(new Record[l.size()]);
 		done = true;
 	} else if (response.isNXDOMAIN()) {
-		nxdomain = true;
+		current_nxdomain = true;
 	} else if (response.isNXRRSET()) {
 		result = TYPE_NOT_FOUND;
 		answers = null;
 		done = true;
 	} else if (response.isCNAME()) {
 		CNAMERecord cname = response.getCNAME();
-		Name newname = cname.getTarget();
-		iterations++;
-		lookup(newname, null);
-		done = true;
+		follow(cname.getTarget(), name);
 	} else if (response.isDNAME()) {
 		DNAMERecord dname = response.getDNAME();
 		Name newname = null;
 		try {
-			newname = name.fromDNAME(dname);
+			follow(name.fromDNAME(dname), name);
 		} catch (NameTooLongException e) {
 			result = UNRECOVERABLE;
 			error = "Invalid DNAME target";
 			done = true;
-			return;
 		}
-		iterations++;
-		lookup(newname, null);
-		done = true;
 	}
 }
 
 private void
-lookup(Name current, Name suffix) {
-	if (iterations > 6) {
-		result = UNRECOVERABLE;
-		error = "CNAME loop";
-		done = true;
+lookup(Name current) {
+	SetResponse sr = cache.lookupRecords(current, type, credibility);
+	if (verbose) {
+		System.err.println("lookup " + current + " " +
+				   Type.string(type));
+		System.err.println(sr);
+	}
+	processResponse(current, sr);
+	if (done)
+		return;
+
+	Record question = Record.newRecord(current, type, dclass);
+	Message query = Message.newQuery(question);
+	Message response = null;
+	try {
+		response = resolver.send(query);
+	}
+	catch (IOException e) {
+		// A network error occurred.  Press on.
+		current_networkerror = true;
+		return;
+	}
+	short rcode = response.getHeader().getRcode();
+	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
+		// The server we contacted is broken or otherwise unhelpful.
+		// Press on.
+		current_badresponse = true;
 		return;
 	}
 
+	sr = cache.addMessage(response);
+	if (sr == null)
+		sr = cache.lookupRecords(current, type, credibility);
+	if (verbose) {
+		System.err.println("queried " + current + " " +
+				   Type.string(type));
+		System.err.println(sr);
+	}
+	processResponse(current, sr);
+}
+
+private void
+resolve(Name current, Name suffix) {
 	Name tname = null;
 	if (suffix == null)
 		tname = current;
@@ -372,45 +416,28 @@ lookup(Name current, Name suffix) {
 			return;
 		}
 	}
-
-	SetResponse sr = cache.lookupRecords(tname, type, credibility);
-	if (verbose) {
-		System.err.println("lookup " + tname + " " +
-				   Type.string(type));
-		System.err.println(sr);
+	current_badresponse = false;
+	current_networkerror = false;
+	current_nxdomain = false;
+	lookup(tname);
+	if (found) {
+		if (current_badresponse) {
+			result = UNRECOVERABLE;
+			error = "bad response";
+			done = true;
+		} else if (current_networkerror) {
+			result = TRY_AGAIN;
+			error = "network error";
+			done = true;
+		} else if (current_nxdomain) {
+			result = HOST_NOT_FOUND;
+			done = true;
+		}
+	} else {
+		badresponse = badresponse || current_badresponse;
+		networkerror = networkerror || current_networkerror;
+		nxdomain = badresponse || current_nxdomain;
 	}
-	processResponse(sr);
-	if (done)
-		return;
-
-	Record question = Record.newRecord(tname, type, dclass);
-	Message query = Message.newQuery(question);
-	Message response = null;
-	try {
-		response = resolver.send(query);
-	}
-	catch (IOException e) {
-		// A network error occurred.  Press on.
-		networkerror = true;
-		return;
-	}
-	short rcode = response.getHeader().getRcode();
-	if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
-		// The server we contacted is broken or otherwise unhelpful.
-		// Press on.
-		badresponse = true;
-		return;
-	}
-
-	sr = cache.addMessage(response);
-	if (sr == null)
-		sr = cache.lookupRecords(tname, type, credibility);
-	if (verbose) {
-		System.err.println("queried " + tname + " " +
-				   Type.string(type));
-		System.err.println(sr);
-	}
-	processResponse(sr);
 }
 
 /**
@@ -420,36 +447,36 @@ lookup(Name current, Name suffix) {
 public Record []
 run() {
 	if (name.isAbsolute())
-		lookup(name, null);
+		resolve(name, null);
 	else if (searchPath == null)
-		lookup(name, Name.root);
+		resolve(name, Name.root);
 	else {
 		if (name.labels() > 1)
-			lookup(name, Name.root);
+			resolve(name, Name.root);
 		if (done)
 			return answers;
 
 		for (int i = 0; i < searchPath.length; i++) {
-			lookup(name, searchPath[i]);
+			resolve(name, searchPath[i]);
 			if (done)
 				return answers;
 		}
 
 		if (name.labels() <= 1) {
-			lookup(name, Name.root);
+			resolve(name, Name.root);
 		}
 	}
 	if (!done) {
-		if (nxdomain) {
-			result = HOST_NOT_FOUND;
-			done = true;
-		} else if (badresponse) {
+		if (badresponse) {
 			result = UNRECOVERABLE;
 			error = "bad response";
 			done = true;
 		} else if (networkerror) {
 			result = TRY_AGAIN;
-			error = "bad response";
+			error = "network error";
+			done = true;
+		} else if (nxdomain) {
+			result = HOST_NOT_FOUND;
 			done = true;
 		}
 	}
@@ -466,6 +493,19 @@ getAnswers() {
 	if (!done || result == -1)
 		throw new IllegalStateException("Lookup isn't done");
 	return answers;
+}
+
+/**
+ * Returns all known aliases for this name.  Whenever a CNAME/DNAME is
+ * followed, an alias is added.
+ * @return The aliases.
+ * @throws IllegalStateException The lookup has not completed.
+ */
+public Name []
+getAliases() {
+	if (!done || result == -1)
+		throw new IllegalStateException("Lookup isn't done");
+	return (Name []) aliases.toArray(new Name[aliases.size()]);
 }
 
 /**
