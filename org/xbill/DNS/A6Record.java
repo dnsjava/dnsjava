@@ -121,7 +121,7 @@ getPrefix() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (suffix == null)
 		return;
 	out.write(prefixBits);

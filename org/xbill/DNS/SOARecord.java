@@ -163,7 +163,7 @@ getMinimum() {
 }       
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (host == null)
 		return;
 
@@ -177,7 +177,7 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 }
 
 void
-rrToWireCanonical(DataByteOutputStream out) throws IOException {
+rrToWireCanonical(DataByteOutputStream out) {
 	if (host == null)
 		return;
 

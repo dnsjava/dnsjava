@@ -124,6 +124,15 @@ writeString(byte [] s, int start) {
 }
 
 /**
+ * Writes a full byte array to the stream.
+ * @param b The byte array to be written.
+ */
+public void
+writeArray(byte [] b) {
+	write(b, 0, b.length);
+}
+
+/**
  * Writes a BigInteger to the stream, encoded as binary data.  If present,
  * the leading 0 byte is removed.
  * @param i The BigInteger to be written

@@ -606,7 +606,7 @@ getLabelString(int n) {
  * @throws IllegalArgumentException The name is not absolute.
  */
 public void
-toWire(DataByteOutputStream out, Compression c) throws IOException {
+toWire(DataByteOutputStream out, Compression c) {
 	if (!isAbsolute())
 		throw new IllegalArgumentException("toWire() called on " +
 						   "non-absolute name");
@@ -640,9 +640,9 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
  * @throws IOException An error occurred writing the name.
  */
 public void
-toWireCanonical(DataByteOutputStream out) throws IOException {
+toWireCanonical(DataByteOutputStream out) {
 	byte [] b = toWireCanonical();
-	out.write(b);
+	out.writeArray(b);
 }
 
 /**
@@ -650,7 +650,7 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
  * @throws IOException An error occurred writing the name.
  */
 public byte []
-toWireCanonical() throws IOException {
+toWireCanonical() {
 	byte labels = labels();
 	if (labels == 0)
 		return (new byte[0]);

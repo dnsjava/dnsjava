@@ -198,7 +198,7 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (alg == null)
 		return;
 
@@ -212,22 +212,23 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeShort(fudge);
 
 	out.writeShort((short)signature.length);
-	out.write(signature);
+	out.writeArray(signature);
 
 	out.writeShort(originalID);
 	out.writeShort(error);
 
 	if (other != null) {
 		out.writeShort((short)other.length);
-		out.write(other);
+		out.writeArray(other);
 	}
 	else
 		out.writeShort(0);
 }
 
 void
-rrToWireCanonical(DataByteOutputStream out) throws IOException {
-	throw new IOException("A TSIG should never be converted to canonical");
+rrToWireCanonical(DataByteOutputStream out) {
+	throw new RuntimeException
+			("A TSIG should never be converted to canonical");
 }
 
 }

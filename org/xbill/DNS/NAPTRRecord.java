@@ -146,7 +146,8 @@ getReplacement() {
 	return replacement;
 }
 
-void rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+void
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (replacement == null && regexp == null)
 		return;
 	out.writeShort(order);
@@ -157,7 +158,8 @@ void rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	replacement.toWire(out, null);
 }
 
-void rrToWireCanonical(DataByteOutputStream out) throws IOException {
+void
+rrToWireCanonical(DataByteOutputStream out) {
 	if (replacement == null && regexp == null)
 		return;
 	out.writeShort(order);

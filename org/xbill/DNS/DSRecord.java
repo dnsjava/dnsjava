@@ -146,12 +146,12 @@ getFootprint() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	out.writeShort(footprint);
 	out.writeByte(alg);
 	out.writeByte(digestid);
 	if (digest != null)
-		out.write(digest);
+		out.writeArray(digest);
 }
 
 }

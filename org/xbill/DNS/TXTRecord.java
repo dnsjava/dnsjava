@@ -113,7 +113,7 @@ getStrings() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (strings == null)
 		return;
 

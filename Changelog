@@ -1,3 +1,8 @@
+10/20/2002
+	- Record.toWire() and Record.toWireCanonical() do not need to
+	  be declared as throwing IOException, since there's no
+	  legitimate reason for them to throw one.
+
 10/18/2002
 	- Race condition fixes and memory usage improvements to the
 	  NameSet class, used by Cache and Zone.

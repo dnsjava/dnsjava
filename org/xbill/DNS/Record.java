@@ -203,9 +203,7 @@ fromWire(byte [] b, int section) throws IOException {
 }
 
 void
-toWire(DataByteOutputStream out, int section, Compression c)
-throws IOException
-{
+toWire(DataByteOutputStream out, int section, Compression c) {
 	int start = out.getPos();
 	name.toWire(out, c);
 	out.writeShort(type);
@@ -224,14 +222,14 @@ throws IOException
  * Converts a Record into DNS uncompressed wire format.
  */
 public byte []
-toWire(int section) throws IOException {
+toWire(int section) {
 	DataByteOutputStream out = new DataByteOutputStream();
 	toWire(out, section, null);
 	return out.toByteArray();
 }
 
 void
-toWireCanonical(DataByteOutputStream out) throws IOException {
+toWireCanonical(DataByteOutputStream out) {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
@@ -247,7 +245,7 @@ toWireCanonical(DataByteOutputStream out) throws IOException {
  * converted to lowercase).
  */
 public byte []
-toWireCanonical() throws IOException {
+toWireCanonical() {
 	DataByteOutputStream out = new DataByteOutputStream();
 	toWireCanonical(out);
 	return out.toByteArray();
@@ -421,8 +419,7 @@ getWireLength() {
 /**
  * Converts the type-specific RR to wire format - must be overriden
  */
-abstract void rrToWire(DataByteOutputStream out, Compression c)
-throws IOException;
+abstract void rrToWire(DataByteOutputStream out, Compression c);
 
 /**
  * Converts the type-specific RR to canonical wire format - must be overriden
@@ -430,7 +427,7 @@ throws IOException;
  * @see Name
  */
 void
-rrToWireCanonical(DataByteOutputStream out) throws IOException {
+rrToWireCanonical(DataByteOutputStream out) {
 	rrToWire(out, null);
 }
 
@@ -460,13 +457,8 @@ equals(Object arg) {
  */
 public int
 hashCode() {
-	try {
-		byte [] array = toWireCanonical();
-		return array.hashCode();
-	}
-	catch (IOException e) {
-		return 0;
-	}
+	byte [] array = toWireCanonical();
+	return array.hashCode();
 }
 
 /**
@@ -511,19 +503,14 @@ compareTo(Object o) {
 	n = type - arg.type;
 	if (n != 0)
 		return (n);
-	try {
-		byte [] rdata1 = toWireCanonical();
-		byte [] rdata2 = arg.toWireCanonical();
-		for (int i = 0; i < rdata1.length && i < rdata2.length; i++) {
-			n = (rdata1[i] & 0xFF) - (rdata2[i] & 0xFF);
-			if (n != 0)
-				return (n);
-		}
-		return (rdata1.length - rdata2.length);
+	byte [] rdata1 = toWireCanonical();
+	byte [] rdata2 = arg.toWireCanonical();
+	for (int i = 0; i < rdata1.length && i < rdata2.length; i++) {
+		n = (rdata1[i] & 0xFF) - (rdata2[i] & 0xFF);
+		if (n != 0)
+			return (n);
 	}
-	catch (IOException e) {
-		throw new RuntimeException("Record.toWireCanonical failed");
-	}
+	return (rdata1.length - rdata2.length);
 }
 
 }

@@ -201,7 +201,7 @@ getSignature() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (signature == null)
 		return;
 
@@ -213,11 +213,11 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeInt((int)(timeSigned.getTime() / 1000));
 	out.writeShort(footprint);
 	signer.toWire(out, null);
-	out.write(signature);
+	out.writeArray(signature);
 }
 
 void
-rrToWireCanonical(DataByteOutputStream out) throws IOException {
+rrToWireCanonical(DataByteOutputStream out) {
 	if (signature == null)
 		return;
 
@@ -229,7 +229,7 @@ rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	out.writeInt((int)(timeSigned.getTime() / 1000));
 	out.writeShort(footprint);
 	signer.toWireCanonical(out);
-	out.write(signature);
+	out.writeArray(signature);
 }
 
 static String

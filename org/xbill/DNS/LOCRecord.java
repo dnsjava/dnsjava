@@ -304,7 +304,7 @@ getVPrecision() {
 }       
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (latitude == 0 && longitude == 0 && altitude == 0)
 		return;
 

@@ -195,10 +195,7 @@ getFootprint() {
 	int foot = 0;
 
 	DataByteOutputStream out = new DataByteOutputStream();
-	try {
-		rrToWire(out, null);
-	}
-	catch (IOException e) {}
+	rrToWire(out, null);
 	byte [] rdata = out.toByteArray();
 
 	if (alg == DNSSEC.RSAMD5) {
@@ -224,7 +221,7 @@ getFootprint() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (key == null && (flags & (FLAG_NOKEY)) != (FLAG_NOKEY) )
 		return;
 
@@ -232,7 +229,7 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeByte(proto);
 	out.writeByte(alg);
 	if (key != null)
-		out.write(key);
+		out.writeArray(key);
 }
 
 }

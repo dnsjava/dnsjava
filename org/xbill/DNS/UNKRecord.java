@@ -72,9 +72,9 @@ rdataToString() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (data != null)
-		out.write(data);
+		out.writeArray(data);
 }
 
 }

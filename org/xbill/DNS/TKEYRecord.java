@@ -210,7 +210,7 @@ getOther() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	if (alg == null)
 		return;
 
@@ -224,22 +224,23 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 
 	if (key != null) {
 		out.writeShort((short)key.length);
-		out.write(key);
+		out.writeArray(key);
 	}
 	else
 		out.writeShort(0);
 
 	if (other != null) {
 		out.writeShort((short)other.length);
-		out.write(other);
+		out.writeArray(other);
 	}
 	else
 		out.writeShort(0);
 }
 
 void
-rrToWireCanonical(DataByteOutputStream out) throws IOException {
-	throw new IOException("A TKEY should never be converted to canonical");
+rrToWireCanonical(DataByteOutputStream out) {
+	throw new RuntimeException
+		("A TKEY should never be converted to canonical");
 }
 
 }

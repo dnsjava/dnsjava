@@ -139,7 +139,7 @@ getAddress() {
 }
 
 void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
+rrToWire(DataByteOutputStream out, Compression c) {
 	out.writeByte(((addr >>> 24) & 0xFF));
 	out.writeByte(((addr >>> 16) & 0xFF));
 	out.writeByte(((addr >>> 8) & 0xFF));
