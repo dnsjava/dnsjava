@@ -453,10 +453,10 @@ getDouble() throws IOException {
 }
 
 /**
- * Gets the next token from a tokenizer and converts it to an integer
- * representing a TTL (which may be encoded in the BIND TTL format).
- * @return The next token in the stream, as a integer.
- * @throws TextParseException The input was invalid or not a valid TTL.
+ * Gets the next token from a tokenizer and converts it to a 32 bit unsigned
+ * integer which may be encoded in the BIND TTL format.
+ * @return The next token in the stream, as an unsigned 32 bit integer.
+ * @throws TextParseException The input was not valid.
  * @throws IOException An I/O error occurred.
  * @see TTL
  */
@@ -467,7 +467,7 @@ getTTL() throws IOException {
 		return TTL.parseTTL(next);
 	}
 	catch (NumberFormatException e) {
-		throw exception("invalid TTL: " + next);
+		throw exception("expecting an 32 bit unsigned integer");
 	}
 }
 
