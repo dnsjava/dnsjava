@@ -1,3 +1,6 @@
+8/11/2002
+	- Querying for a nonexistant name with exactly one label didn't return.
+
 8/10/2002
 	- Add Ant build script (Blake Ramsdell <blake@brutesquadlabs.com>)
 

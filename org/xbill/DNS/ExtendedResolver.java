@@ -278,18 +278,11 @@ send(Message query) throws IOException {
 		}
 		else {
 			short rcode = m.getRcode();
-			if (rcode == Rcode.NOERROR)
+			if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)
 				return m;
 			else {
 				if (best == null)
 					best = m;
-				else {
-					short bestrcode;
-					bestrcode = best.getRcode();
-					if (rcode == Rcode.NXDOMAIN &&
-					    bestrcode != Rcode.NXDOMAIN)
-						best = m;
-				}
 				invalid[r] = true;
 			}
 		}
