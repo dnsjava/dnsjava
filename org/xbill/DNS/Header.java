@@ -7,13 +7,22 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * A DNS message header
+ * @see Message
+ */
+
 public class Header {
 
 private int id; 
 private boolean [] flags;
-byte rcode, opcode;
+private byte rcode, opcode;
 private short [] counts;
 
+/**
+ * Create a new empty header.
+ * @param id The message id
+ */
 public
 Header(int _id) {
 	counts = new short[4];
@@ -21,11 +30,18 @@ Header(int _id) {
 	id = _id;
 }
 
+/**
+ * Create a new empty header with a random message id
+ */
 public
 Header() {
 	this(randomID());
 }
 
+/**
+ * Parses a Header from a stream containing DNS wire format.  This normally
+ * isn't useful to clients.
+ */
 public
 Header(DataByteInputStream in) throws IOException {
 	this(in.readUnsignedShort());
@@ -34,7 +50,7 @@ Header(DataByteInputStream in) throws IOException {
 		counts[i] = in.readShort();
 }
 
-public void
+void
 toWire(DataByteOutputStream out) throws IOException {
 	out.writeShort(getID());
 	writeFlags(out);
@@ -49,21 +65,28 @@ toWire() throws IOException {
 	return out.toByteArray();
 }
 
+/**
+ * Sets a flag to the supplied value
+ * @see Flag
+ */
 public void
 setFlag(int bit) {
 	flags[bit] = true;
 }
 
-void
-setFlags(boolean [] _flags) {
-	flags = _flags;
-}
-
+/**
+ * Sets a flag to the supplied value
+ * @see Flag
+ */
 public void
 unsetFlag(int bit) {
 	flags[bit] = false;
 }
 
+/**
+ * Retrieves a flag
+ * @see Flag
+ */
 public boolean
 getFlag(int bit) {
 	return flags[bit];
@@ -74,57 +97,86 @@ getFlags() {
 	return flags;
 }
 
+/**
+ * Retrieves the message ID
+ */
 public int
 getID() {
 	return id & 0xFFFF;
 }
 
+/**
+ * Sets the message ID
+ */
 public void
 setID(int _id) {
 	id = _id;
 }
 
+/**
+ * Generates a random number suitable for use as a message ID
+ */
 static short
 randomID() {
 	Random random = new Random();
 	return (short) (random.nextInt() & 0xFFFF);
 }
 
+/**
+ * Sets the message's rcode
+ * @see Rcode
+ */
 public void
 setRcode(byte value) {
 	rcode = value;
 }
 
+/**
+ * Retrieves the mesasge's rcode
+ * @see Rcode
+ */
 public byte
 getRcode() {
 	return rcode;
 }
 
+/**
+ * Sets the message's opcode
+ * @see Opcode
+ */
 public void
 setOpcode(byte value) {
 	opcode = value;
 }
 
+/**
+ * Retrieves the mesasge's opcode
+ * @see Opcode
+ */
 public byte
 getOpcode() {
 	return opcode;
 }
 
-public void
+void
 setCount(int field, int value) {
 	counts[field] = (short) value;
 }
 
-public void
+void
 incCount(int field) {
 	counts[field]++;
 }
 
-public void
+void
 decCount(int field) {
 	counts[field]--;
 }
 
+/**
+ * Retrieves the record count for the given section
+ * @see Section
+ */
 public short
 getCount(int field) {
 	return counts[field];
@@ -155,6 +207,7 @@ readFlags(DataByteInputStream in) throws IOException {
 	rcode = (byte) (flags2 & 0xF);
 }
 
+/** Converts the header's flags into a String */
 public String
 printFlags() {
 	String s;
@@ -168,6 +221,7 @@ printFlags() {
 	return sb.toString();
 }
 
+/** Converts the header into a String */
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
@@ -185,6 +239,7 @@ toString() {
 	return sb.toString();
 }
 
+/* Creates a new Header identical to the current one */
 public Object
 clone() {
 	Header h = new Header();

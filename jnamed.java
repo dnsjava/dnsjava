@@ -292,26 +292,26 @@ formerrMessage(byte [] in) {
 	Header header;
 	try {
 		header = new Header(new DataByteInputStream(in));
-		for (int i = 0; i < 4; i++)
-			header.setCount(i, 0);
 	}
 	catch (IOException e) {
 		header = new Header(0);
 	}
 	Message response = new Message();
-	header.setRcode(Rcode.FORMERR);
 	response.setHeader(header);
+	for (int i = 0; i < 4; i++)
+		response.removeAllRecords(i);
+	header.setRcode(Rcode.FORMERR);
 	return response;
 }
 
 public Message
 notimplMessage(Message query) {
 	Header header = query.getHeader();
-	for (int i = 0; i < 4; i++)
-		header.setCount(i, 0);
 	Message response = new Message();
-	header.setRcode(Rcode.NOTIMPL);
 	response.setHeader(header);
+	for (int i = 0; i < 4; i++)
+		response.removeAllRecords(i);
+	header.setRcode(Rcode.NOTIMPL);
 	return response;
 }
 
