@@ -173,6 +173,15 @@ findNetware() {
  */
 private void
 findWin(InputStream in) {
+	String packageName = ResolverConfig.class.getPackage().getName();
+	String resPackageName = packageName + ".windows.DNSServer";
+	ResourceBundle res = ResourceBundle.getBundle(resPackageName);
+
+	String host_name = res.getString("host_name");
+	String primary_dns_suffix = res.getString("primary_dns_suffix_key");
+	String dns_suffix = res.getString("dns_suffix");
+	String dns_servers = res.getString("dns_servers");
+
 	BufferedReader br = new BufferedReader(new InputStreamReader(in));
 	try {
 		List lserver = new ArrayList();
@@ -193,7 +202,7 @@ findWin(InputStream in) {
 				readingSearches = false;
 			}
 			
-			if (line.indexOf("Host Name") != -1) {
+			if (line.indexOf(host_name) != -1) {
 				while (st.hasMoreTokens())
 					s = st.nextToken();
 				Name name;
@@ -206,7 +215,7 @@ findWin(InputStream in) {
 				if (name.labels() == 1)
 					continue;
 				addSearch(s, lsearch);
-			} else if (line.indexOf("Primary Dns Suffix") != -1) {
+			} else if (line.indexOf(primary_dns_suffix) != -1) {
 				while (st.hasMoreTokens())
 					s = st.nextToken();
 				if (s.equals(":"))
@@ -214,7 +223,7 @@ findWin(InputStream in) {
 				addSearch(s, lsearch);
 				readingSearches = true;
 			} else if (readingSearches ||
-				   line.indexOf("DNS Suffix") != -1)
+				   line.indexOf(dns_suffix) != -1)
 			{
 				while (st.hasMoreTokens())
 					s = st.nextToken();
@@ -223,7 +232,7 @@ findWin(InputStream in) {
 				addSearch(s, lsearch);
 				readingSearches = true;
 			} else if (readingServers ||
-				   line.indexOf("DNS Servers") != -1)
+				   line.indexOf(dns_servers) != -1)
 			{
 				while (st.hasMoreTokens())
 					s = st.nextToken();

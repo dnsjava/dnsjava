@@ -1,3 +1,8 @@
+2/8/2004
+	- Add infrastructure for parsing the output of ipconfig on
+	  non-English version of windows, and add support for German
+	  and Polish. (based on a patch by Piotr Kochanski)
+
 2/7/2004
 	- Add Options.refresh() (based on a patch from Th Kuhne)
 	- Add the ResolverConfig class, which is largely based on the
