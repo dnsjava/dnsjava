@@ -1,6 +1,6 @@
 3/4/2004 - 3/10/2004
 	- Add support for more record types (AFSDB, ISDN, MB, MD, MF, MG,
-	  MINFO, MR, NSAP, NULL, PX, RT, WKS, X25).
+	  MINFO, MR, NSAP, NSAP-PTR, NULL, PX, RT, WKS, X25).
 
 3/3/2004
 	- Cached NXDOMAINs were ignored, which caused extra queries to
