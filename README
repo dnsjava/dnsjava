@@ -27,7 +27,7 @@ concept.
 
 Getting started:
 
-Run 'make' or 'ant' from the toplevel directory to build dnsjava.  JDK 1.2
+Run 'make' or 'ant' from the toplevel directory to build dnsjava.  JDK 1.4
 or higher is required.
 
 To compile dnssec support (org.xbill.DNS.security), the Java Cryptography
