@@ -70,48 +70,34 @@ setDefaultResolver(String hostname) {
 	defaultResolver = hostname;
 }
 
-/** Sets the port to communicate with on the server */
 public void
 setPort(int port) {
 	this.port = port;
 }
 
-/** Sets whether TCP connections will be sent by default */
 public void
 setTCP(boolean flag) {
 	this.useTCP = flag;
 }
 
-/** Sets whether truncated responses will be returned */
 public void
 setIgnoreTruncation(boolean flag) {
 	this.ignoreTruncation = flag;
 }
 
-/** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
 public void
 setEDNS(int level) {
+	if (level != 0 && level != -1)
+		throw new UnsupportedOperationException("invalid EDNS level " +
+							"- must be 0 or -1");
 	this.EDNSlevel = (byte) level;
 }
 
-/**
- * Specifies the TSIG key that messages will be signed with
- * @param name The key name
- * @param key The key data
- */
 public void
 setTSIGKey(Name name, byte [] key) {
 	tsig = new TSIG(name, key);
 }
 
-/**
- * Specifies the TSIG key that messages will be signed with
- * @param name The key name
- * @param key The key data, represented as either a base64 encoded string
- * or (if the first character is ':') a hex encoded string
- * @throws IllegalArgumentException The key name is an invalid name
- * @throws IllegalArgumentException The key data is improperly encoded
- */
 public void
 setTSIGKey(String name, String key) {
 	byte [] keyArray;
@@ -131,23 +117,11 @@ setTSIGKey(String name, String key) {
 	setTSIGKey(keyname, keyArray);
 }
 
-/**
- * Specifies the TSIG key (with the same name as the local host) that
- * messages will be signed with.
- * @param key The key data, represented as either a base64 encoded string
- * or (if the first character is ':') a hex encoded string
- * @throws IllegalArgumentException The key data is improperly encoded
- * @throws UnknownHostException The local host name could not be determined
- */
 public void
 setTSIGKey(String key) throws UnknownHostException {
 	setTSIGKey(InetAddress.getLocalHost().getHostName(), key);
 }
 
-/**
- * Sets the amount of time to wait for a response before giving up.
- * @param secs The number of seconds to wait.
- */
 public void
 setTimeout(int secs) {
 	timeoutValue = secs * 1000;
@@ -209,9 +183,10 @@ sendTCP(Message query, byte [] out) throws IOException {
 }
 
 /**
- * Sends a message, and waits for a response.  The exact behavior depends
- * on the options that have been set.
- * @return The response
+ * Sends a message to a single server and waits for a response.
+ * @param query The query to send.
+ * @return The response.
+ * @throws IOException An error occurred while sending or receiving.
  */
 public Message
 send(Message query) throws IOException {
@@ -303,8 +278,12 @@ send(Message query) throws IOException {
 }
 
 /**
- * Asynchronously sends a message, registering a listener to receive a callback.
- * Multiple asynchronous lookups can be performed in parallel.
+ * Asynchronously sends a message to a single server, registering a listener
+ * to receive a callback on success or exception.  Multiple asynchronous
+ * lookups can be performed in parallel.  Since the callback may be invoked
+ * before the function returns, external synchronization is necessary.
+ * @param query The query to send
+ * @param listener The object containing the callbacks.
  * @return An identifier, which is also a parameter in the callback
  */
 public Object

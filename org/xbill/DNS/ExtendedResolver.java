@@ -153,77 +153,48 @@ sendTo(Message query, Receiver receiver, Map idMap, int r) {
 	}
 }
 
-/** Sets the port to communicate with on the servers */
 public void
 setPort(int port) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setPort(port);
 }
 
-/** Sets whether TCP connections will be sent by default */
 public void
 setTCP(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTCP(flag);
 }
 
-/** Sets whether truncated responses will be returned */
 public void
 setIgnoreTruncation(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setIgnoreTruncation(flag);
 }
 
-/** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
 public void
 setEDNS(int level) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setEDNS(level);
 }
 
-/**
- * Specifies the TSIG key that messages will be signed with
- * @param name The key name
- * @param key The key data
- */
 public void
 setTSIGKey(Name name, byte [] key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
 }
 
-/**
- * Specifies the TSIG key that messages will be signed with
- * @param name The key name
- * @param key The key data, represented as either a base64 encoded string
- * or (if the first character is ':') a hex encoded string
- * @throws IllegalArgumentException The key name is an invalid name
- * @throws IllegalArgumentException The key data is improperly encoded
- */
 public void
 setTSIGKey(String name, String key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(name, key);
 }
 
-/**
- * Specifies the TSIG key (with the same name as the local host) that
- * messages will be signed with.
- * @param key The key data, represented as either a base64 encoded string
- * or (if the first character is ':') a hex encoded string
- * @throws IllegalArgumentException The key data is improperly encoded
- * @throws UnknownHostException The local host name could not be determined
- */
 public void
 setTSIGKey(String key) throws UnknownHostException {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(key);
 }
 
-/**
- * Sets the amount of time to wait for a response before giving up.
- * @param secs The number of seconds to wait.
- */
 public void
 setTimeout(int secs) {
 	for (int i = 0; i < resolvers.size(); i++)
@@ -231,10 +202,12 @@ setTimeout(int secs) {
 }
 
 /**
- * Sends a message, and waits for a response.  Multiple servers are queried,
+ * Sends a message and waits for a response.  Multiple servers are queried,
  * and queries are sent multiple times until either a successful response
  * is received, or it is clear that there is no successful response.
- * @return The response
+ * @param query The query to send.
+ * @return The response.
+ * @throws IOException An error occurred while sending or receiving.
  */
 public Message
 send(Message query) throws IOException {
@@ -327,9 +300,14 @@ send(Message query) throws IOException {
 }
 
 /**
- * Asynchronously sends a message, registering a listener to receive a callback
- * Multiple asynchronous lookups can be performed in parallel.
- * @return An identifier
+ * Asynchronously sends a message to multiple servers, potentially multiple
+ * times, registering a listener to receive a callback on success or exception.
+ * Multiple asynchronous lookups can be performed in parallel.  Since the
+ * callback may be invoked before the function returns, external
+ * synchronization is necessary.
+ * @param query The query to send
+ * @param listener The object containing the callbacks.
+ * @return An identifier, which is also a parameter in the callback
  */
 public Object
 sendAsync(final Message query, final ResolverListener listener) {
