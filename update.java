@@ -140,7 +140,9 @@ update(InputStream in) throws IOException {
 			else if (operation.equals("glue"))
 				doGlue(st);
 
-			else if (operation.equals("help")) {
+			else if (operation.equals("help") ||
+				 operation.equals("?"))
+			{
 				if (st.hasMoreTokens())
 					help(st.nextToken());
 				else
@@ -160,6 +162,11 @@ update(InputStream in) throws IOException {
 
 			else if (operation.equals("show")) {
 				print(query);
+			}
+
+			else if (operation.equals("clear")) {
+				query = new Message();
+				query.getHeader().setOpcode(Opcode.UPDATE);
 			}
 
 			else if (operation.equals("query"))
@@ -531,10 +538,11 @@ help(String topic) {
 	System.out.println();
 	if (topic == null)
 		System.out.println("The following are supported commands:\n" +
-		      "add      assert   class    delete   echo     file\n" +
-		      "glue     help     log      key      edns     origin\n" +
-		      "port     prohibit query    quit     require  send\n" +
-		      "server   show     tcp      ttl      zone     #\n");
+		    "add      assert   class    clear    delete   echo\n" +
+		    "file     glue     help     log      key      edns\n" +
+		    "origin   port     prohibit query    quit     require\n" +
+		    "send     server   show     tcp      ttl      zone\n" +
+		    "#\n");
 
 	else if (topic.equalsIgnoreCase("add"))
 		System.out.println(
@@ -552,6 +560,10 @@ help(String topic) {
 		System.out.println(
 			"class <class>\n\n" +
 			"class of the zone to be updated (default: IN)\n");
+	else if (topic.equalsIgnoreCase("clear"))
+		System.out.println(
+			"clear\n\n" +
+			"clears the current update packet\n");
 	else if (topic.equalsIgnoreCase("delete"))
 		System.out.println(
 			"delete <name> [ttl] [class] <type> <data> \n" +
@@ -574,7 +586,7 @@ help(String topic) {
 			"specify an additional record\n");
 	else if (topic.equalsIgnoreCase("help"))
 		System.out.println(
-			"help\n" +
+			"?/help\n" +
 			"help [topic]\n\n" +
 			"prints a list of commands or help about a specific\n" +
 			"command\n");
