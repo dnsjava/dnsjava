@@ -247,7 +247,10 @@ doAXFR(Name name, Message query, Socket s) {
  * TCP.
  */
 Message
-generateReply(Message query, byte [] in, int maxLength, Socket s) {
+generateReply(Message query, byte [] in, Socket s) {
+	boolean badversion;
+	int maxLength;
+
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
 		return errorMessage(query, Rcode.NOTIMPL);
 	Record queryRecord = query.getQuestion();
@@ -259,6 +262,18 @@ generateReply(Message query, byte [] in, int maxLength, Socket s) {
 		if (!tsig.verify(query, in, null))
 			return formerrMessage(in);
 	}
+
+	OPTRecord queryOPT = query.getOPT();
+	if (queryOPT != null && queryOPT.getVersion() > 0)
+		badversion = true;
+
+	if (s != null)
+		maxLength = 65535;
+	else if (queryOPT != null)
+		maxLength = queryOPT.getPayloadSize();
+	else
+		maxLength = 512;
+
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(Flags.QR);
@@ -438,7 +453,7 @@ serveTCP(short port) {
 			Message query, response;
 			try {
 				query = new Message(in);
-				response = generateReply(query, in, 65535, s);
+				response = generateReply(query, in, s);
 				if (response == null)
 					continue;
 			}
@@ -476,12 +491,7 @@ serveUDP(short port) {
 			Message query, response;
 			try {
 				query = new Message(in);
-				OPTRecord opt = query.getOPT();
-				if (opt != null)
-					udpLength = opt.getPayloadSize();
-
-				response = generateReply(query, in, udpLength,
-							 null);
+				response = generateReply(query, in, null);
 				if (response == null)
 					continue;
 			}
