@@ -161,9 +161,6 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
        boolean querysent)
 {
 	Cache cache;
-	Record [] answers;
-	int answerCount = 0, n = 0;
-	Enumeration e;
 
 	if (iterations > 6)
 		return null;
@@ -176,19 +173,25 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 		System.err.println(cached);
 	if (cached.isSuccessful()) {
 		RRset [] rrsets = cached.answers();
-		answerCount = 0;
-		for (int i = 0; i < rrsets.length; i++)
-			answerCount += rrsets[i].size();
+		Vector v = new Vector();
+		Enumeration e;
+		Record [] answers;
+		int i = 0;
 
-		answers = new Record[answerCount];
-
-		for (int i = 0; i < rrsets.length; i++) {
+		for (i = 0; i < rrsets.length; i++) {
 			e = rrsets[i].rrs();
 			while (e.hasMoreElements()) {
-				Record r = (Record)e.nextElement();
-				answers[n++] = r;
+				v.addElement(e.nextElement());
 			}
 		}
+
+		answers = new Record[v.size()];
+
+		e = v.elements();
+		i = 0;
+		while (e.hasMoreElements())
+			answers[i++] = (Record)e.nextElement();
+		return answers;
 	}
 	else if (cached.isNXDOMAIN() || cached.isNXRRSET()) {
 		return null;
@@ -227,8 +230,6 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 
 		return lookup(name, type, dclass, cred, iterations, true);
 	}
-
-	return answers;
 }
 
 
