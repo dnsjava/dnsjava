@@ -103,6 +103,8 @@ findUnix() {
 					vsearch = new Vector();
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip domain */
+				if (!st.hasMoreTokens())
+					continue;
 				String s = st.nextToken();
 				if (!vsearch.contains(s))
 					vsearch.addElement(s);
