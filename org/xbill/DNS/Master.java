@@ -216,10 +216,12 @@ _nextRecord() throws IOException {
 				ttl = last.getTTL();
 		}
 
-		if ((dclass = DClass.value(s)) >= 0) {
-			s = st.getString();
-		} else {
-			dclass = DClass.IN;
+		if (!seen_class) {
+			if ((dclass = DClass.value(s)) >= 0) {
+				s = st.getString();
+			} else {
+				dclass = DClass.IN;
+			}
 		}
 
 		if ((type = Type.value(s)) < 0)
