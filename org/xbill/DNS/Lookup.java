@@ -360,6 +360,10 @@ processResponse(Name name, SetResponse response) {
 		done = true;
 	} else if (response.isNXDOMAIN()) {
 		nxdomain = true;
+		if (iterations > 0) {
+			result = HOST_NOT_FOUND;
+			done = true;
+		}
 	} else if (response.isNXRRSET()) {
 		result = TYPE_NOT_FOUND;
 		answers = null;

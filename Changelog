@@ -1,3 +1,7 @@
+11/17/2003
+	- The Lookup code didn't handle CNAMEs pointing at nonexistant names.
+	  (reported by Joseph Shraibman <jks@iname.com>)
+
 11/11/2003
 	- Store a weak reference to the Cache in the CacheCleaner thread, and
 	  kill the thread when the Cache is finalized.
