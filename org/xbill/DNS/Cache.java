@@ -74,7 +74,9 @@ private class Element {
 
 	public boolean
 	expiredTTL() {
-		return (System.currentTimeMillis() > timeIn + (1000 * ttl));
+		long now = System.currentTimeMillis();
+		long expire = timeIn + (1000 * (long)ttl);
+		return (now > expire);
 	}
 
 	public boolean
