@@ -95,7 +95,7 @@ rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
 		return;
 
 	dbs.writeShort(certType);
-	dbs.writeByte(keyTag);
+	dbs.writeShort(keyTag);
 	dbs.writeByte(alg);
 	dbs.write(cert);
 }
