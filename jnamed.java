@@ -17,7 +17,7 @@ Map znames;
 Map TSIGs;
 
 public
-jnamed(String conffile) throws IOException {
+jnamed(String conffile) throws IOException, ZoneTransferException {
 	FileInputStream fs;
 	List ports = new ArrayList();
 	List addresses = new ArrayList();
@@ -105,10 +105,11 @@ addPrimaryZone(String zname, String zonefile) throws IOException {
 }
 
 public void
-addSecondaryZone(String zone, String remote) throws IOException {
-	Cache cache = getCache(DClass.IN);
+addSecondaryZone(String zone, String remote)
+throws IOException, ZoneTransferException
+{
 	Name zname = Name.fromString(zone, Name.root);
-	Zone newzone = new Zone(zname, DClass.IN, remote, cache);
+	Zone newzone = new Zone(zname, DClass.IN, remote);
 	znames.put(zname, newzone);
 }
 
@@ -641,6 +642,9 @@ public static void main(String [] args) {
 		s = new jnamed(conf);
 	}
 	catch (IOException e) {
+		System.out.println(e);
+	}
+	catch (ZoneTransferException e) {
 		System.out.println(e);
 	}
 }
