@@ -1,3 +1,6 @@
+9/2/2003
+	- 1.4.1 released.
+
 9/1/2003
 	- The Update.delete(Record) method needs to reset the TTL of the cloned
 	  record to 0. (reported by Edwin R. Rivera <erivera@moniker.com>)
