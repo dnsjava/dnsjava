@@ -211,6 +211,7 @@ fromString(String s, Name origin) throws TextParseException {
 				bitstring = false;
 				name.name[name.labels++] =
 						new BitString(newlabel);
+				name.hasBitString = true;
 			}
 			else
 				name.name[name.labels++] = newlabel;
