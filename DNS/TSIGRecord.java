@@ -57,8 +57,12 @@ void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
 
 void rrToBytes(DataOutputStream out) throws IOException {
 	alg.toBytes(out);
-	long time = (((timeSigned.getTime() / 1000) << 16) + fudge);
-	out.writeLong(time);
+	long time = timeSigned.getTime() / 1000;
+	short timeHigh = (short) (time >> 32);
+	int timeLow = (int) (time);
+	out.writeShort(timeHigh);
+	out.writeInt(timeLow);
+	out.writeShort(fudge);
 
 	out.writeShort((short)signature.length);
 	out.write(signature);

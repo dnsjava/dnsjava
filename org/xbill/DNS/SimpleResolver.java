@@ -65,7 +65,8 @@ dnsMessage sendTCP(byte [] out) throws IOException {
 
 	s.close();
 	dnsMessage response = parse(in);
-	TSIG.verify(response);
+	if (TSIG != null)
+		TSIG.verify(response);
 	return response;
 }
 

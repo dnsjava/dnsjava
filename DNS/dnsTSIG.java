@@ -10,32 +10,52 @@ dnsTSIG(byte [] key) {
 	this.key = key;
 }
 
-private static byte [] toCanonicalBytes(dnsMessage m) throws IOException {
-        ByteArrayOutputStream os;
+private static byte [] toBytes(dnsMessage m) throws IOException {
+	ByteArrayOutputStream os;
 
-        os = new ByteArrayOutputStream();
-        m.toCanonicalBytes(new DataOutputStream(os));
-        return os.toByteArray();
+	os = new ByteArrayOutputStream();
+	m.toBytes(new DataOutputStream(os));
+	return os.toByteArray();
 }
 
 void apply(dnsMessage m) {
 	hmacSigner h = new hmacSigner(key);
+
+	Date timeSigned = new Date();
+	short fudge = 300;
+	String local;
 	try {
-		h.addData(toCanonicalBytes(m));
+		local = InetAddress.getLocalHost().getHostName();
+	}
+	catch (UnknownHostException e) {
+		return;
+	}
+	dnsName name = new dnsName(local);
+	dnsName alg = new dnsName(dns.HMAC);
+
+	try {
+		h.addData(toBytes(m));
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		DataOutputStream dout = new DataOutputStream(out);
+		alg.toCanonicalBytes(dout);
+		long time = timeSigned.getTime() / 1000;
+		short timeHigh = (short) (time >> 32);
+		int timeLow = (int) (time);
+		dout.writeShort(timeHigh);
+		dout.writeInt(timeLow);
+		dout.writeShort(fudge);
+
+		dout.writeShort(0); /* No error */
+		dout.writeShort(0); /* No other data */
+
+		h.addData(out.toByteArray());
 	}
 	catch (IOException e) {
 		return;
 	}
-	try {
-		String local = InetAddress.getLocalHost().getHostName();
-		dnsRecord r;
-		r = new dnsTSIGRecord(new dnsName(local), dns.IN, 0,
-				      new dnsName(dns.HMAC), new Date(),
-				      (short)300, h.sign(), dns.NOERROR, null);
-		m.addRecord(dns.ADDITIONAL, r);
-	}
-	catch (UnknownHostException e) {
-	}
+	dnsRecord r = new dnsTSIGRecord(name, dns.IN, 0, alg, timeSigned, fudge,
+					h.sign(), dns.NOERROR, null);
+	m.addRecord(dns.ADDITIONAL, r);
 }
 
 /*
@@ -55,7 +75,7 @@ boolean verify(dnsMessage m) {
 
 	hmacSigner h = new hmacSigner(key);
 	try {
-		h.addData(toCanonicalBytes(m));
+		h.addData(toBytes(m));
 	}
 	catch (IOException e) {
 		return false;
