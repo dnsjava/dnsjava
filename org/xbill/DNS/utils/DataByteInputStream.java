@@ -131,7 +131,9 @@ readString() throws IOException {
 	if (len == -1)
 		throw new IOException("no bytes left to read");
 	byte [] b = new byte[len];
-	read(b);
+	int n = read(b);
+	if (n < len)
+		throw new IOException("no bytes left to read");
 	return new String(b);
 }
 
@@ -144,7 +146,9 @@ readString() throws IOException {
 public BigInteger
 readBigInteger(int len) throws IOException {
 	byte [] b = new byte[len + 1];
-	read(b, 1, len);
+	int n = read(b, 1, len);
+	if (n < len)
+		throw new IOException("no bytes left to read");
 	return new BigInteger(b);
 }
 
