@@ -40,6 +40,8 @@ jnamed(String conffile) throws IOException {
 			System.out.println("Invalid line: " + line);
 			continue;
 		}
+		if (keyword.charAt(0) == '#')
+			continue;
 		if (keyword.equals("primary"))
 			addPrimaryZone(st.nextToken());
 		if (keyword.equals("secondary"))
@@ -258,7 +260,6 @@ generateReply(Message query, byte [] in, int maxLength, Socket s) {
 	}
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
-	response.getHeader().setFlag(Flags.AA);
 	response.getHeader().setFlag(Flags.QR);
 	response.addRecord(queryRecord, Section.QUESTION);
 
@@ -273,6 +274,7 @@ generateReply(Message query, byte [] in, int maxLength, Socket s) {
 		return notimplMessage(query);
 	Zone zone = findBestZone(name);
 	if (zone != null) {
+		response.getHeader().setFlag(Flags.AA);
 		SetResponse zr = zone.findRecords(name, type);
 		if (zr.isNXDOMAIN())
 			response.getHeader().setRcode(Rcode.NXDOMAIN);
