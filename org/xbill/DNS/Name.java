@@ -16,7 +16,36 @@ import org.xbill.DNS.utils.*;
 
 public class Name {
 
-private String [] name;
+class BitString {
+	int nbits;
+	byte [] data;
+
+	BitString(int _nbits, byte [] _data) {
+		nbits = _nbits;
+		data = _data;
+	}
+
+	int
+	bytes() {
+		return (nbits + 7) & ~7;
+	}
+
+	public String
+	toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("\\[x");
+		for (int i = 0; i < bytes(); i++) {
+			int high = data[i] >>> 4;
+			int low = data[i];
+			sb.append(Integer.toHexString(high));
+			sb.append(Integer.toHexString(low));
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+}
+
+private Object [] name;
 private byte labels;
 private boolean qualified;
 
@@ -24,7 +53,7 @@ private boolean qualified;
 public static Name root = new Name("");
 
 /** The maximum number of labels in a Name */
-static final int MAXLABELS = 64;
+static final int MAXLABELS = 256;
 
 /**
  * Create a new name from a string and an origin
@@ -34,7 +63,7 @@ static final int MAXLABELS = 64;
 public
 Name(String s, Name origin) {
 	labels = 0;
-	name = new String[MAXLABELS];
+	name = new Object[MAXLABELS];
 
 	if (s.equals("@") && origin != null) {
 		append(origin);
@@ -100,21 +129,6 @@ Name(DataByteInputStream in, Compression c) throws IOException {
 loop:
 	while ((len = in.readUnsignedByte()) != 0) {
 		switch(len & 0xC0) {
-		case 0xC0:
-		{
-			int pos = in.readUnsignedByte();
-			pos += ((len & ~0xC0) << 8);
-			Name name2 = (c == null) ? null : c.get(pos);
-/*System.out.println("Looking for name at " + pos + ", found " + name2);*/
-			if (name2 == null)
-				name[labels++] = new String("<compressed>");
-			else {
-				System.arraycopy(name2.name, 0, name, labels,
-						 name2.labels);
-				labels += name2.labels;
-			}
-			break loop;
-		}
 		case 0:
 		{
 			byte [] b = new byte[len];
@@ -123,28 +137,58 @@ loop:
 			count++;
 			break;
 		}
+		case 0xC0:
+		{
+			int pos = in.readUnsignedByte();
+			pos += ((len & ~0xC0) << 8);
+			Name name2 = (c == null) ? null : c.get(pos);
+/*System.out.println("Looking for name at " + pos + ", found " + name2);*/
+			if (name2 == null)
+				throw new WireParseException("bad compression");
+			else {
+				System.arraycopy(name2.name, 0, name, labels,
+						 name2.labels);
+				labels += name2.labels;
+			}
+			break loop;
+		}
 		case 0x40:
 		{
 			int type = len & 0x3F;
 			switch (type) {
 			case 0:
-				throw new IOException("Long compression");
+				int pos = in.readUnsignedShort();
+				Name name2 = (c == null) ? null : c.get(pos);
+/*System.out.println("Looking for name at " + pos + ", found " + name2);*/
+				if (name2 == null)
+					throw new WireParseException(
+							"bad compression");
+				else {
+					System.arraycopy(name2.name, 0, name,
+							 labels, name2.labels);
+					labels += name2.labels;
+				}
+				break loop;
 			case 1:
 			{
 				int bits = in.readUnsignedByte();
-				int bytes = (bits + 7) & 7;
+				int bytes = (bits + 7) & ~7;
 				byte [] data = new byte[bytes];
 				in.read(data);
-				throw new IOException("Binary label format");
+				name[labels++] = new BitString(bits, data);
+				count++;
+				break;
 			}
 			case 2:
-				throw new IOException("Long local compression");
+				throw new WireParseException(
+						"Long local compression");
 			default:
-				throw new IOException("Unknown name format");
+				throw new WireParseException(
+						"Unknown name format");
 			} /* switch */
 		}
 		case 0x80:
-			throw new IOException("Local compression");
+			throw new WireParseException("Local compression");
 		} /* switch */
 	}
 	if (c != null) 
@@ -152,7 +196,10 @@ loop:
 			Name tname = new Name(this, i);
 			c.add(pos, tname);
 /*System.out.println("(D) Adding " + tname + " at " + pos);*/
-			pos += (name[i].length() + 1);
+			if (name[i] instanceof String)
+				pos += (((String)name[i]).length() + 1);
+			else
+				pos += (((BitString)name[i]).nbits + 2);
 		}
 	qualified = true;
 }
@@ -214,8 +261,12 @@ append(Name d) {
 public short
 length() {
 	short total = 0;
-	for (int i = 0; i < labels; i++)
-		total += (name[i].length() + 1);
+	for (int i = 0; i < labels; i++) {
+		if (name[i] instanceof String)
+			total += (((String)name[i]).length() + 1);
+		else
+			total += (((BitString)name[i]).bytes() + 2);
+	}
 	return ++total;
 }
 
@@ -249,7 +300,7 @@ toString() {
 	StringBuffer sb = new StringBuffer();
 	if (labels == 0)
 		sb.append(".");
-	for (int i=0; i<labels; i++) {
+	for (int i = 0; i < labels; i++) {
 		sb.append(name[i]);
 		if (qualified || i < labels - 1)
 			sb.append(".");
@@ -262,7 +313,7 @@ toString() {
  */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
-	for (int i=0; i<labels; i++) {
+	for (int i = 0; i < labels; i++) {
 		Name tname = new Name(this, i);
 		int pos;
 		if (c != null)
@@ -279,7 +330,13 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
 			if (c != null)
 				c.add(out.getPos(), tname);
 /*System.out.println("(C) Adding " + tname + " at " + out.getPos());*/
-			out.writeString(name[i]);
+			if (name[i] instanceof String)
+				out.writeString((String)name[i]);
+			else {
+				out.writeByte(0xC0 | 1);
+				out.writeByte(((BitString)name[i]).nbits);
+				out.write(((BitString)name[i]).data);
+			}
 		}
 	}
 	out.writeByte(0);
@@ -290,10 +347,14 @@ toWire(DataByteOutputStream out, Compression c) throws IOException {
  */
 public void
 toWireCanonical(DataByteOutputStream out) throws IOException {
-	for (int i=0; i<labels; i++) {
-		out.writeByte(name[i].length());
-		for (int j=0; j<name[i].length(); j++)
-			out.writeByte(Character.toLowerCase(name[i].charAt(j)));
+	for (int i = 0; i < labels; i++) {
+		if (name[i] instanceof String)
+			out.writeStringCanonical((String)name[i]);
+		else {
+			out.writeByte(0xC0 | 1);
+			out.writeByte(((BitString)name[i]).nbits);
+			out.write(((BitString)name[i]).data);
+		}
 	}
 	out.writeByte(0);
 }
@@ -309,8 +370,23 @@ equals(Object arg) {
 	if (d.labels != labels)
 		return false;
 	for (int i = 0; i < labels; i++) {
-		if (!d.name[i].equalsIgnoreCase(name[i]))
+		if (name[i].getClass() != d.name[i].getClass())
 			return false;
+		if (name[i] instanceof String) {
+			String s1 = (String) name[i];
+			String s2 = (String) d.name[i];
+			if (!s1.equalsIgnoreCase(s2))
+				return false;
+		}
+		else {
+			BitString b1 = (BitString) name[i];
+			BitString b2 = (BitString) d.name[i];
+			if (b1.nbits != b2.nbits)
+				return false;
+			for (int j = 0; j < b1.bytes(); j++)
+				if (b1.data[j] != b2.data[j])
+					return false;
+		}
 	}
 	return true;
 }
@@ -322,8 +398,16 @@ public int
 hashCode() {
 	int code = labels;
 	for (int i = 0; i < labels; i++) {
-		for (int j = 0; j < name[i].length(); j++)
-			code += Character.toLowerCase(name[i].charAt(j));
+		if (name[i] instanceof String) {
+			String s = (String) name[i];
+			for (int j = 0; j < s.length(); j++)
+				code += Character.toLowerCase(s.charAt(j));
+		}
+		else {
+			BitString b = (BitString) name[i];
+			for (int j = 0; j < b.bytes(); j++)
+				code += b.data[i];
+		}
 	}
 	return code;
 }
