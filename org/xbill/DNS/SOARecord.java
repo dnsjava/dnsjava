@@ -25,7 +25,7 @@ getObject() {
 
 /**
  * Creates an SOA Record from the given data
- * @param host The primary nameserver for the zone
+ * @param host The primary name server for the zone
  * @param admin The zone administrator's address
  * @param serial The zone's serial number
  * @param refresh The amount of time until a secondary checks for a new serial
@@ -105,7 +105,7 @@ rrToString() {
 	return sb.toString();
 }
 
-/** Returns the primary nameserver */
+/** Returns the primary name server */
 public Name
 getHost() {  
 	return host;
