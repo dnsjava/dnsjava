@@ -11,6 +11,7 @@ Command line programs:
 		-t  : use TCP by default
 		-i  : ignore truncation errors
 		-e n: Use EDNS level n (only 0 is complete)
+		-d  : Set the DNSSEC OK bit
 
 - update:
 	A dynamic update client with some extra functionality.  This can be

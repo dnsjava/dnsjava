@@ -58,6 +58,7 @@ main(String argv[]) throws IOException {
 	int arg;
 	Message query, response;
 	Record rec;
+	Record opt = null;
 	Resolver res = null;
 
 	if (argv.length < 1) {
@@ -150,6 +151,11 @@ main(String argv[]) throws IOException {
 				res.setEDNS(edns);
 				break;
 
+			    case 'd':
+			    	opt = new OPTRecord((short)1280, (byte)0,
+						    (byte)0, Flags.DO);
+				break;
+
 			    default:
 				System.out.print("Invalid option");
 				System.out.println(argv[arg]);
@@ -165,6 +171,8 @@ main(String argv[]) throws IOException {
 
 	rec = Record.newRecord(name, type, _class);
 	query = Message.newQuery(rec);
+	if (opt != null)
+		query.addRecord(opt, Section.ADDITIONAL);
 	response = res.send(query);
 
 	if (type == Type.AXFR)

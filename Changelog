@@ -6,6 +6,7 @@
 	  with one number after a double colon.
 	- Key footprints were computed incorrectly.  Also cache footprints
 	  in the KEYRecord to avoid recomputation. (David Blacka)
+	- Added the -d flag to dig, which sets the DNSSEC OK bit.
 
 7/13/2001
 	- KEY flags were incorrect (David Blacka <davidb@research.netsol.com>)
