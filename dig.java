@@ -53,7 +53,7 @@ doAXFR(Message response) throws IOException {
 
 public static void
 main(String argv[]) throws IOException {
-	String server;
+	String server = null;
 	int arg;
 	Message query, response;
 	Record rec;
@@ -68,12 +68,8 @@ main(String argv[]) throws IOException {
 
 	try {
 		arg = 0;
-		if (argv[arg].startsWith("@")) {
+		if (argv[arg].startsWith("@"))
 			server = argv[arg++].substring(1);
-			res = new SimpleResolver(server);
-		}
-		else
-			res = new ExtendedResolver();
 
 		String nameString = argv[arg++];
 		if (nameString.equals("-x")) {
@@ -95,6 +91,13 @@ main(String argv[]) throws IOException {
 			else
 				arg++;
 		}
+
+		if (server != null)
+			res = new SimpleResolver(server);
+		else if (type == Type.AXFR)
+			res = new SimpleResolver();
+		else
+			res = new ExtendedResolver();
 
 		while (argv[arg].startsWith("-") && argv[arg].length() > 1) {
 			switch (argv[arg].charAt(1)) {
