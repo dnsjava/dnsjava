@@ -233,10 +233,7 @@ findRecords(Name name, short type) {
 
 	Object [] objects = (Object []) o;
 
-	RRset [] rrsets = new RRset[objects.length];
-	System.arraycopy(objects, 0, rrsets, 0, objects.length);
-
-	RRset rrset = rrsets[0];
+	RRset rrset = (RRset) objects[0];
 	if (name.equals(rrset.getName())) {
 		if (type != Type.CNAME && type != Type.ANY &&
 		    rrset.getType() == Type.CNAME)
@@ -250,8 +247,8 @@ findRecords(Name name, short type) {
 		}
 		else {
 			zr = new SetResponse(SetResponse.SUCCESSFUL);
-			for (int i = 0; i < rrsets.length; i++)
-				zr.addRRset(rrsets[i]);
+			for (int i = 0; i < objects.length; i++)
+				zr.addRRset((RRset)objects[i]);
 		}
 	} else {
 		if (rrset.getType() == Type.CNAME)

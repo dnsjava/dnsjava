@@ -311,13 +311,6 @@ lookupRecords(Name name, short type, byte minCred) {
 		return new SetResponse(SetResponse.UNKNOWN);
 	}
 
-	Element [] elements = new Element[nelements];
-	for (int i = 0, j = 0; i < objects.length; i++) {
-		if (objects[i] == null)
-			continue;
-		elements[j++] = (Element) objects[i];
-	}
-
 	/*
 	 * We have something at the name.  It could be the answer,
 	 * a CNAME, DNAME, or NS, or a negative cache entry.
@@ -327,15 +320,18 @@ lookupRecords(Name name, short type, byte minCred) {
 	 * reduced number of lookups.
 	 */
 
-	for (int i = 0; i < elements.length; i++) {
-		RRset rrset = elements[i].rrset;
+	for (int i = 0; i < objects.length; i++) {
+		if (objects[i] == null)
+			continue;
+		Element element = (Element) objects[i];
+		RRset rrset = element.rrset;
 
 		/* Is this a negatively cached entry? */
 		if (rrset == null) {
 			/*
 			 * If this is an NXDOMAIN entry, return NXDOMAIN.
 			 */
-			if (elements[i].type == 0)
+			if (element.type == 0)
 				return new SetResponse(SetResponse.NXDOMAIN);
 
 			/*
