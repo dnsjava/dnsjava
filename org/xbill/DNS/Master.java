@@ -12,22 +12,21 @@ import org.xbill.DNS.utils.*;
  * one record at a time.  When directives are seen, they are added to the
  * state and used when parsing future records.
  *
- * Should support INCLUDE
- * 
  * @author Brian Wellington
  */
 
 public class Master {
 
-private Name origin = null;
+private Name origin;
 private BufferedReader br;
+private File file;
 private Record last = null;
 private int defaultTTL = 3600;
+private Master included = null;
 
-/** Begins parsing the specified file */
-public
-Master(String file) throws IOException {
+Master(File _file, Name defaultOrigin) throws IOException {
 	FileInputStream fis;
+	file = _file;
 	try {
 		fis = new FileInputStream(file);
 	}
@@ -35,6 +34,13 @@ Master(String file) throws IOException {
 		throw new IOException(e.toString());
 	}
 	br = new BufferedReader(new InputStreamReader(fis));
+	origin = defaultOrigin;
+}
+
+/** Begins parsing the specified file */
+public
+Master(String filename) throws IOException {
+	this(new File(filename), null);
 }
 
 /** Returns the next record in the master file */
@@ -43,6 +49,12 @@ nextRecord() throws IOException {
 	String line;
 	MyStringTokenizer st;
 
+	if (included != null) {
+		Record rec = included.nextRecord();
+		if (rec != null)
+			return rec;
+		included = null;
+	}
 	while (true) {
 		line = readExtendedLine(br);
 		if (line == null)
@@ -61,6 +73,14 @@ nextRecord() throws IOException {
 		if (s.equals("$TTL")) {
 			defaultTTL = parseTTL(st);
 			continue;
+		}
+		if (s.equals("$INCLUDE")) {
+			parseInclude(st);
+			/*
+			 * If we continued, we wouldn't be looking in
+			 * the new file.  Recursing works better.
+			 */
+			return nextRecord();
 		}
 		else if (s.charAt(0) == '$')
 			throw new IOException("Invalid directive: " + s);
@@ -81,6 +101,22 @@ parseTTL(MyStringTokenizer st) throws IOException {
 	if (!st.hasMoreTokens())
 		throw new IOException ("Missing TTL");
 	return new Integer(st.nextToken()).intValue();
+}
+
+private void
+parseInclude(MyStringTokenizer st) throws IOException {
+	if (!st.hasMoreTokens())
+		throw new IOException ("Missing file to include");
+	File newfile;
+	String filename = st.nextToken();
+	if (file.getParent() == null)
+		newfile = new File(filename);
+	else
+		newfile = new File(file.getParent(), filename);
+	if (st.hasMoreTokens())
+		included = new Master(newfile, new Name(st.nextToken()));
+	else
+		included = new Master(newfile, origin);
 }
 
 private Record
