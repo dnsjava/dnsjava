@@ -128,8 +128,24 @@ String rrToString() {
 	}
 	if (other != null) {
 		sb.append("\n\t <");
-		sb.append(other);
-		sb.append("\n\t >");
+		if (error == dns.BADTIME) {
+			try {
+				ByteArrayInputStream is;
+				is = new ByteArrayInputStream(other);
+				DataInputStream ds = new DataInputStream(is);
+				long time = ds.readUnsignedShort();
+				time <<= 32;
+				time += ((long)ds.readInt() & 0xFFFFFFFF);
+				sb.append("Server time: ");
+				sb.append(new Date(time * 1000));
+			}
+			catch (IOException e) {
+				sb.append("Truncated BADTIME other data");
+			}
+		}
+		else
+			sb.append(base64.toString(other));
+		sb.append(">");
 	}
 	sb.append(" )");
 	return sb.toString();
