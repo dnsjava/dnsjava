@@ -76,7 +76,7 @@ void
 rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	if (address == null)
 		return;
-	byte [] data = address.toBytes();
+	out.write(address.toBytes());
 }
 
 }

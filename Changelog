@@ -1,3 +1,7 @@
+7/14/2001
+	- Converting a AAAA record to wire format was broken.
+	  (David Blacka)
+
 7/13/2001
 	- KEY flags were incorrect (David Blacka <davidb@research.netsol.com>)
 	- Add routines for parsing a master file from a non-file input
