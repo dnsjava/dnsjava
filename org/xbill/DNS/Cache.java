@@ -114,7 +114,7 @@ private static class CacheCleaner extends Thread {
 	public
 	CacheCleaner(Cache cache, int cleanInterval) {
 		this.cacheref = new WeakReference(cache);
-		this.interval = cleanInterval * 60 * 1000;
+		this.interval = (long)cleanInterval * 60 * 1000;
 		setDaemon(true);
 		setName("org.xbill.DNS.Cache.CacheCleaner");
 		start();
@@ -807,8 +807,13 @@ setCleanInterval(int cleanInterval) {
 }
 
 protected void
-finalize() {
-	setCleanInterval(0);
+finalize() throws Throwable {
+	try {
+		setCleanInterval(0);
+	}
+	finally {
+		super.finalize();
+	}
 }
 
 }

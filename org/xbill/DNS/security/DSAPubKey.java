@@ -13,7 +13,7 @@ import java.security.interfaces.*;
 
 class DSAPubKey implements DSAPublicKey {
 
-class SimpleDSAParams implements DSAParams {
+static class SimpleDSAParams implements DSAParams {
 	private BigInteger P, Q, G;
 
 	public

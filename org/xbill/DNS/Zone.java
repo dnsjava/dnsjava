@@ -16,7 +16,6 @@ public class Zone extends NameSet {
 
 class ZoneIterator implements Iterator {
 	private Iterator znames;
-	private Name nextName;
 	private Object [] current;
 	int count;
 	boolean wantLastSOA;
@@ -53,7 +52,6 @@ class ZoneIterator implements Iterator {
 		}
 		Object set = current[count++];
 		if (count == current.length) {
-			nextName = null;
 			current = null;
 			while (znames.hasNext()) {
 				Name name = (Name) znames.next();
@@ -62,7 +60,6 @@ class ZoneIterator implements Iterator {
 				Object [] sets = findExactSets(name);
 				if (sets.length == 0)
 					continue;
-				nextName = name;
 				current = sets;
 				count = 0;
 				break;

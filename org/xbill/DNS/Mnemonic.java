@@ -41,7 +41,6 @@ private boolean numericok;
 /**
  * Creates a new Mnemonic table.
  * @param description A short description of the mnemonic to use when
- * @param max The maximum numeric value.
  * @param wordcase Whether to convert strings into uppercase, lowercase,
  * or leave them unchanged.
  * throwing exceptions.
@@ -50,7 +49,6 @@ public
 Mnemonic(String description, int wordcase) {
 	this.description = description;
 	this.wordcase = wordcase;
-	this.max = max;
 	strings = new HashMap();
 	values = new HashMap();
 }

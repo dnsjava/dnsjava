@@ -335,11 +335,6 @@ sameSet(Record r1, Record r2) {
 		r1.getName().equals(r2.getName()));
 }
 
-private static boolean
-sameSet(RRset set, Record rec) {
-	return (sameSet(set.first(), rec));
-}
-
 /**
  * Returns an array containing all records in the given section grouped into
  * RRsets.
