@@ -268,7 +268,7 @@ findExactMatch(Name name, short type) {
 public void
 addRecord(Record r) {
 	Name name = r.getName();
-	short type = r.getType();
+	short type = r.getRRsetType();
 	RRset rrset = (RRset) findExactSet (name, type, dclass);
 	if (rrset == null)
 		addSet(name, type, dclass, rrset = new RRset());
