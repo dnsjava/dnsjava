@@ -30,6 +30,13 @@ void toBytes(DataOutputStream out) throws IOException {
 		out.writeShort(counts[i]);
 }
 
+byte [] toBytes() throws IOException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	DataOutputStream dout = new DataOutputStream(out);
+	toBytes(dout);
+	return out.toByteArray();
+}
+
 void setFlag(int bit) {
 	flags[bit] = true;
 }

@@ -13,7 +13,7 @@ static dnsName name = null;
 static short type = dns.A, _class = dns.IN;
 
 static void usage() {
-	System.out.println("Usage: update @server name [-t ttl] [-p port]");
+	System.out.println("Usage: update @server name [-t ttl] [-p port] [-k key]");
 	System.exit(0);
 }
 
@@ -83,6 +83,16 @@ public static void main(String argv[]) throws IOException {
 				return;
 			}
 			res.setPort(port);
+			break;
+
+		    case 'k':
+			String keyStr;
+			if (argv[arg].length() > 2)
+				keyStr = argv[arg].substring(2);
+			else
+				keyStr = argv[++arg];
+			byte [] key = keyStr.getBytes();
+			res.setTSIGKey(key);
 			break;
 
 		    case 't':

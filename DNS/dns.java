@@ -72,6 +72,10 @@ static final byte YXRRSET = 7;
 static final byte NXRRSET = 8;
 static final byte NOTAUTH = 9;
 static final byte NOTZONE = 10;
+/* TSIG only rcodes */
+static final byte BADSIG = 16;
+static final byte BADKEY = 17;
+static final byte BADTIME = 18;
 
 /* Opcodes */
 static final byte QUERY = 0;
@@ -201,6 +205,9 @@ static {
 	rcodes.put(new Byte(NXRRSET), "NXRRSET");
 	rcodes.put(new Byte(NOTAUTH), "NOTAUTH");
 	rcodes.put(new Byte(NOTZONE), "NOTZONE");
+	rcodes.put(new Byte(BADSIG), "BADSIG");
+	rcodes.put(new Byte(BADKEY), "BADKEY");
+	rcodes.put(new Byte(BADTIME), "BADTIME");
 
 	opcodes.put(new Byte(QUERY), "QUERY");
 	opcodes.put(new Byte(NOTIFY), "NOTIFY");

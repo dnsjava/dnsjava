@@ -26,22 +26,7 @@ public void setTSIGKey(byte [] key) {
 	TSIG = new dnsTSIG(key);
 }
 
-private byte [] toBytes(dnsMessage m) throws IOException {
-	ByteArrayOutputStream os;
-
-	os = new ByteArrayOutputStream();
-	m.toBytes(new DataOutputStream(os));
-	return os.toByteArray();
-}
-
-private dnsMessage parse(byte [] in) throws IOException {
-	ByteArrayInputStream is;
-
-	is = new ByteArrayInputStream(in);
-	return new dnsMessage(new CountedDataInputStream(is));
-}
-
-dnsMessage sendTCP(byte [] out) throws IOException {
+dnsMessage sendTCP(dnsMessage query, byte [] out) throws IOException {
 	byte [] in;
 	Socket s;
 	int inLength;
@@ -64,9 +49,11 @@ dnsMessage sendTCP(byte [] out) throws IOException {
 	dataIn.readFully(in);
 
 	s.close();
-	dnsMessage response = parse(in);
-	if (TSIG != null)
-		TSIG.verify(response);
+	dnsMessage response = new dnsMessage(in);
+	if (TSIG != null) {
+		boolean ok = TSIG.verify(response, in, query.getTSIG());
+		System.out.println("TSIG verify: " + ok);
+	}
 	return response;
 }
 
@@ -74,6 +61,7 @@ public dnsMessage send(dnsMessage query) throws IOException {
 	byte [] out, in;
 	dnsMessage response;
 	DatagramSocket s;
+	DatagramPacket dp;
 
 	try {
 		s = new DatagramSocket();
@@ -86,29 +74,33 @@ public dnsMessage send(dnsMessage query) throws IOException {
 	if (TSIG != null)
 		TSIG.apply(query);
 
-	out = toBytes(query);
+	out = query.toBytes();
 	s.send(new DatagramPacket(out, out.length, addr, port));
 
-	in = new byte[512];
-	s.receive(new DatagramPacket(in, in.length));
-	response = parse(in);
-	if (TSIG != null)
-		TSIG.verify(response);
+	dp = new DatagramPacket(new byte[512], 512);
+	s.receive(dp);
+	in = new byte [dp.getLength()];
+	System.arraycopy(dp.getData(), 0, in, 0, in.length);
+	response = new dnsMessage(in);
+	if (TSIG != null) {
+		boolean ok = TSIG.verify(response, in, query.getTSIG());
+		System.out.println("TSIG verify: " + ok);
+	}
 
 	s.close();
 	if (response.getHeader().getFlag(dns.TC))
-		return sendTCP(out);
+		return sendTCP(query, out);
 	else
 		return response;
 }
 
-public dnsMessage sendAXFR(dnsMessage inMessage) throws IOException {
+public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 	byte [] out, in;
 	Socket s;
 	int inLength;
 	DataInputStream dataIn;
 	int soacount = 0;
-	dnsMessage outMessage;
+	dnsMessage response;
 
 	try {
 		s = new Socket(addr, dns.PORT);
@@ -118,18 +110,18 @@ public dnsMessage sendAXFR(dnsMessage inMessage) throws IOException {
 		return null;
 	}
 
-	out = toBytes(inMessage);
+	out = query.toBytes();
 	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
 	s.getOutputStream().write(out);
 
-	outMessage = new dnsMessage();
-	outMessage.getHeader().setID(inMessage.getHeader().getID());
+	response = new dnsMessage();
+	response.getHeader().setID(query.getHeader().getID());
 	while (true) {
 		dataIn = new DataInputStream(s.getInputStream());
 		inLength = dataIn.readUnsignedShort();
 		in = new byte[inLength];
 		dataIn.readFully(in);
-		dnsMessage m = parse(in);
+		dnsMessage m = new dnsMessage(in);
 		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
 		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
 		    m.getHeader().getCount(dns.AUTHORITY) != 0 ||
@@ -139,7 +131,7 @@ public dnsMessage sendAXFR(dnsMessage inMessage) throws IOException {
 		Enumeration e = v.elements();
 		while (e.hasMoreElements()) {
 			dnsRecord r = (dnsRecord)e.nextElement();
-			outMessage.addRecord(dns.ANSWER, r);
+			response.addRecord(dns.ANSWER, r);
 			if (r instanceof dnsSOARecord)
 				soacount++;
 		}
@@ -148,7 +140,7 @@ public dnsMessage sendAXFR(dnsMessage inMessage) throws IOException {
 	}
 
 	s.close();
-	return outMessage;
+	return response;
 }
 
 

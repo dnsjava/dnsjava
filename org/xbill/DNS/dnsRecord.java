@@ -82,6 +82,13 @@ void toBytes(DataOutputStream out, int section) throws IOException {
 	rrToBytes(out);
 }
 
+byte [] toBytes(int section) throws IOException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	DataOutputStream dout = new DataOutputStream(out);
+	toBytes(dout, section);
+	return out.toByteArray();
+}
+
 void rrToBytes(DataOutputStream out) throws IOException {
 	out.write(data);
 }

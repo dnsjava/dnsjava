@@ -358,14 +358,21 @@ class md {
 
 	return regs;
     }
+    private int ntohs(int i) {
+	long j = (i>>>24);
+	j +=  ((i>>>16)&0xFF) << 8;
+	j += ((i>>>8)&0xFF) << 16;
+	j += (i&0xFF) << 24;
+	return (int)j;
+    }
     byte[] toBytes() {
 	java.io.ByteArrayOutputStream b = new java.io.ByteArrayOutputStream();
 	java.io.DataOutputStream data = new java.io.DataOutputStream(b);
 	try {
-		data.writeInt(this.A);
-		data.writeInt(this.B);
-		data.writeInt(this.C);
-		data.writeInt(this.D);
+		data.writeInt(ntohs(this.A));
+		data.writeInt(ntohs(this.B));
+		data.writeInt(ntohs(this.C));
+		data.writeInt(ntohs(this.D));
 	}
 	catch (java.io.IOException e) {
 		System.out.println("oops...");

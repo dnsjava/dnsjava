@@ -36,9 +36,12 @@ public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
 void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
 	alg = new dnsName(in, c);
 
-	long time = in.readLong();
-	fudge = (short) time;
-	timeSigned = new Date (1000 * (time >>> 16));
+	short timeHigh = in.readShort();
+	int timeLow = in.readInt();
+	long time = ((long)timeHigh & 0xFFFF) << 32;
+	time += (long)timeLow & 0xFFFFFFFF;
+	timeSigned = new Date(time * 1000);
+	fudge = in.readShort();
 
 	int sigLen = in.readUnsignedShort();
 	signature = new byte[sigLen];
@@ -79,8 +82,12 @@ void rrToBytes(DataOutputStream out) throws IOException {
 
 void rrToCanonicalBytes(DataOutputStream out) throws IOException {
 	alg.toCanonicalBytes(out);
-	long time = (((timeSigned.getTime() / 1000) << 16) + fudge);
-	out.writeLong(time);
+	long time = timeSigned.getTime() / 1000;
+	short timeHigh = (short) (time >> 32);
+	int timeLow = (int) (time);
+	out.writeShort(timeHigh);
+	out.writeInt(timeLow);
+	out.writeShort(fudge);
 
 	out.writeShort((short)signature.length);
 	out.write(signature);
@@ -100,27 +107,26 @@ String rrToString() {
 		return null;
 	StringBuffer sb = new StringBuffer();
 	sb.append (alg);
-	sb.append (" ");
+	sb.append (" (\n\t");
 	sb.append (timeSigned.getTime() / 1000);
 	sb.append (" ");
-	sb.append (error);
-	sb.append (" (\n\t");
+	sb.append (dns.rcodeString(error));
+	sb.append (" ");
 	String s = base64.toString(signature);
 	for (int i = 0; i < s.length(); i += 64) {
-		sb.append ("\n\t");
-		if (i + 64 >= s.length()) {
+		if (i != 0)
+			sb.append ("\n\t");
+		if (i + 64 >= s.length())
 			sb.append(s.substring(i));
-			if (other != null) {
-				sb.append("\n\t <");
-				sb.append(other.length);
-				sb.append(" bytes of other data>");
-			}
-			sb.append(" )");
-		}
-		else {
+		else
 			sb.append(s.substring(i, i+64));
-		}
 	}
+	if (other != null) {
+		sb.append("\n\t <");
+		sb.append(other);
+		sb.append("\n\t >");
+	}
+	sb.append(" )");
 	return sb.toString();
 }
 
