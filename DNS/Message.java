@@ -7,12 +7,22 @@ import java.util.*;
 import java.io.*;
 import DNS.utils.*;
 
+/**
+ * A DNS Message.  A message is the basic unit of communication between
+ * the client and server of a DNS operation.  A message consists of a Header
+ * and 4 message sections.
+ * @see Resolver
+ * @see Header
+ * @see Section
+ */
+
 public class Message implements Cloneable {
 
 private Header header;
 private Vector [] sections;
 private int size;
 
+/** Creates a new Message with the specified Message ID */
 public
 Message(int id) {
 	sections = new Vector[4];
@@ -21,21 +31,26 @@ Message(int id) {
 	header = new Header(id);
 }
 
+/** Creates a new Message with a random Message ID */
 public
 Message() {
 	this(Header.randomID());
 }
 
+/**
+ * Creates a new Message with a random Message ID suitable for sending as a
+ * query.
+ * @param r A record containing the question
+ */
 public static Message
 newQuery(Record r) {
 	Message m = new Message();
 	m.header.setOpcode(Opcode.QUERY);
 	m.header.setFlag(Flags.RD);
-	m.addRecord(Section.QUESTION, r);
+	m.addRecord(r, Section.QUESTION);
 	return m;
 }
 
-public
 Message(DataByteInputStream in) throws IOException {
 	this();
 	Compression c = new Compression();
@@ -49,29 +64,48 @@ Message(DataByteInputStream in) throws IOException {
 	size = in.getPos();
 }
 
+/** Creates a new Message from its DNS wire format representation */
 public
 Message(byte [] b) throws IOException {
 	this(new DataByteInputStream(b));
 }
 
+/**
+ * Replaces the Header with a new one
+ * @see Header
+ */
 public void
 setHeader(Header h) {
 	header = h;
 }
 
+/**
+ * Retrieves the Header
+ * @see Header
+ */
 public Header
 getHeader() {
 	return header;
 }
 
+/**
+ * Adds a record to a section of the Message, and adjusts the header
+ * @see Record
+ * @see Section
+ */
 public void
-addRecord(int section, Record r) {
+addRecord(Record r, int section) {
 	sections[section].addElement(r);
 	header.incCount(section);
 }
 
+/**
+ * Removes a record from a section of the Message, and adjusts the header
+ * @see Record
+ * @see Section
+ */
 public boolean
-removeRecord(int section, Record r) {
+removeRecord(Record r, int section) {
 	if (sections[section].removeElement(r)) {
 		header.decCount(section);
 		return true;
@@ -80,17 +114,32 @@ removeRecord(int section, Record r) {
 		return false;
 }
 
+/**
+ * Removes all records from a section of the Message, and adjusts the header
+ * @see Record
+ * @see Section
+ */
 public void
 removeAllRecords(int section) {
 		sections[section].setSize(0);
 		header.setCount(section, (short)0);
 }
 
+/**
+ * Determines if the given record is already present in the given section
+ * @see Record
+ * @see Section
+ */
 public boolean
-findRecord(int section, Record r) {
+findRecord(Record r, int section) {
 	return (sections[section].contains(r));
 }
 
+/**
+ * Determines if the given record is already present in any section
+ * @see Record
+ * @see Section
+ */
 public boolean
 findRecord(Record r) {
 	return (sections[Section.ANSWER].contains(r) ||
@@ -98,6 +147,11 @@ findRecord(Record r) {
 		sections[Section.ADDITIONAL].contains(r));
 }
 
+/**
+ * Returns the first record in the QUESTION section
+ * @see Record
+ * @see Section
+ */
 public Record
 getQuestion() {
 	try {
@@ -108,6 +162,12 @@ getQuestion() {
 	}
 }
 
+/**
+ * Returns the TSIG record from the ADDITIONAL section, if one is present
+ * @see TSIGRecord
+ * @see TSIG
+ * @see Section
+ */
 public TSIGRecord
 getTSIG() {
 	int count = header.getCount(Section.ADDITIONAL);
@@ -120,6 +180,12 @@ getTSIG() {
 	return (TSIGRecord) rec;
 }
 
+/**
+ * Returns the OPT record from the ADDITIONAL section, if one is present
+ * @see OPTRecord
+ * @see EDNS
+ * @see Section
+ */
 public OPTRecord
 getOPT() {
 	Record [] additional = getSectionArray(Section.ADDITIONAL);
@@ -129,11 +195,21 @@ getOPT() {
 	return null;
 }
 
+/**
+ * Returns an Enumeration listing all records in the given section
+ * @see Record
+ * @see Section
+ */
 public Enumeration
 getSection(int section) {
 	return sections[section].elements();
 }
 
+/**
+ * Returns an array containing all records in the given section
+ * @see Record
+ * @see Section
+ */
 public Record []
 getSectionArray(int section) {
 	int size = sections[section].size();
@@ -165,11 +241,19 @@ toWire() throws IOException {
 	return out.toByteArray();
 }
 
+/**
+ * Returns the size of the message.  Only valid if the message has been
+ * converted to or from wire format.
+ */
 public int
 numBytes() {
 	return size;
 }
 
+/**
+ * Converts the given section of the Message to a String
+ * @see Section
+ */
 public String
 sectionToString(int i) {
 	if (i > 3)
@@ -192,30 +276,31 @@ sectionToString(int i) {
 	return sb.toString();
 }
 
+/**
+ * Converts the Message to a String
+ */
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(getHeader() + "\n");
 	for (int i = 0; i < 4; i++) {
-		sb.append(";; " + Section.longString(i) + ":\n");
+		if (header.getOpcode() != Opcode.UPDATE)
+			sb.append(";; " + Section.longString(i) + ":\n");
+		else
+			sb.append(";; " + Section.updString(i) + ":\n");
 		sb.append(sectionToString(i) + "\n");
 	}
 	sb.append(";; done (" + numBytes() + " bytes)");
 	return sb.toString();
 }
 
-public String
-toStringAsUpdate() {
-	StringBuffer sb = new StringBuffer();
-	sb.append(getHeader() + "\n");
-	for (int i = 0; i < 4; i++) {
-		sb.append(";; " + Section.updString(i) + ":\n");
-		sb.append(sectionToString(i) + "\n");
-	}
-	sb.append(";; done (" + numBytes() + " bytes)");
-	return sb.toString();
-}
-
+/**
+ * Creates a copy of this Message.  This is done by the Resolver before adding
+ * TSIG and OPT records, for example.
+ * @see Resolver
+ * @see TSIGRecord
+ * @see OPTGRecord
+ */
 public Object
 clone() {
 	Message m = new Message();

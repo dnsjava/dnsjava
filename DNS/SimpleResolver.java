@@ -149,8 +149,8 @@ send(Message query) {
 		query = (Message) query.clone();
 		if (EDNSlevel >= 0) {
 			udpLength = 1280;
-			query.addRecord(Section.ADDITIONAL,
-					EDNS.newOPT(udpLength));
+			query.addRecord(EDNS.newOPT(udpLength),
+					Section.ADDITIONAL);
 		}
 
 		if (tsig != null)
@@ -279,7 +279,7 @@ sendAXFR(Message query) {
 				Enumeration e = m.getSection(i);
 				while (e.hasMoreElements()) {
 					Record r = (Record)e.nextElement();
-					response.addRecord(i, r);
+					response.addRecord(r, i);
 					if (r instanceof SOARecord)
 						soacount++;
 				}

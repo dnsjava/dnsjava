@@ -190,7 +190,7 @@ sendUpdate() throws IOException {
 			dclass = r.getDClass();
 		}
 		Record soa = Record.newRecord(zone, Type.SOA, dclass);
-		query.addRecord(Section.ZONE, soa);
+		query.addRecord(soa, Section.ZONE);
 	}
 
 	response = res.send(query);
@@ -273,7 +273,7 @@ doRequire(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(Section.PREREQ, rec);
+		query.addRecord(rec, Section.PREREQ);
 		print(rec);
 	}
 }
@@ -294,7 +294,7 @@ doProhibit(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(Section.PREREQ, rec);
+		query.addRecord(rec, Section.PREREQ);
 		print(rec);
 	}
 }
@@ -315,7 +315,7 @@ doAdd(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(Section.UPDATE, rec);
+		query.addRecord(rec, Section.UPDATE);
 		print(rec);
 	}
 }
@@ -336,7 +336,7 @@ doDelete(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(Section.UPDATE, rec);
+		query.addRecord(rec, Section.UPDATE);
 		print(rec);
 	}
 }
@@ -357,7 +357,7 @@ doGlue(MyStringTokenizer st) throws IOException {
 		return;
 	}
 	if (rec != null) {
-		query.addRecord(Section.ADDITIONAL, rec);
+		query.addRecord(rec, Section.ADDITIONAL);
 		print(rec);
 	}
 }

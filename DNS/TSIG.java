@@ -84,7 +84,7 @@ apply(Message m, TSIGRecord old) throws IOException {
 	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
 				  h.sign(), m.getHeader().getID(),
 				  Rcode.NOERROR, null);
-	m.addRecord(Section.ADDITIONAL, r);
+	m.addRecord(r, Section.ADDITIONAL);
 }
 
 /**

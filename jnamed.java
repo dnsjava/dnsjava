@@ -97,7 +97,7 @@ addRRset(Message response, RRset rrset) {
 	Enumeration e = rrset.rrs();
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		response.addRecord(Section.ANSWER, r);
+		response.addRecord(r, Section.ANSWER);
 	}
 }
 
@@ -119,13 +119,13 @@ addAuthority(Message response, Name name, Zone zone) {
 		Enumeration e = nsRecords.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
-			if (response.findRecord(Section.ANSWER, r) == false)
-				response.addRecord(Section.AUTHORITY, r);
+			if (response.findRecord(r, Section.ANSWER) == false)
+				response.addRecord(r, Section.AUTHORITY);
 		}
 	}
 	else {
 		SOARecord soa = (SOARecord) zone.getSOA();
-		response.addRecord(Section.AUTHORITY, soa);
+		response.addRecord(soa, Section.AUTHORITY);
 	}
 }
 
@@ -136,7 +136,7 @@ addGlue(Message response, Name name) {
 	while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
 			if (response.findRecord(r) == false)
-				response.addRecord(Section.ADDITIONAL, r);
+				response.addRecord(r, Section.ADDITIONAL);
 	}
 }
 
@@ -189,7 +189,7 @@ generateReply(Message query, byte [] in, int maxLength) {
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(Flags.AA);
 	response.getHeader().setFlag(Flags.QR);
-	response.addRecord(Section.QUESTION, queryRecord);
+	response.addRecord(queryRecord, Section.QUESTION);
 
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
@@ -244,7 +244,7 @@ truncateSection(Message in, int maxLength, int length, int section) {
 		Record r = records[i];
 		removed += r.getWireLength();
 		length -= r.getWireLength();
-		in.removeRecord(section, r);
+		in.removeRecord(r, section);
 		if (length > maxLength)
 			continue;
 		else {
@@ -256,7 +256,7 @@ truncateSection(Message in, int maxLength, int length, int section) {
 					break;
 				removed += r2.getWireLength();
 				length -= r2.getWireLength();
-				in.removeRecord(section, r2);
+				in.removeRecord(r2, section);
 			}
 			return removed;
 		}
