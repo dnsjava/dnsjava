@@ -119,7 +119,7 @@ throws TextParseException
 	rec.alg = (byte) Integer.parseInt(nextString(st));
 	/* If this is a null key, there's no key data */
 	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
-		rec.key = base64.fromString(st.remainingTokens());
+		rec.key = base64.fromString(remainingStrings(st));
 	else
 		rec.key = null;
 	return rec;

@@ -96,7 +96,7 @@ throws TextParseException
 	rec.certType = (short) Integer.parseInt(nextString(st));
 	rec.keyTag = (short) Integer.parseInt(nextString(st));
 	rec.alg = (byte) Integer.parseInt(nextString(st));
-	rec.cert = base64.fromString(st.remainingTokens());
+	rec.cert = base64.fromString(remainingStrings(st));
 	return rec;
 }
 

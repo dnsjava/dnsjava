@@ -89,7 +89,7 @@ throws TextParseException
 
 	// note that the draft says that the digest is presented as hex,
 	// not base64.
-	rec.digest = base16.fromString(st.remainingTokens());
+	rec.digest = base16.fromString(remainingStrings(st));
 	return rec;
 }
 

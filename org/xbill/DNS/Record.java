@@ -292,9 +292,25 @@ rdataFromString(Name name, short dclass, int ttl,
 		MyStringTokenizer st, Name origin)
 throws TextParseException;
 
+/**
+ * Returns the next string from a MyStringTokenizer, or throws a
+ * TextParseException.
+ */
 protected static String
 nextString(MyStringTokenizer st) throws TextParseException {
 	String s = st.nextToken();
+	if (s == null)
+		throw new TextParseException("incomplete record");
+	return s;
+}
+
+/**
+ * Returns a concatenation of the remaining strings from a MyStringTokenizer,
+ * or throws a TextParseException.
+ */
+protected static String
+remainingStrings(MyStringTokenizer st) throws TextParseException {
+	String s = st.remainingTokens();
 	if (s == null)
 		throw new TextParseException("incomplete record");
 	return s;
@@ -325,7 +341,7 @@ throws IOException
 	if (s.equals("#")) {
 		s = nextString(st);
 		short length = Short.parseShort(s);
-		s = st.remainingTokens();
+		s = remainingStrings(st);
 		byte [] data = base16.fromString(s);
 		if (length != data.length)
 			throw new IOException("Invalid unknown RR encoding: " +

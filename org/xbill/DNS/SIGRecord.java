@@ -111,7 +111,7 @@ throws TextParseException
 	rec.signer = Name.fromString(nextString(st), origin);
 	rec.signer.checkAbsolute("read an SIG record");
 	if (st.hasMoreTokens())
-		rec.signature = base64.fromString(st.remainingTokens());
+		rec.signature = base64.fromString(remainingStrings(st));
 	return rec;
 }
 
