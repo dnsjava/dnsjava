@@ -32,8 +32,8 @@ private boolean hasWild;
 class ZoneIterator implements Iterator {
 	private Iterator zentries;
 	private RRset [] current;
-	int count;
-	boolean wantLastSOA;
+	private int count;
+	private boolean wantLastSOA;
 
 	ZoneIterator(boolean axfr) {
 		zentries = data.entrySet().iterator();
