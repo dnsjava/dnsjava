@@ -1,3 +1,7 @@
+12/3/2002
+	- The Name code didn't handle names with non-printable characters.
+	  (found by Serge Sozonoff <serge@globalbeach.com>)
+
 11/28/2002
 	- Fix a potential deadlock in the WorkerThread class.
 	  (found by Serge Sozonoff <serge@globalbeach.com>)

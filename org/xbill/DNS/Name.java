@@ -677,7 +677,7 @@ toWireCanonical() {
 			throw new IllegalStateException("invalid label");
 		b[pos] = name[pos++];
 		for (int j = 0; j < len; j++)
-			b[pos] = lowercase[name[pos++]];
+			b[pos] = lowercase[(name[pos++] & 0xFF)];
 	}
 	return b;
 }
@@ -707,7 +707,8 @@ equals(byte [] b, int bpos) {
 		if (len > MAXLABEL)
 			throw new IllegalStateException("invalid label");
 		for (int j = 0; j < len; j++)
-			if (lowercase[name[pos++]] != lowercase[b[bpos++]])
+			if (lowercase[(name[pos++] & 0xFF)] !=
+			    lowercase[(b[bpos++] & 0xFF)])
 				return false;
 	}
 	return true;
@@ -737,7 +738,7 @@ hashCode() {
 		return (hashcode);
 	int code = 0;
 	for (int i = offset(0); i < name.length; i++)
-		code += ((code << 3) + lowercase[name[i]]);
+		code += ((code << 3) + lowercase[(name[i] & 0xFF)]);
 	hashcode = code;
 	return hashcode;
 }
@@ -768,8 +769,8 @@ compareTo(Object o) {
 		int length = name[start];
 		int alength = arg.name[astart];
 		for (int j = 0; j < length && j < alength; j++) {
-			int n = lowercase[name[j + start]] -
-				lowercase[arg.name[j + astart]];
+			int n = lowercase[(name[j + start]) & 0xFF] -
+				lowercase[(arg.name[j + astart]) & 0xFF];
 			if (n != 0)
 				return (n);
 		}
