@@ -304,13 +304,13 @@ setSearchPath(String [] domains) throws TextParseException {
 /**
  * Sets the cache to use when performing this lookup.  This overrides the
  * default value.  If the results of this lookup should not be permanently
- * cached, a temporary cache or null can be provided here.
+ * cached, null can be provided here.
  * @param cache The cache to use.
  */
 public void
 setCache(Cache cache) {
 	if (cache == null)
-		cache = new Cache(dclass);
+		cache = new Cache(dclass, 0);
 	this.cache = cache;
 }
 

@@ -113,9 +113,9 @@ private static class CacheCleaner extends Thread {
 	private long interval;
 
 	public
-	CacheCleaner(Cache cache, long cleanInterval) {
+	CacheCleaner(Cache cache, int cleanInterval) {
 		this.cacheref = new WeakReference(cache);
-		this.interval = cleanInterval;
+		this.interval = cleanInterval * 60 * 1000;
 		setDaemon(true);
 		setName("org.xbill.DNS.Cache.CacheCleaner");
 		start();
@@ -147,7 +147,7 @@ private static class CacheCleaner extends Thread {
 	run() {
 		while (true) {
 			long now = System.currentTimeMillis();
-			long next = now + (interval * 60 * 1000);
+			long next = now + interval;
 			while (now < next) {
 				try {
 					Thread.sleep(next - now);
@@ -168,13 +168,28 @@ private static class CacheCleaner extends Thread {
 	}
 }
 
+private static final int defaultCleanInterval = 30;
+
 private Verifier verifier;
 private boolean secure;
 private int maxncache = -1;
 private int maxcache = -1;
-private long cleanInterval = 30;
 private CacheCleaner cleaner;
 private int dclass;
+
+/**
+ * Creates an empty Cache
+ *
+ * @param dclass The dns class of this cache
+ * @param cleanInterval The interval between cache cleanings, in minutes.
+ * @see #setCleanInterval(long)
+ */
+public
+Cache(int dclass, int cleanInterval) {
+	super(true);
+	this.dclass = dclass;
+	setCleanInterval(cleanInterval);
+}
 
 /**
  * Creates an empty Cache
@@ -184,9 +199,7 @@ private int dclass;
  */
 public
 Cache(int dclass) {
-	super(true);
-	cleaner = new CacheCleaner(this, cleanInterval);
-	this.dclass = dclass;
+	this(dclass, defaultCleanInterval);
 }
 
 /**
@@ -195,7 +208,7 @@ Cache(int dclass) {
  */
 public
 Cache() {
-	this(DClass.IN);
+	this(DClass.IN, defaultCleanInterval);
 }
 
 /** Empties the Cache. */
@@ -210,7 +223,7 @@ clearCache() {
 public
 Cache(String file) throws IOException {
 	super(true);
-	cleaner = new CacheCleaner(this, cleanInterval);
+	cleaner = new CacheCleaner(this, defaultCleanInterval);
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null)
@@ -780,13 +793,13 @@ setMaxCache(int seconds) {
 }
 
 /**
- * Sets the interval (in minutes) that all expired records will be expunged
- * the cache.  The default is 30 minutes.  0 or a negative value disables this
- * feature.
+ * Sets the periodic interval (in minutes) that all expired records will be
+ * expunged from the cache.  The default is 30 minutes.  0 or a negative value
+ * disables this feature.
+ * @param cleanInterval The interval between cache cleanings, in minutes.
  */
 public void
-setCleanInterval(int minutes) {
-	cleanInterval = minutes;
+setCleanInterval(int cleanInterval) {
 	if (cleaner != null) {
 		cleaner.interrupt();
 	}
