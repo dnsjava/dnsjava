@@ -251,6 +251,15 @@ getType() {
 }
 
 public short
+getRRsetType() {
+	if (type == Type.SIG) {
+		SIGRecord sig = (SIGRecord) this;
+		return sig.getTypeCovered();
+	}
+	return type;
+}
+
+public short
 getDClass() {
 	return dclass;
 }
