@@ -88,12 +88,11 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	ARecord rec = new ARecord(name, dclass, ttl);
-	String s = nextString(st);
+	String s = st.getString();
 	try {
 		InetAddress address;
 		if (s.equals("@me@")) {

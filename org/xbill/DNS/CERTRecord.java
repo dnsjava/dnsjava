@@ -88,14 +88,13 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
- 		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
-	rec.certType = (short) Integer.parseInt(nextString(st));
-	rec.keyTag = (short) Integer.parseInt(nextString(st));
-	rec.alg = (byte) Integer.parseInt(nextString(st));
+	rec.certType = (short) st.getUInt16();
+	rec.keyTag = (short) st.getUInt16();
+	rec.alg = (byte) st.getUInt8();
 	rec.cert = base64.fromString(remainingStrings(st));
 	return rec;
 }

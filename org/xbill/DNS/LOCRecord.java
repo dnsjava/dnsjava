@@ -80,9 +80,8 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	LOCRecord rec = new LOCRecord(name, dclass, ttl);
 
@@ -94,15 +93,12 @@ throws TextParseException
 	deg = min = 0;
 	sec = 0.0;
 	try {
-		s = nextString(st);
-		deg = Integer.parseInt(s);
-		s = nextString(st);
-		min = Integer.parseInt(s);
-		s = nextString(st);
-		sec = new Double(s).doubleValue();
-		s = nextString(st);
+		deg = st.getUInt16();
+		min = st.getUInt16();
+		sec = st.getDouble();
 	}
 	catch (NumberFormatException e) {
+		st.unget();
 	}
 	if (!s.equalsIgnoreCase("S") && !s.equalsIgnoreCase("N"))
 		throw new TextParseException("Invalid LOC latitude");
@@ -115,16 +111,14 @@ throws TextParseException
 	deg = min = 0;
 	sec = 0.0;
 	try {
-		s = nextString(st);
-		deg = Integer.parseInt(s);
-		s = nextString(st);
-		min = Integer.parseInt(s);
-		s = nextString(st);
-		sec = new Double(s).doubleValue();
-		s = nextString(st);
+		deg = st.getUInt16();
+		min = st.getUInt16();
+		sec = st.getDouble();
 	}
 	catch (NumberFormatException e) {
+		st.unget();
 	}
+	s = st.getString();
 	if (!s.equalsIgnoreCase("W") && !s.equalsIgnoreCase("E"))
 		throw new TextParseException("Invalid LOC longitude");
 	rec.longitude = (int) (1000 * (sec + 60 * (min + 60 * deg)));
@@ -133,9 +127,12 @@ throws TextParseException
 	rec.longitude += (1 << 31);
 
 	/* Altitude */
-	if (!st.hasMoreTokens())
+	Tokenizer.Token token = st.get();
+	if (token.isEOL()) {
+		st.unget();
 		return rec;
-	s = nextString(st);
+	}
+	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
@@ -147,9 +144,11 @@ throws TextParseException
 	}
 	
 	/* Size */
-	if (!st.hasMoreTokens())
+	if (token.isEOL()) {
+		st.unget();
 		return rec;
-	s = nextString(st);
+	}
+	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
@@ -160,9 +159,11 @@ throws TextParseException
 	}
 	
 	/* Horizontal precision */
-	if (!st.hasMoreTokens())
+	if (token.isEOL()) {
+		st.unget();
 		return rec;
-	s = nextString(st);
+	}
+	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {
@@ -174,9 +175,11 @@ throws TextParseException
 	}
 	
 	/* Vertical precision */
-	if (!st.hasMoreTokens())
+	if (token.isEOL()) {
+		st.unget();
 		return rec;
-	s = nextString(st);
+	}
+	s = token.value;
 	if (s.length() > 1 && s.charAt(s.length() - 1) == 'm')
 		s = s.substring(0, s.length() - 1);
 	try {

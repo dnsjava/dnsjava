@@ -72,19 +72,22 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	NXTRecord rec = new NXTRecord(name, dclass, ttl);
-	rec.next = Name.fromString(nextString(st), origin);
-	rec.next.checkAbsolute("read an NXT record");
+	rec.next = st.getName(origin);
 	rec.bitmap = new BitSet();
-	while (st.hasMoreTokens()) {
-		short t = Type.value(nextString(st));
-		if (t > 0)
-			rec.bitmap.set(t);
+	while (true) {
+		Tokenizer.Token t = st.get();
+		if (!t.isString())
+			break;
+		short type = Type.value(t.value);
+		if (type <= 0 || type > 128)
+			throw new TextParseException("Invalid type " + t.value);
+		rec.bitmap.set(type);
 	}
+	st.unget();
 	return rec;
 }
 

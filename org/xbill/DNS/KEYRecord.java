@@ -109,14 +109,13 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	KEYRecord rec = new KEYRecord(name, dclass, ttl);
-	rec.flags = (short) Integer.decode(nextString(st)).intValue();
-	rec.proto = (byte) Integer.parseInt(nextString(st));
-	rec.alg = (byte) Integer.parseInt(nextString(st));
+	rec.flags = (short) st.getUInt16();
+	rec.proto = (byte) st.getUInt8();
+	rec.alg = (byte) st.getUInt8();
 	/* If this is a null key, there's no key data */
 	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
 		rec.key = base64.fromString(remainingStrings(st));

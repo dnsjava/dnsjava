@@ -65,15 +65,12 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	RPRecord rec = new RPRecord(name, dclass, ttl);
-	rec.mailbox = Name.fromString(nextString(st), origin);
-	rec.mailbox.checkAbsolute("read an RP record");
-	rec.textDomain = Name.fromString(nextString(st), origin);
-	rec.textDomain.checkAbsolute("read an RP record");
+	rec.mailbox = st.getName(origin);
+	rec.textDomain = st.getName(origin);
 	return rec;
 }
 

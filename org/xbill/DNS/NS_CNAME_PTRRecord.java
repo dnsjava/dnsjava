@@ -44,11 +44,10 @@ throws IOException
 }
 
 protected static Record
-rdataFromString(NS_CNAME_PTRRecord rec, MyStringTokenizer st, Name origin)
-throws TextParseException
+rdataFromString(NS_CNAME_PTRRecord rec, Tokenizer st, Name origin)
+throws IOException
 {
-	rec.target = Name.fromString(nextString(st), origin);
-	rec.target.checkAbsolute("read an NS, CNAME, PTR, or similar record");
+	rec.target = st.getName(origin);
 	return rec;
 }
 

@@ -513,16 +513,6 @@ isAbsolute() {
 	return (name[name.length - 1] == 0);
 }
 
-/*
- * If the name is not absolute, throw an exception.
- */
-void
-checkAbsolute(String msg) {
-	if (isAbsolute())
-		return;
-	throw new RelativeNameException(this);
-}
-
 /**
  * The length of the name.
  */

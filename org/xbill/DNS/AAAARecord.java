@@ -60,12 +60,11 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	AAAARecord rec = new AAAARecord(name, dclass, ttl);
-	rec.address = new Inet6Address(nextString(st));
+	rec.address = new Inet6Address(st.getString());
 	return rec;
 }
 

@@ -78,14 +78,18 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	TXTRecord rec = new TXTRecord(name, dclass, ttl);
 	rec.strings = new ArrayList();
-	while (st.hasMoreTokens())
-		rec.strings.add(byteArrayFromString(nextString(st)));
+	while (true) {
+		Tokenizer.Token t = st.get();
+		if (!t.isString())
+			break;
+		rec.strings.add(byteArrayFromString(t.value));
+	}
+	st.unget();
 	return rec;
 }
 

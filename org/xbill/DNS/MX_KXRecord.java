@@ -49,12 +49,11 @@ throws IOException
 }
 
 protected static Record
-rdataFromString(MX_KXRecord rec, MyStringTokenizer st, Name origin)
-throws TextParseException
+rdataFromString(MX_KXRecord rec, Tokenizer st, Name origin)
+throws IOException
 {
-	rec.priority = Short.parseShort(nextString(st));
-	rec.target = Name.fromString(nextString(st), origin);
-	rec.target.checkAbsolute("read an MX or KX record");
+	rec.priority = (short) st.getUInt16();
+	rec.target = st.getName(origin);
 	return rec;
 }
 

@@ -78,14 +78,13 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	DSRecord rec = new DSRecord(name, dclass, ttl);
-	rec.footprint = Integer.decode(nextString(st)).intValue();
-	rec.alg = (byte) Integer.parseInt(nextString(st));
-	rec.digestid = (byte) Integer.parseInt(nextString(st));
+	rec.footprint = st.getUInt16();
+	rec.alg = (byte) st.getUInt8();
+	rec.digestid = (byte) st.getUInt8();
 
 	// note that the draft says that the digest is presented as hex,
 	// not base64.

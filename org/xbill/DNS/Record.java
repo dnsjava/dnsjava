@@ -119,7 +119,8 @@ public static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
 	  byte [] data)
 {
-	name.checkAbsolute("create a Record");
+	if (!name.isAbsolute())
+		throw new RelativeNameException(name);
 	DataByteInputStream dbs;
 	if (data != null)
 		dbs = new DataByteInputStream(data);
@@ -302,31 +303,28 @@ toString() {
  */
 abstract Record
 rdataFromString(Name name, short dclass, int ttl,
-		MyStringTokenizer st, Name origin)
-throws TextParseException;
+		Tokenizer st, Name origin)
+throws IOException;
 
 /**
- * Returns the next string from a MyStringTokenizer, or throws a
- * TextParseException.
+ * Returns a concatenation of the remaining strings from a Tokenizer,
+ * or throws an IOException.
  */
 protected static String
-nextString(MyStringTokenizer st) throws TextParseException {
-	String s = st.nextToken();
-	if (s == null)
-		throw new TextParseException("incomplete record");
-	return s;
-}
-
-/**
- * Returns a concatenation of the remaining strings from a MyStringTokenizer,
- * or throws a TextParseException.
- */
-protected static String
-remainingStrings(MyStringTokenizer st) throws TextParseException {
-	String s = st.remainingTokens();
-	if (s == null)
-		throw new TextParseException("incomplete record");
-	return s;
+remainingStrings(Tokenizer st) throws IOException {
+	StringBuffer sb = null;
+	while (true) {
+		Tokenizer.Token t = st.get();
+		if (!t.isString())
+			break;
+		if (sb == null)
+			sb = new StringBuffer();
+		sb.append(t.value);
+	}
+	st.unget();
+	if (sb == null)
+		return null;
+	return sb.toString();
 }
 
 /**
@@ -393,34 +391,34 @@ byteArrayToString(byte [] array) {
  * @param type The record's type.
  * @param dclass The record's class.
  * @param ttl The record's time to live.
- * @param st A tokenized version of the textual representation of the rdata.
+ * @param st A tokenizer containing the textual representation of the rdata.
  * @param origin The default origin to be appended to relative domain names.
  * @return The new record
  * @throws IOException The text format was invalid.
  */
 public static Record
-fromString(Name name, short type, short dclass, int ttl,
-	   MyStringTokenizer st, Name origin)
+fromString(Name name, short type, short dclass, int ttl, Tokenizer st,
+	   Name origin)
 throws IOException
 {
 	Record rec;
 
-	name.checkAbsolute("create a Record");
+	if (!name.isAbsolute())
+		throw new RelativeNameException(name);
 
-	String s = nextString(st);
-	/* the string tokenizer loses the \\. */
-	if (s.equals("#")) {
-		s = nextString(st);
-		short length = Short.parseShort(s);
-		s = remainingStrings(st);
+	Tokenizer.Token t = st.get();
+	if (t.type == Tokenizer.IDENTIFIER && t.value.equals("\\#")) {
+		int length = st.getUInt16();
+		String s = remainingStrings(st);
 		byte [] data = base16.fromString(s);
 		if (length != data.length)
-			throw new IOException("Invalid unknown RR encoding: " +
-					      "length mismatch");
+			throw new TextParseException
+					("Invalid unknown RR encoding: " +
+					 "length mismatch");
 		DataByteInputStream in = new DataByteInputStream(data);
 		rec = newRecord(name, type, dclass, ttl, length, in);
 	}
-	st.putBackToken(s);
+	st.unget();
 
 	rec = getTypedObject(type);
 	return rec.rdataFromString(name, dclass, ttl, st, origin);
@@ -441,8 +439,7 @@ public static Record
 fromString(Name name, short type, short dclass, int ttl, String s, Name origin)
 throws IOException
 {
-	return fromString(name, type, dclass, ttl, new MyStringTokenizer(s),
-			  origin);
+	return fromString(name, type, dclass, ttl, new Tokenizer(s), origin);
 }
 
 /**
@@ -534,7 +531,8 @@ hashCode() {
 public Record
 withName(Name name) {
 	Record rec = null;
-	name.checkAbsolute("create a Record");
+	if (!name.isAbsolute())
+		throw new RelativeNameException(name);
 	try {
 		rec = (Record) clone();
 	}

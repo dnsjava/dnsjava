@@ -1,4 +1,9 @@
 5/28/2003
+	- Replace org.xbill.DNS.utils.MyStringTokenizer with
+	  org.xbill.DNS.Tokenizer, which is a far more robust and correct
+	  DNS tokenizer.  Convert everything to use it.
+
+5/28/2003
 	- When constructing a record, check that all names are absolute.
 
 5/27/2003

@@ -75,17 +75,14 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	A6Record rec = new A6Record(name, dclass, ttl);
-	rec.prefixBits = Short.parseShort(nextString(st));
-	rec.suffix = new Inet6Address(nextString(st));
-	if (rec.prefixBits > 0) {
-		rec.prefix = Name.fromString(nextString(st), origin);
-		rec.prefix.checkAbsolute("read an A6 record");
-	}
+	rec.prefixBits = (short) st.getUInt16();
+	rec.suffix = new Inet6Address(st.getString());
+	if (rec.prefixBits > 0)
+		rec.prefix = st.getName(origin);
 	return rec;
 }
 

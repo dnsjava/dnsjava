@@ -53,7 +53,7 @@ update(InputStream in) throws IOException {
 				if (is == System.in)
 					System.out.print("> ");
 
-				line = Master.readExtendedLine(br);
+				line = br.readLine();
 				if (line == null) {
 					br.close();
 					inputs.remove(br);
@@ -73,23 +73,26 @@ update(InputStream in) throws IOException {
 			if (line.charAt(0) == '>')
 				line = line.substring(1);
 
-			MyStringTokenizer st = new MyStringTokenizer(line);
-			if (!st.hasMoreTokens())
+			Tokenizer st = new Tokenizer(line);
+			Tokenizer.Token token = st.get();
+
+			if (token.isEOL())
 				continue;
-			String operation = st.nextToken();
+			String operation = token.value;
 
 			if (operation.equals("server")) {
-				server = st.nextToken();
+				server = st.getString();
 				res = new SimpleResolver(server);
-				if (st.hasMoreTokens()) {
-					String portstr = st.nextToken();
+				token = st.get();
+				if (token.isString()) {
+					String portstr = token.value;
 					res.setPort(Short.parseShort(portstr));
 				}
 			}
 
 			else if (operation.equals("key")) {
-				String keyname = st.nextToken();
-				String keydata = st.nextToken();
+				String keyname = st.getString();
+				String keydata = st.getString();
 				if (res == null)
 					res = new SimpleResolver(server);
 				res.setTSIGKey(keyname, keydata);
@@ -98,13 +101,13 @@ update(InputStream in) throws IOException {
 			else if (operation.equals("edns")) {
 				if (res == null)
 					res = new SimpleResolver(server);
-				res.setEDNS(Short.parseShort(st.nextToken()));
+				res.setEDNS(st.getUInt16());
 			}
 
 			else if (operation.equals("port")) {
 				if (res == null)
 					res = new SimpleResolver(server);
-				res.setPort(Short.parseShort(st.nextToken()));
+				res.setPort(st.getUInt16());
 			}
 
 			else if (operation.equals("tcp")) {
@@ -114,8 +117,7 @@ update(InputStream in) throws IOException {
 			}
 
 			else if (operation.equals("class")) {
-				String s = st.nextToken();
-				short newClass = DClass.value(s);
+				short newClass = DClass.value(st.getString());
 				if (newClass > 0)
 					defaultClass = newClass;
 				else
@@ -123,13 +125,12 @@ update(InputStream in) throws IOException {
 			}
 
 			else if (operation.equals("ttl"))
-				defaultTTL = TTL.parseTTL(st.nextToken());
+				defaultTTL = st.getTTL();
 
 			else if (operation.equals("origin") ||
 				 operation.equals("zone"))
 			{
-				zone = Name.fromString(st.nextToken(),
-						       Name.root);
+				zone = st.getName(Name.root);
 			}
 
 			else if (operation.equals("require"))
@@ -150,8 +151,9 @@ update(InputStream in) throws IOException {
 			else if (operation.equals("help") ||
 				 operation.equals("?"))
 			{
-				if (st.hasMoreTokens())
-					help(st.nextToken());
+				token = st.get();
+				if (token.isString())
+					help(token.value);
 				else
 					help(null);
 			}
@@ -205,7 +207,7 @@ update(InputStream in) throws IOException {
 			}
 
 			else if (operation.equals("sleep")) {
-				int interval = Integer.parseInt(st.nextToken());
+				long interval = st.getUInt32();
 				try {
 					Thread.sleep(interval);
 				}
@@ -215,8 +217,9 @@ update(InputStream in) throws IOException {
 
 			else if (operation.equals("date")) {
 				Date now = new Date();
-				if (st.hasMoreTokens() &&
-				    st.nextToken().equals("-ms"))
+				token = st.get();
+				if (token.isString() &&
+				    token.value.equals("-ms"))
 					print(Long.toString(now.getTime()));
 				else
 					print(now);
@@ -283,19 +286,19 @@ sendUpdate() throws IOException {
  * Ignore the class, if present.
  */
 Record
-parseRR(MyStringTokenizer st, short classValue, int TTLValue)
+parseRR(Tokenizer st, short classValue, int TTLValue)
 throws IOException
 {
-	Name name = Name.fromString(st.nextToken(), zone);
+	Name name = st.getName(zone);
 	int ttl;
 	short type;
 	Record record;
 
-	String s = st.nextToken();
+	String s = st.getString();
 
 	try {
 		ttl = TTL.parseTTL(s);
-		s = st.nextToken();
+		s = st.getString();
 	}
 	catch (NumberFormatException e) {
 		ttl = TTLValue;
@@ -303,7 +306,7 @@ throws IOException
 
 	if (DClass.value(s) >= 0) {
 		classValue = DClass.value(s);
-		s = st.nextToken();
+		s = st.getString();
 	}
 
 	if ((type = Type.value(s)) < 0)
@@ -317,31 +320,27 @@ throws IOException
 }
 
 void
-doRequire(MyStringTokenizer st) throws IOException {
-	String s;
+doRequire(Tokenizer st) throws IOException {
+	Tokenizer.Token token;
 	Name name;
 	Record record;
 	short type;
 	short dclass;
 
-	s = st.nextToken();
-	if (s.startsWith("-")) {
-		print("qualifiers are now ignored");
-		s = st.nextToken();
-	}
-	name = Name.fromString(s, zone);
-	if (st.hasMoreTokens()) {
-		s = st.nextToken();
-		if ((type = Type.value(s)) < 0)
-			throw new IOException("Invalid type: " + s);
-		if (st.hasMoreTokens()) {
+	name = st.getName(zone);
+	token = st.get();
+	if (token.isString()) {
+		if ((type = Type.value(token.value)) < 0)
+			throw new IOException("Invalid type: " + token.value);
+		token = st.get();
+		boolean iseol = token.isEOL();
+		st.unget();
+		if (!iseol) {
 			record = Record.fromString(name, type, defaultClass,
 						   0, st, zone);
-		}
-		else
+		} else
 			record = Record.newRecord(name, type, DClass.ANY, 0);
-	}
-	else
+	} else
 		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
 
 	query.addRecord(record, Section.PREREQ);
@@ -349,75 +348,57 @@ doRequire(MyStringTokenizer st) throws IOException {
 }
 
 void
-doProhibit(MyStringTokenizer st) throws IOException {
+doProhibit(Tokenizer st) throws IOException {
+	Tokenizer.Token token;
 	String s;
 	Name name;
 	Record record;
 	short type;
 
-	s = st.nextToken();
-	if (s.startsWith("-")) {
-		print("qualifiers are now ignored");
-		s = st.nextToken();
-	}
-	name = Name.fromString(s, zone);
-	if (st.hasMoreTokens()) {
-		s = st.nextToken();
-		if ((type = Type.value(s)) < 0)
-			throw new IOException("Invalid type: " + s);
-	}
-	else
+	name = st.getName(zone);
+	token = st.get();
+	if (token.isString()) {
+		if ((type = Type.value(token.value)) < 0)
+			throw new IOException("Invalid type: " + token.value);
+	} else
 		type = Type.ANY;
-	if (st.hasMoreTokens())
-		throw new IOException("Cannot specify rdata to prohibit");
 	record = Record.newRecord(name, type, DClass.NONE, 0);
 	query.addRecord(record, Section.PREREQ);
 	print(record);
 }
 
 void
-doAdd(MyStringTokenizer st) throws IOException {
-	String s;
-	Record record;
-
-	s = st.nextToken();
-	if (s.startsWith("-"))
-		print("qualifiers are now ignored");
-	else
-		st.putBackToken(s);
-	record = parseRR(st, defaultClass, defaultTTL);
+doAdd(Tokenizer st) throws IOException {
+	Record record = parseRR(st, defaultClass, defaultTTL);
 	query.addRecord(record, Section.UPDATE);
 	print(record);
 }
 
 void
-doDelete(MyStringTokenizer st) throws IOException {
+doDelete(Tokenizer st) throws IOException {
+	Tokenizer.Token token;
 	String s;
 	Name name;
 	Record record;
 	short type;
 	short dclass;
 
-	s = st.nextToken();
-	if (s.startsWith("-")) {
-		print("qualifiers are now ignored");
-		s = st.nextToken();
-	}
-	name = Name.fromString(s, zone);
-	if (st.hasMoreTokens()) {
-		s = st.nextToken();
+	name = st.getName(zone);
+	token = st.get();
+	if (token.isString()) {
+		s = token.value;
 		if ((dclass = DClass.value(s)) >= 0) {
-			if (!st.hasMoreTokens())
-				throw new IOException("Invalid format");
-			s = st.nextToken();
+			s = st.getString();
 		}
 		if ((type = Type.value(s)) < 0)
 			throw new IOException("Invalid type: " + s);
-		if (st.hasMoreTokens()) {
+		token = st.get();
+		boolean iseol = token.isEOL();
+		st.unget();
+		if (!iseol) {
 			record = Record.fromString(name, type, DClass.NONE,
 						   0, st, zone);
-		}
-		else
+		} else
 			record = Record.newRecord(name, type, DClass.ANY, 0);
 	}
 	else
@@ -428,34 +409,29 @@ doDelete(MyStringTokenizer st) throws IOException {
 }
 
 void
-doGlue(MyStringTokenizer st) throws IOException {
-	String s;
-	Record record;
-
-	s = st.nextToken();
-	if (s.startsWith("-"))
-		print("qualifiers are now ignored");
-	else
-		st.putBackToken(s);
-	record = parseRR(st, defaultClass, defaultTTL);
+doGlue(Tokenizer st) throws IOException {
+	Record record = parseRR(st, defaultClass, defaultTTL);
 	query.addRecord(record, Section.ADDITIONAL);
 	print(record);
 }
 
 void
-doQuery(MyStringTokenizer st) throws IOException {
+doQuery(Tokenizer st) throws IOException {
 	Record rec;
+	Tokenizer.Token token;
 
 	Name name = null;
 	short type = Type.A, dclass = defaultClass;
 
-	name = Name.fromString(st.nextToken(), zone);
-	if (st.hasMoreTokens()) {
-		type = Type.value(st.nextToken());
+	name = st.getName(zone);
+	token = st.get();
+	if (token.isString()) {
+		type = Type.value(token.value);
 		if (type < 0)
 			throw new IOException("Invalid type");
-		if (st.hasMoreTokens()) {
-			dclass = DClass.value(st.nextToken());
+		token = st.get();
+		if (token.isString()) {
+			dclass = DClass.value(token.value);
 			if (dclass < 0)
 				throw new IOException("Invalid class");
 		}
@@ -470,8 +446,8 @@ doQuery(MyStringTokenizer st) throws IOException {
 }
 
 void
-doFile(MyStringTokenizer st, List inputs, List istreams) {
-	String s = st.nextToken();
+doFile(Tokenizer st, List inputs, List istreams) throws IOException {
+	String s = st.getString();
 	try {
 		InputStreamReader isr2;
 		if (!s.equals("-")) {
@@ -492,8 +468,8 @@ doFile(MyStringTokenizer st, List inputs, List istreams) {
 }
 
 void
-doLog(MyStringTokenizer st) {
-	String s = st.nextToken();
+doLog(Tokenizer st) throws IOException {
+	String s = st.getString();
 	try {
 		FileOutputStream fos = new FileOutputStream(s);
 		log = new PrintStream(fos);
@@ -504,9 +480,9 @@ doLog(MyStringTokenizer st) {
 }
 
 boolean
-doAssert(MyStringTokenizer st) {
-	String field = st.nextToken();
-	String expected = st.nextToken();
+doAssert(Tokenizer st) throws IOException {
+	String field = st.getString();
+	String expected = st.getString();
 	String value = null;
 	boolean flag = true;
 	int section;
@@ -560,8 +536,13 @@ doAssert(MyStringTokenizer st) {
 	if (flag == false) {
 		print("Expected " + field + " " + expected +
 		      ", received " + value);
-		if (st.hasMoreTokens())
-			print(st.nextToken());
+		while (true) {
+			Tokenizer.Token token = st.get();
+			if (!token.isString())
+				break;
+			print(token.value);
+		}
+		st.unget();
 	}
 	return flag;
 }

@@ -98,22 +98,19 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	SIGRecord rec = new SIGRecord(name, dclass, ttl);
-	rec.covered = Type.value(nextString(st));
-	rec.alg = Byte.parseByte(nextString(st));
-	rec.labels = Byte.parseByte(nextString(st));
-	rec.origttl = TTL.parseTTL(nextString(st));
-	rec.expire = parseDate(nextString(st));
-	rec.timeSigned = parseDate(nextString(st));
-	rec.footprint = (short) Integer.parseInt(nextString(st));
-	rec.signer = Name.fromString(nextString(st), origin);
-	rec.signer.checkAbsolute("read an SIG record");
-	if (st.hasMoreTokens())
-		rec.signature = base64.fromString(remainingStrings(st));
+	rec.covered = Type.value(st.getString());
+	rec.alg = (byte) st.getUInt8();
+	rec.labels = (byte) st.getUInt8();
+	rec.origttl = st.getTTL();
+	rec.expire = parseDate(st.getString());
+	rec.timeSigned = parseDate(st.getString());
+	rec.footprint = (short) st.getUInt16();
+	rec.signer = st.getName(origin);
+	rec.signature = base64.fromString(remainingStrings(st));
 	return rec;
 }
 

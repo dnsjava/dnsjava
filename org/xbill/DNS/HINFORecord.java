@@ -58,13 +58,12 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	HINFORecord rec = new HINFORecord(name, dclass, ttl);
-	rec.cpu = byteArrayFromString(nextString(st));
-	rec.os = byteArrayFromString(nextString(st));
+	rec.cpu = byteArrayFromString(st.getString());
+	rec.os = byteArrayFromString(st.getString());
 	return rec;
 }
 

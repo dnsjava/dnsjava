@@ -78,18 +78,16 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-		Name origin)
-throws TextParseException
+rdataFromString(Name name, short dclass, int ttl, Tokenizer st, Name origin)
+throws IOException
 {
 	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
-	rec.order = Short.parseShort(nextString(st));
-	rec.preference = Short.parseShort(nextString(st));
-	rec.flags = byteArrayFromString(nextString(st));
-	rec.service = byteArrayFromString(nextString(st));
-	rec.regexp = byteArrayFromString(nextString(st));
-	rec.replacement = Name.fromString(nextString(st), origin);
-	rec.replacement.checkAbsolute("read a NAPTR record");
+	rec.order = (short) st.getUInt16();
+	rec.preference = (short) st.getUInt16();
+	rec.flags = byteArrayFromString(st.getString());
+	rec.service = byteArrayFromString(st.getString());
+	rec.regexp = byteArrayFromString(st.getString());
+	rec.replacement = st.getName(origin);
 	return rec;
 }
 
