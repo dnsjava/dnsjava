@@ -329,23 +329,22 @@ static class Stream {
 	Socket sock;
 	int nresponses;
 	TSIG tsig;
+	TSIG.StreamVerifier verifier;
 	Message lastResponse;
-	TSIGRecord lastTSIG;
 
 	Stream(SimpleResolver res) throws IOException {
 		this.res = res;
 		sock = new Socket(res.addr, res.port);
 		sock.setSoTimeout(res.timeoutValue);
 		tsig = res.tsig;
-		if (tsig != null)
-			tsig.verifyStreamStart();
 	}
 
 	void
 	send(Message query) throws IOException {
 		if (tsig != null) {
 			tsig.apply(query, null);
-			lastTSIG = query.getTSIG();
+			verifier = new TSIG.StreamVerifier(tsig,
+							   query.getTSIG());
 		}
 
 		byte [] out = query.toWire(Message.MAXLENGTH);
@@ -360,22 +359,19 @@ static class Stream {
 		nresponses++;
 		if (response.getHeader().getRcode() != Rcode.NOERROR)
 			return response;
-		if (tsig != null) {
+		if (verifier != null) {
 			boolean first = (nresponses == 1);
 			boolean required = (nresponses % 100 == 0);
 
 			TSIGRecord tsigrec = response.getTSIG();
 
-			byte error = tsig.verifyStream(response, in, lastTSIG,
-						       required, first);
+			byte error = verifier.verify(response, in);
 			if (error == Rcode.NOERROR && tsigrec != null)
 				response.tsigState = Message.TSIG_VERIFIED;
 			else if (error == Rcode.NOERROR)
 				response.tsigState = Message.TSIG_INTERMEDIATE;
 			else
 				response.tsigState = Message.TSIG_FAILED;
-			if (tsigrec != null)
-				lastTSIG = tsigrec;
 		}
 		return response;
 	}
