@@ -363,11 +363,11 @@ sectionToString(int i) {
 	if (i > 3)
 		return null;
 
-	Enumeration e = getSection(i);
 	StringBuffer sb = new StringBuffer();
 
-	while (e.hasMoreElements()) {
-		Record rec = (Record) e.nextElement();
+	Record [] records = getSectionArray(i);
+	for (int j = 0; i < records.length; j++) {
+		Record rec = records[j];
 		if (i == Section.QUESTION) {
 			sb.append(";;\t" + rec.name);
 			sb.append(", type = " + Type.string(rec.type));
