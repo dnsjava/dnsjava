@@ -282,9 +282,9 @@ public static void main(String [] args) {
 		System.out.println("usage: server cache zone ... ");
 		System.exit(0);	
 	}
-	dnsServer s;
+	jnamed s;
 	try {
-		s = new dnsServer();
+		s = new jnamed();
 		s.addZone(args[0], Zone.CACHE);
 		for (int i = 1; i < args.length; i++)
 			s.addZone(args[i], Zone.PRIMARY);
