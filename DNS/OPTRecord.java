@@ -41,10 +41,12 @@ throws IOException
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
-	Enumeration e = options.keys();
-	while (e.hasMoreElements()) {
-		Integer i = (Integer) e.nextElement();
-		sb.append(i + " ");
+	if (options != null) {
+		Enumeration e = options.keys();
+		while (e.hasMoreElements()) {
+			Integer i = (Integer) e.nextElement();
+			sb.append(i + " ");
+		}
 	}
 	return sb.toString();
 }
@@ -66,6 +68,8 @@ getVersion() {
 
 void
 rrToWire(DataByteOutputStream dbs, Compression c) throws IOException {
+	if (options == null)
+		return;
 	Enumeration e = options.keys();
 	while (e.hasMoreElements()) {
 		Integer i = (Integer) e.nextElement();
