@@ -24,10 +24,15 @@ protected static Object NXRRSET = new Object();
  * to the root.
  */
 protected
-NameSet(boolean isCache) {
-	data = new HashMap();
+NameSet(boolean isCache, Map map) {
+	data = map;
 	origin = Name.root;
 	this.isCache = isCache;
+}
+
+protected
+NameSet(boolean isCache) {
+	this(isCache, new HashMap());
 }
 
 /** Sets the origin of the NameSet */
@@ -37,9 +42,9 @@ setOrigin(Name origin) {
 }
 
 /** Deletes all sets in a NameSet */
-protected void
+protected synchronized void
 clear() {
-	data = new HashMap();
+	data.clear();
 }
 
 private final Object
