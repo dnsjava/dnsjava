@@ -6,11 +6,13 @@ public class dnsNXTRecord extends dnsRecord {
 dnsName nextName;
 boolean [] typeBitmap;
 
-dnsNXTRecord(dnsName rname, short rclass) {
+public dnsNXTRecord(dnsName rname, short rclass) {
 	super(rname, dns.NXT, rclass);
 }
 
-dnsNXTRecord(dnsName rname, short rclass, dnsName next, boolean [] typeBitmap) {
+public dnsNXTRecord(dnsName rname, short rclass, dnsName next,
+		    boolean [] typeBitmap)
+{
 	this(rname, rclass);
 	this.rttl = rttl;
 	this.nextName = nextName;

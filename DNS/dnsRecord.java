@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.*;
 
 public class dnsRecord {
 
@@ -22,19 +23,23 @@ dnsRecord(dnsName rname, short rtype, short rclass, int rttl, byte [] data) {
 }
 
 static dnsRecord newRecord(dnsName name, short type, short _class) {
-	switch (type) {
-		case dns.A:	return new dnsARecord(name, _class);
-		case dns.NS:	return new dnsNSRecord(name, _class);
-		case dns.CNAME:	return new dnsCNAMERecord(name, _class);
-		case dns.SOA:	return new dnsSOARecord(name, _class);
-		case dns.PTR:	return new dnsPTRRecord(name, _class);
-		case dns.MX:	return new dnsMXRecord(name, _class);
-		case dns.TXT:	return new dnsTXTRecord(name, _class);
-		case dns.KEY:	return new dnsKEYRecord(name, _class);
-		case dns.SIG:	return new dnsSIGRecord(name, _class);
-		case dns.NXT:	return new dnsNXTRecord(name, _class);
-		case dns.TSIG:	return new dnsTSIGRecord(name, _class);
-		default:	return new dnsRecord(name, type, _class);
+	String s = dns.typeString(type);
+	try {
+		Class c;
+		Constructor m;
+		dnsRecord rec;
+
+		c = Class.forName("dns" + s + "Record");
+		m = c.getConstructor(new Class [] {dnsName.class,
+						   java.lang.Short.TYPE});
+		rec = (dnsRecord) m.newInstance(new Object []
+						{name, new Short(_class)});
+		return rec;
+	}
+	catch (Exception e) {
+		if (!(e instanceof ClassNotFoundException))
+			System.out.println(e);
+		return new dnsRecord(name, type, _class);
 	}
 }
 

@@ -5,11 +5,11 @@ public class dnsARecord extends dnsRecord {
 
 InetAddress address;
 
-dnsARecord(dnsName rname, short rclass) {
+public dnsARecord(dnsName rname, short rclass) {
 	super(rname, dns.A, rclass);
 }
 
-dnsARecord(dnsName rname, short rclass, int ttl, InetAddress address) {
+public dnsARecord(dnsName rname, short rclass, int ttl, InetAddress address) {
 	this(rname, rclass);
 	this.rttl = rttl;
 	this.rlength = 4;

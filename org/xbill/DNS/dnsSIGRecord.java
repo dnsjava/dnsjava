@@ -14,13 +14,14 @@ short footprint;
 dnsName signer;
 byte [] signature;
 
-dnsSIGRecord(dnsName rname, short rclass) {
+public dnsSIGRecord(dnsName rname, short rclass) {
 	super(rname, dns.SIG, rclass);
 }
 
-dnsSIGRecord(dnsName rname, short rclass, int rttl, short typeCovered,
-	     byte alg, byte labels, int origTTL, Date expire, Date timeSigned,
-	     short footprint, dnsName signer, byte [] signature)
+public dnsSIGRecord(dnsName rname, short rclass, int rttl, short typeCovered,
+		    byte alg, byte labels, int origTTL, Date expire,
+		    Date timeSigned, short footprint, dnsName signer,
+		    byte [] signature)
 {
 	this(rname, rclass);
 	this.rttl = rttl;

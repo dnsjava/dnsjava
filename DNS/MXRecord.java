@@ -6,11 +6,13 @@ public class dnsMXRecord extends dnsRecord {
 short priority;
 dnsName name;
 
-dnsMXRecord(dnsName rname, short rclass) {
+public dnsMXRecord(dnsName rname, short rclass) {
 	super(rname, dns.MX, rclass);
 }
 
-dnsMXRecord(dnsName rname, short rclass, int rttl, int priority, dnsName name) {
+public dnsMXRecord(dnsName rname, short rclass, int rttl, int priority,
+		   dnsName name)
+{
 	this(rname, rclass);
 	this.rttl = rttl;
 	this.priority = (short)priority;

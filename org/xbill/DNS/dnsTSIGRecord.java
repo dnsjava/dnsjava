@@ -12,13 +12,13 @@ byte [] signature;
 short error;
 byte [] other;
 
-dnsTSIGRecord(dnsName rname, short rclass) {
+public dnsTSIGRecord(dnsName rname, short rclass) {
 	super(rname, dns.TSIG, rclass);
 }
 
-dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
-	     Date timeSigned, short fudge, byte [] signature, short error,
-	     byte other[])
+public dnsTSIGRecord(dnsName rname, short rclass, int rttl, dnsName alg,
+		     Date timeSigned, short fudge, byte [] signature,
+		     short error, byte other[])
 {
 	this(rname, rclass);
 	this.rttl = rttl;

@@ -5,11 +5,11 @@ public class dnsTXTRecord extends dnsRecord {
 
 Vector strings;
 
-dnsTXTRecord(dnsName rname, short rclass) {
+public dnsTXTRecord(dnsName rname, short rclass) {
 	super(rname, dns.TXT, rclass);
 }
 
-dnsTXTRecord(dnsName rname, short rclass, int ttl, Vector strings) {
+public dnsTXTRecord(dnsName rname, short rclass, int ttl, Vector strings) {
 	this(rname, rclass);
 	this.rttl = rttl;
 	this.rlength = 4;

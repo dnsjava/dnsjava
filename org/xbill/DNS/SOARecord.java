@@ -6,13 +6,13 @@ public class dnsSOARecord extends dnsRecord {
 dnsName host, admin;
 int serial, refresh, retry, expire, minimum;
 
-dnsSOARecord(dnsName rname, short rclass) {
+public dnsSOARecord(dnsName rname, short rclass) {
 	super(rname, dns.SOA, rclass);
 }
 
-dnsSOARecord(dnsName rname, short rclass, int rttl, dnsName host,
-	     dnsName admin, int serial, int refresh, int retry,
-	     int expire, int minimum) {
+public dnsSOARecord(dnsName rname, short rclass, int rttl, dnsName host,
+		    dnsName admin, int serial, int refresh, int retry,
+		    int expire, int minimum) {
 	this(rname, rclass);
 	this.rttl = rttl;
 	this.host = host;

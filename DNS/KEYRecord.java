@@ -8,12 +8,12 @@ public class dnsKEYRecord extends dnsRecord {
 short flags, protocol, alg;
 byte [] key;
 
-dnsKEYRecord(dnsName rname, short rclass) {
+public dnsKEYRecord(dnsName rname, short rclass) {
 	super(rname, dns.KEY, rclass);
 }
 
-dnsKEYRecord(dnsName rname, short rclass, int rttl, int flags, int protocol,
-	     int alg, byte [] key)
+public dnsKEYRecord(dnsName rname, short rclass, int rttl, int flags,
+		    int protocol, int alg, byte [] key)
 {
 	this(rname, rclass);
 	this.rttl = rttl;
