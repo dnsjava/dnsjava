@@ -32,20 +32,23 @@ private int tsigerror;
 int tsigstart;
 int tsigState;
 
-/* The response was not signed */
+/* The message was not signed */
 static final int TSIG_UNSIGNED = 0;
 
-/* The response was signed and verification succeeded */
+/* The message was signed and verification succeeded */
 static final int TSIG_VERIFIED = 1;
 
-/* The response was an unsigned message in multiple-message response */
+/* The message was an unsigned message in multiple-message response */
 static final int TSIG_INTERMEDIATE = 2;
 
+/* The message was signed and no verification was attempted.  */
+static final int TSIG_SIGNED = 3;
+
 /*
- * The response was signed and verification failed, or was not signed
+ * The message was signed and verification failed, or was not signed
  * when it should have been.
  */
-static final int TSIG_FAILED = 3;
+static final int TSIG_FAILED = 4;
 
 private static Record [] emptyRecordArray = new Record[0];
 private static RRset [] emptyRRsetArray = new RRset[0];
@@ -270,7 +273,9 @@ getTSIG() {
  */
 public boolean
 isSigned() {
-	return (tsigState == TSIG_VERIFIED || tsigState == TSIG_FAILED);
+	return (tsigState == TSIG_SIGNED ||
+		tsigState == TSIG_VERIFIED ||
+		tsigState == TSIG_FAILED);
 }
 
 /**

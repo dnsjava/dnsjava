@@ -165,6 +165,7 @@ public void
 apply(Message m, int error, TSIGRecord old) {
 	Record r = generate(m, m.toWire(), error, old);
 	m.addRecord(r, Section.ADDITIONAL);
+	m.tsigState = Message.TSIG_SIGNED;
 }
 
 /**
@@ -221,6 +222,7 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 				  signature, m.getHeader().getID(),
 				  Rcode.NOERROR, other);
 	m.addRecord(r, Section.ADDITIONAL);
+	m.tsigState = Message.TSIG_SIGNED;
 }
 
 /**

@@ -1,3 +1,8 @@
+2/3/2004
+	- Message.isSigned() should return true if we signed the Message
+	  with a TSIG.
+	  (reported by Shobana Sampath <shobanas@cisco.com>)
+
 1/28/2004
 	- Attempt to better deal with OutOfMemoryErrors when creating
 	  threads during the resolution process.
