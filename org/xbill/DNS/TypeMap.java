@@ -15,7 +15,7 @@ class TypeMap {
 private Map data;
 
 TypeMap() {
-	data = new HashMap(3);
+	data = new HashMap(2);
 }
 
 /**
