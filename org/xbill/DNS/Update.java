@@ -74,6 +74,7 @@ present(Name name, short type) {
  * condition that must be met is that the set of all records with the same 
  * and type in the update message must be identical to the set of all records
  * with that name and type on the server.
+ * @throws IOException The record could not be parsed.
  */
 public void
 present(Name name, short type, String record) throws IOException {
@@ -86,6 +87,7 @@ present(Name name, short type, String record) throws IOException {
  * condition that must be met is that the set of all records with the same 
  * and type in the update message must be identical to the set of all records
  * with that name and type on the server.
+ * @throws IOException The record could not be parsed.
  */
 public void
 present(Name name, short type, Tokenizer tokenizer) throws IOException {
@@ -99,7 +101,7 @@ present(Name name, short type, Tokenizer tokenizer) throws IOException {
  * be identical to the set of all records with that name and type on the server.
  */
 public void
-present(Record record) throws IOException {
+present(Record record) {
 	newPrereq(record);
 }
 
@@ -124,6 +126,7 @@ absent(Name name, short type) {
 /**
  * Parses a record from the string, and indicates that the record
  * should be inserted into the zone.
+ * @throws IOException The record could not be parsed.
  */
 public void
 add(Name name, short type, int ttl, String record) throws IOException {
@@ -133,6 +136,7 @@ add(Name name, short type, int ttl, String record) throws IOException {
 /**
  * Parses a record from the tokenizer, and indicates that the record
  * should be inserted into the zone.
+ * @throws IOException The record could not be parsed.
  */
 public void
 add(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException {
@@ -144,7 +148,7 @@ add(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException {
  * Indicates that the record should be inserted into the zone.
  */
 public void
-add(Record record) throws IOException {
+add(Record record) {
 	newUpdate(record);
 }
 
@@ -169,6 +173,7 @@ delete(Name name, short type) {
 /**
  * Parses a record from the string, and indicates that the record
  * should be deleted from the zone.
+ * @throws IOException The record could not be parsed.
  */
 public void
 delete(Name name, short type, String record) throws IOException {
@@ -179,6 +184,7 @@ delete(Name name, short type, String record) throws IOException {
 /**
  * Parses a record from the tokenizer, and indicates that the record
  * should be deleted from the zone.
+ * @throws IOException The record could not be parsed.
  */
 public void
 delete(Name name, short type, Tokenizer tokenizer) throws IOException {
@@ -190,7 +196,7 @@ delete(Name name, short type, Tokenizer tokenizer) throws IOException {
  * Indicates that the specified record should be deleted from the zone.
  */
 public void
-delete(Record record) throws IOException {
+delete(Record record) {
 	newUpdate(record);
 }
 
@@ -198,6 +204,7 @@ delete(Record record) throws IOException {
  * Parses a record from the string, and indicates that the record
  * should be inserted into the zone replacing any other records with the
  * same name and type.
+ * @throws IOException The record could not be parsed.
  */
 public void
 replace(Name name, short type, int ttl, String record) throws IOException {
@@ -209,6 +216,7 @@ replace(Name name, short type, int ttl, String record) throws IOException {
  * Parses a record from the tokenizer, and indicates that the record
  * should be inserted into the zone replacing any other records with the
  * same name and type.
+ * @throws IOException The record could not be parsed.
  */
 public void
 replace(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException
@@ -223,7 +231,7 @@ replace(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException
  * other records with the same name and type.
  */
 public void
-replace(Record record) throws IOException {
+replace(Record record) {
 	delete(record.getName(), record.getType());
 	newUpdate(record);
 }
