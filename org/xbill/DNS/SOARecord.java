@@ -117,9 +117,9 @@ getMinimum() {
 }       
 
 byte []
-rrToWire(Compression c) throws IOException {
+rrToWire(Compression c, int index) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs, index);
 
 	host.toWire(ds, c);
 	admin.toWire(ds, c);

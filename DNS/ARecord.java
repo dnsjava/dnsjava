@@ -80,7 +80,7 @@ getAddress() {
 }
 
 byte []
-rrToWire(Compression c) {
+rrToWire(Compression c, int index) {
 	if (address == null)
 		return null;
 	else

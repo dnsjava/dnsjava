@@ -80,7 +80,7 @@ getBitmap() {
 }
 
 byte []
-rrToWire(Compression c) throws IOException {
+rrToWire(Compression c, int index) throws IOException {
 	if (next == null)
 		return null;
 

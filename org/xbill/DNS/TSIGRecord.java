@@ -141,7 +141,7 @@ getOther() {
 }
 
 byte []
-rrToWire(Compression c) throws IOException {
+rrToWire(Compression c, int index) throws IOException {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
 

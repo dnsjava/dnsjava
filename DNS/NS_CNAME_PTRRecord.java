@@ -54,12 +54,12 @@ getTarget() {
 }
 
 byte []
-rrToWire(Compression c) throws IOException {
+rrToWire(Compression c, int index) throws IOException {
 	if (target == null)
 		return null;
 
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
-	CountedDataOutputStream ds = new CountedDataOutputStream(bs);
+	CountedDataOutputStream ds = new CountedDataOutputStream(bs, index);
 
 	target.toWire(ds, c);
 	return bs.toByteArray();

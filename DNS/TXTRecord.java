@@ -79,7 +79,7 @@ getStrings() {
 }
 
 byte []
-rrToWire(Compression c) throws IOException {
+rrToWire(Compression c, int index) throws IOException {
 	if (strings == null)
 		return null;
 

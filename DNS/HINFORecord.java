@@ -52,7 +52,7 @@ getOS() {
 	return os;
 }
 
-byte[] rrToWire(Compression c) throws IOException {
+byte[] rrToWire(Compression c, int index) throws IOException {
 	if (cpu == null || os == null)
 		return null;
 

@@ -97,7 +97,7 @@ getKey() {
 }
 
 byte []
-rrToWire(Compression c) throws IOException {
+rrToWire(Compression c, int index) throws IOException {
 	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
 		return null;
 

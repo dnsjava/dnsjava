@@ -40,7 +40,7 @@ toString() {
 }
 
 byte []
-rrToWire(Compression c) {
+rrToWire(Compression c, int index) {
 	return data;
 }
 

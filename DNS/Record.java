@@ -147,7 +147,7 @@ throws IOException
 	if (section == Section.QUESTION)
 		return;
 	out.writeInt(ttl);
-	byte [] data = rrToWire(c);
+	byte [] data = rrToWire(c, out.getPos() + 2);
 	if (data == null)
 		out.writeShort(0);
 	else {
@@ -260,10 +260,10 @@ getDClass() {
 	return dclass;
 }
 
-abstract byte [] rrToWire(Compression c) throws IOException;
+abstract byte [] rrToWire(Compression c, int index) throws IOException;
 
 byte [] rrToWireCanonical() throws IOException {
-	return rrToWire(null);
+	return rrToWire(null, 0);
 }
 
 
