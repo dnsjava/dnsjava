@@ -14,7 +14,10 @@ public class CNAMERecord extends NS_CNAME_PTRRecord {
 private
 CNAMERecord() {}
 
-/** Creates a new CNAMERecord with the given data */
+/**
+ * Creates a new CNAMERecord with the given data
+ * @param target The name to which the CNAME alias points
+ */
 public
 CNAMERecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException

@@ -17,7 +17,10 @@ private InetAddress address;
 private
 ARecord() {}
 
-/** Creates a new ARecord with the given data */
+/**
+ * Creates an A Record from the given data
+ * @param address The address that the name refers to
+ */
 public
 ARecord(Name _name, short _dclass, int _ttl, InetAddress _address) 
 throws IOException

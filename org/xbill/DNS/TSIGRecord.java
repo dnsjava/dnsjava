@@ -27,7 +27,8 @@ private short error;
 private byte [] other;
 
 /**
- * Creates a TSIG Record from the given data
+ * Creates a TSIG Record from the given data.  This is normally called by
+ * the TSIG class
  * @param alg The shared key's algorithm
  * @param timeSigned The time that this record was generated
  * @param fudge The fudge factor for time - if the time that the message is
@@ -38,6 +39,7 @@ private byte [] other;
  * @param error The extended error field.  Should be 0 in queries.
  * @param other The other data field.  Currently used only in BADTIME
  * responses.
+ * @see TSIG
  */
 public
 TSIGRecord(Name _name, short _dclass, int _ttl, Name _alg,

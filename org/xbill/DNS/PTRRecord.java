@@ -17,7 +17,10 @@ public class PTRRecord extends NS_CNAME_PTRRecord {
 private
 PTRRecord() {}
 
-/** Creates a new PTRRecord with the given data */
+/** 
+ * Creates a new PTR Record with the given data
+ * @param target The name of the machine with this address
+ */
 public
 PTRRecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException

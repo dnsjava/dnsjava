@@ -14,7 +14,10 @@ public class NSRecord extends NS_CNAME_PTRRecord {
 private
 NSRecord() {}
 
-/** Creates a new NSRecord with the given data */
+/** 
+ * Creates a new NS Record with the given data
+ * @param target The name server for the given domain
+ */
 public
 NSRecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException

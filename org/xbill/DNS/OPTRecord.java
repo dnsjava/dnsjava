@@ -23,6 +23,11 @@ private Hashtable options;
 private
 OPTRecord() {}
 
+/**
+ * Creates an OPT Record with no data.  This is normally called by the EDNS
+ * class
+ * @see EDNS
+ */
 public
 OPTRecord(Name _name, short _dclass, int _ttl) {
 	super(_name, Type.OPT, _dclass, _ttl);
