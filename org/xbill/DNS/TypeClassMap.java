@@ -11,6 +11,8 @@ import java.util.*;
  * value is used.  This must not require a linear search if neither
  * index is ANY, should not require a linear search if class is ANY,
  * and may require a linear search if type is ANY.
+ *
+ * @author Brian Wellington
  */
 
 class TypeClassMap {
