@@ -301,8 +301,6 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 		addRRset(name, response, rrset, Section.ANSWER, false);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
-		if (name.equals(cname.getTarget()))
-			return Rcode.NOERROR;
 		rcode = addAnswer(response, cname.getTarget(),
 				  type, dclass, iterations + 1);
 	}
@@ -322,8 +320,6 @@ addAnswer(Message response, Name name, short type, short dclass, int iterations)
 		catch (IOException e) {}
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
-		if (dname.getName().equals(dname.getTarget()))
-			return Rcode.NOERROR;
 		rcode = addAnswer(response, newname, type, dclass,
 				  iterations + 1);
 	}
