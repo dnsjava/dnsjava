@@ -13,9 +13,14 @@ int counter;
 DataOutputStream out;
 
 public
-CountedDataOutputStream(OutputStream o) {
+CountedDataOutputStream(OutputStream o, int start) {
 	out = new DataOutputStream(o);
-	counter = 0;
+	counter = start;
+}
+
+public
+CountedDataOutputStream(OutputStream o) {
+	this(o, 0);
 }
 
 public void
