@@ -31,7 +31,10 @@ Header(DataByteInputStream in) throws IOException {
 
 public void
 toWire(DataByteOutputStream out) throws IOException {
-	out.writeShort(id);
+	if (id < 0)
+		out.writeShort(randomID());
+	else
+		out.writeShort(id);
 	writeFlags(out);
 	for (int i=0; i<counts.length; i++)
 		out.writeShort(counts[i]);
@@ -61,6 +64,8 @@ getFlag(int bit) {
 
 public int
 getID() {
+	if (id < 0)
+		id = randomID();
 	return id & 0xFFFF;
 }
 
@@ -71,7 +76,6 @@ setID(int _id) {
 
 static short
 randomID() {
-	// why can't this be static?
 	Random random = new Random();
 	return (short) (random.nextInt() & 0xFFFF);
 }
