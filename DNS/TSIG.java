@@ -8,20 +8,40 @@ import java.net.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * Transaction signature handling.  This class generates and verifies
+ * TSIG records on messages, which provide transaction security,
+ * @see TSIGRecord
+ */
+
 public class TSIG {
 
+/**
+ * The domain name representing the HMAC-MD5 algorithm (the only supported
+ * algorithm)
+ */
 public static final String HMAC		= "HMAC-MD5.SIG-ALG.REG.INT";
 
 private Name name;
 private byte [] key;
 private hmacSigner axfrSigner = null;
 
+/**
+ * Creates a new TSIG object, which can be used to sign or verify a message.
+ * @param name The name of the shared key
+ * @param key The shared key's data
+ */
 public
 TSIG(String name, byte [] key) {
 	this.name = new Name(name);
 	this.key = key;
 }
 
+/**
+ * Generates a TSIG record for a message and adds it to the message
+ * @param m The message
+ * @param old If this message is a response, the TSIG from the request
+ */
 public void
 apply(Message m, TSIGRecord old) throws IOException {
 	Date timeSigned = new Date();
@@ -67,11 +87,15 @@ apply(Message m, TSIGRecord old) throws IOException {
 	m.addRecord(Section.ADDITIONAL, r);
 }
 
-/*
- * Since this is only called in the context where a TSIG is expected, it
- * is an error to not have one.  Note that we need to take an unparsed message
- * as input, since we can't recreate the wire format exactly (with the same
- * name compression).
+/**
+ * Verifies a TSIG record on an incoming message.  Since this is only called
+ * in the context where a TSIG is expected to be present, it is an error
+ * if one is not present.
+ * @param m The message
+ * @param b The message in unparsed form.  This is necessary since TSIG
+ * signs the message in wire format, and we can't recreate the exact wire
+ * format (with the same name compression).
+ * @param old If this message is a response, the TSIG from the request
  */
 public boolean
 verify(Message m, byte [] b, TSIGRecord old) {
@@ -137,11 +161,22 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		return false;
 }
 
+/** Prepares the TSIG object to verify an AXFR */
 public void
 verifyAXFRStart() {
 	axfrSigner = new hmacSigner(key);
 }
 
+/**
+ * Verifies a TSIG record on an incoming message that is part of an AXFR.
+ * TSIG records must be present on the first and last messages, and
+ * at least every 100 records in between (the last rule is not enforced).
+ * @param m The message
+ * @param b The message in unparsed form
+ * @param old The TSIG from the AXFR request
+ * @param required True if this message is required to include a TSIG.
+ * @param first True if this message is the first message of the AXFR
+ */
 public boolean
 verifyAXFR(Message m, byte [] b, TSIGRecord old,
 	   boolean required, boolean first)
