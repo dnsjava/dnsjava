@@ -132,12 +132,7 @@ public String
 rdataToString() {
 	StringBuffer sb = new StringBuffer();
 	if (key != null || (flags & (FLAG_NOKEY)) == (FLAG_NOKEY) ) {
-		if (!Options.check("nohex")) {
-			sb.append("0x");
-			sb.append(Integer.toHexString(flags));
-		}
-		else
-			sb.append(flags);
+		sb.append(flags);
 		sb.append(" ");
 		sb.append(proto);
 		sb.append(" ");

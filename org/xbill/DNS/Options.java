@@ -9,7 +9,6 @@ import java.util.*;
  * bindttl - Print TTLs in BIND format<BR>
  * multiline - Print records in multiline format<BR>
  * noprintin - Don't print the class of a record if it's IN<BR>
- * nohex - Don't print anything in hex (KEY flags, for example)<BR>
  * pqdn - Allow partially qualified domain names<BR>
  * verbose - Turn on general debugging statements<BR>
  * verbosehmac - Print all data digested by the HMAC routines<BR>
