@@ -27,17 +27,17 @@ private class Element {
 	short type;
 	byte credibility;
 	long timeIn;
-	int ttl;
+	long ttl;
 	int srcid;
 	Thread tid;
 
 	public
-	Element(Name _name, int _ttl, byte cred, int src, short _type) {
+	Element(Name _name, long _ttl, byte cred, int src, short _type) {
 		name = _name;
 		rrset = null;
 		type = _type;
 		credibility = cred;
-		ttl = _ttl;
+		ttl = (long)_ttl & 0xFFFFFFFFL;
 		srcid = src;
 		timeIn = System.currentTimeMillis();
 		tid = Thread.currentThread();
@@ -62,7 +62,7 @@ private class Element {
 		type = r.getType();
 		credibility = cred;
 		timeIn = System.currentTimeMillis();
-		ttl = r.getTTL();
+		ttl = (long)r.getTTL() & 0xFFFFFFFFL;
 		srcid = src;
 		tid = Thread.currentThread();
 	}
@@ -72,7 +72,7 @@ private class Element {
 		rrset.addRR(r);
 		timeIn = System.currentTimeMillis();
 		if (ttl < 0)
-			ttl = r.getTTL();
+			ttl = (long)r.getTTL() & 0xFFFFFFFFL;
 	}
 
 	public void
@@ -83,7 +83,7 @@ private class Element {
 	public final boolean
 	expiredTTL() {
 		long now = System.currentTimeMillis();
-		long expire = timeIn + (1000 * (long)ttl);
+		long expire = timeIn + (1000 * ttl);
 		return (now > expire);
 	}
 
@@ -251,7 +251,7 @@ addRRset(RRset rrset, byte cred, Object o) {
  * @param o The source of this data
  */
 public void
-addNegative(short rcode, Name name, short type, int ttl, byte cred, Object o) {
+addNegative(short rcode, Name name, short type, long ttl, byte cred, Object o) {
 	if (rcode == Rcode.NXDOMAIN)
 		type = 0;
 	int src = (o != null) ? o.hashCode() : 0;
@@ -516,7 +516,9 @@ addMessage(Message in) {
 		else
 			cred = Credibility.NONAUTH_AUTHORITY;
 		if (soa != null) {
-			int ttl = Math.min(soa.getTTL(), soa.getMinimum());
+			long soattl = (long)soa.getTTL() & 0xFFFFFFFFL;
+			long soamin = (long)soa.getMinimum() & 0xFFFFFFFFL;
+			long ttl = Math.min(soattl, soamin);
 			if (maxncache >= 0)
 				ttl = Math.min(ttl, maxncache);
 			if (ancount == 0)
