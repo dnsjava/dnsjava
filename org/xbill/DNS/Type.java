@@ -138,6 +138,18 @@ public static final int APL		= 42;
 /** Delegation Signer */
 public static final int DS		= 43;
 
+/** SSH Key Fingerprint */
+public static final int SSHFP		= 44;
+
+/** Resource Record Signature */
+public static final int RRSIG		= 46;
+
+/** Next Secure Name */
+public static final int NSEC		= 47;
+
+/** DNSSEC Key */
+public static final int DNSKEY		= 48;
+
 /** Transaction key - used to compute a shared secret or exchange a key */
 public static final int TKEY		= 249;
 
@@ -234,6 +246,10 @@ static {
 	types.put(OPT, "OPT");
 	types.put(APL, "APL");
 	types.put(DS, "DS");
+	types.put(SSHFP, "SSHFP");
+	types.put(RRSIG, "RRSIG");
+	types.put(NSEC, "NSEC");
+	types.put(DNSKEY, "DNSKEY");
 	types.put(TKEY, "TKEY");
 	types.put(TSIG, "TSIG");
 	types.put(IXFR, "IXFR");
@@ -265,28 +281,52 @@ string(int i) {
 	return (s != null) ? s : ("TYPE" + i);
 }
 
+private static int
+parseNumericType(String s) {
+	try {
+		int type = Integer.parseInt(s);
+		if (type < 0 || type > 0xFFFF)
+			return -1;
+		return type;
+	}
+	catch (NumberFormatException e) {
+		return -1;
+	}
+}
+
+/**
+ * Converts a String representation of an Type into its numeric value.
+ * @param s The string representation of the type
+ * @param numberok Whether a number will be accepted or not.
+ * @return The type code, or -1 on error.
+ */
+public static int
+value(String s, boolean numberok) {
+	s = s.toUpperCase();
+	Integer val = types.getValue(s);
+	if (val != null)
+		return val.intValue();
+	if (s.startsWith("TYPE")) {
+		int code = parseNumericType(s.substring(4));
+		if (code >= 0) {
+			return code;
+		}
+	} else if (numberok) {
+		int code = parseNumericType(s);
+		if (code >= 0) {
+			return code;
+		}
+	}
+	return -1;
+}
+
 /**
  * Converts a String representation of an Type into its numeric value
  * @return The type code, or -1 on error.
  */
 public static int
 value(String s) {
-	s = s.toUpperCase();
-	Integer val = types.getValue(s);
-	if (val != null)
-		return val.intValue();
-	if (s.startsWith("TYPE")) {
-		try {
-			int type = Integer.parseInt(s.substring(4));
-			if (type < 0 || type > 0xFFFF)
-				return -1;
-			return type;
-		}
-		catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-	return -1;
+	return value(s, false);
 }
 
 /** Is this type valid for a record (a non-meta type)? */
