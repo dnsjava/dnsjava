@@ -97,8 +97,8 @@ getOpcode() {
 }
 
 public void
-setCount(int field, short value) {
-	counts[field] = value;
+setCount(int field, int value) {
+	counts[field] = (short) value;
 }
 
 public void
