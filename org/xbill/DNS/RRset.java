@@ -22,15 +22,12 @@ class Enumerator implements Enumeration {
 
 	Enumerator() {
 		size = rrs.size();
-		if (start >= size)
-			start -= size;
-		if (size == 1)
-			first = count = 0;
-		else
-			first = count = ++start;
 		records = new Record[size];
 		for (int i = 0; i < size; i++)
 			records[i] = (Record) rrs.elementAt(i);
+		if (++start >= size)
+			start -= size;
+		first = count = start;
 	}
 
 	public boolean
