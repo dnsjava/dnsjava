@@ -42,6 +42,7 @@ Function calls:
 			dnsARecord.getType()
 			dnsARecord.getDClass()
 			dnsARecord.getAddress()
+			(not all of the accessor functions are complete yet)
 		Each class defines a constructor that takes all fields as
 		parameters, and dnsRecord provides dnsRecord.newRecord()
 		to create records in a non-type specific way.
