@@ -380,7 +380,7 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 
 	h.clear();
 	DataByteOutputStream dbs = new DataByteOutputStream();
-	dbs.writeShort((short)old.getSignature().length);
+	dbs.writeShort((short)tsig.getSignature().length);
 	h.addData(dbs.toByteArray());
 	h.addData(tsig.getSignature());
 
