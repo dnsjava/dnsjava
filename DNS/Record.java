@@ -57,7 +57,6 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 							new Integer(length),
 							in, c
 						});
-		rec.oLength = length;
 		return rec;
 	}
 	catch (ClassNotFoundException e) {
@@ -115,6 +114,9 @@ throws IOException
 	short length;
 	Name name;
 	Record rec;
+	int start;
+
+	start = in.getPos();
 
 	name = new Name(in, c);
 
@@ -127,6 +129,7 @@ throws IOException
 	ttl = in.readInt();
 	length = in.readShort();
 	rec = newRecord(name, type, dclass, ttl, length, in, c);
+	rec.oLength = in.getPos() - start;
 	return rec;
 }
 
