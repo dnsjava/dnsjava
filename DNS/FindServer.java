@@ -46,7 +46,7 @@ findProperty() {
 		v.addElement(s);
 	}
 	if (v != null) {
-		search = new Name[v.size() + 1];
+		search = new Name[v.size()];
 		for (int i = 0; i < v.size(); i++)
 			search[i] = new Name((String)v.elementAt(i));
 	}
@@ -100,13 +100,13 @@ findUnix() {
 	}
 	catch (IOException e) {
 	}
-	if (vserver != null) {
+	if (server == null && vserver != null) {
 		server = new String[vserver.size()];
 		for (int i = 0; i < vserver.size(); i++)
 			server[i] = (String) vserver.elementAt(i);
 	}
-	if (vsearch != null) {
-		search = new Name[vsearch.size() + 1];
+	if (search == null && vsearch != null) {
+		search = new Name[vsearch.size()];
 		for (int i = 0; i < vsearch.size(); i++)
 			search[i] = new Name((String)vsearch.elementAt(i));
 	}
@@ -118,7 +118,7 @@ probe() {
 		return;
 	probed = true;
 	findProperty();
-	if (server != null)
+	if (server != null && search != null)
 		return;
 	findUnix();
 	return;
@@ -142,9 +142,6 @@ server() {
 public static Name []
 searchPath() {
 	probe();
-	if (search == null)
-		search = new Name [1];
-	search[search.length - 1] = Name.root;
 	return search;
 }
 
