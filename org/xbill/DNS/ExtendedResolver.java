@@ -33,7 +33,6 @@ boolean [] invalid;
 Receiver receiver;
 Vector queue;
 Hashtable idMap;
-Vector workerthreads;
 
 public
 ExtendedResolver() throws UnknownHostException {
@@ -73,8 +72,8 @@ sendTo(Message query, int r, int q) {
 				return true;
 			return false;
 	}
-	int id = resolvers[r].sendAsync(query, receiver);
 	synchronized (idMap) {
+		int id = resolvers[r].sendAsync(query, receiver);
 		idMap.put(new Integer(id), new Integer(r));
 	}
 	return true;
@@ -129,13 +128,13 @@ send(Message query) {
 	byte rcode;
 
 	for (q = 0; q < 20; q++) {
-		boolean ok = false;
-		for (r = 0; r < resolvers.length; r++)
-			ok |= sendTo(query, r, q);
-		if (!ok)
-			break;
-		Message m = null;
+		Message m;
 		synchronized (queue) {
+			boolean ok = false;
+			for (r = 0; r < resolvers.length; r++)
+				ok |= sendTo(query, r, q);
+			if (!ok)
+				break;
 			try {
 				queue.wait((quantum+1) * 1000);
 			}
@@ -177,24 +176,7 @@ uniqueID(Message m) {
 public int
 sendAsync(final Message query, final ResolverListener listener) {
 	final int id = uniqueID(query);
-	if (workerthreads == null)
-		workerthreads = new Vector();
-	WorkerThread t = null;
-	synchronized (workerthreads) {
-		if (workerthreads.size() > 0) {
-			t = (WorkerThread) workerthreads.firstElement();
-			workerthreads.removeElement(t);
-		}
-	}
-	if (t == null) {
-		t = new WorkerThread(this, workerthreads);
-		t.setDaemon(true);
-		t.start();
-	}
-	synchronized (t) {
-		t.assign(query, id, listener);
-		t.notify();
-	}
+	WorkerThread.assignThread(this, query, id, listener);
 	return id;
 }
 

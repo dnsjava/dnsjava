@@ -56,7 +56,7 @@ findUnix() {
 		while (true) {
 			String line = br.readLine();
 			if (line == null)
-				return null;
+				break;
 			if (!line.startsWith("nameserver "))
 				continue;
 			if (v == null)
@@ -73,7 +73,7 @@ findUnix() {
 	array = new String[v.size()];
 	for (int i = 0; i < v.size(); i++)
 		array[i] = (String) v.elementAt(i);
-	return null;
+	return array;
 }
 
 public static String []

@@ -18,7 +18,6 @@ boolean useTCP, ignoreTruncation;
 int EDNSlevel = -1;
 TSIG tsig;
 int timeoutValue = 60 * 1000;
-Vector workerthreads;
 
 static String defaultResolver = "localhost";
 
@@ -205,24 +204,7 @@ uniqueID(Message m) {
 public int
 sendAsync(final Message query, final ResolverListener listener) {
 	final int id = uniqueID(query);
-	if (workerthreads == null)
-		workerthreads = new Vector();
-	WorkerThread t = null;
-	synchronized (workerthreads) {
-		if (workerthreads.size() > 0) {
-			t = (WorkerThread) workerthreads.firstElement();
-			workerthreads.removeElement(t);
-		}
-	}
-	if (t == null) {
-		t = new WorkerThread(this, workerthreads);
-		t.setDaemon(true);
-		t.start();
-	}
-	synchronized (t) {
-		t.assign(query, id, listener);
-		t.notify();
-	}
+	WorkerThread.assignThread(this, query, id, listener);
 	return id;
 }
 
