@@ -295,23 +295,12 @@ sendAXFR(Message query) throws IOException {
 		catch (IOException e) {
 			throw new WireParseException("Error parsing message");
 		}
-		if (m.getHeader().getCount(Section.QUESTION) != 0 ||
+		if (m.getHeader().getCount(Section.QUESTION) > 1 ||
 		    m.getHeader().getCount(Section.ANSWER) <= 0 ||
 		    m.getHeader().getCount(Section.AUTHORITY) != 0)
 		{
-			StringBuffer sb = new StringBuffer();
-			sb.append("Invalid AXFR: ");
-			for (int i=0; i < 4; i++) {
-				Enumeration e = m.getSection(i);
-				System.out.println("--");
-				while (e.hasMoreElements()) {
-					Record r;
-					r = (Record)e.nextElement();
-					System.out.println(r);
-				}
-				System.out.println();
-			}
-			System.out.println(sb.toString());
+			System.out.println("Invalid AXFR packet: ");
+			System.out.println(m);
 			s.close();
 			throw new WireParseException("Invalid AXFR message");
 		}

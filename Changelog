@@ -1,3 +1,18 @@
+6/9/1999
+	- update should handle timeouts
+	- AXFR parser should allow 1 record in the question section
+
+6/7/1999
+	- Zone file parser now handles $TTL, and complains about invalid
+	  directives.
+	- fixed a few parsing problems in update
+	- fixed null key parsing and key flags handling
+
+6/3/1999
+	- added author javadoc tags
+	- added javadoc comments to Master.  Again, not sure how I missed
+	  this before.
+
 5/25/1999
 	- 0.9.5 released
 	- fixed another null pointer in the cache
