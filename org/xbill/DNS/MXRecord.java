@@ -13,10 +13,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class MXRecord extends Record {
-
-private short priority;
-private Name target;
+public class MXRecord extends MX_KXRecord {
 
 private
 MXRecord() {}
@@ -30,70 +27,20 @@ MXRecord() {}
 public
 MXRecord(Name _name, short _dclass, int _ttl, int _priority, Name _target)
 {
-	super(_name, Type.MX, _dclass, _ttl);
-	priority = (short) _priority;
-	target = _target;
+	super(_name, Type.MX, _dclass, _ttl, _priority, _target);
 }
 
 MXRecord(Name _name, short _dclass, int _ttl,
 	    int length, DataByteInputStream in, Compression c)
 throws IOException
 {
-	super(_name, Type.MX, _dclass, _ttl);
-	if (in == null)
-		return;
-	priority = (short) in.readUnsignedShort();
-	target = new Name(in, c);
+	super(_name, Type.MX, _dclass, _ttl, length, in, c);
 }
 
 MXRecord(Name _name, short _dclass, int _ttl, MyStringTokenizer st, Name origin)
 throws IOException
 {
-	super(_name, Type.MX, _dclass, _ttl);
-	priority = Short.parseShort(st.nextToken());
-	target = new Name(st.nextToken(), origin);
-}
-
-/** Converts to a String */
-public String
-toString() {
-	StringBuffer sb = toStringNoData();
-	if (target != null) {
-		sb.append(priority);
-		sb.append(" ");
-		sb.append(target);
-	}
-	return sb.toString();
-}
-
-/** Returns the host that mail is sent to */
-public Name
-getTarget() {
-	return target;
-}
-
-/** Returns the priority of this MX */
-public short
-getPriority() {
-	return priority;
-}
-
-void
-rrToWire(DataByteOutputStream out, Compression c) throws IOException {
-	if (target == null)
-		return;
-
-	out.writeShort(priority);
-	target.toWire(out, null);
-}
-
-void
-rrToWireCanonical(DataByteOutputStream out) throws IOException {
-	if (target == null)
-		return;
-
-	out.writeShort(priority);
-	target.toWireCanonical(out);
+	super(_name, Type.MX, _dclass, _ttl, st, origin);
 }
 
 }
