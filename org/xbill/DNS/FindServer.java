@@ -129,14 +129,14 @@ findUnix() {
 				st.nextToken(); /* skip domain */
 				if (!st.hasMoreTokens())
 					continue;
-				addSearch(st.nextToken(), lserver);
+				addSearch(st.nextToken(), lsearch);
 			}
 			else if (line.startsWith("search")) {
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip search */
 				String s;
 				while (st.hasMoreTokens())
-					addSearch(st.nextToken(), lserver);
+					addSearch(st.nextToken(), lsearch);
 			}
 		}
 		br.close();
