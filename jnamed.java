@@ -372,9 +372,8 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 		int id = query.getHeader().getID();
 		while (e.hasMoreElements()) {
 			RRset rrset = (RRset) e.nextElement();
-			Message response = new Message();
+			Message response = new Message(id);
 			Header header = response.getHeader();
-			header.setID(id);
 			header.setFlag(Flags.QR);
 			header.setFlag(Flags.AA);
 			addRRset(rrset.getName(), response, rrset,
@@ -445,8 +444,7 @@ generateReply(Message query, byte [] in, Socket s) {
 	if (queryOPT != null && (queryOPT.getFlags() & Flags.DO) != 0)
 		flags = FLAG_DNSSECOK;
 
-	Message response = new Message();
-	response.getHeader().setID(query.getHeader().getID());
+	Message response = new Message(query.getHeader().getID());
 	response.getHeader().setFlag(Flags.QR);
 	if (query.getHeader().getFlag(Flags.RD));
 		response.getHeader().setFlag(Flags.RD);
