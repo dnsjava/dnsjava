@@ -257,6 +257,11 @@ throws UnknownHostException
 	return newIXFR(zone, serial, fallback, host, 0, key);
 }
 
+/**
+ * Sets a timeout on this zone transfer.  The default is 900 seconds (15
+ * minutes).
+ * @param secs The maximum amount of time that this zone transfer can take.
+ */
 public void
 setTimeout(int secs) {
 	if (secs < 0)
