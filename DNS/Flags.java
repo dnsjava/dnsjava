@@ -18,13 +18,13 @@ public static final byte AD		= 10;
 public static final byte CD		= 11;
 
 static {
-	flags.put2(QR, "QR");
-	flags.put2(AA, "AA");
-	flags.put2(TC, "TC");
-	flags.put2(RD, "RD");
-	flags.put2(RA, "RA");
-	flags.put2(AD, "AD");
-	flags.put2(CD, "CD");
+	flags.put2(QR, "qr");
+	flags.put2(AA, "aa");
+	flags.put2(TC, "tc");
+	flags.put2(RD, "rd");
+	flags.put2(RA, "ra");
+	flags.put2(AD, "ad");
+	flags.put2(CD, "cd");
 }
 
 public static String
@@ -37,7 +37,7 @@ string(int i) {
 
 public static byte
 value(String s) {
-	byte i = (byte) flags.getValue(s.toUpperCase());
+	byte i = (byte) flags.getValue(s.toLowerCase());
 	if (i >= 0)
 		return i;
 	try {
