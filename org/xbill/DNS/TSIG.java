@@ -128,10 +128,19 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		return false;
 
 	if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
-		if (Options.check("verbose"));
+		if (Options.check("verbose"))
 			System.err.println("BADKEY failure");
 		return false;
 	}
+	long now = System.currentTimeMillis();
+	long then = tsig.getTimeSigned().getTime();
+	long fudge = tsig.getFudge();
+	if (Math.abs(now - then) > fudge * 1000) {
+		if (Options.check("verbose"))
+			System.err.println("BADTIME failure");
+		return false;
+	}
+
 	try {
 		if (old != null && tsig.getError() != Rcode.BADKEY &&
 		    tsig.getError() != Rcode.BADSIG)
@@ -184,7 +193,7 @@ verify(Message m, byte [] b, TSIGRecord old) {
 	if (h.verify(tsig.getSignature()))
 		return true;
 	else {
-		if (Options.check("verbose"));
+		if (Options.check("verbose"))
 			System.err.println("BADSIG failure");
 		return false;
 	}
@@ -238,7 +247,7 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 		if (!tsig.getName().equals(name) ||
 		    !tsig.getAlgorithm().equals(alg))
 		{
-			if (Options.check("verbose"));
+			if (Options.check("verbose"))
 				System.err.println("BADKEY failure");
 			return false;
 		}
@@ -257,7 +266,7 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 	}
 
 	if (h.verify(tsig.getSignature()) == false) {
-		if (Options.check("verbose"));
+		if (Options.check("verbose"))
 			System.err.println("BADSIG failure");
 		return false;
 	}
