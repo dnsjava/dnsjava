@@ -17,8 +17,8 @@ dnsServer() {
 };
 
 public void
-addZone(String zonefile) throws IOException {
-	Zone newzone = new Zone(zonefile);
+addZone(String zonefile, int type) throws IOException {
+	Zone newzone = new Zone(zonefile, type);
 	znames.put(newzone.getOrigin(), newzone);
 	zones[zcount++] = newzone;
 };
@@ -44,29 +44,27 @@ generateReply(Message query) {
 	Message response = new Message();
 	response.getHeader().setID(query.getHeader().getID());
 	response.getHeader().setFlag(dns.AA);
+	response.getHeader().setFlag(dns.QR);
 	response.addRecord(dns.QUESTION, queryRecord);
 
 	Name name = queryRecord.getName();
+	short type = queryRecord.getType();
 	Zone zone = findBestZone(name);
 	if (zone == null) {
 		response.getHeader().setRcode(dns.SERVFAIL);
 	}
 	else {
-		Vector responseRecords = zone.findName(name);
+		Hashtable nameRecords = (Hashtable) zone.findName(name);
+		Short Type = new Short(type);
+		RRset responseRecords = (RRset) nameRecords.get(Type);
 		if (responseRecords == null) {
 			response.getHeader().setRcode(dns.NXDOMAIN);
 		}
 		else {
-			int added = 0;
-			Enumeration e = responseRecords.elements();
+			Enumeration e = responseRecords.rrs();
 			while (e.hasMoreElements()) {
 				Record r = (Record) e.nextElement();
-				if (r.getType() == queryRecord.getType() &&
-				    r.getDClass() == queryRecord.getDClass())
-				{
-					response.addRecord(dns.ANSWER, r);
-					added++;
-				}
+				response.addRecord(dns.ANSWER, r);
 			}
 		}
 	}
@@ -153,25 +151,17 @@ addUDP(final short port) {
 
 public static void main(String [] args) {
 	if (args.length == 0) {
-		System.out.println("usage: server zone");
+		System.out.println("usage: server cache zone ... ");
 		System.exit(0);	
 	}
 	dnsServer s;
 	try {
 		s = new dnsServer();
-		for (int i = 0; i < args.length; i++)
-			s.addZone(args[i]);
+		s.addZone(args[0], Zone.CACHE);
+		for (int i = 1; i < args.length; i++)
+			s.addZone(args[i], Zone.PRIMARY);
 		s.addUDP((short)12345);
 		s.addTCP((short)12345);
-/*
-		while (true) {
-			try {
-				Thread.sleep(1000);
-			}
-			catch (InterruptedException e) {
-			}
-		}
-*/
 	}
 	catch (IOException e) {
 		System.out.println(e);

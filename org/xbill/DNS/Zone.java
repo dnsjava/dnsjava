@@ -8,10 +8,19 @@ import java.io.*;
 
 public class Zone {
 
-Hashtable data;
-Name origin = null;
+public static final int CACHE = 1;
+public static final int PRIMARY = 2;
+public static final int SECONDARY = 3;
 
-public Zone(String file) throws IOException {
+private Hashtable data;
+private Name origin = null;
+private int type;
+
+public Zone(String file, int _type) throws IOException {
+	type = _type;
+	if (type == CACHE)
+		origin = Name.root;
+
 	FileInputStream fis;
 	try {
 		fis = new FileInputStream(file);
@@ -31,8 +40,10 @@ public Zone(String file) throws IOException {
 		line = IO.readExtendedLine(br);
 		if (line == null)
 			break;
+		if (line.length() == 0 || line.startsWith(";"))
+			continue;
+
 		boolean space = line.startsWith(" ") || line.startsWith("\t");
-			
 		st = new MyStringTokenizer(line);
 
 		String s = st.nextToken();
@@ -42,17 +53,23 @@ public Zone(String file) throws IOException {
 		}
 		st.putBackToken(s);
 		record = parseRR(st, space, record, origin);
-		Vector v = (Vector) data.get(record.name);
-		if (v == null)
-			v = new Vector();
-		v.addElement(record);
-		data.put(record.name, v);
+		Hashtable nametable = (Hashtable) data.get(record.name);
+		if (nametable == null) {
+			nametable = new Hashtable();
+			data.put(record.name, nametable);
+		}
+		RRset rrset = (RRset) nametable.get(new Short(record.type));
+		if (rrset == null) {
+			rrset = new RRset(record.name, record.type);
+			nametable.put(new Short(record.type), rrset);
+		}
+		rrset.addRR(record);
 	}
 }
 
-public Vector
+public Hashtable
 findName(Name name) {
-	return (Vector) data.get(name);
+	return (Hashtable) data.get(name);
 }
 
 public Name
