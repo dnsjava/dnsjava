@@ -270,6 +270,8 @@ send(Message query) throws IOException {
 			recvd[r]++;
 		}
 		if (m == null) {
+			if (qe.obj instanceof RuntimeException)
+				throw (RuntimeException)qe.obj;
 			IOException e = (IOException) qe.obj;
 			if (!(e instanceof InterruptedIOException))
 				invalid[r] = true;
