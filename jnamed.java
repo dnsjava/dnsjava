@@ -169,18 +169,18 @@ addRRset(Name name, Message response, RRset rrset, byte section, int flags) {
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
 	if ((flags & FLAG_SIGONLY) == 0) {
-		Enumeration e = rrset.rrs();
-		while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
+		Iterator it = rrset.rrs();
+		while (it.hasNext()) {
+			Record r = (Record) it.next();
 			if (!name.isWild() && r.getName().isWild())
 				r = r.withName(name);
 			response.addRecord(r, section);
 		}
 	}
 	if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
-		Enumeration e = rrset.sigs();
-		while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
+		Iterator it = rrset.sigs();
+		while (it.hasNext()) {
+			Record r = (Record) it.next();
 			if (!name.isWild() && r.getName().isWild())
 				r = r.withName(name);
 			response.addRecord(r, section);
@@ -206,9 +206,9 @@ addCacheNS(Message response, Cache cache, Name name) {
 	if (!sr.isDelegation())
 		return;
 	RRset nsRecords = sr.getNS();
-	Enumeration e = nsRecords.rrs();
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
+	Iterator it = nsRecords.rrs();
+	while (it.hasNext()) {
+		Record r = (Record) it.next();
 		response.addRecord(r, Section.AUTHORITY);
 	}
 }

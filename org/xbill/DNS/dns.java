@@ -196,25 +196,19 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 		System.err.println(cached);
 	if (cached.isSuccessful()) {
 		RRset [] rrsets = cached.answers();
-		Vector v = new Vector();
-		Enumeration e;
+		List l = new ArrayList();
+		Iterator it;
 		Record [] answers;
 		int i = 0;
 
 		for (i = 0; i < rrsets.length; i++) {
-			e = rrsets[i].rrs();
-			while (e.hasMoreElements()) {
-				v.addElement(e.nextElement());
+			it = rrsets[i].rrs();
+			while (it.hasNext()) {
+				l.add(it.next());
 			}
 		}
 
-		answers = new Record[v.size()];
-
-		e = v.elements();
-		i = 0;
-		while (e.hasMoreElements())
-			answers[i++] = (Record)e.nextElement();
-		return answers;
+		return (Record []) l.toArray(new Record[l.size()]);
 	}
 	else if (cached.isNXDOMAIN() || cached.isNXRRSET()) {
 		return null;

@@ -97,8 +97,8 @@ validate() throws IOException {
 	if (rrset == null || rrset.size() != 1)
 		throw new IOException(origin +
 				      ": exactly 1 SOA must be specified");
-	Enumeration e = rrset.rrs();
-	SOA = (SOARecord) e.nextElement();
+	Iterator it = rrset.rrs();
+	SOA = (SOARecord) it.next();
 	NS = (RRset) findExactSet(origin, Type.NS);
 	if (NS == null)
 		throw new IOException(origin + ": no NS set specified");
@@ -343,6 +343,23 @@ addRecord(Record r) {
 	if (rrset == null)
 		addSet(name, type, rrset = new RRset());
 	rrset.addRR(r);
+}
+
+/**
+ * Removes a record from the Zone
+ * @param r The record to be removed
+ * @see Record
+ */
+public void
+removeRecord(Record r) {
+	Name name = r.getName();
+	short type = r.getRRsetType();
+	RRset rrset = (RRset) findExactSet (name, type);
+	if (rrset != null) {
+		rrset.deleteRR(r);
+		if (rrset.size() == 0)
+			removeSet(name, type, rrset);
+	}
 }
 
 public Enumeration

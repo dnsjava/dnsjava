@@ -17,49 +17,17 @@ import java.io.*;
 
 public class RRset {
 
-class Enumerator implements Enumeration {
-	int count;
-	Record [] records;
-
-	Enumerator() {
-		synchronized (rrs) {
-			int size = rrs.size();
-			records = new Record[size];
-			if (size == 0)
-				return;
-			start++;
-			while (start >= size)
-				start -= size;
-			int i = 0;
-			for (int j = start; j < size; j++)
-				records[i++] = (Record) rrs.elementAt(j);
-			for (int j = 0; j < start; j++)
-				records[i++] = (Record) rrs.elementAt(j);
-		}
-	}
-
-	public boolean
-	hasMoreElements() {
-		return (count < records.length);
-	}
-
-	public Object
-	nextElement() {
-		if (count == records.length)
-			throw new NoSuchElementException();
-		return records[count++];
-	}
-}
-
-private Vector rrs;
-private Vector sigs;
+private List rrs;
+private List sigs;
 private int start;
 private byte securityStatus;
+
+private static List emptyList = new ArrayList(0);
 
 /** Creates an empty RRset */
 public
 RRset() {
-	rrs = new Vector(1, 1);
+	rrs = new ArrayList(1);
 	sigs = null;
 	start = 0;
 	securityStatus = DNSSEC.Insecure;
@@ -71,14 +39,15 @@ addRR(Record r) {
 	if (r.getType() != Type.SIG) {
 		synchronized (rrs) {
 			if (!rrs.contains(r))
-				rrs.addElement(r);
+				rrs.add(r);
+			start = 0;
 		}
 	}
 	else {
 		if (sigs == null)
-			sigs = new Vector();
+			sigs = new ArrayList();
 		if (!sigs.contains(r))
-			sigs.addElement(r);
+			sigs.add(r);
 	}
 }
 
@@ -87,39 +56,49 @@ public void
 deleteRR(Record r) {
 	if (r.getType() != Type.SIG) {
 		synchronized (rrs) {
-			rrs.removeElement(r);
+			rrs.remove(r);
+			start = 0;
 		}
 	}
 	else if (sigs != null)
-		sigs.removeElement(r);
+		sigs.remove(r);
 }
 
 /** Deletes all Records from an RRset */
 public void
 clear() {
 	synchronized (rrs) {
-		rrs.setSize(0);
+		rrs.clear();
+		start = 0;
 	}
 	sigs = null;
-	start = 0;
 }
 
 /**
- * Returns an Enumeration listing all (data) records.  This cycles through
- * the records, so each Enumeration will start with a different record.
+ * Returns an Iterator listing all (data) records.  This cycles through
+ * the records, so each Iterator will start with a different record.
  */
-public Enumeration
+public synchronized Iterator
 rrs() {
-	return new Enumerator();
+	int size = rrs.size();
+	if (size == 0)
+		return emptyList.iterator();
+	if (start == size)
+		start = 0;
+	if (start++ == 0)
+		return (rrs.iterator());
+	List list = new ArrayList(rrs.subList(start - 1, size));
+	list.addAll(rrs.subList(0, start - 1));
+	return list.iterator();
 }
 
-/** Returns an Enumeration listing all signature records */
-public Enumeration
+/** Returns an Iterator listing all signature records */
+public Iterator
 sigs() {
 	if (sigs == null)
-		return new Vector(0).elements();
+		return emptyList.iterator();
 	else
-		return sigs.elements();
+		return sigs.iterator();
 }
 
 /** Returns the number of (data) records */
@@ -167,26 +146,27 @@ getDClass() {
 /** Returns the ttl of the records */
 public int
 getTTL() {
-	Enumeration e = rrs();
-	if (!e.hasMoreElements())
-		return 0;
-
-	int ttl = Integer.MAX_VALUE;
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		if (r.getTTL() < ttl)
-			ttl = r.getTTL();
+	synchronized (rrs) {
+		if (rrs.size() == 0)
+			return 0;
+		int ttl = Integer.MAX_VALUE;
+		Iterator it = rrs.iterator();
+		while (it.hasNext()) {
+			Record r = (Record)it.next();
+			if (r.getTTL() < ttl)
+				ttl = r.getTTL();
+		}
+		return (ttl);
 	}
-	return ttl;
 }
 
 /** Returns the first record */
 public Record
 first() {
 	try {
-		return (Record) rrs.elementAt(0);
+		return (Record) rrs.get(0);
 	}
-	catch (ArrayIndexOutOfBoundsException e) {
+	catch (IndexOutOfBoundsException e) {
 		return null;
 	}
 }
@@ -208,21 +188,21 @@ public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append("{ [");
-	Enumeration e = new Enumerator();
-	while (e.hasMoreElements()) {
-		Record rr = (Record) e.nextElement();
+	Iterator it = rrs.iterator();
+	while (it.hasNext()) {
+		Record rr = (Record) it.next();
 		sb.append(rr);
-		if (e.hasMoreElements())
+		if (it.hasNext())
 			sb.append("<>");
 	}
 	sb.append("]");
 	if (sigs != null) {
 		sb.append(" [");
-		e = sigs();
-		while (e.hasMoreElements()) {
-			Record rr = (Record) e.nextElement();
+		it = sigs.iterator();
+		while (it.hasNext()) {
+			Record rr = (Record) it.next();
 			sb.append(rr);
-			if (e.hasMoreElements())
+			if (it.hasNext())
 				sb.append("<>");
 		}
 		sb.append("]");
