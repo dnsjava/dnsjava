@@ -22,7 +22,10 @@ findSet(Name name, short type) {
 	Hashtable nameInfo = (Hashtable) data.get(name);
 	if (nameInfo == null)
 		return null;
-	return nameInfo.get(new Short(type));
+	Object o = nameInfo.get(new Short(type));
+	if (o != null)
+		return o;
+	return nameInfo.get(new Short(Type.CNAME));
 }
 
 protected Hashtable
@@ -36,6 +39,13 @@ addSet(Name name, short type, Object o) {
 	if (nameInfo == null)
 		data.put(name, nameInfo = new Hashtable());
 	nameInfo.put(new Short(type), o);
+}
+
+protected void
+removeSet(Name name, short type) {
+	Hashtable nameInfo = (Hashtable) data.get(name);
+	if (nameInfo != null)
+		nameInfo.remove(new Short(type));
 }
 
 public String
