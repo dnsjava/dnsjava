@@ -97,11 +97,12 @@ newUpdate(Name zone) {
 Message(DataByteInputStream in) throws IOException {
 	this(new Header(in));
 	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < header.getCount(i); j++) {
+		int count = header.getCount(i);
+		if (count > 0)
+			sections[i] = new ArrayList(count);
+		for (int j = 0; j < count; j++) {
 			int pos = in.getPos();
 			Record rec = Record.fromWire(in, i);
-			if (sections[i] == null)
-				sections[i] = new LinkedList();
 			sections[i].add(rec);
 			if (rec.getType() == Type.TSIG)
 				tsigstart = pos;
