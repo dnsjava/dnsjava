@@ -320,9 +320,13 @@ addAnswer(Message response, Name name, short type, short dclass,
 		DNAMERecord dname = sr.getDNAME();
 		rrset.addRR(dname);
 		addRRset(name, response, rrset, Section.ANSWER, flags);
-		Name newname = name.fromDNAME(dname);
-		if (newname == null)
-			return Rcode.SERVFAIL;
+		Name newname;
+		try {
+			newname = name.fromDNAME(dname);
+		}
+		catch (NameTooLongException e) {
+			return Rcode.YXDOMAIN;
+		}
 		try {
 			rrset = new RRset();
 			rrset.addRR(new CNAMERecord(name, dclass, 0, newname));

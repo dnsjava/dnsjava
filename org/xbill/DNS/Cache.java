@@ -607,7 +607,13 @@ addMessage(Message in) {
 			{
 				addRecord(answers[i], cred, in);
 				DNAMERecord dname = (DNAMERecord) answers[i];
-				lookupName = lookupName.fromDNAME(dname);
+				try {
+					lookupName =
+						lookupName.fromDNAME(dname);
+				}
+				catch (NameTooLongException e) {
+					break;
+				}
 				restart = true;
 			} else if (rrtype == Type.DNAME &&
 				   lookupName.subdomain(name))

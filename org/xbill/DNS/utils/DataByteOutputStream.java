@@ -113,6 +113,17 @@ writeString(byte [] s) {
 }
 
 /**
+ * Writes a string represented by a byte array to the stream, encoded as a
+ * length byte followed by data
+ * @param s The byte array containing the string to be written
+ * @param start The start of the string.
+ */
+public void
+writeString(byte [] s, int start) {
+	write(s, start, s[start] + 1);
+}
+
+/**
  * Writes a BigInteger to the stream, encoded as binary data.  If present,
  * the leading 0 byte is removed.
  * @param i The BigInteger to be written

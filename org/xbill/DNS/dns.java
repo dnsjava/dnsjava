@@ -217,8 +217,14 @@ lookup(Name name, short type, short dclass, byte cred, int iterations,
 	}
 	else if (cached.isDNAME()) {
 		DNAMERecord dname = cached.getDNAME();
-		return lookup(name.fromDNAME(dname), type, dclass, cred,
-			      ++iterations, false);
+		Name newname;
+		try {
+			newname = name.fromDNAME(dname);
+		}
+		catch (NameTooLongException e) {
+			return null;
+		}
+		return lookup(newname, type, dclass, cred, ++iterations, false);
 	}
 	else if (querysent) {
 		return null;

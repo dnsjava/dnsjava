@@ -31,9 +31,24 @@ DataByteInputStream(byte [] b) {
  * @return The number of bytes read
  */
 public int
-read(byte b[]) throws IOException {
+read(byte [] b) throws IOException {
 	int n = read(b, 0, b.length);
 	if (n < b.length)
+		throw new IOException("end of input");
+	return n;
+}
+
+/**
+ * Read data from the stream.
+ * @param b The array to read into
+ * @param pos The starting position
+ * @param len The number of bytes to read
+ * @return The number of bytes read
+ */
+public int
+readArray(byte [] b, int pos, int len) throws IOException {
+	int n = read(b, pos, len);
+	if (n < len)
 		throw new IOException("end of input");
 	return n;
 }
