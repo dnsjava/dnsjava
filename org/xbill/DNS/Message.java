@@ -352,15 +352,29 @@ getSectionRRsets(int section) {
 		return emptyRRsetArray;
 	List sets = new LinkedList();
 	Record [] recs = getSectionArray(section);
-	Arrays.sort(recs);
-	int i = 0;
-	while (i < recs.length) {
-		RRset set = new RRset();
-		sets.add(set);
-		do {
+	Set hash = new HashSet();
+	for (int i = 0; i < recs.length; i++) {
+		Name name = recs[i].getName();
+		boolean newset = true;
+		if (hash.contains(name)) {
+			for (int j = sets.size() - 1; j >= 0; j--) {
+				RRset set = (RRset) sets.get(j);
+				if (set.getType() == recs[i].getRRsetType() &&
+				    set.getDClass() == recs[i].getDClass() &&
+				    set.getName().equals(name))
+				{
+					set.addRR(recs[i]);
+					newset = false;
+					break;
+				}
+			}
+		}
+		if (newset) {
+			RRset set = new RRset();
+			sets.add(set);
 			set.addRR(recs[i]);
-			i++;
-		} while (i < recs.length && sameSet(set, recs[i]));
+			hash.add(name);
+		}
 	}
 	return (RRset []) sets.toArray(new RRset[sets.size()]);
 }
