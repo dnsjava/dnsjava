@@ -27,7 +27,8 @@ private byte [] wireFormat;
 private boolean frozen;
 boolean TSIGsigned, TSIGverified;
 
-private static Record [] emptyArray = new Record[0];
+private static Record [] emptyRecordArray = new Record[0];
+private static RRset [] emptyRRsetArray = new RRset[0];
 
 private
 Message(Header header) {
@@ -308,11 +309,44 @@ getSection(int section) {
  */
 public Record []
 getSectionArray(int section) {
-	if (sections[section] != null) {
-		List l = sections[section];
-		return (Record []) l.toArray(new Record[l.size()]);
-	} else
-		return emptyArray;
+	if (sections[section] == null)
+		return emptyRecordArray;
+	List l = sections[section];
+	return (Record []) l.toArray(new Record[l.size()]);
+}
+
+/**
+ * Returns an array containing all records in the given section grouped into
+ * RRsets.
+ * @see RRset
+ * @see Section
+ */
+public RRset []
+getSectionRRsets(int section) {
+	if (sections[section] == null)
+		return emptyRRsetArray;
+	List sets = new LinkedList();
+	Iterator it = sections[section].iterator();
+	while (it.hasNext()) {
+		Record rec = (Record) it.next();
+		RRset set = null;
+		for (int i = sets.size() - 1; i >= 0; i--) {
+			RRset _set = (RRset) sets.get(i);
+			if (_set.getType() == rec.getRRsetType() &&
+			    _set.getDClass() == rec.getDClass() &&
+			    _set.getName().equals(rec.getName()))
+			{
+				set = _set;
+			    	break;
+			}
+		}
+		if (set == null) {
+			set = new RRset();
+			sets.add(set);
+		}
+		set.addRR(rec);
+	}
+	return (RRset []) sets.toArray(new RRset[sets.size()]);
 }
 
 void
