@@ -69,6 +69,8 @@ SIGRecord(Name name, short dclass, int ttl, int covered, int alg, int origttl,
 	this.expire = expire;
 	this.timeSigned = timeSigned;
 	this.footprint = (short) footprint;
+	if (!signer.isAbsolute())
+		throw new RelativeNameException(signer);
 	this.signer = signer;
 	this.signature = signature;
 }

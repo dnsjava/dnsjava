@@ -520,9 +520,7 @@ void
 checkAbsolute(String msg) {
 	if (isAbsolute())
 		return;
-	throw new IllegalArgumentException("Attempted to " + msg + " " +
-					   "with a non-absolute name " +
-					   "(" + this + ")");
+	throw new RelativeNameException(this);
 }
 
 /**

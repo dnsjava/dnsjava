@@ -74,6 +74,8 @@ TKEYRecord(Name name, short dclass, int ttl, Name alg,
 	   byte [] key, byte other[])
 {
 	this(name, dclass, ttl);
+	if (!alg.isAbsolute())
+		throw new RelativeNameException(alg);
 	this.alg = alg;
 	this.timeInception = timeInception;
 	this.timeExpire = timeExpire;

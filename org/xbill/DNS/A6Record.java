@@ -48,6 +48,8 @@ A6Record(Name name, short dclass, int ttl, int prefixBits,
 	this(name, dclass, ttl);
 	this.prefixBits = (short) prefixBits;
 	this.suffix = suffix;
+	if (prefix != null && !prefix.isAbsolute())
+		throw new RelativeNameException(prefix);
 	this.prefix = prefix;
 }
 

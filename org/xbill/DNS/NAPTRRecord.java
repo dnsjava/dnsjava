@@ -55,6 +55,8 @@ NAPTRRecord(Name name, short dclass, int ttl, int order, int preference,
 	this.flags = byteArrayFromString(flags);
 	this.service = byteArrayFromString(service);
 	this.regexp = byteArrayFromString(regexp);
+	if (!replacement.isAbsolute())
+		throw new RelativeNameException(replacement);
 	this.replacement = replacement;
 }
 

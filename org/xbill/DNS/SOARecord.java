@@ -50,7 +50,11 @@ SOARecord(Name name, short dclass, int ttl, Name host, Name admin,
 	  int serial, int refresh, int retry, int expire, int minimum)
 {
 	this(name, dclass, ttl);
+	if (!host.isAbsolute())
+		throw new RelativeNameException(host);
 	this.host = host;
+	if (!admin.isAbsolute())
+		throw new RelativeNameException(admin);
 	this.admin = admin;
 	this.serial = serial;
 	this.refresh = refresh;

@@ -43,7 +43,11 @@ getMember() {
 public
 RPRecord(Name name, short dclass, int ttl, Name mailbox, Name textDomain) {
 	this(name, dclass, ttl);
+	if (!mailbox.isAbsolute())
+		throw new RelativeNameException(mailbox);
 	this.mailbox = mailbox;
+	if (!textDomain.isAbsolute())
+		throw new RelativeNameException(textDomain);
 	this.textDomain = textDomain;
 }
 

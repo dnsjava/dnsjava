@@ -44,6 +44,8 @@ getMember() {
 public
 NXTRecord(Name name, short dclass, int ttl, Name next, BitSet bitmap) {
 	this(name, dclass, ttl);
+	if (!next.isAbsolute())
+		throw new RelativeNameException(next);
 	this.next = next;
 	this.bitmap = bitmap;
 }

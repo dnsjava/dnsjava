@@ -35,6 +35,8 @@ protected
 Record() {}
 
 Record(Name name, short type, short dclass, int ttl) {
+	if (!name.isAbsolute())
+		throw new RelativeNameException(name);
 	this.name = name;
 	this.type = type;
 	this.dclass = dclass;

@@ -64,6 +64,8 @@ TSIGRecord(Name name, short dclass, int ttl, Name alg, Date timeSigned,
 	   byte other[])
 {
 	this(name, dclass, ttl);
+	if (!alg.isAbsolute())
+		throw new RelativeNameException(alg);
 	this.alg = alg;
 	this.timeSigned = timeSigned;
 	this.fudge = fudge;

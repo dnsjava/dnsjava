@@ -58,6 +58,8 @@ SRVRecord(Name name, short dclass, int ttl, int priority,
 	this.priority = priority;
 	this.weight = weight;
 	this.port = port;
+	if (!target.isAbsolute())
+		throw new RelativeNameException(target);
 	this.target = target;
 }
 
