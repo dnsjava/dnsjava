@@ -112,6 +112,7 @@ rrToString() {
 		sb.append (" ");
 		sb.append (base64.toString(signature));
 	}
+	sb.append (" ");
 	sb.append (Rcode.TSIGstring(error));
 	sb.append (" ");
 	if (other == null)
