@@ -72,7 +72,7 @@ main(String argv[]) throws IOException {
 			res = new dnsResolver(server);
 		}
 		else
-			res = new dnsResolver("localhost");
+			res = new dnsResolver();
 
 		name = new dnsName(argv[arg++]);
 
