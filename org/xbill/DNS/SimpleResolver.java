@@ -167,8 +167,9 @@ sendTCP(Message query, byte [] out) throws IOException {
 		throw new WireParseException("Error parsing message");
 	}
 	if (tsig != null) {
+		response.TSIGsigned = true;
 		boolean ok = tsig.verify(response, in, query.getTSIG());
-		System.out.println(";; TSIG verify: " + ok);
+		response.TSIGverified = ok;
 	}
 	return response;
 }
@@ -232,8 +233,9 @@ send(Message query) throws IOException {
 		throw new WireParseException("Error parsing message");
 	}
 	if (tsig != null) {
+		response.TSIGsigned = true;
 		boolean ok = tsig.verify(response, in, query.getTSIG());
-		System.out.println(";; TSIG verify: " + ok);
+		response.TSIGverified = ok;
 	}
 
 	s.close();
@@ -291,8 +293,10 @@ sendAXFR(Message query) throws IOException {
 
 		response = new Message();
 		response.getHeader().setID(query.getHeader().getID());
-		if (tsig != null)
+		if (tsig != null) {
 			tsig.verifyAXFRStart();
+			response.TSIGverified = true;
+		}
 		while (soacount < 2) {
 			try {
 				InputStream sIn = s.getInputStream();
@@ -340,7 +344,8 @@ sendAXFR(Message query) throws IOException {
 				boolean ok = tsig.verifyAXFR(m, in,
 							     query.getTSIG(),
 							     required, first);
-				System.out.println("TSIG verify: " + ok);
+				if (!ok)
+					response.TSIGverified = false;
 			}
 			first = false;
 		}

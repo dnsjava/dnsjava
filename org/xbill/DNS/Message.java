@@ -23,6 +23,7 @@ public class Message implements Cloneable {
 private Header header;
 private Vector [] sections;
 private int size;
+boolean TSIGsigned, TSIGverified;
 
 /** Creates a new Message with the specified Message ID */
 public
@@ -197,6 +198,24 @@ getTSIG() {
 }
 
 /**
+ * Was this message signed by a TSIG?
+ * @see TSIG
+ */
+public boolean
+isSigned() {
+	return TSIGsigned;
+}
+
+/**
+ * If this message was signed by a TSIG, was the TSIG verified?
+ * @see TSIG
+ */
+public boolean
+isVerified() {
+	return TSIGverified;
+}
+
+/**
  * Returns the OPT record from the ADDITIONAL section, if one is present
  * @see OPTRecord
  * @see EDNS
@@ -299,6 +318,14 @@ public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(getHeader() + "\n");
+	if (isSigned()) {
+		sb.append(";; TSIG ");
+		if (isVerified())
+			sb.append("ok");
+		else
+			sb.append("invalid");
+		sb.append('\n');
+	}
 	for (int i = 0; i < 4; i++) {
 		if (header.getOpcode() != Opcode.UPDATE)
 			sb.append(";; " + Section.longString(i) + ":\n");
