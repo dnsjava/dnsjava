@@ -123,8 +123,9 @@ boolean verify(dnsMessage m, byte [] b, dnsTSIGRecord old) {
 		return false;
 }
 
-void verifyAXFRStart() {
+void verifyAXFRStart(dnsTSIGRecord old) {
 	axfrSigner = new hmacSigner(key);
+	axfrSigner.addData(old.signature);
 }
 
 boolean verifyAXFR(dnsMessage m, byte [] b, boolean required) {

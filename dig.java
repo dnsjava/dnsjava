@@ -73,6 +73,9 @@ static void doAXFR(dnsMessage query, dnsResolver res) throws IOException {
 
 	response = res.sendAXFR(query);
 
+	if (response == null)
+		return;
+
 	Enumeration e = response.getSection(dns.ANSWER).elements();
 	while (e.hasMoreElements())
 		System.out.println(e.nextElement());

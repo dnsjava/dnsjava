@@ -101,6 +101,7 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 	DataInputStream dataIn;
 	int soacount = 0;
 	dnsMessage response;
+	boolean first = true;
 
 	try {
 		s = new Socket(addr, dns.PORT);
@@ -119,7 +120,8 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 
 	response = new dnsMessage();
 	response.getHeader().setID(query.getHeader().getID());
-	TSIG.verifyAXFRStart();
+	if (TSIG != null)
+		TSIG.verifyAXFRStart(query.getTSIG());
 	while (soacount < 2) {
 		dataIn = new DataInputStream(s.getInputStream());
 		inLength = dataIn.readUnsignedShort();
@@ -129,7 +131,22 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 		if (m.getHeader().getCount(dns.QUESTION) != 0 ||
 		    m.getHeader().getCount(dns.ANSWER) <= 0 ||
 		    m.getHeader().getCount(dns.AUTHORITY) != 0)
-			throw new IOException("Invalid AXFR message");
+		{
+			StringBuffer sb = new StringBuffer();
+			sb.append("Invalid AXFR: ");
+			for (int i=0; i < 4; i++) {
+				Enumeration e = m.getSection(i).elements();
+				System.out.println("--");
+				while (e.hasMoreElements()) {
+					dnsRecord r;
+					r = (dnsRecord)e.nextElement();
+					System.out.println(r);
+				}
+				System.out.println();
+			}
+			System.out.println(sb.toString());
+			return null;
+		}
 		for (int i = 1; i < 4; i++) {
 			Enumeration e = m.getSection(i).elements();
 			while (e.hasMoreElements()) {
@@ -140,10 +157,11 @@ public dnsMessage sendAXFR(dnsMessage query) throws IOException {
 			}
 		}
 		if (TSIG != null) {
-			boolean required = (soacount > 1);
+			boolean required = (soacount > 1 || first);
 			boolean ok = TSIG.verifyAXFR(m, in, required);
 			System.out.println("TSIG verify: " + ok);
 		}
+		first = false;
 	}
 
 	s.close();
