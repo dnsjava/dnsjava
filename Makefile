@@ -14,4 +14,4 @@ docs:
 	${JAVADOC} org.xbill.Task org.xbill.DNS org.xbill.DNS.utils
 
 docsclean:	
-	rm -f doc/*
+	rm -rf doc/*
