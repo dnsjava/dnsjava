@@ -144,7 +144,7 @@ sendAXFR(dnsMessage query) throws IOException {
 	boolean first = true;
 
 	try {
-		s = new Socket(addr, dns.PORT);
+		s = new Socket(addr, port);
 	}
 	catch (SocketException e) {
 		System.out.println(e);
