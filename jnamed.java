@@ -386,7 +386,9 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
  * TCP.
  */
 byte []
-generateReply(Message query, byte [] in, Socket s) throws IOException {
+generateReply(Message query, byte [] in, int length, Socket s)
+throws IOException
+{
 	Header header;
 	boolean badversion;
 	int maxLength;
@@ -409,7 +411,7 @@ generateReply(Message query, byte [] in, Socket s) throws IOException {
 	if (queryTSIG != null) {
 		tsig = findTSIG(queryTSIG.getName());
 		if (tsig == null ||
-		    tsig.verify(query, in, null) != Rcode.NOERROR)
+		    tsig.verify(query, in, length, null) != Rcode.NOERROR)
 			return formerrMessage(in);
 	}
 
@@ -567,7 +569,8 @@ serveTCP(InetAddress addr, short port) {
 			byte [] response = null;
 			try {
 				query = new Message(in);
-				response = generateReply(query, in, s);
+				response = generateReply(query, in,
+							 in.length, s);
 				if (response == null)
 					continue;
 			}
@@ -611,7 +614,9 @@ serveUDP(InetAddress addr, short port) {
 			byte [] response = null;
 			try {
 				query = new Message(in);
-				response = generateReply(query, in, null);
+				response = generateReply(query, in,
+							 indp.getLength(),
+							 null);
 				if (response == null)
 					continue;
 			}

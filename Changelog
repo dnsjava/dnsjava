@@ -1,6 +1,7 @@
 12/15/2002
 	- Converting some types of records (TXT, for example) to wire format
 	  could throw an IndexOutOfBoundsException.
+	- TSIG signed UDP queries weren't properly verified by jnamed.
 
 12/14/2002
 	- Move additional data processing to the Record class from jnamed;
