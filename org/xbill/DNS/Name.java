@@ -530,7 +530,7 @@ toString() {
 			sb.append(name[i]);
 		else
 			sb.append(byteString((byte [])name[i]));
-		if (qualified || i < labels - 1)
+		if (qualified || i < labels)
 			sb.append(".");
 	}
 	return sb.toString();
