@@ -1,4 +1,4 @@
-// Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
+// Copyright (c) 2002 Brian Wellington (bwelling@xbill.org)
 
 package org.xbill.DNS;
 
@@ -74,14 +74,80 @@ static {
 	defaultCaches = new HashMap();
 }
 
-private static synchronized Cache
-getCache(short dclass) {
+/**
+ * Gets the Resolver that will be used as the default by future Lookups.
+ * @return The default resolver.
+ */
+public static synchronized Resolver
+getDefaultResolver() {
+	return defaultResolver;
+}
+
+/**
+ * Sets the Resolver that will be used as the default by future Lookups.
+ * @param resolver The default resolver.
+ */
+public static synchronized void
+setDefaultResolver(Resolver resolver) {
+	defaultResolver = resolver;
+}
+
+/**
+ * Gets the Cache that will be used as the default for the specified
+ * class by future Lookups.
+ * @param dclass The class whose cache is being retrieved.
+ * @return The default cache for the specified class.
+ */
+public static synchronized Cache
+getDefaultCache(short dclass) {
 	Cache c = (Cache) defaultCaches.get(DClass.toShort(dclass));
 	if (c == null) {
 		c = new Cache(dclass);
 		defaultCaches.put(DClass.toShort(dclass), c);
 	}
 	return c;
+}
+
+/**
+ * Sets the Cache that will be used as the default for the specified
+ * class by future Lookups.
+ * @param cache The default cache for the specified class.
+ * @param dclass The class whose cache is being set.
+ */
+public static synchronized void
+setDefaultCache(Cache cache, short dclass) {
+	defaultCaches.put(DClass.toShort(dclass), cache);
+}
+
+/**
+ * Gets the search path that will be used as the default by future Lookups.
+ * @return The default search path.
+ */
+public static synchronized Name []
+getDefaultSearchPath() {
+	return defaultSearchPath;
+}
+
+/**
+ * Sets the search path that will be used as the default by future Lookups.
+ * @param domains The default search path.
+ */
+public static synchronized void
+setDefaultSearchPath(Name [] domains) {
+	defaultSearchPath = domains;
+}
+
+/**
+ * Sets the search path that will be used as the default by future Lookups.
+ * @param domains The default search path.
+ * @throws TextParseException A name in the array is not a valid DNS name.
+ */
+public static synchronized void
+setDefaultSearchPath(String [] domains) throws TextParseException {
+	Name [] newdomains = new Name[domains.length];
+	for (int i = 0; i < domains.length; i++)
+		newdomains[i] = Name.fromString(domains[i], Name.root);
+	defaultSearchPath = newdomains;
 }
 
 /**
@@ -107,9 +173,11 @@ Lookup(Name name, short type, short dclass) {
 	this.name = name;
 	this.type = type;
 	this.dclass = dclass;
-	this.resolver = defaultResolver;
-	this.searchPath = defaultSearchPath;
-	this.cache = getCache(dclass);
+	synchronized (Lookup.class) {
+		this.resolver = defaultResolver;
+		this.searchPath = defaultSearchPath;
+		this.cache = getDefaultCache(dclass);
+	}
 	this.credibility = Credibility.NORMAL;
 	this.verbose = Options.check("verbose");
 	this.result = -1;
