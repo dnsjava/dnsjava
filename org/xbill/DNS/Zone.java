@@ -253,7 +253,9 @@ findRecords(Name name, short type) {
 			zr = new SetResponse(SetResponse.CNAME);
 			zr.addCNAME((CNAMERecord) rrset.first());
 		}
-		else if (rrset.getType() == Type.NS) {
+		else if (rrset.getType() == Type.NS &&
+			 !name.equals(origin))
+		{
 			zr = new SetResponse(SetResponse.DELEGATION);
 			zr.addNS(rrset);
 		}
