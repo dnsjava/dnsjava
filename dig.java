@@ -162,7 +162,7 @@ main(String argv[]) throws IOException {
 				break;
 
 			    default:
-				System.out.print("Invalid option");
+				System.out.print("Invalid option: ");
 				System.out.println(argv[arg]);
 			}
 			arg++;
