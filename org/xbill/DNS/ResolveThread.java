@@ -14,7 +14,7 @@ import java.net.*;
  * @author Brian Wellington
  */
 
-class ResolveThread implements Runnable {
+class ResolveThread extends Thread {
 
 private Message query;
 private Object id;
