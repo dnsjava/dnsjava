@@ -206,6 +206,8 @@ substitute(String spec, long n) throws IOException {
 
 /**
  * Constructs and returns the next record in the expansion.
+ * @throws IOException The name or rdata was invalid after substitutions were
+ * performed.
  */
 public Record
 nextRecord() throws IOException {
@@ -220,6 +222,8 @@ nextRecord() throws IOException {
 
 /**
  * Constructs and returns all records in the expansion.
+ * @throws IOException The name or rdata of a record was invalid after
+ * substitutions were performed.
  */
 public Record []
 expand() throws IOException {
