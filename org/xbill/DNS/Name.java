@@ -343,7 +343,11 @@ toString() {
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
 	for (int i = 0; i < labels; i++) {
-		Name tname = new Name(this, i);
+		Name tname;
+		if (i == 0)
+			tname = this;
+		else
+			tname = new Name(this, i);
 		int pos = -1;
 		if (c != null) {
 			pos = c.get(tname);
