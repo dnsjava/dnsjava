@@ -166,17 +166,17 @@ addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
  * @param type The type to look up
  * @param dclass The class to look up
  * @param minCred The minimum acceptable credibility
- * @return A CacheResponse object
- * @see CacheResponse
+ * @return A SetResponse object
+ * @see SetResponse
  * @see Credibility
  */
-public CacheResponse
+public SetResponse
 lookupRecords(Name name, short type, short dclass, byte minCred) {
-	CacheResponse cr = null;
+	SetResponse cr = null;
 	Object [] objects = findSets(name, type, dclass);
 
 	if (objects == null)
-		return new CacheResponse(CacheResponse.UNKNOWN);
+		return new SetResponse(SetResponse.UNKNOWN);
 
 	int nelements = 0;
 	for (int i = 0; i < objects.length; i++) {
@@ -191,7 +191,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			nelements++;
 	}
 	if (nelements == 0)
-		return new CacheResponse(CacheResponse.UNKNOWN);
+		return new SetResponse(SetResponse.UNKNOWN);
 
 	Element [] elements = new Element[nelements];
 	for (int i = 0, j = 0; i < objects.length; i++) {
@@ -208,7 +208,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 		if (rrset == null) {
 			if (type == Type.ANY)
 				continue;
-			return new CacheResponse(CacheResponse.NEGATIVE);
+			return new SetResponse(SetResponse.NEGATIVE);
 		}
 
 		if (type != Type.CNAME && type != Type.ANY &&
@@ -218,12 +218,12 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 			cr = lookupRecords(cname.getTarget(), type, dclass,
 					   minCred);
 			if (cr.isUnknown())
-				cr.set(CacheResponse.PARTIAL, cname);
+				cr.set(SetResponse.PARTIAL, cname);
 			cr.addCNAME(cname);
 			return cr;
 		}
 		if (cr == null)
-			cr = new CacheResponse(CacheResponse.SUCCESSFUL);
+			cr = new SetResponse(SetResponse.SUCCESSFUL);
 		cr.addRRset(rrset);	
 	}
 	return cr;
@@ -231,7 +231,7 @@ lookupRecords(Name name, short type, short dclass, byte minCred) {
 
 private RRset []
 findRecords(Name name, short type, short dclass, byte minCred) {
-	CacheResponse cr = lookupRecords(name, type, dclass, minCred);
+	SetResponse cr = lookupRecords(name, type, dclass, minCred);
 	if (cr.isSuccessful())
 		return cr.answers();
 	else

@@ -101,7 +101,7 @@ lookup(Name name, short type, short dclass, byte cred) {
 	Enumeration e;
 
 /*System.out.println("lookup of " + name + " " + Type.string(type));*/
-	CacheResponse cached = cache.lookupRecords(name, type, dclass, cred);
+	SetResponse cached = cache.lookupRecords(name, type, dclass, cred);
 /*System.out.println(cached);*/
 	if (cached.isSuccessful()) {
 		RRset [] rrsets = cached.answers();

@@ -207,7 +207,7 @@ generateReply(Message query, byte [] in, int maxLength) {
 	short dclass = queryRecord.getDClass();
 	Zone zone = findBestZone(name);
 	if (zone != null) {
-		ZoneResponse zr = zone.findRecords(name, type);
+		SetResponse zr = zone.findRecords(name, type);
 		if (zr.isNXDOMAIN())
 			response.getHeader().setRcode(Rcode.NXDOMAIN);
 		Vector backtrace = zr.backtrace();
@@ -225,7 +225,7 @@ generateReply(Message query, byte [] in, int maxLength) {
 		}
 	}
 	else {
-		CacheResponse cr;
+		SetResponse cr;
 		cr = cache.lookupRecords(name, type, dclass,
 					 Credibility.NONAUTH_ANSWER);
 		Vector backtrace = cr.backtrace();

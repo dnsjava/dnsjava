@@ -80,18 +80,18 @@ getDClass() {
  * Looks up Records in the Zone.  This follows CNAMEs.
  * @param name The name to look up
  * @param type The type to look up
- * @return A ZoneResponse object
- * @see ZoneResponse
+ * @return A SetResponse object
+ * @see SetResponse
  */ 
-public ZoneResponse
+public SetResponse
 findRecords(Name name, short type) {
-	ZoneResponse zr = null;
+	SetResponse zr = null;
 
 	if (findName(name) == null)
-		return new ZoneResponse(ZoneResponse.NXDOMAIN);
+		return new SetResponse(SetResponse.NXDOMAIN);
 	Object [] objects = findSets(name, type, dclass);
 	if (objects == null)
-		return new ZoneResponse(ZoneResponse.NODATA);
+		return new SetResponse(SetResponse.NODATA);
 
 	RRset [] rrsets = new RRset[objects.length];
 	System.arraycopy(objects, 0, rrsets, 0, objects.length);
@@ -105,15 +105,15 @@ findRecords(Name name, short type) {
 			CNAMERecord cname = (CNAMERecord) rrset.first();
 			zr = findRecords(cname.getTarget(), type);
 			if (zr.isNODATA())
-				zr.set(ZoneResponse.PARTIAL, cname);
+				zr.set(SetResponse.PARTIAL, cname);
 			else if (zr.isNXDOMAIN() &&
 				 !cname.getTarget().subdomain(origin))
-				zr.set(ZoneResponse.PARTIAL, cname);
+				zr.set(SetResponse.PARTIAL, cname);
 			zr.addCNAME(cname);
 			return zr;
 		}
 		if (zr == null)
-			zr = new ZoneResponse(ZoneResponse.SUCCESSFUL);
+			zr = new SetResponse(SetResponse.SUCCESSFUL);
 		zr.addRRset(rrset);
 	}
 	return zr;
