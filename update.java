@@ -232,7 +232,8 @@ throws IOException
 		s = st.nextToken();
 
 	if ((type = Type.value(s)) < 0)
-		throw new IOException("Parse error");
+		/* Close enough... */
+		throw new NullPointerException("Parse error");
 
 	return Record.fromString(name, type, classValue, ttl, st, origin);
 }
