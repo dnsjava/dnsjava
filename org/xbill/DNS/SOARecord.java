@@ -119,6 +119,7 @@ rdataToString() {
 			sb.append(minimum);
 			sb.append(" )\t; minimum");
 		} else {
+			sb.append(" ");
 			sb.append(serial & 0xFFFFFFFFL);
 			sb.append(" ");
 			sb.append(refresh);
