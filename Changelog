@@ -1,5 +1,6 @@
 10/7/2002
 	- Fix problems with search path handling in the dns class.
+	- Possible race condition fixes to the Cache code.
 
 10/6/2002
 	- Fix minor bugs in Name code (Bob Halley <bob.halley@nominum.com>)
