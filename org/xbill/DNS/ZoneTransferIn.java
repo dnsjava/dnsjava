@@ -446,9 +446,7 @@ run() throws IOException, ZoneTransferException {
 	}
 	if (axfr != null)
 		return axfr;
-	if (ixfr != null)
-		return ixfr;
-	return null;
+	return ixfr;
 }
 
 /**
