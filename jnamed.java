@@ -65,6 +65,7 @@ jnamed(String conffile) throws IOException {
 		addUDP((short) 53);
 		addTCP((short) 53);
 	}
+	System.out.println("running");
 }
 
 public void
@@ -134,23 +135,6 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 	}
 }
 
-public RRset
-findDelegation(Name name, short dclass) {
-	Zone zone = findBestZone(name);
-	if (zone == null)
-		return null;
-	byte zlabels = zone.getOrigin().labels();
-	int labels = name.labels() - zlabels;
-	for (int i = 0; i < labels; i++) {
-		Name tname = new Name(name, i);
-		RRset rrset = findExactMatch(tname, Type.NS, dclass, false);
-		if (rrset != null)
-			return rrset;
-	}
-	return null;
-}
-
-
 void
 addRRset(Name name, Message response, RRset rrset, byte section,
 	 boolean sigonly)
@@ -198,6 +182,8 @@ addNS(Message response, Zone zone) {
 private void
 addGlue(Message response, Name name) {
 	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
+	if (a == null)
+		return;
 	Enumeration e = a.rrs();
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
