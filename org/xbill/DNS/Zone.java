@@ -122,15 +122,14 @@ Zone(String file, Cache cache, Name initialOrigin) throws IOException {
 	while ((record = m.nextRecord()) != null) {
 		if (!seenSOA) {
 			if (record.getType() == Type.SOA) {
-				if (origin == null) {
+				if (origin == null)
 					origin = record.getName();
-					setOrigin(origin);
-				}
 				else if (!origin.equals(record.getName())) {
 					str = "SOA owner " + record.getName() + " does not match zone origin " + origin;
 					throw new IOException(str);
 				}
 				seenSOA = true;
+				setOrigin(origin);
 			}
 			else {
 				str = "No SOA at the top of the zone in file " + file;
