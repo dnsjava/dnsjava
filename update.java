@@ -484,7 +484,7 @@ doFile(MyStringTokenizer st, List inputs, List istreams) {
 		inputs.add(br2);
 	}
 	catch (FileNotFoundException e) {
-		print(s + "not found");
+		print(s + " not found");
 	}
 	
 }
