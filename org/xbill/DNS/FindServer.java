@@ -11,7 +11,7 @@ import java.util.*;
  * be appended to unqualified names.  Currently, this works if either the
  * appropriate properties are set, the OS has a unix-like /etc/resolv.conf,
  * or the system is Windows based with ipconfig or winipcfg.  There is no
- * reason for these routines to be called directly except * curiosity.
+ * reason for these routines to be called directly except curiosity.
  *
  * @author Brian Wellington
  */
