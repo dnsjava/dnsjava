@@ -29,9 +29,10 @@ WorkerThread() {
 
 /**
  * Sets the lifetime of an idle WorkerThread (in ms).  A WorkerThread
- * will remain on the idle list for this much time before exiting.
+ * will remain on the idle list for this much time before exiting.  This
+ * does not affect WorkerThreads currently idling.
  */
-static void
+synchronized static void
 setLifetime(long time) {
 	lifetime = time;
 }
@@ -41,7 +42,7 @@ setLifetime(long time) {
  * time.  If this value is decreased below the current number of
  * WorkerThreads, this will not take effect immediately.
  */
-static void
+synchronized static void
 setMaxThreads(int maxThreads) {
 	max = maxThreads;
 }
@@ -89,42 +90,51 @@ getThread() {
  */
 public static void
 assignThread(Runnable task, String name) {
-	WorkerThread t = getThread();
-	t.task = task;
-	t.name = name;
-	synchronized (t) {
-		if (!t.isAlive())
-			t.start();
-		else
-			t.notify();
+	while (true) {
+		try {
+			WorkerThread t = getThread();
+			synchronized (t) {
+				t.task = task;
+				t.name = name;
+				if (!t.isAlive())
+					t.start();
+				else
+					t.notify();
+			}
+			return;
+		}
+		catch (IllegalThreadStateException e) {
+		}
 	}
 }
 
 /** Performs the task */
-public void
+synchronized public void
 run() {
 	while (true) {
-		
 		setName(name);
-		task.run();
+		try {
+			task.run();
+		}
+		catch (Throwable t) {
+			System.err.println(t);
+		}
 		setName("idle thread");
 		synchronized (list) {
 			list.addElement(this);
-			if (nactive == max)
+			if (nactive >= max)
 				list.notify();
 			nactive--;
 		}
 		task = null;
-		synchronized (this) {
-			try {
-				wait(lifetime);
-			}
-			catch (InterruptedException e) {
-			}
-			if (task == null) {
-				list.removeElement(this);
-				return;
-			}
+		try {
+			wait(lifetime);
+		}
+		catch (InterruptedException e) {
+		}
+		if (task == null) {
+			list.removeElement(this);
+			return;
 		}
 	}
 }
