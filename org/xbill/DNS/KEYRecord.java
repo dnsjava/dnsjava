@@ -20,6 +20,7 @@ public class KEYRecord extends Record {
 private short flags;
 private byte proto, alg;
 private byte [] key;
+private int footprint = -1;
 
 /* flags */
 /** This key cannot be used for confidentiality (encryption) */
@@ -172,30 +173,38 @@ getKey() {
  */
 public short
 getFootprint() {
+	if (footprint >= 0)
+		return (short)footprint;
+	
 	int foot = 0;
-	if (key == null)
-		return 0;
+
+	DataByteOutputStream out = new DataByteOutputStream();
+	try {
+		rrToWire(out, null);
+	}
+	catch (IOException e) {}
+	byte [] rdata = out.toByteArray();
+
 	if (alg == DNSSEC.RSA) {
-		if (key.length < 3)
-			return 0;
-		int d1 = key[key.length - 3] & 0xFF;
-		int d2 = key[key.length - 2] & 0xFF;
+		int d1 = rdata[key.length - 3] & 0xFF;
+		int d2 = rdata[key.length - 2] & 0xFF;
 		foot = (d1 << 8) + d2;
 	}
 	else {
 		int i;
-		for (i = 0; i < key.length - 1; i += 2) {
-			int d1 = key[i] & 0xFF;
-			int d2 = key[i + 1] & 0xFF;
+		for (i = 0; i < rdata.length - 1; i += 2) {
+			int d1 = rdata[i] & 0xFF;
+			int d2 = rdata[i + 1] & 0xFF;
 			foot += ((d1 << 8) + d2);
 		}
-		if (i <= key.length) {
-			int d1 = key[key.length - 1] & 0xFF;
+		if (i <= rdata.length) {
+			int d1 = rdata[i] & 0xFF;
 			foot += (d1 << 8);
 		}
 		foot += ((foot >> 16) & 0xffff);
 	}
-	return (short) (foot & 0xffff);
+	footprint = (foot & 0xffff);
+	return (short) footprint;
 }
 
 void
