@@ -1,3 +1,6 @@
+3/12/2004
+	- Make it possible to use a Tokenizer without leaving files open.
+
 3/4/2004 - 3/10/2004
 	- Add support for more record types (AFSDB, ISDN, MB, MD, MF, MG,
 	  MINFO, MR, NSAP, NSAP-PTR, NULL, PX, RT, WKS, X25).
