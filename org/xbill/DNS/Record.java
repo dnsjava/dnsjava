@@ -53,14 +53,13 @@ getTypedObject(int type) {
 		return UNKRecord.getMember();
 	if (knownRecords[type] != null)
 		return knownRecords[type];
+
+	/* Construct the class name by putting the type before "Record". */
+	StringBuffer sb = new StringBuffer(Record.class.getName());
+	sb.insert(sb.lastIndexOf("Record"), Type.string(type));
+
 	try {
-		String s = Record.class.getName();
-		/*
-		 * Remove "Record" from the end and construct the new
-		 * class name.
-		 */
-		Class c = Class.forName(s.substring(0, s.length() - 6) +
-					Type.string(type) + "Record");
+		Class c = Class.forName(sb.toString());
 		Method m = c.getDeclaredMethod("getMember", emptyClassArray);
 		knownRecords[type] = (Record) m.invoke(null, emptyObjectArray);
 	}
