@@ -75,6 +75,8 @@ isDelim(int i) {
 /** Are there any more tokens in the string */
 public boolean
 hasMoreTokens() {
+	if (putBack != null)
+		return true;
 	if (current >= string.length)
 		return false;
 	if (!isDelim(current) || returnTokens)
