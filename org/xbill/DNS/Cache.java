@@ -166,12 +166,22 @@ private short dclass;
  * Creates an empty Cache
  *
  * @param dclass The dns class of this cache
+ * @see DClass
  */
 public
 Cache(short dclass) {
 	super(true);
 	cleaner = new CacheCleaner();
 	this.dclass = dclass;
+}
+
+/**
+ * Creates an empty Cache for class IN.
+ * @see DClass
+ */
+public
+Cache() {
+	this(DClass.IN);
 }
 
 /** Empties the Cache */
