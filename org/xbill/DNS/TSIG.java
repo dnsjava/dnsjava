@@ -88,7 +88,7 @@ boolean verify(Message m, byte [] b, TSIGRecord old) {
 		h.addData(header);
 
 		int len = b.length - header.length;	
-		len -= tsig.oLength;
+		len -= tsig.wireLength;
 		h.addData(b, header.length, len);
 /*System.out.println("digested message");*/
 
@@ -159,7 +159,7 @@ boolean verifyAXFR(Message m, byte [] b, TSIGRecord old,
 
 		int len = b.length - header.length;	
 		if (tsig != null)
-			len -= tsig.oLength;
+			len -= tsig.wireLength;
 		h.addData(b, header.length, len);
 
 		if (tsig == null) {
