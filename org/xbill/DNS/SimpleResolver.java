@@ -237,9 +237,11 @@ send(Message query) throws IOException {
 		System.err.println("Sending to " + addr.getHostAddress() +
 				   ":" + port);
 
-	Record question = query.getQuestion();
-	if (question != null && question.getType() == Type.AXFR)
-		return sendAXFR(query);
+	if (query.getHeader().getOpcode() == Opcode.QUERY) {
+		Record question = query.getQuestion();
+		if (question != null && question.getType() == Type.AXFR)
+			return sendAXFR(query);
+	}
 
 	query = (Message) query.clone();
 	applyEDNS(query);
