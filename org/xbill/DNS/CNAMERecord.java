@@ -1,4 +1,4 @@
-public class dnsCNAMERecord extends dnsNS_CNAME_MX_Record {
+public class dnsCNAMERecord extends dnsNS_CNAME_PTR_Record {
 
 public dnsCNAMERecord(dnsName rname, short rclass) {
 	super(rname, dns.CNAME, rclass);

@@ -1,16 +1,16 @@
 import java.net.*;
 import java.io.*;
 
-abstract public class dnsNS_CNAME_MX_Record extends dnsRecord {
+abstract public class dnsNS_CNAME_PTR_Record extends dnsRecord {
 
 dnsName name;
 
-dnsNS_CNAME_MX_Record(dnsName rname, short rtype, short rclass) {
+dnsNS_CNAME_PTR_Record(dnsName rname, short rtype, short rclass) {
 	super(rname, rtype, rclass);
 }
 
-dnsNS_CNAME_MX_Record(dnsName rname, short rtype, short rclass, int rttl,
-		      dnsName name)
+dnsNS_CNAME_PTR_Record(dnsName rname, short rtype, short rclass, int rttl,
+		       dnsName name)
 {
 	super(rname, rtype, rclass);
 	this.rttl = rttl;
