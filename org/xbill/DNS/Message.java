@@ -165,6 +165,35 @@ findRecord(Record r) {
 }
 
 /**
+ * Determines if an RRset with the given name and type is already
+ * present in the given section
+ * @see RRset
+ * @see Section
+ */
+public boolean
+findRRset(Name name, short type, int section) {
+	for (int i = 0; i < sections[section].size(); i++) {
+		Record r = (Record) sections[section].elementAt(i);
+		if (r.getType() == type || name.equals(r.getName()))
+			return true;
+	}
+	return false;
+}
+
+/**
+ * Determines if an RRset with the given name and type is already
+ * present in any section
+ * @see RRset
+ * @see Section
+ */
+public boolean
+findRRset(Name name, short type) {
+	return (findRRset(name, type, Section.ANSWER) ||
+		findRRset(name, type, Section.AUTHORITY) ||
+		findRRset(name, type, Section.ADDITIONAL));
+}
+
+/**
  * Returns the first record in the QUESTION section
  * @see Record
  * @see Section

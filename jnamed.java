@@ -140,15 +140,15 @@ addRRset(Name name, Message response, RRset rrset, byte section,
 	 boolean sigonly)
 {
 	Enumeration e;
+	for (byte s = 1; s < section; s++)
+		if (response.findRRset(name, rrset.getType(), s))
+			return;
 	if (!sigonly) {
 		e = rrset.rrs();
 		while (e.hasMoreElements()) {
 			Record r = (Record) e.nextElement();
 			if (!name.isWild() && r.getName().isWild())
 				r = r.withName(name);
-			for (byte s = 1; s < section; s++)
-				if (response.findRecord(r, s))
-					continue;
 			response.addRecord(r, section);
 		}
 	}
@@ -157,9 +157,6 @@ addRRset(Name name, Message response, RRset rrset, byte section,
 		Record r = (Record) e.nextElement();
 		if (!name.isWild() && r.getName().isWild())
 			r = r.withName(name);
-		for (byte s = 1; s < section; s++)
-			if (response.findRecord(r, s))
-				continue;
 		response.addRecord(r, section);
 	}
 }
@@ -184,17 +181,17 @@ addGlue(Message response, Name name) {
 	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
 	if (a == null)
 		return;
+	if (response.findRRset(name, Type.A))
+		return;
 	Enumeration e = a.rrs();
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		if (response.findRecord(r) == false)
-			response.addRecord(r, Section.ADDITIONAL);
+		response.addRecord(r, Section.ADDITIONAL);
 	}
 	e = a.sigs();
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
-		if (response.findRecord(r) == false)
-			response.addRecord(r, Section.ADDITIONAL);
+		response.addRecord(r, Section.ADDITIONAL);
 	}
 }
 
