@@ -491,43 +491,58 @@ errorMessage(Message query, short rcode) {
 }
 
 public void
+TCPclient(Socket s) {
+	try {
+		int inLength;
+		DataInputStream dataIn;
+		DataOutputStream dataOut;
+		byte [] in;
+
+		InputStream is = s.getInputStream();
+		dataIn = new DataInputStream(is);
+		inLength = dataIn.readUnsignedShort();
+		in = new byte[inLength];
+		dataIn.readFully(in);
+
+		Message query;
+		byte [] response = null;
+		try {
+			query = new Message(in);
+			response = generateReply(query, in, in.length, s);
+			if (response == null)
+				return;
+		}
+		catch (IOException e) {
+			response = formerrMessage(in);
+		}
+		dataOut = new DataOutputStream(s.getOutputStream());
+		dataOut.writeShort(response.length);
+		dataOut.write(response);
+	}
+	catch (IOException e) {
+		String addrString;
+		System.out.println("TCPclient(" +
+				   s.getLocalAddress().getHostAddress() + "#" +
+				   s.getLocalPort() + "): " + e);
+	}
+	finally {
+		try {
+			s.close();
+		}
+		catch (IOException e) {}
+	}
+}
+
+public void
 serveTCP(InetAddress addr, short port) {
 	try {
 		ServerSocket sock = new ServerSocket(port, 128, addr);
 		while (true) {
-			Socket s = sock.accept();
-			int inLength;
-			DataInputStream dataIn;
-			DataOutputStream dataOut;
-			byte [] in;
-
-			try {
-				InputStream is = s.getInputStream();
-				dataIn = new DataInputStream(is);
-				inLength = dataIn.readUnsignedShort();
-				in = new byte[inLength];
-				dataIn.readFully(in);
-			}
-			catch (InterruptedIOException e) {
-				s.close();
-				continue;
-			}
-			Message query;
-			byte [] response = null;
-			try {
-				query = new Message(in);
-				response = generateReply(query, in,
-							 in.length, s);
-				if (response == null)
-					continue;
-			}
-			catch (IOException e) {
-				response = formerrMessage(in);
-			}
-			dataOut = new DataOutputStream(s.getOutputStream());
-			dataOut.writeShort(response.length);
-			dataOut.write(response);
-			s.close();
+			final Socket s = sock.accept();
+			Thread t;
+			t = new Thread(new Runnable() {
+					public void run() {TCPclient(s);}});
+			t.start();
 		}
 	}
 	catch (IOException e) {
