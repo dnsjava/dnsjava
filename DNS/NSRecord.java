@@ -7,8 +7,14 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Name Server Record  - contains the name server serving the named zone */
+
 public class NSRecord extends NS_CNAME_PTRRecord {
 
+private
+NSRecord() {}
+
+/** Creates a new NSRecord with the given data */
 public
 NSRecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException

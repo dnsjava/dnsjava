@@ -5,53 +5,142 @@ package DNS;
 
 import DNS.utils.*;
 
+/** Constants and functions relating to DNS Types */
+
 public final class Type {
 
 private static StringValueTable types = new StringValueTable();
 
+/** Address */
 public static final short A		= 1;
+
+/** Name server */
 public static final short NS		= 2;
+
+/** Mail destination */
 public static final short MD		= 3;
+
+/** Mail forwarder */
 public static final short MF		= 4;
+
+/** Canonical name (alias) */
 public static final short CNAME		= 5;
+
+/** Start of authority */
 public static final short SOA		= 6;
+
+/** Mailbox domain name */
 public static final short MB		= 7;
+
+/** Mail group member */
 public static final short MG		= 8;
+
+/** Mail rename name */
 public static final short MR		= 9;
+
+/** Null record */
 public static final short NULL		= 10;
+
+/** Well known services */
 public static final short WKS		= 11;
+
+/** Domain name pointer */
 public static final short PTR		= 12;
+
+/** Host information */
 public static final short HINFO		= 13;
+
+/** Mailbox information */
 public static final short MINFO		= 14;
+
+/** Mail routing information */
 public static final short MX		= 15;
+
+/** Text strings */
 public static final short TXT		= 16;
+
+/** Responsible person */
 public static final short RP		= 17;
+
+/** AFS cell database */
 public static final short AFSDB		= 18;
+
+/** X_25 calling address */
 public static final short X25		= 19;
+
+/** ISDN calling address */
 public static final short ISDN		= 20;
+
+/** Router */
 public static final short RT		= 21;
+
+/** NSAP address */
 public static final short NSAP		= 22;
+
+/** Reverse NSAP address (deprecated) */
 public static final short NSAP_PTR	= 23;
+
+/** Signature */
 public static final short SIG		= 24;
+
+/** Key */
 public static final short KEY		= 25;
+
+/** X.400 mail mapping */
 public static final short PX		= 26;
+
+/** Geographical position (withdrawn) */
 public static final short GPOS		= 27;
+
+/** IPv6 address */
 public static final short AAAA		= 28;
+
+/** Location */
 public static final short LOC		= 29;
+
+/** Next valid name in zone */
 public static final short NXT		= 30;
+
+/** Endpoint identifier */
 public static final short EID		= 31;
+
+/** Nimrod locator */
 public static final short NIMLOC	= 32;
+
+/** Server selection */
 public static final short SRV		= 33;
+
+/** ATM address */
 public static final short ATMA		= 34;
+
+/** Naming authority pointer */
 public static final short NAPTR		= 35;
+
+/** Certificate */
 public static final short CERT		= 37;
+
+/** OPT record - contains EDNS metadata */
 public static final short OPT		= 249;
+
+/** Transaction signature */
 public static final short TSIG		= 250;
+
+/** Incremental zone transfer */
 public static final short IXFR		= 251;
+
+/** Zone transfer */
 public static final short AXFR		= 252;
+
+/** Transfer mailbox records */
 public static final short MAILB		= 253;
+
+/** Transfer mail agent records */
 public static final short MAILA		= 254;
+
+/** Matches any type */
 public static final short ANY           = 255;
+
+/** Address */
 
 static {
 	types.put2(A, "A");
@@ -99,12 +188,18 @@ static {
 	types.put2(ANY, "ANY");
 }
 
+private
+Type() {
+}
+
+/** Converts a numeric Type into a String */
 public static String
 string(int i) {
 	String s = types.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+/** Converts a String representation of an Type into its numeric value */
 public static short
 value(String s) {
 	short i = (short) types.getValue(s.toUpperCase());
@@ -118,6 +213,7 @@ value(String s) {
 	}
 }
 
+/** Is this type valid for a record (a non-meta type)? */
 public static boolean
 isRR(int type) {
 	return (type > 0 && type < 128);

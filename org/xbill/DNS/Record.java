@@ -1,15 +1,6 @@
 // Copyright (c) 1999 Brian Wellington (bwelling@xbill.org)
 // Portions Copyright (c) 1999 Network Associates, Inc.
 
-// This class should be extended for each record type.  The individual
-// types must provide:
-//	constructors
-//	toString()
-// and may provide, if necessary:
-//	toWireCanonical()
-// and should provide
-//	accessor functions
-
 package DNS;
 
 import java.io.*;
@@ -17,12 +8,19 @@ import java.lang.reflect.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * The base class that all records are derived from.
+ */
+
 abstract public class Record {
 
-Name name;
-short type, dclass;
-int ttl;
-int wireLength = -1;
+protected Name name;
+protected short type, dclass;
+protected int ttl;
+protected int wireLength = -1;
+
+protected
+Record() {}
 
 Record(Name _name, short _type, short _dclass, int _ttl) {
 	name = _name;
@@ -36,7 +34,7 @@ toClass(short type) throws ClassNotFoundException {
 	return Class.forName("DNS." + Type.string(type) + "Record");
 }
 
-static Record
+private static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
 	  DataByteInputStream in, Compression c) throws IOException
 {
@@ -79,7 +77,10 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	}
 }
 
-
+/**
+ * Creates a new record, with the given parameters.
+ * @return An object of a type extending Record
+ */
 public static Record
 newRecord(Name name, short type, short dclass, int ttl, int length,
 	  byte [] data)
@@ -97,17 +98,27 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	}
 }
 
+/**
+ * Creates a new empty record, with the given parameters.
+ * @return An object of a type extending Record
+ */
 public static Record
 newRecord(Name name, short type, short dclass, int ttl) {
 	return newRecord(name, type, dclass, ttl, 0, null);
 }
 
+/**
+ * Creates a new empty record, with the given parameters.  This method is
+ * designed to create records that will be added to the QUERY section
+ * of a message.
+ * @return An object of a type extending Record
+ */
 public static Record
 newRecord(Name name, short type, short dclass) {
 	return newRecord(name, type, dclass, 0, 0, null);
 }
 
-public static Record
+static Record
 fromWire(DataByteInputStream in, int section, Compression c)
 throws IOException
 {
@@ -138,7 +149,7 @@ throws IOException
 	return rec;
 }
 
-public void
+void
 toWire(DataByteOutputStream out, int section, Compression c)
 throws IOException
 {
@@ -156,6 +167,9 @@ throws IOException
 	wireLength = out.getPos() - start;
 }
 
+/**
+ * Converts a Record into DNS uncompressed wire format.
+ */
 public byte []
 toWire(int section) throws IOException {
 	DataByteOutputStream out = new DataByteOutputStream();
@@ -163,6 +177,10 @@ toWire(int section) throws IOException {
 	return out.toByteArray();
 }
 
+/**
+ * Converts a Record into canonical DNS uncompressed wire format (all names are
+ * converted to lowercase).
+ */
 public void /* XXX - shouldn't be public */
 toWireCanonical(DataByteOutputStream out) throws IOException {
 	name.toWireCanonical(out);
@@ -192,6 +210,9 @@ toStringNoData() {
 	return sb;
 }
 
+/**
+ * Converts a Record into a String representation
+ */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -199,6 +220,9 @@ toString() {
 	return sb.toString();
 }
 
+/**
+ * Builds a new Record from its textual representation
+ */
 public static Record
 fromString(Name name, short type, short dclass, int ttl,
 	   MyStringTokenizer st, Name origin)
@@ -241,16 +265,33 @@ throws IOException
 	}
 }
 
+/**
+ * Returns the record's name
+ * @see Name
+ */
 public Name
 getName() {
 	return name;
 }
 
+/**
+ * Returns record's type
+ * @see Type
+ */
 public short
 getType() {
 	return type;
 }
 
+/**
+ * Returns the type of RRset that this record would belong to.  For all types
+ * except SIGRecord, this is equivalent to getType().
+ * @return The type of record, if not SIGRecord.  If the type is SIGRecord,
+ * the type covered is returned.
+ * @see Type
+ * @see RRset
+ * @see SIGRecord
+ */
 public short
 getRRsetType() {
 	if (type == Type.SIG) {
@@ -260,16 +301,29 @@ getRRsetType() {
 	return type;
 }
 
+/**
+ * Returns the record's class
+ */
 public short
 getDClass() {
 	return dclass;
 }
 
+/**
+ * Returns the record's TTL
+ */
 public int
 getTTL() {
 	return ttl;
 }
 
+/**
+ * Returns the length of this record in wire format, based on the last time
+ * this record was parsed from data or converted to data.  The wire format
+ * may or may not be compressed
+ * @return The last known length, or -1 if the record has never been in wire
+ * format
+ */
 public short
 getWireLength() {
 	return (short) wireLength;
@@ -284,6 +338,9 @@ rrToWireCanonical() throws IOException {
 	return dbs.toByteArray();
 }
 
+/**
+ * Determines if two Records are identical
+ */
 public boolean
 equals(Object arg) {
 	if (arg == null || !(arg instanceof Record))
@@ -304,6 +361,9 @@ equals(Object arg) {
 	}
 }
 
+/**
+ * Generates a hash code based on the Record's data
+ */
 public int
 hashCode() {
 	try {

@@ -7,9 +7,14 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Implements NS, CNAME, and PTR records, which have identical formats */
+
 public class NS_CNAME_PTRRecord extends Record {
 
-Name target;
+private Name target;
+
+protected
+NS_CNAME_PTRRecord() {}
 
 public
 NS_CNAME_PTRRecord(Name _name, short _type, short _dclass, int _ttl,
@@ -39,7 +44,7 @@ throws IOException
         target = new Name(st.nextToken(), origin);
 }
 
-
+/** Converts the NS, CNAME, or PTR Record to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -48,6 +53,7 @@ toString() {
 	return sb.toString();
 }
 
+/** Gets the target of the NS, CNAME, or PTR Record */
 public Name
 getTarget() {
 	return target;

@@ -7,8 +7,14 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** CNAME Record  - maps an alias to its real name */
+
 public class CNAMERecord extends NS_CNAME_PTRRecord {
 
+private
+CNAMERecord() {}
+
+/** Creates a new CNAMERecord with the given data */
 public
 CNAMERecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException

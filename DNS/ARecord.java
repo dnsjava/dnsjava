@@ -8,10 +8,16 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** Address Record  - maps a domain name to an Internet address */
+
 public class ARecord extends Record {
 
-InetAddress address;
+private InetAddress address;
 
+private
+ARecord() {}
+
+/** Creates a new ARecord with the given data */
 public
 ARecord(Name _name, short _dclass, int _ttl, InetAddress _address) 
 throws IOException
@@ -66,6 +72,7 @@ throws IOException
 		address = InetAddress.getByName(s);
 }
 
+/** Converts to a String */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
@@ -74,6 +81,7 @@ toString() {
 	return sb.toString();
 }
 
+/** Returns the Internet address */
 public InetAddress
 getAddress() {
 	return address;

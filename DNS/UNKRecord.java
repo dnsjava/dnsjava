@@ -7,11 +7,17 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/** A class implementing Records of unknown and/or unimplemented types.  This
+ * class can only be initialized using static Record initializers.
+ */
+
 public class UNKRecord extends Record {
 
-byte [] data;
+private byte [] data;
 
-public 
+private
+UNKRecord() {}
+
 UNKRecord(Name _name, short _type, short _dclass, int _ttl, int length,
 	  DataByteInputStream in, Compression c) throws IOException
 {
@@ -26,7 +32,6 @@ UNKRecord(Name _name, short _type, short _dclass, int _ttl, int length,
 		data = null;
 }
 
-public 
 UNKRecord(Name _name, short _type, short _dclass, int _ttl,
 	  MyStringTokenizer st, Name origin) throws IOException
 {
@@ -35,6 +40,7 @@ UNKRecord(Name _name, short _type, short _dclass, int _ttl,
 	System.exit(-1);
 }
 
+/** Converts this Record to the String "unknown format" */
 public String
 toString() {
 	StringBuffer sb = toStringNoData();

@@ -65,7 +65,7 @@ throws IOException
 	if (!useLast)
 		name = new Name(st.nextToken(), origin);
 	else
-		name = last.name;
+		name = last.getName();
 
 	String s = st.nextToken();
 
@@ -77,7 +77,7 @@ throws IOException
 		if (!useLast || last == null)
 			ttl = 3600;
 		else
-			ttl = last.ttl;
+			ttl = last.getTTL();
 	}
 
 	if ((dclass = DClass.value(s)) > 0)

@@ -7,8 +7,17 @@ import java.io.*;
 import java.util.*;
 import DNS.utils.*;
 
+/**
+ * Pointer Record  - maps a domain name representing an Internet Address to
+ * a hostname
+ */
+
 public class PTRRecord extends NS_CNAME_PTRRecord {
 
+private
+PTRRecord() {}
+
+/** Creates a new PTRRecord with the given data */
 public
 PTRRecord(Name _name, short _dclass, int _ttl, Name _target)
 throws IOException
