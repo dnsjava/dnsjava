@@ -311,20 +311,6 @@ getRcode() {
 }
 
 /**
- * Returns an Enumeration listing all records in the given section.
- * @see Record
- * @see Section
- * @deprecated As of dnsjava 1.3.0, replaced by <code>getSectionArray()</code>.
- */
-public Enumeration
-getSection(int section) {
-	if (sections[section] != null)
-		return Collections.enumeration(sections[section]);
-	else
-		return Collections.enumeration(Collections.EMPTY_LIST);
-}
-
-/**
  * Returns an array containing all records in the given section, or an
  * empty array if the section is empty.
  * @see Record
