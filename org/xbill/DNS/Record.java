@@ -83,6 +83,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 							new Integer(length),
 							in, c
 						});
+		rec.wireLength = length;
 		return rec;
 	}
 	catch (ClassNotFoundException e) {
@@ -168,6 +169,8 @@ throws IOException
 
 	ttl = in.readInt();
 	length = in.readShort();
+	if (length == 0)
+		return newRecord(name, type, dclass, ttl);
 	datastart = in.getPos();
 	rec = newRecord(name, type, dclass, ttl, length, in, c);
 	if (in.getPos() - datastart != length)
