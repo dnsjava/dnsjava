@@ -217,13 +217,13 @@ rrToString() {
 /** Returns the latitude */
 public double
 getLatitude() {  
-	return ((double)(latitude - (1<<31))) / (3600 * 1000);
+	return ((double)(latitude - (1L << 31))) / (3600 * 1000);
 }       
 
 /** Returns the longitude */
 public double
 getLongitude() {  
-	return ((double)(longitude - (1<<31))) / (3600 * 1000);
+	return ((double)(longitude - (1L << 31))) / (3600 * 1000);
 }       
 
 /** Returns the altitude */
