@@ -22,7 +22,7 @@ abstract public class Record {
 Name name;
 short type, dclass;
 int ttl;
-int oLength;
+int wireLength = -1;
 
 Record(Name _name, short _type, short _dclass, int _ttl) {
 	name = _name;
@@ -65,7 +65,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	}
 	catch (ClassNotFoundException e) {
 		rec = new UNKRecord(name, type, dclass, ttl, length, in, c);
-		rec.oLength = length;
+		rec.wireLength = length;
 		return rec;
 	}
 	catch (InvocationTargetException e) {
@@ -133,7 +133,7 @@ throws IOException
 	ttl = in.readInt();
 	length = in.readShort();
 	rec = newRecord(name, type, dclass, ttl, length, in, c);
-	rec.oLength = in.getPos() - start;
+	rec.wireLength = in.getPos() - start;
 	return rec;
 }
 
@@ -141,6 +141,7 @@ public void
 toWire(CountedDataOutputStream out, int section, Compression c)
 throws IOException
 {
+	int start = out.getPos();
 	name.toWire(out, c);
 	out.writeShort(type);
 	out.writeShort(dclass);
@@ -154,6 +155,7 @@ throws IOException
 		out.writeShort(data.length);
 		out.write(data);
 	}
+	wireLength = out.getPos() - start;
 
 }
 
@@ -260,11 +262,50 @@ getDClass() {
 	return dclass;
 }
 
+public short
+getWireLength() {
+	return (short) wireLength;
+}
+
 abstract byte [] rrToWire(Compression c, int index) throws IOException;
 
 byte [] rrToWireCanonical() throws IOException {
 	return rrToWire(null, 0);
 }
 
+public boolean
+equals(Object arg) {
+System.out.println("in Record.equals()");
+System.out.println("1: " + this);
+System.out.println("2: " + arg);
+	if (arg == null || !(arg instanceof Record))
+		return false;
+	Record r = (Record) arg;
+	try {
+		byte [] array1 = toWire(Section.ANSWER);
+		byte [] array2 = r.toWire(Section.ANSWER);
+		if (array1.length != array2.length)
+			return false;
+		for (int i = 0; i < array1.length; i++)
+			if (array1[i] != array2[i])
+				return false;
+		return true;
+	}
+	catch (IOException e) {
+		return false;
+	}
+}
+
+public int
+hashCode() {
+System.out.println("in Record.hashcode()");
+	try {
+		byte [] array1 = toWire(Section.ANSWER);
+		return array1.hashCode();
+	}
+	catch (IOException e) {
+		return 0;
+	}
+}
 
 }
