@@ -351,10 +351,18 @@ nextGenerated() throws IOException {
 	String namestr = substitute(genNameSpec, genCurrent);
 	Name name = Name.fromString(namestr, origin);
 	String rdata = substitute(genRdataSpec, genCurrent);
-	Record rec = Record.fromString(name, currentType, currentDClass,
-				       currentTTL, rdata, origin);
-	genCurrent += genStep;
-	return rec;
+	try {
+		Record rec = Record.fromString(name, currentType, currentDClass,
+					       currentTTL, rdata, origin);
+		genCurrent += genStep;
+		return rec;
+	}
+	catch (Tokenizer.TokenizerException e) {
+		throw st.exception("Parsing $GENERATE: " + e.getBaseMessage());
+	}
+	catch (TextParseException e) {
+		throw st.exception("Parsing $GENERATE: " + e.getMessage());
+	}
 }
 
 /**

@@ -123,6 +123,21 @@ public static class Token {
 	}
 }
 
+class TokenizerException extends TextParseException {
+	String message;
+
+	public
+	TokenizerException(String filename, int line, String message) {
+		super(filename + ":" + line + ": " + message);
+		this.message = message;
+	}
+
+	public String
+	getBaseMessage() {
+		return message;
+	}
+}
+
 /**
  * Creates a Tokenizer from an arbitrary input stream.
  * @param is The InputStream to tokenize.
@@ -601,7 +616,7 @@ getHex() throws IOException {
  */
 public TextParseException
 exception(String s) {
-	return new TextParseException(filename + ":" + line + ": " + s);
+	return new TokenizerException(filename, line, s);
 }
 
 /**
