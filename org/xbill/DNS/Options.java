@@ -6,20 +6,22 @@ package org.xbill.DNS;
 import java.util.*;
 
 /**
- * General options.
- * bindttl - Print TTLs in BIND format
- * noprintin - Don't print the class of a record if it's IN
- * nohex - Don't print anything in hex (KEY flags, for example)
- * pqdn - Allow partially qualified domain names
+ * Boolean options:<BR>
+ * bindttl - Print TTLs in BIND format<BR>
+ * noprintin - Don't print the class of a record if it's IN<BR>
+ * nohex - Don't print anything in hex (KEY flags, for example)<BR>
+ * pqdn - Allow partially qualified domain names<BR>
  * 2065sig - Omit the labels field from the SIG record's text format, as
- *	specified in RFC 2065 and changed in RFC 2535
- * tsigfudge=n - Sets the default TSIG fudge value
- * verbosehmac - Print all data digested by the HMAC routines
- * verbosemsg - Print all messages sent or received by SimpleResolver
- * verbosecompression - Print messages related to name compression
+ *	specified in RFC 2065 and changed in RFC 2535<BR>
+ * verbosehmac - Print all data digested by the HMAC routines<BR>
+ * verbosemsg - Print all messages sent or received by SimpleResolver<BR>
+ * verbosecompression - Print messages related to name compression<BR>
  * verboseexceptions - Print messages when certain exceptions are received
- *	and handled
- * verboselookup - Print lookups and cache responses from the dns class
+ *	and handled<BR>
+ * verboselookup - Print lookups and cache responses from the dns class<BR>
+ * <BR>
+ * Valued options:<BR>
+ * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<BR>
  * @author Brian Wellington
  */
 
