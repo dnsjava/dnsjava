@@ -500,7 +500,7 @@ getType() {
 public int
 getRRsetType() {
 	if (type == Type.SIG || type == Type.RRSIG) {
-		SIGRecord sig = (SIGBase) this;
+		SIGBase sig = (SIGBase) this;
 		return sig.getTypeCovered();
 	}
 	return type;
