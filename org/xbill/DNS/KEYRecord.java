@@ -23,35 +23,38 @@ private byte [] key;
 
 /* flags */
 /** This key cannot be used for confidentiality (encryption) */
-public static final int NOCONF = 0x8000;
+public static final int FLAG_NOCONF = 0x8000;
 
 /** This key cannot be used for authentication */
-public static final int NOAUTH = 0x4000;
+public static final int FLAG_NOAUTH = 0x4000;
+
+/** This key cannot be used for authentication or confidentiality */
+public static final int FLAG_NOKEY = 0xC000;
 
 /** A zone key */
-public static final int ZONE = 0x1000;
+public static final int OWNER_ZONE = 0x1000;
 
 /** A host/end entity key */
-public static final int HOST = 0x2000;
+public static final int OWNER_HOST = 0x2000;
 
 /** A user key */
-public static final int USER = 0x0000;
+public static final int OWNER_USER = 0x0000;
 
 /* protocols */
 /** Key was created for use with transaction level security */
-public static final int TLS = 1;
+public static final int PROTOCOL_TLS = 1;
 
 /** Key was created for use with email */
-public static final int EMAIL = 2;
+public static final int PROTOCOL_EMAIL = 2;
 
 /** Key was created for use with DNSSEC */
-public static final int DNSSEC = 3;
+public static final int PROTOCOL_DNSSEC = 3;
 
 /** Key was created for use with IPSEC */
-public static final int IPSEC = 4;
+public static final int PROTOCOL_IPSEC = 4;
 
 /** Key was created for use with any protocol */
-public static final int ANY = 255;
+public static final int PROTOCOL_ANY = 255;
 
 private
 KEYRecord() {}
@@ -99,7 +102,7 @@ throws IOException
 	proto = (byte) Integer.parseInt(st.nextToken());
 	alg = (byte) Integer.parseInt(st.nextToken());
 	/* If this is a null key, there's no key data */
-	if (!((flags & (NOAUTH|NOCONF)) == (NOAUTH|NOCONF)))
+	if (!((flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
 		key = base64.fromString(st.remainingTokens());
 	else
 		key = null;
@@ -111,7 +114,7 @@ throws IOException
 public String
 toString() {
 	StringBuffer sb = toStringNoData();
-	if (key != null || (flags & (NOAUTH|NOCONF)) == (NOAUTH|NOCONF) ) {
+	if (key != null || (flags & (FLAG_NOKEY)) == (FLAG_NOKEY) ) {
 		sb.append ("0x");
 		sb.append (Integer.toHexString(flags & 0xFFFF));
 		sb.append (" ");
@@ -158,9 +161,40 @@ getKey() {
 	return key;
 }
 
+/**
+ * Returns the key's footprint (after computing it)
+ */
+public short
+getFootprint() {
+	int foot = 0;
+	if (key == null)
+		return 0;
+	if (alg == DNSSEC.RSA) {
+		if (key.length < 3)
+			return 0;
+		int d1 = key[key.length - 3] & 0xFF;
+		int d2 = key[key.length - 2] & 0xFF;
+		foot = (d1 << 8) + d2;
+	}
+	else {
+		int i;
+		for (i = 0; i < key.length - 1; i += 2) {
+			int d1 = key[i] & 0xFF;
+			int d2 = key[i + 1] & 0xFF;
+			foot += ((d1 << 8) + d2);
+		}
+		if (i <= key.length) {
+			int d1 = key[key.length - 1] & 0xFF;
+			foot += (d1 << 8);
+		}
+		foot += ((foot >> 16) & 0xffff);
+	}
+	return (short) (foot & 0xffff);
+}
+
 void
 rrToWire(DataByteOutputStream out, Compression c) throws IOException {
-	if (key == null && (flags & (NOAUTH|NOCONF)) != (NOAUTH|NOCONF) )
+	if (key == null && (flags & (FLAG_NOKEY)) != (FLAG_NOKEY) )
 		return;
 
 	out.writeShort(flags);
