@@ -21,6 +21,8 @@ protected short type, dclass;
 protected int ttl;
 protected int wireLength = -1;
 
+private	static Class [] knownTypes = new Class[256];
+
 protected
 Record() {}
 
@@ -31,15 +33,24 @@ Record(Name _name, short _type, short _dclass, int _ttl) {
 	ttl = _ttl;
 }
 
-private static Class
+private static final Class
 toClass(short type) throws ClassNotFoundException {
+	/*
+	 * First, see if we've already found this type.
+	 */
+	if (type < 0 || type > 255)
+		throw new ClassNotFoundException();
+	if (knownTypes[type] != null)
+		return knownTypes[type];
+
 	String s = Record.class.toString();
 	/*
 	 * Remove "class " from the beginning, and "Record" from the end.
 	 * Then construct the new class name.
 	 */
-	return Class.forName(s.substring(6, s.length() - 6) +
-			     Type.string(type) + "Record");
+	knownTypes[type] = Class.forName(s.substring(6, s.length() - 6) +
+					 Type.string(type) + "Record");
+	return knownTypes[type];
 }
 
 private static Record
