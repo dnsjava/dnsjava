@@ -11,7 +11,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class KXRecord extends MX_KXRecord {
+public class KXRecord extends U16NameBase {
 
 KXRecord() {}
 
@@ -28,7 +28,25 @@ getObject() {
  */
 public
 KXRecord(Name name, int dclass, long ttl, int preference, Name target) {
-	super(name, Type.KX, dclass, ttl, preference, target);
+	super(name, Type.KX, dclass, ttl, preference, "preference",
+	      target, "target");
+}
+
+/** Returns the target of the KX record */
+public Name
+getTarget() {
+	return getNameField();
+}
+
+/** Returns the preference of this KX record */
+public int
+getPreference() {
+	return getU16Field();
+}
+
+public Name
+getAdditionalName() {
+	return getNameField();
 }
 
 }

@@ -11,10 +11,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class RTRecord extends Record {
-
-private int preference;
-private Name intermediateHost;
+public class RTRecord extends U16NameBase {
 
 RTRecord() {}
 
@@ -33,50 +30,20 @@ public
 RTRecord(Name name, int dclass, long ttl, int preference,
 	 Name intermediateHost)
 {
-	super(name, Type.RT, dclass, ttl);
-
-	this.preference = checkU16("preference", preference);
-	this.intermediateHost = checkName("intermediateHost", intermediateHost);
-}
-
-void
-rrFromWire(DNSInput in) throws IOException {
-	preference = in.readU16();
-	intermediateHost = new Name(in);
-}
-
-void
-rdataFromString(Tokenizer st, Name origin) throws IOException {
-	preference = st.getUInt16();
-	intermediateHost = st.getName(origin);
-}
-
-/** Converts the RT Record to a String */
-String
-rrToString() {
-	StringBuffer sb = new StringBuffer();
-	sb.append(preference);
-	sb.append(" ");
-	sb.append(intermediateHost);
-	return sb.toString();
+	super(name, Type.RT, dclass, ttl, preference, "preference",
+	      intermediateHost, "intermediateHost");
 }
 
 /** Gets the preference of the route. */
 public int
 getPreference() {
-	return preference;
+	return getU16Field();
 }
 
 /** Gets the host to use as a router. */
 public Name
 getIntermediateHost() {
-	return intermediateHost;
-}
-
-void
-rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	out.writeU16(preference);
-	intermediateHost.toWire(out, null, canonical);
+	return getNameField();
 }
 
 }

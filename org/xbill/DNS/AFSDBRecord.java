@@ -13,10 +13,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class AFSDBRecord extends Record {
-
-private int subtype;
-private Name host;
+public class AFSDBRecord extends U16NameBase {
 
 AFSDBRecord() {}
 
@@ -32,49 +29,19 @@ getObject() {
  */
 public
 AFSDBRecord(Name name, int dclass, long ttl, int subtype, Name host) {
-	super(name, Type.AFSDB, dclass, ttl);
-
-	this.subtype = checkU16("subtype", subtype);
-	this.host = checkName("host", host);
-}
-
-void
-rrFromWire(DNSInput in) throws IOException {
-	subtype = in.readU16();
-	host = new Name(in);
-}
-
-void
-rdataFromString(Tokenizer st, Name origin) throws IOException {
-	subtype = st.getUInt16();
-	host = st.getName(origin);
-}
-
-String
-rrToString() {
-	StringBuffer sb = new StringBuffer();
-	sb.append(subtype);
-	sb.append(" ");
-	sb.append(host);
-	return sb.toString();
+	super(name, Type.AFSDB, dclass, ttl, subtype, "subtype", host, "host");
 }
 
 /** Gets the subtype indicating the service provided by the host. */
 public int
 getSubtype() {
-	return subtype;
+	return getU16Field();
 }
 
 /** Gets the host providing service for the domain. */
 public Name
 getHost() {
-	return host;
-}
-
-void
-rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	out.writeU16(subtype);
-	host.toWire(out, null, canonical);
+	return getNameField();
 }
 
 }
