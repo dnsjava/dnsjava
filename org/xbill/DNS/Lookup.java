@@ -1,4 +1,4 @@
-// Copyright (c) 2002 Brian Wellington (bwelling@xbill.org)
+// Copyright (c) 2002-2003 Brian Wellington (bwelling@xbill.org)
 
 package org.xbill.DNS;
 
