@@ -138,7 +138,7 @@ addRR(Record record) {
 	}
 	RRset rrset = (RRset) nametable.get(new Short(record.getType()));
 	if (rrset == null) {
-		rrset = new RRset(record.getName(), record.getType());
+		rrset = new RRset();
 		nametable.put(new Short(record.getType()), rrset);
 	}
 	rrset.addRR(record);
