@@ -760,13 +760,13 @@ equals(Object arg) {
 	if (arg == null || !(arg instanceof Name))
 		return false;
 	Name d = (Name) arg;
-	if (d.labels() != labels())
-		return false;
 	if (d.hashcode == 0)
 		d.hashCode();
 	if (hashcode == 0)
 		hashCode();
 	if (d.hashcode != hashcode)
+		return false;
+	if (d.labels() != labels())
 		return false;
 	return equals(d.name, d.offset(0));
 }
