@@ -144,7 +144,7 @@ main(String argv[]) throws IOException {
 				edns = Integer.parseInt(ednsStr);
 				if (edns < 0 || edns > 1) {
 					System.out.println("Unsupported " +
-							   "EDNS level " +
+							   "EDNS level: " +
 							   edns);
 					return;
 				}
