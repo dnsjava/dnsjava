@@ -645,7 +645,7 @@ addMessage(Message in) {
 		}
 		if (restart) {
 			restart = false;
-			i = 0;
+			i = -1;
 		}
 	}
 

@@ -1,3 +1,7 @@
+1/20/2003
+	- Certain responses with CNAMEs weren't being properly cached.
+	  (reported by Sean O'Neil <SeanO@telemate.net>)
+
 12/22/2002
 	- Check for SecurityExceptions in the Options static initializer;
 	  this was preventing the use of dnsjava in an unsigned applet.
