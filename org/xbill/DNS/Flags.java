@@ -5,16 +5,31 @@ package DNS;
 
 import DNS.utils.*;
 
+/** Constants and functions relating to DNS flags */
+
 public final class Flags {
 
 private static StringValueTable flags = new StringValueTable();
 
+/** query/response */
 public static final byte QR		= 0;
+
+/** authoritative answer */
 public static final byte AA		= 5;
+
+/** truncated */
 public static final byte TC		= 6;
+
+/** recursion desired */
 public static final byte RD		= 7;
+
+/** recursion available */
 public static final byte RA		= 8;
+
+/** authenticated data */
 public static final byte AD		= 10;
+
+/** (security) checking disabled */
 public static final byte CD		= 11;
 
 static {
@@ -27,6 +42,10 @@ static {
 	flags.put2(CD, "cd");
 }
 
+private
+Flags() {}
+
+/** Converts a numeric Flag into a String */
 public static String
 string(int i) {
 	if ((i >= 1 && i <= 4) || (i >= 12 && i <= 15))
@@ -35,6 +54,7 @@ string(int i) {
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+/** Converts a String representation of an Flag into its numeric value */
 public static byte
 value(String s) {
 	byte i = (byte) flags.getValue(s.toLowerCase());

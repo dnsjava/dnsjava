@@ -6,19 +6,33 @@ package DNS;
 import java.util.*;
 import DNS.utils.*;
 
+/** Constants and functions relating to DNS message sections */
+
 public final class Section {
 
 private static StringValueTable sections = new StringValueTable();
 private static StringValueTable longSections = new StringValueTable();
 
+/** The question (first) section */
 public static final byte QUESTION	= 0;
+
+/** The answer (second) section */
 public static final byte ANSWER		= 1;
+
+/** The authority (third) section */
 public static final byte AUTHORITY	= 2;
+
+/** The additional (fourth) section */
 public static final byte ADDITIONAL	= 3;
 
 /* Aliases for dynamic update */
+/** The zone (first) section of a dynamic update message */
 public static final byte ZONE		= 0;
+
+/** The prerequisite (second) section of a dynamic update message */
 public static final byte PREREQ		= 1;
+
+/** The update (third) section of a dynamic update message */
 public static final byte UPDATE		= 2;
 
 static {
@@ -34,18 +48,25 @@ static {
 
 }
 
+private
+Section() {}
+
+
+/** Converts a numeric Opcode into an abbreviation String */
 public static String
 string(int i) {
 	String s = sections.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+/** Converts a numeric Opcode into a full description String */
 public static String
 longString(int i) {
 	String s = longSections.getString(i);
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+/** Converts a String representation of a Section into its numeric value */
 public static byte
 value(String s) {
 	byte i = (byte) sections.getValue(s.toUpperCase());

@@ -38,7 +38,7 @@ string(int i) {
 	return (s != null) ? s : new Integer(i).toString();
 }
 
-/** Converts a String represntation of an Opcode into its numeric value */
+/** Converts a String representation of an Opcode into its numeric value */
 public static byte
 value(String s) {
 	byte i = (byte) opcodes.getValue(s.toUpperCase());
