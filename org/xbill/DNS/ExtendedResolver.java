@@ -18,52 +18,87 @@ import org.xbill.Task.*;
 
 public class ExtendedResolver implements Resolver {
 
-class QElement {
-	Object obj;
-	int res;
+private static class Resolution implements ResolverListener {
+	Resolver [] resolvers;
+	int [] sent;
+	Object [] inprogress;
+	int retries;
+	int outstanding;
+	boolean done;
+	Message query;
+	Message response;
+	Exception exception;
 
 	public
-	QElement(Object obj, int res) {
-		this.obj = obj;
-		this.res = res;
-	}
-}
-
-class Receiver implements ResolverListener {
-	LinkedList queue;
-	Map idMap;
-
-	public
-	Receiver(LinkedList queue, Map idMap) {
-		this.queue = queue;
-		this.idMap = idMap;
+	Resolution(ExtendedResolver eres, Message query) {
+		List l = eres.resolvers;
+		resolvers = (Resolver []) l.toArray (new Resolver[l.size()]);
+		if (eres.loadBalance) {
+			int nresolvers = resolvers.length;
+			/*
+			 * Note: this is not synchronized, since the
+			 * worst thing that can happen is a random
+			 * ordering, which is ok.
+			 */
+			int start = eres.lbStart++ % nresolvers;
+			if (eres.lbStart > nresolvers)
+				eres.lbStart %= nresolvers;
+			if (start > 0) {
+				Resolver [] shuffle = new Resolver[nresolvers];
+				for (int i = 0; i <= start; i++)
+					shuffle[i + start] = resolvers[i];
+				for (int i = start; i < nresolvers; i++)
+					shuffle[i - start] = resolvers[i];
+				resolvers = shuffle;
+			}
+		}
+		sent = new int[resolvers.length];
+		inprogress = new Object[resolvers.length];
+		retries = eres.retries;
+		this.query = query;
 	}
 
 	public void
-	enqueueInfo(Object id, Object obj) {
-		Integer R;
-		int r;
-		synchronized (idMap) {
-			R = (Integer)idMap.get(id);
-			if (R == null)
-				return;
-			r = R.intValue();
-			idMap.remove(id);
-		}
-		synchronized (queue) {
-			QElement qe = new QElement(obj, r);
-			queue.add(qe);
-			queue.notify();
-		}
+	send(int n) {
+		sent[n]++;
+		outstanding++;
+		inprogress[n] = resolvers[n].sendAsync(query, this);
 	}
 
+	public Message
+	start() throws IOException {
+		send(0);
+		synchronized (this) {
+			while (!done) {
+				try {
+					wait();
+				}
+				catch (InterruptedException e) {
+				}
+			}
+		}
+		if (response != null)
+			return response;
+		else if (exception instanceof IOException)
+			throw (IOException) exception;
+		else if (exception instanceof RuntimeException)
+			throw (RuntimeException) exception;
+		else
+			throw new RuntimeException("ExtendedResolver failure");
+	}
 
 	public void
 	receiveMessage(Object id, Message m) {
 		if (Options.check("verbose"))
 			System.err.println("ExtendedResolver: " +
 					   "received message " + id);
-		enqueueInfo(id, m);
+		synchronized (this) {
+			if (done)
+				return;
+			response = m;
+			done = true;
+			notifyAll();
+		}
 	}
 
 	public void
@@ -71,7 +106,40 @@ class Receiver implements ResolverListener {
 		if (Options.check("verbose"))
 			System.err.println("ExtendedResolver: " +
 					   "exception on message " + id);
-		enqueueInfo(id, e);
+		synchronized (this) {
+			outstanding--;
+			if (done)
+				return;
+			int n;
+			for (n = 0; n < inprogress.length; n++)
+				if (inprogress[n] == id)
+					break;
+			if (n == inprogress.length)
+				return;
+			boolean startnext = false;
+			boolean waiting = false;
+			if (sent[n] == 1 && n < resolvers.length - 1)
+				startnext = true;
+			if (e instanceof InterruptedIOException) {
+				/* Got a timeout; retry */
+				if (sent[n] < retries)
+					send(n);
+				if (exception == null)
+					exception = e;
+			} else if (e instanceof SocketException) {
+				if (exception == null ||
+				    exception instanceof InterruptedIOException)
+					exception = e;
+			} else {
+				exception = e;
+			}
+			if (startnext)
+				send(n + 1);
+			if (outstanding == 0) {
+				done = true;
+				notifyAll();
+			}
+		}
 	}
 }
 
@@ -141,18 +209,6 @@ ExtendedResolver(Resolver [] res) throws UnknownHostException {
 		resolvers.add(res[i]);
 }
 
-private void
-sendTo(Message query, Receiver receiver, Map idMap, int r) {
-	Resolver res = (Resolver) resolvers.get(r);
-	synchronized (idMap) {
-		Object id = res.sendAsync(query, receiver);
-		if (Options.check("verbose"))
-			System.err.println("ExtendedResolver: sending id " +
-					   id + " to resolver " + r);
-		idMap.put(id, new Integer(r));
-	}
-}
-
 public void
 setPort(int port) {
 	for (int i = 0; i < resolvers.size(); i++)
@@ -211,90 +267,8 @@ setTimeout(int secs) {
  */
 public Message
 send(Message query) throws IOException {
-	int i, start, r;
-	Message best = null;
-	IOException bestException = null;
-	boolean [] invalid = new boolean[resolvers.size()];
-	byte [] sent = new byte[resolvers.size()];
-	byte [] recvd = new byte[resolvers.size()];
-	LinkedList queue = new LinkedList();
-	Map idMap = new HashMap();
-	Receiver receiver = new Receiver(queue, idMap);
-
-	while (true) {
-		Message m;
-		boolean waiting = false;
-		QElement qe;
-		synchronized (queue) {
-			int nresolvers = resolvers.size();
-			if (loadBalance) {
-				/*
-				 * Note: this is not synchronized, since the
-				 * worst thing that can happen is a random
-				 * ordering, which is ok.
-				 */
-				start = lbStart % nresolvers;
-				if (lbStart > nresolvers)
-					lbStart %= nresolvers;
-			}
-			else
-				start = 0;
-			for (i = start; i < nresolvers + start; i++) {
-				r = i % nresolvers;
-				if (!invalid[r] &&
-				    sent[r] == recvd[r] &&
-				    sent[r] < retries)
-				{
-					sendTo(query, receiver, idMap, r);
-					sent[r]++;
-					waiting = true;
-					break;
-				}
-				else if (recvd[r] < sent[r])
-					waiting = true;
-			}
-			if (!waiting)
-				break;
-
-			try {
-				queue.wait();
-			}
-			catch (InterruptedException e) {
-			}
-			if (queue.size() == 0)
-				continue;
-			qe = (QElement) queue.getFirst();
-			queue.remove(qe);
-			if (qe.obj instanceof Message)
-				m = (Message) qe.obj;
-			else
-				m = null;
-			r = qe.res;
-			recvd[r]++;
-		}
-		if (m == null) {
-			if (qe.obj instanceof RuntimeException)
-				throw (RuntimeException)qe.obj;
-			IOException e = (IOException) qe.obj;
-			if (!(e instanceof InterruptedIOException))
-				invalid[r] = true;
-			if (bestException == null)
-				bestException = e;
-		}
-		else {
-			short rcode = m.getRcode();
-			if (rcode == Rcode.NOERROR || rcode == Rcode.NXDOMAIN)
-				return m;
-			else {
-				if (best == null)
-					best = m;
-				invalid[r] = true;
-			}
-		}
-	}
-	if (best != null)
-		return best;
-	throw bestException;
+	Resolution res = new Resolution(this, query);
+	return res.start();
 }
 
 /**
@@ -325,11 +299,11 @@ sendAsync(final Message query, final ResolverListener listener) {
 	return id;
 }
 
-/** Returns the i'th resolver used by this ExtendedResolver */
+/** Returns the nth resolver used by this ExtendedResolver */
 public Resolver
-getResolver(int i) {
-	if (i < resolvers.size())
-		return (Resolver)resolvers.get(i);
+getResolver(int n) {
+	if (n < resolvers.size())
+		return (Resolver)resolvers.get(n);
 	return null;
 }
 
