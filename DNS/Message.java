@@ -152,6 +152,7 @@ public byte []
 toWire() throws IOException {
 	DataByteOutputStream out = new DataByteOutputStream();
 	toWire(out);
+	size = out.getPos();
 	return out.toByteArray();
 }
 
