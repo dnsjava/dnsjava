@@ -1,3 +1,6 @@
+4/24/2002
+	- Reduce the memory usage of the RRset class.
+
 4/23/2002
 	- Fix potential race conditions in the RRset class.
 	  (David Esposito <esposito@newnetco.com>)

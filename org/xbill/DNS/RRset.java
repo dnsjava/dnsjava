@@ -59,8 +59,8 @@ private byte securityStatus;
 /** Creates an empty RRset */
 public
 RRset() {
-	rrs = new Vector();
-	sigs = new Vector();
+	rrs = new Vector(1, 1);
+	sigs = null;
 	start = 0;
 	securityStatus = DNSSEC.Insecure;
 }
@@ -75,6 +75,8 @@ addRR(Record r) {
 		}
 	}
 	else {
+		if (sigs == null)
+			sigs = new Vector();
 		if (!sigs.contains(r))
 			sigs.addElement(r);
 	}
@@ -88,7 +90,7 @@ deleteRR(Record r) {
 			rrs.removeElement(r);
 		}
 	}
-	else
+	else if (sigs != null)
 		sigs.removeElement(r);
 }
 
@@ -98,7 +100,7 @@ clear() {
 	synchronized (rrs) {
 		rrs.setSize(0);
 	}
-	sigs.setSize(0);
+	sigs = null;
 	start = 0;
 }
 
@@ -114,7 +116,10 @@ rrs() {
 /** Returns an Enumeration listing all signature records */
 public Enumeration
 sigs() {
-	return sigs.elements();
+	if (sigs == null)
+		return new Vector(0).elements();
+	else
+		return sigs.elements();
 }
 
 /** Returns the number of (data) records */
@@ -210,15 +215,19 @@ toString() {
 		if (e.hasMoreElements())
 			sb.append("<>");
 	}
-	sb.append("] [");
-	e = sigs();
-	while (e.hasMoreElements()) {
-		Record rr = (Record) e.nextElement();
-		sb.append(rr);
-		if (e.hasMoreElements())
-			sb.append("<>");
+	sb.append("]");
+	if (sigs != null) {
+		sb.append(" [");
+		e = sigs();
+		while (e.hasMoreElements()) {
+			Record rr = (Record) e.nextElement();
+			sb.append(rr);
+			if (e.hasMoreElements())
+				sb.append("<>");
+		}
+		sb.append("]");
 	}
-	sb.append("] }");
+	sb.append(" }");
 	return sb.toString();
 }
 
