@@ -13,8 +13,7 @@ import java.io.*;
 
 public class hexdump {
 
-private static final byte [] hex = {'0', '1', '2', '3', '4', '5', '6', '7',
-				    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+private static final byte [] hex = "0123456789ABCDEF".getBytes();
 
 /**
  * Dumps a byte array into hex format.
