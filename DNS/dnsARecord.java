@@ -46,7 +46,17 @@ dnsARecord(dnsName _name, short _dclass, int _ttl, MyStringTokenizer st,
 throws IOException
 {
 	super(_name, dns.A, _dclass, _ttl);
-	address = InetAddress.getByName(st.nextToken());
+	String s = st.nextToken();
+	if (s.equals("@me@")) {
+		try {
+			address = InetAddress.getLocalHost();
+		}
+		catch (UnknownHostException e) {
+			address = null;
+		}
+	}
+	else
+		address = InetAddress.getByName(s);
 }
 
 public String

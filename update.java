@@ -117,14 +117,19 @@ update(String _server) throws IOException {
 void
 sendUpdate() throws IOException {
 	if (query.getHeader().getCount(ZONE) == 0) {
-		Vector updates = query.getSection(UPDATE);
-		if (updates == null) {
-			System.out.println("Invalid update - no records");
-			return;
+		dnsName zone = origin;
+		short dclass = defaultClass;
+		if (zone == null) {
+			Vector updates = query.getSection(UPDATE);
+			if (updates == null) {
+				System.out.println("Invalid update");
+				return;
+			}
+			dnsRecord r = (dnsRecord) updates.elementAt(0);
+			zone = new dnsName(r.getName(), 1);
+			dclass = r.dclass;
 		}
-		dnsRecord r = (dnsRecord) query.getSection(UPDATE).elementAt(0);
-		dnsName zone = new dnsName(r.getName(), 1);
-		dnsRecord soa = dnsRecord.newRecord(zone, dns.SOA, r.dclass);
+		dnsRecord soa = dnsRecord.newRecord(zone, dns.SOA, dclass);
 		query.addRecord(ZONE, soa);
 	}
 

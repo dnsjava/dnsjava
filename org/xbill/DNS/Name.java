@@ -15,6 +15,10 @@ dnsName(String s, dnsName origin) {
 	labels = 0;
 	name = new String[MAXLABELS];
 
+	if (s.equals("@") && origin != null) {
+		append(origin);
+		return;
+	}
 	try {
 		MyStringTokenizer st = new MyStringTokenizer(s, ".");
 
