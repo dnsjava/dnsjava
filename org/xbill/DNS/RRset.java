@@ -22,8 +22,6 @@ private List sigs;
 private int start;
 private byte securityStatus;
 
-private static List emptyList = new ArrayList(0);
-
 /** Creates an empty RRset */
 public
 RRset() {
@@ -82,7 +80,7 @@ public synchronized Iterator
 rrs() {
 	int size = rrs.size();
 	if (size == 0)
-		return emptyList.iterator();
+		return Collections.EMPTY_LIST.iterator();
 	if (start == size)
 		start = 0;
 	if (start++ == 0)
@@ -96,7 +94,7 @@ rrs() {
 public Iterator
 sigs() {
 	if (sigs == null)
-		return emptyList.iterator();
+		return Collections.EMPTY_LIST.iterator();
 	else
 		return sigs.iterator();
 }
