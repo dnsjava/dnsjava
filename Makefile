@@ -3,7 +3,7 @@ JFLAGS = -g
 JAR = jar cf
 
 SUNAPIDOC = http://java.sun.com/products/jdk/1.4/docs/api
-JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link ${SUNAPIDOC}
+JAVADOC=javadoc -classpath . -d doc -windowtitle "dnsjava documentation" -link ${SUNAPIDOC}
 
 VERSION = 1.3.0
 
