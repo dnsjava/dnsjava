@@ -109,6 +109,7 @@ private class Element {
 			sb.append("NXRRSET " + name + " " + Type.string(type));
 		sb.append(" cl = ");
 		sb.append(credibility);
+		sb.append("\n");
 		return sb.toString();
 	}
 }
