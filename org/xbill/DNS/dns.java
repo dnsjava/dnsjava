@@ -157,10 +157,10 @@ setSearchPath(String [] domains) {
  */
 public static synchronized Cache
 getCache(short dclass) {
-	Cache c = (Cache) caches.get(new Short(dclass));
+	Cache c = (Cache) caches.get(DClass.toShort(dclass));
 	if (c == null) {
 		c = new Cache(dclass);
-		caches.put(new Short(dclass), c);
+		caches.put(DClass.toShort(dclass), c);
 	}
 	return c;
 }

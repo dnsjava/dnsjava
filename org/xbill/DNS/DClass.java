@@ -31,7 +31,11 @@ public static final short NONE		= 254;
 /** Matches any class */
 public static final short ANY		= 255;
 
+private static Short [] classcache = new Short [5];
+
 static {
+	for (short i = 0; i < classcache.length; i++)
+		classcache[i] = new Short(i);
 	classes.put2(IN, "IN");
 	classes.put2(CHAOS, "CHAOS");
 	classes.put2(HESIOD, "HESIOD");
@@ -64,6 +68,14 @@ value(String s) {
 	catch (Exception e) {
 		return (-1);
 	}
+}
+
+/* Converts a class into a Short, for use in Hashmaps, etc. */
+static Short
+toShort(short dclass) {
+	if (dclass < classcache.length)
+		return (classcache[dclass]);
+	return new Short(dclass);
 }
 
 }

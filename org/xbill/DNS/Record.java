@@ -83,7 +83,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 		m = rrclass.getDeclaredConstructor(fromWireList);
 		rec = (Record) m.newInstance(new Object [] {
 							name,
-							new Short(dclass),
+							DClass.toShort(dclass),
 							new Integer(ttl),
 							new Integer(length),
 							in
@@ -346,7 +346,7 @@ throws IOException
 		m = rrclass.getDeclaredConstructor(fromTextList);
 		rec = (Record) m.newInstance(new Object [] {
 						name,
-						new Short(dclass),
+						DClass.toShort(dclass),
 						new Integer(ttl),
 						st, origin
 					     });
