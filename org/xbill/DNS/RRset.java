@@ -141,19 +141,19 @@ getDClass() {
 }
 
 /** Returns the ttl of the records */
-public int
+public long
 getTTL() {
 	synchronized (rrs) {
 		if (rrs.size() == 0)
 			return 0;
-		int ttl = Integer.MAX_VALUE;
+		long ttl = 0xFFFFFFFFL;
 		Iterator it = rrs.iterator();
 		while (it.hasNext()) {
 			Record r = (Record)it.next();
 			if (r.getTTL() < ttl)
 				ttl = r.getTTL();
 		}
-		return (ttl);
+		return ttl;
 	}
 }
 

@@ -66,6 +66,14 @@ writeInt(int i) {
 }
 
 /**
+ * Writes an unsigned int to the stream
+ * @param i The unsigned int to be written
+ */
+public void
+writeUnsignedInt(long i) {
+	writeInt((int)(i & 0xFFFFFFFFL));
+}
+/**
  * Writes a long to the stream
  * @param l The long to be written
  */

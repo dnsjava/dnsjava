@@ -29,7 +29,7 @@ private byte [] digest;
 private DSRecord() {}
 
 private
-DSRecord(Name name, int dclass, int ttl) {
+DSRecord(Name name, int dclass, long ttl) {
 	super(name, Type.DS, dclass, ttl);
 }
 
@@ -46,19 +46,13 @@ getMember() {
  * @param digest A hash of the original key.
  */
 public
-DSRecord(Name name, int dclass, int ttl, int footprint, int alg,
+DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 	 int digestid, byte []  digest)
 {
 	this(name, dclass, ttl);
-	if (footprint < 0 || footprint > 0xFFFF)
-		throw new IllegalArgumentException("invalid footprint: " +
-						   footprint);
-	if (alg < 0 || alg > 0xFF)
-		throw new IllegalArgumentException("invalid algorithm: " +
-						   alg);
-	if (digestid < 0 || digestid > 0xFF)
-		throw new IllegalArgumentException("invalid digest id: " +
-						   digestid);
+	checkU16("footprint", footprint);
+	checkU8("alg", alg);
+	checkU8("digestid", digestid);
 	this.footprint = footprint;
 	this.alg = alg;
 	this.digestid = digestid;
@@ -66,7 +60,7 @@ DSRecord(Name name, int dclass, int ttl, int footprint, int alg,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -86,7 +80,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	DSRecord rec = new DSRecord(name, dclass, ttl);

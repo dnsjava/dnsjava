@@ -18,8 +18,7 @@ public class KEYRecord extends Record {
 
 private static KEYRecord member = new KEYRecord();
 
-private short flags;
-private byte proto, alg;
+private int flags, proto, alg;
 private byte [] key;
 private int footprint = -1;
 
@@ -62,7 +61,7 @@ private
 KEYRecord() {}
 
 private
-KEYRecord(Name name, int dclass, int ttl) {
+KEYRecord(Name name, int dclass, long ttl) {
 	super(name, Type.KEY, dclass, ttl);
 }
 
@@ -79,18 +78,18 @@ getMember() {
  * @param key Binary data representing the key
  */
 public
-KEYRecord(Name name, int dclass, int ttl, int flags, int proto, int alg,
+KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	  byte []  key)
 {
 	this(name, dclass, ttl);
-	this.flags = (short) flags;
-	this.proto = (byte) proto;
-	this.alg = (byte) alg;
+	checkU16("flags", flags);
+	checkU8("proto", proto);
+	checkU8("alg", alg);
 	this.key = key;
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -108,7 +107,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	KEYRecord rec = new KEYRecord(name, dclass, ttl);
@@ -132,21 +131,21 @@ rdataToString() {
 	if (key != null || (flags & (FLAG_NOKEY)) == (FLAG_NOKEY) ) {
 		if (!Options.check("nohex")) {
 			sb.append("0x");
-			sb.append(Integer.toHexString(flags & 0xFFFF));
+			sb.append(Integer.toHexString(flags));
 		}
 		else
-			sb.append(flags & 0xFFFF);
+			sb.append(flags);
 		sb.append(" ");
-		sb.append(proto & 0xFF);
+		sb.append(proto);
 		sb.append(" ");
-		sb.append(alg & 0xFF);
+		sb.append(alg);
 		if (key != null) {
 			if (Options.check("multiline")) {
 				sb.append(" (\n");
 				sb.append(base64.formatString(key, 64, "\t",
 							      true));
 				sb.append(" ; key_tag = ");
-				sb.append(getFootprint() & 0xFFFF);
+				sb.append(getFootprint());
 			} else {
 				sb.append(" ");
 				sb.append(base64.toString(key));
@@ -159,7 +158,7 @@ rdataToString() {
 /**
  * Returns the flags describing the key's properties
  */
-public short
+public int
 getFlags() {
 	return flags;
 }
@@ -167,7 +166,7 @@ getFlags() {
 /**
  * Returns the protocol that the key was created for
  */
-public byte
+public int
 getProtocol() {
 	return proto;
 }
@@ -175,7 +174,7 @@ getProtocol() {
 /**
  * Returns the key's algorithm
  */
-public byte
+public int
 getAlgorithm() {
 	return alg;
 }

@@ -20,7 +20,7 @@ private
 MXRecord() {}
 
 private
-MXRecord(Name name, int dclass, int ttl) {
+MXRecord(Name name, int dclass, long ttl) {
 	super(name, Type.MX, dclass, ttl);
 }
 
@@ -36,13 +36,13 @@ getMember() {
  * @param target The host that mail is sent to
  */
 public
-MXRecord(Name name, int dclass, int ttl, int priority, Name target)
+MXRecord(Name name, int dclass, long ttl, int priority, Name target)
 {
 	super(name, Type.MX, dclass, ttl, priority, target);
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -50,7 +50,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	return rdataFromString(new MXRecord(name, dclass, ttl), st, origin);

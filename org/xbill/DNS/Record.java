@@ -20,7 +20,7 @@ public abstract class Record implements Cloneable, Comparable {
 
 protected Name name;
 protected int type, dclass;
-protected int ttl;
+protected long ttl;
 private boolean empty;
 
 private static final Record [] knownRecords = new Record[256];
@@ -36,11 +36,12 @@ static {
 protected
 Record() {}
 
-Record(Name name, int type, int dclass, int ttl) {
+Record(Name name, int type, int dclass, long ttl) {
 	if (!name.isAbsolute())
 		throw new RelativeNameException(name);
 	Type.check(type);
 	DClass.check(dclass);
+	TTL.check(ttl);
 	this.name = name;
 	this.type = type;
 	this.dclass = dclass;
@@ -87,12 +88,12 @@ getTypedObject(int type) {
 /**
  * Converts the type-specific RR to wire format - must be overriden
  */
-abstract Record rrFromWire(Name name, int type, int dclass, int ttl,
+abstract Record rrFromWire(Name name, int type, int dclass, long ttl,
 			   int length, DataByteInputStream in)
 throws IOException;
 
 private static Record
-newRecord(Name name, int type, int dclass, int ttl, int length,
+newRecord(Name name, int type, int dclass, long ttl, int length,
 	  DataByteInputStream in) throws IOException
 {
 	Record rec;
@@ -123,11 +124,12 @@ newRecord(Name name, int type, int dclass, int ttl, int length,
  * the first length bytes are used.
  */
 public static Record
-newRecord(Name name, int type, int dclass, int ttl, int length, byte [] data) {
+newRecord(Name name, int type, int dclass, long ttl, int length, byte [] data) {
 	if (!name.isAbsolute())
 		throw new RelativeNameException(name);
 	Type.check(type);
 	DClass.check(dclass);
+	TTL.check(ttl);
 
 	DataByteInputStream dbs;
 	if (data != null)
@@ -152,7 +154,7 @@ newRecord(Name name, int type, int dclass, int ttl, int length, byte [] data) {
  * format.
  */
 public static Record
-newRecord(Name name, int type, int dclass, int ttl, byte [] data) {
+newRecord(Name name, int type, int dclass, long ttl, byte [] data) {
 	return newRecord(name, type, dclass, ttl, data.length, data);
 }
 
@@ -165,7 +167,7 @@ newRecord(Name name, int type, int dclass, int ttl, byte [] data) {
  * @return An object of a subclass of Record
  */
 public static Record
-newRecord(Name name, int type, int dclass, int ttl) {
+newRecord(Name name, int type, int dclass, long ttl) {
 	return newRecord(name, type, dclass, ttl, 0, (byte []) null);
 }
 
@@ -186,7 +188,7 @@ newRecord(Name name, int type, int dclass) {
 static Record
 fromWire(DataByteInputStream in, int section) throws IOException {
 	int type, dclass;
-	int ttl;
+	long ttl;
 	int length;
 	Name name;
 	Record rec;
@@ -201,7 +203,7 @@ fromWire(DataByteInputStream in, int section) throws IOException {
 	if (section == Section.QUESTION)
 		return newRecord(name, type, dclass);
 
-	ttl = in.readInt();
+	ttl = in.readUnsignedInt();
 	length = in.readUnsignedShort();
 	if (length == 0)
 		return newRecord(name, type, dclass, ttl);
@@ -226,7 +228,7 @@ toWire(DataByteOutputStream out, int section, Compression c) {
 	out.writeShort(dclass);
 	if (section == Section.QUESTION)
 		return;
-	out.writeInt(ttl);
+	out.writeUnsignedInt(ttl);
 	int lengthPosition = out.getPos();
 	out.writeShort(0); /* until we know better */
 	if (!empty)
@@ -249,10 +251,11 @@ toWireCanonical(DataByteOutputStream out) {
 	name.toWireCanonical(out);
 	out.writeShort(type);
 	out.writeShort(dclass);
-	out.writeInt(ttl);
+	out.writeUnsignedInt(ttl);
 	int lengthPosition = out.getPos();
 	out.writeShort(0); /* until we know better */
-	rrToWire(out, null, true);
+	if (!empty)
+		rrToWire(out, null, true);
 	out.writeShortAt(out.getPos() - lengthPosition - 2, lengthPosition);
 }
 
@@ -295,7 +298,7 @@ toString() {
 	if (Options.check("BINDTTL"))
 		sb.append(TTL.format(ttl));
 	else
-		sb.append((long)ttl & 0xFFFFFFFFL);
+		sb.append(ttl);
 	sb.append("\t");
 	if (dclass != DClass.IN || !Options.check("noPrintIN")) {
 		sb.append(DClass.string(dclass));
@@ -313,7 +316,7 @@ toString() {
  * Converts the text format of an RR to the internal format - must be overriden
  */
 abstract Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException;
 
 /**
@@ -427,7 +430,7 @@ byteArrayToString(byte [] array, boolean quote) {
  * @throws IOException The text format was invalid.
  */
 public static Record
-fromString(Name name, int type, int dclass, int ttl, Tokenizer st, Name origin)
+fromString(Name name, int type, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	Record rec;
@@ -436,6 +439,7 @@ throws IOException
 		throw new RelativeNameException(name);
 	Type.check(type);
 	DClass.check(dclass);
+	TTL.check(ttl);
 
 	Tokenizer.Token t = st.get();
 	if (t.type == Tokenizer.IDENTIFIER && t.value.equals("\\#")) {
@@ -470,7 +474,7 @@ throws IOException
  * @throws IOException The text format was invalid.
  */
 public static Record
-fromString(Name name, int type, int dclass, int ttl, String s, Name origin)
+fromString(Name name, int type, int dclass, long ttl, String s, Name origin)
 throws IOException
 {
 	return fromString(name, type, dclass, ttl, new Tokenizer(s), origin);
@@ -523,7 +527,7 @@ getDClass() {
 /**
  * Returns the record's TTL
  */
-public int
+public long
 getTTL() {
 	return ttl;
 }
@@ -586,7 +590,7 @@ withName(Name name) {
  * class and ttl.  This is most useful for dynamic update.
  */
 Record
-withDClass(int dclass, int ttl) {
+withDClass(int dclass, long ttl) {
 	Record rec = cloneRecord();
 	rec.dclass = dclass;
 	rec.ttl = ttl;
@@ -639,6 +643,33 @@ compareTo(Object o) {
 public Name
 getAdditionalName() {
 	return null;
+}
+
+/* Checks that an int contains an unsigned 8 bit value */
+static void
+checkU8(String field, int val) {
+	if (val < 0 || val > 0xFF)
+		throw new IllegalArgumentException("\"" + field + "\" " + val + 
+						   "must be an unsigned 8 " +
+						   "bit value");
+}
+
+/* Checks that an int contains an unsigned 16 bit value */
+static void
+checkU16(String field, int val) {
+	if (val < 0 || val > 0xFFFF)
+		throw new IllegalArgumentException("\"" + field + "\" " + val + 
+						   "must be an unsigned 16 " +
+						   "bit value");
+}
+
+/* Checks that a long contains an unsigned 32 bit value */
+static void
+checkU32(String field, long val) {
+	if (val < 0 || val > 0xFFFFFFFFL)
+		throw new IllegalArgumentException("\"" + field + "\" " + val + 
+						   "must be an unsigned 32 " +
+						   "bit value");
 }
 
 }

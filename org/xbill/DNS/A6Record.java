@@ -24,7 +24,7 @@ private
 A6Record() {}
 
 private
-A6Record(Name name, int dclass, int ttl) {
+A6Record(Name name, int dclass, long ttl) {
 	super(name, Type.A6, dclass, ttl);
 }
 
@@ -40,7 +40,7 @@ getMember() {
  * @param prefix The name of the prefix
  */
 public
-A6Record(Name name, int dclass, int ttl, int prefixBits,
+A6Record(Name name, int dclass, long ttl, int prefixBits,
 	 Inet6Address suffix, Name prefix)
 {
 	this(name, dclass, ttl);
@@ -52,7 +52,7 @@ A6Record(Name name, int dclass, int ttl, int prefixBits,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -73,7 +73,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	A6Record rec = new A6Record(name, dclass, ttl);

@@ -495,9 +495,9 @@ doAssert(Tokenizer st) throws IOException {
 			print("Invalid response (no SOA)");
 		else {
 			SOARecord soa = (SOARecord) answers[0];
-			int serial = soa.getSerial();
-			if (serial != Integer.parseInt(expected)) {
-				value = new Integer(serial).toString();
+			long serial = soa.getSerial();
+			if (serial != Long.parseLong(expected)) {
+				value = Long.toString(serial);
 				flag = false;
 			}
 		}

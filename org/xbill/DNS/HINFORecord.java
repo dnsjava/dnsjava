@@ -22,7 +22,7 @@ private
 HINFORecord() {}
 
 private
-HINFORecord(Name name, int dclass, int ttl) {
+HINFORecord(Name name, int dclass, long ttl) {
 	super(name, Type.HINFO, dclass, ttl);
 }
 
@@ -38,7 +38,7 @@ getMember() {
  * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
-HINFORecord(Name name, int dclass, int ttl, String cpu, String os) {
+HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
 	this(name, dclass, ttl);
 	try {
 		this.cpu = byteArrayFromString(cpu);
@@ -50,7 +50,7 @@ HINFORecord(Name name, int dclass, int ttl, String cpu, String os) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -63,7 +63,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	HINFORecord rec = new HINFORecord(name, dclass, ttl);

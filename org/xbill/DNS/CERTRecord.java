@@ -33,15 +33,15 @@ public static final int OID = 254;
 
 private static CERTRecord member = new CERTRecord();
 
-private short certType, keyTag;
-private byte alg;
+private int certType, keyTag;
+private int alg;
 private byte [] cert;
 
 private
 CERTRecord() {}
 
 private
-CERTRecord(Name name, int dclass, int ttl) {
+CERTRecord(Name name, int dclass, long ttl) {
 	super(name, Type.CERT, dclass, ttl);
 }
 
@@ -58,18 +58,21 @@ getMember() {
  * @param cert Binary data representing the certificate
  */
 public
-CERTRecord(Name name, int dclass, int ttl, int certType, int keyTag,
+CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 	   int alg, byte []  cert)
 {
 	this(name, dclass, ttl);
-	this.certType = (short) certType;
-	this.keyTag = (short) keyTag;
-	this.alg = (byte) alg;
+	checkU16("certType", certType);
+	checkU16("keyTag", keyTag);
+	checkU8("alg", alg);
+	this.certType = certType;
+	this.keyTag = keyTag;
+	this.alg = alg;
 	this.cert = cert;
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -87,7 +90,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
@@ -107,7 +110,7 @@ rdataToString() {
 	if (cert != null) {
 		sb.append (certType);
 		sb.append (" ");
-		sb.append (keyTag & 0xFFFF);
+		sb.append (keyTag);
 		sb.append (" ");
 		sb.append (alg);
 		if (cert != null) {
@@ -127,7 +130,7 @@ rdataToString() {
 /**
  * Returns the type of certificate
  */
-public short
+public int
 getCertType() {
 	return certType;
 }
@@ -135,7 +138,7 @@ getCertType() {
 /**
  * Returns the ID of the associated KEYRecord, if present
  */
-public short
+public int
 getKeyTag() {
 	return keyTag;
 }
@@ -143,7 +146,7 @@ getKeyTag() {
 /**
  * Returns the algorithm of the associated KEYRecord, if present
  */
-public byte
+public int
 getAlgorithm() {
 	return alg;
 }

@@ -132,7 +132,7 @@ absent(Name name, int type) {
  * @throws IOException The record could not be parsed.
  */
 public void
-add(Name name, int type, int ttl, String record) throws IOException {
+add(Name name, int type, long ttl, String record) throws IOException {
 	newUpdate(Record.fromString(name, type, dclass, ttl, record, origin));
 }
 
@@ -142,7 +142,7 @@ add(Name name, int type, int ttl, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-add(Name name, int type, int ttl, Tokenizer tokenizer) throws IOException {
+add(Name name, int type, long ttl, Tokenizer tokenizer) throws IOException {
 	newUpdate(Record.fromString(name, type, dclass, ttl, tokenizer,
 				    origin));
 }
@@ -248,7 +248,7 @@ delete(RRset rrset) {
  * @throws IOException The record could not be parsed.
  */
 public void
-replace(Name name, int type, int ttl, String record) throws IOException {
+replace(Name name, int type, long ttl, String record) throws IOException {
 	delete(name, type);
 	add(name, type, ttl, record);
 }
@@ -260,7 +260,7 @@ replace(Name name, int type, int ttl, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-replace(Name name, int type, int ttl, Tokenizer tokenizer) throws IOException
+replace(Name name, int type, long ttl, Tokenizer tokenizer) throws IOException
 {
 	delete(name, type);
 	add(name, type, ttl, tokenizer);

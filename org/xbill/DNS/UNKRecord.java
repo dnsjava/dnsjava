@@ -23,7 +23,7 @@ private
 UNKRecord() {}
 
 private
-UNKRecord(Name name, int type, int dclass, int ttl) {
+UNKRecord(Name name, int type, int dclass, long ttl) {
 	super(name, type, dclass, ttl);
 }
 
@@ -33,7 +33,7 @@ getMember() {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -50,7 +50,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	throw st.exception("invalid unknown RR encoding");

@@ -21,7 +21,7 @@ private
 PTRRecord() {}
 
 private
-PTRRecord(Name name, int dclass, int ttl) {
+PTRRecord(Name name, int dclass, long ttl) {
 	super(name, Type.PTR, dclass, ttl);
 }
 
@@ -35,12 +35,12 @@ getMember() {
  * @param target The name of the machine with this address
  */
 public
-PTRRecord(Name name, int dclass, int ttl, Name target) {
+PTRRecord(Name name, int dclass, long ttl, Name target) {
 	super(name, Type.PTR, dclass, ttl, target);
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -48,7 +48,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	return rdataFromString(new PTRRecord(name, dclass, ttl), st, origin);

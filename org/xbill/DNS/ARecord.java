@@ -23,7 +23,7 @@ private
 ARecord() {}
 
 private
-ARecord(Name name, int dclass, int ttl) {
+ARecord(Name name, int dclass, long ttl) {
 	super(name, Type.A, dclass, ttl);
 }
 
@@ -63,13 +63,13 @@ toDottedQuad(int addr) {
  * @param address The address that the name refers to
  */
 public
-ARecord(Name name, int dclass, int ttl, InetAddress address) {
+ARecord(Name name, int dclass, long ttl, InetAddress address) {
 	this(name, dclass, ttl);
 	addr = fromArray(address.getAddress());
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -87,7 +87,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	ARecord rec = new ARecord(name, dclass, ttl);

@@ -25,7 +25,7 @@ private
 SRVRecord() {}
 
 private
-SRVRecord(Name name, int dclass, int ttl) {
+SRVRecord(Name name, int dclass, long ttl) {
 	super(name, Type.SRV, dclass, ttl);
 }
 
@@ -44,16 +44,13 @@ getMember() {
  * @param target The host running the service
  */
 public
-SRVRecord(Name name, int dclass, int ttl, int priority,
+SRVRecord(Name name, int dclass, long ttl, int priority,
 	  int weight, int port, Name target)
 {
 	this(name, dclass, ttl);
-	if (priority < 0 || priority > 0xFFFF)
-		throw new IllegalArgumentException("priority is out of range");
-	if (weight < 0 || weight > 0xFFFF)
-		throw new IllegalArgumentException("weight is out of range");
-	if (port < 0 || port > 0xFFFF)
-		throw new IllegalArgumentException("port is out of range");
+	checkU16("priority", priority);
+	checkU16("weight", weight);
+	checkU16("port", port);
 	this.priority = priority;
 	this.weight = weight;
 	this.port = port;
@@ -63,7 +60,7 @@ SRVRecord(Name name, int dclass, int ttl, int priority,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -78,7 +75,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SRVRecord rec = new SRVRecord(name, dclass, ttl);

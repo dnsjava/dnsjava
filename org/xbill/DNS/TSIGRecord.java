@@ -33,7 +33,7 @@ private
 TSIGRecord() {} 
 
 private
-TSIGRecord(Name name, int dclass, int ttl) {
+TSIGRecord(Name name, int dclass, long ttl) {
 	super(name, Type.TSIG, dclass, ttl);
 }
 
@@ -58,15 +58,14 @@ getMember() {
  * @see TSIG
  */
 public
-TSIGRecord(Name name, int dclass, int ttl, Name alg, Date timeSigned,
+TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 	   int fudge, byte [] signature, int originalID, short error,
 	   byte other[])
 {
 	this(name, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
-	if (fudge < 0 || fudge > 0xFFFF)
-		throw new IllegalArgumentException("priority is out of range");
+	checkU16("fudge", fudge);
 	this.alg = alg;
 	this.timeSigned = timeSigned;
 	this.fudge = fudge;
@@ -77,7 +76,7 @@ TSIGRecord(Name name, int dclass, int ttl, Name alg, Date timeSigned,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -86,10 +85,9 @@ throws IOException
 		return rec;
 	rec.alg = new Name(in);
 
-	int timeHigh = in.readUnsignedShort();
-	int timeLow = in.readInt();
-	long time = ((long)timeHigh) << 32;
-	time += (long)timeLow & 0xFFFFFFFF;
+	long timeHigh = in.readUnsignedShort();
+	long timeLow = in.readUnsignedInt();
+	long time = (timeHigh << 32) + timeLow;
 	rec.timeSigned = new Date(time * 1000);
 	rec.fudge = in.readUnsignedShort();
 
@@ -111,7 +109,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	throw st.exception("no text format defined for TSIG");

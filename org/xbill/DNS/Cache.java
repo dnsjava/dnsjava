@@ -28,7 +28,7 @@ private abstract static class Element implements TypedObject {
 	setValues(byte credibility, long ttl) {
 		this.credibility = credibility;
 		this.expire = (int)((System.currentTimeMillis() / 1000) + ttl);
-		if (this.expire  < 0)
+		if (this.expire < 0 || this.expire > Integer.MAX_VALUE)
 			this.expire = Integer.MAX_VALUE;
 	}
 
@@ -47,7 +47,7 @@ private static class PositiveElement extends Element {
 	public
 	PositiveElement(RRset r, byte cred, long maxttl) {
 		rrset = r;
-		long ttl = ((long) r.getTTL()) & 0xFFFFFFFFL;
+		long ttl = r.getTTL();
 		if (maxttl >= 0 && maxttl < ttl)
 			ttl = maxttl;
 		setValues(cred, ttl);
@@ -82,7 +82,7 @@ private static class NegativeElement extends Element {
 		this.soa = soa;
 		long cttl = 0;
 		if (soa != null) {
-			cttl = soa.getMinimum() & 0xFFFFFFFFL;
+			cttl = soa.getMinimum();
 			if (maxttl >= 0)
 				cttl = Math.min(cttl, maxttl);
 		}
@@ -245,7 +245,7 @@ addRecord(Record r, byte cred, Object o) {
  */
 public void
 addRRset(RRset rrset, byte cred) {
-	long ttl = ((long) rrset.getTTL()) & 0xFFFFFFFFL;
+	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
 	if (verifier != null)

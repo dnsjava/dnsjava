@@ -20,7 +20,7 @@ private
 KXRecord() {}
 
 private
-KXRecord(Name name, int dclass, int ttl) {
+KXRecord(Name name, int dclass, long ttl) {
 	super(name, Type.KX, dclass, ttl);
 }
 
@@ -36,12 +36,12 @@ getMember() {
  * @param target The host that authority is delegated to
  */
 public
-KXRecord(Name name, int dclass, int ttl, int preference, Name target) {
+KXRecord(Name name, int dclass, long ttl, int preference, Name target) {
 	super(name, Type.KX, dclass, ttl, preference, target);
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -49,7 +49,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	return rdataFromString(new KXRecord(name, dclass, ttl), st, origin);

@@ -16,6 +16,12 @@ public final class TTL {
 private
 TTL() {}
 
+static void
+check(long i) {
+	if (i < 0 || i > 0xFFFFFFFFL)
+		throw new InvalidTTLException(i);
+}
+
 /**
  * Parses a BIND-stype TTL
  * @return The TTL as a number of seconds
@@ -49,9 +55,10 @@ parseTTL(String s) {
 }
 
 public static String
-format(int ttl) {
+format(long ttl) {
+	TTL.check(ttl);
 	StringBuffer sb = new StringBuffer();
-	int secs, mins, hours, days, weeks;
+	long secs, mins, hours, days, weeks;
 	secs = ttl % 60;
 	ttl /= 60;
 	mins = ttl % 60;

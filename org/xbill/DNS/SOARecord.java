@@ -17,13 +17,13 @@ public class SOARecord extends Record {
 private static SOARecord member = new SOARecord();
 
 private Name host, admin;
-private int serial, refresh, retry, expire, minimum;
+private long serial, refresh, retry, expire, minimum;
 
 private
 SOARecord() {}
 
 private
-SOARecord(Name name, int dclass, int ttl) {
+SOARecord(Name name, int dclass, long ttl) {
 	super(name, Type.SOA, dclass, ttl);
 }
 
@@ -45,8 +45,8 @@ getMember() {
  * @param minimum The minimum TTL for records in the zone
 */
 public
-SOARecord(Name name, int dclass, int ttl, Name host, Name admin,
-	  int serial, int refresh, int retry, int expire, int minimum)
+SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
+	  long serial, long refresh, long retry, long expire, long minimum)
 {
 	this(name, dclass, ttl);
 	if (!host.isAbsolute())
@@ -54,6 +54,11 @@ SOARecord(Name name, int dclass, int ttl, Name host, Name admin,
 	this.host = host;
 	if (!admin.isAbsolute())
 		throw new RelativeNameException(admin);
+	checkU32("serial", serial);
+	checkU32("refresh", refresh);
+	checkU32("retry", retry);
+	checkU32("expire", expire);
+	checkU32("minimum", minimum);
 	this.admin = admin;
 	this.serial = serial;
 	this.refresh = refresh;
@@ -63,7 +68,7 @@ SOARecord(Name name, int dclass, int ttl, Name host, Name admin,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -72,16 +77,16 @@ throws IOException
 		return rec;
 	rec.host = new Name(in);
 	rec.admin = new Name(in);
-	rec.serial = in.readInt();
-	rec.refresh = in.readInt();
-	rec.retry = in.readInt();
-	rec.expire = in.readInt();
-	rec.minimum = in.readInt();
+	rec.serial = in.readUnsignedInt();
+	rec.refresh = in.readUnsignedInt();
+	rec.retry = in.readUnsignedInt();
+	rec.expire = in.readUnsignedInt();
+	rec.minimum = in.readUnsignedInt();
 	return rec;
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SOARecord rec = new SOARecord(name, dclass, ttl);
@@ -105,7 +110,7 @@ rdataToString() {
 		sb.append(admin);
 		if (Options.check("multiline")) {
 			sb.append(" (\n\t\t\t\t\t");
-			sb.append(serial & 0xFFFFFFFFL);
+			sb.append(serial);
 			sb.append("\t; serial\n\t\t\t\t\t");
 			sb.append(refresh);
 			sb.append("\t; refresh\n\t\t\t\t\t");
@@ -117,7 +122,7 @@ rdataToString() {
 			sb.append(" )\t; minimum");
 		} else {
 			sb.append(" ");
-			sb.append(serial & 0xFFFFFFFFL);
+			sb.append(serial);
 			sb.append(" ");
 			sb.append(refresh);
 			sb.append(" ");
@@ -144,31 +149,31 @@ getAdmin() {
 }       
 
 /** Returns the zone's serial number */
-public int
+public long
 getSerial() {  
 	return serial;
 }       
 
 /** Returns the zone refresh interval */
-public int
+public long
 getRefresh() {  
 	return refresh;
 }       
 
 /** Returns the zone retry interval */
-public int
+public long
 getRetry() {  
 	return retry;
 }       
 
 /** Returns the time until a secondary expires a zone */
-public int
+public long
 getExpire() {  
 	return expire;
 }       
 
 /** Returns the minimum TTL for records in the zone */
-public int
+public long
 getMinimum() {  
 	return minimum;
 }       
@@ -180,11 +185,11 @@ rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
 
 	host.toWire(out, c, canonical);
 	admin.toWire(out, c, canonical);
-	out.writeInt(serial);
-	out.writeInt(refresh);
-	out.writeInt(retry);
-	out.writeInt(expire);
-	out.writeInt(minimum);
+	out.writeUnsignedInt(serial);
+	out.writeUnsignedInt(refresh);
+	out.writeUnsignedInt(retry);
+	out.writeUnsignedInt(expire);
+	out.writeUnsignedInt(minimum);
 }
 
 }

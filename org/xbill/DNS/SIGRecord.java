@@ -24,7 +24,7 @@ public class SIGRecord extends Record {
 private static SIGRecord member = new SIGRecord();
 
 private int covered;
-private byte alg, labels;
+private int alg, labels;
 private int origttl;
 private Date expire, timeSigned;
 private short footprint;
@@ -35,7 +35,7 @@ private
 SIGRecord() {}
 
 private
-SIGRecord(Name name, int dclass, int ttl) {
+SIGRecord(Name name, int dclass, long ttl) {
 	super(name, Type.SIG, dclass, ttl);
 }
 
@@ -57,12 +57,16 @@ getMember() {
  * @param signature Binary data representing the signature
  */
 public
-SIGRecord(Name name, int dclass, int ttl, int covered, int alg, int origttl,
+SIGRecord(Name name, int dclass, long ttl, int covered, int alg, int origttl,
 	  Date expire, Date timeSigned, int footprint, Name signer,
 	  byte [] signature)
 {
 	this(name, dclass, ttl);
 	Type.check(covered);
+	checkU8("alg", alg);
+	checkU8("labels", labels);
+	TTL.check(origttl);
+	checkU16("footprint", footprint);
 	this.covered = covered;
 	this.alg = (byte) alg;
 	this.labels = name.labels();
@@ -77,7 +81,7 @@ SIGRecord(Name name, int dclass, int ttl, int covered, int alg, int origttl,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -99,7 +103,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	SIGRecord rec = new SIGRecord(name, dclass, ttl);
@@ -138,7 +142,7 @@ rdataToString() {
 		sb.append (" ");
 		sb.append (formatDate(timeSigned));
 		sb.append (" ");
-		sb.append ((int)footprint & 0xFFFF);
+		sb.append ((int)footprint);
 		sb.append (" ");
 		sb.append (signer);
 		if (Options.check("multiline")) {
@@ -162,7 +166,7 @@ getTypeCovered() {
 /**
  * Returns the cryptographic algorithm of the key that generated the signature
  */
-public byte
+public int
 getAlgorithm() {
 	return alg;
 }
@@ -172,7 +176,7 @@ getAlgorithm() {
  * different than the record's domain name if the record is a wildcard
  * record.
  */
-public byte
+public int
 getLabels() {
 	return labels;
 }

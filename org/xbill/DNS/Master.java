@@ -78,7 +78,7 @@ nextRecord() throws IOException {
 	}
 	while (true) {
 		Name name;
-		int ttl;
+		long ttl;
 		int type, dclass;
 
 		token = st.get(true, false);

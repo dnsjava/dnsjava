@@ -32,7 +32,7 @@ private
 OPTRecord() {}
 
 private
-OPTRecord(Name name, int dclass, int ttl) {
+OPTRecord(Name name, int dclass, long ttl) {
 	super(name, Type.OPT, dclass, ttl);
 }
 
@@ -49,6 +49,10 @@ public
 OPTRecord(int payloadSize, byte xrcode, byte version, int flags) {
 	this(Name.root, payloadSize,
 	      ((int)xrcode << 24) + ((int)version << 16) + flags);
+	checkU16("payloadSize", payloadSize);
+	checkU8("xrcode", xrcode);
+	checkU8("version", version);
+	checkU16("flags", flags);
 	options = null;
 }
 
@@ -62,7 +66,7 @@ OPTRecord(int payloadSize, byte xrcode, byte version) {
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -84,7 +88,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	throw st.exception("no text format defined for OPT");
@@ -127,19 +131,19 @@ getPayloadSize() {
  */
 public int
 getExtendedRcode() {
-	return (ttl >>> 24);
+	return (int)(ttl >>> 24);
 }
 
 /** Returns the highest supported EDNS version */
 public int
 getVersion() {
-	return ((ttl >>> 16) & 0xFF);
+	return (int)((ttl >>> 16) & 0xFF);
 }
 
 /** Returns the EDNS flags */
 public int
 getFlags() {
-	return (ttl & 0xFFFF);
+	return (int)(ttl & 0xFFFF);
 }
 
 void

@@ -45,7 +45,7 @@ private
 TKEYRecord() {}
 
 private
-TKEYRecord(Name name, int dclass, int ttl) {
+TKEYRecord(Name name, int dclass, long ttl) {
 	super(name, Type.TKEY, dclass, ttl);
 }
 
@@ -68,19 +68,15 @@ getMember() {
  * responses.
  */
 public
-TKEYRecord(Name name, int dclass, int ttl, Name alg,
+TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	   Date timeInception, Date timeExpire, int mode, int error,
 	   byte [] key, byte other[])
 {
 	this(name, dclass, ttl);
 	if (!alg.isAbsolute())
 		throw new RelativeNameException(alg);
-	if (mode < 0 || mode > 0xFFFF)
-		throw new IllegalArgumentException("invalid TKEY mode: " +
-						   mode);
-	if (error < 0 || error > 0xFFFF)
-		throw new IllegalArgumentException("invalid TKEY error: " +
-						   error);
+	checkU16("mode", mode);
+	checkU16("error", error);
 	this.alg = alg;
 	this.timeInception = timeInception;
 	this.timeExpire = timeExpire;
@@ -91,7 +87,7 @@ TKEYRecord(Name name, int dclass, int ttl, Name alg,
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -123,7 +119,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	throw st.exception("no text format defined for TKEY");

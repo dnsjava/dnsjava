@@ -48,14 +48,14 @@ private static final int END		= 7;
 private SimpleResolver res;
 private Name zname;
 private int qtype;
-private int ixfr_serial;
+private long ixfr_serial;
 private boolean want_fallback;
 
 private SimpleResolver.Stream stream;
 
 private int state;
-private int end_serial;
-private int current_serial;
+private long end_serial;
+private long current_serial;
 private Record initialsoa;
 
 private int rtype;
@@ -69,10 +69,10 @@ public static class Delta {
 	 */
 
 	/** The starting serial number of this delta. */
-	public int start;
+	public long start;
 
 	/** The ending serial number of this delta. */
-	public int end;
+	public long end;
 
 	/** A list of records added between the start and end versions */
 	public List adds;
@@ -92,7 +92,7 @@ ZoneTransferIn() {}
 
 private
 ZoneTransferIn(SimpleResolver sres, Name zone, int xfrtype,
-	       int serial, boolean fallback)
+	       long serial, boolean fallback)
 {
 	res = sres;
 	if (zone.isAbsolute())
@@ -174,7 +174,7 @@ throws UnknownHostException
  * @return The ZoneTransferIn object.
  */
 public static ZoneTransferIn
-newIXFR(Name zone, int serial, boolean fallback, SimpleResolver res) {
+newIXFR(Name zone, long serial, boolean fallback, SimpleResolver res) {
 	return new ZoneTransferIn(res, zone, Type.IXFR, serial, fallback);
 }
 
@@ -191,7 +191,7 @@ newIXFR(Name zone, int serial, boolean fallback, SimpleResolver res) {
  * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
-newIXFR(Name zone, int serial, boolean fallback,
+newIXFR(Name zone, long serial, boolean fallback,
 	String host, int port, TSIG key)
 throws UnknownHostException
 {
@@ -210,7 +210,7 @@ throws UnknownHostException
  * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
-newIXFR(Name zone, int serial, boolean fallback, String host, TSIG key)
+newIXFR(Name zone, long serial, boolean fallback, String host, TSIG key)
 throws UnknownHostException
 {
 	return newIXFR(zone, serial, fallback, newResolver(host, 0, key));
@@ -230,14 +230,14 @@ sendQuery() throws IOException {
 	query.addRecord(question, Section.QUESTION);
 	if (qtype == Type.IXFR) {
 		Record soa = new SOARecord(zname, DClass.IN, 0, Name.root,
-					   Name.root, (int)ixfr_serial,
+					   Name.root, ixfr_serial,
 					   0, 0, 0, 0);
 		query.addRecord(soa, Section.AUTHORITY);
 	}
 	stream.send(query);
 }
 
-private int
+private long
 getSOASerial(Record rec) {
 	SOARecord soa = (SOARecord) rec;
 	return soa.getSerial();
@@ -335,7 +335,7 @@ parseRR(Record rec) throws ZoneTransferException {
 
 	case IXFR_ADD:
 		if (type == Type.SOA) {
-			int soa_serial = getSOASerial(rec);
+			long soa_serial = getSOASerial(rec);
 			if (soa_serial == end_serial) {
 				state = END;
 				break;

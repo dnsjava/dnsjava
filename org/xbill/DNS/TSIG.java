@@ -279,7 +279,7 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		DataByteOutputStream out = new DataByteOutputStream();
 		tsig.getName().toWireCanonical(out);
 		out.writeShort(tsig.dclass);
-		out.writeInt(tsig.ttl);
+		out.writeUnsignedInt(tsig.ttl);
 		tsig.getAlgorithm().toWireCanonical(out);
 		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);

@@ -119,6 +119,20 @@ readInt() throws IOException {
 }
 
 /**
+ * Read an unsigned int from the stream
+ * @return The unsigned int, as a long.
+ */
+public long
+readUnsignedInt() throws IOException {
+	int c1 = read();
+	int c2 = read();
+	int c3 = read();
+	int c4 = read();
+	if (c1 == -1 || c2 == -1 || c3 == -1 || c4 == -1)
+		throw new IOException("end of input");
+	return (((long)c1 << 24) + (c2 << 16) + (c3 << 8) + c4);
+}
+/**
  * Read a long from the stream
  * @return The long
  */

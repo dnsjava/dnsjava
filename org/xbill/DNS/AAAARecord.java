@@ -22,7 +22,7 @@ private
 AAAARecord() {}
 
 private
-AAAARecord(Name name, int dclass, int ttl) {
+AAAARecord(Name name, int dclass, long ttl) {
 	super(name, Type.AAAA, dclass, ttl);
 }
 
@@ -36,13 +36,13 @@ getMember() {
  * @param address The address suffix
  */
 public
-AAAARecord(Name name, int dclass, int ttl, Inet6Address address) {
+AAAARecord(Name name, int dclass, long ttl, Inet6Address address) {
 	this(name, dclass, ttl);
 	this.address = address;
 }
 
 Record
-rrFromWire(Name name, int type, int dclass, int ttl, int length,
+rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
@@ -58,7 +58,7 @@ throws IOException
 }
 
 Record
-rdataFromString(Name name, int dclass, int ttl, Tokenizer st, Name origin)
+rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
 	AAAARecord rec = new AAAARecord(name, dclass, ttl);
