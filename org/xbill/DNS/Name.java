@@ -602,7 +602,6 @@ getLabelString(int n) {
  * Convert Name to DNS wire format
  * @param out The output stream containing the DNS message.
  * @param c The compression context, or null of no compression is desired.
- * @throws IOException An error occurred writing the name.
  * @throws IllegalArgumentException The name is not absolute.
  */
 public void
@@ -637,9 +636,8 @@ toWire(DataByteOutputStream out, Compression c) {
 /**
  * Convert Name to canonical DNS wire format (all lowercase)
  * @param out The output stream to which the message is written.
- * @throws IOException An error occurred writing the name.
  */
-public void
+void
 toWireCanonical(DataByteOutputStream out) {
 	byte [] b = toWireCanonical();
 	out.writeArray(b);
@@ -647,7 +645,6 @@ toWireCanonical(DataByteOutputStream out) {
 
 /**
  * Convert Name to canonical DNS wire format (all lowercase)
- * @throws IOException An error occurred writing the name.
  */
 public byte []
 toWireCanonical() {
