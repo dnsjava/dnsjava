@@ -42,12 +42,12 @@ getTypedObject(short type) {
 	if (knownRecords[type] != null)
 		return knownRecords[type];
 	try {
-		String s = Record.class.toString();
+		String s = Record.class.getName();
 		/*
-		 * Remove "class " from the beginning and "Record" from the end.
-		 * Then construct the new class name.
+		 * Remove "Record" from the end and construct the new
+		 * class name.
 		 */
-		Class c = Class.forName(s.substring(6, s.length() - 6) +
+		Class c = Class.forName(s.substring(0, s.length() - 6) +
 					Type.string(type) + "Record");
 		Method m = c.getDeclaredMethod("getMember", emptyClassArray);
 		knownRecords[type] = (Record) m.invoke(null, emptyObjectArray);

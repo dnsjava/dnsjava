@@ -1,3 +1,9 @@
+8/31/2002
+	- Changed the code that dynamically loads record types; hopefully
+	  this will solve some of the mysterious problems that I think
+	  are related to non-English versions of Windows.
+	- Clean up the Name code.
+
 8/28/2002
 	- Remove support for bitstring labels, since they're now deprecated.
 

@@ -75,18 +75,6 @@ grow(int n) {
 }
 
 private final void
-grow() {
-	if (labels >= MAXLABELS)
-		throw new ArrayIndexOutOfBoundsException("name too long");
-	else if (labels * 2 > MAXLABELS)
-		grow(MAXLABELS);
-	else if (labels > 0)
-		grow(labels * 2);
-	else
-		grow(1);
-}
-
-private final void
 append(Object label) {
 	if (name == null || labels == name.length)
 		grow(labels + 1);
@@ -96,7 +84,7 @@ append(Object label) {
 /**
  * Create a new name from a string and an origin
  * @param s The string to be converted
- * @param origin If the name is unqualified, the origin to be appended
+ * @param origin If the name is not absolute, the origin to be appended
  * @deprecated As of dnsjava 1.3.0, replaced by <code>Name.fromString</code>.
  */
 public
@@ -115,12 +103,12 @@ Name(String s, Name origin) {
 	}
 	labels = n.labels;
 	name = n.name;
-	if (!isQualified()) {
+	if (!isAbsolute()) {
 		/*
 		 * This isn't exactly right, but it's close.
 		 * Partially qualified names are evil.
 		 */
-		if (Options.check("pqdn") && labels > 1)
+		if (!Options.check("pqdn") && labels > 1)
 			append(emptyLabel);
 	}
 }
@@ -140,20 +128,19 @@ Name(String s) {
  * make the name absolute; it will be absolute if it has a trailing dot or an
  * absolute origin is appended.
  * @param s The string to be converted
- * @param origin If the name is unqualified, the origin to be appended.
+ * @param origin If the name is not absolute, the origin to be appended.
  * @throws TextParseException The name is invalid.
  */
 public static Name
 fromString(String s, Name origin) throws TextParseException {
 	Name name = new Name();
 	name.labels = 0;
-	name.name = new Object[1];
+	name.name = null;
 
 	if (s.equals("@")) {
-		if (origin != null)
-			return origin;
-		else
+		if (origin == null)
 			return name;
+		return origin;
 	} else if (s.equals("."))
 		return (root);
 	int labelstart = -1;
@@ -162,6 +149,7 @@ fromString(String s, Name origin) throws TextParseException {
 	boolean escaped = false;
 	int digits = 0;
 	int intval = 0;
+	boolean absolute = false;
 	for (int i = 0; i < s.length(); i++) {
 		byte b = (byte) s.charAt(i);
 		if (escaped) {
@@ -191,9 +179,7 @@ fromString(String s, Name origin) throws TextParseException {
 			System.arraycopy(label, 0, newlabel, 0, pos);
 			if (name.labels == MAXLABELS)
 				throw new TextParseException("too many labels");
-			if (name.labels == name.name.length)
-				name.grow();
-			name.name[name.labels++] = newlabel;
+			name.append(newlabel);
 			labelstart = -1;
 			pos = 0;
 		} else {
@@ -204,17 +190,20 @@ fromString(String s, Name origin) throws TextParseException {
 			label[pos++] = b;
 		}
 	}
-	if (labelstart == -1)
+	if (labelstart == -1) {
 		name.append(emptyLabel);
-	else {
+		absolute = true;
+	} else {
 		byte [] newlabel = new byte[pos];
 		System.arraycopy(label, 0, newlabel, 0, pos);
 		if (name.labels == MAXLABELS)
 			throw new TextParseException("too many labels");
 		name.append(newlabel);
 	}
-	if (origin != null && !name.isQualified())
-		return concatenate(name, origin);
+	if (origin != null && !absolute) {
+		for (int i = 0; i < origin.labels; i++)
+			name.append(origin.name[origin.offset + i]);
+	}
 	return (name);
 }
 
@@ -251,23 +240,27 @@ fromConstantString(String s) {
  */
 public
 Name(DataByteInputStream in) throws IOException {
-	int len, start, pos, count = 0, savedpos;
+	int len, pos, savedpos;
 	Name name2;
+	boolean done = false;
 
 	labels = 0;
 	name = new Object[STARTLABELS];
 
-	start = in.getPos();
-loop:
-	while ((len = in.readUnsignedByte()) != 0) {
-		count++;
-		switch(len & LABEL_MASK) {
+	while (!done) {
+		len = in.readUnsignedByte();
+		switch (len & LABEL_MASK) {
 		case LABEL_NORMAL:
-			byte [] b = new byte[len];
-			in.read(b);
-			if (labels == name.length)
-				grow();
-			name[labels++] = b;
+			if (labels >= MAXLABELS)
+				throw new WireParseException("too many labels");
+			if (len == 0) {
+				append(emptyLabel);
+				done = true;
+			} else {
+				byte [] b = new byte[len];
+				in.read(b);
+				append(b);
+			}
 			break;
 		case LABEL_COMPRESSION:
 			pos = in.readUnsignedByte();
@@ -275,9 +268,9 @@ loop:
 			if (Options.check("verbosecompression"))
 				System.err.println("currently " + in.getPos() +
 						   ", pointer to " + pos);
-			if (pos >= in.getPos())
-				throw new WireParseException("bad compression");
 			savedpos = in.getPos();
+			if (pos >= savedpos)
+				throw new WireParseException("bad compression");
 			in.setPos(pos);
 			if (Options.check("verbosecompression"))
 				System.err.println("current name '" + this +
@@ -288,16 +281,17 @@ loop:
 			finally {
 				in.setPos(savedpos);
 			}
+			if (labels + name2.labels >= MAXLABELS)
+				throw new WireParseException("too many labels");
 			if (labels + name2.labels > name.length)
 				grow(labels + name2.labels);
 			System.arraycopy(name2.name, 0, name, labels,
 					 name2.labels);
 			labels += name2.labels;
-			break loop;
-		} /* switch */
+			done = true;
+			break;
+		}
 	}
-	if (!isQualified())
-		append(emptyLabel);
 }
 
 /**
@@ -320,7 +314,7 @@ Name(Name src, int n) {
  */
 public static Name
 concatenate(Name prefix, Name suffix) {
-	if (prefix.isQualified())
+	if (prefix.isAbsolute())
 		return (prefix);
 	int nlabels = prefix.labels + suffix.labels;
 	if (nlabels > MAXLABELS)
@@ -381,10 +375,21 @@ isWild() {
 }
 
 /**
- * Is this name fully qualified?
+ * Is this name fully qualified (that is, absolute)?
+ * @deprecated As of dnsjava 1.3.0, replaced by <code>isAbsolute</code>.
  */
 public boolean
 isQualified() {
+	if (labels == 0)
+		return false;
+	return (name[offset + labels - 1] == emptyLabel);
+}
+
+/**
+ * Is this name absolute?
+ */
+public boolean
+isAbsolute() {
 	if (labels == 0)
 		return false;
 	return (name[offset + labels - 1] == emptyLabel);
@@ -433,8 +438,12 @@ byteString(byte [] array) {
 		}
 		else if (b == '"' || b == '(' || b == ')' || b == '.' ||
 			 b == ';' || b == '\\' || b == '@' || b == '$')
+		{
 			sb.append('\\');
-		sb.append((char)b);
+			sb.append((char)b);
+		}
+		else
+			sb.append((char)b);
 	}
 	return sb.toString();
 }
@@ -472,7 +481,7 @@ getLabelString(int n) {
  */
 public void
 toWire(DataByteOutputStream out, Compression c) throws IOException {
-	if (!isQualified())
+	if (!isAbsolute())
 		throw new IllegalArgumentException("toWire() called on " +
 						   "non-absolute name");
 	for (int i = offset; i < labels + offset; i++) {
