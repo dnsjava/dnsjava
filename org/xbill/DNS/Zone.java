@@ -112,19 +112,20 @@ maybeAddRecord(Record record, Cache cache, Object source) throws IOException {
 	int type = record.getType();
 	Name name = record.getName();
 
-	if (type == Type.SOA) {
-		if (!name.equals(origin))
-			throw new IOException("SOA owner " + name +
-					      " does not match zone origin " +
-					      origin);
-		else {
+	if (origin == null) {
+		if (type == Type.SOA) {
+			origin = name;
 			setOrigin(origin);
-			dclass = record.getDClass();
+		} else {
+			throw new IOException("non-SOA record seen at " +
+					      name + " with no origin set");
 		}
 	}
-	if (origin == null && type != Type.SOA)
-		throw new IOException("non-SOA record seen at " +
-				      name + " with no origin set");
+	if (type == Type.SOA && !name.equals(origin)) {
+		throw new IOException("SOA owner " + name +
+				      " does not match zone origin " +
+				      origin);
+	}
 	if (name.subdomain(origin))
 		addRecord(record);
 	else if (cache != null)
