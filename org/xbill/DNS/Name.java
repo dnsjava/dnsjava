@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.text.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
@@ -34,6 +35,13 @@ static final int MAXLABELS = 128;
 
 /* The number of labels initially allocated. */
 private static final int STARTLABELS = 4;
+
+/* Used for printing non-printable characters */
+private static DecimalFormat byteFormat = new DecimalFormat();
+
+static {
+	byteFormat.setMinimumIntegerDigits(3);
+}
 
 private
 Name() {
@@ -340,8 +348,25 @@ toString() {
 	for (int i = 0; i < labels; i++) {
 		if (name[i] instanceof BitString)
 			sb.append(name[i]);
-		else
-			sb.append(new String((byte []) name[i]));
+		else {
+			byte [] s = (byte []) name[i];
+			for (int j = 0; j < s.length; j++) {
+				/* Ick. */
+				short b = (short)(s[j] & 0xFF);
+				if (b <= 0x20 || b >= 0x7f) {
+					sb.append('\\');
+					sb.append(byteFormat.format(b));
+				}
+				else if (b == '"' || b == '.' || b == ';' ||
+					 b == '\\' || b == '@' || b == '$')
+				{
+					sb.append('\\');
+					sb.append((char)b);
+				}
+				else
+					sb.append((char)b);
+			}
+		}
 		if (qualified || i < labels - 1)
 			sb.append(".");
 	}
