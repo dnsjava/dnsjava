@@ -1,6 +1,6 @@
 dnsjava v0.1
 Brian Wellington (bwelling@xbill.org)
-March 21, 1999
+March 23, 1999
 
 Overview:
 
@@ -15,16 +15,21 @@ interoperability testing at the 44th IETF.
 
 dnsjava is far from complete.  It should support the rest of the record types,
 even though most are deprecated and/or rarely used.  It should handle
-exceptions in more places, and probably define exception of its own.  It should
-be better documented.
+exceptions in more places, and probably define exception of its own.
 
 
-Usage:
+Limitations:
 
-The dig client looks more or less like dig:
-	dig @server name type [class] [-p port]
+There's no way to determine what the local nameserver is at runtime from within
+the JVM.  First, the property 'dns.resolver' is checked.  This can either be an
+IP address or a hostname (which is resolved using Java's built in DNS support).
+If the underlying OS is unix-based, the dnsjava package can parse
+/etc/resolv.conf and determine the nameserver.  If the property is not defined
+and the OS is not unix-based, the default nameserver is "localhost".
 
-The update program is well documented; run 'help' from the command line.
+This is very bad.  Unfortuantely, I have no idea how to determine the
+nameserver under Windows, MacOS, etc.  Contributions of code are welcome
+(see DNS/dnsFindResolver.java for the basic structure).
 
 
 Future:
@@ -33,6 +38,7 @@ Future:
 - A basic (primary, caching, non-recursive) server wouldn't be too hard.
   dnsServer.java & dnsZone.java contain part of a server, but it's not
   done yet.
+- javadoc documentation
 
 
 License:

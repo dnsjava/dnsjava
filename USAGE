@@ -1,0 +1,70 @@
+dnsjava can be used in several ways:
+
+Command line programs:
+
+- dig: A clone of dig (as distributed with BIND)
+	dig @server name type [class] [-p port]
+
+- update:
+	A dynamic update client with some extra functionality.  Rather than
+	describing it all here, run 'help' from the command line.
+
+
+Function calls:
+
+- All functions are defined in the DNS package.
+
+- All constants are defined in the dns class.  These include types, classes,
+	flags, rcodes, and opcodes.  In most cases, there are functions to
+	convert between numeric and string representations.
+
+- High Level API:
+	These are static methods in the dns class, and return 'dnsRecord []'
+
+	getRecords(dnsResolver res, String name, short type, short dclass)
+	getRecords(dnsResolver res, String name, short type)
+	getRecords(String name, short type, short dclass)
+	getRecords(String name, short type)
+	getRecordsByAddress(dnsResolver res, String addr, short type)
+	getRecordsByAddress(String addr, short type)
+
+- Lower Level API
+
+	Names:
+		Names are normally represented by dnsName objects, which
+		can be created from Strings.
+
+	Records:
+		Each record type is represented by a subclass of dnsRecord.
+		For example, an A record is an instance of dnsARecord.  Each
+		class has accessor functions which extract the data:
+			dnsARecord.getName()
+			dnsARecord.getType()
+			dnsARecord.getDClass()
+			dnsARecord.getAddress()
+		Each class defines a constructor that takes all fields as
+		parameters, and dnsRecord provides dnsRecord.newRecord()
+		to create records in a non-type specific way.
+	
+	Messages:
+		To extract the message header, use dnsMessage.getHeader().
+		The header object supports:
+			dnsHeader.getID() / dnsHeader.setID(id)
+			dnsHeader.getFlag(flag)
+			dnsHeader.setFlag(flag) / dnsHeader.unsetFlag(flag)
+			dnsHeader.getRcode() / dnsHeader.setRcode(rcode)
+			dnsHeader.getOpcode() / dnsHeader.setOpcode(opcode)
+			dnsHeader.getCount()
+		The message object supports:
+			dnsMessage.addRecord(section, record)
+			dnsMessage.removeRecord(section, record)
+			dnsMessage.getSection(section)
+
+	Resolver:
+		dnsResolver.send(message) is used to send/receive messages.
+		Resolver options can also be set:
+			dnsResolver.setPort(port)
+			dnsResolver.useTCP(flag)
+			dnsResolver.setTSIGKey(name, key)
+
+	See the dig client for a simple use of the resolver.
