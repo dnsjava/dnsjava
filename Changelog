@@ -4,6 +4,8 @@
 	  (reported by Shobana Sampath <shobanas@cisco.com>)
 	- Implement NSEC, DNSKEY, and RRSIG record types.  (loosely based on
 	  a patch from David Blacka <davidb@verisignlabs.com>).
+	- Change the representations of sections, rcodes, opcodes, flags,
+	  and credibility to int.
 
 1/28/2004
 	- Attempt to better deal with OutOfMemoryErrors when creating
