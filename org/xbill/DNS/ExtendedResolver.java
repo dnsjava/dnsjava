@@ -161,12 +161,13 @@ send(Message query) {
 	for (q = 0; q < 20; q++) {
 		Message m;
 		boolean ok = false;
-		for (r = 0; r < resolvers.size(); r++)
-			if (!invalid[r])
-				ok |= sendTo(query, receiver, idMap, r, q);
-		if (!ok)
-			break;
 		synchronized (queue) {
+			for (r = 0; r < resolvers.size(); r++)
+				if (!invalid[r])
+					ok |= sendTo(query, receiver, idMap,
+						     r, q);
+			if (!ok)
+				break;
 			try {
 				queue.wait(quantum * 1000);
 			}
