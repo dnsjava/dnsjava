@@ -18,12 +18,53 @@ import java.util.*;
 
 public class FindServer {
 
-private static String [] server = null;
-private static Name [] search = null;
-private static boolean probed = false;
+private static String [] servers = null;
+private static Name [] searchlist = null;
+
+static {
+	findProperty();
+	if (servers == null || searchlist == null) {
+		String OS = System.getProperty("os.name");
+		if (OS.indexOf("Windows") != -1) {
+			if (OS.indexOf("NT") != -1 ||
+			    OS.indexOf("2000") != -1 ||
+			    OS.indexOf("XP") != -1)
+				findNT();
+			else
+				find95();
+		} else
+			findUnix();
+	}
+	List l = new ArrayList();
+	if (searchlist != null)
+		l.addAll(Arrays.asList(searchlist));
+	addSearch(".", l);
+	searchlist = (Name []) l.toArray(new Name[l.size()]);
+}
 
 private
 FindServer() {}
+
+private static void
+addServer(String server, List list) {
+	if (list.contains(server))
+		return;
+	list.add(server);
+}
+
+private static void
+addSearch(String search, List list) {
+	Name name;
+	try {
+		name = Name.fromString(search, Name.root);
+	}
+	catch (TextParseException e) {
+		return;
+	}
+	if (list.contains(name))
+		return;
+	list.add(name);
+}
 
 /**
  * Looks in the system properties to find servers and a search path.
@@ -39,12 +80,10 @@ findProperty() {
 	prop = System.getProperty("dns.server");
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
-		while (st.hasMoreTokens()) {
-			s = st.nextToken();
-			l.add(s);
-		}
+		while (st.hasMoreTokens())
+			addServer(st.nextToken(), l);
 		if (l.size() > 0)
-			server = (String []) l.toArray(new String[l.size()]);
+			servers = (String []) l.toArray(new String[l.size()]);
 	}
 
 	l.clear();
@@ -52,14 +91,10 @@ findProperty() {
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
 		while (st.hasMoreTokens()) {
-			s = st.nextToken();
-			try {
-				l.add(Name.fromString(s, Name.root));
-			}
-			catch (TextParseException e) {}
+			addSearch(st.nextToken(), l);
 		}
 		if (l.size() > 0)
-			search = (Name []) l.toArray(new Name[l.size()]);
+			searchlist = (Name []) l.toArray(new Name[l.size()]);
 	}
 }
 
@@ -87,26 +122,21 @@ findUnix() {
 			if (line.startsWith("nameserver")) {
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip nameserver */
-				lserver.add(st.nextToken());
+				addServer(st.nextToken(), lserver);
 			}
 			else if (line.startsWith("domain")) {
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip domain */
 				if (!st.hasMoreTokens())
 					continue;
-				String s = st.nextToken();
-				if (!lsearch.contains(s))
-					lsearch.add(s);
+				addSearch(st.nextToken(), lserver);
 			}
 			else if (line.startsWith("search")) {
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip search */
 				String s;
-				while (st.hasMoreTokens()) {
-					s = st.nextToken();
-					if (!lsearch.contains(s))
-						lsearch.add(s);
-				}
+				while (st.hasMoreTokens())
+					addSearch(st.nextToken(), lserver);
 			}
 		}
 		br.close();
@@ -114,21 +144,13 @@ findUnix() {
 	catch (IOException e) {
 	}
 
-	if (server == null && lserver.size() > 0)
-		server = (String [])lserver.toArray(new String[lserver.size()]);
+	if (servers == null && lserver.size() > 0)
+		servers =
+			(String [])lserver.toArray(new String[lserver.size()]);
 
-	if (search == null && lsearch.size() > 0) {
-		List l = new ArrayList();
-		for (int i = 0; i < lsearch.size(); i++) {
-			String s = (String)lsearch.get(i);
-			try {
-				l.add(Name.fromString(s, Name.root));
-			}
-			catch (TextParseException e) {
-			}
-		}
-		search = (Name [])l.toArray(new Name[l.size()]);
-	}
+	if (searchlist == null && lsearch.size() > 0)
+		searchlist =
+			(Name [])lsearch.toArray(new Name[lsearch.size()]);
 }
 
 /**
@@ -164,8 +186,8 @@ findWin(InputStream in) {
 				if (name.labels() == 1)
 					continue;
 				name = new Name(name, 1);
-				search = new Name[1];
-				search[0] = name;
+				if (searchlist == null)
+					searchlist = new Name[] {name};
 			}
 			else if (readingServers ||
 				 line.indexOf("DNS Servers") != -1)
@@ -174,13 +196,13 @@ findWin(InputStream in) {
 					s = st.nextToken();
 				if (s.equals(":"))
 					continue;
-				lserver.add(s);
+				addServer(s, lserver);
 				readingServers = true;
 			}
 		}
 		
-		if (server == null && lserver.size() > 0)
-			server = (String [])lserver.toArray
+		if (servers == null && lserver.size() > 0)
+			servers = (String [])lserver.toArray
 						(new String[lserver.size()]);
 	}
 	catch (IOException e) {
@@ -209,7 +231,7 @@ find95() {
 		findWin(new FileInputStream(f));
 		new File(s).delete();
 	}
-	catch(Exception e) {
+	catch (Exception e) {
 		return;
 	}
 }
@@ -225,62 +247,29 @@ findNT() {
 		findWin(p.getInputStream());
 		p.destroy();
 	}
-	catch(Exception e) {
+	catch (Exception e) {
 		return;
 	}
-}
-
-synchronized private static void
-probe() {
-	if (probed)
-		return;
-	probed = true;
-	findProperty();
-	if (server == null || search == null) {
-		String OS = System.getProperty("os.name");
-		if (OS.indexOf("Windows") != -1) {
-			if (OS.indexOf("NT") != -1 ||
-			    OS.indexOf("2000") != -1 ||
-			    OS.indexOf("XP") != -1)
-				findNT();
-			else
-				find95();
-		}
-		else
-			findUnix();
-	}
-	if (search == null)
-		search = new Name[1];
-	else {
-		Name [] oldsearch = search;
-		search = new Name[oldsearch.length + 1];
-		System.arraycopy(oldsearch, 0, search, 0, oldsearch.length);
-	}
-	search[search.length - 1] = Name.root;
 }
 
 /** Returns all located servers */
 public static String []
 servers() {
-	probe();
-	return server;
+	return servers;
 }
 
 /** Returns the first located server */
 public static String
 server() {
-	String [] array = servers();
-	if (array == null)
+	if (servers == null)
 		return null;
-	else
-		return array[0];
+	return servers[0];
 }
 
 /** Returns all entries in the located search path */
 public static Name []
 searchPath() {
-	probe();
-	return search;
+	return searchlist;
 }
 
 }
