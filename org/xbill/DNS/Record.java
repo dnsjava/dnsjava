@@ -145,7 +145,7 @@ newRecord(Name name, short type, short dclass, int ttl, byte [] data) {
  * @param type The record's type.
  * @param dclass The record's class.
  * @param ttl The record's time to live.
- * @return An object of a type extending Record
+ * @return An object of a subclass of Record
  */
 public static Record
 newRecord(Name name, short type, short dclass, int ttl) {
@@ -159,7 +159,7 @@ newRecord(Name name, short type, short dclass, int ttl) {
  * @param name The owner name of the record.
  * @param type The record's type.
  * @param dclass The record's class.
- * @return An object of a type extending Record
+ * @return An object of a subclass of Record
  */
 public static Record
 newRecord(Name name, short type, short dclass) {
@@ -178,7 +178,6 @@ fromWire(DataByteInputStream in, int section) throws IOException {
 	start = in.getPos();
 
 	name = new Name(in);
-
 	type = in.readShort();
 	dclass = in.readShort();
 
