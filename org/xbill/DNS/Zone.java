@@ -92,6 +92,14 @@ private int type;
 private Name origin;
 private short dclass = DClass.IN;
 
+private void
+validate() throws IOException {
+	if (getSOA() == null)
+		throw new IOException(origin + ": no SOA specified");
+	if (getNS() == null)
+		throw new IOException(origin + ": no NS set specified");
+}
+
 /**
  * Creates a Zone from the records in the specified master file.  All
  * records that do not belong in the Zone are added to the specified Cache.
@@ -112,9 +120,45 @@ Zone(String file, Cache cache) throws IOException {
 			if (origin == null && record.getType() == Type.SOA)
 				origin = record.getName();
 		}
-		else
+		else if (cache != null)
 			cache.addRecord(record, Credibility.ZONE_GLUE, m);
 	}
+	validate();
+}
+
+/**
+ * Creates a Zone from the records in the specified master file.  All
+ * records that do not belong in the Zone are added to the specified Cache.
+ * @see Cache
+ * @see Master
+ */
+public
+Zone(Name zone, short _dclass, String remote, Cache cache)
+throws IOException
+{
+	origin = zone;
+	dclass = _dclass;
+	type = SECONDARY;
+	Resolver res = new SimpleResolver(remote);
+	Record rec = Record.newRecord(zone, Type.AXFR, dclass);
+	Message query = Message.newQuery(rec);
+	Message response = res.send(query);
+	Record [] recs = response.getSectionArray(Section.ANSWER);
+	for (int i = 0; i < recs.length; i++) {
+		if (!recs[i].getName().subdomain(origin)) {
+			if (Options.check("verbose"))
+				System.err.println(recs[i].getName() +
+						   "is not in zone " + origin);
+			continue;
+		}
+		addRecord(recs[i]);
+	}
+	if (cache != null) {
+		recs = response.getSectionArray(Section.ADDITIONAL);
+		for (int i = 0; i < recs.length; i++)
+			cache.addRecord(recs[i], Credibility.ZONE_GLUE, recs);
+	}
+	validate();
 }
 
 /** Returns the Zone's origin */
