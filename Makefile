@@ -1,24 +1,42 @@
-JAVAC=javac
-JFLAGS=-g
-JAR = jar
+JAVAC = javac
+JFLAGS = -g
+JAR = jar cf
 
-JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link http://java.sun.com/products/jdk/1.3/docs/api
+SUNAPIDOC = http://java.sun.com/products/jdk/1.4/docs/api
+JAVADOC=javadoc -d doc -windowtitle "dnsjava documentation" -link ${SUNAPIDOC}
+
+VERSION = 1.3.0
+
+TASKSRC = org/xbill/Task/*.java
+DNSSRC = org/xbill/DNS/*.java org/xbill/DNS/utils/*.java
+DNSSECSRC = org/xbill/DNS/security/*.java
+PROGSRC = *.java
+
+TASKCLASS = org/xbill/Task/*.class
+DNSCLASS = org/xbill/DNS/*.class org/xbill/DNS/utils/*.class
+DNSSECCLASS = org/xbill/DNS/security/*.class
+PROGCLASS = *.class
+
+CLASSLIST =	org.xbill.Task org.xbill.DNS org.xbill.DNS.utils \
+		org.xbill.DNS.security
+
+JARFILE = dnsjava-${VERSION}.jar
 
 all:
-	${JAVAC} ${JFLAGS} *.java org/xbill/Task/*.java org/xbill/DNS/*.java org/xbill/DNS/utils/*.java
+	${JAVAC} ${JFLAGS} ${PROGSRC} ${TASKSRC} ${DNSSRC}
 
 dnssec:
-	${JAVAC} ${JFLAGS} org/xbill/DNS/security/*.java
+	${JAVAC} ${JFLAGS} ${DNSSECSRC}
 
 jar:
-	${JAR} cf dnsjava.jar *.class org/xbill/Task/*.class org/xbill/DNS/*.class org/xbill/DNS/utils/*.class org/xbill/DNS/security/*.class
+	${JAR} ${JARFILE} ${PROGCLASS} ${TASKCLASS} ${DNSCLASS} ${DNSSECCLASS}
 
 clean:
-	rm -f *.class org/xbill/Task/*.class org/xbill/DNS/*.class org/xbill/DNS/utils/*.class org/xbill/DNS/security/*.class *.jar
+	rm -f ${PROGCLASS} ${TASKCLASS} ${DNSCLASS} ${DNSSECCLASS} ${JARFILE}
 
-docs:
+doc docs: docsclean
 	if test ! -d doc ; then mkdir doc ; fi
-	${JAVADOC} org.xbill.Task org.xbill.DNS org.xbill.DNS.utils org.xbill.DNS.security
+	${JAVADOC} ${CLASSLIST}
 
-docsclean:	
+docclean docsclean:	
 	rm -rf doc/*
