@@ -687,6 +687,9 @@ public int
 compareTo(Object o) {
 	Name arg = (Name) o;
 
+	if (this == arg)
+		return (0);
+
 	int compares = labels > arg.labels ? arg.labels : labels;
 
 	for (int i = 1; i <= compares; i++) {

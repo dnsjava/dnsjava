@@ -500,6 +500,9 @@ public int
 compareTo(Object o) {
         Record arg = (Record) o;
 
+	if (this == arg)
+		return (0);
+
 	int n = name.compareTo(arg.name);
 	if (n != 0)
 		return (n);
