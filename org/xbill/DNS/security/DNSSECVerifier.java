@@ -25,18 +25,6 @@ import org.xbill.DNS.utils.*;
 
 public class DNSSECVerifier implements Verifier {
 
-class ByteArrayComparator implements Comparator {
-	public int
-	compare(Object o1, Object o2) throws ClassCastException {
-		byte [] b1 = (byte []) o1;
-		byte [] b2 = (byte []) o2;
-		for (int i = 0; i < b1.length && i < b2.length; i++)
-			if (b1[i] != b2[i])
-				return (b1[i] & 0xFF) - (b2[i] & 0xFF);
-		return b1.length - b2.length;
-	}
-}
-
 private Map trustedKeys;
 
 /** Creates a new DNSSECVerifier */
@@ -131,17 +119,16 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 		Iterator it = set.rrs();
 		int size = set.size();
 		byte [][] records = new byte[size][];
+		Name wild = null;
+		if (set.getName().labels > sigrec.getLabels())
+			wild = name.wild(name.labels() - sigrec.getLabels());
 		while (it.hasNext()) {
 			Record rec = (Record) it.next();
-			if (rec.getName().labels() > sigrec.getLabels()) {
-				Name name = rec.getName();
-				Name wild = name.wild(name.labels() -
-						      sigrec.getLabels());
+			if (wild != null)
 				rec = rec.withName(wild);
-			}
 			records[--size] = rec.toWireCanonical();
 		}
-		Arrays.sort(records, new ByteArrayComparator());
+		Arrays.sort(records);
 		for (int i = 0; i < records.length; i++)
 			out.write(records[i]);
 	}
