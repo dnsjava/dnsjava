@@ -49,7 +49,11 @@ Command line programs:
 		jnamed [config_file]
 
 - lookup:
-	A simple program that looks up the address associated with a name.
+	A simple program that looks up records associated with names.
+	If no type is specified, address lookups are done.
+
+	lookup [-t type] name ...
+	
 
 DNS and DNS.utils packages:
 

@@ -15,8 +15,16 @@ printAnswer(String name, Record [] answer) {
 
 public static void
 main(String [] args) throws Exception {
-	for (int i = 0; i < args.length; i++)
-		printAnswer(args[i], dns.getRecords(args[i], Type.A));
+	short type = Type.A;
+	int start = 0;
+	if (args.length > 2 && args[0].equals("-t")) {
+		type = Type.value(args[1]);
+		if (type < 0)
+			throw new IllegalArgumentException("invalid type");
+		start = 2;
+	}
+	for (int i = start; i < args.length; i++)
+		printAnswer(args[i], dns.getRecords(args[i], type));
 }
 
 }
