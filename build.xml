@@ -51,13 +51,19 @@
         <delete dir="${doc_dir}"/>
     </target>
 
+    <property name="source_excludes"
+              value="**/*.class,${jarname},${zipname},${targzname}" />
+
     <target name="sourcedist" description="Builds source distributions"
-            depends="compile, docs">
-        <zip destfile="${src_dir}/${zipname}" basedir="${build_dir}"
-             excludes="**/*.class,${jarname},${zipname},${targzname},"/>
-        <tar destfile="${src_dir}/${targzname}" basedir="${build_dir}"
-             compression="gzip"
-             excludes="**/*.class,${jarname},${zipname},${targzname},"/>
+            depends="compile,docs">
+        <zip destfile="${dist_dir}/${zipname}">
+            <zipfileset dir="${src_dir}" prefix="dnsjava-${version}"
+	                excludes="${source_excludes}" />
+        </zip>
+        <tar destfile="${dist_dir}/${targzname}" compression="gzip">
+            <tarfileset dir="${src_dir}" prefix="dnsjava-${version}"
+	                excludes="${source_excludes}" />
+        </tar>
     </target>
 
 </project>
