@@ -30,6 +30,17 @@ for (int i = 0; i < records.length; i++) {
 
 <br>
 
+<p><b>Query a remote name server for its version:</b></p>
+<pre><code>
+Lookup l = new Lookup("version.bind.", Type.TXT, DClass.CH);
+l.setResolver(new SimpleResolver(args[0]));
+l.run();
+if (l.getResult() == Lookup.SUCCESSFUL)
+	System.out.println(l.getAnswers()[0].rdataToString());
+</code></pre>
+
+<br>
+
 <p><b>Transfer a zone from a server and print it:</b></p>
 <pre><code>
 ZoneTransferIn xfr = ZoneTransferIn.newAXFR(new Name("dnsjava.org"), "204.152.186.163", null);
@@ -45,8 +56,7 @@ for (Iterator it = records.iterator(); it.hasNext(); )
 Name zone = Name.fromString("dyn.test.example.");
 Name host = Name.fromString("host", zone);
 Update update = new Update(zone);
-update.deleteName(host);
-update.addRecord(host, Type.A, 3600, args[1]);
+update.replace(host, Type.A, 3600, args[1]);
 
 Resolver res = new SimpleResolver("10.0.0.1");
 res.setTSIGKey(host, "1234");

@@ -92,11 +92,7 @@ newQuery(Record r) {
  */
 public static Message
 newUpdate(Name zone) {
-	Message m = new Message();
-	m.header.setOpcode(Opcode.UPDATE);
-	Record soa = Record.newRecord(zone, Type.SOA, DClass.IN);
-	m.addRecord(soa, Section.QUESTION);
-	return m;
+	return new Update(zone);
 }
 
 Message(DataByteInputStream in) throws IOException {

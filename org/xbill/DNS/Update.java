@@ -11,11 +11,10 @@ import java.util.*;
  * @author Brian Wellington
  */
 
-public class Update {
+public class Update extends Message {
 
 private Name origin;
 private short dclass;
-private Message message;
 
 /**
  * Creates an update message.
@@ -24,9 +23,12 @@ private Message message;
  */
 public
 Update(Name zone, short dclass) {
+	super();
+        getHeader().setOpcode(Opcode.UPDATE);
+	Record soa = Record.newRecord(zone, Type.SOA, DClass.IN);
+	addRecord(soa, Section.QUESTION);
 	this.origin = zone;
 	this.dclass = dclass;
-	this.message = Message.newUpdate(zone);
 }
 
 /**
@@ -40,12 +42,12 @@ Update(Name zone) {
 
 private void
 newPrereq(Record rec) {
-	message.addRecord(rec, Section.PREREQ);
+	addRecord(rec, Section.PREREQ);
 }
 
 private void
 newUpdate(Record rec) {
-	message.addRecord(rec, Section.UPDATE);
+	addRecord(rec, Section.UPDATE);
 }
 
 /**
@@ -53,7 +55,7 @@ newUpdate(Record rec) {
  * exist records with the given name in the zone.
  */
 public void
-nameExists(Name name) {
+present(Name name) {
 	newPrereq(Record.newRecord(name, Type.ANY, DClass.ANY, 0));
 }
 
@@ -62,7 +64,7 @@ nameExists(Name name) {
  * exist records with the given name and type in the zone.
  */
 public void
-rrsetExists(Name name, short type) {
+present(Name name, short type) {
 	newPrereq(Record.newRecord(name, type, DClass.ANY, 0));
 }
 
@@ -74,7 +76,7 @@ rrsetExists(Name name, short type) {
  * with that name and type on the server.
  */
 public void
-recordExists(Name name, short type, String record) throws IOException {
+present(Name name, short type, String record) throws IOException {
 	newPrereq(Record.fromString(name, type, dclass, 0, record, origin));
 }
 
@@ -86,7 +88,7 @@ recordExists(Name name, short type, String record) throws IOException {
  * with that name and type on the server.
  */
 public void
-recordExists(Name name, short type, Tokenizer tokenizer) throws IOException {
+present(Name name, short type, Tokenizer tokenizer) throws IOException {
 	newPrereq(Record.fromString(name, type, dclass, 0, tokenizer, origin));
 }
 
@@ -97,7 +99,7 @@ recordExists(Name name, short type, Tokenizer tokenizer) throws IOException {
  * be identical to the set of all records with that name and type on the server.
  */
 public void
-recordExists(Record record) throws IOException {
+present(Record record) throws IOException {
 	newPrereq(record);
 }
 
@@ -106,7 +108,7 @@ recordExists(Record record) throws IOException {
  * there are no records with the given name in the zone.
  */
 public void
-nameDoesNotExist(Name name) {
+absent(Name name) {
 	newPrereq(Record.newRecord(name, Type.ANY, DClass.NONE, 0));
 }
 
@@ -115,7 +117,7 @@ nameDoesNotExist(Name name) {
  * there are no records with the given name and type in the zone.
  */
 public void
-rrsetDoesNotExist(Name name, short type) {
+absent(Name name, short type) {
 	newPrereq(Record.newRecord(name, type, DClass.NONE, 0));
 }
 
@@ -124,7 +126,7 @@ rrsetDoesNotExist(Name name, short type) {
  * should be inserted into the zone.
  */
 public void
-addRecord(Name name, short type, int ttl, String record) throws IOException {
+add(Name name, short type, int ttl, String record) throws IOException {
 	newUpdate(Record.fromString(name, type, dclass, ttl, record, origin));
 }
 
@@ -133,9 +135,7 @@ addRecord(Name name, short type, int ttl, String record) throws IOException {
  * should be inserted into the zone.
  */
 public void
-addRecord(Name name, short type, int ttl, Tokenizer tokenizer)
-throws IOException
-{
+add(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException {
 	newUpdate(Record.fromString(name, type, dclass, ttl, tokenizer,
 				    origin));
 }
@@ -144,7 +144,7 @@ throws IOException
  * Indicates that the record should be inserted into the zone.
  */
 public void
-addRecord(Record record) throws IOException {
+add(Record record) throws IOException {
 	newUpdate(record);
 }
 
@@ -153,7 +153,7 @@ addRecord(Record record) throws IOException {
  * the zone.
  */
 public void
-deleteName(Name name) {
+delete(Name name) {
 	newUpdate(Record.newRecord(name, Type.ANY, DClass.ANY, 0));
 }
 
@@ -162,7 +162,7 @@ deleteName(Name name) {
  * from the zone.
  */
 public void
-deleteRRset(Name name, short type) {
+delete(Name name, short type) {
 	newUpdate(Record.newRecord(name, type, DClass.ANY, 0));
 }
 
@@ -171,7 +171,7 @@ deleteRRset(Name name, short type) {
  * should be deleted from the zone.
  */
 public void
-deleteRecord(Name name, short type, String record) throws IOException {
+delete(Name name, short type, String record) throws IOException {
 	newUpdate(Record.fromString(name, type, DClass.NONE, 0, record,
 				    origin));
 }
@@ -181,8 +181,7 @@ deleteRecord(Name name, short type, String record) throws IOException {
  * should be deleted from the zone.
  */
 public void
-deleteRecord(Name name, short type, Tokenizer tokenizer) throws IOException
-{
+delete(Name name, short type, Tokenizer tokenizer) throws IOException {
 	newUpdate(Record.fromString(name, type, DClass.NONE, 0, tokenizer,
 				    origin));
 }
@@ -191,17 +190,44 @@ deleteRecord(Name name, short type, Tokenizer tokenizer) throws IOException
  * Indicates that the specified record should be deleted from the zone.
  */
 public void
-deleteRecord(Record record) throws IOException {
+delete(Record record) throws IOException {
 	newUpdate(record);
 }
 
 /**
- * Returns the update message.  This may be called at any time after the update
- * has been created.
+ * Parses a record from the string, and indicates that the record
+ * should be inserted into the zone replacing any other records with the
+ * same name and type.
  */
-public Message
-getMessage() {
-	return message;
+public void
+replace(Name name, short type, int ttl, String record) throws IOException {
+	delete(name, type);
+	newUpdate(Record.fromString(name, type, dclass, ttl, record, origin));
 }
+
+/**
+ * Parses a record from the tokenizer, and indicates that the record
+ * should be inserted into the zone replacing any other records with the
+ * same name and type.
+ */
+public void
+replace(Name name, short type, int ttl, Tokenizer tokenizer) throws IOException
+{
+	delete(name, type);
+	newUpdate(Record.fromString(name, type, dclass, ttl, tokenizer,
+				    origin));
+}
+
+/**
+ * Indicates that the record should be inserted into the zone replacing any
+ * other records with the same name and type.
+ */
+public void
+replace(Record record) throws IOException {
+	delete(record.getName(), record.getType());
+	newUpdate(record);
+}
+
+
 
 }
