@@ -13,13 +13,9 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-public class KEYRecord extends Record {
+public class KEYRecord extends KEYBase {
 
 private static KEYRecord member = new KEYRecord();
-
-private int flags, proto, alg;
-private byte [] key;
-private int footprint = -1;
 
 /* flags */
 /** This key cannot be used for confidentiality (encryption) */
@@ -78,13 +74,9 @@ getMember() {
  */
 public
 KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-	  byte []  key)
+	  byte [] key)
 {
-	this(name, dclass, ttl);
-	checkU16("flags", flags);
-	checkU8("proto", proto);
-	checkU8("alg", alg);
-	this.key = key;
+	super(name, Type.KEY, dclass, ttl, flags, proto, alg, key);
 }
 
 Record
@@ -92,145 +84,14 @@ rrFromWire(Name name, int type, int dclass, long ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
-	KEYRecord rec = new KEYRecord(name, dclass, ttl);
-	if (in == null)
-		return rec;
-	rec.flags = in.readShort();
-	rec.proto = in.readByte();
-	rec.alg = in.readByte();
-	if (length > 4) {
-		rec.key = new byte[length - 4];
-		in.read(rec.key);
-	}
-	return rec;
+	return rrFromWire(new KEYRecord(name, dclass, ttl), length, in);
 }
 
 Record
 rdataFromString(Name name, int dclass, long ttl, Tokenizer st, Name origin)
 throws IOException
 {
-	KEYRecord rec = new KEYRecord(name, dclass, ttl);
-	rec.flags = st.getUInt16();
-	rec.proto = st.getUInt8();
-	String algString = st.getString();
-	int alg = DNSSEC.Algorithm.value(algString);
-	if (alg < 0)
-		throw st.exception("Invalid algorithm: " + algString);
-	rec.alg = alg;
-	/* If this is a null key, there's no key data */
-	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
-		rec.key = st.getBase64();
-	else
-		rec.key = null;
-	return rec;
-}
-
-/**
- * Converts rdata to a String
- */
-public String
-rdataToString() {
-	StringBuffer sb = new StringBuffer();
-	if (key != null || (flags & (FLAG_NOKEY)) == (FLAG_NOKEY) ) {
-		sb.append(flags);
-		sb.append(" ");
-		sb.append(proto);
-		sb.append(" ");
-		sb.append(alg);
-		if (key != null) {
-			if (Options.check("multiline")) {
-				sb.append(" (\n");
-				sb.append(base64.formatString(key, 64, "\t",
-							      true));
-				sb.append(" ; key_tag = ");
-				sb.append(getFootprint());
-			} else {
-				sb.append(" ");
-				sb.append(base64.toString(key));
-			}
-		}
-	}
-	return sb.toString();
-}
-
-/**
- * Returns the flags describing the key's properties
- */
-public int
-getFlags() {
-	return flags;
-}
-
-/**
- * Returns the protocol that the key was created for
- */
-public int
-getProtocol() {
-	return proto;
-}
-
-/**
- * Returns the key's algorithm
- */
-public int
-getAlgorithm() {
-	return alg;
-}
-
-/**
- * Returns the binary data representing the key
- */
-public byte []
-getKey() {
-	return key;
-}
-
-/**
- * Returns the key's footprint (after computing it)
- */
-public int
-getFootprint() {
-	if (footprint >= 0)
-		return footprint;
-	
-	int foot = 0;
-
-	DataByteOutputStream out = new DataByteOutputStream();
-	rrToWire(out, null, false);
-	byte [] rdata = out.toByteArray();
-
-	if (alg == DNSSEC.RSAMD5) {
-		int d1 = rdata[rdata.length - 3] & 0xFF;
-		int d2 = rdata[rdata.length - 2] & 0xFF;
-		foot = (d1 << 8) + d2;
-	}
-	else {
-		int i;
-		for (i = 0; i < rdata.length - 1; i += 2) {
-			int d1 = rdata[i] & 0xFF;
-			int d2 = rdata[i + 1] & 0xFF;
-			foot += ((d1 << 8) + d2);
-		}
-		if (i < rdata.length) {
-			int d1 = rdata[i] & 0xFF;
-			foot += (d1 << 8);
-		}
-		foot += ((foot >> 16) & 0xFFFF);
-	}
-	footprint = (foot & 0xFFFF);
-	return footprint;
-}
-
-void
-rrToWire(DataByteOutputStream out, Compression c, boolean canonical) {
-	if (key == null && (flags & (FLAG_NOKEY)) != (FLAG_NOKEY) )
-		return;
-
-	out.writeShort(flags);
-	out.writeByte(proto);
-	out.writeByte(alg);
-	if (key != null)
-		out.writeArray(key);
+	return rdataFromString(new KEYRecord(name, dclass, ttl), st, origin);
 }
 
 }

@@ -94,11 +94,9 @@ parseDSA(DataByteInputStream in) throws IOException {
 	return dsa;
 }
 
-/** Converts a KEY record into a PublicKey */
-public static PublicKey
-parseRecord(KEYRecord r) {
-	int alg = r.getAlgorithm();
-	byte [] data = r.getKey();
+/** Converts a KEY/DNSKEY record into a PublicKey */
+static PublicKey
+parseRecord(int alg, byte [] data) {
 	DataByteInputStream dbs = new DataByteInputStream(data); 
 	try {
 		switch (alg) {
@@ -118,6 +116,22 @@ parseRecord(KEYRecord r) {
 			System.err.println(e);
 		return null;
 	}
+}
+
+/** Converts a DNSKEY record into a PublicKey */
+public static PublicKey
+parseRecord(DNSKEYRecord r) {
+	int alg = r.getAlgorithm();
+	byte [] data = r.getKey();
+	return parseRecord(alg, data);
+}
+
+/** Converts a KEY record into a PublicKey */
+public static PublicKey
+parseRecord(KEYRecord r) {
+	int alg = r.getAlgorithm();
+	byte [] data = r.getKey();
+	return parseRecord(alg, data);
 }
 
 static byte []
