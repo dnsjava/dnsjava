@@ -42,11 +42,25 @@ public static class Element {
 		}
 	}
 
+	/**
+	 * Creates an APL element corresponding to an IPv4 prefix.
+	 * @param negative Indicates if this prefix is a negation.
+	 * @param address The IPv4 address.
+	 * @param negative The prefix length.
+	 * @throws IllegalArgumentException The prefix length is invalid.
+	 */
 	public
 	Element(boolean negative, InetAddress address, int prefixLength) {
 		this(AddressFamily.IPv4, negative, address, prefixLength);
 	}
 
+	/**
+	 * Creates an APL element corresponding to an IPv6 prefix.
+	 * @param negative Indicates if this prefix is a negation.
+	 * @param address The IPv6 address.
+	 * @param negative The prefix length.
+	 * @throws IllegalArgumentException The prefix length is invalid.
+	 */
 	public
 	Element(boolean negative, Inet6Address address, int prefixLength) {
 		this(AddressFamily.IPv6, negative, address, prefixLength);
@@ -114,7 +128,7 @@ APLRecord(Name name, int dclass, long ttl, List elements) {
 	}
 }
 
-byte []
+private static byte []
 parseAddress(byte [] in, int length) throws WireParseException {
 	if (in.length > length)
 		throw new WireParseException("invalid address length");
@@ -227,6 +241,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 			throw new IllegalStateException();
 		}
 	}
+	st.unget();
 }
 
 String
