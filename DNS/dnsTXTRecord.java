@@ -21,6 +21,16 @@ public dnsTXTRecord(dnsName rname, short rclass, int ttl, Vector strings) {
 	this.strings = strings;
 }
 
+public dnsTXTRecord(dnsName rname, short rclass, int ttl, String string) {
+	this(rname, rclass);
+	this.rttl = rttl;
+	this.rlength = 0;
+	Vector v = new Vector();
+	v.addElement(string);
+	this.strings = v;
+	this.rlength = (short) (string.length() + 1);
+}
+
 void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
 	int count = 0;
 	strings = new Vector();
