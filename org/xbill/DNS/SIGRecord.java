@@ -111,7 +111,11 @@ throws IOException
 	if (covered < 0)
 		throw st.exception("Invalid type: " + typeString);
 	rec.covered = covered;
-	rec.alg = st.getUInt8();
+	String algString = st.getString();
+	int alg = DNSSEC.Algorithm.value(algString);
+	if (alg < 0)
+		throw st.exception("Invalid algorithm: " + algString);
+	rec.alg = alg;
 	rec.labels = st.getUInt8();
 	rec.origttl = st.getTTL();
 	rec.expire = FormattedTime.parse(st.getString());

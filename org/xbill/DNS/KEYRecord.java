@@ -112,7 +112,11 @@ throws IOException
 	KEYRecord rec = new KEYRecord(name, dclass, ttl);
 	rec.flags = st.getUInt16();
 	rec.proto = st.getUInt8();
-	rec.alg = st.getUInt8();
+	String algString = st.getString();
+	int alg = DNSSEC.Algorithm.value(algString);
+	if (alg < 0)
+		throw st.exception("Invalid algorithm: " + algString);
+	rec.alg = alg;
 	/* If this is a null key, there's no key data */
 	if (!((rec.flags & (FLAG_NOKEY)) == (FLAG_NOKEY)))
 		rec.key = st.getBase64();

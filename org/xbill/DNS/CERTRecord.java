@@ -95,7 +95,11 @@ throws IOException
 	CERTRecord rec = new CERTRecord(name, dclass, ttl);
 	rec.certType = st.getUInt16();
 	rec.keyTag = st.getUInt16();
-	rec.alg = st.getUInt8();
+	String algString = st.getString();
+	int alg = DNSSEC.Algorithm.value(algString);
+	if (alg < 0)
+		throw st.exception("Invalid algorithm: " + algString);
+	rec.alg = alg;
 	rec.cert = st.getBase64();
 	return rec;
 }
