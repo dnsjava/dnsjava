@@ -49,9 +49,6 @@ SRVRecord(Name name, short dclass, int ttl, int priority,
 	  int weight, int port, Name target)
 {
 	this(name, dclass, ttl);
-	checkRange(priority, "priority");
-	checkRange(weight, "weight");
-	checkRange(port, "port");
 	if (priority < 0 || priority > 0xFFFF)
 		throw new IllegalArgumentException("priority is out of range");
 	if (weight < 0 || weight > 0xFFFF)
