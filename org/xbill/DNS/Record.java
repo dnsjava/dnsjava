@@ -70,6 +70,8 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 	  DataByteInputStream in, Compression c) throws IOException
 {
 	Record rec;
+	int recstart = in.getPos();
+
 	try {
 		Class rrclass;
 		Constructor m;
@@ -83,15 +85,13 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 							new Integer(length),
 							in, c
 						});
-		rec.wireLength = length;
-		return rec;
 	}
 	catch (ClassNotFoundException e) {
 		rec = new UNKRecord(name, type, dclass, ttl, length, in, c);
-		rec.wireLength = length;
-		return rec;
 	}
 	catch (InvocationTargetException e) {
+		if (e.getTargetException() instanceof IOException)
+			throw (IOException) e.getTargetException();
 		if (Options.check("verbose")) {
 			System.err.println("new record: " + e);
 			System.err.println(e.getTargetException());
@@ -103,6 +103,10 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 			System.err.println("new record: " + e);
 		return null;
 	}
+	if (in.getPos() - recstart != length)
+		throw new IOException("Invalid record length");
+	rec.wireLength = length;
+	return rec;
 }
 
 /**
@@ -155,7 +159,7 @@ throws IOException
 	short length;
 	Name name;
 	Record rec;
-	int start, datastart;
+	int start;
 
 	start = in.getPos();
 
@@ -171,10 +175,7 @@ throws IOException
 	length = in.readShort();
 	if (length == 0)
 		return newRecord(name, type, dclass, ttl);
-	datastart = in.getPos();
 	rec = newRecord(name, type, dclass, ttl, length, in, c);
-	if (in.getPos() - datastart != length)
-		throw new IOException("Invalid record length");
 	rec.wireLength = in.getPos() - start;
 	return rec;
 }
@@ -283,8 +284,10 @@ throws IOException
 		s = st.remainingTokens();
 		byte [] data = base16.fromString(s);
 		if (length != data.length)
-			throw new IOException("Invalid unknown RR encoding: length mismatch");
-		return newRecord(name, type, dclass, ttl, length, data);
+			throw new IOException("Invalid unknown RR encoding: " +
+					      "length mismatch");
+		DataByteInputStream in = new DataByteInputStream(data);
+		rec = newRecord(name, type, dclass, ttl, length, in, null);
 	}
 	st.putBackToken(s);
 
