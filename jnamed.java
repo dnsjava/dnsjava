@@ -365,13 +365,13 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 	boolean first = true;
 	if (zone == null)
 		return errorMessage(query, Rcode.REFUSED);
-	Enumeration e = zone.AXFR();
+	Iterator it = zone.AXFR();
 	try {
 		DataOutputStream dataOut;
 		dataOut = new DataOutputStream(s.getOutputStream());
 		int id = query.getHeader().getID();
-		while (e.hasMoreElements()) {
-			RRset rrset = (RRset) e.nextElement();
+		while (it.hasNext()) {
+			RRset rrset = (RRset) it.next();
 			Message response = new Message(id);
 			Header header = response.getHeader();
 			header.setFlag(Flags.QR);

@@ -15,24 +15,24 @@ import java.util.*;
 
 public class Zone extends NameSet {
 
-class AXFREnumeration implements Enumeration {
+class AXFRIterator implements Iterator {
 	private Iterator znames;
 	private Name currentName;
 	private Object [] current;
 	int count;
 	boolean sentFirstSOA, sentNS, sentOrigin, sentLastSOA;
 
-	AXFREnumeration() {
+	AXFRIterator() {
 		znames = names();
 	}
 
 	public boolean
-	hasMoreElements() {
+	hasNext() {
 		return (!sentLastSOA);
 	}
 
 	public Object
-	nextElement() {
+	next() {
 		if (sentLastSOA)
 			return null;
 		if (!sentFirstSOA) {
@@ -76,6 +76,11 @@ class AXFREnumeration implements Enumeration {
 		RRset rrset = new RRset();
 		rrset.addRR(getSOA());
 		return rrset;
+	}
+
+	public void
+	remove() {
+		throw new UnsupportedOperationException();
 	}
 }
 
@@ -362,9 +367,9 @@ removeRecord(Record r) {
 	}
 }
 
-public Enumeration
+public Iterator
 AXFR() {
-	return new AXFREnumeration();
+	return new AXFRIterator();
 }
 
 /**
