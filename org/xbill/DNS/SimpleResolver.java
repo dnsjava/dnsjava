@@ -34,6 +34,7 @@ private TSIG tsig;
 private int timeoutValue = 60 * 1000;
 
 private static String defaultResolver = "localhost";
+private static int uniqueID = 0;
 
 /**
  * Creates a SimpleResolver that will query the specified host 
@@ -130,27 +131,32 @@ sendTCP(Message query, byte [] out) throws IOException {
 	Socket s;
 	int inLength;
 	DataInputStream dataIn;
+	DataOutputStream dataOut;
 	Message response;
 
 	s = new Socket(addr, port);
 
-	new DataOutputStream(s.getOutputStream()).writeShort(out.length);
-	s.getOutputStream().write(out);
-	s.setSoTimeout(timeoutValue);
-
 	try {
-		dataIn = new DataInputStream(s.getInputStream());
-		inLength = dataIn.readUnsignedShort();
-		in = new byte[inLength];
-		dataIn.readFully(in);
+		dataOut = new DataOutputStream(s.getOutputStream());
+		dataOut.writeShort(out.length);
+		dataOut.write(out);
+		s.setSoTimeout(timeoutValue);
+
+		try {
+			dataIn = new DataInputStream(s.getInputStream());
+			inLength = dataIn.readUnsignedShort();
+			in = new byte[inLength];
+			dataIn.readFully(in);
+		}
+		catch (IOException e) {
+			System.out.println(";; No response");
+			throw e;
+		}
 	}
-	catch (IOException e) {
+	finally {
 		s.close();
-		System.out.println(";; No response");
-		throw e;
 	}
 
-	s.close();
 	try {
 		response = new Message(in);
 	}
@@ -177,7 +183,6 @@ send(Message query) throws IOException {
 	DatagramPacket dp;
 	int udpLength = 512;
 
-	s = new DatagramSocket();
 	query = (Message) query.clone();
 	if (EDNSlevel >= 0) {
 		udpLength = 1280;
@@ -192,17 +197,23 @@ send(Message query) throws IOException {
 	if (useTCP || out.length > udpLength)
 		return sendTCP(query, out);
 
-	s.send(new DatagramPacket(out, out.length, addr, port));
+	s = new DatagramSocket();
 
-	dp = new DatagramPacket(new byte[udpLength], udpLength);
-	s.setSoTimeout(timeoutValue);
 	try {
-		s.receive(dp);
+		s.send(new DatagramPacket(out, out.length, addr, port));
+
+		dp = new DatagramPacket(new byte[udpLength], udpLength);
+		s.setSoTimeout(timeoutValue);
+		try {
+			s.receive(dp);
+		}
+		catch (IOException e) {
+			System.out.println(";; No response");
+			throw e;
+		}
 	}
-	catch (IOException e) {
+	finally {
 		s.close();
-		System.out.println(";; No response");
-		throw e;
 	}
 	in = new byte [dp.getLength()];
 	System.arraycopy(dp.getData(), 0, in, 0, in.length);
@@ -224,22 +235,17 @@ send(Message query) throws IOException {
 		return response;
 }
 
-private int
-uniqueID(Message m) {
-	Record r = m.getQuestion();
-	return (((r.getName().hashCode() & 0xFFFF) << 16) +
-		(r.getType() << 8) +
-		(hashCode() & 0xFF));
-}
-
 /**
  * Asynchronously sends a message, registering a listener to receive a callback.
  * Multiple asynchronous lookups can be performed in parallel.
  * @return An identifier, which is also a parameter in the callback
  */
-public int
+public Object
 sendAsync(final Message query, final ResolverListener listener) {
-	final int id = uniqueID(query);
+	final Object id;
+	synchronized (this) {
+		id = new Integer(uniqueID++);
+	}
 	String name = this.getClass() + ": " + query.getQuestion().getName();
 	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
 				  name);
@@ -262,66 +268,71 @@ sendAXFR(Message query) throws IOException {
 
 	s = new Socket(addr, port);
 
-	query = (Message) query.clone();
-	if (tsig != null)
-		tsig.apply(query, null);
+	try {
+		query = (Message) query.clone();
+		if (tsig != null)
+			tsig.apply(query, null);
 
-	out = query.toWire();
-	OutputStream sOut = s.getOutputStream();
-	new DataOutputStream(sOut).writeShort(out.length);
-	sOut.write(out);
-	s.setSoTimeout(timeoutValue);
+		out = query.toWire();
+		OutputStream sOut = s.getOutputStream();
+		new DataOutputStream(sOut).writeShort(out.length);
+		sOut.write(out);
+		s.setSoTimeout(timeoutValue);
 
-	response = new Message();
-	response.getHeader().setID(query.getHeader().getID());
-	if (tsig != null)
-		tsig.verifyAXFRStart();
-	while (soacount < 2) {
-		try {
-			InputStream sIn = s.getInputStream();
-			dataIn = new DataInputStream(sIn);
-			inLength = dataIn.readUnsignedShort();
-			in = new byte[inLength];
-			dataIn.readFully(in);
-		}
-		catch (IOException e) {
-			s.close();
-			System.out.println(";; No response");
-			throw e;
-		}
-		try {
-			m = new Message(in);
-		}
-		catch (IOException e) {
-			throw new WireParseException("Error parsing message");
-		}
-		if (m.getHeader().getCount(Section.QUESTION) > 1 ||
-		    m.getHeader().getCount(Section.ANSWER) <= 0 ||
-		    m.getHeader().getCount(Section.AUTHORITY) != 0)
-		{
-			System.out.println("Invalid AXFR packet: ");
-			System.out.println(m);
-			s.close();
-			throw new WireParseException("Invalid AXFR message");
-		}
-		for (int i = 1; i < 4; i++) {
-			Enumeration e = m.getSection(i);
-			while (e.hasMoreElements()) {
-				Record r = (Record)e.nextElement();
-				response.addRecord(r, i);
-				if (r instanceof SOARecord)
-					soacount++;
+		response = new Message();
+		response.getHeader().setID(query.getHeader().getID());
+		if (tsig != null)
+			tsig.verifyAXFRStart();
+		while (soacount < 2) {
+			try {
+				InputStream sIn = s.getInputStream();
+				dataIn = new DataInputStream(sIn);
+				inLength = dataIn.readUnsignedShort();
+				in = new byte[inLength];
+				dataIn.readFully(in);
 			}
+			catch (IOException e) {
+				System.out.println(";; No response");
+				throw e;
+			}
+			try {
+				m = new Message(in);
+			}
+			catch (IOException e) {
+				throw new WireParseException
+						("Error parsing message");
+			}
+			if (m.getHeader().getCount(Section.QUESTION) > 1 ||
+			    m.getHeader().getCount(Section.ANSWER) <= 0 ||
+			    m.getHeader().getCount(Section.AUTHORITY) != 0)
+			{
+				System.out.println("Invalid AXFR packet: ");
+				System.out.println(m);
+				throw new WireParseException
+						("Invalid AXFR message");
+			}
+			for (int i = 1; i < 4; i++) {
+				Enumeration e = m.getSection(i);
+				while (e.hasMoreElements()) {
+					Record r = (Record)e.nextElement();
+					response.addRecord(r, i);
+					if (r instanceof SOARecord)
+						soacount++;
+				}
+			}
+			if (tsig != null) {
+				boolean required = (soacount > 1 || first);
+				boolean ok = tsig.verifyAXFR(m, in,
+							     query.getTSIG(),
+							     required, first);
+				System.out.println("TSIG verify: " + ok);
+			}
+			first = false;
 		}
-		if (tsig != null) {
-			boolean required = (soacount > 1 || first);
-			boolean ok = tsig.verifyAXFR(m, in, query.getTSIG(),
-						     required, first);
-			System.out.println("TSIG verify: " + ok);
-		}
-		first = false;
 	}
-	s.close();
+	finally {
+		s.close();
+	}
 	return response;
 }
 

@@ -46,10 +46,12 @@ public Message send(Message query) throws IOException;
 
 /**
  * Asynchronously sends a message, registering a listener to receive a callback.
- * Multiple asynchronous lookups can be performed in parallel.
+ * Multiple asynchronous lookups can be performed in parallel.  Since the
+ * callback may be invoked before the function returns, external
+ * synchronization is necessary.
  * @return An identifier, which is also a parameter in the callback
  */
-public int sendAsync(final Message query, final ResolverListener listener);
+public Object sendAsync(final Message query, final ResolverListener listener);
 
 /**
  * Sends a zone transfer message, and waits for a response

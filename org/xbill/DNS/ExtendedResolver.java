@@ -40,16 +40,15 @@ class Receiver implements ResolverListener {
 	}
 
 	public void
-	enqueueInfo(int id, Object obj) {
-		Integer ID, R;
+	enqueueInfo(Object id, Object obj) {
+		Integer R;
 		int r;
 		synchronized (idMap) {
-			ID = new Integer(id);
-			R = (Integer)idMap.get(ID);
+			R = (Integer)idMap.get(id);
 			if (R == null)
 				return;
 			r = R.intValue();
-			idMap.remove(ID);
+			idMap.remove(id);
 		}
 		synchronized (queue) {
 			QElement qe = new QElement(obj, r);
@@ -60,12 +59,12 @@ class Receiver implements ResolverListener {
 
 
 	public void
-	receiveMessage(int id, Message m) {
+	receiveMessage(Object id, Message m) {
 		enqueueInfo(id, m);
 	}
 
 	public void
-	handleException(int id, Exception e) {
+	handleException(Object id, Exception e) {
 		System.out.println("got an exception: " + e);
 		enqueueInfo(id, e);
 	}
@@ -73,6 +72,7 @@ class Receiver implements ResolverListener {
 
 private static final int quantum = 30;
 private static final byte retries = 3;
+private static int uniqueID = 0;
 private Vector resolvers;
 
 private void
@@ -136,8 +136,8 @@ private void
 sendTo(Message query, Receiver receiver, Hashtable idMap, int r) {
 	Resolver res = (Resolver) resolvers.elementAt(r);
 	synchronized (idMap) {
-		int id = res.sendAsync(query, receiver);
-		idMap.put(new Integer(id), new Integer(r));
+		Object id = res.sendAsync(query, receiver);
+		idMap.put(id, new Integer(r));
 	}
 }
 
@@ -275,22 +275,17 @@ send(Message query) throws IOException {
 	throw bestException;
 }
 
-private int
-uniqueID(Message m) {
-	Record r = m.getQuestion();
-	return (((r.getName().hashCode() & 0xFFFF) << 16) +
-		(r.getType() << 8) +
-		(hashCode() & 0xFF));
-}
-
 /**
  * Asynchronously sends a message, registering a listener to receive a callback
  * Multiple asynchronous lookups can be performed in parallel.
  * @return An identifier
  */
-public int
+public Object
 sendAsync(final Message query, final ResolverListener listener) {
-	final int id = uniqueID(query);
+	final Object id;
+	synchronized (this) {
+		id = new Integer(uniqueID++);
+	}
 	String name = this.getClass() + ": " + query.getQuestion().getName();
 	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
 				  name);

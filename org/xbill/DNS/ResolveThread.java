@@ -20,7 +20,7 @@ import org.xbill.Task.*;
 class ResolveThread implements Runnable {
 
 private Message query;
-private int id;
+private Object id;
 private ResolverListener listener;
 private Resolver res;
 
@@ -31,7 +31,7 @@ private static final long lifetime = 900 * 1000;
 
 /** Creates a new ResolveThread */
 public
-ResolveThread(Resolver _res, Message _query, int _id,
+ResolveThread(Resolver _res, Message _query, Object _id,
 	      ResolverListener _listener)
 {
 	res = _res;
