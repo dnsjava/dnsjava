@@ -16,7 +16,8 @@ private Hashtable data;
 private Name origin = null;
 private int type;
 
-public Zone(String file, int _type) throws IOException {
+public
+Zone(String file, int _type, Zone cache) throws IOException {
 	type = _type;
 	if (type == CACHE)
 		origin = Name.root;
@@ -53,17 +54,10 @@ public Zone(String file, int _type) throws IOException {
 		}
 		st.putBackToken(s);
 		record = parseRR(st, space, record, origin);
-		Hashtable nametable = (Hashtable) data.get(record.name);
-		if (nametable == null) {
-			nametable = new Hashtable();
-			data.put(record.name, nametable);
-		}
-		RRset rrset = (RRset) nametable.get(new Short(record.type));
-		if (rrset == null) {
-			rrset = new RRset(record.name, record.type);
-			nametable.put(new Short(record.type), rrset);
-		}
-		rrset.addRR(record);
+		if (record.getName().subdomain(origin))
+			addRR(record);
+		else
+			cache.addRR(record);
 	}
 }
 
@@ -75,6 +69,20 @@ findName(Name name) {
 public Name
 getOrigin() {
 	return origin;
+}
+
+public RRset
+getNS() {
+	Hashtable h = findName(origin);
+	return (RRset) h.get(new Short(Type.NS));
+}
+
+public SOARecord
+getSOA() {
+	Hashtable h = findName(origin);
+	RRset r = (RRset) h.get(new Short(Type.SOA));
+	Enumeration e = r.rrs();
+	return (SOARecord) e.nextElement();
 }
 
 Name
@@ -118,6 +126,22 @@ throws IOException
 		throw new IOException("Parse error");
 
 	return Record.fromString(name, type, dclass, ttl, st, origin);
+}
+
+public void
+addRR(Record record) {
+	Hashtable nametable = (Hashtable) data.get(record.getName());
+	if (nametable == null) {
+		nametable = new Hashtable();
+		data.put(record.name, nametable);
+System.out.println("Adding name <" + record.name + "> to [" + origin + "]");
+	}
+	RRset rrset = (RRset) nametable.get(new Short(record.getType()));
+	if (rrset == null) {
+		rrset = new RRset(record.getName(), record.getType());
+		nametable.put(new Short(record.getType()), rrset);
+	}
+	rrset.addRR(record);
 }
 
 }
