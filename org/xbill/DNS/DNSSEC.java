@@ -24,14 +24,28 @@ import org.xbill.DNS.utils.*;
 public class DNSSEC {
 
 public static class Algorithm {
+	/** RSA/MD5 public key (deprecated) */
 	public static final int RSAMD5 = 1;
-	public static final int RSA = RSAMD5;
+
+	/** Diffie Hellman key */
 	public static final int DH = 2;
+
+	/** DSA public key */
 	public static final int DSA = 3;
+
+	/** Elliptic Curve key */
 	public static final int ECC = 4;
+
+	/** RSA/SHA1 public key */
 	public static final int RSASHA1 = 5;
+	
+	/** Indirect keys; the actual key is elsewhere. */
 	public static final int INDIRECT = 252;
+
+	/** Private algorithm, specified by domain name */
 	public static final int PRIVATEDNS = 253;
+
+	/** Private algorithm, specified by OID */
 	public static final int PRIVATEOID = 254;
 
 	private static Mnemonic algs = new Mnemonic("DNSSEC algorithm",
