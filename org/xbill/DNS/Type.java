@@ -191,7 +191,10 @@ static {
 	types.put2(SRV, "SRV");
 	types.put2(ATMA, "ATMA");
 	types.put2(NAPTR, "NAPTR");
+	types.put2(KX, "KX");
 	types.put2(CERT, "CERT");
+	types.put2(A6, "A6");
+	types.put2(DNAME, "DNAME");
 	types.put2(OPT, "OPT");
 	types.put2(TSIG, "TSIG");
 	types.put2(IXFR, "IXFR");
