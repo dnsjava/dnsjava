@@ -18,7 +18,7 @@ Command line programs:
 	used either interactively or by specifying a file containing commands
 	to be executed.  Running 'help' lists all other commands.
 	update [file]
-	
+
 
 - jnamed:
 	A basic authoritative only (non-caching, non-recursive) server.  It's
@@ -53,7 +53,7 @@ Command line programs:
 	If no type is specified, address lookups are done.
 
 	lookup [-t type] name ...
-	
+
 
 DNS and DNS.utils packages:
 
@@ -85,7 +85,7 @@ DNS and DNS.utils packages:
 
 	RRset:
 		A set of records with the same Name and type.  The important
-		function is rrs(), which creates an Enumeration.
+		function is rrs(), which creates an Iterator.
 
 	Messages:
 		A Header and a collection of records comprising the message.
@@ -129,8 +129,8 @@ DNS and DNS.utils packages:
 		resolver(s).
 
 	Cache:
-		Records are added with:
-			addRecord(Record r, byte cred, Object src)
+		Records (as RRsets) are added with:
+			addRRset(RRset r, byte cred)
 		Records are looked up with:
 			lookupRecords(Name name, short type, byte minCred)
 		which returns a CacheResponse, or
@@ -153,4 +153,4 @@ DNS and DNS.utils packages:
 		cache.setSecurePolicy();
 
 		From this point on, all data will be checked for DNSSEC
-		validity before entering the cache.	
+		validity before entering the cache.
