@@ -99,6 +99,8 @@ setoffset(int n, int offset) {
 
 private final int
 offset(int n) {
+	if (n < 0 || n >= getlabels())
+		throw new IllegalArgumentException("label out of range");
 	if (n < MAXOFFSETS) {
 		int shift = 8 * (7 - n);
 		return ((int)(offsets >>> shift) & 0xFF);
@@ -577,7 +579,20 @@ toString() {
 
 /**
  * Convert the nth label in a Name to a String
- * @param n The label to be converted to a String
+ * @param n The label to be converted to a String.  The first label is 0.
+ */
+public byte []
+getLabel(int n) {
+	int pos = offset(n);
+	byte len = (byte)(name[pos] + 1);
+	byte [] label = new byte[len];
+	System.arraycopy(name, pos, label, 0, len);
+	return label;
+}
+
+/**
+ * Convert the nth label in a Name to a String
+ * @param n The label to be converted to a String.  The first label is 0.
  */
 public String
 getLabelString(int n) {

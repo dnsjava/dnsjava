@@ -1,3 +1,6 @@
+10/11/2002
+	- Add Name.getLabel()
+
 10/10/2002
 	- When cleaning the cache, catch ConcurrentModificationExceptions.
 
