@@ -36,6 +36,9 @@ public static final byte AD		= 10;
 /** (security) checking disabled */
 public static final byte CD		= 11;
 
+/** dnssec ok (extended) */
+public static final int DO		= 0x8000;
+
 static {
 	flags.put2(QR, "qr");
 	flags.put2(AA, "aa");
@@ -44,6 +47,7 @@ static {
 	flags.put2(RA, "ra");
 	flags.put2(AD, "ad");
 	flags.put2(CD, "cd");
+	flags.put2(DO, "do");
 }
 
 private
