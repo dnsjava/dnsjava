@@ -86,7 +86,10 @@ throws TextParseException
 	SOARecord rec = new SOARecord(name, dclass, ttl);
 	rec.host = Name.fromString(st.nextToken(), origin);
 	rec.admin = Name.fromString(st.nextToken(), origin);
-	rec.serial = Integer.parseInt(st.nextToken());
+	long tserial = Long.parseLong(st.nextToken());
+	if (tserial > 0xFFFFFFFFL)
+		throw new TextParseException("Invalid serial number");
+	rec.serial = (int) tserial;
 	rec.refresh = TTL.parseTTL(st.nextToken());
 	rec.retry = TTL.parseTTL(st.nextToken());
 	rec.expire = TTL.parseTTL(st.nextToken());
@@ -103,7 +106,7 @@ rdataToString() {
 		sb.append(" ");
 		sb.append(admin);
 		sb.append(" (\n\t\t\t\t\t");
-		sb.append(serial);
+		sb.append(serial & 0xFFFFFFFFL);
 		sb.append("\t; serial\n\t\t\t\t\t");
 		sb.append(refresh);
 		sb.append("\t; refresh\n\t\t\t\t\t");
