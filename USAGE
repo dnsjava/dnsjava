@@ -5,7 +5,7 @@ Command line programs:
 - dig:
 	A clone of dig (as distributed with BIND)
 	dig @server [-x] name type [class] [-p port] [-k name/secret] [-t] \
-	[-i] [-e n]
+	[-i] [-e n] [-d]
 		-x  : reverse lookup, name must be a dotted quad
 		-k  : use TSIG transaction security
 		-t  : use TCP by default
