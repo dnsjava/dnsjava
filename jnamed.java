@@ -210,12 +210,12 @@ findTSIG(Name name) {
 		return null;
 }
 
-void
-doAXFR(Name name, Socket s) {
+Message
+doAXFR(Name name, Message query, Socket s) {
 	Zone zone = (Zone) znames.get(name);
 	if (zone == null) {
-		System.out.println("no zone " + name + " to AXFR");
-		return;
+/*		System.out.println("no zone " + name + " to AXFR");*/
+		return errorMessage(query, Rcode.REFUSED);
 	}
 	Enumeration e = zone.AXFR();
 	try {
@@ -238,6 +238,7 @@ doAXFR(Name name, Socket s) {
 	}
 	catch (IOException ex) {
 	}
+	return null;
 }
 
 /*
@@ -248,7 +249,7 @@ doAXFR(Name name, Socket s) {
 Message
 generateReply(Message query, byte [] in, int maxLength, Socket s) {
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
-		return notimplMessage(query);
+		return errorMessage(query, Rcode.NOTIMPL);
 	Record queryRecord = query.getQuestion();
 
 	TSIGRecord queryTSIG = query.getTSIG();
@@ -266,12 +267,10 @@ generateReply(Message query, byte [] in, int maxLength, Socket s) {
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
 	short dclass = queryRecord.getDClass();
-	if (type == Type.AXFR && s != null) {
-		doAXFR(name, s);
-		return null;
-	}
+	if (type == Type.AXFR && s != null)
+		return doAXFR(name, query, s);
 	if (!Type.isRR(type) && type != Type.ANY)
-		return notimplMessage(query);
+		return errorMessage(query, Rcode.NOTIMPL);
 	Zone zone = findBestZone(name);
 	if (zone != null) {
 		response.getHeader().setFlag(Flags.AA);
@@ -404,13 +403,13 @@ formerrMessage(byte [] in) {
 }
 
 public Message
-notimplMessage(Message query) {
+errorMessage(Message query, short rcode) {
 	Header header = query.getHeader();
 	Message response = new Message();
 	response.setHeader(header);
 	for (int i = 0; i < 4; i++)
 		response.removeAllRecords(i);
-	header.setRcode(Rcode.NOTIMPL);
+	header.setRcode(rcode);
 	return response;
 }
 
