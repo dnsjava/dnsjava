@@ -1,5 +1,6 @@
 3/22/2002
 	- Record.equals() did not properly canonicalize names.
+	- Record.equals() should ignore the TTL.
 
 3/19/2002
 	- When a compressed name is parsed, it should be added to the

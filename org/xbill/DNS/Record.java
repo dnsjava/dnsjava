@@ -426,8 +426,11 @@ equals(Object arg) {
 		return false;
 	Record r = (Record) arg;
 	try {
-		byte [] array1 = toWireCanonical();
-		byte [] array2 = r.toWireCanonical();
+		if (type != r.type || dclass != r.dclass ||
+		    !name.equals(r.name))
+			return false;
+		byte [] array1 = rdataToWireCanonical();
+		byte [] array2 = r.rdataToWireCanonical();
 		if (array1.length != array2.length)
 			return false;
 		for (int i = 0; i < array1.length; i++)
