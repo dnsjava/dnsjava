@@ -56,6 +56,16 @@ Master(InputStream in) {
 	this(in, null);
 }
 
+private Name
+parseName(String s, Name origin) throws TextParseException {
+	try {
+		return Name.fromString(s, origin);
+	}
+	catch (TextParseException e) {
+		throw st.exception(e.getMessage());
+	}
+}
+
 /** Returns the next record in the master file */
 public Record
 nextRecord() throws IOException {
@@ -102,8 +112,8 @@ nextRecord() throws IOException {
 				Name incorigin = origin;
 				token = st.get();
 				if (token.isString()) {
-					incorigin = Name.fromString(token.value,
-								    Name.root);
+					incorigin = parseName(token.value,
+							      Name.root);
 					st.getEOL();
 				}
 				included = new Master(newfile, incorigin);
@@ -115,7 +125,7 @@ nextRecord() throws IOException {
 			} else if (s.charAt(0) == '$') {
 				throw st.exception("Invalid directive: " + s);
 			} else {
-				name = Name.fromString(s, origin);
+				name = parseName(s, origin);
 			}
 		}
 
