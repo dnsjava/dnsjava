@@ -250,8 +250,13 @@ addRRset(RRset rrset, byte cred) {
 	if (secure && rrset.getSecurity() < DNSSEC.Secure)
 		return;
 	Element element = (Element) findExactSet(name, type);
-	if (element == null || cred > element.credibility)
-		addSet(name, type, new PositiveElement(rrset, cred));
+	if (rrset.getTTL() == 0) {
+		if (element != null)
+			removeSet(name, type, element);
+	} else {
+		if (element == null || cred > element.credibility)
+			addSet(name, type, new PositiveElement(rrset, cred));
+	}
 }
 
 /**
