@@ -44,15 +44,22 @@ Header() {
 }
 
 /**
- * Parses a Header from a stream containing DNS wire format.  This normally
- * isn't useful to clients.
+ * Parses a Header from a stream containing DNS wire format.
  */
-public
 Header(DataByteInputStream in) throws IOException {
 	this(in.readUnsignedShort());
 	readFlags(in);
 	for (int i = 0; i < counts.length; i++)
 		counts[i] = in.readUnsignedShort();
+}
+
+/**
+ * Creates a new Header from its DNS wire format representation
+ * @param b A byte array containing the DNS Header.
+ */
+public
+Header(byte [] b) throws IOException {
+	this(new DataByteInputStream(b));
 }
 
 void
