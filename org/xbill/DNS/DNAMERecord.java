@@ -22,7 +22,7 @@ getObject() {
 
 /**
  * Creates a new DNAMERecord with the given data
- * @param target The name to which the DNAME alias points
+ * @param alias The name to which the DNAME alias points
  */
 public
 DNAMERecord(Name name, int dclass, long ttl, Name alias) {

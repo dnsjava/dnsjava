@@ -26,7 +26,7 @@ getObject() {
 /**
  * Creates an ISDN Record from the given data
  * @param address The ISDN number associated with the domain.
- * @param address The subaddress, if any.
+ * @param subAddress The subaddress, if any.
  * @throws IllegalArgumentException One of the strings is invalid.
  */
 public

@@ -588,9 +588,7 @@ getObject() {
  * Creates a WKS Record from the given data
  * @param address The IP address
  * @param protocol The IP protocol number
- * @param keyTag The ID of the associated KEYRecord, if present
- * @param alg The algorithm of the associated KEYRecord, if present
- * @param cert Binary data representing the certificate
+ * @param services An array of supported services, represented by port number.
  */
 public
 WKSRecord(Name name, int dclass, long ttl, InetAddress address, int protocol,
