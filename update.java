@@ -28,8 +28,8 @@ print(Object o) {
 
 public
 update(InputStream in) throws IOException {
-	List inputs = new ArrayList();
-	List istreams = new ArrayList();
+	List inputs = new LinkedList();
+	List istreams = new LinkedList();
 
 	query = new Message();
 	query.getHeader().setOpcode(Opcode.UPDATE);
@@ -45,10 +45,8 @@ update(InputStream in) throws IOException {
 			String line = null;
 			do {
 				InputStream is;
-				is = (InputStream)istreams.get(istreams.size()
-							       - 1);
-				br = (BufferedReader)inputs.get(inputs.size()
-								- 1);
+				is = (InputStream)istreams.get(0);
+				br = (BufferedReader)inputs.get(0);
 
 				if (is == System.in)
 					System.out.print("> ");
@@ -56,8 +54,8 @@ update(InputStream in) throws IOException {
 				line = br.readLine();
 				if (line == null) {
 					br.close();
-					inputs.remove(br);
-					istreams.remove(is);
+					inputs.remove(0);
+					istreams.remove(0);
 					if (inputs.isEmpty())
 						return;
 				}
@@ -448,19 +446,14 @@ doQuery(Tokenizer st) throws IOException {
 void
 doFile(Tokenizer st, List inputs, List istreams) throws IOException {
 	String s = st.getString();
+	InputStream is;
 	try {
-		InputStreamReader isr2;
-		if (!s.equals("-")) {
-			FileInputStream fis = new FileInputStream(s);
-			isr2 = new InputStreamReader(fis);
-			istreams.add(fis);
-		}
-		else {
-			isr2 = new InputStreamReader(System.in);
-			istreams.add(System.in);
-		}
-		BufferedReader br2 = new BufferedReader(isr2);
-		inputs.add(br2);
+		if (s.equals("-"))
+			is = System.in;
+		else
+			is = new FileInputStream(s);
+		istreams.add(0, is);
+		inputs.add(new BufferedReader(new InputStreamReader(is)));
 	}
 	catch (FileNotFoundException e) {
 		print(s + " not found");
