@@ -103,10 +103,7 @@ throws TextParseException
         SIGRecord rec = new SIGRecord(name, dclass, ttl);
 	rec.covered = Type.value(st.nextToken());
 	rec.alg = Byte.parseByte(st.nextToken());
-	if (Options.check("2065sig"))
-		rec.labels = name.labels();
-	else
-		rec.labels = Byte.parseByte(st.nextToken());
+	rec.labels = Byte.parseByte(st.nextToken());
 	rec.origttl = TTL.parseTTL(st.nextToken());
 	rec.expire = parseDate(st.nextToken());
 	rec.timeSigned = parseDate(st.nextToken());
@@ -126,10 +123,8 @@ rdataToString() {
 		sb.append (" ");
 		sb.append (alg);
 		sb.append (" ");
-		if (!Options.check("2065sig")) {
-			sb.append (labels);
-			sb.append (" ");
-		}
+		sb.append (labels);
+		sb.append (" ");
 		sb.append (origttl);
 		sb.append (" (\n\t");
 		sb.append (formatDate(expire));
