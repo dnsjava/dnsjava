@@ -9,6 +9,8 @@ public class dnsName {
 private String [] name;
 private byte labels;
 
+static dnsName root = new dnsName("");
+
 static final int MAXLABELS = 64;
 
 dnsName(String s, dnsName origin) {
@@ -125,7 +127,11 @@ public void
 toWire(CountedDataOutputStream out, dnsCompression c) throws IOException {
 	for (int i=0; i<labels; i++) {
 		dnsName tname = new dnsName(this, i);
-		int pos = c.get(tname);
+		int pos;
+		if (c != null)
+			pos = c.get(tname);
+		else
+			pos = -1;
 /*System.out.println("Looking for compressed " + tname + ", found " + pos);*/
 		if (pos >= 0) {
 			pos |= (0xC0 << 8);
@@ -133,7 +139,8 @@ toWire(CountedDataOutputStream out, dnsCompression c) throws IOException {
 			return;
 		}
 		else {
-			c.add(out.getPos(), tname);
+			if (c != null)
+				c.add(out.getPos(), tname);
 /*System.out.println("(C) Adding " + tname + " at " + out.getPos());*/
 			out.writeString(name[i]);
 		}
