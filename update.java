@@ -202,6 +202,9 @@ update(InputStream in) throws IOException {
 		catch (SocketException se) {
 			System.out.println("Socket error");
 		}
+		catch (IOException ioe) {
+			System.out.println(ioe);
+		}
 	}
 }
 
@@ -250,6 +253,7 @@ throws IOException
 	Name name = new Name(st.nextToken(), origin);
 	int ttl;
 	short type;
+	Record record;
 
 	String s = st.nextToken();
 
@@ -261,143 +265,140 @@ throws IOException
 		ttl = TTLValue;
 	}
 
-	if (DClass.value(s) >= 0)
+	if (DClass.value(s) >= 0) {
+		classValue = DClass.value(s);
 		s = st.nextToken();
+	}
 
 	if ((type = Type.value(s)) < 0)
-		/* Close enough... */
-		throw new NullPointerException("Parse error");
+		throw new IOException("Invalid type: " + s);
 
-	return Record.fromString(name, type, classValue, ttl, st, origin);
-}
-
-/* 
- * <name> <type>
- */
-Record
-parseSet(MyStringTokenizer st, short classValue) throws IOException {
-	Name name = new Name(st.nextToken(), origin);
-	short type;
-
-	if ((type = Type.value(st.nextToken())) < 0)
+	record = Record.fromString(name, type, classValue, ttl, st, origin);
+	if (record != null)
+		return (record);
+	else
 		throw new IOException("Parse error");
-
-	return Record.newRecord(name, type, classValue, 0);
-	
-}
-
-/* 
- * <name>
- */
-Record
-parseName(MyStringTokenizer st, short classValue) throws IOException {
-	Name name = new Name(st.nextToken(), origin);
-
-	return Record.newRecord(name, Type.ANY, classValue, 0);
-	
 }
 
 void
 doRequire(MyStringTokenizer st) throws IOException {
-	Record rec;
+	String s;
+	Name name;
+	Record record;
+	short type;
+	short dclass;
 
-	String qualifier = st.nextToken();
-	if (qualifier.equals("-r")) 
-		rec = parseRR(st, defaultClass, 0);
-	else if (qualifier.equals("-s"))
-		rec = parseSet(st, DClass.ANY);
-	else if (qualifier.equals("-n"))
-		rec = parseName(st, DClass.ANY);
-	else {
-		print("qualifier " + qualifier + " not supported");
-		return;
+	s = st.nextToken();
+	if (s.startsWith("-")) {
+		print("qualifiers are now ignored");
+		s = st.nextToken();
 	}
-	if (rec != null) {
-		query.addRecord(rec, Section.PREREQ);
-		print(rec);
+	name = new Name(s, origin);
+	if (st.hasMoreTokens()) {
+		s = st.nextToken();
+		if ((type = Type.value(s)) < 0)
+			throw new IOException("Invalid type: " + s);
+		if (st.hasMoreTokens()) {
+			record = Record.fromString(name, type, defaultClass,
+						   0, st, origin);
+		}
+		else
+			record = Record.newRecord(name, type, DClass.ANY, 0);
 	}
+	else
+		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
+
+	query.addRecord(record, Section.PREREQ);
+	print(record);
 }
 
 void
 doProhibit(MyStringTokenizer st) throws IOException {
-	Record rec;
+	String s;
+	Name name;
+	Record record;
+	short type;
 
-	String qualifier = st.nextToken();
-	if (qualifier.equals("-s"))
-		rec = parseSet(st, DClass.NONE);
-	else if (qualifier.equals("-n"))
-		rec = parseName(st, DClass.NONE);
-	else {
-		print("qualifier " + qualifier + " not supported");
-		return;
+	s = st.nextToken();
+	if (s.startsWith("-")) {
+		print("qualifiers are now ignored");
+		s = st.nextToken();
 	}
-	if (rec != null) {
-		query.addRecord(rec, Section.PREREQ);
-		print(rec);
+	name = new Name(s, origin);
+	if (st.hasMoreTokens()) {
+		s = st.nextToken();
+		if ((type = Type.value(s)) < 0)
+			throw new IOException("Invalid type: " + s);
 	}
+	else
+		type = Type.ANY;
+	if (st.hasMoreTokens())
+		throw new IOException("Cannot specify rdata to prohibit");
+	record = Record.newRecord(name, type, DClass.NONE, 0);
+	query.addRecord(record, Section.PREREQ);
+	print(record);
 }
 
 void
 doAdd(MyStringTokenizer st) throws IOException {
-	Record rec;
+	String s;
+	Record record;
 
-	String qualifier = st.nextToken();
-	if (!qualifier.startsWith("-")) {
-		st.putBackToken(qualifier);
-		qualifier = "-r";
-	}
-	if (qualifier.equals("-r"))
-		rec = parseRR(st, defaultClass, defaultTTL);
-	else {
-		print("qualifier " + qualifier + " not supported");
-		return;
-	}
-	if (rec != null) {
-		query.addRecord(rec, Section.UPDATE);
-		print(rec);
-	}
+	s = st.nextToken();
+	if (s.startsWith("-"))
+		print("qualifiers are now ignored");
+	else
+		st.putBackToken(s);
+	record = parseRR(st, defaultClass, defaultTTL);
+	query.addRecord(record, Section.UPDATE);
+	print(record);
 }
 
 void
 doDelete(MyStringTokenizer st) throws IOException {
-	Record rec;
+	String s;
+	Name name;
+	Record record;
+	short type;
+	short dclass;
 
-	String qualifier = st.nextToken();
-	if (qualifier.equals("-r"))
-		rec = parseRR(st, DClass.NONE, 0);
-	else if (qualifier.equals("-s"))
-		rec = parseSet(st, DClass.ANY);
-	else if (qualifier.equals("-n"))
-		rec = parseName(st, DClass.ANY);
-	else {
-		print("qualifier " + qualifier + " not supported");
-		return;
+	s = st.nextToken();
+	if (s.startsWith("-")) {
+		print("qualifiers are now ignored");
+		s = st.nextToken();
 	}
-	if (rec != null) {
-		query.addRecord(rec, Section.UPDATE);
-		print(rec);
+	name = new Name(s, origin);
+	if (st.hasMoreTokens()) {
+		s = st.nextToken();
+		if ((type = Type.value(s)) < 0)
+			throw new IOException("Invalid type: " + s);
+		if (st.hasMoreTokens()) {
+			record = Record.fromString(name, type, DClass.NONE,
+						   0, st, origin);
+		}
+		else
+			record = Record.newRecord(name, type, DClass.ANY, 0);
 	}
+	else
+		record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
+
+	query.addRecord(record, Section.UPDATE);
+	print(record);
 }
 
 void
 doGlue(MyStringTokenizer st) throws IOException {
-	Record rec;
+	String s;
+	Record record;
 
-	String qualifier = st.nextToken();
-	if (!qualifier.startsWith("-")) {
-		st.putBackToken(qualifier);
-		qualifier = "-r";
-	}
-	if (qualifier.equals("-r"))
-		rec = parseRR(st, defaultClass, defaultTTL);
-	else {
-		print("qualifier " + qualifier + " not supported");
-		return;
-	}
-	if (rec != null) {
-		query.addRecord(rec, Section.ADDITIONAL);
-		print(rec);
-	}
+	s = st.nextToken();
+	if (s.startsWith("-"))
+		print("qualifiers are now ignored");
+	else
+		st.putBackToken(s);
+	record = parseRR(st, defaultClass, defaultTTL);
+	query.addRecord(record, Section.ADDITIONAL);
+	print(record);
 }
 
 void
@@ -537,7 +538,7 @@ help(String topic) {
 
 	else if (topic.equalsIgnoreCase("add"))
 		System.out.println(
-			"add [-r] <name> [ttl] [class] <type> <data>\n\n" +
+			"add <name> [ttl] [class] <type> <data>\n\n" +
 			"specify a record to be added\n");
 	else if (topic.equalsIgnoreCase("assert"))
 		System.out.println(
@@ -553,9 +554,9 @@ help(String topic) {
 			"class of the zone to be updated (default: IN)\n");
 	else if (topic.equalsIgnoreCase("delete"))
 		System.out.println(
-			"delete -r <name> [ttl] [class] <type> <data> \n" +
-			"delete -s <name> <type> \n" +
-			"delete -n <name>\n\n" +
+			"delete <name> [ttl] [class] <type> <data> \n" +
+			"delete <name> <type> \n" +
+			"delete <name>\n\n" +
 			"specify a record or set to be deleted, or that\n" +
 			"all records at a name should be deleted\n");
 	else if (topic.equalsIgnoreCase("echo"))
@@ -569,7 +570,7 @@ help(String topic) {
 			"(- represents stdin)\n");
 	else if (topic.equalsIgnoreCase("glue"))
 		System.out.println(
-			"glue [-r] <name> [ttl] [class] <type> <data>\n\n" +
+			"glue <name> [ttl] [class] <type> <data>\n\n" +
 			"specify an additional record\n");
 	else if (topic.equalsIgnoreCase("help"))
 		System.out.println(
@@ -599,8 +600,8 @@ help(String topic) {
 			"UDP/TCP port messages are sent to (default: 53)\n");
 	else if (topic.equalsIgnoreCase("prohibit"))
 		System.out.println(
-			"prohibit -s <name> <type> \n" +
-			"prohibit -n <name>\n\n" +
+			"prohibit <name> <type> \n" +
+			"prohibit <name>\n\n" +
 			"require that a set or name is not present\n");
 	else if (topic.equalsIgnoreCase("query"))
 		System.out.println(
@@ -613,9 +614,9 @@ help(String topic) {
 			"quits the program\n");
 	else if (topic.equalsIgnoreCase("require"))
 		System.out.println(
-			"require -r <name> [ttl] [class] <type> <data> \n" +
-			"require -s <name> <type> \n" +
-			"require -n <name>\n\n" +
+			"require <name> [ttl] [class] <type> <data> \n" +
+			"require <name> <type> \n" +
+			"require <name>\n\n" +
 			"require that a record, set, or name is present\n");
 	else if (topic.equalsIgnoreCase("send"))
 		System.out.println(
