@@ -35,9 +35,7 @@ getMember() {
  * @param target The name server for the given domain
  */
 public
-NSRecord(Name name, short dclass, int ttl, Name target)
-throws IOException
-{
+NSRecord(Name name, short dclass, int ttl, Name target) {
 	super(name, Type.NS, dclass, ttl, target);
 }
 

@@ -71,7 +71,7 @@ getMember() {
 public
 TKEYRecord(Name name, short dclass, int ttl, Name alg,
 	   Date timeInception, Date timeExpire, short mode, short error,
-	   byte [] key, byte other[]) throws IOException
+	   byte [] key, byte other[])
 {
 	this(name, dclass, ttl);
 	this.alg = alg;

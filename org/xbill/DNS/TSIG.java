@@ -59,7 +59,7 @@ TSIG(Name name, byte [] key) {
  * @param old If this message is a response, the TSIG from the request
  */
 public void
-apply(Message m, byte error, TSIGRecord old) throws IOException {
+apply(Message m, byte error, TSIGRecord old) {
 	Date timeSigned;
 	if (error != Rcode.BADTIME)
 		timeSigned = new Date();
@@ -82,41 +82,36 @@ apply(Message m, byte error, TSIGRecord old) throws IOException {
 	else
 		fudge = FUDGE;
 
-	try {
-		if (old != null) {
-			DataByteOutputStream dbs = new DataByteOutputStream();
-			dbs.writeShort((short)old.getSignature().length);
-			if (h != null) {
-				h.addData(dbs.toByteArray());
-				h.addData(old.getSignature());
-			}
+	if (old != null) {
+		DataByteOutputStream dbs = new DataByteOutputStream();
+		dbs.writeShort((short)old.getSignature().length);
+		if (h != null) {
+			h.addData(dbs.toByteArray());
+			h.addData(old.getSignature());
 		}
-
-		/* Digest the message */
-		if (h != null)
-			h.addData(m.toWire());
-
-		DataByteOutputStream out = new DataByteOutputStream();
-		name.toWireCanonical(out);
-		out.writeShort(DClass.ANY);	/* class */
-		out.writeInt(0);		/* ttl */
-		alg.toWireCanonical(out);
-		long time = timeSigned.getTime() / 1000;
-		short timeHigh = (short) (time >> 32);
-		int timeLow = (int) (time);
-		out.writeShort(timeHigh);
-		out.writeInt(timeLow);
-		out.writeShort(fudge);
-
-		out.writeShort(error);
-		out.writeShort(0); /* No other data */
-
-		if (h != null)
-			h.addData(out.toByteArray());
 	}
-	catch (IOException e) {
-		return;
-	}
+
+	/* Digest the message */
+	if (h != null)
+		h.addData(m.toWire());
+
+	DataByteOutputStream out = new DataByteOutputStream();
+	name.toWireCanonical(out);
+	out.writeShort(DClass.ANY);	/* class */
+	out.writeInt(0);		/* ttl */
+	alg.toWireCanonical(out);
+	long time = timeSigned.getTime() / 1000;
+	short timeHigh = (short) (time >> 32);
+	int timeLow = (int) (time);
+	out.writeShort(timeHigh);
+	out.writeInt(timeLow);
+	out.writeShort(fudge);
+
+	out.writeShort(error);
+	out.writeShort(0); /* No other data */
+
+	if (h != null)
+		h.addData(out.toByteArray());
 
 	byte [] signature;
 	if (h != null)
@@ -126,10 +121,10 @@ apply(Message m, byte error, TSIGRecord old) throws IOException {
 
 	byte [] other = null;
 	if (error == Rcode.BADTIME) {
-		DataByteOutputStream out = new DataByteOutputStream();
-		long time = new Date().getTime() / 1000;
-		short timeHigh = (short) (time >> 32);
-		int timeLow = (int) (time);
+		out = new DataByteOutputStream();
+		time = new Date().getTime() / 1000;
+		timeHigh = (short) (time >> 32);
+		timeLow = (int) (time);
 		out.writeShort(timeHigh);
 		out.writeInt(timeLow);
 		other = out.toByteArray();
@@ -147,7 +142,7 @@ apply(Message m, byte error, TSIGRecord old) throws IOException {
  * @param old If this message is a response, the TSIG from the request
  */
 public void
-apply(Message m, TSIGRecord old) throws IOException {
+apply(Message m, TSIGRecord old) {
 	apply(m, Rcode.NOERROR, old);
 }
 
@@ -157,7 +152,7 @@ apply(Message m, TSIGRecord old) throws IOException {
  * @param old If this message is a response, the TSIG from the request
  */
 public void
-applyAXFR(Message m, TSIGRecord old, boolean first) throws IOException {
+applyAXFR(Message m, TSIGRecord old, boolean first) {
 	if (first) {
 		apply(m, old);
 		return;
@@ -178,28 +173,23 @@ applyAXFR(Message m, TSIGRecord old, boolean first) throws IOException {
 	else
 		fudge = FUDGE;
 
-	try {
-		DataByteOutputStream dbs = new DataByteOutputStream();
-		dbs.writeShort((short)old.getSignature().length);
-		h.addData(dbs.toByteArray());
-		h.addData(old.getSignature());
+	DataByteOutputStream dbs = new DataByteOutputStream();
+	dbs.writeShort((short)old.getSignature().length);
+	h.addData(dbs.toByteArray());
+	h.addData(old.getSignature());
 
-		/* Digest the message */
-		h.addData(m.toWire());
+	/* Digest the message */
+	h.addData(m.toWire());
 
-		DataByteOutputStream out = new DataByteOutputStream();
-		long time = timeSigned.getTime() / 1000;
-		short timeHigh = (short) (time >> 32);
-		int timeLow = (int) (time);
-		out.writeShort(timeHigh);
-		out.writeInt(timeLow);
-		out.writeShort(fudge);
+	DataByteOutputStream out = new DataByteOutputStream();
+	long time = timeSigned.getTime() / 1000;
+	short timeHigh = (short) (time >> 32);
+	int timeLow = (int) (time);
+	out.writeShort(timeHigh);
+	out.writeInt(timeLow);
+	out.writeShort(fudge);
 
-		h.addData(out.toByteArray());
-	}
-	catch (IOException e) {
-		return;
-	}
+	h.addData(out.toByteArray());
 
 	byte [] signature = h.sign();
 	byte [] other = null;
@@ -328,46 +318,42 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 	
 	if (first)
 		return verify(m, b, old);
-	try {
-		if (tsig != null)
-			m.getHeader().decCount(Section.ADDITIONAL);
-		byte [] header = m.getHeader().toWire();
-		if (tsig != null)
-			m.getHeader().incCount(Section.ADDITIONAL);
-		h.addData(header);
 
-		int len = b.length - header.length;
-		if (tsig != null)
-			len -= tsig.wireLength;
-		h.addData(b, header.length, len);
+	if (tsig != null)
+		m.getHeader().decCount(Section.ADDITIONAL);
+	byte [] header = m.getHeader().toWire();
+	if (tsig != null)
+		m.getHeader().incCount(Section.ADDITIONAL);
+	h.addData(header);
 
-		if (tsig == null) {
-			if (required)
-				return Rcode.FORMERR;
-			else
-				return Rcode.NOERROR;
-		}
+	int len = b.length - header.length;
+	if (tsig != null)
+		len -= tsig.wireLength;
+	h.addData(b, header.length, len);
 
-		if (!tsig.getName().equals(name) ||
-		    !tsig.getAlgorithm().equals(alg))
-		{
-			if (Options.check("verbose"))
-				System.err.println("BADKEY failure");
-			return Rcode.BADKEY;
-		}
-
-		DataByteOutputStream out = new DataByteOutputStream();
-		long time = tsig.getTimeSigned().getTime() / 1000;
-		short timeHigh = (short) (time >> 32);
-		int timeLow = (int) (time);
-		out.writeShort(timeHigh);
-		out.writeInt(timeLow);
-		out.writeShort(tsig.getFudge());
-		h.addData(out.toByteArray());
+	if (tsig == null) {
+		if (required)
+			return Rcode.FORMERR;
+		else
+			return Rcode.NOERROR;
 	}
-	catch (IOException e) {
-		return Rcode.SERVFAIL;
+
+	if (!tsig.getName().equals(name) ||
+	    !tsig.getAlgorithm().equals(alg))
+	{
+		if (Options.check("verbose"))
+			System.err.println("BADKEY failure");
+		return Rcode.BADKEY;
 	}
+
+	DataByteOutputStream out = new DataByteOutputStream();
+	long time = tsig.getTimeSigned().getTime() / 1000;
+	short timeHigh = (short) (time >> 32);
+	int timeLow = (int) (time);
+	out.writeShort(timeHigh);
+	out.writeInt(timeLow);
+	out.writeShort(tsig.getFudge());
+	h.addData(out.toByteArray());
 
 	if (h.verify(tsig.getSignature()) == false) {
 		if (Options.check("verbose"))

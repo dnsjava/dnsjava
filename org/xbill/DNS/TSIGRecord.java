@@ -62,7 +62,6 @@ public
 TSIGRecord(Name name, short dclass, int ttl, Name alg, Date timeSigned,
 	   short fudge, byte [] signature, int originalID, short error,
 	   byte other[])
-throws IOException
 {
 	this(name, dclass, ttl);
 	this.alg = alg;

@@ -48,7 +48,6 @@ getMember() {
 public
 SOARecord(Name name, short dclass, int ttl, Name host, Name admin,
 	  int serial, int refresh, int retry, int expire, int minimum)
-throws IOException
 {
 	this(name, dclass, ttl);
 	this.host = host;

@@ -44,7 +44,6 @@ getMember() {
 public
 A6Record(Name name, short dclass, int ttl, int prefixBits,
 	 Inet6Address suffix, Name prefix)
-throws IOException
 {
 	this(name, dclass, ttl);
 	this.prefixBits = (short) prefixBits;

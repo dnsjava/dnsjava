@@ -38,9 +38,7 @@ getMember() {
  * @param address The address suffix
  */
 public
-AAAARecord(Name name, short dclass, int ttl, Inet6Address address)
-throws IOException
-{
+AAAARecord(Name name, short dclass, int ttl, Inet6Address address) {
 	this(name, dclass, ttl);
 	this.address = address;
 }

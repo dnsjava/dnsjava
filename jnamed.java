@@ -326,12 +326,9 @@ addAnswer(Message response, Name name, short type, short dclass,
 		catch (NameTooLongException e) {
 			return Rcode.YXDOMAIN;
 		}
-		try {
-			rrset = new RRset();
-			rrset.addRR(new CNAMERecord(name, dclass, 0, newname));
-			addRRset(name, response, rrset, Section.ANSWER, flags);
-		}
-		catch (IOException e) {}
+		rrset = new RRset();
+		rrset.addRR(new CNAMERecord(name, dclass, 0, newname));
+		addRRset(name, response, rrset, Section.ANSWER, flags);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
 		rcode = addAnswer(response, newname, type, dclass,
@@ -362,7 +359,7 @@ findTSIG(Name name) {
 		return null;
 }
 
-Message
+byte []
 doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 	Zone zone = (Zone) znames.get(name);
 	boolean first = true;
@@ -407,8 +404,8 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
  * anything.  Currently this only happens if this is an AXFR request over
  * TCP.
  */
-Message
-generateReply(Message query, byte [] in, Socket s) {
+byte []
+generateReply(Message query, byte [] in, Socket s) throws IOException {
 	Header header;
 	boolean badversion;
 	int maxLength;
@@ -468,27 +465,17 @@ generateReply(Message query, byte [] in, Socket s) {
 		return errorMessage(query, rcode);
 
 	addAdditional(response, flags);
-	if (queryTSIG != null) {
-		try {
-			if (tsig != null)
-				tsig.apply(response, queryTSIG);
-		}
-		catch (IOException e) {
-		}
+	if (tsig != null)
+		tsig.apply(response, queryTSIG);
+	response.freeze();
+	byte [] out = response.toWire();
+	if (out.length > maxLength) {
+		response.thaw();
+		truncate(response, out.length, maxLength);
+		if (tsig != null)
+			tsig.apply(response, queryTSIG);
 	}
-	try {
-		response.freeze();
-		byte [] out = response.toWire();
-		if (out.length > maxLength) {
-			response.thaw();
-			truncate(response, out.length, maxLength);
-			if (tsig != null)
-				tsig.apply(response, queryTSIG);
-		}
-	}
-	catch (IOException e) {
-	}
-	return response;
+	return response.toWire();
 }
 
 public int
@@ -497,8 +484,9 @@ truncateSection(Message in, int maxLength, int length, int section) {
 	Record [] records = in.getSectionArray(section);
 	for (int i = records.length - 1; i >= 0; i--) {
 		Record r = records[i];
-		removed += r.getWireLength();
-		length -= r.getWireLength();
+		int rlength = r.getWireLength();
+		removed += rlength;
+		length -= rlength;
 		in.removeRecord(r, section);
 		if (length > maxLength)
 			continue;
@@ -509,8 +497,9 @@ truncateSection(Message in, int maxLength, int length, int section) {
 				    r.getType() != r2.getType() ||
 				    r.getDClass() != r2.getDClass())
 					break;
-				removed += r2.getWireLength();
-				length -= r2.getWireLength();
+				rlength =  r2.getWireLength();
+				removed += rlength;
+				length -= rlength;
 				in.removeRecord(r2, section);
 			}
 			return removed;
@@ -541,7 +530,19 @@ truncate(Message in, int length, int maxLength) {
 	length -= truncateSection(in, maxLength, length, Section.ANSWER);
 }
 
-public Message
+byte []
+buildErrorMessage(Header header, short rcode, Record question) {
+	Message response = new Message();
+	response.setHeader(header);
+	for (int i = 0; i < 4; i++)
+		response.removeAllRecords(i);
+	if (rcode == Rcode.SERVFAIL)
+		response.addRecord(question, Section.QUESTION);
+	header.setRcode(rcode);
+	return response.toWire();
+}
+
+public byte []
 formerrMessage(byte [] in) {
 	Header header;
 	try {
@@ -550,25 +551,13 @@ formerrMessage(byte [] in) {
 	catch (IOException e) {
 		header = new Header(0);
 	}
-	Message response = new Message();
-	response.setHeader(header);
-	for (int i = 0; i < 4; i++)
-		response.removeAllRecords(i);
-	header.setRcode(Rcode.FORMERR);
-	return response;
+	return buildErrorMessage(header, Rcode.FORMERR, null);
 }
 
-public Message
+public byte []
 errorMessage(Message query, short rcode) {
-	Header header = query.getHeader();
-	Message response = new Message();
-	response.setHeader(header);
-	for (int i = 0; i < 4; i++)
-		response.removeAllRecords(i);
-	if (rcode == Rcode.SERVFAIL)
-		response.addRecord(query.getQuestion(), Section.QUESTION);
-	header.setRcode(rcode);
-	return response;
+	return buildErrorMessage(query.getHeader(), rcode,
+				 query.getQuestion());
 }
 
 public void
@@ -593,7 +582,8 @@ serveTCP(InetAddress addr, short port) {
 				s.close();
 				continue;
 			}
-			Message query, response;
+			Message query;
+			byte [] response = null;
 			try {
 				query = new Message(in);
 				response = generateReply(query, in, s);
@@ -603,10 +593,9 @@ serveTCP(InetAddress addr, short port) {
 			catch (IOException e) {
 				response = formerrMessage(in);
 			}
-			byte [] out = response.toWire();
 			dataOut = new DataOutputStream(s.getOutputStream());
-			dataOut.writeShort(out.length);
-			dataOut.write(out);
+			dataOut.writeShort(response.length);
+			dataOut.write(response);
 			s.close();
 		}
 	}
@@ -637,7 +626,8 @@ serveUDP(InetAddress addr, short port) {
 			catch (InterruptedIOException e) {
 				continue;
 			}
-			Message query, response;
+			Message query;
+			byte [] response = null;
 			try {
 				query = new Message(in);
 				response = generateReply(query, in, null);
@@ -647,15 +637,14 @@ serveUDP(InetAddress addr, short port) {
 			catch (IOException e) {
 				response = formerrMessage(in);
 			}
-			byte [] out = response.toWire();
-
 			if (outdp == null)
-				outdp = new DatagramPacket(out, out.length,
+				outdp = new DatagramPacket(response,
+							   response.length,
 							   indp.getAddress(),
 							   indp.getPort());
 			else {
-				outdp.setData(out);
-				outdp.setLength(out.length);
+				outdp.setData(response);
+				outdp.setLength(response.length);
 				outdp.setAddress(indp.getAddress());
 				outdp.setPort(indp.getPort());
 			}

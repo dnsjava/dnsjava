@@ -64,9 +64,7 @@ toDottedQuad(int addr) {
  * @param address The address that the name refers to
  */
 public
-ARecord(Name name, short dclass, int ttl, InetAddress address) 
-throws IOException
-{
+ARecord(Name name, short dclass, int ttl, InetAddress address) {
 	this(name, dclass, ttl);
 	addr = fromArray(address.getAddress());
 }

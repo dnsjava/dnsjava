@@ -345,7 +345,7 @@ getSectionRRsets(int section) {
 }
 
 void
-toWire(DataByteOutputStream out) throws IOException {
+toWire(DataByteOutputStream out) {
 	header.toWire(out);
 	Compression c = new Compression();
 	for (int i = 0; i < 4; i++) {
@@ -362,7 +362,7 @@ toWire(DataByteOutputStream out) throws IOException {
  * Returns an array containing the wire format representation of the Message.
  */
 public byte []
-toWire() throws IOException {
+toWire() {
 	if (frozen && wireFormat != null)
 		return wireFormat;
 	DataByteOutputStream out = new DataByteOutputStream();

@@ -35,9 +35,7 @@ getMember() {
  * @param target The name to which the DNAME alias points
  */
 public
-DNAMERecord(Name name, short dclass, int ttl, Name target)
-throws IOException
-{
+DNAMERecord(Name name, short dclass, int ttl, Name target) {
 	super(name, Type.DNAME, dclass, ttl, target);
 }
 

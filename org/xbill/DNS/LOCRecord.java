@@ -46,7 +46,6 @@ getMember() {
 public
 LOCRecord(Name name, short dclass, int ttl, double latitude, double longitude,
 	  double altitude, double size, double hPrecision, double vPrecision)
-throws IOException
 {
 	this(name, dclass, ttl);
 	this.latitude = (int)(latitude * 3600 * 1000 + (1 << 31));
