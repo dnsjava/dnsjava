@@ -1,6 +1,9 @@
 1/20/2003
 	- Certain responses with CNAMEs weren't being properly cached.
 	  (reported by Sean O'Neil <SeanO@telemate.net>)
+	- Add a 'compile' target to build.xml, and make the 'all' target
+	  both compile and build the jar file.
+	  (Jon Scott Stevens <jon@latchkey.com>)
 
 12/22/2002
 	- Check for SecurityExceptions in the Options static initializer;

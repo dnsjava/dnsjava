@@ -4,7 +4,10 @@
     <property name="doc_dir" value="${basedir}/doc"/>
     <property name="version" value="1.3.1"/>
 
-    <target name="all" description="Compile everything">
+    <target name="all" description="Compile and Jar" depends="jar">
+    </target>
+
+    <target name="compile" description="Compile everything">
         <javac destdir="${build_dir}" debug="true">
             <src path="${src_dir}"/>
             <exclude name="org/xbill/DNS/security/*.java"/>
@@ -18,7 +21,7 @@
         </javac>
     </target>
 
-    <target name="jar" description="Makes dnsjava.jar">
+    <target name="jar" description="Makes dnsjava.jar" depends="compile">
         <jar jarfile="${build_dir}/dnsjava-${version}.jar"
              basedir="${build_dir}" includes="**/*.class"/>
     </target>
