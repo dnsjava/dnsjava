@@ -25,7 +25,7 @@ private short mode, error;
 private byte [] key;
 private byte [] other;
 
-/** The key is assigned by the server */
+/** The key is assigned by the server (unimplemented) */
 public static short SERVERASSIGNED	= 1;
 
 /** The key is computed using a Diffie-Hellman key exchange */
@@ -34,7 +34,7 @@ public static short DIFFIEHELLMAN	= 2;
 /** The key is computed using GSS_API (unimplemented) */
 public static short GSSAPI		= 3;
 
-/** The key is assigned by the resolver */
+/** The key is assigned by the resolver (unimplemented) */
 public static short RESOLVERASSIGNED	= 4;
 
 /** The key should be deleted */
