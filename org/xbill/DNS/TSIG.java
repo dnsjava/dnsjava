@@ -29,7 +29,7 @@ public static final String HMAC		= "HMAC-MD5.SIG-ALG.REG.INT";
  */
 public static final short FUDGE		= 300;
 
-private Name name;
+private Name name, alg;
 private byte [] key;
 private hmacSigner axfrSigner = null;
 
@@ -46,6 +46,7 @@ static {
 public
 TSIG(String name, byte [] key) {
 	this.name = new Name(name);
+	this.alg = new Name(HMAC);
 	this.key = key;
 }
 
@@ -59,8 +60,6 @@ apply(Message m, TSIGRecord old) throws IOException {
 	Date timeSigned = new Date();
 	short fudge;
 	hmacSigner h = new hmacSigner(key);
-
-	Name alg = new Name(HMAC);
 
 	if (Options.check("tsigfudge")) {
 		String s = Options.value("tsigfudge");
@@ -128,6 +127,11 @@ verify(Message m, byte [] b, TSIGRecord old) {
 	if (tsig == null)
 		return false;
 
+	if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
+		if (Options.check("verbose"));
+			System.err.println("BADKEY failure");
+		return false;
+	}
 	try {
 		if (old != null && tsig.getError() != Rcode.BADKEY &&
 		    tsig.getError() != Rcode.BADSIG)
@@ -150,7 +154,7 @@ verify(Message m, byte [] b, TSIGRecord old) {
 		tsig.getName().toWireCanonical(out);
 		out.writeShort(tsig.dclass);
 		out.writeInt(tsig.ttl);
-		tsig.getAlg().toWireCanonical(out);
+		tsig.getAlgorithm().toWireCanonical(out);
 		long time = tsig.getTimeSigned().getTime() / 1000;
 		short timeHigh = (short) (time >> 32);
 		int timeLow = (int) (time);
@@ -179,8 +183,11 @@ verify(Message m, byte [] b, TSIGRecord old) {
 	}
 	if (h.verify(tsig.getSignature()))
 		return true;
-	else
+	else {
+		if (Options.check("verbose"));
+			System.err.println("BADSIG failure");
 		return false;
+	}
 }
 
 /** Prepares the TSIG object to verify an AXFR */
@@ -216,7 +223,7 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 			m.getHeader().incCount(Section.ADDITIONAL);
 		h.addData(header);
 
-		int len = b.length - header.length;	
+		int len = b.length - header.length;
 		if (tsig != null)
 			len -= tsig.wireLength;
 		h.addData(b, header.length, len);
@@ -226,6 +233,14 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 				return false;
 			else
 				return true;
+		}
+
+		if (!tsig.getName().equals(name) ||
+		    !tsig.getAlgorithm().equals(alg))
+		{
+			if (Options.check("verbose"));
+				System.err.println("BADKEY failure");
+			return false;
 		}
 
 		DataByteOutputStream out = new DataByteOutputStream();
@@ -242,6 +257,8 @@ verifyAXFR(Message m, byte [] b, TSIGRecord old,
 	}
 
 	if (h.verify(tsig.getSignature()) == false) {
+		if (Options.check("verbose"));
+			System.err.println("BADSIG failure");
 		return false;
 	}
 
