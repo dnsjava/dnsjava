@@ -124,8 +124,18 @@ findExactMatch(Name name, short type, short dclass, boolean glue) {
 }
 
 void
-addRRset(Name name, Message response, RRset rrset) {
-	Enumeration e = rrset.rrs();
+addRRset(Name name, Message response, RRset rrset, boolean sigonly) {
+	Enumeration e;
+	if (!sigonly) {
+		e = rrset.rrs();
+		while (e.hasMoreElements()) {
+			Record r = (Record) e.nextElement();
+			if (!name.isWild() && r.getName().isWild())
+				r = r.withName(name);
+			response.addRecord(r, Section.ANSWER);
+		}
+	}
+	e = rrset.sigs();
 	while (e.hasMoreElements()) {
 		Record r = (Record) e.nextElement();
 		if (!name.isWild() && r.getName().isWild())
@@ -161,6 +171,12 @@ addAuthority(Message response, Name name, Zone zone) {
 			if (response.findRecord(r, Section.ANSWER) == false)
 				response.addRecord(r, Section.AUTHORITY);
 		}
+		e = nsRecords.sigs();
+		while (e.hasMoreElements()) {
+			Record r = (Record) e.nextElement();
+			if (response.findRecord(r, Section.ANSWER) == false)
+				response.addRecord(r, Section.AUTHORITY);
+		}
 	}
 	else {
 		SOARecord soa = (SOARecord) zone.getSOA();
@@ -173,9 +189,15 @@ addGlue(Message response, Name name) {
 	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
 	Enumeration e = a.rrs();
 	while (e.hasMoreElements()) {
-			Record r = (Record) e.nextElement();
-			if (response.findRecord(r) == false)
-				response.addRecord(r, Section.ADDITIONAL);
+		Record r = (Record) e.nextElement();
+		if (response.findRecord(r) == false)
+			response.addRecord(r, Section.ADDITIONAL);
+	}
+	e = a.sigs();
+	while (e.hasMoreElements()) {
+		Record r = (Record) e.nextElement();
+		if (response.findRecord(r) == false)
+			response.addRecord(r, Section.ADDITIONAL);
 	}
 }
 
@@ -224,7 +246,7 @@ doAXFR(Name name, Message query, Socket s) {
 		while (e.hasMoreElements()) {
 			RRset rrset = (RRset) e.nextElement();
 			Message response = new Message();
-			addRRset(rrset.getName(), response, rrset);
+			addRRset(rrset.getName(), response, rrset, false);
 			byte [] out = response.toWire();
 			dataOut.writeShort(out.length);
 			dataOut.write(out);
@@ -250,6 +272,7 @@ Message
 generateReply(Message query, byte [] in, Socket s) {
 	boolean badversion;
 	int maxLength;
+	boolean sigonly;
 
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
 		return errorMessage(query, Rcode.NOTIMPL);
@@ -286,6 +309,13 @@ generateReply(Message query, byte [] in, Socket s) {
 		return doAXFR(name, query, s);
 	if (!Type.isRR(type) && type != Type.ANY)
 		return errorMessage(query, Rcode.NOTIMPL);
+	if (type == Type.SIG) {
+		type = Type.ANY;
+		sigonly = true;
+	}
+	else
+		sigonly = false;
+
 	Zone zone = findBestZone(name);
 	if (zone != null) {
 		response.getHeader().setFlag(Flags.AA);
@@ -303,7 +333,7 @@ generateReply(Message query, byte [] in, Socket s) {
 		if (zr.isSuccessful()) {
 			RRset [] rrsets = zr.answers();
 			for (int i = 0; i < rrsets.length; i++)
-				addRRset(name, response, rrsets[i]);
+				addRRset(name, response, rrsets[i], sigonly);
 		}
 	}
 	else {
@@ -324,7 +354,7 @@ generateReply(Message query, byte [] in, Socket s) {
 		if (cr.isSuccessful()) {
 			RRset [] rrsets = cr.answers();
 			for (int i = 0; i < rrsets.length; i++)
-				addRRset(name, response, rrsets[i]);
+				addRRset(name, response, rrsets[i], sigonly);
 		}
 	}
 	addAuthority(response, name, zone);
