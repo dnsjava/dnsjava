@@ -166,6 +166,14 @@ addNegative(Name name, short type, short dclass, int ttl, byte cred, Object o) {
 		addSet(name, type, dclass, new Element(ttl, cred, src));
 }
 
+/** Does this object match this class and type? */
+boolean
+match(Object o, short type, short dclass) {
+        Element element = (Element) o;
+	RRset rrset = element.rrset;
+        return (rrset.getType() == type && rrset.getDClass() == dclass);
+}
+
 /**
  * Looks up Records in the Cache.  This follows CNAMEs and handles negatively
  * cached data.

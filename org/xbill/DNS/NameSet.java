@@ -13,7 +13,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  */
 
-class NameSet {
+abstract class NameSet {
 
 private Hashtable data;
 
@@ -22,6 +22,10 @@ protected
 NameSet() {
 	data = new Hashtable();
 }
+
+/** Does this object match this class and type? */
+abstract boolean
+match(Object o, short type, short dclass);
 
 /**
  * Finds all matching sets.  This traverses CNAMEs, and has provisions for 
@@ -45,6 +49,8 @@ findSets(Name name, short type, short dclass) {
 		}
 		return array;
 	}
+	if (dclass == DClass.ANY)
+		dclass = DClass.IN; /* hack */
 	o = nameInfo.get(new TypeClass(type, dclass));
 	if (o != null) {
 		array = new Object[1];
