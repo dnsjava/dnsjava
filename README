@@ -1,11 +1,11 @@
-dnsjava v1.0
+dnsjava v1.1
 
 http://www.xbill.org/dnsjava
 
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-June 18, 1999
+August 25, 1999
 
 Overview:
 
@@ -13,7 +13,7 @@ dnsjava is an implementation of DNS in Java.  It supports all of the common
 record types and the DNSSEC types.  It can be used for queries, zone transfers,
 and dynamic updates.  It includes a cache which can be used by clients, and a
 minimal implementation of a server.  It supports TSIG authenticated messages
-(if you don't know, don't worry about it).
+(if you don't know, don't worry about it) and partial DNSSEC verification.
 
 dnsjava provides functionality above and beyond that of the InetAddress class.
 Since it is written in pure Java, dnsjava is fully threadable.
@@ -25,6 +25,15 @@ interoperability testing at the 44th IETF.  The high level API and caching
 resolver were added to make it useful to a wider audience.
 
 
+Getting started:
+
+Run 'make' from the toplevel directory to build dnsjava.  JDK 1.1 or higher is
+required.  If using JDK 1.1, ignore the deprecation warning.
+
+To compile dnssec support (org.xbill.DNS.security), JDK 1.2 or higher and the
+Java Cryptography Extensions are required.  Run 'make dnssec' to compile this
+package.
+
 Limitations:
 
 There's no way to determine what the local nameserver is at runtime from within
@@ -33,9 +42,9 @@ checked.  These can either be IP addresses or hostnames (which are resolved
 using Java's built in DNS support).  If the underlying OS is unix-based, the
 dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
 the property is not defined and the OS is not unix-based, the default
-nameserver is "localhost".  This is very bad.  Unfortuantely, I have no idea
+nameserver is "localhost".  This is very bad.  Unfortunately, I have no idea
 how to determine the nameserver under Windows, MacOS, etc.  Contributions of
-code are welcome (see DNS/FindResolver.java for the basic structure).
+code are welcome (see org/xbill/DNS/FindServer.java for the basic structure).
 
 One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has

@@ -9,6 +9,7 @@ Command line programs:
 		-k : use TSIG transaction security
 		-t : use TCP by default
 		-i : ignore truncation errors
+		-e : Use EDNS0 (not complete)
 
 - update:
 	A dynamic update client with some extra functionality.  This can be
