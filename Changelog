@@ -1,3 +1,8 @@
+2/12/2003
+	- Fix an infinite loop that could occur when processing a response
+	  containing a CNAME loop and an rcode of NOERROR.
+	  (reported by Sean O'Neil <SeanO@telemate.net>)
+
 1/25/2003
 	- Cleanup and improvements to the ExtendedResolver class.
 

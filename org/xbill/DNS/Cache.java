@@ -586,7 +586,6 @@ addMessage(Message in) {
 	short rcode = in.getHeader().getRcode();
 	boolean haveAnswer = false;
 	boolean completed = false;
-	boolean restart = false;
 	RRset [] answers, auth, addl;
 	SetResponse response = null;
 	boolean verbose = Options.check("verbosecache");
@@ -632,7 +631,6 @@ addMessage(Message in) {
 							   answers[i]);
 			cname = (CNAMERecord) answers[i].first();
 			curname = cname.getTarget();
-			restart = true;
 			haveAnswer = true;
 		} else if (type == Type.DNAME && curname.subdomain(name)) {
 			DNAMERecord dname;
@@ -647,12 +645,7 @@ addMessage(Message in) {
 			catch (NameTooLongException e) {
 				break;
 			}
-			restart = true;
 			haveAnswer = true;
-		}
-		if (restart) {
-			restart = false;
-			i = -1;
 		}
 	}
 
