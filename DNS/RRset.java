@@ -15,14 +15,49 @@ import java.io.*;
 
 public class RRset {
 
+class Enumerator implements Enumeration {
+	int first, count, size;
+	Record [] records;
+	boolean cycled;
+
+	Enumerator() {
+		size = rrs.size();
+		if (start >= size)
+			start -= size;
+		first = count = ++start;
+		records = new Record[size];
+		for (int i = 0; i < size; i++)
+			records[i] = (Record) rrs.elementAt(i);
+	}
+
+	public boolean
+	hasMoreElements() {
+		return (!cycled || count < first);
+	}
+
+	public Object
+	nextElement() {
+		if (count == first && cycled)
+			throw new NoSuchElementException();
+		Object o = records[count++];
+		if (count == size) {
+			count = 0;
+			cycled = true;
+		}
+		return o;
+	}
+}
+
 private Vector rrs;
 private Vector sigs;
+private int start;
 
 /** Creates an empty RRset */
 public
 RRset() {
 	rrs = new Vector();
 	sigs = new Vector();
+	start = 0;
 }
 
 /** Adds a Record to an RRset */
@@ -43,12 +78,16 @@ public void
 clear() {
 	rrs.setSize(0);
 	sigs.setSize(0);
+	start = 0;
 }
 
-/** Returns an Enumeration listing all (data) records */
+/**
+ * Returns an Enumeration listing all (data) records.  This cycles through
+ * the records, so each Enumeration will start with a different record.
+ */
 public Enumeration
 rrs() {
-	return rrs.elements();
+	return new Enumerator();
 }
 
 /** Returns an Enumeration listing all signature records */
