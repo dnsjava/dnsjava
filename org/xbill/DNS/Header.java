@@ -24,6 +24,9 @@ private int [] counts;
 
 private static Random random = new Random();
 
+/** The length of a DNS Header in wire format. */
+public static final int LENGTH = 12;
+
 /**
  * Create a new empty header.
  * @param id The message id
