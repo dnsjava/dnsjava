@@ -8,7 +8,7 @@ import java.net.*;
 /**
  * A set functions designed to deal with DNS names used in reverse mappings.
  * For the IPv4 address a.b.c.d, the reverse map name is d.c.b.a.in-addr.arpa.
- * For the IPv6 address, the reverse map name is ...
+ * For an IPv6 address, the reverse map name is ...ip6.arpa.
  *
  * @author Brian Wellington
  */
