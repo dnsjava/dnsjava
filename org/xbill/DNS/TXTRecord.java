@@ -80,7 +80,8 @@ rdataToString() {
 			String s = (String) e.nextElement();
 			sb.append("\"");
 			sb.append(s);
-			sb.append("\" ");
+			if (e.hasMoreElements())
+				sb.append("\" ");
 		}
 	}
 	return sb.toString();
