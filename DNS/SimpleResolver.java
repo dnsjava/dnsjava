@@ -159,7 +159,7 @@ send(Message query) {
 
 		out = query.toWire();
 
-		if (useTCP)
+		if (useTCP || out.length > udpLength)
 			return sendTCP(query, out);
 
 		s.send(new DatagramPacket(out, out.length, addr, port));
