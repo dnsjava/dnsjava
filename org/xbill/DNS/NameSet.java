@@ -152,7 +152,7 @@ findName(Name name) {
  * set is abstract.
  */
 protected void
-addSet(Name name, short type, Object set) {
+addSet(Name name, short type, TypedObject set) {
 	TypeMap nameInfo = findName(name);
 	if (nameInfo == null)
 		data.put(name, nameInfo = new TypeMap());
@@ -166,7 +166,7 @@ addSet(Name name, short type, Object set) {
  * set is abstract.
  */
 protected void
-removeSet(Name name, short type, Object set) {
+removeSet(Name name, short type, TypedObject set) {
 	TypeMap nameInfo = findName(name);
 	if (nameInfo == null)
 		return;

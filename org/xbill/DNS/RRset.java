@@ -15,7 +15,7 @@ import java.io.*;
  * @author Brian Wellington
  */
 
-public class RRset {
+public class RRset implements TypedObject {
 
 private List rrs;
 private List sigs;

@@ -16,8 +16,7 @@ class TypeMap {
 private Map data;
 
 /* Otherwise the data is stored explicitly. */
-private Object object;
-private short otype;
+private TypedObject object;
 
 TypeMap() {
 }
@@ -31,7 +30,7 @@ get(short type) {
 		throw new RuntimeException("called TypeMap.get() with ANY");
 	if (data != null)
 		return data.get(Type.toShort(type));
-	else if (object != null && otype == type)
+	else if (object != null && object.getType() == type)
 		return object;
 	else
 		return null;
@@ -57,22 +56,20 @@ getAll() {
  * Associates an object with a type.
  */
 synchronized void
-put(short type, Object value) {
+put(short type, TypedObject value) {
 	if (object != null) {
-		if (type == otype)
+		if (type == object.getType())
 			object = value;
 		else {
 			data = new HashMap(2);
-			data.put(Type.toShort(otype), object);
+			data.put(Type.toShort(object.getType()), object);
 			object = null;
 		}
 	}
 	if (data != null)
 		data.put(Type.toShort(type), value);
-	else {
-		otype = type;
+	else
 		object = value;
-	}
 }
 
 /**
@@ -82,7 +79,7 @@ synchronized void
 remove(short type) {
 	if (data != null)
 		data.remove(Type.toShort(type));
-	else if (object != null && otype == type)
+	else if (object != null && object.getType() == type)
 		object = null;
 }
 

@@ -351,7 +351,7 @@ addRecord(Record r) {
  * set is abstract.
  */
 protected void
-addSet(Name name, short type, Object set) {
+addSet(Name name, short type, TypedObject set) {
 	if (!hasWild && name.isWild())
 		hasWild = true;
 	super.addSet(name, type, set);
