@@ -203,13 +203,13 @@ doAXFR(Name name, Socket s) {
 	}
 	Enumeration e = zone.AXFR();
 	try {
+		DataOutputStream dataOut;
+		dataOut = new DataOutputStream(s.getOutputStream());
 		while (e.hasMoreElements()) {
 			RRset rrset = (RRset) e.nextElement();
 			Message response = new Message();
 			addRRset(rrset.getName(), response, rrset);
 			byte [] out = response.toWire();
-			DataOutputStream dataOut;
-			dataOut = new DataOutputStream(s.getOutputStream());
 			dataOut.writeShort(out.length);
 			dataOut.write(out);
 		} 
