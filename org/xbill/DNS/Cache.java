@@ -185,14 +185,14 @@ Cache() {
 	this(DClass.IN);
 }
 
-/** Empties the Cache */
+/** Empties the Cache. */
 public void
 clearCache() {
 	clear();
 }
 
 /**
- * Creates a Cache which initially contains all records in the specified file
+ * Creates a Cache which initially contains all records in the specified file.
  */
 public
 Cache(String file) throws IOException {
@@ -205,7 +205,7 @@ Cache(String file) throws IOException {
 }
 
 /**
- * Adds a record to the Cache
+ * Adds a record to the Cache.
  * @param r The record to be added
  * @param cred The credibility of the record
  * @param o The source of the record (this could be a Message, for example)
@@ -231,7 +231,7 @@ addRecord(Record r, byte cred, Object o) {
 }
 
 /**
- * Adds an RRset to the Cache
+ * Adds an RRset to the Cache.
  * @param r The RRset to be added
  * @param cred The credibility of these records
  * @param o The source of this RRset (this could be a Message, for example)
@@ -252,7 +252,7 @@ addRRset(RRset rrset, byte cred, Object o) {
 }
 
 /**
- * Adds a negative entry to the Cache
+ * Adds a negative entry to the Cache.
  * @param name The name of the negative entry
  * @param type The type of the negative entry
  * @param ttl The ttl of the negative entry
@@ -357,22 +357,21 @@ lookupRecords(Name name, short type, byte minCred) {
 				continue;
 		}
 
+		int rtype = rrset.getType();
 		if (name.equals(rrset.getName())) {
 			if (type != Type.CNAME && type != Type.ANY &&
-			    rrset.getType() == Type.CNAME)
+			    rtype == Type.CNAME)
 			{
 				cr = new SetResponse(SetResponse.CNAME);
 				cr.addCNAME((CNAMERecord) rrset.first());
 				return cr;
-			}
-			else if (type != Type.NS && type != Type.ANY &&
-				 rrset.getType() == Type.NS)
+			} else if (type != Type.NS && type != Type.ANY &&
+				   rtype == Type.NS)
 			{
 				cr = new SetResponse(SetResponse.DELEGATION);
 				cr.addNS(rrset);
 				return cr;
-			}
-			else {
+			} else {
 				if (cr == null)
 					cr = new SetResponse
 						(SetResponse.SUCCESSFUL);
@@ -380,14 +379,14 @@ lookupRecords(Name name, short type, byte minCred) {
 			}
 		}
 		else {
-			if (rrset.getType() == Type.CNAME)
+			if (rtype == Type.CNAME)
 				return new SetResponse(SetResponse.NXDOMAIN);
-			else if (rrset.getType() == Type.DNAME) {
+			else if (rtype == Type.DNAME) {
 				cr = new SetResponse(SetResponse.DNAME);
 				cr.addDNAME((DNAMERecord)rrset.first());
 				return cr;
 			}
-			else if (rrset.getType() == Type.NS) {
+			else if (rtype == Type.NS) {
 				cr = new SetResponse(SetResponse.DELEGATION);
 				cr.addNS(rrset);
 				return cr;
@@ -481,21 +480,18 @@ getCred(Name recordName, Name queryName, short section, boolean isAuth) {
 			cred = Credibility.AUTH_NONAUTH_ANSWER;
 		else
 			cred = Credibility.NONAUTH_ANSWER;
-	}
-	else if (section == Section.AUTHORITY) {
+	} else if (section == Section.AUTHORITY) {
 		if (isAuth)
 			cred = Credibility.AUTH_AUTHORITY;
 		else
 			cred = Credibility.NONAUTH_AUTHORITY;
-	}
-	else if (section == Section.ADDITIONAL) {
+	} else if (section == Section.ADDITIONAL) {
 		if (isAuth)
 			cred = Credibility.AUTH_ADDITIONAL;
 		else
 			cred = Credibility.NONAUTH_ADDITIONAL;
-	}
-	else
-		cred = 0;
+	} else
+		throw new IllegalArgumentException("getCred: invalid section");
 	return cred;
 }
 
@@ -540,26 +536,22 @@ addMessage(Message in) {
 				CNAMERecord cname = (CNAMERecord) answers[i];
 				lookupName = cname.getTarget();
 				restart = true;
-			}
-			else if (rrtype == Type.CNAME &&
-				 name.equals(lookupName))
+			} else if (rrtype == Type.CNAME &&
+				   name.equals(lookupName))
 			{
 				addRecord(answers[i], cred, in);
-			}
-			else if (type == Type.DNAME &&
-				 lookupName.subdomain(name))
+			} else if (type == Type.DNAME &&
+				   lookupName.subdomain(name))
 			{
 				addRecord(answers[i], cred, in);
 				DNAMERecord dname = (DNAMERecord) answers[i];
 				lookupName = lookupName.fromDNAME(dname);
 				restart = true;
-			}
-			else if (rrtype == Type.DNAME &&
-				 lookupName.subdomain(name))
+			} else if (rrtype == Type.DNAME &&
+				   lookupName.subdomain(name))
 			{
 				addRecord(answers[i], cred, in);
-			}
-			else if ((rrtype == queryType ||
+			} else if ((rrtype == queryType ||
 				  queryType == Type.ANY) &&
 				 name.equals(lookupName))
 			{

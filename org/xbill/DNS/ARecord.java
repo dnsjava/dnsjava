@@ -78,10 +78,9 @@ throws TextParseException
 				throw new RuntimeException(msg);
 			}
 		} else {
-			if (!Address.isDottedQuad(s)) {
-				String error = "invalid dotted quad";
-				throw new TextParseException(error);
-			}
+			if (!Address.isDottedQuad(s))
+				throw new TextParseException
+						("invalid dotted quad");
 			address = Address.getByName(s);
 		}
 		rec.addr = address.getAddress();
