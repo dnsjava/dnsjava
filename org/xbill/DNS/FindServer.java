@@ -27,40 +27,46 @@ FindServer() {}
 
 /**
  * Looks in the system properties to find servers and a search path.
- * Properties of the form dns.server1, dns.server2, etc. define servers.
- * Properties of the form dns.search1, dns.search2, etc. define the search path.
+ * Servers are defined by dns.server=server1,server2...
+ * The search path is defined by dns.search=domain1,domain2...
  */
 private static void
 findProperty() {
-	String s;
+	String s, prop;
 	Vector v = null;
-	for (int i = 1; i <= 5; i++) {
-		s = System.getProperty("dns.server" + i);
-		if (s == null)
-			break;
-		if (v == null)
-			v = new Vector();
-		v.addElement(s);
-	}
-	if (v != null) {
-		server = new String[v.size()];
-		for (int i = 0; i < v.size(); i++)
-			server[i] = (String) v.elementAt(i);
+	StringTokenizer st;
+
+	prop = System.getProperty("dns.server");
+	if (prop != null) {
+		st = new StringTokenizer(prop, ",");
+		while (st.hasMoreTokens()) {
+			s = st.nextToken();
+			if (v == null)
+				v = new Vector();
+			v.addElement(s);
+		}
+		if (v != null) {
+			server = new String[v.size()];
+			for (int i = 0; i < v.size(); i++)
+				server[i] = (String) v.elementAt(i);
+		}
 	}
 
 	v = null;
-	for (int i = 1; i <= 5; i++) {
-		s = System.getProperty("dns.search" + i);
-		if (s == null)
-			break;
-		if (v == null)
-			v = new Vector();
-		v.addElement(s);
-	}
-	if (v != null) {
-		search = new Name[v.size()];
-		for (int i = 0; i < v.size(); i++)
-			search[i] = new Name((String)v.elementAt(i));
+	prop = System.getProperty("dns.search");
+	if (prop != null) {
+		st = new StringTokenizer(prop, ",");
+		while (st.hasMoreTokens()) {
+			s = st.nextToken();
+			if (v == null)
+				v = new Vector();
+			v.addElement(s);
+		}
+		if (v != null) {
+			search = new Name[v.size()];
+			for (int i = 0; i < v.size(); i++)
+				search[i] = new Name((String)v.elementAt(i));
+		}
 	}
 }
 
