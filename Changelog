@@ -1,3 +1,8 @@
+4/3/2005
+	- Change the Cache from being periodically cleaned to being
+	  size-bounded.  (based on a patch from several years ago
+	  from Joseph Shraibman <jks@iname.com>).
+
 4/1/2005
 	- Use java.nio classes for sockets internally, which provide a
 	  number of improvements, most visibly improved timeouts.

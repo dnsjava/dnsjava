@@ -107,88 +107,39 @@ private static class NegativeElement extends Element {
 	}
 }
 
-private static class CacheCleaner extends Thread {
-	private Reference cacheref;
-	private long interval;
+private static class CacheMap extends LinkedHashMap {
+	private int maxsize = -1;
 
-	public
-	CacheCleaner(Cache cache, int cleanInterval) {
-		this.cacheref = new WeakReference(cache);
-		this.interval = (long)cleanInterval * 60 * 1000;
-		setDaemon(true);
-		setName("org.xbill.DNS.Cache.CacheCleaner");
-		start();
+	CacheMap(int maxsize) {
+		super(16, (float) 0.75, true);
+		this.maxsize = maxsize;
 	}
 
-	private boolean
-	clean(Cache cache) {
-		Iterator it = cache.data.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry;
-			try {
-				entry = (Map.Entry) it.next();
-			} catch (ConcurrentModificationException e) {
-				return false;
-			}
-			Name name = (Name) entry.getKey();
-			Element [] elements =
-				cache.allElements(entry.getValue());
-			for (int i = 0; i < elements.length; i++) {
-				Element element = elements[i];
-				if (element.expired())
-					cache.removeElement(name,
-							    element.getType());
-			}
-		}
-		return true;
+	int
+	getMaxSize() {
+		return maxsize;
 	}
 
-	public void
-	run() {
-		while (true) {
-			long now = System.currentTimeMillis();
-			long next = now + interval;
-			while (now < next) {
-				try {
-					Thread.sleep(next - now);
-				}
-				catch (InterruptedException e) {
-					return;
-				}
-				now = System.currentTimeMillis();
-			}
-			Cache cache = (Cache) cacheref.get();
-			if (cache == null) {
-				return;
-			}
-			for (int i = 0; i < 4; i++)
-				if (clean(cache))
-					break;
-		}
+	void
+	setMaxSize(int maxsize) {
+		/*
+		 * Note that this doesn't shrink the size of the map if
+		 * the maximum size is lowered, but it should shrink as
+		 * entries expire.
+		 */
+		this.maxsize = maxsize;
+	}
+
+	protected boolean removeEldestEntry(Map.Entry eldest) {
+		return maxsize >= 0 && size() > maxsize;
 	}
 }
 
-private static final int defaultCleanInterval = 30;
-
-private Map data;
+private CacheMap data;
+private int maxEntries = 50000;
 private int maxncache = -1;
 private int maxcache = -1;
-private CacheCleaner cleaner;
 private int dclass;
-
-/**
- * Creates an empty Cache
- *
- * @param dclass The dns class of this cache
- * @param cleanInterval The interval between cache cleanings, in minutes.
- * @see #setCleanInterval(int)
- */
-public
-Cache(int dclass, int cleanInterval) {
-	data = new HashMap();
-	this.dclass = dclass;
-	setCleanInterval(cleanInterval);
-}
 
 /**
  * Creates an empty Cache
@@ -198,7 +149,19 @@ Cache(int dclass, int cleanInterval) {
  */
 public
 Cache(int dclass) {
-	this(dclass, defaultCleanInterval);
+	data = new CacheMap(maxEntries);
+}
+
+/**
+ * Creates an empty Cache
+ *
+ * @param dclass The dns class of this cache
+ * @param cleanInterval unused
+ * @deprecated Use Cache(int) instead.
+ */
+public
+Cache(int dclass, int cleanInterval) {
+	this(dclass);
 }
 
 /**
@@ -207,7 +170,7 @@ Cache(int dclass) {
  */
 public
 Cache() {
-	this(DClass.IN, defaultCleanInterval);
+	this(DClass.IN);
 }
 
 /**
@@ -215,8 +178,7 @@ Cache() {
  */
 public
 Cache(String file) throws IOException {
-	data = new HashMap();
-	cleaner = new CacheCleaner(this, defaultCleanInterval);
+	data = new CacheMap(maxEntries);
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null)
@@ -800,28 +762,65 @@ setMaxCache(int seconds) {
 }
 
 /**
- * Sets the periodic interval (in minutes) that all expired records will be
- * expunged from the cache.  The default is 30 minutes.  0 or a negative value
- * disables this feature.
- * @param cleanInterval The interval between cache cleanings, in minutes.
+ * Gets the current number of entries in the Cache, where an entry consists
+ * of all records with a specific Name.
+ */
+public int
+getSize() {
+	return data.size();
+}
+
+/**
+ * Gets the maximum number of entries in the Cache, where an entry consists
+ * of all records with a specific Name.  A negative value is treated as an
+ * infinite limit.
+ */
+public int
+getMaxEntries() {
+	return data.getMaxSize();
+}
+
+/**
+ * Sets the maximum number of entries in the Cache, where an entry consists
+ * of all records with a specific Name.  A negative value is treated as an
+ * infinite limit.
+ *
+ * Note that setting this to a value lower than the current number
+ * of entries will not cause the Cache to shrink immediately.
+ *
+ * The default maximum number of entries is 50000.
+ *
+ * @param The maximum number of entries in the Cache.
+ */
+public void
+setMaxEntries(int entries) {
+	data.setMaxSize(entries);
+}
+
+/**
+ * @deprecated Caches are no longer periodically cleaned.
  */
 public void
 setCleanInterval(int cleanInterval) {
-	if (cleaner != null) {
-		cleaner.interrupt();
-	}
-	if (cleanInterval > 0)
-		cleaner = new CacheCleaner(this, cleanInterval);
 }
 
-protected void
-finalize() throws Throwable {
-	try {
-		setCleanInterval(0);
+/**
+ * Returns the contents of the Cache as a string.
+ */ 
+public String
+toString() {
+	StringBuffer sb = new StringBuffer();
+	synchronized (this) {
+		Iterator it = data.values().iterator();
+		while (it.hasNext()) {
+			Element [] elements = allElements(it.next());
+			for (int i = 0; i < elements.length; i++) {
+				sb.append(elements[i]);
+				sb.append("\n");
+			}
+		}
 	}
-	finally {
-		super.finalize();
-	}
+	return sb.toString();
 }
 
 }

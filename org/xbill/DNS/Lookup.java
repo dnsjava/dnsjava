@@ -345,7 +345,7 @@ setSearchPath(String [] domains) throws TextParseException {
 public void
 setCache(Cache cache) {
 	if (cache == null) {
-		this.cache = new Cache(dclass, 0);
+		this.cache = new Cache(dclass);
 		this.temporary_cache = true;
 	} else {
 		this.cache = cache;
