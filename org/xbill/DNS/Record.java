@@ -239,7 +239,7 @@ toWireCanonical() throws IOException {
 	return out.toByteArray();
 }
 
-abstract String rdataToString();
+public abstract String rdataToString();
 
 /**
  * Converts a Record into a String representation
