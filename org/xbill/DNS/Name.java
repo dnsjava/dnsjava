@@ -37,6 +37,9 @@ private static final byte [] wildLabel = new byte[] {(byte)1, (byte)'*'};
 /** The root name */
 public static final Name root;
 
+/** The root name */
+public static final Name empty;
+
 /** The maximum length of a Name */
 private static final int MAXNAME = 255;
 
@@ -67,6 +70,7 @@ static {
 			lowercase[i] = (byte)(i - 'A' + 'a');
 	}
 	root = new Name();
+	empty = new Name();
 	wild = new Name();
 	root.appendSafe(emptyLabel, 0, 1);
 	wild.appendSafe(wildLabel, 0, 1);
@@ -620,8 +624,9 @@ toString() {
 }
 
 /**
- * Convert the nth label in a Name to a String
- * @param n The label to be converted to a String.  The first label is 0.
+ * Retrieve the nth label of a Name.  This makes a copy of the label; changing
+ * this does not change the Name.
+ * @param n The label to be retrieved.  The first label is 0.
  */
 public byte []
 getLabel(int n) {
