@@ -1,3 +1,7 @@
+4/10/2004
+	- When parsing paster files, handle the fact that class and ttl may
+	  be in either order.
+
 4/8/2004
 	- The opcode field in the DNS header was incorrectly parsed; this
 	  would affect messages with opcodes other than QUERY.

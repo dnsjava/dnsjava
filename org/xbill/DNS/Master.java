@@ -131,6 +131,7 @@ _nextRecord() throws IOException {
 		Name name;
 		long ttl;
 		int type, dclass;
+		boolean seen_class;
 
 		token = st.get(true, false);
 		if (token.type == Tokenizer.WHITESPACE) {
@@ -189,7 +190,19 @@ _nextRecord() throws IOException {
 			}
 		}
 
+		// This is a bit messy, since any of the following are legal:
+		//   class ttl type
+		//   ttl class type
+		//   class type
+		//   ttl type
+		//   type
+		seen_class = false;
 		s = st.getString();
+		if ((dclass = DClass.value(s)) >= 0) {
+			s = st.getString();
+			seen_class = true;
+		}
+
 		try {
 			ttl = TTL.parseTTL(s);
 			s = st.getString();
@@ -203,11 +216,12 @@ _nextRecord() throws IOException {
 				ttl = last.getTTL();
 		}
 
-		if ((dclass = DClass.value(s)) > 0)
+		if ((dclass = DClass.value(s)) >= 0) {
 			s = st.getString();
-		else
+		} else {
 			dclass = DClass.IN;
-		
+		}
+
 		if ((type = Type.value(s)) < 0)
 			throw st.exception("Invalid type '" + s + "'");
 
