@@ -7,6 +7,12 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
+/**
+ * An implementation of Resolver that can send queries to multiple servers,
+ * sending the queries multiple times if necessary.
+ * @see Resolver
+ */
+
 public class ExtendedResolver implements Resolver {
 
 class QElement {
@@ -50,8 +56,7 @@ class Receiver implements ResolverListener {
 	}
 }
 
-static final int quantum = 20;
-
+private static final int quantum = 20;
 private Vector resolvers;
 
 private void
@@ -59,6 +64,13 @@ init() {
 	resolvers = new Vector();
 }
 
+/**
+ * Creates a new Extended Resolver.  FindServer is used to locate the servers
+ * for which SimpleResolver contexts should be initialized.
+ * @see SimpleResolver
+ * @see FindServer
+ * @exception UnknownHostException Failure occured initializing SimpleResolvers
+ */
 public
 ExtendedResolver() throws UnknownHostException {
 	init();
@@ -74,6 +86,13 @@ ExtendedResolver() throws UnknownHostException {
 		resolvers.addElement(new SimpleResolver());
 }
 
+/**
+ * Creates a new Extended Resolver
+ * @param servers  An array of server names for which SimpleResolver
+ * contexts should be initialized.
+ * @see SimpleResolver
+ * @exception UnknownHostException Failure occured initializing SimpleResolvers
+ */
 public
 ExtendedResolver(String [] servers) throws UnknownHostException {
 	init();
@@ -84,6 +103,12 @@ ExtendedResolver(String [] servers) throws UnknownHostException {
 	}
 }
 
+/**
+ * Creates a new Extended Resolver
+ * @param res An array of pre-initialized Resolvers is provided.
+ * @see SimpleResolver
+ * @exception UnknownHostException Failure occured initializing SimpleResolvers
+ */
 public
 ExtendedResolver(Resolver [] res) throws UnknownHostException {
 	init();
@@ -91,7 +116,7 @@ ExtendedResolver(Resolver [] res) throws UnknownHostException {
 		resolvers.addElement(res[i]);
 }
 
-boolean
+private boolean
 sendTo(Message query, Receiver receiver, Hashtable idMap, int r, int q) {
 	q -= r;
 	Resolver res = (Resolver) resolvers.elementAt(r);
@@ -107,48 +132,64 @@ sendTo(Message query, Receiver receiver, Hashtable idMap, int r, int q) {
 	return false;
 }
 
+/** Sets the port to communicate with on the servers */
 public void
 setPort(int port) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setPort(port);
 }
 
+/** Sets whether TCP connections will be sent by default */
 public void
 setTCP(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setTCP(flag);
 }
 
+/** Sets whether truncated responses will be returned */
 public void
 setIgnoreTruncation(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setIgnoreTruncation(flag);
 }
 
+/** Sets the EDNS version used on outgoing messages (only 0 is meaningful) */
 public void
 setEDNS(int level) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setEDNS(level);
 }
 
+/** Specifies the TSIG key that messages will be signed with */
 public void
 setTSIGKey(String name, String key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setTSIGKey(name, key);
 }
 
+/**
+ * Specifies the TSIG key (with the same name as the local host) that messages
+ * will be signed with
+ */
 public void
 setTSIGKey(String key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setTSIGKey(key);
 }
 
+/** Sets the amount of time to wait for a response before giving up */
 public void
 setTimeout(int secs) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.elementAt(i)).setTimeout(secs);
 }
 
+/**
+ * Sends a message, and waits for a response.  Multiple servers are queried,
+ * and queries are sent multiple times until either a successful response
+ * is received, or it is clear that there is no successful response.
+ * @return The response
+ */
 public Message
 send(Message query) {
 	int q, r;
@@ -211,6 +252,11 @@ uniqueID(Message m) {
 		(hashCode() & 0xFF));
 }
 
+/**
+ * Asynchronously sends a message, registering a listener to receive a callback
+ * Multiple asynchronous lookups can be performed in parallel.
+ * @return An identifier
+ */
 public int
 sendAsync(final Message query, final ResolverListener listener) {
 	final int id = uniqueID(query);
@@ -218,11 +264,17 @@ sendAsync(final Message query, final ResolverListener listener) {
 	return id;
 }
 
+/**
+ * Sends a zone transfer message to the first known server, and waits for a
+ * response.  This should be further tuned later.
+ * @return The response
+ */
 public
 Message sendAXFR(Message query) {
 	return ((Resolver)resolvers.elementAt(0)).sendAXFR(query);
 }
 
+/** Returns the i'th resolver used by this ExtendedResolver */
 public Resolver
 getResolver(int i) {
 	if (i < resolvers.size())
@@ -230,6 +282,7 @@ getResolver(int i) {
 	return null;
 }
 
+/** Returns all resolvers used by this ExtendedResolver */
 public Resolver []
 getResolvers() {
 	Resolver [] res = new Resolver[resolvers.size()];
@@ -238,11 +291,13 @@ getResolvers() {
 	return res;
 }
 
+/** Adds a new resolver to be used by this ExtendedResolver */
 public void
 addResolver(Resolver r) {
 	resolvers.addElement(r);
 }
 
+/** Deletes a resolver used by this ExtendedResolver */
 public void
 deleteResolver(Resolver r) {
 	resolvers.removeElement(r);

@@ -12,9 +12,10 @@ import java.net.*;
 /**
  * High level API for mapping queries to DNS Records.  Caching is used
  * when possible to reduce the number of DNS requests, and a Resolver
- * is used to perform the queries.
- *
+ * is used to perform the queries.  A search path can be set or determined
+ * by FindServer, which allows lookups of unqualified names.
  * @see Resolver
+ * @see FindServer
  */
 
 public final class dns {
@@ -78,7 +79,8 @@ setResolver(Resolver _res) {
 
 /**
  * Specifies the domains which will be appended to unqualified names before
- * beginning the lookup process
+ * beginning the lookup process.  If this is not set, FindServer will be used.
+ * @see FindServer
  */
 public static void
 setSearchPath(String [] domains) {

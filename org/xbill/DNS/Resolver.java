@@ -42,7 +42,8 @@ public void setTimeout(int secs);
 public Message send(Message query);
 
 /**
- * Asynchronously sends a message, registering a listener to receive a callback
+ * Asynchronously sends a message, registering a listener to receive a callback.
+ * Multiple asynchronous lookups can be performed in parallel.
  * @return An identifier, which is also a parameter in the callback
  */
 public int sendAsync(final Message query, final ResolverListener listener);
