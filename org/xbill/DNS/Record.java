@@ -181,10 +181,8 @@ toStringNoData() {
 	sb.append(name);
 	sb.append("\t");
 	sb.append(ttl);
-	if (dclass != DClass.IN) {
-		sb.append("\t");
-		sb.append(DClass.string(dclass));
-	}
+	sb.append("\t");
+	sb.append(DClass.string(dclass));
 	sb.append("\t");
 	sb.append(Type.string(type));
 	sb.append("\t");
