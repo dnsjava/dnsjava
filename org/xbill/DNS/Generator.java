@@ -19,7 +19,7 @@ public long start;
 /** The end of the range. */
 public long end;
 
-/** The end of the range. */
+/** The step value of the range. */
 public long step;
 
 /** The pattern to use for generating record names. */
@@ -37,14 +37,38 @@ public final long ttl;
 /** The pattern to use for generating record data. */
 public final String rdataPattern;
 
-/** The origin to append when relative names are seen. */
+/** The origin to append to relative names. */
 public final Name origin;
 
 private long current;
 
+/**
+ * Creates a specification for generating records, as a $GENERATE
+ * statement in a master file.
+ * @param start The start of the range.
+ * @param end The end of the range.
+ * @param step The step value of the range.
+ * @param namePattern The pattern to use for generating record names.
+ * @param type The type of the generated records.  The supported types are
+ * PTR, CNAME, DNAME, A, AAAA, and NS.
+ * @param dclass The class of the generated records.
+ * @param ttl The ttl of the generated records.
+ * @param rdataPattern The pattern to use for generating record data.
+ * @param origin The origin to append to relative names.
+ * @throws IllegalArgumentException The range is invalid.
+ * @throws IllegalArgumentException The type does not support generation.
+ */
+public
 Generator(long start, long end, long step, String namePattern,
 	  int type, int dclass, long ttl, String rdataPattern, Name origin)
 {
+	if (start < 0 || end < 0 || start > end || step <= 0)
+		throw new IllegalArgumentException
+				("invalid range specification");
+	if (type != Type.PTR && type != Type.CNAME && type != Type.DNAME &&
+	    type != Type.A && type != Type.AAAA && type != Type.NS)
+		throw new IllegalArgumentException("unsupported type");
+
 	this.start = start;
 	this.end = end;
 	this.step = step;
