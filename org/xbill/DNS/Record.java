@@ -23,6 +23,18 @@ protected int wireLength = -1;
 
 private	static Class [] knownTypes = new Class[256];
 
+private static Class [] fromWireList = new Class [] {Name.class,
+                                                     Short.TYPE,
+                                                     Integer.TYPE,
+                                                     Integer.TYPE,
+                                                     DataByteInputStream.class,
+                                                     Compression.class};
+private static Class [] fromTextList = new Class [] {Name.class,
+						     Short.TYPE,
+						     Integer.TYPE,
+						     MyStringTokenizer.class,
+						     Name.class};
+
 protected
 Record() {}
 
@@ -63,14 +75,7 @@ newRecord(Name name, short type, short dclass, int ttl, int length,
 		Constructor m;
 
 		rrclass = toClass(type);
-		m = rrclass.getDeclaredConstructor(new Class [] {
-							Name.class,
-							Short.TYPE,
-							Integer.TYPE,
-							Integer.TYPE,
-						      DataByteInputStream.class,
-							Compression.class
-						   });
+		m = rrclass.getDeclaredConstructor(fromWireList);
 		rec = (Record) m.newInstance(new Object [] {
 							name,
 							new Short(dclass),
@@ -289,13 +294,7 @@ throws IOException
 		Constructor m;
 
 		rrclass = toClass(type);
-		m = rrclass.getDeclaredConstructor(new Class [] {
-							Name.class,
-							Short.TYPE,
-							Integer.TYPE,
-							MyStringTokenizer.class,
-							Name.class,
-						   });
+		m = rrclass.getDeclaredConstructor(fromTextList);
 		rec = (Record) m.newInstance(new Object [] {
 						name,
 						new Short(dclass),
