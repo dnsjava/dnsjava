@@ -1,3 +1,6 @@
+7/22/2001
+	- Added the -q (print query) option to dig.
+
 7/19/2001
 	- A string tokenizer bug caused TXT records with one string to be
 	  incorrectly parsed.  (David Blacka)

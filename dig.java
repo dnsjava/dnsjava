@@ -60,6 +60,7 @@ main(String argv[]) throws IOException {
 	Record rec;
 	Record opt = null;
 	Resolver res = null;
+	boolean printQuery = false;
 
 	if (argv.length < 1) {
 		usage();
@@ -156,6 +157,10 @@ main(String argv[]) throws IOException {
 						    (byte)0, Flags.DO);
 				break;
 
+			    case 'q':
+			    	printQuery = true;
+				break;
+
 			    default:
 				System.out.print("Invalid option");
 				System.out.println(argv[arg]);
@@ -173,6 +178,8 @@ main(String argv[]) throws IOException {
 	query = Message.newQuery(rec);
 	if (opt != null)
 		query.addRecord(opt, Section.ADDITIONAL);
+	if (printQuery)
+		System.out.println(query);
 	response = res.send(query);
 
 	if (type == Type.AXFR)
