@@ -3,7 +3,7 @@ import java.io.*;
 
 public class dnsMXRecord extends dnsRecord {
 
-short priority;
+int priority;
 dnsName name;
 
 public dnsMXRecord(dnsName rname, short rclass) {
@@ -21,7 +21,7 @@ public dnsMXRecord(dnsName rname, short rclass, int rttl, int priority,
 }
 
 void parse(CountedDataInputStream in, dnsCompression c) throws IOException {
-	priority = (short)in.readUnsignedShort();
+	priority = in.readUnsignedShort();
 	name = new dnsName(in, c);
 }
 
