@@ -220,6 +220,23 @@ static {
 	rcodes.put(new Byte(BADSIG), "BADSIG");
 	rcodes.put(new Byte(BADKEY), "BADKEY");
 	rcodes.put(new Byte(BADTIME), "BADTIME");
+	rcodes.put(new Byte(BADID), "BADID");
+
+	rcodes.put("NOERROR", new Byte(NOERROR));
+	rcodes.put("FORMERROR", new Byte(FORMERR));
+	rcodes.put("SERVFAIL", new Byte(SERVFAIL));
+	rcodes.put("NXDOMAIN", new Byte(NXDOMAIN));
+	rcodes.put("NOTIMPL", new Byte(NOTIMPL));
+	rcodes.put("REFUSED", new Byte(REFUSED));
+	rcodes.put("YXDOMAIN", new Byte(YXDOMAIN));
+	rcodes.put("YXRRSET", new Byte(YXRRSET));
+	rcodes.put("NXRRSET", new Byte(NXRRSET));
+	rcodes.put("NOTAUTH", new Byte(NOTAUTH));
+	rcodes.put("NOTZONE", new Byte(NOTZONE));
+	rcodes.put("BADSIG", new Byte(BADSIG));
+	rcodes.put("BADKEY", new Byte(BADKEY));
+	rcodes.put("BADTIME", new Byte(BADTIME));
+	rcodes.put("BADID", new Byte(BADID));
 
 	opcodes.put(new Byte(QUERY), "QUERY");
 	opcodes.put(new Byte(NOTIFY), "NOTIFY");
@@ -237,6 +254,11 @@ static {
 	sections.put(new Byte(ANSWER), "an");
 	sections.put(new Byte(AUTHORITY), "au");
 	sections.put(new Byte(ADDITIONAL), "ad");
+
+	sections.put("qd", new Byte(QUESTION));
+	sections.put("an", new Byte(ANSWER));
+	sections.put("au", new Byte(AUTHORITY));
+	sections.put("ad", new Byte(ADDITIONAL));
 
 	longSections.put(new Byte(QUESTION), "QUESTIONS");
 	longSections.put(new Byte(ANSWER), "ANSWERS");
@@ -283,6 +305,18 @@ static String rcodeString(int i) {
 	return (s != null) ? s : new Integer(i).toString();
 }
 
+static byte rcodeValue(String s) {
+	Byte i = (Byte) rcodes.get(s.toUpperCase());
+	if (i != null)
+		return i.byteValue();
+	try {
+		return Byte.parseByte(s);
+	}
+	catch (Exception e) {
+		return (-1);
+	}
+}
+
 static String opcodeString(int i) {
 	String s = (String) opcodes.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();
@@ -300,6 +334,19 @@ static String sectionString(int i) {
 	String s = (String) sections.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();
 }
+
+static byte sectionValue(String s) {
+	Byte i = (Byte) sections.get(s.toLowerCase());
+	if (i != null)
+		return i.byteValue();
+	try {
+		return Byte.parseByte(s);
+	}
+	catch (Exception e) {
+		return (-1);
+	}
+}
+
 static String longSectionString(int i) {
 	String s = (String) longSections.get(new Byte((byte)i));
 	return (s != null) ? s : new Integer(i).toString();

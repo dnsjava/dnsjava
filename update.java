@@ -12,13 +12,12 @@ static final int PREREQ = dns.ANSWER;
 static final int UPDATE = dns.AUTHORITY;
 static final int ADDITIONAL = dns.ADDITIONAL;
 
-dnsMessage query;
+dnsMessage query, response;
 dnsResolver res;
 String server = "localhost";
 dnsName origin;
 int defaultTTL;
 short defaultClass = dns.IN;
-short lastRcode;
 
 public
 update(InputStream in) throws IOException {
@@ -134,22 +133,13 @@ update(InputStream in) throws IOException {
 			 operation.equals("q"))
 			System.exit(0);
 
-		else if (operation.equals("assert")) {
-			String s = st.nextToken();
-			String rcodeString = dns.rcodeString(lastRcode);
-			if (!s.equalsIgnoreCase(rcodeString)) {
-				System.out.println("Expected rcode " + s +
-						   ", received " + rcodeString);
-				if (st.hasMoreTokens()) {
-					s = st.nextToken();
-					System.out.println(s);
-				}
-				System.exit(-1);
-			}
-		}
-
 		else if (operation.equals("file"))
 			doFile(st, inputs);
+
+		else if (operation.equals("assert")) {
+			if (doAssert(st) == false)
+				return;
+		}
 
 		else
 			System.out.println("invalid keyword: " + operation);
@@ -175,11 +165,10 @@ sendUpdate() throws IOException {
 		query.addRecord(ZONE, soa);
 	}
 
-	dnsMessage response = res.send(query);
+	response = res.send(query);
 	if (response == null)
 		return;
 
-	lastRcode = response.getHeader().getRcode();
 	System.out.println(response.getHeader());
 
 	System.out.println(";; done");
@@ -358,9 +347,8 @@ doQuery(MyStringTokenizer st) throws IOException {
 	newQuery.addRecord(dns.QUESTION, rec);
 	if (res == null)
 		res = new dnsResolver(server);
-	dnsMessage newResponse = res.send(newQuery);
-	System.out.println(newResponse);
-	lastRcode = newResponse.getHeader().getRcode();
+	response = res.send(newQuery);
+	System.out.println(response);
 }
 
 void
@@ -377,6 +365,40 @@ doFile(MyStringTokenizer st, Vector inputs) {
 		return;
 	}
 	
+}
+
+boolean
+doAssert(MyStringTokenizer st) {
+	String field = st.nextToken();
+	String expected = st.nextToken();
+	String value = null;
+	boolean flag = true;
+	int section;
+
+	if (field.equalsIgnoreCase("rcode")) {
+		short rcode = response.getHeader().getRcode();
+		if (rcode != dns.rcodeValue(expected)) {
+			value = dns.rcodeString(rcode);
+			flag = false;
+		}
+	}
+	else if ((section = dns.sectionValue(field)) >= 0) {
+		short count = response.getHeader().getCount(section);
+		if (count != Short.parseShort(expected)) {
+			value = new Short(count).toString();
+			flag = false;
+		}
+	}
+	else
+		System.out.println("Invalid assertion keyword: " + field);
+
+	if (flag == false) {
+		System.out.println("Expected " + field + " " + expected + 
+				   ", received " + value);
+		if (st.hasMoreTokens())
+			System.out.println(st.nextToken());
+	}
+	return flag;
 }
 
 static void
@@ -453,14 +475,14 @@ helpOperations() {
 	  "    quit\t\t" +
 	  "quits the program\n" +
 
-	  "    assert <val> [msg]\t" +
-	  "asserts that the rcode of the last operation matches\n" +
-	  "\t\t\tthe value specified.  If not, the message is printed\n" +
-	  "\t\t\t(if present) and the program exits.\n" +
-
 	  "    file <file>\t\t" +
 	  "opens the specified file and uses it as the new input\n" +
-	  "\t\t\tsource\n"
+	  "\t\t\tsource\n" +
+
+	  "    assert <field> <value> [msg]\n" +
+	  "\t\t\tasserts that the value of the field in the last response\n" +
+	  "\t\t\tmatches the value specified.  If not, the message is\n" +
+	  "\t\t\tprinted (if present) and the program exits.\n"
 	);
 }
 

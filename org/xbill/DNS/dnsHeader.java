@@ -109,7 +109,7 @@ decCount(int field) {
 	counts[field]--;
 }
 
-public int
+public short
 getCount(int field) {
 	return counts[field];
 }
