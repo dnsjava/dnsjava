@@ -96,7 +96,11 @@ throws IOException
 	flags = (short) Integer.decode(st.nextToken()).intValue();
 	proto = (byte) Integer.parseInt(st.nextToken());
 	alg = (byte) Integer.parseInt(st.nextToken());
-	key = base64.fromString(st.nextToken());
+	/* If this is a null key, there's no key data */
+	if (!((flags & (NOAUTH|NOCONF)) == (NOAUTH|NOCONF)))
+		key = base64.fromString(st.nextToken());
+	else
+		key = null;
 }
 
 /**
@@ -107,7 +111,7 @@ toString() {
 	StringBuffer sb = toStringNoData();
 	if (key != null || (flags & (NOAUTH|NOCONF)) == (NOAUTH|NOCONF) ) {
 		sb.append ("0x");
-		sb.append (Integer.toHexString(flags));
+		sb.append (Integer.toHexString(flags & 0xFFFF));
 		sb.append (" ");
 		sb.append (proto);
 		sb.append (" ");
