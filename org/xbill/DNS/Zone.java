@@ -41,9 +41,7 @@ class AXFREnumeration implements Enumeration {
 		}
 		if (!sentNS) {
 			sentNS = true;
-			RRset nsset = getNS();
-			if (nsset != null)
-				return nsset;
+			return getNS();
 		}
 		if (!sentOrigin) {
 			if (currentName == null) {
