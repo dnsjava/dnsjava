@@ -74,7 +74,6 @@ class AXFREnumeration implements Enumeration {
 			count = 0;
 			if (count < current.length)
 				return current[count++];
-			count++;
 		}
 		sentLastSOA = true;
 		RRset rrset = new RRset();
