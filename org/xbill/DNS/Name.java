@@ -284,7 +284,8 @@ fromString(String s, Name origin) throws TextParseException {
 			intval = 0;
 		} else if (b == '.') {
 			if (labelstart == -1)
-				throw new TextParseException("invalid label");
+				throw new TextParseException
+							("invalid empty label");
 			label[0] = (byte)(pos - 1);
 			name.appendFromString(label, 0, 1);
 			labelstart = -1;
