@@ -347,7 +347,10 @@ doQuery(MyStringTokenizer st) throws IOException {
 	newQuery.addRecord(dns.QUESTION, rec);
 	if (res == null)
 		res = new dnsResolver(server);
-	response = res.send(newQuery);
+	if (rec.type == dns.AXFR)
+		response = res.sendAXFR(newQuery);
+	else
+		response = res.send(newQuery);
 	System.out.println(response);
 }
 
