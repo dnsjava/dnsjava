@@ -9,9 +9,9 @@ import java.util.*;
 /**
  * A helper class that tries to locate name servers and the search path to
  * be appended to unqualified names.  Currently, this works if either the
- * appropriate properties are set, or the OS has a unix-like /etc/resolv.conf.
- * There is no reason for these routines to be called directly except
- * curiosity.
+ * appropriate properties are set, the OS has a unix-like /etc/resolv.conf,
+ * or the system is Windows based with ipconfig or winipcfg.  There is no
+ * reason for these routines to be called directly except * curiosity.
  *
  * @author Brian Wellington
  */
@@ -146,7 +146,19 @@ findWin(InputStream in) {
 		Vector vserver = null;
 		String line = null;
 		while ((line = br.readLine()) != null) {
-			if (line.indexOf("DNS") != -1)
+			if (line.indexOf("Host Name") != -1) {
+				String s = null;
+				StringTokenizer st = new StringTokenizer(line);
+				while (st.hasMoreTokens())
+					s = st.nextToken();
+				Name name = new Name(s);
+				if (name.labels() == 1)
+					continue;
+				name = new Name(name, 1);
+				search = new Name[1];
+				search[0] = name;
+			}
+			else if (line.indexOf("DNS") != -1)
 				break;
 		}
 		
@@ -183,8 +195,7 @@ findWin(InputStream in) {
 }
 
 /**
- * Calls winipcfg and parses the result to find servers.  I don't see a way
- * to find a search path.
+ * Calls winipcfg and parses the result to find servers and a search path.
  */
 private static void
 find95() {
@@ -203,8 +214,7 @@ find95() {
 }
 
 /**
- * Calls ipconfig and parses the result to find servers.  I don't see a way
- * to find a search path.
+ * Calls ipconfig and parses the result to find servers and a search path.
  */
 private static void
 findNT() {
