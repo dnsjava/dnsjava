@@ -185,9 +185,7 @@ Zone(String file, Cache cache) throws IOException {
  * @see Master
  */
 public
-Zone(Name zone, short dclass, String remote, Cache cache)
-throws IOException
-{
+Zone(Name zone, short dclass, String remote, Cache cache) throws IOException {
 	super(false);
 	origin = zone;
 	this.dclass = dclass;
@@ -252,24 +250,19 @@ findRecords(Name name, short type) {
 	Object o = lookup(name, type);
 	if (o == null) {
 		/* The name does not exist */
-		if (name.isWild())
+		if (name.isWild() || !hasWild)
 			return SetResponse.ofType(SetResponse.NXDOMAIN);
 
 		int labels = name.labels() - origin.labels();
-		if (labels == 0)
-			return SetResponse.ofType(SetResponse.NXDOMAIN);
-		if (hasWild) {
-			SetResponse sr;
-			Name tname = name;
-			do {
-				sr = findRecords(tname.wild(1), type);
-				if (!sr.isNXDOMAIN())
-					return sr;
-				tname = new Name(tname, 1);
-			} while (labels-- >= 1);
-			return sr;
-		} else
-			return SetResponse.ofType(SetResponse.NXDOMAIN);
+		SetResponse sr;
+		Name tname = name;
+		do {
+			sr = findRecords(tname.wild(1), type);
+			if (!sr.isNXDOMAIN())
+				return sr;
+			tname = new Name(tname, 1);
+		} while (labels-- >= 1);
+		return SetResponse.ofType(SetResponse.NXDOMAIN);
 	} else if (o == NXRRSET) {
 		/* The name exists but the type does not. */
 		return SetResponse.ofType(SetResponse.NXRRSET);
@@ -304,13 +297,11 @@ findRecords(Name name, short type) {
 		}
 	} else {
 		if (rrset.getType() == Type.CNAME)
-			return SetResponse.ofType(SetResponse.NXDOMAIN);
-		else if (rrset.getType() == Type.DNAME) {
+			zr = SetResponse.ofType(SetResponse.NXDOMAIN);
+		else if (rrset.getType() == Type.DNAME)
 			zr = new SetResponse(SetResponse.DNAME, rrset);
-		}
-		else if (rrset.getType() == Type.NS) {
+		else if (rrset.getType() == Type.NS)
 			zr = new SetResponse(SetResponse.DELEGATION, rrset);
-		}
 	}
 	return zr;
 }
