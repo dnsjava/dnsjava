@@ -67,7 +67,7 @@ getTypedObject(int type) {
 	sb.insert(s.lastIndexOf("Record"), Type.string(type));
 
 	try {
-		Class c = Class.forName(sb.toString());
+		Class c = Class.forName(sb.toString().replace('-', '_'));
 		Constructor m = c.getDeclaredConstructor(emptyClassArray);
 		knownRecords[type] = (Record) m.newInstance(emptyObjectArray);
 	}
