@@ -59,6 +59,7 @@ private static class Resolution implements ResolverListener {
 		this.query = query;
 	}
 
+	/* Asynchronously sends a message. */
 	public void
 	send(int n) {
 		sent[n]++;
@@ -66,18 +67,46 @@ private static class Resolution implements ResolverListener {
 		inprogress[n] = resolvers[n].sendAsync(query, this);
 	}
 
+	/* Start a synchronous resolution */
 	public Message
 	start() throws IOException {
-		send(0);
-		synchronized (this) {
-			while (!done) {
-				try {
-					wait();
-				}
-				catch (InterruptedException e) {
+		try {
+			/*
+			 * First, try sending synchronously.  If this works,
+			 * we're done.  Otherwise, we'll get an exception
+			 * and continue.  It would be easier to call send(0),
+			 * but this avoids a thread creation.  If and when
+			 * SimpleResolver.sendAsync() can be made to not
+			 * create a thread, this could be changed.
+			 */
+			sent[0]++;
+			outstanding++;
+			inprogress[0] = new Object();
+			return resolvers[0].send(query);
+		}
+		catch (Exception e) {
+			/*
+			 * This will either cause more queries to be sent
+			 * asynchronously or will set the 'done' flag.
+			 */
+			handleException(inprogress[0], e);
+		}
+		if (!done) {
+			/*
+			 * Wait for a successful response or for each
+			 * subresolver to fail.
+			 */
+			synchronized (this) {
+				while (!done) {
+					try {
+						wait();
+					}
+					catch (InterruptedException e) {
+					}
 				}
 			}
 		}
+		/* Return the response or throw an exception */
 		if (response != null)
 			return response;
 		else if (exception instanceof IOException)
@@ -88,17 +117,22 @@ private static class Resolution implements ResolverListener {
 			throw new RuntimeException("ExtendedResolver failure");
 	}
 
+	/* Start an asynchronous resolution */
 	public void
 	startAsync(ResolverListener listener) {
 		this.listener = listener;
 		send(0);
 	}
 
+	/*
+	 * Receive a response.  If the resolution hasn't been completed,
+	 * either wake up the blocking thread or call the callback.
+	 */
 	public void
 	receiveMessage(Object id, Message m) {
 		if (Options.check("verbose"))
 			System.err.println("ExtendedResolver: " +
-					   "received message " + id);
+					   "received message");
 		synchronized (this) {
 			if (done)
 				return;
@@ -112,11 +146,14 @@ private static class Resolution implements ResolverListener {
 		listener.receiveMessage(this, response);
 	}
 
+	/*
+	 * Receive an exception.  If the resolution has been completed,
+	 * do nothing.  Otherwise make progress.
+	 */
 	public void
 	handleException(Object id, Exception e) {
 		if (Options.check("verbose"))
-			System.err.println("ExtendedResolver: " +
-					   "exception on message " + id);
+			System.err.println("ExtendedResolver: got" + e);
 		synchronized (this) {
 			outstanding--;
 			if (done)
@@ -125,28 +162,45 @@ private static class Resolution implements ResolverListener {
 			for (n = 0; n < inprogress.length; n++)
 				if (inprogress[n] == id)
 					break;
+			/* If we don't know what this is, do nothing. */
 			if (n == inprogress.length)
 				return;
 			boolean startnext = false;
 			boolean waiting = false;
+			/*
+			 * If this is the first response from server n, 
+			 * we should start sending queries to server n + 1.
+			 */
 			if (sent[n] == 1 && n < resolvers.length - 1)
 				startnext = true;
 			if (e instanceof InterruptedIOException) {
-				/* Got a timeout; retry */
+				/* Got a timeout; resend */
 				if (sent[n] < retries)
 					send(n);
 				if (exception == null)
 					exception = e;
 			} else if (e instanceof SocketException) {
+				/*
+				 * Problem with the socket; don't resend
+				 * on it
+				 */
 				if (exception == null ||
 				    exception instanceof InterruptedIOException)
 					exception = e;
 			} else {
+				/*
+				 * Problem with the response; don't resend
+				 * on the same socket.
+				 */
 				exception = e;
 			}
 			if (startnext)
 				send(n + 1);
 			if (outstanding == 0) {
+				/*
+				 * If we're done and this is synchronous,
+				 * wake up the blocking thread.
+				 */
 				done = true;
 				if (listener == null) {
 					notifyAll();
@@ -156,6 +210,7 @@ private static class Resolution implements ResolverListener {
 			if (!done)
 				return;
 		}
+		/* If we're done and this is asynchronous, call the callback. */
 		listener.handleException(this, exception);
 	}
 }
