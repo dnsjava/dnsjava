@@ -47,10 +47,50 @@ parseTTL(String s) throws NumberFormatException {
 	return ttl;
 }
 
+public static String
+format(int ttl) {
+	StringBuffer sb = new StringBuffer();
+	int secs, mins, hours, days, weeks;
+	secs = ttl % 60;
+	ttl /= 60;
+	mins = ttl % 60;
+	ttl /= 60;
+	hours = ttl % 24;
+	ttl /= 24;
+	days = ttl % 7;
+	ttl /= 7;
+	weeks = ttl;
+	if (weeks > 0) {
+		sb.append(weeks);
+		sb.append("W");
+	}
+	if (days > 0) {
+		sb.append(days);
+		sb.append("D");
+	}
+	if (hours > 0) {
+		sb.append(hours);
+		sb.append("H");
+	}
+	if (mins > 0) {
+		sb.append(mins);
+		sb.append("M");
+	}
+	if (secs > 0 || (weeks == 0 && days == 0 && hours == 0 && mins == 0)) {
+		sb.append(secs);
+		sb.append("S");
+	}
+	return sb.toString();
+}
+
 public static void main(String [] args) {
-	String [] strings = {"1S", "1M", "1m", "1M1S", "1D", "1H1D", "1d1h", "1w", "12345"};
-	for (int i = 0; i < strings.length; i++)
-		System.out.println(strings[i] + " = " + parseTTL(strings[i]));
+	String [] strings = {"1S", "1M", "1m", "1M1S", "1D", "1H1D", "1d1h",
+			     "1w", "12345"};
+	for (int i = 0; i < strings.length; i++) {
+		int ttl = parseTTL(strings[i]);
+		String s = TTL.format(ttl);
+		System.out.println(strings[i] + " = " + ttl + " = " + s);
+	}
 }
 
 }
