@@ -123,15 +123,17 @@ private class CacheCleaner extends Thread {
 	public void
 	run() {
 		while (true) {
-			boolean interrupted = false;
-			try {
-				Thread.sleep(cleanInterval * 60 * 1000);
+			long now = System.currentTimeMillis();
+			long next = now + cleanInterval * 60 * 1000;
+			while (now < next) {
+				try {
+					Thread.sleep(next - now);
+				}
+				catch (InterruptedException e) {
+					now = System.currentTimeMillis();
+					continue;
+				}
 			}
-			catch (InterruptedException e) {
-				interrupted = true;
-			}
-			if (interrupted)
-				continue;
 
 			Iterator it = names();
 			while (it.hasNext()) {
@@ -145,7 +147,8 @@ private class CacheCleaner extends Thread {
 					continue;
 				for (int i = 0; i < elements.length; i++) {
 					Element element = (Element) elements[i];
-					if (element.ttl == 0)
+					if (element.ttl == 0 &&
+					    element.timeIn >= now)
 						continue;
 					if (element.expiredTTL())
 						removeSet(name, element.type,
