@@ -105,10 +105,9 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 public void
 addPrimaryZone(String zname, String zonefile) throws IOException {
 	Name origin = null;
-	Cache cache = getCache(DClass.IN);
 	if (zname != null)
 		origin = Name.fromString(zname, Name.root);
-	Zone newzone = new Zone(zonefile, cache, origin);
+	Zone newzone = new Zone(origin, zonefile);
 	znames.put(newzone.getOrigin(), newzone);
 }
 
