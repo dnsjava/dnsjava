@@ -58,7 +58,7 @@ TKEYRecord(Name _name, short _dclass, int _ttl, Name _alg,
 	   Date _timeInception, Date _timeExpire, short _mode, short _error,
 	   byte [] _key, byte _other[]) throws IOException
 {
-	super(_name, Type.TSIG, _dclass, _ttl);
+	super(_name, Type.TKEY, _dclass, _ttl);
 	alg = _alg;
 	timeInception = _timeInception;
 	timeExpire = _timeExpire;
@@ -71,7 +71,7 @@ TKEYRecord(Name _name, short _dclass, int _ttl, Name _alg,
 TKEYRecord(Name _name, short _dclass, int _ttl, int length,
 	   DataByteInputStream in, Compression c) throws IOException
 {
-	super(_name, Type.TSIG, _dclass, _ttl);
+	super(_name, Type.TKEY, _dclass, _ttl);
 	if (in == null)
 		return;
 	alg = new Name(in, c);
