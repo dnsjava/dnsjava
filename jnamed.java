@@ -420,8 +420,10 @@ generateReply(Message query, byte [] in, Socket s) {
 		}
 	}
 	try {
+		response.freeze();
 		byte [] out = response.toWire();
 		if (out.length > maxLength) {
+			response.thaw();
 			truncate(response, out.length, maxLength);
 			if (tsig != null)
 				tsig.apply(response, queryTSIG);
@@ -560,16 +562,14 @@ serveUDP(short port) {
 		DatagramSocket sock = new DatagramSocket(port);
 		while (true) {
 			short udpLength = 512;
-			DatagramPacket dp = new DatagramPacket(new byte[512],
-							       512);
+			byte [] in = new byte[udpLength];
+			DatagramPacket dp = new DatagramPacket(in, in.length);
 			try {
 				sock.receive(dp);
 			}
 			catch (InterruptedIOException e) {
 				continue;
 			}
-			byte [] in = new byte[dp.getLength()];
-			System.arraycopy(dp.getData(), 0, in, 0, in.length);
 			Message query, response;
 			try {
 				query = new Message(in);

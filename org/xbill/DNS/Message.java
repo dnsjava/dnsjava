@@ -23,6 +23,8 @@ public class Message implements Cloneable {
 private Header header;
 private Vector [] sections;
 private int size;
+private byte [] wireFormat;
+private boolean frozen;
 boolean TSIGsigned, TSIGverified;
 
 /** Creates a new Message with the specified Message ID */
@@ -32,6 +34,8 @@ Message(int id) {
 	for (int i=0; i<4; i++)
 		sections[i] = new Vector();
 	header = new Header(id);
+	wireFormat = null;
+	frozen = false;
 }
 
 /** Creates a new Message with a random Message ID */
@@ -309,13 +313,44 @@ toWire(DataByteOutputStream out) throws IOException {
 	}
 }
 
+/**
+ * Returns an array containing the wire format representation of the Message.
+ */
 public byte []
 toWire() throws IOException {
+	if (frozen && wireFormat != null)
+		return wireFormat;
 	DataByteOutputStream out = new DataByteOutputStream();
 	toWire(out);
 	size = out.getPos();
-	return out.toByteArray();
+	if (frozen) {
+		wireFormat = out.toByteArray();
+		return wireFormat;
+	}
+	else
+		return out.toByteArray();
 }
+
+/**
+ * Indicates that a message's contents will not be changed until a thaw
+ * operation.
+ * @see #thaw
+ */
+public void
+freeze() {
+	frozen = true;
+}
+
+/**
+ * Indicates that a message's contents can now change (are no longer frozen).
+ * @see #freeze
+ */
+public void
+thaw() {
+	frozen = false;
+	wireFormat = null;
+}
+
 
 /**
  * Returns the size of the message.  Only valid if the message has been
