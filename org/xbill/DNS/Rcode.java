@@ -64,7 +64,7 @@ public static final byte BADKEY		= 17;
 public static final byte BADTIME	= 18;
 
 /** The mode is invalid (TKEY extended error) */
-public static final byte BADMODE	= 18;
+public static final byte BADMODE	= 19;
 
 static {
 	rcodes.put2(NOERROR, "NOERROR");
