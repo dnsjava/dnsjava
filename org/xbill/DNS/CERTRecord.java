@@ -65,7 +65,7 @@ throws IOException
 	if (in == null)
 		return;
 	certType = in.readShort();
-	keyTag = in.readShort();
+	keyTag = (short) in.readUnsignedShort();
 	alg = in.readByte();
 	if (length > 5) {
 		cert = new byte[length - 5];
@@ -93,7 +93,7 @@ toString() {
 	if (cert != null) {
 		sb.append (certType);
 		sb.append (" ");
-		sb.append (keyTag);
+		sb.append (keyTag & 0xFFFF);
 		sb.append (" ");
 		sb.append (alg);
 		if (cert != null) {
