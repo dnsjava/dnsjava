@@ -48,7 +48,7 @@ getMember() {
  * @param signature Binary data representing the signature
  */
 public
-SIGRecord(Name name, int dclass, long ttl, int covered, int alg, int origttl,
+SIGRecord(Name name, int dclass, long ttl, int covered, int alg, long origttl,
 	  Date expire, Date timeSigned, int footprint, Name signer,
 	  byte [] signature)
 {
