@@ -22,7 +22,7 @@ public class TSIG {
  * The domain name representing the HMAC-MD5 algorithm (the only supported
  * algorithm)
  */
-public static final Name HMAC		= Name.fromStringNoException
+public static final Name HMAC		= Name.fromConstantString
 						("HMAC-MD5.SIG-ALG.REG.INT.");
 
 /** The default fudge value for outgoing packets.  Can be overriden by the

@@ -28,7 +28,7 @@ private byte labels;
 private boolean qualified;
 
 /** The root name */
-public static final Name root = Name.fromStringNoException(".");
+public static final Name root = Name.fromConstantString(".");
 
 /** The maximum number of labels in a Name */
 static final int MAXLABELS = 128;
@@ -255,19 +255,18 @@ fromString(String s) throws TextParseException {
 }
 
 /**
- * Create a new name from a string, returning null if the name is invalid.
- * This should only be used when the name is known to be good - that is,
- * when it is constant.
+ * Create a new name from a constant string.  This should only be used when
+ the name is known to be good - that is, when it is constant.
  * @param s  The string to be converted
- * @param origin  If the name is unqualified, the origin to be appended.
+ * @throws IllegalArgumentException The name is invalid.
  */
 public static Name
-fromStringNoException(String s) {
+fromConstantString(String s) {
 	try {
 		return fromString(s, null);
 	}
 	catch (TextParseException e) {
-		return null;
+		throw new IllegalArgumentException("Invalid name '" + s + "'");
 	}
 }
 
