@@ -354,6 +354,13 @@ processResponse(SetResponse response) {
 
 private void
 lookup(Name current, Name suffix) {
+	if (iterations > 6) {
+		result = UNRECOVERABLE;
+		error = "CNAME loop";
+		done = true;
+		return;
+	}
+
 	Name tname = null;
 	if (suffix == null)
 		tname = current;
