@@ -144,6 +144,10 @@ setDefaultSearchPath(Name [] domains) {
  */
 public static synchronized void
 setDefaultSearchPath(String [] domains) throws TextParseException {
+	if (domains == null) {
+		defaultSearchPath = null;
+		return;
+	}
 	Name [] newdomains = new Name[domains.length];
 	for (int i = 0; i < domains.length; i++)
 		newdomains[i] = Name.fromString(domains[i], Name.root);
@@ -273,6 +277,10 @@ setSearchPath(Name [] domains) {
  */
 public void
 setSearchPath(String [] domains) throws TextParseException {
+	if (domains == null) {
+		this.searchPath = null;
+		return;
+	}
 	Name [] newdomains = new Name[domains.length];
 	for (int i = 0; i < domains.length; i++)
 		newdomains[i] = Name.fromString(domains[i], Name.root);
