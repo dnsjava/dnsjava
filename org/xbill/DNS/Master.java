@@ -360,7 +360,9 @@ _nextRecord() throws IOException {
 		last = Record.fromString(name, currentType, currentDClass,
 					 currentTTL, st, origin);
 		if (needSOATTL) {
-			last.setTTL(((SOARecord)last).getMinimum());
+			long ttl = ((SOARecord)last).getMinimum();
+			last.setTTL(ttl);
+			defaultTTL = ttl;
 			needSOATTL = false;
 		}
 		return last;
