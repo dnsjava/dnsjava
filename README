@@ -37,14 +37,15 @@ package.  This does not include TSIG support, which does not require 1.2.
 Limitations:
 
 There's no way to determine what the local nameserver is at runtime from within
-the JVM.  First, the properties 'dns.server1',  'dns.server2', etc. are
+the JVM.  First, the property 'dns.server' (a comma delimited list) is
 checked.  These can either be IP addresses or hostnames (which are resolved
 using Java's built in DNS support).  If the underlying OS is unix-based, the
 dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
-the property is not defined and the OS is not unix-based, the default
-nameserver is "localhost".  This is very bad.  Unfortunately, I have no idea
-how to determine the nameserver under Windows, MacOS, etc.  Contributions of
-code are welcome (see org/xbill/DNS/FindServer.java for the basic structure).
+the underlying OS is Windows, winipcfg/ipconfig can be called and the output
+parsed.  Otherwise, or if these attempts fail, the default nameserver is
+"localhost".  This is very bad.  Unfortunately, I have no idea how to determine
+the nameserver under MacOS or any other OSes.  Contributions of code are
+welcome (see org/xbill/DNS/FindServer.java for the basic structure).
 
 One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
