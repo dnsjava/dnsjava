@@ -73,8 +73,6 @@ DNS and DNS.utils packages:
 			receiveMessage(int id, Message m)
 		where 'id' is returned by sendAsync.
 
-		Resolver.sendAXFR(message) performs a zone transfer.
-
 		Resolver options can also be set:
 			Resolver.setPort(port)
 			Resolver.useTCP(flag)
@@ -108,3 +106,20 @@ DNS and DNS.utils packages:
 			findRecords(Name name, short type)
 			findAnyRecords(Name name, short type)
 		which return an array of RRsets.
+
+	DNSSEC:
+		Use of DNSSEC is slightly complicated, to avoid creating
+		dependencies in the mainline code.  An implementation of a
+		Verifier must be created and assigned to a Cache.  The
+		Verifier must be seeded with trusted keys, or else no
+		data will ever be considered secure.  Finally, if only
+		secure data is desired, the cache must be instructed to
+		use this policy:
+
+		DNSSECVerifier v = new DNSSECVerifier();
+		cache.setVerifier(v);
+		v.addTrustedKey(key);
+		cache.setSecurePolicy();
+
+		From this point on, all data will be checked for DNSSEC
+		validity before entering the cache.	

@@ -1,3 +1,73 @@
+9/20/1999
+	- 1.1 released (finally)
+	- Change OPT to type 41 and fixed related stuff
+	- Change license to LGPL
+
+9/16/1999
+	- Cache & DNSSEC bug fixes
+
+9/9/1999
+	- A6 record support (and IPv6 addresses)
+
+9/6/1999
+	- jnamed has limited support for SIG records
+
+9/4/1999
+	- res.sendAXFR() is now obsolete, just use res.send()
+	- jnamed (and Zone) support incoming AXFR
+	- Zone handles wildcards that replace multiple labels
+
+9/2/1999
+	- Bitstrings are now compatible with current BIND 9
+	- jnamed (and Zone) support outgoing AXFR
+	- jnamed uses jnamed.conf by default, can specify port in config file,
+	  returns NOTIMPL on meta-queries other than AXFR and ANY.
+	- DNSSEC can now verify records that came from wildcard expansion
+	- SimpleResolver handles AXFR REFUSED
+	- Lots of EDNS updates
+
+9/1/1999
+	- More bitstring fixes.
+	- Added RP record (from Tom Scola <tscola@research.att.com>)
+
+8/29/1999
+	- More bitstring label stuff.  I think they work now.
+	_ DataByteInputStream cleanup.  Should handle errors better now.
+
+8/26/1999
+	- More verbose options
+	- TSIG badtime bug & better reporting
+	- Large TTL bug
+	- MyStringTokenizer.setNoEscapeCharacter()
+
+8/25/1999
+	- Imported DNSSEC code
+	- New options: tsigfudge, verbosehmac, verbosemsg
+	- Added utils.hexdump to print a formatted dump of bytes
+
+8/24/1999
+	- More bitstring label support
+
+8/23/1999
+	- All data now passes through the Cache.  This should help with
+	  DNSSEC verification
+	- Added basic DNSSEC verification
+	- Fixes for handling data with TTL 0
+	- Started adding bitstring labels
+	- Added support for DNAME records (no processing yet)
+
+8/8/1999
+	- Started adding global options (Options class)
+
+8/7/1999
+	- Type and Class ANY should work correctly now
+	- jnamed and Zone handle wildcard records
+	- Cache returns wildcard set if name is negatively cached
+	- TTL can be converted into BIND format
+
+8/6/1999
+	- Updates to KEYRecord - getFootprint() and renamed constants
+
 8/2/1999
 	- 1.0.2 released
 	- WorkerThread obscure race conditions fixed (patches provided by

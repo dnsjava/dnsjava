@@ -5,24 +5,24 @@ http://www.xbill.org/dnsjava
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-August 25, 1999
+September 20, 1999
 
 Overview:
 
 dnsjava is an implementation of DNS in Java.  It supports all of the common
 record types and the DNSSEC types.  It can be used for queries, zone transfers,
 and dynamic updates.  It includes a cache which can be used by clients, and a
-minimal implementation of a server.  It supports TSIG authenticated messages
-(if you don't know, don't worry about it) and partial DNSSEC verification.
+minimal implementation of a server.  It supports TSIG authenticated messages ,
+partial DNSSEC verification, and EDNS0.
 
 dnsjava provides functionality above and beyond that of the InetAddress class.
 Since it is written in pure Java, dnsjava is fully threadable.
 
 dnsjava was started as an excuse to learn Java.  It was useful for testing new
 features in BIND without rewriting the C resolver.  It was then cleaned up and
-extended in order to be used as a testing framework for the DNS
-interoperability testing at the 44th IETF.  The high level API and caching
-resolver were added to make it useful to a wider audience.
+extended in order to be used as a testing framework for DNS interoperability
+testing.  The high level API and caching resolver were added to make it useful
+to a wider audience.
 
 
 Getting started:
@@ -50,12 +50,13 @@ One some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
 usually caused by a bug in the JVM, and often happens when the machine has
 a dynamic address and its hostname is not in DNS.  If the @me@ variable
 is present in the textual form of an A record and InetAddress.getLocalHost()
-doesn't work, dnsjava will print an error and die.  I'm investigating
-ways to improve this behavior without using JNI.
+doesn't work, dnsjava will print an error and die.  I don't know of a way to
+fix this without using JNI.
 
 Not all of the record types are supported.  Most unsupported types are
 deprecated or rarely used.  Adding support for a new type is not difficult,
-and requires no changes to any existing files.
+and requires no changes to any existing files.  If you want to see a new type
+supported, send a patch or just ask.
 
 
 Additional documentation:
@@ -65,5 +66,5 @@ Javadoc (1.2) documentation is provided in the doc/ subdirectory.
 
 License:
 
-dnsjava is placed under the GNU General Public License (GPL).  However,
+dnsjava is placed under the GNU Library General Public License (LGPL).  However,
 usage under additional licenses may be granted by the author.
