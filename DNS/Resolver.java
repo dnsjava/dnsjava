@@ -10,6 +10,33 @@ import DNS.utils.*;
 
 public class Resolver {
 
+class WorkerThread extends Thread {
+	Message query = null, response = null;
+	int id;
+	ResolverListener listener;
+
+	public void run() {
+		while (true) {
+			try {
+				response = send(query);
+			}
+			catch (IOException e) {
+			}
+			listener.receiveMessage(id, response);
+			synchronized (workerthreads) {
+				workerthreads.addElement(this);
+			}
+			synchronized (this) {
+				try {
+					wait();
+				}
+				catch (InterruptedException e) {
+				}
+			}
+		}
+	}
+}
+
 public static final int PORT		= 53;
 
 InetAddress addr;
@@ -18,6 +45,7 @@ boolean useTCP, ignoreTruncation;
 int EDNSlevel = -1;
 TSIG tsig;
 int timeoutValue = 60 * 1000;
+Vector workerthreads;
 
 static String defaultResolver = "localhost";
 
@@ -189,18 +217,26 @@ send(Message query) throws IOException {
 public int
 sendAsync(final Message query, final ResolverListener listener) {
 	final int id = query.getHeader().getID();
-	Thread t;
-	t = new Thread(new Runnable() {
-			public void run() {
-				Message response = null;
-				try {
-					response = send(query);
-				}
-				catch (IOException e) {
-				}
-				listener.receiveMessage(id, response);
-			}});
-	t.start();
+	if (workerthreads == null)
+		workerthreads = new Vector();
+	WorkerThread t = null;
+	synchronized (workerthreads) {
+		if (workerthreads.size() > 0) {
+			t = (WorkerThread) workerthreads.firstElement();
+			workerthreads.removeElement(t);
+		}
+	}
+	if (t == null) {
+		t = new WorkerThread();
+		t.setDaemon(true);
+		t.start();
+	}
+	synchronized (t) {
+		t.query = query;
+		t.id = id;
+		t.listener = listener;
+		t.notify();
+	}
 	return id;
 }
 
