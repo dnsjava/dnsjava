@@ -8,6 +8,7 @@ import java.util.*;
 /**
  * Boolean options:<BR>
  * bindttl - Print TTLs in BIND format<BR>
+ * multiline - Print records in multiline format<BR>
  * noprintin - Don't print the class of a record if it's IN<BR>
  * nohex - Don't print anything in hex (KEY flags, for example)<BR>
  * pqdn - Allow partially qualified domain names<BR>

@@ -275,20 +275,21 @@ public String
 toString() {
 	StringBuffer sb = new StringBuffer();
 	sb.append(name);
+	if (sb.length() < 8)
+		sb.append("\t");
+	if (sb.length() < 16)
+		sb.append("\t");
 	sb.append("\t");
-	int position = sb.length();
 	if (Options.check("BINDTTL"))
 		sb.append(TTL.format(ttl));
 	else
 		sb.append((long)ttl & 0xFFFFFFFFL);
-	sb.append(" ");
+	sb.append("\t");
 	if (dclass != DClass.IN || !Options.check("noPrintIN")) {
 		sb.append(DClass.string(dclass));
-		sb.append(" ");
+		sb.append("\t");
 	}
 	sb.append(Type.string(type));
-	if (sb.length() - position < 8)
-		sb.append("\t");
 	sb.append("\t");
 	sb.append(rdataToString());
 	return sb.toString();

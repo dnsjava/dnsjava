@@ -143,8 +143,9 @@ rdataToString() {
 		return sb.toString();
 
 	sb.append(alg);
-	sb.append(" (\n\t");
-
+	sb.append(" ");
+	if (Options.check("multiline"))
+		sb.append("(\n\t");
 	sb.append(SIGRecord.formatDate(timeInception));
 	sb.append(" ");
 	sb.append(SIGRecord.formatDate(timeExpire));
@@ -152,12 +153,24 @@ rdataToString() {
 	sb.append(modeString());
 	sb.append(" ");
 	sb.append(Rcode.TSIGstring(error));
-	sb.append("\n");
-	if (key != null)
-		sb.append(base64.formatString(key, 64, "\t", false));
-	if (other != null)
-		sb.append(base64.formatString(other, 64, "\t", false));
-	sb.append(" )");
+	if (Options.check("multiline")) {
+		sb.append("\n");
+		if (key != null) {
+			sb.append(base64.formatString(key, 64, "\t", false));
+			sb.append("\n");
+		}
+		if (other != null)
+			sb.append(base64.formatString(other, 64, "\t", false));
+		sb.append(" )");
+	} else {
+		sb.append(" ");
+		if (key != null) {
+			sb.append(base64.toString(key));
+			sb.append(" ");
+		}
+		if (other != null)
+			sb.append(base64.toString(other));
+	}
 	return sb.toString();
 }
 

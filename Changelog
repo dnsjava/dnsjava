@@ -2,6 +2,8 @@
 	- Add the ZoneTransferIn class, which performs incoming AXFR/IXFR
 	- Make TSIG verification of multiple-message responses reentrant.
 	- Fix incorrect string quoting.
+	- Make records print on a single line by default; add the 'multiline'
+	  option to use the more verbose format.
 
 3/17/2003
 	- Make the routine that converts an IP address from a string

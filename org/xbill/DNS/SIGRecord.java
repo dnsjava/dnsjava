@@ -127,7 +127,9 @@ rdataToString() {
 		sb.append (labels);
 		sb.append (" ");
 		sb.append (origttl);
-		sb.append (" (\n\t");
+		sb.append (" ");
+		if (Options.check("multiline"))
+			sb.append ("(\n\t");
 		sb.append (formatDate(expire));
 		sb.append (" ");
 		sb.append (formatDate(timeSigned));
@@ -135,8 +137,14 @@ rdataToString() {
 		sb.append ((int)footprint & 0xFFFF);
 		sb.append (" ");
 		sb.append (signer);
-		sb.append ("\n");
-		sb.append (base64.formatString(signature, 64, "\t", true));
+		if (Options.check("multiline")) {
+			sb.append("\n");
+			sb.append(base64.formatString(signature, 64, "\t",
+				  true));
+		} else {
+			sb.append (" ");
+			sb.append(base64.toString(signature));
+		}
 	}
 	return sb.toString();
 }

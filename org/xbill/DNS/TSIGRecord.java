@@ -123,24 +123,32 @@ rdataToString() {
 		return sb.toString();
 
 	sb.append(alg);
-	sb.append(" (\n\t");
+	sb.append(" ");
+	if (Options.check("multiline"))
+		sb.append("(\n\t");
 
 	sb.append (timeSigned.getTime() / 1000);
 	sb.append (" ");
 	sb.append (fudge);
 	sb.append (" ");
 	sb.append (signature.length);
-	sb.append ("\n");
-	sb.append (base64.formatString(signature, 64, "\t", false));
-	sb.append (" ");
+	if (Options.check("multiline")) {
+		sb.append ("\n");
+		sb.append (base64.formatString(signature, 64, "\t", false));
+	} else {
+		sb.append (" ");
+		sb.append (base64.toString(signature));
+	}
 	sb.append (Rcode.TSIGstring(error));
 	sb.append (" ");
 	if (other == null)
 		sb.append (0);
 	else {
 		sb.append (other.length);
-		sb.append ("\n");
-		sb.append("\n\t <");
+		if (Options.check("multiline"))
+			sb.append("\n\n\n\t");
+		else
+			sb.append(" ");
 		if (error == Rcode.BADTIME) {
 			if (other.length != 6) {
 				sb.append("<invalid BADTIME other data>");
@@ -159,7 +167,8 @@ rdataToString() {
 			sb.append(base64.toString(other));
 		sb.append(">");
 	}
-	sb.append(" )");
+	if (Options.check("multiline"))
+		sb.append(" )");
 	return sb.toString();
 }
 

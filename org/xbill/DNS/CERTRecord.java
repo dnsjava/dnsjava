@@ -113,8 +113,14 @@ rdataToString() {
 		sb.append (" ");
 		sb.append (alg);
 		if (cert != null) {
-			sb.append (" (\n");
-			sb.append (base64.formatString(cert, 64, "\t", true));
+			if (Options.check("multiline")) {
+				sb.append(" (\n");
+				sb.append(base64.formatString(cert, 64,
+							      "\t", true));
+			} else {
+				sb.append(" ");
+				sb.append(base64.toString(cert));
+			}
 		}
 	}
 	return sb.toString();

@@ -143,10 +143,16 @@ rdataToString() {
 		sb.append(" ");
 		sb.append(alg & 0xFF);
 		if (key != null) {
-			sb.append(" (\n");
-			sb.append(base64.formatString(key, 64, "\t", true));
-			sb.append(" ; key_tag = ");
-			sb.append(getFootprint() & 0xFFFF);
+			if (Options.check("multiline")) {
+				sb.append(" (\n");
+				sb.append(base64.formatString(key, 64, "\t",
+							      true));
+				sb.append(" ; key_tag = ");
+				sb.append(getFootprint() & 0xFFFF);
+			} else {
+				sb.append(" ");
+				sb.append(base64.toString(key));
+			}
 		}
 	}
 	return sb.toString();
