@@ -135,6 +135,9 @@ public static final short DNAME		= 39;
 /** Options - contains EDNS metadata */
 public static final short OPT		= 41;
 
+/** Delegation Signer */
+public static final short DS		= 43;
+
 /** Transaction key - used to compute a shared secret or exchange a key */
 public static final short TKEY		= 249;
 
@@ -199,6 +202,7 @@ static {
 	types.put2(A6, "A6");
 	types.put2(DNAME, "DNAME");
 	types.put2(OPT, "OPT");
+	types.put2(DS, "DS");
 	types.put2(TKEY, "TKEY");
 	types.put2(TSIG, "TSIG");
 	types.put2(IXFR, "IXFR");

@@ -1,3 +1,6 @@
+3/27/2002
+	- Add support for the Delegation Signer (DS) record. (David Blacka)
+
 3/22/2002
 	- Record.equals() did not properly canonicalize names.
 	- Record.equals() should ignore the TTL.
