@@ -152,7 +152,7 @@ private static class Resolution implements ResolverListener {
 	public void
 	handleException(Object id, Exception e) {
 		if (Options.check("verbose"))
-			System.err.println("ExtendedResolver: got" + e);
+			System.err.println("ExtendedResolver: got " + e);
 		synchronized (this) {
 			outstanding--;
 			if (done)
