@@ -26,6 +26,7 @@ private static Resolver res;
 private static Cache cache;
 private static Name [] searchPath;
 private static boolean searchPathSet;
+private static boolean initialized;
 
 /* Otherwise the class could be instantiated */
 private
@@ -33,6 +34,8 @@ dns() {}
 
 synchronized private static void
 initialize() {
+	if (initialized)
+		return;
 	if (res == null) {
 		try {
 			setResolver(new ExtendedResolver());
