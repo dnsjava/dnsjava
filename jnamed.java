@@ -169,11 +169,8 @@ addSOA(Message response, Zone zone) {
 private void
 addNS(Message response, Zone zone) {
 	RRset nsRecords = zone.getNS();
-	Enumeration e = nsRecords.rrs();
-	while (e.hasMoreElements()) {
-		Record r = (Record) e.nextElement();
-		response.addRecord(r, Section.AUTHORITY);
-	}
+	addRRset(nsRecords.getName(), response, nsRecords,
+		 Section.AUTHORITY, false);
 }
 
 private void
