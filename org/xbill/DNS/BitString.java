@@ -179,13 +179,30 @@ equals(Object o) {
 }
 
 /** Compare two bitstrings. */
+int
+compareBits(BitString b, int n) {
+	if (n > nbits || n > b.nbits)
+		throw new IllegalArgumentException();
+
+
+	for (int i = 0; i < n; i++) {
+		int bit = ((data[i / 8] & 0xFF) >> (7 - i)) & 0x1;
+		int bbit = ((b.data[i / 8] & 0xFF) >> (7 - i)) & 0x1;
+		if (bit != bbit)
+			return (bit - bbit);
+	}
+	return 0;
+}
+
+/** Compare two bitstrings. */
 public int
 compareTo(Object o) {
 	BitString b = (BitString) o;
 
-	for (int i = 0; i < data.length && i < b.data.length; i++)
-		if (data[i] != b.data[i])
-			return (data[i] & 0xFF) - (b.data[i] & 0xFF);
+	int min = nbits > b.nbits ? b.nbits : nbits;
+	int ret = compareBits(b, min);
+	if (ret != 0)
+		return ret;
 	return nbits - b.nbits;
 }
 

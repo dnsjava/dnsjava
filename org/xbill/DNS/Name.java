@@ -531,9 +531,23 @@ compareTo(Object o) {
 		}
 		if (label instanceof BitString) {
 			BitString bs = (BitString)label;
-			int n = bs.compareTo(alabel);
+			BitString abs = (BitString)alabel;
+			int bits = bs.nbits > abs.nbits ? abs.nbits : bs.nbits;
+			int n = bs.compareBits(abs, bits);
 			if (n != 0)
 				return (n);
+			if (bs.nbits == abs.nbits)
+				continue;
+
+			/*
+			 * If label X has more bits than label Y, then the
+			 * name with X is greater if Y is the first label
+			 * of its name.  Otherwise, the name with Y is greater.
+			 */
+			if (bs.nbits > abs.nbits)
+				return (i == arg.labels ? 1 : -1);
+			else
+				return (i == labels ? -1 : 1);
 		}
 		else {
 			byte [] b = (byte []) label;
