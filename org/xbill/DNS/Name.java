@@ -329,9 +329,8 @@ fromConstantString(String s) {
 
 /**
  * Create a new name from DNS wire format
- * @param in A stream containing the input data
+ * @param in A stream containing the wire format of the Name.
  */
-public
 Name(DataByteInputStream in) throws IOException {
 	int len, pos, currentpos;
 	Name name2;
@@ -375,6 +374,15 @@ Name(DataByteInputStream in) throws IOException {
 	}
 	if (savedpos != -1)
 		in.setPos(savedpos);
+}
+
+/**
+ * Create a new name from DNS wire format
+ * @param in A byte array containing the wire format of the name.
+ */
+public
+Name(byte [] b) throws IOException {
+	this(new DataByteInputStream(b));
 }
 
 /**
