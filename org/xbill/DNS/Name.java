@@ -55,7 +55,7 @@ Name(String s, Name origin) {
 
 		while (st.hasMoreTokens()) {
 			String token = st.nextToken();
-			if (token.charAt(0) == '\\')
+			if (token.charAt(0) == '[')
 				name[labels++] = new BitString(token);
 			else
 				name[labels++] = token;

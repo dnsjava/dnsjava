@@ -20,7 +20,7 @@ byte [] data;
 
 BitString(String s) throws IOException {
 System.out.println("parsing BitString");
-	if (s.length() < 5 || !s.startsWith("\\[") || !s.endsWith("]"))
+	if (s.length() < 4 || !s.startsWith("[") || !s.endsWith("]"))
 		throw new IOException("Invalid encoding: " + s);
 System.out.println("basic encoding ok");
 	int radix;
@@ -146,7 +146,7 @@ wireBits() {
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
-	sb.append("\\[x");
+	sb.append("[x");
 	for (int i = 0; i < bytes(); i++) {
 		int value = (int)(data[i] & 0xFF);
 		int high = value >> 4;
