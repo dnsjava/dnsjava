@@ -363,6 +363,13 @@ Name(Name src, int n) {
 	offset = (byte)(src.offset + n);
 	labels = (byte)(src.labels - n);
 	qualified = src.qualified;
+	if (!src.hasBitString)
+		hasBitString = false;
+	else {
+		for (int i = 0; i < labels; i++)
+			if (name[i + offset] instanceof BitString)
+				hasBitString = true;
+	}
 }
 
 /**
