@@ -194,8 +194,43 @@ findTSIG(Name name) {
 		return null;
 }
 
+void
+doAXFR(Name name, Socket s) {
+	Zone zone = (Zone) znames.get(name);
+	if (zone == null) {
+		System.out.println("no zone " + name + " to AXFR");
+		return;
+	}
+	Enumeration e = zone.AXFR();
+	try {
+		while (e.hasMoreElements()) {
+			RRset rrset = (RRset) e.nextElement();
+			Message response = new Message();
+			addRRset(rrset.getName(), response, rrset);
+			byte [] out = response.toWire();
+			DataOutputStream dataOut;
+			dataOut = new DataOutputStream(s.getOutputStream());
+			dataOut.writeShort(out.length);
+			dataOut.write(out);
+		} 
+	}
+	catch (IOException ex) {
+		System.out.println("AXFR failed");
+	}	
+	try {
+		s.close();
+	}
+	catch (IOException ex) {
+	}
+}
+
+/*
+ * Note: a null return value means that the caller doesn't need to do
+ * anything.  Currently this only happens if this is an AXFR request over
+ * TCP.
+ */
 Message
-generateReply(Message query, byte [] in, int maxLength) {
+generateReply(Message query, byte [] in, int maxLength, Socket s) {
 	if (query.getHeader().getOpcode() != Opcode.QUERY)
 		return notimplMessage(query);
 	Record queryRecord = query.getQuestion();
@@ -215,9 +250,13 @@ generateReply(Message query, byte [] in, int maxLength) {
 
 	Name name = queryRecord.getName();
 	short type = queryRecord.getType();
-	if (!Type.isRR(type))
-		return notimplMessage(query);
 	short dclass = queryRecord.getDClass();
+	if (type == Type.AXFR && s != null) {
+		doAXFR(name, s);
+		return null;
+	}
+	if (!Type.isRR(type) && type != Type.ANY)
+		return notimplMessage(query);
 	Zone zone = findBestZone(name);
 	if (zone != null) {
 		SetResponse zr = zone.findRecords(name, type);
@@ -384,7 +423,9 @@ serveTCP(short port) {
 			Message query, response;
 			try {
 				query = new Message(in);
-				response = generateReply(query, in, 65535);
+				response = generateReply(query, in, 65535, s);
+				if (response == null)
+					continue;
 			}
 			catch (IOException e) {
 				response = formerrMessage(in);
@@ -424,7 +465,10 @@ serveUDP(short port) {
 				if (opt != null)
 					udpLength = opt.getPayloadSize();
 
-				response = generateReply(query, in, udpLength);
+				response = generateReply(query, in, udpLength,
+							 null);
+				if (response == null)
+					continue;
 			}
 			catch (IOException e) {
 				response = formerrMessage(in);

@@ -15,6 +15,74 @@ import java.util.*;
 
 public class Zone extends NameSet {
 
+class AXFREnumeration implements Enumeration {
+	private Enumeration znames;
+	private Name currentName;
+	private Object [] current;
+	int count;
+	boolean sentFirstSOA, sentNS, sentOrigin, sentLastSOA;
+
+	AXFREnumeration() {
+		znames = names();
+	}
+
+	public boolean
+	hasMoreElements() {
+		return (!sentLastSOA);
+	}
+
+	public Object
+	nextElement() {
+		if (sentLastSOA)
+			return null;
+		if (!sentFirstSOA) {
+			sentFirstSOA = true;
+			RRset rrset = new RRset();
+			rrset.addRR(getSOA());
+			return rrset;
+		}
+		if (!sentNS) {
+			sentNS = true;
+			return getNS();
+		}
+		if (!sentOrigin) {
+			if (currentName == null) {
+				currentName = getOrigin();
+				TypeClassMap tcm = findName(currentName);
+				current = (Object []) tcm.getMultiple(Type.ANY,
+								      dclass);
+				count = 0;
+			}
+			while (count < current.length) {
+				RRset rrset = (RRset) current[count];
+				if (rrset.getType() != Type.SOA &&
+				    rrset.getType() != Type.NS)
+					return current[count++];
+				count++;
+			}
+			current = null;
+			sentOrigin = true;
+		}
+		if (current != null && count < current.length)
+			return current[count++];
+		while (znames.hasMoreElements()) {
+			Name currentName = (Name) znames.nextElement();
+			if (currentName.equals(getOrigin()))
+				continue;
+			TypeClassMap tcm = findName(currentName);
+			current = (Object []) tcm.getMultiple(Type.ANY, dclass);
+			count = 0;
+			if (count < current.length)
+				return current[count++];
+			count++;
+		}
+		sentLastSOA = true;
+		RRset rrset = new RRset();
+		rrset.addRR(getSOA());
+		return rrset;
+	}
+}
+
 /** A primary zone */
 public static final int PRIMARY = 1;
 
@@ -150,6 +218,11 @@ addRecord(Record r) {
 	if (rrset == null)
 		addSet(name, type, dclass, rrset = new RRset());
 	rrset.addRR(r);
+}
+
+public Enumeration
+AXFR() {
+	return new AXFREnumeration();
 }
 
 }
