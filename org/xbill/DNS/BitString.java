@@ -84,21 +84,18 @@ System.out.println("basic encoding ok");
 		}
 	}
 	else {
-System.out.println("parsing dotted quad");
 		int end;
 		if (slash != -1) {
 			end = slash;
 		}
 		else
 			end = s.length() - 1;
-		end--;
-		StringTokenizer st = new StringTokenizer(s.substring(2, end),
-							 ".");
+		String quad = s.substring(2, end);
+		StringTokenizer st = new StringTokenizer(quad, ".");
 		for (int i = 0; i < 4; i++) {
 			if (!st.hasMoreTokens())
 				throw new IOException("Invalid dotted quad");
 			String token = st.nextToken();
-System.out.println("token " + i + " = " + token);
 			try {
 				int x = Integer.parseInt(token);
 				for (int j = 0; j < 8; j++) {
@@ -129,7 +126,6 @@ System.out.println("token " + i + " = " + token);
 	data = new byte[bytes()];
 	for (int i = 0; i < nbits; i++)
 		data[i/8] |= ((set.get(i) ? 1 : 0) << (7 - i%8));
-System.out.println("nbits = " + nbits);
 }
 
 BitString(int _nbits, byte [] _data) {
