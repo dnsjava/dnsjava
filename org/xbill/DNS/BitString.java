@@ -130,6 +130,10 @@ BitString(String s) throws IOException {
 	data = new byte[bytes()];
 	for (int i = 0; i < nbits; i++)
 		data[i/8] |= ((set.get(i) ? 1 : 0) << (7 - i%8));
+	for (int i = nbits; i < (((nbits + 7) >>> 3) << 3); i++) {
+		if (set.get(i))
+			throw new IOException("Invalid binary label: " + s);
+	}
 }
 
 BitString(int _nbits, byte [] _data) {
