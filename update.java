@@ -461,7 +461,10 @@ helpData() {
 
 	  "    glue\t" +
 	  "specify an additional record\n" +
-	  "\t[-r] <name> [ttl] [class] <type> <data ...> \n"
+	  "\t[-r] <name> [ttl] [class] <type> <data ...> \n\n" +
+
+	  "    (notes: @ represents the origin " +
+	  "and @me@ represents the local IP address)\n"
 	);
 }
 
