@@ -197,7 +197,7 @@ getFootprint() {
 			int d2 = rdata[i + 1] & 0xFF;
 			foot += ((d1 << 8) + d2);
 		}
-		if (i <= rdata.length) {
+		if (i < rdata.length) {
 			int d1 = rdata[i] & 0xFF;
 			foot += (d1 << 8);
 		}
