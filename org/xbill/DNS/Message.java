@@ -326,25 +326,19 @@ getSectionRRsets(int section) {
 	if (sections[section] == null)
 		return emptyRRsetArray;
 	List sets = new LinkedList();
-	Iterator it = sections[section].iterator();
-	while (it.hasNext()) {
-		Record rec = (Record) it.next();
-		RRset set = null;
-		for (int i = sets.size() - 1; i >= 0; i--) {
-			RRset _set = (RRset) sets.get(i);
-			if (_set.getType() == rec.getRRsetType() &&
-			    _set.getDClass() == rec.getDClass() &&
-			    _set.getName().equals(rec.getName()))
-			{
-				set = _set;
-			    	break;
-			}
-		}
-		if (set == null) {
-			set = new RRset();
-			sets.add(set);
-		}
-		set.addRR(rec);
+	Record [] recs = getSectionArray(section);
+	Arrays.sort(recs);
+	int i = 0;
+	while (i < recs.length) {
+		RRset set = new RRset();
+		sets.add(set);
+		do {
+			set.addRR(recs[i]);
+			i++;
+		} while (i < recs.length &&
+			 set.getType() == recs[i].getRRsetType() &&
+			 set.getDClass() == recs[i].getDClass() &&
+			 set.getName().equals(recs[i].getName()));
 	}
 	return (RRset []) sets.toArray(new RRset[sets.size()]);
 }
