@@ -25,7 +25,6 @@ Master(File file, Name initialOrigin, long initialTTL) throws IOException {
 	if (origin != null && !origin.isAbsolute()) {
 		throw new RelativeNameException(origin);
 	}
-	FileInputStream fis;
 	this.file = file;
 	st = new Tokenizer(file);
 	origin = initialOrigin;
@@ -118,7 +117,7 @@ parseName(String s, Name origin) throws TextParseException {
  * invalid.
  */
 public Record
-nextRecord() throws IOException {
+_nextRecord() throws IOException {
 	Tokenizer.Token token;
 	String s;
 
@@ -216,6 +215,32 @@ nextRecord() throws IOException {
 		last = Record.fromString(name, type, dclass, ttl, st, origin);
 		return last;
 	}
+}
+
+/**
+ * Returns the next record in the master file.  This will process any
+ * directives before the next record.
+ * @return The next record.
+ * @throws IOException The master file could not be read, or was syntactically
+ * invalid.
+ */
+public Record
+nextRecord() throws IOException {
+	Record rec = null;
+	try {
+		rec = _nextRecord();
+	}
+	finally {
+		if (rec == null) {
+			st.close();
+		}
+	}
+	return rec;
+}
+
+protected void
+finalize() {
+	st.close();
 }
 
 }
