@@ -7,7 +7,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import org.xbill.DNS.utils.*;
-import org.xbill.Task.*;
 
 /**
  * An implementation of Resolver that sends one query to one server.
@@ -303,8 +302,9 @@ sendAsync(final Message query, final ResolverListener listener) {
 	else
 		qname = "(none)";
 	String name = this.getClass() + ": " + qname;
-	WorkerThread.assignThread(new ResolveThread(this, query, id, listener),
-				  name);
+	Thread thread = new ResolveThread(this, query, id, listener);
+	thread.setDaemon(true);
+	thread.start();
 	return id;
 }
 
