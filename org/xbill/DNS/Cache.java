@@ -113,11 +113,16 @@ private class CacheCleaner extends Thread {
 		start();
 	}
 
-	public void
+	public boolean
 	clean() {
 		Iterator it = names();
 		while (it.hasNext()) {
-			Name name = (Name) it.next();
+			Name name;
+			try {
+				name = (Name) it.next();
+			} catch (ConcurrentModificationException e) {
+				return false;
+			}
 			TypeMap tm = findName(name);
 			if (tm == null)
 				continue;
@@ -132,6 +137,7 @@ private class CacheCleaner extends Thread {
 						  element);
 			}
 		}
+		return true;
 	}
 
 	public void
@@ -149,7 +155,9 @@ private class CacheCleaner extends Thread {
 				}
 				now = System.currentTimeMillis();
 			}
-			clean();
+			for (int i = 0; i < 4; i++)
+				if (clean())
+					break;
 		}
 	}
 }
