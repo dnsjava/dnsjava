@@ -46,7 +46,7 @@ public static class Element {
 	 * Creates an APL element corresponding to an IPv4 prefix.
 	 * @param negative Indicates if this prefix is a negation.
 	 * @param address The IPv4 address.
-	 * @param negative The prefix length.
+	 * @param prefixLength The length of this prefix, in bits.
 	 * @throws IllegalArgumentException The prefix length is invalid.
 	 */
 	public
@@ -58,7 +58,7 @@ public static class Element {
 	 * Creates an APL element corresponding to an IPv6 prefix.
 	 * @param negative Indicates if this prefix is a negation.
 	 * @param address The IPv6 address.
-	 * @param negative The prefix length.
+	 * @param prefixLength The length of this prefix, in bits.
 	 * @throws IllegalArgumentException The prefix length is invalid.
 	 */
 	public
