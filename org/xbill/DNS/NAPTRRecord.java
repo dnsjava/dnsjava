@@ -63,7 +63,7 @@ rrFromWire(Name name, short type, short dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
-        NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
+	NAPTRRecord rec = new NAPTRRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
 	rec.order = (short) in.readUnsignedShort();

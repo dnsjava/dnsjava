@@ -173,7 +173,7 @@ rrToWire(DataByteOutputStream out, Compression c) throws IOException {
 	out.writeInt(refresh);
 	out.writeInt(retry);
 	out.writeInt(expire);
-        out.writeInt(minimum);
+	out.writeInt(minimum);
 }
 
 void
@@ -187,7 +187,7 @@ rrToWireCanonical(DataByteOutputStream out) throws IOException {
 	out.writeInt(refresh);
 	out.writeInt(retry);
 	out.writeInt(expire);
-        out.writeInt(minimum);
+	out.writeInt(minimum);
 }
 
 }

@@ -196,8 +196,8 @@ rdataToString() {
 	if (latitude != 0 || longitude != 0 || altitude != 0) {
 		long temp;
 		char direction;
-	        NumberFormat nf = new DecimalFormat();
-	        nf.setMaximumFractionDigits(3);
+		NumberFormat nf = new DecimalFormat();
+		nf.setMaximumFractionDigits(3);
 		nf.setGroupingUsed(false);
 
 		/* Latitude */
@@ -246,7 +246,7 @@ rdataToString() {
 		sb.append(direction);
 		sb.append(" ");
 
-	        nf.setMaximumFractionDigits(2);
+		nf.setMaximumFractionDigits(2);
 
 		/* Altitude */
 		sb.append(nf.format((double)(altitude - 10000000)/100));

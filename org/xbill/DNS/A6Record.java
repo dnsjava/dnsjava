@@ -9,7 +9,7 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * Address Record - maps a domain name to an IPv6 address (experimental)
+ * A6 Record - maps a domain name to an IPv6 address (experimental)
  *
  * @author Brian Wellington
  */
@@ -27,12 +27,12 @@ A6Record() {}
 
 private
 A6Record(Name name, short dclass, int ttl) {
-        super(name, Type.A6, dclass, ttl);
+	super(name, Type.A6, dclass, ttl);
 }
 
 static A6Record
 getMember() {
-        return member;
+	return member;
 }
 
 /**

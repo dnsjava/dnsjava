@@ -38,7 +38,7 @@ public
 DNAMERecord(Name name, short dclass, int ttl, Name target)
 throws IOException
 {
-        super(name, Type.DNAME, dclass, ttl, target);
+	super(name, Type.DNAME, dclass, ttl, target);
 }
 
 Record
@@ -51,7 +51,7 @@ throws IOException
 
 Record
 rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-                Name origin)
+		Name origin)
 throws TextParseException
 {
 	return rdataFromString(new DNAMERecord(name, dclass, ttl), st, origin);

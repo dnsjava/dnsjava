@@ -47,12 +47,12 @@ TKEYRecord() {}
 
 private
 TKEYRecord(Name name, short dclass, int ttl) {
-        super(name, Type.TKEY, dclass, ttl);
+	super(name, Type.TKEY, dclass, ttl);
 }
 
 static TKEYRecord
 getMember() {
-        return member;
+	return member;
 }
 
 /**
@@ -117,7 +117,7 @@ throws IOException
 
 Record
 rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-                Name origin)
+		Name origin)
 throws TextParseException
 {
 	throw new TextParseException("no text format defined for TKEY");

@@ -22,12 +22,12 @@ NSRecord() {}
 
 private
 NSRecord(Name name, short dclass, int ttl) {
-        super(name, Type.NS, dclass, ttl);
+	super(name, Type.NS, dclass, ttl);
 }
 
 static NSRecord
 getMember() {
-        return member;
+	return member;
 }
 
 /** 
@@ -38,7 +38,7 @@ public
 NSRecord(Name name, short dclass, int ttl, Name target)
 throws IOException
 {
-        super(name, Type.NS, dclass, ttl, target);
+	super(name, Type.NS, dclass, ttl, target);
 }
 
 Record
@@ -46,15 +46,15 @@ rrFromWire(Name name, short type, short dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
-        return rrFromWire(new NSRecord(name, dclass, ttl), in);
+	return rrFromWire(new NSRecord(name, dclass, ttl), in);
 }
 
 Record
 rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-                Name origin)
+		Name origin)
 throws TextParseException
 {
-        return rdataFromString(new NSRecord(name, dclass, ttl), st, origin);
+	return rdataFromString(new NSRecord(name, dclass, ttl), st, origin);
 }
 
 }

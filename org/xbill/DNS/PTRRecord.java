@@ -39,7 +39,7 @@ public
 PTRRecord(Name name, short dclass, int ttl, Name target)
 throws IOException
 {
-        super(name, Type.PTR, dclass, ttl, target);
+	super(name, Type.PTR, dclass, ttl, target);
 }
 
 Record

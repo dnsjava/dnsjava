@@ -295,7 +295,7 @@ toString() {
  */
 abstract Record
 rdataFromString(Name name, short dclass, int ttl,
-	        MyStringTokenizer st, Name origin)
+		MyStringTokenizer st, Name origin)
 throws TextParseException;
 
 /**
@@ -485,7 +485,7 @@ withName(Name name) {
 	return rec;
 }
 
-/**                     
+/**
  * Compares this Record to another Object.
  * @param o The Object to be compared.
  * @return The value 0 if the argument is a record equivalent to this record;
@@ -497,7 +497,7 @@ withName(Name name) {
  */
 public int
 compareTo(Object o) {
-        Record arg = (Record) o;
+	Record arg = (Record) o;
 
 	if (this == arg)
 		return (0);

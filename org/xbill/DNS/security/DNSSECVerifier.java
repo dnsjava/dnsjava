@@ -167,7 +167,7 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 			break;
 		default:
 			return DNSSEC.Failed;
-        }
+	}
 
 	try {
 		Signature s = Signature.getInstance(algString);

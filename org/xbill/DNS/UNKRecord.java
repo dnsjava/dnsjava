@@ -30,7 +30,7 @@ UNKRecord(Name name, short type, short dclass, int ttl) {
 
 static UNKRecord
 getMember() {
-        return member;
+	return member;
 }
 
 Record

@@ -100,7 +100,7 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 		Name origin)
 throws TextParseException
 {
-        SIGRecord rec = new SIGRecord(name, dclass, ttl);
+	SIGRecord rec = new SIGRecord(name, dclass, ttl);
 	rec.covered = Type.value(st.nextToken());
 	rec.alg = Byte.parseByte(st.nextToken());
 	rec.labels = Byte.parseByte(st.nextToken());
@@ -136,7 +136,7 @@ rdataToString() {
 		sb.append (signer);
 		sb.append ("\n");
 		sb.append (base64.formatString(signature, 64, "\t", true));
-        }
+	}
 	return sb.toString();
 }
 

@@ -84,7 +84,7 @@ throws IOException, SignatureException, InvalidKeyException,
 		}
 		catch (NumberFormatException e) {
 		}
-        }
+	}
 	
 	long now = System.currentTimeMillis();
 	Date timeSigned = new Date(now);

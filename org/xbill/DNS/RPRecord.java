@@ -27,12 +27,12 @@ RPRecord() {}
 
 private
 RPRecord(Name name, short dclass, int ttl) {
-        super(name, Type.RP, dclass, ttl);
+	super(name, Type.RP, dclass, ttl);
 }
 
 static RPRecord
 getMember() {
-        return member;
+	return member;
 }
 
 /**
@@ -65,9 +65,9 @@ rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
 		Name origin)
 throws TextParseException
 {
-        RPRecord rec = new RPRecord(name, dclass, ttl);
-        rec.mailbox = Name.fromString(st.nextToken(), origin);
-        rec.textDomain = Name.fromString(st.nextToken(), origin);
+	RPRecord rec = new RPRecord(name, dclass, ttl);
+	rec.mailbox = Name.fromString(st.nextToken(), origin);
+	rec.textDomain = Name.fromString(st.nextToken(), origin);
 	return rec;
 }
 

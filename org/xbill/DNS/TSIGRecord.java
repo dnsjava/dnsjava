@@ -35,12 +35,12 @@ TSIGRecord() {}
 
 private
 TSIGRecord(Name name, short dclass, int ttl) {
-        super(name, Type.TSIG, dclass, ttl);
+	super(name, Type.TSIG, dclass, ttl);
 }
 
 static TSIGRecord
 getMember() {
-        return member;
+	return member;
 }
 
 /**
@@ -110,7 +110,7 @@ throws IOException
 
 Record
 rdataFromString(Name name, short dclass, int ttl, MyStringTokenizer st,
-                Name origin)
+		Name origin)
 throws TextParseException
 {
 	throw new TextParseException("no text format defined for TSIG");

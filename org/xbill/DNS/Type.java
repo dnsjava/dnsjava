@@ -159,7 +159,7 @@ public static final short MAILB		= 253;
 public static final short MAILA		= 254;
 
 /** Matches any type */
-public static final short ANY           = 255;
+public static final short ANY		= 255;
 
 private static class DoubleHashMap {
 	private HashMap v2s, s2v;

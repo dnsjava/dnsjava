@@ -24,7 +24,7 @@ TXTRecord() {}
 
 private
 TXTRecord(Name name, short dclass, int ttl) {
-        super(name, Type.TXT, dclass, ttl);
+	super(name, Type.TXT, dclass, ttl);
 }
 
 static TXTRecord
@@ -58,18 +58,18 @@ rrFromWire(Name name, short type, short dclass, int ttl, int length,
 	   DataByteInputStream in)
 throws IOException
 {
-        TXTRecord rec = new TXTRecord(name, dclass, ttl);
+	TXTRecord rec = new TXTRecord(name, dclass, ttl);
 	if (in == null)
 		return rec;
 	int count = 0;
 	rec.strings = new ArrayList();
-        while (count < length) {
-                int len = in.readByte();
-                byte [] b = new byte[len];
-                in.read(b);
-                count += (len + 1);
-                rec.strings.add(new String(b));
-        }
+	while (count < length) {
+		int len = in.readByte();
+		byte [] b = new byte[len];
+		in.read(b);
+		count += (len + 1);
+		rec.strings.add(new String(b));
+	}
 	return rec;
 }
 

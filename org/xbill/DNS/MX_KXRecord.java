@@ -23,7 +23,7 @@ MX_KXRecord() {}
 
 protected
 MX_KXRecord(Name name, short type, short dclass, int ttl) {
-        super(name, type, dclass, ttl);
+	super(name, type, dclass, ttl);
 }
 
 public
