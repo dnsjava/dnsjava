@@ -1,22 +1,20 @@
-dnsjava v1.3
+dnsjava v1.4
 
 http://www.xbill.org/dnsjava
+http://www.dnsjava.org/
 
 Author:
 
 Brian Wellington (bwelling@xbill.org)
-October 16, 2002
+August 21, 2003
 
 Overview:
 
 dnsjava is an implementation of DNS in Java.  It supports all of the common
-record types and the DNSSEC types.  It can be used for queries, zone transfers,
-and dynamic updates.  It includes a cache which can be used by clients, and an
-authoritative only server.  It supports TSIG authenticated messages, partial
-DNSSEC verification, and EDNS0.
-
-dnsjava provides functionality above and beyond that of the InetAddress class.
-Since it is written in pure Java, dnsjava is fully threadsafe.
+record types, the DNSSEC types, and unknown types.  It can be used for queries,
+zone transfers, and dynamic updates.  It includes a cache which can be used by
+clients, and an authoritative only server.  It supports TSIG authenticated
+messages, partial DNSSEC verification, and EDNS0.  It is fully thread safe.
 
 dnsjava was started as an excuse to learn Java.  It was useful for testing new
 features in BIND without rewriting the C resolver.  It was then cleaned up and
@@ -44,9 +42,10 @@ checked.  These can either be IP addresses or hostnames (which are resolved
 using Java's built in DNS support).  If the underlying OS is unix-based, the
 dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
 the underlying OS is Windows, winipcfg/ipconfig can be called and the output
-parsed.  Otherwise, or if these attempts fail, the default nameserver is
+parsed.  Note that this may fail for non-English versions of Windows.
+Otherwise, or if these attempts fail, the default nameserver is
 "localhost".  This is unavoidable.  Unfortunately, I have no idea how to
-determine the nameserver under MacOS or any other OSes.  Contributions of code
+determine the nameserver for any other OSes.  Contributions of code
 are welcome (see org/xbill/DNS/FindServer.java for the basic structure).
 
 On some machines, InetAddress.getLocalHost() returns 127.0.0.1.  This is
@@ -54,13 +53,13 @@ usually caused by a bug in the JVM, and often happens when the machine has
 a dynamic address and its hostname is not in DNS.  This breaks the (mostly
 undocumented) feature that the @me@ variable can be used in the textual form
 of an A record to indicate the local address.  If InetAddress.getLocalHost()
-doesn't work, dnsjava will print an error and die.  I don't know of a way to
-fix this without using JNI.
+doesn't work, a RuntimeException will be thrown.  This should be fixable
+if/when dnsjava requires Java 1.4.
 
 Not all of the record types are supported.  Most types that are not supported
 are either deprecated or rarely used.  Adding support for a new type is not
-difficult, and requires no changes to any existing files.  If you want to see
-a new type supported, send a patch or just ask.
+difficult, and usually requires no changes to any existing files.  If you want
+to see a new type supported, send a patch or just ask.
 
 The underlying platform must use an ASCII encoding of characters.  This means
 that dnsjava will not work on OS/390, for example.
