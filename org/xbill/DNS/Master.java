@@ -22,6 +22,9 @@ private Master included = null;
 private Tokenizer st;
 
 Master(File file, Name initialOrigin, long initialTTL) throws IOException {
+	if (origin != null && !origin.isAbsolute()) {
+		throw new RelativeNameException(origin);
+	}
 	FileInputStream fis;
 	this.file = file;
 	st = new Tokenizer(file);
@@ -70,6 +73,9 @@ Master(String filename) throws IOException {
  */
 public
 Master(InputStream in, Name origin, long ttl) {
+	if (origin != null && !origin.isAbsolute()) {
+		throw new RelativeNameException(origin);
+	}
 	st = new Tokenizer(in);
 	this.origin = origin;
 	defaultTTL = ttl;
