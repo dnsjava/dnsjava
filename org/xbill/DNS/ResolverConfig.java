@@ -178,7 +178,7 @@ findWin(InputStream in) {
 	ResourceBundle res = ResourceBundle.getBundle(resPackageName);
 
 	String host_name = res.getString("host_name");
-	String primary_dns_suffix = res.getString("primary_dns_suffix_key");
+	String primary_dns_suffix = res.getString("primary_dns_suffix");
 	String dns_suffix = res.getString("dns_suffix");
 	String dns_servers = res.getString("dns_servers");
 
@@ -246,6 +246,10 @@ findWin(InputStream in) {
 		if (servers == null && lserver.size() > 0)
 			servers = (String [])lserver.toArray
 						(new String[lserver.size()]);
+
+		if (searchlist == null && lsearch.size() > 0)
+			searchlist =
+			    (Name [])lsearch.toArray(new Name[lsearch.size()]);
 	}
 	catch (IOException e) {
 	}
