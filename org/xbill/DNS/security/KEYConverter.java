@@ -196,7 +196,7 @@ buildDSA(DSAPublicKey key) {
 
 /** Builds a KEY record from a PublicKey */
 public static KEYRecord
-buildRecord(Name name, short dclass, int ttl, int flags, int proto,
+buildRecord(Name name, int dclass, int ttl, int flags, int proto,
 	    PublicKey key)
 {
 	byte [] data;

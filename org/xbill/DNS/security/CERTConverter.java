@@ -49,7 +49,7 @@ parseRecord(CERTRecord r) {
 
 /** Builds a CERT record from a Certificate associated with a key also in DNS */
 public static CERTRecord
-buildRecord(Name name, short dclass, int ttl, Certificate cert, int tag,
+buildRecord(Name name, int dclass, int ttl, Certificate cert, int tag,
 	    int alg)
 {
 	short type;
@@ -74,7 +74,7 @@ buildRecord(Name name, short dclass, int ttl, Certificate cert, int tag,
 
 /** Builds a CERT record from a Certificate */
 public static CERTRecord
-buildRecord(Name name, short dclass, int ttl, Certificate cert) {
+buildRecord(Name name, int dclass, int ttl, Certificate cert) {
 	return buildRecord(name, dclass, ttl, cert, 0, 0);
 }
 
