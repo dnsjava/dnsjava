@@ -199,48 +199,6 @@ appendSafe(byte [] array, int start, int n) {
 }
 
 /**
- * Create a new name from a string and an origin
- * @param s The string to be converted
- * @param origin If the name is not absolute, the origin to be appended
- * @deprecated As of dnsjava 1.3.0, replaced by <code>Name.fromString</code>.
- */
-public
-Name(String s, Name origin) {
-	Name n;
-	try {
-		n = Name.fromString(s, origin);
-	}
-	catch (TextParseException e) {
-		StringBuffer sb = new StringBuffer(s);
-		if (origin != null)
-			sb.append("." + origin);
-		sb.append(": "+ e.getMessage());
-		System.err.println(sb.toString());
-		return;
-	}
-	if (!n.isAbsolute() && !Options.check("pqdn") &&
-	    n.getlabels() > 1 && n.getlabels() < MAXLABELS - 1)
-	{
-		/*
-		 * This isn't exactly right, but it's close.
-		 * Partially qualified names are evil.
-		 */
-		n.appendSafe(emptyLabel, 0, 1);
-	}
-	copy(n, this);
-}
-
-/**
- * Create a new name from a string
- * @param s The string to be converted
- * @deprecated as of dnsjava 1.3.0, replaced by <code>Name.fromString</code>.
- */
-public
-Name(String s) {
-	this (s, null);
-}
-
-/**
  * Create a new name from a string and an origin.  This does not automatically
  * make the name absolute; it will be absolute if it has a trailing dot or an
  * absolute origin is appended.
@@ -248,18 +206,19 @@ Name(String s) {
  * @param origin If the name is not absolute, the origin to be appended.
  * @throws TextParseException The name is invalid.
  */
-public static Name
-fromString(String s, Name origin) throws TextParseException {
-	Name name = new Name();
-
+public
+Name(String s, Name origin) throws TextParseException {
 	if (s.equals(""))
 		throw parseException(s, "empty name");
 	else if (s.equals("@")) {
 		if (origin == null)
-			return name;
-		return origin;
-	} else if (s.equals("."))
-		return (root);
+			return;
+		copy(origin, this);
+		return;
+	} else if (s.equals(".")) {
+		copy(root, this);
+		return;
+	}
 	int labelstart = -1;
 	int pos = 1;
 	byte [] label = new byte[MAXLABEL + 1];
@@ -295,7 +254,7 @@ fromString(String s, Name origin) throws TextParseException {
 			if (labelstart == -1)
 				throw parseException(s, "invalid empty label");
 			label[0] = (byte)(pos - 1);
-			name.appendFromString(s, label, 0, 1);
+			appendFromString(s, label, 0, 1);
 			labelstart = -1;
 			pos = 1;
 		} else {
@@ -309,20 +268,51 @@ fromString(String s, Name origin) throws TextParseException {
 	if (digits > 0 && digits < 3)
 		throw parseException(s, "bad escape");
 	if (labelstart == -1) {
-		name.appendFromString(s, emptyLabel, 0, 1);
+		appendFromString(s, emptyLabel, 0, 1);
 		absolute = true;
 	} else {
 		label[0] = (byte)(pos - 1);
-		name.appendFromString(s, label, 0, 1);
+		appendFromString(s, label, 0, 1);
 	}
 	if (origin != null && !absolute)
-		name.appendFromString(s, origin.name, 0, origin.getlabels());
-	return (name);
+		appendFromString(s, origin.name, 0, origin.getlabels());
 }
 
 /**
  * Create a new name from a string.  This does not automatically make the name
  * absolute; it will be absolute if it has a trailing dot.
+ * @param s The string to be converted
+ * @throws TextParseException The name is invalid.
+ */
+public
+Name(String s) throws TextParseException {
+	this(s, null);
+}
+
+/**
+ * Create a new name from a string and an origin.  This does not automatically
+ * make the name absolute; it will be absolute if it has a trailing dot or an
+ * absolute origin is appended.  This is identical to the constructor, except
+ * that it will avoid creating new objects in some cases.
+ * @param s The string to be converted
+ * @param origin If the name is not absolute, the origin to be appended.
+ * @throws TextParseException The name is invalid.
+ */
+public static Name
+fromString(String s, Name origin) throws TextParseException {
+	if (s.equals("@") && origin != null)
+		return origin;
+	else if (s.equals("."))
+		return (root);
+
+	return new Name(s, origin);
+}
+
+/**
+ * Create a new name from a string.  This does not automatically make the name
+ * absolute; it will be absolute if it has a trailing dot.  This is identical
+ * to the constructor, except that it will avoid creating new objects in some
+ * cases.
  * @param s The string to be converted
  * @throws TextParseException The name is invalid.
  */

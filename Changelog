@@ -1,5 +1,7 @@
 12/8/2003
 	- Change to the BSD license.
+	- Replace the deprecated Name(String) and Name(String, Name)
+	  constructors with new versions that properly return exceptions.
 
 12/6/2003
 	- Make the J2SE javadoc link a property in build.xml.  (Ville Skyttä)
