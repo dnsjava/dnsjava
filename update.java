@@ -498,130 +498,120 @@ doAssert(MyStringTokenizer st) {
 }
 
 static void
-helpResolver() {
-	System.out.println("Resolver options:\n" +
-
-	  "    server <name>" +
-	  "\tserver that receives the updates\n" +
-
-	  "    key <name> <data>" +
-	  "\tTSIG key used to sign the messages\n" +
-
-	  "    port <port>" +
-	  "\t\tUDP/TCP port the message is sent to (default: 53)\n" +
-
-	  "    tcp" +
-	  "\t\t\tTCP should be used to send messages (default: unset)\n"
-	);
-}
-
-static void
-helpAttributes() {
-	System.out.println("Attributes:\n" +
-
-	  "    class <class>\t" +
-	  "class of the zone to be updated (default: IN)\n" +
-
-	  "    ttl <ttl>\t\t" +
-	  "ttl of an added record, if unspecified (default: 0)\n" +
-
-	  "    origin <origin>\t" +
-	  "default origin of each record name (default: .)\n" +
-
-	  "    zone <zone>\t" +
-	  "zone to update (default: value of <origin>)\n"
-	);
-};
-
-static void
-helpData() {
-	System.out.println("Data:\n" +
-
-	  "    require/prohibit\t" +
-	  "require that a record, set, or name is/is not present\n" +
-	  "\t-r <name> [ttl] [class] <type> <data ...> \n" +
-	  "\t-s <name> <type> \n" +
-	  "\t-n <name> \n\n" +
-
-	  "    add\t\t" +
-	  "specify a record to be added\n" +
-	  "\t[-r] <name> [ttl] [class] <type> <data ...> \n\n" +
-
-	  "    delete\t" +
-	  "specify a record, set, or all records at a name to be deleted\n" +
-	  "\t-r <name> [ttl] [class] <type> <data ...> \n" +
-	  "\t-s <name> <type> \n" +
-	  "\t-n <name> \n\n" +
-
-	  "    glue\t" +
-	  "specify an additional record\n" +
-	  "\t[-r] <name> [ttl] [class] <type> <data ...> \n\n" +
-
-	  "    (notes: @ represents the origin " +
-	  "and @me@ represents the local IP address)\n"
-	);
-}
-
-static void
-helpOperations() {
-	System.out.println("Operations:\n" +
-	  "    help [topic]\t" +
-	  "this information\n" +
-
-	  "    echo <text>\t\t" +
-	  "echoes the line\n" +
-
-	  "    send\t\t" +
-	  "sends the update and resets the current query\n" +
-
-	  "    query <name> <type> <class> \t" +
-	  "issues a query for this name, type, and class\n" +
-
-	  "    quit\t\t" +
-	  "quits the program\n" +
-
-	  "    file <file>\t\t" +
-	  "opens the specified file as the new input source\n" +
-
-	  "    log <file>\t\t" +
-	  "opens the specified file and uses it to log output\n" +
-
-	  "    assert <field> <value> [msg]\n" +
-	  "\t\t\tasserts that the value of the field in the last response\n" +
-	  "\t\t\tmatches the value specified.  If not, the message is\n" +
-	  "\t\t\tprinted (if present) and the program exits.\n"
-	);
-}
-
-static void
 help(String topic) {
-	if (topic != null) {
-		if (topic.equalsIgnoreCase("resolver"))
-			helpResolver();
-		else if (topic.equalsIgnoreCase("attributes"))
-			helpAttributes();
-		else if (topic.equalsIgnoreCase("data"))
-			helpData();
-		else if (topic.equalsIgnoreCase("operations"))
-			helpOperations();
-		else
-			System.out.println ("Topic " + topic + " unrecognized");
-		return;
-	}
+	System.out.println();
+	if (topic == null)
+		System.out.println("The following are supported commands:\n" +
+			"add      assert   class    delete   echo     file\n" +
+			"glue     help     log      key      origin   port\n" +
+			"prohibit q        query    quit     require  send\n" +
+			"server   tcp      ttl      zone     #\n");
 
-	System.out.println("The help topics are:\n" +
-	  "    Resolver\t" +
-	  "Properties of the resolver and DNS\n" +
-
-	  "    Attributes\t" +
-	  "Properties of some/all records\n" +
-
-	  "    Data\t" +
-	  "Prerequisites, updates, and additional records\n" +
-
-	  "    Operations\t" +
-	  "Actions to be taken\n"
-	);
+	else if (topic.equalsIgnoreCase("add"))
+		System.out.println(
+			"add [-r] <name> [ttl] [class] <type> <data>\n\n" +
+			"specify a record to be added\n");
+	else if (topic.equalsIgnoreCase("assert"))
+		System.out.println(
+			"assert <field> <value> [msg]\n\n" +
+			"asserts that the value of the field in the last\n" +
+			"response matches the value specified.  If not,\n" +
+			"the message is printed (if present) and the\n" +
+			"program exits.  The field may be any of <rcode>,\n" +
+			"<serial>, <qu>, <an>, <au>, or <ad>.\n");
+	else if (topic.equalsIgnoreCase("class"))
+		System.out.println(
+			"class <class>\n\n" +
+			"class of the zone to be updated (default: IN)\n");
+	else if (topic.equalsIgnoreCase("delete"))
+		System.out.println(
+			"delete -r <name> [ttl] [class] <type> <data> \n" +
+			"delete -s <name> <type> \n" +
+			"delete -n <name>\n\n" +
+			"specify a record or set to be deleted, or that\n" +
+			"all records at a name should be deleted\n");
+	else if (topic.equalsIgnoreCase("echo"))
+		System.out.println(
+			"echo <text>\n\n" +
+			"prints the text\n");
+	else if (topic.equalsIgnoreCase("file"))
+		System.out.println(
+			"file <file>\n\n" +
+			"opens the specified file as the new input source\n" +
+			"(- represents stdin)\n");
+	else if (topic.equalsIgnoreCase("glue"))
+		System.out.println(
+			"glue [-r] <name> [ttl] [class] <type> <data>\n\n" +
+			"specify an additional record\n");
+	else if (topic.equalsIgnoreCase("help"))
+		System.out.println(
+			"help\n" +
+			"help [topic]\n\n" +
+			"prints a list of commands or help about a specific\n" +
+			"command\n");
+	else if (topic.equalsIgnoreCase("log"))
+		System.out.println(
+			"log <file>\n\n" +
+			"opens the specified file and uses it to log output\n");
+	else if (topic.equalsIgnoreCase("key"))
+		System.out.println(
+			"key <name> <data>\n\n" +
+			"TSIG key used to sign messages\n");
+	else if (topic.equalsIgnoreCase("origin"))
+		System.out.println(
+			"origin <origin>\n\n" +
+			"default origin of unqualified names (default: .)\n");
+	else if (topic.equalsIgnoreCase("port"))
+		System.out.println(
+			"port <port>\n\n" +
+			"UDP/TCP port messages are sent to (default: 53)\n");
+	else if (topic.equalsIgnoreCase("prohibit"))
+		System.out.println(
+			"prohibit -r <name> [ttl] [class] <type> <data> \n" +
+			"prohibit -s <name> <type> \n" +
+			"prohibit -n <name>\n\n" +
+			"require that a record, set, or name is not present\n");
+	else if (topic.equalsIgnoreCase("query"))
+		System.out.println(
+			"query <name> [type [class]] \n\n" +
+			"issues a query\n");
+	else if (topic.equalsIgnoreCase("q") ||
+		 topic.equalsIgnoreCase("quit"))
+		System.out.println(
+			"q/quit\n\n" +
+			"quits the program\n");
+	else if (topic.equalsIgnoreCase("require"))
+		System.out.println(
+			"require -r <name> [ttl] [class] <type> <data> \n" +
+			"require -s <name> <type> \n" +
+			"require -n <name>\n\n" +
+			"require that a record, set, or name is present\n");
+	else if (topic.equalsIgnoreCase("send"))
+		System.out.println(
+			"send\n\n" +
+			"sends and resets the current update packet\n");
+	else if (topic.equalsIgnoreCase("server"))
+		System.out.println(
+			"server <name>\n\n" +
+			"server that receives send updates/queries\n");
+	else if (topic.equalsIgnoreCase("tcp"))
+		System.out.println(
+			"tcp\n\n" +
+			"TCP should be used to send all messages\n");
+	else if (topic.equalsIgnoreCase("ttl"))
+		System.out.println(
+			"ttl <ttl>\n\n" +
+			"default ttl of added records (default: 0)\n");
+	else if (topic.equalsIgnoreCase("zone"))
+		System.out.println(
+			"zone <zone>\n\n" +
+			"zone to update (default: value of <origin>\n");
+	else if (topic.equalsIgnoreCase("#"))
+		System.out.println(
+			"# <text>\n\n" +
+			"a comment\n");
+	else
+		System.out.println ("Topic " + topic + " unrecognized\n");
 }
 
 public static void
