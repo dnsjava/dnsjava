@@ -310,6 +310,8 @@ toWireCanonical() {
  */
 public byte []
 rdataToWireCanonical() {
+	if (empty)
+		return new byte[0];
 	DNSOutput out = new DNSOutput();
 	rrToWire(out, null, true);
 	return out.toByteArray();
@@ -597,6 +599,10 @@ equals(Object arg) {
 	Record r = (Record) arg;
 	if (type != r.type || dclass != r.dclass || !name.equals(r.name))
 		return false;
+	if (empty && r.empty)
+		return true;
+	else if (empty || r.empty)
+		return false;
 	byte [] array1 = rdataToWireCanonical();
 	byte [] array2 = r.rdataToWireCanonical();
 	return Arrays.equals(array1, array2);
@@ -675,6 +681,12 @@ compareTo(Object o) {
 	n = type - arg.type;
 	if (n != 0)
 		return (n);
+	if (empty && arg.empty)
+		return 0;
+	else if (empty)
+		return -1;
+	else if (arg.empty)
+		return 1;
 	byte [] rdata1 = rdataToWireCanonical();
 	byte [] rdata2 = arg.rdataToWireCanonical();
 	for (int i = 0; i < rdata1.length && i < rdata2.length; i++) {
