@@ -34,7 +34,7 @@ getRecords(Resolver res, String name, short type, short dclass) {
 
 	if (res == _res && _res == null) {
 		try {
-			_res = new Resolver();
+			res = _res = new Resolver();
 		}
 		catch (UnknownHostException uhe) {
 			System.out.println("Failed to initialize resolver");
