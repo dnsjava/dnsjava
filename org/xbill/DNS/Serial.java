@@ -4,7 +4,8 @@ package org.xbill.DNS;
 
 /**
  * Helper functions for doing serial arithmetic.  These should be used when
- * setting/checking SOA serial numbers.
+ * setting/checking SOA serial numbers.  SOA serial number arithmetic is
+ * defined in RFC 1982.
  *
  * @author Brian Wellington
  */
