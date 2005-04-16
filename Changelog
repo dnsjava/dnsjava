@@ -1,3 +1,8 @@
+4/16/2005
+	- Change the internal representation of empty records (that is,
+	  records in the question section of a message or meta-records
+	  used in dynamic update).
+
 4/3/2005
 	- Change the Cache from being periodically cleaned to being
 	  size-bounded.  (based on a patch from several years ago

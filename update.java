@@ -227,9 +227,6 @@ update(InputStream in) throws IOException {
 		catch (TextParseException tpe) {
 			System.out.println(tpe.getMessage());
 		}
-		catch (NullPointerException npe) {
-			System.out.println("Parse error");
-		}
 		catch (InterruptedIOException iioe) {
 			System.out.println("Operation timed out");
 		}
