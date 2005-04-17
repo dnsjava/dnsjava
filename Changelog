@@ -2,6 +2,8 @@
 	- Change the internal representation of empty records (that is,
 	  records in the question section of a message or meta-records
 	  used in dynamic update).
+	- Minor cleanups to the Mnemonic class.
+	  (Matt Rutherford <rutherfo@cs.colorado.edu>)
 
 4/3/2005
 	- Change the Cache from being periodically cleaned to being
