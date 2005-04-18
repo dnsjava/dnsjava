@@ -56,6 +56,12 @@ refresh() {
 	}
 }
 
+/** Clears all defined options */
+public static void
+clear() {
+	table = null;
+}
+
 /** Sets an option to "true" */
 public static void
 set(String option) {
