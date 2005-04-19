@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * X.400 mail mapping record.

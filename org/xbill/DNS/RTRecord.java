@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * Route Through Record - lists a route preference and intermediate host.
  *

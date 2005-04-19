@@ -2,10 +2,7 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import java.text.*;
 import java.util.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Signature - A SIG provides the digital signature of an RRset, so that

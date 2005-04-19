@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * CNAME Record  - maps an alias to its real name
  *

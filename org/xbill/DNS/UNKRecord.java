@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * A class implementing Records of unknown and/or unimplemented types.  This

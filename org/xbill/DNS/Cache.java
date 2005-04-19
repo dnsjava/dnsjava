@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.util.*;
-import java.lang.ref.*;
 
 /**
  * A cache of DNS records.  The cache obeys TTLs, so items are purged after

@@ -4,8 +4,6 @@ package org.xbill.DNS;
 
 import java.util.*;
 
-import org.xbill.DNS.utils.*;
-
 /**
  * Constants and functions relating to DNSSEC (algorithm constants).
  * DNSSEC provides authentication for DNS information.  RRsets are

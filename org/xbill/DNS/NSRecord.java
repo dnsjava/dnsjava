@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * Name Server Record  - contains the name server serving the named zone
  *

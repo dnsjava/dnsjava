@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Mailbox information Record - lists the address responsible for a mailing

@@ -5,7 +5,6 @@ package org.xbill.DNS;
 import java.util.*;
 import java.io.*;
 import java.net.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * An implementation of Resolver that sends one query to one server.

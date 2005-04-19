@@ -2,8 +2,6 @@
 
 package org.xbill.DNS;
 
-import org.xbill.DNS.utils.*;
-
 /**
  * Constants and functions relating to flags in the DNS header.
  *

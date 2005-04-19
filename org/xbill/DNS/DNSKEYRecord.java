@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Key - contains a cryptographic public key for use by DNS.

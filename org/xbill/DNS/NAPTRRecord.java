@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Name Authority Pointer Record  - specifies rewrite rule, that when applied

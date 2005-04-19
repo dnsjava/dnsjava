@@ -2,8 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-
 /**
  * An exception thrown when a name is longer than the maximum length of a DNS
  * name.

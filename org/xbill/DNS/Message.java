@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.util.*;
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * A DNS Message.  A message is the basic unit of communication between

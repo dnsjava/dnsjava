@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import java.net.*;
 
 /**
  * Interface describing a resolver.

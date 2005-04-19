@@ -2,8 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-
 /**
  * An exception thrown when a relative name is passed as an argument to
  * a method requiring an absolute name.

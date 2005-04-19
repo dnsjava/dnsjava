@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * Key Exchange - delegation of authority
  *

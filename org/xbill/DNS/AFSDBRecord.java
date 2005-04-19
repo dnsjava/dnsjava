@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * AFS Data Base Record - maps a domain name to the name of an AFS cell
  * database server.

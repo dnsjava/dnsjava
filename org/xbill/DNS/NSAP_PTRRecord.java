@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * NSAP Pointer Record  - maps a domain name representing an NSAP Address to
  * a hostname.

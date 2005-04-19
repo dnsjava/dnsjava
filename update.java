@@ -4,7 +4,6 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import org.xbill.DNS.*;
-import org.xbill.DNS.utils.*;
 
 /** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
 

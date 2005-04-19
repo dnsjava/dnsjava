@@ -3,8 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import java.text.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Geographical Location - describes the physical location of a host.

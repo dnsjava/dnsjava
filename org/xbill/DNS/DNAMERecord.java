@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * DNAME Record  - maps a nonterminal alias (subtree) to a different domain
  *

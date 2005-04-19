@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * Pointer Record  - maps a domain name representing an Internet Address to
  * a hostname.

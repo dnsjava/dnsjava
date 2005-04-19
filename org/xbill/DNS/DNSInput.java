@@ -2,8 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-
 /**
  * An class for parsing DNS messages.
  *

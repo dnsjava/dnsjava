@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * Mail Destination Record  - specifies a mail agent which delivers mail
  * for a domain (obsolete)

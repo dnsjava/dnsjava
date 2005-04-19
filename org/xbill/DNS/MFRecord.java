@@ -2,9 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
 /**
  * Mail Forwarder Record  - specifies a mail agent which forwards mail
  * for a domain (obsolete)

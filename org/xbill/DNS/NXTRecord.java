@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.util.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Next name - this record contains the following name in an ordered list

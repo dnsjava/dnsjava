@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.net.*;
 import java.io.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Address Record - maps a domain name to an Internet address

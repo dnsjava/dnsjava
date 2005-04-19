@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.text.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Location - describes the physical location of hosts, networks, subnets.

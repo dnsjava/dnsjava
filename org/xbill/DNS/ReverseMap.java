@@ -2,7 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.util.*;
 import java.net.*;
 
 /**

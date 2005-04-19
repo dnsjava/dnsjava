@@ -2,8 +2,6 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-
 /**
  * An exception thrown when an invalid dclass code is specified.
  *

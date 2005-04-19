@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.text.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * A representation of a domain name.  It may either be absolute (fully
