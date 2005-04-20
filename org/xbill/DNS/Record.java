@@ -587,6 +587,18 @@ abstract void
 rrToWire(DNSOutput out, Compression c, boolean canonical);
 
 /**
+ * Determines if two Records could be part of the same RRset.
+ * This compares the name, type, and class of the Records; the ttl and
+ * rdata are not compared.
+ */
+public boolean
+sameRRset(Record rec) {
+	return (getRRsetType() == rec.getRRsetType() &&
+		dclass == rec.dclass &&
+		name.equals(rec.name));
+}
+
+/**
  * Determines if two Records are identical.  This compares the name, type,
  * class, and rdata (with names canonicalized).  The TTLs are not compared.
  * @param arg The record to compare to
