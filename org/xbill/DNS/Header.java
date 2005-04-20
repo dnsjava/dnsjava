@@ -191,7 +191,7 @@ setOpcode(int value) {
 	if (value < 0 || value > 0xF)
 		throw new IllegalArgumentException("DNS Opcode " + value +
 						   "is out of range");
-	flags &= ~0x87FF;
+	flags &= 0x87FF;
 	flags |= (value << 11);
 }
 
