@@ -66,6 +66,7 @@ parseV4(String s) {
 	/* The fourth octet can't be empty. */
 	if (numDigits == 0)
 		return null;
+	values[currentOctet] = (byte) currentValue;
 	return values;
 }
 
@@ -150,6 +151,8 @@ parseV6(String s) {
 public static int []
 toArray(String s, int family) {
 	byte [] byteArray = toByteArray(s, family);
+	if (byteArray == null)
+		return null;
 	int [] intArray = new int[byteArray.length];
 	for (int i = 0; i < byteArray.length; i++)
 		intArray[i] = byteArray[i] & 0xFF;
