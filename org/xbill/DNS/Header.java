@@ -222,7 +222,7 @@ incCount(int field) {
 
 void
 decCount(int field) {
-	if (counts[field] == 0xFF)
+	if (counts[field] == 0)
 		throw new IllegalStateException("DNS section count cannot " +
 						"be decremented");
 	counts[field]--;
