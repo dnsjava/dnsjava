@@ -628,7 +628,7 @@ hashCode() {
 	return code;
 }
 
-private Record
+Record
 cloneRecord() {
 	try {
 		return (Record) clone();

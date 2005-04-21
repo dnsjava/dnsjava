@@ -16,16 +16,20 @@ import java.util.*;
 
 public class RRset implements TypedObject {
 
+/*
+ * rrs contains both normal and SIG/RRSIG records, with the SIG/RRSIG records
+ * at the end.
+ */
 private List rrs;
-private List sigs;
-private int start;
+private short nsigs;
+private short position;
 
 /** Creates an empty RRset */
 public
 RRset() {
 	rrs = new ArrayList(1);
-	sigs = null;
-	start = 0;
+	nsigs = 0;
+	position = 0;
 }
 
 /** Creates an RRset with the contents of an existing RRset */
@@ -33,44 +37,96 @@ public
 RRset(RRset rrset) {
 	synchronized (rrset) {
 		rrs = (List) ((ArrayList)rrset.rrs).clone();
-		if (rrset.sigs != null)
-			sigs = (List) ((ArrayList)rrset.sigs).clone();
 	}
 }
 
 /** Adds a Record to an RRset */
 public synchronized void
 addRR(Record r) {
-	if (!(r instanceof SIGBase)) {
-		if (!rrs.contains(r))
-			rrs.add(r);
-		start = 0;
+	Record first = first();
+	if (first != null && !r.sameRRset(first))
+		throw new IllegalArgumentException("record does not match " +
+						   "rrset");
+
+	if (first != null && r.getTTL() != first.getTTL()) {
+		r = r.cloneRecord();
+		r.setTTL(first.getTTL());
 	}
-	else {
-		if (sigs == null)
-			sigs = new ArrayList();
-		if (!sigs.contains(r))
-			sigs.add(r);
+
+	if (rrs.contains(r))
+		return;
+
+	if (!(r instanceof SIGBase)) {
+		if (nsigs == 0)
+			rrs.add(r);
+		else
+			rrs.add(rrs.size() - nsigs, r);
+	} else {
+		rrs.add(r);
+		nsigs++;
 	}
 }
 
 /** Deletes a Record from an RRset */
 public synchronized void
 deleteRR(Record r) {
-	if (!(r instanceof SIGBase)) {
-		rrs.remove(r);
-		start = 0;
-	}
-	else if (sigs != null)
-		sigs.remove(r);
+	if (rrs.remove(r) && (r instanceof SIGBase))
+		nsigs--;
 }
 
 /** Deletes all Records from an RRset */
 public synchronized void
 clear() {
 	rrs.clear();
-	start = 0;
-	sigs = null;
+	position = 0;
+	nsigs = 0;
+}
+
+private synchronized Iterator
+iterator(boolean data, boolean cycle) {
+	int size, start, total;
+
+	total = rrs.size();
+
+	if (data)
+		size = total - nsigs;
+	else
+		size = nsigs;
+	if (size == 0)
+		return Collections.EMPTY_LIST.iterator();
+
+	if (data) {
+		if (!cycle)
+			start = 0;
+		else {
+			if (position >= size)
+				position = 0;
+			start = position++;
+		}
+	} else {
+		start = total - nsigs;
+	}
+
+	List list = new ArrayList(size);
+	if (data) {
+		list.addAll(rrs.subList(start, size));
+		if (start != 0)
+			list.addAll(rrs.subList(0, start));
+	} else {
+		list.addAll(rrs.subList(start, total));
+	}
+
+	return list.iterator();
+}
+
+/**
+ * Returns an Iterator listing all (data) records.
+ * @param cycle If true, cycle through the records so that each Iterator will
+ * start with a different record.
+ */
+public synchronized Iterator
+rrs(boolean cycle) {
+	return iterator(true, cycle);
 }
 
 /**
@@ -79,31 +135,19 @@ clear() {
  */
 public synchronized Iterator
 rrs() {
-	int size = rrs.size();
-	if (size == 0)
-		return Collections.EMPTY_LIST.iterator();
-	if (start == size)
-		start = 0;
-	if (start++ == 0)
-		return (rrs.iterator());
-	List list = new ArrayList(rrs.subList(start - 1, size));
-	list.addAll(rrs.subList(0, start - 1));
-	return list.iterator();
+	return iterator(true, true);
 }
 
 /** Returns an Iterator listing all signature records */
 public synchronized Iterator
 sigs() {
-	if (sigs == null)
-		return Collections.EMPTY_LIST.iterator();
-	else
-		return sigs.iterator();
+	return iterator(false, false);
 }
 
 /** Returns the number of (data) records */
 public int
 size() {
-	return rrs.size();
+	return rrs.size() - nsigs;
 }
 
 /**
@@ -127,7 +171,7 @@ getType() {
 	Record r = first();
 	if (r == null)
 		return 0;
-	return r.getType();
+	return r.getRRsetType();
 }
 
 /**
@@ -145,27 +189,18 @@ getDClass() {
 /** Returns the ttl of the records */
 public synchronized long
 getTTL() {
-	if (rrs.size() == 0)
+	Record r = first();
+	if (r == null)
 		return 0;
-	long ttl = 0xFFFFFFFFL;
-	Iterator it = rrs.iterator();
-	while (it.hasNext()) {
-		Record r = (Record)it.next();
-		if (r.getTTL() < ttl)
-			ttl = r.getTTL();
-	}
-	return ttl;
+	return r.getTTL();
 }
 
 /** Returns the first record */
-public Record
+public synchronized Record
 first() {
-	try {
-		return (Record) rrs.get(0);
-	}
-	catch (IndexOutOfBoundsException e) {
+	if (rrs.size() == 0)
 		return null;
-	}
+	return (Record) rrs.get(0);
 }
 
 private String
@@ -193,10 +228,10 @@ toString() {
 	sb.append(getTTL() + " ");
 	sb.append(DClass.string(getDClass()) + " ");
 	sb.append(Type.string(getType()) + " ");
-	sb.append(iteratorToString(rrs.iterator()));
-	if (sigs != null) {
+	sb.append(iteratorToString(iterator(true, false)));
+	if (nsigs > 0) {
 		sb.append(" sigs: ");
-		sb.append(iteratorToString(sigs.iterator()));
+		sb.append(iteratorToString(iterator(false, false)));
 	}
 	sb.append(" }");
 	return sb.toString();
