@@ -28,7 +28,7 @@ check(long i) {
  */
 public static long
 parseTTL(String s) {
-	if (s == null || !Character.isDigit(s.charAt(0)))
+	if (s == null || s.length() == 0 || !Character.isDigit(s.charAt(0)))
 		throw new NumberFormatException();
 	long value = 0;
 	long ttl = 0;
