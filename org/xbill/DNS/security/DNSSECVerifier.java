@@ -72,8 +72,6 @@ findCachedKey(Cache cache, Name name, int algorithm, int footprint) {
 	if (keysets == null)
 		return null;
 	RRset keys = keysets[0];
-	if (keys.getSecurity() < DNSSEC.Secure)
-		return null;
 	return findMatchingKey(keys.rrs(), algorithm, footprint);
 }
 

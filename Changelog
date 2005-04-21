@@ -1,3 +1,6 @@
+4/21/2005
+	- Remove RRset.getSecurity()/.setSecurity().
+
 4/16/2005
 	- Change the internal representation of empty records (that is,
 	  records in the question section of a message or meta-records

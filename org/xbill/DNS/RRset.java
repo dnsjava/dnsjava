@@ -19,7 +19,6 @@ public class RRset implements TypedObject {
 private List rrs;
 private List sigs;
 private int start;
-private int securityStatus;
 
 /** Creates an empty RRset */
 public
@@ -27,7 +26,6 @@ RRset() {
 	rrs = new ArrayList(1);
 	sigs = null;
 	start = 0;
-	securityStatus = DNSSEC.Insecure;
 }
 
 /** Creates an RRset with the contents of an existing RRset */
@@ -37,7 +35,6 @@ RRset(RRset rrset) {
 		rrs = (List) ((ArrayList)rrset.rrs).clone();
 		if (rrset.sigs != null)
 			sigs = (List) ((ArrayList)rrset.sigs).clone();
-		securityStatus = rrset.securityStatus;
 	}
 }
 
@@ -169,18 +166,6 @@ first() {
 	catch (IndexOutOfBoundsException e) {
 		return null;
 	}
-}
-
-/** Sets the DNSSEC security of the RRset. */
-void
-setSecurity(int status) {
-	securityStatus = status;
-}
-
-/** Returns the DNSSEC security of the RRset. */
-public int
-getSecurity() {
-	return securityStatus;
 }
 
 private String
