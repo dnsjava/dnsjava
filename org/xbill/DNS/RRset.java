@@ -49,8 +49,17 @@ addRR(Record r) {
 						   "rrset");
 
 	if (first != null && r.getTTL() != first.getTTL()) {
-		r = r.cloneRecord();
-		r.setTTL(first.getTTL());
+		if (r.getTTL() > first.getTTL()) {
+			r = r.cloneRecord();
+			r.setTTL(first.getTTL());
+		} else {
+			for (int i = 0; i < rrs.size(); i++) {
+				Record tmp = (Record) rrs.get(i);
+				tmp = tmp.cloneRecord();
+				tmp.setTTL(r.getTTL());
+				rrs.set(i, tmp);
+			}
+		}
 	}
 
 	if (rrs.contains(r))
