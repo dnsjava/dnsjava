@@ -46,7 +46,7 @@ fromAddress(byte [] addr) {
 			nibbles[0] = (addr[i] & 0xFF) >> 4;
 			nibbles[1] = (addr[i] & 0xFF) & 0xF;
 			for (int j = nibbles.length - 1; j >= 0; j--) {
-				sb.append(nibbles[j]);
+				sb.append(Integer.toHexString(nibbles[j]));
 				if (i > 0 || j > 0)
 					sb.append(".");
 			}
@@ -54,7 +54,10 @@ fromAddress(byte [] addr) {
 	}
 
 	try {
-		return Name.fromString(sb.toString(), inaddr4);
+		if (addr.length == 4)
+			return Name.fromString(sb.toString(), inaddr4);
+		else
+			return Name.fromString(sb.toString(), inaddr6);
 	}
 	catch (TextParseException e) {
 		throw new IllegalStateException("name cannot be invalid");
