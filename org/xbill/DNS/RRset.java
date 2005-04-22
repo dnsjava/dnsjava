@@ -37,6 +37,8 @@ public
 RRset(RRset rrset) {
 	synchronized (rrset) {
 		rrs = (List) ((ArrayList)rrset.rrs).clone();
+		nsigs = rrset.nsigs;
+		position = rrset.position;
 	}
 }
 
