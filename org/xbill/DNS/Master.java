@@ -84,6 +84,7 @@ Master(InputStream in, Name origin, long ttl) {
 	if (origin != null && !origin.isAbsolute()) {
 		throw new RelativeNameException(origin);
 	}
+	TTL.check(ttl);
 	st = new Tokenizer(in);
 	this.origin = origin;
 	defaultTTL = ttl;
