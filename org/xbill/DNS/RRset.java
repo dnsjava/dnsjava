@@ -42,15 +42,32 @@ RRset(RRset rrset) {
 	}
 }
 
+private void
+safeAddRR(Record r) {
+	if (!(r instanceof SIGBase)) {
+		if (nsigs == 0)
+			rrs.add(r);
+		else
+			rrs.add(rrs.size() - nsigs, r);
+	} else {
+		rrs.add(r);
+		nsigs++;
+	}
+}
+
 /** Adds a Record to an RRset */
 public synchronized void
 addRR(Record r) {
+	if (rrs.size() == 0) {
+		safeAddRR(r);
+		return;
+	}
 	Record first = first();
-	if (first != null && !r.sameRRset(first))
+	if (!r.sameRRset(first))
 		throw new IllegalArgumentException("record does not match " +
 						   "rrset");
 
-	if (first != null && r.getTTL() != first.getTTL()) {
+	if (r.getTTL() != first.getTTL()) {
 		if (r.getTTL() > first.getTTL()) {
 			r = r.cloneRecord();
 			r.setTTL(first.getTTL());
@@ -64,18 +81,8 @@ addRR(Record r) {
 		}
 	}
 
-	if (rrs.contains(r))
-		return;
-
-	if (!(r instanceof SIGBase)) {
-		if (nsigs == 0)
-			rrs.add(r);
-		else
-			rrs.add(rrs.size() - nsigs, r);
-	} else {
-		rrs.add(r);
-		nsigs++;
-	}
+	if (!rrs.contains(r))
+		safeAddRR(r);
 }
 
 /** Deletes a Record from an RRset */
@@ -167,10 +174,7 @@ size() {
  */
 public Name
 getName() {
-	Record r = first();
-	if (r == null)
-		return null;
-	return r.getName();
+	return first().getName();
 }
 
 /**
@@ -179,10 +183,7 @@ getName() {
  */
 public int
 getType() {
-	Record r = first();
-	if (r == null)
-		return 0;
-	return r.getRRsetType();
+	return first().getRRsetType();
 }
 
 /**
@@ -191,26 +192,23 @@ getType() {
  */
 public int
 getDClass() {
-	Record r = first();
-	if (r == null)
-		return 0;
-	return r.getDClass();
+	return first().getDClass();
 }
 
 /** Returns the ttl of the records */
 public synchronized long
 getTTL() {
-	Record r = first();
-	if (r == null)
-		return 0;
-	return r.getTTL();
+	return first().getTTL();
 }
 
-/** Returns the first record */
+/**
+ * Returns the first record
+ * @throws IllegalStateException if the rrset is empty
+ */
 public synchronized Record
 first() {
 	if (rrs.size() == 0)
-		return null;
+		throw new IllegalArgumentException("rrset is empty");
 	return (Record) rrs.get(0);
 }
 
