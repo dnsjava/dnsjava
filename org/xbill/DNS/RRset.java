@@ -208,7 +208,7 @@ getTTL() {
 public synchronized Record
 first() {
 	if (rrs.size() == 0)
-		throw new IllegalArgumentException("rrset is empty");
+		throw new IllegalStateException("rrset is empty");
 	return (Record) rrs.get(0);
 }
 
