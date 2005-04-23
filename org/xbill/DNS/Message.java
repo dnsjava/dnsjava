@@ -19,7 +19,7 @@ import java.io.*;
 public class Message implements Cloneable {
 
 /** The maximum length of a message in wire format. */
-public final static int MAXLENGTH = 65535;
+public static final int MAXLENGTH = 65535;
 
 private Header header;
 private List [] sections;
