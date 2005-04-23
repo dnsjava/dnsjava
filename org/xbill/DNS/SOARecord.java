@@ -64,10 +64,10 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	host = st.getName(origin);
 	admin = st.getName(origin);
 	serial = st.getUInt32();
-	refresh = st.getTTL();
-	retry = st.getTTL();
-	expire = st.getTTL();
-	minimum = st.getTTL();
+	refresh = st.getTTLLike();
+	retry = st.getTTLLike();
+	expire = st.getTTLLike();
+	minimum = st.getTTLLike();
 }
 
 /** Convert to a String */

@@ -12,22 +12,29 @@ package org.xbill.DNS;
 
 public final class TTL {
 
+public static final long MAX_VALUE = 0x7FFFFFFFL;
+
 private
 TTL() {}
 
 static void
 check(long i) {
-	if (i < 0 || i > 0xFFFFFFFFL)
+	if (i < 0 || i > MAX_VALUE)
 		throw new InvalidTTLException(i);
 }
 
 /**
- * Parses a BIND-stype TTL
- * @return The TTL as a number of seconds
- * @throws NumberFormatException The TTL was not a valid TTL.
+ * Parses a TTL-like value, which can either be expressed as a number or a
+ * BIND-style string with numbers and units.
+ * @param s The string representing the numeric value.
+ * @param clamp Whether to clamp values in the range [MAX_VALUE + 1, 2^32 -1]
+ * to MAX_VALUE.  This should be donw for TTLs, but not other values which
+ * can be expressed in this format.
+ * @return The value as a number of seconds
+ * @throws NumberFormatException The string was not in a valid TTL format.
  */
 public static long
-parseTTL(String s) {
+parse(String s, boolean clamp) {
 	if (s == null || s.length() == 0 || !Character.isDigit(s.charAt(0)))
 		throw new NumberFormatException();
 	long value = 0;
@@ -54,12 +61,26 @@ parseTTL(String s) {
 				throw new NumberFormatException();
 		}
 	}
-	if (ttl == 0) {
+	if (ttl == 0)
 		ttl = value;
-		if (ttl > 0xFFFFFFFFL)
-			throw new NumberFormatException();
-	}
+
+	if (ttl > 0xFFFFFFFFL)
+		throw new NumberFormatException();
+	else if (ttl > MAX_VALUE && clamp)
+		ttl = MAX_VALUE;
 	return ttl;
+}
+
+/**
+ * Parses a TTL, which can either be expressed as a number or a BIND-style
+ * string with numbers and units.
+ * @param s The string representing the TTL
+ * @return The TTL as a number of seconds
+ * @throws NumberFormatException The string was not in a valid TTL format.
+ */
+public static long
+parseTTL(String s) {
+	return parse(s, true);
 }
 
 public static String

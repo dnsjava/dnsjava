@@ -476,6 +476,24 @@ getTTL() throws IOException {
 }
 
 /**
+ * Gets the next token from a tokenizer and parses it as if it were a TTL.
+ * @return The next token in the stream, as an unsigned 32 bit integer.
+ * @throws TextParseException The input was not valid.
+ * @throws IOException An I/O error occurred.
+ * @see TTL
+ */
+public long
+getTTLLike() throws IOException {
+	String next = getIdentifier();
+	try {
+		return TTL.parse(next, false);
+	}
+	catch (NumberFormatException e) {
+		throw exception("expecting a valid TTL-like value");
+	}
+}
+
+/**
  * Gets the next token from a tokenizer and converts it to a name.
  * @param origin The origin to append to relative names.
  * @return The next token in the stream, as a name.

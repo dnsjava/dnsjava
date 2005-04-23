@@ -1,3 +1,8 @@
+4/23/2005
+	- As per RFC 2181, the maximum allowed TTL value is 0x7FFFFFFF.
+	  Change TTL.parseTTL() to reflect this by silently clamping
+	  larger 32 bit values.
+
 4/22/2005
 	- Attempting to get the name/type/class/ttl of an empty RRset
 	  throws an exception.
