@@ -237,7 +237,6 @@ fromWire(byte [] b, int section) throws IOException {
 
 void
 toWire(DNSOutput out, int section, Compression c) {
-	int start = out.current();
 	name.toWire(out, c);
 	out.writeU16(type);
 	out.writeU16(dclass);
@@ -722,7 +721,7 @@ static int
 checkU8(String field, int val) {
 	if (val < 0 || val > 0xFF)
 		throw new IllegalArgumentException("\"" + field + "\" " + val + 
-						   "must be an unsigned 8 " +
+						   " must be an unsigned 8 " +
 						   "bit value");
 	return val;
 }
@@ -732,7 +731,7 @@ static int
 checkU16(String field, int val) {
 	if (val < 0 || val > 0xFFFF)
 		throw new IllegalArgumentException("\"" + field + "\" " + val + 
-						   "must be an unsigned 16 " +
+						   " must be an unsigned 16 " +
 						   "bit value");
 	return val;
 }
@@ -742,7 +741,7 @@ static long
 checkU32(String field, long val) {
 	if (val < 0 || val > 0xFFFFFFFFL)
 		throw new IllegalArgumentException("\"" + field + "\" " + val + 
-						   "must be an unsigned 32 " +
+						   " must be an unsigned 32 " +
 						   "bit value");
 	return val;
 }
