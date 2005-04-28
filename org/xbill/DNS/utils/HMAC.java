@@ -49,6 +49,7 @@ init(byte [] key) {
 public
 HMAC(MessageDigest digest, byte [] key) {
 	digest.reset();
+	this.digest = digest;
 	init(key);
 }
 
