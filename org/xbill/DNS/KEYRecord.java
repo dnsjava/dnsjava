@@ -307,11 +307,6 @@ KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	super(name, Type.KEY, dclass, ttl, flags, proto, alg, key);
 }
 
-private boolean
-isNullKEY() {
-	return ((flags & FLAG_NOKEY) == FLAG_NOKEY);
-}
-
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String flagString = st.getIdentifier();
