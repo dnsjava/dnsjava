@@ -8,7 +8,7 @@ import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * APL - Address Prefix List.
+ * APL - Address Prefix List.  See RFC 3123.
  *
  * @author Brian Wellington
  */
@@ -25,7 +25,6 @@ public static class Element {
 	public final boolean negative;
 	public final int prefixLength;
 	public final Object address;
-
 
 	private
 	Element(int family, boolean negative, Object address, int prefixLength)
@@ -67,6 +66,17 @@ public static class Element {
 		sb.append("/");
 		sb.append(prefixLength);
 		return sb.toString();
+	}
+
+	public boolean
+	equals(Object arg) {
+		if (arg == null || !(arg instanceof Element))
+			return false;
+		Element elt = (Element) arg;
+		return (family == elt.family &&
+			negative == elt.negative &&
+			prefixLength == elt.prefixLength &&
+			address.equals(elt.address));
 	}
 }
 
