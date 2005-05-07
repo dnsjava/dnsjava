@@ -69,9 +69,10 @@ static {
 			lowercase[i] = (byte)(i - 'A' + 'a');
 	}
 	root = new Name();
-	empty = new Name();
-	wild = new Name();
 	root.appendSafe(emptyLabel, 0, 1);
+	empty = new Name();
+	empty.name = new byte[0];
+	wild = new Name();
 	wild.appendSafe(wildLabel, 0, 1);
 }
 
@@ -110,6 +111,8 @@ setoffset(int n, int offset) {
 
 private final int
 offset(int n) {
+	if (n == 0 && getlabels() == 0)
+		return 0;
 	if (n < 0 || n >= getlabels())
 		throw new IllegalArgumentException("label out of range");
 	if (n < MAXOFFSETS) {
