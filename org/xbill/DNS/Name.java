@@ -225,8 +225,9 @@ Name(String s, Name origin) throws TextParseException {
 		throw parseException(s, "empty name");
 	else if (s.equals("@")) {
 		if (origin == null)
-			return;
-		copy(origin, this);
+			copy(empty, this);
+		else
+			copy(origin, this);
 		return;
 	} else if (s.equals(".")) {
 		copy(root, this);
@@ -548,6 +549,8 @@ isAbsolute() {
  */
 public short
 length() {
+	if (getlabels() == 0)
+		return 0;
 	return (short)(name.length - offset(0));
 }
 

@@ -1,3 +1,7 @@
+5/7/2005
+	- Fix several problems with empty names.
+	  (Matt Rutherford <rutherfo@cs.colorado.edu>)  
+
 4/23/2005
 	- As per RFC 2181, the maximum allowed TTL value is 0x7FFFFFFF.
 	  Change TTL.parseTTL() to reflect this by silently clamping
