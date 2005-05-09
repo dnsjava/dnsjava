@@ -21,6 +21,19 @@ getObject() {
 	return new GPOSRecord();
 }
 
+private void
+validate(double longitude, double latitude) throws IllegalArgumentException
+{
+       if (longitude < -90.0 || longitude > 90.0) {
+               throw new IllegalArgumentException("illegal longitude " +
+                                                  longitude);
+       }
+       if (latitude < -180.0 || latitude > 180.0) {
+               throw new IllegalArgumentException("illegal latitude " +
+                                                  latitude);
+       }
+}
+
 /**
  * Creates an GPOS Record from the given data
  * @param longitude The longitude component of the location.
@@ -33,14 +46,7 @@ GPOSRecord(Name name, int dclass, long ttl, double longitude, double latitude,
 	   double altitude)
 {
 	super(name, Type.GPOS, dclass, ttl);
-	if (longitude < -90.0 || longitude > 90.0) {
-		throw new IllegalArgumentException("illegal longitude " +
-						   longitude);
-	}
-	if (latitude < -180.0 || latitude > 180.0) {
-		throw new IllegalArgumentException("illegal latitude " +
-						   latitude);
-	}
+	validate(longitude, latitude);
 	this.longitude = Double.toString(longitude).getBytes();
 	this.latitude = Double.toString(latitude).getBytes();
 	this.altitude = Double.toString(altitude).getBytes();
@@ -61,6 +67,7 @@ GPOSRecord(Name name, int dclass, long ttl, String longitude, String latitude,
 	try {
 		this.longitude = byteArrayFromString(longitude);
 		this.latitude = byteArrayFromString(latitude);
+		validate(getLongitude(), getLatitude());
 		this.altitude = byteArrayFromString(altitude);
 	}
 	catch (TextParseException e) {
@@ -73,17 +80,29 @@ rrFromWire(DNSInput in) throws IOException {
 	longitude = in.readCountedString();
 	latitude = in.readCountedString();
 	altitude = in.readCountedString();
+	try {
+		validate(getLongitude(), getLatitude());
+	}
+	catch(IllegalArgumentException e) {
+		throw new WireParseException(e.getMessage());
+	}
 }
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	try {
-		this.longitude = byteArrayFromString(st.getString());
-		this.latitude = byteArrayFromString(st.getString());
-		this.altitude = byteArrayFromString(st.getString());
+		longitude = byteArrayFromString(st.getString());
+		latitude = byteArrayFromString(st.getString());
+		altitude = byteArrayFromString(st.getString());
 	}
 	catch (TextParseException e) {
 		throw st.exception(e.getMessage());
+	}
+	try {
+		validate(getLongitude(), getLatitude());
+	}
+	catch(IllegalArgumentException e) {
+		throw new WireParseException(e.getMessage());
 	}
 }
 
