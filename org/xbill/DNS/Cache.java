@@ -154,10 +154,11 @@ private static class CacheMap extends LinkedHashMap {
 }
 
 private CacheMap data;
-private int maxEntries = 50000;
 private int maxncache = -1;
 private int maxcache = -1;
 private int dclass;
+
+private static final int defaultMaxEntries = 50000;
 
 /**
  * Creates an empty Cache
@@ -168,7 +169,7 @@ private int dclass;
 public
 Cache(int dclass) {
 	this.dclass = dclass;
-	data = new CacheMap(maxEntries);
+	data = new CacheMap(defaultMaxEntries);
 }
 
 /**
@@ -197,7 +198,7 @@ Cache() {
  */
 public
 Cache(String file) throws IOException {
-	data = new CacheMap(maxEntries);
+	data = new CacheMap(defaultMaxEntries);
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null)
