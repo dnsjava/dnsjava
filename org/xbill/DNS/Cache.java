@@ -162,7 +162,7 @@ private int dclass;
 /**
  * Creates an empty Cache
  *
- * @param dclass The dns class of this cache
+ * @param dclass The DNS class of this cache
  * @see DClass
  */
 public
@@ -174,7 +174,7 @@ Cache(int dclass) {
 /**
  * Creates an empty Cache
  *
- * @param dclass The dns class of this cache
+ * @param dclass The DNS class of this cache
  * @param cleanInterval unused
  * @deprecated Use Cache(int) instead.
  */
@@ -770,12 +770,30 @@ setMaxNCache(int seconds) {
 }
 
 /**
+ * Gets the maximum length of time that a negative response will be stored
+ * in this Cache.  A negative value indicates no limit.
+ */
+public int
+getMaxNCache() {
+	return maxncache;
+}
+
+/**
  * Sets the maximum length of time that records will be stored in this
  * Cache.  A negative value disables this feature (that is, sets no limit).
  */
 public void
 setMaxCache(int seconds) {
 	maxcache = seconds;
+}
+
+/**
+ * Gets the maximum length of time that records will be stored
+ * in this Cache.  A negative value indicates no limit.
+ */
+public int
+getMaxCache() {
+	return maxcache;
 }
 
 /**
@@ -812,6 +830,14 @@ getMaxEntries() {
 public void
 setMaxEntries(int entries) {
 	data.setMaxSize(entries);
+}
+
+/**
+ * Returns the DNS class of this cache.
+ */
+public int
+getDClass() {
+	return dclass;
 }
 
 /**
