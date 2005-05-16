@@ -3,6 +3,8 @@
     <property name="src_dir" value="${basedir}"/>
     <property name="doc_dir" value="${basedir}/doc"/>
     <property name="dist_dir" value="${basedir}"/>
+    <property name="tests_dir" value="${basedir}/tests"/>
+    <property name="reports_dir" value="${basedir}/reports"/>
     <property name="version" value="1.6.6"/>
     <property name="jarname" value="dnsjava-${version}.jar"/>
     <property name="zipname" value="dnsjava-${version}.zip"/>
@@ -15,74 +17,137 @@
     </target>
 
     <target name="compile" description="Compile everything">
-        <javac destdir="${build_dir}" debug="true">
-            <src path="${src_dir}"/>
-            <exclude name="org/xbill/DNS/security/*.java"/>
-        </javac>
+	<javac destdir="${build_dir}" debug="true">
+	    <src path="${src_dir}"/>
+	    <exclude name="org/xbill/DNS/security/*.java"/>
+	    <exclude name="tests/**"/>
+	</javac>
     </target>
 
     <target name="dnssec" description="Compile the DNSSEC code">
-        <javac destdir="${build_dir}" debug="true">
-            <src path="${src_dir}"/>
-            <include name="org/xbill/DNS/security/*.java"/>
-        </javac>
+	<javac destdir="${build_dir}" debug="true">
+	    <src path="${src_dir}"/>
+	    <include name="org/xbill/DNS/security/*.java"/>
+	</javac>
     </target>
 
     <target name="spi" description="Compile the Name Service Provider code">
-        <javac destdir="${build_dir}" debug="true">
-            <src path="${src_dir}"/>
-            <include name="org/xbill/DNS/spi/*.java"/>
-        </javac>
+	<javac destdir="${build_dir}" debug="true">
+	    <src path="${src_dir}"/>
+	    <include name="org/xbill/DNS/spi/*.java"/>
+	</javac>
     </target>
 
     <target name="jar" description="Makes dnsjava.jar" depends="compile">
-        <jar jarfile="${dist_dir}/${jarname}"
-             basedir="${build_dir}" includes="**/*.class">
-            <exclude name="org/xbill/DNS/tests/*.class"/>
-            <manifest>
-                <attribute name="Implementation-Title" value="dnsjava"/>
-                <attribute name="Implementation-Version" value="${version}"/>
-            </manifest>
-            <metainf dir="org/xbill/DNS/spi/">
-                <include name="services/*"/>
-            </metainf>
-        </jar>
+	<jar jarfile="${dist_dir}/${jarname}"
+	     basedir="${build_dir}" includes="**/*.class">
+	    <exclude name="org/xbill/DNS/tests/*.class"/>
+	    <exclude name="tests/**"/>
+	    <manifest>
+		<attribute name="Implementation-Title" value="dnsjava"/>
+		<attribute name="Implementation-Version" value="${version}"/>
+	    </manifest>
+	    <metainf dir="org/xbill/DNS/spi/">
+		<include name="services/*"/>
+	    </metainf>
+	</jar>
     </target>
 
     <target name="clean" description="Remove old class files">
-        <delete>
-            <fileset dir="${build_dir}" includes="**/*.class"/>
-            <fileset dir="${build_dir}" includes="*.jar *.zip *.tar.gz"/>
-        </delete>
+	<delete>
+	    <fileset dir="${build_dir}" includes="**/*.class"/>
+	    <fileset dir="${build_dir}" includes="*.jar *.zip *.tar.gz jcoverage.ser"/>
+	</delete>
     </target>
 
     <target name="docs" description="Makes Javadoc documentation">
-        <javadoc destdir="${doc_dir}"
-                 sourcepath="${src_dir}"
-                 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security,org.xbill.DNS.spi"
-                 windowtitle="dnsjava documentation">
+	<javadoc destdir="${doc_dir}"
+		 sourcepath="${src_dir}"
+		 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security,org.xbill.DNS.spi"
+		 windowtitle="dnsjava documentation">
 
-            <link href="${j2se.javadoc}"/>
-        </javadoc>
+	    <link href="${j2se.javadoc}"/>
+	</javadoc>
     </target>
 
     <target name="docsclean" description="Remove old documentation">
-        <delete dir="${doc_dir}"/>
+	<delete dir="${doc_dir}"/>
+    </target>
+
+    <target name="reportsclean" description="Remove old reports">
+	<delete dir="${reports_dir}"/>
     </target>
 
     <property name="source_excludes"
-              value="**/*.class,${jarname},${zipname},${targzname}" />
+	      value="**/*.class,${jarname},${zipname},${targzname}" />
 
     <target name="sourcedist" description="Builds source distributions"
-            depends="compile,docs">
-        <zip destfile="${dist_dir}/${zipname}">
-            <zipfileset dir="${src_dir}" prefix="dnsjava-${version}"
-	                excludes="${source_excludes}" />
-        </zip>
-        <tar destfile="${dist_dir}/${targzname}" compression="gzip">
-            <tarfileset dir="${src_dir}" prefix="dnsjava-${version}"
-	                excludes="${source_excludes}" />
-        </tar>
+	    depends="compile,docs">
+	<zip destfile="${dist_dir}/${zipname}">
+	    <zipfileset dir="${src_dir}" prefix="dnsjava-${version}"
+			excludes="${source_excludes}" />
+	</zip>
+	<tar destfile="${dist_dir}/${targzname}" compression="gzip">
+	    <tarfileset dir="${src_dir}" prefix="dnsjava-${version}"
+			excludes="${source_excludes}" />
+	</tar>
+    </target>
+
+    <target name="compile_tests" depends="compile">
+	<javac destdir="${tests_dir}" debug="true">
+	    <src path="${tests_dir}"/>
+	</javac>
+    </target>
+
+    <target name="run_tests">
+      <path id="tests_classpath">
+	<path location="${basedir}"/>
+	<path location="${tests_dir}"/>
+      </path>
+      <antcall target="_run_tests">
+	<param name="classpath_name" value="tests_classpath"/>
+      </antcall>
+    </target>
+
+    <target name="_run_tests" depends="compile_tests">
+      <junit fork="yes" forkmode="perTest" dir="${basedir}" haltonerror="on" haltonfailure="on">
+	<classpath>
+	  <path refid="${classpath_name}"/>
+	</classpath>
+	<formatter type="plain" usefile="no"/>
+	<test name="${testcase}" if="testcase"/>
+	<batchtest unless="testcase">
+	  <fileset dir="${tests_dir}">
+	  <include name="**/*Test.class"/>
+	</fileset>
+	</batchtest>
+      </junit>
+    </target>
+    
+    <target name="coverage_report" depends="clean,compile_tests" if="jcoverage_jar">
+      <taskdef resource="tasks.properties">
+	<classpath>
+	  <path location="${jcoverage_jar}"/>
+	</classpath>
+      </taskdef>
+      <instrument todir="${basedir}/iclasses">
+	<fileset dir="${basedir}">
+	  <include name="**/*.class"/>
+	  <exclude name="iclasses/**"/>
+	  <exclude name="tests/**"/>
+	</fileset>
+	<ignore regex="org.xbill.DNS.Tokenizer$*"/>
+      </instrument>
+      <path id="itests_classpath">
+	<path location="${basedir}/iclasses"/>
+	<path location="${tests_dir}"/>
+	<path location="${jcoverage_jar}"/>
+      </path>
+      <antcall target="_run_tests">
+	<param name="classpath_name" value="itests_classpath"/>
+      </antcall>
+      <report srcdir="${basedir}" destdir="${reports_dir}/coverage"/>
+      <delete dir="${basedir}/iclasses"/>
     </target>
 
 </project>

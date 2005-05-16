@@ -1,3 +1,8 @@
+5/15/2005
+	- Add unit tests for many classes.  The unit tests are located
+	  in the tests directory, which mirrors the org.xbill.DNS hierarchy.
+	  (Matt Rutherford <rutherfo@cs.colorado.edu>)
+
 5/7/2005
 	- Fix several problems with empty names.
 	  (Matt Rutherford <rutherfo@cs.colorado.edu>)  
