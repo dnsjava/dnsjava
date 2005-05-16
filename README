@@ -30,11 +30,6 @@ Getting started:
 Run 'make' or 'ant' from the toplevel directory to build dnsjava.  JDK 1.4
 or higher is required.
 
-To compile dnssec support (org.xbill.DNS.security), the Java Cryptography
-Extensions are required.  Run 'make dnssec' or 'ant dnssec' to compile this
-package.  TSIG support is separate from dnssec support, and does not require
-that dnssec support be built.
-
 
 Replacing the standard Java DNS functionality:
 

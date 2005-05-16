@@ -19,15 +19,7 @@
     <target name="compile" description="Compile everything">
 	<javac destdir="${build_dir}" debug="true">
 	    <src path="${src_dir}"/>
-	    <exclude name="org/xbill/DNS/security/*.java"/>
 	    <exclude name="tests/**"/>
-	</javac>
-    </target>
-
-    <target name="dnssec" description="Compile the DNSSEC code">
-	<javac destdir="${build_dir}" debug="true">
-	    <src path="${src_dir}"/>
-	    <include name="org/xbill/DNS/security/*.java"/>
 	</javac>
     </target>
 
