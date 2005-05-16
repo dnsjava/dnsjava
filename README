@@ -27,20 +27,35 @@ concept.
 
 Getting started:
 
-Run 'make' or 'ant' from the toplevel directory to build dnsjava.  JDK 1.4
+Run 'ant' from the toplevel directory to build dnsjava (a Makefile is also
+provided, but does not have all of the features of the ant script).  JDK 1.4
 or higher is required.
+
+To compile name service provider support (org.xbill.DNS.spi), run 'ant spi'.
 
 
 Replacing the standard Java DNS functionality:
 
 Beginning with Java 1.4, service providers can be loaded at runtime.  To load
-the dnsjava service provider, set the system property:
+the dnsjava service provider, build it as explained above and set the system
+property:
 
 	sun.net.spi.nameservice.provider.1=dns,dnsjava
 
 This instructs the JVM to use the dnsjava service provide for DNS at the
 highest priority.
-	
+
+
+Testing dnsjava:
+
+Matt Rutherford <rutherfo@cs.colorado.edu> contributed a number of unit
+tests, which are in the tests subdirectory.  The hierarchy under tests
+mirrors the org.xbill.DNS classes.  To build the unit tests, run
+'ant compile_tests', and to run then, run 'ant run_tests'.  The tests require
+JUnit (http://www.junit.org) to be installed.
+
+Some high-level test programs are in org/xbill/DNS/tests.
+
 
 Limitations:
 
@@ -63,7 +78,7 @@ that dnsjava will not work on OS/390, for example.
 Additional documentation:
 
 Javadoc documentation is provided in the doc/ subdirectory of binary
-distributions, and can be built with 'make docs' or 'ant docs'.
+distributions, and can be built with 'ant docs'.
 
 
 License:
