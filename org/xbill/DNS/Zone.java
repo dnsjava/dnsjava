@@ -468,10 +468,8 @@ addRecord(Record r) {
 	int type = r.getRRsetType();
 	synchronized (this) {
 		RRset rrset = findRRset(name, type);
-		if (rrset == null) {
-			rrset = new RRset();
-			rrset.addRR(r);
-		}
+		if (rrset == null)
+			rrset = new RRset(r);
 		addRRset(name, rrset);
 	}
 }

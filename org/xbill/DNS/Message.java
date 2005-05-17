@@ -371,9 +371,8 @@ getSectionRRsets(int section) {
 			}
 		}
 		if (newset) {
-			RRset set = new RRset();
+			RRset set = new RRset(recs[i]);
 			sets.add(set);
-			set.addRR(recs[i]);
 			hash.add(name);
 		}
 	}
