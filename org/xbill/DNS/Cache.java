@@ -323,11 +323,9 @@ removeElement(Name name, int type) {
 }
 
 /** Empties the Cache. */
-public void
+public synchronized void
 clearCache() {
-	synchronized (this) {
-		data.clear();
-	}
+	data.clear();
 }
 
 /**
@@ -337,7 +335,7 @@ clearCache() {
  * @param o The source of the record (this could be a Message, for example)
  * @see Record
  */
-public void
+public synchronized void
 addRecord(Record r, int cred, Object o) {
 	Name name = r.getName();
 	int type = r.getRRsetType();
@@ -361,16 +359,19 @@ addRecord(Record r, int cred, Object o) {
  * @param cred The credibility of these records
  * @see RRset
  */
-public void
+public synchronized void
 addRRset(RRset rrset, int cred) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
-	Element element = findElement(name, type, cred);
+	Element element = findElement(name, type, 0);
 	if (ttl == 0) {
-		if (element != null && element.compareCredibility(cred) < 0)
+		System.out.println("adding RRset, element = " + element);
+		if (element != null && element.compareCredibility(cred) <= 0)
 			removeElement(name, type);
 	} else {
+		if (element != null && element.compareCredibility(cred) <= 0)
+			element = null;
 		if (element == null) {
 			CacheRRset crrset;
 			if (rrset instanceof CacheRRset)
@@ -390,20 +391,22 @@ addRRset(RRset rrset, int cred) {
  * The negative cache ttl is derived from the SOA.
  * @param cred The credibility of the negative entry
  */
-public void
+public synchronized void
 addNegative(Name name, int type, SOARecord soa, int cred) {
 	long ttl = 0;
 	if (soa != null)
 		ttl = soa.getTTL();
-	Element element = findElement(name, type, cred);
+	Element element = findElement(name, type, 0);
 	if (ttl == 0) {
-		if (element != null && element.compareCredibility(cred) < 0)
+		if (element != null && element.compareCredibility(cred) <= 0)
 			removeElement(name, type);
 	} else {
+		if (element != null && element.compareCredibility(cred) <= 0)
+			element = null;
 		if (element == null)
-			addElement(name,
-				   new NegativeElement(name, type, soa, cred,
-						       maxncache));
+			addElement(name, new NegativeElement(name, type,
+							     soa, cred,
+							     maxncache));
 	}
 }
 

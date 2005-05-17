@@ -1,3 +1,6 @@
+5/16/2005
+	- Fix the code to deal with TTL 0 data in the Cache.
+
 5/15/2005
 	- Add unit tests for many classes.  The unit tests are located
 	  in the tests directory, which mirrors the org.xbill.DNS hierarchy.
