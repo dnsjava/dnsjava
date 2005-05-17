@@ -294,9 +294,8 @@ addAnswer(Message response, Name name, int type, int dclass,
 			 Section.AUTHORITY, flags);
 	}
 	else if (sr.isCNAME()) {
-		RRset rrset = new RRset();
 		CNAMERecord cname = sr.getCNAME();
-		rrset.addRR(cname);
+		RRset rrset = new RRset(cname);
 		addRRset(name, response, rrset, Section.ANSWER, flags);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
@@ -304,9 +303,8 @@ addAnswer(Message response, Name name, int type, int dclass,
 				  type, dclass, iterations + 1, flags);
 	}
 	else if (sr.isDNAME()) {
-		RRset rrset = new RRset();
 		DNAMERecord dname = sr.getDNAME();
-		rrset.addRR(dname);
+		RRset rrset = new RRset(dname);
 		addRRset(name, response, rrset, Section.ANSWER, flags);
 		Name newname;
 		try {
@@ -315,8 +313,7 @@ addAnswer(Message response, Name name, int type, int dclass,
 		catch (NameTooLongException e) {
 			return Rcode.YXDOMAIN;
 		}
-		rrset = new RRset();
-		rrset.addRR(new CNAMERecord(name, dclass, 0, newname));
+		rrset = new RRset(new CNAMERecord(name, dclass, 0, newname));
 		addRRset(name, response, rrset, Section.ANSWER, flags);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
