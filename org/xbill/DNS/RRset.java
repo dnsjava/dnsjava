@@ -32,6 +32,13 @@ RRset() {
 	position = 0;
 }
 
+/** Creates an RRset and sets its contents to the specified record */
+public
+RRset(Record record) {
+	this();
+	safeAddRR(record);
+}
+
 /** Creates an RRset with the contents of an existing RRset */
 public
 RRset(RRset rrset) {
