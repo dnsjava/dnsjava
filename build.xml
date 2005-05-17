@@ -116,10 +116,15 @@
       </junit>
     </target>
     
-    <target name="coverage_report" depends="clean,compile_tests" if="jcoverage_jar">
+    <target name="coverage_report" depends="clean,compile_tests" if="jcoverage_dir">
       <taskdef resource="tasks.properties">
 	<classpath>
-	  <path location="${jcoverage_jar}"/>
+		<path location="${jcoverage_dir}/jcoverage.jar"/>
+		<path location="${jcoverage_dir}/lib/log4j/1.2.8/*.jar"/>
+		<path location="${jcoverage_dir}/log4j.jar"/>
+		<path location="${jcoverage_dir}/bcel.jar"/>
+		<path location="${jcoverage_dir}/oro.jar"/>
+		<path location="${jcoverage_dir}/gnu.getopt.jar"/>
 	</classpath>
       </taskdef>
       <instrument todir="${basedir}/iclasses">
@@ -133,7 +138,12 @@
       <path id="itests_classpath">
 	<path location="${basedir}/iclasses"/>
 	<path location="${tests_dir}"/>
-	<path location="${jcoverage_jar}"/>
+	<path location="${jcoverage_dir}/jcoverage.jar"/>
+	<path location="${jcoverage_dir}/lib/log4j/1.2.8/*.jar"/>
+	<path location="${jcoverage_dir}/log4j.jar"/>
+	<path location="${jcoverage_dir}/bcel.jar"/>
+	<path location="${jcoverage_dir}/oro.jar"/>
+	<path location="${jcoverage_dir}/gnu.getopt.jar"/>
       </path>
       <antcall target="_run_tests">
 	<param name="classpath_name" value="itests_classpath"/>
