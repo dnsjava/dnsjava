@@ -5,7 +5,7 @@ JAR = jar cf
 SUNAPIDOC = http://java.sun.com/j2se/1.4/docs/api
 JAVADOC=javadoc -classpath . -d doc -windowtitle "dnsjava documentation" -link ${SUNAPIDOC}
 
-VERSION = 1.6.6
+VERSION = 2.0.0
 
 DNSSRC = org/xbill/DNS/*.java \
 	 org/xbill/DNS/utils/*.java \
