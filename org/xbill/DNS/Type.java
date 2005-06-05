@@ -2,6 +2,8 @@
 
 package org.xbill.DNS;
 
+import java.util.HashMap;
+
 /**
  * Constants and functions relating to DNS Types
  *
@@ -170,69 +172,84 @@ public static final int MAILA		= 254;
 public static final int ANY		= 255;
 
 private static class TypeMnemonic extends Mnemonic {
+	private HashMap objects;
+
 	public
 	TypeMnemonic() {
 		super("Type", CASE_UPPER);
 		setPrefix("TYPE");
+		objects = new HashMap();
 	}
 
+	public void
+	add(int val, String str, Record proto) {
+		super.add(val, str);
+		objects.put(Mnemonic.toInteger(val), proto);
+	}
+	
 	public void
 	check(int val) {
 		Type.check(val);
 	}
+
+	public Record
+	getProto(int val) {
+		check(val);
+		return (Record) objects.get(toInteger(val));
+	}
 }
 
-private static Mnemonic types = new TypeMnemonic();
+private static TypeMnemonic types = new TypeMnemonic();
 
 static {
-	types.add(A, "A");
-	types.add(NS, "NS");
-	types.add(MD, "MD");
-	types.add(MF, "MF");
-	types.add(CNAME, "CNAME");
-	types.add(SOA, "SOA");
-	types.add(MB, "MB");
-	types.add(MG, "MG");
-	types.add(MR, "MR");
-	types.add(NULL, "NULL");
-	types.add(WKS, "WKS");
-	types.add(PTR, "PTR");
-	types.add(HINFO, "HINFO");
-	types.add(MINFO, "MINFO");
-	types.add(MX, "MX");
-	types.add(TXT, "TXT");
-	types.add(RP, "RP");
-	types.add(AFSDB, "AFSDB");
-	types.add(X25, "X25");
-	types.add(ISDN, "ISDN");
-	types.add(RT, "RT");
-	types.add(NSAP, "NSAP");
-	types.add(NSAP_PTR, "NSAP-PTR");
-	types.add(SIG, "SIG");
-	types.add(KEY, "KEY");
-	types.add(PX, "PX");
-	types.add(GPOS, "GPOS");
-	types.add(AAAA, "AAAA");
-	types.add(LOC, "LOC");
-	types.add(NXT, "NXT");
+	types.add(A, "A", new ARecord());
+	types.add(NS, "NS", new NSRecord());
+	types.add(MD, "MD", new MDRecord());
+	types.add(MF, "MF", new MFRecord());
+	types.add(CNAME, "CNAME", new CNAMERecord());
+	types.add(SOA, "SOA", new SOARecord());
+	types.add(MB, "MB", new MBRecord());
+	types.add(MG, "MG", new MGRecord());
+	types.add(MR, "MR", new MRRecord());
+	types.add(NULL, "NULL", new NULLRecord());
+	types.add(WKS, "WKS", new WKSRecord());
+	types.add(PTR, "PTR", new PTRRecord());
+	types.add(HINFO, "HINFO", new HINFORecord());
+	types.add(MINFO, "MINFO", new MINFORecord());
+	types.add(MX, "MX", new MXRecord());
+	types.add(TXT, "TXT", new TXTRecord());
+	types.add(RP, "RP", new RPRecord());
+	types.add(AFSDB, "AFSDB", new AFSDBRecord());
+	types.add(X25, "X25", new X25Record());
+	types.add(ISDN, "ISDN", new ISDNRecord());
+	types.add(RT, "RT", new RTRecord());
+	types.add(NSAP, "NSAP", new NSAPRecord());
+	types.add(NSAP_PTR, "NSAP-PTR", new NSAP_PTRRecord());
+	types.add(SIG, "SIG", new SIGRecord());
+	types.add(KEY, "KEY", new KEYRecord());
+	types.add(PX, "PX", new PXRecord());
+	types.add(GPOS, "GPOS", new GPOSRecord());
+	types.add(AAAA, "AAAA", new AAAARecord());
+	types.add(LOC, "LOC", new LOCRecord());
+	types.add(NXT, "NXT", new NXTRecord());
 	types.add(EID, "EID");
 	types.add(NIMLOC, "NIMLOC");
-	types.add(SRV, "SRV");
+	types.add(SRV, "SRV", new SRVRecord());
 	types.add(ATMA, "ATMA");
-	types.add(NAPTR, "NAPTR");
-	types.add(KX, "KX");
-	types.add(CERT, "CERT");
-	types.add(A6, "A6");
-	types.add(DNAME, "DNAME");
-	types.add(OPT, "OPT");
-	types.add(APL, "APL");
-	types.add(DS, "DS");
-	types.add(SSHFP, "SSHFP");
-	types.add(RRSIG, "RRSIG");
-	types.add(NSEC, "NSEC");
-	types.add(DNSKEY, "DNSKEY");
-	types.add(TKEY, "TKEY");
-	types.add(TSIG, "TSIG");
+	types.add(NAPTR, "NAPTR", new NAPTRRecord());
+	types.add(KX, "KX", new KXRecord());
+	types.add(CERT, "CERT", new CERTRecord());
+	types.add(A6, "A6", new A6Record());
+	types.add(DNAME, "DNAME", new DNAMERecord());
+	types.add(OPT, "OPT", new OPTRecord());
+	types.add(APL, "APL", new APLRecord());
+	types.add(DS, "DS", new DSRecord());
+	types.add(SSHFP, "SSHFP", new SSHFPRecord());
+	types.add(RRSIG, "RRSIG", new RRSIGRecord());
+	types.add(NSEC, "NSEC", new NSECRecord());
+	types.add(DNSKEY, "DNSKEY", new DNSKEYRecord());
+	types.add(TKEY, "TKEY", new TKEYRecord());
+	types.add(TSIG, "TSIG", new TSIGRecord());
 	types.add(IXFR, "IXFR");
 	types.add(AXFR, "AXFR");
 	types.add(MAILB, "MAILB");
@@ -245,19 +262,20 @@ Type() {
 }
 
 static void
-check(int i) {
-	if (i < 0 || i > 0xFFFF)
-		throw new InvalidTypeException(i);
+check(int val) {
+	if (val < 0 || val > 0xFFFF)
+		throw new InvalidTypeException(val);
 }
 
 /**
  * Converts a numeric Type into a String
+ * @param val The type value.
  * @return The canonical string representation of the type
  * @throws InvalidTypeException The type is out of range.
  */
 public static String
-string(int i) {
-	return types.getText(i);
+string(int val) {
+	return types.getText(val);
 }
 
 /**
@@ -282,6 +300,11 @@ value(String s, boolean numberok) {
 public static int
 value(String s) {
 	return value(s, false);
+}
+
+static Record
+getProto(int val) {
+	return types.getProto(val);
 }
 
 /** Is this type valid for a record (a non-meta type)? */

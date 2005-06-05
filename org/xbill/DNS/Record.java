@@ -21,7 +21,6 @@ protected Name name;
 protected int type, dclass;
 protected long ttl;
 
-private static final Record [] knownRecords = new Record[256];
 private static final Record unknownRecord = new UNKRecord();
 private static final Class [] emptyClassArray = new Class[0];
 private static final Object [] emptyObjectArray = new Object[0];
@@ -54,38 +53,16 @@ abstract Record
 getObject();
 
 private static final Record
-getTypedObject(int type) {
-	if (type < 0 || type > knownRecords.length)
-		return unknownRecord.getObject();
-	if (knownRecords[type] != null)
-		return knownRecords[type];
-
-	/* Construct the class name by putting the type before "Record". */
-	String s = Record.class.getPackage().getName() + "." +
-		   Type.string(type).replace('-', '_') + "Record";
-	try {
-		Class c = Class.forName(s);
-		Constructor m = c.getDeclaredConstructor(emptyClassArray);
-		knownRecords[type] = (Record) m.newInstance(emptyObjectArray);
-	}
-	catch (ClassNotFoundException e) {
-		/* This is normal; do nothing */
-	}
-	catch (Exception e) {
-		if (Options.check("verbose"))
-			System.err.println(e);
-	}
-	if (knownRecords[type] == null)
-		knownRecords[type] = unknownRecord.getObject();
-	return knownRecords[type];
-}
-
-private static final Record
 getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
-	Record rec;
-	if (hasData)
-		rec = getTypedObject(type).getObject();
-	else
+	Record proto, rec;
+
+	if (hasData) {
+		proto = Type.getProto(type);
+		if (proto != null)
+			rec = proto.getObject();
+		else
+			rec = new UNKRecord();
+	} else
 		rec = new EmptyRecord();
 	rec.name = name;
 	rec.type = type;
