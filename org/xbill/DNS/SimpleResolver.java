@@ -285,6 +285,7 @@ sendAXFR(Message query) throws IOException {
 	Name qname = query.getQuestion().getName();
 	SocketAddress sockaddr = new InetSocketAddress(addr, port);
 	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, sockaddr, tsig);
+	xfrin.setTimeout(getTimeout());
 	try {
 		xfrin.run();
 	}

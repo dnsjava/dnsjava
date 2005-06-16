@@ -1,3 +1,8 @@
+6/15/2005
+	- When doing a zone transfer with a SimpleResolver object, the
+	  timeout was not properly obeyed.
+	  (reported by Peter Bryant <peter@pingability.com>)
+
 6/5/2005
 	- Explictly register record type implementations instead of
 	  using reflection; this should prevent hard to diagnose
