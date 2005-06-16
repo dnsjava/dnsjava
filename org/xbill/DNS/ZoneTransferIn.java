@@ -144,6 +144,8 @@ public static ZoneTransferIn
 newAXFR(Name zone, String host, int port, TSIG key)
 throws UnknownHostException
 {
+	if (port == 0)
+		port = SimpleResolver.DEFAULT_PORT;
 	return newAXFR(zone, new InetSocketAddress(host, port), key);
 }
 
@@ -215,6 +217,8 @@ newIXFR(Name zone, long serial, boolean fallback, String host, int port,
 	TSIG key)
 throws UnknownHostException
 {
+	if (port == 0)
+		port = SimpleResolver.DEFAULT_PORT;
 	return newIXFR(zone, serial, fallback,
 		       new InetSocketAddress(host, port), key);
 }
