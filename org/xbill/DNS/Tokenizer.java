@@ -375,6 +375,14 @@ getString() throws IOException {
 	return next.value;
 }
 
+private String
+_getIdentifier(String expected) throws IOException {
+	Token next = get();
+	if (next.type != IDENTIFIER)
+		throw exception("expected " + expected);
+	return next.value;
+}
+
 /**
  * Gets the next token from a tokenizer, ensures it is an unquoted string,
  * and converts it to a string.
@@ -384,11 +392,7 @@ getString() throws IOException {
  */
 public String
 getIdentifier() throws IOException {
-	Token next = get();
-	if (next.type != IDENTIFIER) {
-		throw exception("expected an identifier");
-	}
-	return next.value;
+	return _getIdentifier("an identifier");
 }
 
 /**
@@ -399,13 +403,13 @@ getIdentifier() throws IOException {
  */
 public long
 getLong() throws IOException {
-	String next = getIdentifier();
+	String next = _getIdentifier("an integer");
 	if (!Character.isDigit(next.charAt(0)))
-		throw exception("expecting an integer");
+		throw exception("expected an integer");
 	try {
 		return Long.parseLong(next);
 	} catch (NumberFormatException e) {
-		throw exception("expecting an integer");
+		throw exception("expected an integer");
 	}
 }
 
@@ -421,7 +425,7 @@ public long
 getUInt32() throws IOException {
 	long l = getLong();
 	if (l < 0 || l > 0xFFFFFFFFL)
-		throw exception("expecting an 32 bit unsigned integer");
+		throw exception("expected an 32 bit unsigned integer");
 	return l;
 }
 
@@ -437,7 +441,7 @@ public int
 getUInt16() throws IOException {
 	long l = getLong();
 	if (l < 0 || l > 0xFFFFL)
-		throw exception("expecting an 16 bit unsigned integer");
+		throw exception("expected an 16 bit unsigned integer");
 	return (int) l;
 }
 
@@ -453,7 +457,7 @@ public int
 getUInt8() throws IOException {
 	long l = getLong();
 	if (l < 0 || l > 0xFFL)
-		throw exception("expecting an 8 bit unsigned integer");
+		throw exception("expected an 8 bit unsigned integer");
 	return (int) l;
 }
 
@@ -466,12 +470,12 @@ getUInt8() throws IOException {
  */
 public long
 getTTL() throws IOException {
-	String next = getIdentifier();
+	String next = _getIdentifier("a TTL value");
 	try {
 		return TTL.parseTTL(next);
 	}
 	catch (NumberFormatException e) {
-		throw exception("expecting a valid TTL value");
+		throw exception("expected a TTL value");
 	}
 }
 
@@ -484,12 +488,12 @@ getTTL() throws IOException {
  */
 public long
 getTTLLike() throws IOException {
-	String next = getIdentifier();
+	String next = _getIdentifier("a TTL-like value");
 	try {
 		return TTL.parse(next, false);
 	}
 	catch (NumberFormatException e) {
-		throw exception("expecting a valid TTL-like value");
+		throw exception("expected a TTL-like value");
 	}
 }
 
@@ -505,8 +509,9 @@ getTTLLike() throws IOException {
  */
 public Name
 getName(Name origin) throws IOException {
+	String next = _getIdentifier("a name");
 	try {
-		Name name = Name.fromString(getIdentifier(), origin);
+		Name name = Name.fromString(next, origin);
 		if (!name.isAbsolute())
 			throw new RelativeNameException(name);
 		return name;
@@ -525,7 +530,7 @@ public void
 getEOL() throws IOException {
 	Token next = get();
 	if (next.type != EOL && next.type != EOF) {
-		throw exception("expecting EOL or EOF");
+		throw exception("expected EOL or EOF");
 	}
 }
 
