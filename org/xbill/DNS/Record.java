@@ -4,13 +4,12 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.text.*;
-import java.lang.reflect.*;
 import java.util.*;
 import org.xbill.DNS.utils.*;
 
 /**
  * A generic DNS resource record.  The specific record types extend this class.
- * A record contains a name, type, class, and rdata.
+ * A record contains a name, type, class, ttl, and rdata.
  *
  * @author Brian Wellington
  */
