@@ -354,9 +354,11 @@ fromConstantString(String s) {
 }
 
 /**
- * Create a new name from DNS wire format
- * @param in A stream containing the wire format of the Name.
+ * Create a new name from DNS a wire format message
+ * @param in A stream containing the DNS message which is currently
+ * positioned at the start of the name to be read.
  */
+public
 Name(DNSInput in) throws WireParseException {
 	int len, pos, currentpos;
 	Name name2;
@@ -599,7 +601,8 @@ byteString(byte [] array, int pos) {
 }
 
 /**
- * Convert Name to a String
+ * Convert a Name to a String
+ * @return The representation of this name as a (printable) String.
  */
 public String
 toString() {
@@ -640,7 +643,8 @@ getLabel(int n) {
 
 /**
  * Convert the nth label in a Name to a String
- * @param n The label to be converted to a String.  The first label is 0.
+ * @param n The label to be converted to a (printable) String.  The first
+ * label is 0.
  */
 public String
 getLabelString(int n) {
@@ -649,12 +653,12 @@ getLabelString(int n) {
 }
 
 /**
- * Convert Name to DNS wire format
+ * Emit a Name in DNS wire format
  * @param out The output stream containing the DNS message.
  * @param c The compression context, or null of no compression is desired.
  * @throws IllegalArgumentException The name is not absolute.
  */
-void
+public void
 toWire(DNSOutput out, Compression c) {
 	if (!isAbsolute())
 		throw new IllegalArgumentException("toWire() called on " +
@@ -685,7 +689,7 @@ toWire(DNSOutput out, Compression c) {
 }
 
 /**
- * Convert Name to DNS wire format
+ * Emit a Name in DNS wire format
  * @throws IllegalArgumentException The name is not absolute.
  */
 public byte []
@@ -696,17 +700,18 @@ toWire() {
 }
 
 /**
- * Convert Name to canonical DNS wire format (all lowercase)
+ * Emit a Name in canonical DNS wire format (all lowercase)
  * @param out The output stream to which the message is written.
  */
-void
+public void
 toWireCanonical(DNSOutput out) {
 	byte [] b = toWireCanonical();
 	out.writeByteArray(b);
 }
 
 /**
- * Convert Name to canonical DNS wire format (all lowercase)
+ * Emit a Name in canonical DNS wire format (all lowercase)
+ * @return The canonical form of the name.
  */
 public byte []
 toWireCanonical() {
@@ -726,12 +731,14 @@ toWireCanonical() {
 }
 
 /**
- * Convert Name to DNS wire format
+ * Emit a Name in DNS wire format
  * @param out The output stream containing the DNS message.
  * @param c The compression context, or null of no compression is desired.
+ * @param canonical If true, emit the name in canonicalized form
+ * (all lowercase).
  * @throws IllegalArgumentException The name is not absolute.
  */
-void
+public void
 toWire(DNSOutput out, Compression c, boolean canonical) {
 	if (canonical)
 		toWireCanonical(out);
