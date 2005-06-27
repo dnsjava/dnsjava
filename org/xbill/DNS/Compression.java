@@ -4,12 +4,13 @@ package org.xbill.DNS;
 
 /**
  * DNS Name Compression object.
+ * @see Message
  * @see Name
  *
  * @author Brian Wellington
  */
 
-class Compression {
+public class Compression {
 
 private static class Entry {
 	Name name;
@@ -29,7 +30,11 @@ Compression() {
 	table = new Entry[TABLE_SIZE];
 }
 
-/** Adds a compression entry mapping a name to a position.  */
+/**
+ * Adds a compression entry mapping a name to a position in a message.
+ * @param pos The position at which the name is added.
+ * @param name The name being added to the message.
+ */
 public void
 add(int pos, Name name) {
 	int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;
@@ -45,6 +50,8 @@ add(int pos, Name name) {
 /**
  * Retrieves the position of the given name, if it has been previously
  * included in the message.
+ * @param name The name to find in the compression table.
+ * @return The position of the name, or -1 if not found.
  */
 public int
 get(Name name) {
