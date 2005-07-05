@@ -32,7 +32,7 @@
 
     <target name="jar" description="Makes dnsjava.jar" depends="compile">
 	<jar jarfile="${dist_dir}/${jarname}"
-	     basedir="${build_dir}" includes="**/*.class">
+		basedir="${build_dir}" includes="**/*.class **/*.properties">
 	    <exclude name="org/xbill/DNS/tests/*.class"/>
 	    <exclude name="tests/**"/>
 	    <manifest>
