@@ -59,17 +59,19 @@ Some high-level test programs are in org/xbill/DNS/tests.
 
 Limitations:
 
-There's no way to determine what the local nameserver is at runtime from within
-the JVM.  First, the property 'dns.server' (a comma delimited list) is
-checked.  These can either be IP addresses or hostnames (which are resolved
-using Java's built in DNS support).  If the underlying OS is unix-based, the
-dnsjava package can parse /etc/resolv.conf and determine the nameservers.  If
-the underlying OS is Windows, winipcfg/ipconfig can be called and the output
-parsed.  Note that this may fail for some non-English versions of Windows.
-Otherwise, or if these attempts fail, the default nameserver is
-"localhost".  This is unavoidable.  Unfortunately, I have no idea how to
-determine the nameserver for any other OSes.  Contributions of code
-are welcome (see org/xbill/DNS/ResolverConfig.java for the basic structure).
+There's no standard way to determine what the local nameserver or DNS search
+path is at runtime from within the JVM.  dnsjava attempts several methods
+until one succeeds.
+
+ - The properties 'dns.server' and 'dns.search' (comma delimited lists) are
+   checked.  The servers can either be IP addresses or hostnames (which are
+   resolved using Java's built in DNS support).
+ - The sun.net.dns.ResolverConfiguration class is queried.
+ - On Unix, /etc/resolv.conf is parsed.
+ - On Windows, ipconfig/winipcfg is called and its output parsed.  This may
+   fail for non-English versions on Windows.
+ - As a last resort, "localhost" is used as the nameserver, and the search
+   path is empty.
 
 The underlying platform must use an ASCII encoding of characters.  This means
 that dnsjava will not work on OS/390, for example.
