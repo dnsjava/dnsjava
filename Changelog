@@ -1,3 +1,9 @@
+7/5/2005
+	- Add support to ResolverConfig for using the undocumented
+	  sun.net.dns.ResolverConfiguration class to determine the list
+	  of nameservers and search path; make this the default when
+	  it works (Yannick Meudal <yannick@meudal.net>).
+
 6/16/2005
 	- The inbound zone transfer code failed to treat port 0 as the
 	  default as it claimed to. (Bill Kuker <wckits@rit.edu>)

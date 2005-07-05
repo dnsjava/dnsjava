@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -14,6 +15,7 @@ import java.util.*;
  * directly if desired.
  *
  * @author Brian Wellington
+ * @author <a href="mailto:yannick@meudal.net">Yannick Meudal</a>
  */
 
 public class ResolverConfig {
@@ -29,7 +31,10 @@ static {
 
 public
 ResolverConfig() {
-	findProperty();
+	if (findProperty())
+		return;
+	if (findSunJVM())
+		return;
 	if (servers == null || searchlist == null) {
 		String OS = System.getProperty("os.name");
 		if (OS.indexOf("Windows") != -1) {
@@ -76,7 +81,7 @@ addSearch(String search, List list) {
  * Servers are defined by dns.server=server1,server2...
  * The search path is defined by dns.search=domain1,domain2...
  */
-private void
+private boolean
 findProperty() {
 	String s, prop;
 	List l = new ArrayList(0);
@@ -101,6 +106,64 @@ findProperty() {
 		if (l.size() > 0)
 			searchlist = (Name []) l.toArray(new Name[l.size()]);
 	}
+	return (servers != null && searchlist != null);
+}
+
+/**
+ * Uses the undocumented Sun DNS implementation to determine the configuration.
+ * This doesn't work or even compile with all JVMs (gcj, for example).
+ */
+private boolean
+findSunJVM() {
+	List l = new ArrayList(0);
+	List lserver, lserver_tmp;
+	List lsearch, lsearch_tmp;
+
+	try {
+		Class [] noClasses = new Class[0];
+		Object [] noObjects = new Object[0];
+		String resConfName = "sun.net.dns.ResolverConfiguration";
+		Class resConfClass = Class.forName(resConfName);
+		Object resConf;
+
+		// ResolverConfiguration resConf = ResolverConfiguration.open();
+		Method open = resConfClass.getDeclaredMethod("open", noClasses);
+		resConf = open.invoke(null, noObjects);
+
+		// lserver_tmp = resConf.nameservers();
+		Method nameservers = resConfClass.getMethod("nameservers",
+							    noClasses);
+		lserver_tmp = (List) nameservers.invoke(resConf, noObjects);
+
+		// lsearch_tmp = resConf.searchlist();
+		Method searchlist = resConfClass.getMethod("searchlist",
+							    noClasses);
+		lsearch_tmp = (List) searchlist.invoke(resConf, noObjects);
+	}
+	catch (Exception e) {
+		return false;
+	}
+
+	l = new ArrayList();
+	if (servers == null && lserver_tmp.size() > 0) {
+		Iterator it = lserver_tmp.iterator();
+		while (it.hasNext())
+			addServer((String)it.next(), l);
+		if (l.size() > 0)
+			servers = (String []) l.toArray(new String[l.size()]);
+	}
+
+	l.clear();
+	if (searchlist == null && lsearch_tmp.size() > 0) {
+		Iterator it = lsearch_tmp.iterator();
+		while (it.hasNext())
+			addSearch((String)it.next(), l);
+		if (l.size() > 0)
+			searchlist = (Name []) l.toArray(new Name[l.size()]);
+	}
+	System.out.println(servers);
+	System.out.println(searchlist);
+	return true;
 }
 
 /**
