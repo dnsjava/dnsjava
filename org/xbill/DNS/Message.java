@@ -154,8 +154,8 @@ public void
 addRecord(Record r, int section) {
 	if (sections[section] == null)
 		sections[section] = new LinkedList();
-	sections[section].add(r);
 	header.incCount(section);
+	sections[section].add(r);
 }
 
 /**
