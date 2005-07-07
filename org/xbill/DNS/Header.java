@@ -206,7 +206,7 @@ getOpcode() {
 
 void
 setCount(int field, int value) {
-	if (value < 0 || value > 0xFF)
+	if (value < 0 || value > 0xFFFF)
 		throw new IllegalArgumentException("DNS section count " +
 						   value + " is out of range");
 	counts[field] = value;
@@ -214,7 +214,7 @@ setCount(int field, int value) {
 
 void
 incCount(int field) {
-	if (counts[field] == 0xFF)
+	if (counts[field] == 0xFFFF)
 		throw new IllegalStateException("DNS section count cannot " +
 						"be incremented");
 	counts[field]++;
