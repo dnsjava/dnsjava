@@ -62,7 +62,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = st.getString();
 	byte [] array = Address.toByteArray(s, Address.IPv4);
 	if (array == null)
-		throw st.exception("invalid dotted quad");
+		throw st.exception("invalid dotted quad:" + s);
 	addr = fromArray(array);
 }
 

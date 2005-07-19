@@ -41,9 +41,10 @@ rrFromWire(DNSInput in) throws IOException {
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	byte [] bytes = Address.toByteArray(st.getString(), Address.IPv6);
+	String s = st.getString();
+	byte [] bytes = Address.toByteArray(s, Address.IPv6);
 	if (bytes == null)
-		throw st.exception("invalid IPv6 address");
+		throw st.exception("invalid IPv6 address: " + s);
 	address = InetAddress.getByAddress(bytes);
 }
 
