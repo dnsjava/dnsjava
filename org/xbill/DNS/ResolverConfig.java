@@ -161,8 +161,6 @@ findSunJVM() {
 		if (l.size() > 0)
 			searchlist = (Name []) l.toArray(new Name[l.size()]);
 	}
-	System.out.println(servers);
-	System.out.println(searchlist);
 	return true;
 }
 
