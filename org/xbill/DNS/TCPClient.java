@@ -15,6 +15,12 @@ TCPClient(long endTime) throws IOException {
 }
 
 void
+bind(SocketAddress addr) throws IOException {
+	SocketChannel channel = (SocketChannel) key.channel();
+	channel.socket().bind(addr);
+}
+
+void
 connect(SocketAddress addr) throws IOException {
 	SocketChannel channel = (SocketChannel) key.channel();
 	if (channel.connect(addr))
@@ -96,16 +102,25 @@ recv() throws IOException {
 }
 
 static byte []
-sendrecv(SocketAddress addr, byte [] data, long endTime) throws IOException {
+sendrecv(SocketAddress local, SocketAddress remote, byte [] data, long endTime)
+throws IOException
+{
 	TCPClient client = new TCPClient(endTime);
 	try {
-		client.connect(addr);
+		if (local != null)
+			client.bind(local);
+		client.connect(remote);
 		client.send(data);
 		return client.recv();
 	}
 	finally {
 		client.cleanup();
 	}
+}
+
+static byte []
+sendrecv(SocketAddress addr, byte [] data, long endTime) throws IOException {
+	return sendrecv(null, addr, data, endTime);
 }
 
 }

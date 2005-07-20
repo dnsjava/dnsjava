@@ -15,6 +15,12 @@ UDPClient(long endTime) throws IOException {
 }
 
 void
+bind(SocketAddress addr) throws IOException {
+	DatagramChannel channel = (DatagramChannel) key.channel();
+	channel.socket().bind(addr);
+}
+
+void
 connect(SocketAddress addr) throws IOException {
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	channel.connect(addr);
@@ -51,18 +57,28 @@ recv(int max) throws IOException {
 }
 
 static byte []
-sendrecv(SocketAddress addr, byte [] data, int max, long endTime)
+sendrecv(SocketAddress local, SocketAddress remote, byte [] data, int max,
+	 long endTime)
 throws IOException
 {
 	UDPClient client = new UDPClient(endTime);
 	try {
-		client.connect(addr);
+		if (local != null)
+			client.bind(local);
+		client.connect(remote);
 		client.send(data);
 		return client.recv(max);
 	}
 	finally {
 		client.cleanup();
 	}
+}
+
+static byte []
+sendrecv(SocketAddress addr, byte [] data, int max, long endTime)
+throws IOException
+{
+	return sendrecv(null, addr, data, max, endTime);
 }
 
 }

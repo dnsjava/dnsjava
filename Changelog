@@ -1,3 +1,8 @@
+7/19/2005
+	- Add support for binding clients to local addresses when using
+	  a SimpleResolver.  Also add the -b option to the dig program
+	  to test this. (based on a patch by Bruno Dillenseger)
+
 7/5/2005
 	- Add support to ResolverConfig for using the undocumented
 	  sun.net.dns.ResolverConfiguration class to determine the list

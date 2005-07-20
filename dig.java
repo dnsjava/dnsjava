@@ -1,6 +1,7 @@
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
 
 import java.io.*;
+import java.net.*;
 import org.xbill.DNS.*;
 
 /** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
@@ -58,7 +59,7 @@ main(String argv[]) throws IOException {
 	Message query, response;
 	Record rec;
 	Record opt = null;
-	Resolver res = null;
+	SimpleResolver res = null;
 	boolean printQuery = false;
 	long startTime, endTime;
 
@@ -94,14 +95,12 @@ main(String argv[]) throws IOException {
 
 		if (server != null)
 			res = new SimpleResolver(server);
-		else if (type == Type.AXFR)
-			res = new SimpleResolver();
 		else
-			res = new ExtendedResolver();
+			res = new SimpleResolver();
 
 		while (argv[arg].startsWith("-") && argv[arg].length() > 1) {
 			switch (argv[arg].charAt(1)) {
-			    case 'p':
+			case 'p':
 				String portStr;
 				int port;
 				if (argv[arg].length() > 2)
@@ -116,7 +115,24 @@ main(String argv[]) throws IOException {
 				res.setPort(port);
 				break;
 
-			    case 'k':
+			case 'b':
+				String addrStr;
+				if (argv[arg].length() > 2)
+					addrStr = argv[arg].substring(2);
+				else
+					addrStr = argv[++arg];
+				InetAddress addr;
+				try {
+					addr = InetAddress.getByName(addrStr);
+				}
+				catch (Exception e) {
+					System.out.println("Invalid address");
+					return;
+				}
+				res.setLocalAddress(addr);
+				break;
+
+			case 'k':
 				String key;
 				if (argv[arg].length() > 2)
 					key = argv[arg].substring(2);
@@ -125,15 +141,15 @@ main(String argv[]) throws IOException {
 				res.setTSIGKey(TSIG.fromString(key));
 				break;
 
-			    case 't':
+			case 't':
 				res.setTCP(true);
 				break;
 
-			    case 'i':
+			case 'i':
 				res.setIgnoreTruncation(true);
 				break;
 
-			    case 'e':
+			case 'e':
 				String ednsStr;
 				int edns;
 				if (argv[arg].length() > 2)
@@ -150,16 +166,16 @@ main(String argv[]) throws IOException {
 				res.setEDNS(edns);
 				break;
 
-			    case 'd':
+			case 'd':
 			    	opt = new OPTRecord((short)1280, (byte)0,
 						    (byte)0, ExtendedFlags.DO);
 				break;
 
-			    case 'q':
+			case 'q':
 			    	printQuery = true;
 				break;
 
-			    default:
+			default:
 				System.out.print("Invalid option: ");
 				System.out.println(argv[arg]);
 			}
@@ -172,7 +188,7 @@ main(String argv[]) throws IOException {
 			usage();
 	}
 	if (res == null)
-		res = new ExtendedResolver();
+		res = new SimpleResolver();
 
 	rec = Record.newRecord(name, type, dclass);
 	query = Message.newQuery(rec);
