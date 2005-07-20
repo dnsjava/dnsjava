@@ -83,21 +83,39 @@ setPort(int port) {
 	address = new InetSocketAddress(address.getAddress(), port);
 }
 
-public void
-setAddress(InetAddress addr) {
-	address = new InetSocketAddress(addr, address.getPort());
-}
-
+/**
+ * Sets the address of the server to communicate with.
+ * @param addr The address of the DNS server
+ */
 public void
 setAddress(InetSocketAddress addr) {
 	address = addr;
 }
 
+/**
+ * Sets the address of the server to communicate with (on the default
+ * DNS port)
+ * @param addr The address of the DNS server
+ */
+public void
+setAddress(InetAddress addr) {
+	address = new InetSocketAddress(addr, address.getPort());
+}
+
+/**
+ * Sets the local address to bind to when sending messages.
+ * @param addr The local address to send messages from.
+ */
 public void
 setLocalAddress(InetSocketAddress addr) {
 	localAddress = addr;
 }
 
+/**
+ * Sets the local address to bind to when sending messages.  A random port
+ * will be used.
+ * @param addr The local address to send messages from.
+ */
 public void
 setLocalAddress(InetAddress addr) {
 	localAddress = new InetSocketAddress(addr, 0);
