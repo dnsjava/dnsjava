@@ -443,7 +443,10 @@ findRecords(Name name, int type) {
  */ 
 public RRset
 findExactMatch(Name name, int type) {
-	return oneRRset(exactName(name), type);
+	Object types = exactName(name);
+	if (types == null)
+		return null;
+	return oneRRset(types, type);
 }
 
 /**

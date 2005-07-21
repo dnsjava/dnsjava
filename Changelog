@@ -1,3 +1,8 @@
+7/21/2005
+	- Zone.findExactMatch() would throw a NullPointerException if the
+	  name didn't exist.
+	  (reported by Hans Zandbelt <Hans.Zandbelt@telin.nl>)
+
 7/19/2005
 	- Add support for binding clients to local addresses when using
 	  a SimpleResolver.  Also add the -b option to the dig program
