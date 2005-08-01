@@ -77,10 +77,10 @@ rrFromWire(DNSInput in) throws IOException {
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	String address = st.getString();
-	this.address = checkAndConvertAddress(address);
+	String addr = st.getString();
+	this.address = checkAndConvertAddress(addr);
 	if (this.address == null)
-		throw st.exception("invalid NSAP address " + address);
+		throw st.exception("invalid NSAP address " + addr);
 }
 
 /**

@@ -109,10 +109,10 @@ validate() throws IOException {
 
 private final void
 maybeAddRecord(Record record) throws IOException {
-	int type = record.getType();
+	int rtype = record.getType();
 	Name name = record.getName();
 
-	if (type == Type.SOA && !name.equals(origin)) {
+	if (rtype == Type.SOA && !name.equals(origin)) {
 		throw new IOException("SOA owner " + name +
 				      " does not match zone origin " +
 				      origin);
@@ -278,12 +278,12 @@ addRRset(Name name, RRset rrset) {
 		data.put(name, rrset);
 		return;
 	}
-	int type = rrset.getType();
+	int rtype = rrset.getType();
 	if (types instanceof List) {
 		List list = (List) types;
 		for (int i = 0; i < list.size(); i++) {
 			RRset set = (RRset) list.get(i);
-			if (set.getType() == type) {
+			if (set.getType() == rtype) {
 				list.set(i, rrset);
 				return;
 			}
@@ -291,7 +291,7 @@ addRRset(Name name, RRset rrset) {
 		list.add(rrset);
 	} else {
 		RRset set = (RRset) types;
-		if (set.getType() == type)
+		if (set.getType() == rtype)
 			data.put(name, rrset);
 		else {
 			LinkedList list = new LinkedList();
@@ -468,9 +468,9 @@ addRRset(RRset rrset) {
 public void
 addRecord(Record r) {
 	Name name = r.getName();
-	int type = r.getRRsetType();
+	int rtype = r.getRRsetType();
 	synchronized (this) {
-		RRset rrset = findRRset(name, type);
+		RRset rrset = findRRset(name, rtype);
 		if (rrset == null)
 			rrset = new RRset(r);
 		addRRset(name, rrset);
@@ -485,14 +485,14 @@ addRecord(Record r) {
 public void
 removeRecord(Record r) {
 	Name name = r.getName();
-	int type = r.getRRsetType();
+	int rtype = r.getRRsetType();
 	synchronized (this) {
-		RRset rrset = findRRset(name, type);
+		RRset rrset = findRRset(name, rtype);
 		if (rrset == null)
 			return;
 		rrset.deleteRR(r);
 		if (rrset.size() == 0)
-			removeRRset(name, type);
+			removeRRset(name, rtype);
 	}
 }
 

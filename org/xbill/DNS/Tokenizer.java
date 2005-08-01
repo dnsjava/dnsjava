@@ -539,19 +539,19 @@ getEOL() throws IOException {
  */
 private String
 remainingStrings() throws IOException {
-        StringBuffer sb = null;
+        StringBuffer buffer = null;
         while (true) {
                 Tokenizer.Token t = get();
                 if (!t.isString())
                         break;
-                if (sb == null)
-                        sb = new StringBuffer();
-                sb.append(t.value);
+                if (buffer == null)
+                        buffer = new StringBuffer();
+                buffer.append(t.value);
         }
         unget();
-        if (sb == null)
+        if (buffer == null)
                 return null;
-        return sb.toString();
+        return buffer.toString();
 }
 
 /**

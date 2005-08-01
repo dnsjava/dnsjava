@@ -59,10 +59,10 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
 			break;
-		int type = Type.value(t.value, true);
-		if (type <= 0 || type > 128)
+		int typecode = Type.value(t.value, true);
+		if (typecode <= 0 || typecode > 128)
 			throw st.exception("Invalid type: " + t.value);
-		bitmap.set(type);
+		bitmap.set(typecode);
 	}
 	st.unget();
 }

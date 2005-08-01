@@ -127,8 +127,8 @@ rrToString() {
 			if (other.length != 6) {
 				sb.append("<invalid BADTIME other data>");
 			} else {
-				long time = ((other[0] & 0xFF) << 40) +
-					    ((other[1] & 0xFF) << 32) +
+				long time = ((long)(other[0] & 0xFF) << 40) +
+					    ((long)(other[1] & 0xFF) << 32) +
 					    ((other[2] & 0xFF) << 24) +
 					    ((other[3] & 0xFF) << 16) +
 					    ((other[4] & 0xFF) << 8) +
