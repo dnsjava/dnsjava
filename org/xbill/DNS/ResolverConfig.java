@@ -164,13 +164,13 @@ findSunJVM() {
 	if (lserver_tmp.size() > 0) {
 		Iterator it = lserver_tmp.iterator();
 		while (it.hasNext())
-			addServer((String)it.next(), lserver);
+			addServer((String) it.next(), lserver);
 	}
 
 	if (lsearch_tmp.size() > 0) {
 		Iterator it = lsearch_tmp.iterator();
 		while (it.hasNext())
-			addSearch((String)it.next(), lsearch);
+			addSearch((String) it.next(), lsearch);
 	}
 	configureFromLists(lserver, lsearch);
 	return true;
