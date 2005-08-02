@@ -8,10 +8,22 @@ import java.util.*;
 
 /**
  * A class that tries to locate name servers and the search path to
- * be appended to unqualified names.  Currently, this works if either the
- * appropriate properties are set, the OS has a unix-like /etc/resolv.conf,
- * or the system is Windows based with ipconfig or winipcfg.  These routines
- * will be called internally by the Lookup class, and can also be called
+ * be appended to unqualified names.
+ *
+ * The following are attempted, in order, until one succeeds.
+ * <UL>
+ *   <LI>The properties 'dns.server' and 'dns.search' (comma delimited lists)
+ *       are checked.  The servers can either be IP addresses or hostnames
+ *       (which are resolved using Java's built in DNS support).
+ *   <LI>The sun.net.dns.ResolverConfiguration class is queried.
+ *   <LI>On Unix, /etc/resolv.conf is parsed.
+ *   <LI>On Windows, ipconfig/winipcfg is called and its output parsed.  This
+ *       may fail for non-English versions on Windows.
+ *   <LI>"localhost" is used as the nameserver, and the search path is empty.
+ * </UL>
+ *
+ * These routines will be called internally when creating Resolvers/Lookups
+ * without explicitly specifying server names, and can also be called
  * directly if desired.
  *
  * @author Brian Wellington
