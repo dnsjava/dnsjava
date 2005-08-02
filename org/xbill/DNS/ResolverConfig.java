@@ -88,6 +88,14 @@ addSearch(String search, List list) {
 	list.add(name);
 }
 
+private void
+configureFromLists(List lserver, List lsearch) {
+	if (servers == null && lserver.size() > 0)
+		servers = (String []) lserver.toArray(new String[0]);
+	if (searchlist == null && lsearch.size() > 0)
+		searchlist = (Name []) lsearch.toArray(new Name[0]);
+}
+
 /**
  * Looks in the system properties to find servers and a search path.
  * Servers are defined by dns.server=server1,server2...
@@ -96,28 +104,24 @@ addSearch(String search, List list) {
 private boolean
 findProperty() {
 	String s, prop;
-	List l = new ArrayList(0);
+	List lserver = new ArrayList(0);
+	List lsearch = new ArrayList(0);
 	StringTokenizer st;
 
 	prop = System.getProperty("dns.server");
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
 		while (st.hasMoreTokens())
-			addServer(st.nextToken(), l);
-		if (l.size() > 0)
-			servers = (String []) l.toArray(new String[l.size()]);
+			addServer(st.nextToken(), lserver);
 	}
 
-	l.clear();
 	prop = System.getProperty("dns.search");
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
-		while (st.hasMoreTokens()) {
-			addSearch(st.nextToken(), l);
-		}
-		if (l.size() > 0)
-			searchlist = (Name []) l.toArray(new Name[l.size()]);
+		while (st.hasMoreTokens())
+			addSearch(st.nextToken(), lsearch);
 	}
+	configureFromLists(lserver, lsearch);
 	return (servers != null && searchlist != null);
 }
 
@@ -127,9 +131,10 @@ findProperty() {
  */
 private boolean
 findSunJVM() {
-	List l = new ArrayList(0);
-	List lserver, lserver_tmp;
-	List lsearch, lsearch_tmp;
+	List lserver = new ArrayList(0);
+	List lserver_tmp;
+	List lsearch = new ArrayList(0);
+	List lsearch_tmp;
 
 	try {
 		Class [] noClasses = new Class[0];
@@ -156,23 +161,18 @@ findSunJVM() {
 		return false;
 	}
 
-	l = new ArrayList();
-	if (servers == null && lserver_tmp.size() > 0) {
+	if (lserver_tmp.size() > 0) {
 		Iterator it = lserver_tmp.iterator();
 		while (it.hasNext())
-			addServer((String)it.next(), l);
-		if (l.size() > 0)
-			servers = (String []) l.toArray(new String[l.size()]);
+			addServer((String)it.next(), lserver);
 	}
 
-	l.clear();
-	if (searchlist == null && lsearch_tmp.size() > 0) {
+	if (lsearch_tmp.size() > 0) {
 		Iterator it = lsearch_tmp.iterator();
 		while (it.hasNext())
-			addSearch((String)it.next(), l);
-		if (l.size() > 0)
-			searchlist = (Name []) l.toArray(new Name[l.size()]);
+			addSearch((String)it.next(), lsearch);
 	}
+	configureFromLists(lserver, lsearch);
 	return true;
 }
 
@@ -222,13 +222,7 @@ findResolvConf(String file) {
 	catch (IOException e) {
 	}
 
-	if (servers == null && lserver.size() > 0)
-		servers =
-			(String [])lserver.toArray(new String[lserver.size()]);
-
-	if (searchlist == null && lsearch.size() > 0)
-		searchlist =
-			(Name [])lsearch.toArray(new Name[lsearch.size()]);
+	configureFromLists(lserver, lsearch);
 }
 
 private void
@@ -316,13 +310,7 @@ findWin(InputStream in) {
 			}
 		}
 		
-		if (servers == null && lserver.size() > 0)
-			servers = (String [])lserver.toArray
-						(new String[lserver.size()]);
-
-		if (searchlist == null && lsearch.size() > 0)
-			searchlist =
-			    (Name [])lsearch.toArray(new Name[lsearch.size()]);
+		configureFromLists(lserver, lsearch);
 	}
 	catch (IOException e) {
 	}
