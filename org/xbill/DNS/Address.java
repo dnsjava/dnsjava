@@ -95,7 +95,7 @@ parseV6(String s) {
 	if (tokens[last].length() == 0) {
 		// If the last two tokens are empty, it means the string
 		// ended with ::, which is fine.  If only the last is
-		// empty, the string started with :, which is bad.
+		// empty, the string ended with :, which is bad.
 		if (last - first > 0 && tokens[last - 1].length() == 0)
 			last--;
 		else
