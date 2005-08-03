@@ -328,7 +328,7 @@ public class HeaderTest extends TestCase
 
 	try {m_h.setCount(0, -1); fail("IllegalArgumentException not thrown");}
 	catch( IllegalArgumentException e ){}
-	try {m_h.setCount(3, 0x100); fail("IllegalArgumentException not thrown");}
+	try {m_h.setCount(3, 0x10000); fail("IllegalArgumentException not thrown");}
 	catch( IllegalArgumentException e ){}
     }
 
@@ -342,7 +342,7 @@ public class HeaderTest extends TestCase
 
     public void test_incCount_invalid()
     {
-	m_h.setCount(1, 0xFF);
+	m_h.setCount(1, 0xFFFF);
 	try {m_h.incCount(1); fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
     }
