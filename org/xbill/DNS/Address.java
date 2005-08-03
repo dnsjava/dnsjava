@@ -75,43 +75,69 @@ parseV6(String s) {
 	boolean parsev4 = false;
 	List l = new ArrayList();
 	int range = -1;
-
 	byte [] data = new byte[16];
 
-	StringTokenizer st = new StringTokenizer(s, ":", true);
-	while (st.hasMoreTokens())
-		l.add(st.nextToken());
-	l.add("");
-	l.add("");
+	String [] tokens = s.split(":", -1);
 
-	String [] tokens = (String []) l.toArray(new String[l.size()]);
+	int first = 0;
+	int last = tokens.length - 1;
 
-	int i = 0, j = 0;
-	while (i < tokens.length - 2) {
-		if (tokens[i].equals(":")) {
-			if (tokens[i+1].equals(":")) {
-				if (tokens[i+2].equals(":") || range >= 0)
-					return null;
-				range = j;
-				if (tokens[i+2].equals(""))
-					break;
-				i++;
-			}
-			i++;
+	if (tokens[0].length() == 0) {
+		// If the first two tokens are empty, it means the string
+		// started with ::, which is fine.  If only the first is
+		// empty, the string started with :, which is bad.
+		if (last - first > 0 && tokens[1].length() == 0)
+			first++;
+		else
+			return null;
+	}
+
+	if (tokens[last].length() == 0) {
+		// If the last two tokens are empty, it means the string
+		// ended with ::, which is fine.  If only the last is
+		// empty, the string started with :, which is bad.
+		if (last - first > 0 && tokens[last - 1].length() == 0)
+			last--;
+		else
+			return null;
+	}
+
+	if (last - first + 1 > 8)
+		return null;
+
+	int i, j;
+	for (i = first, j = 0; i <= last; i++) {
+		if (tokens[i].length() == 0) {
+			if (range >= 0)
+				return null;
+			range = j;
+			continue;
 		}
 
 		if (tokens[i].indexOf('.') >= 0) {
 			parsev4 = true;
-			if (!tokens[i+1].equals(""))
+			// An IPv4 address must be the last component
+			if (i < last)
 				return null;
+			// There can't have been more than 6 components.
+			if (i > 6)
+				return null;
+			byte [] v4addr = Address.toByteArray(tokens[i], IPv4);
+			if (v4addr == null)
+				return null;
+			for (int k = 0; k < 4; k++)
+				data[j++] = v4addr[k];
 			break;
 		}
 
 		try {
+			for (int k = 0; k < tokens[i].length(); k++) {
+				char c = tokens[i].charAt(k);
+				if (Character.digit(c, 16) < 0)
+					return null;
+			}
 			int x = Integer.parseInt(tokens[i], 16);
 			if (x > 0xFFFF || x < 0)
-				return null;
-			if (j > 16 - 2)
 				return null;
 			data[j++] = (byte)(x >>> 8);
 			data[j++] = (byte)(x & 0xFF);
@@ -119,26 +145,18 @@ parseV6(String s) {
 		catch (NumberFormatException e) {
 			return null;
 		}
-		i++;
 	}
 
-	if (parsev4) {
-		byte [] v4addr = Address.toByteArray(tokens[i], IPv4);
-		if (v4addr == null)
-			return null;
-		for (int k = 0; k < 4; k++)
-			data[j++] = v4addr[k];
-	}
-	if (range >= 0) {
-		int left = 16 - j;
-		for (int k = 15; k >= 0; k--) {
-			if (k >= range + left)
-				data[k] = data[k - left];
-			else if (k >= range)
-				data[k] = 0;
-		}
-	} else if (j < 16)
+	if (j < 16 && range < 0)
 		return null;
+
+	if (range >= 0) {
+		int empty = 16 - j;
+		System.arraycopy(data, range, data, range + empty, j - range);
+		for (i = range; i < range + empty; i++)
+			data[i] = 0;
+	}
+
 	return data;
 }
 
