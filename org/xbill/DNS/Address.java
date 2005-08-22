@@ -256,7 +256,7 @@ lookupHostName(String name) throws UnknownHostException {
  */
 public static InetAddress
 getByName(String name) throws UnknownHostException {
-	if (isDottedQuad(name))
+	if (toByteArray(name, IPv4) != null || toByteArray(name, IPv6) != null)
 		return InetAddress.getByName(name);
 	Record [] records = lookupHostName(name);
 	ARecord a = (ARecord) records[0];
@@ -271,7 +271,7 @@ getByName(String name) throws UnknownHostException {
  */
 public static InetAddress []
 getAllByName(String name) throws UnknownHostException {
-	if (isDottedQuad(name))
+	if (toByteArray(name, IPv4) != null || toByteArray(name, IPv6) != null)
 		return InetAddress.getAllByName(name);
 	Record [] records = lookupHostName(name);
 	InetAddress [] addrs = new InetAddress[records.length];
@@ -280,6 +280,45 @@ getAllByName(String name) throws UnknownHostException {
 		addrs[i] = a.getAddress();
 	}
 	return addrs;
+}
+
+/**
+ * Converts an address from its string representation to an IP address.
+ * The address can be either IPv4 or IPv6.
+ * @param addr The address, in string form
+ * @return The IP addresses
+ * @exception UnknownHostException The address is not a valid IP address.
+ */
+public static InetAddress
+getByAddress(String addr) throws UnknownHostException {
+	byte [] bytes;
+	bytes = toByteArray(addr, IPv4);
+	if (bytes != null)
+		return InetAddress.getByAddress(bytes);
+	bytes = toByteArray(addr, IPv6);
+	if (bytes != null)
+		return InetAddress.getByAddress(bytes);
+	throw new UnknownHostException("Invalid address: " + addr);
+}
+
+/**
+ * Converts an address from its string representation to an IP address in
+ * a particular family.
+ * @param addr The address, in string form
+ * @param family The address family, either IPv4 or IPv6.
+ * @return The IP addresses
+ * @exception UnknownHostException The address is not a valid IP address in
+ * the specified address family.
+ */
+public static InetAddress
+getByAddress(String addr, int family) throws UnknownHostException {
+	if (family != IPv4 && family != IPv6)
+		throw new IllegalArgumentException("unknown address family");
+	byte [] bytes;
+	bytes = toByteArray(addr, family);
+	if (bytes != null)
+		return InetAddress.getByAddress(bytes);
+	throw new UnknownHostException("Invalid address: " + addr);
 }
 
 /**
