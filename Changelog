@@ -1,3 +1,7 @@
+8/22/2005
+	- Add Address.getByAddress(String) and
+	  Address.getByAddress(String, family).
+
 7/21/2005
 	- Zone.findExactMatch() would throw a NullPointerException if the
 	  name didn't exist.
