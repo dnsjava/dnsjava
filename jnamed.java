@@ -17,6 +17,11 @@ Map caches;
 Map znames;
 Map TSIGs;
 
+private static String
+addrport(InetAddress addr, int port) {
+	return addr.getHostAddress() + "#" + port;
+}
+
 public
 jnamed(String conffile) throws IOException, ZoneTransferException {
 	FileInputStream fs;
@@ -64,7 +69,7 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 				ports.add(Integer.valueOf(st.nextToken()));
 			else if (keyword.equals("address")) {
 				String addr = st.nextToken();
-				addresses.add(InetAddress.getByName(addr));
+				addresses.add(Address.getByAddress(addr));
 			} else {
 				System.out.println("unknown keyword: " +
 						   keyword);
@@ -76,7 +81,7 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 			ports.add(new Integer(53));
 
 		if (addresses.size() == 0)
-			addresses.add(null);
+			addresses.add(Address.getByAddress("0.0.0.0"));
 
 		Iterator iaddr = addresses.iterator();
 		while (iaddr.hasNext()) {
@@ -84,15 +89,10 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 			Iterator iport = ports.iterator();
 			while (iport.hasNext()) {
 				int port = ((Integer)iport.next()).intValue();
-				String addrString;
 				addUDP(addr, port);
 				addTCP(addr, port);
-				if (addr == null)
-					addrString = "0.0.0.0";
-				else
-					addrString = addr.getHostAddress();
 				System.out.println("jnamed: listening on " +
-						   addrString + "#" + port);
+						   addrport(addr, port));
 			}
 		}
 		System.out.println("jnamed: running");
@@ -525,10 +525,10 @@ TCPclient(Socket s) {
 		dataOut.write(response);
 	}
 	catch (IOException e) {
-		String addrString;
 		System.out.println("TCPclient(" +
-				   s.getLocalAddress().getHostAddress() + "#" +
-				   s.getLocalPort() + "): " + e);
+				   addrport(s.getLocalAddress(),
+					    s.getLocalPort()) +
+				   "): " + e);
 	}
 	finally {
 		try {
@@ -551,13 +551,8 @@ serveTCP(InetAddress addr, int port) {
 		}
 	}
 	catch (IOException e) {
-		String addrString;
-		if (addr == null)
-			addrString = "0.0.0.0";
-		else
-			addrString = addr.getHostAddress();
-		System.out.println("serveTCP(" + addrString + "#" + port +
-				   "): " + e);
+		System.out.println("serveTCP(" + addrport(addr, port) + "): " +
+				   e);
 	}
 }
 
@@ -605,13 +600,8 @@ serveUDP(InetAddress addr, int port) {
 		}
 	}
 	catch (IOException e) {
-		String addrString;
-		if (addr == null)
-			addrString = "0.0.0.0";
-		else
-			addrString = addr.getHostAddress();
-		System.out.println("serveUDP(" + addrString + "#" + port +
-				   "): " + e);
+		System.out.println("serveUDP(" + addrport(addr, port) + "): " +
+				   e);
 	}
 }
 
