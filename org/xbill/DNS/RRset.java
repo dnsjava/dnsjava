@@ -14,7 +14,7 @@ import java.util.*;
  * @author Brian Wellington
  */
 
-public class RRset implements TypedObject {
+public class RRset {
 
 /*
  * rrs contains both normal and SIG/RRSIG records, with the SIG/RRSIG records

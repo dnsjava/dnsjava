@@ -19,7 +19,7 @@ import java.util.*;
 
 public class Cache {
 
-private interface Element extends TypedObject {
+private interface Element {
 	public boolean expired();
 	public int compareCredibility(int cred);
 	public int getType();
