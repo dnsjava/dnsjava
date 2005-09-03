@@ -256,11 +256,13 @@ lookupHostName(String name) throws UnknownHostException {
  */
 public static InetAddress
 getByName(String name) throws UnknownHostException {
-	if (toByteArray(name, IPv4) != null || toByteArray(name, IPv6) != null)
-		return InetAddress.getByName(name);
-	Record [] records = lookupHostName(name);
-	ARecord a = (ARecord) records[0];
-	return a.getAddress();
+	try {
+		return getByAddress(name);
+	} catch (UnknownHostException e) {
+		Record [] records = lookupHostName(name);
+		ARecord a = (ARecord) records[0];
+		return a.getAddress();
+	}
 }
 
 /**
@@ -271,15 +273,17 @@ getByName(String name) throws UnknownHostException {
  */
 public static InetAddress []
 getAllByName(String name) throws UnknownHostException {
-	if (toByteArray(name, IPv4) != null || toByteArray(name, IPv6) != null)
-		return InetAddress.getAllByName(name);
-	Record [] records = lookupHostName(name);
-	InetAddress [] addrs = new InetAddress[records.length];
-	for (int i = 0; i < records.length; i++) {
-		ARecord a = (ARecord) records[i];
-		addrs[i] = a.getAddress();
+	try {
+		InetAddress addr = getByAddress(name);
+		return new InetAddress[1] {addr};
+	} catch (UnknownHostException e) {
+		InetAddress [] addrs = new InetAddress[records.length];
+		for (int i = 0; i < records.length; i++) {
+			ARecord a = (ARecord) records[i];
+			addrs[i] = a.getAddress();
+		}
+		return addrs;
 	}
-	return addrs;
 }
 
 /**
