@@ -275,8 +275,9 @@ public static InetAddress []
 getAllByName(String name) throws UnknownHostException {
 	try {
 		InetAddress addr = getByAddress(name);
-		return new InetAddress[1] {addr};
+		return new InetAddress[] {addr};
 	} catch (UnknownHostException e) {
+		Record [] records = lookupHostName(name);
 		InetAddress [] addrs = new InetAddress[records.length];
 		for (int i = 0; i < records.length; i++) {
 			ARecord a = (ARecord) records[i];
