@@ -366,7 +366,6 @@ addRRset(RRset rrset, int cred) {
 	int type = rrset.getType();
 	Element element = findElement(name, type, 0);
 	if (ttl == 0) {
-		System.out.println("adding RRset, element = " + element);
 		if (element != null && element.compareCredibility(cred) <= 0)
 			removeElement(name, type);
 	} else {
