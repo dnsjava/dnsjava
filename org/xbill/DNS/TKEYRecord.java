@@ -104,7 +104,7 @@ modeString() {
 	switch (mode) {
 		case SERVERASSIGNED:	return "SERVERASSIGNED";
 		case DIFFIEHELLMAN:	return "DIFFIEHELLMAN";
-		case GSSAPI:		return "GSSAPRESOLVERASSIGNED";
+		case GSSAPI:		return "GSSAPI";
 		case RESOLVERASSIGNED:	return "RESOLVERASSIGNED";
 		case DELETE:		return "DELETE";
 		default:		return Integer.toString(mode);
