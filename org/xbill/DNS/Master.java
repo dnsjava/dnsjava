@@ -84,7 +84,6 @@ Master(InputStream in, Name origin, long ttl) {
 	if (origin != null && !origin.isAbsolute()) {
 		throw new RelativeNameException(origin);
 	}
-	TTL.check(ttl);
 	st = new Tokenizer(in);
 	this.origin = origin;
 	defaultTTL = ttl;
@@ -320,8 +319,13 @@ _nextRecord() throws IOException {
 				continue;
 			} else  if (s.equalsIgnoreCase("$INCLUDE")) {
 				String filename = st.getString();
-				String parent = file.getParent();
-				File newfile = new File(parent, filename);
+				File newfile;
+				if (file != null) {
+					String parent = file.getParent();
+					newfile = new File(parent, filename);
+				} else {
+					newfile = new File(filename);
+				}
 				Name incorigin = origin;
 				token = st.get();
 				if (token.isString()) {

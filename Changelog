@@ -1,3 +1,10 @@
+10/25/2005
+	- The Master(InputStream in, Name origin) constructor should not
+	  always fail.
+	- Correctly handle the case where reading a Master from an InputStream
+	  would throw a NullPointerException if a $INCLUDE file wasn't found.
+	  (reported by Lars Petrus <Lars.Petrus@nominum.com>)
+
 8/22/2005
 	- Add Address.getByAddress(String) and
 	  Address.getByAddress(String, family).
