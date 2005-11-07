@@ -1,3 +1,9 @@
+11/6/2005
+	- Add a Resolver.setEDNS(int level, int payloadSize, int flags,
+	  List options) method, to allow a Resolver to automatically set
+	  the DO flag, as well as future EDNS features.
+	  (requested by Rick Wesson <wessorh@ar.com>)
+
 10/25/2005
 	- The Master(InputStream in, Name origin) constructor should not
 	  always fail.

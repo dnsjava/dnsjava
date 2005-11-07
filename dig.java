@@ -58,7 +58,6 @@ main(String argv[]) throws IOException {
 	int arg;
 	Message query, response;
 	Record rec;
-	Record opt = null;
 	SimpleResolver res = null;
 	boolean printQuery = false;
 	long startTime, endTime;
@@ -167,8 +166,7 @@ main(String argv[]) throws IOException {
 				break;
 
 			case 'd':
-			    	opt = new OPTRecord((short)1280, (byte)0,
-						    (byte)0, ExtendedFlags.DO);
+				res.setEDNS(0, 0, ExtendedFlags.DO, null);
 				break;
 
 			case 'q':
@@ -192,8 +190,6 @@ main(String argv[]) throws IOException {
 
 	rec = Record.newRecord(name, type, dclass);
 	query = Message.newQuery(rec);
-	if (opt != null)
-		query.addRecord(opt, Section.ADDITIONAL);
 	if (printQuery)
 		System.out.println(query);
 	startTime = System.currentTimeMillis();

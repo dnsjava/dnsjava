@@ -23,15 +23,17 @@ public class SimpleResolver implements Resolver {
 /** The default port to send queries to */
 public static final int DEFAULT_PORT = 53;
 
+/** The default EDNS payload size */
+public static final int DEFAULT_EDNS_PAYLOADSIZE = 1280;
+
 private InetSocketAddress address;
 private InetSocketAddress localAddress;
 private boolean useTCP, ignoreTruncation;
-private byte EDNSlevel = -1;
+private OPTRecord queryOPT;
 private TSIG tsig;
 private int timeoutValue = 10 * 1000;
 
 private static final short DEFAULT_UDPSIZE = 512;
-private static final short EDNS_UDPSIZE = 1280;
 
 private static String defaultResolver = "localhost";
 private static int uniqueID = 0;
@@ -132,11 +134,18 @@ setIgnoreTruncation(boolean flag) {
 }
 
 public void
-setEDNS(int level) {
+setEDNS(int level, int payloadSize, int flags, List options) {
 	if (level != 0 && level != -1)
-		throw new UnsupportedOperationException("invalid EDNS level " +
-							"- must be 0 or -1");
-	this.EDNSlevel = (byte) level;
+		throw new IllegalArgumentException("invalid EDNS level - " +
+						   "must be 0 or -1");
+	if (payloadSize == 0)
+		payloadSize = DEFAULT_EDNS_PAYLOADSIZE;
+	queryOPT = new OPTRecord(payloadSize, 0, level, flags, options);
+}
+
+public void
+setEDNS(int level) {
+	setEDNS(level, 0, 0, null);
 }
 
 public void
@@ -198,10 +207,9 @@ verifyTSIG(Message query, Message response, byte [] b, TSIG tsig) {
 
 private void
 applyEDNS(Message query) {
-	if (EDNSlevel < 0 || query.getOPT() != null)
+	if (queryOPT == null || query.getOPT() != null)
 		return;
-	OPTRecord opt = new OPTRecord(EDNS_UDPSIZE, Rcode.NOERROR, (byte)0);
-	query.addRecord(opt, Section.ADDITIONAL);
+	query.addRecord(queryOPT, Section.ADDITIONAL);
 }
 
 private int

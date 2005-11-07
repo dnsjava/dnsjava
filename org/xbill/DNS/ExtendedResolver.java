@@ -322,6 +322,13 @@ setEDNS(int level) {
 }
 
 public void
+setEDNS(int level, int payloadSize, int flags, List options) {
+	for (int i = 0; i < resolvers.size(); i++)
+		((Resolver)resolvers.get(i)).setEDNS(level, payloadSize,
+						     flags, options);
+}
+
+public void
 setTSIGKey(TSIG key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(key);

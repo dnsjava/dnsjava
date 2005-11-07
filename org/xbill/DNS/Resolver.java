@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.util.*;
 
 /**
  * Interface describing a resolver.
@@ -35,9 +36,23 @@ void setIgnoreTruncation(boolean flag);
  * Sets the EDNS version used on outgoing messages.
  * @param level The EDNS level to use.  0 indicates EDNS0 and -1 indicates no
  * EDNS.
- * @throws UnsupportedOperationException An invalid level was indicated
+ * @throws IllegalArgumentException An invalid level was indicated.
  */
 void setEDNS(int level);
+
+/**
+ * Sets the EDNS information on outgoing messages.
+ * @param level The EDNS level to use.  0 indicates EDNS0 and -1 indicates no
+ * EDNS.
+ * @param payloadSize The maximum DNS packet size that this host is capable
+ * of receiving over UDP.  If 0 is specified, the default (1280) is used.
+ * @param flags EDNS extended flags to be set in the OPT record.
+ * @param options EDNS options to be set in the OPT record, specified as a
+ * List of OPTRecord.Option elements.
+ * @throws IllegalArgumentException An invalid field was specified.
+ * @see OPTRecord
+ */
+void setEDNS(int level, int payloadSize, int flags, List options);
 
 /**
  * Specifies the TSIG key that messages will be signed with
