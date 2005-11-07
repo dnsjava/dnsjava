@@ -115,7 +115,7 @@ private
 DNSSEC() { }
 
 private static void
-digestSIG(DNSOutput out, SIGRecord sig) {
+digestSIG(DNSOutput out, SIGBase sig) {
 	out.writeU16(sig.getTypeCovered());
 	out.writeU8(sig.getAlgorithm());
 	out.writeU8(sig.getLabels());
@@ -135,7 +135,7 @@ digestSIG(DNSOutput out, SIGRecord sig) {
  * @return The data to be cryptographically signed or verified.
  */
 public static byte []
-digestRRset(SIGRecord sig, RRset rrset) {
+digestRRset(RRSIGRecord sig, RRset rrset) {
 	DNSOutput out = new DNSOutput();
 	digestSIG(out, sig);
 

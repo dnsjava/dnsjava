@@ -51,7 +51,7 @@ RRset(RRset rrset) {
 
 private void
 safeAddRR(Record r) {
-	if (!(r instanceof SIGBase)) {
+	if (!(r instanceof RRSIGRecord)) {
 		if (nsigs == 0)
 			rrs.add(r);
 		else
@@ -95,7 +95,7 @@ addRR(Record r) {
 /** Deletes a Record from an RRset */
 public synchronized void
 deleteRR(Record r) {
-	if (rrs.remove(r) && (r instanceof SIGBase))
+	if (rrs.remove(r) && (r instanceof RRSIGRecord))
 		nsigs--;
 }
 

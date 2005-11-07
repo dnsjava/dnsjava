@@ -84,7 +84,7 @@ findKey(Cache cache, Name name, int algorithm, int footprint) {
 }
 
 private int
-verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
+verifySIG(RRset set, RRSIGRecord sigrec, Cache cache) {
 	PublicKey key = findKey(cache, sigrec.getSigner(),
 				sigrec.getAlgorithm(), sigrec.getFootprint());
 	if (key == null)
@@ -108,7 +108,7 @@ verifySIG(RRset set, SIGRecord sigrec, Cache cache) {
 			algString = "MD5withRSA";
 			break;
 		case DNSSEC.DSA:
-			sig = DSASignature.create(sigrec);
+			sig = DSASignature.create(sigrec.getSignature());
 			algString = "SHA1withDSA";
 			break;
 		case DNSSEC.RSASHA1:
@@ -151,7 +151,7 @@ verify(RRset set, Cache cache) {
 		return DNSSEC.Insecure;
 	}
 	while (sigs.hasNext()) {
-		SIGRecord sigrec = (SIGRecord) sigs.next();
+		RRSIGRecord sigrec = (RRSIGRecord) sigs.next();
 		if (verifySIG(set, sigrec, cache) == DNSSEC.Secure) {
 			if (Options.check("verbosesec"))
 				System.out.println("Secure");

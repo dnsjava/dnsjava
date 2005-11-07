@@ -523,8 +523,8 @@ getType() {
 
 /**
  * Returns the type of RRset that this record would belong to.  For all types
- * except SIGRecord, this is equivalent to getType().
- * @return The type of record, if not SIGRecord.  If the type is SIGRecord,
+ * except RRSIGRecord, this is equivalent to getType().
+ * @return The type of record, if not SIGRecord.  If the type is RRSIGRecord,
  * the type covered is returned.
  * @see Type
  * @see RRset
@@ -532,8 +532,8 @@ getType() {
  */
 public int
 getRRsetType() {
-	if (type == Type.SIG || type == Type.RRSIG) {
-		SIGBase sig = (SIGBase) this;
+	if (type == Type.RRSIG) {
+		RRSIGRecord sig = (RRSIGRecord) this;
 		return sig.getTypeCovered();
 	}
 	return type;

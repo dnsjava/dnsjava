@@ -1,3 +1,6 @@
+11/7/2005
+	- Update remaining DNSSEC code to be compliant with the current spec.
+
 11/6/2005
 	- Add a Resolver.setEDNS(int level, int payloadSize, int flags,
 	  List options) method, to allow a Resolver to automatically set

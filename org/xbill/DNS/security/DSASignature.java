@@ -26,19 +26,17 @@ private DSASignature() {}
  * format expected by the DSA verification routines.
  */
 static byte []
-create(SIGRecord sigrec) {
+create(byte [] sig) {
 	final int len = 20;
 	int n = 0;
 	byte rlen, slen, seqlen;
 
-	byte [] sigdata = sigrec.getSignature();
-
 	rlen = len;
-	if (sigdata[1] < 0)
+	if (sig[1] < 0)
 		rlen++;
 
 	slen = len;
-	if (sigdata[1] < 0)
+	if (sig[len + 1] < 0)
 		slen++;
 
 	/* 4 = 2 * (INT, value) */
@@ -54,13 +52,13 @@ create(SIGRecord sigrec) {
 	if (rlen > len)
 		array[n++] = 0;
 	for (int i = 0; i < len; i++, n++)
-		array[n] = sigdata[1 + i];
+		array[n] = sig[1 + i];
 	array[n++] = ASN1_INT;
 	array[n++] = slen;
 	if (slen > len)
 		array[n++] = 0;
 	for (int i = 0; i < len; i++, n++)
-		array[n] = sigdata[1 + len + i];
+		array[n] = sig[1 + len + i];
 	return array;
 }
 
