@@ -1,3 +1,8 @@
+11/11/2005
+	- The InetAddresses returned by Address.getByName() should have their
+	  hostname copied from the input parameter.
+	  (reported by Praveen Tammana <praveen.public@gmail.com>)
+
 11/7/2005
 	- Update remaining DNSSEC code to be compliant with the current spec.
 

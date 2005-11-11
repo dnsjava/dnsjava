@@ -248,6 +248,12 @@ lookupHostName(String name) throws UnknownHostException {
 	}
 }
 
+private static InetAddress
+addrFromRecord(String name, Record r) throws UnknownHostException {
+	ARecord a = (ARecord) r;
+	return InetAddress.getByAddress(name, a.getAddress().getAddress());
+}
+
 /**
  * Determines the IP address of a host
  * @param name The hostname to look up
@@ -260,8 +266,7 @@ getByName(String name) throws UnknownHostException {
 		return getByAddress(name);
 	} catch (UnknownHostException e) {
 		Record [] records = lookupHostName(name);
-		ARecord a = (ARecord) records[0];
-		return a.getAddress();
+		return addrFromRecord(name, records[0]);
 	}
 }
 
@@ -279,10 +284,8 @@ getAllByName(String name) throws UnknownHostException {
 	} catch (UnknownHostException e) {
 		Record [] records = lookupHostName(name);
 		InetAddress [] addrs = new InetAddress[records.length];
-		for (int i = 0; i < records.length; i++) {
-			ARecord a = (ARecord) records[i];
-			addrs[i] = a.getAddress();
-		}
+		for (int i = 0; i < records.length; i++)
+			addrs[i] = addrFromRecord(name, records[i]);
 		return addrs;
 	}
 }
