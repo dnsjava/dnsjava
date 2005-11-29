@@ -56,7 +56,7 @@ for (Iterator it = records.iterator(); it.hasNext(); )
 Name zone = Name.fromString("dyn.test.example.");
 Name host = Name.fromString("host", zone);
 Update update = new Update(zone);
-update.replace(host, Type.A, 3600, args[1]);
+update.replace(host, Type.A, 3600, args[0]);
 
 Resolver res = new SimpleResolver("10.0.0.1");
 res.setTSIGKey(new TSIG(host, base64.fromString("1234")));
