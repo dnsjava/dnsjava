@@ -1,3 +1,6 @@
+11/30/2005
+	- 2.0.1 released.
+
 11/11/2005
 	- The InetAddresses returned by Address.getByName() should have their
 	  hostname copied from the input parameter.
