@@ -31,13 +31,12 @@ private InetSocketAddress localAddress;
 private boolean useTCP, ignoreTruncation;
 private OPTRecord queryOPT;
 private TSIG tsig;
-private int timeoutValue = 10 * 1000;
+private long timeoutValue = 10 * 1000;
 
 private static final short DEFAULT_UDPSIZE = 512;
 
 private static String defaultResolver = "localhost";
 private static int uniqueID = 0;
-
 
 /**
  * Creates a SimpleResolver that will query the specified host 
@@ -159,13 +158,18 @@ getTSIGKey() {
 }
 
 public void
-setTimeout(int secs) {
-	timeoutValue = secs * 1000;
+setTimeout(int secs, int msecs) {
+	timeoutValue = (long)secs * 1000 + msecs;
 }
 
-int
+public void
+setTimeout(int secs) {
+	setTimeout(secs, 0);
+}
+
+long
 getTimeout() {
-	return timeoutValue / 1000;
+	return timeoutValue;
 }
 
 private Message
@@ -324,7 +328,7 @@ private Message
 sendAXFR(Message query) throws IOException {
 	Name qname = query.getQuestion().getName();
 	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, address, tsig);
-	xfrin.setTimeout(getTimeout());
+	xfrin.setTimeout((int)(getTimeout() / 1000));
 	try {
 		xfrin.run();
 	}

@@ -335,9 +335,14 @@ setTSIGKey(TSIG key) {
 }
 
 public void
-setTimeout(int secs) {
+setTimeout(int secs, int msecs) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTimeout(secs);
+		((Resolver)resolvers.get(i)).setTimeout(secs, msecs);
+}
+
+public void
+setTimeout(int secs) {
+	setTimeout(secs, 0);
 }
 
 /**

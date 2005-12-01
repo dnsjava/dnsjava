@@ -63,6 +63,13 @@ void setTSIGKey(TSIG key);
 /**
  * Sets the amount of time to wait for a response before giving up.
  * @param secs The number of seconds to wait.
+ * @param secs The number of milliseconds to wait.
+ */
+void setTimeout(int secs, int msecs);
+
+/**
+ * Sets the amount of time to wait for a response before giving up.
+ * @param secs The number of seconds to wait.
  */
 void setTimeout(int secs);
 

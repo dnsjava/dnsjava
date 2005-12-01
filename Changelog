@@ -1,4 +1,8 @@
 11/30/2005
+	- Add a Resolver.setTimeout(int secs, int msecs) method.
+	  (requested by Dmitry Isakbayev) <isakdim@users.sourceforge.net>)
+
+11/30/2005
 	- 2.0.1 released.
 
 11/11/2005
