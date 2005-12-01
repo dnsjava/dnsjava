@@ -173,18 +173,6 @@ Cache(int dclass) {
 }
 
 /**
- * Creates an empty Cache
- *
- * @param dclass The DNS class of this cache
- * @param cleanInterval unused
- * @deprecated Use Cache(int) instead.
- */
-public
-Cache(int dclass, int cleanInterval) {
-	this(dclass);
-}
-
-/**
  * Creates an empty Cache for class IN.
  * @see DClass
  */
@@ -841,13 +829,6 @@ setMaxEntries(int entries) {
 public int
 getDClass() {
 	return dclass;
-}
-
-/**
- * @deprecated Caches are no longer periodically cleaned.
- */
-public void
-setCleanInterval(int cleanInterval) {
 }
 
 /**

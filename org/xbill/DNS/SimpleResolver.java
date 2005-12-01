@@ -153,16 +153,6 @@ setTSIGKey(TSIG key) {
 	tsig = key;
 }
 
-public void
-setTSIGKey(Name name, byte [] key) {
-	tsig = new TSIG(name, key);
-}
-
-public void
-setTSIGKey(String name, String key) {
-	tsig = new TSIG(name, key);
-}
-
 TSIG
 getTSIGKey() {
 	return tsig;

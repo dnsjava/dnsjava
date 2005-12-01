@@ -335,16 +335,6 @@ setTSIGKey(TSIG key) {
 }
 
 public void
-setTSIGKey(Name name, byte [] key) {
-	setTSIGKey(new TSIG(name, key));
-}
-
-public void
-setTSIGKey(String name, String key) {
-	setTSIGKey(new TSIG(name, key));
-}
-
-public void
 setTimeout(int secs) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTimeout(secs);

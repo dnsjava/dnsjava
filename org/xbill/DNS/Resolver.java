@@ -61,24 +61,6 @@ void setEDNS(int level, int payloadSize, int flags, List options);
 void setTSIGKey(TSIG key);
 
 /**
- * Specifies the TSIG key that messages will be signed with
- * @param name The key name
- * @param key The key data
- * @deprecated Use setTSIGKey(TSIG)
- */
-void setTSIGKey(Name name, byte [] key);
-
-/**
- * Specifies the TSIG key that messages will be signed with
- * @param name The key name
- * @param key The key data, represented as a base64 encoded string.
- * @throws IllegalArgumentException The key name is an invalid name
- * @throws IllegalArgumentException The key data is improperly encoded
- * @deprecated Use setTSIGKey(TSIG)
- */
-void setTSIGKey(String name, String key);
-
-/**
  * Sets the amount of time to wait for a response before giving up.
  * @param secs The number of seconds to wait.
  */

@@ -152,23 +152,6 @@ throws UnknownHostException
 /**
  * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
  * @param zone The zone to transfer.
- * @param res The resolver to use when doing the transfer.
- * @return The ZoneTransferIn object.
- *
- * @deprecated Use newAXFR(Name, String, int, TSIG) or newAXFR(Name,
- * SocketAddress, TSIG)
- */
-public static ZoneTransferIn
-newAXFR(Name zone, SimpleResolver res) {
-	ZoneTransferIn xfrin = newAXFR(zone, res.getAddress(),
-				       res.getTSIGKey());
-	xfrin.timeout = res.getTimeout() * 1000L;
-	return xfrin;
-}
-
-/**
- * Instantiates a ZoneTransferIn object to do an AXFR (full zone transfer).
- * @param zone The zone to transfer.
  * @param host The host from which to transfer the zone.
  * @param key The TSIG key used to authenticate the transfer, or null.
  * @return The ZoneTransferIn object.
@@ -221,26 +204,6 @@ throws UnknownHostException
 		port = SimpleResolver.DEFAULT_PORT;
 	return newIXFR(zone, serial, fallback,
 		       new InetSocketAddress(host, port), key);
-}
-
-/**
- * Instantiates a ZoneTransferIn object to do an IXFR (incremental zone
- * transfer).
- * @param zone The zone to transfer.
- * @param serial The existing serial number.
- * @param fallback If true, fall back to AXFR if IXFR is not supported.
- * @param res The resolver to use when doing the transfer.
- * @return The ZoneTransferIn object.
- *
- * @deprecated Use newIXFR(Name, long, int, String, int, TSIG) or
- * newIXFR((Name, long, int, SocketAddress, TSIG)
- */
-public static ZoneTransferIn
-newIXFR(Name zone, long serial, boolean fallback, SimpleResolver res) {
-	ZoneTransferIn xfrin = newIXFR(zone, serial, fallback,
-				       res.getAddress(), res.getTSIGKey());
-	xfrin.timeout = res.getTimeout() * 1000L;
-	return xfrin;
 }
 
 /**
