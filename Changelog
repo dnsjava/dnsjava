@@ -699,6 +699,7 @@
 8/9/2001
 	- nsupdate compatibility and a bug fix to the update client.
 	  (patch from David Sward <david@berzerked.org>)
+
 8/8/2001
 	- The results of ANY queries were not properly cached.
 
