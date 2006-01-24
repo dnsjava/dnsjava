@@ -427,7 +427,8 @@ parseRR(Record rec) throws ZoneTransferException {
 private void
 closeConnection() {
 	try {
-		client.cleanup();
+		if (client != null)
+			client.cleanup();
 	}
 	catch (IOException e) {
 	}
@@ -513,8 +514,8 @@ doxfr() throws IOException, ZoneTransferException {
  */
 public List
 run() throws IOException, ZoneTransferException {
-	openConnection();
 	try {
+		openConnection();
 		doxfr();
 	}
 	finally {

@@ -1,3 +1,7 @@
+1/24/2005
+	- AXFR requests could leak file descriptors if the connection
+	  failed. (Can Bican <can@bican.net>)
+
 11/30/2005
 	- Add a Resolver.setTimeout(int secs, int msecs) method.
 	  (requested by Dmitry Isakbayev) <isakdim@users.sourceforge.net>)
