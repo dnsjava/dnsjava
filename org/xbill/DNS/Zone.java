@@ -471,9 +471,12 @@ addRecord(Record r) {
 	int rtype = r.getRRsetType();
 	synchronized (this) {
 		RRset rrset = findRRset(name, rtype);
-		if (rrset == null)
+		if (rrset == null) {
 			rrset = new RRset(r);
-		addRRset(name, rrset);
+			addRRset(name, rrset);
+		} else {
+			rrset.addRR(r);
+		}
 	}
 }
 

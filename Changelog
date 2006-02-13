@@ -1,3 +1,7 @@
+2/13/2005
+	- Loading zones containing RRsets with multiple records didn't work.
+	  (reported by Olafur Gudmundsson" <ogud@ogud.com>)
+
 1/24/2005
 	- AXFR requests could leak file descriptors if the connection
 	  failed. (Can Bican <can@bican.net>)
