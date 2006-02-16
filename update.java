@@ -537,19 +537,22 @@ doAssert(Tokenizer st) throws IOException {
 static void
 help(String topic) {
 	System.out.println();
-	if (topic == null)
+	if (topic == null) {
 		System.out.println("The following are supported commands:\n" +
 		    "add      assert   class    clear    date     delete\n" +
-		    "echo     file     glue     help     log      key\n" +
-		    "edns     origin   port     prohibit query    quit\n" +
-		    "require  send     server   show     sleep    tcp\n" +
-		    "ttl      zone     #\n");
+		    "echo     edns     file     glue     help     key\n" +
+		    "log      port     prohibit query    quit     require\n" +
+		    "send     server   show     sleep    tcp      ttl\n" +
+		    "zone     #\n");
+		return;
+	}
+	topic = topic.toLowerCase();
 
-	else if (topic.equalsIgnoreCase("add"))
+	if (topic.equals("add"))
 		System.out.println(
 			"add <name> [ttl] [class] <type> <data>\n\n" +
 			"specify a record to be added\n");
-	else if (topic.equalsIgnoreCase("assert"))
+	else if (topic.equals("assert"))
 		System.out.println(
 			"assert <field> <value> [msg]\n\n" +
 			"asserts that the value of the field in the last\n" +
@@ -557,115 +560,110 @@ help(String topic) {
 			"the message is printed (if present) and the\n" +
 			"program exits.  The field may be any of <rcode>,\n" +
 			"<serial>, <tsig>, <qu>, <an>, <au>, or <ad>.\n");
-	else if (topic.equalsIgnoreCase("class"))
+	else if (topic.equals("class"))
 		System.out.println(
 			"class <class>\n\n" +
 			"class of the zone to be updated (default: IN)\n");
-	else if (topic.equalsIgnoreCase("clear"))
+	else if (topic.equals("clear"))
 		System.out.println(
 			"clear\n\n" +
 			"clears the current update packet\n");
-	else if (topic.equalsIgnoreCase("date"))
+	else if (topic.equals("date"))
 		System.out.println(
 			"date [-ms]\n\n" +
 			"prints the current date and time in human readable\n" +
 			"format or as the number of milliseconds since the\n" +
 			"epoch");
-	else if (topic.equalsIgnoreCase("delete"))
+	else if (topic.equals("delete"))
 		System.out.println(
 			"delete <name> [ttl] [class] <type> <data> \n" +
 			"delete <name> <type> \n" +
 			"delete <name>\n\n" +
 			"specify a record or set to be deleted, or that\n" +
 			"all records at a name should be deleted\n");
-	else if (topic.equalsIgnoreCase("echo"))
+	else if (topic.equals("echo"))
 		System.out.println(
 			"echo <text>\n\n" +
 			"prints the text\n");
-	else if (topic.equalsIgnoreCase("file"))
+	else if (topic.equals("edns"))
+		System.out.println(
+			"edns <level>\n\n" +
+			"EDNS level specified when sending messages\n");
+	else if (topic.equals("file"))
 		System.out.println(
 			"file <file>\n\n" +
 			"opens the specified file as the new input source\n" +
 			"(- represents stdin)\n");
-	else if (topic.equalsIgnoreCase("glue"))
+	else if (topic.equals("glue"))
 		System.out.println(
 			"glue <name> [ttl] [class] <type> <data>\n\n" +
 			"specify an additional record\n");
-	else if (topic.equalsIgnoreCase("help"))
+	else if (topic.equals("help"))
 		System.out.println(
-			"?/help\n" +
+			"help\n" +
 			"help [topic]\n\n" +
 			"prints a list of commands or help about a specific\n" +
 			"command\n");
-	else if (topic.equalsIgnoreCase("log"))
-		System.out.println(
-			"log <file>\n\n" +
-			"opens the specified file and uses it to log output\n");
-	else if (topic.equalsIgnoreCase("key"))
+	else if (topic.equals("key"))
 		System.out.println(
 			"key <name> <data>\n\n" +
 			"TSIG key used to sign messages\n");
-	else if (topic.equalsIgnoreCase("edns"))
+	else if (topic.equals("log"))
 		System.out.println(
-			"edns <level>\n\n" +
-			"EDNS level specified when sending messages\n");
-	else if (topic.equalsIgnoreCase("origin"))
-		System.out.println(
-			"origin <origin>\n\n" +
-			"<same as zone>\n");
-	else if (topic.equalsIgnoreCase("port"))
+			"log <file>\n\n" +
+			"opens the specified file and uses it to log output\n");
+	else if (topic.equals("port"))
 		System.out.println(
 			"port <port>\n\n" +
 			"UDP/TCP port messages are sent to (default: 53)\n");
-	else if (topic.equalsIgnoreCase("prohibit"))
+	else if (topic.equals("prohibit"))
 		System.out.println(
 			"prohibit <name> <type> \n" +
 			"prohibit <name>\n\n" +
 			"require that a set or name is not present\n");
-	else if (topic.equalsIgnoreCase("query"))
+	else if (topic.equals("query"))
 		System.out.println(
 			"query <name> [type [class]] \n\n" +
 			"issues a query\n");
-	else if (topic.equalsIgnoreCase("q") ||
-		 topic.equalsIgnoreCase("quit"))
+	else if (topic.equals("q") || topic.equals("quit"))
 		System.out.println(
-			"q/quit\n\n" +
+			"quit\n\n" +
 			"quits the program\n");
-	else if (topic.equalsIgnoreCase("require"))
+	else if (topic.equals("require"))
 		System.out.println(
 			"require <name> [ttl] [class] <type> <data> \n" +
 			"require <name> <type> \n" +
 			"require <name>\n\n" +
 			"require that a record, set, or name is present\n");
-	else if (topic.equalsIgnoreCase("send"))
+	else if (topic.equals("send"))
 		System.out.println(
 			"send\n\n" +
 			"sends and resets the current update packet\n");
-	else if (topic.equalsIgnoreCase("server"))
+	else if (topic.equals("server"))
 		System.out.println(
 			"server <name> [port]\n\n" +
 			"server that receives send updates/queries\n");
-	else if (topic.equalsIgnoreCase("show"))
+	else if (topic.equals("show"))
 		System.out.println(
 			"show\n\n" +
 			"shows the current update packet\n");
-	else if (topic.equalsIgnoreCase("sleep"))
+	else if (topic.equals("sleep"))
 		System.out.println(
 			"sleep <milliseconds>\n\n" +
 			"pause for interval before next command\n");
-	else if (topic.equalsIgnoreCase("tcp"))
+	else if (topic.equals("tcp"))
 		System.out.println(
 			"tcp\n\n" +
 			"TCP should be used to send all messages\n");
-	else if (topic.equalsIgnoreCase("ttl"))
+	else if (topic.equals("ttl"))
 		System.out.println(
 			"ttl <ttl>\n\n" +
 			"default ttl of added records (default: 0)\n");
-	else if (topic.equalsIgnoreCase("zone"))
+	else if (topic.equals("zone") || topic.equals("origin"))
 		System.out.println(
 			"zone <zone>\n\n" +
 			"zone to update (default: .\n");
-	else if (topic.equalsIgnoreCase("#"))
+	else if (topic.equals("#"))
 		System.out.println(
 			"# <text>\n\n" +
 			"a comment\n");
