@@ -24,13 +24,19 @@ print(Object o) {
 		log.println(o);
 }
 
+public Message
+newMessage() {
+	Message msg = new Message();
+	msg.getHeader().setOpcode(Opcode.UPDATE);
+	return msg;
+}
+
 public
 update(InputStream in) throws IOException {
 	List inputs = new LinkedList();
 	List istreams = new LinkedList();
 
-	query = new Message();
-	query.getHeader().setOpcode(Opcode.UPDATE);
+	query = newMessage();
 
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
@@ -160,18 +166,15 @@ update(InputStream in) throws IOException {
 
 			else if (operation.equals("send")) {
 				sendUpdate();
-				query = new Message();
-				query.getHeader().setOpcode(Opcode.UPDATE);
+				query = newMessage();
 			}
 
 			else if (operation.equals("show")) {
 				print(query);
 			}
 
-			else if (operation.equals("clear")) {
-				query = new Message();
-				query.getHeader().setOpcode(Opcode.UPDATE);
-			}
+			else if (operation.equals("clear"))
+				query = newMessage();
 
 			else if (operation.equals("query"))
 				doQuery(st);
