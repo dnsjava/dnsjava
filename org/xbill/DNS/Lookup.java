@@ -380,7 +380,7 @@ follow(Name name, Name oldname) {
 	}
 	if (aliases == null)
 		aliases = new ArrayList();
-	aliases.add(name);
+	aliases.add(oldname);
 	lookup(name);
 }
 

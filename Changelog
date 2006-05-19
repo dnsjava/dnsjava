@@ -1,8 +1,13 @@
-2/13/2005
+5/18/2006
+	- The result of a Lookup that involves a CNAME should include
+	  the queried name as one of the aliases, not the CNAME target.
+	  (Jon Lachelt <jon.lachelt@hp.com>)
+
+2/13/2006
 	- Loading zones containing RRsets with multiple records didn't work.
 	  (reported by Olafur Gudmundsson" <ogud@ogud.com>)
 
-1/24/2005
+1/24/2006
 	- AXFR requests could leak file descriptors if the connection
 	  failed. (Can Bican <can@bican.net>)
 
