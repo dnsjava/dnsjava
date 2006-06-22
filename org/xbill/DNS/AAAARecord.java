@@ -41,13 +41,7 @@ rrFromWire(DNSInput in) throws IOException {
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	String s = st.getString();
-	try {
-		address = Address.getByAddress(s, Address.IPv6);
-	}
-	catch (UnknownHostException e) {
-		throw st.exception("invalid IPv6 address: " + s);
-	}
+	address = st.getAddress(Address.IPv6);
 }
 
 /** Converts rdata to a String */

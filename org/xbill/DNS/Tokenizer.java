@@ -18,6 +18,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.net.*;
 
 import org.xbill.DNS.utils.*;
 
@@ -517,6 +518,25 @@ getName(Name origin) throws IOException {
 		return name;
 	}
 	catch (TextParseException e) {
+		throw exception(e.getMessage());
+	}
+}
+
+/**
+ * Gets the next token from a tokenizer and converts it to an IP Address.
+ * @param family The address family.
+ * @return The next token in the stream, as an InetAddress
+ * @throws TextParseException The input was invalid or not a valid address.
+ * @throws IOException An I/O error occurred.
+ * @see Address
+ */
+public InetAddress
+getAddress(int family) throws IOException {
+	String next = _getIdentifier("an address");
+	try {
+		return Address.getByAddress(next, family);
+	}
+	catch (UnknownHostException e) {
 		throw exception(e.getMessage());
 	}
 }

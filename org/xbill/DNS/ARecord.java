@@ -59,11 +59,8 @@ rrFromWire(DNSInput in) throws IOException {
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	String s = st.getString();
-	byte [] array = Address.toByteArray(s, Address.IPv4);
-	if (array == null)
-		throw st.exception("invalid dotted quad:" + s);
-	addr = fromArray(array);
+	InetAddress address = st.getAddress(Address.IPv4);
+	addr = fromArray(address.getAddress());
 }
 
 /** Converts rdata to a String */
