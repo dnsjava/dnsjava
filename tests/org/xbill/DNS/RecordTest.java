@@ -640,8 +640,8 @@ public class RecordTest extends TestCase
 	Record r = Record.newRecord(n, Type.A, DClass.IN, 0);
 	assertEquals(Type.A, r.getRRsetType());
 
-	r = new SIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
-			  new Date(), 10, n, new byte[ 0 ]);
+	r = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
+			    new Date(), 10, n, new byte[ 0 ]);
 	assertEquals(Type.A, r.getRRsetType());
     }
 
@@ -651,20 +651,20 @@ public class RecordTest extends TestCase
 	Name m = Name.fromString("My.M.");
 
 	Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
-	Record r2 = new SIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
-				  new Date(), 10, n, new byte[ 0 ]);
+	Record r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
+				    new Date(), 10, n, new byte[ 0 ]);
 	assertTrue(r1.sameRRset(r2));
 	assertTrue(r2.sameRRset(r1));
 
 	r1 = Record.newRecord(n, Type.A, DClass.HS, 0);
-	r2 = new SIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
-			   new Date(), 10, n, new byte[ 0 ]);
+	r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
+			     new Date(), 10, n, new byte[ 0 ]);
 	assertFalse(r1.sameRRset(r2));
 	assertFalse(r2.sameRRset(r1));
 
 	r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
-	r2 = new SIGRecord(m, DClass.IN, 0, Type.A, 1, 0, new Date(),
-			   new Date(), 10, n, new byte[ 0 ]);
+	r2 = new RRSIGRecord(m, DClass.IN, 0, Type.A, 1, 0, new Date(),
+			     new Date(), 10, n, new byte[ 0 ]);
 	assertFalse(r1.sameRRset(r2));
 	assertFalse(r2.sameRRset(r1));
     }

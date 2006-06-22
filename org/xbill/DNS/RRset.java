@@ -6,9 +6,8 @@ import java.util.*;
 
 /**
  * A set of Records with the same name, type, and class.  Also included
- * are all SIG/RRSIG records signing the data records.
+ * are all RRSIG records signing the data records.
  * @see Record
- * @see SIGRecord 
  * @see RRSIGRecord 
  *
  * @author Brian Wellington
@@ -17,7 +16,7 @@ import java.util.*;
 public class RRset {
 
 /*
- * rrs contains both normal and SIG/RRSIG records, with the SIG/RRSIG records
+ * rrs contains both normal and RRSIG records, with the RRSIG records
  * at the end.
  */
 private List rrs;

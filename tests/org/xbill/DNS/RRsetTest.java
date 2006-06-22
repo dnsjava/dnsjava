@@ -45,7 +45,7 @@ import	org.xbill.DNS.DClass;
 import	org.xbill.DNS.Name;
 import	org.xbill.DNS.RRset;
 import	org.xbill.DNS.Record;
-import	org.xbill.DNS.SIGRecord;
+import	org.xbill.DNS.RRSIGRecord;
 import	org.xbill.DNS.TextParseException;
 import	org.xbill.DNS.Type;
 
@@ -55,7 +55,7 @@ public class RRsetTest extends TestCase
     Name m_name, m_name2;
     long m_ttl;
     ARecord m_a1, m_a2;
-    SIGRecord m_s1, m_s2;
+    RRSIGRecord m_s1, m_s2;
 
     public void setUp() throws TextParseException, UnknownHostException
     {
@@ -68,10 +68,12 @@ public class RRsetTest extends TestCase
 	m_a2 = new ARecord(m_name, DClass.IN, m_ttl+1,
 			   InetAddress.getByName("192.169.232.12"));
 
-	m_s1 = new SIGRecord(m_name, DClass.IN, m_ttl, Type.A, 0xF, 0xABCDEL,
-			     new Date(), new Date(), 0xA, m_name, new byte[ 0 ]);
-	m_s2 = new SIGRecord(m_name, DClass.IN, m_ttl, Type.A, 0xF, 0xABCDEL,
-			     new Date(), new Date(), 0xA, m_name2, new byte[ 0 ]);
+	m_s1 = new RRSIGRecord(m_name, DClass.IN, m_ttl, Type.A, 0xF, 0xABCDEL,
+			       new Date(), new Date(), 0xA, m_name,
+			       new byte[ 0 ]);
+	m_s2 = new RRSIGRecord(m_name, DClass.IN, m_ttl, Type.A, 0xF, 0xABCDEL,
+			       new Date(), new Date(), 0xA, m_name2,
+			       new byte[ 0 ]);
     }
 
     public void test_ctor_0arg()
