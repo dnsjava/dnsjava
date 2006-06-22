@@ -141,6 +141,9 @@ public static final int DS		= 43;
 /** SSH Key Fingerprint */
 public static final int SSHFP		= 44;
 
+/** IPSEC key */
+public static final int IPSECKEY	= 45;
+
 /** Resource Record Signature */
 public static final int RRSIG		= 46;
 
@@ -245,6 +248,7 @@ static {
 	types.add(APL, "APL", new APLRecord());
 	types.add(DS, "DS", new DSRecord());
 	types.add(SSHFP, "SSHFP", new SSHFPRecord());
+	types.add(IPSECKEY, "IPSECKEY", new IPSECKEYRecord());
 	types.add(RRSIG, "RRSIG", new RRSIGRecord());
 	types.add(NSEC, "NSEC", new NSECRecord());
 	types.add(DNSKEY, "DNSKEY", new DNSKEYRecord());
