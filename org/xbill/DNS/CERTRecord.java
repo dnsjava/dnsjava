@@ -16,7 +16,7 @@ import org.xbill.DNS.utils.*;
 public class CERTRecord extends Record {
 
 public static class CertificateType {
-	/** Certificate type identifiers.  See RFC 2538 for more detail. */
+	/** Certificate type identifiers.  See RFC 4398 for more detail. */
 
 	private CertificateType() {}
 
@@ -28,6 +28,21 @@ public static class CertificateType {
 
 	/** Pretty Good Privacy */
 	public static final int PGP = 3;
+
+	/** URL of an X.509 data object */
+	public static final int IPKIX = 4;
+
+	/** URL of an SPKI certificate */
+	public static final int ISPKI = 5;
+
+	/** Fingerprint and URL of an OpenPGP packet */
+	public static final int IPGP = 6;
+
+	/** Attribute Certificate */
+	public static final int ACPKIX = 7;
+
+	/** URL of an Attribute Certificate */
+	public static final int IACPKIX = 8;
 
 	/** Certificate format defined by URI */
 	public static final int URI = 253;
@@ -45,6 +60,11 @@ public static class CertificateType {
 		types.add(PKIX, "PKIX");
 		types.add(SPKI, "SPKI");
 		types.add(PGP, "PGP");
+		types.add(PKIX, "IPKIX");
+		types.add(SPKI, "ISPKI");
+		types.add(PGP, "IPGP");
+		types.add(PGP, "ACPKIX");
+		types.add(PGP, "IACPKIX");
 		types.add(URI, "URI");
 		types.add(OID, "OID");
 	}
