@@ -328,7 +328,7 @@ parseRR(Record rec) throws ZoneTransferException {
 		if (type != Type.SOA)
 			fail("missing initial SOA");
 		initialsoa = rec;
-		// Remember the serial number in the intial SOA; we need it
+		// Remember the serial number in the initial SOA; we need it
 		// to recognize the end of an IXFR.
 		end_serial = getSOASerial(rec);
 		if (qtype == Type.IXFR && end_serial <= ixfr_serial) {
