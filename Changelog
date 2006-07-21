@@ -1,3 +1,8 @@
+7/21/2006
+	- DNSSEC.digestRRset could digest records in the wrong order.
+	  (reported by David Blacka <davidb@verisignlabs.com> and
+	   Mahendra Jain <Majain@verisign.com>)
+
 6/26/2006
 	- 2.0.2 released.
 
