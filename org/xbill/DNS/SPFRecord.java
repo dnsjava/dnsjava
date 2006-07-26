@@ -6,37 +6,37 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Text - stores text strings
+ * Sender Policy Framework (RFC 4408, experimental)
  *
  * @author Brian Wellington
  */
 
-public class TXTRecord extends TXTBase {
+public class SPFRecord extends TXTBase {
 
-TXTRecord() {}
+SPFRecord() {}
 
 Record
 getObject() {
-	return new TXTRecord();
+	return new SPFRecord();
 }
 
 /**
- * Creates a TXT Record from the given data
+ * Creates a SPF Record from the given data
  * @param strings The text strings
  * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
-TXTRecord(Name name, int dclass, long ttl, List strings) {
+SPFRecord(Name name, int dclass, long ttl, List strings) {
 	super(name, dclass, ttl, strings);
 }
 
 /**
- * Creates a TXT Record from the given data
+ * Creates a SPF Record from the given data
  * @param string One text string
  * @throws IllegalArgumentException The string has invalid escapes
  */
 public
-TXTRecord(Name name, int dclass, long ttl, String string) {
+SPFRecord(Name name, int dclass, long ttl, String string) {
 	super(name, dclass, ttl, string);
 }
 

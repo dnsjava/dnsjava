@@ -153,6 +153,9 @@ public static final int NSEC		= 47;
 /** DNSSEC Key */
 public static final int DNSKEY		= 48;
 
+/** Sender Policy Framework (experimental) */
+public static final int SPF		= 99;
+
 /** Transaction key - used to compute a shared secret or exchange a key */
 public static final int TKEY		= 249;
 
@@ -252,6 +255,7 @@ static {
 	types.add(RRSIG, "RRSIG", new RRSIGRecord());
 	types.add(NSEC, "NSEC", new NSECRecord());
 	types.add(DNSKEY, "DNSKEY", new DNSKEYRecord());
+	types.add(SPF, "SPF", new SPFRecord());
 	types.add(TKEY, "TKEY", new TKEYRecord());
 	types.add(TSIG, "TSIG", new TSIGRecord());
 	types.add(IXFR, "IXFR");
