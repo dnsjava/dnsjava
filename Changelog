@@ -1,4 +1,8 @@
 7/30/2006
+	- Added support for parsing the output of ipconfig in French .
+	  (Frederic Bazin <fbazin@users sourceforge.net>)
+
+7/30/2006
 	- If both "search" and "domain" lines are present in a resolv.conf
 	  file, the domain line should be ignored.
 
