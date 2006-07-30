@@ -207,12 +207,14 @@ findResolvConf(String file) {
 				st.nextToken(); /* skip domain */
 				if (!st.hasMoreTokens())
 					continue;
-				addSearch(st.nextToken(), lsearch);
+				if (lsearch.isEmpty())
+					addSearch(st.nextToken(), lsearch);
 			}
 			else if (line.startsWith("search")) {
+				if (!lsearch.isEmpty())
+					lsearch.clear();
 				StringTokenizer st = new StringTokenizer(line);
 				st.nextToken(); /* skip search */
-				String s;
 				while (st.hasMoreTokens())
 					addSearch(st.nextToken(), lsearch);
 			}
