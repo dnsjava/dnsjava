@@ -237,19 +237,42 @@ public static KEYRecord
 buildRecord(Name name, int dclass, long ttl, int flags, int proto,
 	    PublicKey key)
 {
-	byte [] data;
 	byte alg;
 
 	if (key instanceof RSAPublicKey) {
 		alg = DNSSEC.RSAMD5;
-		data = buildRSA((RSAPublicKey) key);
 	}
 	else if (key instanceof DHPublicKey) {
 		alg = DNSSEC.DH;
-		data = buildDH((DHPublicKey) key);
 	}
 	else if (key instanceof DSAPublicKey) {
 		alg = DNSSEC.DSA;
+	}
+	else
+		return null;
+
+	return (KEYRecord) buildRecord(name, Type.KEY, dclass, ttl, flags,
+				       proto, alg, key);
+}
+
+/** Builds a DNSKEY or KEY record from a PublicKey */
+public static Record
+buildRecord(Name name, int type, int dclass, long ttl, int flags, int proto,
+	    int alg, PublicKey key)
+{
+	byte [] data;
+
+	if (type != Type.KEY && type != Type.DNSKEY)
+		throw new IllegalArgumentException("type must be KEY " +
+						   "or DNSKEY");
+
+	if (key instanceof RSAPublicKey) {
+		data = buildRSA((RSAPublicKey) key);
+	}
+	else if (key instanceof DHPublicKey) {
+		data = buildDH((DHPublicKey) key);
+	}
+	else if (key instanceof DSAPublicKey) {
 		data = buildDSA((DSAPublicKey) key);
 	}
 	else
@@ -258,7 +281,12 @@ buildRecord(Name name, int dclass, long ttl, int flags, int proto,
 	if (data == null)
 		return null;
 
-	return new KEYRecord(name, dclass, ttl, flags, proto, alg, data);
+	if (type == Type.DNSKEY)
+		return new DNSKEYRecord(name, dclass, ttl, flags, proto, alg,
+					data);
+	else
+		return new KEYRecord(name, dclass, ttl, flags, proto, alg,
+				     data);
 }
 
 }

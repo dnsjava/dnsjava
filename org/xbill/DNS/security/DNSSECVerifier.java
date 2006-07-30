@@ -29,7 +29,7 @@ DNSSECVerifier() {
 
 /** Adds the specified key to the set of trusted keys */
 public synchronized void
-addTrustedKey(KEYRecord key) {
+addTrustedKey(DNSKEYRecord key) {
 	Name name = key.getName();
 	List list = (List) trustedKeys.get(name);
 	if (list == null)
@@ -39,18 +39,18 @@ addTrustedKey(KEYRecord key) {
 
 /** Adds the specified key to the set of trusted keys */
 public void
-addTrustedKey(Name name, PublicKey key) {
-	KEYRecord keyrec;
-	keyrec = KEYConverter.buildRecord(name, DClass.IN, 0, 0,
-					  KEYRecord.PROTOCOL_DNSSEC, key);
-	if (keyrec != null)
-		addTrustedKey(keyrec);
+addTrustedKey(Name name, int alg, PublicKey key) {
+	Record rec;
+	rec = KEYConverter.buildRecord(name, Type.DNSKEY, DClass.IN, 0, 0,
+				       DNSKEYRecord.Protocol.DNSSEC, alg, key);
+	if (rec != null)
+		addTrustedKey((DNSKEYRecord) rec);
 }
 
 private PublicKey
 findMatchingKey(Iterator it, int algorithm, int footprint) {
 	while (it.hasNext()) {
-		KEYRecord keyrec = (KEYRecord) it.next();
+		DNSKEYRecord keyrec = (DNSKEYRecord) it.next();
 		if (keyrec.getAlgorithm() == algorithm &&
 		    keyrec.getFootprint() == footprint)
 			return KEYConverter.parseRecord(keyrec);
@@ -68,7 +68,7 @@ findTrustedKey(Name name, int algorithm, int footprint) {
 
 private PublicKey
 findCachedKey(Cache cache, Name name, int algorithm, int footprint) {
-	RRset [] keysets = cache.findAnyRecords(name, Type.KEY);
+	RRset [] keysets = cache.findAnyRecords(name, Type.DNSKEY);
 	if (keysets == null)
 		return null;
 	RRset keys = keysets[0];

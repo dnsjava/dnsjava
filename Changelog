@@ -1,4 +1,14 @@
 7/30/2006
+	- When converting a PublicKey to a DNS record, allow the algorithm
+	  to be specified, as RSA keys can be either of the RSA-SHA1 or
+	  RSA-MD5 algorithms (based on a patch from
+	  Eric <ginipginob@users.sourceforge.net>)
+	- When converting a PublicKey to a DNS record, allow the type (KEY
+	  or DNSKEY) to be specified.
+	- Update the DNSSECVerifier code to use DNSKEY records, not KEY
+	  records.
+
+7/30/2006
 	- Added support for parsing the output of ipconfig in French .
 	  (Frederic Bazin <fbazin@users sourceforge.net>)
 
