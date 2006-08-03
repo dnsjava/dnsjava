@@ -80,7 +80,7 @@ TSIG(Name name, byte [] key) {
 
 /**
  * Creates a new TSIG object, which can be used to sign or verify a message.
- * @param name The name of the shared key
+ * @param name The name of the shared key.
  * @param key The shared key's data represented as a base64 encoded string.
  * @throws IllegalArgumentException The key name is an invalid name
  * @throws IllegalArgumentException The key data is improperly encoded
@@ -101,6 +101,28 @@ TSIG(Name algorithm, String name, String key) {
 }
 
 /**
+ * Creates a new TSIG object, which can be used to sign or verify a message.
+ * @param name The name of the shared key.  The legal values are "hmac-md5",
+ * "hmac-sha1", and "hmac-sha256".
+ * @param key The shared key's data represented as a base64 encoded string.
+ * @throws IllegalArgumentException The key name is an invalid name
+ * @throws IllegalArgumentException The key data is improperly encoded
+ */
+public
+TSIG(String algorithm, String name, String key) {
+	this(HMAC_MD5, name, key);
+	if (algorithm.equalsIgnoreCase("hmac-md5"))
+		this.alg = HMAC_MD5;
+	else if (algorithm.equalsIgnoreCase("hmac-sha1"))
+		this.alg = HMAC_SHA1;
+	else if (algorithm.equalsIgnoreCase("hmac-sha256"))
+		this.alg = HMAC_SHA256;
+	else
+		throw new IllegalArgumentException("Invalid TSIG algorithm");
+	getDigest();
+}
+
+/**
  * Creates a new TSIG object with the hmac-md5 algorithm, which can be used to
  * sign or verify a message.
  * @param name The name of the shared key
@@ -116,7 +138,9 @@ TSIG(String name, String key) {
 /**
  * Creates a new TSIG object with the hmac-md5 algorithm, which can be used to
  * sign or verify a message.
- * @param str The TSIG key, in the form name/secret or name:secret.
+ * @param str The TSIG key, in the form name:secret, name/secret,
+ * alg:name:secret, or alg/name/secret.  If an algorithm is specified, it must
+ * be "hmac-md5", "hmac-sha1", or "hmac-sha256".
  * @throws IllegalArgumentException The string does not contain both a name
  * and secret.
  * @throws IllegalArgumentException The key name is an invalid name
@@ -124,13 +148,14 @@ TSIG(String name, String key) {
  */
 static public TSIG
 fromString(String str) {
-	int index = str.indexOf('/');
-	if (index < 0)
-		index = str.indexOf(':');
-	if (index < 0)
-		throw new IllegalArgumentException("String does not contain " +
-						   "both name and secret");
-	return new TSIG(str.substring(0, index), str.substring(index + 1));
+	String [] parts = str.split("[:/]");
+	if (parts.length < 2 || parts.length > 3)
+		throw new IllegalArgumentException("Invalid TSIG key " +
+						   "specification");
+	if (parts.length == 3)
+		return new TSIG(parts[0], parts[1], parts[2]);
+	else
+		return new TSIG(HMAC_MD5, parts[0], parts[1]);
 }
 
 /**

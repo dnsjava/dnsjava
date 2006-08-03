@@ -1,3 +1,7 @@
+8/3/2006
+	- Add a TSIG constructor that takes an algorithm as a String.
+	- Add support to TSIG.fromString() for specifying an algorithm.
+
 7/30/2006
 	- When converting a PublicKey to a DNS record, allow the algorithm
 	  to be specified, as RSA keys can be either of the RSA-SHA1 or
