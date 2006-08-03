@@ -30,7 +30,7 @@ For examples of API usage, see examples.html.
 		primary <zonename> <masterfile>
 		secondary <zonename> <IP address>
 		cache <hintfile>
-		key <name> <base 64 encoded secret>
+		key [algorithm] <name> <base 64 encoded secret>
 		address <IP address>
 		port <port number>
 

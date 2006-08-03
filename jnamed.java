@@ -62,12 +62,16 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 			else if (keyword.equals("cache")) {
 				Cache cache = new Cache(st.nextToken());
 				caches.put(new Integer(DClass.IN), cache);
-			}
-			else if (keyword.equals("key"))
-				addTSIG(st.nextToken(), st.nextToken());
-			else if (keyword.equals("port"))
+			} else if (keyword.equals("key")) {
+				String s1 = st.nextToken();
+				String s2 = st.nextToken();
+				if (st.hasMoreTokens())
+					addTSIG(s1, s2, st.nextToken());
+				else
+					addTSIG("hmac-md5", s1, s2);
+			} else if (keyword.equals("port")) {
 				ports.add(Integer.valueOf(st.nextToken()));
-			else if (keyword.equals("address")) {
+			} else if (keyword.equals("address")) {
 				String addr = st.nextToken();
 				addresses.add(Address.getByAddress(addr));
 			} else {
@@ -121,9 +125,9 @@ throws IOException, ZoneTransferException
 }
 
 public void
-addTSIG(String namestr, String key) throws IOException {
+addTSIG(String algstr, String namestr, String key) throws IOException {
 	Name name = Name.fromString(namestr, Name.root);
-	TSIGs.put(name, base64.fromString(key));
+	TSIGs.put(name, new TSIG(algstr, namestr, key));
 }
 
 public Cache
@@ -336,15 +340,6 @@ addAnswer(Message response, Name name, int type, int dclass,
 	return rcode;
 }
 
-TSIG
-findTSIG(Name name) {
-	byte [] key = (byte []) TSIGs.get(name);
-	if (key != null)
-		return new TSIG(name, key);
-	else
-		return null;
-}
-
 byte []
 doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 	Zone zone = (Zone) znames.get(name);
@@ -414,7 +409,7 @@ throws IOException
 	TSIGRecord queryTSIG = query.getTSIG();
 	TSIG tsig = null;
 	if (queryTSIG != null) {
-		tsig = findTSIG(queryTSIG.getName());
+		tsig = (TSIG) TSIGs.get(queryTSIG.getName());
 		if (tsig == null ||
 		    tsig.verify(query, in, length, null) != Rcode.NOERROR)
 			return formerrMessage(in);
