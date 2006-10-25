@@ -108,7 +108,7 @@ verifySIG(RRset set, RRSIGRecord sigrec, Cache cache) {
 			algString = "MD5withRSA";
 			break;
 		case DNSSEC.DSA:
-			sig = DSASignature.create(sigrec.getSignature());
+			sig = DSASignature.fromDNS(sigrec.getSignature());
 			algString = "SHA1withDSA";
 			break;
 		case DNSSEC.RSASHA1:

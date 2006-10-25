@@ -1,3 +1,8 @@
+10/25/2006
+	- Make the routines that convert between the DNS and standard Java
+	  representations of DSA signatures public.
+	  (suggested by Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 8/3/2006
 	- Add a TSIG constructor that takes an algorithm as a String.
 	- Add support to TSIG.fromString() for specifying an algorithm.

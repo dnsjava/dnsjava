@@ -114,7 +114,7 @@ throws IOException, SignatureException, InvalidKeyException,
 	 */
 	if (algorithm == DNSSEC.DSA) {
 		DSAKey dsakey = (DSAKey) privateKey;
-		signature = DSASignature.create(dsakey.getParams(), signature);
+		signature = DSASignature.toDNS(dsakey.getParams(), signature);
 	}
 	
 	SIGRecord sig = new SIGRecord(Name.root, DClass.ANY, 0, 0, algorithm,
