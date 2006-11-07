@@ -355,7 +355,7 @@ setCache(Cache cache) {
 
 /**
  * Sets the minimum credibility level that will be accepted when performing
- * the lookup.  This defaults to Crefibility.NORMAL.
+ * the lookup.  This defaults to Credibility.NORMAL.
  * @param credibility The minimum credibility level.
  */
 public void
