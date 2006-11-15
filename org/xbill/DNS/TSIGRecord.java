@@ -137,9 +137,11 @@ rrToString() {
 				sb.append(new Date(time * 1000));
 				sb.append(">");
 			}
-		} else
+		} else {
+			sb.append("<");
 			sb.append(base64.toString(other));
-		sb.append(">");
+			sb.append(">");
+		}
 	}
 	if (Options.check("multiline"))
 		sb.append(" )");
