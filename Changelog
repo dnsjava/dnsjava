@@ -1,3 +1,8 @@
+11/27/2006
+	- The Zone.fromXFR() method should be able to create zones
+	  from AXFR-style IXFR responses.
+	  (Bill Kuker <bkuker@users.sourceforge.net>)
+
 10/25/2006
 	- Make the routines that convert between the DNS and standard Java
 	  representations of DSA signatures public.

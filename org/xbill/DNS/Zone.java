@@ -167,7 +167,7 @@ fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
 	data = new HashMap();
 	type = SECONDARY;
 
-	if (xfrin.getType() != Type.AXFR)
+	if (!xfrin.isAXFR())
 		throw new IllegalArgumentException("zones can only be " +
 						   "created from AXFRs");
 	origin = xfrin.getName();
