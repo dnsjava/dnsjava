@@ -450,12 +450,6 @@ lookup(Name name, int type, int minCred) {
 				return sr;
 		}
 
-		/* Look for an NS */
-		element = oneElement(tname, types, Type.NS, minCred);
-		if (element != null && element instanceof CacheRRset)
-			return new SetResponse(SetResponse.DELEGATION,
-					       (CacheRRset) element);
-
 		/*
 		 * If this is the name, look for the actual type or a CNAME.
 		 * Otherwise, look for a DNAME.
@@ -489,6 +483,12 @@ lookup(Name name, int type, int minCred) {
 						       (CacheRRset) element);
 			}
 		}
+
+		/* Look for an NS */
+		element = oneElement(tname, types, Type.NS, minCred);
+		if (element != null && element instanceof CacheRRset)
+			return new SetResponse(SetResponse.DELEGATION,
+					       (CacheRRset) element);
 
 		/* Check for the special NXDOMAIN element. */
 		if (isExact) {

@@ -439,6 +439,7 @@ lookup(Name current) {
 				   Type.string(type));
 		System.err.println(sr);
 	}
+	System.out.println("--- " + sr);
 	processResponse(current, sr);
 	if (done || doneCurrent)
 		return;

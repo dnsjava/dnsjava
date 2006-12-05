@@ -1,3 +1,8 @@
+12/4/2006
+	- A cache lookup for a record would incorrectly return a delegation
+	  when records for both the queried type and NS were present.
+	  (reported by yosukear <y_arimoto_acare@users.sourceforge.net>)
+
 11/28/2006
 	- 2.0.3 released
 
