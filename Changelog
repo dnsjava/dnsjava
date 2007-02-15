@@ -1,3 +1,8 @@
+2/15/2007
+	- Properly obey timeouts in TCPClient code when the message is
+	  read in multiple chunks. (based on a patch from
+	  Francesco Vivoli <fvivoli@ripe.net>)
+
 12/4/2006
 	- A cache lookup for a record would incorrectly return a delegation
 	  when records for both the queried type and NS were present.
