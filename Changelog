@@ -1,3 +1,8 @@
+3/7/2007
+	- Message.getQuestion() incorrectly handled the case where the
+	  question section was represented by an empty list.
+	  (reported by Karl Auer <kauer@biplane.com.au>)
+
 2/15/2007
 	- Properly obey timeouts in TCPClient code when the message is
 	  read in multiple chunks. (based on a patch from

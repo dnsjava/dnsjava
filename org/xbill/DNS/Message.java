@@ -245,14 +245,10 @@ findRRset(Name name, int type) {
  */
 public Record
 getQuestion() {
-	if (sections[Section.QUESTION] == null)
+	List l = sections[Section.QUESTION];
+	if (l == null || l.size() == 0)
 		return null;
-	try {
-		return (Record) sections[Section.QUESTION].get(0);
-	}
-	catch (NoSuchElementException e) {
-		return null;
-	}
+	return (Record) l.get(0);
 }
 
 /**
