@@ -14,13 +14,19 @@ import java.util.*;
 
 abstract class TXTBase extends Record {
 
-private List strings;
+protected List strings;
 
+protected
 TXTBase() {}
 
 protected
-TXTBase(Name name, int dclass, long ttl, List strings) {
-	super(name, Type.TXT, dclass, ttl);
+TXTBase(Name name, int type, int dclass, long ttl) {
+	super(name, type, dclass, ttl);
+}
+
+protected
+TXTBase(Name name, int type, int dclass, long ttl, List strings) {
+	super(name, type, dclass, ttl);
 	if (strings == null)
 		throw new IllegalArgumentException("strings must not be null");
 	this.strings = new ArrayList(strings.size());
@@ -37,8 +43,8 @@ TXTBase(Name name, int dclass, long ttl, List strings) {
 }
 
 protected
-TXTBase(Name name, int dclass, long ttl, String string) {
-	this(name, dclass, ttl, Collections.singletonList(string));
+TXTBase(Name name, int type, int dclass, long ttl, String string) {
+	this(name, type, dclass, ttl, Collections.singletonList(string));
 }
 
 void

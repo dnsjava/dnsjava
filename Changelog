@@ -1,3 +1,8 @@
+6/12/2007
+	- The SPFRecord constructors incorrectly created records whose
+	  internal type field was TXT, not SPF.
+	  (reported by Stefano Bagnara <bago75@users.sourceforge.net>)
+
 3/7/2007
 	- Message.getQuestion() incorrectly handled the case where the
 	  question section was represented by an empty list.

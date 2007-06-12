@@ -27,7 +27,7 @@ getObject() {
  */
 public
 TXTRecord(Name name, int dclass, long ttl, List strings) {
-	super(name, dclass, ttl, strings);
+	super(name, Type.TXT, dclass, ttl, strings);
 }
 
 /**
@@ -37,7 +37,7 @@ TXTRecord(Name name, int dclass, long ttl, List strings) {
  */
 public
 TXTRecord(Name name, int dclass, long ttl, String string) {
-	super(name, dclass, ttl, string);
+	super(name, Type.TXT, dclass, ttl, string);
 }
 
 }

@@ -27,7 +27,7 @@ getObject() {
  */
 public
 SPFRecord(Name name, int dclass, long ttl, List strings) {
-	super(name, dclass, ttl, strings);
+	super(name, Type.SPF, dclass, ttl, strings);
 }
 
 /**
@@ -37,7 +37,7 @@ SPFRecord(Name name, int dclass, long ttl, List strings) {
  */
 public
 SPFRecord(Name name, int dclass, long ttl, String string) {
-	super(name, dclass, ttl, string);
+	super(name, Type.SPF, dclass, ttl, string);
 }
 
 }
