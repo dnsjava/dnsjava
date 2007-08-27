@@ -1,4 +1,5 @@
 8/26/2007
+	- 2.0.4 released
 	- Fix an argument parsing bug in the dig program, where failure to
 	  specify both type and class would cause the specified server to
 	  be ignored.
