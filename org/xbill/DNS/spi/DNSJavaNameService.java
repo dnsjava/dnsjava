@@ -77,7 +77,7 @@ protected DNSJavaNameService() {
  * @param host The host name to resolve.
  * @return All the ip addresses found for the host name.
  */
-public byte [][]
+public InetAddress []
 lookupAllHostAddr(String host) throws UnknownHostException {
 	Name name = null;
 
@@ -98,15 +98,15 @@ lookupAllHostAddr(String host) throws UnknownHostException {
 	if (records == null)
 		throw new UnknownHostException(host);
 
-	byte[][] array = new byte[records.length][];
+	InetAddress[] array = new InetAddress[records.length];
 	for (int i = 0; i < records.length; i++) {
 		Record record = records[i];
 		if (records[i] instanceof ARecord) {
 			ARecord a = (ARecord) records[i];
-			array[i] = a.getAddress().getAddress();
+			array[i] = a.getAddress();
 		} else {
 			AAAARecord aaaa = (AAAARecord) records[i];
-			array[i] = aaaa.getAddress().getAddress();
+			array[i] = aaaa.getAddress();
 		}
 	}
 	return array;
