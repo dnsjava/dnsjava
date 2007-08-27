@@ -1,3 +1,9 @@
+8/26/2007
+	- Fix an argument parsing bug in the dig program, where failure to
+	  specify both type and class would cause the specified server to
+	  be ignored.
+	  (reported by Stefano Bagnara <bago75@users.sourceforge.net>)
+
 6/12/2007
 	- The SPFRecord constructors incorrectly created records whose
 	  internal type field was TXT, not SPF.

@@ -71,6 +71,11 @@ main(String argv[]) throws IOException {
 		if (argv[arg].startsWith("@"))
 			server = argv[arg++].substring(1);
 
+		if (server != null)
+			res = new SimpleResolver(server);
+		else
+			res = new SimpleResolver();
+
 		String nameString = argv[arg++];
 		if (nameString.equals("-x")) {
 			name = ReverseMap.fromAddress(argv[arg++]);
@@ -91,11 +96,6 @@ main(String argv[]) throws IOException {
 			else
 				arg++;
 		}
-
-		if (server != null)
-			res = new SimpleResolver(server);
-		else
-			res = new SimpleResolver();
 
 		while (argv[arg].startsWith("-") && argv[arg].length() > 1) {
 			switch (argv[arg].charAt(1)) {
