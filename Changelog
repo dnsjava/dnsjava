@@ -2,6 +2,7 @@
 	- Build jar file with -source and -target options to provide
 	  compatibility with older Java releases (that is, revert to
 	  pre-2.0.4 behavior).
+	  (reported by Stefano Bagnara <apache@bago.org>)
 
 8/26/2007
 	- 2.0.4 released
