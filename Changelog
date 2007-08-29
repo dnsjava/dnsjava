@@ -1,4 +1,5 @@
 8/28/2007
+	- 2.0.5 released
 	- Add the ZoneTransferIn.setLocalAddress() method.  (based on a patch
 	  from <mpugge@users.sourceforge.net>)
 	- Build jar file with -source and -target options to provide
