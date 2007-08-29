@@ -17,14 +17,14 @@
     </target>
 
     <target name="compile" description="Compile everything">
-	<javac destdir="${build_dir}" debug="true">
+	<javac destdir="${build_dir}" debug="true" target="1.4" source="1.4">
 	    <src path="${src_dir}"/>
 	    <exclude name="tests/**"/>
 	</javac>
     </target>
 
     <target name="spi" description="Compile the Name Service Provider code">
-	<javac destdir="${build_dir}" debug="true">
+	<javac destdir="${build_dir}" debug="true" target="1.4" source="1.4">
 	    <src path="${src_dir}"/>
 	    <include name="org/xbill/DNS/spi/*.java"/>
 	</javac>
@@ -86,7 +86,7 @@
     </target>
 
     <target name="compile_tests" depends="compile">
-	<javac destdir="${tests_dir}" debug="true">
+	<javac destdir="${tests_dir}" debug="true" target="1.4" source="1.4">
 	    <src path="${tests_dir}"/>
 	</javac>
     </target>

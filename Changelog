@@ -1,3 +1,8 @@
+8/28/2007
+	- Build jar file with -source and -target options to provide
+	  compatibility with older Java releases (that is, revert to
+	  pre-2.0.4 behavior).
+
 8/26/2007
 	- 2.0.4 released
 	- Update SPI code to work with java 6.
