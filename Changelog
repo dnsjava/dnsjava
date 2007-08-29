@@ -1,4 +1,6 @@
 8/28/2007
+	- Add the ZoneTransferIn.setLocalAddress() method.  (based on a patch
+	  from <mpugge@users.sourceforge.net>)
 	- Build jar file with -source and -target options to provide
 	  compatibility with older Java releases (that is, revert to
 	  pre-2.0.4 behavior).

@@ -329,6 +329,7 @@ sendAXFR(Message query) throws IOException {
 	Name qname = query.getQuestion().getName();
 	ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, address, tsig);
 	xfrin.setTimeout((int)(getTimeout() / 1000));
+	xfrin.setLocalAddress(localAddress);
 	try {
 		xfrin.run();
 	}

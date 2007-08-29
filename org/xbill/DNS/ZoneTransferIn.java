@@ -51,6 +51,7 @@ private int dclass;
 private long ixfr_serial;
 private boolean want_fallback;
 
+private SocketAddress localAddress;
 private SocketAddress address;
 private TCPClient client;
 private TSIG tsig;
@@ -262,10 +263,21 @@ setDClass(int dclass) {
 	this.dclass = dclass;
 }
 
+/**
+ * Sets the local address to bind to when sending messages.
+ * @param addr The local address to send messages from.
+ */
+public void
+setLocalAddress(SocketAddress addr) {
+	this.localAddress = addr;
+}
+
 private void
 openConnection() throws IOException {
 	long endTime = System.currentTimeMillis() + timeout;
 	client = new TCPClient(endTime);
+	if (localAddress != null)
+		client.bind(localAddress);
 	client.connect(address);
 }
 
