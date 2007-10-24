@@ -249,7 +249,8 @@ getType() {
 public void
 setTimeout(int secs) {
 	if (secs < 0)
-		throw new IllegalArgumentException("timeout cannt be negative");
+		throw new IllegalArgumentException("timeout cannot be " +
+						   "negative");
 	timeout = 1000L * secs;
 }
 
