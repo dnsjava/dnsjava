@@ -1,3 +1,9 @@
+1/22/2008
+
+	- Fix an off-by-2 error that could cause an infinite loop when
+	  parsing a Name with a self-referential compression pointer.
+	  (reported by Carole Gill <cgill@silverspringnet.com>)
+
 8/28/2007
 	- 2.0.5 released
 	- Add the ZoneTransferIn.setLocalAddress() method.  (based on a patch

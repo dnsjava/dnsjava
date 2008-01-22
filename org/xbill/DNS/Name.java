@@ -388,7 +388,7 @@ Name(DNSInput in) throws WireParseException {
 				System.err.println("currently " + in.current() +
 						   ", pointer to " + pos);
 
-			if (pos >= in.current())
+			if (pos >= in.current() - 2)
 				throw new WireParseException("bad compression");
 			if (!savedState) {
 				in.save();
