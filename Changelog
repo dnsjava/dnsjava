@@ -4,6 +4,11 @@
 	  parsing a Name with a self-referential compression pointer.
 	  (reported by Carole Gill <cgill@silverspringnet.com>)
 
+	- Raise an exception when an invalid label type is seen in a wire
+	  format name.  The previous behavior would incorrectly parse invalid
+	  names, and could lead to infinite loops.
+	  (reported by Carole Gill <cgill@silverspringnet.com>)
+
 8/28/2007
 	- 2.0.5 released
 	- Add the ZoneTransferIn.setLocalAddress() method.  (based on a patch
