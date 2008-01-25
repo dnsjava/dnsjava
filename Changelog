@@ -1,5 +1,7 @@
-1/22/2008
+1/24/2008
+	- 2.0.6 released
 
+1/22/2008
 	- Fix an off-by-2 error that could cause an infinite loop when
 	  parsing a Name with a self-referential compression pointer.
 	  (reported by Carole Gill <cgill@silverspringnet.com>)

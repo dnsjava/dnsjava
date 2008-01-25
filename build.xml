@@ -5,7 +5,7 @@
     <property name="dist_dir" value="${basedir}"/>
     <property name="tests_dir" value="${basedir}/tests"/>
     <property name="reports_dir" value="${basedir}/reports"/>
-    <property name="version" value="2.0.5"/>
+    <property name="version" value="2.0.6"/>
     <property name="jarname" value="dnsjava-${version}.jar"/>
     <property name="zipname" value="dnsjava-${version}.zip"/>
     <property name="targzname" value="dnsjava-${version}.tar.gz"/>
