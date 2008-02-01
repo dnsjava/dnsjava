@@ -19,6 +19,7 @@ private static class Entry {
 }
 
 private static final int TABLE_SIZE = 17;
+private static final int MAX_POINTER = 0x3FFF;
 private Entry [] table;
 private boolean verbose = Options.check("verbosecompression");
 
@@ -37,6 +38,8 @@ Compression() {
  */
 public void
 add(int pos, Name name) {
+	if (pos > MAX_POINTER)
+		return;
 	int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;
 	Entry entry = new Entry();
 	entry.name = name;
