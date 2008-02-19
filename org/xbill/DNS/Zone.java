@@ -493,9 +493,10 @@ removeRecord(Record r) {
 		RRset rrset = findRRset(name, rtype);
 		if (rrset == null)
 			return;
-		rrset.deleteRR(r);
-		if (rrset.size() == 0)
+		if (rrset.size() == 1 && rrset.first().equals(r))
 			removeRRset(name, rtype);
+		else
+			rrset.deleteRR(r);
 	}
 }
 

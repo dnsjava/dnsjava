@@ -1,3 +1,8 @@
+2/19/2008
+	- The Zone.removeRecord() method threw an exception if there were no
+	  other records in the same RRset.
+	  (reported by Yoyo Chen <yoyochen@sinter.com.tw>)
+
 1/31/2008
 	- When converting messages to wire format, don't include name
 	  compression pointers greater than 2^14 - 1.
