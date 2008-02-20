@@ -3,6 +3,9 @@
 	  other records in the same RRset.
 	  (reported by Yoyo Chen <yoyochen@sinter.com.tw>)
 
+	- Parsing and formatting LOC records should not depend on the current
+	  locale. (reported by Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 1/31/2008
 	- When converting messages to wire format, don't include name
 	  compression pointers greater than 2^14 - 1.
