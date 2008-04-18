@@ -2,10 +2,23 @@
 
 package org.xbill.DNS.spi;
 
-import java.net.*;
-import java.util.*;
-import org.xbill.DNS.*;
-import sun.net.spi.nameservice.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.StringTokenizer;
+
+import org.xbill.DNS.AAAARecord;
+import org.xbill.DNS.ARecord;
+import org.xbill.DNS.ExtendedResolver;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.PTRRecord;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.Resolver;
+import org.xbill.DNS.ReverseMap;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 /**
  * This class implements a Name Service Provider, which Java can use 
@@ -21,7 +34,7 @@ import sun.net.spi.nameservice.*;
  * @author Paul Cowan (pwc21@yahoo.com)
  */
 
-public class DNSJavaNameService implements NameService {
+public class DNSJavaNameService implements InvocationHandler {
 
 private static final String nsProperty = "sun.net.spi.nameservice.nameservers";
 private static final String domainProperty = "sun.net.spi.nameservice.domain";
@@ -70,6 +83,33 @@ protected DNSJavaNameService() {
 
 	if (v6 != null && v6.equalsIgnoreCase("true"))
 		preferV6 = true;
+}
+
+
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	try {
+		if (method.getName().equals("getHostByAddr")) {
+			return this.getHostByAddr((byte[]) args[0]);
+		} else if (method.getName().equals("lookupAllHostAddr")) {
+			InetAddress[] addresses = this.lookupAllHostAddr((String) args[0]);
+			if (method.getReturnType().equals(InetAddress[].class)) {
+				// method for Java >= 1.6
+				return addresses;
+			} else if (method.getReturnType().equals(byte[][].class)) {
+				// method for Java <= 1.5
+				byte[][] byteAddresses = new byte[addresses.length][];
+				for (int i=0; i < addresses.length; i++) {
+					byteAddresses[i] = addresses[i].getAddress();
+				}
+				return byteAddresses;
+			}
+		}		
+	} catch (Throwable e) {
+		System.err.println("DNSJavaNameService: Unexpected error.");
+		e.printStackTrace();
+		throw e;
+	}
+	throw new IllegalArgumentException("Unknown function name or arguments.");
 }
 
 /**
@@ -124,5 +164,4 @@ public String getHostByAddr(byte [] addr) throws UnknownHostException {
 		throw new UnknownHostException();
 	return ((PTRRecord) records[0]).getTarget().toString();
 }
-
 }

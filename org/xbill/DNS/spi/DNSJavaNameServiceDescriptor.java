@@ -2,6 +2,8 @@
 
 package org.xbill.DNS.spi;
 
+import java.lang.reflect.Proxy;
+
 import sun.net.spi.nameservice.*;
 
 /**
@@ -16,7 +18,9 @@ public class DNSJavaNameServiceDescriptor implements NameServiceDescriptor {
 private static NameService nameService;
 
 static {
-	nameService = new DNSJavaNameService();
+	nameService = (NameService) Proxy.newProxyInstance(NameService.class.getClassLoader(),
+			new Class[] { NameService.class },
+			new DNSJavaNameService());
 }
 
 /**
