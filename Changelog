@@ -1,3 +1,7 @@
+4/18/2008
+	- The prior change to allow creating Zones from AXFR-style IXFR
+	  ZoneTransferIn responses didn't work.
+
 2/19/2008
 	- The Zone.removeRecord() method threw an exception if there were no
 	  other records in the same RRset.

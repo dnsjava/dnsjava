@@ -167,15 +167,15 @@ fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
 	data = new HashMap();
 	type = SECONDARY;
 
-	if (!xfrin.isAXFR())
-		throw new IllegalArgumentException("zones can only be " +
-						   "created from AXFRs");
 	origin = xfrin.getName();
 	List records = xfrin.run();
 	for (Iterator it = records.iterator(); it.hasNext(); ) {
 		Record record = (Record) it.next();
 		maybeAddRecord(record);
 	}
+	if (!xfrin.isAXFR())
+		throw new IllegalArgumentException("zones can only be " +
+						   "created from AXFRs");
 	validate();
 }
 
