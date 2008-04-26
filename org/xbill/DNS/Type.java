@@ -153,6 +153,9 @@ public static final int NSEC		= 47;
 /** DNSSEC Key */
 public static final int DNSKEY		= 48;
 
+/** Dynamic Host Configuration Protocol (DHCP) ID */
+public static final int DHCID		= 49;
+
 /** Sender Policy Framework (experimental) */
 public static final int SPF		= 99;
 
@@ -255,6 +258,7 @@ static {
 	types.add(RRSIG, "RRSIG", new RRSIGRecord());
 	types.add(NSEC, "NSEC", new NSECRecord());
 	types.add(DNSKEY, "DNSKEY", new DNSKEYRecord());
+	types.add(DHCID, "DHCID", new DHCIDRecord());
 	types.add(SPF, "SPF", new SPFRecord());
 	types.add(TKEY, "TKEY", new TKEYRecord());
 	types.add(TSIG, "TSIG", new TSIGRecord());
