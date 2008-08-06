@@ -1,3 +1,7 @@
+8/06/2008
+	- Randomize the UDP source ports for outgoing queries.
+	  (based on a patch from Derek Morr <derekmorr@psu.edu>)
+
 4/25/2008
 	- Add support for the DHCID record.
 

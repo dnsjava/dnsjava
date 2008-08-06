@@ -4,24 +4,71 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.net.*;
+import java.security.SecureRandom;
 import java.nio.*;
 import java.nio.channels.*;
 
 final class UDPClient extends Client {
+
+private static final int EPHEMERAL_START = 1024;
+private static final int EPHEMERAL_STOP  = 65535;
+private static final int EPHEMERAL_RANGE  = EPHEMERAL_STOP - EPHEMERAL_START;
+
+private static SecureRandom prng = new SecureRandom();
+
+private boolean bound = false;
 
 public
 UDPClient(long endTime) throws IOException {
 	super(DatagramChannel.open(), endTime);
 }
 
+private void
+bind_random(InetSocketAddress addr) throws IOException
+{
+	DatagramChannel channel = (DatagramChannel) key.channel();
+	InetSocketAddress temp;
+
+	for (int i = 0; i < 1024; i++) {
+		try {
+			int port = prng.nextInt(EPHEMERAL_RANGE) +
+				   EPHEMERAL_START;
+			if (addr != null)
+				temp = new InetSocketAddress(addr.getAddress(),
+							     port);
+			else
+				temp = new InetSocketAddress(port);
+			channel.socket().bind(temp);
+			bound = true;
+			return;
+		}
+		catch (SocketException e) {
+		}
+	}
+}
+
 void
 bind(SocketAddress addr) throws IOException {
-	DatagramChannel channel = (DatagramChannel) key.channel();
-	channel.socket().bind(addr);
+	if (addr == null ||
+	    (addr instanceof InetSocketAddress &&
+	     ((InetSocketAddress)addr).getPort() == 0))
+	{
+		bind_random((InetSocketAddress) addr);
+		if (bound)
+			return;
+	}
+
+	if (addr != null) {
+		DatagramChannel channel = (DatagramChannel) key.channel();
+		channel.socket().bind(addr);
+		bound = true;
+	}
 }
 
 void
 connect(SocketAddress addr) throws IOException {
+	if (!bound)
+		bind(null);
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	channel.connect(addr);
 }
@@ -63,8 +110,7 @@ throws IOException
 {
 	UDPClient client = new UDPClient(endTime);
 	try {
-		if (local != null)
-			client.bind(local);
+		client.bind(local);
 		client.connect(remote);
 		client.send(data);
 		return client.recv(max);
