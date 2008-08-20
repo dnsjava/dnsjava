@@ -695,7 +695,7 @@ addMessage(Message in) {
 					responseType = SetResponse.NXRRSET;
 				response = SetResponse.ofType(responseType);
 			}
-			/* NXT records are not cached yet. */
+			/* DNSSEC records are not cached. */
 		} else {
 			/* Referral response */
 			cred = getCred(Section.AUTHORITY, isAuth);
