@@ -680,7 +680,7 @@ addMessage(Message in) {
 	if (!completed) {
 		/* This is a negative response or a referral. */
 		int cachetype = (rcode == Rcode.NXDOMAIN) ? 0 : qtype;
-		if (soa != null || ns == null) {
+		if (rcode == Rcode.NXDOMAIN || soa != null || ns == null)
 			/* Negative response */
 			cred = getCred(Section.AUTHORITY, isAuth);
 			SOARecord soarec = null;
