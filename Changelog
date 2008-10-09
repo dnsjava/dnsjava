@@ -1,3 +1,7 @@
+9/17/2008
+	- Fix LOC record rounding.
+	  (reported by Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 8/22/2008
 	- Type 4 NXDOMAIN responses were incorrectly cached as referrals.
 	  (reported by Luis Silva <luisfilsilva@gmail.com>)

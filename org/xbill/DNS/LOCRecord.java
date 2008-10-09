@@ -155,10 +155,6 @@ throws IOException
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	String s = null;
-	int deg, min;
-	double sec;
-
 	latitude = parsePosition(st, "latitude");
 	longitude = parsePosition(st, "longitude");
 	altitude = parseDouble(st, "altitude", true,
@@ -215,8 +211,6 @@ positionToString(long value, char pos, char neg) {
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
-	long temp;
-	char direction;
 
 	/* Latitude */
 	sb.append(positionToString(latitude, 'N', 'S'));
@@ -303,14 +297,14 @@ parseLOCformat(int b) throws WireParseException {
 	return (out);
 }
 
-private byte
+private int
 toLOCformat(long l) {
 	byte exp = 0;
 	while (l > 9) {
 		exp++;
-		l = (l + 5) / 10;
+		l /= 10;
 	}
-	return (byte)((l << 4) + exp);
+	return (int)((l << 4) + exp);
 }
 
 }
