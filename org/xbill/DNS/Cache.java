@@ -602,7 +602,6 @@ addMessage(Message in) {
 	int qclass;
 	int cred;
 	int rcode = in.getHeader().getRcode();
-	boolean haveAnswer = false;
 	boolean completed = false;
 	RRset [] answers, auth, addl;
 	SetResponse response = null;
@@ -633,7 +632,6 @@ addMessage(Message in) {
 		{
 			addRRset(answers[i], cred);
 			completed = true;
-			haveAnswer = true;
 			if (curname == qname) {
 				if (response == null)
 					response = new SetResponse(
@@ -649,7 +647,6 @@ addMessage(Message in) {
 							   answers[i]);
 			cname = (CNAMERecord) answers[i].first();
 			curname = cname.getTarget();
-			haveAnswer = true;
 		} else if (type == Type.DNAME && curname.subdomain(name)) {
 			DNAMERecord dname;
 			addRRset(answers[i], cred);
@@ -663,7 +660,6 @@ addMessage(Message in) {
 			catch (NameTooLongException e) {
 				break;
 			}
-			haveAnswer = true;
 		}
 	}
 
