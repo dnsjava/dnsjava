@@ -332,7 +332,6 @@ fallback() throws ZoneTransferException {
 
 private void
 parseRR(Record rec) throws ZoneTransferException {
-	Name name = rec.getName();
 	int type = rec.getType();
 	Delta delta;
 
