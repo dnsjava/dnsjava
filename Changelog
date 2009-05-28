@@ -1,3 +1,8 @@
+5/28/2008
+	- The canonical form of an NSEC record was incorrectly computed - the
+	  next name should not have its case changed.
+	  (David Blacka <davidb@verisign.com>)
+
 9/17/2008
 	- Fix LOC record rounding.
 	  (reported by Klaus Malorny <Klaus.Malorny@knipp.de>)
