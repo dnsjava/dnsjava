@@ -375,13 +375,12 @@ doDelete(Tokenizer st) throws IOException {
 	Name name;
 	Record record;
 	int type;
-	int dclass;
 
 	name = st.getName(zone);
 	token = st.get();
 	if (token.isString()) {
 		s = token.value;
-		if ((dclass = DClass.value(s)) >= 0) {
+		if (DClass.value(s) >= 0) {
 			s = st.getString();
 		}
 		if ((type = Type.value(s)) < 0)

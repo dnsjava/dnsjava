@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import org.xbill.DNS.*;
-import org.xbill.DNS.utils.*;
 
 /** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
 
@@ -392,8 +391,6 @@ throws IOException
 	Header header;
 	boolean badversion;
 	int maxLength;
-	boolean sigonly;
-	SetResponse sr;
 	int flags = 0;
 
 	header = query.getHeader();
