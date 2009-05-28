@@ -17,6 +17,7 @@ import org.xbill.DNS.utils.*;
 public class DSRecord extends Record {
 
 public static final byte SHA1_DIGEST_ID = 1;
+public static final byte SHA256_DIGEST_ID = 2;
 
 private int footprint;
 private int alg;
