@@ -82,7 +82,7 @@ rrToString() {
 	}
 
 	return sb.toString();
-}	
+}
 
 /**
  * Returns the key's algorithm.
