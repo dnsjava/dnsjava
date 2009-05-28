@@ -39,6 +39,12 @@ public static class Algorithm {
 	/** RSA/SHA1 public key */
 	public static final int RSASHA1 = 5;
 	
+	/** DSA/SHA1, NSEC3-aware public key */
+	public static final int DSA_NSEC3_SHA1 = 6;
+	
+	/** RSA/SHA1, NSEC3-aware public key */
+	public static final int RSA_NSEC3_SHA1 = 7;
+	
 	/** Indirect keys; the actual key is elsewhere. */
 	public static final int INDIRECT = 252;
 
@@ -60,6 +66,8 @@ public static class Algorithm {
 		algs.add(DSA, "DSA");
 		algs.add(ECC, "ECC");
 		algs.add(RSASHA1, "RSASHA1");
+		algs.add(DSA_NSEC3_SHA1, "DSA-NSEC3-SHA1");
+		algs.add(RSA_NSEC3_SHA1, "RSA-NSEC3-SHA1");
 		algs.add(INDIRECT, "INDIRECT");
 		algs.add(PRIVATEDNS, "PRIVATEDNS");
 		algs.add(PRIVATEOID, "PRIVATEOID");
@@ -90,6 +98,8 @@ public static final int RSA = Algorithm.RSAMD5;
 public static final int DH = Algorithm.DH;
 public static final int DSA = Algorithm.DSA;
 public static final int RSASHA1 = Algorithm.RSASHA1;
+public static final int DSA_NSEC3_SHA1 = Algorithm.DSA_NSEC3_SHA1;
+public static final int RSA_NSEC3_SHA1 = Algorithm.RSA_NSEC3_SHA1;
 
 public static final int Failed = -1;
 public static final int Insecure = 0;
