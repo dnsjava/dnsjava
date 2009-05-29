@@ -651,6 +651,37 @@ getHex() throws IOException {
 }
 
 /**
+ * Gets the next token from a tokenizer and decodes it as hex.
+ * @return The byte array containing the decoded string.
+ * @throws TextParseException The input was invalid.
+ * @throws IOException An I/O error occurred.
+ */
+public byte []
+getHexString() throws IOException {
+	String next = _getIdentifier("a hex string");
+	byte [] array = base16.fromString(next);
+	if (array == null)
+		throw exception("invalid hex encoding");
+	return array;
+}
+
+/**
+ * Gets the next token from a tokenizer and decodes it as base32.
+ * @param b32 The base32 context to decode with.
+ * @return The byte array containing the decoded string.
+ * @throws TextParseException The input was invalid.
+ * @throws IOException An I/O error occurred.
+ */
+public byte []
+getBase32String(base32 b32) throws IOException {
+	String next = _getIdentifier("a base32 string");
+	byte [] array = b32.fromString(next);
+	if (array == null)
+		throw exception("invalid base32 encoding");
+	return array;
+}
+
+/**
  * Creates an exception which includes the current state in the error message
  * @param s The error message to include.
  * @return The exception to be thrown

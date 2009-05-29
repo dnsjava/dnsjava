@@ -3,6 +3,9 @@
 	  next name should not have its case changed.
 	  (David Blacka <davidb@verisign.com>)
 
+	- Add support for NSEC3, NSEC3PARAM, and DLV records.
+	  (based on a patch from David Blacka <davidb@verisign.com>)
+
 9/17/2008
 	- Fix LOC record rounding.
 	  (reported by Klaus Malorny <Klaus.Malorny@knipp.de>)

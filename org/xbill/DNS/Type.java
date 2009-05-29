@@ -156,6 +156,11 @@ public static final int DNSKEY		= 48;
 /** Dynamic Host Configuration Protocol (DHCP) ID */
 public static final int DHCID		= 49;
 
+/** Next SECure, 3rd edition, RFC 5155 */
+public static final int NSEC3		= 50;
+
+public static final int NSEC3PARAM	= 51;
+
 /** Sender Policy Framework (experimental) */
 public static final int SPF		= 99;
 
@@ -179,6 +184,10 @@ public static final int MAILA		= 254;
 
 /** Matches any type */
 public static final int ANY		= 255;
+
+/** DNSSEC Lookaside Validation, RFC 4431 . */
+public static final int DLV		= 32769;
+
 
 private static class TypeMnemonic extends Mnemonic {
 	private HashMap objects;
@@ -259,6 +268,8 @@ static {
 	types.add(NSEC, "NSEC", new NSECRecord());
 	types.add(DNSKEY, "DNSKEY", new DNSKEYRecord());
 	types.add(DHCID, "DHCID", new DHCIDRecord());
+	types.add(NSEC3, "NSEC3", new NSEC3Record());
+	types.add(NSEC3PARAM, "NSEC3PARAM", new NSEC3PARAMRecord());
 	types.add(SPF, "SPF", new SPFRecord());
 	types.add(TKEY, "TKEY", new TKEYRecord());
 	types.add(TSIG, "TSIG", new TSIGRecord());
@@ -267,6 +278,7 @@ static {
 	types.add(MAILB, "MAILB");
 	types.add(MAILA, "MAILA");
 	types.add(ANY, "ANY");
+	types.add(DLV, "DLV", new DLVRecord());
 }
 
 private
