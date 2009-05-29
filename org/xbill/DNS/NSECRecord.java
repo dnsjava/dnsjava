@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import java.util.*;
 
 /**
  * Next SECure name - this record contains the following name in an
@@ -20,7 +19,7 @@ import java.util.*;
 public class NSECRecord extends Record {
 
 private Name next;
-private int types[];
+private TypeBitmap types;
 
 NSECRecord() {}
 
@@ -41,69 +40,26 @@ NSECRecord(Name name, int dclass, long ttl, Name next, int [] types) {
 	for (int i = 0; i < types.length; i++) {
 		Type.check(types[i]);
 	}
-	this.types = new int[types.length];
-	System.arraycopy(types, 0, this.types, 0, types.length);
-	Arrays.sort(this.types);
-}
-
-private int []
-listToArray(List list) {
-	int size = list.size();
-	int [] array = new int[size];
-	for (int i = 0; i < size; i++) {
-		array[i] = ((Integer)list.get(i)).intValue();
-	}
-	return array;
+	this.types = new TypeBitmap(types);
 }
 
 void
 rrFromWire(DNSInput in) throws IOException {
 	next = new Name(in);
+	types = new TypeBitmap(in);
+}
 
-	int lastbase = -1;
-	List list = new ArrayList();
-	while (in.remaining() > 0) {
-		if (in.remaining() < 2)
-			throw new WireParseException
-						("invalid bitmap descriptor");
-		int mapbase = in.readU8();
-		if (mapbase < lastbase)
-			throw new WireParseException("invalid ordering");
-		int maplength = in.readU8();
-		if (maplength > in.remaining())
-			throw new WireParseException("invalid bitmap");
-		for (int i = 0; i < maplength; i++) {
-			int current = in.readU8();
-			if (current == 0)
-				continue;
-			for (int j = 0; j < 8; j++) {
-				if ((current & (1 << (7 - j))) == 0)
-					continue;
-				int typecode = mapbase * 256 + + i * 8 + j;
-				list.add(Mnemonic.toInteger(typecode));
-			}
-		}
-	}
-	types = listToArray(list);
+void
+rrToWire(DNSOutput out, Compression c, boolean canonical) {
+	// Note: The next name is not lowercased.
+	next.toWire(out, null, false);
+	types.toWire(out);
 }
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	next = st.getName(origin);
-	List list = new ArrayList();
-	while (true) {
-		Tokenizer.Token t = st.get();
-		if (!t.isString())
-			break;
-		int typecode = Type.value(t.value);
-		if (typecode < 0) {
-			throw st.exception("Invalid type: " + t.value);
-		}
-		list.add(Mnemonic.toInteger(typecode));
-	}
-	st.unget();
-	types = listToArray(list);
-	Arrays.sort(types);
+	types = new TypeBitmap(st);
 }
 
 /** Converts rdata to a String */
@@ -112,9 +68,9 @@ rrToString()
 {
 	StringBuffer sb = new StringBuffer();
 	sb.append(next);
-	for (int i = 0; i < types.length; i++) {
-		sb.append(" ");
-		sb.append(Type.string(types[i]));
+	if (!types.empty()) {
+		sb.append(' ');
+		sb.append(types.toString());
 	}
 	return sb.toString();
 }
@@ -128,55 +84,13 @@ getNext() {
 /** Returns the set of types defined for this name */
 public int []
 getTypes() {
-	int [] array = new int[types.length];
-	System.arraycopy(types, 0, array, 0, types.length);
-	return array;
+	return types.toArray();
 }
 
 /** Returns whether a specific type is in the set of types. */
 public boolean
 hasType(int type) {
-	return (Arrays.binarySearch(types, type) >= 0);
-}
-
-static void
-mapToWire(DNSOutput out, int [] array, int mapbase,
-	  int mapstart, int mapend)
-{
-	int mapmax = array[mapend - 1] & 0xFF;
-	int maplength = (mapmax / 8) + 1;
-	int [] map = new int[maplength];
-	out.writeU8(mapbase);
-	out.writeU8(maplength);
-	for (int j = mapstart; j < mapend; j++) {
-		int typecode = array[j];
-		map[(typecode & 0xFF) / 8] |= (1 << ( 7 - typecode % 8));
-	}
-	for (int j = 0; j < maplength; j++) {
-		out.writeU8(map[j]);
-	}
-}
-
-void
-rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	// Note: The next name is not lowercased.
-	next.toWire(out, null, false);
-
-	if (types.length == 0)
-		return;
-	int mapbase = -1;
-	int mapstart = -1;
-	for (int i = 0; i < types.length; i++) {
-		int base = types[i] >> 8;
-		if (base == mapbase)
-			continue;
-		if (mapstart >= 0) {
-			mapToWire(out, types, mapbase, mapstart, i);
-		}
-		mapbase = base;
-		mapstart = i;
-	}
-	mapToWire(out, types, mapbase, mapstart, types.length);
+	return types.contains(type);
 }
 
 }
