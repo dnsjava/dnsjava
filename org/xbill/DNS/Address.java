@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.net.*;
 import java.net.Inet6Address;
-import java.util.*;
 
 /**
  * Routines dealing with IP addresses.  Includes functions similar to

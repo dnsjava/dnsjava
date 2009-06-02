@@ -405,7 +405,6 @@ lookup(Name name, int type, int minCred) {
 	int labels;
 	int tlabels;
 	Element element;
-	CacheRRset crrset;
 	Name tname;
 	Object types;
 	SetResponse sr;

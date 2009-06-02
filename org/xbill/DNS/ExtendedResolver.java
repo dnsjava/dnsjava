@@ -177,7 +177,6 @@ private static class Resolution implements ResolverListener {
 			if (n == inprogress.length)
 				return;
 			boolean startnext = false;
-			boolean waiting = false;
 			/*
 			 * If this is the first response from server n, 
 			 * we should start sending queries to server n + 1.

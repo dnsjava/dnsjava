@@ -103,7 +103,7 @@ configureFromLists(List lserver, List lsearch) {
  */
 private boolean
 findProperty() {
-	String s, prop;
+	String prop;
 	List lserver = new ArrayList(0);
 	List lsearch = new ArrayList(0);
 	StringTokenizer st;

@@ -5,7 +5,6 @@ package org.xbill.DNS.security;
 import java.util.*;
 import java.security.*;
 import org.xbill.DNS.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * A class that verifies DNS data using digital signatures contained in DNSSEC

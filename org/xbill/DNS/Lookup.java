@@ -417,7 +417,6 @@ processResponse(Name name, SetResponse response) {
 		follow(cname.getTarget(), name);
 	} else if (response.isDNAME()) {
 		DNAMERecord dname = response.getDNAME();
-		Name newname = null;
 		try {
 			follow(name.fromDNAME(dname), name);
 		} catch (NameTooLongException e) {

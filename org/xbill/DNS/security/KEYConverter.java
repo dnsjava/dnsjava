@@ -8,7 +8,6 @@ import java.security.*;
 import java.security.interfaces.*;
 import javax.crypto.interfaces.*;
 import org.xbill.DNS.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Routines to convert between a DNS KEY record and a Java PublicKey.

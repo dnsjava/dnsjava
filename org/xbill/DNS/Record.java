@@ -20,10 +20,6 @@ protected Name name;
 protected int type, dclass;
 protected long ttl;
 
-private static final Record unknownRecord = new UNKRecord();
-private static final Class [] emptyClassArray = new Class[0];
-private static final Object [] emptyObjectArray = new Object[0];
-
 private static final DecimalFormat byteFormat = new DecimalFormat();
 
 static {
@@ -81,7 +77,6 @@ newRecord(Name name, int type, int dclass, long ttl, int length, DNSInput in)
 throws IOException
 {
 	Record rec;
-	int recstart;
 	rec = getEmptyRecord(name, type, dclass, ttl, in != null);
 	if (in != null) {
 		if (in.remaining() < length)

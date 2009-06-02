@@ -344,7 +344,6 @@ doRequire(Tokenizer st) throws IOException {
 void
 doProhibit(Tokenizer st) throws IOException {
 	Tokenizer.Token token;
-	String s;
 	Name name;
 	Record record;
 	int type;

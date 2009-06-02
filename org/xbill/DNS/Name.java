@@ -81,26 +81,6 @@ Name() {
 }
 
 private final void
-dump(String prefix) {
-	String s;
-	try {
-		s = toString();
-	} catch (Exception e) {
-		s = "<unprintable>";
-	}
-	System.out.println(prefix + ": " + s);
-
-	int labels = labels();
-	for (int i = 0; i < labels; i++)
-		System.out.print(offset(i) + " ");
-	System.out.println("");
-
-	for (int i = 0; name != null && i < name.length; i++)
-		System.out.print((name[i] & 0xFF) + " ");
-	System.out.println("");
-}
-
-private final void
 setoffset(int n, int offset) {
 	if (n >= MAXOFFSETS)
 		return;
@@ -360,8 +340,7 @@ fromConstantString(String s) {
  */
 public
 Name(DNSInput in) throws WireParseException {
-	int len, pos, currentpos;
-	Name name2;
+	int len, pos;
 	boolean done = false;
 	byte [] label = new byte[MAXLABEL + 1];
 	boolean savedState = false;

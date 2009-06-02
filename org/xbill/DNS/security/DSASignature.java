@@ -5,7 +5,6 @@ package org.xbill.DNS.security;
 import java.security.SignatureException;
 import java.security.interfaces.DSAParams;
 import java.util.Arrays;
-import org.xbill.DNS.*;
 
 /**
  * Converts DSA signatures between the RRSIG/SIG record format (as specified

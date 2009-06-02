@@ -21,7 +21,6 @@ public static final int PRIMARY = 1;
 public static final int SECONDARY = 2;
 
 private Map data;
-private int type;
 private Name origin;
 private Object originNode;
 private int dclass = DClass.IN;
@@ -130,7 +129,6 @@ maybeAddRecord(Record record) throws IOException {
 public
 Zone(Name zone, String file) throws IOException {
 	data = new HashMap();
-	type = PRIMARY;
 
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
@@ -152,7 +150,6 @@ Zone(Name zone, String file) throws IOException {
 public
 Zone(Name zone, Record [] records) throws IOException {
 	data = new HashMap();
-	type = PRIMARY;
 
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
@@ -165,7 +162,6 @@ Zone(Name zone, Record [] records) throws IOException {
 private void
 fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
 	data = new HashMap();
-	type = SECONDARY;
 
 	origin = xfrin.getName();
 	List records = xfrin.run();
