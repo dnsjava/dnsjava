@@ -1,4 +1,9 @@
-5/28/2008
+6/03/2009
+	- The lists of servers and searchlist entries in ResolverConfig should
+	  not be static.
+	  (Isabelle Dalmasso <isa@8x8.com>)
+
+5/28/2009
 	- The canonical form of an NSEC record was incorrectly computed - the
 	  next name should not have its case changed.
 	  (David Blacka <davidb@verisign.com>)

@@ -32,8 +32,8 @@ import java.util.*;
 
 public class ResolverConfig {
 
-private static String [] servers = null;
-private static Name [] searchlist = null;
+private String [] servers = null;
+private Name [] searchlist = null;
 
 private static ResolverConfig currentConfig;
 
