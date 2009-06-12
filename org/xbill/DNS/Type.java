@@ -285,7 +285,11 @@ private
 Type() {
 }
 
-static void
+/**
+ * Checks that a numeric Type is valid.
+ * @throws InvalidTypeException The type is out of range.
+ */
+public static void
 check(int val) {
 	if (val < 0 || val > 0xFFFF)
 		throw new InvalidTypeException(val);

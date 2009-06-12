@@ -60,7 +60,11 @@ static {
 private
 DClass() {}
 
-static void
+/**
+ * Checks that a numeric DClass is valid.
+ * @throws InvalidDClassException The class is out of range.
+ */
+public static void
 check(int i) {
 	if (i < 0 || i > 0xFFFF)
 		throw new InvalidDClassException(i);
