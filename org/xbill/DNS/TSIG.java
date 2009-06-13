@@ -309,7 +309,8 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 /**
  * Verifies a TSIG record on an incoming message.  Since this is only called
  * in the context where a TSIG is expected to be present, it is an error
- * if one is not present.
+ * if one is not present.  After calling this routine, Message.isVerified() may
+ * be called on this message.
  * @param m The message
  * @param b An array containing the message in unparsed form.  This is
  * necessary since TSIG signs the message in wire format, and we can't
@@ -321,6 +322,7 @@ applyStream(Message m, TSIGRecord old, boolean first) {
  */
 public byte
 verify(Message m, byte [] b, int length, TSIGRecord old) {
+	m.tsigState = Message.TSIG_FAILED;
 	TSIGRecord tsig = m.getTSIG();
 	HMAC hmac = new HMAC(digest, key);
 	if (tsig == null)
@@ -377,9 +379,10 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 
 	hmac.update(out.toByteArray());
 
-	if (hmac.verify(tsig.getSignature()))
+	if (hmac.verify(tsig.getSignature())) {
+		m.tsigState = Message.TSIG_VERIFIED;
 		return Rcode.NOERROR;
-	else {
+	} else {
 		if (Options.check("verbose"))
 			System.err.println("BADSIG failure");
 		return Rcode.BADSIG;
@@ -389,7 +392,8 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 /**
  * Verifies a TSIG record on an incoming message.  Since this is only called
  * in the context where a TSIG is expected to be present, it is an error
- * if one is not present.
+ * if one is not present.  After calling this routine, Message.isVerified() may
+ * be called on this message.
  * @param m The message
  * @param b The message in unparsed form.  This is necessary since TSIG
  * signs the message in wire format, and we can't recreate the exact wire
@@ -442,6 +446,8 @@ public static class StreamVerifier {
 	 * multiple message response.
 	 * TSIG records must be present on the first and last messages, and
 	 * at least every 100 records in between.
+	 * After calling this routine, Message.isVerified() may be called on
+	 * this message.
 	 * @param m The message
 	 * @param b The message in unparsed form
 	 * @return The result of the verification (as an Rcode)
@@ -486,10 +492,13 @@ public static class StreamVerifier {
 		}
 		else {
 			boolean required = (nresponses - lastsigned >= 100);
-			if (required)
+			if (required) {
+				m.tsigState = Message.TSIG_FAILED;
 				return Rcode.FORMERR;
-			else
+			} else {
+				m.tsigState = Message.TSIG_INTERMEDIATE;
 				return Rcode.NOERROR;
+			}
 		}
 
 		if (!tsig.getName().equals(key.name) ||
@@ -497,6 +506,7 @@ public static class StreamVerifier {
 		{
 			if (Options.check("verbose"))
 				System.err.println("BADKEY failure");
+			m.tsigState = Message.TSIG_FAILED;
 			return Rcode.BADKEY;
 		}
 

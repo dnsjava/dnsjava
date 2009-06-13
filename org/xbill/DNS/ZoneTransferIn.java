@@ -470,11 +470,7 @@ doxfr() throws IOException, ZoneTransferException {
 			TSIGRecord tsigrec = response.getTSIG();
 
 			int error = verifier.verify(response, in);
-			if (error == Rcode.NOERROR && tsigrec != null)
-				response.tsigState = Message.TSIG_VERIFIED;
-			else if (error == Rcode.NOERROR)
-				response.tsigState = Message.TSIG_INTERMEDIATE;
-			else
+			if (error != Rcode.NOERROR)
 				fail("TSIG failure");
 		}
 
@@ -509,8 +505,8 @@ doxfr() throws IOException, ZoneTransferException {
 			parseRR(answers[i]);
 		}
 
-		if (state == END &&
-		    response.tsigState == Message.TSIG_INTERMEDIATE)
+		if (state == END && verifier != null &&
+		    !response.isVerified())
 			fail("last message must be signed");
 	}
 }

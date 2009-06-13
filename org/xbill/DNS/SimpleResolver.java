@@ -191,10 +191,6 @@ verifyTSIG(Message query, Message response, byte [] b, TSIG tsig) {
 	if (tsig == null)
 		return;
 	int error = tsig.verify(response, b, query.getTSIG());
-	if (error == Rcode.NOERROR)
-		response.tsigState = Message.TSIG_VERIFIED;
-	else
-		response.tsigState = Message.TSIG_FAILED;
 	if (Options.check("verbose"))
 		System.err.println("TSIG verify: " + Rcode.string(error));
 }
