@@ -1,3 +1,8 @@
+6/15/2009
+	- Change the ResolverConfig.refresh() method to only synchronize the
+	  assignment to currentConfig, not the code which determines the new
+	  configuration.
+
 6/12/2009
 	- The TSIG verification routines (TSIG.verify,
 	  TSIG.StreamVerifier.verify() now update the Message object with the

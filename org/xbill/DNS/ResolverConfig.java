@@ -388,9 +388,12 @@ getCurrentConfig() {
 }
 
 /** Gets the current configuration */
-public static synchronized void
+public static void
 refresh() {
-	currentConfig = new ResolverConfig();
+	ResolverConfig newConfig = new ResolverConfig();
+	synchronized (ResolverConfig.class) {
+		currentConfig = newConfig;
+	}
 }
 
 }
