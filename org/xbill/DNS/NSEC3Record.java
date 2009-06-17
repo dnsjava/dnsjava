@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.security.*;
 
 import org.xbill.DNS.utils.*;
 
@@ -64,8 +65,8 @@ Record getObject() {
  * @param next The next hash (may not be null).
  * @param types The types present at the original ownername.
  */
-public NSEC3Record(Name name, int dclass, long ttl, byte hashAlg,
-		   byte flags, int iterations, byte [] salt, byte [] next,
+public NSEC3Record(Name name, int dclass, long ttl, int hashAlg,
+		   int flags, int iterations, byte [] salt, byte [] next,
 		   int [] types)
 {
 	super(name, Type.NSEC3, dclass, ttl);
@@ -211,6 +212,39 @@ public boolean
 hasType(int type)
 {
 	return types.contains(type);
+}
+
+/**
+ * Hashes a name.
+ * @param name The name to hash
+ * @return The hashed version of the name
+ * @throws NoSuchAlgorithmException The hash algorithm is unknown.
+ */
+public byte []
+hashName(Name name) throws NoSuchAlgorithmException
+{
+	MessageDigest digest;
+	switch (hashAlg) {
+	case SHA1_DIGEST_ID:
+		digest = MessageDigest.getInstance("sha-1");
+		break;
+	default:
+		throw new NoSuchAlgorithmException("Unknown NSEC3 algorithm" +
+						   "identifier: " +
+						   hashAlg);
+	}
+	byte [] hash = null;
+	for (int i = 0; i <= iterations; i++) {
+		digest.reset();
+		if (i == 0)
+			digest.update(name.toWireCanonical());
+		else
+			digest.update(hash);
+		if (salt != null)
+			digest.update(salt);
+		hash = digest.digest();
+	}
+	return hash;
 }
 
 }
