@@ -214,14 +214,9 @@ hasType(int type)
 	return types.contains(type);
 }
 
-/**
- * Hashes a name.
- * @param name The name to hash
- * @return The hashed version of the name
- * @throws NoSuchAlgorithmException The hash algorithm is unknown.
- */
-public byte []
-hashName(Name name) throws NoSuchAlgorithmException
+static byte []
+hashName(Name name, int hashAlg, int iterations, byte [] salt)
+throws NoSuchAlgorithmException
 {
 	MessageDigest digest;
 	switch (hashAlg) {
@@ -245,6 +240,18 @@ hashName(Name name) throws NoSuchAlgorithmException
 		hash = digest.digest();
 	}
 	return hash;
+}
+
+/**
+ * Hashes a name with the parameters of this NSEC3 record.
+ * @param name The name to hash
+ * @return The hashed version of the name
+ * @throws NoSuchAlgorithmException The hash algorithm is unknown.
+ */
+public byte []
+hashName(Name name) throws NoSuchAlgorithmException
+{
+	return hashName(name, hashAlg, iterations, salt);
 }
 
 }
