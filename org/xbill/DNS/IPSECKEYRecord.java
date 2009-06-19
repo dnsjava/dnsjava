@@ -17,8 +17,8 @@ public class IPSECKEYRecord extends Record {
 public static class Algorithm {
 	private Algorithm() {}
 
-	public static final int RSA = 1;
-	public static final int DSS = 2;
+	public static final int DSA = 1;
+	public static final int RSA = 2;
 }
 
 public static class Gateway {
