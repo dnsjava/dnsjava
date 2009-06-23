@@ -1,3 +1,9 @@
+6/23/2009
+	- DNSSEC signature validation incorrectly used the TTL of the records
+	  being verified, not the original TTL from the RRSIG record, which
+	  caused failures when verifying records returned by a caching server.
+	  (reported by Samuel Benz <samuel.benz@switch.ch>)
+
 6/15/2009
 	- Change the ResolverConfig.refresh() method to only synchronize the
 	  assignment to currentConfig, not the code which determines the new

@@ -142,15 +142,29 @@ digestRRset(RRSIGRecord sig, RRset rrset) {
 	int sigLabels = sig.getLabels() + 1; // Add the root label back.
 	if (name.labels() > sigLabels)
 		wild = name.wild(name.labels() - sigLabels);
-	while (it.hasNext()) {
-		Record rec = (Record) it.next();
-		if (wild != null)
-			rec = rec.withName(wild);
-		records[--size] = rec;
-	}
+	while (it.hasNext())
+		records[--size] = (Record) it.next();
 	Arrays.sort(records);
-	for (int i = 0; i < records.length; i++)
-		out.writeByteArray(records[i].toWireCanonical());
+
+	DNSOutput header = new DNSOutput();
+	if (wild != null)
+		wild.toWireCanonical(header);
+	else
+		name.toWireCanonical(header);
+	header.writeU16(rrset.getType());
+	header.writeU16(rrset.getDClass());
+	header.writeU32(sig.getOrigTTL());
+	for (int i = 0; i < records.length; i++) {
+		out.writeByteArray(header.toByteArray());
+		int lengthPosition = out.current();
+		out.writeU16(0);
+		out.writeByteArray(records[i].rdataToWireCanonical());
+		int rrlength = out.current() - lengthPosition - 2;
+		out.save();
+		out.jump(lengthPosition);
+		out.writeU16(rrlength);
+		out.restore();
+	}
 	return out.toByteArray();
 }
 
