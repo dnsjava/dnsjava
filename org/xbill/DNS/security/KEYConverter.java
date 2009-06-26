@@ -126,10 +126,12 @@ parseRecord(int alg, byte [] data) {
 		switch (alg) {
 			case DNSSEC.RSAMD5:
 			case DNSSEC.RSASHA1:
+			case DNSSEC.RSA_NSEC3_SHA1:
 				return parseRSA(in);
 			case DNSSEC.DH:
 				return parseDH(in);
 			case DNSSEC.DSA:
+			case DNSSEC.DSA_NSEC3_SHA1:
 				return parseDSA(in);
 			default:
 				return null;
