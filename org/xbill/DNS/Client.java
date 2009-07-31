@@ -20,7 +20,7 @@ Client(SelectableChannel channel, long endTime) throws IOException {
 	try {
 		selector = Selector.open();
 		channel.configureBlocking(false);
-		key = channel.register(selector, 0);
+		key = channel.register(selector, SelectionKey.OP_READ);
 		done = true;
 	}
 	finally {
