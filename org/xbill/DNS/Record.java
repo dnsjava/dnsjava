@@ -410,7 +410,7 @@ byteArrayToString(byte [] array, boolean quote) {
 		if (b < 0x20 || b >= 0x7f) {
 			sb.append('\\');
 			sb.append(byteFormat.format(b));
-		} else if (b == '"' || b == ';' || b == '\\') {
+		} else if (b == '"' || b == '\\') {
 			sb.append('\\');
 			sb.append((char)b);
 		} else

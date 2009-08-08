@@ -1,3 +1,6 @@
+8/08/2009
+	- The escaping code for text strings should not escape semicolons.
+
 6/23/2009
 	- DNSSEC signature validation incorrectly used the TTL of the records
 	  being verified, not the original TTL from the RRSIG record, which
