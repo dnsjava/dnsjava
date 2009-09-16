@@ -1,3 +1,7 @@
+9/15/2009
+	- Add a constant for the REVOKE DNSKEY flag.
+	  (patch from Wolfgang Nagele <dreamguard@users.sourceforge.net>)
+
 8/08/2009
 	- The escaping code for text strings should not escape semicolons.
 
