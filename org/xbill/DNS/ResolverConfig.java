@@ -161,6 +161,9 @@ findSunJVM() {
 		return false;
 	}
 
+	if (lserver_tmp.size() == 0)
+		return false;
+
 	if (lserver_tmp.size() > 0) {
 		Iterator it = lserver_tmp.iterator();
 		while (it.hasNext())
