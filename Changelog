@@ -1,6 +1,9 @@
 9/15/2009
 	- Add a constant for the REVOKE DNSKEY flag.
 	  (patch from Wolfgang Nagele <dreamguard@users.sourceforge.net>)
+	- ReverseMap.fromAddress(String) should support both IPv4 and IPv6
+	  addresses.
+	  (reported by Stephan Fuhrmann <stfu1und1@users.sourceforge.net>)
 
 8/08/2009
 	- The escaping code for text strings should not escape semicolons.

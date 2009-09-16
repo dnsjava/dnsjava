@@ -119,7 +119,12 @@ fromAddress(String addr, int family) throws UnknownHostException {
  */
 public static Name
 fromAddress(String addr) throws UnknownHostException {
-	return fromAddress(addr, Address.IPv4);
+	byte [] array = Address.toByteArray(addr, Address.IPv4);
+	if (array == null)
+		array = Address.toByteArray(addr, Address.IPv6);
+	if (array == null)
+		throw new UnknownHostException("Invalid IP address");
+	return fromAddress(array);
 }
 
 }
