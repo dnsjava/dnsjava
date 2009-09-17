@@ -2,6 +2,7 @@
 
 package org.xbill.DNS;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -13,7 +14,9 @@ import java.util.*;
  * @author Brian Wellington
  */
 
-public class RRset {
+public class RRset implements Serializable {
+
+private static final long serialVersionUID = -3270249290171239695L;
 
 /*
  * rrs contains both normal and RRSIG records, with the RRSIG records

@@ -18,6 +18,8 @@ import org.xbill.DNS.utils.*;
 
 public class TSIGRecord extends Record {
 
+private static final long serialVersionUID = -88820909016649306L;
+
 private Name alg;
 private Date timeSigned;
 private int fudge;

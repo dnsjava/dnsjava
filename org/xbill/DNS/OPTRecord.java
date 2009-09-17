@@ -23,6 +23,8 @@ import org.xbill.DNS.utils.*;
 
 public class OPTRecord extends Record {
 
+private static final long serialVersionUID = -6254521894809367938L;
+
 public static class Option {
 	public final int code;
 	public final byte [] data;

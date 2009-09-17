@@ -14,6 +14,8 @@ import java.io.*;
 
 public class RPRecord extends Record {
 
+private static final long serialVersionUID = 8124584364211337460L;
+
 private Name mailbox;
 private Name textDomain;
 

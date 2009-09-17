@@ -13,6 +13,8 @@ import java.net.*;
 
 public class AAAARecord extends Record {
 
+private static final long serialVersionUID = -4588601512069748050L;
+
 private InetAddress address;
 
 AAAARecord() {}

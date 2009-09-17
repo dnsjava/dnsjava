@@ -12,7 +12,9 @@ import java.text.*;
  * @author Brian Wellington
  */
 
-public class Name implements Comparable {
+public class Name implements Comparable, Serializable {
+
+private static final long serialVersionUID = -7257019940971525644L;
 
 private static final int LABEL_NORMAL = 0;
 private static final int LABEL_COMPRESSION = 0xC0;

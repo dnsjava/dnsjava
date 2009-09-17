@@ -12,7 +12,9 @@ import java.util.*;
  * @author Brian Wellington
  */
 
-public class Zone {
+public class Zone implements Serializable {
+
+private static final long serialVersionUID = -9220510891189510942L;
 
 /** A primary zone */
 public static final int PRIMARY = 1;

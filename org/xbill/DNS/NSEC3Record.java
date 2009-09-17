@@ -36,6 +36,8 @@ public static class Flags {
 
 public static final byte SHA1_DIGEST_ID = 1;
 
+private static final long serialVersionUID = -7123504635968932855L;
+
 private int hashAlg;
 private int flags;
 private int iterations;

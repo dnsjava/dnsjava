@@ -12,6 +12,8 @@ import java.io.*;
 
 public class SOARecord extends Record {
 
+private static final long serialVersionUID = 1049740098229303931L;
+
 private Name host, admin;
 private long serial, refresh, retry, expire, minimum;
 

@@ -13,6 +13,8 @@ import java.net.*;
 
 public class A6Record extends Record {
 
+private static final long serialVersionUID = -8815026887337346789L;
+
 private int prefixBits;
 private InetAddress suffix;
 private Name prefix;

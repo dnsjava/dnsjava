@@ -13,6 +13,8 @@ import org.xbill.DNS.utils.*;
 
 public class SSHFPRecord extends Record {
 
+private static final long serialVersionUID = -8104701402654687025L;
+
 public static class Algorithm {
 	private Algorithm() {}
 

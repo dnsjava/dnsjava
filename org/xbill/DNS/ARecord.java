@@ -13,6 +13,8 @@ import java.io.*;
 
 public class ARecord extends Record {
 
+private static final long serialVersionUID = -2172609200849142323L;
+
 private int addr;
 
 ARecord() {}

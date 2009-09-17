@@ -20,6 +20,8 @@ public class DLVRecord extends Record {
 public static final byte SHA1_DIGEST_ID = 1;
 public static final byte SHA256_DIGEST_ID = 2;
 
+private static final long serialVersionUID = 1960742375677534148L;
+
 private int footprint;
 private int alg;
 private int digestid;

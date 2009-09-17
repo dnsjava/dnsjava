@@ -14,6 +14,8 @@ import org.xbill.DNS.utils.*;
 
 abstract class SIGBase extends Record {
 
+private static final long serialVersionUID = -3738444391533812369L;
+
 protected int covered;
 protected int alg, labels;
 protected long origttl;

@@ -12,6 +12,8 @@ import java.io.*;
 
 public class HINFORecord extends Record {
 
+private static final long serialVersionUID = -4732870630947452112L;
+	
 private byte [] cpu, os;
 
 HINFORecord() {}

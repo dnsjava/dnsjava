@@ -80,6 +80,8 @@ public static class Element {
 	}
 }
 
+private static final long serialVersionUID = -1348173791712935864L;
+
 private List elements;
 
 APLRecord() {} 

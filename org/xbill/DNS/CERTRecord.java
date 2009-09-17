@@ -104,6 +104,8 @@ public static final int URI = CertificateType.URI;
 /** Certificate format defined by IOD */
 public static final int OID = CertificateType.OID;
 
+private static final long serialVersionUID = 4763014646517016835L;
+
 private int certType, keyTag;
 private int alg;
 private byte [] cert;

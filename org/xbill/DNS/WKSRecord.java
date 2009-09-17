@@ -14,6 +14,8 @@ import java.util.*;
 
 public class WKSRecord extends Record {
 
+private static final long serialVersionUID = -9104259763909119805L;
+
 public static class Protocol {
 	/**
 	 * IP protocol identifiers.  This is basically copied out of RFC 1010.

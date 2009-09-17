@@ -12,6 +12,8 @@ import java.io.*;
 
 public class GPOSRecord extends Record {
 
+private static final long serialVersionUID = -6349714958085750705L;
+
 private byte [] latitude, longitude, altitude;
 
 GPOSRecord() {}

@@ -12,6 +12,8 @@ import java.io.*;
 
 public class ISDNRecord extends Record {
 
+private static final long serialVersionUID = -8730801385178968798L;
+
 private byte [] address;
 private byte [] subAddress;
 

@@ -11,6 +11,8 @@ package org.xbill.DNS;
 
 public class MDRecord extends SingleNameBase {
 
+private static final long serialVersionUID = 5268878603762942202L;
+
 MDRecord() {}
 
 Record

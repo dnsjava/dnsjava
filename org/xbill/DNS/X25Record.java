@@ -13,6 +13,8 @@ import java.io.*;
 
 public class X25Record extends Record {
 
+private static final long serialVersionUID = 4267576252335579764L;
+
 private byte [] address;
 
 X25Record() {}

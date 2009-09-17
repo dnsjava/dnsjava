@@ -14,6 +14,8 @@ import org.xbill.DNS.utils.*;
 
 public class IPSECKEYRecord extends Record {
 
+private static final long serialVersionUID = 3050449702765909687L;
+
 public static class Algorithm {
 	private Algorithm() {}
 

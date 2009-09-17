@@ -13,6 +13,8 @@ import org.xbill.DNS.utils.*;
 
 abstract class KEYBase extends Record {
 
+private static final long serialVersionUID = 3469321722693285454L;
+
 protected int flags, proto, alg;
 protected byte [] key;
 protected int footprint = -1;

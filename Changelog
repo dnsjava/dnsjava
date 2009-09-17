@@ -2,6 +2,9 @@
 	- When determining the nameservers to use, if the
 	  sun.net.dns.ResolverConfiguration class returns an empty list, ignore
 	  it. (based on an anonymous patch).
+	- Make the Name, Record (and all subclasses), RRset, and Zone classes
+	  implement Serializable.
+	  (based on a patch from Patrick <psp294@users.sourceforge.net>)
 
 9/15/2009
 	- Add a constant for the REVOKE DNSKEY flag.

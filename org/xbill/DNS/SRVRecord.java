@@ -14,6 +14,8 @@ import java.io.*;
 
 public class SRVRecord extends Record {
 
+private static final long serialVersionUID = -3886460132387522052L;
+
 private int priority, weight, port;
 private Name target;
 

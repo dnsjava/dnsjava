@@ -13,6 +13,8 @@ import java.io.*;
 
 public class NAPTRRecord extends Record {
 
+private static final long serialVersionUID = 5191232392044947002L;
+
 private int order, preference;
 private byte [] flags, service, regexp;
 private Name replacement;

@@ -14,6 +14,8 @@ import java.io.*;
 
 public class MINFORecord extends Record {
 
+private static final long serialVersionUID = -3962147172340353796L;
+
 private Name responsibleAddress;
 private Name errorAddress;
 

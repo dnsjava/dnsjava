@@ -12,6 +12,8 @@ import java.util.*;
 
 public class SPFRecord extends TXTBase {
 
+private static final long serialVersionUID = -2100754352801658722L;
+
 SPFRecord() {}
 
 Record

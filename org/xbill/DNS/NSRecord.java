@@ -10,6 +10,8 @@ package org.xbill.DNS;
 
 public class NSRecord extends SingleCompressedNameBase {
 
+private static final long serialVersionUID = 487170758138268838L;
+
 NSRecord() {}
 
 Record

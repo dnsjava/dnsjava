@@ -20,6 +20,8 @@ import org.xbill.DNS.utils.base16;
 
 public class NSEC3PARAMRecord extends Record {
 
+private static final long serialVersionUID = -8689038598776316533L;
+
 private int hashAlg;
 private int flags;
 private int iterations;

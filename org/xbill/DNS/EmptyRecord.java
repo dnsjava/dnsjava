@@ -13,6 +13,8 @@ import java.io.*;
 
 class EmptyRecord extends Record {
 
+private static final long serialVersionUID = 3601852050646429582L;
+
 EmptyRecord() {}
 
 Record

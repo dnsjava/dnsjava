@@ -10,6 +10,8 @@ package org.xbill.DNS;
 
 public class MXRecord extends U16NameBase {
 
+private static final long serialVersionUID = 2914841027584208546L;
+
 MXRecord() {}
 
 Record

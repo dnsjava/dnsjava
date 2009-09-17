@@ -13,6 +13,8 @@ import java.io.*;
 
 abstract class U16NameBase extends Record {
 
+private static final long serialVersionUID = -8315884183112502995L;
+
 protected int u16Field;
 protected Name nameField;
 

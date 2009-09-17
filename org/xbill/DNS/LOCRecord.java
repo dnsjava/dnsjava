@@ -13,6 +13,8 @@ import java.text.*;
 
 public class LOCRecord extends Record {
 
+private static final long serialVersionUID = 9058224788126750409L;
+
 private static NumberFormat w2, w3;
 
 private long size, hPrecision, vPrecision;

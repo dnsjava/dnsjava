@@ -36,6 +36,8 @@ limitExpire(long ttl, long maxttl) {
 }
 
 private static class CacheRRset extends RRset implements Element {
+	private static final long serialVersionUID = 5971755205903597024L;
+	
 	int credibility;
 	int expire;
 
