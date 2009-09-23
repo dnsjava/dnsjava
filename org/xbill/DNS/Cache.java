@@ -29,10 +29,10 @@ private static int
 limitExpire(long ttl, long maxttl) {
 	if (maxttl >= 0 && maxttl < ttl)
 		ttl = maxttl;
-	int expire = (int)((System.currentTimeMillis() / 1000) + ttl);
+	long expire = (System.currentTimeMillis() / 1000) + ttl;
 	if (expire < 0 || expire > Integer.MAX_VALUE)
 		return Integer.MAX_VALUE;
-	return expire;
+	return (int)expire;
 }
 
 private static class CacheRRset extends RRset implements Element {
@@ -80,7 +80,6 @@ private static class CacheRRset extends RRset implements Element {
 private static class NegativeElement implements Element {
 	int type;
 	Name name;
-	SOARecord soa;
 	int credibility;
 	int expire;
 
@@ -90,7 +89,6 @@ private static class NegativeElement implements Element {
 	{
 		this.name = name;
 		this.type = type;
-		this.soa = soa;
 		long cttl = 0;
 		if (soa != null)
 			cttl = soa.getMinimum();

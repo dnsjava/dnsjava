@@ -172,7 +172,7 @@ sigs() {
 }
 
 /** Returns the number of (data) records */
-public int
+public synchronized int
 size() {
 	return rrs.size() - nsigs;
 }

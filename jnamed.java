@@ -24,10 +24,14 @@ addrport(InetAddress addr, int port) {
 public
 jnamed(String conffile) throws IOException, ZoneTransferException {
 	FileInputStream fs;
+	InputStreamReader isr;
+	BufferedReader br;
 	List ports = new ArrayList();
 	List addresses = new ArrayList();
 	try {
 		fs = new FileInputStream(conffile);
+		isr = new InputStreamReader(fs);
+		br = new BufferedReader(isr);
 	}
 	catch (Exception e) {
 		System.out.println("Cannot open " + conffile);
@@ -39,8 +43,6 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 		znames = new HashMap();
 		TSIGs = new HashMap();
 
-		InputStreamReader isr = new InputStreamReader(fs);
-		BufferedReader br = new BufferedReader(isr);
 		String line = null;
 		while ((line = br.readLine()) != null) {
 			StringTokenizer st = new StringTokenizer(line);

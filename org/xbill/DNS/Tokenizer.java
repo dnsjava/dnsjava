@@ -123,7 +123,7 @@ public static class Token {
 	}
 }
 
-class TokenizerException extends TextParseException {
+static class TokenizerException extends TextParseException {
 	String message;
 
 	public

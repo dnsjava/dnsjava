@@ -12,7 +12,7 @@ import java.util.*;
  * @author Brian Wellington
  */
 
-public class Header {
+public class Header implements Cloneable {
 
 private int id; 
 private int flags;

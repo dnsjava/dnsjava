@@ -11,7 +11,9 @@ package org.xbill.DNS;
 import java.io.*;
 import java.util.*;
 
-final class TypeBitmap {
+final class TypeBitmap implements Serializable {
+
+private static final long serialVersionUID = -125354057735389003L;
 
 private TreeSet types;
 

@@ -37,7 +37,9 @@ class ZoneIterator implements Iterator {
 	private boolean wantLastSOA;
 
 	ZoneIterator(boolean axfr) {
-		zentries = data.entrySet().iterator();
+		synchronized (Zone.this) {
+			zentries = data.entrySet().iterator();
+		}
 		wantLastSOA = axfr;
 		RRset [] sets = allRRsets(originNode);
 		current = new RRset[sets.length];
@@ -62,7 +64,7 @@ class ZoneIterator implements Iterator {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
-		if (current == null && wantLastSOA) {
+		if (current == null) {
 			wantLastSOA = false;
 			return oneRRset(originNode, Type.SOA);
 		}
@@ -533,7 +535,7 @@ nodeToString(StringBuffer sb, Object node) {
 /**
  * Returns the contents of the Zone in master file format.
  */
-public String
+public synchronized String
 toMasterFile() {
 	Iterator zentries = data.entrySet().iterator();
 	StringBuffer sb = new StringBuffer();

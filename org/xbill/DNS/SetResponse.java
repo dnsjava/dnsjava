@@ -195,7 +195,7 @@ toString() {
 		case CNAME:		return "CNAME: " + data;
 		case DNAME:		return "DNAME: " + data;
 		case SUCCESSFUL:	return "successful";
-		default:		return null;
+		default:		throw new IllegalStateException();
 	}
 }
 

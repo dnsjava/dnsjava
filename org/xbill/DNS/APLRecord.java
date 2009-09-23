@@ -78,6 +78,11 @@ public static class Element {
 			prefixLength == elt.prefixLength &&
 			address.equals(elt.address));
 	}
+
+	public int
+	hashCode() {
+		return address.hashCode() + prefixLength + (negative ? 1 : 0);
+	}
 }
 
 private static final long serialVersionUID = -1348173791712935864L;
