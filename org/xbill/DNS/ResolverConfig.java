@@ -28,6 +28,7 @@ import java.util.*;
  *
  * @author Brian Wellington
  * @author <a href="mailto:yannick@meudal.net">Yannick Meudal</a>
+ * @author <a href="mailto:arnt@gulbrandsen.priv.no">Arnt Gulbrandsen</a>
  */
 
 public class ResolverConfig {
@@ -49,6 +50,7 @@ ResolverConfig() {
 		return;
 	if (servers == null || searchlist == null) {
 		String OS = System.getProperty("os.name");
+		String vendor = System.getProperty("java.vendor");
 		if (OS.indexOf("Windows") != -1) {
 			if (OS.indexOf("95") != -1 ||
 			    OS.indexOf("98") != -1 ||
@@ -56,10 +58,13 @@ ResolverConfig() {
 				find95();
 			else
 				findNT();
-		} else if (OS.indexOf("NetWare") != -1)
+		} else if (OS.indexOf("NetWare") != -1) {
 			findNetware();
-		else
+		} else if (vendor.indexOf("Android") != -1) {
+			findAndroid();
+		} else {
 			findUnix();
+		}
 	}
 }
 
@@ -361,6 +366,39 @@ findNT() {
 	}
 	catch (Exception e) {
 		return;
+	}
+}
+
+/**
+ * Parses the output of getprop, which is the only way to get DNS
+ * info on Android. getprop might disappear in future releases, so
+ * this code comes with a use-by date.
+ */
+private void
+findAndroid() {
+	String re1 = "^\\d+(\\.\\d+){3}$";
+	String re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$";
+	try { 
+		ArrayList maybe = new ArrayList(); 
+		String line; 
+		Process p = Runtime.getRuntime().exec("getprop"); 
+		InputStream in = p.getInputStream();
+		InputStreamReader isr = new InputStreamReader(in);
+		BufferedReader br = new BufferedReader(isr);
+		while ((line = br.readLine()) != null ) { 
+			StringTokenizer t = new StringTokenizer( line, ":" );
+			String name = t.nextToken();
+			if (name.indexOf( ".dns" ) > -1) {
+				String v = t.nextToken();
+				v = v.replaceAll( "[ \\[\\]]", "" );
+				if ((v.matches(re1) || v.matches(re2)) &&
+				    !maybe.contains(v))
+					maybe.add(v);
+			}
+		}
+		configureFromLists(maybe, null);
+	} catch ( Exception e ) { 
+		// ignore resolutely
 	}
 }
 
