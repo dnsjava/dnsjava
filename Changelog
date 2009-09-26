@@ -1,4 +1,5 @@
 9/25/2009
+	- 2.0.7 released
 	- Add support for detecting the configured nameservers on the Android
 	  platform.  (patch from Arnt Gulbrandsen <arnt@gulbrandsen.priv.no>)
 
