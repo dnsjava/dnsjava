@@ -39,7 +39,7 @@ Record getObject() {
  * @param name The ownername of the NSEC3PARAM record (generally the zone name).
  * @param dclass The class.
  * @param ttl The TTL.
- * @param hashalg The hash algorithm.
+ * @param hashAlg The hash algorithm.
  * @param flags The value of the flags field.
  * @param iterations The number of hash iterations.
  * @param salt The salt to use (may be null).
