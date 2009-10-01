@@ -1,3 +1,8 @@
+10/01/2009
+	- Properly initialize the Date objects used in RRSIG (and other)
+	  records, so that any unused fields are cleard.
+	  (Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 9/25/2009
 	- 2.0.7 released
 	- Add support for detecting the configured nameservers on the Android

@@ -55,11 +55,12 @@ format(Date date) {
  */
 public static Date
 parse(String s) throws TextParseException {
-	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-
 	if (s.length() != 14) {
 		throw new TextParseException("Invalid time encoding: " + s);
 	}
+
+	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+	c.clear();
 	try {
 		int year = Integer.parseInt(s.substring(0, 4));
 		int month = Integer.parseInt(s.substring(4, 6)) - 1;
