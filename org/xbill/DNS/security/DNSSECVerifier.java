@@ -116,6 +116,14 @@ verifySIG(RRset set, RRSIGRecord sigrec, Cache cache) {
 			sig = sigrec.getSignature();
 			algString = "SHA1withRSA";
 			break;
+		case DNSSEC.RSASHA256:
+			sig = sigrec.getSignature();
+			algString = "SHA256withRSA";
+			break;
+		case DNSSEC.RSASHA512:
+			sig = sigrec.getSignature();
+			algString = "SHA512withRSA";
+			break;
 		default:
 			return DNSSEC.Failed;
 	}
