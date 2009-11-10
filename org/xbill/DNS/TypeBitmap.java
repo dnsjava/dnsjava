@@ -121,14 +121,14 @@ toWire(DNSOutput out) {
 	for (Iterator it = types.iterator(); it.hasNext(); ) {
 		int t = ((Integer)it.next()).intValue();
 		int base = t >> 8;
-		if (base == mapbase)
-			map.add(new Integer(t));
-		else {
-			if (map.size() > 0)
+		if (base != mapbase) {
+			if (map.size() > 0) {
 				mapToWire(out, map, mapbase);
-			map.clear();
+				map.clear();
+			}
 			mapbase = base;
 		}
+			map.add(new Integer(t));
 	}
 	mapToWire(out, map, mapbase);
 }
