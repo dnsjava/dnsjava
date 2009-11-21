@@ -1,3 +1,6 @@
+11/21/2009
+	- 2.0.8 released
+
 11/10/2009
 	- Fix the conversion of NSEC/NSEC3 bitmaps into wire format.
 	  (Klaus Malorny <Klaus.Malorny@knipp.de>, also reported by
