@@ -18,7 +18,8 @@ public class DNSJavaNameServiceDescriptor implements NameServiceDescriptor {
 private static NameService nameService;
 
 static {
-	nameService = (NameService) Proxy.newProxyInstance(NameService.class.getClassLoader(),
+	ClassLoader loader = NameService.class.getClassLoader();
+	nameService = (NameService) Proxy.newProxyInstance(loader,
 			new Class[] { NameService.class },
 			new DNSJavaNameService());
 }

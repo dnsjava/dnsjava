@@ -27,7 +27,7 @@ import org.xbill.DNS.Type;
  * <p>
  * This Name Service Provider uses dnsjava.
  * <p>
- * To use this provider, you must set the following system propery:
+ * To use this provider, you must set the following system property:
  * <b>sun.net.spi.nameservice.provider.1=dns,dnsjava</b>
  *
  * @author Brian Wellington
@@ -50,7 +50,8 @@ private boolean preferV6 = false;
  * <b>sun.net.spi.nameservice.domain</b>, and
  * <b>java.net.preferIPv6Addresses</b> properties for configuration.
  */
-protected DNSJavaNameService() {
+protected
+DNSJavaNameService() {
 	String nameServers = System.getProperty(nsProperty);
 	String domain = System.getProperty(domainProperty);
 	String v6 = System.getProperty(v6Property);
@@ -86,20 +87,26 @@ protected DNSJavaNameService() {
 }
 
 
-public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+public Object
+invoke(Object proxy, Method method, Object[] args) throws Throwable {
 	try {
 		if (method.getName().equals("getHostByAddr")) {
 			return this.getHostByAddr((byte[]) args[0]);
 		} else if (method.getName().equals("lookupAllHostAddr")) {
-			InetAddress[] addresses = this.lookupAllHostAddr((String) args[0]);
-			if (method.getReturnType().equals(InetAddress[].class)) {
+			InetAddress[] addresses;
+			addresses = this.lookupAllHostAddr((String) args[0]);
+			Class returnType = method.getReturnType();
+			if (returnType.equals(InetAddress[].class)) {
 				// method for Java >= 1.6
 				return addresses;
-			} else if (method.getReturnType().equals(byte[][].class)) {
+			} else if (returnType.equals(byte[][].class)) {
 				// method for Java <= 1.5
-				byte[][] byteAddresses = new byte[addresses.length][];
-				for (int i=0; i < addresses.length; i++) {
-					byteAddresses[i] = addresses[i].getAddress();
+				int naddrs = addresses.length;
+				byte [][] byteAddresses = new byte[naddrs][];
+				byte [] addr;
+				for (int i = 0; i < naddrs; i++) {
+					addr = addresses[i].getAddress();
+					byteAddresses[i] = addr;
 				}
 				return byteAddresses;
 			}
@@ -109,7 +116,8 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 		e.printStackTrace();
 		throw e;
 	}
-	throw new IllegalArgumentException("Unknown function name or arguments.");
+	throw new IllegalArgumentException(
+					"Unknown function name or arguments.");
 }
 
 /**
@@ -157,7 +165,8 @@ lookupAllHostAddr(String host) throws UnknownHostException {
  * @param addr The ip address to lookup.
  * @return The host name found for the ip address.
  */
-public String getHostByAddr(byte [] addr) throws UnknownHostException {
+public String
+getHostByAddr(byte [] addr) throws UnknownHostException {
 	Name name = ReverseMap.fromAddress(InetAddress.getByAddress(addr));
 	Record [] records = new Lookup(name, Type.PTR).run();
 	if (records == null)
