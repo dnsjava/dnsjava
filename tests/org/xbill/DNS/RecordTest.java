@@ -549,7 +549,7 @@ public class RecordTest extends TestCase
     public void test_byteArrayToString()
     {
 	byte[] in = new byte[] { ' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte)0xFF };
-	String exp = "\" \\031Aa\\;\\\"\\\\~\\127\\255\"";
+	String exp = "\" \\031Aa;\\\"\\\\~\\127\\255\"";
 	assertEquals(exp, SubRecord.byteArrayToString(in, true));
     }
 
