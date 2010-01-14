@@ -127,6 +127,8 @@ parseRecord(int alg, byte [] data) {
 			case DNSSEC.RSAMD5:
 			case DNSSEC.RSASHA1:
 			case DNSSEC.RSA_NSEC3_SHA1:
+			case DNSSEC.RSASHA256:
+			case DNSSEC.RSASHA512:
 				return parseRSA(in);
 			case DNSSEC.DH:
 				return parseDH(in);
