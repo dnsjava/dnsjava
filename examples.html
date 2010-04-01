@@ -21,7 +21,7 @@ InetAddress addr = Address.getByName("www.dnsjava.org");
 
 <p><b>Get the MX target and preference of a name:</b></p>
 <pre><code>
-Record [] records = new Lookup("dnsjava.org", Type.MX).run();
+Record [] records = new Lookup("gmail.com", Type.MX).run();
 for (int i = 0; i &lt; records.length; i++) {
 	MXRecord mx = (MXRecord) records[i];
 	System.out.println("Host " + mx.getTarget() + " has preference ", mx.getPriority());
