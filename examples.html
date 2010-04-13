@@ -43,7 +43,7 @@ if (l.getResult() == Lookup.SUCCESSFUL)
 
 <p><b>Transfer a zone from a server and print it:</b></p>
 <pre><code>
-ZoneTransferIn xfr = ZoneTransferIn.newAXFR(new Name("dnsjava.org"), "204.152.186.163", null);
+ZoneTransferIn xfr = ZoneTransferIn.newAXFR(new Name("."), "192.5.5.241", null);
 List records = xfr.run();
 for (Iterator it = records.iterator(); it.hasNext(); )
 	System.out.println(it.next());
