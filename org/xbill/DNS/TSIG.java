@@ -136,8 +136,7 @@ TSIG(String name, String key) {
 }
 
 /**
- * Creates a new TSIG object with the hmac-md5 algorithm, which can be used to
- * sign or verify a message.
+ * Creates a new TSIG object, which can be used to sign or verify a message.
  * @param str The TSIG key, in the form name:secret, name/secret,
  * alg:name:secret, or alg/name/secret.  If an algorithm is specified, it must
  * be "hmac-md5", "hmac-sha1", or "hmac-sha256".
