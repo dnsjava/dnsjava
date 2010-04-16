@@ -34,7 +34,14 @@ public static class Flags {
 	public static final int OPT_OUT = 0x01;
 }
 
-public static final byte SHA1_DIGEST_ID = 1;
+public static class Digest {
+	private Digest() {}
+
+	/** SHA-1 */
+	public static final int SHA1 = 1;
+}
+
+public static final int SHA1_DIGEST_ID = Digest.SHA1;
 
 private static final long serialVersionUID = -7123504635968932855L;
 
@@ -222,7 +229,7 @@ throws NoSuchAlgorithmException
 {
 	MessageDigest digest;
 	switch (hashAlg) {
-	case SHA1_DIGEST_ID:
+	case Digest.SHA1:
 		digest = MessageDigest.getInstance("sha-1");
 		break;
 	default:
