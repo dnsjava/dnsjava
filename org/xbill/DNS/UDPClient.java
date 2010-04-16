@@ -17,10 +17,50 @@ private static final int EPHEMERAL_RANGE  = EPHEMERAL_STOP - EPHEMERAL_START;
 private static SecureRandom prng = new SecureRandom();
 
 private boolean bound = false;
+private boolean noPortRandomization = false;
 
 public
 UDPClient(long endTime) throws IOException {
 	super(DatagramChannel.open(), endTime);
+}
+
+/*
+ * On some platforms (Windows), the SecureRandom module initialization involves
+ * a call to InetAddress.getLocalHost(), which can end up here if using a
+ * dnsjava name service provider.
+ *
+ * This can cause problems in multiple ways.
+ *   - If the SecureRandom seed generation process calls into here, and this
+ *     module attempts to seed the local SecureRandom object, the thread hangs.
+ *   - If something else calls InetAddress.getLocalHost(), and that causes this
+ *     module to seed the local SecureRandom object, the thread hangs.
+ *
+ * To avoid both of these, check on the first N calls (where N is arbitrarily
+ * 8) to see if either SecureRandom or InetAddress is in the call chain.  If
+ * so, disable port randomization.
+ */
+private static int initialization_counter = 8;
+
+private final boolean
+disablePortRandomization()
+{
+	if (initialization_counter <= 0)
+		return false;
+	initialization_counter--;
+
+	if (System.getProperty("os.name").indexOf("Windows") < 0)
+		return false;
+
+	StackTraceElement [] stack = new Exception().getStackTrace();
+	String prng_class = prng.getClass().getName();
+	String inetaddress_class = InetAddress.class.getName();
+	for (int i = 0; i < stack.length; i++) {
+		StackTraceElement e = stack[i];
+		if (e.getClassName().equals(prng_class) ||
+		    e.getClassName().equals(inetaddress_class))
+			return true;
+	}
+	return false;
 }
 
 private void
@@ -53,9 +93,13 @@ bind(SocketAddress addr) throws IOException {
 	    (addr instanceof InetSocketAddress &&
 	     ((InetSocketAddress)addr).getPort() == 0))
 	{
-		bind_random((InetSocketAddress) addr);
-		if (bound)
-			return;
+		if (disablePortRandomization()) {
+			noPortRandomization = true;
+		} else {
+			bind_random((InetSocketAddress) addr);
+			if (bound)
+				return;
+		}
 	}
 
 	if (addr != null) {
@@ -67,7 +111,7 @@ bind(SocketAddress addr) throws IOException {
 
 void
 connect(SocketAddress addr) throws IOException {
-	if (!bound)
+	if (!bound && !noPortRandomization)
 		bind(null);
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	channel.connect(addr);
