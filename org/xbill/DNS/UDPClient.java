@@ -15,14 +15,7 @@ private static final int EPHEMERAL_STOP  = 65535;
 private static final int EPHEMERAL_RANGE  = EPHEMERAL_STOP - EPHEMERAL_START;
 
 private static SecureRandom prng = new SecureRandom();
-
-private boolean bound = false;
-private boolean noPortRandomization = false;
-
-public
-UDPClient(long endTime) throws IOException {
-	super(DatagramChannel.open(), endTime);
-}
+private static volatile boolean prng_initializing = true;
 
 /*
  * On some platforms (Windows), the SecureRandom module initialization involves
@@ -35,37 +28,38 @@ UDPClient(long endTime) throws IOException {
  *   - If something else calls InetAddress.getLocalHost(), and that causes this
  *     module to seed the local SecureRandom object, the thread hangs.
  *
- * To avoid both of these, check on the first N calls (where N is arbitrarily
- * 8) to see if either SecureRandom or InetAddress is in the call chain.  If
- * so, disable port randomization.
+ * To avoid both of these, check at initialization time to see if InetAddress
+ * is in the call chain.  If so, initialize the SecureRandom object in a new
+ * thread, and disable port randomization until it completes.
  */
-private static int initialization_counter = 8;
+static {
+	new Thread(new Runnable() {
+			   public void run() {
+			   int n = prng.nextInt();
+			   prng_initializing = false;
+		   }}).start();
+}
 
-private final boolean
-disablePortRandomization()
-{
-	if (initialization_counter <= 0)
-		return false;
-	initialization_counter--;
+private boolean bound = false;
 
-	if (System.getProperty("os.name").indexOf("Windows") < 0)
-		return false;
-
-	StackTraceElement [] stack = new Exception().getStackTrace();
-	String prng_class = prng.getClass().getName();
-	String inetaddress_class = InetAddress.class.getName();
-	for (int i = 0; i < stack.length; i++) {
-		StackTraceElement e = stack[i];
-		if (e.getClassName().equals(prng_class) ||
-		    e.getClassName().equals(inetaddress_class))
-			return true;
-	}
-	return false;
+public
+UDPClient(long endTime) throws IOException {
+	super(DatagramChannel.open(), endTime);
 }
 
 private void
 bind_random(InetSocketAddress addr) throws IOException
 {
+	if (prng_initializing) {
+		try {
+			Thread.sleep(2);
+		}
+		catch (InterruptedException e) {
+		}
+		if (prng_initializing)
+			return;
+	}
+
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	InetSocketAddress temp;
 
@@ -93,13 +87,9 @@ bind(SocketAddress addr) throws IOException {
 	    (addr instanceof InetSocketAddress &&
 	     ((InetSocketAddress)addr).getPort() == 0))
 	{
-		if (disablePortRandomization()) {
-			noPortRandomization = true;
-		} else {
-			bind_random((InetSocketAddress) addr);
-			if (bound)
-				return;
-		}
+		bind_random((InetSocketAddress) addr);
+		if (bound)
+			return;
 	}
 
 	if (addr != null) {
@@ -111,7 +101,7 @@ bind(SocketAddress addr) throws IOException {
 
 void
 connect(SocketAddress addr) throws IOException {
-	if (!bound && !noPortRandomization)
+	if (!bound)
 		bind(null);
 	DatagramChannel channel = (DatagramChannel) key.channel();
 	channel.connect(addr);
