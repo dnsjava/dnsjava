@@ -61,6 +61,20 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 	this.digest = digest;
 }
 
+/**
+ * Creates a DS Record from the given data
+ * @param footprint The original KEY record's footprint (keyid).
+ * @param digestid The digest id code.
+ * @param key The key to digest
+ */
+public
+DSRecord(Name name, int dclass, long ttl, int footprint, int digestid,
+	 DNSKEYRecord key)
+{
+	this(name, dclass, ttl, footprint, key.getAlgorithm(), digestid,
+	     DNSSEC.generateDS(key, digestid));
+}
+
 void
 rrFromWire(DNSInput in) throws IOException {
 	footprint = in.readU16();

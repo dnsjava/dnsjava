@@ -55,7 +55,7 @@
     <target name="docs" description="Makes Javadoc documentation">
 	<javadoc destdir="${doc_dir}"
 		 sourcepath="${src_dir}"
-		 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.security,org.xbill.DNS.spi"
+		 packagenames="org.xbill.DNS,org.xbill.DNS.utils,org.xbill.DNS.spi"
 		 windowtitle="dnsjava documentation">
 
 	    <link href="${j2se.javadoc}"/>

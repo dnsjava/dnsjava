@@ -1,4 +1,7 @@
-4/15/2009
+5/2/2010
+	- Rewrite DNSSEC support.
+
+4/15/2010
 	- Fix a hang that could occur when using the dnsjava service provider
 	  on Windows (initial patch from <jy123@users.sourceforge.net>).
 

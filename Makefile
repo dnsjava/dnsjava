@@ -8,16 +8,14 @@ JAVADOC=javadoc -classpath . -d doc -windowtitle "dnsjava documentation" -link $
 VERSION = 2.0.8
 
 DNSSRC = org/xbill/DNS/*.java \
-	 org/xbill/DNS/utils/*.java \
-	 org/xbill/DNS/security/*.java
+	 org/xbill/DNS/utils/*.java
 PROGSRC = *.java
 
 DNSCLASS = org/xbill/DNS/*.class \
-	   org/xbill/DNS/utils/*.class \
-	   org/xbill/DNS/security/*.class
+	   org/xbill/DNS/utils/*.class
 PROGCLASS = *.class
 
-CLASSLIST = org.xbill.DNS org.xbill.DNS.utils org.xbill.DNS.security
+CLASSLIST = org.xbill.DNS org.xbill.DNS.utils
 
 JARFILE = dnsjava-${VERSION}.jar
 

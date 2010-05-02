@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.security.*;
 
 /**
- * A pure java implementation of the HMAC-MD5 secure hash algorithm
+ * An implementation of the HMAC message authentication code.
  *
  * @author Brian Wellington
  */

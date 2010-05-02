@@ -173,6 +173,11 @@ getSignature() {
 }
 
 void
+setSignature(byte [] signature) {
+	this.signature = signature;
+}
+
+void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(covered);
 	out.writeU8(alg);

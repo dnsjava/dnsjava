@@ -30,6 +30,7 @@ private int tsigerror;
 
 int tsigstart;
 int tsigState;
+int sig0start;
 
 /* The message was not signed */
 static final int TSIG_UNSIGNED = 0;
@@ -109,6 +110,9 @@ Message(DNSInput in) throws IOException {
 				sections[i].add(rec);
 				if (rec.getType() == Type.TSIG)
 					tsigstart = pos;
+				if (rec.getType() == Type.SIG &&
+				    ((SIGRecord) rec).getTypeCovered() == 0)
+					sig0start = pos;
 			}
 		}
 	} catch (WireParseException e) {

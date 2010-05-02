@@ -3,6 +3,8 @@
 package org.xbill.DNS;
 
 import java.io.*;
+import java.security.PublicKey;
+
 import org.xbill.DNS.utils.*;
 
 /**
@@ -18,6 +20,7 @@ private static final long serialVersionUID = 3469321722693285454L;
 protected int flags, proto, alg;
 protected byte [] key;
 protected int footprint = -1;
+protected PublicKey publicKey = null;
 
 protected
 KEYBase() {}
@@ -131,6 +134,19 @@ getFootprint() {
 	}
 	footprint = (foot & 0xFFFF);
 	return footprint;
+}
+
+/**
+ * Returns a PublicKey corresponding to the data in this key.
+ * @throws DNSSEC.DNSSECException The key could not be converted.
+ */
+public PublicKey
+getPublicKey() throws DNSSEC.DNSSECException {
+	if (publicKey != null)
+		return publicKey;
+
+	publicKey = DNSSEC.toPublicKey(this);
+	return publicKey;
 }
 
 void
