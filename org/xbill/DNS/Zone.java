@@ -132,7 +132,7 @@ maybeAddRecord(Record record) throws IOException {
  */
 public
 Zone(Name zone, String file) throws IOException {
-	data = new HashMap();
+	data = new TreeMap();
 
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
@@ -153,7 +153,7 @@ Zone(Name zone, String file) throws IOException {
  */
 public
 Zone(Name zone, Record [] records) throws IOException {
-	data = new HashMap();
+	data = new TreeMap();
 
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
@@ -165,7 +165,7 @@ Zone(Name zone, Record [] records) throws IOException {
 
 private void
 fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
-	data = new HashMap();
+	data = new TreeMap();
 
 	origin = xfrin.getName();
 	List records = xfrin.run();
