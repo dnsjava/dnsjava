@@ -44,11 +44,30 @@
 	    </metainf>
 	</jar>
     </target>
+	
+	<target name="bundle" description="Creates an OSGi bundle" depends="jar">
+		<get src="http://www.aqute.biz/repo/biz/aQute/bnd/0.0.384/bnd-0.0.384.jar"
+			dest="${build_dir}/bnd.jar"/>
+		<taskdef resource="aQute/bnd/ant/taskdef.properties"
+			classpath="${build_dir}/bnd.jar"/> 
+		<echo file="${dist_dir}/dnsjava-${version}.bnd" append="false">
+			Bundle-Version: ${version}
+			Bundle-Name: dnsjava is an implementation of DNS in Java
+			Bundle-SymbolicName: org.xbill.dns
+			Export-Package: org.xbill.DNS;uses:="org.xbill.DNS.utils",org.xbill.DNS.spi;uses:="org.xbill.DNS,sun.net.spi.nameservice",org.xbill.DNS.utils,org.xbill.DNS.windows
+			Bundle-Vendor: dnsjava.org
+			Bundle-RequiredExecutionEnvironment: J2SE-1.4
+		</echo>
+		<bndwrap
+			definitions="${dist_dir}"
+			jars="${dist_dir}/${jarname}"
+			output="${dist_dir}/org.xbill.dns_${version}.jar"/>
+	</target>
 
     <target name="clean" description="Remove old class files">
 	<delete>
 	    <fileset dir="${build_dir}" includes="**/*.class"/>
-	    <fileset dir="${build_dir}" includes="*.jar *.zip *.tar.gz jcoverage.ser"/>
+	    <fileset dir="${build_dir}" includes="*.bnd *.jar *.zip *.tar.gz jcoverage.ser"/>
 	</delete>
     </target>
 
