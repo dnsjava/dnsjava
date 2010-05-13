@@ -249,10 +249,14 @@ findNetware() {
  * Parses the output of winipcfg or ipconfig.
  */
 private void
-findWin(InputStream in) {
+findWin(InputStream in, Locale locale) {
 	String packageName = ResolverConfig.class.getPackage().getName();
 	String resPackageName = packageName + ".windows.DNSServer";
-	ResourceBundle res = ResourceBundle.getBundle(resPackageName);
+	ResourceBundle res;
+	if (locale != null)
+		res = ResourceBundle.getBundle(resPackageName, locale);
+	else
+		res = ResourceBundle.getBundle(resPackageName);
 
 	String host_name = res.getString("host_name");
 	String primary_dns_suffix = res.getString("primary_dns_suffix");
@@ -324,14 +328,26 @@ findWin(InputStream in) {
 	}
 	catch (IOException e) {
 	}
-	finally {
-		try {
-			br.close();
-		}
-		catch (IOException e) {
-		}
-	}
 	return;
+}
+
+private void
+findWin(InputStream in) {
+	String property = "org.xbill.DNS.windows.parse.buffer";
+	final int defaultBufSize = 8 * 1024;
+	int bufSize = Integer.getInteger(property, defaultBufSize).intValue();
+	BufferedInputStream b = new BufferedInputStream(in, bufSize);
+	b.mark(bufSize);
+	findWin(b, null);
+	if (servers == null) {
+		try {
+			b.reset();
+		} 
+		catch (IOException e) {
+			return;
+		}
+		findWin(b, new Locale("", ""));
+	}
 }
 
 /**
