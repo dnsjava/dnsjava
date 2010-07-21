@@ -1,3 +1,9 @@
+7/21/2010
+	- The changes to TSIG verification in 2.0.6 didn't work correctly for
+	  stream verification; specifically, the state was only set on the
+	  first Message in the stream.
+	  (reported by William Kocik <wkocik@verisign.com>)
+
 5/12/2010
 	- Add support for determining resolver configuration on
 	  Japanese Windows.  (translation and original patch from

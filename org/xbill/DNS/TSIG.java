@@ -521,6 +521,7 @@ public static class StreamVerifier {
 		if (verifier.verify(tsig.getSignature()) == false) {
 			if (Options.check("verbose"))
 				System.err.println("BADSIG failure");
+			m.tsigState = Message.TSIG_FAILED;
 			return Rcode.BADSIG;
 		}
 
@@ -530,6 +531,7 @@ public static class StreamVerifier {
 		verifier.update(out.toByteArray());
 		verifier.update(tsig.getSignature());
 
+		m.tsigState = Message.TSIG_VERIFIED;
 		return Rcode.NOERROR;
 	}
 }
