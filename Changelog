@@ -1,3 +1,7 @@
+7/22/2010
+	- Fix LOC record parsing to allow negative altitudes.
+	  (based on a patch from William Kocik <wkocik@verisign.com>)
+
 7/21/2010
 	- The changes to TSIG verification in 2.0.6 didn't work correctly for
 	  stream verification; specifically, the state was only set on the
