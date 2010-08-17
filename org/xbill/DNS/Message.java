@@ -440,20 +440,19 @@ toWire(DNSOutput out, int maxLength) {
 			continue;
 		skipped = sectionToWire(out, i, c, tempMaxLength);
 		if (skipped != 0) {
-			if (i != Section.ADDITIONAL) {
-				if (newheader == null)
-					newheader = (Header) header.clone();
+			if (newheader == null)
+				newheader = (Header) header.clone();
+			if (i != Section.ADDITIONAL)
 				newheader.setFlag(Flags.TC);
-				int count = newheader.getCount(i);
-				newheader.setCount(i, count - skipped);
-				for (int j = i + 1; j < 4; j++)
-					newheader.setCount(j, 0);
+			int count = newheader.getCount(i);
+			newheader.setCount(i, count - skipped);
+			for (int j = i + 1; j < 4; j++)
+				newheader.setCount(j, 0);
 
-				out.save();
-				out.jump(startpos);
-				newheader.toWire(out);
-				out.restore();
-			}
+			out.save();
+			out.jump(startpos);
+			newheader.toWire(out);
+			out.restore();
 			break;
 		}
 	}

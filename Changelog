@@ -1,3 +1,8 @@
+8/17/2010
+	- When rendering a message, if records from the additional section did
+	  not fit, the header counts were not properly updated.
+	  (patch from Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 7/22/2010
 	- Fix LOC record parsing to allow negative altitudes.
 	  (based on a patch from William Kocik <wkocik@verisign.com>)
