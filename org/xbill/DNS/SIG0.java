@@ -56,8 +56,7 @@ signMessage(Message message, KEYRecord key, PrivateKey privkey,
  * @param b An array containing the message in unparsed form.  This is
  * necessary since SIG(0) signs the message in wire format, and we can't
  * recreate the exact wire format (with the same name compression).
- * @param key The DNSKEY record to use as part of signing
- * @param privkey The PrivateKey to use when signing
+ * @param key The KEY record to verify the signature with.
  * @param previous If this message is a response, the SIG(0) from the query
  */
 public static void
