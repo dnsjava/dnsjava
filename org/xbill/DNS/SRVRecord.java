@@ -6,8 +6,9 @@ import java.io.*;
 
 /**
  * Server Selection Record  - finds hosts running services in a domain.  An
- * SRV record will normally be named <service>.<protocol>.domain - an
- * example would be http.tcp.example.com (if HTTP used SRV records)
+ * SRV record will normally be named _&lt;service&gt;._&lt;protocol&gt;.domain
+ * - examples would be _sips._tcp.example.org (for the secure SIP protocol) and
+ * _http._tcp.example.com (if HTTP used SRV records)
  *
  * @author Brian Wellington
  */
