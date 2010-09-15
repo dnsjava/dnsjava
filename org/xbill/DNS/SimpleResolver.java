@@ -68,6 +68,11 @@ SimpleResolver() throws UnknownHostException {
 	this(null);
 }
 
+/**
+ * Gets the destination address associated with this SimpleResolver.
+ * Messages sent using this SimpleResolver will be sent to this address.
+ * @return The destination address associated with this SimpleResolver.
+ */
 InetSocketAddress
 getAddress() {
 	return address;
