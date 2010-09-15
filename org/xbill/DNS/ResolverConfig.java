@@ -392,6 +392,10 @@ findNT() {
  */
 private void
 findAndroid() {
+	// This originally looked for all lines containing .dns; but
+	// http://code.google.com/p/android/issues/detail?id=2207#c73
+	// indicates that net.dns* should always be the active nameservers, so
+	// we use those.
 	String re1 = "^\\d+(\\.\\d+){3}$";
 	String re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$";
 	try { 
@@ -402,11 +406,11 @@ findAndroid() {
 		InputStreamReader isr = new InputStreamReader(in);
 		BufferedReader br = new BufferedReader(isr);
 		while ((line = br.readLine()) != null ) { 
-			StringTokenizer t = new StringTokenizer( line, ":" );
+			StringTokenizer t = new StringTokenizer(line, ":");
 			String name = t.nextToken();
-			if (name.indexOf( ".dns" ) > -1) {
+			if (name.startsWith("net.dns")) {
 				String v = t.nextToken();
-				v = v.replaceAll( "[ \\[\\]]", "" );
+				v = v.replaceAll("[ \\[\\]]", "");
 				if ((v.matches(re1) || v.matches(re2)) &&
 				    !maybe.contains(v))
 					maybe.add(v);
