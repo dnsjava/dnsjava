@@ -399,7 +399,8 @@ findAndroid() {
 	String re1 = "^\\d+(\\.\\d+){3}$";
 	String re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$";
 	try { 
-		ArrayList maybe = new ArrayList(); 
+		ArrayList lserver = new ArrayList(); 
+		ArrayList lsearch = new ArrayList(); 
 		String line; 
 		Process p = Runtime.getRuntime().exec("getprop"); 
 		InputStream in = p.getInputStream();
@@ -408,15 +409,15 @@ findAndroid() {
 		while ((line = br.readLine()) != null ) { 
 			StringTokenizer t = new StringTokenizer(line, ":");
 			String name = t.nextToken();
-			if (name.startsWith("net.dns")) {
+			if (name.indexOf( "net.dns" ) > -1) {
 				String v = t.nextToken();
 				v = v.replaceAll("[ \\[\\]]", "");
 				if ((v.matches(re1) || v.matches(re2)) &&
-				    !maybe.contains(v))
-					maybe.add(v);
+				    !lserver.contains(v))
+					lserver.add(v);
 			}
 		}
-		configureFromLists(maybe, null);
+		configureFromLists(lserver, lsearch);
 	} catch ( Exception e ) { 
 		// ignore resolutely
 	}
