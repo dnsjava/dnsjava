@@ -62,6 +62,7 @@
 			definitions="${dist_dir}"
 			jars="${dist_dir}/${jarname}"
 			output="${dist_dir}/org.xbill.dns_${version}.jar"/>
+		<delete file="${dist_dir}/dnsjava-${version}.bnd"/>
 	</target>
 
     <target name="clean" description="Remove old class files">
