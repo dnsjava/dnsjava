@@ -448,7 +448,7 @@ doFile(Tokenizer st, List inputs, List istreams) throws IOException {
 		else
 			is = new FileInputStream(s);
 		istreams.add(0, is);
-		inputs.add(new BufferedReader(new InputStreamReader(is)));
+		inputs.add(0, new BufferedReader(new InputStreamReader(is)));
 	}
 	catch (FileNotFoundException e) {
 		print(s + " not found");
