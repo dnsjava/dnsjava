@@ -29,6 +29,7 @@ public final class Lookup {
 private static Resolver defaultResolver;
 private static Name [] defaultSearchPath;
 private static Map defaultCaches;
+private static int defaultNdots;
 
 private Resolver resolver;
 private Name [] searchPath;
@@ -89,6 +90,7 @@ refreshDefault() {
 	}
 	defaultSearchPath = ResolverConfig.getCurrentConfig().searchPath();
 	defaultCaches = new HashMap();
+	defaultNdots = ResolverConfig.getCurrentConfig().ndots();
 }
 
 static {
@@ -354,6 +356,22 @@ setCache(Cache cache) {
 }
 
 /**
+ * Sets ndots to use when performing this lookup, overriding the default value.
+ * Specifically, this refers to the number of "dots" which, if present in a
+ * name, indicate that a lookup for the absolute name should be attempted
+ * before appending any search path elements.
+ * @param ndots The ndots value to use, which must be greater than or equal to
+ * 0.
+ */
+public void
+setNdots(int ndots) {
+	if (ndots < 0)
+		throw new IllegalArgumentException("Illegal ndots value: " +
+						   ndots);
+	defaultNdots = ndots;
+}
+
+/**
  * Sets the minimum credibility level that will be accepted when performing
  * the lookup.  This defaults to Credibility.NORMAL.
  * @param credibility The minimum credibility level.
@@ -514,7 +532,7 @@ run() {
 	else if (searchPath == null)
 		resolve(name, Name.root);
 	else {
-		if (name.labels() > 1)
+		if (name.labels() > defaultNdots)
 			resolve(name, Name.root);
 		if (done)
 			return answers;

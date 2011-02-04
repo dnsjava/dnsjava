@@ -1,4 +1,9 @@
 2/3/2011
+	- Add the ability to set ndots on Lookup objects, and parse the ndots
+	  option from a resolv.conf file (patch from Oleg Tsvinev
+	  <Oleg.Tsvinev@Reardencommerce.com>).
+
+2/3/2011
 	- The 'file' command in the 'update' program didn't work correctly.
 	  (reported by Olafur Gudmundsson <ogud@ogud.com>)
 

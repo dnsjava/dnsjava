@@ -35,6 +35,7 @@ public class ResolverConfig {
 
 private String [] servers = null;
 private Name [] searchlist = null;
+private int ndots = -1;
 
 private static ResolverConfig currentConfig;
 
@@ -93,12 +94,34 @@ addSearch(String search, List list) {
 	list.add(name);
 }
 
+private int
+parseNdots(String token) {
+	token = token.substring(6);
+	try {
+		int ndots = Integer.parseInt(token);
+		if (ndots >= 0) {
+			if (Options.check("verbose"))
+				System.out.println("setting ndots " + token);
+			return ndots;
+		}
+	}
+	catch (NumberFormatException e) {
+	}
+	return -1;
+}
+
 private void
 configureFromLists(List lserver, List lsearch) {
 	if (servers == null && lserver.size() > 0)
 		servers = (String []) lserver.toArray(new String[0]);
 	if (searchlist == null && lsearch.size() > 0)
 		searchlist = (Name []) lsearch.toArray(new Name[0]);
+}
+
+private void
+configureNdots(int lndots) {
+	if (ndots < 0 && lndots > 0)
+		ndots = lndots;
 }
 
 /**
@@ -202,6 +225,7 @@ findResolvConf(String file) {
 	BufferedReader br = new BufferedReader(isr);
 	List lserver = new ArrayList(0);
 	List lsearch = new ArrayList(0);
+	int lndots = -1;
 	try {
 		String line;
 		while ((line = br.readLine()) != null) {
@@ -226,6 +250,16 @@ findResolvConf(String file) {
 				while (st.hasMoreTokens())
 					addSearch(st.nextToken(), lsearch);
 			}
+			else if(line.startsWith("options")) {
+				StringTokenizer st = new StringTokenizer(line);
+				st.nextToken(); /* skip options */
+				while (st.hasMoreTokens()) {
+					String token = st.nextToken();
+					if (token.startsWith("ndots:")) {
+						lndots = parseNdots(token);
+					}
+				}
+			}
 		}
 		br.close();
 	}
@@ -233,6 +267,7 @@ findResolvConf(String file) {
 	}
 
 	configureFromLists(lserver, lsearch);
+	configureNdots(lndots);
 }
 
 private void
@@ -441,6 +476,19 @@ server() {
 public Name []
 searchPath() {
 	return searchlist;
+}
+
+/**
+ * Returns the located ndots value, or the default (1) if not configured.
+ * Note that ndots can only be configured in a resolv.conf file, and will only
+ * take effect if ResolverConfig uses resolv.conf directly (that is, if the
+ * JVM does not include the sun.net.dns.ResolverConfiguration class).
+ */
+public int
+ndots() {
+	if (ndots < 0)
+		return 1;
+	return ndots;
 }
 
 /** Gets the current configuration */
