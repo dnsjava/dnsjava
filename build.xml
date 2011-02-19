@@ -54,9 +54,10 @@
 			Bundle-Version: ${version}
 			Bundle-Name: dnsjava is an implementation of DNS in Java
 			Bundle-SymbolicName: org.xbill.dns
-			Export-Package: org.xbill.DNS;uses:="org.xbill.DNS.utils",org.xbill.DNS.spi;uses:="org.xbill.DNS,sun.net.spi.nameservice",org.xbill.DNS.utils,org.xbill.DNS.windows
+			Export-Package: org.xbill.DNS;version=${version},org.xbill.DNS.spi;version=${version},org.xbill.DNS.utils;version=${version},org.xbill.DNS.windows;version=${version}
 			Bundle-Vendor: dnsjava.org
 			Bundle-RequiredExecutionEnvironment: J2SE-1.4
+			Import-Package: !org.xbill.DNS*,!sun.*,*
 		</echo>
 		<bndwrap
 			definitions="${dist_dir}"
