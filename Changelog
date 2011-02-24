@@ -12,7 +12,7 @@
 
 9/15/2010
 	- Change the Android name server detection mechanism to avoid false
-	  positives. (patch from Ulf Dittmer <ulf@ulfdittmer.com>)
+	  positives. (patch from Ulf Dittmer)
 
 9/9/2010
 	- The IXFR code didn't do serial number arithmetic correctly, and would
