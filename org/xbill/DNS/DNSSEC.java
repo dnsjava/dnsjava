@@ -457,7 +457,12 @@ fromPublicKey(PublicKey key, int alg) throws DNSSECException
 	}
 }
 
-private static String
+/**
+ * Convert an algorithm number to the corresponding JCA string.
+ * @param alg The algorithm number.
+ * @throws UnsupportedAlgorithmException The algorithm is unknown.
+ */
+public static String
 algString(int alg) throws UnsupportedAlgorithmException {
 	switch (alg) {
 	case Algorithm.RSAMD5:
@@ -623,12 +628,16 @@ verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key) throws DNSSECException
 }
 
 private static byte []
-sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data)
-	throws DNSSECException
+sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data,
+     String provider) throws DNSSECException
 {
 	byte [] signature;
 	try {
-		Signature s = Signature.getInstance(algString(alg));
+		Signature s;
+		if (provider != null)
+			s = Signature.getInstance(algString(alg), provider);
+		else
+			s = Signature.getInstance(algString(alg));
 		s.initSign(privkey);
 		s.update(data);
 		signature = s.sign();
@@ -691,6 +700,28 @@ public static RRSIGRecord
 sign(RRset rrset, DNSKEYRecord key, PrivateKey privkey,
      Date inception, Date expiration) throws DNSSECException
 {
+	return sign(rrset, key, privkey, inception, expiration, null);
+}
+
+/**
+ * Generate a DNSSEC signature.  key and privateKey must refer to the
+ * same underlying cryptographic key.
+ * @param rrset The data to be signed
+ * @param key The DNSKEY record to use as part of signing
+ * @param privkey The PrivateKey to use when signing
+ * @param inception The time at which the signatures should become valid
+ * @param expiration The time at which the signatures should expire
+ * @param provider The name of the JCA provider.  If non-null, it will be
+ * passed to JCA getInstance() methods.
+ * @throws UnsupportedAlgorithmException The algorithm is unknown
+ * @throws MalformedKeyException The key is malformed
+ * @throws DNSSECException Some other error occurred.
+ * @return The generated signature
+ */
+public static RRSIGRecord
+sign(RRset rrset, DNSKEYRecord key, PrivateKey privkey,
+     Date inception, Date expiration, String provider) throws DNSSECException
+{
 	int alg = key.getAlgorithm();
 	checkAlgorithm(privkey, alg);
 
@@ -702,7 +733,7 @@ sign(RRset rrset, DNSKEYRecord key, PrivateKey privkey,
 					    key.getName(), null);
 
 	rrsig.setSignature(sign(privkey, key.getPublicKey(), alg,
-				digestRRset(rrsig, rrset)));
+				digestRRset(rrsig, rrset), provider));
 	return rrsig;
 }
 
@@ -725,7 +756,7 @@ signMessage(Message message, SIGRecord previous, KEYRecord key,
 	message.toWire(out);
 
 	sig.setSignature(sign(privkey, key.getPublicKey(),
-			      alg, out.toByteArray()));
+			      alg, out.toByteArray(), null));
 	return sig;
 }
 
