@@ -34,7 +34,7 @@ public static class Option {
 	 */
 	public
 	Option(int code, byte [] data) {
-		this.code = checkU8("option code", code);
+		this.code = checkU16("option code", code);
 		this.data = data;
 	}
 
