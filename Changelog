@@ -1,8 +1,12 @@
-3/9/2010
+4/20/2011
+	- Add missing support for the HMAC-SHA224, HMA-SHA384, and HMAC-SHA384
+	  TSIG algorithms. (patch from Thomas Corte <Thomas.Corte@knipp.de>)
+
+3/9/2011
 	- Add support for using alternate JCA providers when generating DNSSEC
 	  signatures (patch from Jeffrey Damick <Jeffrey.Damick@neustar.biz>)
 
-2/9/2010
+2/9/2011
 	- 2.1.1 released
 
 2/3/2011
