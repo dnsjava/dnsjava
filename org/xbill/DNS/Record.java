@@ -721,4 +721,15 @@ checkName(String field, Name name) {
 	return name;
 }
 
+static byte []
+checkByteArrayLength(String field, byte [] array, int maxLength) {
+	if (array.length > 0xFFFF)
+		throw new IllegalArgumentException("\"" + field + "\" array " +
+						   "must have no more than " +
+						   maxLength + " elements");
+	byte [] out = new byte[array.length];
+	System.arraycopy(array, 0, out, 0, array.length);
+	return out;
+}
+
 }
