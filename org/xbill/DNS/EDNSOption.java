@@ -16,6 +16,9 @@ public abstract class EDNSOption {
 public static class Code {
 	private Code() {}
 
+	/** Name Server Identifier, RFC 5001 */
+	public final static int NSID = 3;
+
 	/** Client Subnet, defined in draft-vandergaast-edns-client-subnet-00 */
 	public final static int CLIENT_SUBNET = 20730;
 
@@ -27,6 +30,7 @@ public static class Code {
 		codes.setPrefix("RESERVED");
 		codes.setNumericAllowed(true);
 
+		codes.add(NSID, "NSID");
 		codes.add(CLIENT_SUBNET, "CLIENT_SUBNET");
 	}
 
@@ -121,6 +125,9 @@ fromWire(DNSInput in) throws IOException {
 	in.setActive(length);
 	EDNSOption option;
 	switch (code) {
+	case Code.NSID:
+		option = new NSIDOption();
+		break;
 	case Code.CLIENT_SUBNET:
 		option = new ClientSubnetOption();
 		break;

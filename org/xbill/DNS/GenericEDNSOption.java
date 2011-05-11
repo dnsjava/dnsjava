@@ -19,6 +19,10 @@ GenericEDNSOption(int code) {
 	super(code);
 }
 
+/**
+ * Construct a generic EDNS option.
+ * @param data The contents of the option.
+ */
 public 
 GenericEDNSOption(int code, byte [] data) {
 	super(code);

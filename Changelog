@@ -3,6 +3,8 @@
 	  implementations, and add support for the Client Subnet option.
 	  (based on a patch from Ming Zhou <mizhou@bnivideo.com>)
 
+	- Add support for the NSID EDNS option.
+
 4/20/2011
 	- Add missing support for the HMAC-SHA224, HMA-SHA384, and HMAC-SHA384
 	  TSIG algorithms. (patch from Thomas Corte <Thomas.Corte@knipp.de>)
