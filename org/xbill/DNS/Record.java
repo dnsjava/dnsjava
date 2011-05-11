@@ -220,10 +220,7 @@ toWire(DNSOutput out, int section, Compression c) {
 	out.writeU16(0); /* until we know better */
 	rrToWire(out, c, false);
 	int rrlength = out.current() - lengthPosition - 2;
-	out.save();
-	out.jump(lengthPosition);
-	out.writeU16(rrlength);
-	out.restore();
+	out.writeU16At(rrlength, lengthPosition);
 }
 
 /**
@@ -250,10 +247,7 @@ toWireCanonical(DNSOutput out, boolean noTTL) {
 	out.writeU16(0); /* until we know better */
 	rrToWire(out, null, true);
 	int rrlength = out.current() - lengthPosition - 2;
-	out.save();
-	out.jump(lengthPosition);
-	out.writeU16(rrlength);
-	out.restore();
+	out.writeU16At(rrlength, lengthPosition);
 }
 
 /*
