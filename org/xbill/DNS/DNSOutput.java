@@ -125,6 +125,21 @@ writeU16(int val) {
 }
 
 /**
+ * Writes an unsigned 16 bit value to the specified position in the stream.
+ * @param val The value to be written
+ * @param where The position to write the value.
+ */
+public void
+writeU16At(int val, int where) {
+	check(val, 16);
+	if (where > pos - 2)
+		throw new IllegalArgumentException("cannot write past " +
+						   "end of data");
+	array[where++] = (byte)((val >>> 8) & 0xFF);
+	array[where++] = (byte)(val & 0xFF);
+}
+
+/**
  * Writes an unsigned 32 bit value to the stream.
  * @param val The value to be written
  */
