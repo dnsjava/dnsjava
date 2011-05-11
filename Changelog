@@ -1,3 +1,8 @@
+5/10/2011
+	- Refactor EDNS Option support to allow for custom type
+	  implementations, and add support for the Client Subnet option.
+	  (based on a patch from Ming Zhou <mizhou@bnivideo.com>)
+
 4/20/2011
 	- Add missing support for the HMAC-SHA224, HMA-SHA384, and HMAC-SHA384
 	  TSIG algorithms. (patch from Thomas Corte <Thomas.Corte@knipp.de>)

@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.util.*;
-import org.xbill.DNS.utils.*;
 
 /**
  * Options - describes Extended DNS (EDNS) properties of a Message.
@@ -24,25 +23,6 @@ import org.xbill.DNS.utils.*;
 public class OPTRecord extends Record {
 
 private static final long serialVersionUID = -6254521894809367938L;
-
-public static class Option {
-	public final int code;
-	public final byte [] data;
-
-	/**
-	 * Creates an option with the given option code and data.
-	 */
-	public
-	Option(int code, byte [] data) {
-		this.code = checkU16("option code", code);
-		this.data = data;
-	}
-
-	public String
-	toString() {
-		return "{" + code + " <" + base16.toString(data) + ">}";
-	}
-}
 
 private List options;
 
@@ -111,10 +91,8 @@ rrFromWire(DNSInput in) throws IOException {
 	if (in.remaining() > 0)
 		options = new ArrayList();
 	while (in.remaining() > 0) {
-		int code = in.readU16();
-		int len = in.readU16();
-		byte [] data = in.readByteArray(len);
-		options.add(new Option(code, data));
+		EDNSOption option = EDNSOption.fromWire(in);
+		options.add(option);
 	}
 }
 
@@ -175,15 +153,13 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 		return;
 	Iterator it = options.iterator();
 	while (it.hasNext()) {
-		Option opt = (Option) it.next();
-		out.writeU16(opt.code);
-		out.writeU16(opt.data.length);
-		out.writeByteArray(opt.data);
+		EDNSOption option = (EDNSOption) it.next();
+		option.toWire(out);
 	}
 }
 
 /**
- * Gets all options in the OPTRecord.  This returns a list of Options.
+ * Gets all options in the OPTRecord.  This returns a list of EDNSOptions.
  */
 public List
 getOptions() {
@@ -193,24 +169,22 @@ getOptions() {
 }
 
 /**
- * Gets all options in the OPTRecord with a specific code.  This returns a
- * list of byte arrays.
+ * Gets all options in the OPTRecord with a specific code.  This returns a list
+ * of EDNSOptions.
  */
 public List
 getOptions(int code) {
 	if (options == null)
 		return Collections.EMPTY_LIST;
-	List list = null;
+	List list = Collections.EMPTY_LIST;
 	for (Iterator it = options.iterator(); it.hasNext(); ) {
-		Option opt = (Option) it.next();
-		if (opt.code == code) {
-			if (list == null)
+		EDNSOption opt = (EDNSOption) it.next();
+		if (opt.getCode() == code) {
+			if (list == Collections.EMPTY_LIST)
 				list = new ArrayList();
-			list.add(opt.data);
+			list.add(opt);
 		}
 	}
-	if (list == null)
-		return Collections.EMPTY_LIST;
 	return list;
 }
 
