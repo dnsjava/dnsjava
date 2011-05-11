@@ -78,6 +78,29 @@ clearActive() {
 }
 
 /**
+ * Returns the position of the end of the current active region.
+ */
+public int
+saveActive() {
+	return end;
+}
+
+/**
+ * Restores the previously set active region.  This differs from setActive() in
+ * that restoreActive() takes an absolute position, and setActive takes an
+ * offset from the current location.
+ * @param pos The end of the active region.
+ */
+public void
+restoreActive(int pos) {
+	if (pos > array.length) {
+		throw new IllegalArgumentException("cannot set active " +
+						   "region past end of input");
+	}
+	end = pos;
+}
+
+/**
  * Resets the current position of the input stream to the specified index,
  * and clears the active region.
  * @param index The position to continue parsing at.
