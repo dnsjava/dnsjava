@@ -185,7 +185,7 @@ toWire() throws IOException {
 
 /**
  * Determines if two EDNS Options are identical.
- * @param option The option to compare to
+ * @param arg The option to compare to
  * @return true if the options are equal, false otherwise.
  */
 public boolean
