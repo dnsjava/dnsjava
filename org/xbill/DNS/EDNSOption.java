@@ -27,7 +27,7 @@ public static class Code {
 
 	static {
 		codes.setMaximum(0xFFFF);
-		codes.setPrefix("RESERVED");
+		codes.setPrefix("CODE");
 		codes.setNumericAllowed(true);
 
 		codes.add(NSID, "NSID");
