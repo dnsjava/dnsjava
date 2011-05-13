@@ -24,7 +24,8 @@ WireParseException(String s) {
 
 public
 WireParseException(String s, Throwable cause) {
-	super(s, cause);
+	super(s);
+	initCause(cause);
 }
 
 }
