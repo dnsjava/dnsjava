@@ -1,3 +1,7 @@
+5/12/2011
+	- Support verifying truncated TSIG signatures, as specified in RFC
+	  4635.
+
 5/10/2011
 	- Refactor EDNS Option support to allow for custom type
 	  implementations, and add support for the Client Subnet option.

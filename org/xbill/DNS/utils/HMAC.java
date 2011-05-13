@@ -137,11 +137,29 @@ sign() {
 /**
  * Verifies the data (computes the secure hash and compares it to the input)
  * @param signature The signature to compare against
- * @return true if the signature matched, false otherwise
+ * @return true if the signature matches, false otherwise
  */
 public boolean
 verify(byte [] signature) {
-	return Arrays.equals(signature, sign());
+	return verify(signature, false);
+}
+
+/**
+ * Verifies the data (computes the secure hash and compares it to the input)
+ * @param signature The signature to compare against
+ * @param trucation_ok If true, the signature may be truncated; only the
+ * number of bytes in the provided signature are compared.
+ * @return true if the signature matches, false otherwise
+ */
+public boolean
+verify(byte [] signature, boolean truncation_ok) {
+	byte [] expected = sign();
+	if (truncation_ok && signature.length < expected.length) {
+		byte [] truncated = new byte[signature.length];
+		System.arraycopy(expected, 0, truncated, 0, truncated.length);
+		expected = truncated;
+	}
+	return Arrays.equals(signature, expected);
 }
 
 /**
@@ -151,6 +169,14 @@ public void
 clear() {
 	digest.reset();
 	digest.update(ipad);
+}
+
+/**
+ * Returns the length of the digest.
+ */
+public int
+digestLength() {
+	return digest.getDigestLength();
 }
 
 }

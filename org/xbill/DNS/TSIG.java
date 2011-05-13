@@ -415,14 +415,26 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 
 	hmac.update(out.toByteArray());
 
-	if (hmac.verify(tsig.getSignature())) {
-		m.tsigState = Message.TSIG_VERIFIED;
-		return Rcode.NOERROR;
-	} else {
+	byte [] signature = tsig.getSignature();
+	int digestLength = hmac.digestLength();
+	int minDigestLength = digest.equals("md5") ? 10 : digestLength / 2;
+
+	if (signature.length > digestLength) {
 		if (Options.check("verbose"))
-			System.err.println("BADSIG failure");
+			System.err.println("BADSIG: signature too long");
+		return Rcode.BADSIG;
+	} else if (signature.length < minDigestLength) {
+		if (Options.check("verbose"))
+			System.err.println("BADSIG: signature too short");
+		return Rcode.BADSIG;
+	} else if (!hmac.verify(signature, true)) {
+		if (Options.check("verbose"))
+			System.err.println("BADSIG: signature verification");
 		return Rcode.BADSIG;
 	}
+
+	m.tsigState = Message.TSIG_VERIFIED;
+	return Rcode.NOERROR;
 }
 
 /**
