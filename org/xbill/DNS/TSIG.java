@@ -184,14 +184,18 @@ TSIG(String name, String key) {
  */
 static public TSIG
 fromString(String str) {
-	String [] parts = str.split("[:/]");
-	if (parts.length < 2 || parts.length > 3)
+	String [] parts = str.split("[:/]", 3);
+	if (parts.length < 2)
 		throw new IllegalArgumentException("Invalid TSIG key " +
 						   "specification");
-	if (parts.length == 3)
-		return new TSIG(parts[0], parts[1], parts[2]);
-	else
-		return new TSIG(HMAC_MD5, parts[0], parts[1]);
+	if (parts.length == 3) {
+		try {
+			return new TSIG(parts[0], parts[1], parts[2]);
+		} catch (IllegalArgumentException e) {
+			parts = str.split("[:/]", 2);
+		}
+	}
+	return new TSIG(HMAC_MD5, parts[0], parts[1]);
 }
 
 /**
