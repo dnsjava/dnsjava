@@ -379,15 +379,19 @@ public static InetAddress
 truncate(InetAddress address, int maskLength)
 {
 	int family = familyOf(address);
-	if (maskLength > addressLength(family) * 8)
+	int maxMaskLength = addressLength(family) * 8;
+	if (maskLength < 0 || maskLength > maxMaskLength)
 		throw new IllegalArgumentException("invalid mask length");
-	int maskBytes = (maskLength + 7) / 8;
-	int maskBits = maskLength % 8;
+	if (maskLength == maxMaskLength)
+		return address;
 	byte [] bytes = address.getAddress();
-	for (int i = maskBytes; i < bytes.length; i++)
+	for (int i = maskLength / 8 + 1; i < bytes.length; i++)
 		bytes[i] = 0;
-	for (int i = 0; i < 8 - maskBits; i++)
-		bytes[maskBytes - 1] &= ~(1 << i);
+	int maskBits = maskLength % 8;
+	int bitmask = 0;
+	for (int i = 0; i < maskBits; i++)
+		bitmask |= (1 << (7 - i));
+	bytes[maskLength / 8] &= bitmask;
 	try {
 		return InetAddress.getByAddress(bytes);
 	} catch (UnknownHostException e) {
