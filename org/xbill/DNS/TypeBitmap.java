@@ -90,9 +90,10 @@ toString() {
 	for (Iterator it = types.iterator(); it.hasNext(); ) {
 		int t = ((Integer)it.next()).intValue();
 		sb.append(Type.string(t));
-		sb.append(' ');
+		if (it.hasNext())
+			sb.append(' ');
 	}
-	return sb.substring(0, sb.length() - 1);
+	return sb.toString();
 }
 
 private static void

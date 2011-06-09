@@ -1,3 +1,7 @@
+6/9/2011
+	- TypeBitmap.toString() failed if no bits were set.
+	  (patch from Jeffrey Damick <Jeffrey.Damick@neustar.biz>)
+
 5/24/2011
 	- TSIG.fromString() didn't handle base64-encoded secrets with /
 	  characters. (reported by Sten <stennordstrom@users.sourceforge.net>)
