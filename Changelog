@@ -1,3 +1,6 @@
+7/24/2011
+	- 2.1.2 released
+
 6/9/2011
 	- TypeBitmap.toString() failed if no bits were set.
 	  (patch from Jeffrey Damick <Jeffrey.Damick@neustar.biz>)
