@@ -147,7 +147,7 @@ verify(byte [] signature) {
 /**
  * Verifies the data (computes the secure hash and compares it to the input)
  * @param signature The signature to compare against
- * @param trucation_ok If true, the signature may be truncated; only the
+ * @param truncation_ok If true, the signature may be truncated; only the
  * number of bytes in the provided signature are compared.
  * @return true if the signature matches, false otherwise
  */
