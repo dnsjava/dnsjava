@@ -189,7 +189,8 @@ fromWire(DNSInput in, int section, boolean isUpdate) throws IOException {
 
 	ttl = in.readU32();
 	length = in.readU16();
-	if (length == 0 && isUpdate)
+	if (length == 0 && isUpdate &&
+	    (section == Section.PREREQ || section == Section.UPDATE))
 		return newRecord(name, type, dclass, ttl);
 	rec = newRecord(name, type, dclass, ttl, length, in);
 	return rec;
