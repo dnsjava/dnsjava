@@ -426,7 +426,11 @@ lookup(Name name, int type, int minCred) {
 		if (types == null)
 			continue;
 
-		/* If this is an ANY lookup, return everything. */
+		/*
+		 * If this is the name, look for the actual type or a CNAME
+		 * (unless it's an ANY query, where we return everything).
+		 * Otherwise, look for a DNAME.
+		 */
 		if (isExact && type == Type.ANY) {
 			sr = new SetResponse(SetResponse.SUCCESSFUL);
 			Element [] elements = allElements(types);
@@ -447,13 +451,7 @@ lookup(Name name, int type, int minCred) {
 			/* There were positive entries */
 			if (added > 0)
 				return sr;
-		}
-
-		/*
-		 * If this is the name, look for the actual type or a CNAME.
-		 * Otherwise, look for a DNAME.
-		 */
-		if (isExact) {
+		} else if (isExact) {
 			element = oneElement(tname, types, type, minCred);
 			if (element != null &&
 			    element instanceof CacheRRset)

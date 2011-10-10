@@ -1,3 +1,9 @@
+10/10/2011
+	- An exception could be thrown when attempting to look up data in the
+	  cache for type ANY when there were only previously cached
+	  NOERROR/NODATA responses for that name.
+	  (reported by Niel de Wet <nieldw@gmail.com>)
+
 7/24/2011
 	- 2.1.2 released
 
