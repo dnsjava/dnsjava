@@ -1,3 +1,7 @@
+10/17/2011
+	- Add a callback interface to ZoneTransferIn.
+	  (based on a patch from Nick Sayer <nsayer@silverspringnet.com>)
+
 10/10/2011
 	- An exception could be thrown when attempting to look up data in the
 	  cache for type ANY when there were only previously cached

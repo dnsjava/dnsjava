@@ -50,6 +50,7 @@ private int qtype;
 private int dclass;
 private long ixfr_serial;
 private boolean want_fallback;
+private ZoneTransferHandler handler;
 
 private SocketAddress localAddress;
 private SocketAddress address;
@@ -64,9 +65,6 @@ private long current_serial;
 private Record initialsoa;
 
 private int rtype;
-
-private List axfr;
-private List ixfr;
 
 public static class Delta {
 	/**
@@ -91,6 +89,79 @@ public static class Delta {
 		deletes = new ArrayList();
 	}
 }
+
+public static interface ZoneTransferHandler {
+	/**
+	 * Handles a Zone Transfer.
+	 */
+
+	/**
+	 * Called when an AXFR transfer begins.
+	 */
+	public void startAXFR() throws ZoneTransferException;
+
+	/**
+	 * Called when an IXFR transfer begins.
+	 */
+	public void startIXFR() throws ZoneTransferException;
+
+	/**
+	 * Called when a series of IXFR deletions begins.
+	 * @param soa The starting SOA.
+	 */
+	public void startIXFRDeletes(Record soa) throws ZoneTransferException;
+
+	/**
+	 * Called when a series of IXFR adds begins.
+	 * @param soa The starting SOA.
+	 */
+	public void startIXFRAdds(Record soa) throws ZoneTransferException;
+
+	/**
+	 * Called for each content record in an AXFR.
+	 * @param r The DNS record.
+	 */
+	public void handleRecord(Record r) throws ZoneTransferException;
+};
+
+private static class BasicHandler implements ZoneTransferHandler {
+	private List axfr;
+	private List ixfr;
+
+	public void startAXFR() {
+		axfr = new ArrayList();
+	}
+
+	public void startIXFR() {
+		ixfr = new ArrayList();
+	}
+
+	public void startIXFRDeletes(Record soa) {
+		Delta delta = new Delta();
+		delta.deletes.add(soa);
+		delta.start = getSOASerial(soa);
+		ixfr.add(delta);
+	}
+
+	public void startIXFRAdds(Record soa) {
+		Delta delta = (Delta) ixfr.get(ixfr.size() - 1);
+		delta.adds.add(soa);
+		delta.end = getSOASerial(soa);
+	}
+
+	public void handleRecord(Record r) {
+		List list;
+		if (ixfr != null) {
+			Delta delta = (Delta) ixfr.get(ixfr.size() - 1);
+			if (delta.adds.size() > 0)
+				list = delta.adds;
+			else
+				list = delta.deletes;
+		} else
+			list = axfr;
+		list.add(r);
+	}
+};
 
 private
 ZoneTransferIn() {}
@@ -303,7 +374,7 @@ sendQuery() throws IOException {
 	client.send(out);
 }
 
-private long
+private static long
 getSOASerial(Record rec) {
 	SOARecord soa = (SOARecord) rec;
 	return soa.getSerial();
@@ -360,13 +431,13 @@ parseRR(Record rec) throws ZoneTransferException {
 		    getSOASerial(rec) == ixfr_serial)
 		{
 			rtype = Type.IXFR;
-			ixfr = new ArrayList();
+			handler.startIXFR();
 			logxfr("got incremental response");
 			state = IXFR_DELSOA;
 		} else {
-			rtype = Type.AXFR;
-			axfr = new ArrayList();
-			axfr.add(initialsoa);
+			rtype = Type.IXFR;
+			handler.startAXFR();
+			handler.handleRecord(initialsoa);
 			logxfr("got nonincremental response");
 			state = AXFR;
 		}
@@ -374,10 +445,7 @@ parseRR(Record rec) throws ZoneTransferException {
 		return;
 
 	case IXFR_DELSOA:
-		delta = new Delta();
-		ixfr.add(delta);
-		delta.start = getSOASerial(rec);
-		delta.deletes.add(rec);
+		handler.startIXFRDeletes(rec);
 		state = IXFR_DEL;
 		break;
 
@@ -388,14 +456,11 @@ parseRR(Record rec) throws ZoneTransferException {
 			parseRR(rec); // Restart...
 			return;
 		}
-		delta = (Delta) ixfr.get(ixfr.size() - 1);
-		delta.deletes.add(rec);
+		handler.handleRecord(rec);
 		break;
 
 	case IXFR_ADDSOA:
-		delta = (Delta) ixfr.get(ixfr.size() - 1);
-		delta.end = getSOASerial(rec);
-		delta.adds.add(rec);
+		handler.startIXFRAdds(rec);
 		state = IXFR_ADD;
 		break;
 
@@ -414,15 +479,14 @@ parseRR(Record rec) throws ZoneTransferException {
 				return;
 			}
 		}
-		delta = (Delta) ixfr.get(ixfr.size() - 1);
-		delta.adds.add(rec);
+		handler.handleRecord(rec);
 		break;
 
 	case AXFR:
 		// Old BINDs sent cross class A records for non IN classes.
 		if (type == Type.A && rec.getDClass() != dclass)
 			break;
-		axfr.add(rec);
+		handler.handleRecord(rec);
 		if (type == Type.SOA) {
 			state = END;
 		}
@@ -515,6 +579,25 @@ doxfr() throws IOException, ZoneTransferException {
 
 /**
  * Does the zone transfer.
+ * @param handler The callback object that handles the zone transfer data.
+ * @throws IOException The zone transfer failed to due an IO problem.
+ * @throws ZoneTransferException The zone transfer failed to due a problem
+ * with the zone transfer itself.
+ */
+public void
+run(ZoneTransferHandler handler) throws IOException, ZoneTransferException {
+	this.handler = handler;
+	try {
+		openConnection();
+		doxfr();
+	}
+	finally {
+		closeConnection();
+	}
+}
+
+/**
+ * Does the zone transfer.
  * @return A list, which is either an AXFR-style response (List of Records),
  * and IXFR-style response (List of Deltas), or null, which indicates that
  * an IXFR was performed and the zone is up to date.
@@ -524,16 +607,19 @@ doxfr() throws IOException, ZoneTransferException {
  */
 public List
 run() throws IOException, ZoneTransferException {
-	try {
-		openConnection();
-		doxfr();
-	}
-	finally {
-		closeConnection();
-	}
-	if (axfr != null)
-		return axfr;
-	return ixfr;
+	BasicHandler handler = new BasicHandler();
+	run(handler);
+	if (handler.axfr != null)
+		return handler.axfr;
+	return handler.ixfr;
+}
+
+private BasicHandler
+getBasicHandler() throws IllegalArgumentException {
+	if (handler instanceof BasicHandler)
+		return (BasicHandler) handler;
+	throw new IllegalArgumentException("ZoneTransferIn used callback " +
+					   "interface");
 }
 
 /**
@@ -549,10 +635,13 @@ isAXFR() {
 
 /**
  * Gets the AXFR-style response.
+ * @throws IllegalArgumentException The transfer used the callback interface,
+ * so the response was not stored.
  */
 public List
 getAXFR() {
-	return axfr;
+	BasicHandler handler = getBasicHandler();
+	return handler.axfr;
 }
 
 /**
@@ -567,19 +656,25 @@ isIXFR() {
 
 /**
  * Gets the IXFR-style response.
+ * @throws IllegalArgumentException The transfer used the callback interface,
+ * so the response was not stored.
  */
 public List
 getIXFR() {
-	return ixfr;
+	BasicHandler handler = getBasicHandler();
+	return handler.ixfr;
 }
 
 /**
  * Returns true if the response indicates that the zone is up to date.
  * This will be true only if an IXFR was performed.
+ * @throws IllegalArgumentException The transfer used the callback interface,
+ * so the response was not stored.
  */
 public boolean
 isCurrent() {
-	return (axfr == null && ixfr == null);
+	BasicHandler handler = getBasicHandler();
+	return (handler.axfr == null && handler.ixfr == null);
 }
 
 }
