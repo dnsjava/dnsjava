@@ -63,16 +63,14 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 
 /**
  * Creates a DS Record from the given data
- * @param footprint The original KEY record's footprint (keyid).
  * @param digestid The digest id code.
  * @param key The key to digest
  */
 public
-DSRecord(Name name, int dclass, long ttl, int footprint, int digestid,
-	 DNSKEYRecord key)
+DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
 {
-	this(name, dclass, ttl, footprint, key.getAlgorithm(), digestid,
-	     DNSSEC.generateDS(key, digestid));
+	this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(),
+	     digestid, DNSSEC.generateDSDigest(key, digestid));
 }
 
 void

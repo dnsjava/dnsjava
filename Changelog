@@ -1,3 +1,12 @@
+11/3/2011
+	- Update DSRecord constructor from DNSKEYRecord to generate the
+	  correct digest.
+	  (patch from Marty Kube <marty@beavercreekconsulting.com>)
+
+	- Also update the signature of the DSRecord constructor from
+	  DNSKEYRecord to not take the key's footprint as a parameter, as it
+	  can be derived from the key.
+
 10/24/2011
 	- 2.1.3 released
 

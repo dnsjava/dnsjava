@@ -790,15 +790,15 @@ verifyMessage(Message message, byte [] bytes, SIGRecord sig, SIGRecord previous,
 	       out.toByteArray(), sig.getSignature());
 }
 
+/**
+ * Generate the digest value for a DS key
+ * @param key Which is covered by the DS record
+ * @param digestid The type of digest
+ * @return The digest value as an array of bytes
+ */
 static byte []
-generateDS(DNSKEYRecord key, int digestid)
+generateDSDigest(DNSKEYRecord key, int digestid)
 {
-	DNSOutput out = new DNSOutput();
-
-	out.writeU16(key.getFootprint());
-	out.writeU8(key.getAlgorithm());
-	out.writeU8(digestid);
-
 	MessageDigest digest;
 	try {
 		switch (digestid) {
@@ -818,9 +818,7 @@ generateDS(DNSKEYRecord key, int digestid)
 	}
 	digest.update(key.getName().toWire());
 	digest.update(key.rdataToWireCanonical());
-	out.writeByteArray(digest.digest());
-
-	return out.toByteArray();
+	return digest.digest();
 }
 
 }
