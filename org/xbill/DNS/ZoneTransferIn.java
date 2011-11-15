@@ -435,7 +435,7 @@ parseRR(Record rec) throws ZoneTransferException {
 			logxfr("got incremental response");
 			state = IXFR_DELSOA;
 		} else {
-			rtype = Type.IXFR;
+			rtype = Type.AXFR;
 			handler.startAXFR();
 			handler.handleRecord(initialsoa);
 			logxfr("got nonincremental response");
