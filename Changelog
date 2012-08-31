@@ -1,3 +1,6 @@
+8/31/2012
+	- Add support for the TLSA record type.
+
 11/15/2011
 	- Fix the ZoneTransferIn object to properly report AXFRs; this was
 	  broken by the changes in 2.1.3.

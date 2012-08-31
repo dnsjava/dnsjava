@@ -159,7 +159,11 @@ public static final int DHCID		= 49;
 /** Next SECure, 3rd edition, RFC 5155 */
 public static final int NSEC3		= 50;
 
+/** Next SECure PARAMeter, RFC 5155 */
 public static final int NSEC3PARAM	= 51;
+
+/** Transport Layer Security Authentication, draft-ietf-dane-protocol-23 */
+public static final int TLSA		= 52;
 
 /** Sender Policy Framework (experimental) */
 public static final int SPF		= 99;
@@ -270,6 +274,7 @@ static {
 	types.add(DHCID, "DHCID", new DHCIDRecord());
 	types.add(NSEC3, "NSEC3", new NSEC3Record());
 	types.add(NSEC3PARAM, "NSEC3PARAM", new NSEC3PARAMRecord());
+	types.add(TLSA, "TLSA", new TLSARecord());
 	types.add(SPF, "SPF", new SPFRecord());
 	types.add(TKEY, "TKEY", new TKEYRecord());
 	types.add(TSIG, "TSIG", new TSIGRecord());
