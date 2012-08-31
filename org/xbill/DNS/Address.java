@@ -298,10 +298,10 @@ getByAddress(String addr) throws UnknownHostException {
 	byte [] bytes;
 	bytes = toByteArray(addr, IPv4);
 	if (bytes != null)
-		return InetAddress.getByAddress(bytes);
+		return InetAddress.getByAddress(addr, bytes);
 	bytes = toByteArray(addr, IPv6);
 	if (bytes != null)
-		return InetAddress.getByAddress(bytes);
+		return InetAddress.getByAddress(addr, bytes);
 	throw new UnknownHostException("Invalid address: " + addr);
 }
 
@@ -321,7 +321,7 @@ getByAddress(String addr, int family) throws UnknownHostException {
 	byte [] bytes;
 	bytes = toByteArray(addr, family);
 	if (bytes != null)
-		return InetAddress.getByAddress(bytes);
+		return InetAddress.getByAddress(addr, bytes);
 	throw new UnknownHostException("Invalid address: " + addr);
 }
 

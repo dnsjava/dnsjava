@@ -75,7 +75,8 @@ rrToString() {
 public InetAddress
 getAddress() {
 	try {
-		return InetAddress.getByAddress(toArray(addr));
+		return InetAddress.getByAddress(name.toString(),
+						toArray(addr));
 	} catch (UnknownHostException e) {
 		return null;
 	}
