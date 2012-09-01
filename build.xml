@@ -109,6 +109,7 @@
     <target name="compile_tests" depends="compile">
 	<javac destdir="${tests_dir}" debug="true" target="1.4" source="1.4">
 	    <src path="${tests_dir}"/>
+	    <exclude name="org/xbill/DNS/DNSSECWithLunaProviderTest**"/>
 	</javac>
     </target>
 
