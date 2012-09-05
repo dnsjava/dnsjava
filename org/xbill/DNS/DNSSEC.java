@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Constants and methods relating to DNSSEC.
  *
- * DNSSEC provides authentication for DNS information. 
+ * DNSSEC provides authentication for DNS information.
  * @see RRSIGRecord
  * @see DNSKEYRecord
  * @see RRset
@@ -34,24 +34,27 @@ public static class Algorithm {
 	/** DSA public key */
 	public static final int DSA = 3;
 
-	/** Elliptic Curve key */
-	public static final int ECC = 4;
-
 	/** RSA/SHA1 public key */
 	public static final int RSASHA1 = 5;
-	
+
 	/** DSA/SHA1, NSEC3-aware public key */
 	public static final int DSA_NSEC3_SHA1 = 6;
-	
+
 	/** RSA/SHA1, NSEC3-aware public key */
 	public static final int RSA_NSEC3_SHA1 = 7;
-	
+
 	/** RSA/SHA256 public key */
 	public static final int RSASHA256 = 8;
-	
+
 	/** RSA/SHA512 public key */
 	public static final int RSASHA512 = 10;
-	
+
+	/** ECDSA Curve P-256 with SHA-256 public key **/
+	public static final int ECDSAP256SHA256 = 13;
+
+	/** ECDSA Curve P-384 with SHA-384 public key **/
+	public static final int ECDSAP384SHA384 = 14;
+
 	/** Indirect keys; the actual key is elsewhere. */
 	public static final int INDIRECT = 252;
 
@@ -71,12 +74,13 @@ public static class Algorithm {
 		algs.add(RSAMD5, "RSAMD5");
 		algs.add(DH, "DH");
 		algs.add(DSA, "DSA");
-		algs.add(ECC, "ECC");
 		algs.add(RSASHA1, "RSASHA1");
 		algs.add(DSA_NSEC3_SHA1, "DSA-NSEC3-SHA1");
 		algs.add(RSA_NSEC3_SHA1, "RSA-NSEC3-SHA1");
 		algs.add(RSASHA256, "RSASHA256");
 		algs.add(RSASHA512, "RSASHA512");
+		algs.add(ECDSAP256SHA256, "ECDSAP256SHA256");
+		algs.add(ECDSAP384SHA384, "ECDSAP384SHA384");
 		algs.add(INDIRECT, "INDIRECT");
 		algs.add(PRIVATEDNS, "PRIVATEDNS");
 		algs.add(PRIVATEOID, "PRIVATEOID");
@@ -181,7 +185,7 @@ digestMessage(SIGRecord sig, Message msg, byte [] previous) {
 
 	if (previous != null)
 		out.writeByteArray(previous);
-	
+
 	msg.toWire(out);
 	return out.toByteArray();
 }
@@ -338,7 +342,7 @@ writeBigInteger(DNSOutput out, BigInteger val) {
 
 private static PublicKey
 toRSAPublicKey(KEYBase r) throws IOException, GeneralSecurityException {
-	DNSInput in = new DNSInput(r.getKey()); 
+	DNSInput in = new DNSInput(r.getKey());
 	int exponentLength = in.readU8();
 	if (exponentLength == 0)
 		exponentLength = in.readU16();
@@ -353,7 +357,7 @@ private static PublicKey
 toDSAPublicKey(KEYBase r) throws IOException, GeneralSecurityException,
 	MalformedKeyException
 {
-	DNSInput in = new DNSInput(r.getKey()); 
+	DNSInput in = new DNSInput(r.getKey());
 
 	int t = in.readU8();
 	if (t > 8)
@@ -366,6 +370,60 @@ toDSAPublicKey(KEYBase r) throws IOException, GeneralSecurityException,
 
 	KeyFactory factory = KeyFactory.getInstance("DSA");
 	return factory.generatePublic(new DSAPublicKeySpec(y, p, q, g));
+}
+
+private static class ECKeyInfo {
+	int length;
+	public BigInteger p, a, b, gx, gy, n;
+	EllipticCurve curve;
+	ECParameterSpec spec;
+
+	ECKeyInfo(int length, String p_str, String a_str, String b_str,
+		  String gx_str, String gy_str, String n_str)
+	{
+		this.length = length;
+		p = new BigInteger(p_str, 16);
+		a = new BigInteger(a_str, 16);
+		b = new BigInteger(b_str, 16);
+		gx = new BigInteger(gx_str, 16);
+		gy = new BigInteger(gy_str, 16);
+		n = new BigInteger(n_str, 16);
+		curve = new EllipticCurve(new ECFieldFp(p), a, b);
+		spec = new ECParameterSpec(curve, new ECPoint(gx, gy), n, 1);
+	}
+}
+
+// RFC 5114 Section 2.6
+private static final ECKeyInfo ECDSA_P256 = new ECKeyInfo(32,
+	"FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF",
+	"FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC",
+	"5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B",
+	"6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296",
+	"4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5",
+	"FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551");
+
+// RFC 5114 Section 2.7
+private static final ECKeyInfo ECDSA_P384 = new ECKeyInfo(48,
+	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF",
+	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFC",
+	"B3312FA7E23EE7E4988E056BE3F82D19181D9C6EFE8141120314088F5013875AC656398D8A2ED19D2A85C8EDD3EC2AEF",
+	"AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7",
+	"3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F",
+	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973");
+
+private static PublicKey
+toECDSAPublicKey(KEYBase r, ECKeyInfo keyinfo) throws IOException,
+	GeneralSecurityException, MalformedKeyException
+{
+	DNSInput in = new DNSInput(r.getKey());
+
+	// RFC 6605 Section 4
+	BigInteger x = readBigInteger(in, keyinfo.length);
+	BigInteger y = readBigInteger(in, keyinfo.length);
+	ECPoint q = new ECPoint(x, y);
+
+	KeyFactory factory = KeyFactory.getInstance("EC");
+	return factory.generatePublic(new ECPublicKeySpec(q, keyinfo.spec));
 }
 
 /** Converts a KEY/DNSKEY record into a PublicKey */
@@ -383,6 +441,10 @@ toPublicKey(KEYBase r) throws DNSSECException {
 		case Algorithm.DSA:
 		case Algorithm.DSA_NSEC3_SHA1:
 			return toDSAPublicKey(r);
+		case Algorithm.ECDSAP256SHA256:
+			return toECDSAPublicKey(r, ECDSA_P256);
+		case Algorithm.ECDSAP384SHA384:
+			return toECDSAPublicKey(r, ECDSA_P384);
 		default:
 			throw new UnsupportedAlgorithmException(alg);
 		}
@@ -432,11 +494,23 @@ fromDSAPublicKey(DSAPublicKey key) {
 	return out.toByteArray();
 }
 
+private static byte []
+fromECDSAPublicKey(ECPublicKey key) {
+	DNSOutput out = new DNSOutput();
+
+	BigInteger x = key.getW().getAffineX();
+	BigInteger y = key.getW().getAffineY();
+
+	writeBigInteger(out, x);
+	writeBigInteger(out, y);
+
+	return out.toByteArray();
+}
+
 /** Builds a DNSKEY record from a PublicKey */
 static byte []
 fromPublicKey(PublicKey key, int alg) throws DNSSECException
 {
-	byte [] data = null;
 
 	switch (alg) {
 	case Algorithm.RSAMD5:
@@ -452,6 +526,11 @@ fromPublicKey(PublicKey key, int alg) throws DNSSECException
 		if (! (key instanceof DSAPublicKey))
 			throw new IncompatibleKeyException();
 		return fromDSAPublicKey((DSAPublicKey) key);
+	case Algorithm.ECDSAP256SHA256:
+	case Algorithm.ECDSAP384SHA384:
+		if (! (key instanceof ECPublicKey))
+			throw new IncompatibleKeyException();
+		return fromECDSAPublicKey((ECPublicKey) key);
 	default:
 		throw new UnsupportedAlgorithmException(alg);
 	}
@@ -477,6 +556,10 @@ algString(int alg) throws UnsupportedAlgorithmException {
 		return "SHA256withRSA";
 	case Algorithm.RSASHA512:
 		return "SHA512withRSA";
+	case Algorithm.ECDSAP256SHA256:
+		return "SHA256withECDSA";
+	case Algorithm.ECDSAP384SHA384:
+		return "SHA384withECDSA";
 	default:
 		throw new UnsupportedAlgorithmException(alg);
 	}
@@ -495,7 +578,7 @@ DSASignaturefromDNS(byte [] dns) throws DNSSECException, IOException {
 	DNSInput in = new DNSInput(dns);
 	DNSOutput out = new DNSOutput();
 
-	int t = in.readU8(); 
+	int t = in.readU8();
 
 	byte [] r = in.readByteArray(DSA_LEN);
 	int rlen = DSA_LEN;
@@ -526,8 +609,8 @@ DSASignaturefromDNS(byte [] dns) throws DNSSECException, IOException {
 }
 
 private static byte []
-DSASignaturetoDNS(byte [] key, int t) throws IOException {
-	DNSInput in = new DNSInput(key);
+DSASignaturetoDNS(byte [] signature, int t) throws IOException {
+	DNSInput in = new DNSInput(signature);
 	DNSOutput out = new DNSOutput();
 
 	out.writeU8(t);
@@ -564,6 +647,81 @@ DSASignaturetoDNS(byte [] key, int t) throws IOException {
 	return out.toByteArray();
 }
 
+private static byte []
+ECDSASignaturefromDNS(byte [] signature, ECKeyInfo keyinfo)
+	throws DNSSECException, IOException
+{
+	if (signature.length != keyinfo.length * 2)
+		throw new SignatureVerificationException();
+
+	DNSInput in = new DNSInput(signature);
+	DNSOutput out = new DNSOutput();
+
+	byte [] r = in.readByteArray(keyinfo.length);
+	int rlen = keyinfo.length;
+	if (r[0] < 0)
+		rlen++;
+
+	byte [] s = in.readByteArray(keyinfo.length);
+	int slen = keyinfo.length;
+	if (s[0] < 0)
+		slen++;
+
+	out.writeU8(ASN1_SEQ);
+	out.writeU8(rlen + slen + 4);
+
+	out.writeU8(ASN1_INT);
+	out.writeU8(rlen);
+	if (rlen > keyinfo.length)
+		out.writeU8(0);
+	out.writeByteArray(r);
+
+	out.writeU8(ASN1_INT);
+	out.writeU8(slen);
+	if (slen > keyinfo.length)
+		out.writeU8(0);
+	out.writeByteArray(s);
+
+	return out.toByteArray();
+}
+
+private static byte []
+ECDSASignaturetoDNS(byte [] signature, ECKeyInfo keyinfo) throws IOException {
+	DNSInput in = new DNSInput(signature);
+	DNSOutput out = new DNSOutput();
+
+	int tmp = in.readU8();
+	if (tmp != ASN1_SEQ)
+		throw new IOException();
+	int seqlen = in.readU8();
+
+	tmp = in.readU8();
+	if (tmp != ASN1_INT)
+		throw new IOException();
+	int rlen = in.readU8();
+	if (rlen == keyinfo.length + 1) {
+		if (in.readU8() != 0)
+			throw new IOException();
+	} else if (rlen != keyinfo.length)
+		throw new IOException();
+	byte[] bytes = in.readByteArray(keyinfo.length);
+	out.writeByteArray(bytes);
+
+	tmp = in.readU8();
+	if (tmp != ASN1_INT)
+		throw new IOException();
+	int slen = in.readU8();
+	if (slen == keyinfo.length + 1) {
+		if (in.readU8() != 0)
+			throw new IOException();
+	} else if (slen != keyinfo.length)
+		throw new IOException();
+	bytes = in.readByteArray(keyinfo.length);
+	out.writeByteArray(bytes);
+
+	return out.toByteArray();
+}
+
 private static void
 verify(PublicKey key, int alg, byte [] data, byte [] signature)
 throws DNSSECException
@@ -571,6 +729,24 @@ throws DNSSECException
 	if (key instanceof DSAPublicKey) {
 		try {
 			signature = DSASignaturefromDNS(signature);
+		}
+		catch (IOException e) {
+			throw new IllegalStateException();
+		}
+	} else if (key instanceof ECPublicKey) {
+		try {
+			switch (alg) {
+			case Algorithm.ECDSAP256SHA256:
+				signature = ECDSASignaturefromDNS(signature,
+								  ECDSA_P256);
+				break;
+			case Algorithm.ECDSAP384SHA384:
+				signature = ECDSASignaturefromDNS(signature,
+								  ECDSA_P384);
+				break;
+			default:
+				throw new UnsupportedAlgorithmException(alg);
+			}
 		}
 		catch (IOException e) {
 			throw new IllegalStateException();
@@ -656,11 +832,28 @@ sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data,
 		catch (IOException e) {
 			throw new IllegalStateException();
 		}
+	} else if (pubkey instanceof ECPublicKey) {
+		try {
+			switch (alg) {
+			case Algorithm.ECDSAP256SHA256:
+				signature = ECDSASignaturetoDNS(signature,
+								ECDSA_P256);
+				break;
+			case Algorithm.ECDSAP384SHA384:
+				signature = ECDSASignaturetoDNS(signature,
+								ECDSA_P384);
+				break;
+			default:
+				throw new UnsupportedAlgorithmException(alg);
+			}
+		}
+		catch (IOException e) {
+			throw new IllegalStateException();
+		}
 	}
 
 	return signature;
 }
-
 static void
 checkAlgorithm(PrivateKey key, int alg) throws UnsupportedAlgorithmException
 {
@@ -676,6 +869,11 @@ checkAlgorithm(PrivateKey key, int alg) throws UnsupportedAlgorithmException
 	case Algorithm.DSA:
 	case Algorithm.DSA_NSEC3_SHA1:
 		if (! (key instanceof DSAPrivateKey))
+			throw new IncompatibleKeyException();
+		break;
+	case Algorithm.ECDSAP256SHA256:
+	case Algorithm.ECDSAP384SHA384:
+		if (! (key instanceof ECPrivateKey))
 			throw new IncompatibleKeyException();
 		break;
 	default:
@@ -768,6 +966,7 @@ verifyMessage(Message message, byte [] bytes, SIGRecord sig, SIGRecord previous,
 		throw new KeyMismatchException(key, sig);
 
 	Date now = new Date();
+
 	if (now.compareTo(sig.getExpire()) > 0)
 		throw new SignatureExpiredException(sig.getExpire(), now);
 	if (now.compareTo(sig.getTimeSigned()) < 0)
@@ -807,6 +1006,9 @@ generateDSDigest(DNSKEYRecord key, int digestid)
 			break;
 		case DSRecord.Digest.SHA256:
 			digest = MessageDigest.getInstance("sha-256");
+			break;
+		case DSRecord.Digest.SHA384:
+			digest = MessageDigest.getInstance("sha-384");
 			break;
 		default:
 			throw new IllegalArgumentException(

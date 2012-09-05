@@ -1,3 +1,8 @@
+9/4/2012
+	- Add support for RFC 6605: Elliptic Curve Digital Signature
+	  Algorithm (DSA) for DNSSEC. (original patch from
+	  Marcos Sanz <sanz@denic.de>, with some local modifications)
+
 8/31/2012
 	- Add support for the TLSA record type.
 	- Pass hostnames to InetAddress.getByAddress where possible.

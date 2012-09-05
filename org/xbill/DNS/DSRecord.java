@@ -24,10 +24,14 @@ public static class Digest {
 
 	/** SHA-256 */
 	public static final int SHA256 = 2;
+
+	/** SHA-384 */
+	public static final int SHA384 = 4;
 }
 
 public static final int SHA1_DIGEST_ID = Digest.SHA1;
 public static final int SHA256_DIGEST_ID = Digest.SHA256;
+public static final int SHA384_DIGEST_ID = Digest.SHA384;
 
 private static final long serialVersionUID = -9001819329700081493L;
 
