@@ -108,11 +108,15 @@ Message(DNSInput in) throws IOException {
 				int pos = in.current();
 				Record rec = Record.fromWire(in, i, isUpdate);
 				sections[i].add(rec);
-				if (rec.getType() == Type.TSIG)
-					tsigstart = pos;
-				if (rec.getType() == Type.SIG &&
-				    ((SIGRecord) rec).getTypeCovered() == 0)
-					sig0start = pos;
+				if (i == Section.ADDITIONAL) {
+					if (rec.getType() == Type.TSIG)
+						tsigstart = pos;
+					if (rec.getType() == Type.SIG) {
+						SIGRecord sig = (SIGRecord) rec;
+						if (sig.getTypeCovered() == 0)
+							sig0start = pos;
+					}
+				}
 			}
 		}
 	} catch (WireParseException e) {

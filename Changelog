@@ -1,3 +1,8 @@
+10/25/2012
+	- Fix the Message constructor to not raise a ClassCastException when a
+	  SIG or TSIG record is seen in the question section.
+	  (patch from Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 9/4/2012
 	- Add support for RFC 6605: Elliptic Curve Digital Signature
 	  Algorithm (DSA) for DNSSEC. (original patch from
