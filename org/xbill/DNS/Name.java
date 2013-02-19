@@ -474,6 +474,30 @@ wild(int n) {
 }
 
 /**
+ * Returns a canonicalized version of the Name (all lowercase).  This may be
+ * the same name, if the input Name is already canonical.
+ */
+public Name
+canonicalize() {
+	boolean canonical = true;
+	for (int i = 0; i < name.length; i++) {
+		if (lowercase[name[i] & 0xFF] != name[i]) {
+			canonical = false;
+			break;
+		}
+	}
+	if (canonical)
+		return this;
+
+	Name newname = new Name();
+	newname.appendSafe(name, offset(0), getlabels());
+	for (int i = 0; i < newname.name.length; i++)
+		newname.name[i] = lowercase[newname.name[i] & 0xFF];
+
+	return newname;
+}
+
+/**
  * Generates a new Name to be used when following a DNAME.
  * @param dname The DNAME record to follow.
  * @return The constructed name.
@@ -585,10 +609,11 @@ byteString(byte [] array, int pos) {
 
 /**
  * Convert a Name to a String
+ * @param omitFinalDot If true, and the name is absolute, omit the final dot.
  * @return The representation of this name as a (printable) String.
  */
 public String
-toString() {
+toString(boolean omitFinalDot) {
 	int labels = labels();
 	if (labels == 0)
 		return "@";
@@ -599,15 +624,26 @@ toString() {
 		int len = name[pos];
 		if (len > MAXLABEL)
 			throw new IllegalStateException("invalid label");
-		if (len == 0)
+		if (len == 0) {
+			if (!omitFinalDot)
+				sb.append('.');
 			break;
+		}
+		if (i > 0)
+			sb.append('.');
 		sb.append(byteString(name, pos));
-		sb.append('.');
 		pos += (1 + len);
 	}
-	if (!isAbsolute())
-		sb.deleteCharAt(sb.length() - 1);
 	return sb.toString();
+}
+
+/**
+ * Convert a Name to a String
+ * @return The representation of this name as a (printable) String.
+ */
+public String
+toString() {
+	return toString(false);
 }
 
 /**

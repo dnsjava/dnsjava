@@ -1180,6 +1180,35 @@ public class NameTest extends TestCase
 	}
     }
 
+    public void test_canonicalize() throws TextParseException
+    {
+	Name n1 = new Name("ABC.com");
+	Name n2 = new Name("abc.com");
+	Name n3 = new Name("\\193.com");
+
+	Name cn1 = n1.canonicalize();
+	Name cn2 = n2.canonicalize();
+	Name cn3 = n3.canonicalize();
+
+	assertNotSame(n1, cn1);
+	assertEquals(n1, cn1);
+	assertSame(n2, cn2);
+	assertSame(n3, cn3);
+	assertEquals(n1.toString(), n2.toString());
+    }
+
+    public void test_to_string() throws TextParseException
+    {
+	Name n1 = new Name("abc.com");
+	Name n2 = new Name("abc.com.");
+
+	assertEquals(n1.toString(true), n1.toString(true));
+	assertFalse(n2.toString(true).equals(n2.toString(false)));
+	assertEquals(n2.toString(true) + ".", n2.toString(false));
+	assertEquals(Name.root.toString(true), Name.root.toString(false));
+	assertEquals(Name.empty.toString(true), Name.empty.toString(false));
+    }
+
     public static Test suite()
     {
 	TestSuite s = new TestSuite();
