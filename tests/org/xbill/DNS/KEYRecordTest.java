@@ -161,12 +161,12 @@ public class KEYRecordTest extends TestCase
 
 	// basic w/o key
 	kr = new KEYRecord();
-	st = new Tokenizer("NOAUTH|NOKEY|FLAG10 TLS ECC");
+	st = new Tokenizer("NOAUTH|NOKEY|FLAG10 TLS 3");
 	kr.rdataFromString(st, null);
 	assertEquals(KEYRecord.Flags.NOAUTH|KEYRecord.Flags.FLAG10|KEYRecord.Flags.NOKEY,
 		     kr.getFlags());
 	assertEquals(KEYRecord.Protocol.TLS, kr.getProtocol());
-	assertEquals(DNSSEC.Algorithm.ECC, kr.getAlgorithm());
+	assertEquals(3, kr.getAlgorithm()); // Was ECC
 	assertNull(kr.getKey());
 
 	// invalid flags
@@ -180,7 +180,7 @@ public class KEYRecordTest extends TestCase
 
 	// invalid protocol
 	kr = new KEYRecord();
-	st = new Tokenizer("NOAUTH|ZONE RSASHA1 ECC AQIDBAUGBwgJ");
+	st = new Tokenizer("NOAUTH|ZONE RSASHA1 3 AQIDBAUGBwgJ");
 	try {
 	    kr.rdataFromString(st, null);
 	    fail("TextParseException not thrown");
