@@ -38,8 +38,11 @@ AAAARecord(Name name, int dclass, long ttl, InetAddress address) {
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	address = InetAddress.getByAddress(name.toString(),
-					   in.readByteArray(16));
+	if (name == null)
+		address = InetAddress.getByAddress(in.readByteArray(16));
+	else
+		address = InetAddress.getByAddress(name.toString(),
+						   in.readByteArray(16));
 }
 
 void
