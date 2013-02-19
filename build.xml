@@ -124,9 +124,11 @@
     </target>
 
     <target name="_run_tests" depends="compile_tests">
-      <junit fork="yes" forkmode="perTest" dir="${basedir}" haltonerror="on" haltonfailure="on">
+      <junit fork="yes" forkmode="perTest" dir="${basedir}"
+             haltonerror="on" haltonfailure="on">
 	<classpath>
-	  <path refid="${classpath_name}"/>
+          <path location="${basedir}"/>
+          <path location="${tests_dir}"/>
 	</classpath>
 	<formatter type="plain" usefile="no"/>
 	<test name="${testcase}" if="testcase"/>
