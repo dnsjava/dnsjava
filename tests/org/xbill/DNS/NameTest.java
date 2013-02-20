@@ -1194,7 +1194,9 @@ public class NameTest extends TestCase
 	assertEquals(n1, cn1);
 	assertSame(n2, cn2);
 	assertSame(n3, cn3);
-	assertEquals(n1.toString(), n2.toString());
+	assertEquals(cn1.toString(), cn2.toString());
+	assertFalse(n1.toString().equals(n2.toString()));
+	assertEquals(cn1.toString(), cn2.toString());
     }
 
     public void test_to_string() throws TextParseException
