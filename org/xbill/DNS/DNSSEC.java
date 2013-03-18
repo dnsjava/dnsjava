@@ -1018,7 +1018,7 @@ generateDSDigest(DNSKEYRecord key, int digestid)
 	catch (NoSuchAlgorithmException e) {
 		throw new IllegalStateException("no message digest support");
 	}
-	digest.update(key.getName().toWire());
+	digest.update(key.getName().toWireCanonical());
 	digest.update(key.rdataToWireCanonical());
 	return digest.digest();
 }
