@@ -1,4 +1,8 @@
 04/10/2013
+	- Fix Name.isAbsolute() to check that the length of the last label is
+	  0, not that the last byte of the name is 0.
+
+04/10/2013
 	- 2.1.5 released
 
 03/18/2013
