@@ -1211,6 +1211,20 @@ public class NameTest extends TestCase
 	assertEquals(Name.empty.toString(true), Name.empty.toString(false));
     }
 
+    public void test_absolute() throws TextParseException {
+        Name n1 = new Name("abc.com");
+        Name n2 = new Name("abc.com.");
+        Name n3 = new Name("abc.com", Name.root);
+        Name n4 = new Name("abc.com", n1);
+        Name n5 = new Name("abc.com\\000");
+
+        assertFalse(n1.isAbsolute());
+        assertTrue(n2.isAbsolute());
+        assertTrue(n3.isAbsolute());
+        assertFalse(n4.isAbsolute());
+        assertFalse(n5.isAbsolute());
+    }
+
     public static Test suite()
     {
 	TestSuite s = new TestSuite();
