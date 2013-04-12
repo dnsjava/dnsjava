@@ -283,7 +283,7 @@ public class AddressTest extends TestCase
     public void test_getByName_invalid() throws UnknownHostException
     {
 	try {
-	    Address.getByName("bogushost.com");
+	    Address.getByName("example.invalid");
 	    fail("UnknownHostException not thrown");
 	}
 	catch( UnknownHostException e ){
@@ -317,7 +317,7 @@ public class AddressTest extends TestCase
     public void test_getAllByName_invalid() throws UnknownHostException
     {
 	try {
-	    Address.getAllByName("bogushost.com");
+	    Address.getAllByName("example.invalid");
 	    fail("UnknownHostException not thrown");
 	}
 	catch( UnknownHostException e ){
