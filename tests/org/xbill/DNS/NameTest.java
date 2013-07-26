@@ -193,6 +193,16 @@ public class NameTest extends TestCase
 	    assertEquals("", n.getLabelString(7));
 	}
 
+	public void test_ctor_removed_label() throws TextParseException, NameTooLongException
+	{
+		String pre = "prepend";
+		Name stripped = new Name(Name.fromString("sub.domain.example."), 1);
+		Name concat = new Name(pre, stripped);
+		assertEquals(Name.concatenate(Name.fromString(pre), stripped), concat);
+		assertEquals(Name.fromString(pre, stripped), concat);
+		assertEquals("prepend.domain.example.", concat.toString());
+	}
+
 	public void test_ctor_abs_abs_origin() throws TextParseException
 	{
 	    Name n = new Name(m_abs, m_abs_origin);

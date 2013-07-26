@@ -273,7 +273,8 @@ Name(String s, Name origin) throws TextParseException {
 		appendFromString(s, label, 0, 1);
 	}
 	if (origin != null && !absolute)
-		appendFromString(s, origin.name, 0, origin.getlabels());
+		appendFromString(s, origin.name, origin.offset(0),
+				 origin.getlabels());
 }
 
 /**

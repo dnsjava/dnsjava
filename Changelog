@@ -1,3 +1,8 @@
+05/04/2013
+	- The Name(String s, Name origin) constructor copies too many labels
+	  when origin has been created by stripping a label.
+	  (patch from Ingo Bauersachs <ingo@jitsi.org>)
+
 04/10/2013
 	- Fix Name.isAbsolute() to check that the length of the last label is
 	  0, not that the last byte of the name is 0.
