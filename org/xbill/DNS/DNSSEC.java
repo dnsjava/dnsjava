@@ -314,6 +314,15 @@ public static class IncompatibleKeyException extends IllegalArgumentException {
 	}
 }
 
+/**
+ * No signature was found.
+ */
+public static class NoSignatureException extends DNSSECException {
+	NoSignatureException() {
+		super("no signature found");
+	}
+}
+
 private static int
 BigIntegerLength(BigInteger i) {
 	return (i.bitLength() + 7) / 8;
@@ -951,7 +960,7 @@ signMessage(Message message, SIGRecord previous, KEYRecord key,
 	digestSIG(out, sig);
 	if (previous != null)
 		out.writeByteArray(previous.getSignature());
-	message.toWire(out);
+	out.writeByteArray(message.toWire());
 
 	sig.setSignature(sign(privkey, key.getPublicKey(),
 			      alg, out.toByteArray(), null));
@@ -962,6 +971,9 @@ static void
 verifyMessage(Message message, byte [] bytes, SIGRecord sig, SIGRecord previous,
 	      KEYRecord key) throws DNSSECException
 {
+	if (message.sig0start == 0)
+		throw new NoSignatureException();
+
 	if (!matches(sig, key))
 		throw new KeyMismatchException(key, sig);
 

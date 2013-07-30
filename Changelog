@@ -1,3 +1,9 @@
+07/29/2013
+	- SIG(0) signatures were incorrectly generated in some cases.
+	  (patch from Tekto <tekto@geekr.de>)
+	- Add NoSignature exception, thrown when attempting to validate a
+	  SIG(0) in a message without one.
+
 05/04/2013
 	- The Name(String s, Name origin) constructor copies too many labels
 	  when origin has been created by stripping a label.
