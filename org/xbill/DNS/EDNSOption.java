@@ -19,8 +19,8 @@ public static class Code {
 	/** Name Server Identifier, RFC 5001 */
 	public final static int NSID = 3;
 
-	/** Client Subnet, defined in draft-vandergaast-edns-client-subnet-00 */
-	public final static int CLIENT_SUBNET = 20730;
+	/** Client Subnet, defined in draft-vandergaast-edns-client-subnet-02 */
+	public final static int CLIENT_SUBNET = 8;
 
 	private static Mnemonic codes = new Mnemonic("EDNS Option Codes",
 						     Mnemonic.CASE_UPPER);

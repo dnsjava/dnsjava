@@ -1,3 +1,7 @@
+08/07/2013
+	- Change the edns-client-subnet option to use the officially defined
+	  option code.
+
 07/29/2013
 	- SIG(0) signatures were incorrectly generated in some cases.
 	  (patch from Tekto <tekto@geekr.de>)

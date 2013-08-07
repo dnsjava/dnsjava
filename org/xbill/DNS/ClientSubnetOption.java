@@ -18,9 +18,6 @@ import java.util.regex.*;
  * The option is transmitted as part of an OPTRecord in the additional section
  * of a DNS message, as defined by RFC 2671 (EDNS0).
  * 
- * An option code has not been assigned by IANA; the value 20730 (used here) is
- * also used by several other implementations.
- *
  * The wire format of the option contains a 2-byte length field (1 for IPv4, 2
  * for IPv6), a 1-byte source netmask, a 1-byte scope netmask, and an address
  * truncated to the source netmask length (where the final octet is padded with
@@ -56,9 +53,9 @@ checkMaskLength(String field, int family, int val) {
 }
 
 /**
- * Construct a Client Subnet option.  Note that the number of significant bits in
- * the address must not be greater than the supplied source netmask.
- * XXX something about Java's mapped addresses
+ * Construct a Client Subnet option.  Note that the number of significant bits
+ * in the address must not be greater than the supplied source netmask.  There
+ * may also be issues related to Java's handling of mapped addresses
  * @param sourceNetmask The length of the netmask pertaining to the query.
  * In replies, it mirrors the same value as in the requests.
  * @param scopeNetmask The length of the netmask pertaining to the reply.
