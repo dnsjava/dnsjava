@@ -431,31 +431,30 @@ findAndroid() {
 	// http://code.google.com/p/android/issues/detail?id=2207#c73
 	// indicates that net.dns* should always be the active nameservers, so
 	// we use those.
-	String re1 = "^\\d+(\\.\\d+){3}$";
-	String re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$";
-	try { 
-		ArrayList lserver = new ArrayList(); 
-		ArrayList lsearch = new ArrayList(); 
-		String line; 
-		Process p = Runtime.getRuntime().exec("getprop"); 
-		InputStream in = p.getInputStream();
-		InputStreamReader isr = new InputStreamReader(in);
-		BufferedReader br = new BufferedReader(isr);
-		while ((line = br.readLine()) != null ) { 
-			StringTokenizer t = new StringTokenizer(line, ":");
-			String name = t.nextToken();
-			if (name.indexOf( "net.dns" ) > -1) {
-				String v = t.nextToken();
-				v = v.replaceAll("[ \\[\\]]", "");
-				if ((v.matches(re1) || v.matches(re2)) &&
-				    !lserver.contains(v))
-					lserver.add(v);
-			}
+	final String re1 = "^\\d+(\\.\\d+){3}$";
+	final String re2 = "^[0-9a-f]+(:[0-9a-f]*)+:[0-9a-f]+$";
+	ArrayList lserver = new ArrayList();
+	ArrayList lsearch = new ArrayList();
+	try {
+		Class SystemProperties =
+		    Class.forName("android.os.SystemProperties");
+		Method method =
+		    SystemProperties.getMethod("get",
+					       new Class[] { String.class });
+		final String [] netdns = new String [] {"net.dns1", "net.dns2",
+						        "net.dns3", "net.dns4"};
+		for (int i = 0; i < netdns.length; i++) {
+			Object [] args = new Object [] { netdns[i] };
+			String v = (String) method.invoke(null, args);
+			if (v != null &&
+			    (v.matches(re1) || v.matches(re2)) &&
+			    !lserver.contains(v))
+				lserver.add(v);
 		}
-		configureFromLists(lserver, lsearch);
-	} catch ( Exception e ) { 
+	} catch ( Exception e ) {
 		// ignore resolutely
 	}
+	configureFromLists(lserver, lsearch);
 }
 
 /** Returns all located servers */

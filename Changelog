@@ -1,3 +1,8 @@
+10/07/2013
+	- Improve the name server detection code for Android.
+	  (patch from Florian Schmaus <fschmaus@gmail.com>, based on
+	   stackoverflow.com/a/11362271/194894).
+
 08/07/2013
 	- Change the edns-client-subnet option to use the officially defined
 	  option code.
