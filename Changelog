@@ -1,3 +1,8 @@
+10/14/2013
+	- Address.getByName() and Address.getAllByName() had incomplete IPv6
+	  support; they wouldn't issue AAAA queries.
+	  (reported by Cédric Braem <cbr@internetvista.com>)
+
 10/07/2013
 	- Improve the name server detection code for Android.
 	  (patch from Florian Schmaus <fschmaus@gmail.com>, based on
