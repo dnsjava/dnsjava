@@ -1,4 +1,5 @@
 10/14/2013
+	- 2.1.6 released
 	- Address.getByName() and Address.getAllByName() had incomplete IPv6
 	  support; they wouldn't issue AAAA queries.
 	  (reported by Cédric Braem <cbr@internetvista.com>)
