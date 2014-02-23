@@ -1,4 +1,4 @@
-# A github dnsjava mirror
+# A dnsjava mirror hosted at github
 
 This repository contains a github mirror of the dnsjava svn repository
 located at http://sourceforge.net/p/dnsjava/code/HEAD/tree/
@@ -32,7 +32,6 @@ by doing issuing the following command:
 `git svn clone --stdlayout http://svn.code.sf.net/p/dnsjava/code`
 
 I then manually pushed the master branch onto the branch `upstream`
-and copied the pom.xml file
-http://repo1.maven.org/maven2/org/dnsjava/dnsjava/2.0.6/dnsjava-2.0.6.pom
+and copied the pom.xml file from
+https://issues.sonatype.org/browse/OSSRH-1305
 with some updates to the master branch. 
-
