@@ -17,15 +17,16 @@
     <url>http://www.dnsjava.org</url>
     <licenses>
         <license>
-            <name>BSD license</name>
-            <url>http://dnsjava.org/dnsjava-current/README</url>
+            <name>BSD 2-Clause license</name>
+            <url>http://opensource.org/licenses/BSD-2-Clause</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.code.sf.net/p/dnsjava/code/trunk/k</connection>
-        <developerConnection>scm:svn:https://svn.code.sf.net/p/dnsjava/code/trunk/</developerConnection>
-        <url>http://sourceforge.net/p/dnsjava/code/HEAD/tree/</url>
+        <connection>scm:git:https://github.com/dnsjava/dnsjava</connection>
+        <developerConnection>scm:git:git@github.com:dnsjava/dnsjava</developerConnection>
+        <url>https://github.com/dnsjava/dnsjava</url>
+        <tag>v2.1.6</tag>
     </scm>
     <developers>
         <developer>
@@ -174,6 +175,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>3.8.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
