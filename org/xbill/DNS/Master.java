@@ -421,7 +421,8 @@ generators() {
 
 protected void
 finalize() {
-	st.close();
+	if (st != null)
+		st.close();
 }
 
 }
