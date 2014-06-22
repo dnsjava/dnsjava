@@ -55,7 +55,7 @@
 
         <plugins>
         
-            <!--        <plugin>
+            <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-gpg-plugin</artifactId>
               <version>1.4</version>
@@ -68,7 +68,7 @@
                   </goals>
                 </execution>
               </executions>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -175,7 +175,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
-            <!--<scope>test</scope>-->
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
