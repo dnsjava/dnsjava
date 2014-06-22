@@ -35,10 +35,12 @@
 package	org.xbill.DNS;
 
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class KXRecordTest extends TestCase
+public class KXRecordTest
 {
+    @Test
     public void test_getObject()
     {
 	KXRecord d = new KXRecord();
@@ -46,6 +48,7 @@ public class KXRecordTest extends TestCase
 	assertTrue(r instanceof KXRecord);
     }
 
+    @Test
     public void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");

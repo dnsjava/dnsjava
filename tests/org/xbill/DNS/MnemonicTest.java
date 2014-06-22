@@ -36,22 +36,21 @@ package org.xbill.DNS;
 
 // Mnemonic has package-level access.
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
-public class MnemonicTest extends TestCase
+public class MnemonicTest
 {
     private Mnemonic m_mn;
 
-    public MnemonicTest( String name )
-    {
-	super( name );
-    }
-    
-    public void setUp()
+    @Before
+    public void init()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " UPPER", Mnemonic.CASE_UPPER);
     }
 
+    @Test
     public void test_toInteger()
     {
 	Integer i = Mnemonic.toInteger(64);
@@ -79,11 +78,17 @@ public class MnemonicTest extends TestCase
 	assertSame( i, i2 );
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void test_Minus1()
+    {
+	m_mn.check(-1);
+    }
+    
+    @Test
     public void test_no_maximum()
     {
-	try {m_mn.check(-1); fail( "IllegalArgumentException not thrown" );} catch( IllegalArgumentException e ){}
-	try {m_mn.check(0);} catch( IllegalArgumentException e ){fail(e.getMessage());}
-	try {m_mn.check(Integer.MAX_VALUE);} catch( IllegalArgumentException e ){fail(e.getMessage());}
+	m_mn.check(0);
+        m_mn.check(Integer.MAX_VALUE);
 
 	m_mn.setNumericAllowed(true);
 
@@ -97,14 +102,27 @@ public class MnemonicTest extends TestCase
 	assertEquals( Integer.MAX_VALUE, val );
     }
 
-    public void test_setMaximum()
+    @Test(expected = IllegalArgumentException.class)
+    public void test_setMaximum_MinusOne()
     {
 	m_mn.setMaximum(15);
-	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
-	try {m_mn.check(0);} catch( IllegalArgumentException e ){fail( e.getMessage() );}
-	try {m_mn.check(15);} catch( IllegalArgumentException e ){fail( e.getMessage() );}
-	try {m_mn.check(16); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
+	m_mn.check(-1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_setMaximum_MaxValue()
+    {
+        m_mn.setMaximum(15);
+        m_mn.check(16);
+}
 
+    @Test
+    public void test_setMaximum()
+    {
+        m_mn.setMaximum(15);
+        m_mn.check(0);
+	m_mn.check(15);
+        
 	// need numericok to exercise the usage of max in parseNumeric
 	m_mn.setNumericAllowed(true);
 	
@@ -121,6 +139,7 @@ public class MnemonicTest extends TestCase
 	assertEquals( -1, val );
     }
 
+    @Test
     public void test_setPrefix()
     {
 	final String prefix = "A mixed CASE Prefix".toUpperCase();
@@ -133,6 +152,7 @@ public class MnemonicTest extends TestCase
 	assertEquals( 10, i );
     }
 
+    @Test
     public void test_basic_operation()
     {
 	// setUp creates Mnemonic with CASE_UPPER
@@ -166,6 +186,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(30, value);
     }
 
+    @Test
     public void test_basic_operation_lower()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " LOWER", Mnemonic.CASE_LOWER);
@@ -199,6 +220,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(30, value);
     }
 
+    @Test
     public void test_basic_operation_sensitive()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " SENSITIVE", Mnemonic.CASE_SENSITIVE);
@@ -238,6 +260,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(30, value);
     }
 
+    @Test
     public void test_invalid_numeric()
     {
 	m_mn.setNumericAllowed(true);
@@ -245,6 +268,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(-1, value);
     }
 
+    @Test
     public void test_addAll()
     {
 	m_mn.add( 10, "Ten" );

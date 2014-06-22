@@ -34,14 +34,16 @@
 //
 package	org.xbill.DNS;
 
+import static org.junit.Assert.*;
 import	java.io.IOException;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class DNSKEYRecordTest extends TestCase
+public class DNSKEYRecordTest
 {
+    @Test
     public void test_ctor_0arg() throws UnknownHostException
     {
 	DNSKEYRecord ar = new DNSKEYRecord();
@@ -56,6 +58,7 @@ public class DNSKEYRecordTest extends TestCase
 	assertNull(ar.getKey());
     }
 
+    @Test
     public void test_getObject()
     {
 	DNSKEYRecord ar = new DNSKEYRecord();
@@ -63,6 +66,7 @@ public class DNSKEYRecordTest extends TestCase
 	assertTrue(r instanceof DNSKEYRecord);
     }
 
+    @Test(expected = RelativeNameException.class)
     public void test_ctor_7arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Absolute.Name.");
@@ -80,13 +84,10 @@ public class DNSKEYRecordTest extends TestCase
 	assertTrue(Arrays.equals(key, kr.getKey()));
 
 	// a relative name
-	try {
-	    new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
     }
 
+    @Test
     public void test_rdataFromString() throws IOException, TextParseException
     {
 	// basic
@@ -97,14 +98,14 @@ public class DNSKEYRecordTest extends TestCase
 	assertEquals(0x81, kr.getProtocol());
 	assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
 	assertTrue(Arrays.equals(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, kr.getKey()));
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromString_invalidAlgorithm() throws IOException, TextParseException
+    {
 	// invalid algorithm
-	kr = new DNSKEYRecord();
-	st = new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ");
-	try {
-	    kr.rdataFromString(st, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	DNSKEYRecord kr = new DNSKEYRecord();
+	Tokenizer st = new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ");
+	kr.rdataFromString(st, null);
     }
 }

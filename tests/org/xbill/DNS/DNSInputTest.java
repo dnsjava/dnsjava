@@ -34,31 +34,36 @@
 //
 package org.xbill.DNS;
 
+import static org.junit.Assert.*;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class DNSInputTest extends TestCase
+public class DNSInputTest
 {
     private byte[]	m_raw;
     private DNSInput	m_di;
 
-    private void assertEquals( byte[] exp, byte[] act )
+    private void byteAssertEquals( byte[] exp, byte[] act )
     {
 	assertTrue(Arrays.equals(exp, act));
     }
 
-    public void setUp()
+    @Before
+    public void init()
     {
 	m_raw = new byte[] { 0, 1, 2, 3, 4, 5, (byte)255, (byte)255, (byte)255, (byte)255 };
 	m_di = new DNSInput( m_raw );
     }
 
+    @Test
     public void test_initial_state()
     {
 	assertEquals( 0, m_di.current() );
 	assertEquals( 10, m_di.remaining() );
     }
 
+    @Test
     public void test_jump1()
     {
 	m_di.jump( 1 );
@@ -66,6 +71,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 9, m_di.remaining() );
     }
 
+    @Test
     public void test_jump2()
     {
 	m_di.jump( 9 );
@@ -73,17 +79,13 @@ public class DNSInputTest extends TestCase
 	assertEquals( 1, m_di.remaining() );
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_jump_invalid()
     {
-	try {
-	    m_di.jump( 10 );
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_di.jump( 10 );
     }
 
+    @Test
     public void test_setActive()
     {
 	m_di.setActive( 5 );
@@ -91,6 +93,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 5, m_di.remaining() );
     }
 
+    @Test
     public void test_setActive_boundary1()
     {
 	m_di.setActive( 10 );
@@ -98,6 +101,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 10, m_di.remaining() );
     }
 
+    @Test
     public void test_setActive_boundary2()
     {
 	m_di.setActive( 0 );
@@ -105,17 +109,13 @@ public class DNSInputTest extends TestCase
 	assertEquals( 0, m_di.remaining() );
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_setActive_invalid()
     {
-	try {
-	    m_di.setActive( 11 );
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_di.setActive( 11 );
     }
 
+    @Test
     public void test_clearActive()
     {
 	// first without setting active:
@@ -129,17 +129,13 @@ public class DNSInputTest extends TestCase
 	assertEquals( 10, m_di.remaining() );
     }
 
+    @Test(expected = IllegalStateException.class)
     public void test_restore_invalid()
     {
-	try {
-	    m_di.restore();
-	    fail( "IllegalStateException not thrown" );
-	}
-	catch( IllegalStateException e ){
-	    // pass
-	}
+        m_di.restore();
     }
 
+    @Test
     public void test_save_restore()
     {
 	m_di.jump( 4 );
@@ -156,6 +152,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 6, m_di.remaining() );
     }
 
+    @Test
     public void test_readU8_basic() throws WireParseException
     {
 	int v1 = m_di.readU8();
@@ -164,6 +161,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 0, v1 );
     }
 
+    @Test(expected = WireParseException.class)
     public void test_readU8_maxval() throws WireParseException
     {
 	m_di.jump( 9 );
@@ -172,15 +170,10 @@ public class DNSInputTest extends TestCase
 	assertEquals( 0, m_di.remaining() );
 	assertEquals( 255, v1 );
 
-	try {
-	    v1 = m_di.readU8();
-	    fail( "WireParseException not thrown" );
-	}
-	catch( WireParseException e ){
-	    // pass
-	}
+        v1 = m_di.readU8();
     }
     
+    @Test
     public void test_readU16_basic() throws WireParseException
     {
 	int v1 = m_di.readU16();
@@ -193,6 +186,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 258, v1 );
     }
 
+    @Test(expected = WireParseException.class)
     public void test_readU16_maxval() throws WireParseException
     {
 	m_di.jump(8);
@@ -201,16 +195,11 @@ public class DNSInputTest extends TestCase
 	assertEquals( 0, m_di.remaining() );
 	assertEquals( 0xFFFF, v );
 	
-	try {
-	    m_di.jump( 9 );
-	    m_di.readU16();
-	    fail( "WireParseException not thrown" );
-	}
-	catch( WireParseException e ){
-	    // pass 
-	}
+        m_di.jump( 9 );
+        m_di.readU16();
     }
 
+    @Test
     public void test_readU32_basic() throws WireParseException
     {
 	long v1 = m_di.readU32();
@@ -219,6 +208,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 66051, v1 );
     }
 
+    @Test(expected = WireParseException.class)
     public void test_readU32_maxval() throws WireParseException
     {
 	m_di.jump(6);
@@ -227,16 +217,11 @@ public class DNSInputTest extends TestCase
 	assertEquals( 0, m_di.remaining() );
 	assertEquals( 0xFFFFFFFFL, v );
 	
-	try {
-	    m_di.jump( 7 );
-	    m_di.readU32();
-	    fail( "WireParseException not thrown" );
-	}
-	catch( WireParseException e ){
-	    // pass 
-	}
+        m_di.jump( 7 );
+	m_di.readU32();
     }
     
+    @Test
     public void test_readByteArray_0arg() throws WireParseException
     {
 	m_di.jump( 1 );
@@ -249,6 +234,7 @@ public class DNSInputTest extends TestCase
 	}
     }
 
+    @Test
     public void test_readByteArray_0arg_boundary() throws WireParseException
     {
 	m_di.jump(9);
@@ -257,6 +243,7 @@ public class DNSInputTest extends TestCase
 	assertEquals( 0, out.length );
     }
 
+    @Test
     public void test_readByteArray_1arg() throws WireParseException
     {
 	byte[] out = m_di.readByteArray( 2 );
@@ -267,25 +254,22 @@ public class DNSInputTest extends TestCase
 	assertEquals( 1, out[1] );
     }
 
+    @Test
     public void test_readByteArray_1arg_boundary() throws WireParseException
     {
 	byte[] out = m_di.readByteArray( 10 );
 	assertEquals( 10, m_di.current() );
 	assertEquals( 0, m_di.remaining() );
-	assertEquals( m_raw, out );
+	byteAssertEquals( m_raw, out );
     }
 
-    public void test_readByteArray_1arg_invalid()
+    @Test(expected = WireParseException.class)
+    public void test_readByteArray_1arg_invalid() throws WireParseException
     {
-	try {
-	    m_di.readByteArray( 11 );
-	    fail( "WireParseException not thrown" );
-	}
-	catch( WireParseException e ){
-	    // pass
-	}
+	m_di.readByteArray( 11 );
     }
 
+    @Test
     public void test_readByteArray_3arg() throws WireParseException
     {
 	byte[] data = new byte [ 5 ];
@@ -299,6 +283,7 @@ public class DNSInputTest extends TestCase
 	}
     }
 
+    @Test
     public void test_readCountedSting() throws WireParseException
     {
 	m_di.jump( 1 );

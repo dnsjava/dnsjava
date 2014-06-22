@@ -34,10 +34,12 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class ExtendedFlagsTest extends TestCase
+public class ExtendedFlagsTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -45,23 +47,23 @@ public class ExtendedFlagsTest extends TestCase
 
 	// one that doesn't exist
 	assertTrue(ExtendedFlags.string(1).startsWith("flag"));
-
-	try {
-	    ExtendedFlags.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_MinusOne()
+    {
+	ExtendedFlags.string(-1);
 	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_MaxValue()
+    {
 	//  (max is 0xFFFF)
-	try {
-	    ExtendedFlags.string(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	ExtendedFlags.string(0x10000);
     }
 
+    @Test
     public void test_value()
     {
 	// regular one

@@ -36,10 +36,12 @@ package org.xbill.DNS;
 
 import	java.io.IOException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
 import	org.xbill.DNS.utils.base64;
 
-public class KEYBaseTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class KEYBaseTest
 {
     private static class TestClass extends KEYBase
     {
@@ -61,6 +63,7 @@ public class KEYBaseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor() throws TextParseException
     {
 	TestClass tc = new TestClass();
@@ -85,6 +88,7 @@ public class KEYBaseTest extends TestCase
 	assertTrue(Arrays.equals(key, tc.getKey()));
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, (byte)0x19, 1, 2, 3, 4, 5 };
@@ -111,6 +115,7 @@ public class KEYBaseTest extends TestCase
 	assertNull(tc.getKey());
     }
 
+    @Test
     public void test_rrToString() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -135,6 +140,7 @@ public class KEYBaseTest extends TestCase
 	Options.unset("multiline");
     }
 
+    @Test
     public void test_getFootprint() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -163,6 +169,7 @@ public class KEYBaseTest extends TestCase
 	assertEquals(0, tc.getFootprint());
     }
 
+    @Test
     public void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");

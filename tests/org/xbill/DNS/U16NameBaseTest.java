@@ -36,11 +36,12 @@ package org.xbill.DNS;
 
 import	java.io.IOException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class U16NameBaseTest extends TestCase
+public class U16NameBaseTest
 {
-    private void assertEquals( byte[] exp, byte[] act )
+    private void byteAssertEquals( byte[] exp, byte[] act )
     {
 	assertTrue(java.util.Arrays.equals(exp, act));
     }
@@ -60,22 +61,26 @@ public class U16NameBaseTest extends TestCase
 	    super(name, type, dclass, ttl, u16Field, u16Description, nameField, nameDescription);
 	}
 	
+        @Override
 	public int getU16Field()
 	{
 	    return super.getU16Field();
 	}
 
+        @Override
 	public Name getNameField()
 	{
 	    return super.getNameField();
 	}
 
+        @Override
 	public Record getObject()
 	{
 	    return null;
 	}
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	TestClass tc = new TestClass();
@@ -87,6 +92,7 @@ public class U16NameBaseTest extends TestCase
 	assertNull(tc.getNameField());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -101,6 +107,7 @@ public class U16NameBaseTest extends TestCase
 	assertNull(tc.getNameField());
     }
 
+    @Test
     public void test_ctor_8arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -117,27 +124,33 @@ public class U16NameBaseTest extends TestCase
 	assertEquals(0x1F2B, tc.getU16Field());
 	assertEquals(m, tc.getNameField());
 
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_ctor_8arg_invalid_u16() throws TextParseException
+    {
+        Name n = Name.fromString("My.Name.");
+        Name m = Name.fromString("My.Other.Name.");
+        
 	// an invalid u16 value
-	try {
-	    new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
+        new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
 			  0x10000, "u16 description",
 			  m, "name description");
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
-
-	// a relative name
-	Name rel = Name.fromString("My.relative.Name");
-	try {
-	    new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
-			  0x1F2B, "u16 description",
-			  rel, "name description");
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
-	
     }
 
+    @Test(expected = RelativeNameException.class)
+    public void test_ctor_8arg_relativeName() throws TextParseException
+    {
+        Name n = Name.fromString("My.Name.");
+        
+	// a relative name
+	Name rel = Name.fromString("My.relative.Name");
+	new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
+			  0x1F2B, "u16 description",
+			  rel, "name description");
+    }
+
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xBC, (byte)0x1F, 2, 'M', 'y', 6, 's', 'i', 'N', 'g', 'l', 'E', 4, 'n', 'A', 'm', 'E', 0 };
@@ -151,6 +164,7 @@ public class U16NameBaseTest extends TestCase
 	assertEquals(exp, tc.getNameField());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Name exp = Name.fromString("My.Single.Name.");
@@ -161,16 +175,18 @@ public class U16NameBaseTest extends TestCase
 
 	assertEquals(0x19A2, tc.getU16Field());
 	assertEquals(exp, tc.getNameField());
-
-	t = new Tokenizer("10 My.Relative.Name");
-	tc = new TestClass();
-	try {
-	    tc.rdataFromString(t, null);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+    }
+    
+    @Test(expected = RelativeNameException.class)
+    public void test_rdataFromString_relativeName() throws IOException
+    {
+	Tokenizer t = new Tokenizer("10 My.Relative.Name");
+	TestClass tc = new TestClass();
+	
+        tc.rdataFromString(t, null);
     }
 
+    @Test
     public void test_rrToString() throws IOException, TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -186,6 +202,7 @@ public class U16NameBaseTest extends TestCase
 	assertEquals(exp, out);
     }
 
+    @Test
     public void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("My.Name.");

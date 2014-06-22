@@ -34,31 +34,31 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class SectionTest extends TestCase
+public class SectionTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
 	assertEquals("au", Section.string(Section.AUTHORITY));
-
-	try {
-	    Section.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	
-	//  (max is 3)
-	try {
-	    Section.string(4);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_minusOne()
+    {
+        Section.string(-1);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_maxValue()
+    {
+        Section.string(4);
+    }
+
+    @Test
     public void test_value()
     {
 	// regular one
@@ -71,6 +71,7 @@ public class SectionTest extends TestCase
 	assertEquals(-1, Section.value(""));
     }
 
+    @Test
     public void test_longString()
     {
 	assertEquals("ADDITIONAL RECORDS", Section.longString(Section.ADDITIONAL));
@@ -79,6 +80,7 @@ public class SectionTest extends TestCase
 	try {Section.longString(4);} catch( IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_updString()
     {
 	assertEquals("ZONE", Section.updString(Section.ZONE));

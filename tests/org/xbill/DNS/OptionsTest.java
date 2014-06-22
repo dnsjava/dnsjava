@@ -34,16 +34,20 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
-public class OptionsTest extends TestCase
+public class OptionsTest
 {
-    public void setUp()
+    @Before
+    public void init()
     {
 	// reset the options table before each test
 	Options.clear();
     }
 
+    @Test
     public void test_set_1arg()
     {
 	Options.set("Option1");
@@ -57,6 +61,7 @@ public class OptionsTest extends TestCase
 	assertEquals("true", Options.value("option2"));
     }
 
+    @Test
     public void test_set_2arg()
     {
 	Options.set("OPTION1", "Value1");
@@ -71,6 +76,7 @@ public class OptionsTest extends TestCase
 	assertEquals("value2b", Options.value("option2"));
     }
 
+    @Test
     public void test_check()
     {
 	assertFalse(Options.check("No Options yet"));
@@ -81,6 +87,7 @@ public class OptionsTest extends TestCase
 	assertTrue(Options.check("FIRST option"));
     }
 
+    @Test
     public void test_unset()
     {
 	// unset something non-existant
@@ -100,6 +107,7 @@ public class OptionsTest extends TestCase
 	Options.unset("Still Not an Option Name");
     }
 
+    @Test
     public void test_value()
     {
 	assertNull(Options.value("Table is Null"));
@@ -110,6 +118,7 @@ public class OptionsTest extends TestCase
 	assertEquals("true", Options.value("Testing OPTION"));
     }
 
+    @Test
     public void test_intValue()
     {
 	assertEquals(-1, Options.intValue("Table is Null"));
@@ -126,6 +135,7 @@ public class OptionsTest extends TestCase
 	assertEquals(-1, Options.intValue("A negative int Value"));
     }
 
+    @Test
     public void test_systemProperty()
     {
 	System.setProperty("dnsjava.options", "booleanOption,valuedOption1=10,valuedOption2=NotAnInteger");

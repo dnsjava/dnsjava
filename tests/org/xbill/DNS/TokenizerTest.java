@@ -39,22 +39,27 @@ import	java.io.ByteArrayInputStream;
 import	java.io.File;
 import	java.io.FileWriter;
 import	java.io.IOException;
-import	junit.framework.TestCase;
 
-public class TokenizerTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+public class TokenizerTest
 {
     private Tokenizer m_t;
 
-    protected void setUp()
+    @Before
+    public void init()
     {
 	m_t = null;
     }
 
-    private void assertEquals( byte[] exp, byte[] act )
+    private void byteAssertEquals( byte[] exp, byte[] act )
     {
 	assertTrue(java.util.Arrays.equals(exp, act));
     }
 
+    @Test
     public void test_get() throws IOException
     {
 	m_t = new Tokenizer(new BufferedInputStream(new ByteArrayInputStream("AnIdentifier \"a quoted \\\" string\"\r\n; this is \"my\"\t(comment)\nanotherIdentifier (\ramultilineIdentifier\n)".getBytes())));
@@ -187,30 +192,43 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, m_t.get().type);
     }
 
-    public void test_get_invalid() throws IOException
+    @Test(expected = TextParseException.class)
+    public void test_get_invalid1() throws IOException
     {
 	m_t = new Tokenizer("(this ;");
 	m_t.get();
-	try {m_t.get(); fail("TextParseException not thrown");}
-	catch( TextParseException e ){}
-
+	m_t.get();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_get_invalid2() throws IOException
+    {
 	m_t = new Tokenizer("\"bad");
-	try {m_t.get(); fail("TextParseException not thrown");}
-	catch( TextParseException e ){}
-	
+	m_t.get();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_get_invalid3() throws IOException
+    {
 	m_t = new Tokenizer(")");
-	try {m_t.get(); fail("TextParseException not thrown");}
-	catch( TextParseException e ){}
+	m_t.get();
+    }
 	
+    @Test(expected = TextParseException.class)
+    public void test_get_invalid4() throws IOException
+    {
 	m_t = new Tokenizer("\\");
-	try {m_t.get(); fail("TextParseException not thrown");}
-	catch( TextParseException e ){}
-
+	m_t.get();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_get_invalid5() throws IOException
+    {
 	m_t = new Tokenizer("\"\n");
-	try {m_t.get(); fail("TextParseException not thrown");}
-	catch( TextParseException e ){}
+	m_t.get();
     }
 
+    @Test
     public void test_File_input() throws IOException
     {
 	File tmp = File.createTempFile("dnsjava", "tmp");
@@ -243,6 +261,7 @@ public class TokenizerTest extends TestCase
 	}
     }
 
+    @Test
     public void test_unwanted_comment() throws IOException
     {
 	m_t = new Tokenizer("; this whole thing is a comment\n");
@@ -251,6 +270,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOL, tt.type);
     }
 
+    @Test
     public void test_unwanted_ungotten_whitespace() throws IOException
     {
 	m_t = new Tokenizer(" ");
@@ -260,6 +280,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, tt.type);
     }
 
+    @Test
     public void test_unwanted_ungotten_comment() throws IOException
     {
 	m_t = new Tokenizer("; this whole thing is a comment");
@@ -269,6 +290,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, tt.type);
     }
 
+    @Test
     public void test_empty_string() throws IOException
     {
 	m_t = new Tokenizer("");
@@ -280,19 +302,19 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, tt.type);
     }
 
+    @Test(expected = IllegalStateException.class)
     public void test_multiple_ungets() throws IOException
     {
 	m_t = new Tokenizer("a simple one");
 	Tokenizer.Token tt = m_t.get();
 
 	m_t.unget();
-	try {
-	    m_t.unget();
-	    fail("IllegalStateException not thrown");
-	}
-	catch( IllegalStateException e ){}
+        
+        //Second unget is expected to fail
+        m_t.unget();
     }
 
+    @Test(expected = TextParseException.class)
     public void test_getString() throws IOException
     {
 	m_t = new Tokenizer("just_an_identifier");
@@ -304,13 +326,11 @@ public class TokenizerTest extends TestCase
 	assertEquals("just a string", out);
 
 	m_t = new Tokenizer("; just a comment");
-	try {
-	    out = m_t.getString();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	
+        out = m_t.getString();
     }
 
+    @Test(expected = TextParseException.class)
     public void test_getIdentifier() throws IOException
     {
 	m_t = new Tokenizer("just_an_identifier");
@@ -318,97 +338,100 @@ public class TokenizerTest extends TestCase
 	assertEquals("just_an_identifier", out);
 
 	m_t = new Tokenizer("\"just a string\"");
-	try {
-	    m_t.getIdentifier();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	
+        m_t.getIdentifier();
     }
 
+    @Test
     public void test_getLong() throws IOException
     {
 	m_t = new Tokenizer((Integer.MAX_VALUE+1L) + "");
 	long out = m_t.getLong();
 	assertEquals((Integer.MAX_VALUE+1L), out);
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getLong_minusTen() throws IOException
+    {
 	m_t = new Tokenizer("-10");
-	try {
-	    m_t.getLong();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+        m_t.getLong();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getLong_19identifier() throws IOException
+    {
 
 	m_t = new Tokenizer("19_identifier");
-	try {
-	    m_t.getLong();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getLong();
     }
 
+    @Test
     public void test_getUInt32() throws IOException
     {
 	m_t = new Tokenizer(0xABCDEF12L + "");
 	long out = m_t.getUInt32();
 	assertEquals(0xABCDEF12L, out);
-
-	m_t = new Tokenizer(0x100000000L + "");
-	try {
-	    m_t.getUInt32();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
-	m_t = new Tokenizer("-12345");
-	try {
-	    m_t.getUInt32();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
     }
 
+    @Test(expected = TextParseException.class)
+    public void test_getUInt32_invalid() throws IOException
+    {
+	m_t = new Tokenizer(0x100000000L + "");
+	m_t.getUInt32();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getUInt32_negative() throws IOException
+    {
+	m_t = new Tokenizer("-12345");
+	m_t.getUInt32();
+    }
+
+    @Test
     public void test_getUInt16() throws IOException
     {
 	m_t = new Tokenizer(0xABCDL + "");
 	int out = m_t.getUInt16();
 	assertEquals(0xABCDL, out);
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getUInt16_invalid() throws IOException
+    {
 	m_t = new Tokenizer(0x10000 + "");
-	try {
-	    m_t.getUInt16();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
+	m_t.getUInt16();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getUInt16_negative() throws IOException
+    {
 	m_t = new Tokenizer("-125");
-	try {
-	    m_t.getUInt16();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getUInt16();
     }
 
+    @Test
     public void test_getUInt8() throws IOException
     {
 	m_t = new Tokenizer(0xCDL + "");
 	int out = m_t.getUInt8();
 	assertEquals(0xCDL, out);
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getUInt8_invalid() throws IOException
+    {
 	m_t = new Tokenizer(0x100 + "");
-	try {
-	    m_t.getUInt8();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
+	m_t.getUInt8();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getUInt8_negative() throws IOException
+    {
 	m_t = new Tokenizer("-12");
-	try {
-	    m_t.getUInt8();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getUInt8();
     }
 
+    @Test
     public void test_getTTL() throws IOException
     {
 	m_t = new Tokenizer("59S");
@@ -419,15 +442,16 @@ public class TokenizerTest extends TestCase
 
 	m_t = new Tokenizer((TTL.MAX_VALUE+1L) + "");
 	assertEquals(TTL.MAX_VALUE, m_t.getTTL());
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getTTL_invalid() throws IOException
+    {
 	m_t = new Tokenizer("Junk");
-	try {
-	    m_t.getTTL();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getTTL();
     }
 
+    @Test
     public void test_getTTLLike() throws IOException
     {
 	m_t = new Tokenizer("59S");
@@ -438,15 +462,16 @@ public class TokenizerTest extends TestCase
 
 	m_t = new Tokenizer((TTL.MAX_VALUE+1L) + "");
 	assertEquals(TTL.MAX_VALUE+1L, m_t.getTTLLike());
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getTTLLike_invalid() throws IOException
+    {
 	m_t = new Tokenizer("Junk");
-	try {
-	    m_t.getTTLLike();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getTTLLike();
     }
 
+    @Test
     public void test_getName() throws IOException, TextParseException
     {
 	Name root = Name.fromString(".");
@@ -454,138 +479,132 @@ public class TokenizerTest extends TestCase
 	Name exp = Name.fromString("junk.");
 	Name out = m_t.getName(root);
 	assertEquals(exp, out);
-
+    }
+    
+    @Test(expected = RelativeNameException.class)
+    public void test_getName_RelativeName() throws IOException, TextParseException
+    {
 	Name rel = Name.fromString("you.dig");
 	m_t = new Tokenizer("junk");
-	try {
-	    m_t.getName(rel);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
-
+	m_t.getName(rel);
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getName_Empty() throws IOException, TextParseException
+    {
+        Name root = Name.fromString(".");
 	m_t = new Tokenizer("");
-	try {
-	    m_t.getName(root);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getName(root);
     }
 
+    @Test
     public void test_getEOL() throws IOException
     {
 	m_t = new Tokenizer("id");
 	m_t.getIdentifier();
-	try {
-	    m_t.getEOL();
-	}
-	catch( TextParseException e ){
-	    fail(e.getMessage());
-	}
-
+	m_t.getEOL();
+	
 	m_t = new Tokenizer("\n");
-	try {
-	    m_t.getEOL();
-	    m_t.getEOL();
-	}
-	catch( TextParseException e ){
-	    fail(e.getMessage());
-	}
-
+	m_t.getEOL();
+	m_t.getEOL();
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getEOL2() throws IOException
+    {
 	m_t = new Tokenizer("id");
-	try {
-	    m_t.getEOL();
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getEOL();
     }
 
+    @Test
     public void test_getBase64() throws IOException
     {
 	byte[] exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	// basic
 	m_t = new Tokenizer("AQIDBAUGBwgJ");
 	byte[] out = m_t.getBase64();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// with some whitespace
 	m_t = new Tokenizer("AQIDB AUGB   wgJ");
 	out = m_t.getBase64();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// two base64s separated by newline
 	m_t = new Tokenizer("AQIDBAUGBwgJ\nAB23DK");
 	out = m_t.getBase64();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// no remaining strings
 	m_t = new Tokenizer("\n");
 	assertNull( m_t.getBase64() );
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getBase64_newLine() throws IOException
+    {
 	m_t = new Tokenizer("\n");
-	try {
-	    m_t.getBase64(true);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
-	// invalid encoding
-	m_t = new Tokenizer("not_base64");
-	try {
-	    m_t.getBase64(false);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
-	m_t = new Tokenizer("not_base64");
-	try {
-	    m_t.getBase64(true);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getBase64(true);
     }
 
+    @Test(expected = TextParseException.class)
+    public void test_getBase64_notBase64_1() throws IOException
+    {
+        // invalid encoding
+	m_t = new Tokenizer("not_base64");
+	m_t.getBase64(false);
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getBase64_notBase64_2() throws IOException
+    {
+	m_t = new Tokenizer("not_base64");
+	m_t.getBase64(true);
+    }
+
+    @Test
     public void test_getHex() throws IOException
     {
 	byte[] exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	// basic
 	m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F");
 	byte[] out = m_t.getHex();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// with some whitespace
 	m_t = new Tokenizer("0102030 405 060708090A0B0C      0D0E0F");
 	out = m_t.getHex();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// two hexs separated by newline
 	m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F\n01AB3FE");
 	out = m_t.getHex();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// no remaining strings
 	m_t = new Tokenizer("\n");
 	assertNull( m_t.getHex() );
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getHex_newLine() throws IOException
+    {
 	m_t = new Tokenizer("\n");
-	try {
-	    m_t.getHex(true);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
+	m_t.getHex(true);
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_getHex_notHex1() throws IOException
+    {
 	// invalid encoding
 	m_t = new Tokenizer("not_hex");
-	try {
-	    m_t.getHex(false);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getHex(false);
+    }
 
+    @Test(expected = TextParseException.class)
+    public void test_getHex_notHex2() throws IOException
+    {
 	m_t = new Tokenizer("not_hex");
-	try {
-	    m_t.getHex(true);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	m_t.getHex(true);
     }
 }

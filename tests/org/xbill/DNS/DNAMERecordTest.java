@@ -34,10 +34,12 @@
 //
 package	org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class DNAMERecordTest extends TestCase
+public class DNAMERecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	DNAMERecord d = new DNAMERecord();
@@ -46,6 +48,7 @@ public class DNAMERecordTest extends TestCase
 	assertNull(d.getAlias());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -60,6 +63,7 @@ public class DNAMERecordTest extends TestCase
 	assertEquals(a, d.getAlias());
     }
 
+    @Test
     public void test_getObject()
     {
 	DNAMERecord d = new DNAMERecord();

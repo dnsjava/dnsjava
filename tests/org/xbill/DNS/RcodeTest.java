@@ -34,10 +34,12 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class RcodeTest extends TestCase
+public class RcodeTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -48,23 +50,22 @@ public class RcodeTest extends TestCase
 
 	// one that doesn't exist
 	assertTrue(Rcode.string(20).startsWith("RESERVED"));
-
-	try {
-	    Rcode.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_minusOne()
+    {
+	Rcode.string(-1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_maxValue()
+    {
 	//  (max is 0xFFF)
-	try {
-	    Rcode.string(0x1000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	Rcode.string(0x1000);
     }
 
+    @Test
     public void test_TSIGstring()
     {
 	// a regular one
@@ -72,23 +73,22 @@ public class RcodeTest extends TestCase
 
 	// one that doesn't exist
 	assertTrue(Rcode.TSIGstring(20).startsWith("RESERVED"));
-
-	try {
-	    Rcode.TSIGstring(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_TSIGstring_minusOne()
+    {
+	Rcode.TSIGstring(-1);
+    }
 	
+    @Test(expected = IllegalArgumentException.class)
+    public void test_TSIGstring_maxValue()
+    {
 	//  (max is 0xFFFF)
-	try {
-	    Rcode.string(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	Rcode.string(0x10000);
     }
 
+    @Test
     public void test_value()
     {
 	// regular one

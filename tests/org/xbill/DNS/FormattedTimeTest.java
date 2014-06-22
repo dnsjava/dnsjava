@@ -34,15 +34,18 @@
 //
 package org.xbill.DNS;
 
+import static org.junit.Assert.*;
+
 import	java.util.Date;
 import	java.util.Calendar;
 import	java.util.GregorianCalendar;
 import	java.util.TimeZone;
-import	junit.framework.TestCase;
+import org.junit.Test;
 import	org.xbill.DNS.FormattedTime;
 
-public class FormattedTimeTest extends TestCase
+public class FormattedTimeTest
 {
+    @Test
     public void test_format()
     {
 	GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -51,6 +54,7 @@ public class FormattedTimeTest extends TestCase
 	assertEquals("20050319040405", out);
     }
 
+    @Test
     public void test_parse() throws TextParseException
     {
 	// have to make sure to clear out the milliseconds since there
@@ -67,25 +71,21 @@ public class FormattedTimeTest extends TestCase
 	assertEquals(cal, cal2);
     }
 
-    public void test_parse_invalid()
+    @Test(expected = TextParseException.class)
+    public void test_parse_invalid1() throws TextParseException
     {
-	try {
-	    FormattedTime.parse("2004010101010");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){
-	}
-	try {
-	    FormattedTime.parse("200401010101010");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){
-	}
-	try {
-	    FormattedTime.parse("2004010101010A");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){
-	}
+	FormattedTime.parse("2004010101010");
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_parse_invalid2() throws TextParseException
+    {
+        FormattedTime.parse("200401010101010");
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_parse_invalid3() throws TextParseException
+    {
+	FormattedTime.parse("2004010101010A");
     }
 }

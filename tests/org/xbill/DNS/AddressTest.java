@@ -34,12 +34,14 @@
 //
 package org.xbill.DNS;
 
+import static org.junit.Assert.*;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class AddressTest extends TestCase
+public class AddressTest
 {
     private void assertEquals( byte[] exp, byte[] act )
     {
@@ -54,16 +56,13 @@ public class AddressTest extends TestCase
 	}
     }
 
-    public void test_toByteArray_invalid()
+    @Test(expected = IllegalArgumentException.class)
+    public void test_toByteArray_invalidAddress()
     {
-	try {
-	    Address.toByteArray("doesn't matter", 3);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	Address.toByteArray("doesn't matter", 3);
     }
 
+    @Test
     public void test_toByteArray_IPv4()
     {
 	byte[] exp = new byte[] { (byte)198, (byte)121, (byte)10, (byte)234 };
@@ -78,6 +77,7 @@ public class AddressTest extends TestCase
 	ret = Address.toByteArray("255.255.255.255", Address.IPv4);
     }
 
+    @Test
     public void test_toByteArray_IPv4_invalid()
     {
 	assertNull(Address.toByteArray("A.B.C.D", Address.IPv4));
@@ -117,7 +117,8 @@ public class AddressTest extends TestCase
 	assertNull(Address.toByteArray("", Address.IPv4));
     }
 
-    public void test_toByteArray_IPv6()
+    @Test
+    public void test_toByteArray_IPv6Address()
     {
 	byte[] exp = new byte[] { (byte)32, (byte)1, (byte)13, (byte)184,
 				  (byte)133, (byte)163, (byte)8, (byte)211,
@@ -199,6 +200,7 @@ public class AddressTest extends TestCase
 	assertEquals(exp, ret);
     }
 
+    @Test
     public void test_toByteArray_IPv6_invalid()
     {
 	// not enough groups
@@ -220,6 +222,7 @@ public class AddressTest extends TestCase
 	
     }
 
+    @Test
     public void test_toArray()
     {
 	int[] exp = new int[] { 1, 2, 3, 4 };
@@ -235,19 +238,21 @@ public class AddressTest extends TestCase
 	assertEquals( exp, ret );
     }
 
+    @Test
     public void test_toArray_invalid()
     {
 	assertNull(Address.toArray("128.121.1", Address.IPv4));
-
 	assertNull(Address.toArray(""));
     }
 
+    @Test
     public void test_isDottedQuad()
     {
 	assertTrue(Address.isDottedQuad("1.2.3.4"));
 	assertFalse(Address.isDottedQuad("256.2.3.4"));
     }
 
+    @Test
     public void test_toDottedQuad()
     {
 	assertEquals("128.176.201.1",
@@ -257,19 +262,16 @@ public class AddressTest extends TestCase
 		     Address.toDottedQuad(new int[] { 200, 1, 255, 128 }));
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_addressLength()
     {
 	assertEquals(4, Address.addressLength(Address.IPv4));
 	assertEquals(16, Address.addressLength(Address.IPv6));
 
-	try {
-	    Address.addressLength(3);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	Address.addressLength(3);
     }
 
+    @Test
     public void test_getByName() throws UnknownHostException
     {
 	InetAddress out = Address.getByName("128.145.198.231");
@@ -280,22 +282,20 @@ public class AddressTest extends TestCase
 	assertEquals("128.138.72.229", out.getHostAddress());
     }
 
-    public void test_getByName_invalid() throws UnknownHostException
+    @Test(expected = UnknownHostException.class)
+    public void test_getByName_invalidHost() throws UnknownHostException
     {
-	try {
-	    Address.getByName("example.invalid");
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
-	try {
-	    Address.getByName("");
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
+	Address.getByName("example.invalid");
+	
+    }
+    
+    @Test(expected = UnknownHostException.class)
+    public void test_getByName_invalidEmpty() throws UnknownHostException
+    {
+	Address.getByName("");
     }
 
+    @Test
     public void test_getAllByName() throws UnknownHostException
     {
 	InetAddress[] out = Address.getAllByName("128.145.198.231");
@@ -314,44 +314,34 @@ public class AddressTest extends TestCase
 	}
     }
 
-    public void test_getAllByName_invalid() throws UnknownHostException
+    @Test(expected = UnknownHostException.class)
+    public void test_getAllByName_invalidHost() throws UnknownHostException
     {
-	try {
-	    Address.getAllByName("example.invalid");
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
-	try {
-	    Address.getAllByName("");
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
+	Address.getAllByName("example.invalid");
+	
+    }
+    
+    @Test(expected = UnknownHostException.class)
+    public void test_getAllByName_invalidEmpty() throws UnknownHostException
+    {
+	Address.getAllByName("");
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_familyOf() throws UnknownHostException
     {
 	assertEquals(Address.IPv4, Address.familyOf(InetAddress.getByName("192.168.0.1")));
 	assertEquals(Address.IPv6, Address.familyOf(InetAddress.getByName("1:2:3:4:5:6:7:8")));
-	try {
-	    Address.familyOf(null);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	Address.familyOf(null);
     }
 
+    @Ignore
+    @Test(expected = UnknownHostException.class)
     public void test_getHostName() throws UnknownHostException
     {
 	String out = Address.getHostName(InetAddress.getByName("128.138.207.163"));
 	assertEquals("www-serl.cs.colorado.edu.", out);
 
-	try {
-	    Address.getHostName(InetAddress.getByName("192.168.1.1"));
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
+	Address.getHostName(InetAddress.getByName("192.168.1.1"));
     }
 }

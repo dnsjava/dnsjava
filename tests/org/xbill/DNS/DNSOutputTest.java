@@ -34,47 +34,47 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
-public class DNSOutputTest extends TestCase
+public class DNSOutputTest
 {
     private DNSOutput m_do;
 
-    public void setUp()
+    @Before
+    public void init()
     {
 	m_do = new DNSOutput( 1 );
     }
 
-    private void assertEquals( byte[] exp, byte[] act )
+    private void byteAssertEquals( byte[] exp, byte[] act )
     {
 	assertTrue(java.util.Arrays.equals(exp, act));
     }
 
+    @Test
     public void test_default_ctor()
     {
 	m_do = new DNSOutput();
 	assertEquals( 0, m_do.current() );
     }
 
+    @Test(expected = IllegalStateException.class)
     public void test_initial_state()
     {
 	assertEquals( 0, m_do.current() );
-	try {
-	    m_do.restore();
-	    fail( "IllegalStateException not thrown" );
-	}
-	catch( IllegalStateException e ){
-	    // pass
-	}
-	try {
-	    m_do.jump(1);
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_do.restore();
+	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_initial_stateJump1()
+    {
+	m_do.jump(1);
     }
 
+    @Test
     public void test_writeU8_basic()
     {
 	m_do.writeU8(1);
@@ -85,6 +85,7 @@ public class DNSOutputTest extends TestCase
 	assertEquals( 1, curr[0] );
     }
 
+    @Test
     public void test_writeU8_expand()
     {
 	// starts off at 1;
@@ -99,6 +100,7 @@ public class DNSOutputTest extends TestCase
 	assertEquals( 2, curr[1] );
     }
 
+    @Test
     public void test_writeU8_max()
     {
 	m_do.writeU8(0xFF);
@@ -106,17 +108,13 @@ public class DNSOutputTest extends TestCase
 	assertEquals( (byte)0xFF, (byte)curr[0] );
     }
     
+    @Test(expected = IllegalArgumentException.class)
     public void test_writeU8_toobig()
     {
-	try {
-	    m_do.writeU8( 0x1FF );
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_do.writeU8( 0x1FF );
     }
 
+    @Test
     public void test_writeU16_basic()
     {
 	m_do.writeU16(0x100);
@@ -128,6 +126,7 @@ public class DNSOutputTest extends TestCase
 	assertEquals( 0, curr[1] );
     }
 
+    @Test
     public void test_writeU16_max()
     {
 	m_do.writeU16(0xFFFF);
@@ -136,17 +135,13 @@ public class DNSOutputTest extends TestCase
 	assertEquals( (byte)0XFF, (byte)curr[1] );
     }
     
+    @Test(expected = IllegalArgumentException.class)
     public void test_writeU16_toobig()
     {
-	try {
-	    m_do.writeU16( 0x1FFFF );
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_do.writeU16( 0x1FFFF );
     }
 
+    @Test
     public void test_writeU32_basic()
     {
 	m_do.writeU32(0x11001011);
@@ -160,6 +155,7 @@ public class DNSOutputTest extends TestCase
 	assertEquals( 0x11, curr[3] );
     }
 
+    @Test
     public void test_writeU32_max()
     {
 	m_do.writeU32(0xFFFFFFFFL);
@@ -170,17 +166,13 @@ public class DNSOutputTest extends TestCase
 	assertEquals( (byte)0XFF, (byte)curr[3] );
     }
     
+    @Test(expected = IllegalArgumentException.class)
     public void test_writeU32_toobig()
     {
-	try {
-	    m_do.writeU32( 0x1FFFFFFFFL );
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_do.writeU32( 0x1FFFFFFFFL );
     }
 
+    @Test
     public void test_jump_basic()
     {
 	m_do.writeU32(0x11223344L);
@@ -196,15 +188,17 @@ public class DNSOutputTest extends TestCase
 	
     }
 
+    @Test
     public void test_writeByteArray_1arg()
     {
 	byte[] in = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, (byte)0x12, (byte)0x34 };
 	m_do.writeByteArray( in );
 	assertEquals( 5, m_do.current() );
 	byte[] curr = m_do.toByteArray();
-	assertEquals( in, curr );
+	byteAssertEquals( in, curr );
     }
 
+    @Test
     public void test_writeByteArray_3arg()
     {
 	byte[] in = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, (byte)0x12, (byte)0x34 };
@@ -212,9 +206,10 @@ public class DNSOutputTest extends TestCase
 	assertEquals( 3, m_do.current() );
 	byte[] exp = new byte[] { in[2], in[3], in[4] };
 	byte[] curr = m_do.toByteArray();
-	assertEquals( exp, curr );
+	byteAssertEquals( exp, curr );
     }
 
+    @Test
     public void test_writeCountedString_basic()
     {
 	byte[] in = new byte[] { 'h', 'e', 'l', 'L', '0' };
@@ -222,9 +217,10 @@ public class DNSOutputTest extends TestCase
 	assertEquals( in.length + 1, m_do.current() );
 	byte[] curr = m_do.toByteArray();
 	byte[] exp = new byte[] { (byte)(in.length), in[0], in[1], in[2], in[3], in[4] };
-	assertEquals( exp, curr );
+	byteAssertEquals( exp, curr );
     }
 
+    @Test
     public void test_writeCountedString_empty()
     {
 	byte[] in = new byte[] {};
@@ -232,21 +228,17 @@ public class DNSOutputTest extends TestCase
 	assertEquals( in.length + 1, m_do.current() );
 	byte[] curr = m_do.toByteArray();
 	byte[] exp = new byte[] { (byte)(in.length) };
-	assertEquals( exp, curr );
+	byteAssertEquals( exp, curr );
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_writeCountedString_toobig()
     {
 	byte[] in = new byte [ 256 ];
-	try {
-	    m_do.writeCountedString(in);
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	m_do.writeCountedString(in);
     }
 
+    @Test(expected = IllegalStateException.class)
     public void test_save_restore()
     {
 	m_do.writeU32( 0x12345678L );
@@ -256,13 +248,6 @@ public class DNSOutputTest extends TestCase
 	assertEquals( 6, m_do.current() );
 	m_do.restore();
 	assertEquals( 4, m_do.current() );
-	try {
-	    m_do.restore();
-	    fail( "IllegalArgumentException not thrown" );
-	}
-	catch( IllegalStateException e ){
-	    // pass
-	}
+	m_do.restore();
     }
-
 }
