@@ -35,28 +35,34 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import junit.framework.TestCase;
 
-public class ExceptionTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class ExceptionTest
 {
+    @Test
     public void test_InvalidDClassException()
     {
 	IllegalArgumentException e = new InvalidDClassException(10);
 	assertEquals( "Invalid DNS class: 10", e.getMessage() );
     }
 
+    @Test
     public void test_InvalidTTLException()
     {
 	IllegalArgumentException e = new InvalidTTLException(32345);
 	assertEquals( "Invalid DNS TTL: 32345", e.getMessage() );
     }
 
+    @Test
     public void test_InvalidTypeException()
     {
 	IllegalArgumentException e = new InvalidTypeException(32345);
 	assertEquals( "Invalid DNS type: 32345", e.getMessage() );
     }
 
+    @Test
     public void test_NameTooLongException()
     {
 	WireParseException e = new NameTooLongException();
@@ -66,6 +72,7 @@ public class ExceptionTest extends TestCase
 	assertEquals( "This is my too long name", e.getMessage() );
     }
 
+    @Test
     public void test_RelativeNameException() throws TextParseException
     {
 	IllegalArgumentException e = new RelativeNameException("This is my relative name");
@@ -75,6 +82,7 @@ public class ExceptionTest extends TestCase
 	assertEquals("'relative' is not an absolute name", e.getMessage());
     }
 
+    @Test
     public void test_TextParseException()
     {
 	IOException e = new TextParseException();
@@ -84,6 +92,7 @@ public class ExceptionTest extends TestCase
 	assertEquals( "This is my message", e.getMessage() );
     }
 
+    @Test
     public void test_WireParseException()
     {
 	IOException e = new WireParseException();
@@ -93,6 +102,7 @@ public class ExceptionTest extends TestCase
 	assertEquals( "This is my message", e.getMessage() );
     }
 
+    @Test
     public void test_ZoneTransferException()
     {
 	Exception e = new ZoneTransferException();

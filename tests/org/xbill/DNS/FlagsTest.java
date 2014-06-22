@@ -34,10 +34,12 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class FlagsTest extends TestCase
+public class FlagsTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -45,23 +47,22 @@ public class FlagsTest extends TestCase
 
 	// one that doesn't exist
 	assertTrue(Flags.string(12).startsWith("flag"));
-
-	try {
-	    Flags.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_stringMinus1()
+    {
+	Flags.string(-1);
+    }
 	
+    @Test(expected = IllegalArgumentException.class)
+    public void test_stringMaxValue()
+    {
 	//  (max is 0xF)
-	try {
-	    Flags.string(0x10);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+        Flags.string(0x10);
     }
 
+    @Test
     public void test_value()
     {
 	// regular one
@@ -80,14 +81,16 @@ public class FlagsTest extends TestCase
 	assertEquals(-1, Flags.value(""));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void test_isFlagMinus1()
+    {
+	Flags.isFlag(-1);
+	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
     public void test_isFlag()
     {
-	try {
-	    Flags.isFlag(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
 	assertTrue(Flags.isFlag(0));
 	assertFalse(Flags.isFlag(1)); // opcode
 	assertFalse(Flags.isFlag(2));
@@ -104,11 +107,7 @@ public class FlagsTest extends TestCase
 	assertFalse(Flags.isFlag(13));
 	assertFalse(Flags.isFlag(14));
 	assertFalse(Flags.isFlag(14));
-	try {
-	    Flags.isFlag(16);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+
+        Flags.isFlag(16);
     }
 }

@@ -38,10 +38,13 @@ import	java.io.IOException;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
 
-public class KEYRecordTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class KEYRecordTest
 {
+    @Test
     public void test_ctor_0arg() throws UnknownHostException
     {
 	KEYRecord ar = new KEYRecord();
@@ -56,6 +59,7 @@ public class KEYRecordTest extends TestCase
 	assertNull(ar.getKey());
     }
 
+    @Test
     public void test_getObject()
     {
 	KEYRecord ar = new KEYRecord();
@@ -63,6 +67,7 @@ public class KEYRecordTest extends TestCase
 	assertTrue(r instanceof KEYRecord);
     }
 
+    @Test(expected = RelativeNameException.class)
     public void test_ctor_7arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Absolute.Name.");
@@ -80,33 +85,33 @@ public class KEYRecordTest extends TestCase
 	assertTrue(Arrays.equals(key, kr.getKey()));
 
 	// a relative name
-	try {
-	    new KEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	new KEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
     }
 
+    @Test
     public void test_Protocol_string()
     {
 	// a regular one
 	assertEquals("DNSSEC", KEYRecord.Protocol.string(KEYRecord.Protocol.DNSSEC));
 	// a unassigned value within range
 	assertEquals("254", KEYRecord.Protocol.string(0xFE));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_Protocol_stringTooLow()
+    {
 	// too low
-	try {
-	    KEYRecord.Protocol.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
+	KEYRecord.Protocol.string(-1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_Protocol_stringTooHigh()
+    {
 	// too high
-	try {
-	    KEYRecord.Protocol.string(0x100);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
+	KEYRecord.Protocol.string(0x100);
     }
 
+    @Test
     public void test_Protocol_value()
     {
 	// a regular one
@@ -119,6 +124,7 @@ public class KEYRecordTest extends TestCase
 	assertEquals(-1, KEYRecord.Protocol.value("256"));
     }
 
+    @Test
     public void test_Flags_value()
     {
 	// numeric
@@ -147,6 +153,7 @@ public class KEYRecordTest extends TestCase
 	assertEquals(0, KEYRecord.Flags.value("|"));
     }
 
+    @Test
     public void test_rdataFromString() throws IOException, TextParseException
     {
 	// basic
@@ -168,32 +175,33 @@ public class KEYRecordTest extends TestCase
 	assertEquals(KEYRecord.Protocol.TLS, kr.getProtocol());
 	assertEquals(3, kr.getAlgorithm()); // Was ECC
 	assertNull(kr.getKey());
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromStringInvalidFlags() throws IOException, TextParseException
+    {
 	// invalid flags
-	kr = new KEYRecord();
-	st = new Tokenizer("NOAUTH|ZONE|JUNK EMAIL RSASHA1 AQIDBAUGBwgJ");
-	try {
-	    kr.rdataFromString(st, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
+	KEYRecord kr = new KEYRecord();
+	Tokenizer st = new Tokenizer("NOAUTH|ZONE|JUNK EMAIL RSASHA1 AQIDBAUGBwgJ");
+	kr.rdataFromString(st, null);
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromStringInvalidProtocol() throws IOException, TextParseException
+    {
 	// invalid protocol
-	kr = new KEYRecord();
-	st = new Tokenizer("NOAUTH|ZONE RSASHA1 3 AQIDBAUGBwgJ");
-	try {
-	    kr.rdataFromString(st, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	KEYRecord kr = new KEYRecord();
+	Tokenizer st = new Tokenizer("NOAUTH|ZONE RSASHA1 3 AQIDBAUGBwgJ");
+	kr.rdataFromString(st, null);
+	
+    }
 
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromStringInvalidAlgorithm() throws IOException, TextParseException
+    {
 	// invalid algorithm
-	kr = new KEYRecord();
-	st = new Tokenizer("NOAUTH|ZONE EMAIL ZONE AQIDBAUGBwgJ");
-	try {
-	    kr.rdataFromString(st, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	KEYRecord kr = new KEYRecord();
+	Tokenizer st = new Tokenizer("NOAUTH|ZONE EMAIL ZONE AQIDBAUGBwgJ");
+	kr.rdataFromString(st, null);
     }
 }

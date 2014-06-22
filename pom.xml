@@ -37,7 +37,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <target.jdk>1.4</target.jdk>
+        <target.jdk>1.7</target.jdk>
     </properties>
 
     <build>
@@ -55,27 +55,27 @@
 
         <plugins>
         
-        <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+            <!--        <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-gpg-plugin</artifactId>
+              <version>1.4</version>
+              <executions>
+                <execution>
+                  <id>sign-artifacts</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <source>${target.jdk}</source>
-                    <target>${target.jdk}</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>iso8859-1</encoding>
                     <testExcludes>
                         <!-- Exclude unit tests with external dependencies -->
@@ -174,8 +174,8 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.2</version>
-            <scope>test</scope>
+            <version>4.11</version>
+            <!--<scope>test</scope>-->
         </dependency>
     </dependencies>
 

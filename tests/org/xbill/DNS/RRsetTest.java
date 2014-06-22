@@ -38,7 +38,6 @@ import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Date;
 import	java.util.Iterator;
-import	junit.framework.TestCase;
 import	org.xbill.DNS.ARecord;
 import	org.xbill.DNS.CNAMERecord;
 import	org.xbill.DNS.DClass;
@@ -49,7 +48,11 @@ import	org.xbill.DNS.RRSIGRecord;
 import	org.xbill.DNS.TextParseException;
 import	org.xbill.DNS.Type;
 
-public class RRsetTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+public class RRsetTest
 {
     private RRset m_rs;
     Name m_name, m_name2;
@@ -57,7 +60,8 @@ public class RRsetTest extends TestCase
     ARecord m_a1, m_a2;
     RRSIGRecord m_s1, m_s2;
 
-    public void setUp() throws TextParseException, UnknownHostException
+    @Before
+    public void init() throws TextParseException, UnknownHostException
     {
 	m_rs = new RRset();
 	m_name = Name.fromString("this.is.a.test.");
@@ -76,24 +80,12 @@ public class RRsetTest extends TestCase
 			       new byte[ 0 ]);
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	assertEquals(0, m_rs.size());
-	try {m_rs.getDClass(); fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.getType();fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.getTTL();fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.getName();fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.first();fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-
-	try {m_rs.toString();fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-
-	Iterator itr = m_rs.rrs();
+        
+        Iterator itr = m_rs.rrs();
 	assertNotNull(itr);
 	assertFalse(itr.hasNext());
 
@@ -101,7 +93,44 @@ public class RRsetTest extends TestCase
 	assertNotNull(itr);
 	assertFalse(itr.hasNext());
     }
+    
+    @Test(expected = IllegalStateException.class)
+    public void test_ctor_0argDClass()
+    {
+	m_rs.getDClass();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void test_ctor_0argType()
+    {
+	m_rs.getType();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void test_ctor_0argTTL()
+    {
+	m_rs.getTTL();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void test_ctor_0argName()
+    {
+	m_rs.getName();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void test_ctor_0argFirst()
+    {
+	m_rs.first();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void test_ctor_0argToString()
+    {
+	m_rs.toString();
+    }
 
+    @Test
     public void test_basics() throws TextParseException,
 				     UnknownHostException
     {
@@ -186,6 +215,7 @@ public class RRsetTest extends TestCase
 
     }
 
+    @Test
     public void test_ctor_1arg()
     {
 	m_rs.addRR(m_a1);
@@ -210,6 +240,7 @@ public class RRsetTest extends TestCase
 	assertFalse(itr.hasNext());
     }
 
+    @Test
     public void test_toString()
     {
 	m_rs.addRR(m_a1);
@@ -225,20 +256,17 @@ public class RRsetTest extends TestCase
 	assertTrue(out.indexOf("[192.169.232.12]") != -1);
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_addRR_invalidType() throws TextParseException
     {
 	m_rs.addRR(m_a1);
 	
 	CNAMERecord c = new CNAMERecord(m_name, DClass.IN, m_ttl, Name.fromString("an.alias."));
 	
-	try {
-	    m_rs.addRR(c);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	m_rs.addRR(c);
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_addRR_invalidName() throws TextParseException, UnknownHostException
     {
 	m_rs.addRR(m_a1);
@@ -246,14 +274,10 @@ public class RRsetTest extends TestCase
 	m_a2 = new ARecord(m_name2, DClass.IN, m_ttl,
 			   InetAddress.getByName("192.169.232.11"));
 	
-	try {
-	    m_rs.addRR(m_a2);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	m_rs.addRR(m_a2);
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_addRR_invalidDClass() throws TextParseException, UnknownHostException
     {
 	m_rs.addRR(m_a1);
@@ -261,14 +285,10 @@ public class RRsetTest extends TestCase
 	m_a2 = new ARecord(m_name, DClass.CHAOS, m_ttl,
 			   InetAddress.getByName("192.169.232.11"));
 	
-	try {
-	    m_rs.addRR(m_a2);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	m_rs.addRR(m_a2);
     }
 
+    @Test
     public void test_TTLcalculation()
     {
 	m_rs.addRR(m_a2);
@@ -283,6 +303,7 @@ public class RRsetTest extends TestCase
 	}
     }
 
+    @Test
     public void test_Record_placement()
     {
 	m_rs.addRR(m_a1);
@@ -302,6 +323,7 @@ public class RRsetTest extends TestCase
 	assertFalse(itr.hasNext());
     }
 
+    @Test
     public void test_noncycling_iterator()
     {
 	m_rs.addRR(m_a1);

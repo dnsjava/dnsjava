@@ -34,17 +34,21 @@
 //
 package org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 import	org.xbill.DNS.Compression;
 import	org.xbill.DNS.Name;
 
-public class CompressionTest extends TestCase
+public class CompressionTest
 {
-    public void setUp()
+    @Before
+    public void init()
     {
 	Options.set("verbosecompression");
     }
 
+    @Test
     public void test() throws TextParseException
     {
 	Compression c = new Compression();

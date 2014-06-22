@@ -38,10 +38,13 @@ import	java.io.IOException;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
 
-public class EmptyRecordTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class EmptyRecordTest
 {
+    @Test
     public void test_ctor() throws UnknownHostException
     {
 	EmptyRecord ar = new EmptyRecord();
@@ -51,6 +54,7 @@ public class EmptyRecordTest extends TestCase
 	assertEquals(0, ar.getTTL());
     }
 
+    @Test
     public void test_getObject()
     {
 	EmptyRecord ar = new EmptyRecord();
@@ -58,6 +62,7 @@ public class EmptyRecordTest extends TestCase
 	assertTrue(r instanceof EmptyRecord);
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	DNSInput i = new DNSInput(new byte[] { 1, 2, 3, 4, 5 });
@@ -72,6 +77,7 @@ public class EmptyRecordTest extends TestCase
 	assertEquals(0, er.getTTL());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer("these are the tokens");
@@ -85,12 +91,14 @@ public class EmptyRecordTest extends TestCase
 	assertEquals("these", t.getString());
     }
 
+    @Test
     public void test_rrToString()
     {
 	EmptyRecord er = new EmptyRecord();
 	assertEquals("", er.rrToString());
     }
 
+    @Test
     public void test_rrToWire()
     {
 	EmptyRecord er = new EmptyRecord();

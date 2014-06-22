@@ -34,10 +34,12 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class OpcodeTest extends TestCase
+public class OpcodeTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -46,22 +48,22 @@ public class OpcodeTest extends TestCase
 	// one that doesn't exist
 	assertTrue(Opcode.string(6).startsWith("RESERVED"));
 
-	try {
-	    Opcode.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_stringMinus1()
+    {
+	Opcode.string(-1);
+    }
 	
+    @Test(expected = IllegalArgumentException.class)
+    public void test_stringMaxValue()
+    {
 	//  (max is 0xF)
-	try {
-	    Opcode.string(0x10);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	Opcode.string(0x10);
     }
 
+    @Test
     public void test_value()
     {
 	// regular one

@@ -34,8 +34,11 @@
 //
 package org.xbill.DNS;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import org.xbill.DNS.DNSInput;
 import org.xbill.DNS.DNSOutput;
 import org.xbill.DNS.Header;
@@ -43,15 +46,17 @@ import org.xbill.DNS.Opcode;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Flags;
 
-public class HeaderTest extends TestCase
+public class HeaderTest
 {
     private Header m_h;
 
-    public void setUp()
+    @Before
+    public void init()
     {
 	m_h = new Header(0xABCD); // 43981
     }
 
+    @Test
     public void test_fixture_state()
     {
 	assertEquals(0xABCD, m_h.getID());
@@ -68,6 +73,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0, m_h.getCount(3));
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	m_h = new Header();
@@ -85,6 +91,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0, m_h.getCount(3));
     }
 
+    @Test
     public void test_ctor_DNSInput() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0x12, (byte)0xAB, // ID
@@ -124,6 +131,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0x7190, m_h.getCount(3));
     }
 
+    @Test
     public void test_toWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0x12, (byte)0xAB, // ID
@@ -162,6 +170,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_flags()
     {
 	m_h.setFlag(0);
@@ -192,28 +201,61 @@ public class HeaderTest extends TestCase
 	}
     }
 
-    public void test_flags_invalid()
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidSetMinus1()
     {
-	try {m_h.setFlag(-1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.setFlag(1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.setFlag(16); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.unsetFlag(-1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.unsetFlag(13); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.unsetFlag(16); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.getFlag(-1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.getFlag(4); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.getFlag(16); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	m_h.setFlag(-1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidSet1()
+    {
+	m_h.setFlag(1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidSet16()
+    {
+        m_h.setFlag(16);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidUnsetMinus1()
+    {
+	m_h.unsetFlag(-1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidUnset13()
+    {
+	m_h.unsetFlag(13);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidUnset16()
+    {
+	m_h.unsetFlag(16);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidGetMinus1()
+    {
+	m_h.getFlag(-1);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidGet4()
+    {
+	m_h.getFlag(4);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_flags_invalidGet16()
+    {
+	m_h.getFlag(16);
     }
 
+    @Test
     public void test_ID()
     {
 	assertEquals(0xABCD, m_h.getID());
@@ -228,22 +270,20 @@ public class HeaderTest extends TestCase
 	assertEquals(0xDCBA, m_h.getID());
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_setID_invalid()
     {
-	try {
-	    m_h.setID(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	try {
-	    m_h.setID(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	m_h.setID(0x10000);
+	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_setID_invalidMinus1()
+    {
+	m_h.setID(-1);
     }
 
+    @Test
     public void test_Rcode()
     {
 	assertEquals(0, m_h.getRcode());
@@ -258,22 +298,20 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void test_setRcode_invalidMinus1()
+    {
+	m_h.setRcode(-1);
+	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
     public void test_setRcode_invalid()
     {
-	try {
-	    m_h.setRcode(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	try {
-	    m_h.setRcode(0x100);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	m_h.setRcode(0x100);
     }
 
+    @Test
     public void test_Opcode()
     {
 	assertEquals(0, m_h.getOpcode());
@@ -288,22 +326,19 @@ public class HeaderTest extends TestCase
 	assertEquals(0, m_h.getRcode());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void test_setOpcode_invalidMinus1()
+    {
+	m_h.setOpcode(-1);
+    }
+    
+   @Test(expected = IllegalArgumentException.class)
     public void test_setOpcode_invalid()
     {
-	try {
-	    m_h.setOpcode(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	try {
-	    m_h.setOpcode(0x100);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	m_h.setOpcode(0x100);
     }
 
+   @Test
     public void test_Count()
     {
 	m_h.setCount(2, 0x1E);
@@ -319,41 +354,57 @@ public class HeaderTest extends TestCase
 	assertEquals(0x1E-1, m_h.getCount(2));
     }
 
-    public void test_setCount_invalid()
+   @Test(expected = ArrayIndexOutOfBoundsException.class)
+    public void test_setCount_invalid1()
     {
-	try {m_h.setCount(-1, 0); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
-	try {m_h.setCount(4, 0); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
-
-	try {m_h.setCount(0, -1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.setCount(3, 0x10000); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	m_h.setCount(-1, 0);
     }
-
+   
+   @Test(expected = ArrayIndexOutOfBoundsException.class)
+    public void test_setCount_invalid2()
+    {
+	m_h.setCount(4, 0);
+    }
+   
+   @Test(expected = IllegalArgumentException.class)
+    public void test_setCount_invalid3()
+    {
+	m_h.setCount(0, -1);
+    }
+   
+    @Test(expected = IllegalArgumentException.class)
+    public void test_setCount_invalid4()
+    {
+	m_h.setCount(3, 0x10000);
+    }
+   
+   @Test(expected = ArrayIndexOutOfBoundsException.class)
+    public void test_getCount_invalidMinus1()
+    {
+	m_h.getCount(-1);
+    }
+   
+   @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void test_getCount_invalid()
     {
-	try {m_h.getCount(-1); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
-	try {m_h.getCount(4); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
+	m_h.getCount(4);
     }
 
+   @Test(expected = IllegalStateException.class)
     public void test_incCount_invalid()
     {
 	m_h.setCount(1, 0xFFFF);
-	try {m_h.incCount(1); fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
+	m_h.incCount(1);
     }
 
+   @Test(expected = IllegalStateException.class)
     public void test_decCount_invalid()
     {
 	m_h.setCount(2, 0);
-	try {m_h.decCount(2); fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
+	m_h.decCount(2);
     }
 
+   @Test
     public void test_toString()
     {
 	m_h.setOpcode(Opcode.value("STATUS"));
@@ -381,6 +432,7 @@ public class HeaderTest extends TestCase
 	assertFalse(text.indexOf("ad: 0 ") == -1);
     }
     
+   @Test
     public void test_clone()
     {
 	m_h.setOpcode(Opcode.value("IQUERY"));

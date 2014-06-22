@@ -34,21 +34,24 @@
 //
 package	org.xbill.DNS;
 
+import static org.junit.Assert.*;
 import	java.io.IOException;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class AAAARecordTest extends TestCase
+public class AAAARecordTest
 {
     Name m_an, m_rn;
     InetAddress m_addr;
     String m_addr_string;
     byte[] m_addr_bytes;
     long m_ttl;
-
-    protected void setUp() throws TextParseException,
+    
+    @Before
+    public void init() throws TextParseException,
 				  UnknownHostException
     {
 	m_an = Name.fromString("My.Absolute.Name.");
@@ -59,6 +62,7 @@ public class AAAARecordTest extends TestCase
 	m_ttl = 0x13579;
     }
 
+    @Test
     public void test_ctor_0arg() throws UnknownHostException
     {
 	AAAARecord ar = new AAAARecord();
@@ -69,6 +73,7 @@ public class AAAARecordTest extends TestCase
 	assertNull(ar.getAddress());
     }
 
+    @Test
     public void test_getObject()
     {
 	AAAARecord ar = new AAAARecord();
@@ -76,7 +81,8 @@ public class AAAARecordTest extends TestCase
 	assertTrue(r instanceof AAAARecord);
     }
 
-    public void test_ctor_4arg()
+    @Test
+    public void test_ctor_4arg() throws UnknownHostException
     {
 	AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
 	assertEquals(m_an, ar.getName());
@@ -84,24 +90,24 @@ public class AAAARecordTest extends TestCase
 	assertEquals(DClass.IN, ar.getDClass());
 	assertEquals(m_ttl, ar.getTTL());
 	assertEquals(m_addr, ar.getAddress());
-
+    }
+    
+    @Test(expected = RelativeNameException.class)
+    public void test_ctor_4argRelativeName() 
+    {
 	// a relative name
-	try {
-	    new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
-
-	// an IPv4 address
-	try {
-	    new AAAARecord(m_an, DClass.IN, m_ttl,
+	new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_ctor_4argIPv4Address() throws UnknownHostException
+    {
+        // an IPv4 address
+	new AAAARecord(m_an, DClass.IN, m_ttl,
 			InetAddress.getByName("192.168.0.1"));
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
-	catch( UnknownHostException e ){ fail(e.getMessage()); }
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	DNSInput di = new DNSInput(m_addr_bytes);
@@ -112,6 +118,7 @@ public class AAAARecordTest extends TestCase
 	assertEquals(m_addr, ar.getAddress());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer(m_addr_string);
@@ -120,23 +127,25 @@ public class AAAARecordTest extends TestCase
 	ar.rdataFromString(t, null);
 
 	assertEquals(m_addr, ar.getAddress());
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromStringInvalidAddress() throws IOException
+    {
 	// invalid address
-	t = new Tokenizer("193.160.232.1");
-	ar = new AAAARecord();
-	try {
-	    ar.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	Tokenizer t = new Tokenizer("193.160.232.1");
+	AAAARecord ar = new AAAARecord();
+	ar.rdataFromString(t, null);
     }
 
+    @Test
     public void test_rrToString()
     {
 	AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
 	assertEquals(m_addr_string, ar.rrToString());
     }
 
+    @Test
     public void test_rrToWire()
     {
 	AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);

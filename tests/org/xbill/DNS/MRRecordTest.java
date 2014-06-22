@@ -34,10 +34,12 @@
 //
 package	org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class MRRecordTest extends TestCase
+public class MRRecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	MRRecord d = new MRRecord();
@@ -45,6 +47,7 @@ public class MRRecordTest extends TestCase
 	assertNull(d.getNewName());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -58,6 +61,7 @@ public class MRRecordTest extends TestCase
 	assertEquals(a, d.getNewName());
     }
 
+    @Test
     public void test_getObject()
     {
 	MRRecord d = new MRRecord();
