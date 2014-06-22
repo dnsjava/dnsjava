@@ -51,13 +51,13 @@ public class OpcodeTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMinus1()
+    public void test_string_minusOne()
     {
 	Opcode.string(-1);
     }
 	
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMaxValue()
+    public void test_string_maxValue()
     {
 	//  (max is 0xF)
 	Opcode.string(0x10);

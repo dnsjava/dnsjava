@@ -35,11 +35,12 @@
 package org.xbill.DNS;
 
 import	java.io.IOException;
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class SingleCompressedNameBaseTest extends TestCase
+public class SingleCompressedNameBaseTest
 {
-    private void assertEquals( byte[] exp, byte[] act )
+    private void byteAssertEquals( byte[] exp, byte[] act )
     {
 	assertTrue(java.util.Arrays.equals(exp, act));
     }
@@ -64,6 +65,7 @@ public class SingleCompressedNameBaseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor() throws TextParseException
     {
 	TestClass tc = new TestClass();
@@ -81,6 +83,7 @@ public class SingleCompressedNameBaseTest extends TestCase
 	assertSame(sn, tc.getSingleName());
     }
 
+    @Test
     public void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -94,7 +97,7 @@ public class SingleCompressedNameBaseTest extends TestCase
 	tc.rrToWire(dout, null, false);
 	
 	byte[] out = dout.toByteArray();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
 
 	// canonical (lowercase)
 	tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
@@ -104,6 +107,6 @@ public class SingleCompressedNameBaseTest extends TestCase
 	tc.rrToWire(dout, null, true);
 	
 	out = dout.toByteArray();
-	assertEquals(exp, out);
+	byteAssertEquals(exp, out);
     }
 }

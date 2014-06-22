@@ -101,7 +101,7 @@ public class DNSKEYRecordTest
     }
     
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidAlgorithm() throws IOException, TextParseException
+    public void test_rdataFromString_invalidAlgorithm() throws IOException, TextParseException
     {
 	// invalid algorithm
 	DNSKEYRecord kr = new DNSKEYRecord();

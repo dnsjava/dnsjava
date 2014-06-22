@@ -50,13 +50,13 @@ public class FlagsTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMinus1()
+    public void test_string_MinusOne()
     {
 	Flags.string(-1);
     }
 	
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMaxValue()
+    public void test_string_MaxValue()
     {
 	//  (max is 0xF)
         Flags.string(0x10);

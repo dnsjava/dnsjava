@@ -46,7 +46,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({NameTest.Test_String_init.class, NameTest.Test_DNSInput_init.class, NameTest.class, NameTest.Test_toWire.class, NameTest.Test_toWireCanonical.class, NameTest.Test_equals.class, NameTest.Test_compareTo.class})
+@Suite.SuiteClasses({NameTest.Test_String_init.class, NameTest.Test_DNSInput_init.class, NameTest.NameTestMain.class, NameTest.Test_toWire.class, NameTest.Test_toWireCanonical.class, NameTest.Test_equals.class, NameTest.Test_compareTo.class})
 public class NameTest
 {
     public static class Test_String_init
@@ -64,7 +64,7 @@ public class NameTest
 	}
 	    
         @Test(expected = TextParseException.class)
-	public void test_ctor_empty()
+	public void test_ctor_empty() throws TextParseException
 	{
 	    new Name("");
 	}
@@ -656,261 +656,6 @@ public class NameTest
 	}
     }
 
-    @Test
-    public void test_init_from_name() throws TextParseException
-    {
-	Name n = new Name("A.B.c.d.");
-	Name e = new Name("B.c.d.");
-	Name o = new Name(n, 1);
-	assertEquals(e, o);
-    }
-
-    @Test
-    public void test_init_from_name_root() throws TextParseException
-    {
-	Name n = new Name("A.B.c.d.");
-	Name o = new Name(n, 4);
-	assertEquals(Name.root, o);
-    }
-
-    @Test
-    public void test_init_from_name_empty() throws TextParseException
-    {
-	Name n = new Name("A.B.c.d.");
-	Name n2 = new Name(n, 5);
-
-	assertFalse(n2.isAbsolute());
-	assertFalse(n2.isWild());
-	assertEquals(0, n2.labels());
-	assertEquals(0, n2.length());
-    }
-
-    @Test
-    public void test_concatenate_basic() throws NameTooLongException, TextParseException
-    {
-	Name p = Name.fromString("A.B");
-	Name s = Name.fromString("c.d.");
-	Name e = Name.fromString("A.B.c.d.");
-	
-	Name n = Name.concatenate(p, s);
-	assertEquals(e, n);
-    }
-
-    @Test
-    public void test_concatenate_abs_prefix() throws NameTooLongException, TextParseException
-    {
-	Name p = Name.fromString("A.B.");
-	Name s = Name.fromString("c.d.");
-	Name e = Name.fromString("A.B.");
-	
-	Name n = Name.concatenate(p, s);
-	assertEquals(e, n);
-    }
-
-    @Test(expected = NameTooLongException.class)
-    public void test_concatenate_too_long() throws TextParseException, NameTooLongException
-    {
-	Name p = Name.fromString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-	Name s = Name.fromString("ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.");
-
-	Name.concatenate(p, s);
-    }
-
-    @Test
-    public void test_relativize() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	Name dom = Name.fromString("c.");
-	Name exp = Name.fromString("a.b");
-
-	Name n = sub.relativize(dom);
-	assertEquals(exp, n);
-    }
-
-    @Test
-    public void test_relativize_null_origin() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	Name dom = null;
-
-	Name n = sub.relativize(dom);
-	assertEquals(sub, n);
-    }
-
-    @Test
-    public void test_relativize_disjoint() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	Name dom = Name.fromString("e.f.");
-
-	Name n = sub.relativize(dom);
-	assertEquals(sub, n);
-    }
-
-    @Test
-    public void test_relativize_root() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	Name dom = Name.fromString(".");
-	Name exp = Name.fromString("a.b.c");
-
-	Name n = sub.relativize(dom);
-	assertEquals(exp, n);
-    }
-
-    @Test
-    public void test_wild() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	Name exp = Name.fromString("*.b.c.");
-
-	Name n = sub.wild(1);
-	assertEquals(exp, n);
-    }
-
-    @Test
-    public void test_wild_abs() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	Name exp = Name.fromString("*.");
-
-	Name n = sub.wild(3);
-	assertEquals(exp, n);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_wild_toobig() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	sub.wild(4);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_wild_toosmall() throws TextParseException
-    {
-	Name sub = Name.fromString("a.b.c.");
-	sub.wild(0);
-    }
-
-    @Test
-    public void test_fromDNAME() throws NameTooLongException, TextParseException
-    {
-	Name own = new Name("the.owner.");
-	Name alias = new Name("the.alias.");
-	DNAMERecord dnr = new DNAMERecord(own, DClass.IN, 0xABCD, alias);
-	Name sub = new Name("sub.the.owner.");
-	Name exp = new Name("sub.the.alias.");
-
-	Name n = sub.fromDNAME(dnr);
-	assertEquals(exp, n);
-    }
-
-    @Test(expected = NameTooLongException.class)
-    public void test_fromDNAME_toobig() throws NameTooLongException, TextParseException
-    {
-	Name own = new Name("the.owner.");
-	Name alias = new Name("the.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.");
-	DNAMERecord dnr = new DNAMERecord(own, DClass.IN, 0xABCD, alias);
-	Name sub = new Name("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.the.owner.");
-
-	sub.fromDNAME(dnr);
-    }
-
-    @Test
-    public void test_fromDNAME_disjoint() throws NameTooLongException, TextParseException
-    {
-	Name own = new Name("the.owner.");
-	Name alias = new Name("the.alias.");
-	DNAMERecord dnr = new DNAMERecord(own, DClass.IN, 0xABCD, alias);
-	
-	Name sub = new Name("sub.the.other");
-
-	assertNull(sub.fromDNAME(dnr));
-    }
-
-    @Test
-    public void test_subdomain_abs() throws TextParseException
-    {
-	Name dom = new Name("the.domain.");
-	Name sub = new Name("sub.of.the.domain.");
-	assertTrue(sub.subdomain(dom));
-	assertFalse(dom.subdomain(sub));
-    }
-
-    @Test
-    public void test_subdomain_rel() throws TextParseException
-    {
-	Name dom = new Name("the.domain");
-	Name sub = new Name("sub.of.the.domain");
-	assertTrue(sub.subdomain(dom));
-	assertFalse(dom.subdomain(sub));
-    }
-
-    @Test
-    public void test_subdomain_equal() throws TextParseException
-    {
-	Name dom = new Name("the.domain");
-	Name sub = new Name("the.domain");
-	assertTrue(sub.subdomain(dom));
-	assertTrue(dom.subdomain(sub));
-    }
-
-    @Test
-    public void test_toString_abs() throws TextParseException
-    {
-	String in = "This.Is.My.Absolute.Name.";
-	Name n = new Name(in);
-	
-	assertEquals(in, n.toString());
-    }
-
-    @Test
-    public void test_toString_rel() throws TextParseException
-    {
-	String in = "This.Is.My.Relative.Name";
-	Name n = new Name(in);
-	
-	assertEquals(in, n.toString());
-    }
-
-    @Test
-    public void test_toString_at() throws TextParseException
-    {
-	Name n = new Name("@", null);
-	assertEquals("@", n.toString());
-    }
-
-    @Test
-    public void test_toString_root() throws TextParseException
-    {
-	assertEquals(".", Name.root.toString());
-    }
-
-    @Test
-    public void test_toString_wild() throws TextParseException
-    {
-	String in = "*.A.b.c.e";
-	Name n = new Name(in);
-	assertEquals(in, n.toString());
-    }
-
-    @Test
-    public void test_toString_escaped() throws TextParseException
-    {
-	String in = "my.escaped.junk\\128.label.";
-	Name n = new Name(in);
-	assertEquals(in, n.toString());
-    }
-
-    @Test
-    public void test_toString_special_char() throws TextParseException, WireParseException
-    {
-	byte[] raw = new byte[] { 1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0 };
-	String exp = "\\\".\\(.\\).\\..\\;.\\\\.\\@.\\$.";
-	Name n = new Name(new DNSInput(raw));
-	assertEquals(exp, n.toString());
-    }
-
     public static class Test_toWire
     {
         @Test(expected = IllegalArgumentException.class)
@@ -1209,52 +954,310 @@ public class NameTest
 	    assertTrue(n2.compareTo(n1) > 0);
 	}
     }
-
-    @Test
-    public void test_canonicalize() throws TextParseException
+    
+    public static class NameTestMain
     {
-	Name n1 = new Name("ABC.com");
-	Name n2 = new Name("abc.com");
-	Name n3 = new Name("\\193.com");
+        @Test
+        public void test_init_from_name() throws TextParseException
+        {
+            Name n = new Name("A.B.c.d.");
+            Name e = new Name("B.c.d.");
+            Name o = new Name(n, 1);
+            assertEquals(e, o);
+        }
 
-	Name cn1 = n1.canonicalize();
-	Name cn2 = n2.canonicalize();
-	Name cn3 = n3.canonicalize();
+        @Test
+        public void test_init_from_name_root() throws TextParseException
+        {
+            Name n = new Name("A.B.c.d.");
+            Name o = new Name(n, 4);
+            assertEquals(Name.root, o);
+        }
 
-	assertNotSame(n1, cn1);
-	assertEquals(n1, cn1);
-	assertSame(n2, cn2);
-	assertSame(n3, cn3);
-	assertEquals(cn1.toString(), cn2.toString());
-	assertFalse(n1.toString().equals(n2.toString()));
-	assertEquals(cn1.toString(), cn2.toString());
-    }
+        @Test
+        public void test_init_from_name_empty() throws TextParseException
+        {
+            Name n = new Name("A.B.c.d.");
+            Name n2 = new Name(n, 5);
 
-    @Test
-    public void test_to_string() throws TextParseException
-    {
-	Name n1 = new Name("abc.com");
-	Name n2 = new Name("abc.com.");
+            assertFalse(n2.isAbsolute());
+            assertFalse(n2.isWild());
+            assertEquals(0, n2.labels());
+            assertEquals(0, n2.length());
+        }
 
-	assertEquals(n1.toString(true), n1.toString(true));
-	assertFalse(n2.toString(true).equals(n2.toString(false)));
-	assertEquals(n2.toString(true) + ".", n2.toString(false));
-	assertEquals(Name.root.toString(true), Name.root.toString(false));
-	assertEquals(Name.empty.toString(true), Name.empty.toString(false));
-    }
+        @Test
+        public void test_concatenate_basic() throws NameTooLongException, TextParseException
+        {
+            Name p = Name.fromString("A.B");
+            Name s = Name.fromString("c.d.");
+            Name e = Name.fromString("A.B.c.d.");
 
-    @Test
-    public void test_absolute() throws TextParseException {
-        Name n1 = new Name("abc.com");
-        Name n2 = new Name("abc.com.");
-        Name n3 = new Name("abc.com", Name.root);
-        Name n4 = new Name("abc.com", n1);
-        Name n5 = new Name("abc.com\\000");
+            Name n = Name.concatenate(p, s);
+            assertEquals(e, n);
+        }
 
-        assertFalse(n1.isAbsolute());
-        assertTrue(n2.isAbsolute());
-        assertTrue(n3.isAbsolute());
-        assertFalse(n4.isAbsolute());
-        assertFalse(n5.isAbsolute());
+        @Test
+        public void test_concatenate_abs_prefix() throws NameTooLongException, TextParseException
+        {
+            Name p = Name.fromString("A.B.");
+            Name s = Name.fromString("c.d.");
+            Name e = Name.fromString("A.B.");
+
+            Name n = Name.concatenate(p, s);
+            assertEquals(e, n);
+        }
+
+        @Test(expected = NameTooLongException.class)
+        public void test_concatenate_too_long() throws TextParseException, NameTooLongException
+        {
+            Name p = Name.fromString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+            Name s = Name.fromString("ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.");
+
+            Name.concatenate(p, s);
+        }
+
+        @Test
+        public void test_relativize() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            Name dom = Name.fromString("c.");
+            Name exp = Name.fromString("a.b");
+
+            Name n = sub.relativize(dom);
+            assertEquals(exp, n);
+        }
+
+        @Test
+        public void test_relativize_null_origin() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            Name dom = null;
+
+            Name n = sub.relativize(dom);
+            assertEquals(sub, n);
+        }
+
+        @Test
+        public void test_relativize_disjoint() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            Name dom = Name.fromString("e.f.");
+
+            Name n = sub.relativize(dom);
+            assertEquals(sub, n);
+        }
+
+        @Test
+        public void test_relativize_root() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            Name dom = Name.fromString(".");
+            Name exp = Name.fromString("a.b.c");
+
+            Name n = sub.relativize(dom);
+            assertEquals(exp, n);
+        }
+
+        @Test
+        public void test_wild() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            Name exp = Name.fromString("*.b.c.");
+
+            Name n = sub.wild(1);
+            assertEquals(exp, n);
+        }
+
+        @Test
+        public void test_wild_abs() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            Name exp = Name.fromString("*.");
+
+            Name n = sub.wild(3);
+            assertEquals(exp, n);
+        }
+
+        @Test(expected = IllegalArgumentException.class)
+        public void test_wild_toobig() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            sub.wild(4);
+        }
+
+        @Test(expected = IllegalArgumentException.class)
+        public void test_wild_toosmall() throws TextParseException
+        {
+            Name sub = Name.fromString("a.b.c.");
+            sub.wild(0);
+        }
+
+        @Test
+        public void test_fromDNAME() throws NameTooLongException, TextParseException
+        {
+            Name own = new Name("the.owner.");
+            Name alias = new Name("the.alias.");
+            DNAMERecord dnr = new DNAMERecord(own, DClass.IN, 0xABCD, alias);
+            Name sub = new Name("sub.the.owner.");
+            Name exp = new Name("sub.the.alias.");
+
+            Name n = sub.fromDNAME(dnr);
+            assertEquals(exp, n);
+        }
+
+        @Test(expected = NameTooLongException.class)
+        public void test_fromDNAME_toobig() throws NameTooLongException, TextParseException
+        {
+            Name own = new Name("the.owner.");
+            Name alias = new Name("the.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.");
+            DNAMERecord dnr = new DNAMERecord(own, DClass.IN, 0xABCD, alias);
+            Name sub = new Name("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.the.owner.");
+
+            sub.fromDNAME(dnr);
+        }
+
+        @Test
+        public void test_fromDNAME_disjoint() throws NameTooLongException, TextParseException
+        {
+            Name own = new Name("the.owner.");
+            Name alias = new Name("the.alias.");
+            DNAMERecord dnr = new DNAMERecord(own, DClass.IN, 0xABCD, alias);
+
+            Name sub = new Name("sub.the.other");
+
+            assertNull(sub.fromDNAME(dnr));
+        }
+
+        @Test
+        public void test_subdomain_abs() throws TextParseException
+        {
+            Name dom = new Name("the.domain.");
+            Name sub = new Name("sub.of.the.domain.");
+            assertTrue(sub.subdomain(dom));
+            assertFalse(dom.subdomain(sub));
+        }
+
+        @Test
+        public void test_subdomain_rel() throws TextParseException
+        {
+            Name dom = new Name("the.domain");
+            Name sub = new Name("sub.of.the.domain");
+            assertTrue(sub.subdomain(dom));
+            assertFalse(dom.subdomain(sub));
+        }
+
+        @Test
+        public void test_subdomain_equal() throws TextParseException
+        {
+            Name dom = new Name("the.domain");
+            Name sub = new Name("the.domain");
+            assertTrue(sub.subdomain(dom));
+            assertTrue(dom.subdomain(sub));
+        }
+
+        @Test
+        public void test_toString_abs() throws TextParseException
+        {
+            String in = "This.Is.My.Absolute.Name.";
+            Name n = new Name(in);
+
+            assertEquals(in, n.toString());
+        }
+
+        @Test
+        public void test_toString_rel() throws TextParseException
+        {
+            String in = "This.Is.My.Relative.Name";
+            Name n = new Name(in);
+
+            assertEquals(in, n.toString());
+        }
+
+        @Test
+        public void test_toString_at() throws TextParseException
+        {
+            Name n = new Name("@", null);
+            assertEquals("@", n.toString());
+        }
+
+        @Test
+        public void test_toString_root() throws TextParseException
+        {
+            assertEquals(".", Name.root.toString());
+        }
+
+        @Test
+        public void test_toString_wild() throws TextParseException
+        {
+            String in = "*.A.b.c.e";
+            Name n = new Name(in);
+            assertEquals(in, n.toString());
+        }
+
+        @Test
+        public void test_toString_escaped() throws TextParseException
+        {
+            String in = "my.escaped.junk\\128.label.";
+            Name n = new Name(in);
+            assertEquals(in, n.toString());
+        }
+
+        @Test
+        public void test_toString_special_char() throws TextParseException, WireParseException
+        {
+            byte[] raw = new byte[] { 1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0 };
+            String exp = "\\\".\\(.\\).\\..\\;.\\\\.\\@.\\$.";
+            Name n = new Name(new DNSInput(raw));
+            assertEquals(exp, n.toString());
+        }
+        
+        @Test
+         public void test_canonicalize() throws TextParseException
+         {
+             Name n1 = new Name("ABC.com");
+             Name n2 = new Name("abc.com");
+             Name n3 = new Name("\\193.com");
+
+             Name cn1 = n1.canonicalize();
+             Name cn2 = n2.canonicalize();
+             Name cn3 = n3.canonicalize();
+
+             assertNotSame(n1, cn1);
+             assertEquals(n1, cn1);
+             assertSame(n2, cn2);
+             assertSame(n3, cn3);
+             assertEquals(cn1.toString(), cn2.toString());
+             assertFalse(n1.toString().equals(n2.toString()));
+             assertEquals(cn1.toString(), cn2.toString());
+         }
+
+         @Test
+         public void test_to_string() throws TextParseException
+         {
+             Name n1 = new Name("abc.com");
+             Name n2 = new Name("abc.com.");
+
+             assertEquals(n1.toString(true), n1.toString(true));
+             assertFalse(n2.toString(true).equals(n2.toString(false)));
+             assertEquals(n2.toString(true) + ".", n2.toString(false));
+             assertEquals(Name.root.toString(true), Name.root.toString(false));
+             assertEquals(Name.empty.toString(true), Name.empty.toString(false));
+         }
+
+         @Test
+         public void test_absolute() throws TextParseException {
+             Name n1 = new Name("abc.com");
+             Name n2 = new Name("abc.com.");
+             Name n3 = new Name("abc.com", Name.root);
+             Name n4 = new Name("abc.com", n1);
+             Name n5 = new Name("abc.com\\000");
+
+             assertFalse(n1.isAbsolute());
+             assertTrue(n2.isAbsolute());
+             assertTrue(n3.isAbsolute());
+             assertFalse(n4.isAbsolute());
+             assertFalse(n5.isAbsolute());
+         }
     }
 }

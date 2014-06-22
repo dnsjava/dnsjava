@@ -37,10 +37,12 @@ package	org.xbill.DNS;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class SetResponseTest extends TestCase
+public class SetResponseTest
 {
+    @Test
     public void test_ctor_1arg()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
@@ -64,24 +66,19 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_1arg_toosmall()
     {
-	try {
-	    new SetResponse(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException a){}
+	new SetResponse(-1);
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_1arg_toobig()
     {
-	try {
-	    new SetResponse(7);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException a){}
+	new SetResponse(7);
     }
 
+    @Test
     public void test_ctor_2arg()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
@@ -105,25 +102,20 @@ public class SetResponseTest extends TestCase
 	    assertEquals(types[i] == SetResponse.SUCCESSFUL, sr.isSuccessful());
 	}
     }
-
+    
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_2arg_toosmall()
     {
-	try {
-	    new SetResponse(-1, new RRset());
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException a){}
+	new SetResponse(-1, new RRset());
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_2arg_toobig()
     {
-	try {
-	    new SetResponse(7, new RRset());
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException a){}
+        new SetResponse(7, new RRset());
     }
 
+    @Test
     public void test_ofType_basic()
     {
 	final int[] types = new int[] { SetResponse.DELEGATION,
@@ -147,6 +139,7 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ofType_singleton()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
@@ -169,24 +162,19 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ofType_toosmall()
     {
-	try {
-	    SetResponse.ofType(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException e ){}
+	SetResponse.ofType(-1);
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ofType_toobig()
     {
-	try {
-	    SetResponse.ofType(7);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException e ){}
+	SetResponse.ofType(7);
     }
 
+    @Test
     public void test_addRRset() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -205,6 +193,7 @@ public class SetResponseTest extends TestCase
 	assertTrue(Arrays.equals(exp, sr.answers()));
     }
 
+    @Test
     public void test_addRRset_multiple() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -235,12 +224,14 @@ public class SetResponseTest extends TestCase
 	assertTrue(Arrays.equals(exp, sr.answers()));
     }
 
+    @Test
     public void test_answers_nonSUCCESSFUL()
     {
 	SetResponse sr = new SetResponse(SetResponse.UNKNOWN, new RRset());
 	assertNull(sr.answers());
     }
 
+    @Test
     public void test_getCNAME() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -253,6 +244,7 @@ public class SetResponseTest extends TestCase
 	assertEquals(cr, sr.getCNAME());
     }
 
+    @Test
     public void test_getDNAME() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -264,7 +256,8 @@ public class SetResponseTest extends TestCase
 	SetResponse sr = new SetResponse(SetResponse.DNAME, rrs);
 	assertEquals(dr, sr.getDNAME());
     }
-
+    
+    @Test
     public void test_toString() throws TextParseException, UnknownHostException
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,

@@ -98,14 +98,14 @@ public class KEYRecordTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_Protocol_stringTooLow()
+    public void test_Protocol_string_tooLow()
     {
 	// too low
 	KEYRecord.Protocol.string(-1);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_Protocol_stringTooHigh()
+    public void test_Protocol_string_tooHigh()
     {
 	// too high
 	KEYRecord.Protocol.string(0x100);
@@ -178,7 +178,7 @@ public class KEYRecordTest
     }
     
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidFlags() throws IOException, TextParseException
+    public void test_rdataFromString_invalidFlags() throws IOException, TextParseException
     {
 	// invalid flags
 	KEYRecord kr = new KEYRecord();
@@ -187,7 +187,7 @@ public class KEYRecordTest
     }
     
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidProtocol() throws IOException, TextParseException
+    public void test_rdataFromString_invalidProtocol() throws IOException, TextParseException
     {
 	// invalid protocol
 	KEYRecord kr = new KEYRecord();
@@ -197,7 +197,7 @@ public class KEYRecordTest
     }
 
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidAlgorithm() throws IOException, TextParseException
+    public void test_rdataFromString_invalidAlgorithm() throws IOException, TextParseException
     {
 	// invalid algorithm
 	KEYRecord kr = new KEYRecord();

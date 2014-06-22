@@ -93,14 +93,14 @@ public class AAAARecordTest
     }
     
     @Test(expected = RelativeNameException.class)
-    public void test_ctor_4argRelativeName() 
+    public void test_ctor_4arg_relativeName() 
     {
 	// a relative name
 	new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_ctor_4argIPv4Address() throws UnknownHostException
+    public void test_ctor_4arg_IPv4Address() throws UnknownHostException
     {
         // an IPv4 address
 	new AAAARecord(m_an, DClass.IN, m_ttl,
@@ -123,14 +123,12 @@ public class AAAARecordTest
     {
 	Tokenizer t = new Tokenizer(m_addr_string);
 	AAAARecord ar = new AAAARecord();
-
 	ar.rdataFromString(t, null);
-
 	assertEquals(m_addr, ar.getAddress());
     }
     
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidAddress() throws IOException
+    public void test_rdataFromString_invalidAddress() throws IOException
     {
 	// invalid address
 	Tokenizer t = new Tokenizer("193.160.232.1");

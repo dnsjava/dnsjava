@@ -202,55 +202,55 @@ public class HeaderTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidSetMinus1()
+    public void test_flags_SetMinusOne()
     {
 	m_h.setFlag(-1);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidSet1()
+    public void test_flags_SetOne()
     {
 	m_h.setFlag(1);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidSet16()
+    public void test_flags_Set16()
     {
         m_h.setFlag(16);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidUnsetMinus1()
+    public void test_flags_UnsetMinusOne()
     {
 	m_h.unsetFlag(-1);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidUnset13()
+    public void test_flags_Unset13()
     {
 	m_h.unsetFlag(13);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidUnset16()
+    public void test_flags_Unset16()
     {
 	m_h.unsetFlag(16);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidGetMinus1()
+    public void test_flags_GetMinusOne()
     {
 	m_h.getFlag(-1);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidGet4()
+    public void test_flags_Get4()
     {
 	m_h.getFlag(4);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_flags_invalidGet16()
+    public void test_flags_Get16()
     {
 	m_h.getFlag(16);
     }
@@ -278,7 +278,7 @@ public class HeaderTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_setID_invalidMinus1()
+    public void test_setID_MinusOne()
     {
 	m_h.setID(-1);
     }
@@ -299,7 +299,7 @@ public class HeaderTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_setRcode_invalidMinus1()
+    public void test_setRcode_MinusOne()
     {
 	m_h.setRcode(-1);
 	
@@ -327,7 +327,7 @@ public class HeaderTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_setOpcode_invalidMinus1()
+    public void test_setOpcode_MinusOne()
     {
 	m_h.setOpcode(-1);
     }
@@ -379,7 +379,7 @@ public class HeaderTest
     }
    
    @Test(expected = ArrayIndexOutOfBoundsException.class)
-    public void test_getCount_invalidMinus1()
+    public void test_getCount_MinusOne()
     {
 	m_h.getCount(-1);
     }

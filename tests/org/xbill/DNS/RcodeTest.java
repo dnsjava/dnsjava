@@ -53,13 +53,13 @@ public class RcodeTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMinus1()
+    public void test_string_minusOne()
     {
 	Rcode.string(-1);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMaxValue()
+    public void test_string_maxValue()
     {
 	//  (max is 0xFFF)
 	Rcode.string(0x1000);
@@ -76,13 +76,13 @@ public class RcodeTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_TSIGstringMinus1()
+    public void test_TSIGstring_minusOne()
     {
 	Rcode.TSIGstring(-1);
     }
 	
     @Test(expected = IllegalArgumentException.class)
-    public void test_TSIGstringMaxValue()
+    public void test_TSIGstring_maxValue()
     {
 	//  (max is 0xFFFF)
 	Rcode.string(0x10000);

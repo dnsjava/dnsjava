@@ -50,14 +50,14 @@ public class ExtendedFlagsTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMinus1()
+    public void test_string_MinusOne()
     {
 	ExtendedFlags.string(-1);
 	
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMaxValue()
+    public void test_string_MaxValue()
     {
 	//  (max is 0xFFFF)
 	ExtendedFlags.string(0x10000);

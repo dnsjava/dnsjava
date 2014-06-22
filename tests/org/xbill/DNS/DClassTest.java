@@ -53,14 +53,14 @@ public class DClassTest
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMinusOne()
+    public void test_string_Minus1()
     {
         DClass.string(-1);
 	
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_stringMaxValue()
+    public void test_string_MaxValue()
     {
 	//  (max is 0xFFFF)
 	DClass.string(0x10000);

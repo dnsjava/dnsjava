@@ -93,14 +93,14 @@ public class ARecordTest
     }
     
     @Test(expected = RelativeNameException.class)
-    public void test_ctor_4argRelativeName()
+    public void test_ctor_4arg_relativeName()
     {
 	// a relative name
 	new ARecord(m_rn, DClass.IN, m_ttl, m_addr);
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void test_ctor_4argIPv6Address() throws UnknownHostException
+    public void test_ctor_4arg_IPv6() throws UnknownHostException
     {
 	// an IPv6 address
 	new ARecord(m_an, DClass.IN, m_ttl,

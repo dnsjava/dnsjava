@@ -57,7 +57,7 @@ public class AddressTest
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_toByteArray_invalid()
+    public void test_toByteArray_invalidAddress()
     {
 	Address.toByteArray("doesn't matter", 3);
     }
@@ -118,7 +118,7 @@ public class AddressTest
     }
 
     @Test
-    public void test_toByteArray_IPv6()
+    public void test_toByteArray_IPv6Address()
     {
 	byte[] exp = new byte[] { (byte)32, (byte)1, (byte)13, (byte)184,
 				  (byte)133, (byte)163, (byte)8, (byte)211,
@@ -242,7 +242,6 @@ public class AddressTest
     public void test_toArray_invalid()
     {
 	assertNull(Address.toArray("128.121.1", Address.IPv4));
-
 	assertNull(Address.toArray(""));
     }
 
@@ -284,7 +283,7 @@ public class AddressTest
     }
 
     @Test(expected = UnknownHostException.class)
-    public void test_getByName_invalid() throws UnknownHostException
+    public void test_getByName_invalidHost() throws UnknownHostException
     {
 	Address.getByName("example.invalid");
 	
@@ -316,7 +315,7 @@ public class AddressTest
     }
 
     @Test(expected = UnknownHostException.class)
-    public void test_getAllByName_invalid() throws UnknownHostException
+    public void test_getAllByName_invalidHost() throws UnknownHostException
     {
 	Address.getAllByName("example.invalid");
 	

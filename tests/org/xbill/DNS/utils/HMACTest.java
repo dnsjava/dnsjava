@@ -36,9 +36,10 @@ package org.xbill.DNS.utils;
 
 import	java.security.MessageDigest;
 import	java.security.NoSuchAlgorithmException;
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class HMACTest extends TestCase
+public class HMACTest
 {
     private static class test_data
     {
@@ -106,12 +107,6 @@ public class HMACTest extends TestCase
 	tests[6].digest =        base16.fromString("6f630fad67cda0ee1fb1f562db3aa53e");
     }
 
-    public HMACTest( String name )
-    {
-	super(name);
-    }
-
-
     private void do_test(int i, HMAC h) throws CloneNotSupportedException
     {
 	h.update(tests[i].data, 0, tests[i].data.length);
@@ -135,6 +130,7 @@ public class HMACTest extends TestCase
 	assertFalse(h.verify(tmp));
     }
 
+    @Test
     public void test_ctor_digest_key() throws NoSuchAlgorithmException,
 					      CloneNotSupportedException
     {
@@ -145,6 +141,7 @@ public class HMACTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor_digestName_key() throws NoSuchAlgorithmException,
 					      CloneNotSupportedException
     {
@@ -154,12 +151,9 @@ public class HMACTest extends TestCase
 	}
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_digestName_key_invalid()
     {
-	try {
-	    new HMAC("no name", new byte[ 0 ]);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
+        new HMAC("no name", new byte[ 0 ]);
     }
 }

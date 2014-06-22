@@ -116,14 +116,14 @@ public class A6RecordTest
     }
     
    @Test(expected = RelativeNameException.class)
-    public void test_ctor_6argRelativePrefixName()
+    public void test_ctor_6arg_relativeName()
     {
 	// a relative prefix name
 	new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn);
     }
    
    @Test(expected = IllegalArgumentException.class)
-    public void test_ctor_6argInvalidPrefix()
+    public void test_ctor_6arg_invalidPrefix()
     {
 	// invalid prefix bits
 	new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null);
@@ -197,7 +197,7 @@ public class A6RecordTest
     }
     
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidPrefix() throws IOException
+    public void test_rdataFromString_invalidPrefix() throws IOException
     {
 	// record with invalid prefixBits
 	Tokenizer t = new Tokenizer("129");
@@ -206,7 +206,7 @@ public class A6RecordTest
     }
 
     @Test(expected = TextParseException.class)
-    public void test_rdataFromStringInvalidAddress() throws IOException
+    public void test_rdataFromString_invalidAddress() throws IOException
     {
 	// record with invalid ipv6 address
 	Tokenizer t = new Tokenizer("0 " + m_addr_string.substring(4));
