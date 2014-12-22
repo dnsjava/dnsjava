@@ -3,6 +3,10 @@
 	  (based on a patch from Klaus Malorny <Klaus.Malorny@knipp.de>)
 	- Properly deal with short DSA and ECDSA keys.  (original patch from
 	  Marcos Sanz <sanz@denic.de>, with some local modifications)
+	- Add support for GOST (RFC 5933) to DNSSEC.  Using GOST requires an
+	  external cryptography provider, such as BouncyCastle.
+	  (original patch from Marcos Sanz <sanz@denic.de>, with some
+	  local modifications)
 
 10/14/2013
 	- 2.1.6 released
