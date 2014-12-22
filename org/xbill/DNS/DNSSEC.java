@@ -340,13 +340,36 @@ readBigInteger(DNSInput in) {
 	return new BigInteger(1, b);
 }
 
+private static byte []
+trimByteArray(byte [] array) {
+	if (array[0] == 0) {
+		byte trimmedArray[] = new byte[array.length - 1];
+		System.arraycopy(array, 1, trimmedArray, 0, array.length - 1);
+		return trimmedArray;
+	} else {
+		return array;
+	}
+}
+
 private static void
 writeBigInteger(DNSOutput out, BigInteger val) {
-	byte [] b = val.toByteArray();
-	if (b[0] == 0)
-		out.writeByteArray(b, 1, b.length - 1);
-	else
-		out.writeByteArray(b);
+	byte [] b = trimByteArray(val.toByteArray());
+	out.writeByteArray(b);
+}
+
+private static void
+writePaddedBigInteger(DNSOutput out, BigInteger val, int len) {
+	byte [] b = trimByteArray(val.toByteArray());
+       
+	if (b.length > len)
+		throw new IllegalArgumentException();
+
+	if (b.length < len) {
+		byte [] pad = new byte[len - b.length];
+		out.writeByteArray(pad);
+	}
+
+	out.writeByteArray(b);
 }
 
 private static PublicKey
@@ -497,21 +520,21 @@ fromDSAPublicKey(DSAPublicKey key) {
 	out.writeU8(t);
 	writeBigInteger(out, q);
 	writeBigInteger(out, p);
-	writeBigInteger(out, g);
-	writeBigInteger(out, y);
+	writePaddedBigInteger(out, g, 8 * t + 64);
+	writePaddedBigInteger(out, y, 8 * t + 64);
 
 	return out.toByteArray();
 }
 
 private static byte []
-fromECDSAPublicKey(ECPublicKey key) {
+fromECDSAPublicKey(ECPublicKey key, ECKeyInfo keyinfo) {
 	DNSOutput out = new DNSOutput();
 
 	BigInteger x = key.getW().getAffineX();
 	BigInteger y = key.getW().getAffineY();
 
-	writeBigInteger(out, x);
-	writeBigInteger(out, y);
+	writePaddedBigInteger(out, x, keyinfo.length);
+	writePaddedBigInteger(out, y, keyinfo.length);
 
 	return out.toByteArray();
 }
@@ -536,10 +559,13 @@ fromPublicKey(PublicKey key, int alg) throws DNSSECException
 			throw new IncompatibleKeyException();
 		return fromDSAPublicKey((DSAPublicKey) key);
 	case Algorithm.ECDSAP256SHA256:
+		if (! (key instanceof ECPublicKey))
+			throw new IncompatibleKeyException();
+		return fromECDSAPublicKey((ECPublicKey) key, ECDSA_P256);
 	case Algorithm.ECDSAP384SHA384:
 		if (! (key instanceof ECPublicKey))
 			throw new IncompatibleKeyException();
-		return fromECDSAPublicKey((ECPublicKey) key);
+		return fromECDSAPublicKey((ECPublicKey) key, ECDSA_P384);
 	default:
 		throw new UnsupportedAlgorithmException(alg);
 	}
