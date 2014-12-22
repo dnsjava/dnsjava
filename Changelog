@@ -7,6 +7,9 @@
 	  external cryptography provider, such as BouncyCastle.
 	  (original patch from Marcos Sanz <sanz@denic.de>, with some
 	  local modifications)
+	- Change the OPTRecord equals() method to check TTL, since the TTL
+	  field holds relevant information.  (based on a patch from
+	  Dr. Christian Möller <cmoeller@users.sourceforge.net>)
 
 10/14/2013
 	- 2.1.6 released

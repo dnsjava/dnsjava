@@ -188,4 +188,16 @@ getOptions(int code) {
 	return list;
 }
 
+/**
+ * Determines if two OPTRecords are identical.  This compares the name, type,
+ * class, and rdata (with names canonicalized).  Additionally, because TTLs
+ * are relevant for OPT records, the TTLs are compared.
+ * @param arg The record to compare to
+ * @return true if the records are equal, false otherwise.
+ */
+public boolean
+equals(final Object arg) {
+	return super.equals(arg) && ttl == ((OPTRecord) arg).ttl;
+}
+
 }
