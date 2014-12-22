@@ -405,10 +405,16 @@ sectionToWire(DNSOutput out, int section, Compression c,
 	int n = sections[section].size();
 	int pos = out.current();
 	int rendered = 0;
+	int skipped = 0;
 	Record lastrec = null;
 
 	for (int i = 0; i < n; i++) {
 		Record rec = (Record)sections[section].get(i);
+		if (section == Section.ADDITIONAL && rec instanceof OPTRecord) {
+			skipped++;
+			continue;
+		}
+
 		if (lastrec != null && !sameSet(rec, lastrec)) {
 			pos = out.current();
 			rendered = i;
@@ -417,10 +423,10 @@ sectionToWire(DNSOutput out, int section, Compression c,
 		rec.toWire(out, section, c);
 		if (out.current() > maxLength) {
 			out.jump(pos);
-			return n - rendered;
+			return n - rendered + skipped;
 		}
 	}
-	return 0;
+	return skipped;
 }
 
 /* Returns true if the message could be rendered. */
@@ -435,45 +441,52 @@ toWire(DNSOutput out, int maxLength) {
 	if (tsigkey != null)
 		tempMaxLength -= tsigkey.recordLength();
 
+	OPTRecord opt = getOPT();
+	byte [] optBytes = null;
+        if (opt != null) {
+		optBytes = opt.toWire(Section.ADDITIONAL);
+		tempMaxLength -= optBytes.length;
+	}
+
 	int startpos = out.current();
 	header.toWire(out);
 	Compression c = new Compression();
+	int flags = header.getFlagsByte();
+	int additionalCount = 0;
 	for (int i = 0; i < 4; i++) {
 		int skipped;
 		if (sections[i] == null)
 			continue;
 		skipped = sectionToWire(out, i, c, tempMaxLength);
-		if (skipped != 0) {
-			if (newheader == null)
-				newheader = (Header) header.clone();
-			if (i != Section.ADDITIONAL)
-				newheader.setFlag(Flags.TC);
-			int count = newheader.getCount(i);
-			newheader.setCount(i, count - skipped);
-			for (int j = i + 1; j < 4; j++)
-				newheader.setCount(j, 0);
-
-			out.save();
-			out.jump(startpos);
-			newheader.toWire(out);
-			out.restore();
+		if (skipped != 0 && i != Section.ADDITIONAL) {
+			flags = Header.setFlag(flags, Flags.TC, true);
+			out.writeU16At(header.getCount(i) - skipped,
+				       startpos + 4 + 2 * i);
+			for (int j = i + 1; j < Section.ADDITIONAL; j++)
+				out.writeU16At(0, startpos + 4 + 2 * j);
 			break;
 		}
+		if (i == Section.ADDITIONAL)
+			additionalCount = header.getCount(i) - skipped;
 	}
+
+	if (optBytes != null) {
+		out.writeByteArray(optBytes);
+		additionalCount++;
+	}
+
+	if (flags != header.getFlagsByte())
+		out.writeU16At(flags, startpos + 2);
+
+	if (additionalCount != header.getCount(Section.ADDITIONAL))
+		out.writeU16At(additionalCount, startpos + 10);
 
 	if (tsigkey != null) {
 		TSIGRecord tsigrec = tsigkey.generate(this, out.toByteArray(),
 						      tsigerror, querytsig);
 
-		if (newheader == null)
-			newheader = (Header) header.clone();
 		tsigrec.toWire(out, Section.ADDITIONAL, c);
-		newheader.incCount(Section.ADDITIONAL);
-
-		out.save();
-		out.jump(startpos);
-		newheader.toWire(out);
-		out.restore();
+		out.writeU16At(additionalCount + 1, startpos + 10);
 	}
 
 	return true;
