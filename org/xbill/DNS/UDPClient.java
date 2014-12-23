@@ -110,7 +110,8 @@ connect(SocketAddress addr) throws IOException {
 void
 send(byte [] data) throws IOException {
 	DatagramChannel channel = (DatagramChannel) key.channel();
-	verboseLog("UDP write", data);
+	verboseLog("UDP write", channel.socket().getLocalSocketAddress(),
+		   channel.socket().getRemoteSocketAddress(), data);
 	channel.write(ByteBuffer.wrap(data));
 }
 
@@ -133,7 +134,8 @@ recv(int max) throws IOException {
 	int len = (int) ret;
 	byte [] data = new byte[len];
 	System.arraycopy(temp, 0, data, 0, len);
-	verboseLog("UDP read", data);
+	verboseLog("UDP read", channel.socket().getLocalSocketAddress(),
+		   channel.socket().getRemoteSocketAddress(), data);
 	return data;
 }
 

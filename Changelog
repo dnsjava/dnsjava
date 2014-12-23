@@ -1,4 +1,8 @@
 12/23/2014
+	- Add an interface for logging sent/received packets.
+	  (based on a patch from Damian Minkov <damencho@users.sf.net>)
+
+12/22/2014
 	- Fix message truncation to preserve the OPT record.
 	  (based on a patch from Klaus Malorny <Klaus.Malorny@knipp.de>)
 	- Properly deal with short DSA and ECDSA keys.  (original patch from

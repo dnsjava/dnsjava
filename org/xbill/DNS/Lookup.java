@@ -179,6 +179,16 @@ setDefaultSearchPath(String [] domains) throws TextParseException {
 	defaultSearchPath = newdomains;
 }
 
+/**
+ * Sets a custom logger that will be used to log the send and received packets.
+ * @param logger
+ */
+public static synchronized void
+setPacketLogger(PacketLogger logger)
+{
+    Client.setPacketLogger(logger);
+}
+
 private final void
 reset() {
 	iterations = 0;
