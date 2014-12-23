@@ -44,7 +44,7 @@ public class TypeTest extends TestCase
 	assertEquals("CNAME", Type.string(Type.CNAME));
 
 	// one that doesn't exist
-	assertTrue(Type.string(256).startsWith("TYPE"));
+	assertTrue(Type.string(65535).startsWith("TYPE"));
 
 	try {
 	    Type.string(-1);
