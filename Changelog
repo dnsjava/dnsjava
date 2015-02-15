@@ -1,3 +1,6 @@
+2/15/2015
+	- 2.1.7 released
+
 2/14/2015
 	- Attempt to deal with Java's poor handling of IPv4-mapped IPv6
 	  addresses. (reported by Keshav Badruka <keshav.badruka@gmail.com>)
