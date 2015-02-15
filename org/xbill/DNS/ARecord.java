@@ -61,8 +61,7 @@ rrFromWire(DNSInput in) throws IOException {
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	InetAddress address = st.getAddress(Address.IPv4);
-	addr = fromArray(address.getAddress());
+	addr = fromArray(st.getAddressBytes(Address.IPv4));
 }
 
 /** Converts rdata to a String */

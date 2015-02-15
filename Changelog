@@ -1,3 +1,7 @@
+2/14/2015
+	- Attempt to deal with Java's poor handling of IPv4-mapped IPv6
+	  addresses. (reported by Keshav Badruka <keshav.badruka@gmail.com>)
+
 12/23/2014
 	- Add an interface for logging sent/received packets.
 	  (based on a patch from Damian Minkov <damencho@users.sf.net>)
