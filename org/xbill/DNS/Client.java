@@ -12,6 +12,11 @@ class Client {
 protected long endTime;
 protected SelectionKey key;
 
+/**
+ * Packet logger, if available.
+ */
+private static PacketLogger packetLogger = null;
+
 protected
 Client(SelectableChannel channel, long endTime) throws IOException {
 	boolean done = false;
@@ -44,15 +49,24 @@ blockUntil(SelectionKey key, long endTime) throws IOException {
 }
 
 static protected void
-verboseLog(String prefix, byte [] data) {
+verboseLog(String prefix, SocketAddress local, SocketAddress remote,
+           byte [] data)
+{
 	if (Options.check("verbosemsg"))
 		System.err.println(hexdump.dump(prefix, data));
+	if (packetLogger != null)
+		packetLogger.log(prefix, local, remote, data);
 }
 
 void
 cleanup() throws IOException {
 	key.selector().close();
 	key.channel().close();
+}
+
+static void setPacketLogger(PacketLogger logger)
+{
+    packetLogger = logger;
 }
 
 }

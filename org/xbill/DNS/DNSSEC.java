@@ -49,6 +49,12 @@ public static class Algorithm {
 	/** RSA/SHA512 public key */
 	public static final int RSASHA512 = 10;
 
+	/** GOST R 34.10-2001.
+	  * This requires an external cryptography provider,
+	  * such as BouncyCastle.
+	  */
+	public static final int ECC_GOST = 12;
+
 	/** ECDSA Curve P-256 with SHA-256 public key **/
 	public static final int ECDSAP256SHA256 = 13;
 
@@ -79,6 +85,7 @@ public static class Algorithm {
 		algs.add(RSA_NSEC3_SHA1, "RSA-NSEC3-SHA1");
 		algs.add(RSASHA256, "RSASHA256");
 		algs.add(RSASHA512, "RSASHA512");
+		algs.add(ECC_GOST, "ECC-GOST");
 		algs.add(ECDSAP256SHA256, "ECDSAP256SHA256");
 		algs.add(ECDSAP384SHA384, "ECDSAP384SHA384");
 		algs.add(INDIRECT, "INDIRECT");
@@ -340,13 +347,69 @@ readBigInteger(DNSInput in) {
 	return new BigInteger(1, b);
 }
 
+private static byte []
+trimByteArray(byte [] array) {
+	if (array[0] == 0) {
+		byte trimmedArray[] = new byte[array.length - 1];
+		System.arraycopy(array, 1, trimmedArray, 0, array.length - 1);
+		return trimmedArray;
+	} else {
+		return array;
+	}
+}
+
+private static void
+reverseByteArray(byte [] array) {
+	for (int i = 0; i < array.length / 2; i++) {
+		int j = array.length - i - 1;
+		byte tmp = array[i];
+		array[i] = array[j];
+		array[j] = tmp;
+	}
+}
+
+private static BigInteger
+readBigIntegerLittleEndian(DNSInput in, int len) throws IOException {
+	byte [] b = in.readByteArray(len);
+	reverseByteArray(b);
+	return new BigInteger(1, b);
+}
+
 private static void
 writeBigInteger(DNSOutput out, BigInteger val) {
-	byte [] b = val.toByteArray();
-	if (b[0] == 0)
-		out.writeByteArray(b, 1, b.length - 1);
-	else
-		out.writeByteArray(b);
+	byte [] b = trimByteArray(val.toByteArray());
+	out.writeByteArray(b);
+}
+
+private static void
+writePaddedBigInteger(DNSOutput out, BigInteger val, int len) {
+	byte [] b = trimByteArray(val.toByteArray());
+
+	if (b.length > len)
+		throw new IllegalArgumentException();
+
+	if (b.length < len) {
+		byte [] pad = new byte[len - b.length];
+		out.writeByteArray(pad);
+	}
+
+	out.writeByteArray(b);
+}
+
+private static void
+writePaddedBigIntegerLittleEndian(DNSOutput out, BigInteger val, int len) {
+	byte [] b = trimByteArray(val.toByteArray());
+
+	if (b.length > len)
+		throw new IllegalArgumentException();
+
+	reverseByteArray(b);
+	out.writeByteArray(b);
+
+	if (b.length < len) {
+		byte [] pad = new byte[len - b.length];
+		out.writeByteArray(pad);
+	}
 }
 
 private static PublicKey
@@ -402,6 +465,15 @@ private static class ECKeyInfo {
 	}
 }
 
+// RFC 4357 Section 11.4
+private static final ECKeyInfo GOST = new ECKeyInfo(32,
+	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD97",
+	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD94",
+	"A6",
+	"1",
+	"8D91E471E0989CDA27DF505A453F2B7635294F2DDF23E3B122ACC99C9E9F1E14",
+	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6C611070995AD10045841B09B761B893");
+
 // RFC 5114 Section 2.6
 private static final ECKeyInfo ECDSA_P256 = new ECKeyInfo(32,
 	"FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF",
@@ -419,6 +491,20 @@ private static final ECKeyInfo ECDSA_P384 = new ECKeyInfo(48,
 	"AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7",
 	"3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F",
 	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973");
+
+private static PublicKey
+toECGOSTPublicKey(KEYBase r, ECKeyInfo keyinfo) throws IOException,
+	GeneralSecurityException, MalformedKeyException
+{
+	DNSInput in = new DNSInput(r.getKey());
+
+	BigInteger x = readBigIntegerLittleEndian(in, keyinfo.length);
+	BigInteger y = readBigIntegerLittleEndian(in, keyinfo.length);
+	ECPoint q = new ECPoint(x, y);
+
+	KeyFactory factory = KeyFactory.getInstance("ECGOST3410");
+	return factory.generatePublic(new ECPublicKeySpec(q, keyinfo.spec));
+}
 
 private static PublicKey
 toECDSAPublicKey(KEYBase r, ECKeyInfo keyinfo) throws IOException,
@@ -450,6 +536,8 @@ toPublicKey(KEYBase r) throws DNSSECException {
 		case Algorithm.DSA:
 		case Algorithm.DSA_NSEC3_SHA1:
 			return toDSAPublicKey(r);
+		case Algorithm.ECC_GOST:
+			return toECGOSTPublicKey(r, GOST);
 		case Algorithm.ECDSAP256SHA256:
 			return toECDSAPublicKey(r, ECDSA_P256);
 		case Algorithm.ECDSAP384SHA384:
@@ -497,21 +585,34 @@ fromDSAPublicKey(DSAPublicKey key) {
 	out.writeU8(t);
 	writeBigInteger(out, q);
 	writeBigInteger(out, p);
-	writeBigInteger(out, g);
-	writeBigInteger(out, y);
+	writePaddedBigInteger(out, g, 8 * t + 64);
+	writePaddedBigInteger(out, y, 8 * t + 64);
 
 	return out.toByteArray();
 }
 
 private static byte []
-fromECDSAPublicKey(ECPublicKey key) {
+fromECGOSTPublicKey(ECPublicKey key, ECKeyInfo keyinfo) {
 	DNSOutput out = new DNSOutput();
 
 	BigInteger x = key.getW().getAffineX();
 	BigInteger y = key.getW().getAffineY();
 
-	writeBigInteger(out, x);
-	writeBigInteger(out, y);
+	writePaddedBigIntegerLittleEndian(out, x, keyinfo.length);
+	writePaddedBigIntegerLittleEndian(out, y, keyinfo.length);
+
+	return out.toByteArray();
+}
+
+private static byte []
+fromECDSAPublicKey(ECPublicKey key, ECKeyInfo keyinfo) {
+	DNSOutput out = new DNSOutput();
+
+	BigInteger x = key.getW().getAffineX();
+	BigInteger y = key.getW().getAffineY();
+
+	writePaddedBigInteger(out, x, keyinfo.length);
+	writePaddedBigInteger(out, y, keyinfo.length);
 
 	return out.toByteArray();
 }
@@ -520,7 +621,6 @@ fromECDSAPublicKey(ECPublicKey key) {
 static byte []
 fromPublicKey(PublicKey key, int alg) throws DNSSECException
 {
-
 	switch (alg) {
 	case Algorithm.RSAMD5:
 	case Algorithm.RSASHA1:
@@ -535,11 +635,18 @@ fromPublicKey(PublicKey key, int alg) throws DNSSECException
 		if (! (key instanceof DSAPublicKey))
 			throw new IncompatibleKeyException();
 		return fromDSAPublicKey((DSAPublicKey) key);
+	case Algorithm.ECC_GOST:
+		if (! (key instanceof ECPublicKey))
+			throw new IncompatibleKeyException();
+		return fromECGOSTPublicKey((ECPublicKey) key, GOST);
 	case Algorithm.ECDSAP256SHA256:
+		if (! (key instanceof ECPublicKey))
+			throw new IncompatibleKeyException();
+		return fromECDSAPublicKey((ECPublicKey) key, ECDSA_P256);
 	case Algorithm.ECDSAP384SHA384:
 		if (! (key instanceof ECPublicKey))
 			throw new IncompatibleKeyException();
-		return fromECDSAPublicKey((ECPublicKey) key);
+		return fromECDSAPublicKey((ECPublicKey) key, ECDSA_P384);
 	default:
 		throw new UnsupportedAlgorithmException(alg);
 	}
@@ -565,6 +672,8 @@ algString(int alg) throws UnsupportedAlgorithmException {
 		return "SHA256withRSA";
 	case Algorithm.RSASHA512:
 		return "SHA512withRSA";
+	case Algorithm.ECC_GOST:
+		return "GOST3411withECGOST3410";
 	case Algorithm.ECDSAP256SHA256:
 		return "SHA256withECDSA";
 	case Algorithm.ECDSAP384SHA384:
@@ -657,6 +766,16 @@ DSASignaturetoDNS(byte [] signature, int t) throws IOException {
 }
 
 private static byte []
+ECGOSTSignaturefromDNS(byte [] signature, ECKeyInfo keyinfo)
+	throws DNSSECException, IOException
+{
+	if (signature.length != keyinfo.length * 2)
+		throw new SignatureVerificationException();
+	// Wire format is equal to the engine input
+	return signature;
+}
+
+private static byte []
 ECDSASignaturefromDNS(byte [] signature, ECKeyInfo keyinfo)
 	throws DNSSECException, IOException
 {
@@ -745,6 +864,10 @@ throws DNSSECException
 	} else if (key instanceof ECPublicKey) {
 		try {
 			switch (alg) {
+			case Algorithm.ECC_GOST:
+				signature = ECGOSTSignaturefromDNS(signature,
+								   GOST);
+				break;
 			case Algorithm.ECDSAP256SHA256:
 				signature = ECDSASignaturefromDNS(signature,
 								  ECDSA_P256);
@@ -844,6 +967,9 @@ sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data,
 	} else if (pubkey instanceof ECPublicKey) {
 		try {
 			switch (alg) {
+			case Algorithm.ECC_GOST:
+				// Wire format is equal to the engine output
+				break;
 			case Algorithm.ECDSAP256SHA256:
 				signature = ECDSASignaturetoDNS(signature,
 								ECDSA_P256);
@@ -880,6 +1006,7 @@ checkAlgorithm(PrivateKey key, int alg) throws UnsupportedAlgorithmException
 		if (! (key instanceof DSAPrivateKey))
 			throw new IncompatibleKeyException();
 		break;
+	case Algorithm.ECC_GOST:
 	case Algorithm.ECDSAP256SHA256:
 	case Algorithm.ECDSAP384SHA384:
 		if (! (key instanceof ECPrivateKey))
@@ -1018,6 +1145,9 @@ generateDSDigest(DNSKEYRecord key, int digestid)
 			break;
 		case DSRecord.Digest.SHA256:
 			digest = MessageDigest.getInstance("sha-256");
+			break;
+		case DSRecord.Digest.GOST3411:
+			digest = MessageDigest.getInstance("GOST3411");
 			break;
 		case DSRecord.Digest.SHA384:
 			digest = MessageDigest.getInstance("sha-384");

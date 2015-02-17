@@ -523,6 +523,25 @@ getName(Name origin) throws IOException {
 }
 
 /**
+ * Gets the next token from a tokenizer and converts it to a byte array
+ * containing an IP address.
+ * @param family The address family.
+ * @return The next token in the stream, as an byte array representing an IP
+ * address.
+ * @throws TextParseException The input was invalid or not a valid address.
+ * @throws IOException An I/O error occurred.
+ * @see Address
+ */
+public byte []
+getAddressBytes(int family) throws IOException {
+	String next = _getIdentifier("an address");
+	byte [] bytes = Address.toByteArray(next, family);
+	if (bytes == null)
+		throw exception("Invalid address: " + next);
+	return bytes;
+}
+
+/**
  * Gets the next token from a tokenizer and converts it to an IP Address.
  * @param family The address family.
  * @return The next token in the stream, as an InetAddress

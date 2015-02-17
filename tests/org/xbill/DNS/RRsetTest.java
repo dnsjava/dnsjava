@@ -90,8 +90,7 @@ public class RRsetTest extends TestCase
 	try {m_rs.first();fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
 
-	try {m_rs.toString();fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
+	assertEquals("{empty}", m_rs.toString());
 
 	Iterator itr = m_rs.rrs();
 	assertNotNull(itr);

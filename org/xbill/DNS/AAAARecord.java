@@ -15,7 +15,7 @@ public class AAAARecord extends Record {
 
 private static final long serialVersionUID = -4588601512069748050L;
 
-private InetAddress address;
+private byte [] address;
 
 AAAARecord() {}
 
@@ -33,38 +33,58 @@ AAAARecord(Name name, int dclass, long ttl, InetAddress address) {
 	super(name, Type.AAAA, dclass, ttl);
 	if (Address.familyOf(address) != Address.IPv6)
 		throw new IllegalArgumentException("invalid IPv6 address");
-	this.address = address;
+	this.address = address.getAddress();
 }
 
 void
 rrFromWire(DNSInput in) throws IOException {
-	if (name == null)
-		address = InetAddress.getByAddress(in.readByteArray(16));
-	else
-		address = InetAddress.getByAddress(name.toString(),
-						   in.readByteArray(16));
+	address = in.readByteArray(16);
 }
 
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	address = st.getAddress(Address.IPv6);
+	address = st.getAddressBytes(Address.IPv6);
 }
 
 /** Converts rdata to a String */
 String
 rrToString() {
-	return address.getHostAddress();
+	InetAddress addr;
+	try {
+		addr = InetAddress.getByAddress(null, address);
+	} catch (UnknownHostException e) {
+		return null;
+	}
+	if (addr.getAddress().length == 4) {
+		// Deal with Java's broken handling of mapped IPv4 addresses.
+		StringBuffer sb = new StringBuffer("0:0:0:0:0:ffff:");
+		int high = ((address[12] & 0xFF) << 8) + (address[13] & 0xFF);
+		int low = ((address[14] & 0xFF) << 8) + (address[15] & 0xFF);
+		sb.append(Integer.toHexString(high));
+		sb.append(':');
+		sb.append(Integer.toHexString(low));
+		return sb.toString();
+	}
+	return addr.getHostAddress();
 }
 
 /** Returns the address */
 public InetAddress
 getAddress() {
-	return address;
+	try {
+		if (name == null)
+			return InetAddress.getByAddress(address);
+		else
+			return InetAddress.getByAddress(name.toString(),
+							address);
+	} catch (UnknownHostException e) {
+		return null;
+	}
 }
 
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	out.writeByteArray(address.getAddress());
+	out.writeByteArray(address);
 }
 
 }

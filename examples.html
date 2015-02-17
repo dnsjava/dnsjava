@@ -24,7 +24,7 @@ InetAddress addr = Address.getByName("www.dnsjava.org");
 Record [] records = new Lookup("gmail.com", Type.MX).run();
 for (int i = 0; i &lt; records.length; i++) {
 	MXRecord mx = (MXRecord) records[i];
-	System.out.println("Host " + mx.getTarget() + " has preference ", mx.getPriority());
+	System.out.println("Host " + mx.getTarget() + " has preference " + mx.getPriority());
 }
 </code></pre>
 

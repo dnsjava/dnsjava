@@ -1,3 +1,30 @@
+2/15/2015
+	- 2.1.7 released
+
+2/14/2015
+	- Attempt to deal with Java's poor handling of IPv4-mapped IPv6
+	  addresses. (reported by Keshav Badruka <keshav.badruka@gmail.com>)
+
+12/23/2014
+	- Add an interface for logging sent/received packets.
+	  (based on a patch from Damian Minkov <damencho@users.sf.net>)
+	- Add support for the URI record.
+	  (patch from Anthony Kirby <anthonykirby@users.sf.net>)
+
+12/22/2014
+	- Fix message truncation to preserve the OPT record.
+	  (based on a patch from Klaus Malorny <Klaus.Malorny@knipp.de>)
+	- Properly deal with short DSA and ECDSA keys.  (original patch from
+	  Marcos Sanz <sanz@denic.de>, with some local modifications)
+	- Add support for GOST (RFC 5933) to DNSSEC.  Using GOST requires an
+	  external cryptography provider, such as BouncyCastle.
+	  (original patch from Marcos Sanz <sanz@denic.de>, with some
+	  local modifications)
+	- Change the OPTRecord equals() method to check TTL, since the TTL
+	  field holds relevant information.  (based on a patch from
+	  Dr. Christian Möller <cmoeller@users.sourceforge.net>)
+	- Printing an empty RRset would incorrectly throw an exception.
+
 10/14/2013
 	- 2.1.6 released
 	- Address.getByName() and Address.getAllByName() had incomplete IPv6

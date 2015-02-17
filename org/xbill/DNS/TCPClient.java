@@ -41,7 +41,8 @@ connect(SocketAddress addr) throws IOException {
 void
 send(byte [] data) throws IOException {
 	SocketChannel channel = (SocketChannel) key.channel();
-	verboseLog("TCP write", data);
+	verboseLog("TCP write", channel.socket().getLocalSocketAddress(),
+		   channel.socket().getRemoteSocketAddress(), data);
 	byte [] lengthArray = new byte[2];
 	lengthArray[0] = (byte)(data.length >>> 8);
 	lengthArray[1] = (byte)(data.length & 0xFF);
@@ -103,7 +104,9 @@ recv() throws IOException {
 	byte [] buf = _recv(2);
 	int length = ((buf[0] & 0xFF) << 8) + (buf[1] & 0xFF);
 	byte [] data = _recv(length);
-	verboseLog("TCP read", data);
+	SocketChannel channel = (SocketChannel) key.channel();
+	verboseLog("TCP read", channel.socket().getLocalSocketAddress(),
+		   channel.socket().getRemoteSocketAddress(), data);
 	return data;
 }
 

@@ -238,7 +238,7 @@ iteratorToString(Iterator it) {
 /** Converts the RRset to a String */
 public String
 toString() {
-	if (rrs == null)
+	if (rrs.size() == 0)
 		return ("{empty}");
 	StringBuffer sb = new StringBuffer();
 	sb.append("{ ");

@@ -73,7 +73,7 @@ SimpleResolver() throws UnknownHostException {
  * Messages sent using this SimpleResolver will be sent to this address.
  * @return The destination address associated with this SimpleResolver.
  */
-InetSocketAddress
+public InetSocketAddress
 getAddress() {
 	return address;
 }

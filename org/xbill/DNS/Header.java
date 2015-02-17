@@ -93,6 +93,17 @@ checkFlag(int bit) {
 		throw new IllegalArgumentException("invalid flag bit " + bit);
 }
 
+static int
+setFlag(int flags, int bit, boolean value) {
+	checkFlag(bit);
+
+	// bits are indexed from left to right
+	if (value)
+		return flags |= (1 << (15 - bit));
+	else
+		return flags &= ~(1 << (15 - bit));
+}
+
 /**
  * Sets a flag to the supplied value
  * @see Flags
@@ -100,8 +111,7 @@ checkFlag(int bit) {
 public void
 setFlag(int bit) {
 	checkFlag(bit);
-	// bits are indexed from left to right
-	flags |= (1 << (15 - bit));
+	flags = setFlag(flags, bit, true);
 }
 
 /**
@@ -111,8 +121,7 @@ setFlag(int bit) {
 public void
 unsetFlag(int bit) {
 	checkFlag(bit);
-	// bits are indexed from left to right
-	flags &= ~(1 << (15 - bit));
+	flags = setFlag(flags, bit, false);
 }
 
 /**
@@ -235,6 +244,11 @@ decCount(int field) {
 public int
 getCount(int field) {
 	return counts[field];
+}
+
+int
+getFlagsByte() {
+	return flags;
 }
 
 /** Converts the header's flags into a String */
