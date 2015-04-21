@@ -190,7 +190,7 @@ public static final int MAILA		= 254;
 public static final int ANY		= 255;
 
 /** URI
- * @see see http://tools.ietf.org/html/draft-faltstrom-uri-09
+ * @see see http://tools.ietf.org/html/draft-faltstrom-uri-14
  */
 public static final int URI		= 256;
 
