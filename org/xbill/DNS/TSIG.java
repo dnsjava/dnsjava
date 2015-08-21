@@ -3,7 +3,11 @@
 package org.xbill.DNS;
 
 import java.util.*;
-import org.xbill.DNS.utils.*;
+import java.security.GeneralSecurityException;
+import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
+import javax.crypto.Mac;
+import org.xbill.DNS.utils.base64;
 
 /**
  * Transaction signature handling.  This class generates and verifies
@@ -15,37 +19,47 @@ import org.xbill.DNS.utils.*;
 
 public class TSIG {
 
-private static final String HMAC_MD5_STR = "HMAC-MD5.SIG-ALG.REG.INT.";
-private static final String HMAC_SHA1_STR = "hmac-sha1.";
-private static final String HMAC_SHA224_STR = "hmac-sha224.";
-private static final String HMAC_SHA256_STR = "hmac-sha256.";
-private static final String HMAC_SHA384_STR = "hmac-sha384.";
-private static final String HMAC_SHA512_STR = "hmac-sha512.";
-
-/** The domain name representing the HMAC-MD5 algorithm. */
-public static final Name HMAC_MD5 = Name.fromConstantString(HMAC_MD5_STR);
-
-/** The domain name representing the HMAC-MD5 algorithm (deprecated). */
+// Backwards compatible constants for the HMAC algorithm selectors
+public static final Name HMAC_MD5 = Name.fromConstantString("HMAC-MD5.SIG-ALG.REG.INT.");
 public static final Name HMAC = HMAC_MD5;
+public static final Name HMAC_SHA1 = Name.fromConstantString("hmac-sha1.");
+public static final Name HMAC_SHA224 = Name.fromConstantString("hmac-sha224.");
+public static final Name HMAC_SHA256 = Name.fromConstantString("hmac-sha256.");
+public static final Name HMAC_SHA384 = Name.fromConstantString("hmac-sha384.");
+public static final Name HMAC_SHA512 = Name.fromConstantString("hmac-sha512.");
 
-/** The domain name representing the HMAC-SHA1 algorithm. */
-public static final Name HMAC_SHA1 = Name.fromConstantString(HMAC_SHA1_STR);
+private static Map algMap;
 
-/**
- * The domain name representing the HMAC-SHA224 algorithm.
- * Note that SHA224 is not supported by Java out-of-the-box, this requires use
- * of a third party provider like BouncyCastle.org.
- */
-public static final Name HMAC_SHA224 = Name.fromConstantString(HMAC_SHA224_STR);
+static {
+	Map out = new HashMap();
+	out.put(HMAC_MD5, "HmacMD5");
+	out.put(HMAC_SHA1, "HmacSHA1");
+	out.put(HMAC_SHA224, "HmacSHA224");
+	out.put(HMAC_SHA256, "HmacSHA256");
+	out.put(HMAC_SHA384, "HmacSHA384");
+	out.put(HMAC_SHA512, "HmacSHA512");
+	algMap = Collections.unmodifiableMap(out);
+}
 
-/** The domain name representing the HMAC-SHA256 algorithm. */
-public static final Name HMAC_SHA256 = Name.fromConstantString(HMAC_SHA256_STR);
-
-/** The domain name representing the HMAC-SHA384 algorithm. */
-public static final Name HMAC_SHA384 = Name.fromConstantString(HMAC_SHA384_STR);
-
-/** The domain name representing the HMAC-SHA512 algorithm. */
-public static final Name HMAC_SHA512 = Name.fromConstantString(HMAC_SHA512_STR);
+public static Name
+algorithmToName(String alg)
+{
+	Iterator it = algMap.entrySet().iterator();
+	while (it.hasNext()) {
+		Map.Entry entry = (Map.Entry) it.next();
+		if (alg.equalsIgnoreCase((String)entry.getValue()))
+			return (Name) entry.getKey();
+	}
+	throw new IllegalArgumentException("Unknown algorithm");
+}
+public static String
+nameToAlgorithm(Name name)
+{
+	String alg = (String) algMap.get(name);
+	if (alg != null)
+		return alg;
+	throw new IllegalArgumentException("Unknown algorithm");
+}
 
 /**
  * The default fudge value for outgoing packets.  Can be overriden by the
@@ -54,32 +68,36 @@ public static final Name HMAC_SHA512 = Name.fromConstantString(HMAC_SHA512_STR);
 public static final short FUDGE		= 300;
 
 private Name name, alg;
-private String digest;
-private int digestBlockLength;
-private byte [] key;
+private Mac hmac;
 
-private void
-getDigest() {
-	if (alg.equals(HMAC_MD5)) {
-		digest = "md5";
-		digestBlockLength = 64;
-	} else if (alg.equals(HMAC_SHA1)) {
-		digest = "sha-1";
-		digestBlockLength = 64;
-	} else if (alg.equals(HMAC_SHA224)) {
-		digest = "sha-224";
-		digestBlockLength = 64;
-	} else if (alg.equals(HMAC_SHA256)) {
-		digest = "sha-256";
-		digestBlockLength = 64;
-	} else if (alg.equals(HMAC_SHA512)) {
-		digest = "sha-512";
-		digestBlockLength = 128;
-	} else if (alg.equals(HMAC_SHA384)) {
-		digest = "sha-384";
-		digestBlockLength = 128;
-	} else
-		throw new IllegalArgumentException("Invalid algorithm");
+/**
+ * Verifies the data (computes the secure hash and compares it to the input)
+ * @param mac The HMAC generator
+ * @param signature The signature to compare against
+ * @return true if the signature matches, false otherwise
+ */
+private static boolean
+verify(Mac mac, byte [] signature) {
+        return verify(mac, signature, false);
+}
+
+/**
+ * Verifies the data (computes the secure hash and compares it to the input)
+ * @param mac The HMAC generator
+ * @param signature The signature to compare against
+ * @param truncation_ok If true, the signature may be truncated; only the
+ * number of bytes in the provided signature are compared.
+ * @return true if the signature matches, false otherwise
+ */
+private static boolean
+verify(Mac mac, byte [] signature, boolean truncation_ok) {
+        byte [] expected = mac.doFinal();
+        if (truncation_ok && signature.length < expected.length) {
+                byte [] truncated = new byte[signature.length];
+                System.arraycopy(expected, 0, truncated, 0, truncated.length);
+                expected = truncated;
+        }
+        return Arrays.equals(signature, expected);
 }
 
 /**
@@ -89,11 +107,52 @@ getDigest() {
  * @param key The shared key's data.
  */
 public
-TSIG(Name algorithm, Name name, byte [] key) {
+TSIG(Name algorithm, Name name, byte [] keyBytes) {
 	this.name = name;
 	this.alg = algorithm;
-	this.key = key;
-	getDigest();
+	String macAlgorithm = nameToAlgorithm(algorithm);
+	SecretKey key = new SecretKeySpec(keyBytes, macAlgorithm);
+	try {
+		this.hmac = Mac.getInstance(macAlgorithm);
+		this.hmac.init(key);
+	}
+	catch(GeneralSecurityException ex) {
+		throw new IllegalArgumentException("Caught security exception setting up HMAC.");
+	}
+}
+
+/**
+ * Creates a new TSIG key, which can be used to sign or verify a message.
+ * @param algorithm The algorithm of the shared key.
+ * @param name The name of the shared key.
+ * @param key The shared key.
+ */
+public
+TSIG(Name algorithm, Name name, SecretKey key) {
+	this.name = name;
+	this.alg = algorithm;
+	String macAlgorithm = nameToAlgorithm(algorithm);
+	try {
+		this.hmac = Mac.getInstance(macAlgorithm);
+		this.hmac.init(key);
+	}
+	catch(GeneralSecurityException ex) {
+		throw new IllegalArgumentException("Caught security exception setting up HMAC.");
+	}
+}
+
+/**
+ * Creates a new TSIG key from a pre-initialized Mac instance.
+ * This assumes that init() has already been called on the mac
+ * to set up the key.
+ * @param mac The JCE HMAC object
+ * @param Name The name of the key
+ */
+public
+TSIG(Mac mac, Name name) {
+	this.name = name;
+	this.hmac = mac;
+	this.alg = algorithmToName(mac.getAlgorithm());
 }
 
 /**
@@ -116,8 +175,8 @@ TSIG(Name name, byte [] key) {
  */
 public
 TSIG(Name algorithm, String name, String key) {
-	this.key = base64.fromString(key);
-	if (this.key == null)
+	byte[] keyBytes = base64.fromString(key);
+	if (keyBytes == null)
 		throw new IllegalArgumentException("Invalid TSIG key string");
 	try {
 		this.name = Name.fromString(name, Name.root);
@@ -126,7 +185,14 @@ TSIG(Name algorithm, String name, String key) {
 		throw new IllegalArgumentException("Invalid TSIG key name");
 	}
 	this.alg = algorithm;
-	getDigest();
+	String macAlgorithm = nameToAlgorithm(this.alg);
+	try {
+		this.hmac = Mac.getInstance(macAlgorithm);
+		this.hmac.init(new SecretKeySpec(keyBytes, macAlgorithm));
+	}
+	catch(GeneralSecurityException ex) {
+		throw new IllegalArgumentException("Caught security exception setting up HMAC.");
+	}
 }
 
 /**
@@ -141,22 +207,7 @@ TSIG(Name algorithm, String name, String key) {
  */
 public
 TSIG(String algorithm, String name, String key) {
-	this(HMAC_MD5, name, key);
-	if (algorithm.equalsIgnoreCase("hmac-md5"))
-		this.alg = HMAC_MD5;
-	else if (algorithm.equalsIgnoreCase("hmac-sha1"))
-		this.alg = HMAC_SHA1;
-	else if (algorithm.equalsIgnoreCase("hmac-sha224"))
-		this.alg = HMAC_SHA224;
-	else if (algorithm.equalsIgnoreCase("hmac-sha256"))
-		this.alg = HMAC_SHA256;
-	else if (algorithm.equalsIgnoreCase("hmac-sha384"))
-		this.alg = HMAC_SHA384;
-	else if (algorithm.equalsIgnoreCase("hmac-sha512"))
-		this.alg = HMAC_SHA512;
-	else
-		throw new IllegalArgumentException("Invalid TSIG algorithm");
-	getDigest();
+	this(algorithmToName(algorithm), name, key);
 }
 
 /**
@@ -215,9 +266,11 @@ generate(Message m, byte [] b, int error, TSIGRecord old) {
 	else
 		timeSigned = old.getTimeSigned();
 	int fudge;
-	HMAC hmac = null;
-	if (error == Rcode.NOERROR || error == Rcode.BADTIME)
-		hmac = new HMAC(digest, digestBlockLength, key);
+	boolean signing = false;
+	if (error == Rcode.NOERROR || error == Rcode.BADTIME) {
+		signing = true;
+		hmac.reset();
+	}
 
 	fudge = Options.intValue("tsigfudge");
 	if (fudge < 0 || fudge > 0x7FFF)
@@ -226,14 +279,14 @@ generate(Message m, byte [] b, int error, TSIGRecord old) {
 	if (old != null) {
 		DNSOutput out = new DNSOutput();
 		out.writeU16(old.getSignature().length);
-		if (hmac != null) {
+		if (signing) {
 			hmac.update(out.toByteArray());
 			hmac.update(old.getSignature());
 		}
 	}
 
 	/* Digest the message */
-	if (hmac != null)
+	if (signing)
 		hmac.update(b);
 
 	DNSOutput out = new DNSOutput();
@@ -251,12 +304,12 @@ generate(Message m, byte [] b, int error, TSIGRecord old) {
 	out.writeU16(error);
 	out.writeU16(0); /* No other data */
 
-	if (hmac != null)
+	if (signing)
 		hmac.update(out.toByteArray());
 
 	byte [] signature;
-	if (hmac != null)
-		signature = hmac.sign();
+	if (signing)
+		signature = hmac.doFinal();
 	else
 		signature = new byte[0];
 
@@ -312,7 +365,7 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 	}
 	Date timeSigned = new Date();
 	int fudge;
-	HMAC hmac = new HMAC(digest, digestBlockLength, key);
+	hmac.reset();
 
 	fudge = Options.intValue("tsigfudge");
 	if (fudge < 0 || fudge > 0x7FFF)
@@ -336,7 +389,7 @@ applyStream(Message m, TSIGRecord old, boolean first) {
 
 	hmac.update(out.toByteArray());
 
-	byte [] signature = hmac.sign();
+	byte [] signature = hmac.doFinal();
 	byte [] other = null;
 
 	Record r = new TSIGRecord(name, DClass.ANY, 0, alg, timeSigned, fudge,
@@ -364,7 +417,7 @@ public byte
 verify(Message m, byte [] b, int length, TSIGRecord old) {
 	m.tsigState = Message.TSIG_FAILED;
 	TSIGRecord tsig = m.getTSIG();
-	HMAC hmac = new HMAC(digest, digestBlockLength, key);
+	hmac.reset();
 	if (tsig == null)
 		return Rcode.FORMERR;
 
@@ -420,8 +473,8 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 	hmac.update(out.toByteArray());
 
 	byte [] signature = tsig.getSignature();
-	int digestLength = hmac.digestLength();
-	int minDigestLength = digest.equals("md5") ? 10 : digestLength / 2;
+	int digestLength = hmac.getMacLength();
+	int minDigestLength = hmac.getAlgorithm().toLowerCase().contains("md5") ? 10 : digestLength / 2;
 
 	if (signature.length > digestLength) {
 		if (Options.check("verbose"))
@@ -431,7 +484,7 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 		if (Options.check("verbose"))
 			System.err.println("BADSIG: signature too short");
 		return Rcode.BADSIG;
-	} else if (!hmac.verify(signature, true)) {
+	} else if (!verify(hmac, signature, true)) {
 		if (Options.check("verbose"))
 			System.err.println("BADSIG: signature verification");
 		return Rcode.BADSIG;
@@ -479,7 +532,7 @@ public static class StreamVerifier {
 	 */
 
 	private TSIG key;
-	private HMAC verifier;
+	private Mac verifier;
 	private int nresponses;
 	private int lastsigned;
 	private TSIGRecord lastTSIG;
@@ -488,7 +541,7 @@ public static class StreamVerifier {
 	public
 	StreamVerifier(TSIG tsig, TSIGRecord old) {
 		key = tsig;
-		verifier = new HMAC(key.digest, key.digestBlockLength, key.key);
+		verifier = tsig.hmac;
 		nresponses = 0;
 		lastTSIG = old;
 	}
@@ -571,14 +624,14 @@ public static class StreamVerifier {
 		out.writeU16(tsig.getFudge());
 		verifier.update(out.toByteArray());
 
-		if (verifier.verify(tsig.getSignature()) == false) {
+		if (TSIG.verify(verifier, tsig.getSignature()) == false) {
 			if (Options.check("verbose"))
 				System.err.println("BADSIG failure");
 			m.tsigState = Message.TSIG_FAILED;
 			return Rcode.BADSIG;
 		}
 
-		verifier.clear();
+		verifier.reset();
 		out = new DNSOutput();
 		out.writeU16(tsig.getSignature().length);
 		verifier.update(out.toByteArray());

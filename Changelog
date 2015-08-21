@@ -1,3 +1,8 @@
+8/21/2015:
+	- Convert the TSIG code from using a custom HMAC implementation to
+	  the one in javax.crypto.Mac.
+	  (patch from Nick Sayer <nsayer@silverspringnet.com>)
+
 4/21/2015:
 	- Update the URI record implementation to match the latest spec.
 	  (patch from Anthony Kirby <anthonykirby@users.sf.net>)
