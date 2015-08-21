@@ -19,13 +19,30 @@ import org.xbill.DNS.utils.base64;
 
 public class TSIG {
 
-// Backwards compatible constants for the HMAC algorithm selectors
-public static final Name HMAC_MD5 = Name.fromConstantString("HMAC-MD5.SIG-ALG.REG.INT.");
+/** The domain name representing the HMAC-MD5 algorithm. */
+public static final Name HMAC_MD5 =
+	Name.fromConstantString("HMAC-MD5.SIG-ALG.REG.INT.");
+
+/** The domain name representing the HMAC-MD5 algorithm (deprecated). */
 public static final Name HMAC = HMAC_MD5;
+
+/** The domain name representing the HMAC-SHA1 algorithm. */
 public static final Name HMAC_SHA1 = Name.fromConstantString("hmac-sha1.");
+
+/**
+ * The domain name representing the HMAC-SHA224 algorithm.
+ * Note that SHA224 is not supported by Java out-of-the-box, this requires use
+ * of a third party provider like BouncyCastle.org.
+ */
 public static final Name HMAC_SHA224 = Name.fromConstantString("hmac-sha224.");
+
+/** The domain name representing the HMAC-SHA256 algorithm. */
 public static final Name HMAC_SHA256 = Name.fromConstantString("hmac-sha256.");
+
+/** The domain name representing the HMAC-SHA384 algorithm. */
 public static final Name HMAC_SHA384 = Name.fromConstantString("hmac-sha384.");
+
+/** The domain name representing the HMAC-SHA512 algorithm. */
 public static final Name HMAC_SHA512 = Name.fromConstantString("hmac-sha512.");
 
 private static Map algMap;
@@ -100,6 +117,19 @@ verify(Mac mac, byte [] signature, boolean truncation_ok) {
         return Arrays.equals(signature, expected);
 }
 
+private void
+init_hmac(String macAlgorithm, SecretKey key) {
+	try {
+		hmac = Mac.getInstance(macAlgorithm);
+		hmac.init(key);
+	}
+	catch (GeneralSecurityException ex) {
+		throw new IllegalArgumentException("Caught security " +
+						   "exception setting up " +
+						   "HMAC.");
+	}
+}
+
 /**
  * Creates a new TSIG key, which can be used to sign or verify a message.
  * @param algorithm The algorithm of the shared key.
@@ -112,13 +142,7 @@ TSIG(Name algorithm, Name name, byte [] keyBytes) {
 	this.alg = algorithm;
 	String macAlgorithm = nameToAlgorithm(algorithm);
 	SecretKey key = new SecretKeySpec(keyBytes, macAlgorithm);
-	try {
-		this.hmac = Mac.getInstance(macAlgorithm);
-		this.hmac.init(key);
-	}
-	catch(GeneralSecurityException ex) {
-		throw new IllegalArgumentException("Caught security exception setting up HMAC.");
-	}
+	init_hmac(macAlgorithm, key);
 }
 
 /**
@@ -132,13 +156,7 @@ TSIG(Name algorithm, Name name, SecretKey key) {
 	this.name = name;
 	this.alg = algorithm;
 	String macAlgorithm = nameToAlgorithm(algorithm);
-	try {
-		this.hmac = Mac.getInstance(macAlgorithm);
-		this.hmac.init(key);
-	}
-	catch(GeneralSecurityException ex) {
-		throw new IllegalArgumentException("Caught security exception setting up HMAC.");
-	}
+	init_hmac(macAlgorithm, key);
 }
 
 /**
@@ -186,13 +204,7 @@ TSIG(Name algorithm, String name, String key) {
 	}
 	this.alg = algorithm;
 	String macAlgorithm = nameToAlgorithm(this.alg);
-	try {
-		this.hmac = Mac.getInstance(macAlgorithm);
-		this.hmac.init(new SecretKeySpec(keyBytes, macAlgorithm));
-	}
-	catch(GeneralSecurityException ex) {
-		throw new IllegalArgumentException("Caught security exception setting up HMAC.");
-	}
+	init_hmac(macAlgorithm, new SecretKeySpec(keyBytes, macAlgorithm));
 }
 
 /**
@@ -474,7 +486,11 @@ verify(Message m, byte [] b, int length, TSIGRecord old) {
 
 	byte [] signature = tsig.getSignature();
 	int digestLength = hmac.getMacLength();
-	int minDigestLength = hmac.getAlgorithm().toLowerCase().contains("md5") ? 10 : digestLength / 2;
+	int minDigestLength;
+	if (hmac.getAlgorithm().toLowerCase().contains("md5"))
+		minDigestLength = 10;
+	else
+		minDigestLength = digestLength / 2;
 
 	if (signature.length > digestLength) {
 		if (Options.check("verbose"))
