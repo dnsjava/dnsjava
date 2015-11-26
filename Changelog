@@ -1,3 +1,6 @@
+11/25/2015:
+	- Add support for the CAA record.
+
 8/21/2015:
 	- Convert the TSIG code from using a custom HMAC implementation to
 	  the one in javax.crypto.Mac.

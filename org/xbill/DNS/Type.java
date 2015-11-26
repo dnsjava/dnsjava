@@ -194,6 +194,9 @@ public static final int ANY		= 255;
  */
 public static final int URI		= 256;
 
+/** Certification Authority Authorization, RFC 6844 */
+public static final int CAA		= 257;
+
 /** DNSSEC Lookaside Validation, RFC 4431 . */
 public static final int DLV		= 32769;
 
@@ -289,6 +292,7 @@ static {
 	types.add(MAILA, "MAILA");
 	types.add(ANY, "ANY");
 	types.add(URI, "URI", new URIRecord());
+	types.add(CAA, "CAA", new CAARecord());
 	types.add(DLV, "DLV", new DLVRecord());
 }
 
