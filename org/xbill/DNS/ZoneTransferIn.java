@@ -196,7 +196,6 @@ ZoneTransferIn(Name zone, int xfrtype, long serial, boolean fallback,
  * @param address The host/port from which to transfer the zone.
  * @param key The TSIG key used to authenticate the transfer, or null.
  * @return The ZoneTransferIn object.
- * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
 newAXFR(Name zone, SocketAddress address, TSIG key) {
@@ -245,7 +244,6 @@ throws UnknownHostException
  * @param address The host/port from which to transfer the zone.
  * @param key The TSIG key used to authenticate the transfer, or null.
  * @return The ZoneTransferIn object.
- * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
 newIXFR(Name zone, long serial, boolean fallback, SocketAddress address,

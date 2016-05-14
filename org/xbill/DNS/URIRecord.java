@@ -55,7 +55,7 @@ void
 rrFromWire(DNSInput in) throws IOException {
 	priority = in.readU16();
 	weight = in.readU16();
-	target = in.readCountedString();
+	target = in.readByteArray();
 }
 
 void
@@ -102,7 +102,7 @@ void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(priority);
 	out.writeU16(weight);
-	out.writeCountedString(target);
+	out.writeByteArray(target);
 }
 
 }
