@@ -2,6 +2,9 @@
 	- Add a Message constructor taking a ByteBuffer, and convert the
 	  DNSInput class to use a ByteBuffer internally.
 	  (patch from Marrache Mickael <mickoo95@users.sf.net>)
+	- Add support for the OPENPGPKEY record.
+	  (patch from Valentin Hauner <vh@hnr.name>)
+	- Add support for the SMIMEA record.
 
 11/25/2015:
 	- Add support for the CAA record.
