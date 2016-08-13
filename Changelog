@@ -1,3 +1,8 @@
+8/13/2016:
+	- Add a Message constructor taking a ByteBuffer, and convert the
+	  DNSInput class to use a ByteBuffer internally.
+	  (patch from Marrache Mickael <mickoo95@users.sf.net>)
+
 11/25/2015:
 	- Add support for the CAA record.
 

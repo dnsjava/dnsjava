@@ -4,6 +4,7 @@ package org.xbill.DNS;
 
 import java.util.*;
 import java.io.*;
+import java.nio.ByteBuffer;
 
 /**
  * A DNS Message.  A message is the basic unit of communication between
@@ -133,6 +134,15 @@ Message(DNSInput in) throws IOException {
 public
 Message(byte [] b) throws IOException {
 	this(new DNSInput(b));
+}
+
+/**
+ * Creates a new Message from its DNS wire format representation
+ * @param byteBuffer A ByteBuffer containing the DNS Message.
+ */
+public
+Message(ByteBuffer byteBuffer) throws IOException {
+    this(new DNSInput(byteBuffer));
 }
 
 /**
