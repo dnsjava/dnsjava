@@ -33,7 +33,7 @@ getObject() {
 public
 OPENPGPKEYRecord(Name name, int dclass, long ttl, byte [] cert)
 {
-	super(name, Type.CERT, dclass, ttl);
+	super(name, Type.OPENPGPKEY, dclass, ttl);
 	this.cert = cert;
 }
 
