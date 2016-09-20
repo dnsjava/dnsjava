@@ -275,9 +275,8 @@ public class AddressTest extends TestCase
 	InetAddress out = Address.getByName("128.145.198.231");
 	assertEquals("128.145.198.231", out.getHostAddress());
 
-	out = Address.getByName("serl.cs.colorado.edu");
-	assertEquals("epic.cs.colorado.edu", out.getCanonicalHostName());
-	assertEquals("128.138.72.229", out.getHostAddress());
+	out = Address.getByName("a.root-servers.net");
+	assertEquals("198.41.0.4", out.getHostAddress());
     }
 
     public void test_getByName_invalid() throws UnknownHostException
@@ -302,10 +301,10 @@ public class AddressTest extends TestCase
 	assertEquals(1, out.length);
 	assertEquals("128.145.198.231", out[0].getHostAddress());
 
-	out = Address.getAllByName("serl.cs.colorado.edu");
-	assertEquals(1, out.length);
-	assertEquals("epic.cs.colorado.edu", out[0].getCanonicalHostName());
-	assertEquals("128.138.72.229", out[0].getHostAddress());
+	out = Address.getAllByName("a.root-servers.net");
+	assertTrue(out.length == 2);
+	assertEquals("198.41.0.4", out[0].getHostAddress());
+	assertEquals("2001:503:ba3e:0:0:0:2:30", out[1].getHostAddress());
 
 	out = Address.getAllByName("cnn.com");
 	assertTrue(out.length > 1);
@@ -344,8 +343,8 @@ public class AddressTest extends TestCase
 
     public void test_getHostName() throws UnknownHostException
     {
-	String out = Address.getHostName(InetAddress.getByName("128.138.207.163"));
-	assertEquals("www-serl.cs.colorado.edu.", out);
+	String out = Address.getHostName(InetAddress.getByName("198.41.0.4"));
+	assertEquals("a.root-servers.net.", out);
 
 	try {
 	    Address.getHostName(InetAddress.getByName("192.168.1.1"));

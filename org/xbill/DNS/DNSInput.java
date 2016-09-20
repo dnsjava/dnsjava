@@ -2,6 +2,8 @@
 
 package org.xbill.DNS;
 
+import java.nio.ByteBuffer;
+
 /**
  * An class for parsing DNS messages.
  *
@@ -10,9 +12,7 @@ package org.xbill.DNS;
 
 public class DNSInput {
 
-private byte [] array;
-private int pos;
-private int end;
+private ByteBuffer byteBuffer;
 private int saved_pos;
 private int saved_end;
 
@@ -22,9 +22,18 @@ private int saved_end;
  */
 public
 DNSInput(byte [] input) {
-	array = input;
-	pos = 0;
-	end = array.length;
+	byteBuffer = ByteBuffer.wrap(input);
+	saved_pos = -1;
+	saved_end = -1;
+}
+
+/**
+ * Creates a new DNSInput from the given {@link ByteBuffer}
+ * @param byteBuffer The ByteBuffer
+ */
+public
+DNSInput(ByteBuffer byteBuffer) {
+	this.byteBuffer = byteBuffer;
 	saved_pos = -1;
 	saved_end = -1;
 }
@@ -34,7 +43,7 @@ DNSInput(byte [] input) {
  */
 public int
 current() {
-	return pos;
+	return byteBuffer.position();
 }
 
 /**
@@ -43,7 +52,7 @@ current() {
  */
 public int
 remaining() {
-	return end - pos;
+	return byteBuffer.remaining();
 }
 
 private void
@@ -61,11 +70,11 @@ require(int n) throws WireParseException{
  */
 public void
 setActive(int len) {
-	if (len > array.length - pos) {
+	if (len > byteBuffer.capacity() - byteBuffer.position()) {
 		throw new IllegalArgumentException("cannot set active " +
 						   "region past end of input");
 	}
-	end = pos + len;
+	byteBuffer.limit(byteBuffer.position() + len);
 }
 
 /**
@@ -74,7 +83,7 @@ setActive(int len) {
  */
 public void
 clearActive() {
-	end = array.length;
+	byteBuffer.limit(byteBuffer.capacity());
 }
 
 /**
@@ -82,7 +91,7 @@ clearActive() {
  */
 public int
 saveActive() {
-	return end;
+	return byteBuffer.limit();
 }
 
 /**
@@ -93,11 +102,11 @@ saveActive() {
  */
 public void
 restoreActive(int pos) {
-	if (pos > array.length) {
+	if (pos > byteBuffer.capacity()) {
 		throw new IllegalArgumentException("cannot set active " +
 						   "region past end of input");
 	}
-	end = pos;
+	byteBuffer.limit(byteBuffer.position());
 }
 
 /**
@@ -108,12 +117,12 @@ restoreActive(int pos) {
  */
 public void
 jump(int index) {
-	if (index >= array.length) {
+	if (index >= byteBuffer.capacity()) {
 		throw new IllegalArgumentException("cannot jump past " +
 						   "end of input");
 	}
-	pos = index;
-	end = array.length;
+	byteBuffer.position(index);
+	byteBuffer.limit(byteBuffer.capacity());
 }
 
 /**
@@ -123,8 +132,8 @@ jump(int index) {
  */
 public void
 save() {
-	saved_pos = pos;
-	saved_end = end;
+	saved_pos = byteBuffer.position();
+	saved_end = byteBuffer.limit();
 }
 
 /**
@@ -135,8 +144,8 @@ restore() {
 	if (saved_pos < 0) {
 		throw new IllegalStateException("no previous state");
 	}
-	pos = saved_pos;
-	end = saved_end;
+	byteBuffer.position(saved_pos);
+	byteBuffer.limit(saved_end);
 	saved_pos = -1;
 	saved_end = -1;
 }
@@ -149,7 +158,7 @@ restore() {
 public int
 readU8() throws WireParseException {
 	require(1);
-	return (array[pos++] & 0xFF);
+	return (byteBuffer.get() & 0xFF);
 }
 
 /**
@@ -160,9 +169,7 @@ readU8() throws WireParseException {
 public int
 readU16() throws WireParseException {
 	require(2);
-	int b1 = array[pos++] & 0xFF;
-	int b2 = array[pos++] & 0xFF;
-	return ((b1 << 8) + b2);
+	return (byteBuffer.getShort() & 0xFFFF);
 }
 
 /**
@@ -173,11 +180,7 @@ readU16() throws WireParseException {
 public long
 readU32() throws WireParseException {
 	require(4);
-	int b1 = array[pos++] & 0xFF;
-	int b2 = array[pos++] & 0xFF;
-	int b3 = array[pos++] & 0xFF;
-	int b4 = array[pos++] & 0xFF;
-	return (((long)b1 << 24) + (b2 << 16) + (b3 << 8) + b4);
+	return (byteBuffer.getInt() & 0xFFFFFFFFL);
 }
 
 /**
@@ -191,8 +194,7 @@ readU32() throws WireParseException {
 public void
 readByteArray(byte [] b, int off, int len) throws WireParseException {
 	require(len);
-	System.arraycopy(array, pos, b, off, len);
-	pos += len;
+	byteBuffer.get(b, off, len);
 }
 
 /**
@@ -204,8 +206,7 @@ public byte []
 readByteArray(int len) throws WireParseException {
 	require(len);
 	byte [] out = new byte[len];
-	System.arraycopy(array, pos, out, 0, len);
-	pos += len;
+	byteBuffer.get(out, 0, len);
 	return out;
 }
 
@@ -218,8 +219,7 @@ public byte []
 readByteArray() {
 	int len = remaining();
 	byte [] out = new byte[len];
-	System.arraycopy(array, pos, out, 0, len);
-	pos += len;
+	byteBuffer.get(out, 0, len);
 	return out;
 }
 
@@ -231,8 +231,7 @@ readByteArray() {
  */
 public byte []
 readCountedString() throws WireParseException {
-	require(1);
-	int len = array[pos++] & 0xFF;
+	int len = readU8();
 	return readByteArray(len);
 }
 
