@@ -43,15 +43,6 @@
     <build>
         <sourceDirectory>./</sourceDirectory>
         <testSourceDirectory>./tests</testSourceDirectory>
-        <resources>
-            <resource>
-                <directory>org/xbill/DNS/spi/</directory>
-                <targetPath>META-INF</targetPath>
-                <includes>
-                    <include>services/</include>
-                </includes>
-            </resource>
-        </resources>
 
         <plugins>
         
@@ -72,7 +63,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>${target.jdk}</source>
                     <target>${target.jdk}</target>
@@ -150,7 +141,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.10.4</version>
                 <configuration>
                     <excludePackageNames>*.tests.*</excludePackageNames>
                     <sourcepath>./org</sourcepath>
@@ -166,6 +157,14 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <!-- Workaround to be able to use JDK 9 >= b175 -->
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                        <version>2.6</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
@@ -193,6 +192,59 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                             <additionalparam>-Xdoclint:none</additionalparam>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>spi-up-to-java8</id>
+            <activation>
+                <jdk>(,1.8]</jdk>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>org/xbill/DNS/spi/</directory>
+                        <targetPath>META-INF</targetPath>
+                        <includes>
+                            <include>services/</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <!-- JDK9 removed the Nameservice SPI as per bug 8134577. There's no replacement. -->
+            <id>no-spi-on-java9</id>
+            <activation>
+                <jdk>[1.9,)</jdk>
+            </activation>
+
+            <properties>
+                <target.jdk>9</target.jdk>
+                <maven.compiler.release>${target.jdk}</maven.compiler.release>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>org/xbill/DNS/tests/**</exclude>
+                                <exclude>org/xbill/DNS/spi/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <excludePackageNames>*.tests.*:*.spi.*</excludePackageNames>
                         </configuration>
                     </plugin>
                 </plugins>
