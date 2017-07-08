@@ -400,7 +400,7 @@ follow(Name name, Name oldname) {
 	nxdomain = false;
 	referral = false;
 	iterations++;
-	if (iterations >= 6 || name.equals(oldname)) {
+	if (iterations >= 10 || name.equals(oldname)) {
 		result = UNRECOVERABLE;
 		error = "CNAME loop";
 		done = true;
