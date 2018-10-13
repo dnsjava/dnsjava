@@ -134,7 +134,7 @@ init_hmac(String macAlgorithm, SecretKey key) {
  * Creates a new TSIG key, which can be used to sign or verify a message.
  * @param algorithm The algorithm of the shared key.
  * @param name The name of the shared key.
- * @param key The shared key's data.
+ * @param keyBytes The shared key's data.
  */
 public
 TSIG(Name algorithm, Name name, byte [] keyBytes) {
@@ -164,7 +164,7 @@ TSIG(Name algorithm, Name name, SecretKey key) {
  * This assumes that init() has already been called on the mac
  * to set up the key.
  * @param mac The JCE HMAC object
- * @param Name The name of the key
+ * @param name The name of the key
  */
 public
 TSIG(Mac mac, Name name) {
