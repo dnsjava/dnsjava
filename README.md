@@ -28,7 +28,7 @@ the branch named `upstream`.
 ## Details on how this repository is maintained
 
 This repository is populated using the git-svn tool, initially
-by doing issuing the following command:
+by running the following command:
 `git svn clone --stdlayout http://svn.code.sf.net/p/dnsjava/code`
 
 I then manually pushed the master branch onto the branch `upstream`
