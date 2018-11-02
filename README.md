@@ -35,3 +35,7 @@ I then manually pushed the master branch onto the branch `upstream`
 and copied the pom.xml file from
 https://issues.sonatype.org/browse/OSSRH-1305
 with some updates to the master branch. 
+
+## Usage in Gradle build system
+
+Please follow the instruction here https://jitpack.io/#dnsjava/dnsjava
