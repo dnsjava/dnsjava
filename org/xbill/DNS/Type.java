@@ -168,6 +168,12 @@ public static final int TLSA		= 52;
 /** S/MIME cert association, draft-ietf-dane-smime */
 public static final int SMIMEA		= 53;
 
+/** Child Delegation Signer, RFC 8078 **/
+public static final int CDS = 59;
+
+/** Child DNSKEY, RFC 8078 **/
+public static final int CDNSKEY = 60;
+
 /** OpenPGP Key, RFC 7929 */
 public static final int OPENPGPKEY	= 61;
 
@@ -302,6 +308,8 @@ static {
 	types.add(URI, "URI", new URIRecord());
 	types.add(CAA, "CAA", new CAARecord());
 	types.add(DLV, "DLV", new DLVRecord());
+	types.add(CDNSKEY, "CDNSKEY", new CDNSKEYRecord());
+	types.add(CDS, "CDS", new CDSRecord());
 }
 
 private
