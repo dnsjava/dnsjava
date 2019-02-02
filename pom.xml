@@ -31,7 +31,7 @@
     </developers>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.sourceEncoding>iso8859-1</project.build.sourceEncoding>
         <target.jdk>1.4</target.jdk>
     </properties>
 
@@ -62,7 +62,6 @@
                 <configuration>
                     <source>${target.jdk}</source>
                     <target>${target.jdk}</target>
-                    <encoding>iso8859-1</encoding>
                     <testExcludes>
                         <!-- Exclude unit tests with external dependencies -->
                         <exclude>**/DNSSECWithLunaProviderTest.java</exclude>
