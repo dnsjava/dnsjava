@@ -92,14 +92,6 @@
                         <exclude>org/xbill/DNS/tests/</exclude>
                     </excludes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <plugin>
