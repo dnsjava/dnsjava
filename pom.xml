@@ -17,7 +17,7 @@
     <url>http://www.dnsjava.org</url>
     <licenses>
         <license>
-            <name>BSD 2-Clause license</name>
+            <name>BSD-2-Clause</name>
             <url>http://opensource.org/licenses/BSD-2-Clause</url>
             <distribution>repo</distribution>
         </license>
