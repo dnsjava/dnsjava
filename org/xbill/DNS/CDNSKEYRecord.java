@@ -26,7 +26,7 @@ public
 CDNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
              byte [] key)
 {
-    super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
+    super(name, Type.CDNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 
 /**
