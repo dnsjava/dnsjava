@@ -1,7 +1,5 @@
 package org.xbill.DNS;
 
-import java.io.IOException;
-
 import java.security.PublicKey;
 
 
@@ -10,7 +8,7 @@ import java.security.PublicKey;
  * of the parent zone.
  */
 public
-class CDNSKEYRecord extends KEYBase
+class CDNSKEYRecord extends AbstractDNSKEYRecord
 {
 	static private final long serialVersionUID = 8018121023082348677L;
 
@@ -55,24 +53,6 @@ class CDNSKEYRecord extends KEYBase
 	@Override
 	Record getObject()
 	{
-		return new DNSKEYRecord();
-	}
-
-	@Override
-	void rdataFromString(final Tokenizer st, final Name origin)
-	              throws IOException
-	{
-		flags = st.getUInt16();
-		proto = st.getUInt8();
-
-		final String algString = st.getString();
-		alg = DNSSEC.Algorithm.value(algString);
-
-		if (alg < 0)
-		{
-			throw st.exception("Invalid algorithm: " + algString);
-		}
-
-		key = st.getBase64();
+		return new CDNSKEYRecord();
 	}
 }

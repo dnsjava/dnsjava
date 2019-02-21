@@ -2,160 +2,79 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-import org.xbill.DNS.utils.*;
-
-/**
- * DS - contains a Delegation Signer record, which acts as a
- * placeholder for KEY records in the parent zone.
- * @see DNSSEC
+/********************************************************************
+ * DS - contains a Delegation Signer record, which acts as a placeholder for KEY
+ * records in the parent zone.
  *
+ * @see    DNSSEC
  * @author David Blacka
  * @author Brian Wellington
  */
 
-public class DSRecord extends Record {
-
-public static class Digest {
-	private Digest() {}
-
-	/** SHA-1 */
-	public static final int SHA1 = 1;
-
-	/** SHA-256 */
-	public static final int SHA256 = 2;
-
-	/** GOST R 34.11-94 */
-	public static final int GOST3411 = 3;
-	
-	/** SHA-384 */
-	public static final int SHA384 = 4;
-}
-
-public static final int SHA1_DIGEST_ID = Digest.SHA1;
-public static final int SHA256_DIGEST_ID = Digest.SHA256;
-public static final int GOST3411_DIGEST_ID = Digest.GOST3411;
-public static final int SHA384_DIGEST_ID = Digest.SHA384;
-
-private static final long serialVersionUID = -9001819329700081493L;
-
-private int footprint;
-private int alg;
-private int digestid;
-private byte [] digest;
-
-DSRecord() {}
-
-Record
-getObject() {
-	return new DSRecord();
-}
-
-/**
- * Creates a DS Record from the given data
- * @param footprint The original KEY record's footprint (keyid).
- * @param alg The original key algorithm.
- * @param digestid The digest id code.
- * @param digest A hash of the original key.
- */
 public
-DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
-	 int digestid, byte [] digest)
+class DSRecord extends AbstractDSRecord
 {
-	super(name, Type.DS, dclass, ttl);
-	this.footprint = checkU16("footprint", footprint);
-	this.alg = checkU8("alg", alg);
-	this.digestid = checkU8("digestid", digestid);
-	this.digest = digest;
-}
+	static public final int SHA1_DIGEST_ID     = Digest.SHA1;
+	static public final int SHA256_DIGEST_ID   = Digest.SHA256;
+	static public final int GOST3411_DIGEST_ID = Digest.GOST3411;
+	static public final int SHA384_DIGEST_ID   = Digest.SHA384;
 
-/**
- * Creates a DS Record from the given data
- * @param digestid The digest id code.
- * @param key The key to digest
- */
-public
-DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
-{
-	this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(),
-	     digestid, DNSSEC.generateDSDigest(key, digestid));
-}
+	static private final long serialVersionUID = -9001819329700081493L;
 
-void
-rrFromWire(DNSInput in) throws IOException {
-	footprint = in.readU16();
-	alg = in.readU8();
-	digestid = in.readU8();
-	digest = in.readByteArray();
-}
-
-void
-rdataFromString(Tokenizer st, Name origin) throws IOException {
-	footprint = st.getUInt16();
-	alg = st.getUInt8();
-	digestid = st.getUInt8();
-	digest = st.getHex();
-}
-
-/**
- * Converts rdata to a String
- */
-String
-rrToString() {
-	StringBuffer sb = new StringBuffer();
-	sb.append(footprint);
-	sb.append(" ");
-	sb.append(alg);
-	sb.append(" ");
-	sb.append(digestid);
-	if (digest != null) {
-		sb.append(" ");
-		sb.append(base16.toString(digest));
+	/***************************************
+	 * Creates a DS Record from the given data
+	 *
+	 * @param digestid The digest id code.
+	 * @param key      The key to digest
+	 */
+	public DSRecord(final Name name, final int dclass, final long ttl,
+	                final int digestid, final DNSKEYRecord key)
+	{
+		this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(), digestid, DNSSEC.generateDSDigest(key, digestid));
 	}
 
-	return sb.toString();
-}
+	/***************************************
+	 * Creates a DS Record from the given data
+	 *
+	 * @param footprint The original KEY record's footprint (keyid).
+	 * @param alg       The original key algorithm.
+	 * @param digestid  The digest id code.
+	 * @param digest    A hash of the original key.
+	 */
+	public DSRecord(final Name name, final int dclass, final long ttl,
+	                final int footprint, final int alg, final int digestid,
+	                final byte[] digest)
+	{
+		super(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
+	}
 
-/**
- * Returns the key's algorithm.
- */
-public int
-getAlgorithm() {
-	return alg;
-}
+	DSRecord()
+	{
+	}
 
-/**
- *  Returns the key's Digest ID.
- */
-public int
-getDigestID()
-{
-	return digestid;
-}
-  
-/**
- * Returns the binary hash of the key.
- */
-public byte []
-getDigest() {
-	return digest;
-}
+	@Override
+	Record getObject()
+	{
+		return new DSRecord();
+	}
 
-/**
- * Returns the key's footprint.
- */
-public int
-getFootprint() {
-	return footprint;
-}
+	static public
+	class Digest
+	{
+		/** SHA-1 */
+		static public final int SHA1 = 1;
 
-void
-rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	out.writeU16(footprint);
-	out.writeU8(alg);
-	out.writeU8(digestid);
-	if (digest != null)
-		out.writeByteArray(digest);
-}
+		/** SHA-256 */
+		static public final int SHA256 = 2;
 
+		/** GOST R 34.11-94 */
+		static public final int GOST3411 = 3;
+
+		/** SHA-384 */
+		static public final int SHA384 = 4;
+
+		private Digest()
+		{
+		}
+	}
 }
