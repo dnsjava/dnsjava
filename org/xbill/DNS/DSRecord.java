@@ -52,7 +52,6 @@ class DSRecord extends AbstractDSRecord
 	{
 	}
 
-	@Override
 	Record getObject()
 	{
 		return new DSRecord();

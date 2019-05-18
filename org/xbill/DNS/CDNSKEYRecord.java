@@ -50,7 +50,6 @@ class CDNSKEYRecord extends AbstractDNSKEYRecord
 	{
 	}
 
-	@Override
 	Record getObject()
 	{
 		return new CDNSKEYRecord();

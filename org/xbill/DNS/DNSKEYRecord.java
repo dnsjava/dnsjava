@@ -56,7 +56,6 @@ class DNSKEYRecord extends AbstractDNSKEYRecord
 	{
 	}
 
-	@Override
 	Record getObject()
 	{
 		return new DNSKEYRecord();

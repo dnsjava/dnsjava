@@ -40,7 +40,6 @@ class CDSRecord extends AbstractDSRecord
 	{
 	}
 
-	@Override
 	Record getObject()
 	{
 		return new CDSRecord();
