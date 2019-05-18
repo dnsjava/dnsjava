@@ -33,7 +33,6 @@ import java.util.*;
  *
  * @author Brian Wellington
  */
-
 public class ZoneTransferIn {
 
 private static final int INITIALSOA	= 0;
@@ -66,10 +65,10 @@ private Record initialsoa;
 
 private int rtype;
 
+/**
+ * All changes between two versions of a zone in an IXFR response.
+ */
 public static class Delta {
-	/**
-	 * All changes between two versions of a zone in an IXFR response.
-	 */
 
 	/** The starting serial number of this delta. */
 	public long start;
@@ -90,10 +89,10 @@ public static class Delta {
 	}
 }
 
+/**
+ * Handles a Zone Transfer.
+ */
 public static interface ZoneTransferHandler {
-	/**
-	 * Handles a Zone Transfer.
-	 */
 
 	/**
 	 * Called when an AXFR transfer begins.

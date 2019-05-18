@@ -23,7 +23,6 @@ import java.net.*;
  *
  * @author Brian Wellington
  */
-
 public final class Lookup {
 
 private static Resolver defaultResolver;
@@ -181,7 +180,7 @@ setDefaultSearchPath(String [] domains) throws TextParseException {
 
 /**
  * Sets a custom logger that will be used to log the send and received packets.
- * @param logger
+ * @param logger The logger
  */
 public static synchronized void
 setPacketLogger(PacketLogger logger)
