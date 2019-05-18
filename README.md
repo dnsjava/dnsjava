@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/dnsjsva/dnsjava.svg?branch=master)](https://travis-ci.org/dnsjava/dnsjava)
 [![Coverage Status](https://coveralls.io/repos/dnsjava/dnsjava/badge.svg)](https://coveralls.io/r/dnsjava/dnsjava)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/dnsjava/dnsjava/badge.svg)](https://search.maven.org/artifact/dnsjava/dnsjava)
+[![Javadocs](http://javadoc.io/badge/dnsjava/dnsjava.svg)](http://javadoc.io/doc/dnsjava/dnsjava)
 
 # dnsjava
 

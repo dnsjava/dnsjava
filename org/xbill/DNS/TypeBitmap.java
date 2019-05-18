@@ -2,15 +2,14 @@
 
 package org.xbill.DNS;
 
+import java.io.*;
+import java.util.*;
+
 /**
  * Routines for deal with the lists of types found in NSEC/NSEC3 records.
  *
  * @author Brian Wellington
  */
-
-import java.io.*;
-import java.util.*;
-
 final class TypeBitmap implements Serializable {
 
 private static final long serialVersionUID = -125354057735389003L;

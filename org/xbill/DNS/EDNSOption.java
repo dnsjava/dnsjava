@@ -111,7 +111,7 @@ optionFromWire(DNSInput in) throws IOException;
 /**
  * Converts the wire format of an EDNS Option (including code and length) into
  * the type-specific format.
- * @param out The input stream.
+ * @param in The input stream.
  */
 static EDNSOption
 fromWire(DNSInput in) throws IOException {

@@ -123,7 +123,7 @@ parseNumeric(String s) {
 /**
  * Defines the text representation of a numeric value.
  * @param val The numeric value
- * @param string The text string
+ * @param str The text string
  */
 public void
 add(int val, String str) {
@@ -138,7 +138,7 @@ add(int val, String str) {
  * Defines an additional text representation of a numeric value.  This will
  * be used by getValue(), but not getText().
  * @param val The numeric value
- * @param string The text string
+ * @param str The text string
  */
 public void
 addAlias(int val, String str) {
@@ -150,8 +150,7 @@ addAlias(int val, String str) {
 
 /**
  * Copies all mnemonics from one table into another.
- * @param val The numeric value
- * @param string The text string
+ * @param source The source mnemonic
  * @throws IllegalArgumentException The wordcases of the Mnemonics do not
  * match.
  */
