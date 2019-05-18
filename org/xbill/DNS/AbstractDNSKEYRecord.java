@@ -28,7 +28,6 @@ class AbstractDNSKEYRecord extends KEYBase
 		super(name, type, dclass, ttl, flags, proto, alg, key);
 	}
 
-	@Override
 	void rdataFromString(final Tokenizer st, final Name origin)
 	              throws IOException
 	{

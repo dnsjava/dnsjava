@@ -394,7 +394,6 @@ class Type
 			objects.put(Mnemonic.toInteger(val), proto);
 		}
 
-		@Override
 		public void check(final int val)
 		{
 			Type.check(val);

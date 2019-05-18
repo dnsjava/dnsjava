@@ -69,7 +69,6 @@ class AbstractDSRecord extends Record
 		return footprint;
 	}
 
-	@Override
 	void rdataFromString(final Tokenizer st, final Name origin)
 	              throws IOException
 	{
@@ -79,7 +78,6 @@ class AbstractDSRecord extends Record
 		digest    = st.getHex();
 	}
 
-	@Override
 	void rrFromWire(final DNSInput in) throws IOException
 	{
 		footprint = in.readU16();
@@ -91,7 +89,6 @@ class AbstractDSRecord extends Record
 	/***************************************
 	 * Converts rdata to a String
 	 */
-	@Override
 	String rrToString()
 	{
 		final StringBuffer sb = new StringBuffer();
@@ -110,7 +107,6 @@ class AbstractDSRecord extends Record
 		return sb.toString();
 	}
 
-	@Override
 	void rrToWire(final DNSOutput out, final Compression c,
 	              final boolean canonical)
 	{
