@@ -7,6 +7,7 @@ import java.io.IOException;
  * An abstract base class that is used to reduce duplicate code for different
  * DNSKEY record types.
  *
+ * @author Brian Wellington
  * @author Dennis Reichenberg
  * @see    DNSKEYRecord
  * @see    CDNSKEYRecord

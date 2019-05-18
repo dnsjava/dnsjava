@@ -9,6 +9,7 @@ import java.io.IOException;
  * An abstract base class that is used to reduce duplicate code between the
  * different DS record types.
  *
+ * @author Brian Wellington
  * @author Dennis Reichenberg
  * @see    DSRecord
  * @see    CDSRecord
