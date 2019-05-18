@@ -7,7 +7,7 @@
     <groupId>dnsjava</groupId>
     <artifactId>dnsjava</artifactId>
     <packaging>bundle</packaging>
-    <version>2.1.9-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <name>dnsjava</name>
     <description>dnsjava is an implementation of DNS in Java. It supports all defined record types (including the DNSSEC types), and unknown types. It can be used for queries, zone transfers, and dynamic updates. It includes a cache which can be used by clients, and a minimal implementation of a server. It supports TSIG authenticated messages, partial DNSSEC verification, and EDNS0. </description>
     <organization>
@@ -25,7 +25,7 @@
         <connection>scm:git:https://github.com/dnsjava/dnsjava</connection>
         <developerConnection>scm:git:git@github.com:dnsjava/dnsjava</developerConnection>
         <url>https://github.com/dnsjava/dnsjava</url>
-        <tag>v2.1.8</tag>
+        <tag>HEAD</tag>
     </scm>
     <developers>
         <developer>
@@ -36,7 +36,7 @@
 
     <properties>
         <project.build.sourceEncoding>iso8859-1</project.build.sourceEncoding>
-        <target.jdk>1.4</target.jdk>
+        <target.jdk>1.5</target.jdk>
     </properties>
 
     <build>
@@ -110,7 +110,7 @@
                         <Import-Package>
                             !org.xbill.DNS*,!sun.*,*
                         </Import-Package>
-                        <Bundle-RequiredExecutionEnvironment>J2SE-1.4</Bundle-RequiredExecutionEnvironment>
+                        <Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
                         <_removeheaders>Bnd-*, Tool, Require-Capability</_removeheaders>
                     </instructions>
                 </configuration>
@@ -210,6 +210,28 @@
                         <configuration>
                             <excludePackageNames>*.tests.*:*.spi.*</excludePackageNames>
                         </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>animal-sniffer-maven-plugin</artifactId>
+                        <version>1.17</version>
+                        <configuration>
+                            <signature>
+                                <groupId>org.codehaus.mojo.signature</groupId>
+                                <artifactId>java15</artifactId>
+                                <version>1.0</version>
+                            </signature>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>checkjava</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

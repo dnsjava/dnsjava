@@ -43,12 +43,12 @@ still exists.
 
 ## Getting started
 
-Run `mvn package` from the toplevel directory to build dnsjava. JDK 1.4
+Run `mvn package` from the toplevel directory to build dnsjava. JDK 1.5
 or higher is required.
 
 ### Replacing the standard Java DNS functionality:
 
-Java versions from 1.4 to 1.8 can load DNS service providers at runtime. The
+Java versions from 1.5 to 1.8 can load DNS service providers at runtime. The
 functionality was [removed in JDK 9](https://bugs.openjdk.java.net/browse/JDK-8134577),
 a replacement is [requested](https://bugs.openjdk.java.net/browse/JDK-8192780),
 but so far has not been implemented.
