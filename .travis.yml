@@ -1,0 +1,10 @@
+branches:
+  only:
+    - master
+
+language: java
+jdk:
+  - openjdk8
+
+install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip -B -V
+script: mvn test jacoco:report coveralls:report -Dgpg.skip -B
