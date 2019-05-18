@@ -13,7 +13,7 @@ final class UDPClient extends Client {
 private static final int EPHEMERAL_START = 1024;
 private static final int EPHEMERAL_STOP  = 65535;
 private static final int EPHEMERAL_RANGE  = EPHEMERAL_STOP - EPHEMERAL_START;
-
+private static final String UDPCLIENT_DEFAULT_TO_EPHEMERAL_PORT = "dnsjava.udpclient.defaulttoephemeralport";
 private static SecureRandom prng = new SecureRandom();
 private static volatile boolean prng_initializing = true;
 
@@ -83,13 +83,17 @@ bind_random(InetSocketAddress addr) throws IOException
 
 void
 bind(SocketAddress addr) throws IOException {
-	if (addr == null ||
-	    (addr instanceof InetSocketAddress &&
-	     ((InetSocketAddress)addr).getPort() == 0))
-	{
-		bind_random((InetSocketAddress) addr);
-		if (bound)
-			return;
+	boolean useEphemeralPort = Boolean.parseBoolean(System.getProperty(UDPCLIENT_DEFAULT_TO_EPHEMERAL_PORT, "false"));
+
+	if (!useEphemeralPort) {
+		if (addr == null ||
+            (addr instanceof InetSocketAddress &&
+             ((InetSocketAddress)addr).getPort() == 0))
+        {
+            bind_random((InetSocketAddress) addr);
+            if (bound)
+                return;
+        }
 	}
 
 	if (addr != null) {
