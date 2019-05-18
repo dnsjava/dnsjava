@@ -14,34 +14,37 @@ import java.io.IOException;
 public abstract
 class AbstractDNSKEYRecord extends KEYBase
 {
-	static private final long serialVersionUID = 439608609035127006L;
+static private final long serialVersionUID = 439608609035127006L;
 
-	public AbstractDNSKEYRecord()
+public
+AbstractDNSKEYRecord()
+{
+}
+
+public
+AbstractDNSKEYRecord(final Name name, final int type,
+							final int dclass, final long ttl,
+							final int flags, final int proto, final int alg,
+							final byte[] key)
+{
+	super(name, type, dclass, ttl, flags, proto, alg, key);
+}
+
+void
+rdataFromString(final Tokenizer st, final Name origin)
+			  throws IOException
+{
+	flags = st.getUInt16();
+	proto = st.getUInt8();
+
+	final String algString = st.getString();
+	alg = DNSSEC.Algorithm.value(algString);
+
+	if (alg < 0)
 	{
+		throw st.exception("Invalid algorithm: " + algString);
 	}
 
-	public AbstractDNSKEYRecord(final Name name, final int type,
-	                            final int dclass, final long ttl,
-	                            final int flags, final int proto, final int alg,
-	                            final byte[] key)
-	{
-		super(name, type, dclass, ttl, flags, proto, alg, key);
-	}
-
-	void rdataFromString(final Tokenizer st, final Name origin)
-	              throws IOException
-	{
-		flags = st.getUInt16();
-		proto = st.getUInt8();
-
-		final String algString = st.getString();
-		alg = DNSSEC.Algorithm.value(algString);
-
-		if (alg < 0)
-		{
-			throw st.exception("Invalid algorithm: " + algString);
-		}
-
-		key = st.getBase64();
-	}
+	key = st.getBase64();
+}
 }
