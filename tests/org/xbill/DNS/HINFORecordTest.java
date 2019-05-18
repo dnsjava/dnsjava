@@ -36,10 +36,13 @@ package org.xbill.DNS;
 
 import	java.io.IOException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
 
-public class HINFORecordTest extends TestCase
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class HINFORecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	HINFORecord dr = new HINFORecord();
@@ -49,6 +52,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(0, dr.getTTL());
     }
     
+    @Test
     public void test_getObject()
     {
 	HINFORecord dr = new HINFORecord();
@@ -56,6 +60,7 @@ public class HINFORecordTest extends TestCase
 	assertTrue(r instanceof HINFORecord);
     }
 
+    @Test
     public void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("The.Name.");
@@ -72,6 +77,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(os, dr.getOS());
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_5arg_invalid_CPU() throws TextParseException
     {
 	Name n = Name.fromString("The.Name.");
@@ -79,13 +85,10 @@ public class HINFORecordTest extends TestCase
 	String cpu = "i686 Intel(R) Pentium(R) M \\256 processor 1.70GHz GenuineIntel GNU/Linux";
 	String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
 	
-	try {
-	    new HINFORecord(n, DClass.IN, ttl, cpu, os);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException e){}
+	new HINFORecord(n, DClass.IN, ttl, cpu, os);
     }
 
+    @Test(expected = IllegalArgumentException.class)
     public void test_ctor_5arg_invalid_OS() throws TextParseException
     {
 	Name n = Name.fromString("The.Name.");
@@ -93,13 +96,10 @@ public class HINFORecordTest extends TestCase
 	String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
 	String os = "Linux troy 2.6.10-gentoo-r6 \\1 #8 Wed Apr 6 21:25:04 MDT 2005";
 	
-	try {
-	    new HINFORecord(n, DClass.IN, ttl, cpu, os);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException e){}
+	new HINFORecord(n, DClass.IN, ttl, cpu, os);
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -116,6 +116,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(os, dr.getOS());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -129,6 +130,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(os, dr.getOS());
     }
 
+    @Test(expected = TextParseException.class)
     public void test_rdataFromString_invalid_CPU() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
@@ -137,13 +139,10 @@ public class HINFORecordTest extends TestCase
 	Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
 
 	HINFORecord dr = new HINFORecord();
-	try {
-	    dr.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch(TextParseException e){}
+	dr.rdataFromString(t, null);
     }
 
+    @Test(expected = TextParseException.class)
     public void test_rdataFromString_invalid_OS() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -151,13 +150,10 @@ public class HINFORecordTest extends TestCase
 	Tokenizer t = new Tokenizer("\"" + cpu + "\"");
 
 	HINFORecord dr = new HINFORecord();
-	try {
-	    dr.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch(TextParseException e){}
+	dr.rdataFromString(t, null);
     }
 
+    @Test
     public void test_rrToString() throws TextParseException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -170,6 +166,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(exp, dr.rrToString());
     }
 
+    @Test
     public void test_rrToWire() throws TextParseException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";

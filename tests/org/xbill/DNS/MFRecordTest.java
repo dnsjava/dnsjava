@@ -34,10 +34,12 @@
 //
 package	org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class MFRecordTest extends TestCase
+public class MFRecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	MFRecord d = new MFRecord();
@@ -46,6 +48,7 @@ public class MFRecordTest extends TestCase
 	assertNull(d.getMailAgent());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -60,6 +63,7 @@ public class MFRecordTest extends TestCase
 	assertEquals(a, d.getMailAgent());
     }
 
+    @Test
     public void test_getObject()
     {
 	MFRecord d = new MFRecord();

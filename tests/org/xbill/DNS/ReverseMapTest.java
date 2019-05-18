@@ -36,10 +36,12 @@ package org.xbill.DNS;
 
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class ReverseMapTest extends TestCase
+public class ReverseMapTest
 {
+    @Test
     public void test_fromAddress_ipv4() throws UnknownHostException,
 						    TextParseException
     {
@@ -53,6 +55,7 @@ public class ReverseMapTest extends TestCase
 	assertEquals(exp, ReverseMap.fromAddress(new int[] { 192, 168, 0, 1 }));
     }
 
+    @Test
     public void test_fromAddress_ipv6() throws UnknownHostException,
 						    TextParseException
     {
@@ -72,31 +75,46 @@ public class ReverseMapTest extends TestCase
 	assertEquals(exp, ReverseMap.fromAddress(idat));
     }
 
-    public void test_fromAddress_invalid()
+    @Test(expected = UnknownHostException.class)
+    public void test_fromAddress_invalid1() throws UnknownHostException
     {
-	try {
-	    ReverseMap.fromAddress("A.B.C.D", Address.IPv4);
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
-	try {ReverseMap.fromAddress(new byte [ 0 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 3 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 5 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 15 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 17 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-
-	try {
-	    int[] dat = new int[] { 0, 1, 2, 256 };
-	    ReverseMap.fromAddress(dat);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	ReverseMap.fromAddress("A.B.C.D", Address.IPv4);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_fromAddress_invalidByte0()
+    {
+	ReverseMap.fromAddress(new byte [ 0 ] );
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_fromAddress_invalidByte3()
+    {
+	ReverseMap.fromAddress(new byte [ 3 ] );
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_fromAddress_invalidByte5()
+    {
+	ReverseMap.fromAddress(new byte [ 5 ] );
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_fromAddress_invalidByte15()
+    {
+	ReverseMap.fromAddress(new byte [ 15 ] );
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_fromAddress_invalidByte17()
+    {
+	ReverseMap.fromAddress(new byte [ 17 ] );
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_fromAddress_invalid2()
+    {
+        int[] dat = new int[] { 0, 1, 2, 256 };
+        ReverseMap.fromAddress(dat);
     }
 }

@@ -7,23 +7,19 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.xbill.DNS.DNSSEC.Algorithm;
 
-public class DNSSECSIG0Test extends TestCase {
+public class DNSSECSIG0Test {
 
 	private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
 	private static final String KEY_ALGORITHM = "RSA";
 	int algorithm = Algorithm.RSASHA1;
 	byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();
 
-	public void setUp() {
-	}
-
-	public void tearDown() {
-	}
-
+        @Test
 	public void testSIG0() throws Exception {
 		Name sig0zoneName = new Name("sig0.invalid.");
 		Name sig0hostName = new Name("sometext.sig0.invalid.");

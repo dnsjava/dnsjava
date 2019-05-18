@@ -34,21 +34,18 @@
 //
 package org.xbill.DNS.utils;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class hexdumpTest extends TestCase
+public class hexdumpTest 
 {
-    public hexdumpTest( String name )
-    {
-	super(name);
-    }
-
     /*
      * this seems to be basically a debugging routine, so its most
      * important to check that the values are all rendered correctly,
      * not the formatting.
      */
     
+    @Test
     public void test_shortform()
     {
 	byte[] data = new byte[] { 1, 1, 1, 1, 1,
@@ -69,6 +66,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( long_out, short_out );
     }
 
+    @Test
     public void test_0()
     {
 	byte[] data = new byte[] { 1, 0, 2 };
@@ -76,6 +74,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t00 \n", out );
     }
 
+    @Test
     public void test_1()
     {
 	byte[] data = new byte[] { 2, 1, 3 };
@@ -83,6 +82,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t01 \n", out );
     }
 
+    @Test
     public void test_2()
     {
 	byte[] data = new byte[] { 1, 2, 3 };
@@ -90,6 +90,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t02 \n", out );
     }
 
+    @Test
     public void test_3()
     {
 	byte[] data = new byte[] { 1, 3, 2 };
@@ -97,6 +98,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t03 \n", out );
     }
 
+    @Test
     public void test_4()
     {
 	byte[] data = new byte[] { 1, 4, 2 };
@@ -104,6 +106,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t04 \n", out );
     }
 
+    @Test
     public void test_5()
     {
 	byte[] data = new byte[] { 1, 5, 2 };
@@ -111,6 +114,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t05 \n", out );
     }
 
+    @Test
     public void test_6()
     {
 	byte[] data = new byte[] { 1, 6, 2 };
@@ -118,6 +122,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t06 \n", out );
     }
 
+    @Test
     public void test_7()
     {
 	byte[] data = new byte[] { 1, 7, 2 };
@@ -125,6 +130,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t07 \n", out );
     }
 
+    @Test
     public void test_8()
     {
 	byte[] data = new byte[] { 1, 8, 2 };
@@ -132,6 +138,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t08 \n", out );
     }
 
+    @Test
     public void test_9()
     {
 	byte[] data = new byte[] { 1, 9, 2 };
@@ -139,6 +146,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t09 \n", out );
     }
 
+    @Test
     public void test_10()
     {
 	byte[] data = new byte[] { 1, 10, 2 };
@@ -146,6 +154,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t0A \n", out );
     }
 
+    @Test
     public void test_11()
     {
 	byte[] data = new byte[] { 1, 11, 2 };
@@ -153,6 +162,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t0B \n", out );
     }
 
+    @Test
     public void test_12()
     {
 	byte[] data = new byte[] { 1, 12, 2 };
@@ -160,6 +170,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t0C \n", out );
     }
 
+    @Test
     public void test_13()
     {
 	byte[] data = new byte[] { 1, 13, 2 };
@@ -167,6 +178,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t0D \n", out );
     }
 
+    @Test
     public void test_14()
     {
 	byte[] data = new byte[] { 1, 14, 2 };
@@ -174,6 +186,7 @@ public class hexdumpTest extends TestCase
 	assertEquals( "1b:\t0E \n", out );
     }
 
+    @Test
     public void test_15()
     {
 	byte[] data = new byte[] { 1, 15, 2 };
@@ -182,6 +195,7 @@ public class hexdumpTest extends TestCase
     }
 
     // strictly for stupid code coverage...a useless test
+    @Test
     public void test_default_constructor()
     {
 	new hexdump();

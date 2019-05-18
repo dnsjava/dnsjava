@@ -34,10 +34,12 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class TypeTest extends TestCase
+public class TypeTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -45,15 +47,15 @@ public class TypeTest extends TestCase
 
 	// one that doesn't exist
 	assertTrue(Type.string(65535).startsWith("TYPE"));
-
-	try {
-	    Type.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_minusOne()
+    {
+	Type.string(-1);
     }
 
+    @Test
     public void test_value()
     {
 	// regular one
@@ -69,11 +71,13 @@ public class TypeTest extends TestCase
 	assertEquals(-1, Type.value(""));
     }
 
+    @Test
     public void test_value_2arg()
     {
 	assertEquals(301, Type.value("301", true));
     }
 
+    @Test
     public void test_isRR()
     {
 	assertTrue(Type.isRR(Type.CNAME));

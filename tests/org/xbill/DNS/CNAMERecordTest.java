@@ -34,10 +34,12 @@
 //
 package	org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class CNAMERecordTest extends TestCase
+public class CNAMERecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	CNAMERecord d = new CNAMERecord();
@@ -46,6 +48,7 @@ public class CNAMERecordTest extends TestCase
 	assertNull(d.getAlias());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -60,6 +63,7 @@ public class CNAMERecordTest extends TestCase
 	assertEquals(a, d.getAlias());
     }
 
+    @Test
     public void test_getObject()
     {
 	CNAMERecord d = new CNAMERecord();

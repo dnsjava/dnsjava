@@ -37,14 +37,33 @@ package org.xbill.DNS;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.Test;
-import	junit.framework.TestCase;
-import	junit.framework.TestSuite;
 
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({MessageTest.Test_init.class})
 public class MessageTest
 {
-    public static class Test_init extends TestCase
+    public static class Test_init
     {
+        @Test(expected = IndexOutOfBoundsException.class)
+	public void test_0argSections()
+	{
+            Message m = new Message();
+            m.getSectionArray(4);
+        }
+        
+        @Test(expected = IndexOutOfBoundsException.class)
+	public void test_1argSections()
+	{
+            Message m = new Message(10);
+            m.getSectionArray(4);
+        }
+        
+        @Test
 	public void test_0arg()
 	{
 	    Message m = new Message();
@@ -52,11 +71,7 @@ public class MessageTest
 	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(1)));
 	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(2)));
 	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(3)));
-	    try {
-		m.getSectionArray(4);
-		fail("IndexOutOfBoundsException not thrown");
-	    }
-	    catch(IndexOutOfBoundsException e){}
+
 	    Header h = m.getHeader();
 	    assertEquals(0, h.getCount(0));
 	    assertEquals(0, h.getCount(1));
@@ -64,6 +79,7 @@ public class MessageTest
 	    assertEquals(0, h.getCount(3));
 	}
 
+        @Test
 	public void test_1arg()
 	{
 	    Message m = new Message(10);
@@ -72,11 +88,7 @@ public class MessageTest
 	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(1)));
 	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(2)));
 	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(3)));
-	    try {
-		m.getSectionArray(4);
-		fail("IndexOutOfBoundsException not thrown");
-	    }
-	    catch(IndexOutOfBoundsException e){}
+            
 	    Header h = m.getHeader();
 	    assertEquals(0, h.getCount(0));
 	    assertEquals(0, h.getCount(1));
@@ -84,6 +96,7 @@ public class MessageTest
 	    assertEquals(0, h.getCount(3));
 	}
 
+        @Test
 	public void test_newQuery() throws TextParseException,
 					   UnknownHostException
 	{
@@ -105,13 +118,5 @@ public class MessageTest
 	    assertEquals(Opcode.QUERY, h.getOpcode());
 	    assertEquals(true, h.getFlag(Flags.RD));
 	}
-
-    }
-
-    public static Test suite()
-    {
-	TestSuite s = new TestSuite();
-	s.addTestSuite(Test_init.class);
-	return s;
     }
 }

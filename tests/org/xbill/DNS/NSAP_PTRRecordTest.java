@@ -34,10 +34,12 @@
 //
 package	org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class NSAP_PTRRecordTest extends TestCase
+public class NSAP_PTRRecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	NSAP_PTRRecord d = new NSAP_PTRRecord();
@@ -45,6 +47,7 @@ public class NSAP_PTRRecordTest extends TestCase
 	assertNull(d.getTarget());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -58,6 +61,7 @@ public class NSAP_PTRRecordTest extends TestCase
 	assertEquals(a, d.getTarget());
     }
 
+    @Test
     public void test_getObject()
     {
 	NSAP_PTRRecord d = new NSAP_PTRRecord();

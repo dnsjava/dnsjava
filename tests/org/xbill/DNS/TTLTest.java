@@ -34,9 +34,10 @@
 //
 package org.xbill.DNS;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class TTLTest extends TestCase
+public class TTLTest
 {
     private final long S = 1;
     private final long M = 60*S;
@@ -44,6 +45,7 @@ public class TTLTest extends TestCase
     private final long D = 24*H;
     private final long W = 7*D;
 
+    @Test
     public void test_parseTTL()
     {
 	assertEquals(9876, TTL.parseTTL("9876"));
@@ -69,27 +71,43 @@ public class TTLTest extends TestCase
 	assertEquals(98*S+11*M+1234*H+2*D+W, TTL.parseTTL("98S11M1234H2D01W"));
     }
 
-    public void test_parseTTL_invalid()
+    @Test(expected = NumberFormatException.class)
+    public void test_parseTTL_invalidNull()
     {
-	try {TTL.parseTTL(null); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
-
-	try {TTL.parseTTL(""); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
-
-	try {TTL.parseTTL("S"); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
-
-	try {TTL.parseTTL("10S4B"); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
-
-	try {TTL.parseTTL("1S"+0xFFFFFFFFL+"S"); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
-
-	try {TTL.parseTTL(""+0x100000000L); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	TTL.parseTTL(null);
+    }
+    
+    @Test(expected = NumberFormatException.class)
+    public void test_parseTTL_empty()
+    {
+	TTL.parseTTL("");
+    }
+    
+    @Test(expected = NumberFormatException.class)
+    public void test_parseTTL_invalidS()
+    {
+	TTL.parseTTL("S");
+    }
+    
+    @Test(expected = NumberFormatException.class)
+    public void test_parseTTL_invalid10S4B()
+    {
+	TTL.parseTTL("10S4B");
+    }
+    
+    @Test(expected = NumberFormatException.class)
+    public void test_parseTTL_invalid1sFFFS()
+    {
+	TTL.parseTTL("1S"+0xFFFFFFFFL+"S");
+    }
+    
+    @Test(expected = NumberFormatException.class)
+    public void test_parseTTL_maxValue()
+    {
+        TTL.parseTTL(""+0x100000000L);
     }
 
+    @Test
     public void test_format()
     {
 	assertEquals("0S", TTL.format(0));
@@ -110,12 +128,15 @@ public class TTLTest extends TestCase
 	assertEquals("3550W5D3H14M7S", TTL.format(0x7FFFFFFFL));
     }
 
-    public void test_format_invalid()
+    @Test(expected = InvalidTTLException.class)
+    public void test_format_minusOne()
     {
-	try {TTL.format(-1); fail("InvalidTTLException not thrown");
-	} catch( InvalidTTLException e ){}
-
-	try {TTL.format(0x100000000L); fail("InvalidTTLException not thrown");
-	} catch( InvalidTTLException e ){}
+	TTL.format(-1);
+    }
+    
+    @Test(expected = InvalidTTLException.class)
+    public void test_format_maxValue()
+    {
+	TTL.format(0x100000000L);
     }
 }

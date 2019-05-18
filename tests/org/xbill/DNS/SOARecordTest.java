@@ -38,10 +38,15 @@ import	java.io.IOException;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
 import	java.util.Random;
-import	junit.framework.Test;
-import	junit.framework.TestCase;
-import	junit.framework.TestSuite;
 
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({SOARecordTest.Test_init.class, SOARecordTest.Test_rrFromWire.class, SOARecordTest.Test_rdataFromString.class, SOARecordTest.Test_rrToString.class, SOARecordTest.Test_rrToWire.class})
 public class SOARecordTest
 {
     private final static Random m_random = new Random();
@@ -56,12 +61,13 @@ public class SOARecordTest
 	return m_random.nextLong() >>> 32;
     }
 
-    public static class Test_init extends TestCase
+    public static class Test_init
     {
 	private Name m_an, m_rn, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-	protected void setUp() throws TextParseException,
+        @Before
+	public void init() throws TextParseException,
 				      UnknownHostException
 	{
 	    m_an = Name.fromString("My.Absolute.Name.");
@@ -76,6 +82,7 @@ public class SOARecordTest
 	    m_minimum = randomU32();
 	}
 	
+        @Test
 	public void test_0arg() throws UnknownHostException
 	{
 	    SOARecord ar = new SOARecord();
@@ -92,6 +99,7 @@ public class SOARecordTest
 	    assertEquals(0, ar.getMinimum());
 	}
 	
+        @Test
 	public void test_getObject()
 	{
 	    SOARecord ar = new SOARecord();
@@ -99,6 +107,7 @@ public class SOARecordTest
 	    assertTrue(r instanceof SOARecord);
 	}
 	
+        @Test
 	public void test_10arg()
 	{
 	    SOARecord ar = new SOARecord(m_an, DClass.IN, m_ttl,
@@ -117,156 +126,118 @@ public class SOARecordTest
 	    assertEquals(m_minimum, ar.getMinimum());
 	}
 	
+        @Test(expected = RelativeNameException.class)
 	public void test_10arg_relative_name()
 	{
-	    try {
-		new SOARecord(m_rn, DClass.IN, m_ttl,
+	    new SOARecord(m_rn, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      m_retry, m_expire, m_minimum);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
 	}
 	
+        @Test(expected = RelativeNameException.class)
 	public void test_10arg_relative_host()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_rn, m_admin, m_serial, m_refresh,
 			      m_retry, m_expire, m_minimum);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
 	}
 	
+        @Test(expected = RelativeNameException.class)
 	public void test_10arg_relative_admin()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_rn, m_serial, m_refresh,
 			      m_retry, m_expire, m_minimum);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_negative_serial()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, -1, m_refresh,
 			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_toobig_serial()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, 0x100000000L, m_refresh,
 			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_negative_refresh()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, -1,
 			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_toobig_refresh()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, 0x100000000L,
 			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_negative_retry()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      -1, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_toobig_retry()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      0x100000000L, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_negative_expire()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      m_retry, -1, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_toobig_expire()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      m_retry, 0x100000000L, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_negative_minimun()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      m_retry, m_expire, -1);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
 	
+        @Test(expected = IllegalArgumentException.class)
 	public void test_10arg_toobig_minimum()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
 			      m_retry, m_expire, 0x100000000L);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
     }
 
-    public static class Test_rrFromWire extends TestCase
+    public static class Test_rrFromWire
     {
 	private Name m_host, m_admin;
 	private long m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-	protected void setUp() throws TextParseException,
+        @Before
+	public void init() throws TextParseException,
 				      UnknownHostException
 	{
 	    m_host = Name.fromString("M.h.N.");
@@ -278,6 +249,7 @@ public class SOARecordTest
 	    m_minimum = 0x3456789AL;
 	}
 	
+        @Test
 	public void test() throws IOException
 	{
 	    byte[] raw = new byte[] {
@@ -304,12 +276,13 @@ public class SOARecordTest
 	}
     }
 
-    public static class Test_rdataFromString extends TestCase
+    public static class Test_rdataFromString
     {
 	private Name m_host, m_admin, m_origin;
 	private long m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-	protected void setUp() throws TextParseException,
+        @Before
+	public void init() throws TextParseException,
 				      UnknownHostException
 	{
 	    m_origin = Name.fromString("O.");
@@ -322,6 +295,7 @@ public class SOARecordTest
 	    m_minimum = 0x3456789AL;
 	}
 	
+        @Test
 	public void test_valid() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("M.h " + m_admin + " " +
@@ -343,6 +317,7 @@ public class SOARecordTest
 	    assertEquals(m_minimum, ar.getMinimum());
 	}
 
+        @Test(expected = RelativeNameException.class)
 	public void test_relative_name() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("M.h " + m_admin + " " +
@@ -353,20 +328,17 @@ public class SOARecordTest
 					m_minimum);
 	    SOARecord ar = new SOARecord();
 	    
-	    try {
-		ar.rdataFromString(t, null);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch(RelativeNameException e){}
+	    ar.rdataFromString(t, null);
 	}
     }
 
-    public static class Test_rrToString extends TestCase
+    public static class Test_rrToString
     {
 	private Name m_an, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-	protected void setUp() throws TextParseException
+        @Before
+	public void init() throws TextParseException
 	{
 	    m_an = Name.fromString("My.absolute.name.");
 	    m_ttl = 0x13A8;
@@ -379,6 +351,7 @@ public class SOARecordTest
 	    m_minimum = 0x3456789AL;
 	}
 
+        @Test
 	public void test_singleLine()
 	{
 	    SOARecord ar = new SOARecord(m_an, DClass.IN, m_ttl,
@@ -392,6 +365,7 @@ public class SOARecordTest
 	    assertEquals(exp, out);
 	}
 
+        @Test
 	public void test_multiLine()
 	{
 	    SOARecord ar = new SOARecord(m_an, DClass.IN, m_ttl,
@@ -412,12 +386,13 @@ public class SOARecordTest
 	}
     }
 
-    public static class Test_rrToWire extends TestCase
+    public static class Test_rrToWire
     {
 	private Name m_an, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-	protected void setUp() throws TextParseException
+        @Before
+	public void init() throws TextParseException
 	{
 	    m_an = Name.fromString("My.Abs.Name.");
 	    m_ttl = 0x13A8;
@@ -430,6 +405,7 @@ public class SOARecordTest
 	    m_minimum = 0x3456789AL;
 	}
 
+        @Test
 	public void test_canonical()
 	{
 	    byte[] exp = new byte[] {
@@ -450,6 +426,7 @@ public class SOARecordTest
 	    assertTrue(Arrays.equals(exp, o.toByteArray()));
 	}
 
+        @Test
 	public void test_case_sensitive()
 	{
 	    byte[] exp = new byte[] {
@@ -469,16 +446,5 @@ public class SOARecordTest
 
 	    assertTrue(Arrays.equals(exp, o.toByteArray()));
 	}
-    }
-
-    public static Test suite()
-    {
-	TestSuite s = new TestSuite();
-	s.addTestSuite(Test_init.class);
-	s.addTestSuite(Test_rrFromWire.class);
-	s.addTestSuite(Test_rdataFromString.class);
-	s.addTestSuite(Test_rrToString.class);
-	s.addTestSuite(Test_rrToWire.class);
-	return s;
     }
 }

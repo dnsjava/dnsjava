@@ -34,10 +34,12 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class DClassTest extends TestCase
+public class DClassTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -48,23 +50,23 @@ public class DClassTest extends TestCase
 
 	// one that doesn't exist
 	assertTrue(DClass.string(20).startsWith("CLASS"));
-
-	try {
-	    DClass.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_Minus1()
+    {
+        DClass.string(-1);
 	
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void test_string_MaxValue()
+    {
 	//  (max is 0xFFFF)
-	try {
-	    DClass.string(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	DClass.string(0x10000);
     }
 
+    @Test
     public void test_value()
     {
 	// regular one

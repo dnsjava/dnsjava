@@ -32,15 +32,18 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+
 package	org.xbill.DNS;
 
+import static org.junit.Assert.*;
 import	java.io.IOException;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class A6RecordTest extends TestCase
+public class A6RecordTest
 {
     Name m_an, m_an2, m_rn;
     InetAddress m_addr;
@@ -49,7 +52,8 @@ public class A6RecordTest extends TestCase
     int m_prefix_bits;
     long m_ttl;
 
-    protected void setUp() throws TextParseException,
+    @Before
+    public void init() throws TextParseException,
 				  UnknownHostException
     {
 	m_an = Name.fromString("My.Absolute.Name.");
@@ -62,7 +66,8 @@ public class A6RecordTest extends TestCase
 	m_ttl = 0x13579;
 	m_prefix_bits = 9;
     }
-
+    
+    @Test
     public void test_ctor_0arg()
     {
 	A6Record ar = new A6Record();
@@ -71,14 +76,16 @@ public class A6RecordTest extends TestCase
 	assertEquals(0, ar.getDClass());
 	assertEquals(0, ar.getTTL());
     }
-
+    
+    @Test
     public void test_getObject()
     {
 	A6Record ar = new A6Record();
 	Record r = ar.getObject();
 	assertTrue(r instanceof A6Record);
     }
-
+    
+    @Test
     public void test_ctor_6arg()
     {
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
@@ -99,38 +106,38 @@ public class A6RecordTest extends TestCase
 	assertEquals(m_prefix_bits, ar.getPrefixBits());
 	assertEquals(m_addr, ar.getSuffix());
 	assertEquals(m_an2, ar.getPrefix());
-
-	// a relative name
-	try {
-	    new A6Record(m_rn, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
-
-	// a relative prefix name
-	try {
-	    new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
-
-	// invalid prefix bits
-	try {
-	    new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( RelativeNameException e ){}
-
-	// an IPv4 address
-	try {
-	    new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits,
-			InetAddress.getByName("192.168.0.1"), null);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
-	catch( UnknownHostException e ){ fail(e.getMessage()); }
     }
-
+  
+    @Test(expected = RelativeNameException.class)
+    public void test_ctor_6argRelativeName() throws UnknownHostException, UnknownHostException
+    {
+	// a relative name
+	new A6Record(m_rn, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
+    }
+    
+   @Test(expected = RelativeNameException.class)
+    public void test_ctor_6arg_relativeName()
+    {
+	// a relative prefix name
+	new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn);
+    }
+   
+   @Test(expected = IllegalArgumentException.class)
+    public void test_ctor_6arg_invalidPrefix()
+    {
+	// invalid prefix bits
+	new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null);
+    }
+   
+   @Test(expected = IllegalArgumentException.class)
+    public void test_ctor_6argIPv4Address() throws UnknownHostException
+    {
+	// an IPv4 address
+        new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits,
+                    InetAddress.getByName("192.168.0.1"), null);
+    }
+        
+    @Test
     public void test_rrFromWire() throws CloneNotSupportedException,
 					 IOException,
 					 UnknownHostException
@@ -164,7 +171,8 @@ public class A6RecordTest extends TestCase
 	assertEquals(exp, ar.getSuffix());
 	assertEquals(m_an2, ar.getPrefix());
     }
-
+    
+    @Test
     public void test_rdataFromString() throws CloneNotSupportedException,
 					      IOException,
 					      UnknownHostException
@@ -186,26 +194,27 @@ public class A6RecordTest extends TestCase
 	assertEquals(9, ar.getPrefixBits());
 	assertEquals(m_addr, ar.getSuffix());
 	assertEquals(m_an2, ar.getPrefix());
-
+    }
+    
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromString_invalidPrefix() throws IOException
+    {
 	// record with invalid prefixBits
-	t = new Tokenizer("129");
-	ar = new A6Record();
-	try {
-	    ar.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
-	// record with invalid ipv6 address
-	t = new Tokenizer("0 " + m_addr_string.substring(4));
-	ar = new A6Record();
-	try {
-	    ar.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	Tokenizer t = new Tokenizer("129");
+	A6Record ar = new A6Record();
+	ar.rdataFromString(t, null);
     }
 
+    @Test(expected = TextParseException.class)
+    public void test_rdataFromString_invalidAddress() throws IOException
+    {
+	// record with invalid ipv6 address
+	Tokenizer t = new Tokenizer("0 " + m_addr_string.substring(4));
+	A6Record ar = new A6Record();
+	ar.rdataFromString(t, null);
+    }
+    
+    @Test
     public void test_rrToString()
     {
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
@@ -213,7 +222,8 @@ public class A6RecordTest extends TestCase
 	String out = ar.rrToString();
 	assertEquals(exp, out);
     }
-
+    
+    @Test
     public void test_rrToWire()
     {
 	// canonical form
