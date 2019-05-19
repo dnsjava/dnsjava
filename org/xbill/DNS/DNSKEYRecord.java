@@ -54,7 +54,7 @@ getObject() {
  */
 public
 DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-	     byte[] key)
+	     byte [] key)
 {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
