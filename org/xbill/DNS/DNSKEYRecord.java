@@ -20,20 +20,20 @@ public static class Protocol {
 	private Protocol() {}
 
 	/** Key will be used for DNSSEC */
-	static public final int DNSSEC = 3;
+	public static final int DNSSEC = 3;
 }
 
-static public class Flags {
+public static class Flags {
 	private Flags() {}
 
 	/** Key is a zone key */
-	static public final int ZONE_KEY = 0x100;
+	public static final int ZONE_KEY = 0x100;
 
 	/** Key is a secure entry point key */
-	static public final int SEP_KEY = 0x1;
+	public static final int SEP_KEY = 0x1;
 
 	/** Key has been revoked */
-	static public final int REVOKE = 0x80;
+	public static final int REVOKE = 0x80;
 }
 
 private static final long serialVersionUID = -8679800040426675002L;
@@ -50,6 +50,19 @@ getObject() {
  * @param flags Flags describing the key's properties
  * @param proto The protocol that the key was created for
  * @param alg The key's algorithm
+ * @param key Binary representation of the key
+ */
+public
+DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
+			 byte[] key) {
+	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
+}
+
+/**
+ * Creates a DNSKEY Record from the given data
+ * @param flags Flags describing the key's properties
+ * @param proto The protocol that the key was created for
+ * @param alg The key's algorithm
  * @param key The key as a PublicKey
  * @throws DNSSEC.DNSSECException The PublicKey could not be converted into DNS format.
  */
@@ -58,18 +71,5 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 			 PublicKey key) throws DNSSEC.DNSSECException {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, DNSSEC.fromPublicKey(key, alg));
 	publicKey = key;
-}
-
-/**
- * Creates a DNSKEY Record from the given data
- * @param flags Flags describing the key's properties
- * @param proto The protocol that the key was created for
- * @param alg The key's algorithm
- * @param key Binary representation of the key
- */
-public
-DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-			 byte[] key) {
-	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 }
