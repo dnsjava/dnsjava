@@ -32,7 +32,7 @@ As of 2019-05-15, Github is
 [officially](https://sourceforge.net/p/dnsjava/mailman/message/36666800/)
 the new home of dnsjava.
 
-Please use the Github [issue tracker](issues) and send - well tested - pull
+Please use the Github [issue tracker](https://github.com/dnsjava/dnsjava/issues) and send - well tested - pull
 requests. The
 [dnsjava-users@lists.sourceforge.net](mailto:dnsjava-users@lists.sourceforge.net)
 mailing list still exists.
