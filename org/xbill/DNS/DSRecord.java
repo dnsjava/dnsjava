@@ -53,7 +53,7 @@ getObject() {
  */
 public
 DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
-	 int digestid, byte[] digest)
+	 int digestid, byte [] digest)
 {
 	super(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
 }
