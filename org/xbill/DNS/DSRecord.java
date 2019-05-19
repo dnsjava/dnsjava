@@ -3,33 +3,45 @@
 package org.xbill.DNS;
 
 /**
- * DS - contains a Delegation Signer record, which acts as a placeholder for KEY
- * records in the parent zone.
- * @see    DNSSEC
+ * DS - contains a Delegation Signer record, which acts as a
+ * placeholder for KEY records in the parent zone.
+ * @see DNSSEC
  *
  * @author David Blacka
  * @author Brian Wellington
  */
 
-public
-class DSRecord extends DSRecordBase
-{
-static public final int SHA1_DIGEST_ID     = Digest.SHA1;
-static public final int SHA256_DIGEST_ID   = Digest.SHA256;
-static public final int GOST3411_DIGEST_ID = Digest.GOST3411;
-static public final int SHA384_DIGEST_ID   = Digest.SHA384;
+public class DSRecord extends DSRecordBase {
 
-static private final long serialVersionUID = -9001819329700081493L;
-
-/**
- * Creates a DS Record from the given data
- * @param digestid The digest id code.
- * @param key      The key to digest
- */
-public
-DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
+static public class Digest
 {
-	this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(), digestid, DNSSEC.generateDSDigest(key, digestid));
+	private Digest() {}
+
+	/** SHA-1 */
+	static public final int SHA1 = 1;
+
+	/** SHA-256 */
+	static public final int SHA256 = 2;
+
+	/** GOST R 34.11-94 */
+	static public final int GOST3411 = 3;
+
+	/** SHA-384 */
+	static public final int SHA384 = 4;
+}
+
+public static final int SHA1_DIGEST_ID     = Digest.SHA1;
+public static final int SHA256_DIGEST_ID   = Digest.SHA256;
+public static final int GOST3411_DIGEST_ID = Digest.GOST3411;
+public static final int SHA384_DIGEST_ID   = Digest.SHA384;
+
+private static final long serialVersionUID = -9001819329700081493L;
+
+DSRecord() {}
+
+Record
+getObject() {
+	return new DSRecord();
 }
 
 /**
@@ -46,33 +58,14 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg, int digestid,
 	super(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
 }
 
-DSRecord()
+/**
+ * Creates a DS Record from the given data
+ * @param digestid The digest id code.
+ * @param key      The key to digest
+ */
+public
+DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
 {
-}
-
-Record
-getObject()
-{
-	return new DSRecord();
-}
-
-static public
-class Digest
-{
-	/** SHA-1 */
-	static public final int SHA1 = 1;
-
-	/** SHA-256 */
-	static public final int SHA256 = 2;
-
-	/** GOST R 34.11-94 */
-	static public final int GOST3411 = 3;
-
-	/** SHA-384 */
-	static public final int SHA384 = 4;
-
-	private Digest()
-	{
-	}
+	this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(), digestid, DNSSEC.generateDSDigest(key, digestid));
 }
 }
