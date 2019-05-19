@@ -5,7 +5,7 @@ import org.xbill.DNS.utils.base16;
 import java.io.IOException;
 
 
-/********************************************************************
+/**
  * An abstract base class that is used to reduce duplicate code between the
  * different DS record types.
  *
@@ -23,9 +23,9 @@ private int digestid;
 private byte[] digest;
 
 public
-AbstractDSRecord(final Name name, final int type, final int dclass,
-						final long ttl, final int footprint, final int alg,
-						final int digestid, final byte[] digest) {
+AbstractDSRecord(Name name, int type, int dclass,
+						long ttl, int footprint, int alg,
+						int digestid, byte[] digest) {
 	super(name, type, dclass, ttl);
 	this.footprint = checkU16("footprint", footprint);
 	this.alg = checkU8("alg", alg);
@@ -36,7 +36,7 @@ AbstractDSRecord(final Name name, final int type, final int dclass,
 AbstractDSRecord() {
 }
 
-/***************************************
+/**
  * Returns the key's algorithm.
  */
 public int
@@ -44,7 +44,7 @@ getAlgorithm() {
 	return alg;
 }
 
-/***************************************
+/**
  * Returns the binary hash of the key.
  */
 public byte[]
@@ -52,7 +52,7 @@ getDigest() {
 	return digest;
 }
 
-/***************************************
+/**
  * Returns the key's Digest ID.
  */
 public int
@@ -60,7 +60,7 @@ getDigestID() {
 	return digestid;
 }
 
-/***************************************
+/**
  * Returns the key's footprint.
  */
 public int
@@ -69,7 +69,7 @@ getFootprint() {
 }
 
 void
-rdataFromString(final Tokenizer st, final Name origin)
+rdataFromString(Tokenizer st, Name origin)
 	throws IOException {
 	footprint = st.getUInt16();
 	alg = st.getUInt8();
@@ -78,19 +78,19 @@ rdataFromString(final Tokenizer st, final Name origin)
 }
 
 void
-rrFromWire(final DNSInput in) throws IOException {
+rrFromWire(DNSInput in) throws IOException {
 	footprint = in.readU16();
 	alg = in.readU8();
 	digestid = in.readU8();
 	digest = in.readByteArray();
 }
 
-/***************************************
+/**
  * Converts rdata to a String
  */
 String
 rrToString() {
-	final StringBuffer sb = new StringBuffer();
+	StringBuffer sb = new StringBuffer();
 	sb.append(footprint);
 	sb.append(" ");
 	sb.append(alg);
@@ -106,8 +106,8 @@ rrToString() {
 }
 
 void
-rrToWire(final DNSOutput out, final Compression c,
-			  final boolean canonical) {
+rrToWire(DNSOutput out, Compression c,
+			  boolean canonical) {
 	out.writeU16(footprint);
 	out.writeU8(alg);
 	out.writeU8(digestid);

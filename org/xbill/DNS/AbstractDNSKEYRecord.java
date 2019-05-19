@@ -3,7 +3,7 @@ package org.xbill.DNS;
 import java.io.IOException;
 
 
-/********************************************************************
+/**
  * An abstract base class that is used to reduce duplicate code for different
  * DNSKEY record types.
  *
@@ -23,16 +23,16 @@ AbstractDNSKEYRecord()
 }
 
 public
-AbstractDNSKEYRecord(final Name name, final int type,
-							final int dclass, final long ttl,
-							final int flags, final int proto, final int alg,
-							final byte[] key)
+AbstractDNSKEYRecord(Name name, int type,
+							int dclass, long ttl,
+							int flags, int proto, int alg,
+							byte[] key)
 {
 	super(name, type, dclass, ttl, flags, proto, alg, key);
 }
 
 void
-rdataFromString(final Tokenizer st, final Name origin)
+rdataFromString(Tokenizer st, Name origin)
 			  throws IOException
 {
 	flags = st.getUInt16();

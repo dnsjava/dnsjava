@@ -5,7 +5,7 @@ package org.xbill.DNS;
 import java.security.PublicKey;
 
 
-/********************************************************************
+/**
  * Key - contains a cryptographic public key for use by DNS. The data can be
  * converted to objects implementing java.security.interfaces.PublicKey
  *
@@ -18,7 +18,7 @@ class DNSKEYRecord extends AbstractDNSKEYRecord
 {
 static private final long serialVersionUID = -8679800040426675002L;
 
-/***************************************
+/**
  * Creates a DNSKEY Record from the given data
  *
  * @param flags Flags describing the key's properties
@@ -34,7 +34,7 @@ DNSKEYRecord(final Name name, final int dclass, final long ttl,
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 
-/***************************************
+/**
  * Creates a DNSKEY Record from the given data
  *
  * @param  flags Flags describing the key's properties
@@ -46,9 +46,9 @@ DNSKEYRecord(final Name name, final int dclass, final long ttl,
  *                                DNS format.
  */
 public
-DNSKEYRecord(final Name name, final int dclass, final long ttl,
-					final int flags, final int proto, final int alg,
-					final PublicKey key) throws DNSSEC.DNSSECException
+DNSKEYRecord(Name name, int dclass, long ttl,
+					int flags, int proto, int alg,
+					PublicKey key) throws DNSSEC.DNSSECException
 {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, DNSSEC.fromPublicKey(key, alg));
 	publicKey = key;

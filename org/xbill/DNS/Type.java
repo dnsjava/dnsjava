@@ -18,7 +18,7 @@ class Type
 public static final int A		= 1;
 
 /** Name server */
-public static final int NS	 	= 2;
+public static final int NS		= 2;
 
 /** Mail destination */
 public static final int MD		= 3;
@@ -27,13 +27,13 @@ public static final int MD		= 3;
 public static final int MF		= 4;
 
 /** Canonical name (alias) */
-public static final int CNAME	= 5;
+public static final int CNAME		= 5;
 
 /** Start of authority */
 public static final int SOA		= 6;
 
 /** Mailbox domain name */
-public static final int MB 		= 7;
+public static final int MB		= 7;
 
 /** Mail group member */
 public static final int MG		= 8;
@@ -42,7 +42,7 @@ public static final int MG		= 8;
 public static final int MR		= 9;
 
 /** Null record */
-public static final int NULL	= 10;
+public static final int NULL		= 10;
 
 /** Well known services */
 public static final int WKS		= 11;
@@ -51,10 +51,10 @@ public static final int WKS		= 11;
 public static final int PTR		= 12;
 
 /** Host information */
-public static final int HINFO	= 13;
+public static final int HINFO		= 13;
 
 /** Mailbox information */
-public static final int MINFO	= 14;
+public static final int MINFO		= 14;
 
 /** Mail routing information */
 public static final int MX		= 15;
@@ -66,13 +66,13 @@ public static final int TXT		= 16;
 public static final int RP		= 17;
 
 /** AFS cell database */
-public static final int AFSDB	= 18;
+public static final int AFSDB		= 18;
 
 /** X.25 calling address */
 public static final int X25		= 19;
 
 /** ISDN calling address */
-public static final int ISDN	= 20;
+public static final int ISDN		= 20;
 
 /** Router */
 public static final int RT		= 21;
@@ -84,34 +84,34 @@ public static final int NSAP		= 22;
 public static final int NSAP_PTR	= 23;
 
 /** Signature */
-public static final int SIG			= 24;
+public static final int SIG		= 24;
 
 /** Key */
-public static final int KEY 		= 25;
+public static final int KEY		= 25;
 
 /** X.400 mail mapping */
-public static final int PX 			= 26;
+public static final int PX		= 26;
 
 /** Geographical position (withdrawn) */
-public static final int GPOS 		= 27;
+public static final int GPOS		= 27;
 
 /** IPv6 address */
-public static final int AAAA 		= 28;
+public static final int AAAA		= 28;
 
 /** Location */
-public static final int LOC			= 29;
+public static final int LOC		= 29;
 
 /** Next valid name in zone */
-public static final int NXT			= 30;
+public static final int NXT		= 30;
 
 /** Endpoint identifier */
-public static final int EID			= 31;
+public static final int EID		= 31;
 
 /** Nimrod locator */
 public static final int NIMLOC		= 32;
 
 /** Server selection */
-public static final int SRV			= 33;
+public static final int SRV		= 33;
 
 /** ATM address */
 public static final int ATMA		= 34;
@@ -120,25 +120,25 @@ public static final int ATMA		= 34;
 public static final int NAPTR		= 35;
 
 /** Key exchange */
-public static final int KX			= 36;
+public static final int KX		= 36;
 
 /** Certificate */
 public static final int CERT		= 37;
 
 /** IPv6 address (experimental) */
-public static final int A6			= 38;
+public static final int A6		= 38;
 
 /** Non-terminal name redirection */
 public static final int DNAME		= 39;
 
 /** Options - contains EDNS metadata */
-public static final int OPT			= 41;
+public static final int OPT		= 41;
 
 /** Address Prefix List */
-public static final int APL			= 42;
+public static final int APL		= 42;
 
 /** Delegation Signer */
-public static final int DS			= 43;
+public static final int DS		= 43;
 
 /** SSH Key Fingerprint */
 public static final int SSHFP		= 44;
@@ -168,7 +168,7 @@ public static final int NSEC3PARAM	= 51;
 public static final int TLSA		= 52;
 
 /** S/MIME cert association, draft-ietf-dane-smime */
-public static final int SMIMEA		= 53;
+public static final int SMIMEA	= 53;
 
 /** Child Delegation Signer, RFC 8078 * */
 public static final int CDS			= 59;
@@ -180,40 +180,39 @@ public static final int CDNSKEY		= 60;
 public static final int OPENPGPKEY	= 61;
 
 /** Sender Policy Framework (experimental) */
-public static final int SPF 		= 99;
+public static final int SPF		= 99;
 
 /** Transaction key - used to compute a shared secret or exchange a key */
-public static final int TKEY 		= 249;
+public static final int TKEY		= 249;
 
 /** Transaction signature */
-public static final int TSIG 		= 250;
+public static final int TSIG		= 250;
 
 /** Incremental zone transfer */
-public static final int IXFR 		= 251;
+public static final int IXFR		= 251;
 
 /** Zone transfer */
-public static final int AXFR 		= 252;
+public static final int AXFR		= 252;
 
 /** Transfer mailbox records */
-public static final int MAILB 		= 253;
+public static final int MAILB		= 253;
 
 /** Transfer mail agent records */
-public static final int MAILA 		= 254;
+public static final int MAILA		= 254;
 
 /** Matches any type */
-public static final int ANY 		= 255;
+public static final int ANY		= 255;
 
-/**
- * URI
+/** URI
  * @see <a href="http://tools.ietf.org/html/draft-faltstrom-uri-14">draft-faltstrom-uri-14</a>
  */
-public static final int URI 		= 256;
+public static final int URI		= 256;
 
 /** Certification Authority Authorization, RFC 6844 */
-public static final int CAA 		= 257;
+public static final int CAA		= 257;
 
 /** DNSSEC Lookaside Validation, RFC 4431 . */
-public static final int DLV 		= 32769;
+public static final int DLV	= 32769;
 
 private static TypeMnemonic types = new TypeMnemonic();
 
@@ -295,7 +294,7 @@ private Type() {
  * @throws InvalidTypeException The type is out of range.
  */
 public static void
-check(final int val) {
+check(int val) {
 	if (val < 0 || val > 0xFFFF) {
 		throw new InvalidTypeException(val);
 	}
@@ -305,7 +304,7 @@ check(final int val) {
  * Is this type valid for a record (a non-meta type)?
  */
 public static boolean
-isRR(final int type)
+isRR(int type)
 {
 	switch (type)
 	{
@@ -334,7 +333,7 @@ isRR(final int type)
  * @throws InvalidTypeException The type is out of range.
  */
 public static String
-string(final int val) {
+string(int val) {
 	return types.getText(val);
 }
 
@@ -344,7 +343,7 @@ string(final int val) {
  * @return The type code, or -1 on error.
  */
 public static int
-value(final String s) {
+value(String s) {
 	return value(s, false);
 }
 
@@ -357,7 +356,7 @@ value(final String s) {
  * @return The type code, or -1 on error.
  */
 public static int
-value(final String s, final boolean numberok) {
+value(String s, boolean numberok) {
 	int val = types.getValue(s);
 
 	if (val == -1 && numberok)
@@ -369,13 +368,13 @@ value(final String s, final boolean numberok) {
 }
 
 static Record
-getProto(final int val) {
+getProto(int val) {
 	return types.getProto(val);
 }
 
 static private
 class TypeMnemonic extends Mnemonic {
-	private final HashMap objects;
+	private HashMap objects;
 
 	public
 	TypeMnemonic() {
@@ -385,18 +384,18 @@ class TypeMnemonic extends Mnemonic {
 	}
 
 	public void
-	add(final int val, final String str, final Record proto) {
+	add(int val, String str, Record proto) {
 		super.add(val, str);
 		objects.put(Mnemonic.toInteger(val), proto);
 	}
 
 	public void
-	check(final int val) {
+	check(int val) {
 		Type.check(val);
 	}
 
 	public Record
-	getProto(final int val) {
+	getProto(int val) {
 		check(val);
 
 		return (Record) objects.get(toInteger(val));

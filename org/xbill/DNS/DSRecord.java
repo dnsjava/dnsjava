@@ -2,7 +2,7 @@
 
 package org.xbill.DNS;
 
-/********************************************************************
+/**
  * DS - contains a Delegation Signer record, which acts as a placeholder for KEY
  * records in the parent zone.
  *
@@ -21,20 +21,20 @@ static public final int SHA384_DIGEST_ID   = Digest.SHA384;
 
 static private final long serialVersionUID = -9001819329700081493L;
 
-/***************************************
+/**
  * Creates a DS Record from the given data
  *
  * @param digestid The digest id code.
  * @param key      The key to digest
  */
 public
-DSRecord(final Name name, final int dclass, final long ttl,
-				final int digestid, final DNSKEYRecord key)
+DSRecord(Name name, int dclass, long ttl,
+				int digestid, DNSKEYRecord key)
 {
 	this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(), digestid, DNSSEC.generateDSDigest(key, digestid));
 }
 
-/***************************************
+/**
  * Creates a DS Record from the given data
  *
  * @param footprint The original KEY record's footprint (keyid).
@@ -43,9 +43,9 @@ DSRecord(final Name name, final int dclass, final long ttl,
  * @param digest    A hash of the original key.
  */
 public
-DSRecord(final Name name, final int dclass, final long ttl,
-				final int footprint, final int alg, final int digestid,
-				final byte[] digest)
+DSRecord(Name name, int dclass, long ttl,
+			int footprint, int alg, int digestid,
+			byte[] digest)
 {
 	super(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
 }
