@@ -55,8 +55,7 @@ getObject() {
  */
 public
 DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-			 PublicKey key) throws DNSSEC.DNSSECException
-{
+			 PublicKey key) throws DNSSEC.DNSSECException {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, DNSSEC.fromPublicKey(key, alg));
 	publicKey = key;
 }
@@ -70,8 +69,7 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
  */
 public
 DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-			 byte[] key)
-{
+			 byte[] key) {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 }

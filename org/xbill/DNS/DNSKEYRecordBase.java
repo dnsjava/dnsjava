@@ -12,27 +12,22 @@ import java.io.IOException;
  * @see    DNSKEYRecord
  * @see    CDNSKEYRecord
  */
-public abstract
-class DNSKEYRecordBase extends KEYBase
-{
+public abstract class DNSKEYRecordBase extends KEYBase {
+
 static private final long serialVersionUID = 439608609035127006L;
 
-public DNSKEYRecordBase()
-{
-}
+public DNSKEYRecordBase() {}
 
 public DNSKEYRecordBase(Name name, int type,
 						int dclass, long ttl,
 						int flags, int proto, int alg,
-						byte[] key)
-{
+						byte[] key) {
 	super(name, type, dclass, ttl, flags, proto, alg, key);
 }
 
 void
 rdataFromString(Tokenizer st, Name origin)
-			  throws IOException
-{
+			  throws IOException {
 	flags = st.getUInt16();
 	proto = st.getUInt8();
 
