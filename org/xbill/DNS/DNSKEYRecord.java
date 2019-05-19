@@ -16,20 +16,16 @@ import java.security.PublicKey;
 
 public class DNSKEYRecord extends DNSKEYRecordBase {
 
-static public
-class Protocol
-{
+public static class Protocol {
+	private Protocol() {}
+
 	/** Key will be used for DNSSEC */
 	static public final int DNSSEC = 3;
-
-	private Protocol()
-	{
-	}
 }
 
-static public
-class Flags
-{
+static public class Flags {
+	private Flags() {}
+
 	/** Key is a zone key */
 	static public final int ZONE_KEY = 0x100;
 
@@ -38,13 +34,9 @@ class Flags
 
 	/** Key has been revoked */
 	static public final int REVOKE = 0x80;
-
-	private Flags()
-	{
-	}
 }
 
-static private final long serialVersionUID = -8679800040426675002L;
+private static final long serialVersionUID = -8679800040426675002L;
 
 DNSKEYRecord() {}
 
@@ -58,21 +50,7 @@ getObject() {
  * @param flags Flags describing the key's properties
  * @param proto The protocol that the key was created for
  * @param alg The key's algorithm
- * @param key Binary representation of the key
- */
-public
-DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-			 final byte[] key)
-{
-	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
-}
-
-/**
- * Creates a DNSKEY Record from the given data
- * @param  flags Flags describing the key's properties
- * @param  proto The protocol that the key was created for
- * @param  alg The key's algorithm
- * @param  key The key as a PublicKey
+ * @param key The key as a PublicKey
  * @throws DNSSEC.DNSSECException The PublicKey could not be converted into DNS format.
  */
 public
@@ -81,5 +59,19 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, DNSSEC.fromPublicKey(key, alg));
 	publicKey = key;
+}
+
+/**
+ * Creates a DNSKEY Record from the given data
+ * @param flags Flags describing the key's properties
+ * @param proto The protocol that the key was created for
+ * @param alg The key's algorithm
+ * @param key Binary representation of the key
+ */
+public
+DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
+			 byte[] key)
+{
+	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 }

@@ -61,7 +61,7 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
 /**
  * Creates a DS Record from the given data
  * @param digestid The digest id code.
- * @param key      The key to digest
+ * @param key The key to digest
  */
 public
 DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
