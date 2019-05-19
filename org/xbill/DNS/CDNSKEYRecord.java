@@ -8,7 +8,7 @@ import java.security.PublicKey;
  * of the parent zone.
  */
 public
-class CDNSKEYRecord extends AbstractDNSKEYRecord
+class CDNSKEYRecord extends DNSKEYRecordBase
 {
 	static private final long serialVersionUID = 8018121023082348677L;
 

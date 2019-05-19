@@ -12,7 +12,7 @@ package org.xbill.DNS;
  */
 
 public
-class DSRecord extends AbstractDSRecord
+class DSRecord extends DSRecordBase
 {
 static public final int SHA1_DIGEST_ID     = Digest.SHA1;
 static public final int SHA256_DIGEST_ID   = Digest.SHA256;

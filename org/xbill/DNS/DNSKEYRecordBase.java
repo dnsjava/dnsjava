@@ -13,20 +13,18 @@ import java.io.IOException;
  * @see    CDNSKEYRecord
  */
 public abstract
-class AbstractDNSKEYRecord extends KEYBase
+class DNSKEYRecordBase extends KEYBase
 {
 static private final long serialVersionUID = 439608609035127006L;
 
-public
-AbstractDNSKEYRecord()
+public DNSKEYRecordBase()
 {
 }
 
-public
-AbstractDNSKEYRecord(Name name, int type,
-							int dclass, long ttl,
-							int flags, int proto, int alg,
-							byte[] key)
+public DNSKEYRecordBase(Name name, int type,
+						int dclass, long ttl,
+						int flags, int proto, int alg,
+						byte[] key)
 {
 	super(name, type, dclass, ttl, flags, proto, alg, key);
 }

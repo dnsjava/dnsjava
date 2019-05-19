@@ -15,7 +15,7 @@ import java.security.PublicKey;
  */
 
 public
-class DNSKEYRecord extends AbstractDNSKEYRecord
+class DNSKEYRecord extends DNSKEYRecordBase
 {
 static private final long serialVersionUID = -8679800040426675002L;
 

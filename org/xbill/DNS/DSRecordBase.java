@@ -15,17 +15,16 @@ import java.io.IOException;
  * @see    CDSRecord
  */
 public abstract
-class AbstractDSRecord extends Record {
+class DSRecordBase extends Record {
 static private final long serialVersionUID = -6303497472951402748L;
 private int footprint;
 private int alg;
 private int digestid;
 private byte[] digest;
 
-public
-AbstractDSRecord(Name name, int type, int dclass,
-						long ttl, int footprint, int alg,
-						int digestid, byte[] digest) {
+public DSRecordBase(Name name, int type, int dclass,
+					long ttl, int footprint, int alg,
+					int digestid, byte[] digest) {
 	super(name, type, dclass, ttl);
 	this.footprint = checkU16("footprint", footprint);
 	this.alg = checkU8("alg", alg);
@@ -33,7 +32,7 @@ AbstractDSRecord(Name name, int type, int dclass,
 	this.digest = digest;
 }
 
-AbstractDSRecord() {
+DSRecordBase() {
 }
 
 /**

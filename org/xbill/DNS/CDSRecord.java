@@ -5,7 +5,7 @@ package org.xbill.DNS;
  * of the parent zone.
  */
 public
-class CDSRecord extends AbstractDSRecord
+class CDSRecord extends DSRecordBase
 {
 	static private final long serialVersionUID = 1886725731593276503L;
 
