@@ -4,16 +4,14 @@ package org.xbill.DNS;
 
 import java.util.HashMap;
 
-
 /**
  * Constants and functions relating to DNS Types
  *
  * @author Brian Wellington
  */
 
-public final
-class Type
-{
+public final class Type {
+
 /** Address */
 public static final int A		= 1;
 
@@ -168,7 +166,7 @@ public static final int NSEC3PARAM	= 51;
 public static final int TLSA		= 52;
 
 /** S/MIME cert association, draft-ietf-dane-smime */
-public static final int SMIMEA	= 53;
+public static final int SMIMEA		= 53;
 
 /** Child Delegation Signer, RFC 8078 * */
 public static final int CDS			= 59;
@@ -212,7 +210,36 @@ public static final int URI		= 256;
 public static final int CAA		= 257;
 
 /** DNSSEC Lookaside Validation, RFC 4431 . */
-public static final int DLV	= 32769;
+public static final int DLV		= 32769;
+
+
+private static class TypeMnemonic extends Mnemonic {
+	private HashMap objects;
+
+	public
+	TypeMnemonic() {
+		super("Type", CASE_UPPER);
+		setPrefix("TYPE");
+		objects = new HashMap();
+	}
+
+	public void
+	add(int val, String str, Record proto) {
+		super.add(val, str);
+		objects.put(Mnemonic.toInteger(val), proto);
+	}
+
+	public void
+	check(int val) {
+		Type.check(val);
+	}
+
+	public Record
+	getProto(int val) {
+		check(val);
+		return (Record) objects.get(toInteger(val));
+	}
+}
 
 private static TypeMnemonic types = new TypeMnemonic();
 
@@ -269,6 +296,8 @@ static {
 	types.add(NSEC3PARAM, "NSEC3PARAM", new NSEC3PARAMRecord());
 	types.add(TLSA, "TLSA", new TLSARecord());
 	types.add(SMIMEA, "SMIMEA", new SMIMEARecord());
+	types.add(CDNSKEY, "CDNSKEY", new CDNSKEYRecord());
+	types.add(CDS, "CDS", new CDSRecord());
 	types.add(OPENPGPKEY, "OPENPGPKEY", new OPENPGPKEYRecord());
 	types.add(SPF, "SPF", new SPFRecord());
 	types.add(TKEY, "TKEY", new TKEYRecord());
@@ -281,33 +310,66 @@ static {
 	types.add(URI, "URI", new URIRecord());
 	types.add(CAA, "CAA", new CAARecord());
 	types.add(DLV, "DLV", new DLVRecord());
-	types.add(CDNSKEY, "CDNSKEY", new CDNSKEYRecord());
-	types.add(CDS, "CDS", new CDSRecord());
 }
 
-private Type() {
+private
+Type() {
 }
 
-/***************************************
+/**
  * Checks that a numeric Type is valid.
- *
  * @throws InvalidTypeException The type is out of range.
  */
 public static void
 check(int val) {
-	if (val < 0 || val > 0xFFFF) {
+	if (val < 0 || val > 0xFFFF)
 		throw new InvalidTypeException(val);
-	}
 }
 
-/***************************************
- * Is this type valid for a record (a non-meta type)?
+/**
+ * Converts a numeric Type into a String
+ * @param val The type value.
+ * @return The canonical string representation of the type
+ * @throws InvalidTypeException The type is out of range.
  */
+public static String
+string(int val) {
+	return types.getText(val);
+}
+
+/**
+ * Converts a String representation of an Type into its numeric value.
+ * @param s The string representation of the type
+ * @param numberok Whether a number will be accepted or not.
+ * @return The type code, or -1 on error.
+ */
+public static int
+value(String s, boolean numberok) {
+	int val = types.getValue(s);
+	if (val == -1 && numberok) {
+		val = types.getValue("TYPE" + s);
+	}
+	return val;
+}
+
+/**
+ * Converts a String representation of an Type into its numeric value
+ * @return The type code, or -1 on error.
+ */
+public static int
+value(String s) {
+	return value(s, false);
+}
+
+static Record
+getProto(int val) {
+	return types.getProto(val);
+}
+
+/** Is this type valid for a record (a non-meta type)? */
 public static boolean
-isRR(int type)
-{
-	switch (type)
-	{
+isRR(int type) {
+	switch (type) {
 		case OPT:
 		case TKEY:
 		case TSIG:
@@ -317,88 +379,9 @@ isRR(int type)
 		case MAILA:
 		case ANY:
 			return false;
-
 		default:
 			return true;
 	}
 }
 
-/***************************************
- * Converts a numeric Type into a String
- *
- * @param  val The type value.
- *
- * @return The canonical string representation of the type
- *
- * @throws InvalidTypeException The type is out of range.
- */
-public static String
-string(int val) {
-	return types.getText(val);
-}
-
-/***************************************
- * Converts a String representation of an Type into its numeric value
- *
- * @return The type code, or -1 on error.
- */
-public static int
-value(String s) {
-	return value(s, false);
-}
-
-/***************************************
- * Converts a String representation of an Type into its numeric value.
- *
- * @param  s        The string representation of the type
- * @param  numberok Whether a number will be accepted or not.
- *
- * @return The type code, or -1 on error.
- */
-public static int
-value(String s, boolean numberok) {
-	int val = types.getValue(s);
-
-	if (val == -1 && numberok)
-	{
-		val = types.getValue("TYPE" + s);
-	}
-
-	return val;
-}
-
-static Record
-getProto(int val) {
-	return types.getProto(val);
-}
-
-static private
-class TypeMnemonic extends Mnemonic {
-	private HashMap objects;
-
-	public
-	TypeMnemonic() {
-		super("Type", CASE_UPPER);
-		setPrefix("TYPE");
-		objects = new HashMap();
-	}
-
-	public void
-	add(int val, String str, Record proto) {
-		super.add(val, str);
-		objects.put(Mnemonic.toInteger(val), proto);
-	}
-
-	public void
-	check(int val) {
-		Type.check(val);
-	}
-
-	public Record
-	getProto(int val) {
-		check(val);
-
-		return (Record) objects.get(toInteger(val));
-	}
-}
 }
