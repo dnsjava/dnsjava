@@ -53,7 +53,8 @@ getObject() {
  */
 public
 DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
-	 int digestid, byte[] digest)  {
+	 int digestid, byte[] digest)
+{
 	super(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
 }
 
@@ -63,8 +64,7 @@ DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
  * @param key The key to digest
  */
 public
-DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
-{
+DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key) {
 	this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(), digestid, DNSSEC.generateDSDigest(key, digestid));
 }
 }

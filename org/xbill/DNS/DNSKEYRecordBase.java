@@ -14,14 +14,15 @@ import java.io.IOException;
  */
 public abstract class DNSKEYRecordBase extends KEYBase {
 
-static private final long serialVersionUID = 439608609035127006L;
+private static final long serialVersionUID = 439608609035127006L;
 
 public DNSKEYRecordBase() {}
 
 public DNSKEYRecordBase(Name name, int type,
 						int dclass, long ttl,
 						int flags, int proto, int alg,
-						byte[] key) {
+						byte[] key)
+{
 	super(name, type, dclass, ttl, flags, proto, alg, key);
 }
 
