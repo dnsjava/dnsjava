@@ -95,7 +95,8 @@ that dnsjava will not work on OS/390, for example.
 
 ## Additional documentation
 
-Javadoc documentation can be built with `mvn javadoc:javadoc`.
+Javadoc documentation can be built with `mvn javadoc:javadoc` or viewed online
+at [javadoc.io](http://javadoc.io/doc/dnsjava/dnsjava).
 
 
 ## License
