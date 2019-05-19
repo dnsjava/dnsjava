@@ -1,6 +1,6 @@
 package org.xbill.DNS;
 
-/********************************************************************
+/**
  * Equivalent to the {@link DSRecord}, but it is added to the child zone instead
  * of the parent zone.
  */
@@ -9,7 +9,7 @@ class CDSRecord extends AbstractDSRecord
 {
 	static private final long serialVersionUID = 1886725731593276503L;
 
-	/***************************************
+	/**
 	 * Creates a CDS Record from the given data
 	 *
 	 * @param digestid The digest id code.
@@ -21,7 +21,7 @@ class CDSRecord extends AbstractDSRecord
 		this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(), digestid, DNSSEC.generateDSDigest(key, digestid));
 	}
 
-	/***************************************
+	/**
 	 * Creates a CDS Record from the given data
 	 *
 	 * @param footprint The original KEY record's footprint (keyid).

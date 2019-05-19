@@ -3,7 +3,7 @@ package org.xbill.DNS;
 import java.security.PublicKey;
 
 
-/********************************************************************
+/**
  * Equivalent to {@link DNSKEYRecord}, but it is added to the child zone instead
  * of the parent zone.
  */
@@ -12,7 +12,7 @@ class CDNSKEYRecord extends AbstractDNSKEYRecord
 {
 	static private final long serialVersionUID = 8018121023082348677L;
 
-	/***************************************
+	/**
 	 * Creates a CNDSKEY Record from the given data
 	 *
 	 * @param flags Flags describing the key's properties
@@ -27,7 +27,7 @@ class CDNSKEYRecord extends AbstractDNSKEYRecord
 		super(name, Type.CDNSKEY, dclass, ttl, flags, proto, alg, key);
 	}
 
-	/***************************************
+	/**
 	 * Creates a CNDSKEY Record from the given data
 	 *
 	 * @param  flags Flags describing the key's properties
