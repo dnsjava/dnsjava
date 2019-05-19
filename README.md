@@ -106,4 +106,4 @@ additional licenses; see the individual files for details.
 ## Final notes
 - Thanks to Network Associates, Inc. for sponsoring some of the original
   dnsjava work in 1999-2000.
-- Thanks to Nominum, Inc. for sponsoring some work on dnsjava from 2000 throught 2017.
+- Thanks to Nominum, Inc. for sponsoring some work on dnsjava from 2000 through 2017.
