@@ -228,7 +228,6 @@ private static class TypeMnemonic extends Mnemonic {
 		super.add(val, str);
 		objects.put(Mnemonic.toInteger(val), proto);
 	}
-
 	public void
 	check(int val) {
 		Type.check(val);

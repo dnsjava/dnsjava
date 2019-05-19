@@ -6,9 +6,9 @@ import java.security.PublicKey;
 
 
 /**
- * Key - contains a cryptographic public key for use by DNS. The data can be
- * converted to objects implementing java.security.interfaces.PublicKey
- *
+ * Key - contains a cryptographic public key for use by DNS.
+ * The data can be converted to objects implementing
+ * java.security.interfaces.PublicKey
  * @see    DNSSEC
  * @author Brian Wellington
  */
@@ -20,15 +20,13 @@ static private final long serialVersionUID = -8679800040426675002L;
 
 /**
  * Creates a DNSKEY Record from the given data
- *
  * @param flags Flags describing the key's properties
  * @param proto The protocol that the key was created for
- * @param alg   The key's algorithm
- * @param key   Binary representation of the key
+ * @param alg The key's algorithm
+ * @param key Binary representation of the key
  */
 public
-DNSKEYRecord(final Name name, final int dclass, final long ttl,
-					final int flags, final int proto, final int alg,
+DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 					final byte[] key)
 {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
@@ -36,18 +34,15 @@ DNSKEYRecord(final Name name, final int dclass, final long ttl,
 
 /**
  * Creates a DNSKEY Record from the given data
- *
  * @param  flags Flags describing the key's properties
  * @param  proto The protocol that the key was created for
- * @param  alg   The key's algorithm
- * @param  key   The key as a PublicKey
- *
+ * @param  alg The key's algorithm
+ * @param  key The key as a PublicKey
  * @throws DNSSEC.DNSSECException The PublicKey could not be converted into
  *                                DNS format.
  */
 public
-DNSKEYRecord(Name name, int dclass, long ttl,
-					int flags, int proto, int alg,
+DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 					PublicKey key) throws DNSSEC.DNSSECException
 {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, DNSSEC.fromPublicKey(key, alg));
