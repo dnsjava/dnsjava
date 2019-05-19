@@ -73,7 +73,7 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	     PublicKey key) throws DNSSEC.DNSSECException
 {
 	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg,
-		DNSSEC.fromPublicKey(key, alg));
+	      DNSSEC.fromPublicKey(key, alg));
 	publicKey = key;
 }
 }
