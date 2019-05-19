@@ -6,6 +6,7 @@ package org.xbill.DNS;
  * DS - contains a Delegation Signer record, which acts as a placeholder for KEY
  * records in the parent zone.
  * @see    DNSSEC
+ *
  * @author David Blacka
  * @author Brian Wellington
  */
@@ -40,7 +41,7 @@ DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
  */
 public
 DSRecord(Name name, int dclass, long ttl, int footprint, int alg, int digestid,
-			byte[] digest)
+		 byte[] digest)
 {
 	super(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
 }
