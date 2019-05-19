@@ -64,7 +64,8 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
  * @param proto The protocol that the key was created for
  * @param alg The key's algorithm
  * @param key The key as a PublicKey
- * @throws DNSSEC.DNSSECException The PublicKey could not be converted into DNS format.
+ * @throws DNSSEC.DNSSECException The PublicKey could not be converted into DNS
+ * format.
  */
 public
 DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
