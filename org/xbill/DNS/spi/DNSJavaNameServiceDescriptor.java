@@ -12,13 +12,15 @@ import sun.net.spi.nameservice.*;
  * @author Brian Wellington
  * @author Paul Cowan (pwc21@yahoo.com)
  */
-
 public class DNSJavaNameServiceDescriptor implements NameServiceDescriptor {
 
 private static NameService nameService;
 
 static {
 	ClassLoader loader = NameService.class.getClassLoader();
+	if (loader == null) {
+		loader = Thread.currentThread().getContextClassLoader();
+	}
 	nameService = (NameService) Proxy.newProxyInstance(loader,
 			new Class[] { NameService.class },
 			new DNSJavaNameService());
