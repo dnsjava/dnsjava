@@ -415,28 +415,28 @@ sectionToWire(DNSOutput out, int section, Compression c,
 	int n = sections[section].size();
 	int pos = out.current();
 	int rendered = 0;
-	int skipped = 0;
+	int count = 0;
 	Record lastrec = null;
 
 	for (int i = 0; i < n; i++) {
 		Record rec = (Record)sections[section].get(i);
 		if (section == Section.ADDITIONAL && rec instanceof OPTRecord) {
-			skipped++;
 			continue;
 		}
 
 		if (lastrec != null && !sameSet(rec, lastrec)) {
 			pos = out.current();
-			rendered = i;
+			rendered = count;
 		}
 		lastrec = rec;
 		rec.toWire(out, section, c);
 		if (out.current() > maxLength) {
 			out.jump(pos);
-			return n - rendered + skipped;
+			return n - rendered;
 		}
+		count++;
 	}
-	return skipped;
+	return n - count;
 }
 
 /* Returns true if the message could be rendered. */
