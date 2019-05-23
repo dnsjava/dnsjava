@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: BSD-2-Clause
+package org.xbill.DNS;
+
+/**
+ * Child Delegation Signer record as specified in RFC 8078.
+ * 
+ * @see DNSSEC
+ */
+public class CDSRecord extends DSRecord {
+
+private static final long serialVersionUID = -3156174257356976006L;
+
+CDSRecord() {}
+
+Record
+getObject() {
+	return new CDSRecord();
+}
+
+/**
+ * Creates a CDS Record from the given data
+ * @param footprint The original KEY record's footprint (keyid).
+ * @param alg The original key algorithm.
+ * @param digestid The digest id code.
+ * @param digest A hash of the original key.
+ */
+public
+CDSRecord(Name name, int dclass, long ttl, int footprint, int alg,
+	 int digestid, byte [] digest)
+{
+	super(name, Type.CDS, dclass, ttl, footprint, alg, digestid, digest);
+}
+
+/**
+ * Creates a CDS Record from the given data
+ * @param digestid The digest id code.
+ * @param key The key to digest
+ */
+public
+CDSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
+{
+	super(name, Type.CDS, dclass, ttl, key.getFootprint(),
+	      key.getAlgorithm(), digestid,
+	      DNSSEC.generateDSDigest(key, digestid));
+}
+
+}

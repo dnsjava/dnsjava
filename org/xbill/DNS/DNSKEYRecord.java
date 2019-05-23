@@ -52,11 +52,25 @@ getObject() {
  * @param alg The key's algorithm
  * @param key Binary representation of the key
  */
+protected
+DNSKEYRecord(Name name, int type, int dclass, long ttl, int flags, int proto,
+	     int alg, byte [] key)
+{
+	super(name, type, dclass, ttl, flags, proto, alg, key);
+}
+
+/**
+ * Creates a DNSKEY Record from the given data
+ * @param flags Flags describing the key's properties
+ * @param proto The protocol that the key was created for
+ * @param alg The key's algorithm
+ * @param key Binary representation of the key
+ */
 public
 DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	     byte [] key)
 {
-	super(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
+	this(name, Type.DNSKEY, dclass, ttl, flags, proto, alg, key);
 }
 
 /**
