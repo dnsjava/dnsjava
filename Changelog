@@ -1,3 +1,24 @@
+05/23/2019:
+	- Fix NPE during NameService registration.
+	  (PR#26, Kenny Ingle <kenny.ingle@gmail.com>)
+	- Add japicmp Maven plugin for compatibility checks.
+	  (PR#36, Kenny Ingle <kenny.ingle@gmail.com>)
+	- Fix parsing/generation of (EC)DSA signatures from/to DER.
+	- Fix miscount in Message.sectionToWire related to OPT records.
+	  (PR#37, Klaus Malorny <Klaus.Malorny@knipp.de>)
+	- Add support for the CDS and CDNSKEY record types.
+
+05/18/2019:
+	- Primary maintainer is now Ingo Bauersachs (ingo@jitsi.org)
+	- Move project from Sourceforge to Github.
+	- Cleanup Maven POM.
+	- Add CI und Code Coverage tools.
+	- Add Javadoc-Badge.
+	  (PR#27, Kenny Ingle <kenny.ingle@gmail.com>)
+
+10/13/2018:
+	- Fix Javadoc nits (David Xia <davidxia@users.sourceforge.net>)
+
 3/20/2017:
 	- Change the number of CNAMEs that the Lookup code will follow,
 	  as the previous limit (6) was not enough for www.paypal.com.
