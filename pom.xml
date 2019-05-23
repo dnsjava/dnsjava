@@ -104,6 +104,7 @@
                     <instructions>
                         <Bundle-Name>dnsjava is an implementation of DNS in Java</Bundle-Name>
                         <Bundle-SymbolicName>org.xbill.dns</Bundle-SymbolicName>
+                        <Automatic-Module-Name>org.dnsjava</Automatic-Module-Name>
                         <Export-Package>
                             org.xbill.DNS.*
                         </Export-Package>
