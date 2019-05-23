@@ -58,15 +58,29 @@ getObject() {
  * @param digestid The digest id code.
  * @param digest A hash of the original key.
  */
-public
-DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
+protected
+DSRecord(Name name, int type, int dclass, long ttl, int footprint, int alg,
 	 int digestid, byte [] digest)
 {
-	super(name, Type.DS, dclass, ttl);
+	super(name, type, dclass, ttl);
 	this.footprint = checkU16("footprint", footprint);
 	this.alg = checkU8("alg", alg);
 	this.digestid = checkU8("digestid", digestid);
 	this.digest = digest;
+}
+
+/**
+ * Creates a DS Record from the given data
+ * @param footprint The original KEY record's footprint (keyid).
+ * @param alg The original key algorithm.
+ * @param digestid The digest id code.
+ * @param digest A hash of the original key.
+ */
+public
+DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
+	 int digestid, byte [] digest)
+{
+	this(name, Type.DS, dclass, ttl, footprint, alg, digestid, digest);
 }
 
 /**
