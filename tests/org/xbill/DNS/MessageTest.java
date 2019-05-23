@@ -37,6 +37,7 @@ package org.xbill.DNS;
 import	java.net.InetAddress;
 import	java.net.UnknownHostException;
 import	java.util.Arrays;
+import  java.io.IOException;
 import	junit.framework.Test;
 import	junit.framework.TestCase;
 import	junit.framework.TestSuite;
@@ -105,6 +106,32 @@ public class MessageTest
 	    assertEquals(Opcode.QUERY, h.getOpcode());
 	    assertEquals(true, h.getFlag(Flags.RD));
 	}
+
+        public void test_sectionToWire ()
+          throws IOException
+        {
+            Message m = new Message(4711);
+            Name n2 = Name.fromConstantString("test2.example.");
+            m.addRecord(new TXTRecord(n2, DClass.IN, 86400, "other record"), Section.ADDITIONAL);
+            Name n = Name.fromConstantString("test.example.");
+            m.addRecord(new TXTRecord(n, DClass.IN, 86400, "example text -1-"), Section.ADDITIONAL);
+            m.addRecord(new TXTRecord(n, DClass.IN, 86400, "example text -2-"), Section.ADDITIONAL);
+            m.addRecord(new TXTRecord(n, DClass.IN, 86400, "example text -3-"), Section.ADDITIONAL);
+            m.addRecord(new TXTRecord(n, DClass.IN, 86400, "example text -4-"), Section.ADDITIONAL);
+	    m.addRecord(new OPTRecord(512, 0, 0, 0), Section.ADDITIONAL);
+
+	    for(int i = 5; i < 50; i++)
+               m.addRecord(new TXTRecord(n, DClass.IN, 86400, "example text -" + i + "-"),
+                 Section.ADDITIONAL);
+
+            byte[] binary = m.toWire(512);
+            Message m2 = new Message(binary);
+            assertEquals(2, m2.getHeader().getCount(Section.ADDITIONAL));
+            Record[] records = m2.getSectionArray(Section.ADDITIONAL);
+            assertEquals(2, records.length);
+            assertEquals(TXTRecord.class, records[0].getClass());
+            assertEquals(OPTRecord.class, records[1].getClass());
+        }
 
     }
 
