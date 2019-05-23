@@ -702,11 +702,17 @@ DSASignaturefromDNS(byte [] dns) throws DNSSECException, IOException {
 	int rlen = DSA_LEN;
 	if (r[0] < 0)
 		rlen++;
+	else
+		for(int i = 0; i < DSA_LEN - 1 && r[i] == 0 && r[i+1] >= 0; i++)
+			rlen--;
 
 	byte [] s = in.readByteArray(DSA_LEN);
-        int slen = DSA_LEN;
-        if (s[0] < 0)
-                slen++;
+	int slen = DSA_LEN;
+	if (s[0] < 0)
+		slen++;
+	else
+		for(int i = 0; i < DSA_LEN - 1 && s[i] == 0 && s[i+1] >= 0; i++)
+			slen--;
 
 	out.writeU8(ASN1_SEQ);
 	out.writeU8(rlen + slen + 4);
@@ -715,13 +721,19 @@ DSASignaturefromDNS(byte [] dns) throws DNSSECException, IOException {
 	out.writeU8(rlen);
 	if (rlen > DSA_LEN)
 		out.writeU8(0);
-	out.writeByteArray(r);
+	if (rlen >= DSA_LEN)
+		out.writeByteArray(r);
+	else
+		out.writeByteArray(r, DSA_LEN - rlen, rlen);
 
 	out.writeU8(ASN1_INT);
 	out.writeU8(slen);
 	if (slen > DSA_LEN)
 		out.writeU8(0);
-	out.writeByteArray(s);
+	if (slen >= DSA_LEN)
+		out.writeByteArray(s);
+	else
+		out.writeByteArray(s, DSA_LEN - slen, slen);
 
 	return out.toByteArray();
 }
@@ -735,32 +747,48 @@ DSASignaturetoDNS(byte [] signature, int t) throws IOException {
 
 	int tmp = in.readU8();
 	if (tmp != ASN1_SEQ)
-		throw new IOException();
+		throw new IOException("Invalid ASN.1 data, expected " + ASN1_SEQ + " got " + tmp);
 	int seqlen = in.readU8();
 
 	tmp = in.readU8();
 	if (tmp != ASN1_INT)
-		throw new IOException();
+		throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
+
+	// r must be of DSA_LEN or +1 if it has a leading zero for negative
+	// ASN.1 integers
 	int rlen = in.readU8();
-	if (rlen == DSA_LEN + 1) {
-		if (in.readU8() != 0)
-			throw new IOException();
-	} else if (rlen != DSA_LEN)
-		throw new IOException();
-	byte [] bytes = in.readByteArray(DSA_LEN);
-	out.writeByteArray(bytes);
+	if (rlen == DSA_LEN + 1 && in.readU8() == 0) { 
+		--rlen;
+	} else if (rlen <= DSA_LEN) {
+		// pad with leading zeros, rfc2536#section-3
+		for (int i = 0; i < DSA_LEN - rlen; i++) {
+			out.writeU8(0);
+		}
+	} else {
+		throw new IOException("Invalid r-value in ASN.1 DER encoded DSA signature: " + rlen);
+	}
+
+	out.writeByteArray(in.readByteArray(rlen));
 
 	tmp = in.readU8();
 	if (tmp != ASN1_INT)
-		throw new IOException();
+		throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
+
+	// s must be of DSA_LEN or +1 if it has a leading zero for negative
+	// ASN.1 integers
 	int slen = in.readU8();
-	if (slen == DSA_LEN + 1) {
-		if (in.readU8() != 0)
-			throw new IOException();
-	} else if (slen != DSA_LEN)
-		throw new IOException();
-	bytes = in.readByteArray(DSA_LEN);
-	out.writeByteArray(bytes);
+	if (slen == DSA_LEN + 1 && in.readU8() == 0) {
+		--slen;
+	} else if (slen <= DSA_LEN) {
+		// pad with leading zeros, rfc2536#section-3
+		for (int i = 0; i < DSA_LEN - slen; i++) {
+			out.writeU8(0);
+		}
+	} else {
+		throw new IOException("Invalid s-value in ASN.1 DER encoded DSA signature: " + slen);
+	}
+
+	out.writeByteArray(in.readByteArray(slen));
 
 	return out.toByteArray();
 }
@@ -789,11 +817,17 @@ ECDSASignaturefromDNS(byte [] signature, ECKeyInfo keyinfo)
 	int rlen = keyinfo.length;
 	if (r[0] < 0)
 		rlen++;
+	else
+		for(int i = 0; i < keyinfo.length - 1 && r[i] == 0 && r[i+1] >= 0; i++)
+			rlen--;
 
 	byte [] s = in.readByteArray(keyinfo.length);
 	int slen = keyinfo.length;
 	if (s[0] < 0)
 		slen++;
+	else
+		for(int i = 0; i < keyinfo.length - 1 && s[i] == 0 && s[i+1] >= 0; i++)
+			slen--;
 
 	out.writeU8(ASN1_SEQ);
 	out.writeU8(rlen + slen + 4);
@@ -802,13 +836,19 @@ ECDSASignaturefromDNS(byte [] signature, ECKeyInfo keyinfo)
 	out.writeU8(rlen);
 	if (rlen > keyinfo.length)
 		out.writeU8(0);
-	out.writeByteArray(r);
+	if (rlen >= keyinfo.length)
+		out.writeByteArray(r);
+	else
+		out.writeByteArray(r, keyinfo.length - rlen, rlen);
 
 	out.writeU8(ASN1_INT);
 	out.writeU8(slen);
 	if (slen > keyinfo.length)
 		out.writeU8(0);
-	out.writeByteArray(s);
+	if (slen >= keyinfo.length)
+		out.writeByteArray(s);
+	else
+		out.writeByteArray(s, keyinfo.length - slen, slen);
 
 	return out.toByteArray();
 }
@@ -820,32 +860,43 @@ ECDSASignaturetoDNS(byte [] signature, ECKeyInfo keyinfo) throws IOException {
 
 	int tmp = in.readU8();
 	if (tmp != ASN1_SEQ)
-		throw new IOException();
+		throw new IOException("Invalid ASN.1 data, expected " + ASN1_SEQ + " got " + tmp);
 	int seqlen = in.readU8();
 
 	tmp = in.readU8();
 	if (tmp != ASN1_INT)
-		throw new IOException();
+		throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
+
 	int rlen = in.readU8();
-	if (rlen == keyinfo.length + 1) {
-		if (in.readU8() != 0)
-			throw new IOException();
-	} else if (rlen != keyinfo.length)
-		throw new IOException();
-	byte[] bytes = in.readByteArray(keyinfo.length);
-	out.writeByteArray(bytes);
+	if (rlen == keyinfo.length + 1 && in.readU8() == 0) {
+		--rlen;
+	} else if (rlen <= keyinfo.length) {
+		// pad with leading zeros, rfc2536#section-3
+		for (int i = 0; i < keyinfo.length - rlen; i++) {
+			out.writeU8(0);
+		}
+	} else {
+		throw new IOException("Invalid r-value in ASN.1 DER encoded ECDSA signature: " + rlen);
+	}
+
+	out.writeByteArray(in.readByteArray(rlen));
 
 	tmp = in.readU8();
 	if (tmp != ASN1_INT)
-		throw new IOException();
+		throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
 	int slen = in.readU8();
-	if (slen == keyinfo.length + 1) {
-		if (in.readU8() != 0)
-			throw new IOException();
-	} else if (slen != keyinfo.length)
-		throw new IOException();
-	bytes = in.readByteArray(keyinfo.length);
-	out.writeByteArray(bytes);
+		if (slen == keyinfo.length + 1 && in.readU8() == 0) {
+			--slen;
+	} else if (slen <= keyinfo.length) {
+		// pad with leading zeros, rfc2536#section-3
+		for (int i = 0; i < keyinfo.length - slen; i++) {
+			out.writeU8(0);
+		}
+	} else {
+		throw new IOException("Invalid s-value in ASN.1 DER encoded ECDSA signature: " + slen);
+	}
+
+	out.writeByteArray(in.readByteArray(slen));
 
 	return out.toByteArray();
 }
@@ -921,15 +972,33 @@ matches(SIGBase sig, KEYBase key)
 public static void
 verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key) throws DNSSECException
 {
+	verify(rrset, rrsig, key, new Date());
+}
+
+/**
+ * Verify a DNSSEC signature.
+ * @param rrset The data to be verified.
+ * @param rrsig The RRSIG record containing the signature.
+ * @param key The DNSKEY record to verify the signature with.
+ * @param date The date against which the signature is verified.
+ * @throws UnsupportedAlgorithmException The algorithm is unknown
+ * @throws MalformedKeyException The key is malformed
+ * @throws KeyMismatchException The key and signature do not match
+ * @throws SignatureExpiredException The signature has expired
+ * @throws SignatureNotYetValidException The signature is not yet valid
+ * @throws SignatureVerificationException The signature does not verify.
+ * @throws DNSSECException Some other error occurred.
+ */
+public static void
+verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key, Date date) throws DNSSECException
+{
 	if (!matches(rrsig, key))
 		throw new KeyMismatchException(key, rrsig);
 
-	Date now = new Date();
-	if (now.compareTo(rrsig.getExpire()) > 0)
-		throw new SignatureExpiredException(rrsig.getExpire(), now);
-	if (now.compareTo(rrsig.getTimeSigned()) < 0)
-		throw new SignatureNotYetValidException(rrsig.getTimeSigned(),
-							now);
+	if (date.compareTo(rrsig.getExpire()) > 0)
+		throw new SignatureExpiredException(rrsig.getExpire(), date);
+	if (date.compareTo(rrsig.getTimeSigned()) < 0)
+		throw new SignatureNotYetValidException(rrsig.getTimeSigned(), date);
 
 	verify(key.getPublicKey(), rrsig.getAlgorithm(),
 	       digestRRset(rrsig, rrset), rrsig.getSignature());
@@ -962,7 +1031,7 @@ sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data,
 			signature = DSASignaturetoDNS(signature, t);
 		}
 		catch (IOException e) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(e);
 		}
 	} else if (pubkey instanceof ECPublicKey) {
 		try {
@@ -983,7 +1052,7 @@ sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data,
 			}
 		}
 		catch (IOException e) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(e);
 		}
 	}
 
