@@ -10,7 +10,7 @@ charset = latin1
 indent_style = space
 indent_size = 2
 
-[pom.xml]
+[{pom.xml,*.md}]
 indent_style = space
 indent_size = 4
 

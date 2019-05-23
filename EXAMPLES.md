@@ -1,58 +1,50 @@
-<html>
-<head>
-<title>dnsjava examples</title>
-</head>
-
-<body bgcolor="white">
-
-<h1 align="center">dnsjava examples</h1>
+# dnsjava examples
 
 All of these examples are code fragments.  Code using these fragments should
 check exceptions when appropriate, and should:
 
-<pre><code>import org.xbill.DNS.*;</code></pre>
+```java
+import org.xbill.DNS.*;
+```
 
-<p><b>Get the IP address associated with a name:</b></p>
-<pre><code>
+## Get the IP address associated with a name
+
+```java
 InetAddress addr = Address.getByName("www.dnsjava.org");
-</code></pre>
+```
 
-<br>
+## Get the MX target and preference of a name
 
-<p><b>Get the MX target and preference of a name:</b></p>
-<pre><code>
+```java
 Record [] records = new Lookup("gmail.com", Type.MX).run();
 for (int i = 0; i &lt; records.length; i++) {
-	MXRecord mx = (MXRecord) records[i];
-	System.out.println("Host " + mx.getTarget() + " has preference " + mx.getPriority());
+    MXRecord mx = (MXRecord) records[i];
+    System.out.println("Host " + mx.getTarget() + " has preference " + mx.getPriority());
 }
-</code></pre>
+```
 
-<br>
+## Query a remote name server for its version
 
-<p><b>Query a remote name server for its version:</b></p>
-<pre><code>
+```java
 Lookup l = new Lookup("version.bind.", Type.TXT, DClass.CH);
 l.setResolver(new SimpleResolver(args[0]));
 l.run();
 if (l.getResult() == Lookup.SUCCESSFUL)
-	System.out.println(l.getAnswers()[0].rdataToString());
-</code></pre>
+    System.out.println(l.getAnswers()[0].rdataToString());
+```
 
-<br>
+## Transfer a zone from a server and print it
 
-<p><b>Transfer a zone from a server and print it:</b></p>
-<pre><code>
+```java
 ZoneTransferIn xfr = ZoneTransferIn.newAXFR(new Name("."), "192.5.5.241", null);
 List records = xfr.run();
 for (Iterator it = records.iterator(); it.hasNext(); )
-	System.out.println(it.next());
-</code></pre>
+    System.out.println(it.next());
+```
 
-<br>
+## Use DNS dynamic update to set the address of a host to a value specified on the command line
 
-<p><b>Use DNS dynamic update to set the address of a host to a value specified on the command line:</b></p>
-<pre><code>
+```java
 Name zone = Name.fromString("dyn.test.example.");
 Name host = Name.fromString("host", zone);
 Update update = new Update(zone);
@@ -63,17 +55,16 @@ res.setTSIGKey(new TSIG(host, base64.fromString("1234")));
 res.setTCP(true);
 
 Message response = res.send(update);
-</code></pre>
+```
 
-<br>
+## Manipulate domain names
 
-<p><b>Manipulate domain names:</b></p>
-<pre><code>
+```java
 Name n = Name.fromString("www.dnsjava.org");
 Name o = Name.fromString("dnsjava.org");
 System.out.println(n.subdomain(o));            // True
 
-System.out.println(n.compareTo(o));            // &gt; 0
+System.out.println(n.compareTo(o));            // > 0
 
 Name rel = n.relativize(o);                    // the relative name 'www'
 Name n2 = Name.concatenate(rel, o);
@@ -83,8 +74,5 @@ System.out.println(n2.equals(n));              // True
 // dnsjava
 // org
 for (int i = 0; i &lt; n.labels(); i++)
-	System.out.println(n.getLabelString(i));
-</code></pre>
-
-</body>
-</html>
+    System.out.println(n.getLabelString(i));
+```
