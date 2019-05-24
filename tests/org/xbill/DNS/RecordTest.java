@@ -643,6 +643,11 @@ public class RecordTest extends TestCase
 	r = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(),
 			    new Date(), 10, n, new byte[ 0 ]);
 	assertEquals(Type.A, r.getRRsetType());
+
+	// create an "EmptyRecord" instance with RRSIG type. As it has no RDATA,
+	// it cannot return the covered type
+	r = Record.newRecord(n, Type.RRSIG, DClass.IN, 86400, 0, null);
+	assertEquals(Type.RRSIG, r.getRRsetType());
     }
 
     public void test_sameRRset() throws TextParseException
