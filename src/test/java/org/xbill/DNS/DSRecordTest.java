@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -101,7 +102,7 @@ public class DSRecordTest
 	    assertEquals(m_footprint, dr.getFootprint());
 	    assertEquals(m_algorithm, dr.getAlgorithm());
 	    assertEquals(m_digestid, dr.getDigestID());
-	    assertTrue(Arrays.equals(m_digest, dr.getDigest()));
+		assertArrayEquals(m_digest, dr.getDigest());
 	}
 
     @Test
@@ -199,8 +200,7 @@ public class DSRecordTest
 	assertEquals(0xABCD, dr.getFootprint());
 	assertEquals(0xEF, dr.getAlgorithm());
 	assertEquals(0x01, dr.getDigestID());
-	assertTrue(Arrays.equals(new byte[] { (byte)0x23, (byte)0x45, (byte)0x67, (byte)0x89 },
-				 dr.getDigest()));
+	    assertArrayEquals(new byte[]{(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89}, dr.getDigest());
     }
 
     @Test
@@ -216,8 +216,7 @@ public class DSRecordTest
 	assertEquals(0xABCD, dr.getFootprint());
 	assertEquals(0xEF, dr.getAlgorithm());
 	assertEquals(0x01, dr.getDigestID());
-	assertTrue(Arrays.equals(new byte[] { (byte)0x23, (byte)0x45, (byte)0x67, (byte)0x89, (byte)0xAB },
-				 dr.getDigest()));
+	    assertArrayEquals(new byte[]{(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB}, dr.getDigest());
     }
 
     @Test
@@ -247,6 +246,6 @@ public class DSRecordTest
 	DNSOutput out = new DNSOutput();
 	dr.rrToWire(out, null, true);
 
-	assertTrue(Arrays.equals(exp, out.toByteArray()));
+	    assertArrayEquals(exp, out.toByteArray());
     }
 }

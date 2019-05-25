@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -116,7 +117,7 @@ public class NameTest
 	    assertTrue(n.isWild());
 	    assertEquals(1, n.labels());
 	    assertEquals(2, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 1, '*' }, n.getLabel(0)));
+		assertArrayEquals(new byte[]{1, '*'}, n.getLabel(0));
 	    assertEquals("*", n.getLabelString(0));
 	}
 
@@ -128,17 +129,13 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(4, n.labels());
 	    assertEquals(17, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 3, 'W', 'W', 'W' },
-				     n.getLabel(0)));
+		assertArrayEquals(new byte[]{3, 'W', 'W', 'W'}, n.getLabel(0));
 	    assertEquals("WWW", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 7, 'D', 'n', 's', 'J', 'a', 'v', 'a' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
 	    assertEquals("DnsJava", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 3, 'o', 'r', 'g' },
-				     n.getLabel(2)));
+		assertArrayEquals(new byte[]{3, 'o', 'r', 'g'}, n.getLabel(2));
 	    assertEquals("org", n.getLabelString(2));
-	    assertTrue(Arrays.equals(new byte[] { 0 },
-				     n.getLabel(3)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(3));
 	    assertEquals("", n.getLabelString(3));
 	}
 
@@ -150,11 +147,9 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(2, n.labels());
 	    assertEquals(12, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 3, 'W', 'W', 'W' },
-				     n.getLabel(0)));
+		assertArrayEquals(new byte[]{3, 'W', 'W', 'W'}, n.getLabel(0));
 	    assertEquals("WWW", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 7, 'D', 'n', 's', 'J', 'a', 'v', 'a' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
 	    assertEquals("DnsJava", n.getLabelString(1));
 	}
 
@@ -167,19 +162,19 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(7, n.labels());
 	    assertEquals(13, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 1, 'a' }, n.getLabel(0)));
+		assertArrayEquals(new byte[]{1, 'a'}, n.getLabel(0));
 	    assertEquals("a", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'b' }, n.getLabel(1)));
+		assertArrayEquals(new byte[]{1, 'b'}, n.getLabel(1));
 	    assertEquals("b", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'c' }, n.getLabel(2)));
+		assertArrayEquals(new byte[]{1, 'c'}, n.getLabel(2));
 	    assertEquals("c", n.getLabelString(2));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'd' }, n.getLabel(3)));
+		assertArrayEquals(new byte[]{1, 'd'}, n.getLabel(3));
 	    assertEquals("d", n.getLabelString(3));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'e' }, n.getLabel(4)));
+		assertArrayEquals(new byte[]{1, 'e'}, n.getLabel(4));
 	    assertEquals("e", n.getLabelString(4));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'f' }, n.getLabel(5)));
+		assertArrayEquals(new byte[]{1, 'f'}, n.getLabel(5));
 	    assertEquals("f", n.getLabelString(5));
-	    assertTrue(Arrays.equals(new byte[] { 0 }, n.getLabel(6)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(6));
 	    assertEquals("", n.getLabelString(6));
 	}
 
@@ -192,21 +187,21 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(8, n.labels());
 	    assertEquals(15, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 1, 'a' }, n.getLabel(0)));
+		assertArrayEquals(new byte[]{1, 'a'}, n.getLabel(0));
 	    assertEquals("a", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'b' }, n.getLabel(1)));
+		assertArrayEquals(new byte[]{1, 'b'}, n.getLabel(1));
 	    assertEquals("b", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'c' }, n.getLabel(2)));
+		assertArrayEquals(new byte[]{1, 'c'}, n.getLabel(2));
 	    assertEquals("c", n.getLabelString(2));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'd' }, n.getLabel(3)));
+		assertArrayEquals(new byte[]{1, 'd'}, n.getLabel(3));
 	    assertEquals("d", n.getLabelString(3));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'e' }, n.getLabel(4)));
+		assertArrayEquals(new byte[]{1, 'e'}, n.getLabel(4));
 	    assertEquals("e", n.getLabelString(4));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'f' }, n.getLabel(5)));
+		assertArrayEquals(new byte[]{1, 'f'}, n.getLabel(5));
 	    assertEquals("f", n.getLabelString(5));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'g' }, n.getLabel(6)));
+		assertArrayEquals(new byte[]{1, 'g'}, n.getLabel(6));
 	    assertEquals("g", n.getLabelString(6));
-	    assertTrue(Arrays.equals(new byte[] { 0 }, n.getLabel(7)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(7));
 	    assertEquals("", n.getLabelString(7));
 	}
 
@@ -229,17 +224,13 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(4, n.labels());
 	    assertEquals(17, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 3, 'W', 'W', 'W' },
-				     n.getLabel(0)));
+		assertArrayEquals(new byte[]{3, 'W', 'W', 'W'}, n.getLabel(0));
 	    assertEquals("WWW", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 7, 'D', 'n', 's', 'J', 'a', 'v', 'a' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
 	    assertEquals("DnsJava", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 3, 'o', 'r', 'g' },
-				     n.getLabel(2)));
+		assertArrayEquals(new byte[]{3, 'o', 'r', 'g'}, n.getLabel(2));
 	    assertEquals("org", n.getLabelString(2));
-	    assertTrue(Arrays.equals(new byte[] { 0 },
-				     n.getLabel(3)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(3));
 	    assertEquals("", n.getLabelString(3));
 	}
 
@@ -251,17 +242,13 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(4, n.labels());
 	    assertEquals(17, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 3, 'W', 'W', 'W' },
-				     n.getLabel(0)));
+		assertArrayEquals(new byte[]{3, 'W', 'W', 'W'}, n.getLabel(0));
 	    assertEquals("WWW", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 7, 'D', 'n', 's', 'J', 'a', 'v', 'a' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
 	    assertEquals("DnsJava", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 3, 'o', 'r', 'g' },
-				     n.getLabel(2)));
+		assertArrayEquals(new byte[]{3, 'o', 'r', 'g'}, n.getLabel(2));
 	    assertEquals("org", n.getLabelString(2));
-	    assertTrue(Arrays.equals(new byte[] { 0 },
-				     n.getLabel(3)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(3));
 	    assertEquals("", n.getLabelString(3));
 	}
 
@@ -273,17 +260,13 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(4, n.labels());
 	    assertEquals(18, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 3, 'W', 'W', 'W' },
-				     n.getLabel(0)));
+		assertArrayEquals(new byte[]{3, 'W', 'W', 'W'}, n.getLabel(0));
 	    assertEquals("WWW", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 7, 'D', 'n', 's', 'J', 'a', 'v', 'a' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
 	    assertEquals("DnsJava", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 4, 'O', 'r', 'i', 'g'},
-				     n.getLabel(2)));
+		assertArrayEquals(new byte[]{4, 'O', 'r', 'i', 'g'}, n.getLabel(2));
 	    assertEquals("Orig", n.getLabelString(2));
-	    assertTrue(Arrays.equals(new byte[] { 0 },
-				     n.getLabel(3)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(3));
 	    assertEquals("", n.getLabelString(3));
 	}
 
@@ -306,14 +289,11 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(3, n.labels());
 	    assertEquals(67, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 63, 'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a' },
-				     n.getLabel(0)));
+		assertArrayEquals(new byte[]{63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a'}, n.getLabel(0));
 	    assertEquals("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", n.getLabelString(0));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'b' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{1, 'b'}, n.getLabel(1));
 	    assertEquals("b", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 0 },
-				     n.getLabel(2)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(2));
 	    assertEquals("", n.getLabelString(2));
 	}
 
@@ -358,7 +338,7 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(1, n.labels());
 	    assertEquals(6, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 5, 'a', 'b', (byte)123, 'c', 'd' }, n.getLabel(0)));
+		assertArrayEquals(new byte[]{5, 'a', 'b', (byte) 123, 'c', 'd'}, n.getLabel(0));
 	}
 	    
     @Test
@@ -369,7 +349,7 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(1, n.labels());
 	    assertEquals(6, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 5, 'a', 'b', 'c', 'd', (byte)123 }, n.getLabel(0)));
+		assertArrayEquals(new byte[]{5, 'a', 'b', 'c', 'd', (byte) 123}, n.getLabel(0));
 	}
 
     @Test
@@ -431,13 +411,10 @@ public class NameTest
 	    assertFalse(n.isWild());
 	    assertEquals(3, n.labels());
 	    assertEquals(67, n.length());
-	    assertTrue(Arrays.equals(new byte[] { 63, 'a','a','a','a',(byte)100,'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a' },
-				     n.getLabel(0)));
-	    assertTrue(Arrays.equals(new byte[] { 1, 'b' },
-				     n.getLabel(1)));
+		assertArrayEquals(new byte[]{63, 'a', 'a', 'a', 'a', (byte) 100, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a'}, n.getLabel(0));
+		assertArrayEquals(new byte[]{1, 'b'}, n.getLabel(1));
 	    assertEquals("b", n.getLabelString(1));
-	    assertTrue(Arrays.equals(new byte[] { 0 },
-				     n.getLabel(2)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(2));
 	    assertEquals("", n.getLabelString(2));
 	}
 
@@ -454,10 +431,10 @@ public class NameTest
 	    assertEquals(128, n.labels());
 	    assertEquals(255, n.length());
 	    for(int i=0; i<127; ++i){
-		assertTrue(Arrays.equals(new byte[] { 1, 'a' }, n.getLabel(i)));
+		    assertArrayEquals(new byte[]{1, 'a'}, n.getLabel(i));
 		assertEquals("a", n.getLabelString(i));
 	    }
-	    assertTrue(Arrays.equals(new byte[] { 0 }, n.getLabel(127)));
+		assertArrayEquals(new byte[]{0}, n.getLabel(127));
 	    assertEquals("", n.getLabelString(127));
 	}
 
@@ -1014,7 +991,7 @@ public class NameTest
 	    DNSOutput o = new DNSOutput();
 	    n.toWire(o, null);
 
-	    assertTrue(Arrays.equals(raw, o.toByteArray()));
+		assertArrayEquals(raw, o.toByteArray());
 	}
 
     @Test
@@ -1027,7 +1004,7 @@ public class NameTest
 	    DNSOutput o = new DNSOutput();
 	    n.toWire(o, c);
 
-	    assertTrue(Arrays.equals(raw, o.toByteArray()));
+		assertArrayEquals(raw, o.toByteArray());
 	    assertEquals(0, c.get(n));
 	}
 
@@ -1042,7 +1019,7 @@ public class NameTest
 
 	    DNSOutput o = new DNSOutput();
 	    n.toWire(o, c);
-	    assertTrue(Arrays.equals(exp, o.toByteArray()));
+		assertArrayEquals(exp, o.toByteArray());
 	    assertEquals(256, c.get(n));
 	}
 
@@ -1058,7 +1035,7 @@ public class NameTest
 
 	    DNSOutput o = new DNSOutput();
 	    n.toWire(o, c);
-	    assertTrue(Arrays.equals(exp, o.toByteArray()));
+		assertArrayEquals(exp, o.toByteArray());
 	    assertEquals(257, c.get(d));
 	    assertEquals(0, c.get(n));
 	}
@@ -1082,14 +1059,14 @@ public class NameTest
 	    
 	    byte[] out = n.toWire();
 
-	    assertTrue(Arrays.equals(raw, out));
+		assertArrayEquals(raw, out);
 	}
 
     @Test
 	public void test_root()
 	{
 	    byte[] out = Name.root.toWire();
-	    assertTrue(Arrays.equals(new byte[] { 0 }, out));
+		assertArrayEquals(new byte[]{0}, out);
 	}
 
     @Test
@@ -1104,7 +1081,7 @@ public class NameTest
 
 	    DNSOutput o = new DNSOutput();
 	    n.toWire(o, c, false);
-	    assertTrue(Arrays.equals(exp, o.toByteArray()));
+		assertArrayEquals(exp, o.toByteArray());
 	    assertEquals(257, c.get(d));
 	    assertEquals(0, c.get(n));
 	}
@@ -1121,7 +1098,7 @@ public class NameTest
 	    DNSOutput o = new DNSOutput();
 	    n.toWireCanonical(o);
 
-	    assertTrue(Arrays.equals(raw, o.toByteArray()));
+		assertArrayEquals(raw, o.toByteArray());
 	}
 
     @Test
@@ -1132,14 +1109,14 @@ public class NameTest
 	    
 	    byte[] out = n.toWireCanonical();
 
-	    assertTrue(Arrays.equals(raw, out));
+		assertArrayEquals(raw, out);
 	}
 
     @Test
 	public void test_root()
 	{
 	    byte[] out = Name.root.toWireCanonical();
-	    assertTrue(Arrays.equals(new byte[] { 0 }, out));
+		assertArrayEquals(new byte[]{0}, out);
 	}
 
     @Test
@@ -1147,7 +1124,7 @@ public class NameTest
 	{
 	    Name n = new Name("@", null);
 	    byte[] out = n.toWireCanonical();
-	    assertTrue(Arrays.equals(new byte[0], out));
+		assertArrayEquals(new byte[0], out);
 	}
 
     @Test
@@ -1162,7 +1139,7 @@ public class NameTest
 
 	    DNSOutput o = new DNSOutput();
 	    n.toWire(o, c, true);
-	    assertTrue(Arrays.equals(exp, o.toByteArray()));
+		assertArrayEquals(exp, o.toByteArray());
 	    assertEquals(257, c.get(d));
 	    assertEquals(-1, c.get(n));
 	}

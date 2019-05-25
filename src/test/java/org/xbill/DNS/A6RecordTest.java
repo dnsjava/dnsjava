@@ -42,6 +42,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -242,8 +243,8 @@ public class A6RecordTest
 	
 	dout = new DNSOutput();
 	ar.rrToWire(dout, null, true);
-	
-	assertTrue(Arrays.equals(exp, dout.toByteArray()));
+
+	    assertArrayEquals(exp, dout.toByteArray());
 
 	// case sensitiveform
 	dout = new DNSOutput();
@@ -255,6 +256,6 @@ public class A6RecordTest
 	
 	dout = new DNSOutput();
 	ar.rrToWire(dout, null, false);
-	assertTrue(Arrays.equals(exp, dout.toByteArray()));
+	    assertArrayEquals(exp, dout.toByteArray());
     }
 }

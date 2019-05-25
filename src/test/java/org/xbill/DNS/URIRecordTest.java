@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -74,7 +75,7 @@ public class URIRecordTest
 	URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 0xbeef, 0xdead, target);
 	DNSOutput out = new DNSOutput();
 	r.rrToWire(out, null, true);
-	assertTrue(Arrays.equals(exp, out.toByteArray()));
+	    assertArrayEquals(exp, out.toByteArray());
     }
     
     @Test

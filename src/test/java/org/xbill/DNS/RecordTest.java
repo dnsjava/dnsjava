@@ -42,6 +42,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -256,7 +257,7 @@ public class RecordTest
 	assertEquals(Type.NIMLOC, rec.getType());
 	assertEquals(d, rec.getDClass());
 	assertEquals(ttl, rec.getTTL());
-	assertTrue(Arrays.equals(data, ((UNKRecord)rec).getData()));
+	    assertArrayEquals(data, ((UNKRecord) rec).getData());
     }
 
     @Test
@@ -384,11 +385,11 @@ public class RecordTest
 
 	byte[] after = out.toByteArray();
 
-	assertTrue(Arrays.equals(exp, after));
+	    assertArrayEquals(exp, after);
 
 	// an equivalent call
 	after = rec.toWire(Section.ANSWER);
-	assertTrue(Arrays.equals(exp, after));
+	    assertArrayEquals(exp, after);
 
 	// a QUESTION entry
 	out = new DNSOutput();
@@ -401,7 +402,7 @@ public class RecordTest
 	rec.toWire(out, Section.QUESTION, null);
 	after = out.toByteArray();
 
-	assertTrue(Arrays.equals(exp, after));
+	    assertArrayEquals(exp, after);
 
     }
 
@@ -430,7 +431,7 @@ public class RecordTest
 	Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
 
 	byte[] after = rec.toWireCanonical();
-	assertTrue(Arrays.equals(exp, after));
+	    assertArrayEquals(exp, after);
     }
 
     @Test
@@ -456,8 +457,8 @@ public class RecordTest
 	assertTrue(rec instanceof NSRecord);
 
 	byte[] after = rec.rdataToWireCanonical();
-	
-	assertTrue(Arrays.equals(exp, after));
+
+	    assertArrayEquals(exp, after);
     }
 
     @Test
@@ -524,12 +525,12 @@ public class RecordTest
     {
 	String in = "the 98 \" \' quick 0xAB brown";
 	byte[] out = SubRecord.byteArrayFromString(in);
-	assertTrue(Arrays.equals(in.getBytes(), out));
+	    assertArrayEquals(in.getBytes(), out);
 
 	in = " \\031Aa\\;\\\"\\\\~\\127\\255";
 	byte[] exp = new byte[] { ' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte)0xFF };
 	out = SubRecord.byteArrayFromString(in);
-	assertTrue(Arrays.equals(exp, out));
+	    assertArrayEquals(exp, out);
     }
 
     @Test

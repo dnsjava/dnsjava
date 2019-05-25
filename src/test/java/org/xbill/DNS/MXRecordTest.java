@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -80,13 +81,13 @@ public class MXRecordTest
 	mr.rrToWire(dout, null, true);
 	byte[] out = dout.toByteArray();
 	byte[] exp = new byte[] { 0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0 };
-	assertTrue(Arrays.equals(exp, out));
+	    assertArrayEquals(exp, out);
 
 	// case sensitive
 	dout = new DNSOutput();
 	mr.rrToWire(dout, null, false);
 	out = dout.toByteArray();
 	exp = new byte[] { 0x1F, 0x2B, 1, 'M', 1, 'O', 1, 'n', 0 };
-	assertTrue(Arrays.equals(exp, out));
+	    assertArrayEquals(exp, out);
     }
 }

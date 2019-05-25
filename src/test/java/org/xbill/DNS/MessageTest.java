@@ -41,6 +41,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -53,10 +54,10 @@ public class MessageTest
 	public void test_0arg()
 	{
 	    Message m = new Message();
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(0)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(1)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(2)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(3)));
+		assertArrayEquals(new Record[0], m.getSectionArray(0));
+		assertArrayEquals(new Record[0], m.getSectionArray(1));
+		assertArrayEquals(new Record[0], m.getSectionArray(3));
+		assertArrayEquals(new Record[0], m.getSectionArray(2));
 	    try {
 		m.getSectionArray(4);
 		fail("IndexOutOfBoundsException not thrown");
@@ -74,10 +75,10 @@ public class MessageTest
 	{
 	    Message m = new Message(10);
 	    assertEquals(new Header(10).toString(), m.getHeader().toString());
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(0)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(1)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(2)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(3)));
+		assertArrayEquals(new Record[0], m.getSectionArray(0));
+		assertArrayEquals(new Record[0], m.getSectionArray(1));
+		assertArrayEquals(new Record[0], m.getSectionArray(2));
+		assertArrayEquals(new Record[0], m.getSectionArray(3));
 	    try {
 		m.getSectionArray(4);
 		fail("IndexOutOfBoundsException not thrown");
@@ -99,10 +100,10 @@ public class MessageTest
 				     InetAddress.getByName("192.168.101.110"));
 
 	    Message m = Message.newQuery(ar);
-	    assertTrue(Arrays.equals(new Record[]{ ar }, m.getSectionArray(0)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(1)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(2)));
-	    assertTrue(Arrays.equals(new Record[0], m.getSectionArray(3)));
+		assertArrayEquals(new Record[]{ar}, m.getSectionArray(0));
+		assertArrayEquals(new Record[0], m.getSectionArray(1));
+		assertArrayEquals(new Record[0], m.getSectionArray(2));
+		assertArrayEquals(new Record[0], m.getSectionArray(3));
 
 	    Header h = m.getHeader();
 	    assertEquals(1, h.getCount(0));
@@ -110,7 +111,7 @@ public class MessageTest
 	    assertEquals(0, h.getCount(2));
 	    assertEquals(0, h.getCount(3));
 	    assertEquals(Opcode.QUERY, h.getOpcode());
-	    assertEquals(true, h.getFlag(Flags.RD));
+	    assertTrue(h.getFlag(Flags.RD));
 	}
 
     @Test

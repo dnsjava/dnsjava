@@ -40,6 +40,7 @@ import org.xbill.DNS.utils.base64;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -89,7 +90,7 @@ public class KEYBaseTest
 	assertEquals(0xFF, tc.getFlags());
 	assertEquals(0xF, tc.getProtocol());
 	assertEquals(0xE, tc.getAlgorithm());
-	assertTrue(Arrays.equals(key, tc.getKey()));
+	    assertArrayEquals(key, tc.getKey());
     }
 
     @Test
@@ -104,7 +105,7 @@ public class KEYBaseTest
 	assertEquals(0xABCD, tc.getFlags());
 	assertEquals(0xEF, tc.getProtocol());
 	assertEquals(0x19, tc.getAlgorithm());
-	assertTrue(Arrays.equals(new byte[] { 1, 2, 3, 4, 5 }, tc.getKey()));
+	    assertArrayEquals(new byte[]{1, 2, 3, 4, 5}, tc.getKey());
 
 
 	raw = new byte[] { (byte)0xBA, (byte)0xDA, (byte)0xFF, (byte)0x28 };
@@ -188,11 +189,11 @@ public class KEYBaseTest
 
 	// canonical
 	tc.rrToWire(o, null, true);
-	assertTrue(Arrays.equals(exp, o.toByteArray()));
+	    assertArrayEquals(exp, o.toByteArray());
 
 	// not canonical
 	o = new DNSOutput();
 	tc.rrToWire(o, null, false);
-	assertTrue(Arrays.equals(exp, o.toByteArray()));
+	    assertArrayEquals(exp, o.toByteArray());
     }
 }

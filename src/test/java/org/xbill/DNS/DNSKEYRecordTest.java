@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,7 +86,7 @@ public class DNSKEYRecordTest
 	assertEquals(0x9832, kr.getFlags());
 	assertEquals(0x12, kr.getProtocol());
 	assertEquals(0x67, kr.getAlgorithm());
-	assertTrue(Arrays.equals(key, kr.getKey()));
+	    assertArrayEquals(key, kr.getKey());
 
 	// a relative name
 	try {
@@ -105,7 +106,7 @@ public class DNSKEYRecordTest
 	assertEquals(0xABCD, kr.getFlags());
 	assertEquals(0x81, kr.getProtocol());
 	assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
-	assertTrue(Arrays.equals(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, kr.getKey()));
+	    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
 
 	// invalid algorithm
 	kr = new DNSKEYRecord();

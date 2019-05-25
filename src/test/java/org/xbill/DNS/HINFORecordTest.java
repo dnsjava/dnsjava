@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -200,6 +201,6 @@ public class HINFORecordTest
 	DNSOutput out = new DNSOutput();
 	dr.rrToWire(out, null, true);
 
-	assertTrue(Arrays.equals(raw, out.toByteArray()));
+	    assertArrayEquals(raw, out.toByteArray());
     }
 }

@@ -40,6 +40,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -221,7 +222,7 @@ public class SetResponseTest
 	sr.addRRset(rrs);
 
 	RRset[] exp = new RRset[] { rrs };
-	assertTrue(Arrays.equals(exp, sr.answers()));
+	    assertArrayEquals(exp, sr.answers());
     }
 
     @Test
@@ -252,7 +253,7 @@ public class SetResponseTest
 	sr.addRRset(rrs2);
 
 	RRset[] exp = new RRset[] { rrs, rrs2 };
-	assertTrue(Arrays.equals(exp, sr.answers()));
+	    assertArrayEquals(exp, sr.answers());
     }
 
     @Test

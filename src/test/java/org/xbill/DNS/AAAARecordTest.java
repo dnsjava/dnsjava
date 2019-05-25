@@ -42,6 +42,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -159,11 +160,11 @@ public class AAAARecordTest
 	// canonical
 	DNSOutput dout = new DNSOutput();
 	ar.rrToWire(dout, null, true);
-	assertTrue(Arrays.equals(m_addr_bytes, dout.toByteArray()));
+	    assertArrayEquals(m_addr_bytes, dout.toByteArray());
 
 	// case sensitive
 	dout = new DNSOutput();
 	ar.rrToWire(dout, null, false);
-	assertTrue(Arrays.equals(m_addr_bytes, dout.toByteArray()));
+	    assertArrayEquals(m_addr_bytes, dout.toByteArray());
     }
 }

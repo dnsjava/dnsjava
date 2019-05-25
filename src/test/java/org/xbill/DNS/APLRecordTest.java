@@ -45,7 +45,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -70,7 +72,7 @@ public class APLRecordTest
 	{
 	    Element el = new Element(true, m_addr4, 16);
 	    assertEquals(Address.IPv4, el.family);
-	    assertEquals(true, el.negative);
+	    assertTrue(el.negative);
 	    assertEquals(m_addr4, el.address);
 	    assertEquals(16, el.prefixLength);
 	}
@@ -90,7 +92,7 @@ public class APLRecordTest
 	{
 	    Element el = new Element(false, m_addr6, 74);
 	    assertEquals(Address.IPv6, el.family);
-	    assertEquals(false, el.negative);
+	    assertFalse(el.negative);
 	    assertEquals(m_addr6, el.address);
 	    assertEquals(74, el.prefixLength);
 	}
@@ -343,10 +345,9 @@ public class APLRecordTest
 	    
 	    Element el = (Element)l.get(0);
 	    assertEquals(3, el.family);
-	    assertEquals(true, el.negative);
+	    assertTrue(el.negative);
 	    assertEquals(130, el.prefixLength);
-	    assertTrue(Arrays.equals(new byte[] { 1, 2, 3, 4, 5 },
-				     (byte[])el.address));
+		assertArrayEquals(new byte[]{1, 2, 3, 4, 5}, (byte[]) el.address);
 	}
     }
 
@@ -637,7 +638,7 @@ public class APLRecordTest
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
-	    assertTrue(Arrays.equals(new byte[0], dout.toByteArray()));
+		assertArrayEquals(new byte[0], dout.toByteArray());
 	}
 	
     @Test
@@ -661,7 +662,7 @@ public class APLRecordTest
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
-	    assertTrue(Arrays.equals(exp, dout.toByteArray()));
+		assertArrayEquals(exp, dout.toByteArray());
 	}
 	
     @Test
@@ -677,7 +678,7 @@ public class APLRecordTest
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
-	    assertTrue(Arrays.equals(exp, dout.toByteArray()));
+		assertArrayEquals(exp, dout.toByteArray());
 	}
 	
     @Test
@@ -694,7 +695,7 @@ public class APLRecordTest
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
-	    assertTrue(Arrays.equals(exp, dout.toByteArray()));
+		assertArrayEquals(exp, dout.toByteArray());
 	}
 	
     @Test
@@ -711,7 +712,7 @@ public class APLRecordTest
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
-	    assertTrue(Arrays.equals(exp, dout.toByteArray()));
+		assertArrayEquals(exp, dout.toByteArray());
 	}
 	
     @Test
@@ -728,7 +729,7 @@ public class APLRecordTest
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
-	    assertTrue(Arrays.equals(exp, dout.toByteArray()));
+		assertArrayEquals(exp, dout.toByteArray());
 	}
     }
 }
