@@ -34,8 +34,8 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xbill.DNS.APLRecord.Element;
 
 import java.io.IOException;
@@ -45,10 +45,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class APLRecordTest
 {
@@ -57,7 +57,7 @@ public class APLRecordTest
 	InetAddress m_addr4;
 	InetAddress m_addr6;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -118,7 +118,7 @@ public class APLRecordTest
 	String m_addr6_string;
 	byte[] m_addr6_bytes;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -208,7 +208,7 @@ public class APLRecordTest
 	InetAddress m_addr6;
 	byte[] m_addr6_bytes;
 	
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -359,7 +359,7 @@ public class APLRecordTest
 	String m_addr6_string;
 	byte[] m_addr6_bytes;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -563,7 +563,7 @@ public class APLRecordTest
 	String m_addr6_string;
 	byte[] m_addr6_bytes;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -607,7 +607,7 @@ public class APLRecordTest
 	String m_addr6_string;
 	byte[] m_addr6_bytes;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{

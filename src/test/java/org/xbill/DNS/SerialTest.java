@@ -34,11 +34,11 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SerialTest
 {
@@ -49,7 +49,7 @@ public class SerialTest
 	long arg2 = 1;
 	try {
 	    Serial.compare( arg1, arg2 );
-	    fail( "compare accepted negative argument 1" );
+	    fail("compare accepted negative argument 1");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -63,7 +63,7 @@ public class SerialTest
 	long arg2 = 1;
 	try {
 	    Serial.compare( arg1, arg2 );
-	    fail( "compare accepted out-of-bounds argument 1" );
+	    fail("compare accepted out-of-bounds argument 1");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -77,7 +77,7 @@ public class SerialTest
 	long arg2 = -1;
 	try {
 	    Serial.compare( arg1, arg2 );
-	    fail( "compare accepted negative argument 2" );
+	    fail("compare accepted negative argument 2");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -91,7 +91,7 @@ public class SerialTest
 	long arg2 = 0xFFFFFFFFL + 1;
 	try {
 	    Serial.compare( arg1, arg2 );
-	    fail( "compare accepted out-of-bounds argument 1" );
+	    fail("compare accepted out-of-bounds argument 1");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -142,7 +142,7 @@ public class SerialTest
 	long arg = -1;
 	try {
 	    Serial.increment( arg );
-	    fail( "increment accepted negative argument" );
+	    fail("increment accepted negative argument");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -155,7 +155,7 @@ public class SerialTest
 	long arg = 0xFFFFFFFFL + 1;
 	try {
 	    Serial.increment( arg );
-	    fail( "increment accepted out-of-bounds argument" );
+	    fail("increment accepted out-of-bounds argument");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass

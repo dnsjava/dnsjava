@@ -1,9 +1,9 @@
 package org.xbill.DNS;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OPTRecordTest {
 
@@ -34,10 +34,10 @@ public class OPTRecordTest {
 	}
 
 	private void assertNotEqual(final OPTRecord optRecordOne, final OPTRecord optRecordTwo) {
-		assertTrue("Expecting no equality of " + optRecordOne + " compared to " + optRecordTwo,
-		    !optRecordOne.equals(optRecordTwo));
-		assertTrue("Expecting no equality of " + optRecordTwo + " compared to " + optRecordOne,
-		    !optRecordTwo.equals(optRecordOne));
+		assertTrue(
+			!optRecordOne.equals(optRecordTwo), "Expecting no equality of " + optRecordOne + " compared to " + optRecordTwo);
+		assertTrue(
+			!optRecordTwo.equals(optRecordOne), "Expecting no equality of " + optRecordTwo + " compared to " + optRecordOne);
 	}
 
 }

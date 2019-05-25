@@ -34,16 +34,16 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xbill.DNS.utils.base64;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class KEYBaseTest
 {

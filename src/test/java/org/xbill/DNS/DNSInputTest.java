@@ -34,19 +34,19 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DNSInputTest
 {
     private byte[]	m_raw;
     private DNSInput	m_di;
 
-   @Before
+   @BeforeEach
    public void setUp()
     {
 	m_raw = new byte[] { 0, 1, 2, 3, 4, 5, (byte)255, (byte)255, (byte)255, (byte)255 };
@@ -81,7 +81,7 @@ public class DNSInputTest
     {
 	try {
 	    m_di.jump( 10 );
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -117,7 +117,7 @@ public class DNSInputTest
     {
 	try {
 	    m_di.setActive( 11 );
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -143,7 +143,7 @@ public class DNSInputTest
     {
 	try {
 	    m_di.restore();
-	    fail( "IllegalStateException not thrown" );
+	    fail("IllegalStateException not thrown");
 	}
 	catch( IllegalStateException e ){
 	    // pass
@@ -187,7 +187,7 @@ public class DNSInputTest
 
 	try {
 	    v1 = m_di.readU8();
-	    fail( "WireParseException not thrown" );
+	    fail("WireParseException not thrown");
 	}
 	catch( WireParseException e ){
 	    // pass
@@ -219,7 +219,7 @@ public class DNSInputTest
 	try {
 	    m_di.jump( 9 );
 	    m_di.readU16();
-	    fail( "WireParseException not thrown" );
+	    fail("WireParseException not thrown");
 	}
 	catch( WireParseException e ){
 	    // pass 
@@ -247,7 +247,7 @@ public class DNSInputTest
 	try {
 	    m_di.jump( 7 );
 	    m_di.readU32();
-	    fail( "WireParseException not thrown" );
+	    fail("WireParseException not thrown");
 	}
 	catch( WireParseException e ){
 	    // pass 
@@ -301,7 +301,7 @@ public class DNSInputTest
     {
 	try {
 	    m_di.readByteArray( 11 );
-	    fail( "WireParseException not thrown" );
+	    fail("WireParseException not thrown");
 	}
 	catch( WireParseException e ){
 	    // pass

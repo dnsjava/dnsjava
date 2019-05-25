@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.DNSSECException;
 
 import java.io.IOException;

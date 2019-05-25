@@ -34,19 +34,19 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RRsetTest
 {
@@ -56,7 +56,7 @@ public class RRsetTest
     ARecord m_a1, m_a2;
     RRSIGRecord m_s1, m_s2;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException, UnknownHostException
     {
 	m_rs = new RRset();
@@ -82,13 +82,17 @@ public class RRsetTest
 	assertEquals(0, m_rs.size());
 	try {m_rs.getDClass(); fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
-	try {m_rs.getType();fail("IllegalStateException not thrown");}
+	try {m_rs.getType();
+		fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
-	try {m_rs.getTTL();fail("IllegalStateException not thrown");}
+	try {m_rs.getTTL();
+		fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
-	try {m_rs.getName();fail("IllegalStateException not thrown");}
+	try {m_rs.getName();
+		fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
-	try {m_rs.first();fail("IllegalStateException not thrown");}
+	try {m_rs.first();
+		fail("IllegalStateException not thrown");}
 	catch( IllegalStateException e ){}
 
 	assertEquals("{empty}", m_rs.toString());

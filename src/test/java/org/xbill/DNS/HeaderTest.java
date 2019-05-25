@@ -34,22 +34,22 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class HeaderTest
 {
     private Header m_h;
 
-   @Before
+   @BeforeEach
    public void setUp()
     {
 	m_h = new Header(0xABCD); // 43981
@@ -165,7 +165,7 @@ public class HeaderTest
 	
 	assertEquals(12, out.length);
 	for( int i=0; i<out.length; ++i){
-	    assertEquals("i=" + i, raw[i], out[i]);
+	    assertEquals(raw[i], out[i], "i=" + i);
 	}
     }
 

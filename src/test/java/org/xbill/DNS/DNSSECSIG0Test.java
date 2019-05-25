@@ -1,8 +1,8 @@
 package org.xbill.DNS;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.Algorithm;
 
 import java.security.KeyPair;
@@ -17,11 +17,11 @@ public class DNSSECSIG0Test {
 	int algorithm = Algorithm.RSASHA1;
 	byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();
 
-   @Before
+   @BeforeEach
    public void setUp() {
 	}
 
-   @After
+   @AfterEach
    public void tearDown() {
 	}
 

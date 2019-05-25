@@ -34,15 +34,15 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GPOSRecordTest
 {
@@ -70,7 +70,7 @@ public class GPOSRecordTest
 	private long	m_ttl;
 	private double	m_lat, m_long, m_alt;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException
 	{
 	    m_n = Name.fromString("The.Name.");
@@ -160,7 +160,7 @@ public class GPOSRecordTest
 	private long	m_ttl;
 	private double	m_lat, m_long, m_alt;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException
 	{
 	    m_n = Name.fromString("The.Name.");
@@ -423,7 +423,7 @@ public class GPOSRecordTest
 
 	assertEquals(exp.length, bar.length);
 	for( int i=0; i<exp.length; ++i){
-	    assertEquals("i=" + i, exp[i], bar[i]);
+	    assertEquals(exp[i], bar[i], "i=" + i);
 	}
     }
 }

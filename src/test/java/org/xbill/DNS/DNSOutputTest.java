@@ -34,18 +34,18 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class DNSOutputTest
 {
     private DNSOutput m_do;
 
-   @Before
+   @BeforeEach
    public void setUp()
     {
 	m_do = new DNSOutput( 1 );
@@ -64,14 +64,14 @@ public class DNSOutputTest
 	assertEquals( 0, m_do.current() );
 	try {
 	    m_do.restore();
-	    fail( "IllegalStateException not thrown" );
+	    fail("IllegalStateException not thrown");
 	}
 	catch( IllegalStateException e ){
 	    // pass
 	}
 	try {
 	    m_do.jump(1);
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -117,7 +117,7 @@ public class DNSOutputTest
     {
 	try {
 	    m_do.writeU8( 0x1FF );
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -150,7 +150,7 @@ public class DNSOutputTest
     {
 	try {
 	    m_do.writeU16( 0x1FFFF );
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -187,7 +187,7 @@ public class DNSOutputTest
     {
 	try {
 	    m_do.writeU32( 0x1FFFFFFFFL );
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -259,7 +259,7 @@ public class DNSOutputTest
 	byte[] in = new byte [ 256 ];
 	try {
 	    m_do.writeCountedString(in);
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalArgumentException e ){
 	    // pass
@@ -278,7 +278,7 @@ public class DNSOutputTest
 	assertEquals( 4, m_do.current() );
 	try {
 	    m_do.restore();
-	    fail( "IllegalArgumentException not thrown" );
+	    fail("IllegalArgumentException not thrown");
 	}
 	catch( IllegalStateException e ){
 	    // pass

@@ -34,18 +34,18 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SOARecordTest
 {
@@ -66,7 +66,7 @@ public class SOARecordTest
 	private Name m_an, m_rn, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -288,7 +288,7 @@ public class SOARecordTest
 	private Name m_host, m_admin;
 	private long m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -333,7 +333,7 @@ public class SOARecordTest
 	private Name m_host, m_admin, m_origin;
 	private long m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException,
 				      UnknownHostException
 	{
@@ -393,7 +393,7 @@ public class SOARecordTest
 	private Name m_an, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException
 	{
 	    m_an = Name.fromString("My.absolute.name.");
@@ -447,7 +447,7 @@ public class SOARecordTest
 	private Name m_an, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
-   @Before
+   @BeforeEach
    public void setUp() throws TextParseException
 	{
 	    m_an = Name.fromString("My.Abs.Name.");

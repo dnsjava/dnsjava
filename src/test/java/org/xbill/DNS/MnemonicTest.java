@@ -34,13 +34,13 @@
 //
 package org.xbill.DNS;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.fail;
 
 // Mnemonic has package-level access.
 
@@ -48,7 +48,7 @@ public class MnemonicTest
 {
     private Mnemonic m_mn;
 
-   @Before
+   @BeforeEach
    public void setUp()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " UPPER", Mnemonic.CASE_UPPER);
@@ -85,9 +85,11 @@ public class MnemonicTest
     @Test
     public void test_no_maximum()
     {
-	try {m_mn.check(-1); fail( "IllegalArgumentException not thrown" );} catch( IllegalArgumentException e ){}
-	try {m_mn.check(0);} catch( IllegalArgumentException e ){fail(e.getMessage());}
-	try {m_mn.check(Integer.MAX_VALUE);} catch( IllegalArgumentException e ){fail(e.getMessage());}
+	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
+	try {m_mn.check(0);} catch( IllegalArgumentException e ){
+		fail(e.getMessage());}
+	try {m_mn.check(Integer.MAX_VALUE);} catch( IllegalArgumentException e ){
+		fail(e.getMessage());}
 
 	m_mn.setNumericAllowed(true);
 
@@ -106,8 +108,10 @@ public class MnemonicTest
     {
 	m_mn.setMaximum(15);
 	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
-	try {m_mn.check(0);} catch( IllegalArgumentException e ){fail( e.getMessage() );}
-	try {m_mn.check(15);} catch( IllegalArgumentException e ){fail( e.getMessage() );}
+	try {m_mn.check(0);} catch( IllegalArgumentException e ){
+		fail(e.getMessage());}
+	try {m_mn.check(15);} catch( IllegalArgumentException e ){
+		fail(e.getMessage());}
 	try {m_mn.check(16); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
 
 	// need numericok to exercise the usage of max in parseNumeric
