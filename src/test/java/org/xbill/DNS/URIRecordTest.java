@@ -1,12 +1,18 @@
 package org.xbill.DNS;
 
+import org.junit.Test;
+
 import java.io.IOException;
 import java.util.Arrays;
 
-import	junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-public class URIRecordTest extends TestCase
+public class URIRecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	URIRecord r = new URIRecord();
@@ -19,6 +25,7 @@ public class URIRecordTest extends TestCase
 	assertTrue("".equals(r.getTarget()));
     }
     
+    @Test
     public void test_getObject()
     {
 	URIRecord dr = new URIRecord();
@@ -26,6 +33,7 @@ public class URIRecordTest extends TestCase
 	assertTrue(r instanceof URIRecord);
     }
     
+    @Test
     public void test_ctor_6arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -41,6 +49,7 @@ public class URIRecordTest extends TestCase
 	assertEquals(target, r.getTarget());
     }
     
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF01 + " " + "\"http://foo:1234/bar?baz=bum\"");
@@ -52,6 +61,7 @@ public class URIRecordTest extends TestCase
 	assertEquals("http://foo:1234/bar?baz=bum", r.getTarget());
     }
     
+    @Test
     public void test_rdataToWire() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -67,6 +77,7 @@ public class URIRecordTest extends TestCase
 	assertTrue(Arrays.equals(exp, out.toByteArray()));
     }
     
+    @Test
     public void test_rrFromWire() throws IOException
     {
    	byte[] raw= new byte[] { 
@@ -82,6 +93,7 @@ public class URIRecordTest extends TestCase
 	assertEquals("http://foo", r.getTarget());
     }
     
+    @Test
 	public void test_toobig_priority() throws TextParseException
 	{
 	    try {
@@ -91,6 +103,7 @@ public class URIRecordTest extends TestCase
 	    }
 	    catch(IllegalArgumentException e){}
 	}
+    @Test
 	public void test_toosmall_priority() throws TextParseException
 	{
 	    try {
@@ -101,6 +114,7 @@ public class URIRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_toobig_weight() throws TextParseException
 	{
 	    try {
@@ -110,6 +124,7 @@ public class URIRecordTest extends TestCase
 	    }
 	    catch(IllegalArgumentException e){}
 	}
+    @Test
 	public void test_toosmall_weight() throws TextParseException
 	{
 	    try {

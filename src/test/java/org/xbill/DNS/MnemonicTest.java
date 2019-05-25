@@ -34,24 +34,27 @@
 //
 package org.xbill.DNS;
 
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
 // Mnemonic has package-level access.
 
-import junit.framework.TestCase;
-
-public class MnemonicTest extends TestCase
+public class MnemonicTest
 {
     private Mnemonic m_mn;
 
-    public MnemonicTest( String name )
-    {
-	super( name );
-    }
-    
-    public void setUp()
+   @Before
+   public void setUp()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " UPPER", Mnemonic.CASE_UPPER);
     }
 
+    @Test
     public void test_toInteger()
     {
 	Integer i = Mnemonic.toInteger(64);
@@ -79,6 +82,7 @@ public class MnemonicTest extends TestCase
 	assertSame( i, i2 );
     }
 
+    @Test
     public void test_no_maximum()
     {
 	try {m_mn.check(-1); fail( "IllegalArgumentException not thrown" );} catch( IllegalArgumentException e ){}
@@ -97,6 +101,7 @@ public class MnemonicTest extends TestCase
 	assertEquals( Integer.MAX_VALUE, val );
     }
 
+    @Test
     public void test_setMaximum()
     {
 	m_mn.setMaximum(15);
@@ -121,6 +126,7 @@ public class MnemonicTest extends TestCase
 	assertEquals( -1, val );
     }
 
+    @Test
     public void test_setPrefix()
     {
 	final String prefix = "A mixed CASE Prefix".toUpperCase();
@@ -133,6 +139,7 @@ public class MnemonicTest extends TestCase
 	assertEquals( 10, i );
     }
 
+    @Test
     public void test_basic_operation()
     {
 	// setUp creates Mnemonic with CASE_UPPER
@@ -166,6 +173,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(30, value);
     }
 
+    @Test
     public void test_basic_operation_lower()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " LOWER", Mnemonic.CASE_LOWER);
@@ -199,6 +207,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(30, value);
     }
 
+    @Test
     public void test_basic_operation_sensitive()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " SENSITIVE", Mnemonic.CASE_SENSITIVE);
@@ -238,6 +247,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(30, value);
     }
 
+    @Test
     public void test_invalid_numeric()
     {
 	m_mn.setNumericAllowed(true);
@@ -245,6 +255,7 @@ public class MnemonicTest extends TestCase
 	assertEquals(-1, value);
     }
 
+    @Test
     public void test_addAll()
     {
 	m_mn.add( 10, "Ten" );

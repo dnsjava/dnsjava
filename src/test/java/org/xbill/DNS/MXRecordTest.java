@@ -34,11 +34,16 @@
 //
 package	org.xbill.DNS;
 
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class MXRecordTest extends TestCase
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class MXRecordTest
 {
+    @Test
     public void test_getObject()
     {
 	MXRecord d = new MXRecord();
@@ -46,6 +51,7 @@ public class MXRecordTest extends TestCase
 	assertTrue(r instanceof MXRecord);
     }
 
+    @Test
     public void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -61,6 +67,7 @@ public class MXRecordTest extends TestCase
 	assertEquals(m, d.getAdditionalName());
     }
 
+    @Test
     public void test_rrToWire() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");

@@ -34,12 +34,19 @@
 //
 package org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class HINFORecordTest extends TestCase
+import java.io.IOException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class HINFORecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	HINFORecord dr = new HINFORecord();
@@ -49,6 +56,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(0, dr.getTTL());
     }
     
+    @Test
     public void test_getObject()
     {
 	HINFORecord dr = new HINFORecord();
@@ -56,6 +64,7 @@ public class HINFORecordTest extends TestCase
 	assertTrue(r instanceof HINFORecord);
     }
 
+    @Test
     public void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("The.Name.");
@@ -72,6 +81,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(os, dr.getOS());
     }
 
+    @Test
     public void test_ctor_5arg_invalid_CPU() throws TextParseException
     {
 	Name n = Name.fromString("The.Name.");
@@ -86,6 +96,7 @@ public class HINFORecordTest extends TestCase
 	catch(IllegalArgumentException e){}
     }
 
+    @Test
     public void test_ctor_5arg_invalid_OS() throws TextParseException
     {
 	Name n = Name.fromString("The.Name.");
@@ -100,6 +111,7 @@ public class HINFORecordTest extends TestCase
 	catch(IllegalArgumentException e){}
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -116,6 +128,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(os, dr.getOS());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -129,6 +142,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(os, dr.getOS());
     }
 
+    @Test
     public void test_rdataFromString_invalid_CPU() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
@@ -144,6 +158,7 @@ public class HINFORecordTest extends TestCase
 	catch(TextParseException e){}
     }
 
+    @Test
     public void test_rdataFromString_invalid_OS() throws IOException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -158,6 +173,7 @@ public class HINFORecordTest extends TestCase
 	catch(TextParseException e){}
     }
 
+    @Test
     public void test_rrToString() throws TextParseException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
@@ -170,6 +186,7 @@ public class HINFORecordTest extends TestCase
 	assertEquals(exp, dr.rrToString());
     }
 
+    @Test
     public void test_rrToWire() throws TextParseException
     {
 	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";

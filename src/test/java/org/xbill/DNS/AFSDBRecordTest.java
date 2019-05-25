@@ -34,11 +34,14 @@
 //
 package	org.xbill.DNS;
 
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class AFSDBRecordTest extends TestCase
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class AFSDBRecordTest
 {
+    @Test
     public void test_getObject()
     {
 	AFSDBRecord d = new AFSDBRecord();
@@ -46,6 +49,7 @@ public class AFSDBRecordTest extends TestCase
 	assertTrue(r instanceof AFSDBRecord);
     }
 
+    @Test
     public void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");

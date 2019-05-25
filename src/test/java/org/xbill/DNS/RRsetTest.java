@@ -34,22 +34,21 @@
 //
 package org.xbill.DNS;
 
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Date;
-import	java.util.Iterator;
-import	junit.framework.TestCase;
-import	org.xbill.DNS.ARecord;
-import	org.xbill.DNS.CNAMERecord;
-import	org.xbill.DNS.DClass;
-import	org.xbill.DNS.Name;
-import	org.xbill.DNS.RRset;
-import	org.xbill.DNS.Record;
-import	org.xbill.DNS.RRSIGRecord;
-import	org.xbill.DNS.TextParseException;
-import	org.xbill.DNS.Type;
+import org.junit.Before;
+import org.junit.Test;
 
-public class RRsetTest extends TestCase
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
+import java.util.Iterator;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class RRsetTest
 {
     private RRset m_rs;
     Name m_name, m_name2;
@@ -57,7 +56,8 @@ public class RRsetTest extends TestCase
     ARecord m_a1, m_a2;
     RRSIGRecord m_s1, m_s2;
 
-    public void setUp() throws TextParseException, UnknownHostException
+   @Before
+   public void setUp() throws TextParseException, UnknownHostException
     {
 	m_rs = new RRset();
 	m_name = Name.fromString("this.is.a.test.");
@@ -76,6 +76,7 @@ public class RRsetTest extends TestCase
 			       new byte[ 0 ]);
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	assertEquals(0, m_rs.size());
@@ -101,6 +102,7 @@ public class RRsetTest extends TestCase
 	assertFalse(itr.hasNext());
     }
 
+    @Test
     public void test_basics() throws TextParseException,
 				     UnknownHostException
     {
@@ -185,6 +187,7 @@ public class RRsetTest extends TestCase
 
     }
 
+    @Test
     public void test_ctor_1arg()
     {
 	m_rs.addRR(m_a1);
@@ -209,6 +212,7 @@ public class RRsetTest extends TestCase
 	assertFalse(itr.hasNext());
     }
 
+    @Test
     public void test_toString()
     {
 	m_rs.addRR(m_a1);
@@ -224,6 +228,7 @@ public class RRsetTest extends TestCase
 	assertTrue(out.indexOf("[192.169.232.12]") != -1);
     }
 
+    @Test
     public void test_addRR_invalidType() throws TextParseException
     {
 	m_rs.addRR(m_a1);
@@ -238,6 +243,7 @@ public class RRsetTest extends TestCase
 	}
     }
 
+    @Test
     public void test_addRR_invalidName() throws TextParseException, UnknownHostException
     {
 	m_rs.addRR(m_a1);
@@ -253,6 +259,7 @@ public class RRsetTest extends TestCase
 	}
     }
 
+    @Test
     public void test_addRR_invalidDClass() throws TextParseException, UnknownHostException
     {
 	m_rs.addRR(m_a1);
@@ -268,6 +275,7 @@ public class RRsetTest extends TestCase
 	}
     }
 
+    @Test
     public void test_TTLcalculation()
     {
 	m_rs.addRR(m_a2);
@@ -282,6 +290,7 @@ public class RRsetTest extends TestCase
 	}
     }
 
+    @Test
     public void test_Record_placement()
     {
 	m_rs.addRR(m_a1);
@@ -301,6 +310,7 @@ public class RRsetTest extends TestCase
 	assertFalse(itr.hasNext());
     }
 
+    @Test
     public void test_noncycling_iterator()
     {
 	m_rs.addRR(m_a1);

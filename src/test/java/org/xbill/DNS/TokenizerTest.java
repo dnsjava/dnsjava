@@ -34,27 +34,33 @@
 //
 package org.xbill.DNS;
 
-import	java.io.BufferedInputStream;
-import	java.io.ByteArrayInputStream;
-import	java.io.File;
-import	java.io.FileWriter;
-import	java.io.IOException;
-import	junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class TokenizerTest extends TestCase
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class TokenizerTest
 {
     private Tokenizer m_t;
 
-    protected void setUp()
+   @Before
+   public void setUp()
     {
 	m_t = null;
     }
 
-    private void assertEquals( byte[] exp, byte[] act )
-    {
-	assertTrue(java.util.Arrays.equals(exp, act));
-    }
-
+    @Test
     public void test_get() throws IOException
     {
 	m_t = new Tokenizer(new BufferedInputStream(new ByteArrayInputStream("AnIdentifier \"a quoted \\\" string\"\r\n; this is \"my\"\t(comment)\nanotherIdentifier (\ramultilineIdentifier\n)".getBytes())));
@@ -187,6 +193,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, m_t.get().type);
     }
 
+    @Test
     public void test_get_invalid() throws IOException
     {
 	m_t = new Tokenizer("(this ;");
@@ -211,6 +218,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_File_input() throws IOException
     {
 	File tmp = File.createTempFile("dnsjava", "tmp");
@@ -243,6 +251,7 @@ public class TokenizerTest extends TestCase
 	}
     }
 
+    @Test
     public void test_unwanted_comment() throws IOException
     {
 	m_t = new Tokenizer("; this whole thing is a comment\n");
@@ -251,6 +260,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOL, tt.type);
     }
 
+    @Test
     public void test_unwanted_ungotten_whitespace() throws IOException
     {
 	m_t = new Tokenizer(" ");
@@ -260,6 +270,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, tt.type);
     }
 
+    @Test
     public void test_unwanted_ungotten_comment() throws IOException
     {
 	m_t = new Tokenizer("; this whole thing is a comment");
@@ -269,6 +280,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, tt.type);
     }
 
+    @Test
     public void test_empty_string() throws IOException
     {
 	m_t = new Tokenizer("");
@@ -280,6 +292,7 @@ public class TokenizerTest extends TestCase
 	assertEquals(Tokenizer.EOF, tt.type);
     }
 
+    @Test
     public void test_multiple_ungets() throws IOException
     {
 	m_t = new Tokenizer("a simple one");
@@ -293,6 +306,7 @@ public class TokenizerTest extends TestCase
 	catch( IllegalStateException e ){}
     }
 
+    @Test
     public void test_getString() throws IOException
     {
 	m_t = new Tokenizer("just_an_identifier");
@@ -311,6 +325,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getIdentifier() throws IOException
     {
 	m_t = new Tokenizer("just_an_identifier");
@@ -325,6 +340,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getLong() throws IOException
     {
 	m_t = new Tokenizer((Integer.MAX_VALUE+1L) + "");
@@ -346,6 +362,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getUInt32() throws IOException
     {
 	m_t = new Tokenizer(0xABCDEF12L + "");
@@ -367,6 +384,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getUInt16() throws IOException
     {
 	m_t = new Tokenizer(0xABCDL + "");
@@ -388,6 +406,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getUInt8() throws IOException
     {
 	m_t = new Tokenizer(0xCDL + "");
@@ -409,6 +428,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getTTL() throws IOException
     {
 	m_t = new Tokenizer("59S");
@@ -428,6 +448,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getTTLLike() throws IOException
     {
 	m_t = new Tokenizer("59S");
@@ -447,6 +468,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getName() throws IOException, TextParseException
     {
 	Name root = Name.fromString(".");
@@ -471,6 +493,7 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getEOL() throws IOException
     {
 	m_t = new Tokenizer("id");
@@ -499,23 +522,24 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getBase64() throws IOException
     {
 	byte[] exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	// basic
 	m_t = new Tokenizer("AQIDBAUGBwgJ");
 	byte[] out = m_t.getBase64();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// with some whitespace
 	m_t = new Tokenizer("AQIDB AUGB   wgJ");
 	out = m_t.getBase64();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// two base64s separated by newline
 	m_t = new Tokenizer("AQIDBAUGBwgJ\nAB23DK");
 	out = m_t.getBase64();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// no remaining strings
 	m_t = new Tokenizer("\n");
@@ -544,23 +568,24 @@ public class TokenizerTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_getHex() throws IOException
     {
 	byte[] exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	// basic
 	m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F");
 	byte[] out = m_t.getHex();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// with some whitespace
 	m_t = new Tokenizer("0102030 405 060708090A0B0C      0D0E0F");
 	out = m_t.getHex();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// two hexs separated by newline
 	m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F\n01AB3FE");
 	out = m_t.getHex();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// no remaining strings
 	m_t = new Tokenizer("\n");

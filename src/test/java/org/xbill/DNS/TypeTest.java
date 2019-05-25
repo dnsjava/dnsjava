@@ -34,10 +34,16 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TypeTest extends TestCase
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class TypeTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -54,6 +60,7 @@ public class TypeTest extends TestCase
 	}
     }
 
+    @Test
     public void test_value()
     {
 	// regular one
@@ -69,11 +76,13 @@ public class TypeTest extends TestCase
 	assertEquals(-1, Type.value(""));
     }
 
+    @Test
     public void test_value_2arg()
     {
 	assertEquals(301, Type.value("301", true));
     }
 
+    @Test
     public void test_isRR()
     {
 	assertTrue(Type.isRR(Type.CNAME));

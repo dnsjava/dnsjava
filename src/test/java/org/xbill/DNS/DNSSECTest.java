@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
+import org.junit.Test;
+import org.xbill.DNS.DNSSEC.DNSSECException;
+
 import java.io.IOException;
 import java.util.Date;
 
-import org.xbill.DNS.DNSSEC.DNSSECException;
-
-import junit.framework.TestCase;
-
-public class DNSSECTest extends TestCase 
+public class DNSSECTest 
 {
 	private TXTRecord txt = new TXTRecord(Name.root, DClass.IN, 3600, "test");
 
+    @Test
 	public void testECDSALeadingZeroUndersize() throws IOException, DNSSECException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
@@ -25,6 +25,7 @@ public class DNSSECTest extends TestCase
 		DNSSEC.verify(rrset, rrsig, dnskey, new Date(60));
 	}
 
+    @Test
 	public void testECDSALeadingZeroOversize() throws IOException, DNSSECException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
@@ -38,6 +39,7 @@ public class DNSSECTest extends TestCase
 		DNSSEC.verify(rrset, rrsig, dnskey, new Date(60));
 	}
 
+    @Test
 	public void testDSALeadingZeroUndersize() throws DNSSECException, IOException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
@@ -51,6 +53,7 @@ public class DNSSECTest extends TestCase
 		DNSSEC.verify(set, rrsig, dnskey, new Date(60));
 	}
 
+    @Test
 	public void testDSALeadingZeroOversize() throws DNSSECException, IOException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,

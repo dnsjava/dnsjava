@@ -34,18 +34,22 @@
 //
 package org.xbill.DNS;
 
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Arrays;
-import  java.io.IOException;
-import	junit.framework.Test;
-import	junit.framework.TestCase;
-import	junit.framework.TestSuite;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class MessageTest
 {
-    public static class Test_init extends TestCase
+    public static class Test_init
     {
+    @Test
 	public void test_0arg()
 	{
 	    Message m = new Message();
@@ -65,6 +69,7 @@ public class MessageTest
 	    assertEquals(0, h.getCount(3));
 	}
 
+    @Test
 	public void test_1arg()
 	{
 	    Message m = new Message(10);
@@ -85,6 +90,7 @@ public class MessageTest
 	    assertEquals(0, h.getCount(3));
 	}
 
+    @Test
 	public void test_newQuery() throws TextParseException,
 					   UnknownHostException
 	{
@@ -107,6 +113,7 @@ public class MessageTest
 	    assertEquals(true, h.getFlag(Flags.RD));
 	}
 
+    @Test
         public void test_sectionToWire ()
           throws IOException
         {
@@ -133,12 +140,5 @@ public class MessageTest
             assertEquals(OPTRecord.class, records[1].getClass());
         }
 
-    }
-
-    public static Test suite()
-    {
-	TestSuite s = new TestSuite();
-	s.addTestSuite(Test_init.class);
-	return s;
     }
 }

@@ -34,14 +34,20 @@
 //
 package	org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class DNSKEYRecordTest extends TestCase
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class DNSKEYRecordTest
 {
+    @Test
     public void test_ctor_0arg() throws UnknownHostException
     {
 	DNSKEYRecord ar = new DNSKEYRecord();
@@ -56,6 +62,7 @@ public class DNSKEYRecordTest extends TestCase
 	assertNull(ar.getKey());
     }
 
+    @Test
     public void test_getObject()
     {
 	DNSKEYRecord ar = new DNSKEYRecord();
@@ -63,6 +70,7 @@ public class DNSKEYRecordTest extends TestCase
 	assertTrue(r instanceof DNSKEYRecord);
     }
 
+    @Test
     public void test_ctor_7arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Absolute.Name.");
@@ -87,6 +95,7 @@ public class DNSKEYRecordTest extends TestCase
 	catch( RelativeNameException e ){}
     }
 
+    @Test
     public void test_rdataFromString() throws IOException, TextParseException
     {
 	// basic

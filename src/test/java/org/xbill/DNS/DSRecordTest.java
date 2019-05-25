@@ -34,14 +34,20 @@
 //
 package org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.util.Arrays;
-import	junit.framework.Test;
-import	junit.framework.TestCase;
-import	junit.framework.TestSuite;
+import org.junit.Before;
+import org.junit.Test;
 
-public class DSRecordTest extends TestCase
+import java.io.IOException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class DSRecordTest
 {
+    @Test
     public void test_ctor_0arg()
     {
 	DSRecord dr = new DSRecord();
@@ -55,6 +61,7 @@ public class DSRecordTest extends TestCase
 	assertEquals(0, dr.getFootprint());
     }
     
+    @Test
     public void test_getObject()
     {
 	DSRecord dr = new DSRecord();
@@ -62,7 +69,7 @@ public class DSRecordTest extends TestCase
 	assertTrue(r instanceof DSRecord);
     }
 
-    public static class Test_Ctor_7arg extends TestCase
+    public static class Test_Ctor_7arg
     {
 	private Name	m_n;
 	private long	m_ttl;
@@ -71,7 +78,8 @@ public class DSRecordTest extends TestCase
 	private int	m_digestid;
 	private byte[]	m_digest;	
 
-	protected void setUp() throws TextParseException
+   @Before
+   public void setUp() throws TextParseException
 	{
 	    m_n = Name.fromString("The.Name.");
 	    m_ttl = 0xABCDL;
@@ -81,6 +89,7 @@ public class DSRecordTest extends TestCase
 	    m_digest = new byte[] { (byte)0x67, (byte)0x89, (byte)0xAB, (byte)0xCD, (byte)0xEF };
 	}
 	
+    @Test
 	public void test_basic() throws TextParseException
 	{
 	    DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl,
@@ -95,6 +104,7 @@ public class DSRecordTest extends TestCase
 	    assertTrue(Arrays.equals(m_digest, dr.getDigest()));
 	}
 
+    @Test
 	public void test_toosmall_footprint() throws TextParseException
 	{
 	    try {
@@ -105,6 +115,7 @@ public class DSRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_toobig_footprint() throws TextParseException
 	{
 	    try {
@@ -115,6 +126,7 @@ public class DSRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_toosmall_algorithm() throws TextParseException
 	{
 	    try {
@@ -125,6 +137,7 @@ public class DSRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_toobig_algorithm() throws TextParseException
 	{
 	    try {
@@ -135,6 +148,7 @@ public class DSRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_toosmall_digestid() throws TextParseException
 	{
 	    try {
@@ -145,6 +159,7 @@ public class DSRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_toobig_digestid() throws TextParseException
 	{
 	    try {
@@ -155,6 +170,7 @@ public class DSRecordTest extends TestCase
 	    catch(IllegalArgumentException e){}
 	}
 
+    @Test
 	public void test_null_digest()
 	{
 	    DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl,
@@ -170,6 +186,7 @@ public class DSRecordTest extends TestCase
 	}
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, 
@@ -186,6 +203,7 @@ public class DSRecordTest extends TestCase
 				 dr.getDigest()));
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, 
@@ -202,6 +220,7 @@ public class DSRecordTest extends TestCase
 				 dr.getDigest()));
     }
 
+    @Test
     public void test_rrToString() throws TextParseException
     {
 	String exp = 0xABCD + " " + 0xEF + " " + 0x01 + " 23456789AB";
@@ -213,6 +232,7 @@ public class DSRecordTest extends TestCase
 	assertEquals(exp, dr.rrToString());
     }
 
+    @Test
     public void test_rrToWire() throws TextParseException
     {
 	DSRecord dr = new DSRecord(Name.fromString("The.Name."), DClass.IN, 0x123,
@@ -228,13 +248,5 @@ public class DSRecordTest extends TestCase
 	dr.rrToWire(out, null, true);
 
 	assertTrue(Arrays.equals(exp, out.toByteArray()));
-    }
-
-    public static Test suite()
-    {
-	TestSuite s = new TestSuite();
-	s.addTestSuite(Test_Ctor_7arg.class);
-	s.addTestSuite(DSRecordTest.class);
-	return s;
     }
 }

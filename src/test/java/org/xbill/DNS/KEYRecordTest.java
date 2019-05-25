@@ -34,14 +34,20 @@
 //
 package	org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class KEYRecordTest extends TestCase
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class KEYRecordTest
 {
+    @Test
     public void test_ctor_0arg() throws UnknownHostException
     {
 	KEYRecord ar = new KEYRecord();
@@ -56,6 +62,7 @@ public class KEYRecordTest extends TestCase
 	assertNull(ar.getKey());
     }
 
+    @Test
     public void test_getObject()
     {
 	KEYRecord ar = new KEYRecord();
@@ -63,6 +70,7 @@ public class KEYRecordTest extends TestCase
 	assertTrue(r instanceof KEYRecord);
     }
 
+    @Test
     public void test_ctor_7arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Absolute.Name.");
@@ -87,6 +95,7 @@ public class KEYRecordTest extends TestCase
 	catch( RelativeNameException e ){}
     }
 
+    @Test
     public void test_Protocol_string()
     {
 	// a regular one
@@ -107,6 +116,7 @@ public class KEYRecordTest extends TestCase
 	catch( IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_Protocol_value()
     {
 	// a regular one
@@ -119,6 +129,7 @@ public class KEYRecordTest extends TestCase
 	assertEquals(-1, KEYRecord.Protocol.value("256"));
     }
 
+    @Test
     public void test_Flags_value()
     {
 	// numeric
@@ -147,6 +158,7 @@ public class KEYRecordTest extends TestCase
 	assertEquals(0, KEYRecord.Flags.value("|"));
     }
 
+    @Test
     public void test_rdataFromString() throws IOException, TextParseException
     {
 	// basic

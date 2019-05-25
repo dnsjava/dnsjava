@@ -34,21 +34,21 @@
 //
 package org.xbill.DNS.utils;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class base16Test extends TestCase
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class base16Test
 {
-    public base16Test( String name )
-    {
-	super(name);
-    }
-
+    @Test
     public void test_toString_emptyArray()
     {
 	String out = base16.toString( new byte[ 0 ] );
 	assertEquals( "", out );
     }
 
+    @Test
     public void test_toString_singleByte1()
     {
 	byte[] data = { (byte)1 };
@@ -56,6 +56,7 @@ public class base16Test extends TestCase
 	assertEquals( "01", out );
     }
 
+    @Test
     public void test_toString_singleByte2()
     {
 	byte[] data = { (byte)16 };
@@ -63,6 +64,7 @@ public class base16Test extends TestCase
 	assertEquals( "10", out );
     }
 
+    @Test
     public void test_toString_singleByte3()
     {
 	byte[] data = { (byte)255 };
@@ -70,6 +72,7 @@ public class base16Test extends TestCase
 	assertEquals( "FF", out );
     }
 
+    @Test
     public void test_toString_array1()
     {
 	byte[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
@@ -77,6 +80,7 @@ public class base16Test extends TestCase
 	assertEquals( "0102030405060708090A0B0C0D0E0F", out );
     }
 
+    @Test
     public void test_fromString_emptyString()
     {
 	String data = "";
@@ -84,6 +88,7 @@ public class base16Test extends TestCase
 	assertEquals( 0, out.length );
     }
 
+    @Test
     public void test_fromString_invalidStringLength()
     {
 	String data = "1";
@@ -91,6 +96,7 @@ public class base16Test extends TestCase
 	assertNull( out );
     }
 
+    @Test
     public void test_fromString_nonHexChars()
     {
 	String data = "GG";
@@ -101,6 +107,7 @@ public class base16Test extends TestCase
 	 */
     }
 
+    @Test
     public void test_fromString_normal()
     {
 	String data = "0102030405060708090A0B0C0D0E0F";

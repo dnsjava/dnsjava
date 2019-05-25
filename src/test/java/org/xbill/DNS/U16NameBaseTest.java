@@ -34,17 +34,19 @@
 //
 package org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class U16NameBaseTest extends TestCase
+import java.io.IOException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class U16NameBaseTest
 {
-    private void assertEquals( byte[] exp, byte[] act )
-    {
-	assertTrue(java.util.Arrays.equals(exp, act));
-    }
-
     private static class TestClass extends U16NameBase
     {
 	public TestClass(){}
@@ -76,6 +78,7 @@ public class U16NameBaseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	TestClass tc = new TestClass();
@@ -87,6 +90,7 @@ public class U16NameBaseTest extends TestCase
 	assertNull(tc.getNameField());
     }
 
+    @Test
     public void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -101,6 +105,7 @@ public class U16NameBaseTest extends TestCase
 	assertNull(tc.getNameField());
     }
 
+    @Test
     public void test_ctor_8arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -138,6 +143,7 @@ public class U16NameBaseTest extends TestCase
 	
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xBC, (byte)0x1F, 2, 'M', 'y', 6, 's', 'i', 'N', 'g', 'l', 'E', 4, 'n', 'A', 'm', 'E', 0 };
@@ -151,6 +157,7 @@ public class U16NameBaseTest extends TestCase
 	assertEquals(exp, tc.getNameField());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Name exp = Name.fromString("My.Single.Name.");
@@ -171,6 +178,7 @@ public class U16NameBaseTest extends TestCase
 	catch( RelativeNameException e ){}
     }
 
+    @Test
     public void test_rrToString() throws IOException, TextParseException
     {
 	Name n = Name.fromString("My.Name.");
@@ -186,6 +194,7 @@ public class U16NameBaseTest extends TestCase
 	assertEquals(exp, out);
     }
 
+    @Test
     public void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("My.Name.");

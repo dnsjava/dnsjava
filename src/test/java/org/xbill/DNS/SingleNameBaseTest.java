@@ -34,16 +34,18 @@
 //
 package org.xbill.DNS;
 
-import	java.io.IOException;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class SingleNameBaseTest extends TestCase
+import java.io.IOException;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+
+public class SingleNameBaseTest
 {
-    private void assertEquals( byte[] exp, byte[] act )
-    {
-	assertTrue(java.util.Arrays.equals(exp, act));
-    }
-
     private static class TestClass extends SingleNameBase
     {
 	public TestClass(){}
@@ -69,6 +71,7 @@ public class SingleNameBaseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor() throws TextParseException
     {
 	TestClass tc = new TestClass();
@@ -93,6 +96,7 @@ public class SingleNameBaseTest extends TestCase
 	assertSame(sn, tc.getSingleName());
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { 2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0 };
@@ -105,6 +109,7 @@ public class SingleNameBaseTest extends TestCase
 	assertEquals(exp, tc.getSingleName());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Name exp = Name.fromString("my.single.name.");
@@ -123,6 +128,7 @@ public class SingleNameBaseTest extends TestCase
 	catch( RelativeNameException e ){}
     }
 
+    @Test
     public void test_rrToString() throws IOException, TextParseException
     {
 	Name exp = Name.fromString("my.single.name.");
@@ -136,6 +142,7 @@ public class SingleNameBaseTest extends TestCase
 	assertEquals(out, exp.toString());
     }
 
+    @Test
     public void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
@@ -149,7 +156,7 @@ public class SingleNameBaseTest extends TestCase
 	tc.rrToWire(dout, null, false);
 	
 	byte[] out = dout.toByteArray();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
 
 	// canonical (lowercase)
 	tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
@@ -159,6 +166,6 @@ public class SingleNameBaseTest extends TestCase
 	tc.rrToWire(dout, null, true);
 	
 	out = dout.toByteArray();
-	assertEquals(exp, out);
+	assertArrayEquals(exp, out);
     }
 }

@@ -34,10 +34,16 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class FlagsTest extends TestCase
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class FlagsTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -62,6 +68,7 @@ public class FlagsTest extends TestCase
 	}
     }
 
+    @Test
     public void test_value()
     {
 	// regular one
@@ -80,6 +87,7 @@ public class FlagsTest extends TestCase
 	assertEquals(-1, Flags.value(""));
     }
 
+    @Test
     public void test_isFlag()
     {
 	try {

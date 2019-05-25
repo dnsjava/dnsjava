@@ -34,13 +34,20 @@
 //
 package	org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class AAAARecordTest extends TestCase
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class AAAARecordTest
 {
     Name m_an, m_rn;
     InetAddress m_addr;
@@ -48,7 +55,8 @@ public class AAAARecordTest extends TestCase
     byte[] m_addr_bytes;
     long m_ttl;
 
-    protected void setUp() throws TextParseException,
+   @Before
+   public void setUp() throws TextParseException,
 				  UnknownHostException
     {
 	m_an = Name.fromString("My.Absolute.Name.");
@@ -59,6 +67,7 @@ public class AAAARecordTest extends TestCase
 	m_ttl = 0x13579;
     }
 
+    @Test
     public void test_ctor_0arg() throws UnknownHostException
     {
 	AAAARecord ar = new AAAARecord();
@@ -69,6 +78,7 @@ public class AAAARecordTest extends TestCase
 	assertNull(ar.getAddress());
     }
 
+    @Test
     public void test_getObject()
     {
 	AAAARecord ar = new AAAARecord();
@@ -76,6 +86,7 @@ public class AAAARecordTest extends TestCase
 	assertTrue(r instanceof AAAARecord);
     }
 
+    @Test
     public void test_ctor_4arg()
     {
 	AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
@@ -102,6 +113,7 @@ public class AAAARecordTest extends TestCase
 	catch( UnknownHostException e ){ fail(e.getMessage()); }
     }
 
+    @Test
     public void test_rrFromWire() throws IOException
     {
 	DNSInput di = new DNSInput(m_addr_bytes);
@@ -112,6 +124,7 @@ public class AAAARecordTest extends TestCase
 	assertEquals(m_addr, ar.getAddress());
     }
 
+    @Test
     public void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer(m_addr_string);
@@ -131,12 +144,14 @@ public class AAAARecordTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_rrToString()
     {
 	AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
 	assertEquals(m_addr_string, ar.rrToString());
     }
 
+    @Test
     public void test_rrToWire()
     {
 	AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);

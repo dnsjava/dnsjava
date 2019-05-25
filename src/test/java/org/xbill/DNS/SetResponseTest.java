@@ -34,13 +34,22 @@
 //
 package	org.xbill.DNS;
 
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class SetResponseTest extends TestCase
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class SetResponseTest
 {
+    @Test
     public void test_ctor_1arg()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
@@ -64,6 +73,7 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor_1arg_toosmall()
     {
 	try {
@@ -73,6 +83,7 @@ public class SetResponseTest extends TestCase
 	catch(IllegalArgumentException a){}
     }
 
+    @Test
     public void test_ctor_1arg_toobig()
     {
 	try {
@@ -82,6 +93,7 @@ public class SetResponseTest extends TestCase
 	catch(IllegalArgumentException a){}
     }
 
+    @Test
     public void test_ctor_2arg()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
@@ -106,6 +118,7 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ctor_2arg_toosmall()
     {
 	try {
@@ -115,6 +128,7 @@ public class SetResponseTest extends TestCase
 	catch(IllegalArgumentException a){}
     }
 
+    @Test
     public void test_ctor_2arg_toobig()
     {
 	try {
@@ -124,6 +138,7 @@ public class SetResponseTest extends TestCase
 	catch(IllegalArgumentException a){}
     }
 
+    @Test
     public void test_ofType_basic()
     {
 	final int[] types = new int[] { SetResponse.DELEGATION,
@@ -147,6 +162,7 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ofType_singleton()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
@@ -169,6 +185,7 @@ public class SetResponseTest extends TestCase
 	}
     }
 
+    @Test
     public void test_ofType_toosmall()
     {
 	try {
@@ -178,6 +195,7 @@ public class SetResponseTest extends TestCase
 	catch(IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_ofType_toobig()
     {
 	try {
@@ -187,6 +205,7 @@ public class SetResponseTest extends TestCase
 	catch(IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_addRRset() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -205,6 +224,7 @@ public class SetResponseTest extends TestCase
 	assertTrue(Arrays.equals(exp, sr.answers()));
     }
 
+    @Test
     public void test_addRRset_multiple() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -235,12 +255,14 @@ public class SetResponseTest extends TestCase
 	assertTrue(Arrays.equals(exp, sr.answers()));
     }
 
+    @Test
     public void test_answers_nonSUCCESSFUL()
     {
 	SetResponse sr = new SetResponse(SetResponse.UNKNOWN, new RRset());
 	assertNull(sr.answers());
     }
 
+    @Test
     public void test_getCNAME() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -253,6 +275,7 @@ public class SetResponseTest extends TestCase
 	assertEquals(cr, sr.getCNAME());
     }
 
+    @Test
     public void test_getDNAME() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
@@ -265,6 +288,7 @@ public class SetResponseTest extends TestCase
 	assertEquals(dr, sr.getDNAME());
     }
 
+    @Test
     public void test_toString() throws TextParseException, UnknownHostException
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,

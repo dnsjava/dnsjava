@@ -34,10 +34,15 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RcodeTest extends TestCase
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class RcodeTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -65,6 +70,7 @@ public class RcodeTest extends TestCase
 	}
     }
 
+    @Test
     public void test_TSIGstring()
     {
 	// a regular one
@@ -89,6 +95,7 @@ public class RcodeTest extends TestCase
 	}
     }
 
+    @Test
     public void test_value()
     {
 	// regular one

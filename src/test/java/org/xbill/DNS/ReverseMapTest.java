@@ -34,12 +34,17 @@
 //
 package org.xbill.DNS;
 
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	junit.framework.TestCase;
+import org.junit.Test;
 
-public class ReverseMapTest extends TestCase
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class ReverseMapTest
 {
+    @Test
     public void test_fromAddress_ipv4() throws UnknownHostException,
 						    TextParseException
     {
@@ -53,6 +58,7 @@ public class ReverseMapTest extends TestCase
 	assertEquals(exp, ReverseMap.fromAddress(new int[] { 192, 168, 0, 1 }));
     }
 
+    @Test
     public void test_fromAddress_ipv6() throws UnknownHostException,
 						    TextParseException
     {
@@ -72,6 +78,7 @@ public class ReverseMapTest extends TestCase
 	assertEquals(exp, ReverseMap.fromAddress(idat));
     }
 
+    @Test
     public void test_fromAddress_invalid()
     {
 	try {

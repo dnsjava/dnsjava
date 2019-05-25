@@ -34,24 +34,28 @@
 //
 package org.xbill.DNS;
 
-import java.io.IOException;
-import junit.framework.TestCase;
-import org.xbill.DNS.DNSInput;
-import org.xbill.DNS.DNSOutput;
-import org.xbill.DNS.Header;
-import org.xbill.DNS.Opcode;
-import org.xbill.DNS.Rcode;
-import org.xbill.DNS.Flags;
+import org.junit.Before;
+import org.junit.Test;
 
-public class HeaderTest extends TestCase
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class HeaderTest
 {
     private Header m_h;
 
-    public void setUp()
+   @Before
+   public void setUp()
     {
 	m_h = new Header(0xABCD); // 43981
     }
 
+    @Test
     public void test_fixture_state()
     {
 	assertEquals(0xABCD, m_h.getID());
@@ -68,6 +72,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0, m_h.getCount(3));
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	m_h = new Header();
@@ -85,6 +90,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0, m_h.getCount(3));
     }
 
+    @Test
     public void test_ctor_DNSInput() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0x12, (byte)0xAB, // ID
@@ -124,6 +130,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0x7190, m_h.getCount(3));
     }
 
+    @Test
     public void test_toWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0x12, (byte)0xAB, // ID
@@ -162,6 +169,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_flags()
     {
 	m_h.setFlag(0);
@@ -192,6 +200,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_flags_invalid()
     {
 	try {m_h.setFlag(-1); fail("IllegalArgumentException not thrown");}
@@ -214,6 +223,7 @@ public class HeaderTest extends TestCase
 	catch( IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_ID()
     {
 	assertEquals(0xABCD, m_h.getID());
@@ -228,6 +238,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0xDCBA, m_h.getID());
     }
 
+    @Test
     public void test_setID_invalid()
     {
 	try {
@@ -244,6 +255,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_Rcode()
     {
 	assertEquals(0, m_h.getRcode());
@@ -258,6 +270,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_setRcode_invalid()
     {
 	try {
@@ -274,6 +287,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_Opcode()
     {
 	assertEquals(0, m_h.getOpcode());
@@ -288,6 +302,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0, m_h.getRcode());
     }
 
+    @Test
     public void test_setOpcode_invalid()
     {
 	try {
@@ -304,6 +319,7 @@ public class HeaderTest extends TestCase
 	}
     }
 
+    @Test
     public void test_Count()
     {
 	m_h.setCount(2, 0x1E);
@@ -319,6 +335,7 @@ public class HeaderTest extends TestCase
 	assertEquals(0x1E-1, m_h.getCount(2));
     }
 
+    @Test
     public void test_setCount_invalid()
     {
 	try {m_h.setCount(-1, 0); fail("ArrayIndexOutOfBoundsException not thrown");}
@@ -332,6 +349,7 @@ public class HeaderTest extends TestCase
 	catch( IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_getCount_invalid()
     {
 	try {m_h.getCount(-1); fail("ArrayIndexOutOfBoundsException not thrown");}
@@ -340,6 +358,7 @@ public class HeaderTest extends TestCase
 	catch( ArrayIndexOutOfBoundsException e ){}
     }
 
+    @Test
     public void test_incCount_invalid()
     {
 	m_h.setCount(1, 0xFFFF);
@@ -347,6 +366,7 @@ public class HeaderTest extends TestCase
 	catch( IllegalStateException e ){}
     }
 
+    @Test
     public void test_decCount_invalid()
     {
 	m_h.setCount(2, 0);
@@ -354,6 +374,7 @@ public class HeaderTest extends TestCase
 	catch( IllegalStateException e ){}
     }
 
+    @Test
     public void test_toString()
     {
 	m_h.setOpcode(Opcode.value("STATUS"));
@@ -381,6 +402,7 @@ public class HeaderTest extends TestCase
 	assertFalse(text.indexOf("ad: 0 ") == -1);
     }
     
+    @Test
     public void test_clone()
     {
 	m_h.setOpcode(Opcode.value("IQUERY"));

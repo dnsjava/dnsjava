@@ -34,15 +34,19 @@
 //
 package org.xbill.DNS;
 
-import	java.util.Date;
-import	java.util.Calendar;
-import	java.util.GregorianCalendar;
-import	java.util.TimeZone;
-import	junit.framework.TestCase;
-import	org.xbill.DNS.FormattedTime;
+import org.junit.Test;
 
-public class FormattedTimeTest extends TestCase
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class FormattedTimeTest
 {
+    @Test
     public void test_format()
     {
 	GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -51,6 +55,7 @@ public class FormattedTimeTest extends TestCase
 	assertEquals("20050319040405", out);
     }
 
+    @Test
     public void test_parse() throws TextParseException
     {
 	// have to make sure to clear out the milliseconds since there
@@ -67,6 +72,7 @@ public class FormattedTimeTest extends TestCase
 	assertEquals(cal, cal2);
     }
 
+    @Test
     public void test_parse_invalid()
     {
 	try {

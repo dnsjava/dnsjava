@@ -1,20 +1,23 @@
 package org.xbill.DNS.externalprovider;
 
+import com.chrysalisits.crypto.LunaJCAProvider;
+import com.chrysalisits.crypto.LunaTokenManager;
+import com.chrysalisits.cryptox.LunaJCEProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.xbill.DNS.DNSSEC;
+import org.xbill.DNS.DNSSEC.Algorithm;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.security.Signature;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import org.xbill.DNS.DNSSEC;
-import org.xbill.DNS.DNSSEC.Algorithm;
-
-import com.chrysalisits.crypto.LunaJCAProvider;
-import com.chrysalisits.crypto.LunaTokenManager;
-import com.chrysalisits.cryptox.LunaJCEProvider;
-
-public class DNSSECWithLunaProviderTest extends TestCase {
+public class DNSSECWithLunaProviderTest {
 
 	private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
 	private static final String KEY_ALGORITHM = "RSA";
@@ -26,16 +29,19 @@ public class DNSSECWithLunaProviderTest extends TestCase {
 	String lunaJCAProvider = "LunaJCAProvider";
 	byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();
 
-	public void setUp() {
+   @Before
+   public void setUp() {
 		Security.addProvider(new LunaJCEProvider());
 		Security.addProvider(new LunaJCAProvider());
 		tokenManager.Login(partitionName, partitionPassword);
 	}
 
-	public void tearDown() {
+   @After
+   public void tearDown() {
 		tokenManager.Logout();
 	}
 
+   @Test
 	public void testSignHSM() throws Exception {
 
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM, lunaJCAProvider);
@@ -57,6 +63,7 @@ public class DNSSECWithLunaProviderTest extends TestCase {
 
 	}
 
+   @Test
 	public void testSignWithDNSSECAndHSM() throws Exception {
 
 		// generate a signature
@@ -74,6 +81,7 @@ public class DNSSECWithLunaProviderTest extends TestCase {
 		assertTrue(verify);
 	}
 
+   @Test
 	public void testSignWithDNSSECAndSoftware() throws Exception {
 
 		// generate a signature

@@ -1,10 +1,15 @@
 package org.xbill.DNS;
 
-import java.io.IOException;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TSIGTest extends TestCase
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class TSIGTest
 {
+    @Test
     public void test_TSIG_query() throws TextParseException, IOException
     {
 	TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
@@ -22,6 +27,7 @@ public class TSIGTest extends TestCase
 	assertTrue(parsed.isSigned());
     }
 
+    @Test
     public void test_TSIG_response() throws TextParseException, IOException
     {
 	TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
@@ -48,6 +54,7 @@ public class TSIGTest extends TestCase
 	assertTrue(parsed.isSigned());
     }
 
+    @Test
     public void test_TSIG_truncated() throws TextParseException, IOException
     {
 	TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");

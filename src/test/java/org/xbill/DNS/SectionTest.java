@@ -34,10 +34,14 @@
 //
 package org.xbill.DNS;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class SectionTest extends TestCase
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+public class SectionTest
 {
+    @Test
     public void test_string()
     {
 	// a regular one
@@ -59,6 +63,7 @@ public class SectionTest extends TestCase
 	}
     }
 
+    @Test
     public void test_value()
     {
 	// regular one
@@ -71,6 +76,7 @@ public class SectionTest extends TestCase
 	assertEquals(-1, Section.value(""));
     }
 
+    @Test
     public void test_longString()
     {
 	assertEquals("ADDITIONAL RECORDS", Section.longString(Section.ADDITIONAL));
@@ -79,6 +85,7 @@ public class SectionTest extends TestCase
 	try {Section.longString(4);} catch( IllegalArgumentException e ){}
     }
 
+    @Test
     public void test_updString()
     {
 	assertEquals("ZONE", Section.updString(Section.ZONE));

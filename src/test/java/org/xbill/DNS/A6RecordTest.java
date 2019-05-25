@@ -34,13 +34,20 @@
 //
 package	org.xbill.DNS;
 
-import	java.io.IOException;
-import	java.net.InetAddress;
-import	java.net.UnknownHostException;
-import	java.util.Arrays;
-import	junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class A6RecordTest extends TestCase
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+public class A6RecordTest
 {
     Name m_an, m_an2, m_rn;
     InetAddress m_addr;
@@ -49,7 +56,8 @@ public class A6RecordTest extends TestCase
     int m_prefix_bits;
     long m_ttl;
 
-    protected void setUp() throws TextParseException,
+   @Before
+   public void setUp() throws TextParseException,
 				  UnknownHostException
     {
 	m_an = Name.fromString("My.Absolute.Name.");
@@ -63,6 +71,7 @@ public class A6RecordTest extends TestCase
 	m_prefix_bits = 9;
     }
 
+    @Test
     public void test_ctor_0arg()
     {
 	A6Record ar = new A6Record();
@@ -72,6 +81,7 @@ public class A6RecordTest extends TestCase
 	assertEquals(0, ar.getTTL());
     }
 
+    @Test
     public void test_getObject()
     {
 	A6Record ar = new A6Record();
@@ -79,6 +89,7 @@ public class A6RecordTest extends TestCase
 	assertTrue(r instanceof A6Record);
     }
 
+    @Test
     public void test_ctor_6arg()
     {
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
@@ -131,6 +142,7 @@ public class A6RecordTest extends TestCase
 	catch( UnknownHostException e ){ fail(e.getMessage()); }
     }
 
+    @Test
     public void test_rrFromWire() throws CloneNotSupportedException,
 					 IOException,
 					 UnknownHostException
@@ -165,6 +177,7 @@ public class A6RecordTest extends TestCase
 	assertEquals(m_an2, ar.getPrefix());
     }
 
+    @Test
     public void test_rdataFromString() throws CloneNotSupportedException,
 					      IOException,
 					      UnknownHostException
@@ -206,6 +219,7 @@ public class A6RecordTest extends TestCase
 	catch( TextParseException e ){}
     }
 
+    @Test
     public void test_rrToString()
     {
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
@@ -214,6 +228,7 @@ public class A6RecordTest extends TestCase
 	assertEquals(exp, out);
     }
 
+    @Test
     public void test_rrToWire()
     {
 	// canonical form
