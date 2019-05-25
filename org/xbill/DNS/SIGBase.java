@@ -119,6 +119,20 @@ getTypeCovered() {
 }
 
 /**
+ * Returns the type of RRset that this record would belong to.  For all types
+ * except SIG/RRSIG, this is equivalent to getType().
+ * @return The type of record
+ * @see Type
+ * @see RRset
+ * @see Record#getRRsetType()
+ */
+public int
+getRRsetType() {
+	return covered;
+}
+
+
+/**
  * Returns the cryptographic algorithm of the key that generated the signature
  */
 public int
