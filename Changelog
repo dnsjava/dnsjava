@@ -76,14 +76,14 @@
 	  local modifications)
 	- Change the OPTRecord equals() method to check TTL, since the TTL
 	  field holds relevant information.  (based on a patch from
-	  Dr. Christian Möller <cmoeller@users.sourceforge.net>)
+	  Dr. Christian MÃ¶ller <cmoeller@users.sourceforge.net>)
 	- Printing an empty RRset would incorrectly throw an exception.
 
 10/14/2013
 	- 2.1.6 released
 	- Address.getByName() and Address.getAllByName() had incomplete IPv6
 	  support; they wouldn't issue AAAA queries.
-	  (reported by Cédric Braem <cbr@internetvista.com>)
+	  (reported by CÃ©dric Braem <cbr@internetvista.com>)
 
 10/07/2013
 	- Improve the name server detection code for Android.
@@ -776,7 +776,7 @@
 	  constructors with new versions that properly return exceptions.
 
 12/6/2003
-	- Make the J2SE javadoc link a property in build.xml.  (Ville Skyttä)
+	- Make the J2SE javadoc link a property in build.xml.  (Ville SkyttÃ¤)
 
 11/24/2003
 	- Lookup should check that the name, type, and class in the question
