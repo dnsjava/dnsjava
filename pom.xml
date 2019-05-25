@@ -41,9 +41,6 @@
     </properties>
 
     <build>
-        <sourceDirectory>./</sourceDirectory>
-        <testSourceDirectory>./tests</testSourceDirectory>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -69,15 +66,8 @@
                     <target>${target.jdk}</target>
                     <testExcludes>
                         <!-- Exclude unit tests with external dependencies -->
-                        <exclude>**/DNSSECWithLunaProviderTest.java</exclude>
+                        <testExclude>**/DNSSECWithLunaProviderTest.java</testExclude>
                     </testExcludes>
-                    <includes>
-                        <include>*.java</include>
-                        <include>org/**/*.java</include>
-                    </includes>
-                    <excludes>
-                        <exclude>org/xbill/DNS/tests/**</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
 
@@ -85,15 +75,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.0.1</version>
-                <configuration>
-                    <includes>
-                        <include>*.java</include>
-                        <include>org/**/*.java</include>
-                    </includes>
-                    <excludes>
-                        <exclude>org/xbill/DNS/tests/</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -123,8 +104,6 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.1</version>
                 <configuration>
-                    <excludePackageNames>*.tests.*</excludePackageNames>
-                    <sourcepath>./org</sourcepath>
                     <debug>true</debug>
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
@@ -166,8 +145,6 @@
                         <excludes>
                             <!-- JDK9 removed the Nameservice SPI as per bug 8134577. -->
                             <exclude>org.xbill.DNS.spi</exclude>
-                            <!-- The tests don't need to be compatible -->
-                            <exclude>tests.org.xbill.DNS</exclude>
                         </excludes>
                     </parameter>
                 </configuration>
@@ -230,7 +207,6 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
                             <excludes>
-                                <exclude>org/xbill/DNS/tests/**</exclude>
                                 <exclude>org/xbill/DNS/spi/**</exclude>
                             </excludes>
                         </configuration>
@@ -240,7 +216,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <excludePackageNames>*.tests.*:*.spi.*</excludePackageNames>
+                            <excludePackageNames>*.spi.*</excludePackageNames>
                         </configuration>
                     </plugin>
                 </plugins>
