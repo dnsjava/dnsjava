@@ -48,16 +48,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class RRsetTest
+class RRsetTest
 {
     private RRset m_rs;
-    Name m_name, m_name2;
-    long m_ttl;
-    ARecord m_a1, m_a2;
-    RRSIGRecord m_s1, m_s2;
+    private Name m_name;
+	private Name m_name2;
+    private long m_ttl;
+    private ARecord m_a1;
+	private ARecord m_a2;
+    private RRSIGRecord m_s1;
+	private RRSIGRecord m_s2;
 
    @BeforeEach
-   public void setUp() throws TextParseException, UnknownHostException
+   void setUp() throws TextParseException, UnknownHostException
     {
 	m_rs = new RRset();
 	m_name = Name.fromString("this.is.a.test.");
@@ -77,7 +80,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	assertEquals(0, m_rs.size());
 	try {m_rs.getDClass(); fail("IllegalStateException not thrown");}
@@ -107,7 +110,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_basics() throws TextParseException,
+    void test_basics() throws TextParseException,
 				     UnknownHostException
     {
 	m_rs.addRR(m_a1);
@@ -192,7 +195,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_ctor_1arg()
+    void test_ctor_1arg()
     {
 	m_rs.addRR(m_a1);
 	m_rs.addRR(m_a2);
@@ -217,7 +220,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_toString()
+    void test_toString()
     {
 	m_rs.addRR(m_a1);
 	m_rs.addRR(m_a2);
@@ -233,7 +236,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_addRR_invalidType() throws TextParseException
+    void test_addRR_invalidType() throws TextParseException
     {
 	m_rs.addRR(m_a1);
 	
@@ -248,7 +251,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_addRR_invalidName() throws TextParseException, UnknownHostException
+    void test_addRR_invalidName() throws TextParseException, UnknownHostException
     {
 	m_rs.addRR(m_a1);
 	
@@ -264,7 +267,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_addRR_invalidDClass() throws TextParseException, UnknownHostException
+    void test_addRR_invalidDClass() throws TextParseException, UnknownHostException
     {
 	m_rs.addRR(m_a1);
 	
@@ -280,7 +283,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_TTLcalculation()
+    void test_TTLcalculation()
     {
 	m_rs.addRR(m_a2);
 	assertEquals(m_a2.getTTL(), m_rs.getTTL());
@@ -295,7 +298,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_Record_placement()
+    void test_Record_placement()
     {
 	m_rs.addRR(m_a1);
 	m_rs.addRR(m_s1);
@@ -315,7 +318,7 @@ public class RRsetTest
     }
 
     @Test
-    public void test_noncycling_iterator()
+    void test_noncycling_iterator()
     {
 	m_rs.addRR(m_a1);
 	m_rs.addRR(m_a2);

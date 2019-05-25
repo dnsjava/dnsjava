@@ -39,17 +39,17 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class base16Test
+class base16Test
 {
     @Test
-    public void test_toString_emptyArray()
+    void test_toString_emptyArray()
     {
 	String out = base16.toString( new byte[ 0 ] );
 	assertEquals( "", out );
     }
 
     @Test
-    public void test_toString_singleByte1()
+    void test_toString_singleByte1()
     {
 	byte[] data = { (byte)1 };
 	String out = base16.toString( data );
@@ -57,7 +57,7 @@ public class base16Test
     }
 
     @Test
-    public void test_toString_singleByte2()
+    void test_toString_singleByte2()
     {
 	byte[] data = { (byte)16 };
 	String out = base16.toString( data );
@@ -65,7 +65,7 @@ public class base16Test
     }
 
     @Test
-    public void test_toString_singleByte3()
+    void test_toString_singleByte3()
     {
 	byte[] data = { (byte)255 };
 	String out = base16.toString( data );
@@ -73,7 +73,7 @@ public class base16Test
     }
 
     @Test
-    public void test_toString_array1()
+    void test_toString_array1()
     {
 	byte[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 	String out = base16.toString( data );
@@ -81,7 +81,7 @@ public class base16Test
     }
 
     @Test
-    public void test_fromString_emptyString()
+    void test_fromString_emptyString()
     {
 	String data = "";
 	byte[] out = base16.fromString( data );
@@ -89,7 +89,7 @@ public class base16Test
     }
 
     @Test
-    public void test_fromString_invalidStringLength()
+    void test_fromString_invalidStringLength()
     {
 	String data = "1";
 	byte[] out = base16.fromString( data );
@@ -97,7 +97,7 @@ public class base16Test
     }
 
     @Test
-    public void test_fromString_nonHexChars()
+    void test_fromString_nonHexChars()
     {
 	String data = "GG";
 	byte[] out = base16.fromString( data );
@@ -108,7 +108,7 @@ public class base16Test
     }
 
     @Test
-    public void test_fromString_normal()
+    void test_fromString_normal()
     {
 	String data = "0102030405060708090A0B0C0D0E0F";
 	byte[] out = base16.fromString( data );

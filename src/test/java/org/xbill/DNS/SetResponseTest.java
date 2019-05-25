@@ -48,10 +48,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SetResponseTest
+class SetResponseTest
 {
     @Test
-    public void test_ctor_1arg()
+    void test_ctor_1arg()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
 					SetResponse.NXDOMAIN,
@@ -75,7 +75,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ctor_1arg_toosmall()
+    void test_ctor_1arg_toosmall()
     {
 	try {
 	    new SetResponse(-1);
@@ -85,7 +85,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ctor_1arg_toobig()
+    void test_ctor_1arg_toobig()
     {
 	try {
 	    new SetResponse(7);
@@ -95,7 +95,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ctor_2arg()
+    void test_ctor_2arg()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
 					SetResponse.NXDOMAIN,
@@ -120,7 +120,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ctor_2arg_toosmall()
+    void test_ctor_2arg_toosmall()
     {
 	try {
 	    new SetResponse(-1, new RRset());
@@ -130,7 +130,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ctor_2arg_toobig()
+    void test_ctor_2arg_toobig()
     {
 	try {
 	    new SetResponse(7, new RRset());
@@ -140,7 +140,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ofType_basic()
+    void test_ofType_basic()
     {
 	final int[] types = new int[] { SetResponse.DELEGATION,
 					SetResponse.CNAME,
@@ -164,7 +164,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ofType_singleton()
+    void test_ofType_singleton()
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
 					SetResponse.NXDOMAIN,
@@ -187,7 +187,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ofType_toosmall()
+    void test_ofType_toosmall()
     {
 	try {
 	    SetResponse.ofType(-1);
@@ -197,7 +197,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_ofType_toobig()
+    void test_ofType_toobig()
     {
 	try {
 	    SetResponse.ofType(7);
@@ -207,7 +207,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_addRRset() throws TextParseException, UnknownHostException
+    void test_addRRset() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
 	rrs.addRR(new ARecord(Name.fromString("The.Name."),
@@ -226,7 +226,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_addRRset_multiple() throws TextParseException, UnknownHostException
+    void test_addRRset_multiple() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
 	rrs.addRR(new ARecord(Name.fromString("The.Name."),
@@ -257,14 +257,14 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_answers_nonSUCCESSFUL()
+    void test_answers_nonSUCCESSFUL()
     {
 	SetResponse sr = new SetResponse(SetResponse.UNKNOWN, new RRset());
 	assertNull(sr.answers());
     }
 
     @Test
-    public void test_getCNAME() throws TextParseException, UnknownHostException
+    void test_getCNAME() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
 	CNAMERecord cr = new CNAMERecord(Name.fromString("The.Name."),
@@ -277,7 +277,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_getDNAME() throws TextParseException, UnknownHostException
+    void test_getDNAME() throws TextParseException, UnknownHostException
     {
 	RRset rrs = new RRset();
 	DNAMERecord dr = new DNAMERecord(Name.fromString("The.Name."),
@@ -290,7 +290,7 @@ public class SetResponseTest
     }
 
     @Test
-    public void test_toString() throws TextParseException, UnknownHostException
+    void test_toString() throws TextParseException, UnknownHostException
     {
 	final int[] types = new int[] { SetResponse.UNKNOWN,
 					SetResponse.NXDOMAIN,

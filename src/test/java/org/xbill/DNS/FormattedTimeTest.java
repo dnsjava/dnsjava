@@ -44,10 +44,10 @@ import java.util.TimeZone;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class FormattedTimeTest
+class FormattedTimeTest
 {
     @Test
-    public void test_format()
+    void test_format()
     {
 	GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
 	cal.set(2005, 2, 19, 4, 4, 5);
@@ -56,7 +56,7 @@ public class FormattedTimeTest
     }
 
     @Test
-    public void test_parse() throws TextParseException
+    void test_parse() throws TextParseException
     {
 	// have to make sure to clear out the milliseconds since there
 	// is occasionally a difference between when cal and cal2 are
@@ -73,7 +73,7 @@ public class FormattedTimeTest
     }
 
     @Test
-    public void test_parse_invalid()
+    void test_parse_invalid()
     {
 	try {
 	    FormattedTime.parse("2004010101010");

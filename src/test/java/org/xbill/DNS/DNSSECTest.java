@@ -7,12 +7,12 @@ import org.xbill.DNS.DNSSEC.DNSSECException;
 import java.io.IOException;
 import java.util.Date;
 
-public class DNSSECTest 
+class DNSSECTest 
 {
 	private TXTRecord txt = new TXTRecord(Name.root, DClass.IN, 3600, "test");
 
     @Test
-	public void testECDSALeadingZeroUndersize() throws IOException, DNSSECException
+    void testECDSALeadingZeroUndersize() throws IOException, DNSSECException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
 			"256 3 13 HgcQzDrxDm641ASGyEF0MXrjDji4XDnWzjrY9VoIn5GfAvHpuqI2W8yihplAz6C/56Zxq1XbAHjLZATfhZFmaA==", Name.root);
@@ -26,7 +26,7 @@ public class DNSSECTest
 	}
 
     @Test
-	public void testECDSALeadingZeroOversize() throws IOException, DNSSECException
+    void testECDSALeadingZeroOversize() throws IOException, DNSSECException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
 			"256 3 13 OYt2tO1n75q/Wb6CglqPVrU22f02clZehWamgXc9ZGPhVMAerzPR9/bhf1XxtC3xAR9riVuGh9CEPVvmiNqukQ==", Name.root);
@@ -40,7 +40,7 @@ public class DNSSECTest
 	}
 
     @Test
-	public void testDSALeadingZeroUndersize() throws DNSSECException, IOException
+    void testDSALeadingZeroUndersize() throws DNSSECException, IOException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
 			"256 3 3 AJYu3cw2nLqOuyYO5rahJtk0bjjF/KaCzo4Syrom78z3EQ5SbbB4sF7ey80etKII864WF64B81uRpH5t9jQTxeEu0ImbzRMqzVDZkVG9xD7nN1kuF2eEcbJ6nPRO6RpJxRR9samq8kTwWkNNZIaTHS0UJxueNQMLcf1z2heQabMuKTVjDhwgYjVNDaIKbEFuUL55TKRAt3Xr7t5zCMLaujMvqNHOzCFEusXN5mXjJqAj8J0l4B4tbL7M4iIFZeXJDXGCEcsBbNrVAfFnlOO06B6dkB8L", Name.root);
@@ -54,7 +54,7 @@ public class DNSSECTest
 	}
 
     @Test
-	public void testDSALeadingZeroOversize() throws DNSSECException, IOException
+    void testDSALeadingZeroOversize() throws DNSSECException, IOException
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
 			"256 3 3 AJYu3cw2nLqOuyYO5rahJtk0bjjF/KaCzo4Syrom78z3EQ5SbbB4sF7ey80etKII864WF64B81uRpH5t9jQTxeEu0ImbzRMqzVDZkVG9xD7nN1kuF2eEcbJ6nPRO6RpJxRR9samq8kTwWkNNZIaTHS0UJxueNQMLcf1z2heQabMuKTVjDhwgYjVNDaIKbEFuUL55TKQflphJYUXcb2M3wKNGoXP7NufzhfVaDtiS44waWjC8IN98Ab+SPPfM4+xgTsgzWt8KvzL8hhqSW+4+5zjiQ6UG", Name.root);

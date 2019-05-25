@@ -42,10 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MXRecordTest
+class MXRecordTest
 {
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	MXRecord d = new MXRecord();
 	Record r = d.getObject();
@@ -53,7 +53,7 @@ public class MXRecordTest
     }
 
     @Test
-    public void test_ctor_5arg() throws TextParseException
+    void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("My.OtherName.");
@@ -69,7 +69,7 @@ public class MXRecordTest
     }
 
     @Test
-    public void test_rrToWire() throws TextParseException
+    void test_rrToWire() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("M.O.n.");

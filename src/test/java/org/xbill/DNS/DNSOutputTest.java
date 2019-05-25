@@ -41,25 +41,25 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class DNSOutputTest
+class DNSOutputTest
 {
     private DNSOutput m_do;
 
    @BeforeEach
-   public void setUp()
+   void setUp()
     {
 	m_do = new DNSOutput( 1 );
     }
 
     @Test
-    public void test_default_ctor()
+    void test_default_ctor()
     {
 	m_do = new DNSOutput();
 	assertEquals( 0, m_do.current() );
     }
 
     @Test
-    public void test_initial_state()
+    void test_initial_state()
     {
 	assertEquals( 0, m_do.current() );
 	try {
@@ -79,7 +79,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU8_basic()
+    void test_writeU8_basic()
     {
 	m_do.writeU8(1);
 	assertEquals( 1, m_do.current() );
@@ -90,7 +90,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU8_expand()
+    void test_writeU8_expand()
     {
 	// starts off at 1;
 	m_do.writeU8(1);
@@ -105,7 +105,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU8_max()
+    void test_writeU8_max()
     {
 	m_do.writeU8(0xFF);
 	byte[] curr = m_do.toByteArray();
@@ -113,7 +113,7 @@ public class DNSOutputTest
     }
     
     @Test
-    public void test_writeU8_toobig()
+    void test_writeU8_toobig()
     {
 	try {
 	    m_do.writeU8( 0x1FF );
@@ -125,7 +125,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU16_basic()
+    void test_writeU16_basic()
     {
 	m_do.writeU16(0x100);
 	assertEquals( 2, m_do.current() );
@@ -137,7 +137,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU16_max()
+    void test_writeU16_max()
     {
 	m_do.writeU16(0xFFFF);
 	byte[] curr = m_do.toByteArray();
@@ -146,7 +146,7 @@ public class DNSOutputTest
     }
     
     @Test
-    public void test_writeU16_toobig()
+    void test_writeU16_toobig()
     {
 	try {
 	    m_do.writeU16( 0x1FFFF );
@@ -158,7 +158,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU32_basic()
+    void test_writeU32_basic()
     {
 	m_do.writeU32(0x11001011);
 	assertEquals( 4, m_do.current() );
@@ -172,7 +172,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeU32_max()
+    void test_writeU32_max()
     {
 	m_do.writeU32(0xFFFFFFFFL);
 	byte[] curr = m_do.toByteArray();
@@ -183,7 +183,7 @@ public class DNSOutputTest
     }
     
     @Test
-    public void test_writeU32_toobig()
+    void test_writeU32_toobig()
     {
 	try {
 	    m_do.writeU32( 0x1FFFFFFFFL );
@@ -195,7 +195,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_jump_basic()
+    void test_jump_basic()
     {
 	m_do.writeU32(0x11223344L);
 	assertEquals( 4, m_do.current() );
@@ -211,7 +211,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeByteArray_1arg()
+    void test_writeByteArray_1arg()
     {
 	byte[] in = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, (byte)0x12, (byte)0x34 };
 	m_do.writeByteArray( in );
@@ -221,7 +221,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeByteArray_3arg()
+    void test_writeByteArray_3arg()
     {
 	byte[] in = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, (byte)0x12, (byte)0x34 };
 	m_do.writeByteArray( in, 2, 3 );
@@ -232,7 +232,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeCountedString_basic()
+    void test_writeCountedString_basic()
     {
 	byte[] in = new byte[] { 'h', 'e', 'l', 'L', '0' };
 	m_do.writeCountedString( in );
@@ -243,7 +243,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeCountedString_empty()
+    void test_writeCountedString_empty()
     {
 	byte[] in = new byte[] {};
 	m_do.writeCountedString( in );
@@ -254,7 +254,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_writeCountedString_toobig()
+    void test_writeCountedString_toobig()
     {
 	byte[] in = new byte [ 256 ];
 	try {
@@ -267,7 +267,7 @@ public class DNSOutputTest
     }
 
     @Test
-    public void test_save_restore()
+    void test_save_restore()
     {
 	m_do.writeU32( 0x12345678L );
 	assertEquals( 4, m_do.current() );

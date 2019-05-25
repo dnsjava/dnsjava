@@ -43,10 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EmptyRecordTest
+class EmptyRecordTest
 {
     @Test
-    public void test_ctor() throws UnknownHostException
+    void test_ctor() throws UnknownHostException
     {
 	EmptyRecord ar = new EmptyRecord();
 	assertNull(ar.getName());
@@ -56,7 +56,7 @@ public class EmptyRecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	EmptyRecord ar = new EmptyRecord();
 	Record r = ar.getObject();
@@ -64,7 +64,7 @@ public class EmptyRecordTest
     }
 
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
 	DNSInput i = new DNSInput(new byte[] { 1, 2, 3, 4, 5 });
 	i.jump(3);
@@ -79,7 +79,7 @@ public class EmptyRecordTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException
+    void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer("these are the tokens");
 	EmptyRecord er = new EmptyRecord();
@@ -93,14 +93,14 @@ public class EmptyRecordTest
     }
 
     @Test
-    public void test_rrToString()
+    void test_rrToString()
     {
 	EmptyRecord er = new EmptyRecord();
 	assertEquals("", er.rrToString());
     }
 
     @Test
-    public void test_rrToWire()
+    void test_rrToWire()
     {
 	EmptyRecord er = new EmptyRecord();
 	DNSOutput out = new DNSOutput();

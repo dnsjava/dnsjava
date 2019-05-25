@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class NSAP_PTRRecordTest
+class NSAP_PTRRecordTest
 {
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	NSAP_PTRRecord d = new NSAP_PTRRecord();
 	assertNull(d.getName());
@@ -51,7 +51,7 @@ public class NSAP_PTRRecordTest
     }
 
     @Test
-    public void test_ctor_4arg() throws TextParseException
+    void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	Name a = Name.fromString("my.alias.");
@@ -65,7 +65,7 @@ public class NSAP_PTRRecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	NSAP_PTRRecord d = new NSAP_PTRRecord();
 	Record r = d.getObject();

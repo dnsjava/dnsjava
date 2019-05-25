@@ -37,21 +37,21 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TypeBitmapTest {
+class TypeBitmapTest {
     @Test
-    public void test_empty() {
+    void test_empty() {
       TypeBitmap typeBitmap = new TypeBitmap(new int[]{});
       assertEquals(typeBitmap.toString(), "");
     }
     
     @Test
-    public void test_typeA() {
+    void test_typeA() {
       TypeBitmap typeBitmap = new TypeBitmap(new int[]{1});
       assertEquals(typeBitmap.toString(), "A");
     }
     
     @Test
-    public void test_typeNSandSOA() {
+    void test_typeNSandSOA() {
       TypeBitmap typeBitmap = new TypeBitmap(new int[]{2, 6});
       assertEquals(typeBitmap.toString(), "NS SOA");
     }

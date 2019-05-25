@@ -41,27 +41,27 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class DNSInputTest
+class DNSInputTest
 {
     private byte[]	m_raw;
     private DNSInput	m_di;
 
    @BeforeEach
-   public void setUp()
+   void setUp()
     {
 	m_raw = new byte[] { 0, 1, 2, 3, 4, 5, (byte)255, (byte)255, (byte)255, (byte)255 };
 	m_di = new DNSInput( m_raw );
     }
 
     @Test
-    public void test_initial_state()
+    void test_initial_state()
     {
 	assertEquals( 0, m_di.current() );
 	assertEquals( 10, m_di.remaining() );
     }
 
     @Test
-    public void test_jump1()
+    void test_jump1()
     {
 	m_di.jump( 1 );
 	assertEquals( 1, m_di.current() );
@@ -69,7 +69,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_jump2()
+    void test_jump2()
     {
 	m_di.jump( 9 );
 	assertEquals( 9, m_di.current() );
@@ -77,7 +77,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_jump_invalid()
+    void test_jump_invalid()
     {
 	try {
 	    m_di.jump( 10 );
@@ -89,7 +89,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_setActive()
+    void test_setActive()
     {
 	m_di.setActive( 5 );
 	assertEquals( 0, m_di.current() );
@@ -97,7 +97,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_setActive_boundary1()
+    void test_setActive_boundary1()
     {
 	m_di.setActive( 10 );
 	assertEquals( 0, m_di.current() );
@@ -105,7 +105,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_setActive_boundary2()
+    void test_setActive_boundary2()
     {
 	m_di.setActive( 0 );
 	assertEquals( 0, m_di.current() );
@@ -113,7 +113,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_setActive_invalid()
+    void test_setActive_invalid()
     {
 	try {
 	    m_di.setActive( 11 );
@@ -125,7 +125,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_clearActive()
+    void test_clearActive()
     {
 	// first without setting active:
 	m_di.clearActive();
@@ -139,7 +139,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_restore_invalid()
+    void test_restore_invalid()
     {
 	try {
 	    m_di.restore();
@@ -151,7 +151,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_save_restore()
+    void test_save_restore()
     {
 	m_di.jump( 4 );
 	assertEquals( 4, m_di.current() );
@@ -168,7 +168,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readU8_basic() throws WireParseException
+    void test_readU8_basic() throws WireParseException
     {
 	int v1 = m_di.readU8();
 	assertEquals( 1, m_di.current() );
@@ -177,7 +177,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readU8_maxval() throws WireParseException
+    void test_readU8_maxval() throws WireParseException
     {
 	m_di.jump( 9 );
 	int v1 = m_di.readU8();
@@ -195,7 +195,7 @@ public class DNSInputTest
     }
     
     @Test
-    public void test_readU16_basic() throws WireParseException
+    void test_readU16_basic() throws WireParseException
     {
 	int v1 = m_di.readU16();
 	assertEquals( 2, m_di.current() );
@@ -208,7 +208,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readU16_maxval() throws WireParseException
+    void test_readU16_maxval() throws WireParseException
     {
 	m_di.jump(8);
 	int v = m_di.readU16();
@@ -227,7 +227,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readU32_basic() throws WireParseException
+    void test_readU32_basic() throws WireParseException
     {
 	long v1 = m_di.readU32();
 	assertEquals( 4, m_di.current() );
@@ -236,7 +236,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readU32_maxval() throws WireParseException
+    void test_readU32_maxval() throws WireParseException
     {
 	m_di.jump(6);
 	long v = m_di.readU32();
@@ -255,7 +255,7 @@ public class DNSInputTest
     }
     
     @Test
-    public void test_readByteArray_0arg() throws WireParseException
+    void test_readByteArray_0arg() throws WireParseException
     {
 	m_di.jump( 1 );
 	byte[] out = m_di.readByteArray();
@@ -268,7 +268,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readByteArray_0arg_boundary() throws WireParseException
+    void test_readByteArray_0arg_boundary() throws WireParseException
     {
 	m_di.jump(9);
 	m_di.readU8();
@@ -277,7 +277,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readByteArray_1arg() throws WireParseException
+    void test_readByteArray_1arg() throws WireParseException
     {
 	byte[] out = m_di.readByteArray( 2 );
 	assertEquals( 2, m_di.current() );
@@ -288,7 +288,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readByteArray_1arg_boundary() throws WireParseException
+    void test_readByteArray_1arg_boundary() throws WireParseException
     {
 	byte[] out = m_di.readByteArray( 10 );
 	assertEquals( 10, m_di.current() );
@@ -297,7 +297,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readByteArray_1arg_invalid()
+    void test_readByteArray_1arg_invalid()
     {
 	try {
 	    m_di.readByteArray( 11 );
@@ -309,7 +309,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readByteArray_3arg() throws WireParseException
+    void test_readByteArray_3arg() throws WireParseException
     {
 	byte[] data = new byte [ 5 ];
 	m_di.jump(4);
@@ -323,7 +323,7 @@ public class DNSInputTest
     }
 
     @Test
-    public void test_readCountedSting() throws WireParseException
+    void test_readCountedSting() throws WireParseException
     {
 	m_di.jump( 1 );
 	byte[] out = m_di.readCountedString();

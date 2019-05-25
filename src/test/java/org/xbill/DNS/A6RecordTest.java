@@ -48,17 +48,20 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class A6RecordTest
+class A6RecordTest
 {
-    Name m_an, m_an2, m_rn;
-    InetAddress m_addr;
-    String m_addr_string, m_addr_string_canonical;
-    byte[] m_addr_bytes;
-    int m_prefix_bits;
-    long m_ttl;
+    private Name m_an;
+	private Name m_an2;
+	private Name m_rn;
+    private InetAddress m_addr;
+    private String m_addr_string;
+	private String m_addr_string_canonical;
+    private byte[] m_addr_bytes;
+    private int m_prefix_bits;
+    private long m_ttl;
 
    @BeforeEach
-   public void setUp() throws TextParseException,
+   void setUp() throws TextParseException,
 				  UnknownHostException
     {
 	m_an = Name.fromString("My.Absolute.Name.");
@@ -73,7 +76,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	A6Record ar = new A6Record();
 	assertNull(ar.getName());
@@ -83,7 +86,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	A6Record ar = new A6Record();
 	Record r = ar.getObject();
@@ -91,7 +94,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_ctor_6arg()
+    void test_ctor_6arg()
     {
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
 	assertEquals(m_an, ar.getName());
@@ -144,7 +147,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_rrFromWire() throws CloneNotSupportedException,
+    void test_rrFromWire() throws CloneNotSupportedException,
 					 IOException,
 					 UnknownHostException
     {
@@ -179,7 +182,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_rdataFromString() throws CloneNotSupportedException,
+    void test_rdataFromString() throws CloneNotSupportedException,
 					      IOException,
 					      UnknownHostException
     {
@@ -221,7 +224,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_rrToString()
+    void test_rrToString()
     {
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
 	String exp = "" + m_prefix_bits + " " + m_addr_string_canonical + " " + m_an2;
@@ -230,7 +233,7 @@ public class A6RecordTest
     }
 
     @Test
-    public void test_rrToWire()
+    void test_rrToWire()
     {
 	// canonical form
 	A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);

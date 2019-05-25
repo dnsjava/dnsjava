@@ -44,18 +44,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SingleNameBaseTest
+class SingleNameBaseTest
 {
     private static class TestClass extends SingleNameBase
     {
-	public TestClass(){}
+	TestClass(){}
 
-	public TestClass(Name name, int type, int dclass, long ttl)
+	TestClass(Name name, int type, int dclass, long ttl)
 	{
 	    super(name, type, dclass, ttl);
 	}
 	
-	public TestClass(Name name, int type, int dclass, long ttl, Name singleName, String desc )
+	TestClass(Name name, int type, int dclass, long ttl, Name singleName, String desc)
 	{
 	    super(name, type, dclass, ttl, singleName, desc);
 	}
@@ -72,7 +72,7 @@ public class SingleNameBaseTest
     }
 
     @Test
-    public void test_ctor() throws TextParseException
+    void test_ctor() throws TextParseException
     {
 	TestClass tc = new TestClass();
 	assertNull(tc.getSingleName());
@@ -97,7 +97,7 @@ public class SingleNameBaseTest
     }
 
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { 2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0 };
 	DNSInput in = new DNSInput(raw);
@@ -110,7 +110,7 @@ public class SingleNameBaseTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException
+    void test_rdataFromString() throws IOException
     {
 	Name exp = Name.fromString("my.single.name.");
 
@@ -129,7 +129,7 @@ public class SingleNameBaseTest
     }
 
     @Test
-    public void test_rrToString() throws IOException, TextParseException
+    void test_rrToString() throws IOException, TextParseException
     {
 	Name exp = Name.fromString("my.single.name.");
 
@@ -143,7 +143,7 @@ public class SingleNameBaseTest
     }
 
     @Test
-    public void test_rrToWire() throws IOException, TextParseException
+    void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	Name sn = Name.fromString("My.Single.Name.");

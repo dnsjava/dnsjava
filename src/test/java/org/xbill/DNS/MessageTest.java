@@ -48,10 +48,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class MessageTest
 {
-    public static class Test_init
+    static class Test_init
     {
     @Test
-	public void test_0arg()
+    void test_0arg()
 	{
 	    Message m = new Message();
 		assertArrayEquals(new Record[0], m.getSectionArray(0));
@@ -71,7 +71,7 @@ public class MessageTest
 	}
 
     @Test
-	public void test_1arg()
+    void test_1arg()
 	{
 	    Message m = new Message(10);
 	    assertEquals(new Header(10).toString(), m.getHeader().toString());
@@ -92,7 +92,7 @@ public class MessageTest
 	}
 
     @Test
-	public void test_newQuery() throws TextParseException,
+    void test_newQuery() throws TextParseException,
 					   UnknownHostException
 	{
 	    Name n = Name.fromString("The.Name.");
@@ -115,7 +115,7 @@ public class MessageTest
 	}
 
     @Test
-        public void test_sectionToWire ()
+    void test_sectionToWire()
           throws IOException
         {
             Message m = new Message(4711);

@@ -46,10 +46,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class DNSKEYRecordTest
+class DNSKEYRecordTest
 {
     @Test
-    public void test_ctor_0arg() throws UnknownHostException
+    void test_ctor_0arg() throws UnknownHostException
     {
 	DNSKEYRecord ar = new DNSKEYRecord();
 	assertNull(ar.getName());
@@ -64,7 +64,7 @@ public class DNSKEYRecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	DNSKEYRecord ar = new DNSKEYRecord();
 	Record r = ar.getObject();
@@ -72,7 +72,7 @@ public class DNSKEYRecordTest
     }
 
     @Test
-    public void test_ctor_7arg() throws TextParseException
+    void test_ctor_7arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Absolute.Name.");
 	Name r = Name.fromString("My.Relative.Name");
@@ -97,7 +97,7 @@ public class DNSKEYRecordTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException, TextParseException
+    void test_rdataFromString() throws IOException, TextParseException
     {
 	// basic
 	DNSKEYRecord kr = new DNSKEYRecord();

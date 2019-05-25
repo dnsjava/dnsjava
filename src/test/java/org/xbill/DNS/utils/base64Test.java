@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class base64Test
+class base64Test
 {
     @Test
-    public void test_toString_empty()
+    void test_toString_empty()
     {
 	byte[] data = new byte [ 0 ];
 	String out = base64.toString( data );
@@ -51,7 +51,7 @@ public class base64Test
     }
 
     @Test
-    public void test_toString_basic1()
+    void test_toString_basic1()
     {
 	byte[] data = { 0 };
 	String out = base64.toString( data );
@@ -59,7 +59,7 @@ public class base64Test
     }
 
     @Test
-    public void test_toString_basic2()
+    void test_toString_basic2()
     {
 	byte[] data = { 0, 0 };
 	String out = base64.toString( data );
@@ -67,7 +67,7 @@ public class base64Test
     }
 
     @Test
-    public void test_toString_basic3()
+    void test_toString_basic3()
     {
 	byte[] data = { 0, 0, 1 };
 	String out = base64.toString( data );
@@ -75,7 +75,7 @@ public class base64Test
     }
 
     @Test
-    public void test_toString_basic4()
+    void test_toString_basic4()
     {
 	byte[] data = { (byte)0xFC, 0, 0 };
 	String out = base64.toString( data );
@@ -83,7 +83,7 @@ public class base64Test
     }
 
     @Test
-    public void test_toString_basic5()
+    void test_toString_basic5()
     {
 	byte[] data = { (byte)0xFF, (byte)0xFF, (byte)0xFF };
 	String out = base64.toString( data );
@@ -91,7 +91,7 @@ public class base64Test
     }
 
     @Test
-    public void test_toString_basic6()
+    void test_toString_basic6()
     {
 	byte[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	String out = base64.toString( data );
@@ -99,14 +99,14 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_empty1()
+    void test_formatString_empty1()
     {
 	String out = base64.formatString( new byte [ 0 ], 5, "", false );
 	assertEquals( "", out );
     }
 
     @Test
-    public void test_formatString_shorter()
+    void test_formatString_shorter()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 13, "", false );
@@ -114,7 +114,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_sameLength()
+    void test_formatString_sameLength()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 12, "", false );
@@ -122,7 +122,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_oneBreak()
+    void test_formatString_oneBreak()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 10, "", false );
@@ -130,7 +130,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_twoBreaks1()
+    void test_formatString_twoBreaks1()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 5, "", false );
@@ -138,7 +138,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_twoBreaks2()
+    void test_formatString_twoBreaks2()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 4, "", false );
@@ -146,7 +146,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_shorterWithPrefix()
+    void test_formatString_shorterWithPrefix()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 13, "!_", false );
@@ -154,7 +154,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_sameLengthWithPrefix()
+    void test_formatString_sameLengthWithPrefix()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 12, "!_", false );
@@ -162,7 +162,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_oneBreakWithPrefix()
+    void test_formatString_oneBreakWithPrefix()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 10, "!_", false );
@@ -170,7 +170,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_twoBreaks1WithPrefix()
+    void test_formatString_twoBreaks1WithPrefix()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 5, "!_", false );
@@ -178,7 +178,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_twoBreaks2WithPrefix()
+    void test_formatString_twoBreaks2WithPrefix()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 4, "!_", false );
@@ -186,7 +186,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_shorterWithPrefixAndClose()
+    void test_formatString_shorterWithPrefixAndClose()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 13, "!_", true );
@@ -194,7 +194,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_sameLengthWithPrefixAndClose()
+    void test_formatString_sameLengthWithPrefixAndClose()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 12, "!_", true );
@@ -202,7 +202,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_oneBreakWithPrefixAndClose()
+    void test_formatString_oneBreakWithPrefixAndClose()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 10, "!_", true );
@@ -210,7 +210,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_twoBreaks1WithPrefixAndClose()
+    void test_formatString_twoBreaks1WithPrefixAndClose()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 5, "!_", true );
@@ -218,7 +218,7 @@ public class base64Test
     }
 
     @Test
-    public void test_formatString_twoBreaks2WithPrefixAndClose()
+    void test_formatString_twoBreaks2WithPrefixAndClose()
     {
 	byte[] in = { 1, 2, 3, 4, 5, 6, 7, 8, 9 }; // "AQIDBAUGBwgJ" (12 chars)
 	String out = base64.formatString( in, 4, "!_", true );
@@ -226,7 +226,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_empty1()
+    void test_fromString_empty1()
     {
 	byte[] data = new byte [ 0 ];
 	byte[] out = base64.fromString( "" );
@@ -234,7 +234,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_basic1()
+    void test_fromString_basic1()
     {
 	byte[] exp = { 0 };
 	byte [] out = base64.fromString( "AA==" );
@@ -242,7 +242,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_basic2()
+    void test_fromString_basic2()
     {
 	byte[] exp = { 0, 0 };
 	byte[] out = base64.fromString( "AAA=" );
@@ -250,7 +250,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_basic3()
+    void test_fromString_basic3()
     {
 	byte[] exp = { 0, 0, 1 };
 	byte[] out = base64.fromString( "AAAB" );
@@ -258,7 +258,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_basic4()
+    void test_fromString_basic4()
     {
 	byte[] exp = { (byte)0xFC, 0, 0 };
 	byte[] out = base64.fromString( "/AAA" );
@@ -266,7 +266,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_basic5()
+    void test_fromString_basic5()
     {
 	byte[] exp = { (byte)0xFF, (byte)0xFF, (byte)0xFF };
 	byte[] out = base64.fromString( "////" );
@@ -274,7 +274,7 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_basic6()
+    void test_fromString_basic6()
     {
 	byte[] exp = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 	byte[] out = base64.fromString( "AQIDBAUGBwgJ" );
@@ -282,35 +282,35 @@ public class base64Test
     }
 
     @Test
-    public void test_fromString_invalid1()
+    void test_fromString_invalid1()
     {
 	byte[] out = base64.fromString( "AAA" );
 	assertNull( out );
     }
 
     @Test
-    public void test_fromString_invalid2()
+    void test_fromString_invalid2()
     {
 	byte[] out = base64.fromString( "AA" );
 	assertNull( out );
     }
 
     @Test
-    public void test_fromString_invalid3()
+    void test_fromString_invalid3()
     {
 	byte[] out = base64.fromString( "A" );
 	assertNull( out );
     }
 
     @Test
-    public void test_fromString_invalid4()
+    void test_fromString_invalid4()
     {
 	byte[] out = base64.fromString( "BB==" );
 	assertNull( out );
     }
 
     @Test
-    public void test_fromString_invalid5()
+    void test_fromString_invalid5()
     {
 	byte[] out = base64.fromString( "BBB=" );
 	assertNull( out );

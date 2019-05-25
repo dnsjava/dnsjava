@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class OpcodeTest
+class OpcodeTest
 {
     @Test
-    public void test_string()
+    void test_string()
     {
 	// a regular one
 	assertEquals("IQUERY", Opcode.string(Opcode.IQUERY));
@@ -68,7 +68,7 @@ public class OpcodeTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	// regular one
 	assertEquals(Opcode.STATUS, Opcode.value("STATUS"));

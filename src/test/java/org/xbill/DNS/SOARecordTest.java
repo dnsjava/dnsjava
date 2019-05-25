@@ -62,13 +62,13 @@ public class SOARecordTest
 	return m_random.nextLong() >>> 32;
     }
 
-    public static class Test_init
+    static class Test_init
     {
 	private Name m_an, m_rn, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
    @BeforeEach
-   public void setUp() throws TextParseException,
+   void setUp() throws TextParseException,
 				      UnknownHostException
 	{
 	    m_an = Name.fromString("My.Absolute.Name.");
@@ -84,7 +84,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_0arg() throws UnknownHostException
+    void test_0arg() throws UnknownHostException
 	{
 	    SOARecord ar = new SOARecord();
 	    assertNull(ar.getName());
@@ -101,7 +101,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_getObject()
+    void test_getObject()
 	{
 	    SOARecord ar = new SOARecord();
 	    Record r = ar.getObject();
@@ -109,7 +109,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg()
+    void test_10arg()
 	{
 	    SOARecord ar = new SOARecord(m_an, DClass.IN, m_ttl,
 					 m_host, m_admin, m_serial, m_refresh,
@@ -128,7 +128,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_relative_name()
+    void test_10arg_relative_name()
 	{
 	    try {
 		new SOARecord(m_rn, DClass.IN, m_ttl,
@@ -140,7 +140,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_relative_host()
+    void test_10arg_relative_host()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -152,7 +152,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_relative_admin()
+    void test_10arg_relative_admin()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -164,7 +164,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_negative_serial()
+    void test_10arg_negative_serial()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -176,7 +176,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_toobig_serial()
+    void test_10arg_toobig_serial()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -188,7 +188,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_negative_refresh()
+    void test_10arg_negative_refresh()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -200,7 +200,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_toobig_refresh()
+    void test_10arg_toobig_refresh()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -212,7 +212,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_negative_retry()
+    void test_10arg_negative_retry()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -224,7 +224,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_toobig_retry()
+    void test_10arg_toobig_retry()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -236,7 +236,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_negative_expire()
+    void test_10arg_negative_expire()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -248,7 +248,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_toobig_expire()
+    void test_10arg_toobig_expire()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -260,7 +260,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_negative_minimun()
+    void test_10arg_negative_minimun()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -272,7 +272,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_10arg_toobig_minimum()
+    void test_10arg_toobig_minimum()
 	{
 	    try {
 		new SOARecord(m_an, DClass.IN, m_ttl,
@@ -284,13 +284,13 @@ public class SOARecordTest
 	}
     }
 
-    public static class Test_rrFromWire
+    static class Test_rrFromWire
     {
 	private Name m_host, m_admin;
 	private long m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
    @BeforeEach
-   public void setUp() throws TextParseException,
+   void setUp() throws TextParseException,
 				      UnknownHostException
 	{
 	    m_host = Name.fromString("M.h.N.");
@@ -303,7 +303,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test() throws IOException
+    void test() throws IOException
 	{
 	    byte[] raw = new byte[] {
 		1, 'm', 1, 'h', 1, 'n', 0, // host
@@ -329,13 +329,13 @@ public class SOARecordTest
 	}
     }
 
-    public static class Test_rdataFromString
+    static class Test_rdataFromString
     {
 	private Name m_host, m_admin, m_origin;
 	private long m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
    @BeforeEach
-   public void setUp() throws TextParseException,
+   void setUp() throws TextParseException,
 				      UnknownHostException
 	{
 	    m_origin = Name.fromString("O.");
@@ -349,7 +349,7 @@ public class SOARecordTest
 	}
 	
     @Test
-	public void test_valid() throws IOException
+    void test_valid() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("M.h " + m_admin + " " +
 					m_serial + " " +
@@ -371,7 +371,7 @@ public class SOARecordTest
 	}
 
     @Test
-	public void test_relative_name() throws IOException
+    void test_relative_name() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("M.h " + m_admin + " " +
 					m_serial + " " +
@@ -389,13 +389,13 @@ public class SOARecordTest
 	}
     }
 
-    public static class Test_rrToString
+    static class Test_rrToString
     {
 	private Name m_an, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
    @BeforeEach
-   public void setUp() throws TextParseException
+   void setUp() throws TextParseException
 	{
 	    m_an = Name.fromString("My.absolute.name.");
 	    m_ttl = 0x13A8;
@@ -409,7 +409,7 @@ public class SOARecordTest
 	}
 
     @Test
-	public void test_singleLine()
+    void test_singleLine()
 	{
 	    SOARecord ar = new SOARecord(m_an, DClass.IN, m_ttl,
 					 m_host, m_admin, m_serial, m_refresh,
@@ -423,7 +423,7 @@ public class SOARecordTest
 	}
 
     @Test
-	public void test_multiLine()
+    void test_multiLine()
 	{
 	    SOARecord ar = new SOARecord(m_an, DClass.IN, m_ttl,
 					 m_host, m_admin, m_serial, m_refresh,
@@ -443,13 +443,13 @@ public class SOARecordTest
 	}
     }
 
-    public static class Test_rrToWire
+    static class Test_rrToWire
     {
 	private Name m_an, m_host, m_admin;
 	private long m_ttl, m_serial, m_refresh, m_retry, m_expire, m_minimum;
 
    @BeforeEach
-   public void setUp() throws TextParseException
+   void setUp() throws TextParseException
 	{
 	    m_an = Name.fromString("My.Abs.Name.");
 	    m_ttl = 0x13A8;
@@ -463,7 +463,7 @@ public class SOARecordTest
 	}
 
     @Test
-	public void test_canonical()
+    void test_canonical()
 	{
 	    byte[] exp = new byte[] {
 		1, 'm', 1, 'h', 1, 'n', 0, // host
@@ -484,7 +484,7 @@ public class SOARecordTest
 	}
 
     @Test
-	public void test_case_sensitive()
+    void test_case_sensitive()
 	{
 	    byte[] exp = new byte[] {
 		1, 'M', 1, 'h', 1, 'N', 0, // host

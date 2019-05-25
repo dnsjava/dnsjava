@@ -13,23 +13,23 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-public class DNSSECWithProviderTest {
+class DNSSECWithProviderTest {
 
 	private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
 	private static final String KEY_ALGORITHM = "RSA";
 	int algorithm = Algorithm.RSASHA1;
-	byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();
+	private byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();
 
    @BeforeEach
-   public void setUp() {
+   void setUp() {
 	}
 
    @AfterEach
-   public void tearDown() {
+   void tearDown() {
 	}
 
     @Test
-	public void testSignSoftware() throws Exception {
+    void testSignSoftware() throws Exception {
 
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM);
 		keyPairGenerator.initialize(512);

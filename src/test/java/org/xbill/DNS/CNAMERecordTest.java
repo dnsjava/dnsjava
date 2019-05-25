@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CNAMERecordTest
+class CNAMERecordTest
 {
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	CNAMERecord d = new CNAMERecord();
 	assertNull(d.getName());
@@ -52,7 +52,7 @@ public class CNAMERecordTest
     }
 
     @Test
-    public void test_ctor_4arg() throws TextParseException
+    void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	Name a = Name.fromString("my.alias.");
@@ -67,7 +67,7 @@ public class CNAMERecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	CNAMERecord d = new CNAMERecord();
 	Record r = d.getObject();

@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class SerialTest
+class SerialTest
 {
     @Test
-    public void test_compare_NegativeArg1()
+    void test_compare_NegativeArg1()
     {
 	long arg1 = -1;
 	long arg2 = 1;
@@ -57,7 +57,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_OOBArg1()
+    void test_compare_OOBArg1()
     {
 	long arg1 = 0xFFFFFFFFL + 1;
 	long arg2 = 1;
@@ -71,7 +71,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_NegativeArg2()
+    void test_compare_NegativeArg2()
     {
 	long arg1 = 1;
 	long arg2 = -1;
@@ -85,7 +85,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_OOBArg2()
+    void test_compare_OOBArg2()
     {
 	long arg1 = 1;
 	long arg2 = 0xFFFFFFFFL + 1;
@@ -99,7 +99,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_Arg1Greater()
+    void test_compare_Arg1Greater()
     {
 	long arg1 = 10;
 	long arg2 = 9;
@@ -108,7 +108,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_Arg2Greater()
+    void test_compare_Arg2Greater()
     {
 	long arg1 = 9;
 	long arg2 = 10;
@@ -117,7 +117,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_ArgsEqual()
+    void test_compare_ArgsEqual()
     {
 	long arg1 = 10;
 	long arg2 = 10;
@@ -126,7 +126,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_compare_boundary()
+    void test_compare_boundary()
     {
 	long arg1 = 0xFFFFFFFFL;
 	long arg2 = 0;
@@ -137,7 +137,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_increment_NegativeArg()
+    void test_increment_NegativeArg()
     {
 	long arg = -1;
 	try {
@@ -150,7 +150,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_increment_OOBArg()
+    void test_increment_OOBArg()
     {
 	long arg = 0xFFFFFFFFL + 1;
 	try {
@@ -163,7 +163,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_increment_reset()
+    void test_increment_reset()
     {
 	long arg = 0xFFFFFFFFL;
 	long ret = Serial.increment( arg );
@@ -171,7 +171,7 @@ public class SerialTest
     }
 
     @Test
-    public void test_increment_normal()
+    void test_increment_normal()
     {
 	long arg = 10;
 	long ret = Serial.increment( arg );

@@ -39,16 +39,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CompressionTest
+class CompressionTest
 {
    @BeforeEach
-   public void setUp()
+   void setUp()
     {
 	Options.set("verbosecompression");
     }
 
     @Test
-    public void test() throws TextParseException
+    void test() throws TextParseException
     {
 	Compression c = new Compression();
 	Name n = Name.fromString("www.amazon.com.");

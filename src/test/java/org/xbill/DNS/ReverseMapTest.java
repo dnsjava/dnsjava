@@ -42,10 +42,10 @@ import java.net.UnknownHostException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ReverseMapTest
+class ReverseMapTest
 {
     @Test
-    public void test_fromAddress_ipv4() throws UnknownHostException,
+    void test_fromAddress_ipv4() throws UnknownHostException,
 						    TextParseException
     {
 	Name exp = Name.fromString("1.0.168.192.in-addr.arpa.");
@@ -59,7 +59,7 @@ public class ReverseMapTest
     }
 
     @Test
-    public void test_fromAddress_ipv6() throws UnknownHostException,
+    void test_fromAddress_ipv6() throws UnknownHostException,
 						    TextParseException
     {
 	Name exp = Name.fromString("4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa.");
@@ -79,7 +79,7 @@ public class ReverseMapTest
     }
 
     @Test
-    public void test_fromAddress_invalid()
+    void test_fromAddress_invalid()
     {
 	try {
 	    ReverseMap.fromAddress("A.B.C.D", Address.IPv4);

@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class RcodeTest
+class RcodeTest
 {
     @Test
-    public void test_string()
+    void test_string()
     {
 	// a regular one
 	assertEquals("NXDOMAIN", Rcode.string(Rcode.NXDOMAIN));
@@ -71,7 +71,7 @@ public class RcodeTest
     }
 
     @Test
-    public void test_TSIGstring()
+    void test_TSIGstring()
     {
 	// a regular one
 	assertEquals("BADSIG", Rcode.TSIGstring(Rcode.BADSIG));
@@ -96,7 +96,7 @@ public class RcodeTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	// regular one
 	assertEquals(Rcode.FORMERR, Rcode.value("FORMERR"));

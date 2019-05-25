@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MBRecordTest
+class MBRecordTest
 {
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	MBRecord d = new MBRecord();
 	assertNull(d.getName());
@@ -52,7 +52,7 @@ public class MBRecordTest
     }
 
     @Test
-    public void test_ctor_4arg() throws TextParseException
+    void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	Name a = Name.fromString("my.alias.");
@@ -67,7 +67,7 @@ public class MBRecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	MBRecord d = new MBRecord();
 	Record r = d.getObject();

@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class DClassTest
+class DClassTest
 {
     @Test
-    public void test_string()
+    void test_string()
     {
 	// a regular one
 	assertEquals("IN", DClass.string(DClass.IN));
@@ -71,7 +71,7 @@ public class DClassTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	// regular one
 	assertEquals(DClass.NONE, DClass.value("NONE"));

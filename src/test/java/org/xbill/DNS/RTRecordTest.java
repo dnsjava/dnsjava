@@ -39,10 +39,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RTRecordTest
+class RTRecordTest
 {
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	RTRecord d = new RTRecord();
 	Record r = d.getObject();
@@ -50,7 +50,7 @@ public class RTRecordTest
     }
 
     @Test
-    public void test_ctor_5arg() throws TextParseException
+    void test_ctor_5arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("My.OtherName.");

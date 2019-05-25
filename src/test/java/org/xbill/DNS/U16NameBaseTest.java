@@ -46,19 +46,19 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class U16NameBaseTest
+class U16NameBaseTest
 {
     private static class TestClass extends U16NameBase
     {
-	public TestClass(){}
+	TestClass(){}
 
-	public TestClass(Name name, int type, int dclass, long ttl)
+	TestClass(Name name, int type, int dclass, long ttl)
 	{
 	    super(name, type, dclass, ttl);
 	}
 	
-	public TestClass(Name name, int type, int dclass, long ttl, int u16Field,
-			 String u16Description, Name nameField, String nameDescription)
+	TestClass(Name name, int type, int dclass, long ttl, int u16Field,
+		  String u16Description, Name nameField, String nameDescription)
 	{
 	    super(name, type, dclass, ttl, u16Field, u16Description, nameField, nameDescription);
 	}
@@ -80,7 +80,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	TestClass tc = new TestClass();
 	assertNull(tc.getName());
@@ -92,7 +92,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_ctor_4arg() throws TextParseException
+    void test_ctor_4arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 
@@ -107,7 +107,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_ctor_8arg() throws TextParseException
+    void test_ctor_8arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("My.Other.Name.");
@@ -145,7 +145,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xBC, (byte)0x1F, 2, 'M', 'y', 6, 's', 'i', 'N', 'g', 'l', 'E', 4, 'n', 'A', 'm', 'E', 0 };
 	DNSInput in = new DNSInput(raw);
@@ -159,7 +159,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException
+    void test_rdataFromString() throws IOException
     {
 	Name exp = Name.fromString("My.Single.Name.");
 
@@ -180,7 +180,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_rrToString() throws IOException, TextParseException
+    void test_rrToString() throws IOException, TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("My.Other.Name.");
@@ -196,7 +196,7 @@ public class U16NameBaseTest
     }
 
     @Test
-    public void test_rrToWire() throws IOException, TextParseException
+    void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("M.O.n.");

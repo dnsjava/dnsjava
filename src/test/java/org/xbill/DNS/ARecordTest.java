@@ -48,16 +48,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ARecordTest
+class ARecordTest
 {
-    Name m_an, m_rn;
-    InetAddress m_addr;
-    String m_addr_string;
-    byte[] m_addr_bytes;
-    long m_ttl;
+    private Name m_an;
+	private Name m_rn;
+    private InetAddress m_addr;
+    private String m_addr_string;
+    private byte[] m_addr_bytes;
+    private long m_ttl;
 
    @BeforeEach
-   public void setUp() throws TextParseException,
+   void setUp() throws TextParseException,
 				  UnknownHostException
     {
 	m_an = Name.fromString("My.Absolute.Name.");
@@ -69,7 +70,7 @@ public class ARecordTest
     }
 
     @Test
-    public void test_ctor_0arg() throws UnknownHostException
+    void test_ctor_0arg() throws UnknownHostException
     {
 	ARecord ar = new ARecord();
 	assertNull(ar.getName());
@@ -80,7 +81,7 @@ public class ARecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	ARecord ar = new ARecord();
 	Record r = ar.getObject();
@@ -88,7 +89,7 @@ public class ARecordTest
     }
 
     @Test
-    public void test_ctor_4arg()
+    void test_ctor_4arg()
     {
 	ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
 	assertEquals(m_an, ar.getName());
@@ -115,7 +116,7 @@ public class ARecordTest
     }
 
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
 	DNSInput di = new DNSInput(m_addr_bytes);
 	ARecord ar = new ARecord();
@@ -126,7 +127,7 @@ public class ARecordTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException
+    void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer(m_addr_string);
 	ARecord ar = new ARecord();
@@ -146,14 +147,14 @@ public class ARecordTest
     }
 
     @Test
-    public void test_rrToString()
+    void test_rrToString()
     {
 	ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
 	assertEquals(m_addr_string, ar.rrToString());
     }
 
     @Test
-    public void test_rrToWire()
+    void test_rrToWire()
     {
 	ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
 	DNSOutput dout = new DNSOutput();

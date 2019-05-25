@@ -41,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class FlagsTest
+class FlagsTest
 {
     @Test
-    public void test_string()
+    void test_string()
     {
 	// a regular one
 	assertEquals("aa", Flags.string(Flags.AA));
@@ -69,7 +69,7 @@ public class FlagsTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	// regular one
 	assertEquals(Flags.CD, Flags.value("cd"));
@@ -88,7 +88,7 @@ public class FlagsTest
     }
 
     @Test
-    public void test_isFlag()
+    void test_isFlag()
     {
 	try {
 	    Flags.isFlag(-1);

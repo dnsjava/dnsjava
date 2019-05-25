@@ -7,10 +7,10 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TSIGTest
+class TSIGTest
 {
     @Test
-    public void test_TSIG_query() throws TextParseException, IOException
+    void test_TSIG_query() throws TextParseException, IOException
     {
 	TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 
@@ -28,7 +28,7 @@ public class TSIGTest
     }
 
     @Test
-    public void test_TSIG_response() throws TextParseException, IOException
+    void test_TSIG_response() throws TextParseException, IOException
     {
 	TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 
@@ -55,7 +55,7 @@ public class TSIGTest
     }
 
     @Test
-    public void test_TSIG_truncated() throws TextParseException, IOException
+    void test_TSIG_truncated() throws TextParseException, IOException
     {
 	TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 

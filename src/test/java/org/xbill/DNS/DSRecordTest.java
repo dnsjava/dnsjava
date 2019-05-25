@@ -46,10 +46,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class DSRecordTest
+class DSRecordTest
 {
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	DSRecord dr = new DSRecord();
 	assertNull(dr.getName());
@@ -63,14 +63,14 @@ public class DSRecordTest
     }
     
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	DSRecord dr = new DSRecord();
 	Record r = dr.getObject();
 	assertTrue(r instanceof DSRecord);
     }
 
-    public static class Test_Ctor_7arg
+    static class Test_Ctor_7arg
     {
 	private Name	m_n;
 	private long	m_ttl;
@@ -80,7 +80,7 @@ public class DSRecordTest
 	private byte[]	m_digest;	
 
    @BeforeEach
-   public void setUp() throws TextParseException
+   void setUp() throws TextParseException
 	{
 	    m_n = Name.fromString("The.Name.");
 	    m_ttl = 0xABCDL;
@@ -91,7 +91,7 @@ public class DSRecordTest
 	}
 	
     @Test
-	public void test_basic() throws TextParseException
+    void test_basic() throws TextParseException
 	{
 	    DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl,
 				       m_footprint, m_algorithm, m_digestid, m_digest);
@@ -106,7 +106,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_toosmall_footprint() throws TextParseException
+    void test_toosmall_footprint() throws TextParseException
 	{
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
@@ -117,7 +117,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_toobig_footprint() throws TextParseException
+    void test_toobig_footprint() throws TextParseException
 	{
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
@@ -128,7 +128,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_toosmall_algorithm() throws TextParseException
+    void test_toosmall_algorithm() throws TextParseException
 	{
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
@@ -139,7 +139,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_toobig_algorithm() throws TextParseException
+    void test_toobig_algorithm() throws TextParseException
 	{
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
@@ -150,7 +150,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_toosmall_digestid() throws TextParseException
+    void test_toosmall_digestid() throws TextParseException
 	{
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
@@ -161,7 +161,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_toobig_digestid() throws TextParseException
+    void test_toobig_digestid() throws TextParseException
 	{
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
@@ -172,7 +172,7 @@ public class DSRecordTest
 	}
 
     @Test
-	public void test_null_digest()
+    void test_null_digest()
 	{
 	    DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl,
 				       m_footprint, m_algorithm, m_digestid, null);
@@ -188,7 +188,7 @@ public class DSRecordTest
     }
 
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, 
 				  (byte)0x01, (byte)0x23, (byte)0x45,
@@ -204,7 +204,7 @@ public class DSRecordTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException
+    void test_rdataFromString() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, 
 				  (byte)0x01, (byte)0x23, (byte)0x45,
@@ -220,7 +220,7 @@ public class DSRecordTest
     }
 
     @Test
-    public void test_rrToString() throws TextParseException
+    void test_rrToString() throws TextParseException
     {
 	String exp = 0xABCD + " " + 0xEF + " " + 0x01 + " 23456789AB";
 
@@ -232,7 +232,7 @@ public class DSRecordTest
     }
 
     @Test
-    public void test_rrToWire() throws TextParseException
+    void test_rrToWire() throws TextParseException
     {
 	DSRecord dr = new DSRecord(Name.fromString("The.Name."), DClass.IN, 0x123,
 				   0xABCD, 0xEF, 0x01,

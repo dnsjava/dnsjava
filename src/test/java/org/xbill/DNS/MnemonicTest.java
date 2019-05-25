@@ -44,18 +44,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 // Mnemonic has package-level access.
 
-public class MnemonicTest
+class MnemonicTest
 {
     private Mnemonic m_mn;
 
    @BeforeEach
-   public void setUp()
+   void setUp()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " UPPER", Mnemonic.CASE_UPPER);
     }
 
     @Test
-    public void test_toInteger()
+    void test_toInteger()
     {
 	Integer i = Mnemonic.toInteger(64);
 	assertEquals( new Integer(64), i );
@@ -83,7 +83,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_no_maximum()
+    void test_no_maximum()
     {
 	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
 	try {m_mn.check(0);} catch( IllegalArgumentException e ){
@@ -104,7 +104,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_setMaximum()
+    void test_setMaximum()
     {
 	m_mn.setMaximum(15);
 	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
@@ -131,7 +131,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_setPrefix()
+    void test_setPrefix()
     {
 	final String prefix = "A mixed CASE Prefix".toUpperCase();
 	m_mn.setPrefix(prefix);
@@ -144,7 +144,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_basic_operation()
+    void test_basic_operation()
     {
 	// setUp creates Mnemonic with CASE_UPPER
 	m_mn.add( 10, "Ten" );
@@ -178,7 +178,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_basic_operation_lower()
+    void test_basic_operation_lower()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " LOWER", Mnemonic.CASE_LOWER);
 	m_mn.add( 10, "Ten" );
@@ -212,7 +212,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_basic_operation_sensitive()
+    void test_basic_operation_sensitive()
     {
 	m_mn = new Mnemonic(MnemonicTest.class.getName() + " SENSITIVE", Mnemonic.CASE_SENSITIVE);
 	m_mn.add( 10, "Ten" );
@@ -252,7 +252,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_invalid_numeric()
+    void test_invalid_numeric()
     {
 	m_mn.setNumericAllowed(true);
 	int value = m_mn.getValue("Not-A-Number");
@@ -260,7 +260,7 @@ public class MnemonicTest
     }
 
     @Test
-    public void test_addAll()
+    void test_addAll()
     {
 	m_mn.add( 10, "Ten" );
 	m_mn.add( 20, "Twenty" );

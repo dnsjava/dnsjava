@@ -43,13 +43,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class SingleCompressedNameBaseTest
+class SingleCompressedNameBaseTest
 {
     private static class TestClass extends SingleCompressedNameBase
     {
-	public TestClass(){}
+	TestClass(){}
 
-	public TestClass(Name name, int type, int dclass, long ttl, Name singleName, String desc )
+	TestClass(Name name, int type, int dclass, long ttl, Name singleName, String desc)
 	{
 	    super(name, type, dclass, ttl, singleName, desc);
 	}
@@ -66,7 +66,7 @@ public class SingleCompressedNameBaseTest
     }
 
     @Test
-    public void test_ctor() throws TextParseException
+    void test_ctor() throws TextParseException
     {
 	TestClass tc = new TestClass();
 	assertNull(tc.getSingleName());
@@ -84,7 +84,7 @@ public class SingleCompressedNameBaseTest
     }
 
     @Test
-    public void test_rrToWire() throws IOException, TextParseException
+    void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	Name sn = Name.fromString("My.Single.Name.");

@@ -5,28 +5,28 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OPTRecordTest {
+class OPTRecordTest {
 
 	private static final int DEFAULT_EDNS_RCODE = 0;
 	private static final int DEFAULT_EDNS_VERSION = 0;
 	private static final int DEFAULT_PAYLOAD_SIZE = 1024;
 
     @Test
-	public void testForNoEqualityWithDifferentEDNS_Versions() {
+    void testForNoEqualityWithDifferentEDNS_Versions() {
 		final OPTRecord optRecordOne = new OPTRecord(DEFAULT_PAYLOAD_SIZE, DEFAULT_EDNS_RCODE, 0);
 		final OPTRecord optRecordTwo = new OPTRecord(DEFAULT_PAYLOAD_SIZE, DEFAULT_EDNS_RCODE, 1);
 		assertNotEqual(optRecordOne, optRecordTwo);
 	}
 
     @Test
-	public void testForNoEqualityWithDifferentEDNS_RCodes() {
+    void testForNoEqualityWithDifferentEDNS_RCodes() {
 		final OPTRecord optRecordOne = new OPTRecord(DEFAULT_PAYLOAD_SIZE, 0, DEFAULT_EDNS_VERSION);
 		final OPTRecord optRecordTwo = new OPTRecord(DEFAULT_PAYLOAD_SIZE, 1, DEFAULT_EDNS_VERSION);
 		assertNotEqual(optRecordOne, optRecordTwo);
 	}
 
     @Test
-	public void testForEquality() {
+    void testForEquality() {
 		final OPTRecord optRecordOne = new OPTRecord(DEFAULT_PAYLOAD_SIZE, DEFAULT_EDNS_RCODE, DEFAULT_EDNS_VERSION);
 		final OPTRecord optRecordTwo = new OPTRecord(DEFAULT_PAYLOAD_SIZE, DEFAULT_EDNS_RCODE, DEFAULT_EDNS_VERSION);
 		assertEquals(optRecordOne, optRecordTwo);

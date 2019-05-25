@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TTLTest
+class TTLTest
 {
     private final long S = 1;
     private final long M = 60*S;
@@ -48,7 +48,7 @@ public class TTLTest
     private final long W = 7*D;
 
     @Test
-    public void test_parseTTL()
+    void test_parseTTL()
     {
 	assertEquals(9876, TTL.parseTTL("9876"));
 
@@ -74,7 +74,7 @@ public class TTLTest
     }
 
     @Test
-    public void test_parseTTL_invalid()
+    void test_parseTTL_invalid()
     {
 	try {TTL.parseTTL(null); fail("NumberFormatException not throw");}
 	catch( NumberFormatException e ){}
@@ -96,7 +96,7 @@ public class TTLTest
     }
 
     @Test
-    public void test_format()
+    void test_format()
     {
 	assertEquals("0S", TTL.format(0));
 	assertEquals("1S", TTL.format(1));
@@ -117,7 +117,7 @@ public class TTLTest
     }
 
     @Test
-    public void test_format_invalid()
+    void test_format_invalid()
     {
 	try {TTL.format(-1); fail("InvalidTTLException not thrown");
 	} catch( InvalidTTLException e ){}

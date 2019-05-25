@@ -45,18 +45,18 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class HeaderTest
+class HeaderTest
 {
     private Header m_h;
 
    @BeforeEach
-   public void setUp()
+   void setUp()
     {
 	m_h = new Header(0xABCD); // 43981
     }
 
     @Test
-    public void test_fixture_state()
+    void test_fixture_state()
     {
 	assertEquals(0xABCD, m_h.getID());
 
@@ -73,7 +73,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	m_h = new Header();
 	assertTrue(0 <= m_h.getID() && m_h.getID() < 0xFFFF);
@@ -91,7 +91,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_ctor_DNSInput() throws IOException
+    void test_ctor_DNSInput() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0x12, (byte)0xAB, // ID
 				  (byte)0x8F, (byte)0xBD, // flags: 1 0001 1 1 1 1 011 1101
@@ -131,7 +131,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_toWire() throws IOException
+    void test_toWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0x12, (byte)0xAB, // ID
 				  (byte)0x8F, (byte)0xBD, // flags: 1 0001 1 1 1 1 011 1101
@@ -170,7 +170,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_flags()
+    void test_flags()
     {
 	m_h.setFlag(0);
 	m_h.setFlag(5);
@@ -201,7 +201,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_flags_invalid()
+    void test_flags_invalid()
     {
 	try {m_h.setFlag(-1); fail("IllegalArgumentException not thrown");}
 	catch( IllegalArgumentException e ){}
@@ -224,7 +224,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_ID()
+    void test_ID()
     {
 	assertEquals(0xABCD, m_h.getID());
 
@@ -239,7 +239,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_setID_invalid()
+    void test_setID_invalid()
     {
 	try {
 	    m_h.setID(0x10000);
@@ -256,7 +256,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_Rcode()
+    void test_Rcode()
     {
 	assertEquals(0, m_h.getRcode());
 
@@ -271,7 +271,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_setRcode_invalid()
+    void test_setRcode_invalid()
     {
 	try {
 	    m_h.setRcode(-1);
@@ -288,7 +288,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_Opcode()
+    void test_Opcode()
     {
 	assertEquals(0, m_h.getOpcode());
 
@@ -303,7 +303,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_setOpcode_invalid()
+    void test_setOpcode_invalid()
     {
 	try {
 	    m_h.setOpcode(-1);
@@ -320,7 +320,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_Count()
+    void test_Count()
     {
 	m_h.setCount(2, 0x1E);
 	assertEquals(0, m_h.getCount(0));
@@ -336,7 +336,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_setCount_invalid()
+    void test_setCount_invalid()
     {
 	try {m_h.setCount(-1, 0); fail("ArrayIndexOutOfBoundsException not thrown");}
 	catch( ArrayIndexOutOfBoundsException e ){}
@@ -350,7 +350,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_getCount_invalid()
+    void test_getCount_invalid()
     {
 	try {m_h.getCount(-1); fail("ArrayIndexOutOfBoundsException not thrown");}
 	catch( ArrayIndexOutOfBoundsException e ){}
@@ -359,7 +359,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_incCount_invalid()
+    void test_incCount_invalid()
     {
 	m_h.setCount(1, 0xFFFF);
 	try {m_h.incCount(1); fail("IllegalStateException not thrown");}
@@ -367,7 +367,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_decCount_invalid()
+    void test_decCount_invalid()
     {
 	m_h.setCount(2, 0);
 	try {m_h.decCount(2); fail("IllegalStateException not thrown");}
@@ -375,7 +375,7 @@ public class HeaderTest
     }
 
     @Test
-    public void test_toString()
+    void test_toString()
     {
 	m_h.setOpcode(Opcode.value("STATUS"));
 	m_h.setRcode(Rcode.value("NXDOMAIN"));
@@ -403,7 +403,7 @@ public class HeaderTest
     }
     
     @Test
-    public void test_clone()
+    void test_clone()
     {
 	m_h.setOpcode(Opcode.value("IQUERY"));
 	m_h.setRcode(Rcode.value("SERVFAIL"));

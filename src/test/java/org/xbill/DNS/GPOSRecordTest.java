@@ -44,10 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class GPOSRecordTest
+class GPOSRecordTest
 {
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	GPOSRecord gr = new GPOSRecord();
 	assertNull(gr.getName());
@@ -57,21 +57,21 @@ public class GPOSRecordTest
     }
     
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	GPOSRecord gr = new GPOSRecord();
 	Record r = gr.getObject();
 	assertTrue(r instanceof GPOSRecord);
     }
 
-    public static class Test_Ctor_6arg_doubles
+    static class Test_Ctor_6arg_doubles
     {
 	private Name	m_n;
 	private long	m_ttl;
 	private double	m_lat, m_long, m_alt;
 
    @BeforeEach
-   public void setUp() throws TextParseException
+   void setUp() throws TextParseException
 	{
 	    m_n = Name.fromString("The.Name.");
 	    m_ttl = 0xABCDL;
@@ -81,7 +81,7 @@ public class GPOSRecordTest
 	}
 	
     @Test
-	public void test_basic() throws TextParseException
+    void test_basic() throws TextParseException
 	{
 	    GPOSRecord gr = new GPOSRecord(m_n, DClass.IN, m_ttl,
 					   m_long, m_lat, m_alt);
@@ -98,7 +98,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toosmall_longitude() throws TextParseException
+    void test_toosmall_longitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -109,7 +109,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toobig_longitude() throws TextParseException
+    void test_toobig_longitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -120,7 +120,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toosmall_latitude() throws TextParseException
+    void test_toosmall_latitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -131,7 +131,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toobig_latitude() throws TextParseException
+    void test_toobig_latitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -142,7 +142,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_invalid_string()
+    void test_invalid_string()
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -154,14 +154,14 @@ public class GPOSRecordTest
 	}
     }
 
-    public static class Test_Ctor_6arg_Strings
+    static class Test_Ctor_6arg_Strings
     {
 	private Name	m_n;
 	private long	m_ttl;
 	private double	m_lat, m_long, m_alt;
 
    @BeforeEach
-   public void setUp() throws TextParseException
+   void setUp() throws TextParseException
 	{
 	    m_n = Name.fromString("The.Name.");
 	    m_ttl = 0xABCDL;
@@ -171,7 +171,7 @@ public class GPOSRecordTest
 	}
 	
     @Test
-	public void test_basic() throws TextParseException
+    void test_basic() throws TextParseException
 	{
 	    GPOSRecord gr = new GPOSRecord(m_n, DClass.IN, m_ttl,
 					   new Double(m_long).toString(),
@@ -190,7 +190,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toosmall_longitude() throws TextParseException
+    void test_toosmall_longitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -202,7 +202,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toobig_longitude() throws TextParseException
+    void test_toobig_longitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -214,7 +214,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toosmall_latitude() throws TextParseException
+    void test_toosmall_latitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -226,7 +226,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_toobig_latitude() throws TextParseException
+    void test_toobig_latitude() throws TextParseException
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
@@ -237,10 +237,10 @@ public class GPOSRecordTest
 	}
     }
 
-    public static class Test_rrFromWire
+    static class Test_rrFromWire
     {
     @Test
-	public void test_basic() throws IOException
+    void test_basic() throws IOException
 	{
 	    byte[] raw = new byte[] { 5, '-', '8', '.', '1', '2',
 				      6, '1', '2', '3', '.', '0', '7',
@@ -255,7 +255,7 @@ public class GPOSRecordTest
 	}
 	
     @Test
-	public void test_longitude_toosmall() throws IOException
+    void test_longitude_toosmall() throws IOException
 	{
 	    byte[] raw = new byte[] { 5, '-', '9', '5', '.', '0',
 				      6, '1', '2', '3', '.', '0', '7',
@@ -271,7 +271,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_longitude_toobig() throws IOException
+    void test_longitude_toobig() throws IOException
 	{
 	    byte[] raw = new byte[] { 5, '1', '8', '5', '.', '0',
 				      6, '1', '2', '3', '.', '0', '7',
@@ -287,7 +287,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_latitude_toosmall() throws IOException
+    void test_latitude_toosmall() throws IOException
 	{
 	    byte[] raw = new byte[] { 5, '-', '8', '5', '.', '0',
 				      6, '-', '1', '9', '0', '.', '0',
@@ -303,7 +303,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_latitude_toobig() throws IOException
+    void test_latitude_toobig() throws IOException
 	{
 	    byte[] raw = new byte[] { 5, '-', '8', '5', '.', '0',
 				      6, '2', '1', '9', '0', '.', '0',
@@ -319,10 +319,10 @@ public class GPOSRecordTest
 	}
     }
 
-    public static class Test_rdataFromString
+    static class Test_rdataFromString
     {
     @Test
-	public void test_basic() throws IOException
+    void test_basic() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("10.45 171.121212 1010787");
 	    
@@ -334,7 +334,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_longitude_toosmall() throws IOException
+    void test_longitude_toosmall() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("-100.390 171.121212 1010787");
 	    
@@ -347,7 +347,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_longitude_toobig() throws IOException
+    void test_longitude_toobig() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("90.00001 171.121212 1010787");
 	    
@@ -360,7 +360,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_latitude_toosmall() throws IOException
+    void test_latitude_toosmall() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("0.0 -180.01 1010787");
 	    
@@ -373,7 +373,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_latitude_toobig() throws IOException
+    void test_latitude_toobig() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("0.0 180.01 1010787");
 	    
@@ -386,7 +386,7 @@ public class GPOSRecordTest
 	}
 
     @Test
-	public void test_invalid_string() throws IOException
+    void test_invalid_string() throws IOException
 	{
 	    Tokenizer t = new Tokenizer("1.0 2.0 \\435");
 	    try {
@@ -397,7 +397,7 @@ public class GPOSRecordTest
     }
 
     @Test
-    public void test_rrToString() throws TextParseException
+    void test_rrToString() throws TextParseException
     {
 	String exp = "\"10.45\" \"171.121212\" \"1010787.0\"";
 	    
@@ -407,7 +407,7 @@ public class GPOSRecordTest
     }
 
     @Test
-    public void test_rrToWire() throws TextParseException
+    void test_rrToWire() throws TextParseException
     {
 	GPOSRecord gr = new GPOSRecord(Name.fromString("The.Name."), DClass.IN, 0x123,
 				       -10.45, 120.0, 111.0);

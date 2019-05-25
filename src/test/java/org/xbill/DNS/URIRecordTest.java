@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class URIRecordTest
+class URIRecordTest
 {
     @Test
-    public void test_ctor_0arg()
+    void test_ctor_0arg()
     {
 	URIRecord r = new URIRecord();
 	assertNull(r.getName());
@@ -27,7 +27,7 @@ public class URIRecordTest
     }
     
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	URIRecord dr = new URIRecord();
 	Record r = dr.getObject();
@@ -35,7 +35,7 @@ public class URIRecordTest
     }
     
     @Test
-    public void test_ctor_6arg() throws TextParseException
+    void test_ctor_6arg() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	String target = ("http://foo");
@@ -51,7 +51,7 @@ public class URIRecordTest
     }
     
     @Test
-    public void test_rdataFromString() throws IOException
+    void test_rdataFromString() throws IOException
     {
 	Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF01 + " " + "\"http://foo:1234/bar?baz=bum\"");
 
@@ -63,7 +63,7 @@ public class URIRecordTest
     }
     
     @Test
-    public void test_rdataToWire() throws TextParseException
+    void test_rdataToWire() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	String target = ("http://foo");
@@ -79,7 +79,7 @@ public class URIRecordTest
     }
     
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
    	byte[] raw= new byte[] { 
     			(byte)0xbe, (byte)0xef, (byte)0xde, (byte)0xad, 
@@ -95,7 +95,7 @@ public class URIRecordTest
     }
     
     @Test
-	public void test_toobig_priority() throws TextParseException
+    void test_toobig_priority() throws TextParseException
 	{
 	    try {
 		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
@@ -105,7 +105,7 @@ public class URIRecordTest
 	    catch(IllegalArgumentException e){}
 	}
     @Test
-	public void test_toosmall_priority() throws TextParseException
+    void test_toosmall_priority() throws TextParseException
 	{
 	    try {
 		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
@@ -116,7 +116,7 @@ public class URIRecordTest
 	}
 
     @Test
-	public void test_toobig_weight() throws TextParseException
+    void test_toobig_weight() throws TextParseException
 	{
 	    try {
 		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
@@ -126,7 +126,7 @@ public class URIRecordTest
 	    catch(IllegalArgumentException e){}
 	}
     @Test
-	public void test_toosmall_weight() throws TextParseException
+    void test_toosmall_weight() throws TextParseException
 	{
 	    try {
 		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,

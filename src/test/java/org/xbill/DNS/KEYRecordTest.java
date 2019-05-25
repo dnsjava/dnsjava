@@ -46,10 +46,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class KEYRecordTest
+class KEYRecordTest
 {
     @Test
-    public void test_ctor_0arg() throws UnknownHostException
+    void test_ctor_0arg() throws UnknownHostException
     {
 	KEYRecord ar = new KEYRecord();
 	assertNull(ar.getName());
@@ -64,7 +64,7 @@ public class KEYRecordTest
     }
 
     @Test
-    public void test_getObject()
+    void test_getObject()
     {
 	KEYRecord ar = new KEYRecord();
 	Record r = ar.getObject();
@@ -72,7 +72,7 @@ public class KEYRecordTest
     }
 
     @Test
-    public void test_ctor_7arg() throws TextParseException
+    void test_ctor_7arg() throws TextParseException
     {
 	Name n = Name.fromString("My.Absolute.Name.");
 	Name r = Name.fromString("My.Relative.Name");
@@ -97,7 +97,7 @@ public class KEYRecordTest
     }
 
     @Test
-    public void test_Protocol_string()
+    void test_Protocol_string()
     {
 	// a regular one
 	assertEquals("DNSSEC", KEYRecord.Protocol.string(KEYRecord.Protocol.DNSSEC));
@@ -118,7 +118,7 @@ public class KEYRecordTest
     }
 
     @Test
-    public void test_Protocol_value()
+    void test_Protocol_value()
     {
 	// a regular one
 	assertEquals(KEYRecord.Protocol.IPSEC, KEYRecord.Protocol.value("IPSEC"));
@@ -131,7 +131,7 @@ public class KEYRecordTest
     }
 
     @Test
-    public void test_Flags_value()
+    void test_Flags_value()
     {
 	// numeric
 
@@ -160,7 +160,7 @@ public class KEYRecordTest
     }
 
     @Test
-    public void test_rdataFromString() throws IOException, TextParseException
+    void test_rdataFromString() throws IOException, TextParseException
     {
 	// basic
 	KEYRecord kr = new KEYRecord();

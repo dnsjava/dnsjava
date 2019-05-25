@@ -42,17 +42,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class OptionsTest
+class OptionsTest
 {
    @BeforeEach
-   public void setUp()
+   void setUp()
     {
 	// reset the options table before each test
 	Options.clear();
     }
 
     @Test
-    public void test_set_1arg()
+    void test_set_1arg()
     {
 	Options.set("Option1");
 	assertEquals("true", Options.value("option1"));
@@ -66,7 +66,7 @@ public class OptionsTest
     }
 
     @Test
-    public void test_set_2arg()
+    void test_set_2arg()
     {
 	Options.set("OPTION1", "Value1");
 	assertEquals("value1", Options.value("Option1"));
@@ -81,7 +81,7 @@ public class OptionsTest
     }
 
     @Test
-    public void test_check()
+    void test_check()
     {
 	assertFalse(Options.check("No Options yet"));
 
@@ -92,7 +92,7 @@ public class OptionsTest
     }
 
     @Test
-    public void test_unset()
+    void test_unset()
     {
 	// unset something non-existant
 	Options.unset("Not an option Name");
@@ -112,7 +112,7 @@ public class OptionsTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	assertNull(Options.value("Table is Null"));
 
@@ -123,7 +123,7 @@ public class OptionsTest
     }
 
     @Test
-    public void test_intValue()
+    void test_intValue()
     {
 	assertEquals(-1, Options.intValue("Table is Null"));
 
@@ -140,7 +140,7 @@ public class OptionsTest
     }
 
     @Test
-    public void test_systemProperty()
+    void test_systemProperty()
     {
 	System.setProperty("dnsjava.options", "booleanOption,valuedOption1=10,valuedOption2=NotAnInteger");
 	

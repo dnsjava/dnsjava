@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class hexdumpTest
+class hexdumpTest
 {
     /*
      * this seems to be basically a debugging routine, so its most
@@ -47,7 +47,7 @@ public class hexdumpTest
      */
     
     @Test
-    public void test_shortform()
+    void test_shortform()
     {
 	byte[] data = new byte[] { 1, 1, 1, 1, 1,
 				   2, 2, 2, 2, 2, 
@@ -68,7 +68,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_0()
+    void test_0()
     {
 	byte[] data = new byte[] { 1, 0, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -76,7 +76,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_1()
+    void test_1()
     {
 	byte[] data = new byte[] { 2, 1, 3 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -84,7 +84,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_2()
+    void test_2()
     {
 	byte[] data = new byte[] { 1, 2, 3 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -92,7 +92,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_3()
+    void test_3()
     {
 	byte[] data = new byte[] { 1, 3, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -100,7 +100,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_4()
+    void test_4()
     {
 	byte[] data = new byte[] { 1, 4, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -108,7 +108,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_5()
+    void test_5()
     {
 	byte[] data = new byte[] { 1, 5, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -116,7 +116,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_6()
+    void test_6()
     {
 	byte[] data = new byte[] { 1, 6, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -124,7 +124,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_7()
+    void test_7()
     {
 	byte[] data = new byte[] { 1, 7, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -132,7 +132,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_8()
+    void test_8()
     {
 	byte[] data = new byte[] { 1, 8, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -140,7 +140,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_9()
+    void test_9()
     {
 	byte[] data = new byte[] { 1, 9, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -148,7 +148,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_10()
+    void test_10()
     {
 	byte[] data = new byte[] { 1, 10, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -156,7 +156,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_11()
+    void test_11()
     {
 	byte[] data = new byte[] { 1, 11, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -164,7 +164,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_12()
+    void test_12()
     {
 	byte[] data = new byte[] { 1, 12, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -172,7 +172,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_13()
+    void test_13()
     {
 	byte[] data = new byte[] { 1, 13, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -180,7 +180,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_14()
+    void test_14()
     {
 	byte[] data = new byte[] { 1, 14, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -188,7 +188,7 @@ public class hexdumpTest
     }
 
     @Test
-    public void test_15()
+    void test_15()
     {
 	byte[] data = new byte[] { 1, 15, 2 };
 	String out = hexdump.dump( null, data, 1, 1 );
@@ -197,7 +197,7 @@ public class hexdumpTest
 
     // strictly for stupid code coverage...a useless test
     @Test
-    public void test_default_constructor()
+    void test_default_constructor()
     {
 	new hexdump();
     }

@@ -46,14 +46,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class KEYBaseTest
+class KEYBaseTest
 {
     private static class TestClass extends KEYBase
     {
-	public TestClass(){}
+	TestClass(){}
 
-	public TestClass(Name name, int type, int dclass, long ttl,
-			 int flags, int proto, int alg, byte[] key )
+	TestClass(Name name, int type, int dclass, long ttl,
+		  int flags, int proto, int alg, byte[] key)
 	{
 	    super(name, type, dclass, ttl, flags, proto, alg, key);
 	}
@@ -69,7 +69,7 @@ public class KEYBaseTest
     }
 
     @Test
-    public void test_ctor() throws TextParseException
+    void test_ctor() throws TextParseException
     {
 	TestClass tc = new TestClass();
 	assertEquals(0, tc.getFlags());
@@ -94,7 +94,7 @@ public class KEYBaseTest
     }
 
     @Test
-    public void test_rrFromWire() throws IOException
+    void test_rrFromWire() throws IOException
     {
 	byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF, (byte)0x19, 1, 2, 3, 4, 5 };
 	DNSInput in = new DNSInput(raw);
@@ -121,7 +121,7 @@ public class KEYBaseTest
     }
 
     @Test
-    public void test_rrToString() throws IOException, TextParseException
+    void test_rrToString() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	byte[] key = new byte[] { 0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
@@ -146,7 +146,7 @@ public class KEYBaseTest
     }
 
     @Test
-    public void test_getFootprint() throws TextParseException
+    void test_getFootprint() throws TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	byte[] key = new byte[] { 0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
@@ -175,7 +175,7 @@ public class KEYBaseTest
     }
 
     @Test
-    public void test_rrToWire() throws IOException, TextParseException
+    void test_rrToWire() throws IOException, TextParseException
     {
 	Name n = Name.fromString("my.name.");
 	byte[] key = new byte[] { 0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,

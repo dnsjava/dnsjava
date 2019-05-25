@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ExtendedFlagsTest
+class ExtendedFlagsTest
 {
     @Test
-    public void test_string()
+    void test_string()
     {
 	// a regular one
 	assertEquals("do", ExtendedFlags.string(ExtendedFlags.DO));
@@ -68,7 +68,7 @@ public class ExtendedFlagsTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	// regular one
 	assertEquals(ExtendedFlags.DO, ExtendedFlags.value("do"));

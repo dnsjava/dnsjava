@@ -10,7 +10,7 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-public class DNSSECSIG0Test {
+class DNSSECSIG0Test {
 
 	private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
 	private static final String KEY_ALGORITHM = "RSA";
@@ -18,15 +18,15 @@ public class DNSSECSIG0Test {
 	byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();
 
    @BeforeEach
-   public void setUp() {
+   void setUp() {
 	}
 
    @AfterEach
-   public void tearDown() {
+   void tearDown() {
 	}
 
     @Test
-	public void testSIG0() throws Exception {
+    void testSIG0() throws Exception {
 		Name sig0zoneName = new Name("sig0.invalid.");
 		Name sig0hostName = new Name("sometext.sig0.invalid.");
 

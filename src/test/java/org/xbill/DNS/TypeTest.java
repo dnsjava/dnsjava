@@ -41,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class TypeTest
+class TypeTest
 {
     @Test
-    public void test_string()
+    void test_string()
     {
 	// a regular one
 	assertEquals("CNAME", Type.string(Type.CNAME));
@@ -61,7 +61,7 @@ public class TypeTest
     }
 
     @Test
-    public void test_value()
+    void test_value()
     {
 	// regular one
 	assertEquals(Type.MAILB, Type.value("MAILB"));
@@ -77,13 +77,13 @@ public class TypeTest
     }
 
     @Test
-    public void test_value_2arg()
+    void test_value_2arg()
     {
 	assertEquals(301, Type.value("301", true));
     }
 
     @Test
-    public void test_isRR()
+    void test_isRR()
     {
 	assertTrue(Type.isRR(Type.CNAME));
 	assertFalse(Type.isRR(Type.IXFR));
