@@ -1,4 +1,5 @@
 05/25/2019:
+	- 2.1.9 released
 	- Fix getRRsetType for empty RRSIG records.
 	  (PR#40, Klaus Malorny <Klaus.Malorny@knipp.de>)
 
