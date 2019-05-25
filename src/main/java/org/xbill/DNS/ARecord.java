@@ -19,6 +19,7 @@ private int addr;
 
 ARecord() {}
 
+@Override
 Record
 getObject() {
 	return new ARecord();
@@ -54,17 +55,20 @@ ARecord(Name name, int dclass, long ttl, InetAddress address) {
 	addr = fromArray(address.getAddress());
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	addr = fromArray(in.readByteArray(4));
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	addr = fromArray(st.getAddressBytes(Address.IPv4));
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	return (Address.toDottedQuad(toArray(addr)));
@@ -84,6 +88,7 @@ getAddress() {
 	}
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU32(((long)addr) & 0xFFFFFFFFL);

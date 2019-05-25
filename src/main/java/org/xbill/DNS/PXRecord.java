@@ -20,6 +20,7 @@ private Name mapX400;
 
 PXRecord() {}
 
+@Override
 Record
 getObject() {
 	return new PXRecord();
@@ -42,6 +43,7 @@ PXRecord(Name name, int dclass, long ttl, int preference,
 	this.mapX400 = checkName("mapX400", mapX400);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	preference = in.readU16();
@@ -49,6 +51,7 @@ rrFromWire(DNSInput in) throws IOException {
 	mapX400 = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	preference = st.getUInt16();
@@ -57,6 +60,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the PX Record to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -68,6 +72,7 @@ rrToString() {
 	return sb.toString();
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(preference);

@@ -40,6 +40,7 @@ private static final long serialVersionUID = -8679800040426675002L;
 
 DNSKEYRecord() {}
 
+@Override
 Record
 getObject() {
 	return new DNSKEYRecord();
@@ -91,6 +92,7 @@ DNSKEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	publicKey = key;
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	flags = st.getUInt16();

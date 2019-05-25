@@ -42,6 +42,7 @@ public static final int DELETE			= 5;
 
 TKEYRecord() {}
 
+@Override
 Record
 getObject() {
 	return new TKEYRecord();
@@ -75,6 +76,7 @@ TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	this.other = other;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	alg = new Name(in);
@@ -96,6 +98,7 @@ rrFromWire(DNSInput in) throws IOException {
 		other = null;
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("no text format defined for TKEY");
@@ -114,6 +117,7 @@ modeString() {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -197,6 +201,7 @@ getOther() {
 	return other;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	alg.toWire(out, null, canonical);

@@ -14,6 +14,7 @@ private static final long serialVersionUID = 532349543479150419L;
 
 MBRecord() {}
 
+@Override
 Record
 getObject() {
 	return new MBRecord();
@@ -34,6 +35,7 @@ getMailbox() {
 	return getSingleName();
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return getSingleName();

@@ -29,16 +29,19 @@ static {
 /**
  * Returns a reference to a dnsjava name server provider.
  */
+@Override
 public NameService
 createNameService() {
 	return nameService;
 }
 
+@Override
 public String
 getType() {
 	return "dns";
 }
 
+@Override
 public String
 getProviderName() {
 	return "dnsjava"; 

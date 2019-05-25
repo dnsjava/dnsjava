@@ -19,6 +19,7 @@ private byte [] data;
 
 NULLRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NULLRecord();
@@ -38,16 +39,19 @@ NULLRecord(Name name, int dclass, long ttl, byte [] data) {
 	this.data = data;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	data = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("no defined text format for NULL records");
 }
 
+@Override
 String
 rrToString() {
 	return unknownToString(data);
@@ -59,6 +63,7 @@ getData() {
 	return data;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeByteArray(data);

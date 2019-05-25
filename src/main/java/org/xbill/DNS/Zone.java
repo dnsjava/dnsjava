@@ -54,11 +54,13 @@ class ZoneIterator implements Iterator {
 		}
 	}
 
+	@Override
 	public boolean
 	hasNext() {
 		return (current != null || wantLastSOA);
 	}
 
+	@Override
 	public Object
 	next() {
 		if (!hasNext()) {
@@ -86,6 +88,7 @@ class ZoneIterator implements Iterator {
 		return set;
 	}
 
+	@Override
 	public void
 	remove() {
 		throw new UnsupportedOperationException();
@@ -551,6 +554,7 @@ toMasterFile() {
 /**
  * Returns the contents of the Zone as a string (in master file format).
  */
+@Override
 public String
 toString() {
 	return toMasterFile();

@@ -19,6 +19,7 @@ private byte [] address;
 
 X25Record() {}
 
+@Override
 Record
 getObject() {
 	return new X25Record();
@@ -52,11 +53,13 @@ X25Record(Name name, int dclass, long ttl, String address) {
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	address = in.readCountedString();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String addr = st.getString();
@@ -73,11 +76,13 @@ getAddress() {
 	return byteArrayToString(address, false);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeCountedString(address);
 }
 
+@Override
 String
 rrToString() {
 	return byteArrayToString(address, true);

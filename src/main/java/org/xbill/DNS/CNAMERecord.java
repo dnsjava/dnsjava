@@ -14,6 +14,7 @@ private static final long serialVersionUID = -4020373886892538580L;
 
 CNAMERecord() {}
 
+@Override
 Record
 getObject() {
 	return new CNAMERecord();

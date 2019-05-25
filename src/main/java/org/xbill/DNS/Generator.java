@@ -244,6 +244,7 @@ expand() throws IOException {
  * Converts the generate specification to a string containing the corresponding
  * $GENERATE statement.
  */
+@Override
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();

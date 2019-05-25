@@ -291,6 +291,7 @@ public static final int PROTOCOL_ANY = Protocol.ANY;
 
 KEYRecord() {}
 
+@Override
 Record
 getObject() {
 	return new KEYRecord();
@@ -328,6 +329,7 @@ KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
 	publicKey = key;
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String flagString = st.getIdentifier();

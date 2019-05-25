@@ -229,6 +229,7 @@ private static class TypeMnemonic extends Mnemonic {
 		objects.put(Mnemonic.toInteger(val), proto);
 	}
 	
+	@Override
 	public void
 	check(int val) {
 		Type.check(val);

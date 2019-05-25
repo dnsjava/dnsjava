@@ -14,6 +14,7 @@ private static final long serialVersionUID = 487170758138268838L;
 
 NSRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NSRecord();
@@ -34,6 +35,7 @@ getTarget() {
 	return getSingleName();
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return getSingleName();

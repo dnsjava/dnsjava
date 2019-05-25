@@ -56,17 +56,20 @@ private static class CacheRRset extends RRset implements Element {
 		this.expire = limitExpire(rrset.getTTL(), maxttl);
 	}
 
+	@Override
 	public final boolean
 	expired() {
 		int now = (int)(System.currentTimeMillis() / 1000);
 		return (now >= expire);
 	}
 
+	@Override
 	public final int
 	compareCredibility(int cred) {
 		return credibility - cred;
 	}
 
+	@Override
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
@@ -96,22 +99,26 @@ private static class NegativeElement implements Element {
 		this.expire = limitExpire(cttl, maxttl);
 	}
 
+	@Override
 	public int
 	getType() {
 		return type;
 	}
 
+	@Override
 	public final boolean
 	expired() {
 		int now = (int)(System.currentTimeMillis() / 1000);
 		return (now >= expire);
 	}
 
+	@Override
 	public final int
 	compareCredibility(int cred) {
 		return credibility - cred;
 	}
 
+	@Override
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
@@ -148,6 +155,7 @@ private static class CacheMap extends LinkedHashMap {
 		this.maxsize = maxsize;
 	}
 
+	@Override
 	protected boolean removeEldestEntry(Map.Entry eldest) {
 		return maxsize >= 0 && size() > maxsize;
 	}
@@ -827,6 +835,7 @@ getDClass() {
 /**
  * Returns the contents of the Cache as a string.
  */ 
+@Override
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();

@@ -127,14 +127,17 @@ private static class BasicHandler implements ZoneTransferHandler {
 	private List axfr;
 	private List ixfr;
 
+	@Override
 	public void startAXFR() {
 		axfr = new ArrayList();
 	}
 
+	@Override
 	public void startIXFR() {
 		ixfr = new ArrayList();
 	}
 
+	@Override
 	public void startIXFRDeletes(Record soa) {
 		Delta delta = new Delta();
 		delta.deletes.add(soa);
@@ -142,12 +145,14 @@ private static class BasicHandler implements ZoneTransferHandler {
 		ixfr.add(delta);
 	}
 
+	@Override
 	public void startIXFRAdds(Record soa) {
 		Delta delta = (Delta) ixfr.get(ixfr.size() - 1);
 		delta.adds.add(soa);
 		delta.end = getSOASerial(soa);
 	}
 
+	@Override
 	public void handleRecord(Record r) {
 		List list;
 		if (ixfr != null) {

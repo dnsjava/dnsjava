@@ -27,6 +27,7 @@ private byte [] value;
 
 CAARecord() {} 
 
+@Override
 Record
 getObject() {
 	return new CAARecord();
@@ -52,6 +53,7 @@ CAARecord(Name name, int dclass, long ttl, int flags, String tag, String value)
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	flags = in.readU8();
@@ -59,6 +61,7 @@ rrFromWire(DNSInput in) throws IOException {
 	value = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	flags = st.getUInt8();
@@ -71,6 +74,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	}
 }
 
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -100,6 +104,7 @@ getValue() {
 	return byteArrayToString(value, false);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(flags);

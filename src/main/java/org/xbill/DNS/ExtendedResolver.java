@@ -139,6 +139,7 @@ private static class Resolution implements ResolverListener {
 	 * Receive a response.  If the resolution hasn't been completed,
 	 * either wake up the blocking thread or call the callback.
 	 */
+	@Override
 	public void
 	receiveMessage(Object id, Message m) {
 		if (Options.check("verbose"))
@@ -161,6 +162,7 @@ private static class Resolution implements ResolverListener {
 	 * Receive an exception.  If the resolution has been completed,
 	 * do nothing.  Otherwise make progress.
 	 */
+	@Override
 	public void
 	handleException(Object id, Exception e) {
 		if (Options.check("verbose"))
@@ -296,30 +298,35 @@ ExtendedResolver(Resolver [] res) throws UnknownHostException {
 		resolvers.add(res[i]);
 }
 
+@Override
 public void
 setPort(int port) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setPort(port);
 }
 
+@Override
 public void
 setTCP(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTCP(flag);
 }
 
+@Override
 public void
 setIgnoreTruncation(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setIgnoreTruncation(flag);
 }
 
+@Override
 public void
 setEDNS(int level) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setEDNS(level);
 }
 
+@Override
 public void
 setEDNS(int level, int payloadSize, int flags, List options) {
 	for (int i = 0; i < resolvers.size(); i++)
@@ -327,18 +334,21 @@ setEDNS(int level, int payloadSize, int flags, List options) {
 						     flags, options);
 }
 
+@Override
 public void
 setTSIGKey(TSIG key) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTSIGKey(key);
 }
 
+@Override
 public void
 setTimeout(int secs, int msecs) {
 	for (int i = 0; i < resolvers.size(); i++)
 		((Resolver)resolvers.get(i)).setTimeout(secs, msecs);
 }
 
+@Override
 public void
 setTimeout(int secs) {
 	setTimeout(secs, 0);
@@ -352,6 +362,7 @@ setTimeout(int secs) {
  * @return The response.
  * @throws IOException An error occurred while sending or receiving.
  */
+@Override
 public Message
 send(Message query) throws IOException {
 	Resolution res = new Resolution(this, query);
@@ -368,6 +379,7 @@ send(Message query) throws IOException {
  * @param listener The object containing the callbacks.
  * @return An identifier, which is also a parameter in the callback
  */
+@Override
 public Object
 sendAsync(final Message query, final ResolverListener listener) {
 	Resolution res = new Resolution(this, query);

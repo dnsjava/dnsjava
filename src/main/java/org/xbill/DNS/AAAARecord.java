@@ -19,6 +19,7 @@ private byte [] address;
 
 AAAARecord() {}
 
+@Override
 Record
 getObject() {
 	return new AAAARecord();
@@ -36,17 +37,20 @@ AAAARecord(Name name, int dclass, long ttl, InetAddress address) {
 	this.address = address.getAddress();
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	address = in.readByteArray(16);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	address = st.getAddressBytes(Address.IPv6);
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	InetAddress addr;
@@ -82,6 +86,7 @@ getAddress() {
 	}
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeByteArray(address);

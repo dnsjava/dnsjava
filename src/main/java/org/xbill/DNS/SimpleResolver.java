@@ -84,6 +84,7 @@ setDefaultResolver(String hostname) {
 	defaultResolver = hostname;
 }
 
+@Override
 public void
 setPort(int port) {
 	address = new InetSocketAddress(address.getAddress(), port);
@@ -127,16 +128,19 @@ setLocalAddress(InetAddress addr) {
 	localAddress = new InetSocketAddress(addr, 0);
 }
 
+@Override
 public void
 setTCP(boolean flag) {
 	this.useTCP = flag;
 }
 
+@Override
 public void
 setIgnoreTruncation(boolean flag) {
 	this.ignoreTruncation = flag;
 }
 
+@Override
 public void
 setEDNS(int level, int payloadSize, int flags, List options) {
 	if (level != 0 && level != -1)
@@ -147,11 +151,13 @@ setEDNS(int level, int payloadSize, int flags, List options) {
 	queryOPT = new OPTRecord(payloadSize, 0, level, flags, options);
 }
 
+@Override
 public void
 setEDNS(int level) {
 	setEDNS(level, 0, 0, null);
 }
 
+@Override
 public void
 setTSIGKey(TSIG key) {
 	tsig = key;
@@ -162,11 +168,13 @@ getTSIGKey() {
 	return tsig;
 }
 
+@Override
 public void
 setTimeout(int secs, int msecs) {
 	timeoutValue = (long)secs * 1000 + msecs;
 }
 
+@Override
 public void
 setTimeout(int secs) {
 	setTimeout(secs, 0);
@@ -223,6 +231,7 @@ maxUDPSize(Message query) {
  * @return The response.
  * @throws IOException An error occurred while sending or receiving.
  */
+@Override
 public Message
 send(Message query) throws IOException {
 	if (Options.check("verbose"))
@@ -305,6 +314,7 @@ send(Message query) throws IOException {
  * @param listener The object containing the callbacks.
  * @return An identifier, which is also a parameter in the callback
  */
+@Override
 public Object
 sendAsync(final Message query, final ResolverListener listener) {
 	final Object id;

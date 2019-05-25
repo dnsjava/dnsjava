@@ -23,6 +23,7 @@ SingleCompressedNameBase(Name name, int type, int dclass, long ttl,
         super(name, type, dclass, ttl, singleName, description);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	singleName.toWire(out, c, canonical);

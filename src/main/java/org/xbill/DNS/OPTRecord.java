@@ -28,6 +28,7 @@ private List options;
 
 OPTRecord() {}
 
+@Override
 Record
 getObject() {
 	return new OPTRecord();
@@ -86,6 +87,7 @@ OPTRecord(int payloadSize, int xrcode, int version) {
 	this(payloadSize, xrcode, version, 0, null);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	if (in.remaining() > 0)
@@ -96,12 +98,14 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	throw st.exception("no text format defined for OPT");
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -147,6 +151,7 @@ getFlags() {
 	return (int)(ttl & 0xFFFF);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (options == null)
@@ -195,6 +200,7 @@ getOptions(int code) {
  * @param arg The record to compare to
  * @return true if the records are equal, false otherwise.
  */
+@Override
 public boolean
 equals(final Object arg) {
 	return super.equals(arg) && ttl == ((OPTRecord) arg).ttl;

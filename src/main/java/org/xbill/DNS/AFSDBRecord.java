@@ -16,6 +16,7 @@ private static final long serialVersionUID = 3034379930729102437L;
 
 AFSDBRecord() {}
 
+@Override
 Record
 getObject() {
 	return new AFSDBRecord();

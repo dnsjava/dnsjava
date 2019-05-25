@@ -54,11 +54,13 @@ class SingleCompressedNameBaseTest
 	    super(name, type, dclass, ttl, singleName, desc);
 	}
 	
+	@Override
 	public Name getSingleName()
 	{
 	    return super.getSingleName();
 	}
 
+	@Override
 	public Record getObject()
 	{
 	    return null;

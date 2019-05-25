@@ -419,6 +419,7 @@ generators() {
 		return Collections.EMPTY_LIST.iterator();
 }
 
+@Override
 protected void
 finalize() {
 	if (st != null)

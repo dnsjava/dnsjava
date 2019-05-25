@@ -21,6 +21,7 @@ private Name replacement;
 
 NAPTRRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NAPTRRecord();
@@ -57,6 +58,7 @@ NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
 	this.replacement = checkName("replacement", replacement);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	order = in.readU16();
@@ -67,6 +69,7 @@ rrFromWire(DNSInput in) throws IOException {
 	replacement = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	order = st.getUInt16();
@@ -83,6 +86,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -136,6 +140,7 @@ getReplacement() {
 	return replacement;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(order);
@@ -146,6 +151,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	replacement.toWire(out, null, canonical);
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return replacement;

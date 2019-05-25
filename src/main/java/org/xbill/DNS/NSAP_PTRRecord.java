@@ -15,6 +15,7 @@ private static final long serialVersionUID = 2386284746382064904L;
 
 NSAP_PTRRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NSAP_PTRRecord();

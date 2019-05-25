@@ -20,6 +20,7 @@ private byte [] cert;
 
 OPENPGPKEYRecord() {}
 
+@Override
 Record
 getObject() {
 	return new OPENPGPKEYRecord();
@@ -37,11 +38,13 @@ OPENPGPKEYRecord(Name name, int dclass, long ttl, byte [] cert)
 	this.cert = cert;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	cert = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	cert = st.getBase64();
@@ -50,6 +53,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /**
  * Converts rdata to a String
  */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -73,6 +77,7 @@ getCert()
 	return cert;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeByteArray(cert);

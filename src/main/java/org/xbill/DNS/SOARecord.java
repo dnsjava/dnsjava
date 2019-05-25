@@ -19,6 +19,7 @@ private long serial, refresh, retry, expire, minimum;
 
 SOARecord() {}
 
+@Override
 Record
 getObject() {
 	return new SOARecord();
@@ -50,6 +51,7 @@ SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
 	this.minimum = checkU32("minimum", minimum);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	host = new Name(in);
@@ -61,6 +63,7 @@ rrFromWire(DNSInput in) throws IOException {
 	minimum = in.readU32();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	host = st.getName(origin);
@@ -73,6 +76,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Convert to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -148,6 +152,7 @@ getMinimum() {
 	return minimum;
 }       
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	host.toWire(out, c, canonical);

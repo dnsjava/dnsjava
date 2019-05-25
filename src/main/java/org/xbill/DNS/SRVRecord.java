@@ -22,6 +22,7 @@ private Name target;
 
 SRVRecord() {}
 
+@Override
 Record
 getObject() {
 	return new SRVRecord();
@@ -47,6 +48,7 @@ SRVRecord(Name name, int dclass, long ttl, int priority,
 	this.target = checkName("target", target);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	priority = in.readU16();
@@ -55,6 +57,7 @@ rrFromWire(DNSInput in) throws IOException {
 	target = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	priority = st.getUInt16();
@@ -64,6 +67,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -98,6 +102,7 @@ getTarget() {
 	return target;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(priority);
@@ -106,6 +111,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	target.toWire(out, null, canonical);
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return target;

@@ -540,6 +540,7 @@ serveTCP(InetAddress addr, int port) {
 			final Socket s = sock.accept();
 			Thread t;
 			t = new Thread(new Runnable() {
+					@Override
 					public void run() {TCPclient(s);}});
 			t.start();
 		}
@@ -603,6 +604,7 @@ public void
 addTCP(final InetAddress addr, final int port) {
 	Thread t;
 	t = new Thread(new Runnable() {
+			@Override
 			public void run() {serveTCP(addr, port);}});
 	t.start();
 }
@@ -611,6 +613,7 @@ public void
 addUDP(final InetAddress addr, final int port) {
 	Thread t;
 	t = new Thread(new Runnable() {
+			@Override
 			public void run() {serveUDP(addr, port);}});
 	t.start();
 }

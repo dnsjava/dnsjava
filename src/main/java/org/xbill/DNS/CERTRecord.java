@@ -112,6 +112,7 @@ private byte [] cert;
 
 CERTRecord() {}
 
+@Override
 Record
 getObject() {
 	return new CERTRecord();
@@ -135,6 +136,7 @@ CERTRecord(Name name, int dclass, long ttl, int certType, int keyTag,
 	this.cert = cert;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	certType = in.readU16();
@@ -143,6 +145,7 @@ rrFromWire(DNSInput in) throws IOException {
 	cert = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String certTypeString = st.getString();
@@ -161,6 +164,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /**
  * Converts rdata to a String
  */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -213,6 +217,7 @@ getCert() {
 	return cert;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(certType);

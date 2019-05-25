@@ -31,6 +31,7 @@ ResolveThread(Resolver res, Message query, Object id,
 /**
  * Performs the query, and executes the callback.
  */
+@Override
 public void
 run() {
 	try {

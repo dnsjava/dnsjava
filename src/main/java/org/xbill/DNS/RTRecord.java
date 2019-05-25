@@ -14,6 +14,7 @@ private static final long serialVersionUID = -3206215651648278098L;
 
 RTRecord() {}
 
+@Override
 Record
 getObject() {
 	return new RTRecord();

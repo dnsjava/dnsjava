@@ -34,6 +34,7 @@ private byte [] fingerprint;
 
 SSHFPRecord() {} 
 
+@Override
 Record
 getObject() {
 	return new SSHFPRecord();
@@ -55,6 +56,7 @@ SSHFPRecord(Name name, int dclass, long ttl, int alg, int digestType,
 	this.fingerprint = fingerprint;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	alg = in.readU8();
@@ -62,6 +64,7 @@ rrFromWire(DNSInput in) throws IOException {
 	fingerprint = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	alg = st.getUInt8();
@@ -69,6 +72,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	fingerprint = st.getHex(true);
 }
 
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -98,6 +102,7 @@ getFingerPrint() {
 	return fingerprint;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(alg);

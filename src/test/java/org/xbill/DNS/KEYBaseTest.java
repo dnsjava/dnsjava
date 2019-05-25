@@ -58,11 +58,13 @@ class KEYBaseTest
 	    super(name, type, dclass, ttl, flags, proto, alg, key);
 	}
 	
+	@Override
 	public Record getObject()
 	{
 	    return null;
 	}
 
+	@Override
 	void rdataFromString(Tokenizer st, Name origin) throws IOException
 	{
 	}

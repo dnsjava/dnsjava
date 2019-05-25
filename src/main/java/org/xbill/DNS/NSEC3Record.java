@@ -57,6 +57,7 @@ private static final base32 b32 = new base32(base32.Alphabet.BASE32HEX,
 
 NSEC3Record() {}
 
+@Override
 Record getObject() {
 	return new NSEC3Record();
 }
@@ -100,6 +101,7 @@ public NSEC3Record(Name name, int dclass, long ttl, int hashAlg,
 	this.types = new TypeBitmap(types);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	hashAlg = in.readU8();
@@ -117,6 +119,7 @@ rrFromWire(DNSInput in) throws IOException {
 	types = new TypeBitmap(in);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(hashAlg);
@@ -134,6 +137,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	types.toWire(out);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	hashAlg = st.getUInt8();
@@ -155,6 +159,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();

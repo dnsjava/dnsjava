@@ -16,6 +16,7 @@ private static final long serialVersionUID = -2100754352801658722L;
 
 SPFRecord() {}
 
+@Override
 Record
 getObject() {
 	return new SPFRecord();

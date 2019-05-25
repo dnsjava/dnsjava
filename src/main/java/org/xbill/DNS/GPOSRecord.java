@@ -18,6 +18,7 @@ private byte [] latitude, longitude, altitude;
 
 GPOSRecord() {}
 
+@Override
 Record
 getObject() {
 	return new GPOSRecord();
@@ -77,6 +78,7 @@ GPOSRecord(Name name, int dclass, long ttl, String longitude, String latitude,
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	longitude = in.readCountedString();
@@ -90,6 +92,7 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	try {
@@ -109,6 +112,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Convert to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -168,6 +172,7 @@ getAltitude() {
 	return Double.parseDouble(getAltitudeString());
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeCountedString(longitude);

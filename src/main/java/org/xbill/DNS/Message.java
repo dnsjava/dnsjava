@@ -585,6 +585,7 @@ sectionToString(int i) {
 /**
  * Converts the Message to a String.
  */
+@Override
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
@@ -619,6 +620,7 @@ toString() {
  * @see TSIGRecord
  * @see OPTRecord
  */
+@Override
 public Object
 clone() {
 	Message m = new Message();

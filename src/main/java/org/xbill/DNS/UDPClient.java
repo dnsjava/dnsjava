@@ -34,6 +34,7 @@ private static volatile boolean prng_initializing = true;
  */
 static {
 	new Thread(new Runnable() {
+			   @Override
 			   public void run() {
 			   int n = prng.nextInt();
 			   prng_initializing = false;

@@ -61,20 +61,25 @@ class RecordTest
 	    super(name, type, dclass, ttl);
 	}
 
+	@Override
 	public Record getObject()
 	{
 	    return null;
 	}
 
+	@Override
 	public void rrFromWire(DNSInput in) throws IOException {}
 
+	@Override
 	public String rrToString()
 	{
 	    return "{SubRecord: rrToString}";
 	}
 
+	@Override
 	public void rdataFromString(Tokenizer t, Name origin) throws IOException {}
 
+	@Override
 	public void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
 
 	// makes it callable by test code
@@ -95,6 +100,7 @@ class RecordTest
 	    return Record.unknownToString(in);
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException
 	{
 	    throw new CloneNotSupportedException();

@@ -29,6 +29,7 @@ private byte salt[];
 
 NSEC3PARAMRecord() {}
 
+@Override
 Record getObject() {
 	return new NSEC3PARAMRecord();
 }
@@ -63,6 +64,7 @@ public NSEC3PARAMRecord(Name name, int dclass, long ttl, int hashAlg,
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	hashAlg = in.readU8();
@@ -76,6 +78,7 @@ rrFromWire(DNSInput in) throws IOException {
 		salt = null;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(hashAlg);
@@ -89,6 +92,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 		out.writeU8(0);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException
 {
@@ -108,6 +112,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();

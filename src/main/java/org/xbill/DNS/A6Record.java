@@ -21,6 +21,7 @@ private Name prefix;
 
 A6Record() {}
 
+@Override
 Record
 getObject() {
 	return new A6Record();
@@ -45,6 +46,7 @@ A6Record(Name name, int dclass, long ttl, int prefixBits,
 		this.prefix = checkName("prefix", prefix);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	prefixBits = in.readU8();
@@ -59,6 +61,7 @@ rrFromWire(DNSInput in) throws IOException {
 		prefix = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	prefixBits = st.getUInt8();
@@ -78,6 +81,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -111,6 +115,7 @@ getPrefix() {
 	return prefix;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(prefixBits);

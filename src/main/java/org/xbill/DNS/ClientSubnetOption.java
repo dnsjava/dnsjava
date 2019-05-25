@@ -118,6 +118,7 @@ getAddress() {
 	return address;
 }
 
+@Override
 void 
 optionFromWire(DNSInput in) throws WireParseException {
 	family = in.readU16();
@@ -150,6 +151,7 @@ optionFromWire(DNSInput in) throws WireParseException {
 		throw new WireParseException("invalid padding");
 }
 
+@Override
 void 
 optionToWire(DNSOutput out) {
 	out.writeU16(family);
@@ -158,6 +160,7 @@ optionToWire(DNSOutput out) {
 	out.writeByteArray(address.getAddress(), 0, (sourceNetmask + 7) / 8);
 }
 
+@Override
 String 
 optionToString() {
 	StringBuffer sb = new StringBuffer();

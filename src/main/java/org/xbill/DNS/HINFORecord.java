@@ -18,6 +18,7 @@ private byte [] cpu, os;
 
 HINFORecord() {}
 
+@Override
 Record
 getObject() {
 	return new HINFORecord();
@@ -41,12 +42,14 @@ HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	cpu = in.readCountedString();
 	os = in.readCountedString();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	try {
@@ -74,6 +77,7 @@ getOS() {
 	return byteArrayToString(os, false);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeCountedString(cpu);
@@ -83,6 +87,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 /**
  * Converts to a string
  */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();

@@ -52,6 +52,7 @@ public static class Element {
 		     prefixLength);
 	}
 
+	@Override
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
@@ -68,6 +69,7 @@ public static class Element {
 		return sb.toString();
 	}
 
+	@Override
 	public boolean
 	equals(Object arg) {
 		if (arg == null || !(arg instanceof Element))
@@ -79,6 +81,7 @@ public static class Element {
 			address.equals(elt.address));
 	}
 
+	@Override
 	public int
 	hashCode() {
 		return address.hashCode() + prefixLength + (negative ? 1 : 0);
@@ -91,6 +94,7 @@ private List elements;
 
 APLRecord() {} 
 
+@Override
 Record
 getObject() {
 	return new APLRecord();
@@ -141,6 +145,7 @@ parseAddress(byte [] in, int length) throws WireParseException {
 	return out;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	elements = new ArrayList(1);
@@ -170,6 +175,7 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	elements = new ArrayList(1);
@@ -230,6 +236,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	st.unget();
 }
 
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -257,6 +264,7 @@ addressLength(byte [] addr) {
 	return 0;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	for (Iterator it = elements.iterator(); it.hasNext(); ) {

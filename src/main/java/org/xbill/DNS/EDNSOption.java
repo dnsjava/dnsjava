@@ -65,6 +65,7 @@ EDNSOption(int code) {
 	this.code = Record.checkU16("code", code);
 }
 
+@Override
 public String 
 toString() {
 	StringBuffer sb = new StringBuffer();
@@ -188,6 +189,7 @@ toWire() throws IOException {
  * @param arg The option to compare to
  * @return true if the options are equal, false otherwise.
  */
+@Override
 public boolean
 equals(Object arg) {
 	if (arg == null || !(arg instanceof EDNSOption))
@@ -201,6 +203,7 @@ equals(Object arg) {
 /**
  * Generates a hash code based on the EDNS Option's data.
  */
+@Override
 public int
 hashCode() {
 	byte [] array = getData();

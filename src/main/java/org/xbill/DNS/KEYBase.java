@@ -36,6 +36,7 @@ KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
 	this.key = key;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	flags = in.readU16();
@@ -46,6 +47,7 @@ rrFromWire(DNSInput in) throws IOException {
 }
 
 /** Converts the DNSKEY/KEY Record to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -149,6 +151,7 @@ getPublicKey() throws DNSSEC.DNSSECException {
 	return publicKey;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(flags);

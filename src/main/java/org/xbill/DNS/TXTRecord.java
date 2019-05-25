@@ -16,6 +16,7 @@ private static final long serialVersionUID = -5780785764284221342L;
 
 TXTRecord() {}
 
+@Override
 Record
 getObject() {
 	return new TXTRecord();

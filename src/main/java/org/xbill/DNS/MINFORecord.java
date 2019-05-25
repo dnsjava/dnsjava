@@ -21,6 +21,7 @@ private Name errorAddress;
 
 MINFORecord() {}
 
+@Override
 Record
 getObject() {
 	return new MINFORecord();
@@ -44,12 +45,14 @@ MINFORecord(Name name, int dclass, long ttl,
 	this.errorAddress = checkName("errorAddress", errorAddress);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	responsibleAddress = new Name(in);
 	errorAddress = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	responsibleAddress = st.getName(origin);
@@ -57,6 +60,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the MINFO Record to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -81,6 +85,7 @@ getErrorAddress() {
 	return errorAddress;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	responsibleAddress.toWire(out, null, canonical);

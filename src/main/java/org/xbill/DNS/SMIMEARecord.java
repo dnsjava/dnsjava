@@ -62,6 +62,7 @@ private byte [] certificateAssociationData;
 
 SMIMEARecord() {}
 
+@Override
 Record
 getObject() {
 	return new SMIMEARecord();
@@ -92,6 +93,7 @@ SMIMEARecord(Name name, int dclass, long ttl,
 						0xFFFF);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	certificateUsage = in.readU8();
@@ -100,6 +102,7 @@ rrFromWire(DNSInput in) throws IOException {
 	certificateAssociationData = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	certificateUsage = st.getUInt8();
@@ -109,6 +112,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -123,6 +127,7 @@ rrToString() {
 	return sb.toString();
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(certificateUsage);

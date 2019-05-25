@@ -21,6 +21,7 @@ private Name textDomain;
 
 RPRecord() {}
 
+@Override
 Record
 getObject() {
 	return new RPRecord();
@@ -39,12 +40,14 @@ RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
 	this.textDomain = checkName("textDomain", textDomain);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	mailbox = new Name(in);
 	textDomain = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	mailbox = st.getName(origin);
@@ -52,6 +55,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts the RP Record to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -73,6 +77,7 @@ getTextDomain() {
 	return textDomain;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	mailbox.toWire(out, null, canonical);

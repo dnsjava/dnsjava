@@ -643,6 +643,7 @@ toString(boolean omitFinalDot) {
  * Convert a Name to a String
  * @return The representation of this name as a (printable) String.
  */
+@Override
 public String
 toString() {
 	return toString(false);
@@ -788,6 +789,7 @@ equals(byte [] b, int bpos) {
 /**
  * Are these two Names equivalent?
  */
+@Override
 public boolean
 equals(Object arg) {
 	if (arg == this)
@@ -809,6 +811,7 @@ equals(Object arg) {
 /**
  * Computes a hashcode based on the value
  */
+@Override
 public int
 hashCode() {
 	if (hashcode != 0)
@@ -829,6 +832,7 @@ hashCode() {
  * name in the canonical ordering.
  * @throws ClassCastException if the argument is not a Name.
  */
+@Override
 public int
 compareTo(Object o) {
 	Name arg = (Name) o;

@@ -29,6 +29,7 @@ private byte [] digest;
 
 DLVRecord() {}
 
+@Override
 Record
 getObject() {
 	return new DLVRecord();
@@ -52,6 +53,7 @@ DLVRecord(Name name, int dclass, long ttl, int footprint, int alg,
 	this.digest = digest;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	footprint = in.readU16();
@@ -60,6 +62,7 @@ rrFromWire(DNSInput in) throws IOException {
 	digest = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	footprint = st.getUInt16();
@@ -71,6 +74,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /**
  * Converts rdata to a String
  */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -120,6 +124,7 @@ getFootprint() {
 	return footprint;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(footprint);

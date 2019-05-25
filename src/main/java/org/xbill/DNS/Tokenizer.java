@@ -90,6 +90,7 @@ public static class Token {
 	 * Converts the token to a string containing a representation useful
 	 * for debugging.
 	 */
+	@Override
 	public String
 	toString() {
 		switch (type) {
@@ -724,6 +725,7 @@ close() {
 	}
 }
 
+@Override
 protected void
 finalize() {
 	close();

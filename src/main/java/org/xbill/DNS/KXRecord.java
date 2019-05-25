@@ -14,6 +14,7 @@ private static final long serialVersionUID = 7448568832769757809L;
 
 KXRecord() {}
 
+@Override
 Record
 getObject() {
 	return new KXRecord();
@@ -43,6 +44,7 @@ getPreference() {
 	return getU16Field();
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return getNameField();

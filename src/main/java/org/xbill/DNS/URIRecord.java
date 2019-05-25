@@ -23,6 +23,7 @@ URIRecord() {
 	target = new byte[]{};
 }
 
+@Override
 Record
 getObject() {
 	return new URIRecord();
@@ -51,6 +52,7 @@ URIRecord(Name name, int dclass, long ttl, int priority,
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	priority = in.readU16();
@@ -58,6 +60,7 @@ rrFromWire(DNSInput in) throws IOException {
 	target = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	priority = st.getUInt16();
@@ -71,6 +74,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -98,6 +102,7 @@ getTarget() {
 	return byteArrayToString(target, false);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(priority);

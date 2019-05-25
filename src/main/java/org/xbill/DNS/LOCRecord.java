@@ -30,6 +30,7 @@ static {
 
 LOCRecord() {}
 
+@Override
 Record
 getObject() {
 	return new LOCRecord();
@@ -57,6 +58,7 @@ LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
 	this.vPrecision = (long)(vPrecision * 100);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	int version;
@@ -157,6 +159,7 @@ throws IOException
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	latitude = parsePosition(st, "latitude");
@@ -212,6 +215,7 @@ positionToString(long value, char pos, char neg) {
 
 
 /** Convert to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -279,6 +283,7 @@ getVPrecision() {
 	return ((double)vPrecision) / 100;
 }       
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(0); /* version */

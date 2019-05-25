@@ -21,6 +21,7 @@ private static final long serialVersionUID = 4963556060953589058L;
 
 SIGRecord() {}
 
+@Override
 Record
 getObject() {
 	return new SIGRecord();

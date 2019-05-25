@@ -14,6 +14,7 @@ private static final long serialVersionUID = 2670767677200844154L;
 
 DNAMERecord() {}
 
+@Override
 Record
 getObject() {
 	return new DNAMERecord();

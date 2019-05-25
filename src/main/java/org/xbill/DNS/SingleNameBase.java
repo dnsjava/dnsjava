@@ -33,16 +33,19 @@ SingleNameBase(Name name, int type, int dclass, long ttl, Name singleName,
 	this.singleName = checkName(description, singleName);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	singleName = new Name(in);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	singleName = st.getName(origin);
 }
 
+@Override
 String
 rrToString() {
 	return singleName.toString();
@@ -53,6 +56,7 @@ getSingleName() {
 	return singleName;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	singleName.toWire(out, null, canonical);

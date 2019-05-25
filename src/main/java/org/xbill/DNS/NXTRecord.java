@@ -23,6 +23,7 @@ private BitSet bitmap;
 
 NXTRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NXTRecord();
@@ -40,6 +41,7 @@ NXTRecord(Name name, int dclass, long ttl, Name next, BitSet bitmap) {
 	this.bitmap = bitmap;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	next = new Name(in);
@@ -53,6 +55,7 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	next = st.getName(origin);
@@ -70,6 +73,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -95,6 +99,7 @@ getBitmap() {
 	return bitmap;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	next.toWire(out, null, canonical);

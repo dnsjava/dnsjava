@@ -15,6 +15,7 @@ private static final long serialVersionUID = 5268878603762942202L;
 
 MDRecord() {}
 
+@Override
 Record
 getObject() {
 	return new MDRecord();
@@ -35,6 +36,7 @@ getMailAgent() {
 	return getSingleName();
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return getSingleName();

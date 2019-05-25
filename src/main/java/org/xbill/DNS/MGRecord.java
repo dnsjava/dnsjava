@@ -14,6 +14,7 @@ private static final long serialVersionUID = -3980055550863644582L;
 
 MGRecord() {}
 
+@Override
 Record
 getObject() {
 	return new MGRecord();

@@ -29,16 +29,19 @@ GenericEDNSOption(int code, byte [] data) {
 	this.data = Record.checkByteArrayLength("option data", data, 0xFFFF);
 }
 
+@Override
 void 
 optionFromWire(DNSInput in) throws IOException {
 	data = in.readByteArray();
 }
 
+@Override
 void 
 optionToWire(DNSOutput out) {
 	out.writeByteArray(data);
 }
 
+@Override
 String 
 optionToString() {
 	return "<" + base16.toString(data) + ">";

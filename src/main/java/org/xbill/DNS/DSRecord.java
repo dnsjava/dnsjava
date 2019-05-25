@@ -46,6 +46,7 @@ private byte [] digest;
 
 DSRecord() {}
 
+@Override
 Record
 getObject() {
 	return new DSRecord();
@@ -95,6 +96,7 @@ DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key)
 	     digestid, DNSSEC.generateDSDigest(key, digestid));
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	footprint = in.readU16();
@@ -103,6 +105,7 @@ rrFromWire(DNSInput in) throws IOException {
 	digest = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	footprint = st.getUInt16();
@@ -114,6 +117,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /**
  * Converts rdata to a String
  */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -163,6 +167,7 @@ getFootprint() {
 	return footprint;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(footprint);

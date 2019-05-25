@@ -63,16 +63,19 @@ class U16NameBaseTest
 	    super(name, type, dclass, ttl, u16Field, u16Description, nameField, nameDescription);
 	}
 	
+	@Override
 	public int getU16Field()
 	{
 	    return super.getU16Field();
 	}
 
+	@Override
 	public Name getNameField()
 	{
 	    return super.getNameField();
 	}
 
+	@Override
 	public Record getObject()
 	{
 	    return null;

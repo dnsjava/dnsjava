@@ -19,6 +19,7 @@ private byte [] data;
 
 DHCIDRecord() {}
 
+@Override
 Record
 getObject() {
 	return new DHCIDRecord();
@@ -34,21 +35,25 @@ DHCIDRecord(Name name, int dclass, long ttl, byte [] data) {
 	this.data = data;
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	data = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	data = st.getBase64();
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeByteArray(data);
 }
 
+@Override
 String
 rrToString() {
 	return base64.toString(data);

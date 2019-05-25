@@ -19,6 +19,7 @@ private byte [] address;
 
 NSAPRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NSAPRecord();
@@ -72,11 +73,13 @@ NSAPRecord(Name name, int dclass, long ttl, String address) {
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	address = in.readByteArray();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String addr = st.getString();
@@ -93,11 +96,13 @@ getAddress() {
 	return byteArrayToString(address, false);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeByteArray(address);
 }
 
+@Override
 String
 rrToString() {
 	return "0x" + base16.toString(address);

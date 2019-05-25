@@ -298,6 +298,7 @@ rdataToString() {
 /**
  * Converts a Record into a String representation
  */
+@Override
 public String
 toString() {
 	StringBuffer sb = new StringBuffer();
@@ -566,6 +567,7 @@ sameRRset(Record rec) {
  * @param arg The record to compare to
  * @return true if the records are equal, false otherwise.
  */
+@Override
 public boolean
 equals(Object arg) {
 	if (arg == null || !(arg instanceof Record))
@@ -581,6 +583,7 @@ equals(Object arg) {
 /**
  * Generates a hash code based on the Record's data.
  */
+@Override
 public int
 hashCode() {
 	byte [] array = toWireCanonical(true);
@@ -641,6 +644,7 @@ setTTL(long ttl) {
  * is defined to compare by name, class, type, and rdata.
  * @throws ClassCastException if the argument is not a Record.
  */
+@Override
 public int
 compareTo(Object o) {
 	Record arg = (Record) o;

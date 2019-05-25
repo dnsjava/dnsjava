@@ -25,6 +25,7 @@ private TypeBitmap types;
 
 NSECRecord() {}
 
+@Override
 Record
 getObject() {
 	return new NSECRecord();
@@ -45,12 +46,14 @@ NSECRecord(Name name, int dclass, long ttl, Name next, int [] types) {
 	this.types = new TypeBitmap(types);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	next = new Name(in);
 	types = new TypeBitmap(in);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	// Note: The next name is not lowercased.
@@ -58,6 +61,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	types.toWire(out);
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	next = st.getName(origin);
@@ -65,6 +69,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** Converts rdata to a String */
+@Override
 String
 rrToString()
 {

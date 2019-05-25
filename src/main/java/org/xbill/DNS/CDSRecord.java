@@ -12,6 +12,7 @@ private static final long serialVersionUID = -3156174257356976006L;
 
 CDSRecord() {}
 
+@Override
 Record
 getObject() {
 	return new CDSRecord();

@@ -14,6 +14,7 @@ private static final long serialVersionUID = 2914841027584208546L;
 
 MXRecord() {}
 
+@Override
 Record
 getObject() {
 	return new MXRecord();
@@ -43,12 +44,14 @@ getPriority() {
 	return getU16Field();
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU16(u16Field);
 	nameField.toWire(out, c, canonical);
 }
 
+@Override
 public Name
 getAdditionalName() {
 	return getNameField();

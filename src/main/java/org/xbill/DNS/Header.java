@@ -282,12 +282,14 @@ toStringWithRcode(int newrcode) {
 }
 
 /** Converts the header into a String */
+@Override
 public String
 toString() {
 	return toStringWithRcode(getRcode());
 }
 
 /* Creates a new Header identical to the current one */
+@Override
 public Object
 clone() {
 	Header h = new Header();

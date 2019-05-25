@@ -15,6 +15,7 @@ private static final long serialVersionUID = -8321636610425434192L;
 
 PTRRecord() {}
 
+@Override
 Record
 getObject() {
 	return new PTRRecord();

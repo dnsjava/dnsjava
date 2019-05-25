@@ -580,6 +580,7 @@ private int [] services;
 
 WKSRecord() {}
 
+@Override
 Record
 getObject() {
 	return new WKSRecord();
@@ -608,6 +609,7 @@ WKSRecord(Name name, int dclass, long ttl, InetAddress address, int protocol,
 	Arrays.sort(this.services);
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	address = in.readByteArray(4);
@@ -628,6 +630,7 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	String s = st.getString();
@@ -663,6 +666,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 /**
  * Converts rdata to a String
  */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -703,6 +707,7 @@ getServices() {
 	return services;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeByteArray(address);

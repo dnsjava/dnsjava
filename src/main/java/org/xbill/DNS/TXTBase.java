@@ -49,6 +49,7 @@ TXTBase(Name name, int type, int dclass, long ttl, String string) {
 	this(name, type, dclass, ttl, Collections.singletonList(string));
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	strings = new ArrayList(2);
@@ -58,6 +59,7 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	strings = new ArrayList(2);
@@ -77,6 +79,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 }
 
 /** converts to a String */
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
@@ -111,6 +114,7 @@ getStringsAsByteArrays() {
 	return strings;
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	Iterator it = strings.iterator();

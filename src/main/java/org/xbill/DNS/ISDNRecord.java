@@ -19,6 +19,7 @@ private byte [] subAddress;
 
 ISDNRecord() {}
 
+@Override
 Record
 getObject() {
 	return new ISDNRecord();
@@ -43,6 +44,7 @@ ISDNRecord(Name name, int dclass, long ttl, String address, String subAddress) {
 	}
 }
 
+@Override
 void
 rrFromWire(DNSInput in) throws IOException {
 	address = in.readCountedString();
@@ -50,6 +52,7 @@ rrFromWire(DNSInput in) throws IOException {
 		subAddress = in.readCountedString();
 }
 
+@Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
 	try {
@@ -84,6 +87,7 @@ getSubAddress() {
 	return byteArrayToString(subAddress, false);
 }
 
+@Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeCountedString(address);
@@ -91,6 +95,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 		out.writeCountedString(subAddress);
 }
 
+@Override
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
