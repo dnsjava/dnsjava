@@ -23,7 +23,7 @@
     </licenses>
     <scm>
         <connection>scm:git:https://github.com/dnsjava/dnsjava</connection>
-        <developerConnection>scm:git:git@github.com:dnsjava/dnsjava</developerConnection>
+        <developerConnection>scm:git:https://github.com/dnsjava/dnsjava</developerConnection>
         <url>https://github.com/dnsjava/dnsjava</url>
         <tag>HEAD</tag>
     </scm>
