@@ -1,3 +1,7 @@
+05/25/2019:
+	- Fix getRRsetType for empty RRSIG records.
+	  (PR#40, Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 05/23/2019:
 	- Fix NPE during NameService registration.
 	  (PR#26, Kenny Ingle <kenny.ingle@gmail.com>)
