@@ -37,7 +37,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <target.jdk>1.4</target.jdk>
+        <target.jdk>1.8</target.jdk>
     </properties>
 
     <build>
