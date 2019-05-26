@@ -108,7 +108,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	if (options != null) {
 		sb.append(options);
 		sb.append(" ");

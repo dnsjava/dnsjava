@@ -50,7 +50,7 @@ rrFromWire(DNSInput in) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(flags);
 	sb.append(" ");
 	sb.append(proto);

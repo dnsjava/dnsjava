@@ -542,7 +542,7 @@ class RecordTest
     @Test
     void test_byteArrayFromString_invalid()
     {
-	StringBuffer b = new StringBuffer();
+	StringBuilder b = new StringBuilder();
 	for( int i=0; i<257; ++i){
 	    b.append('A');
 	}

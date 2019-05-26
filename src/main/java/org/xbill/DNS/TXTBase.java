@@ -82,7 +82,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	Iterator it = strings.iterator();
 	while (it.hasNext()) {
 		byte [] array = (byte []) it.next();

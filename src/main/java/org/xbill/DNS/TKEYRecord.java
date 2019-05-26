@@ -120,7 +120,7 @@ modeString() {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(alg);
 	sb.append(" ");
 	if (Options.check("multiline"))

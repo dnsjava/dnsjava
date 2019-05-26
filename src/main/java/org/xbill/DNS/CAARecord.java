@@ -77,7 +77,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(flags);
 	sb.append(" ");
 	sb.append(byteArrayToString(tag, false));

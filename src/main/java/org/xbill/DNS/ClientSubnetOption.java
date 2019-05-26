@@ -163,7 +163,7 @@ optionToWire(DNSOutput out) {
 @Override
 String 
 optionToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(address.getHostAddress());
 	sb.append("/");
 	sb.append(sourceNetmask);

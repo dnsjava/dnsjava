@@ -21,11 +21,11 @@ private static final char [] hex = "0123456789ABCDEF".toCharArray();
  */
 public static String
 dump(String description, byte [] b, int offset, int length) {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 
-	sb.append(length + "b");
+	sb.append(length).append("b");
 	if (description != null)
-		sb.append(" (" + description + ")");
+		sb.append(" (").append(description).append(")");
 	sb.append(':');
 
 	int prefixlen = sb.toString().length();

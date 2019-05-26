@@ -669,12 +669,12 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(Address.toDottedQuad(address));
 	sb.append(" ");
 	sb.append(protocol);
 	for (int i = 0; i < services.length; i++) {
-		sb.append(" " + services[i]);
+		sb.append(" ").append(services[i]);
 	}
 	return sb.toString();
 }

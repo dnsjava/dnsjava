@@ -86,7 +86,7 @@ toArray() {
 @Override
 public String
 toString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	for (Iterator it = types.iterator(); it.hasNext(); ) {
 		int t = ((Integer)it.next()).intValue();
 		sb.append(Type.string(t));

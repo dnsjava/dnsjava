@@ -72,7 +72,7 @@ private static class CacheRRset extends RRset implements Element {
 	@Override
 	public String
 	toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(super.toString());
 		sb.append(" cl = ");
 		sb.append(credibility);
@@ -121,11 +121,11 @@ private static class NegativeElement implements Element {
 	@Override
 	public String
 	toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if (type == 0)
-			sb.append("NXDOMAIN " + name);
+			sb.append("NXDOMAIN ").append(name);
 		else
-			sb.append("NXRRSET " + name + " " + Type.string(type));
+			sb.append("NXRRSET ").append(name).append(" ").append(Type.string(type));
 		sb.append(" cl = ");
 		sb.append(credibility);
 		return sb.toString();
@@ -838,7 +838,7 @@ getDClass() {
 @Override
 public String
 toString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	synchronized (this) {
 		Iterator it = data.values().iterator();
 		while (it.hasNext()) {

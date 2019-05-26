@@ -97,7 +97,7 @@ private String
 substitute(String spec, long n) throws IOException {
 	boolean escaped = false;
 	byte [] str = spec.getBytes();
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 
 	for (int i = 0; i < str.length; i++) {
 		char c = (char)(str[i] & 0xFF);
@@ -247,18 +247,18 @@ expand() throws IOException {
 @Override
 public String
 toString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append("$GENERATE ");
-	sb.append(start + "-" + end);
+	sb.append(start).append("-").append(end);
 	if (step > 1)
-		sb.append("/" + step);
+		sb.append("/").append(step);
 	sb.append(" ");
-	sb.append(namePattern + " ");
-	sb.append(ttl + " ");
+	sb.append(namePattern).append(" ");
+	sb.append(ttl).append(" ");
 	if (dclass != DClass.IN || !Options.check("noPrintIN"))
-		sb.append(DClass.string(dclass) + " ");
-	sb.append(Type.string(type) + " ");
-	sb.append(rdataPattern + " ");
+		sb.append(DClass.string(dclass)).append(" ");
+	sb.append(Type.string(type)).append(" ");
+	sb.append(rdataPattern).append(" ");
 	return sb.toString();
 }
 
