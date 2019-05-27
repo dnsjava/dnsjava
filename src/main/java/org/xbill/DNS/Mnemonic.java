@@ -30,8 +30,8 @@ static final int CASE_UPPER = 2;
 /* Strings will be stored/searched for in lowercase. */
 static final int CASE_LOWER = 3;
 
-private HashMap strings;
-private HashMap values;
+private HashMap<String, Integer> strings;
+private HashMap<Integer, String> values;
 private String description;
 private int wordcase;
 private String prefix;
@@ -49,8 +49,8 @@ public
 Mnemonic(String description, int wordcase) {
 	this.description = description;
 	this.wordcase = wordcase;
-	strings = new HashMap();
-	values = new HashMap();
+	strings = new HashMap<>();
+	values = new HashMap<>();
 	max = Integer.MAX_VALUE;
 }
 
@@ -171,7 +171,7 @@ addAll(Mnemonic source) {
 public String
 getText(int val) {
 	check(val);
-	String str = (String) values.get(toInteger(val));
+	String str = values.get(toInteger(val));
 	if (str != null)
 		return str;
 	str = Integer.toString(val);
@@ -188,7 +188,7 @@ getText(int val) {
 public int
 getValue(String str) {
 	str = sanitize(str);
-	Integer value = (Integer) strings.get(str);
+	Integer value = strings.get(str);
 	if (value != null) {
 		return value.intValue();
 	}

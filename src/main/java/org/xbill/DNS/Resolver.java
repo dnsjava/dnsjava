@@ -52,7 +52,7 @@ void setEDNS(int level);
  * @throws IllegalArgumentException An invalid field was specified.
  * @see OPTRecord
  */
-void setEDNS(int level, int payloadSize, int flags, List options);
+void setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options);
 
 /**
  * Specifies the TSIG key that messages will be signed with

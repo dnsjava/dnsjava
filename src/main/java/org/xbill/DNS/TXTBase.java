@@ -16,7 +16,7 @@ abstract class TXTBase extends Record {
 
 private static final long serialVersionUID = -4319510507246305931L;
 
-protected List strings;
+protected List<byte[]> strings;
 
 protected
 TXTBase() {}
@@ -27,15 +27,15 @@ TXTBase(Name name, int type, int dclass, long ttl) {
 }
 
 protected
-TXTBase(Name name, int type, int dclass, long ttl, List strings) {
+TXTBase(Name name, int type, int dclass, long ttl, List<String> strings) {
 	super(name, type, dclass, ttl);
 	if (strings == null)
 		throw new IllegalArgumentException("strings must not be null");
-	this.strings = new ArrayList(strings.size());
-	Iterator it = strings.iterator();
+	this.strings = new ArrayList<>(strings.size());
+	Iterator<String> it = strings.iterator();
 	try {
 		while (it.hasNext()) {
-			String s = (String) it.next();
+			String s = it.next();
 			this.strings.add(byteArrayFromString(s));
 		}
 	}
@@ -52,9 +52,9 @@ TXTBase(Name name, int type, int dclass, long ttl, String string) {
 @Override
 void
 rrFromWire(DNSInput in) throws IOException {
-	strings = new ArrayList(2);
+	strings = new ArrayList<>(2);
 	while (in.remaining() > 0) {
-		byte [] b = in.readCountedString();
+		byte[] b = in.readCountedString();
 		strings.add(b);
 	}
 }
@@ -62,7 +62,7 @@ rrFromWire(DNSInput in) throws IOException {
 @Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	strings = new ArrayList(2);
+	strings = new ArrayList<>(2);
 	while (true) {
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
@@ -83,9 +83,9 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
-	Iterator it = strings.iterator();
+	Iterator<byte[]> it = strings.iterator();
 	while (it.hasNext()) {
-		byte [] array = (byte []) it.next();
+		byte[] array = it.next();
 		sb.append(byteArrayToString(array, true));
 		if (it.hasNext())
 			sb.append(" ");
@@ -97,11 +97,11 @@ rrToString() {
  * Returns the text strings
  * @return A list of Strings corresponding to the text strings.
  */
-public List
+public List<String>
 getStrings() {
-	List list = new ArrayList(strings.size());
+	List<String> list = new ArrayList<>(strings.size());
 	for (int i = 0; i < strings.size(); i++)
-		list.add(byteArrayToString((byte []) strings.get(i), false));
+		list.add(byteArrayToString(strings.get(i), false));
 	return list;
 }
 
@@ -109,7 +109,7 @@ getStrings() {
  * Returns the text strings
  * @return A list of byte arrays corresponding to the text strings.
  */
-public List
+public List<byte[]>
 getStringsAsByteArrays() {
 	return strings;
 }
@@ -117,9 +117,9 @@ getStringsAsByteArrays() {
 @Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	Iterator it = strings.iterator();
+	Iterator<byte[]> it = strings.iterator();
 	while (it.hasNext()) {
-		byte [] b = (byte []) it.next();
+		byte[] b = it.next();
 		out.writeCountedString(b);
 	}
 }

@@ -30,8 +30,8 @@ private static class Resolution implements ResolverListener {
 
 	public
 	Resolution(ExtendedResolver eres, Message query) {
-		List l = eres.resolvers;
-		resolvers = (Resolver []) l.toArray (new Resolver[l.size()]);
+		List<Resolver> l = eres.resolvers;
+		resolvers = l.toArray (new Resolver[l.size()]);
 		if (eres.loadBalance) {
 			int nresolvers = resolvers.length;
 			/*
@@ -235,14 +235,14 @@ private static class Resolution implements ResolverListener {
 
 private static final int quantum = 5;
 
-private List resolvers;
+private List<Resolver> resolvers;
 private boolean loadBalance = false;
 private int lbStart = 0;
 private int retries = 3;
 
 private void
 init() {
-	resolvers = new ArrayList();
+	resolvers = new ArrayList<>();
 }
 
 /**
@@ -302,35 +302,35 @@ ExtendedResolver(Resolver [] res) throws UnknownHostException {
 public void
 setPort(int port) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setPort(port);
+		(resolvers.get(i)).setPort(port);
 }
 
 @Override
 public void
 setTCP(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTCP(flag);
+		(resolvers.get(i)).setTCP(flag);
 }
 
 @Override
 public void
 setIgnoreTruncation(boolean flag) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setIgnoreTruncation(flag);
+		(resolvers.get(i)).setIgnoreTruncation(flag);
 }
 
 @Override
 public void
 setEDNS(int level) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setEDNS(level);
+		(resolvers.get(i)).setEDNS(level);
 }
 
 @Override
 public void
-setEDNS(int level, int payloadSize, int flags, List options) {
+setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setEDNS(level, payloadSize,
+		(resolvers.get(i)).setEDNS(level, payloadSize,
 						     flags, options);
 }
 
@@ -338,14 +338,14 @@ setEDNS(int level, int payloadSize, int flags, List options) {
 public void
 setTSIGKey(TSIG key) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTSIGKey(key);
+		(resolvers.get(i)).setTSIGKey(key);
 }
 
 @Override
 public void
 setTimeout(int secs, int msecs) {
 	for (int i = 0; i < resolvers.size(); i++)
-		((Resolver)resolvers.get(i)).setTimeout(secs, msecs);
+		(resolvers.get(i)).setTimeout(secs, msecs);
 }
 
 @Override
@@ -380,7 +380,7 @@ send(Message query) throws IOException {
  * @return An identifier, which is also a parameter in the callback
  */
 @Override
-public Object
+public Resolution
 sendAsync(final Message query, final ResolverListener listener) {
 	Resolution res = new Resolution(this, query);
 	res.startAsync(listener);
@@ -391,14 +391,14 @@ sendAsync(final Message query, final ResolverListener listener) {
 public Resolver
 getResolver(int n) {
 	if (n < resolvers.size())
-		return (Resolver)resolvers.get(n);
+		return resolvers.get(n);
 	return null;
 }
 
 /** Returns all resolvers used by this ExtendedResolver */
 public Resolver []
 getResolvers() {
-	return (Resolver []) resolvers.toArray(new Resolver[resolvers.size()]);
+	return resolvers.toArray(new Resolver[resolvers.size()]);
 }
 
 /** Adds a new resolver to be used by this ExtendedResolver */

@@ -229,7 +229,7 @@ nextRecord() throws IOException {
  */
 public Record []
 expand() throws IOException {
-	List list = new ArrayList();
+	List<Record> list = new ArrayList<>();
 	for (long i = start; i < end; i += step) {
 		String namestr = substitute(namePattern, current);
 		Name name = Name.fromString(namestr, origin);
@@ -237,7 +237,7 @@ expand() throws IOException {
 		list.add(Record.fromString(name, type, dclass, ttl,
 					   rdata, origin));
 	}
-	return (Record []) list.toArray(new Record[list.size()]);
+	return list.toArray(new Record[list.size()]);
 }
 
 /**

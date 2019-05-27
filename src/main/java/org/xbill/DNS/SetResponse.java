@@ -11,7 +11,6 @@ import java.util.*;
  *
  * @author Brian Wellington
  */
-
 public class SetResponse {
 
 /**
@@ -60,7 +59,7 @@ private static final SetResponse nxdomain = new SetResponse(NXDOMAIN);
 private static final SetResponse nxrrset = new SetResponse(NXRRSET);
 
 private int type;
-private Object data;
+private List<RRset> data;
 
 private
 SetResponse() {}
@@ -69,7 +68,7 @@ SetResponse(int type, RRset rrset) {
 	if (type < 0 || type > 6)
 		throw new IllegalArgumentException("invalid type");
 	this.type = type;
-	this.data = rrset;
+	this.data = Collections.singletonList(rrset);
 }
 
 SetResponse(int type) {
@@ -104,8 +103,8 @@ ofType(int type) {
 void
 addRRset(RRset rrset) {
 	if (data == null)
-		data = new ArrayList();
-	List l = (List) data;
+		data = new ArrayList<>();
+	List<RRset> l = data;
 	l.add(rrset);
 }
 
@@ -156,8 +155,8 @@ public RRset []
 answers() {
 	if (type != SUCCESSFUL)
 		return null;
-	List l = (List) data;
-	return (RRset []) l.toArray(new RRset[l.size()]);
+	List<RRset> l = data;
+	return l.toArray(new RRset[l.size()]);
 }
 
 /**
@@ -165,7 +164,7 @@ answers() {
  */
 public CNAMERecord
 getCNAME() {
-	return (CNAMERecord)((RRset)data).first();
+	return (CNAMERecord)(data.get(0)).first();
 }
 
 /**
@@ -173,7 +172,7 @@ getCNAME() {
  */
 public DNAMERecord
 getDNAME() {
-	return (DNAMERecord)((RRset)data).first();
+	return (DNAMERecord)(data.get(0)).first();
 }
 
 /**
@@ -181,7 +180,7 @@ getDNAME() {
  */
 public RRset
 getNS() {
-	return (RRset)data;
+	return (data != null) ? data.get(0) : null;
 }
 
 /** Prints the value of the SetResponse */
@@ -192,9 +191,9 @@ toString() {
 		case UNKNOWN:		return "unknown";
 		case NXDOMAIN:		return "NXDOMAIN";
 		case NXRRSET:		return "NXRRSET";
-		case DELEGATION:	return "delegation: " + data;
-		case CNAME:		return "CNAME: " + data;
-		case DNAME:		return "DNAME: " + data;
+		case DELEGATION:	return "delegation: " + data.get(0);
+		case CNAME:		return "CNAME: " + data.get(0);
+		case DNAME:		return "DNAME: " + data.get(0);
 		case SUCCESSFUL:	return "successful";
 		default:		throw new IllegalStateException();
 	}

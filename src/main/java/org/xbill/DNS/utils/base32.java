@@ -21,9 +21,9 @@ public static class Alphabet {
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=";
 	public static final String BASE32HEX =
 		"0123456789ABCDEFGHIJKLMNOPQRSTUV=";
-};
+}
 
-private String alphabet;
+	private String alphabet;
 private boolean padding, lowercase;
 
 /**

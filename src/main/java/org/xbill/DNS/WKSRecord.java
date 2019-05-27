@@ -615,7 +615,7 @@ rrFromWire(DNSInput in) throws IOException {
 	address = in.readByteArray(4);
 	protocol = in.readU8();
 	byte [] array = in.readByteArray();
-	List list = new ArrayList();
+	List<Integer> list = new ArrayList<>();
 	for (int i = 0; i < array.length; i++) {
 		for (int j = 0; j < 8; j++) {
 			int octet = array[i] & 0xFF;
@@ -626,7 +626,7 @@ rrFromWire(DNSInput in) throws IOException {
 	}
 	services = new int[list.size()];
 	for (int i = 0; i < list.size(); i++) {
-		services[i] = ((Integer) list.get(i)).intValue();
+		services[i] = (list.get(i)).intValue();
 	}
 }
 
@@ -644,7 +644,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 		throw st.exception("Invalid IP protocol: " + s);
 	}
 
-	List list = new ArrayList();
+	List<Integer> list = new ArrayList<>();
 	while (true) {
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
@@ -659,7 +659,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 	st.unget();
 	services = new int[list.size()];
 	for (int i = 0; i < list.size(); i++) {
-		services[i] = ((Integer) list.get(i)).intValue();
+		services[i] = (list.get(i)).intValue();
 	}
 }
 

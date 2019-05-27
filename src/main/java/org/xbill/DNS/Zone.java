@@ -11,7 +11,6 @@ import java.util.*;
  *
  * @author Brian Wellington
  */
-
 public class Zone implements Serializable {
 
 private static final long serialVersionUID = -9220510891189510942L;
@@ -30,7 +29,7 @@ private RRset NS;
 private SOARecord SOA;
 private boolean hasWild;
 
-class ZoneIterator implements Iterator {
+class ZoneIterator implements Iterator<RRset> {
 	private Iterator zentries;
 	private RRset [] current;
 	private int count;
@@ -61,7 +60,7 @@ class ZoneIterator implements Iterator {
 	}
 
 	@Override
-	public Object
+	public RRset
 	next() {
 		if (!hasNext()) {
 			throw new NoSuchElementException();
@@ -70,7 +69,7 @@ class ZoneIterator implements Iterator {
 			wantLastSOA = false;
 			return oneRRset(originNode, Type.SOA);
 		}
-		Object set = current[count++];
+		RRset set = current[count++];
 		if (count == current.length) {
 			current = null;
 			while (zentries.hasNext()) {
@@ -506,7 +505,7 @@ removeRecord(Record r) {
 /**
  * Returns an Iterator over the RRsets in the zone.
  */
-public Iterator
+public Iterator<RRset>
 iterator() {
 	return new ZoneIterator(false);
 }
@@ -516,7 +515,7 @@ iterator() {
  * construct an AXFR response.  This is identical to {@link #iterator} except
  * that the SOA is returned at the end as well as the beginning.
  */
-public Iterator
+public Iterator<RRset>
 AXFR() {
 	return new ZoneIterator(true);
 }

@@ -90,7 +90,7 @@ public static class Element {
 
 private static final long serialVersionUID = -1348173791712935864L;
 
-private List elements;
+private List<Element> elements;
 
 APLRecord() {} 
 
@@ -117,7 +117,7 @@ validatePrefixLength(int family, int prefixLength) {
 public
 APLRecord(Name name, int dclass, long ttl, List elements) {
 	super(name, Type.APL, dclass, ttl);
-	this.elements = new ArrayList(elements.size());
+	this.elements = new ArrayList<>(elements.size());
 	for (Iterator it = elements.iterator(); it.hasNext(); ) {
 		Object o = it.next();
 		if (!(o instanceof Element)) {
@@ -148,7 +148,7 @@ parseAddress(byte [] in, int length) throws WireParseException {
 @Override
 void
 rrFromWire(DNSInput in) throws IOException {
-	elements = new ArrayList(1);
+	elements = new ArrayList<>(1);
 	while (in.remaining() != 0) {
 		int family = in.readU16();
 		int prefix = in.readU8();
@@ -178,7 +178,7 @@ rrFromWire(DNSInput in) throws IOException {
 @Override
 void
 rdataFromString(Tokenizer st, Name origin) throws IOException {
-	elements = new ArrayList(1);
+	elements = new ArrayList<>(1);
 	while (true) {
 		Tokenizer.Token t = st.get();
 		if (!t.isString())
@@ -240,8 +240,8 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 String
 rrToString() {
 	StringBuffer sb = new StringBuffer();
-	for (Iterator it = elements.iterator(); it.hasNext(); ) {
-		Element element = (Element) it.next();
+	for (Iterator<Element> it = elements.iterator(); it.hasNext(); ) {
+		Element element = it.next();
 		sb.append(element);
 		if (it.hasNext())
 			sb.append(" ");
@@ -250,7 +250,7 @@ rrToString() {
 }
 
 /** Returns the list of APL elements. */
-public List
+public List<Element>
 getElements() {
 	return elements;
 }
@@ -267,8 +267,8 @@ addressLength(byte [] addr) {
 @Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	for (Iterator it = elements.iterator(); it.hasNext(); ) {
-		Element element = (Element) it.next();
+	for (Iterator<Element> it = elements.iterator(); it.hasNext(); ) {
+		Element element = it.next();
 		int length = 0;
 		byte [] data;
 		if (element.family == Address.IPv4 ||
