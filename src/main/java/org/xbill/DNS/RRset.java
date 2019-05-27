@@ -64,7 +64,11 @@ safeAddRR(Record r) {
 	}
 }
 
-/** Adds a Record to an RRset */
+/**
+ * Adds a Record to this RRset. If the TTL of the added record is not the
+ * same as existing records in the RRset, all records are set to the lowest
+ * TTL of either the added record or the existing records.
+ */
 public synchronized void
 addRR(Record r) {
 	if (rrs.size() == 0) {
@@ -76,6 +80,9 @@ addRR(Record r) {
 		throw new IllegalArgumentException("record does not match " +
 						   "rrset");
 
+	// rfc2181#section-5.2:
+	// [...] treat the RRs for all purposes as if all TTLs in the
+	// RRSet had been set to the value of the lowest TTL in the RRSet.
 	if (r.getTTL() != first.getTTL()) {
 		if (r.getTTL() > first.getTTL()) {
 			r = r.cloneRecord();
