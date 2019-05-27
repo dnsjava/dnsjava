@@ -38,8 +38,15 @@ import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class SetResponseTest
 {
@@ -70,13 +77,21 @@ class SetResponseTest
     @Test
     void test_ctor_1arg_toosmall()
     {
-    	assertThrows(IllegalArgumentException.class, () -> new SetResponse(-1));
+	try {
+	    new SetResponse(-1);
+	    fail("IllegalArgumentException not thrown");
+	}
+	catch(IllegalArgumentException a){}
     }
 
     @Test
     void test_ctor_1arg_toobig()
     {
-    	assertThrows(IllegalArgumentException.class, () -> new SetResponse(7));
+	try {
+	    new SetResponse(7);
+	    fail("IllegalArgumentException not thrown");
+	}
+	catch(IllegalArgumentException a){}
     }
 
     @Test
@@ -107,13 +122,21 @@ class SetResponseTest
     @Test
     void test_ctor_2arg_toosmall()
     {
-    	assertThrows(IllegalArgumentException.class, () -> new SetResponse(-1, new RRset()));
+	try {
+	    new SetResponse(-1, new RRset());
+	    fail("IllegalArgumentException not thrown");
+	}
+	catch(IllegalArgumentException a){}
     }
 
     @Test
     void test_ctor_2arg_toobig()
     {
-    	assertThrows(IllegalArgumentException.class, () -> new SetResponse(7, new RRset()));
+	try {
+	    new SetResponse(7, new RRset());
+	    fail("IllegalArgumentException not thrown");
+	}
+	catch(IllegalArgumentException a){}
     }
 
     @Test
@@ -166,13 +189,21 @@ class SetResponseTest
     @Test
     void test_ofType_toosmall()
     {
-    	assertThrows(IllegalArgumentException.class, () -> SetResponse.ofType(-1));
+	try {
+	    SetResponse.ofType(-1);
+	    fail("IllegalArgumentException not thrown");
+	}
+	catch(IllegalArgumentException e ){}
     }
 
     @Test
     void test_ofType_toobig()
     {
-    	assertThrows(IllegalArgumentException.class, () -> SetResponse.ofType(7));
+	try {
+	    SetResponse.ofType(7);
+	    fail("IllegalArgumentException not thrown");
+	}
+	catch(IllegalArgumentException e ){}
     }
 
     @Test
