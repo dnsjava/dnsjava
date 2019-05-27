@@ -33,7 +33,7 @@ fromAddress(byte [] addr) {
 		throw new IllegalArgumentException("array must contain " +
 						   "4 or 16 elements");
 
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	if (addr.length == 4) {
 		for (int i = addr.length - 1; i >= 0; i--) {
 			sb.append(addr[i] & 0xFF);

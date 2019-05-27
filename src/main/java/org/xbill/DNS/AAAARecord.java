@@ -61,7 +61,7 @@ rrToString() {
 	}
 	if (addr.getAddress().length == 4) {
 		// Deal with Java's broken handling of mapped IPv4 addresses.
-		StringBuffer sb = new StringBuffer("0:0:0:0:0:ffff:");
+		StringBuilder sb = new StringBuilder("0:0:0:0:0:ffff:");
 		int high = ((address[12] & 0xFF) << 8) + (address[13] & 0xFF);
 		int low = ((address[14] & 0xFF) << 8) + (address[15] & 0xFF);
 		sb.append(Integer.toHexString(high));

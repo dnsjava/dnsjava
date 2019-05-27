@@ -421,7 +421,7 @@ class NameTest
     @Test
     void test_ctor_max_labels() throws TextParseException
 	{
-	    StringBuffer sb = new StringBuffer();
+	    StringBuilder sb = new StringBuilder();
 	    for(int i=0; i<127; ++i){
 		sb.append("a.");
 	    }

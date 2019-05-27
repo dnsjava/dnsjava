@@ -527,10 +527,10 @@ nodeToString(StringBuffer sb, Object node) {
 		RRset rrset = sets[i];
 		Iterator it = rrset.rrs();
 		while (it.hasNext())
-			sb.append(it.next() + "\n");
+			sb.append(it.next()).append("\n");
 		it = rrset.sigs();
 		while (it.hasNext())
-			sb.append(it.next() + "\n");
+			sb.append(it.next()).append("\n");
 	}
 }
 

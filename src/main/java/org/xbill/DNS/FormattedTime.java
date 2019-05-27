@@ -34,7 +34,7 @@ FormattedTime() {}
 public static String
 format(Date date) {
 	Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 
 	c.setTime(date);
 	sb.append(w4.format(c.get(Calendar.YEAR)));

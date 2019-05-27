@@ -58,7 +58,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(mailbox);
 	sb.append(" ");
 	sb.append(textDomain);

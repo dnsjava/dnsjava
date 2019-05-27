@@ -562,15 +562,15 @@ sectionToString(int i) {
 	if (i > 3)
 		return null;
 
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 
 	Record [] records = getSectionArray(i);
 	for (int j = 0; j < records.length; j++) {
 		Record rec = records[j];
 		if (i == Section.QUESTION) {
-			sb.append(";;\t" + rec.name);
-			sb.append(", type = " + Type.string(rec.type));
-			sb.append(", class = " + DClass.string(rec.dclass));
+			sb.append(";;\t").append(rec.name);
+			sb.append(", type = ").append(Type.string(rec.type));
+			sb.append(", class = ").append(DClass.string(rec.dclass));
 		}
 		else
 			sb.append(rec);
@@ -585,12 +585,12 @@ sectionToString(int i) {
 @Override
 public String
 toString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	OPTRecord opt = getOPT();
 	if (opt != null)
-		sb.append(header.toStringWithRcode(getRcode()) + "\n");
+		sb.append(header.toStringWithRcode(getRcode())).append("\n");
 	else
-		sb.append(header + "\n");
+		sb.append(header).append("\n");
 	if (isSigned()) {
 		sb.append(";; TSIG ");
 		if (isVerified())
@@ -601,12 +601,12 @@ toString() {
 	}
 	for (int i = 0; i < 4; i++) {
 		if (header.getOpcode() != Opcode.UPDATE)
-			sb.append(";; " + Section.longString(i) + ":\n");
+			sb.append(";; ").append(Section.longString(i)).append(":\n");
 		else
-			sb.append(";; " + Section.updString(i) + ":\n");
-		sb.append(sectionToString(i) + "\n");
+			sb.append(";; ").append(Section.updString(i)).append(":\n");
+		sb.append(sectionToString(i)).append("\n");
 	}
-	sb.append(";; Message size: " + numBytes() + " bytes");
+	sb.append(";; Message size: ").append(numBytes()).append(" bytes");
 	return sb.toString();
 }
 

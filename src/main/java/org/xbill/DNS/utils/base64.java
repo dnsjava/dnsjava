@@ -69,7 +69,7 @@ toString(byte [] b) {
 public static String
 formatString(byte [] b, int lineLength, String prefix, boolean addClose) {
 	String s = toString(b);
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	for (int i = 0; i < s.length(); i += lineLength) {
 		sb.append (prefix);
 		if (i + lineLength >= s.length()) {

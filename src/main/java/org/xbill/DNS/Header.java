@@ -254,7 +254,7 @@ getFlagsByte() {
 /** Converts the header's flags into a String */
 public String
 printFlags() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 
 	for (int i = 0; i < 16; i++)
 		if (validFlag(i) && getFlag(i)) {
@@ -266,18 +266,18 @@ printFlags() {
 
 String
 toStringWithRcode(int newrcode) {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 
 	sb.append(";; ->>HEADER<<- "); 
-	sb.append("opcode: " + Opcode.string(getOpcode()));
-	sb.append(", status: " + Rcode.string(newrcode));
-	sb.append(", id: " + getID());
+	sb.append("opcode: ").append(Opcode.string(getOpcode()));
+	sb.append(", status: ").append(Rcode.string(newrcode));
+	sb.append(", id: ").append(getID());
 	sb.append("\n");
 
-	sb.append(";; flags: " + printFlags());
+	sb.append(";; flags: ").append(printFlags());
 	sb.append("; ");
 	for (int i = 0; i < 4; i++)
-		sb.append(Section.string(i) + ": " + getCount(i) + " ");
+		sb.append(Section.string(i)).append(": ").append(getCount(i)).append(" ");
 	return sb.toString();
 }
 

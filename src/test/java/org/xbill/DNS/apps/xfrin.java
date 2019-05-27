@@ -1,6 +1,6 @@
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
 
-package org.xbill.DNS.tests;
+package org.xbill.DNS.apps;
 
 import java.util.*;
 import org.xbill.DNS.*;

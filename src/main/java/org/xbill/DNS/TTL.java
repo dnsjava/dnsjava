@@ -86,7 +86,7 @@ parseTTL(String s) {
 public static String
 format(long ttl) {
 	TTL.check(ttl);
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	long secs, mins, hours, days, weeks;
 	secs = ttl % 60;
 	ttl /= 60;
@@ -98,15 +98,15 @@ format(long ttl) {
 	ttl /= 7;
 	weeks = ttl;
 	if (weeks > 0)
-		sb.append(weeks + "W");
+		sb.append(weeks).append("W");
 	if (days > 0)
-		sb.append(days + "D");
+		sb.append(days).append("D");
 	if (hours > 0)
-		sb.append(hours + "H");
+		sb.append(hours).append("H");
 	if (mins > 0)
-		sb.append(mins + "M");
+		sb.append(mins).append("M");
 	if (secs > 0 || (weeks == 0 && days == 0 && hours == 0 && mins == 0))
-		sb.append(secs + "S");
+		sb.append(secs).append("S");
 	return sb.toString();
 }
 

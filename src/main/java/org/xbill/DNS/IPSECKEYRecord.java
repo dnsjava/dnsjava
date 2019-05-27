@@ -153,7 +153,7 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 @Override
 String
 rrToString() {
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	sb.append(precedence);
 	sb.append(" ");
 	sb.append(gatewayType);
