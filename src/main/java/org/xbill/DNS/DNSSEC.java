@@ -162,11 +162,11 @@ digestRRset(RRSIGRecord rrsig, RRset rrset) {
 	header.writeU16(rrset.getType());
 	header.writeU16(rrset.getDClass());
 	header.writeU32(rrsig.getOrigTTL());
-	for (int i = 0; i < records.length; i++) {
+	for (Record record : records) {
 		out.writeByteArray(header.toByteArray());
 		int lengthPosition = out.current();
 		out.writeU16(0);
-		out.writeByteArray(records[i].rdataToWireCanonical());
+		out.writeByteArray(record.rdataToWireCanonical());
 		int rrlength = out.current() - lengthPosition - 2;
 		out.save();
 		out.jump(lengthPosition);

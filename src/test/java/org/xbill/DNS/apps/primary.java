@@ -24,12 +24,17 @@ main(String [] args) throws Exception {
 		usage();
 
 	while (args.length - arg > 2) {
-		if (args[0].equals("-t"))
-			time = true;
-		else if (args[0].equals("-a"))
-			axfr = true;
-		else if (args[0].equals("-i"))
-			iterator = true;
+		switch (args[0]) {
+			case "-t":
+				time = true;
+				break;
+			case "-a":
+				axfr = true;
+				break;
+			case "-i":
+				iterator = true;
+				break;
+		}
 		arg++;
 	}
 

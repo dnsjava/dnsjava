@@ -100,8 +100,8 @@ rrToString() {
 public List<String>
 getStrings() {
 	List<String> list = new ArrayList<>(strings.size());
-	for (int i = 0; i < strings.size(); i++)
-		list.add(byteArrayToString(strings.get(i), false));
+	for (byte[] string : strings)
+		list.add(byteArrayToString(string, false));
 	return list;
 }
 
@@ -117,9 +117,7 @@ getStringsAsByteArrays() {
 @Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	Iterator<byte[]> it = strings.iterator();
-	while (it.hasNext()) {
-		byte[] b = it.next();
+	for (byte[] b : strings) {
 		out.writeCountedString(b);
 	}
 }

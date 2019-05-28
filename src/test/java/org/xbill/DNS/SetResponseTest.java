@@ -61,17 +61,17 @@ class SetResponseTest
 					SetResponse.DNAME,
 					SetResponse.SUCCESSFUL };
 
-	for( int i=0; i<types.length; ++i){
-	    SetResponse sr = new SetResponse(types[i]);
-	    assertNull(sr.getNS());
-	    assertEquals(types[i] == SetResponse.UNKNOWN, sr.isUnknown());
-	    assertEquals(types[i] == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-	    assertEquals(types[i] == SetResponse.NXRRSET, sr.isNXRRSET());
-	    assertEquals(types[i] == SetResponse.DELEGATION, sr.isDelegation());
-	    assertEquals(types[i] == SetResponse.CNAME, sr.isCNAME());
-	    assertEquals(types[i] == SetResponse.DNAME, sr.isDNAME());
-	    assertEquals(types[i] == SetResponse.SUCCESSFUL, sr.isSuccessful());
-	}
+	    for (int type : types) {
+		    SetResponse sr = new SetResponse(type);
+		    assertNull(sr.getNS());
+		    assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
+		    assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
+		    assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
+		    assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
+		    assertEquals(type == SetResponse.CNAME, sr.isCNAME());
+		    assertEquals(type == SetResponse.DNAME, sr.isDNAME());
+		    assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
+	    }
     }
 
     @Test
@@ -105,18 +105,18 @@ class SetResponseTest
 					SetResponse.DNAME,
 					SetResponse.SUCCESSFUL };
 
-	for( int i=0; i<types.length; ++i){
-	    RRset rs = new RRset();
-	    SetResponse sr = new SetResponse(types[i], rs);
-	    assertSame(rs, sr.getNS());
-	    assertEquals(types[i] == SetResponse.UNKNOWN, sr.isUnknown());
-	    assertEquals(types[i] == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-	    assertEquals(types[i] == SetResponse.NXRRSET, sr.isNXRRSET());
-	    assertEquals(types[i] == SetResponse.DELEGATION, sr.isDelegation());
-	    assertEquals(types[i] == SetResponse.CNAME, sr.isCNAME());
-	    assertEquals(types[i] == SetResponse.DNAME, sr.isDNAME());
-	    assertEquals(types[i] == SetResponse.SUCCESSFUL, sr.isSuccessful());
-	}
+	    for (int type : types) {
+		    RRset rs = new RRset();
+		    SetResponse sr = new SetResponse(type, rs);
+		    assertSame(rs, sr.getNS());
+		    assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
+		    assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
+		    assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
+		    assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
+		    assertEquals(type == SetResponse.CNAME, sr.isCNAME());
+		    assertEquals(type == SetResponse.DNAME, sr.isDNAME());
+		    assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
+	    }
     }
 
     @Test
@@ -147,20 +147,20 @@ class SetResponseTest
 					SetResponse.DNAME,
 					SetResponse.SUCCESSFUL };
 
-	for(int i=0; i<types.length; ++i){
-	    SetResponse sr = SetResponse.ofType(types[i]);
-	    assertNull(sr.getNS());
-	    assertEquals(types[i] == SetResponse.UNKNOWN, sr.isUnknown());
-	    assertEquals(types[i] == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-	    assertEquals(types[i] == SetResponse.NXRRSET, sr.isNXRRSET());
-	    assertEquals(types[i] == SetResponse.DELEGATION, sr.isDelegation());
-	    assertEquals(types[i] == SetResponse.CNAME, sr.isCNAME());
-	    assertEquals(types[i] == SetResponse.DNAME, sr.isDNAME());
-	    assertEquals(types[i] == SetResponse.SUCCESSFUL, sr.isSuccessful());
+	    for (int type : types) {
+		    SetResponse sr = SetResponse.ofType(type);
+		    assertNull(sr.getNS());
+		    assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
+		    assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
+		    assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
+		    assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
+		    assertEquals(type == SetResponse.CNAME, sr.isCNAME());
+		    assertEquals(type == SetResponse.DNAME, sr.isDNAME());
+		    assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
 
-	    SetResponse sr2 = SetResponse.ofType(types[i]);
-	    assertNotSame(sr, sr2);
-	}
+		    SetResponse sr2 = SetResponse.ofType(type);
+		    assertNotSame(sr, sr2);
+	    }
     }
 
     @Test
@@ -170,20 +170,20 @@ class SetResponseTest
 					SetResponse.NXDOMAIN,
 					SetResponse.NXRRSET };
 
-	for(int i=0; i<types.length; ++i){
-	    SetResponse sr = SetResponse.ofType(types[i]);
-	    assertNull(sr.getNS());
-	    assertEquals(types[i] == SetResponse.UNKNOWN, sr.isUnknown());
-	    assertEquals(types[i] == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-	    assertEquals(types[i] == SetResponse.NXRRSET, sr.isNXRRSET());
-	    assertEquals(types[i] == SetResponse.DELEGATION, sr.isDelegation());
-	    assertEquals(types[i] == SetResponse.CNAME, sr.isCNAME());
-	    assertEquals(types[i] == SetResponse.DNAME, sr.isDNAME());
-	    assertEquals(types[i] == SetResponse.SUCCESSFUL, sr.isSuccessful());
+	    for (int type : types) {
+		    SetResponse sr = SetResponse.ofType(type);
+		    assertNull(sr.getNS());
+		    assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
+		    assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
+		    assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
+		    assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
+		    assertEquals(type == SetResponse.CNAME, sr.isCNAME());
+		    assertEquals(type == SetResponse.DNAME, sr.isDNAME());
+		    assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
 
-	    SetResponse sr2 = SetResponse.ofType(types[i]);
-	    assertSame(sr, sr2);
-	}
+		    SetResponse sr2 = SetResponse.ofType(type);
+		    assertSame(sr, sr2);
+	    }
     }
 
     @Test

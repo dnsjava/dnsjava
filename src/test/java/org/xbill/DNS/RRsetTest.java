@@ -229,10 +229,10 @@ class RRsetTest
 
 	String out = m_rs.toString();
 	
-	assertTrue(out.indexOf(m_name.toString()) != -1);
-	assertTrue(out.indexOf(" IN A ") != -1);
-	assertTrue(out.indexOf("[192.169.232.11]") != -1);
-	assertTrue(out.indexOf("[192.169.232.12]") != -1);
+	assertTrue(out.contains(m_name.toString()));
+	assertTrue(out.contains(" IN A "));
+	assertTrue(out.contains("[192.169.232.11]"));
+	assertTrue(out.contains("[192.169.232.12]"));
     }
 
     @Test

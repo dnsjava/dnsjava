@@ -71,8 +71,8 @@ void
 toWire(DNSOutput out) {
 	out.writeU16(getID());
 	out.writeU16(flags);
-	for (int i = 0; i < counts.length; i++)
-		out.writeU16(counts[i]);
+	for (int count : counts)
+		out.writeU16(count);
 }
 
 public byte []

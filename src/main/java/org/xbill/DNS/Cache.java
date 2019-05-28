@@ -231,8 +231,8 @@ oneElement(Name name, Object types, int type, int minCred) {
 		throw new IllegalArgumentException("oneElement(ANY)");
 	if (types instanceof List) {
 		List list = (List) types;
-		for (int i = 0; i < list.size(); i++) {
-			Element set = (Element) list.get(i);
+		for (Object o : list) {
+			Element set = (Element) o;
 			if (set.getType() == type) {
 				found = set;
 				break;
@@ -443,8 +443,8 @@ lookup(Name name, int type, int minCred) {
 			sr = new SetResponse(SetResponse.SUCCESSFUL);
 			Element [] elements = allElements(types);
 			int added = 0;
-			for (int i = 0; i < elements.length; i++) {
-				element = elements[i];
+			for (Element value : elements) {
+				element = value;
 				if (element.expired()) {
 					removeElement(tname, element.getType());
 					continue;
@@ -453,7 +453,7 @@ lookup(Name name, int type, int minCred) {
 					continue;
 				if (element.compareCredibility(minCred) < 0)
 					continue;
-				sr.addRRset((CacheRRset)element);
+				sr.addRRset((CacheRRset) element);
 				added++;
 			}
 			/* There were positive entries */
@@ -626,43 +626,41 @@ addMessage(Message in) {
 	additionalNames = new HashSet<>();
 
 	answers = in.getSectionRRsets(Section.ANSWER);
-	for (int i = 0; i < answers.length; i++) {
-		if (answers[i].getDClass() != qclass)
+	for (RRset answer : answers) {
+		if (answer.getDClass() != qclass)
 			continue;
-		int type = answers[i].getType();
-		Name name = answers[i].getName();
+		int type = answer.getType();
+		Name name = answer.getName();
 		cred = getCred(Section.ANSWER, isAuth);
 		if ((type == qtype || qtype == Type.ANY) &&
-		    name.equals(curname))
-		{
-			addRRset(answers[i], cred);
+			name.equals(curname)) {
+			addRRset(answer, cred);
 			completed = true;
 			if (curname == qname) {
 				if (response == null)
 					response = new SetResponse(
-							SetResponse.SUCCESSFUL);
-				response.addRRset(answers[i]);
+						SetResponse.SUCCESSFUL);
+				response.addRRset(answer);
 			}
-			markAdditional(answers[i], additionalNames);
+			markAdditional(answer, additionalNames);
 		} else if (type == Type.CNAME && name.equals(curname)) {
 			CNAMERecord cname;
-			addRRset(answers[i], cred);
+			addRRset(answer, cred);
 			if (curname == qname)
 				response = new SetResponse(SetResponse.CNAME,
-							   answers[i]);
-			cname = (CNAMERecord) answers[i].first();
+					answer);
+			cname = (CNAMERecord) answer.first();
 			curname = cname.getTarget();
 		} else if (type == Type.DNAME && curname.subdomain(name)) {
 			DNAMERecord dname;
-			addRRset(answers[i], cred);
+			addRRset(answer, cred);
 			if (curname == qname)
 				response = new SetResponse(SetResponse.DNAME,
-							   answers[i]);
-			dname = (DNAMERecord) answers[i].first();
+					answer);
+			dname = (DNAMERecord) answer.first();
 			try {
 				curname = curname.fromDNAME(dname);
-			}
-			catch (NameTooLongException e) {
+			} catch (NameTooLongException e) {
 				break;
 			}
 		}
@@ -670,13 +668,13 @@ addMessage(Message in) {
 
 	auth = in.getSectionRRsets(Section.AUTHORITY);
 	RRset soa = null, ns = null;
-	for (int i = 0; i < auth.length; i++) {
-		if (auth[i].getType() == Type.SOA &&
-		    curname.subdomain(auth[i].getName()))
-			soa = auth[i];
-		else if (auth[i].getType() == Type.NS &&
-			 curname.subdomain(auth[i].getName()))
-			ns = auth[i];
+	for (RRset rset : auth) {
+		if (rset.getType() == Type.SOA &&
+			curname.subdomain(rset.getName()))
+			soa = rset;
+		else if (rset.getType() == Type.NS &&
+			curname.subdomain(rset.getName()))
+			ns = rset;
 	}
 	if (!completed) {
 		/* This is a negative response or a referral. */
@@ -715,15 +713,15 @@ addMessage(Message in) {
 	}
 
 	addl = in.getSectionRRsets(Section.ADDITIONAL);
-	for (int i = 0; i < addl.length; i++) {
-		int type = addl[i].getType();
+	for (RRset rRset : addl) {
+		int type = rRset.getType();
 		if (type != Type.A && type != Type.AAAA && type != Type.A6)
 			continue;
-		Name name = addl[i].getName();
+		Name name = rRset.getName();
 		if (!additionalNames.contains(name))
 			continue;
 		cred = getCred(Section.ADDITIONAL, isAuth);
-		addRRset(addl[i], cred);
+		addRRset(rRset, cred);
 	}
 	if (verbose)
 		System.out.println("addMessage: " + response);
@@ -840,11 +838,10 @@ public String
 toString() {
 	StringBuilder sb = new StringBuilder();
 	synchronized (this) {
-		Iterator it = data.values().iterator();
-		while (it.hasNext()) {
-			Element [] elements = allElements(it.next());
-			for (int i = 0; i < elements.length; i++) {
-				sb.append(elements[i]);
+		for (Object o : data.values()) {
+			Element[] elements = allElements(o);
+			for (Element element : elements) {
+				sb.append(element);
 				sb.append("\n");
 			}
 		}

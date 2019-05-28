@@ -61,9 +61,8 @@ static {
 public static Name
 algorithmToName(String alg)
 {
-	Iterator it = algMap.entrySet().iterator();
-	while (it.hasNext()) {
-		Map.Entry entry = (Map.Entry) it.next();
+	for (Object o : algMap.entrySet()) {
+		Map.Entry entry = (Map.Entry) o;
 		if (alg.equalsIgnoreCase((String)entry.getValue()))
 			return (Name) entry.getKey();
 	}

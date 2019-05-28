@@ -502,28 +502,28 @@ class RecordTest
 	Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
 	String out = rec.toString();
 
-	assertFalse(out.indexOf(n.toString()) == -1);
-	assertFalse(out.indexOf(n2.toString()) == -1);
-	assertFalse(out.indexOf("NS") == -1);
-	assertFalse(out.indexOf("IN") == -1);
-	assertFalse(out.indexOf(ttl+"") == -1);
+	assertFalse(!out.contains(n.toString()));
+	assertFalse(!out.contains(n2.toString()));
+	assertFalse(!out.contains("NS"));
+	assertFalse(!out.contains("IN"));
+	assertFalse(!out.contains(ttl + ""));
 
 	Options.set("BINDTTL");
 
 	out = rec.toString();
-	assertFalse(out.indexOf(n.toString()) == -1);
-	assertFalse(out.indexOf(n2.toString()) == -1);
-	assertFalse(out.indexOf("NS") == -1);
-	assertFalse(out.indexOf("IN") == -1);
-	assertFalse(out.indexOf(TTL.format(ttl)) == -1);
+	assertFalse(!out.contains(n.toString()));
+	assertFalse(!out.contains(n2.toString()));
+	assertFalse(!out.contains("NS"));
+	assertFalse(!out.contains("IN"));
+	assertFalse(!out.contains(TTL.format(ttl)));
 
 	Options.set("noPrintIN");
 	out = rec.toString();
-	assertFalse(out.indexOf(n.toString()) == -1);
-	assertFalse(out.indexOf(n2.toString()) == -1);
-	assertFalse(out.indexOf("NS") == -1);
-	assertTrue(out.indexOf("IN") == -1);
-	assertFalse(out.indexOf(TTL.format(ttl)) == -1);
+	assertFalse(!out.contains(n.toString()));
+	assertFalse(!out.contains(n2.toString()));
+	assertFalse(!out.contains("NS"));
+	assertTrue(!out.contains("IN"));
+	assertFalse(!out.contains(TTL.format(ttl)));
     }
 
     @Test
@@ -592,8 +592,8 @@ class RecordTest
 				   (byte)0xBC, (byte)0xDE, (byte)0xFF };
 	String out = SubRecord.unknownToString(data);
 	
-	assertFalse(out.indexOf("" + data.length) == -1);
-	assertFalse(out.indexOf("123456789ABCDEFF") == -1);
+	assertFalse(!out.contains("" + data.length));
+	assertFalse(!out.contains("123456789ABCDEFF"));
     }
 
     @Test

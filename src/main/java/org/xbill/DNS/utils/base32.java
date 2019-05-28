@@ -148,9 +148,8 @@ public byte[]
 fromString(String str) {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	byte [] raw = str.getBytes();
-	for (int i = 0; i < raw.length; i++)
-	{
-		char c = (char) raw[i];
+	for (byte b : raw) {
+		char c = (char) b;
 		if (!Character.isWhitespace(c)) {
 			c = Character.toUpperCase(c);
 			bs.write((byte) c);

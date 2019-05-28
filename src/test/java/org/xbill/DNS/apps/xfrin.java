@@ -81,17 +81,14 @@ main(String [] args) throws Exception {
 			System.out.println("AXFR-like IXFR response");
 		else
 			System.out.println("AXFR response");
-		Iterator it = response.iterator();
-		while (it.hasNext())
-			System.out.println(it.next());
+		for (Object o : response) System.out.println(o);
 	} else if (xfrin.isIXFR()) {
 		System.out.println("IXFR response");
-		Iterator it = response.iterator();
-		while (it.hasNext()) {
+		for (Object o : response) {
 			ZoneTransferIn.Delta delta;
-			delta = (ZoneTransferIn.Delta) it.next();
+			delta = (ZoneTransferIn.Delta) o;
 			System.out.println("delta from " + delta.start +
-					   " to " + delta.end);
+				" to " + delta.end);
 			System.out.println("deletes");
 			Iterator it2 = delta.deletes.iterator();
 			while (it2.hasNext())

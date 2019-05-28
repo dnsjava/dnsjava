@@ -316,9 +316,9 @@ class AddressTest
 
 	out = Address.getAllByName("cnn.com");
 	assertTrue(out.length > 1);
-	for( int i=0; i<out.length; ++i){
-	    assertTrue(out[i].getHostName().endsWith("cnn.com"));
-	}
+	    for (InetAddress inetAddress : out) {
+		    assertTrue(inetAddress.getHostName().endsWith("cnn.com"));
+	    }
     }
 
     @Test

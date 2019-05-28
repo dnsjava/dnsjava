@@ -156,9 +156,7 @@ void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	if (options == null)
 		return;
-	Iterator<EDNSOption> it = options.iterator();
-	while (it.hasNext()) {
-		EDNSOption option = it.next();
+	for (EDNSOption option : options) {
 		option.toWire(out);
 	}
 }

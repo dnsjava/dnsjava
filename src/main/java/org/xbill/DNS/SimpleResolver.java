@@ -319,7 +319,7 @@ public Integer
 sendAsync(final Message query, final ResolverListener listener) {
 	final Integer id;
 	synchronized (this) {
-		id = new Integer(uniqueID++);
+		id = uniqueID++;
 	}
 	Record question = query.getQuestion();
 	String qname;
@@ -352,9 +352,8 @@ sendAXFR(Message query) throws IOException {
 	response.getHeader().setFlag(Flags.AA);
 	response.getHeader().setFlag(Flags.QR);
 	response.addRecord(query.getQuestion(), Section.QUESTION);
-	Iterator it = records.iterator();
-	while (it.hasNext())
-		response.addRecord((Record)it.next(), Section.ANSWER);
+	for (Object record : records)
+		response.addRecord((Record)record, Section.ANSWER);
 	return response;
 }
 

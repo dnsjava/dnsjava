@@ -55,49 +55,55 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 			}
 			if (keyword.charAt(0) == '#')
 				continue;
-			if (keyword.equals("primary"))
+			switch (keyword) {
+			case "primary":
 				addPrimaryZone(st.nextToken(), st.nextToken());
-			else if (keyword.equals("secondary"))
+				break;
+			case "secondary":
 				addSecondaryZone(st.nextToken(),
-						 st.nextToken());
-			else if (keyword.equals("cache")) {
+					st.nextToken());
+				break;
+			case "cache":
 				Cache cache = new Cache(st.nextToken());
-				caches.put(new Integer(DClass.IN), cache);
-			} else if (keyword.equals("key")) {
+				caches.put(DClass.IN, cache);
+				break;
+			case "key":
 				String s1 = st.nextToken();
 				String s2 = st.nextToken();
 				if (st.hasMoreTokens())
 					addTSIG(s1, s2, st.nextToken());
 				else
 					addTSIG("hmac-md5", s1, s2);
-			} else if (keyword.equals("port")) {
+				break;
+			case "port":
 				ports.add(Integer.valueOf(st.nextToken()));
-			} else if (keyword.equals("address")) {
+				break;
+			case "address":
 				String addr = st.nextToken();
 				addresses.add(Address.getByAddress(addr));
-			} else {
+				break;
+			default:
 				System.out.println("unknown keyword: " +
-						   keyword);
+					keyword);
+				break;
 			}
 
 		}
 
 		if (ports.size() == 0)
-			ports.add(new Integer(53));
+			ports.add(53);
 
 		if (addresses.size() == 0)
 			addresses.add(Address.getByAddress("0.0.0.0"));
 
-		Iterator iaddr = addresses.iterator();
-		while (iaddr.hasNext()) {
-			InetAddress addr = (InetAddress) iaddr.next();
-			Iterator iport = ports.iterator();
-			while (iport.hasNext()) {
-				int port = ((Integer)iport.next()).intValue();
+		for (Object address : addresses) {
+			InetAddress addr = (InetAddress) address;
+			for (Object o : ports) {
+				int port = (Integer) o;
 				addUDP(addr, port);
 				addTCP(addr, port);
 				System.out.println("jnamed: listening on " +
-						   addrport(addr, port));
+					addrport(addr, port));
 			}
 		}
 		System.out.println("jnamed: running");
@@ -133,10 +139,10 @@ addTSIG(String algstr, String namestr, String key) throws IOException {
 
 public Cache
 getCache(int dclass) {
-	Cache c = (Cache) caches.get(new Integer(dclass));
+	Cache c = (Cache) caches.get(dclass);
 	if (c == null) {
 		c = new Cache(dclass);
-		caches.put(new Integer(dclass), c);
+		caches.put(dclass, c);
 	}
 	return c;
 }
@@ -237,8 +243,7 @@ addGlue(Message response, Name name, int flags) {
 private void
 addAdditional2(Message response, int section, int flags) {
 	Record [] records = response.getSectionArray(section);
-	for (int i = 0; i < records.length; i++) {
-		Record r = records[i];
+	for (Record r : records) {
 		Name glueName = r.getAdditionalName();
 		if (glueName != null)
 			addGlue(response, glueName, flags);
@@ -327,9 +332,8 @@ addAnswer(Message response, Name name, int type, int dclass,
 	}
 	else if (sr.isSuccessful()) {
 		RRset [] rrsets = sr.answers();
-		for (int i = 0; i < rrsets.length; i++)
-			addRRset(name, response, rrsets[i],
-				 Section.ANSWER, flags);
+		for (RRset rrset : rrsets)
+			addRRset(name, response, rrset,	Section.ANSWER, flags);
 		if (zone != null) {
 			addNS(response, zone, flags);
 			if (iterations == 0)
@@ -632,10 +636,7 @@ public static void main(String [] args) {
 			conf = "jnamed.conf";
 		s = new jnamed(conf);
 	}
-	catch (IOException e) {
-		System.out.println(e);
-	}
-	catch (ZoneTransferException e) {
+	catch (IOException | ZoneTransferException e) {
 		System.out.println(e);
 	}
 }

@@ -567,8 +567,8 @@ doxfr() throws IOException, ZoneTransferException {
 			}
 		}
 
-		for (int i = 0; i < answers.length; i++) {
-			parseRR(answers[i]);
+		for (Record answer : answers) {
+			parseRR(answer);
 		}
 
 		if (state == END && verifier != null &&

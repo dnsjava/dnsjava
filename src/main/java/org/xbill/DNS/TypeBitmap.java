@@ -24,9 +24,9 @@ TypeBitmap() {
 public
 TypeBitmap(int [] array) {
 	this();
-	for (int i = 0; i < array.length; i++) {
-		Type.check(array[i]);
-		types.add(new Integer(array[i]));
+	for (int value : array) {
+		Type.check(value);
+		types.add(value);
 	}
 }
 
@@ -78,8 +78,8 @@ public int []
 toArray() {
 	int [] array = new int[types.size()];
 	int n = 0;
-	for (Iterator<Integer> it = types.iterator(); it.hasNext(); )
-		array[n++] = (it.next()).intValue();
+	for (Integer type : types)
+		array[n++] = type;
 	return array;
 }
 
@@ -88,7 +88,7 @@ public String
 toString() {
 	StringBuilder sb = new StringBuilder();
 	for (Iterator<Integer> it = types.iterator(); it.hasNext(); ) {
-		int t = (it.next()).intValue();
+		int t = it.next();
 		sb.append(Type.string(t));
 		if (it.hasNext())
 			sb.append(' ');
@@ -98,14 +98,14 @@ toString() {
 
 private static void
 mapToWire(DNSOutput out, TreeSet<Integer> map, int mapbase) {
-	int arraymax = ((map.last()).intValue()) & 0xFF;
+	int arraymax = (map.last()) & 0xFF;
 	int arraylength = (arraymax / 8) + 1;
 	int [] array = new int[arraylength];
 	out.writeU8(mapbase);
 	out.writeU8(arraylength);
-	for (Iterator<Integer> it = map.iterator(); it.hasNext(); ) {
-		int typecode = (it.next()).intValue();
-		array[(typecode & 0xFF) / 8] |= (1 << ( 7 - typecode % 8));
+	for (Integer integer : map) {
+		int typecode = integer;
+		array[(typecode & 0xFF) / 8] |= (1 << (7 - typecode % 8));
 	}
 	for (int j = 0; j < arraylength; j++)
 		out.writeU8(array[j]);
@@ -119,8 +119,8 @@ toWire(DNSOutput out) {
 	int mapbase = -1;
 	TreeSet<Integer> map = new TreeSet<>();
 
-	for (Iterator<Integer> it = types.iterator(); it.hasNext(); ) {
-		int t = (it.next()).intValue();
+	for (Integer type : types) {
+		int t = type;
 		int base = t >> 8;
 		if (base != mapbase) {
 			if (map.size() > 0) {
@@ -129,7 +129,7 @@ toWire(DNSOutput out) {
 			}
 			mapbase = base;
 		}
-			map.add(new Integer(t));
+		map.add(t);
 	}
 	mapToWire(out, map, mapbase);
 }

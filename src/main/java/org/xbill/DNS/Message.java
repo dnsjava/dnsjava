@@ -314,9 +314,9 @@ isVerified() {
 public OPTRecord
 getOPT() {
 	Record [] additional = getSectionArray(Section.ADDITIONAL);
-	for (int i = 0; i < additional.length; i++)
-		if (additional[i] instanceof OPTRecord)
-			return (OPTRecord) additional[i];
+	for (Record record : additional)
+		if (record instanceof OPTRecord)
+			return (OPTRecord) record;
 	return null;
 }
 
@@ -367,24 +367,24 @@ getSectionRRsets(int section) {
 	List<RRset> sets = new LinkedList<>();
 	Record [] recs = getSectionArray(section);
 	Set<Name> hash = new HashSet<>();
-	for (int i = 0; i < recs.length; i++) {
-		Name name = recs[i].getName();
+	for (Record rec : recs) {
+		Name name = rec.getName();
 		boolean newset = true;
 		if (hash.contains(name)) {
 			for (int j = sets.size() - 1; j >= 0; j--) {
 				RRset set = sets.get(j);
-				if (set.getType() == recs[i].getRRsetType() &&
-				    set.getDClass() == recs[i].getDClass() &&
-				    set.getName().equals(name))
+				if (set.getType() == rec.getRRsetType() &&
+					set.getDClass() == rec.getDClass() &&
+					set.getName().equals(name))
 				{
-					set.addRR(recs[i]);
+					set.addRR(rec);
 					newset = false;
 					break;
 				}
 			}
 		}
 		if (newset) {
-			RRset set = new RRset(recs[i]);
+			RRset set = new RRset(rec);
 			sets.add(set);
 			hash.add(name);
 		}
@@ -565,14 +565,12 @@ sectionToString(int i) {
 	StringBuilder sb = new StringBuilder();
 
 	Record [] records = getSectionArray(i);
-	for (int j = 0; j < records.length; j++) {
-		Record rec = records[j];
+	for (Record rec : records) {
 		if (i == Section.QUESTION) {
 			sb.append(";;\t").append(rec.name);
 			sb.append(", type = ").append(Type.string(rec.type));
 			sb.append(", class = ").append(DClass.string(rec.dclass));
-		}
-		else
+		} else
 			sb.append(rec);
 		sb.append("\n");
 	}

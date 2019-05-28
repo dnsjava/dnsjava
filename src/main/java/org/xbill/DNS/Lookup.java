@@ -546,8 +546,8 @@ run() {
 		if (done)
 			return answers;
 
-		for (int i = 0; i < searchPath.length; i++) {
-			resolve(name, searchPath[i]);
+		for (Name value : searchPath) {
+			resolve(name, value);
 			if (done)
 				return answers;
 			else if (foundAlias)

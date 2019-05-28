@@ -160,8 +160,8 @@ Zone(Name zone, Record [] records) throws IOException {
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
 	origin = zone;
-	for (int i = 0; i < records.length; i++)
-		maybeAddRecord(records[i]);
+	for (Record record : records)
+		maybeAddRecord(record);
 	validate();
 }
 
@@ -171,8 +171,8 @@ fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
 
 	origin = xfrin.getName();
 	List records = xfrin.run();
-	for (Iterator it = records.iterator(); it.hasNext(); ) {
-		Record record = (Record) it.next();
+	for (Object o : records) {
+		Record record = (Record) o;
 		maybeAddRecord(record);
 	}
 	if (!xfrin.isAXFR())
@@ -250,8 +250,8 @@ oneRRset(Object types, int type) {
 		throw new IllegalArgumentException("oneRRset(ANY)");
 	if (types instanceof List) {
 		List list = (List) types;
-		for (int i = 0; i < list.size(); i++) {
-			RRset set = (RRset) list.get(i);
+		for (Object o : list) {
+			RRset set = (RRset) o;
 			if (set.getType() == type)
 				return set;
 		}
@@ -372,8 +372,8 @@ lookup(Name name, int type) {
 		if (isExact && type == Type.ANY) {
 			sr = new SetResponse(SetResponse.SUCCESSFUL);
 			RRset [] sets = allRRsets(types);
-			for (int i = 0; i < sets.length; i++)
-				sr.addRRset(sets[i]);
+			for (RRset set : sets)
+				sr.addRRset(set);
 			return sr;
 		}
 
@@ -523,8 +523,7 @@ AXFR() {
 private void
 nodeToString(StringBuffer sb, Object node) {
 	RRset [] sets = allRRsets(node);
-	for (int i = 0; i < sets.length; i++) {
-		RRset rrset = sets[i];
+	for (RRset rrset : sets) {
 		Iterator it = rrset.rrs();
 		while (it.hasNext())
 			sb.append(it.next()).append("\n");

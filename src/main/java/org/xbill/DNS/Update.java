@@ -160,8 +160,8 @@ add(Record record) {
  */
 public void
 add(Record [] records) {
-	for (int i = 0; i < records.length; i++)
-		add(records[i]);
+	for (Record record : records)
+		add(record);
 }
 
 /**
@@ -227,8 +227,8 @@ delete(Record record) {
  */
 public void
 delete(Record [] records) {
-	for (int i = 0; i < records.length; i++)
-		delete(records[i]);
+	for (Record record : records)
+		delete(record);
 }
 
 /**
@@ -282,8 +282,8 @@ replace(Record record) {
  */
 public void
 replace(Record [] records) {
-	for (int i = 0; i < records.length; i++)
-		replace(records[i]);
+	for (Record record : records)
+		replace(record);
 }
 
 /**

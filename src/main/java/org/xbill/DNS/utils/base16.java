@@ -27,8 +27,8 @@ public static String
 toString(byte [] b) {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-	for (int i = 0; i < b.length; i++) {
-		short value = (short) (b[i] & 0xFF);
+	for (byte item : b) {
+		short value = (short) (item & 0xFF);
 		byte high = (byte) (value >> 4);
 		byte low = (byte) (value & 0xF);
 		os.write(Base16.charAt(high));
@@ -46,9 +46,9 @@ public static byte []
 fromString(String str) {
 	ByteArrayOutputStream bs = new ByteArrayOutputStream();
 	byte [] raw = str.getBytes();
-	for (int i = 0; i < raw.length; i++) {
-		if (!Character.isWhitespace((char)raw[i]))
-			bs.write(raw[i]);
+	for (byte b : raw) {
+		if (!Character.isWhitespace((char) b))
+			bs.write(b);
 	}
 	byte [] in = bs.toByteArray();
 	if (in.length % 2 != 0) {

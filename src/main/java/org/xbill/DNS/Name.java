@@ -203,17 +203,18 @@ appendSafe(byte [] array, int start, int n) {
  */
 public
 Name(String s, Name origin) throws TextParseException {
-	if (s.equals(""))
-		throw parseException(s, "empty name");
-	else if (s.equals("@")) {
-		if (origin == null)
-			copy(empty, this);
-		else
-			copy(origin, this);
-		return;
-	} else if (s.equals(".")) {
-		copy(root, this);
-		return;
+	switch (s) {
+		case "":
+			throw parseException(s, "empty name");
+		case "@":
+			if (origin == null)
+				copy(empty, this);
+			else
+				copy(origin, this);
+			return;
+		case ".":
+			copy(root, this);
+			return;
 	}
 	int labelstart = -1;
 	int pos = 1;
@@ -481,8 +482,8 @@ wild(int n) {
 public Name
 canonicalize() {
 	boolean canonical = true;
-	for (int i = 0; i < name.length; i++) {
-		if (lowercase[name[i] & 0xFF] != name[i]) {
+	for (byte b : name) {
+		if (lowercase[b & 0xFF] != b) {
 			canonical = false;
 			break;
 		}

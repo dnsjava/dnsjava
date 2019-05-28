@@ -258,8 +258,8 @@ ExtendedResolver() throws UnknownHostException {
 	init();
 	String [] servers = ResolverConfig.getCurrentConfig().servers();
 	if (servers != null) {
-		for (int i = 0; i < servers.length; i++) {
-			Resolver r = new SimpleResolver(servers[i]);
+		for (String server : servers) {
+			Resolver r = new SimpleResolver(server);
 			r.setTimeout(quantum);
 			resolvers.add(r);
 		}
@@ -278,8 +278,8 @@ ExtendedResolver() throws UnknownHostException {
 public
 ExtendedResolver(String [] servers) throws UnknownHostException {
 	init();
-	for (int i = 0; i < servers.length; i++) {
-		Resolver r = new SimpleResolver(servers[i]);
+	for (String server : servers) {
+		Resolver r = new SimpleResolver(server);
 		r.setTimeout(quantum);
 		resolvers.add(r);
 	}
@@ -294,58 +294,58 @@ ExtendedResolver(String [] servers) throws UnknownHostException {
 public
 ExtendedResolver(Resolver [] res) throws UnknownHostException {
 	init();
-	for (int i = 0; i < res.length; i++)
-		resolvers.add(res[i]);
+	for (Resolver re : res)
+		resolvers.add(re);
 }
 
 @Override
 public void
 setPort(int port) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setPort(port);
+	for (Resolver resolver : resolvers)
+		resolver.setPort(port);
 }
 
 @Override
 public void
 setTCP(boolean flag) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setTCP(flag);
+	for (Resolver resolver : resolvers)
+		resolver.setTCP(flag);
 }
 
 @Override
 public void
 setIgnoreTruncation(boolean flag) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setIgnoreTruncation(flag);
+	for (Resolver resolver : resolvers)
+		resolver.setIgnoreTruncation(flag);
 }
 
 @Override
 public void
 setEDNS(int level) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setEDNS(level);
+	for (Resolver resolver : resolvers)
+		resolver.setEDNS(level);
 }
 
 @Override
 public void
 setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setEDNS(level, payloadSize,
-						     flags, options);
+	for (Resolver resolver : resolvers)
+		resolver.setEDNS(level, payloadSize,
+			flags, options);
 }
 
 @Override
 public void
 setTSIGKey(TSIG key) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setTSIGKey(key);
+	for (Resolver resolver : resolvers)
+		resolver.setTSIGKey(key);
 }
 
 @Override
 public void
 setTimeout(int secs, int msecs) {
-	for (int i = 0; i < resolvers.size(); i++)
-		(resolvers.get(i)).setTimeout(secs, msecs);
+	for (Resolver resolver : resolvers)
+		resolver.setTimeout(secs, msecs);
 }
 
 @Override

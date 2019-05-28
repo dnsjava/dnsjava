@@ -61,9 +61,9 @@ class HeaderTest
 	assertEquals(0xABCD, m_h.getID());
 
 	boolean[] flags = m_h.getFlags();
-	for( int i=0; i<flags.length; ++i){
-	    assertFalse(flags[i]);
-	}
+	    for (boolean flag : flags) {
+		    assertFalse(flag);
+	    }
 	assertEquals(0, m_h.getRcode());
 	assertEquals(0, m_h.getOpcode());
 	assertEquals(0, m_h.getCount(0));
@@ -79,9 +79,9 @@ class HeaderTest
 	assertTrue(0 <= m_h.getID() && m_h.getID() < 0xFFFF);
 
 	boolean[] flags = m_h.getFlags();
-	for( int i=0; i<flags.length; ++i){
-	    assertFalse(flags[i]);
-	}
+	    for (boolean flag : flags) {
+		    assertFalse(flag);
+	    }
 	assertEquals(0, m_h.getRcode());
 	assertEquals(0, m_h.getOpcode());
 	assertEquals(0, m_h.getCount(0));
@@ -389,17 +389,17 @@ class HeaderTest
 
 	String text = m_h.toString();
 
-	assertFalse(text.indexOf("id: 43981") == -1);
-	assertFalse(text.indexOf("opcode: STATUS") == -1);
-	assertFalse(text.indexOf("status: NXDOMAIN") == -1);
-	assertFalse(text.indexOf(" qr ") == -1);
-	assertFalse(text.indexOf(" rd ") == -1);
-	assertFalse(text.indexOf(" ra ") == -1);
-	assertFalse(text.indexOf(" cd ") == -1);
-	assertFalse(text.indexOf("qd: 0 ") == -1);
-	assertFalse(text.indexOf("an: 255 ") == -1);
-	assertFalse(text.indexOf("au: 10 ") == -1);
-	assertFalse(text.indexOf("ad: 0 ") == -1);
+	assertFalse(!text.contains("id: 43981"));
+	assertFalse(!text.contains("opcode: STATUS"));
+	assertFalse(!text.contains("status: NXDOMAIN"));
+	assertFalse(!text.contains(" qr "));
+	assertFalse(!text.contains(" rd "));
+	assertFalse(!text.contains(" ra "));
+	assertFalse(!text.contains(" cd "));
+	assertFalse(!text.contains("qd: 0 "));
+	assertFalse(!text.contains("an: 255 "));
+	assertFalse(!text.contains("au: 10 "));
+	assertFalse(!text.contains("ad: 0 "));
     }
     
     @Test

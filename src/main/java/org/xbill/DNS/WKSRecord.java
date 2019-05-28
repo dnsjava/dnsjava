@@ -601,8 +601,8 @@ WKSRecord(Name name, int dclass, long ttl, InetAddress address, int protocol,
 		throw new IllegalArgumentException("invalid IPv4 address");
 	this.address = address.getAddress();
 	this.protocol = checkU8("protocol", protocol);
-	for (int i = 0; i < services.length; i++) {
-		checkU16("service", services[i]);
+	for (int service : services) {
+		checkU16("service", service);
 	}
 	this.services = new int[services.length];
 	System.arraycopy(services, 0, this.services, 0, services.length);
@@ -620,13 +620,13 @@ rrFromWire(DNSInput in) throws IOException {
 		for (int j = 0; j < 8; j++) {
 			int octet = array[i] & 0xFF;
 			if ((octet & (1 << (7 - j))) != 0) {
-				list.add(new Integer(i * 8 + j));
+				list.add(i * 8 + j);
 			}
 		}
 	}
 	services = new int[list.size()];
 	for (int i = 0; i < list.size(); i++) {
-		services[i] = (list.get(i)).intValue();
+		services[i] = list.get(i);
 	}
 }
 
@@ -654,12 +654,12 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 			throw st.exception("Invalid TCP/UDP service: " +
 					   t.value);
 		}
-		list.add(new Integer(service));
+		list.add(service);
 	}
 	st.unget();
 	services = new int[list.size()];
 	for (int i = 0; i < list.size(); i++) {
-		services[i] = (list.get(i)).intValue();
+		services[i] = list.get(i);
 	}
 }
 
@@ -673,8 +673,8 @@ rrToString() {
 	sb.append(Address.toDottedQuad(address));
 	sb.append(" ");
 	sb.append(protocol);
-	for (int i = 0; i < services.length; i++) {
-		sb.append(" ").append(services[i]);
+	for (int service : services) {
+		sb.append(" ").append(service);
 	}
 	return sb.toString();
 }
@@ -714,8 +714,7 @@ rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	out.writeU8(protocol);
 	int highestPort = services[services.length - 1];
 	byte [] array = new byte[highestPort / 8 + 1];
-	for (int i = 0; i < services.length; i++) {
-		int port = services[i];
+	for (int port : services) {
 		array[port / 8] |= (1 << (7 - port % 8));
 	}
 	out.writeByteArray(array);

@@ -42,8 +42,8 @@ doAXFR(Message response) throws IOException {
 	}
 
 	Record [] records = response.getSectionArray(Section.ANSWER);
-	for (int i = 0; i < records.length; i++)
-		System.out.println(records[i]);
+	for (Record record : records)
+		System.out.println(record);
 
 	System.out.print(";; done (");
 	System.out.print(response.getHeader().getCount(Section.ANSWER));

@@ -118,15 +118,13 @@ public
 APLRecord(Name name, int dclass, long ttl, List elements) {
 	super(name, Type.APL, dclass, ttl);
 	this.elements = new ArrayList<>(elements.size());
-	for (Iterator it = elements.iterator(); it.hasNext(); ) {
-		Object o = it.next();
+	for (Object o : elements) {
 		if (!(o instanceof Element)) {
 			throw new IllegalArgumentException("illegal element");
 		}
 		Element element = (Element) o;
 		if (element.family != Address.IPv4 &&
-		    element.family != Address.IPv6)
-		{
+			element.family != Address.IPv6) {
 			throw new IllegalArgumentException("unknown family");
 		}
 		this.elements.add(element);
@@ -267,18 +265,16 @@ addressLength(byte [] addr) {
 @Override
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	for (Iterator<Element> it = elements.iterator(); it.hasNext(); ) {
-		Element element = it.next();
+	for (Element element : elements) {
 		int length = 0;
-		byte [] data;
+		byte[] data;
 		if (element.family == Address.IPv4 ||
-		    element.family == Address.IPv6)
-		{
+			element.family == Address.IPv6) {
 			InetAddress addr = (InetAddress) element.address;
 			data = addr.getAddress();
 			length = addressLength(data);
 		} else {
-			data = (byte []) element.address;
+			data = (byte[]) element.address;
 			length = data.length;
 		}
 		int wlength = length;

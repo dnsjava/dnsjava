@@ -40,8 +40,8 @@ public
 NSECRecord(Name name, int dclass, long ttl, Name next, int [] types) {
 	super(name, Type.NSEC, dclass, ttl);
 	this.next = checkName("next", next);
-	for (int i = 0; i < types.length; i++) {
-		Type.check(types[i]);
+	for (int value : types) {
+		Type.check(value);
 	}
 	this.types = new TypeBitmap(types);
 }

@@ -65,12 +65,12 @@ verifyMessage(Message message, byte [] b, KEYRecord key, SIGRecord previous)
 {
 	SIGRecord sig = null;
 	Record [] additional = message.getSectionArray(Section.ADDITIONAL);
-	for (int i = 0; i < additional.length; i++) {
-		if (additional[i].getType() != Type.SIG)
+	for (Record record : additional) {
+		if (record.getType() != Type.SIG)
 			continue;
-		if (((SIGRecord) additional[i]).getTypeCovered() != 0)
+		if (((SIGRecord) record).getTypeCovered() != 0)
 			continue;
-		sig = (SIGRecord) additional[i];
+		sig = (SIGRecord) record;
 		break;
 	}
 	DNSSEC.verifyMessage(message, b, sig, previous, key);

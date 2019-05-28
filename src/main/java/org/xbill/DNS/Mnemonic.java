@@ -13,11 +13,11 @@ import java.util.HashMap;
 
 class Mnemonic {
 
-	private static Integer[] cachedInts = new Integer[64];
+private static Integer[] cachedInts = new Integer[64];
 
 static {
 	for (int i = 0; i < cachedInts.length; i++) {
-		cachedInts[i] = new Integer(i);
+		cachedInts[i] = i;
 	}
 }
 
@@ -84,7 +84,7 @@ public static Integer
 toInteger(int val) {
 	if (val >= 0 && val < cachedInts.length)
 		return (cachedInts[val]);
-	return new Integer(val);
+	return val;
 }       
 
 /**
@@ -190,7 +190,7 @@ getValue(String str) {
 	str = sanitize(str);
 	Integer value = strings.get(str);
 	if (value != null) {
-		return value.intValue();
+		return value;
 	}
 	if (prefix != null) {
 		if (str.startsWith(prefix)) {
