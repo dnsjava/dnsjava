@@ -110,9 +110,7 @@ class RRsetTest
     }
 
     @Test
-    void test_basics() throws TextParseException,
-				     UnknownHostException
-    {
+    void test_basics() {
 	m_rs.addRR(m_a1);
 
 	assertEquals(1, m_rs.size());
@@ -251,7 +249,7 @@ class RRsetTest
     }
 
     @Test
-    void test_addRR_invalidName() throws TextParseException, UnknownHostException
+    void test_addRR_invalidName() throws UnknownHostException
     {
 	m_rs.addRR(m_a1);
 	
@@ -267,7 +265,7 @@ class RRsetTest
     }
 
     @Test
-    void test_addRR_invalidDClass() throws TextParseException, UnknownHostException
+    void test_addRR_invalidDClass() throws UnknownHostException
     {
 	m_rs.addRR(m_a1);
 	

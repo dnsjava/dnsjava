@@ -19,14 +19,14 @@ usage() {
 }
 
 static void
-doQuery(Message response, long ms) throws IOException {
+doQuery(Message response, long ms) {
 	System.out.println("; java dig 0.0");
 	System.out.println(response);
 	System.out.println(";; Query time: " + ms + " ms");
 }
 
 static void
-doAXFR(Message response) throws IOException {
+doAXFR(Message response) {
 	System.out.println("; java dig 0.0 <> " + name + " axfr");
 	if (response.isSigned()) {
 		System.out.print(";; TSIG ");

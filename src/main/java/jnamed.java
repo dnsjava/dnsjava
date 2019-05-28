@@ -43,7 +43,7 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 		znames = new HashMap<>();
 		TSIGs = new HashMap<Name, TSIG>();
 
-		String line = null;
+		String line;
 		while ((line = br.readLine()) != null) {
 			StringTokenizer st = new StringTokenizer(line);
 			if (!st.hasMoreTokens())
@@ -149,7 +149,7 @@ getCache(int dclass) {
 
 public Zone
 findBestZone(Name name) {
-	Zone foundzone = null;
+	Zone foundzone;
 	foundzone = znames.get(name);
 	if (foundzone != null)
 		return foundzone;
@@ -391,9 +391,7 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
  * TCP.
  */
 byte []
-generateReply(Message query, byte [] in, int length, Socket s)
-throws IOException
-{
+generateReply(Message query, byte [] in, int length, Socket s) {
 	Header header;
 	boolean badversion;
 	int maxLength;
@@ -419,8 +417,8 @@ throws IOException
 	}
 
 	OPTRecord queryOPT = query.getOPT();
-	if (queryOPT != null && queryOPT.getVersion() > 0)
-		badversion = true;
+	if (queryOPT != null && queryOPT.getVersion() > 0) {
+	}
 
 	if (s != null)
 		maxLength = 65535;
@@ -508,7 +506,7 @@ TCPclient(Socket s) {
 		dataIn.readFully(in);
 
 		Message query;
-		byte [] response = null;
+		byte [] response;
 		try {
 			query = new Message(in);
 			response = generateReply(query, in, in.length, s);
@@ -572,7 +570,7 @@ serveUDP(InetAddress addr, int port) {
 				continue;
 			}
 			Message query;
-			byte [] response = null;
+			byte [] response;
 			try {
 				query = new Message(in);
 				response = generateReply(query, in,
@@ -627,14 +625,14 @@ public static void main(String [] args) {
 		System.out.println("usage: jnamed [conf]");
 		System.exit(0);
 	}
-	jnamed s;
+
 	try {
 		String conf;
 		if (args.length == 1)
 			conf = args[0];
 		else
 			conf = "jnamed.conf";
-		s = new jnamed(conf);
+		new jnamed(conf);
 	}
 	catch (IOException | ZoneTransferException e) {
 		System.out.println(e);

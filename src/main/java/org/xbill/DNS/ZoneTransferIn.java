@@ -211,12 +211,9 @@ newAXFR(Name zone, SocketAddress address, TSIG key) {
  * @param port The port to connect to on the server, or 0 for the default.
  * @param key The TSIG key used to authenticate the transfer, or null.
  * @return The ZoneTransferIn object.
- * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
-newAXFR(Name zone, String host, int port, TSIG key)
-throws UnknownHostException
-{
+newAXFR(Name zone, String host, int port, TSIG key) {
 	if (port == 0)
 		port = SimpleResolver.DEFAULT_PORT;
 	return newAXFR(zone, new InetSocketAddress(host, port), key);
@@ -228,12 +225,9 @@ throws UnknownHostException
  * @param host The host from which to transfer the zone.
  * @param key The TSIG key used to authenticate the transfer, or null.
  * @return The ZoneTransferIn object.
- * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
-newAXFR(Name zone, String host, TSIG key)
-throws UnknownHostException
-{
+newAXFR(Name zone, String host, TSIG key) {
 	return newAXFR(zone, host, 0, key);
 }
 
@@ -265,13 +259,10 @@ newIXFR(Name zone, long serial, boolean fallback, SocketAddress address,
  * @param port The port to connect to on the server, or 0 for the default.
  * @param key The TSIG key used to authenticate the transfer, or null.
  * @return The ZoneTransferIn object.
- * @throws UnknownHostException The host does not exist.
  */
 public static ZoneTransferIn
 newIXFR(Name zone, long serial, boolean fallback, String host, int port,
-	TSIG key)
-throws UnknownHostException
-{
+	TSIG key) {
 	if (port == 0)
 		port = SimpleResolver.DEFAULT_PORT;
 	return newIXFR(zone, serial, fallback,

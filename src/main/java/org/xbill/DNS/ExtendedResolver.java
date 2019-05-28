@@ -71,7 +71,6 @@ private static class Resolution implements ResolverListener {
 				done = true;
 				if (listener == null) {
 					notifyAll();
-					return;
 				}
 			}
 		}
@@ -289,10 +288,9 @@ ExtendedResolver(String [] servers) throws UnknownHostException {
  * Creates a new Extended Resolver
  * @param res An array of pre-initialized Resolvers is provided.
  * @see SimpleResolver
- * @exception UnknownHostException Failure occured initializing SimpleResolvers
  */
 public
-ExtendedResolver(Resolver [] res) throws UnknownHostException {
+ExtendedResolver(Resolver [] res) {
 	init();
 	for (Resolver re : res)
 		resolvers.add(re);

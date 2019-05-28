@@ -31,7 +31,7 @@ GenericEDNSOption(int code, byte [] data) {
 
 @Override
 void 
-optionFromWire(DNSInput in) throws IOException {
+optionFromWire(DNSInput in) {
 	data = in.readByteArray();
 }
 

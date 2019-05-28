@@ -78,7 +78,7 @@ formatString(byte [] b, int lineLength, String prefix, boolean addClose) {
 				sb.append(" )");
 		}
 		else {
-			sb.append(s.substring(i, i + lineLength));
+			sb.append(s, i, i + lineLength);
 			sb.append("\n");
 		}
 	}

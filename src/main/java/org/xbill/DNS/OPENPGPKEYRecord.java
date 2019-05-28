@@ -40,7 +40,7 @@ OPENPGPKEYRecord(Name name, int dclass, long ttl, byte [] cert)
 
 @Override
 void
-rrFromWire(DNSInput in) throws IOException {
+rrFromWire(DNSInput in) {
 	cert = in.readByteArray();
 }
 

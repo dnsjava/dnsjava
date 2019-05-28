@@ -95,7 +95,7 @@ parseFixedPoint(String s)
 private long
 parsePosition(Tokenizer st, String type) throws IOException {
 	boolean isLatitude = type.equals("latitude");
-	int deg = 0, min = 0;
+	int deg, min = 0;
 	double sec = 0;
 	long value;
 	String s;

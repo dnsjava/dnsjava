@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -68,7 +67,7 @@ class RecordTest
 	}
 
 	@Override
-	public void rrFromWire(DNSInput in) throws IOException {}
+	public void rrFromWire(DNSInput in) {}
 
 	@Override
 	public String rrToString()
@@ -77,7 +76,7 @@ class RecordTest
 	}
 
 	@Override
-	public void rdataFromString(Tokenizer t, Name origin) throws IOException {}
+	public void rdataFromString(Tokenizer t, Name origin) {}
 
 	@Override
 	public void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
@@ -289,11 +288,7 @@ class RecordTest
     }
 
     @Test
-    void test_fromWire() throws IOException,
-				       TextParseException,
-				       UnknownHostException
-				       
-    {
+    void test_fromWire() throws IOException {
 	Name n = Name.fromString("my.name.");
 	int t = Type.A;
 	int d = DClass.IN;
@@ -361,11 +356,7 @@ class RecordTest
     }
 
     @Test
-    void test_toWire() throws IOException,
-				     TextParseException,
-				     UnknownHostException
-				       
-    {
+    void test_toWire() throws IOException {
 	Name n = Name.fromString("my.name.");
 	int t = Type.A;
 	int d = DClass.IN;
@@ -413,11 +404,7 @@ class RecordTest
     }
 
     @Test
-    void test_toWireCanonical() throws IOException,
-					      TextParseException,
-					      UnknownHostException
-				       
-    {
+    void test_toWireCanonical() throws IOException {
 	Name n = Name.fromString("My.Name.");
 	int t = Type.A;
 	int d = DClass.IN;
@@ -441,11 +428,7 @@ class RecordTest
     }
 
     @Test
-    void test_rdataToWireCanonical() throws IOException,
-						   TextParseException,
-						   UnknownHostException
-				       
-    {
+    void test_rdataToWireCanonical() throws IOException {
 	Name n = Name.fromString("My.Name.");
 	Name n2 = Name.fromString("My.Second.Name.");
 	int t = Type.NS;
@@ -468,11 +451,7 @@ class RecordTest
     }
 
     @Test
-    void test_rdataToString() throws IOException,
-					    TextParseException,
-					    UnknownHostException
-				       
-    {
+    void test_rdataToString() throws IOException {
 	Name n = Name.fromString("My.Name.");
 	Name n2 = Name.fromString("My.Second.Name.");
 	int t = Type.NS;
@@ -597,8 +576,7 @@ class RecordTest
     }
 
     @Test
-    void test_fromString() throws IOException, TextParseException
-    {
+    void test_fromString() throws IOException {
 	Name n = Name.fromString("My.N.");
 	Name n2 = Name.fromString("My.Second.Name.");
 	int t = Type.A;
@@ -629,8 +607,7 @@ class RecordTest
     }
 
     @Test
-    void test_fromString_invalid() throws IOException, TextParseException
-    {
+    void test_fromString_invalid() throws IOException {
 	Name n = Name.fromString("My.N.");
 	Name rel = Name.fromString("My.R");
 	Name n2 = Name.fromString("My.Second.Name.");

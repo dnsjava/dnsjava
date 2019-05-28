@@ -471,7 +471,7 @@ lookup(Name current) {
 
 	Record question = Record.newRecord(current, type, dclass);
 	Message query = Message.newQuery(question);
-	Message response = null;
+	Message response;
 	try {
 		response = resolver.send(query);
 	}

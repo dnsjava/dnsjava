@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -147,10 +146,8 @@ class A6RecordTest
     }
 
     @Test
-    void test_rrFromWire() throws CloneNotSupportedException,
-					 IOException,
-					 UnknownHostException
-    {
+    void test_rrFromWire() throws
+	    IOException {
 	// record with no prefix
 	DNSOutput dout = new DNSOutput();
 	dout.writeU8(0);
@@ -174,7 +171,7 @@ class A6RecordTest
 	ar.rrFromWire(din);
 	assertEquals(9, ar.getPrefixBits());
 
-	byte[] addr_bytes = (byte[])m_addr_bytes.clone();
+	byte[] addr_bytes = m_addr_bytes.clone();
 	addr_bytes[0] = 0;
 	InetAddress exp = InetAddress.getByAddress(addr_bytes);
 	assertEquals(exp, ar.getSuffix());
@@ -182,10 +179,8 @@ class A6RecordTest
     }
 
     @Test
-    void test_rdataFromString() throws CloneNotSupportedException,
-					      IOException,
-					      UnknownHostException
-    {
+    void test_rdataFromString() throws
+	    IOException {
 	// record with no prefix
 	Tokenizer t = new Tokenizer("0 " + m_addr_string);
 	A6Record ar = new A6Record();

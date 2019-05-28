@@ -73,9 +73,7 @@ value(String s) {
 public static boolean
 isFlag(int index) {
 	flags.check(index);
-	if ((index >= 1 && index <= 4) || (index >= 12))
-		return false;
-	return true;
+	return (index < 1 || index > 4) && (index < 12);
 }
 
 }

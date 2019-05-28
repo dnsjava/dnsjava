@@ -255,8 +255,7 @@ class DNSInputTest
     }
     
     @Test
-    void test_readByteArray_0arg() throws WireParseException
-    {
+    void test_readByteArray_0arg() {
 	m_di.jump( 1 );
 	byte[] out = m_di.readByteArray();
 	assertEquals( 10, m_di.current() );

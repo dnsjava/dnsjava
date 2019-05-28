@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,8 +69,7 @@ class AAAARecordTest
     }
 
     @Test
-    void test_ctor_0arg() throws UnknownHostException
-    {
+    void test_ctor_0arg() {
 	AAAARecord ar = new AAAARecord();
 	assertNull(ar.getName());
 	assertEquals(0, ar.getType());

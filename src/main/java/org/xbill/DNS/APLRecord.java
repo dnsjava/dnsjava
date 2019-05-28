@@ -72,7 +72,7 @@ public static class Element {
 	@Override
 	public boolean
 	equals(Object arg) {
-		if (arg == null || !(arg instanceof Element))
+		if (!(arg instanceof Element))
 			return false;
 		Element elt = (Element) arg;
 		return (family == elt.family &&
@@ -104,10 +104,8 @@ private static boolean
 validatePrefixLength(int family, int prefixLength) {
 	if (prefixLength < 0 || prefixLength >= 256)
 		return false;
-	if ((family == Address.IPv4 && prefixLength > 32) ||
-	    (family == Address.IPv6 && prefixLength > 128))
-		return false;
-	return true;
+	return !((family == Address.IPv4 && prefixLength > 32) ||
+	         (family == Address.IPv6 && prefixLength > 128));
 }
 
 /**
@@ -178,8 +176,8 @@ rdataFromString(Tokenizer st, Name origin) throws IOException {
 			break;
 
 		boolean negative = false;
-		int family = 0;
-		int prefix = 0;
+		int family;
+		int prefix;
 
 		String s = t.value;
 		int start = 0;
@@ -261,7 +259,7 @@ addressLength(byte [] addr) {
 void
 rrToWire(DNSOutput out, Compression c, boolean canonical) {
 	for (Element element : elements) {
-		int length = 0;
+		int length;
 		byte[] data;
 		if (element.family == Address.IPv4 ||
 			element.family == Address.IPv6) {

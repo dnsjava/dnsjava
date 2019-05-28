@@ -469,8 +469,7 @@ class TokenizerTest
     }
 
     @Test
-    void test_getName() throws IOException, TextParseException
-    {
+    void test_getName() throws IOException {
 	Name root = Name.fromString(".");
 	m_t = new Tokenizer("junk");
 	Name exp = Name.fromString("junk.");

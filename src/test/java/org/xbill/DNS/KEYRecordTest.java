@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,8 +48,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class KEYRecordTest
 {
     @Test
-    void test_ctor_0arg() throws UnknownHostException
-    {
+    void test_ctor_0arg() {
 	KEYRecord ar = new KEYRecord();
 	assertNull(ar.getName());
 	assertEquals(0, ar.getType());
@@ -160,8 +158,7 @@ class KEYRecordTest
     }
 
     @Test
-    void test_rdataFromString() throws IOException, TextParseException
-    {
+    void test_rdataFromString() throws IOException {
 	// basic
 	KEYRecord kr = new KEYRecord();
 	Tokenizer st = new Tokenizer("NOAUTH|ZONE|FLAG10 EMAIL RSASHA1 AQIDBAUGBwgJ");

@@ -32,7 +32,7 @@ newMessage() {
 }
 
 public
-update(InputStream in) throws IOException {
+update(InputStream in) {
 	List<BufferedReader> inputs = new LinkedList<>();
 	List<InputStream> istreams = new LinkedList<>();
 
@@ -46,7 +46,7 @@ update(InputStream in) throws IOException {
 
 	while (true) {
 		try {
-			String line = null;
+			String line;
 			do {
 				InputStream is;
 				is = (InputStream)istreams.get(0);
@@ -394,7 +394,7 @@ doQuery(Tokenizer st) throws IOException {
 	Record rec;
 	Tokenizer.Token token;
 
-	Name name = null;
+	Name name;
 	int type = Type.A;
 	int dclass = defaultClass;
 
@@ -504,7 +504,7 @@ doAssert(Tokenizer st) throws IOException {
 	else
 		print("Invalid assertion keyword: " + field);
 
-	if (flag == false) {
+	if (!flag) {
 		print("Expected " + field + " " + expected +
 		      ", received " + value);
 		while (true) {

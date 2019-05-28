@@ -121,7 +121,7 @@ parseName(String s, Name origin) throws TextParseException {
 private void
 parseTTLClassAndType() throws IOException {
 	String s;
-	boolean seen_class = false;
+	boolean seen_class;
 
 
 	// This is a bit messy, since any of the following are legal:

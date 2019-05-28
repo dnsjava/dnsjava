@@ -86,8 +86,7 @@ class SingleCompressedNameBaseTest
     }
 
     @Test
-    void test_rrToWire() throws IOException, TextParseException
-    {
+    void test_rrToWire() throws IOException {
 	Name n = Name.fromString("my.name.");
 	Name sn = Name.fromString("My.Single.Name.");
 

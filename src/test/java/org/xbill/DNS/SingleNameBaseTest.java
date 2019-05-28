@@ -131,8 +131,7 @@ class SingleNameBaseTest
     }
 
     @Test
-    void test_rrToString() throws IOException, TextParseException
-    {
+    void test_rrToString() throws IOException {
 	Name exp = Name.fromString("my.single.name.");
 
 	Tokenizer t = new Tokenizer("my.single.name.");
@@ -145,8 +144,7 @@ class SingleNameBaseTest
     }
 
     @Test
-    void test_rrToWire() throws IOException, TextParseException
-    {
+    void test_rrToWire() throws IOException {
 	Name n = Name.fromString("my.name.");
 	Name sn = Name.fromString("My.Single.Name.");
 

@@ -49,8 +49,7 @@ UDPClient(long endTime) throws IOException {
 }
 
 private void
-bind_random(InetSocketAddress addr) throws IOException
-{
+bind_random(InetSocketAddress addr) {
 	if (prng_initializing) {
 		try {
 			Thread.sleep(2);

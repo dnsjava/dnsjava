@@ -38,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -353,8 +352,7 @@ class NameTest
 	}
 
     @Test
-    void test_ctor_short_escaped() throws TextParseException
-	{
+    void test_ctor_short_escaped() {
 	    try {
 		new Name("ab\\12cd");
 		fail("TextParseException not throw");
@@ -363,8 +361,7 @@ class NameTest
 	}
 	    
     @Test
-    void test_ctor_short_escaped_end() throws TextParseException
-	{
+    void test_ctor_short_escaped_end() {
 	    try {
 		new Name("ab\\12");
 		fail("TextParseException not throw");
@@ -373,8 +370,7 @@ class NameTest
 	}
 	    
     @Test
-    void test_ctor_empty_escaped_end() throws TextParseException
-	{
+    void test_ctor_empty_escaped_end() {
 	    try {
 		new Name("ab\\");
 		fail("TextParseException not throw");
@@ -383,8 +379,7 @@ class NameTest
 	}
 	    
     @Test
-    void test_ctor_toobig_escaped() throws TextParseException
-	{
+    void test_ctor_toobig_escaped() {
 	    try {
 		new Name("ab\\256cd");
 		fail("TextParseException not throw");
@@ -393,8 +388,7 @@ class NameTest
 	}
 
     @Test
-    void test_ctor_toobig_escaped_end() throws TextParseException
-	{
+    void test_ctor_toobig_escaped_end() {
 	    try {
 		new Name("ab\\256");
 		fail("TextParseException not throw");
@@ -439,8 +433,7 @@ class NameTest
 	}
 
     @Test
-    void test_ctor_toobig_label_escaped_end() throws TextParseException
-	{
+    void test_ctor_toobig_label_escaped_end() {
 	    try {
 		// name with a 64 char label containing an escape at the end
 		new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\090.b.");
@@ -450,8 +443,7 @@ class NameTest
 	}
 
     @Test
-    void test_ctor_toobig_label_escaped() throws TextParseException
-	{
+    void test_ctor_toobig_label_escaped() {
 	    try {
 		// name with a 64 char label containing an escape at the end
 		new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaa\\001aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b.");
@@ -504,8 +496,7 @@ class NameTest
     static class Test_DNSInput_init
     {
     @Test
-    void test_basic() throws IOException, TextParseException, WireParseException
-	{
+    void test_basic() throws IOException {
 	    
 	    final byte[] raw = new byte[]
 		{ 3, 'W', 'w', 'w', 7, 'D', 'n', 's', 'J', 'a', 'v', 'a', 3, 'o', 'r', 'g', 0 };
@@ -565,8 +556,7 @@ class NameTest
 	}
 
     @Test
-    void test_toolong_name() throws TextParseException, WireParseException
-	{
+    void test_toolong_name() {
 	    // absolute name with three 63-char labels and a 62-char label
 	    byte[] raw = new byte[] { 63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 63, 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 63, 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 62, 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 0 };
 	    
@@ -588,8 +578,7 @@ class NameTest
 	}
 
     @Test
-    void test_toomany_labels() throws TextParseException, WireParseException
-	{
+    void test_toomany_labels() {
 	    byte[] raw = new byte[] { 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 0 };
 	    try {
 		new Name(new DNSInput(raw));
@@ -653,8 +642,7 @@ class NameTest
 	}
 
     @Test
-    void test_bad_compression() throws TextParseException, WireParseException
-	{
+    void test_bad_compression() {
 	    byte[] raw = new byte[] { (byte)0xC0, 2, 0 };
 	    try {
 		new Name(new DNSInput(raw));
@@ -860,7 +848,7 @@ class NameTest
     }
 
     @Test
-    void test_fromDNAME_toobig() throws NameTooLongException, TextParseException
+    void test_fromDNAME_toobig() throws TextParseException
     {
 	Name own = new Name("the.owner.");
 	Name alias = new Name("the.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.");
@@ -939,8 +927,7 @@ class NameTest
     }
 
     @Test
-    void test_toString_root() throws TextParseException
-    {
+    void test_toString_root() {
 	assertEquals(".", Name.root.toString());
     }
 
@@ -961,7 +948,7 @@ class NameTest
     }
 
     @Test
-    void test_toString_special_char() throws TextParseException, WireParseException
+    void test_toString_special_char() throws WireParseException
     {
 	byte[] raw = new byte[] { 1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0 };
 	String exp = "\\\".\\(.\\).\\..\\;.\\\\.\\@.\\$.";

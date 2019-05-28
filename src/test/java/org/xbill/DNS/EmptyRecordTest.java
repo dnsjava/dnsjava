@@ -46,8 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EmptyRecordTest
 {
     @Test
-    void test_ctor() throws UnknownHostException
-    {
+    void test_ctor() {
 	EmptyRecord ar = new EmptyRecord();
 	assertNull(ar.getName());
 	assertEquals(0, ar.getType());

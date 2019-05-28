@@ -494,8 +494,7 @@ private static final ECKeyInfo ECDSA_P384 = new ECKeyInfo(48,
 
 private static PublicKey
 toECGOSTPublicKey(KEYBase r, ECKeyInfo keyinfo) throws IOException,
-	GeneralSecurityException, MalformedKeyException
-{
+	GeneralSecurityException {
 	DNSInput in = new DNSInput(r.getKey());
 
 	BigInteger x = readBigIntegerLittleEndian(in, keyinfo.length);
@@ -508,8 +507,7 @@ toECGOSTPublicKey(KEYBase r, ECKeyInfo keyinfo) throws IOException,
 
 private static PublicKey
 toECDSAPublicKey(KEYBase r, ECKeyInfo keyinfo) throws IOException,
-	GeneralSecurityException, MalformedKeyException
-{
+	GeneralSecurityException {
 	DNSInput in = new DNSInput(r.getKey());
 
 	// RFC 6605 Section 4
@@ -795,8 +793,7 @@ DSASignaturetoDNS(byte [] signature, int t) throws IOException {
 
 private static byte []
 ECGOSTSignaturefromDNS(byte [] signature, ECKeyInfo keyinfo)
-	throws DNSSECException, IOException
-{
+	throws DNSSECException {
 	if (signature.length != keyinfo.length * 2)
 		throw new SignatureVerificationException();
 	// Wire format is equal to the engine input

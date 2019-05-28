@@ -44,7 +44,7 @@ class DNSSECTest
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
 			"256 3 3 AJYu3cw2nLqOuyYO5rahJtk0bjjF/KaCzo4Syrom78z3EQ5SbbB4sF7ey80etKII864WF64B81uRpH5t9jQTxeEu0ImbzRMqzVDZkVG9xD7nN1kuF2eEcbJ6nPRO6RpJxRR9samq8kTwWkNNZIaTHS0UJxueNQMLcf1z2heQabMuKTVjDhwgYjVNDaIKbEFuUL55TKRAt3Xr7t5zCMLaujMvqNHOzCFEusXN5mXjJqAj8J0l4B4tbL7M4iIFZeXJDXGCEcsBbNrVAfFnlOO06B6dkB8L", Name.root);
-		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600l,
+		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600L,
 			"TXT 3 0 3600 19700101000003 19700101000000 36714 . AAAycZeIdBGB7vjlFzd5+ZgV8IxGRLpLierdV1KO4SGIy707hKUXJRc=", Name.root);
 
 		RRset set = new RRset();
@@ -58,7 +58,7 @@ class DNSSECTest
 	{
 		DNSKEYRecord dnskey = (DNSKEYRecord) Record.fromString(Name.root, Type.DNSKEY, DClass.IN, 3600,
 			"256 3 3 AJYu3cw2nLqOuyYO5rahJtk0bjjF/KaCzo4Syrom78z3EQ5SbbB4sF7ey80etKII864WF64B81uRpH5t9jQTxeEu0ImbzRMqzVDZkVG9xD7nN1kuF2eEcbJ6nPRO6RpJxRR9samq8kTwWkNNZIaTHS0UJxueNQMLcf1z2heQabMuKTVjDhwgYjVNDaIKbEFuUL55TKQflphJYUXcb2M3wKNGoXP7NufzhfVaDtiS44waWjC8IN98Ab+SPPfM4+xgTsgzWt8KvzL8hhqSW+4+5zjiQ6UG", Name.root);
-		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600l,
+		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600L,
 			"TXT 3 0 3600 19700101000003 19700101000000 57407 . AIh8Bp0EFNszs3cB0gNatjWy8tBrgUAUe1gTHkVsm1pva1GYWOW/FbA=", Name.root);
 
 		RRset set = new RRset();

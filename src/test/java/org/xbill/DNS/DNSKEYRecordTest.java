@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,8 +48,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 class DNSKEYRecordTest
 {
     @Test
-    void test_ctor_0arg() throws UnknownHostException
-    {
+    void test_ctor_0arg() {
 	DNSKEYRecord ar = new DNSKEYRecord();
 	assertNull(ar.getName());
 	assertEquals(0, ar.getType());
@@ -97,8 +95,7 @@ class DNSKEYRecordTest
     }
 
     @Test
-    void test_rdataFromString() throws IOException, TextParseException
-    {
+    void test_rdataFromString() throws IOException {
 	// basic
 	DNSKEYRecord kr = new DNSKEYRecord();
 	Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " RSASHA1 AQIDBAUGBwgJ");

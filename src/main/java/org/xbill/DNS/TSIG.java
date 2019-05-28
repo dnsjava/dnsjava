@@ -639,7 +639,7 @@ public static class StreamVerifier {
 		out.writeU16(tsig.getFudge());
 		verifier.update(out.toByteArray());
 
-		if (TSIG.verify(verifier, tsig.getSignature()) == false) {
+		if (!TSIG.verify(verifier, tsig.getSignature())) {
 			if (Options.check("verbose"))
 				System.err.println("BADSIG failure");
 			m.tsigState = Message.TSIG_FAILED;

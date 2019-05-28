@@ -795,7 +795,7 @@ public boolean
 equals(Object arg) {
 	if (arg == this)
 		return true;
-	if (arg == null || !(arg instanceof Name))
+	if (!(arg instanceof Name))
 		return false;
 	Name d = (Name) arg;
 	if (d.hashcode == 0)

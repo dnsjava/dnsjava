@@ -27,7 +27,7 @@ getObject() {
 
 @Override
 void
-rrFromWire(DNSInput in) throws IOException {
+rrFromWire(DNSInput in) {
 	data = in.readByteArray();
 }
 

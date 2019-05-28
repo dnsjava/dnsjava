@@ -38,13 +38,11 @@ import org.junit.jupiter.api.Test;
 import org.xbill.DNS.utils.base64;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class KEYBaseTest
 {
@@ -65,8 +63,7 @@ class KEYBaseTest
 	}
 
 	@Override
-	void rdataFromString(Tokenizer st, Name origin) throws IOException
-	{
+	void rdataFromString(Tokenizer st, Name origin) {
 	}
     }
 
@@ -123,8 +120,7 @@ class KEYBaseTest
     }
 
     @Test
-    void test_rrToString() throws IOException, TextParseException
-    {
+    void test_rrToString() throws IOException {
 	Name n = Name.fromString("my.name.");
 	byte[] key = new byte[] { 0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
 				  0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
@@ -177,8 +173,7 @@ class KEYBaseTest
     }
 
     @Test
-    void test_rrToWire() throws IOException, TextParseException
-    {
+    void test_rrToWire() throws IOException {
 	Name n = Name.fromString("my.name.");
 	byte[] key = new byte[] { 0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
 				  0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };

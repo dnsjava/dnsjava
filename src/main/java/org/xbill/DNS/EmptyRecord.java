@@ -25,12 +25,12 @@ getObject() {
 
 @Override
 void
-rrFromWire(DNSInput in) throws IOException {
+rrFromWire(DNSInput in) {
 }
 
 @Override
 void
-rdataFromString(Tokenizer st, Name origin) throws IOException {
+rdataFromString(Tokenizer st, Name origin) {
 }
 
 @Override

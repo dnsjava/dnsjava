@@ -37,13 +37,11 @@ package org.xbill.DNS;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class U16NameBaseTest
@@ -183,8 +181,7 @@ class U16NameBaseTest
     }
 
     @Test
-    void test_rrToString() throws IOException, TextParseException
-    {
+    void test_rrToString() throws IOException {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("My.Other.Name.");
 	
@@ -199,8 +196,7 @@ class U16NameBaseTest
     }
 
     @Test
-    void test_rrToWire() throws IOException, TextParseException
-    {
+    void test_rrToWire() throws IOException {
 	Name n = Name.fromString("My.Name.");
 	Name m = Name.fromString("M.O.n.");
 	

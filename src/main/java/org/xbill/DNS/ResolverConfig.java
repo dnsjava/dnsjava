@@ -211,7 +211,7 @@ findSunJVM() {
  */
 private void
 findResolvConf(String file) {
-	InputStream in = null;
+	InputStream in;
 	try {
 		in = new FileInputStream(file);
 	}
@@ -299,7 +299,7 @@ findWin(InputStream in, Locale locale) {
 	try {
 		List<String> lserver = new ArrayList<>();
 		List<Name> lsearch = new ArrayList<>();
-		String line = null;
+		String line;
 		boolean readingServers = false;
 		boolean readingSearches = false;
 		while ((line = br.readLine()) != null) {
@@ -360,7 +360,6 @@ findWin(InputStream in, Locale locale) {
 	}
 	catch (IOException e) {
 	}
-	return;
 }
 
 private void
@@ -397,7 +396,6 @@ find95() {
 		new File(s).delete();
 	}
 	catch (Exception e) {
-		return;
 	}
 }
 
@@ -413,7 +411,6 @@ findNT() {
 		p.destroy();
 	}
 	catch (Exception e) {
-		return;
 	}
 }
 

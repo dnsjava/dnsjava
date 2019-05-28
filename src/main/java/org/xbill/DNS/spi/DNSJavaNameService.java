@@ -128,7 +128,7 @@ invoke(Object proxy, Method method, Object[] args) throws Throwable {
  */
 public InetAddress []
 lookupAllHostAddr(String host) throws UnknownHostException {
-	Name name = null;
+	Name name;
 
 	try {
 		name = new Name(host);

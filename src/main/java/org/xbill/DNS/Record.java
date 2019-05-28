@@ -567,7 +567,7 @@ sameRRset(Record rec) {
 @Override
 public boolean
 equals(Object arg) {
-	if (arg == null || !(arg instanceof Record))
+	if (!(arg instanceof Record))
 		return false;
 	Record r = (Record) arg;
 	if (type != r.type || dclass != r.dclass || !name.equals(r.name))

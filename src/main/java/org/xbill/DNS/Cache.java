@@ -133,7 +133,7 @@ private static class NegativeElement implements Element {
 }
 
 private static class CacheMap extends LinkedHashMap {
-	private int maxsize = -1;
+	private int maxsize;
 
 	CacheMap(int maxsize) {
 		super(16, (float) 0.75, true);
@@ -461,8 +461,7 @@ lookup(Name name, int type, int minCred) {
 				return sr;
 		} else if (isExact) {
 			element = oneElement(tname, types, type, minCred);
-			if (element != null &&
-			    element instanceof CacheRRset)
+			if (element instanceof CacheRRset)
 			{
 				sr = new SetResponse(SetResponse.SUCCESSFUL);
 				sr.addRRset((CacheRRset) element);
@@ -473,16 +472,14 @@ lookup(Name name, int type, int minCred) {
 			}
 
 			element = oneElement(tname, types, Type.CNAME, minCred);
-			if (element != null &&
-			    element instanceof CacheRRset)
+			if (element instanceof CacheRRset)
 			{
 				return new SetResponse(SetResponse.CNAME,
 						       (CacheRRset) element);
 			}
 		} else {
 			element = oneElement(tname, types, Type.DNAME, minCred);
-			if (element != null &&
-			    element instanceof CacheRRset)
+			if (element instanceof CacheRRset)
 			{
 				return new SetResponse(SetResponse.DNAME,
 						       (CacheRRset) element);
@@ -491,7 +488,7 @@ lookup(Name name, int type, int minCred) {
 
 		/* Look for an NS */
 		element = oneElement(tname, types, Type.NS, minCred);
-		if (element != null && element instanceof CacheRRset)
+		if (element instanceof CacheRRset)
 			return new SetResponse(SetResponse.DELEGATION,
 					       (CacheRRset) element);
 

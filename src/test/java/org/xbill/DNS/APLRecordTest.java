@@ -59,8 +59,8 @@ public class APLRecordTest
 	InetAddress m_addr6;
 
    @BeforeEach
-   void setUp() throws TextParseException,
-				      UnknownHostException
+   void setUp() throws
+	   UnknownHostException
 	{
 	    m_addr4 = InetAddress.getByName("193.160.232.5");
 	    m_addr6 = InetAddress.getByName("2001:db8:85a3:8d3:1319:8a2e:370:7334");
@@ -143,8 +143,7 @@ public class APLRecordTest
 	}
 	
     @Test
-    void test_0arg() throws UnknownHostException
-	{
+    void test_0arg() {
 	    APLRecord ar = new APLRecord();
 	    assertNull(ar.getName());
 	    assertEquals(0, ar.getType());
@@ -198,8 +197,8 @@ public class APLRecordTest
 	byte[] m_addr6_bytes;
 	
    @BeforeEach
-   void setUp() throws TextParseException,
-				      UnknownHostException
+   void setUp() throws
+	   UnknownHostException
 	{
 	    m_addr4 = InetAddress.getByName("193.160.232.5");
 	    m_addr4_bytes = m_addr4.getAddress();
@@ -348,8 +347,8 @@ public class APLRecordTest
 	byte[] m_addr6_bytes;
 
    @BeforeEach
-   void setUp() throws TextParseException,
-				      UnknownHostException
+   void setUp() throws
+	   UnknownHostException
 	{
 	    m_addr4_string = "193.160.232.5";
 	    m_addr4 = InetAddress.getByName(m_addr4_string);

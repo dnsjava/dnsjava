@@ -109,7 +109,7 @@ class DNSOutputTest
     {
 	m_do.writeU8(0xFF);
 	byte[] curr = m_do.toByteArray();
-	assertEquals( (byte)0xFF, (byte)curr[0] );
+	assertEquals( (byte)0xFF, curr[0]);
     }
     
     @Test
@@ -141,8 +141,8 @@ class DNSOutputTest
     {
 	m_do.writeU16(0xFFFF);
 	byte[] curr = m_do.toByteArray();
-	assertEquals( (byte)0xFF, (byte)curr[0] );
-	assertEquals( (byte)0XFF, (byte)curr[1] );
+	assertEquals( (byte)0xFF, curr[0]);
+	assertEquals( (byte)0XFF, curr[1]);
     }
     
     @Test
@@ -176,10 +176,10 @@ class DNSOutputTest
     {
 	m_do.writeU32(0xFFFFFFFFL);
 	byte[] curr = m_do.toByteArray();
-	assertEquals( (byte)0xFF, (byte)curr[0] );
-	assertEquals( (byte)0XFF, (byte)curr[1] );
-	assertEquals( (byte)0XFF, (byte)curr[2] );
-	assertEquals( (byte)0XFF, (byte)curr[3] );
+	assertEquals( (byte)0xFF, curr[0]);
+	assertEquals( (byte)0XFF, curr[1]);
+	assertEquals( (byte)0XFF, curr[2]);
+	assertEquals( (byte)0XFF, curr[3]);
     }
     
     @Test
@@ -206,7 +206,7 @@ class DNSOutputTest
 	assertEquals( 3, curr.length );
 	assertEquals( 0x11, curr[0] );
 	assertEquals( 0x22, curr[1] );
-	assertEquals( (byte)0x99, (byte)curr[2] );
+	assertEquals( (byte)0x99, curr[2]);
 	
     }
 

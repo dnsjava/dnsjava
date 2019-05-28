@@ -38,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,8 +90,7 @@ class DSRecordTest
 	}
 	
     @Test
-    void test_basic() throws TextParseException
-	{
+    void test_basic() {
 	    DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl,
 				       m_footprint, m_algorithm, m_digestid, m_digest);
 	    assertEquals(m_n, dr.getName());
@@ -106,8 +104,7 @@ class DSRecordTest
 	}
 
     @Test
-    void test_toosmall_footprint() throws TextParseException
-	{
+    void test_toosmall_footprint() {
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
 			     -1, m_algorithm, m_digestid, m_digest);
@@ -117,8 +114,7 @@ class DSRecordTest
 	}
 
     @Test
-    void test_toobig_footprint() throws TextParseException
-	{
+    void test_toobig_footprint() {
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
 			     0x10000, m_algorithm, m_digestid, m_digest);
@@ -128,8 +124,7 @@ class DSRecordTest
 	}
 
     @Test
-    void test_toosmall_algorithm() throws TextParseException
-	{
+    void test_toosmall_algorithm() {
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
 			     m_footprint, -1, m_digestid, m_digest);
@@ -139,8 +134,7 @@ class DSRecordTest
 	}
 
     @Test
-    void test_toobig_algorithm() throws TextParseException
-	{
+    void test_toobig_algorithm() {
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
 			     m_footprint, 0x10000, m_digestid, m_digest);
@@ -150,8 +144,7 @@ class DSRecordTest
 	}
 
     @Test
-    void test_toosmall_digestid() throws TextParseException
-	{
+    void test_toosmall_digestid() {
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
 			     m_footprint, m_algorithm, -1, m_digest);
@@ -161,8 +154,7 @@ class DSRecordTest
 	}
 
     @Test
-    void test_toobig_digestid() throws TextParseException
-	{
+    void test_toobig_digestid() {
 	    try {
 		new DSRecord(m_n, DClass.IN, m_ttl,
 			     m_footprint, m_algorithm, 0x10000, m_digest);

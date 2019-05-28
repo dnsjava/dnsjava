@@ -286,8 +286,7 @@ class AddressTest
     }
 
     @Test
-    void test_getByName_invalid() throws UnknownHostException
-    {
+    void test_getByName_invalid() {
 	try {
 	    Address.getByName("example.invalid");
 	    fail("UnknownHostException not thrown");
@@ -322,8 +321,7 @@ class AddressTest
     }
 
     @Test
-    void test_getAllByName_invalid() throws UnknownHostException
-    {
+    void test_getAllByName_invalid() {
 	try {
 	    Address.getAllByName("example.invalid");
 	    fail("UnknownHostException not thrown");

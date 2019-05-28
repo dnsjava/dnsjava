@@ -178,7 +178,7 @@ toWire(DNSOutput out) {
  * @return The option, in wire format.
  */
 public byte []
-toWire() throws IOException {
+toWire() {
 	DNSOutput out = new DNSOutput();
 	toWire(out);
 	return out.toByteArray();
@@ -192,7 +192,7 @@ toWire() throws IOException {
 @Override
 public boolean
 equals(Object arg) {
-	if (arg == null || !(arg instanceof EDNSOption))
+	if (!(arg instanceof EDNSOption))
 		return false;
 	EDNSOption opt = (EDNSOption) arg;
 	if (code != opt.code)

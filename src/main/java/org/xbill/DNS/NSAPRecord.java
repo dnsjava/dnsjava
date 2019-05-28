@@ -75,7 +75,7 @@ NSAPRecord(Name name, int dclass, long ttl, String address) {
 
 @Override
 void
-rrFromWire(DNSInput in) throws IOException {
+rrFromWire(DNSInput in) {
 	address = in.readByteArray();
 }
 

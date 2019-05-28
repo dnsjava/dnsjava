@@ -38,14 +38,12 @@ import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class SetResponseTest
@@ -264,8 +262,7 @@ class SetResponseTest
     }
 
     @Test
-    void test_getCNAME() throws TextParseException, UnknownHostException
-    {
+    void test_getCNAME() throws TextParseException {
 	RRset rrs = new RRset();
 	CNAMERecord cr = new CNAMERecord(Name.fromString("The.Name."),
 					 DClass.IN,
@@ -277,8 +274,7 @@ class SetResponseTest
     }
 
     @Test
-    void test_getDNAME() throws TextParseException, UnknownHostException
-    {
+    void test_getDNAME() throws TextParseException {
 	RRset rrs = new RRset();
 	DNAMERecord dr = new DNAMERecord(Name.fromString("The.Name."),
 					 DClass.IN,
