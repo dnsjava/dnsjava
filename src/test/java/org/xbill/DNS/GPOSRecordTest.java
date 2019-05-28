@@ -89,12 +89,12 @@ class GPOSRecordTest
 	    assertEquals(DClass.IN, gr.getDClass());
 	    assertEquals(Type.GPOS, gr.getType());
 	    assertEquals(m_ttl, gr.getTTL());
-	    assertEquals(new Double(m_long), new Double(gr.getLongitude()));
-	    assertEquals(new Double(m_lat), new Double(gr.getLatitude()));
-	    assertEquals(new Double(m_alt), new Double(gr.getAltitude()));
-	    assertEquals(new Double(m_long).toString(), gr.getLongitudeString());
-	    assertEquals(new Double(m_lat).toString(), gr.getLatitudeString());
-	    assertEquals(new Double(m_alt).toString(), gr.getAltitudeString());
+	    assertEquals(m_long, gr.getLongitude());
+	    assertEquals(m_lat, gr.getLatitude());
+	    assertEquals(m_alt, gr.getAltitude());
+	    assertEquals(Double.toString(m_long), gr.getLongitudeString());
+	    assertEquals(Double.toString(m_lat), gr.getLatitudeString());
+	    assertEquals(Double.toString(m_alt), gr.getAltitudeString());
 	}
 
     @Test
@@ -146,8 +146,8 @@ class GPOSRecordTest
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       new Double(m_long).toString(),
-			       "120.\\00ABC", new Double(m_alt).toString());
+			Double.toString(m_long),
+			       "120.\\00ABC", Double.toString(m_alt));
 		fail("IllegalArgumentException not thrown");
 	    }
 	    catch(IllegalArgumentException e){}
@@ -174,19 +174,19 @@ class GPOSRecordTest
     void test_basic() throws TextParseException
 	{
 	    GPOSRecord gr = new GPOSRecord(m_n, DClass.IN, m_ttl,
-					   new Double(m_long).toString(),
-					   new Double(m_lat).toString(),
-					   new Double(m_alt).toString());
+					   Double.toString(m_long),
+					   Double.toString(m_lat),
+					   Double.toString(m_alt));
 	    assertEquals(m_n, gr.getName());
 	    assertEquals(DClass.IN, gr.getDClass());
 	    assertEquals(Type.GPOS, gr.getType());
 	    assertEquals(m_ttl, gr.getTTL());
-	    assertEquals(new Double(m_long), new Double(gr.getLongitude()));
-	    assertEquals(new Double(m_lat), new Double(gr.getLatitude()));
-	    assertEquals(new Double(m_alt), new Double(gr.getAltitude()));
-	    assertEquals(new Double(m_long).toString(), gr.getLongitudeString());
-	    assertEquals(new Double(m_lat).toString(), gr.getLatitudeString());
-	    assertEquals(new Double(m_alt).toString(), gr.getAltitudeString());
+	    assertEquals(m_long, gr.getLongitude());
+	    assertEquals(m_lat, gr.getLatitude());
+	    assertEquals(m_alt, gr.getAltitude());
+	    assertEquals(Double.toString(m_long), gr.getLongitudeString());
+	    assertEquals(Double.toString(m_lat), gr.getLatitudeString());
+	    assertEquals(Double.toString(m_alt), gr.getAltitudeString());
 	}
 
     @Test
@@ -194,8 +194,8 @@ class GPOSRecordTest
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       "-90.001", new Double(m_lat).toString(),
-			       new Double(m_alt).toString());
+			       "-90.001", Double.toString(m_lat),
+			Double.toString(m_alt));
 		fail("IllegalArgumentException not thrown");
 	    }
 	    catch(IllegalArgumentException e){}
@@ -206,8 +206,8 @@ class GPOSRecordTest
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       "90.001", new Double(m_lat).toString(),
-			       new Double(m_alt).toString());
+			       "90.001", Double.toString(m_lat),
+			Double.toString(m_alt));
 		fail("IllegalArgumentException not thrown");
 	    }
 	    catch(IllegalArgumentException e){}
@@ -218,8 +218,8 @@ class GPOSRecordTest
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       new Double(m_long).toString(), "-180.001",
-			       new Double(m_alt).toString());
+			Double.toString(m_long), "-180.001",
+			Double.toString(m_alt));
 		fail("IllegalArgumentException not thrown");
 	    }
 	    catch(IllegalArgumentException e){}
@@ -230,7 +230,7 @@ class GPOSRecordTest
 	{
 	    try {
 		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       new Double(m_long).toString(), "180.001", new Double(m_alt).toString());
+			Double.toString(m_long), "180.001", Double.toString(m_alt));
 		fail("IllegalArgumentException not thrown");
 	    }
 	    catch(IllegalArgumentException e){}
@@ -249,9 +249,9 @@ class GPOSRecordTest
 	    
 	    GPOSRecord gr = new GPOSRecord();
 	    gr.rrFromWire(in);
-	    assertEquals(new Double(-8.12), new Double(gr.getLongitude()));
-	    assertEquals(new Double(123.07), new Double(gr.getLatitude()));
-	    assertEquals(new Double(0.0), new Double(gr.getAltitude()));
+	    assertEquals(-8.12, gr.getLongitude());
+	    assertEquals(123.07, gr.getLatitude());
+	    assertEquals(0.0, gr.getAltitude());
 	}
 	
     @Test
@@ -328,9 +328,9 @@ class GPOSRecordTest
 	    
 	    GPOSRecord gr = new GPOSRecord();
 	    gr.rdataFromString(t, null);
-	    assertEquals(new Double(10.45), new Double(gr.getLongitude()));
-	    assertEquals(new Double(171.121212), new Double(gr.getLatitude()));
-	    assertEquals(new Double(1010787), new Double(gr.getAltitude()));
+	    assertEquals(10.45, gr.getLongitude());
+	    assertEquals(171.121212, gr.getLatitude());
+	    assertEquals(1010787, gr.getAltitude());
 	}
 
     @Test
