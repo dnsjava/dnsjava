@@ -426,7 +426,7 @@ processResponse(Name name, SetResponse response) {
 		}
 
 		result = SUCCESSFUL;
-		answers = l.toArray(new Record[l.size()]);
+		answers = l.toArray(new Record[0]);
 		done = true;
 	} else if (response.isNXDOMAIN()) {
 		nxdomain = true;
@@ -617,7 +617,7 @@ getAliases() {
 	checkDone();
 	if (aliases == null)
 		return noAliases;
-	return aliases.toArray(new Name[aliases.size()]);
+	return aliases.toArray(new Name[0]);
 }
 
 /**

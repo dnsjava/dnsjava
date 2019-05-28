@@ -344,7 +344,7 @@ getSectionArray(int section) {
 	if (sections[section] == null)
 		return emptyRecordArray;
 	List l = sections[section];
-	return (Record []) l.toArray(new Record[l.size()]);
+	return (Record []) l.toArray(new Record[0]);
 }
 
 private static boolean
@@ -389,7 +389,7 @@ getSectionRRsets(int section) {
 			hash.add(name);
 		}
 	}
-	return sets.toArray(new RRset[sets.size()]);
+	return sets.toArray(new RRset[0]);
 }
 
 void

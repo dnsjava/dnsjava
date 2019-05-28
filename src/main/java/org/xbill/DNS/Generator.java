@@ -237,7 +237,7 @@ expand() throws IOException {
 		list.add(Record.fromString(name, type, dclass, ttl,
 					   rdata, origin));
 	}
-	return list.toArray(new Record[list.size()]);
+	return list.toArray(new Record[0]);
 }
 
 /**

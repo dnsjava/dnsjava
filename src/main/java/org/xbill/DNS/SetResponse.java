@@ -156,7 +156,7 @@ answers() {
 	if (type != SUCCESSFUL)
 		return null;
 	List<RRset> l = data;
-	return l.toArray(new RRset[l.size()]);
+	return l.toArray(new RRset[0]);
 }
 
 /**

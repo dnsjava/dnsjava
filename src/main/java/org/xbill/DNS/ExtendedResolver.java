@@ -31,7 +31,7 @@ private static class Resolution implements ResolverListener {
 	public
 	Resolution(ExtendedResolver eres, Message query) {
 		List<Resolver> l = eres.resolvers;
-		resolvers = l.toArray (new Resolver[l.size()]);
+		resolvers = l.toArray (new Resolver[0]);
 		if (eres.loadBalance) {
 			int nresolvers = resolvers.length;
 			/*
@@ -398,7 +398,7 @@ getResolver(int n) {
 /** Returns all resolvers used by this ExtendedResolver */
 public Resolver []
 getResolvers() {
-	return resolvers.toArray(new Resolver[resolvers.size()]);
+	return resolvers.toArray(new Resolver[0]);
 }
 
 /** Adds a new resolver to be used by this ExtendedResolver */

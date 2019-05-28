@@ -237,7 +237,7 @@ private synchronized RRset []
 allRRsets(Object types) {
 	if (types instanceof List) {
 		List typelist = (List) types;
-		return (RRset []) typelist.toArray(new RRset[typelist.size()]);
+		return (RRset []) typelist.toArray(new RRset[0]);
 	} else {
 		RRset set = (RRset) types;
 		return new RRset [] {set};
