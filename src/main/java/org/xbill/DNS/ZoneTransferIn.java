@@ -77,64 +77,64 @@ public static class Delta {
 	public long end;
 
 	/** A list of records added between the start and end versions */
-	public List adds;
+	public List<Record> adds;
 
 	/** A list of records deleted between the start and end versions */
-	public List deletes;
+	public List<Record> deletes;
 
 	private
 	Delta() {
-		adds = new ArrayList();
-		deletes = new ArrayList();
+		adds = new ArrayList<>();
+		deletes = new ArrayList<>();
 	}
 }
 
 /**
  * Handles a Zone Transfer.
  */
-public static interface ZoneTransferHandler {
+public interface ZoneTransferHandler {
 
 	/**
 	 * Called when an AXFR transfer begins.
 	 */
-	public void startAXFR() throws ZoneTransferException;
+	void startAXFR() throws ZoneTransferException;
 
 	/**
 	 * Called when an IXFR transfer begins.
 	 */
-	public void startIXFR() throws ZoneTransferException;
+	void startIXFR() throws ZoneTransferException;
 
 	/**
 	 * Called when a series of IXFR deletions begins.
 	 * @param soa The starting SOA.
 	 */
-	public void startIXFRDeletes(Record soa) throws ZoneTransferException;
+	void startIXFRDeletes(Record soa) throws ZoneTransferException;
 
 	/**
 	 * Called when a series of IXFR adds begins.
 	 * @param soa The starting SOA.
 	 */
-	public void startIXFRAdds(Record soa) throws ZoneTransferException;
+	void startIXFRAdds(Record soa) throws ZoneTransferException;
 
 	/**
 	 * Called for each content record in an AXFR.
 	 * @param r The DNS record.
 	 */
-	public void handleRecord(Record r) throws ZoneTransferException;
-};
+	void handleRecord(Record r) throws ZoneTransferException;
+}
 
 private static class BasicHandler implements ZoneTransferHandler {
-	private List axfr;
-	private List ixfr;
+	private List<Record> axfr;
+	private List<Delta> ixfr;
 
 	@Override
 	public void startAXFR() {
-		axfr = new ArrayList();
+		axfr = new ArrayList<>();
 	}
 
 	@Override
 	public void startIXFR() {
-		ixfr = new ArrayList();
+		ixfr = new ArrayList<>();
 	}
 
 	@Override
@@ -147,25 +147,23 @@ private static class BasicHandler implements ZoneTransferHandler {
 
 	@Override
 	public void startIXFRAdds(Record soa) {
-		Delta delta = (Delta) ixfr.get(ixfr.size() - 1);
+		Delta delta = ixfr.get(ixfr.size() - 1);
 		delta.adds.add(soa);
 		delta.end = getSOASerial(soa);
 	}
 
 	@Override
 	public void handleRecord(Record r) {
-		List list;
 		if (ixfr != null) {
-			Delta delta = (Delta) ixfr.get(ixfr.size() - 1);
+			Delta delta = ixfr.get(ixfr.size() - 1);
 			if (delta.adds.size() > 0)
-				list = delta.adds;
+				delta.adds.add(r);
 			else
-				list = delta.deletes;
+				delta.deletes.add(r);
 		} else
-			list = axfr;
-		list.add(r);
+			axfr.add(r);
 	}
-};
+}
 
 private
 ZoneTransferIn() {}

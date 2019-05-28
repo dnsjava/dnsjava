@@ -16,7 +16,6 @@ import java.nio.ByteBuffer;
  *
  * @author Brian Wellington
  */
-
 public class Message implements Cloneable {
 
 /** The maximum length of a message in wire format. */
@@ -365,15 +364,15 @@ public RRset []
 getSectionRRsets(int section) {
 	if (sections[section] == null)
 		return emptyRRsetArray;
-	List sets = new LinkedList();
+	List<RRset> sets = new LinkedList<>();
 	Record [] recs = getSectionArray(section);
-	Set hash = new HashSet();
+	Set<Name> hash = new HashSet<>();
 	for (int i = 0; i < recs.length; i++) {
 		Name name = recs[i].getName();
 		boolean newset = true;
 		if (hash.contains(name)) {
 			for (int j = sets.size() - 1; j >= 0; j--) {
-				RRset set = (RRset) sets.get(j);
+				RRset set = sets.get(j);
 				if (set.getType() == recs[i].getRRsetType() &&
 				    set.getDClass() == recs[i].getDClass() &&
 				    set.getName().equals(name))
@@ -390,7 +389,7 @@ getSectionRRsets(int section) {
 			hash.add(name);
 		}
 	}
-	return (RRset []) sets.toArray(new RRset[sets.size()]);
+	return sets.toArray(new RRset[sets.size()]);
 }
 
 void
@@ -444,8 +443,6 @@ private boolean
 toWire(DNSOutput out, int maxLength) {
 	if (maxLength < Header.LENGTH)
 		return false;
-
-	Header newheader = null;
 
 	int tempMaxLength = maxLength;
 	if (tsigkey != null)

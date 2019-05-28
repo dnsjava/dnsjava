@@ -72,6 +72,7 @@ class AddressTest
 
 	exp = new byte[] { (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF };
 	ret = Address.toByteArray("255.255.255.255", Address.IPv4);
+	assertArrayEquals(exp, ret);
     }
 
     @Test

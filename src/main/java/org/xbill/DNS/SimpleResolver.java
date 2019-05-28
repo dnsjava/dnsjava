@@ -142,7 +142,7 @@ setIgnoreTruncation(boolean flag) {
 
 @Override
 public void
-setEDNS(int level, int payloadSize, int flags, List options) {
+setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options) {
 	if (level != 0 && level != -1)
 		throw new IllegalArgumentException("invalid EDNS level - " +
 						   "must be 0 or -1");
@@ -315,9 +315,9 @@ send(Message query) throws IOException {
  * @return An identifier, which is also a parameter in the callback
  */
 @Override
-public Object
+public Integer
 sendAsync(final Message query, final ResolverListener listener) {
-	final Object id;
+	final Integer id;
 	synchronized (this) {
 		id = new Integer(uniqueID++);
 	}

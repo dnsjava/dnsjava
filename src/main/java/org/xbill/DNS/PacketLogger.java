@@ -7,6 +7,6 @@ import java.net.*;
  * @author Damian Minkov
  */
 public interface PacketLogger {
-    public void log(String prefix, SocketAddress local, SocketAddress remote,
-                    byte [] data);
+    void log(String prefix, SocketAddress local, SocketAddress remote,
+	     byte[] data);
 }

@@ -27,7 +27,7 @@ private long currentTTL;
 private boolean needSOATTL;
 
 private Generator generator;
-private List generators;
+private List<Generator> generators;
 private boolean noExpandGenerate;
 
 Master(File file, Name origin, long initialTTL) throws IOException {
@@ -237,7 +237,7 @@ startGenerate() throws IOException {
 				  currentType, currentDClass, currentTTL,
 				  rdataSpec, origin);
 	if (generators == null)
-		generators = new ArrayList(1);
+		generators = new ArrayList<>(1);
 	generators.add(generator);
 }
 
@@ -306,7 +306,7 @@ _nextRecord() throws IOException {
 			continue;
 		else if (token.type == Tokenizer.EOF)
 			return null;
-		else if (((String) token.value).charAt(0) == '$') {
+		else if ((token.value).charAt(0) == '$') {
 			s = token.value;
 
 			if (s.equalsIgnoreCase("$ORIGIN")) {
@@ -411,12 +411,12 @@ expandGenerate(boolean wantExpand) {
  * is, the parsed contents of $GENERATE statements.
  * @see Generator
  */
-public Iterator
+public Iterator<Generator>
 generators() {
 	if (generators != null)
 		return Collections.unmodifiableList(generators).iterator();
 	else
-		return Collections.EMPTY_LIST.iterator();
+		return Collections.emptyIterator();
 }
 
 @Override

@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.net.*;
-import java.util.regex.*;
 
 /**
  * The Client Subnet EDNS Option, defined in

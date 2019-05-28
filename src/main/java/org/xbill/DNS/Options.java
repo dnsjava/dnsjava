@@ -24,7 +24,7 @@ import java.util.*;
 
 public final class Options {
 
-private static Map table;
+private static Map<String, String> table;
 
 static {
 	try {
@@ -66,7 +66,7 @@ clear() {
 public static void
 set(String option) {
 	if (table == null)
-		table = new HashMap();
+		table = new HashMap<>();
 	table.put(option.toLowerCase(), "true");
 }
 
@@ -74,7 +74,7 @@ set(String option) {
 public static void
 set(String option, String value) {
 	if (table == null)
-		table = new HashMap();
+		table = new HashMap<>();
 	table.put(option.toLowerCase(), value.toLowerCase());
 }
 
@@ -99,7 +99,7 @@ public static String
 value(String option) {
 	if (table == null)
 		return null;
-	return ((String)table.get(option.toLowerCase()));
+	return (table.get(option.toLowerCase()));
 }
 
 /**

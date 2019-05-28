@@ -12,13 +12,13 @@ package org.xbill.DNS;
 class ResolveThread extends Thread {
 
 private Message query;
-private Object id;
+private Integer id;
 private ResolverListener listener;
 private Resolver res;
 
 /** Creates a new ResolveThread */
 public
-ResolveThread(Resolver res, Message query, Object id,
+ResolveThread(Resolver res, Message query, Integer id,
 	      ResolverListener listener)
 {
 	this.res = res;

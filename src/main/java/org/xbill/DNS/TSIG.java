@@ -48,7 +48,7 @@ public static final Name HMAC_SHA512 = Name.fromConstantString("hmac-sha512.");
 private static Map algMap;
 
 static {
-	Map out = new HashMap();
+	Map<Name, String> out = new HashMap<>();
 	out.put(HMAC_MD5, "HmacMD5");
 	out.put(HMAC_SHA1, "HmacSHA1");
 	out.put(HMAC_SHA224, "HmacSHA224");

@@ -22,14 +22,14 @@ private static final long serialVersionUID = -3270249290171239695L;
  * rrs contains both normal and RRSIG records, with the RRSIG records
  * at the end.
  */
-private List rrs;
+private ArrayList<Record> rrs;
 private short nsigs;
 private short position;
 
 /** Creates an empty RRset */
 public
 RRset() {
-	rrs = new ArrayList(1);
+	rrs = new ArrayList<>(1);
 	nsigs = 0;
 	position = 0;
 }
@@ -45,7 +45,7 @@ RRset(Record record) {
 public
 RRset(RRset rrset) {
 	synchronized (rrset) {
-		rrs = (List) ((ArrayList)rrset.rrs).clone();
+		rrs = new ArrayList<>(rrset.rrs);
 		nsigs = rrset.nsigs;
 		position = rrset.position;
 	}
@@ -89,7 +89,7 @@ addRR(Record r) {
 			r.setTTL(first.getTTL());
 		} else {
 			for (int i = 0; i < rrs.size(); i++) {
-				Record tmp = (Record) rrs.get(i);
+				Record tmp = rrs.get(i);
 				tmp = tmp.cloneRecord();
 				tmp.setTTL(r.getTTL());
 				rrs.set(i, tmp);
@@ -116,7 +116,7 @@ clear() {
 	nsigs = 0;
 }
 
-private synchronized Iterator
+private synchronized Iterator<Record>
 iterator(boolean data, boolean cycle) {
 	int size, start, total;
 
@@ -127,7 +127,7 @@ iterator(boolean data, boolean cycle) {
 	else
 		size = nsigs;
 	if (size == 0)
-		return Collections.EMPTY_LIST.iterator();
+		return Collections.emptyIterator();
 
 	if (data) {
 		if (!cycle)
@@ -141,7 +141,7 @@ iterator(boolean data, boolean cycle) {
 		start = total - nsigs;
 	}
 
-	List list = new ArrayList(size);
+	List<Record> list = new ArrayList<>(size);
 	if (data) {
 		list.addAll(rrs.subList(start, size));
 		if (start != 0)
@@ -158,7 +158,7 @@ iterator(boolean data, boolean cycle) {
  * @param cycle If true, cycle through the records so that each Iterator will
  * start with a different record.
  */
-public synchronized Iterator
+public synchronized Iterator<Record>
 rrs(boolean cycle) {
 	return iterator(true, cycle);
 }
@@ -167,13 +167,13 @@ rrs(boolean cycle) {
  * Returns an Iterator listing all (data) records.  This cycles through
  * the records, so each Iterator will start with a different record.
  */
-public synchronized Iterator
+public synchronized Iterator<Record>
 rrs() {
 	return iterator(true, true);
 }
 
 /** Returns an Iterator listing all signature records */
-public synchronized Iterator
+public synchronized Iterator<Record>
 sigs() {
 	return iterator(false, false);
 }
@@ -225,7 +225,7 @@ public synchronized Record
 first() {
 	if (rrs.size() == 0)
 		throw new IllegalStateException("rrset is empty");
-	return (Record) rrs.get(0);
+	return rrs.get(0);
 }
 
 private String

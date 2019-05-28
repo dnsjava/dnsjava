@@ -28,7 +28,7 @@ getObject() {
  * @throws IllegalArgumentException One of the strings has invalid escapes
  */
 public
-SPFRecord(Name name, int dclass, long ttl, List strings) {
+SPFRecord(Name name, int dclass, long ttl, List<String> strings) {
 	super(name, Type.SPF, dclass, ttl, strings);
 }
 

@@ -20,9 +20,9 @@ import java.util.*;
 public class Cache {
 
 private interface Element {
-	public boolean expired();
-	public int compareCredibility(int cred);
-	public int getType();
+	boolean expired();
+	int compareCredibility(int cred);
+	int getType();
 }
 
 private static int
@@ -285,7 +285,7 @@ addElement(Name name, Element element) {
 		if (elt.getType() == type)
 			data.put(name, element);
 		else {
-			LinkedList list = new LinkedList();
+			LinkedList<Element> list = new LinkedList<>();
 			list.add(elt);
 			list.add(element);
 			data.put(name, list);
@@ -575,7 +575,7 @@ getCred(int section, boolean isAuth) {
 }
 
 private static void
-markAdditional(RRset rrset, Set names) {
+markAdditional(RRset rrset, Set<Name> names) {
 	Record first = rrset.first();
 	if (first.getAdditionalName() == null)
 		return;
@@ -611,7 +611,7 @@ addMessage(Message in) {
 	RRset [] answers, auth, addl;
 	SetResponse response = null;
 	boolean verbose = Options.check("verbosecache");
-	HashSet additionalNames;
+	HashSet<Name> additionalNames;
 
 	if ((rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) ||
 	    question == null)
@@ -623,7 +623,7 @@ addMessage(Message in) {
 
 	curname = qname;
 
-	additionalNames = new HashSet();
+	additionalNames = new HashSet<>();
 
 	answers = in.getSectionRRsets(Section.ANSWER);
 	for (int i = 0; i < answers.length; i++) {
