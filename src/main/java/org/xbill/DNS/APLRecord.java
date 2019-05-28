@@ -115,20 +115,15 @@ validatePrefixLength(int family, int prefixLength) {
  * @param elements The list of APL elements.
  */
 public
-APLRecord(Name name, int dclass, long ttl, List elements) {
+APLRecord(Name name, int dclass, long ttl, List<Element> elements) {
 	super(name, Type.APL, dclass, ttl);
 	this.elements = new ArrayList<>(elements.size());
-	for (Object o : elements) {
-		if (!(o instanceof Element)) {
-			throw new IllegalArgumentException("illegal element");
-		}
-		Element element = (Element) o;
+	for (Element element : elements) {
 		if (element.family != Address.IPv4 &&
 			element.family != Address.IPv6) {
 			throw new IllegalArgumentException("unknown family");
 		}
 		this.elements.add(element);
-
 	}
 }
 

@@ -104,7 +104,7 @@ validate() throws IOException {
 	if (rrset == null || rrset.size() != 1)
 		throw new IOException(origin +
 				      ": exactly 1 SOA must be specified");
-	Iterator it = rrset.rrs();
+	Iterator<Record> it = rrset.rrs();
 	SOA = (SOARecord) it.next();
 
 	NS = oneRRset(originNode, Type.NS);
@@ -282,7 +282,7 @@ addRRset(Name name, RRset rrset) {
 	}
 	int rtype = rrset.getType();
 	if (types instanceof List) {
-		List list = (List) types;
+		List<RRset> list = (List<RRset>) types;
 		for (int i = 0; i < list.size(); i++) {
 			RRset set = (RRset) list.get(i);
 			if (set.getType() == rtype) {
@@ -296,7 +296,7 @@ addRRset(Name name, RRset rrset) {
 		if (set.getType() == rtype)
 			data.put(name, rrset);
 		else {
-			LinkedList list = new LinkedList();
+			LinkedList<RRset> list = new LinkedList<>();
 			list.add(set);
 			list.add(rrset);
 			data.put(name, list);
@@ -524,7 +524,7 @@ private void
 nodeToString(StringBuffer sb, Object node) {
 	RRset [] sets = allRRsets(node);
 	for (RRset rrset : sets) {
-		Iterator it = rrset.rrs();
+		Iterator<Record> it = rrset.rrs();
 		while (it.hasNext())
 			sb.append(it.next()).append("\n");
 		it = rrset.sigs();

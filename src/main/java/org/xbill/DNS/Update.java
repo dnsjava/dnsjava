@@ -170,8 +170,8 @@ add(Record [] records) {
  */
 public void
 add(RRset rrset) {
-	for (Iterator it = rrset.rrs(); it.hasNext(); )
-		add((Record) it.next());
+	for (Iterator<Record> it = rrset.rrs(); it.hasNext(); )
+		add(it.next());
 }
 
 /**
@@ -237,8 +237,8 @@ delete(Record [] records) {
  */
 public void
 delete(RRset rrset) {
-	for (Iterator it = rrset.rrs(); it.hasNext(); )
-		delete((Record) it.next());
+	for (Iterator<Record> it = rrset.rrs(); it.hasNext(); )
+		delete(it.next());
 }
 
 /**
@@ -293,8 +293,8 @@ replace(Record [] records) {
 public void
 replace(RRset rrset) {
 	delete(rrset.getName(), rrset.getType());
-	for (Iterator it = rrset.rrs(); it.hasNext(); )
-		add((Record) it.next());
+	for (Iterator<Record> it = rrset.rrs(); it.hasNext(); )
+		add(it.next());
 }
 
 }

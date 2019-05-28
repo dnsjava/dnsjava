@@ -144,7 +144,7 @@ digestRRset(RRSIGRecord rrsig, RRset rrset) {
 	int size = rrset.size();
 	Record [] records = new Record[size];
 
-	Iterator it = rrset.rrs();
+	Iterator<Record> it = rrset.rrs();
 	Name name = rrset.getName();
 	Name wild = null;
 	int sigLabels = rrsig.getLabels() + 1; // Add the root label back.

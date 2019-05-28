@@ -12,9 +12,9 @@ public class jnamed {
 static final int FLAG_DNSSECOK = 1;
 static final int FLAG_SIGONLY = 2;
 
-Map caches;
-Map znames;
-Map TSIGs;
+Map<Integer, Cache> caches;
+Map<Name, Zone> znames;
+Map<Name, TSIG> TSIGs;
 
 private static String
 addrport(InetAddress addr, int port) {
@@ -26,8 +26,8 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 	FileInputStream fs;
 	InputStreamReader isr;
 	BufferedReader br;
-	List ports = new ArrayList();
-	List addresses = new ArrayList();
+	List<Integer> ports = new ArrayList<Integer>();
+	List<InetAddress> addresses = new ArrayList<InetAddress>();
 	try {
 		fs = new FileInputStream(conffile);
 		isr = new InputStreamReader(fs);
@@ -39,9 +39,9 @@ jnamed(String conffile) throws IOException, ZoneTransferException {
 	}
 
 	try {
-		caches = new HashMap();
-		znames = new HashMap();
-		TSIGs = new HashMap();
+		caches = new HashMap<Integer, Cache>();
+		znames = new HashMap<>();
+		TSIGs = new HashMap<Name, TSIG>();
 
 		String line = null;
 		while ((line = br.readLine()) != null) {
@@ -139,7 +139,7 @@ addTSIG(String algstr, String namestr, String key) throws IOException {
 
 public Cache
 getCache(int dclass) {
-	Cache c = (Cache) caches.get(dclass);
+	Cache c = caches.get(dclass);
 	if (c == null) {
 		c = new Cache(dclass);
 		caches.put(dclass, c);
@@ -150,13 +150,13 @@ getCache(int dclass) {
 public Zone
 findBestZone(Name name) {
 	Zone foundzone = null;
-	foundzone = (Zone) znames.get(name);
+	foundzone = znames.get(name);
 	if (foundzone != null)
 		return foundzone;
 	int labels = name.labels();
 	for (int i = 1; i < labels; i++) {
 		Name tname = new Name(name, i);
-		foundzone = (Zone) znames.get(tname);
+		foundzone = znames.get(tname);
 		if (foundzone != null)
 			return foundzone;
 	}
@@ -188,7 +188,7 @@ addRRset(Name name, Message response, RRset rrset, int section, int flags) {
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
 	if ((flags & FLAG_SIGONLY) == 0) {
-		Iterator it = rrset.rrs();
+		Iterator<Record> it = rrset.rrs();
 		while (it.hasNext()) {
 			Record r = (Record) it.next();
 			if (r.getName().isWild() && !name.isWild())
@@ -197,7 +197,7 @@ addRRset(Name name, Message response, RRset rrset, int section, int flags) {
 		}
 	}
 	if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
-		Iterator it = rrset.sigs();
+		Iterator<Record> it = rrset.sigs();
 		while (it.hasNext()) {
 			Record r = (Record) it.next();
 			if (r.getName().isWild() && !name.isWild())
@@ -225,7 +225,7 @@ addCacheNS(Message response, Cache cache, Name name) {
 	if (!sr.isDelegation())
 		return;
 	RRset nsRecords = sr.getNS();
-	Iterator it = nsRecords.rrs();
+	Iterator<Record> it = nsRecords.rrs();
 	while (it.hasNext()) {
 		Record r = (Record) it.next();
 		response.addRecord(r, Section.AUTHORITY);
@@ -347,11 +347,11 @@ addAnswer(Message response, Name name, int type, int dclass,
 
 byte []
 doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
-	Zone zone = (Zone) znames.get(name);
+	Zone zone = znames.get(name);
 	boolean first = true;
 	if (zone == null)
 		return errorMessage(query, Rcode.REFUSED);
-	Iterator it = zone.AXFR();
+	Iterator<RRset> it = zone.AXFR();
 	try {
 		DataOutputStream dataOut;
 		dataOut = new DataOutputStream(s.getOutputStream());
@@ -412,7 +412,7 @@ throws IOException
 	TSIGRecord queryTSIG = query.getTSIG();
 	TSIG tsig = null;
 	if (queryTSIG != null) {
-		tsig = (TSIG) TSIGs.get(queryTSIG.getName());
+		tsig = TSIGs.get(queryTSIG.getName());
 		if (tsig == null ||
 		    tsig.verify(query, in, length, null) != Rcode.NOERROR)
 			return formerrMessage(in);

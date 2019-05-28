@@ -22,7 +22,7 @@ public class Message implements Cloneable {
 public static final int MAXLENGTH = 65535;
 
 private Header header;
-private List [] sections;
+private List<Record>[] sections;
 private int size;
 private TSIG tsigkey;
 private TSIGRecord querytsig;
@@ -103,7 +103,7 @@ Message(DNSInput in) throws IOException {
 		for (int i = 0; i < 4; i++) {
 			int count = header.getCount(i);
 			if (count > 0)
-				sections[i] = new ArrayList(count);
+				sections[i] = new ArrayList<>(count);
 			for (int j = 0; j < count; j++) {
 				int pos = in.current();
 				Record rec = Record.fromWire(in, i, isUpdate);
@@ -170,7 +170,7 @@ getHeader() {
 public void
 addRecord(Record r, int section) {
 	if (sections[section] == null)
-		sections[section] = new LinkedList();
+		sections[section] = new LinkedList<>();
 	header.incCount(section);
 	sections[section].add(r);
 }
@@ -621,7 +621,7 @@ clone() {
 	Message m = new Message();
 	for (int i = 0; i < sections.length; i++) {
 		if (sections[i] != null)
-			m.sections[i] = new LinkedList(sections[i]);
+			m.sections[i] = new LinkedList<>(sections[i]);
 	}
 	m.header = (Header) header.clone();
 	m.size = size;

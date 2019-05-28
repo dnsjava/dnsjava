@@ -168,7 +168,7 @@ findSunJVM() {
 		Class [] noClasses = new Class[0];
 		Object [] noObjects = new Object[0];
 		String resConfName = "sun.net.dns.ResolverConfiguration";
-		Class resConfClass = Class.forName(resConfName);
+		Class<?> resConfClass = Class.forName(resConfName);
 		Object resConf;
 
 		// ResolverConfiguration resConf = ResolverConfiguration.open();
@@ -191,8 +191,7 @@ findSunJVM() {
 
 	if (lserver_tmp.size() == 0)
 		return false;
-
-	if (lserver_tmp.size() > 0) {
+	else {
 		for (String s : lserver_tmp)
 			addServer(s, lserver);
 	}
@@ -434,11 +433,10 @@ findAndroid() {
 	ArrayList<String> lserver = new ArrayList<>();
 	ArrayList<Name> lsearch = new ArrayList<>();
 	try {
-		Class SystemProperties =
+		Class<?> SystemProperties =
 		    Class.forName("android.os.SystemProperties");
 		Method method =
-		    SystemProperties.getMethod("get",
-					       new Class[] { String.class });
+		    SystemProperties.getMethod("get", String.class);
 		final String [] netdns = new String [] {"net.dns1", "net.dns2",
 						        "net.dns3", "net.dns4"};
 		for (String netdn : netdns) {

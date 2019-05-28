@@ -90,7 +90,7 @@ main(String [] args) throws Exception {
 			System.out.println("delta from " + delta.start +
 				" to " + delta.end);
 			System.out.println("deletes");
-			Iterator it2 = delta.deletes.iterator();
+			Iterator<Record> it2 = delta.deletes.iterator();
 			while (it2.hasNext())
 				System.out.println(it2.next());
 			System.out.println("adds");

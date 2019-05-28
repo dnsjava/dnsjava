@@ -271,7 +271,7 @@ addElement(Name name, Element element) {
 	}
 	int type = element.getType();
 	if (types instanceof List) {
-		List list = (List) types;
+		List<Element> list = (List<Element>) types;
 		for (int i = 0; i < list.size(); i++) {
 			Element elt = (Element) list.get(i);
 			if (elt.getType() == type) {
@@ -580,9 +580,9 @@ markAdditional(RRset rrset, Set<Name> names) {
 	if (first.getAdditionalName() == null)
 		return;
 
-	Iterator it = rrset.rrs();
+	Iterator<Record> it = rrset.rrs();
 	while (it.hasNext()) {
-		Record r = (Record) it.next();
+		Record r = it.next();
 		Name name = r.getAdditionalName();
 		if (name != null)
 			names.add(name);

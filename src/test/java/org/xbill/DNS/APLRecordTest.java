@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -112,7 +111,7 @@ public class APLRecordTest
     {
 	Name m_an, m_rn;
 	long m_ttl;
-	ArrayList m_elements;
+	ArrayList<Element> m_elements;
 	InetAddress m_addr4;
 	String m_addr4_string;
 	byte[] m_addr4_bytes;
@@ -135,7 +134,7 @@ public class APLRecordTest
 	    m_addr6 = InetAddress.getByName(m_addr6_string);
 	    m_addr6_bytes = m_addr6.getAddress();
 	    
-	    m_elements = new ArrayList(2);
+	    m_elements = new ArrayList<>(2);
 	    Element e = new Element(true, m_addr4, 12);
 	    m_elements.add(e);
 	    
@@ -176,7 +175,7 @@ public class APLRecordTest
     @Test
     void test_4arg_empty_elements()
 	{
-	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList());
+	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList<>());
 	    assertEquals(new ArrayList(), ar.getElements());
 	}
 	
@@ -188,18 +187,6 @@ public class APLRecordTest
 		fail("RelativeNameException not thrown");
 	    }
 	    catch( RelativeNameException e ){}
-	}
-	
-    @Test
-    void test_4arg_invalid_elements()
-	{
-	    m_elements = new ArrayList();
-	    m_elements.add(new Object());
-	    try {
-		new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
 	}
     }
 
@@ -232,7 +219,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rrFromWire(di);
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(true, m_addr4, 8));
 	    assertEquals(exp, ar.getElements());
 	}
@@ -250,7 +237,7 @@ public class APLRecordTest
 	    
 	    InetAddress a = InetAddress.getByName("193.160.232.0");
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(true, a, 20));
 	    assertEquals(exp, ar.getElements());
 	}
@@ -302,7 +289,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rrFromWire(di);
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(true, m_addr4, 8));
 	    exp.add(new Element(false, m_addr4, 30));
 	    assertEquals(exp, ar.getElements());
@@ -325,7 +312,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rrFromWire(di);
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(false, m_addr6, 115));
 	    assertEquals(exp, ar.getElements());
 	}
@@ -340,7 +327,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rrFromWire(di);
 	    
-	    List l = ar.getElements();
+	    List<Element> l = ar.getElements();
 	    assertEquals(1, l.size());
 	    
 	    Element el = (Element)l.get(0);
@@ -380,7 +367,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rdataFromString(t, null);
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(false, m_addr4, 11));
 	    
 	    assertEquals(exp, ar.getElements());
@@ -396,7 +383,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rdataFromString(t, null);
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(false, m_addr4, 11));
 	    exp.add(new Element(true, m_addr6, 100));
 	    
@@ -410,7 +397,7 @@ public class APLRecordTest
 	    APLRecord ar = new APLRecord();
 	    ar.rdataFromString(t, null);
 	    
-	    ArrayList exp = new ArrayList();
+	    ArrayList<Element> exp = new ArrayList<>();
 	    exp.add(new Element(true, m_addr6, 36));
 	    
 	    assertEquals(exp, ar.getElements());
@@ -556,7 +543,7 @@ public class APLRecordTest
     {
 	Name m_an, m_rn;
 	long m_ttl;
-	ArrayList m_elements;
+	ArrayList<Element> m_elements;
 	InetAddress m_addr4;
 	String m_addr4_string;
 	byte[] m_addr4_bytes;
@@ -579,7 +566,7 @@ public class APLRecordTest
 	    m_addr6 = InetAddress.getByName(m_addr6_string);
 	    m_addr6_bytes = m_addr6.getAddress();
 	    
-	    m_elements = new ArrayList(2);
+	    m_elements = new ArrayList<>(2);
 	    Element e = new Element(true, m_addr4, 12);
 	    m_elements.add(e);
 	    
@@ -600,7 +587,7 @@ public class APLRecordTest
     {
 	Name m_an, m_rn;
 	long m_ttl;
-	ArrayList m_elements;
+	ArrayList<Element> m_elements;
 	InetAddress m_addr4;
 	String m_addr4_string;
 	byte[] m_addr4_bytes;
@@ -623,7 +610,7 @@ public class APLRecordTest
 	    m_addr6 = InetAddress.getByName(m_addr6_string);
 	    m_addr6_bytes = m_addr6.getAddress();
 	    
-	    m_elements = new ArrayList(2);
+	    m_elements = new ArrayList<>(2);
 	    Element e = new Element(true, m_addr4, 12);
 	    m_elements.add(e);
 	    
@@ -634,7 +621,7 @@ public class APLRecordTest
     @Test
     void test_empty()
 	{
-	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList());
+	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList<>());
 	    DNSOutput dout = new DNSOutput();
 	    
 	    ar.rrToWire(dout, null, true);
@@ -685,7 +672,7 @@ public class APLRecordTest
     void test_address_with_embedded_zero() throws UnknownHostException
 	{
 	    InetAddress a = InetAddress.getByName("232.0.11.1");
-	    ArrayList elements = new ArrayList();
+	    ArrayList<Element> elements = new ArrayList<>();
 	    elements.add(new Element(true, a, 31));
 	    
 	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, elements);
@@ -702,7 +689,7 @@ public class APLRecordTest
     void test_short_address() throws UnknownHostException
 	{
 	    InetAddress a = InetAddress.getByName("232.0.11.0");
-	    ArrayList elements = new ArrayList();
+	    ArrayList<Element> elements = new ArrayList<>();
 	    elements.add(new Element(true, a, 31));
 	    
 	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, elements);
@@ -719,7 +706,7 @@ public class APLRecordTest
     void test_wildcard_address() throws UnknownHostException
 	{
 	    InetAddress a = InetAddress.getByName("0.0.0.0");
-	    ArrayList elements = new ArrayList();
+	    ArrayList<Element> elements = new ArrayList<>();
 	    elements.add(new Element(true, a, 31));
 	    
 	    APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, elements);

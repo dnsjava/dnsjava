@@ -33,8 +33,8 @@ newMessage() {
 
 public
 update(InputStream in) throws IOException {
-	List inputs = new LinkedList();
-	List istreams = new LinkedList();
+	List<BufferedReader> inputs = new LinkedList<>();
+	List<InputStream> istreams = new LinkedList<>();
 
 	query = newMessage();
 
@@ -421,7 +421,8 @@ doQuery(Tokenizer st) throws IOException {
 }
 
 void
-doFile(Tokenizer st, List inputs, List istreams) throws IOException {
+doFile(Tokenizer st, List<BufferedReader> inputs, List<InputStream> istreams)
+	throws IOException {
 	String s = st.getString();
 	InputStream is;
 	try {
