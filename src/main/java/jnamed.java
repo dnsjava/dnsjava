@@ -201,19 +201,19 @@ addRRset(Name name, Message response, RRset rrset, int section, int flags) {
 	}
 }
 
-private final void
+private void
 addSOA(Message response, Zone zone) {
 	response.addRecord(zone.getSOA(), Section.AUTHORITY);
 }
 
-private final void
+private void
 addNS(Message response, Zone zone, int flags) {
 	RRset nsRecords = zone.getNS();
 	addRRset(nsRecords.getName(), response, nsRecords,
 		 Section.AUTHORITY, flags);
 }
 
-private final void
+private void
 addCacheNS(Message response, Cache cache, Name name) {
 	SetResponse sr = cache.lookupRecords(name, Type.NS, Credibility.HINT);
 	if (!sr.isDelegation())
@@ -245,7 +245,7 @@ addAdditional2(Message response, int section, int flags) {
 	}
 }
 
-private final void
+private void
 addAdditional(Message response, int flags) {
 	addAdditional2(response, Section.ANSWER, flags);
 	addAdditional2(response, Section.AUTHORITY, flags);

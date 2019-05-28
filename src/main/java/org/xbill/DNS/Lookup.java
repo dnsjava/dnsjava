@@ -188,7 +188,7 @@ setPacketLogger(PacketLogger logger)
     Client.setPacketLogger(logger);
 }
 
-private final void
+private void
 reset() {
 	iterations = 0;
 	foundAlias = false;

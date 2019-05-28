@@ -25,7 +25,7 @@ getObject() {
 	return new X25Record();
 }
 
-private static final byte []
+private static byte []
 checkAndConvertAddress(String address) {
 	int length = address.length();
 	byte [] out = new byte [length];

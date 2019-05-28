@@ -82,7 +82,7 @@ private
 Name() {
 }
 
-private final void
+private void
 setoffset(int n, int offset) {
 	if (n >= MAXOFFSETS)
 		return;
@@ -91,7 +91,7 @@ setoffset(int n, int offset) {
 	offsets |= ((long)offset << shift);
 }
 
-private final int
+private int
 offset(int n) {
 	if (n == 0 && getlabels() == 0)
 		return 0;
@@ -108,18 +108,18 @@ offset(int n) {
 	}
 }
 
-private final void
+private void
 setlabels(int labels) {
 	offsets &= ~(0xFF);
 	offsets |= labels;
 }
 
-private final int
+private int
 getlabels() {
 	return (int)(offsets & 0xFF);
 }
 
-private static final void
+private static void
 copy(Name src, Name dst) {
 	if (src.offset(0) == 0) {
 		dst.name = src.name;
@@ -136,7 +136,7 @@ copy(Name src, Name dst) {
 	}
 }
 
-private final void
+private void
 append(byte [] array, int start, int n) throws NameTooLongException {
 	int length = (name == null ? 0 : (name.length - offset(0)));
 	int alength = 0;
@@ -172,7 +172,7 @@ parseException(String str, String message) {
 	return new TextParseException("'" + str + "': " + message);
 }
 
-private final void
+private void
 appendFromString(String fullName, byte [] array, int start, int n)
 throws TextParseException
 {
@@ -184,7 +184,7 @@ throws TextParseException
 	}
 }
 
-private final void
+private void
 appendSafe(byte [] array, int start, int n) {
 	try {
 		append(array, start, n);
@@ -768,7 +768,7 @@ toWire(DNSOutput out, Compression c, boolean canonical) {
 		toWire(out, c);
 }
 
-private final boolean
+private boolean
 equals(byte [] b, int bpos) {
 	int labels = labels();
 	for (int i = 0, pos = offset(0); i < labels; i++) {

@@ -112,7 +112,7 @@ validate() throws IOException {
 		throw new IOException(origin + ": no NS set specified");
 }
 
-private final void
+private void
 maybeAddRecord(Record record) throws IOException {
 	int rtype = record.getType();
 	Name name = record.getName();

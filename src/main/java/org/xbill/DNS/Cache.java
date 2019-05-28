@@ -556,7 +556,7 @@ findAnyRecords(Name name, int type) {
 	return findRecords(name, type, Credibility.GLUE);
 }
 
-private final int
+private int
 getCred(int section, boolean isAuth) {
 	if (section == Section.ANSWER) {
 		if (isAuth)

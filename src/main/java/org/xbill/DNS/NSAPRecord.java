@@ -25,7 +25,7 @@ getObject() {
 	return new NSAPRecord();
 }
 
-private static final byte []
+private static byte []
 checkAndConvertAddress(String address) {
 	if (!address.substring(0, 2).equalsIgnoreCase("0x")) {
 		return null;

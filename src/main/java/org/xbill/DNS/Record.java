@@ -49,7 +49,7 @@ Record(Name name, int type, int dclass, long ttl) {
 abstract Record
 getObject();
 
-private static final Record
+private static Record
 getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
 	Record proto, rec;
 
