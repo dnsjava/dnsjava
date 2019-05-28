@@ -123,10 +123,10 @@ setDefaultResolver(Resolver resolver) {
 public static synchronized Cache
 getDefaultCache(int dclass) {
 	DClass.check(dclass);
-	Cache c = defaultCaches.get(Mnemonic.toInteger(dclass));
+	Cache c = defaultCaches.get(dclass);
 	if (c == null) {
 		c = new Cache(dclass);
-		defaultCaches.put(Mnemonic.toInteger(dclass), c);
+		defaultCaches.put(dclass, c);
 	}
 	return c;
 }
@@ -140,7 +140,7 @@ getDefaultCache(int dclass) {
 public static synchronized void
 setDefaultCache(Cache cache, int dclass) {
 	DClass.check(dclass);
-	defaultCaches.put(Mnemonic.toInteger(dclass), cache);
+	defaultCaches.put(dclass, cache);
 }
 
 /**

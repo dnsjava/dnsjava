@@ -13,14 +13,6 @@ import java.util.HashMap;
 
 class Mnemonic {
 
-private static Integer[] cachedInts = new Integer[64];
-
-static {
-	for (int i = 0; i < cachedInts.length; i++) {
-		cachedInts[i] = i;
-	}
-}
-
 /* Strings are case-sensitive. */
 static final int CASE_SENSITIVE = 1;
 
@@ -78,16 +70,6 @@ setNumericAllowed(boolean numeric) {
 }
 
 /**
- * Converts an int into a possibly cached Integer.
- */
-public static Integer
-toInteger(int val) {
-	if (val >= 0 && val < cachedInts.length)
-		return (cachedInts[val]);
-	return val;
-}       
-
-/**
  * Checks that a numeric value is within the range [0..max]
  */
 public void
@@ -128,10 +110,9 @@ parseNumeric(String s) {
 public void
 add(int val, String str) {
 	check(val);
-	Integer value = toInteger(val);
 	str = sanitize(str);
-	strings.put(str, value);
-	values.put(value, str);
+	strings.put(str, val);
+	values.put(val, str);
 }
 
 /**
@@ -143,9 +124,8 @@ add(int val, String str) {
 public void
 addAlias(int val, String str) {
 	check(val);
-	Integer value = toInteger(val);
 	str = sanitize(str);
-	strings.put(str, value);
+	strings.put(str, val);
 }
 
 /**
@@ -171,7 +151,7 @@ addAll(Mnemonic source) {
 public String
 getText(int val) {
 	check(val);
-	String str = values.get(toInteger(val));
+	String str = values.get(val);
 	if (str != null)
 		return str;
 	str = Integer.toString(val);
