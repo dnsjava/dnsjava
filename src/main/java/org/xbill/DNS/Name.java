@@ -57,7 +57,7 @@ private static final int MAXOFFSETS = 7;
 private static final DecimalFormat byteFormat = new DecimalFormat();
 
 /* Used to efficiently convert bytes to lowercase */
-private static final byte lowercase[] = new byte[256];
+private static final byte[] lowercase = new byte[256];
 
 /* Used in wildcard names. */
 private static final Name wild;

@@ -673,7 +673,7 @@ help(String topic) {
 }
 
 public static void
-main(String args[]) throws IOException {
+main(String[] args) throws IOException {
 
 	InputStream in = null;
 	if (args.length >= 1) {

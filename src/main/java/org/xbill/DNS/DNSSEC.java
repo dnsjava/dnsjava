@@ -350,7 +350,7 @@ readBigInteger(DNSInput in) {
 private static byte []
 trimByteArray(byte [] array) {
 	if (array[0] == 0) {
-		byte trimmedArray[] = new byte[array.length - 1];
+		byte[] trimmedArray = new byte[array.length - 1];
 		System.arraycopy(array, 1, trimmedArray, 0, array.length - 1);
 		return trimmedArray;
 	} else {

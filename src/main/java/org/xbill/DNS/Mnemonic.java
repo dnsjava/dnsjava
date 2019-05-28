@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 class Mnemonic {
 
-private static Integer cachedInts[] = new Integer[64];
+	private static Integer[] cachedInts = new Integer[64];
 
 static {
 	for (int i = 0; i < cachedInts.length; i++) {

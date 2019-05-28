@@ -53,7 +53,7 @@ doAXFR(Message response) throws IOException {
 }
 
 public static void
-main(String argv[]) throws IOException {
+main(String[] argv) throws IOException {
 	String server = null;
 	int arg;
 	Message query, response;

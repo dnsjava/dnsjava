@@ -54,7 +54,7 @@ getObject() {
 public
 TSIGRecord(Name name, int dclass, long ttl, Name alg, Date timeSigned,
 	   int fudge, byte [] signature, int originalID, int error,
-	   byte other[])
+	   byte[] other)
 {
 	super(name, Type.TSIG, dclass, ttl);
 	this.alg = checkName("alg", alg);

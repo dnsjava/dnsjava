@@ -25,7 +25,7 @@ private static final long serialVersionUID = -8689038598776316533L;
 private int hashAlg;
 private int flags;
 private int iterations;
-private byte salt[];
+private byte[] salt;
 
 NSEC3PARAMRecord() {}
 

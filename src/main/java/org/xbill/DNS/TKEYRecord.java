@@ -64,7 +64,7 @@ getObject() {
 public
 TKEYRecord(Name name, int dclass, long ttl, Name alg,
 	   Date timeInception, Date timeExpire, int mode, int error,
-	   byte [] key, byte other[])
+	   byte [] key, byte[] other)
 {
 	super(name, Type.TKEY, dclass, ttl);
 	this.alg = checkName("alg", alg);
