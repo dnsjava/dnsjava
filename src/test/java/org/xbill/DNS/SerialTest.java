@@ -167,7 +167,7 @@ class SerialTest
     {
 	long arg = 0xFFFFFFFFL;
 	long ret = Serial.increment( arg );
-	assertEquals( 0, ret );
+	assertEquals( 1, ret );
     }
 
     @Test
