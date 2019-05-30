@@ -1001,7 +1001,7 @@ verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key, Date date) throws DNSSE
 	       digestRRset(rrsig, rrset), rrsig.getSignature());
 }
 
-private static byte []
+static byte []
 sign(PrivateKey privkey, PublicKey pubkey, int alg, byte [] data,
      String provider) throws DNSSECException
 {
