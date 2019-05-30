@@ -195,24 +195,6 @@
 
     <profiles>
         <profile>
-            <id>spi-up-to-java8</id>
-            <activation>
-                <jdk>(,1.8]</jdk>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>org/xbill/DNS/spi/</directory>
-                        <targetPath>META-INF</targetPath>
-                        <includes>
-                            <include>services/</include>
-                        </includes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
             <!-- JDK9 removed the Nameservice SPI as per bug 8134577. There's no replacement. -->
             <id>no-spi-on-java9</id>
             <activation>
