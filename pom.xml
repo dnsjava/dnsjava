@@ -65,10 +65,6 @@
                 <configuration>
                     <source>${target.jdk}</source>
                     <target>${target.jdk}</target>
-                    <testExcludes>
-                        <!-- Exclude unit tests with external dependencies -->
-                        <testExclude>**/DNSSECWithLunaProviderTest.java</testExclude>
-                    </testExcludes>
                 </configuration>
             </plugin>
 
@@ -182,7 +178,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.60</version>
+            <version>1.61</version>
             <scope>test</scope>
         </dependency>
         <dependency>
