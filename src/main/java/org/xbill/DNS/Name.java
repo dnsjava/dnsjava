@@ -323,14 +323,19 @@ fromString(String s) throws TextParseException {
 
 /**
  * Create a new name from a constant string.  This should only be used when
- the name is known to be good - that is, when it is constant.
+ * the name is known to be good - that is, when it is constant.
  * @param s The string to be converted
  * @throws IllegalArgumentException The name is invalid.
  */
 public static Name
 fromConstantString(String s) {
+	return fromConstantString(s, null);
+}
+
+static Name
+fromConstantString(String s, Name origin) {
 	try {
-		return fromString(s, null);
+		return fromString(s, origin);
 	}
 	catch (TextParseException e) {
 		throw new IllegalArgumentException("Invalid name '" + s + "'");

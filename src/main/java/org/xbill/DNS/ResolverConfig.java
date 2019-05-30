@@ -5,6 +5,7 @@ package org.xbill.DNS;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * A class that tries to locate name servers and the search path to
@@ -30,8 +31,10 @@ import java.util.*;
  * @author <a href="mailto:yannick@meudal.net">Yannick Meudal</a>
  * @author <a href="mailto:arnt@gulbrandsen.priv.no">Arnt Gulbrandsen</a>
  */
-
 public class ResolverConfig {
+
+	static final String DNS_SERVER_PROP = "dns.server";
+	static final String DNS_SEARCH_PROP = "dns.search";
 
 private String [] servers = null;
 private Name [] searchlist = null;
@@ -53,9 +56,7 @@ ResolverConfig() {
 		String OS = System.getProperty("os.name");
 		String vendor = System.getProperty("java.vendor");
 		if (OS.contains("Windows")) {
-			if (OS.contains("95") ||
-				OS.contains("98") ||
-				OS.contains("ME"))
+			if (Stream.of("95", "98", "ME").anyMatch(OS::contains))
 				find95();
 			else
 				findNT();
@@ -129,21 +130,21 @@ configureNdots(int lndots) {
  * Servers are defined by dns.server=server1,server2...
  * The search path is defined by dns.search=domain1,domain2...
  */
-private boolean
+boolean
 findProperty() {
 	String prop;
 	List<String> lserver = new ArrayList<>(0);
 	List<Name> lsearch = new ArrayList<>(0);
 	StringTokenizer st;
 
-	prop = System.getProperty("dns.server");
+	prop = System.getProperty(DNS_SERVER_PROP);
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
 		while (st.hasMoreTokens())
 			addServer(st.nextToken(), lserver);
 	}
 
-	prop = System.getProperty("dns.search");
+	prop = System.getProperty(DNS_SEARCH_PROP);
 	if (prop != null) {
 		st = new StringTokenizer(prop, ",");
 		while (st.hasMoreTokens())
@@ -209,14 +210,14 @@ findSunJVM() {
  * "nameserver" lines specify servers.  "domain" and "search" lines
  * define the search path.
  */
-private void
+boolean
 findResolvConf(String file) {
 	InputStream in;
 	try {
 		in = new FileInputStream(file);
 	}
 	catch (FileNotFoundException e) {
-		return;
+		return false;
 	}
 	InputStreamReader isr = new InputStreamReader(in);
 	BufferedReader br = new BufferedReader(isr);
@@ -261,26 +262,32 @@ findResolvConf(String file) {
 		br.close();
 	}
 	catch (IOException e) {
+		return false;
+	}
+
+	if (lserver.isEmpty()) {
+		return false;
 	}
 
 	configureFromLists(lserver, lsearch);
 	configureNdots(lndots);
+	return true;
 }
 
-private void
+boolean
 findUnix() {
-	findResolvConf("/etc/resolv.conf");
+	return findResolvConf("/etc/resolv.conf");
 }
 
-private void
+boolean
 findNetware() {
-	findResolvConf("sys:/etc/resolv.cfg");
+	return findResolvConf("sys:/etc/resolv.cfg");
 }
 
 /**
  * Parses the output of winipcfg or ipconfig.
  */
-private void
+boolean
 findWin(InputStream in, Locale locale) {
 	String packageName = ResolverConfig.class.getPackage().getName();
 	String resPackageName = packageName + ".windows.DNSServer";
@@ -355,36 +362,42 @@ findWin(InputStream in, Locale locale) {
 				readingServers = true;
 			}
 		}
-		
+		if (lserver.isEmpty()) {
+			return false;
+		}
 		configureFromLists(lserver, lsearch);
+		return true;
 	}
 	catch (IOException e) {
+		return false;
 	}
 }
 
-private void
+private boolean
 findWin(InputStream in) {
+	boolean found;
 	String property = "org.xbill.DNS.windows.parse.buffer";
 	final int defaultBufSize = 8 * 1024;
 	int bufSize = Integer.getInteger(property, defaultBufSize);
 	BufferedInputStream b = new BufferedInputStream(in, bufSize);
 	b.mark(bufSize);
-	findWin(b, null);
+	found = findWin(b, null);
 	if (servers == null) {
 		try {
 			b.reset();
 		} 
 		catch (IOException e) {
-			return;
+			return false;
 		}
-		findWin(b, new Locale("", ""));
+		found = findWin(b, new Locale("", ""));
 	}
+	return found;
 }
 
 /**
  * Calls winipcfg and parses the result to find servers and a search path.
  */
-private void
+boolean
 find95() {
 	String s = "winipcfg.out";
 	try {
@@ -396,22 +409,27 @@ find95() {
 		new File(s).delete();
 	}
 	catch (Exception e) {
+		return false;
 	}
+	return true;
 }
 
 /**
  * Calls ipconfig and parses the result to find servers and a search path.
  */
-private void
+boolean
 findNT() {
+	boolean found;
 	try {
 		Process p;
 		p = Runtime.getRuntime().exec("ipconfig /all");
-		findWin(p.getInputStream());
+		found = findWin(p.getInputStream());
 		p.destroy();
 	}
 	catch (Exception e) {
+		return false;
 	}
+	return found;
 }
 
 /**
@@ -419,7 +437,7 @@ findNT() {
  * info on Android. getprop might disappear in future releases, so
  * this code comes with a use-by date.
  */
-private void
+boolean
 findAndroid() {
 	// This originally looked for all lines containing .dns; but
 	// http://code.google.com/p/android/issues/detail?id=2207#c73
@@ -444,10 +462,14 @@ findAndroid() {
 				!lserver.contains(v))
 				lserver.add(v);
 		}
-	} catch ( Exception e ) {
-		// ignore resolutely
+	} catch (Exception e) {
+		return false;
+	}
+	if (lserver.isEmpty()) {
+		return false;
 	}
 	configureFromLists(lserver, lsearch);
+	return true;
 }
 
 /** Returns all located servers */
