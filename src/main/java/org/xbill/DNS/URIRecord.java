@@ -9,9 +9,8 @@ import java.io.*;
  * Uniform Resource Identifier (URI) DNS Resource Record
  *
  * @author Anthony Kirby
- * @see <a href="http://tools.ietf.org/html/draft-faltstrom-uri">http://tools.ietf.org/html/draft-faltstrom-uri</a> 
+ * @see <a href="https://tools.ietf.org/html/rfc7553">The Uniform Resource Identifier (URI) DNS Resource Record</a>
  */
-
 public class URIRecord extends Record {
 
 private static final long serialVersionUID = 7955422413971804232L;

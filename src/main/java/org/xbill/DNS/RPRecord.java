@@ -10,8 +10,9 @@ import java.io.*;
  *
  * @author Tom Scola (tscola@research.att.com)
  * @author Brian Wellington
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183</a>
  */
-
 public class RPRecord extends Record {
 
 private static final long serialVersionUID = 8124584364211337460L;

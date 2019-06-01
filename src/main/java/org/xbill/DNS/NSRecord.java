@@ -6,8 +6,8 @@ package org.xbill.DNS;
  * Name Server Record  - contains the name server serving the named zone
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
  */
-
 public class NSRecord extends SingleCompressedNameBase {
 
 private static final long serialVersionUID = 487170758138268838L;

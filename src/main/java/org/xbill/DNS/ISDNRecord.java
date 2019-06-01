@@ -8,8 +8,8 @@ import java.io.*;
  * ISDN - identifies the ISDN number and subaddress associated with a name.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183</a>
  */
-
 public class ISDNRecord extends Record {
 
 private static final long serialVersionUID = -8730801385178968798L;

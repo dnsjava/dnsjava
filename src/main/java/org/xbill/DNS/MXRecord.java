@@ -6,8 +6,9 @@ package org.xbill.DNS;
  * Mail Exchange - specifies where mail to a domain is sent
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7505">RFC 7505</a>
  */
-
 public class MXRecord extends U16NameBase {
 
 private static final long serialVersionUID = 2914841027584208546L;

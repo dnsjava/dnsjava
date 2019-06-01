@@ -7,8 +7,8 @@ package org.xbill.DNS;
  * for a domain (obsolete)
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc973">RFC 973</a>
  */
-
 public class MFRecord extends SingleNameBase {
 
 private static final long serialVersionUID = -6670449036843028169L;

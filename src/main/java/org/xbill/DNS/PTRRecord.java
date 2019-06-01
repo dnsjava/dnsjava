@@ -7,8 +7,8 @@ package org.xbill.DNS;
  * a hostname.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
  */
-
 public class PTRRecord extends SingleCompressedNameBase {
 
 private static final long serialVersionUID = -8321636610425434192L;

@@ -17,8 +17,9 @@ import org.xbill.DNS.utils.*;
  * 
  * @author Brian Wellington
  * @author David Blacka
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc5155">RFC 5155</a>
  */
-
 public class NSEC3Record extends Record {
 
 public static class Flags {

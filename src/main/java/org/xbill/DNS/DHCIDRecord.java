@@ -9,8 +9,8 @@ import org.xbill.DNS.utils.base64;
  * DHCID - Dynamic Host Configuration Protocol (DHCP) ID (RFC 4701)
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc4701">RFC 4701</a>
  */
-
 public class DHCIDRecord extends Record {
 
 private static final long serialVersionUID = -8214820200808997707L;

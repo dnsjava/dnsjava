@@ -8,8 +8,8 @@ import java.io.*;
  * Certification Authority Authorization
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc6844">RFC 6844</a>
  */
-
 public class CAARecord extends Record {
 
 private static final long serialVersionUID = 8544304287274216443L;

@@ -6,11 +6,12 @@ import java.io.*;
 import org.xbill.DNS.utils.*;
 
 /**
- * S/MIME cert association, draft-ietf-dane-smime.
+ * S/MIME cert association
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc8162">RFC 8162</a>
  *
  * @author Brian Wellington
  */
-
 public class SMIMEARecord extends Record {
 
 private static final long serialVersionUID = 1640247915216425235L;

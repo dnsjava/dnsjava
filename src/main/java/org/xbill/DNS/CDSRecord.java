@@ -5,6 +5,7 @@ package org.xbill.DNS;
  * Child Delegation Signer record as specified in RFC 8078.
  * 
  * @see DNSSEC
+ * @see <a href="https://tools.ietf.org/html/rfc8078">RFC 8078</a>
  */
 public class CDSRecord extends DSRecord {
 

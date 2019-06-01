@@ -8,8 +8,8 @@ import java.io.*;
  * Geographical Location - describes the physical location of a host.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1712">DNS Encoding of Geographical Location</a>
  */
-
 public class GPOSRecord extends Record {
 
 private static final long serialVersionUID = -6349714958085750705L;

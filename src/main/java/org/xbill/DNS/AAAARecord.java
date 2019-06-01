@@ -9,8 +9,8 @@ import java.net.*;
  * IPv6 Address Record - maps a domain name to an IPv6 address
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc3596">DNS Extensions to Support IP Version 6</a>
  */
-
 public class AAAARecord extends Record {
 
 private static final long serialVersionUID = -4588601512069748050L;

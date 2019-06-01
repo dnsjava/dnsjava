@@ -8,8 +8,8 @@ import java.io.*;
  * Start of Authority - describes properties of a zone.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
  */
-
 public class SOARecord extends Record {
 
 private static final long serialVersionUID = 1049740098229303931L;

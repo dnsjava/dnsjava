@@ -6,11 +6,11 @@ import org.xbill.DNS.utils.base64;
 
 /**
  * OPENPGPKEY Record - Stores an OpenPGP certificate associated with a name.
- * RFC 7929.
  * 
  * @author Brian Wellington
  * @author Valentin Hauner
  *
+ * @see <a href="https://tools.ietf.org/html/rfc7929">RFC 7929</a>
  */
 public class OPENPGPKEYRecord extends Record {
 

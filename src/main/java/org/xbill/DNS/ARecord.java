@@ -9,8 +9,8 @@ import java.io.*;
  * Address Record - maps a domain name to an Internet address
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
  */
-
 public class ARecord extends Record {
 
 private static final long serialVersionUID = -2172609200849142323L;

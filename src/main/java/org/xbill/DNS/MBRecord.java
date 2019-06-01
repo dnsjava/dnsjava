@@ -6,8 +6,8 @@ package org.xbill.DNS;
  * Mailbox Record  - specifies a host containing a mailbox.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883</a>
  */
-
 public class MBRecord extends SingleNameBase {
 
 private static final long serialVersionUID = 532349543479150419L;

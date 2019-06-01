@@ -13,8 +13,8 @@ import org.xbill.DNS.utils.*;
  *
  * @author David Blacka
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc4431">The DNSSEC Lookaside Validation (DLV) DNS Resource Record</a>
  */
-
 public class DLVRecord extends Record {
 
 public static final int SHA1_DIGEST_ID = DSRecord.Digest.SHA1;

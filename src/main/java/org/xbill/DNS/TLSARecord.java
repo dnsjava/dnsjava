@@ -9,8 +9,8 @@ import org.xbill.DNS.utils.*;
  * Transport Layer Security Authentication
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc6698">RFC 6698</a>
  */
-
 public class TLSARecord extends Record {
 
 private static final long serialVersionUID = 356494267028580169L;

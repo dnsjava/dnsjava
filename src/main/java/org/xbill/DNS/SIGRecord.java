@@ -11,10 +11,10 @@ import java.util.*;
  * @see RRset
  * @see DNSSEC
  * @see KEYRecord
+ * <a href="https://tools.ietf.org/html/rfc2535">Domain Name System Security Extensions</a>
  *
  * @author Brian Wellington
  */
-
 public class SIGRecord extends SIGBase {
 
 private static final long serialVersionUID = 4963556060953589058L;

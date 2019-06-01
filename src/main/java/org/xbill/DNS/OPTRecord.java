@@ -15,11 +15,11 @@ import java.util.*;
  * implementation of EDNS is mostly complete at level 0.
  *
  * @see Message
- * @see Resolver 
+ * @see Resolver
+ * @see <a href="https://tools.ietf.org/html/rfc6891">Extension Mechanisms for DNS</a>
  *
  * @author Brian Wellington
  */
-
 public class OPTRecord extends Record {
 
 private static final long serialVersionUID = -6254521894809367938L;

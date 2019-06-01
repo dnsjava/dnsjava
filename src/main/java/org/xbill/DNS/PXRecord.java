@@ -8,8 +8,8 @@ import java.io.*;
  * X.400 mail mapping record.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc2163">RFC 2163</a>
  */
-
 public class PXRecord extends Record {
 
 private static final long serialVersionUID = 1811540008806660667L;

@@ -12,11 +12,12 @@ import org.xbill.DNS.utils.*;
  *
  * @author Brian Wellington
  */
-
 public class CERTRecord extends Record {
 
+/** Certificate type identifiers.
+ * @see <a href="https://tools.ietf.org/html/rfc4398">Storing Certificates in the Domain Name System (DNS)</a>
+ */
 public static class CertificateType {
-	/** Certificate type identifiers.  See RFC 4398 for more detail. */
 
 	private CertificateType() {}
 

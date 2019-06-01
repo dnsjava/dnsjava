@@ -13,7 +13,6 @@ import org.xbill.DNS.utils.*;
  *
  * @author Brian Wellington
  */
-
 public abstract class Record implements Cloneable, Comparable, Serializable {
 
 private static final long serialVersionUID = 2694906050116005466L;

@@ -11,8 +11,8 @@ import java.io.*;
  * _http._tcp.example.com (if HTTP used SRV records)
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc2782">A DNS RR for specifying the location of services (DNS SRV)</a>
  */
-
 public class SRVRecord extends Record {
 
 private static final long serialVersionUID = -3886460132387522052L;
