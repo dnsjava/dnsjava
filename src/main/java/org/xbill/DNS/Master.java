@@ -13,7 +13,7 @@ import java.util.*;
  * @author Brian Wellington
  */
 
-public class Master {
+public class Master implements AutoCloseable {
 
 private Name origin;
 private File file;
@@ -420,8 +420,8 @@ generators() {
 }
 
 @Override
-protected void
-finalize() {
+public void
+close() {
 	if (st != null)
 		st.close();
 }
