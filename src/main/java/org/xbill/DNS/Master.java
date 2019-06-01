@@ -269,7 +269,7 @@ nextGenerated() throws IOException {
  * @throws IOException The master file could not be read, or was syntactically
  * invalid.
  */
-public Record
+private Record
 _nextRecord() throws IOException {
 	Tokenizer.Token token;
 	String s;
