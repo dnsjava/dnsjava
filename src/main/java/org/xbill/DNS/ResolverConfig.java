@@ -4,6 +4,8 @@ package org.xbill.DNS;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -208,20 +210,12 @@ findSunJVM() {
  * define the search path.
  */
 boolean
-findResolvConf(String file) {
-	InputStream in;
-	try {
-		in = new FileInputStream(file);
-	}
-	catch (FileNotFoundException e) {
-		return false;
-	}
-	InputStreamReader isr = new InputStreamReader(in);
-	BufferedReader br = new BufferedReader(isr);
+findResolvConf(InputStream in) {
 	List<String> lserver = new ArrayList<>(0);
 	List<Name> lsearch = new ArrayList<>(0);
 	int lndots = -1;
-	try {
+	try (InputStreamReader isr = new InputStreamReader(in);
+	     BufferedReader br = new BufferedReader(isr)){
 		String line;
 		while ((line = br.readLine()) != null) {
 			if (line.startsWith("nameserver")) {
@@ -256,7 +250,6 @@ findResolvConf(String file) {
 				}
 			}
 		}
-		br.close();
 	}
 	catch (IOException e) {
 		return false;
@@ -273,16 +266,26 @@ findResolvConf(String file) {
 
 boolean
 findUnix() {
-	return findResolvConf("/etc/resolv.conf");
+	try (InputStream in = Files.newInputStream(Paths.get("/etc/resolv.conf"))) {
+		return findResolvConf(in);
+	}
+	catch (Exception e) {
+		return false;
+	}
 }
 
 boolean
 findNetware() {
-	return findResolvConf("sys:/etc/resolv.cfg");
+	try (InputStream in = Files.newInputStream(Paths.get("sys:/etc/resolv.cfg"))) {
+		return findResolvConf(in);
+	}
+	catch (Exception e) {
+		return false;
+	}
 }
 
 /**
- * Parses the output of winipcfg or ipconfig.
+ * Parses the output of ipconfig.
  */
 boolean
 findWin(InputStream in, Locale locale) {

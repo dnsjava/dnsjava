@@ -7,6 +7,7 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -68,11 +69,9 @@ class ResolverConfigTest {
 	}
 
 	@Test
-	void resolvConfLoaded() throws URISyntaxException {
+	void resolvConfLoaded() {
 		assertTrue(ResolverConfig.getCurrentConfig()
-			.findResolvConf(Paths.get(getClass()
-				.getResource("/test_loaded_resolv.conf")
-				.toURI()).toString()));
+			.findResolvConf(ResolverConfigTest.class.getResourceAsStream("/test_loaded_resolv.conf")));
 		assertEquals(5, ResolverConfig.getCurrentConfig().ndots());
 	}
 
