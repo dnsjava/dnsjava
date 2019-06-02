@@ -171,7 +171,7 @@ public static final int TLSA		= 52;
 /** {@link SMIMEARecord S/MIME cert association} */
 public static final int SMIMEA		= 53;
 
-/** {@link CDSRecord Child Delegation Signer} * */
+/** {@link CDSRecord Child Delegation Signer} */
 public static final int CDS		= 59;
 
 /** {@link CDNSKEYRecord Child DNSKEY} * */

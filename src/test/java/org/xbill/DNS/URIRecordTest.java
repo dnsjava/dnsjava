@@ -22,7 +22,7 @@ class URIRecordTest
 	assertEquals(0, r.getTTL());
 	assertEquals(0, r.getPriority());
 	assertEquals(0, r.getWeight());
-	assertTrue("".equals(r.getTarget()));
+	    assertEquals("", r.getTarget());
     }
     
     @Test

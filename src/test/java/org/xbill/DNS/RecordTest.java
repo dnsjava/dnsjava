@@ -44,6 +44,7 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -481,28 +482,28 @@ class RecordTest
 	Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
 	String out = rec.toString();
 
-	assertFalse(!out.contains(n.toString()));
-	assertFalse(!out.contains(n2.toString()));
-	assertFalse(!out.contains("NS"));
-	assertFalse(!out.contains("IN"));
-	assertFalse(!out.contains(ttl + ""));
+	    assertTrue(out.contains(n.toString()));
+	    assertTrue(out.contains(n2.toString()));
+	    assertTrue(out.contains("NS"));
+	    assertTrue(out.contains("IN"));
+	    assertTrue(out.contains(ttl + ""));
 
 	Options.set("BINDTTL");
 
 	out = rec.toString();
-	assertFalse(!out.contains(n.toString()));
-	assertFalse(!out.contains(n2.toString()));
-	assertFalse(!out.contains("NS"));
-	assertFalse(!out.contains("IN"));
-	assertFalse(!out.contains(TTL.format(ttl)));
+	    assertTrue(out.contains(n.toString()));
+	    assertTrue(out.contains(n2.toString()));
+	    assertTrue(out.contains("NS"));
+	    assertTrue(out.contains("IN"));
+	    assertTrue(out.contains(TTL.format(ttl)));
 
 	Options.set("noPrintIN");
 	out = rec.toString();
-	assertFalse(!out.contains(n.toString()));
-	assertFalse(!out.contains(n2.toString()));
-	assertFalse(!out.contains("NS"));
-	assertTrue(!out.contains("IN"));
-	assertFalse(!out.contains(TTL.format(ttl)));
+	    assertTrue(out.contains(n.toString()));
+	    assertTrue(out.contains(n2.toString()));
+	    assertTrue(out.contains("NS"));
+	    assertFalse(out.contains("IN"));
+	    assertTrue(out.contains(TTL.format(ttl)));
     }
 
     @Test
@@ -570,9 +571,9 @@ class RecordTest
 	byte[] data = new byte[] { (byte)0x12, (byte)0x34, (byte)0x56, (byte)0x78, (byte)0x9A,
 				   (byte)0xBC, (byte)0xDE, (byte)0xFF };
 	String out = SubRecord.unknownToString(data);
-	
-	assertFalse(!out.contains("" + data.length));
-	assertFalse(!out.contains("123456789ABCDEFF"));
+
+	    assertTrue(out.contains("" + data.length));
+	    assertTrue(out.contains("123456789ABCDEFF"));
     }
 
     @Test
@@ -697,8 +698,8 @@ class RecordTest
 
 	Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
 
-	assertFalse(r1.equals(null));
-	assertFalse(r1.equals(new Object()));
+	    assertNotEquals(null, r1);
+	    assertNotEquals(r1, new Object());
 
 	Record r2 = Record.newRecord(n, Type.A, DClass.IN, 0);
 	assertEquals(r1, r2);
@@ -713,16 +714,16 @@ class RecordTest
 	assertEquals(r2, r1);
 
 	r2 = Record.newRecord(m, Type.A, DClass.IN, 0xABCDE);
-	assertFalse(r1.equals(r2));
-	assertFalse(r2.equals(r1));
+	    assertNotEquals(r1, r2);
+	    assertNotEquals(r2, r1);
 
 	r2 = Record.newRecord(n2, Type.MX, DClass.IN, 0xABCDE);
-	assertFalse(r1.equals(r2));
-	assertFalse(r2.equals(r1));
+	    assertNotEquals(r1, r2);
+	    assertNotEquals(r2, r1);
 
 	r2 = Record.newRecord(n2, Type.A, DClass.CHAOS, 0xABCDE);
-	assertFalse(r1.equals(r2));
-	assertFalse(r2.equals(r1));
+	    assertNotEquals(r1, r2);
+	    assertNotEquals(r2, r1);
 
 	byte[] d1 = new byte[] { 23, 12, 9, (byte)129 };
 	byte[] d2 = new byte[] { (byte)220, 1, (byte)131, (byte)212 };
@@ -735,8 +736,8 @@ class RecordTest
 
 	r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d2);
 
-	assertFalse(r1.equals(r2));
-	assertFalse(r2.equals(r1));
+	    assertNotEquals(r1, r2);
+	    assertNotEquals(r2, r1);
     }
 
     @Test
@@ -760,11 +761,11 @@ class RecordTest
 
 	// different names
 	r2 = Record.newRecord(m, Type.A, DClass.IN, 0xABCDE9, d1);
-	assertFalse(r1.hashCode() == r2.hashCode());
+	    assertNotEquals(r1.hashCode(), r2.hashCode());
 
 	// different class
 	r2 = Record.newRecord(n, Type.A, DClass.CHAOS, 0xABCDE9, d1);
-	assertFalse(r1.hashCode() == r2.hashCode());
+	    assertNotEquals(r1.hashCode(), r2.hashCode());
 
 	// different TTL does not matter
 	r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE, d1);
@@ -772,7 +773,7 @@ class RecordTest
 
 	// different data
 	r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d2);
-	assertFalse(r1.hashCode() == r2.hashCode());
+	    assertNotEquals(r1.hashCode(), r2.hashCode());
     }
 
     @Test

@@ -42,6 +42,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -1138,21 +1139,21 @@ class NameTest
     void test_same() throws TextParseException
 	{
 	    Name n = new Name("A.Name.");
-	    assertTrue(n.equals(n));
+		assertEquals(n, n);
 	}
 
     @Test
     void test_null() throws TextParseException
 	{
 	    Name n = new Name("A.Name.");
-	    assertFalse(n.equals(null));
+		assertNotEquals(null, n);
 	}
 
     @Test
     void test_notName() throws TextParseException
 	{
 	    Name n = new Name("A.Name.");
-	    assertFalse(n.equals(new Object()));
+		assertNotEquals(n, new Object());
 	}
 
     @Test
@@ -1161,8 +1162,8 @@ class NameTest
 	    Name n = new Name("A.Name.");
 	    Name n2 = new Name("a.name.");
 
-	    assertTrue(n.equals(n2));
-	    assertTrue(n2.equals(n));
+		assertEquals(n, n2);
+		assertEquals(n2, n);
 	}
 
     @Test
@@ -1171,8 +1172,8 @@ class NameTest
 	    Name n1 = new Name("A.Relative.Name");
 	    Name n2 = new Name("a.relative.name");
 
-	    assertTrue(n1.equals(n2));
-	    assertTrue(n2.equals(n1));
+		assertEquals(n1, n2);
+		assertEquals(n2, n1);
 	}
 
     @Test
@@ -1181,8 +1182,8 @@ class NameTest
 	    Name n1 = new Name("A.Name");
 	    Name n2 = new Name("a.name.");
 
-	    assertFalse(n1.equals(n2));
-	    assertFalse(n2.equals(n1));
+		assertNotEquals(n1, n2);
+		assertNotEquals(n2, n1);
 	}
 
     @Test
@@ -1191,8 +1192,8 @@ class NameTest
 	    Name n1 = new Name("ab.c");
 	    Name n2 = new Name("abc.");
 
-	    assertFalse(n1.equals(n2));
-	    assertFalse(n2.equals(n1));
+		assertNotEquals(n1, n2);
+		assertNotEquals(n2, n1);
 	}
     }
 
@@ -1283,7 +1284,7 @@ class NameTest
 	assertSame(n2, cn2);
 	assertSame(n3, cn3);
 	assertEquals(cn1.toString(), cn2.toString());
-	assertFalse(n1.toString().equals(n2.toString()));
+	    assertNotEquals(n1.toString(), n2.toString());
 	assertEquals(cn1.toString(), cn2.toString());
     }
 
@@ -1294,7 +1295,7 @@ class NameTest
 	Name n2 = new Name("abc.com.");
 
 	assertEquals(n1.toString(true), n1.toString(true));
-	assertFalse(n2.toString(true).equals(n2.toString(false)));
+	    assertNotEquals(n2.toString(true), n2.toString(false));
 	assertEquals(n2.toString(true) + ".", n2.toString(false));
 	assertEquals(Name.root.toString(true), Name.root.toString(false));
 	assertEquals(Name.empty.toString(true), Name.empty.toString(false));

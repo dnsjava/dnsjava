@@ -309,7 +309,7 @@ class AddressTest
 	assertEquals("128.145.198.231", out[0].getHostAddress());
 
 	out = Address.getAllByName("a.root-servers.net");
-	assertTrue(out.length == 2);
+	    assertEquals(2, out.length);
 	assertEquals("198.41.0.4", out[0].getHostAddress());
 	assertEquals("2001:503:ba3e:0:0:0:2:30", out[1].getHostAddress());
 
