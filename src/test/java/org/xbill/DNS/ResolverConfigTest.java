@@ -62,7 +62,7 @@ class ResolverConfigTest {
 	}
 
 	@Test
-	@EnabledOnOs({OS.LINUX, OS.MAC, OS.AIX, OS.SOLARIS})
+	@DisabledOnOs({OS.WINDOWS})
 	void findUnix() {
 		assertTrue(ResolverConfig.getCurrentConfig().findUnix());
 	}

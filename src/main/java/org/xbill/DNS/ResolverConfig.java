@@ -33,8 +33,8 @@ import java.util.stream.Stream;
  */
 public class ResolverConfig {
 
-	static final String DNS_SERVER_PROP = "dns.server";
-	static final String DNS_SEARCH_PROP = "dns.search";
+public static final String DNS_SERVER_PROP = "dns.server";
+public static final String DNS_SEARCH_PROP = "dns.search";
 
 private String [] servers = null;
 private Name [] searchlist = null;
