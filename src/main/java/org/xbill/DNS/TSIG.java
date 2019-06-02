@@ -29,11 +29,7 @@ public static final Name HMAC = HMAC_MD5;
 /** The domain name representing the HMAC-SHA1 algorithm. */
 public static final Name HMAC_SHA1 = Name.fromConstantString("hmac-sha1.");
 
-/**
- * The domain name representing the HMAC-SHA224 algorithm.
- * Note that SHA224 is not supported by Java out-of-the-box, this requires use
- * of a third party provider like BouncyCastle.org.
- */
+/** The domain name representing the HMAC-SHA224 algorithm. */
 public static final Name HMAC_SHA224 = Name.fromConstantString("hmac-sha224.");
 
 /** The domain name representing the HMAC-SHA256 algorithm. */
