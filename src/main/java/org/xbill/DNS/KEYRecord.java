@@ -13,8 +13,8 @@ import java.util.*;
  * @see DNSKEYRecord
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc2535">Domain Name System Security Extensions</a>
- * @see <a href="https://tools.ietf.org/html/rfc3755">Legacy Resolver Compatibility for Delegation Signer (DS)</a>
+ * @see <a href="https://tools.ietf.org/html/rfc2535">RFC 2535: Domain Name System Security Extensions</a>
+ * @see <a href="https://tools.ietf.org/html/rfc3755">RFC 3755: Legacy Resolver Compatibility for Delegation Signer (DS)</a>
  */
 public class KEYRecord extends KEYBase {
 

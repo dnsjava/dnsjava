@@ -12,7 +12,7 @@ import org.xbill.DNS.utils.*;
  *
  * @author David Blacka
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc4034">Resource Records for the DNS Security Extensions</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4034">RFC 4034: Resource Records for the DNS Security Extensions</a>
  */
 public class DSRecord extends Record {
 

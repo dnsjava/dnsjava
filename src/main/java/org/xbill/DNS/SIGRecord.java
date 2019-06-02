@@ -11,7 +11,7 @@ import java.util.*;
  * @see RRset
  * @see DNSSEC
  * @see KEYRecord
- * <a href="https://tools.ietf.org/html/rfc2535">Domain Name System Security Extensions</a>
+ * <a href="https://tools.ietf.org/html/rfc2535">RFC 2535: Domain Name System Security Extensions</a>
  *
  * @author Brian Wellington
  */

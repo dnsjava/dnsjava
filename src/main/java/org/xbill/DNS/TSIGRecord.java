@@ -12,7 +12,7 @@ import org.xbill.DNS.utils.*;
  * sender and receiver of a message, using a shared key.
  * @see Resolver
  * @see TSIG
- * @see <a href="https://tools.ietf.org/html/rfc2845">Secret Key Transaction Authentication for DNS (TSIG)</a>
+ * @see <a href="https://tools.ietf.org/html/rfc2845">RFC 2845: Secret Key Transaction Authentication for DNS (TSIG)</a>
  *
  * @author Brian Wellington
  */

@@ -9,7 +9,7 @@ import org.xbill.DNS.utils.*;
  * SSH Fingerprint - stores the fingerprint of an SSH host key.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc4255">Using DNS to Securely Publish Secure Shell (SSH) Key Fingerprints</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4255">RFC 4255: Using DNS to Securely Publish Secure Shell (SSH) Key Fingerprints</a>
  */
 public class SSHFPRecord extends Record {
 

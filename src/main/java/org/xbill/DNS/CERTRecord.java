@@ -15,7 +15,7 @@ import org.xbill.DNS.utils.*;
 public class CERTRecord extends Record {
 
 /** Certificate type identifiers.
- * @see <a href="https://tools.ietf.org/html/rfc4398">Storing Certificates in the Domain Name System (DNS)</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4398">RFC 4398: Storing Certificates in the Domain Name System (DNS)</a>
  */
 public static class CertificateType {
 

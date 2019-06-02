@@ -7,7 +7,7 @@ package org.xbill.DNS;
  * a hostname.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1706">DNS NSAP Resource Records</a>
+ * @see <a href="https://tools.ietf.org/html/rfc1706">RFC 1706: DNS NSAP Resource Records</a>
  */
 public class NSAP_PTRRecord extends SingleNameBase {
 

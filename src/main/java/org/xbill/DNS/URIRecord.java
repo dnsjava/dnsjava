@@ -9,7 +9,7 @@ import java.io.*;
  * Uniform Resource Identifier (URI) DNS Resource Record
  *
  * @author Anthony Kirby
- * @see <a href="https://tools.ietf.org/html/rfc7553">The Uniform Resource Identifier (URI) DNS Resource Record</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7553">RFC 7553: The Uniform Resource Identifier (URI) DNS Resource Record</a>
  */
 public class URIRecord extends Record {
 

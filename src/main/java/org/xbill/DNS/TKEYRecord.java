@@ -12,7 +12,7 @@ import org.xbill.DNS.utils.*;
  * @see TSIG
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc2930">Secret Key Establishment for DNS (TKEY RR)</a>
+ * @see <a href="https://tools.ietf.org/html/rfc2930">RFC 2930: Secret Key Establishment for DNS (TKEY RR)</a>
  */
 public class TKEYRecord extends Record {
 
