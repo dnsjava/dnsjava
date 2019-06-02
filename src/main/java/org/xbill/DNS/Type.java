@@ -9,181 +9,184 @@ import java.util.HashMap;
  *
  * @author Brian Wellington
  */
-
 public final class Type {
 
-/** Address */
+/** {@link ARecord Address} */
 public static final int A		= 1;
 
-/** Name server */
+/** {@link NSRecord Name server} */
 public static final int NS		= 2;
 
-/** Mail destination */
+/** {@link MDRecord Mail destination} */
 public static final int MD		= 3;
 
-/** Mail forwarder */
+/** {@link MFRecord Mail forwarder} */
 public static final int MF		= 4;
 
-/** Canonical name (alias) */
+/** {@link CNAMERecord Canonical name (alias)} */
 public static final int CNAME		= 5;
 
-/** Start of authority */
+/** {@link SOARecord Start of authority} */
 public static final int SOA		= 6;
 
-/** Mailbox domain name */
+/** {@link MBRecord Mailbox domain name} */
 public static final int MB		= 7;
 
-/** Mail group member */
+/** {@link MGRecord Mail group member} */
 public static final int MG		= 8;
 
-/** Mail rename name */
+/** {@link MRRecord Mail rename name} */
 public static final int MR		= 9;
 
-/** Null record */
+/** {@link NULLRecord Null record} */
 public static final int NULL		= 10;
 
-/** Well known services */
+/** {@link WKSRecord Well known services} */
 public static final int WKS		= 11;
 
-/** Domain name pointer */
+/** {@link PTRRecord Domain name pointer} */
 public static final int PTR		= 12;
 
-/** Host information */
+/** {@link HINFORecord Host information} */
 public static final int HINFO		= 13;
 
-/** Mailbox information */
+/** {@link MINFORecord Mailbox information} */
 public static final int MINFO		= 14;
 
-/** Mail routing information */
+/** {@link MXRecord Mail routing information} */
 public static final int MX		= 15;
 
-/** Text strings */
+/** {@link TXTRecord Text strings} */
 public static final int TXT		= 16;
 
-/** Responsible person */
+/** {@link RPRecord Responsible person} */
 public static final int RP		= 17;
 
-/** AFS cell database */
+/** {@link AFSDBRecord AFS cell database} */
 public static final int AFSDB		= 18;
 
-/** X.25 calling address */
+/** {@link X25Record X.25 calling address} */
 public static final int X25		= 19;
 
-/** ISDN calling address */
+/** {@link ISDNRecord ISDN calling address} */
 public static final int ISDN		= 20;
 
-/** Router */
+/** {@link RTRecord Router} */
 public static final int RT		= 21;
 
-/** NSAP address */
+/** {@link NSAPRecord NSAP address} */
 public static final int NSAP		= 22;
 
-/** Reverse NSAP address (deprecated) */
+/** {@link NSAP_PTRRecord Reverse NSAP address (deprecated)} */
 public static final int NSAP_PTR	= 23;
 
-/** Signature */
+/** {@link SIGRecord Signature} */
 public static final int SIG		= 24;
 
-/** Key */
+/** {@link KEYRecord Key} */
 public static final int KEY		= 25;
 
-/** X.400 mail mapping */
+/** {@link PXRecord X.400 mail mapping} */
 public static final int PX		= 26;
 
-/** Geographical position (withdrawn) */
+/** {@link GPOSRecord Geographical position (withdrawn)} */
 public static final int GPOS		= 27;
 
-/** IPv6 address */
+/** {@link AAAARecord IPv6 address} */
 public static final int AAAA		= 28;
 
-/** Location */
+/** {@link LOCRecord Location} */
 public static final int LOC		= 29;
 
-/** Next valid name in zone */
+/** {@link NXTRecord Next valid name in zone} */
 public static final int NXT		= 30;
 
-/** Endpoint identifier */
+/** Endpoint identifier
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-nimrod-dns-00">DNS Resource Records for Nimrod Routing Architecture</a>
+ */
 public static final int EID		= 31;
 
-/** Nimrod locator */
+/** Nimrod locator
+ * @see <a href="https://tools.ietf.org/html/draft-ietf-nimrod-dns-00">DNS Resource Records for Nimrod Routing Architecture</a>
+ */
 public static final int NIMLOC		= 32;
 
-/** Server selection */
+/** {@link SRVRecord Server selection} */
 public static final int SRV		= 33;
 
 /** ATM address */
 public static final int ATMA		= 34;
 
-/** Naming authority pointer */
+/** {@link NAPTRRecord Naming authority pointer} */
 public static final int NAPTR		= 35;
 
-/** Key exchange */
+/** {@link KXRecord Key exchange} */
 public static final int KX		= 36;
 
-/** Certificate */
+/** {@link CERTRecord Certificate} */
 public static final int CERT		= 37;
 
-/** IPv6 address (experimental) */
+/** {@link A6Record IPv6 address (historic)} */
 public static final int A6		= 38;
 
-/** Non-terminal name redirection */
+/** {@link DNAMERecord Non-terminal name redirection} */
 public static final int DNAME		= 39;
 
-/** Options - contains EDNS metadata */
+/** {@link OPTRecord Options - contains EDNS metadata} */
 public static final int OPT		= 41;
 
-/** Address Prefix List */
+/** {@link APLRecord Address Prefix List} */
 public static final int APL		= 42;
 
-/** Delegation Signer */
+/** {@link DSRecord Delegation Signer} */
 public static final int DS		= 43;
 
-/** SSH Key Fingerprint */
+/** {@link SSHFPRecord SSH Key Fingerprint} */
 public static final int SSHFP		= 44;
 
-/** IPSEC key */
+/** {@link IPSECKEYRecord IPSEC key} */
 public static final int IPSECKEY	= 45;
 
-/** Resource Record Signature */
+/** {@link RRSIGRecord Resource Record Signature} */
 public static final int RRSIG		= 46;
 
-/** Next Secure Name */
+/** {@link NSECRecord Next Secure Name} */
 public static final int NSEC		= 47;
 
-/** DNSSEC Key */
+/** {@link DNSKEYRecord DNSSEC Key} */
 public static final int DNSKEY		= 48;
 
-/** Dynamic Host Configuration Protocol (DHCP) ID */
+/** {@link DHCIDRecord Dynamic Host Configuration Protocol (DHCP) ID} */
 public static final int DHCID		= 49;
 
-/** Next SECure, 3rd edition, RFC 5155 */
+/** {@link NSEC3Record Next SECure, 3rd edition} */
 public static final int NSEC3		= 50;
 
-/** Next SECure PARAMeter, RFC 5155 */
+/** {@link NSEC3PARAMRecord Next SECure PARAMeter} */
 public static final int NSEC3PARAM	= 51;
 
-/** Transport Layer Security Authentication, draft-ietf-dane-protocol-23 */
+/** {@link TLSARecord Transport Layer Security Authentication} */
 public static final int TLSA		= 52;
 
-/** S/MIME cert association, draft-ietf-dane-smime */
+/** {@link SMIMEARecord S/MIME cert association} */
 public static final int SMIMEA		= 53;
 
-/** Child Delegation Signer, RFC 8078 * */
-public static final int CDS			= 59;
+/** {@link CDSRecord Child Delegation Signer} * */
+public static final int CDS		= 59;
 
-/** Child DNSKEY, RFC 8078 * */
+/** {@link CDNSKEYRecord Child DNSKEY} * */
 public static final int CDNSKEY		= 60;
 
-/** OpenPGP Key, RFC 7929 */
+/** {@link OPENPGPKEYRecord OpenPGP Key} */
 public static final int OPENPGPKEY	= 61;
 
-/** Sender Policy Framework (experimental) */
+/** {@link SPFRecord Sender Policy Framework (experimental)} */
 public static final int SPF		= 99;
 
-/** Transaction key - used to compute a shared secret or exchange a key */
+/** {@link TKEYRecord Transaction key} */
 public static final int TKEY		= 249;
 
-/** Transaction signature */
+/** {@link TSIGRecord Transaction signature} */
 public static final int TSIG		= 250;
 
 /** Incremental zone transfer */
@@ -201,15 +204,13 @@ public static final int MAILA		= 254;
 /** Matches any type */
 public static final int ANY		= 255;
 
-/** URI
- * @see <a href="http://tools.ietf.org/html/draft-faltstrom-uri-14">draft-faltstrom-uri-14</a>
- */
+/** {@link URIRecord URI} */
 public static final int URI		= 256;
 
-/** Certification Authority Authorization, RFC 6844 */
+/** {@link CAARecord Certification Authority Authorization} */
 public static final int CAA		= 257;
 
-/** DNSSEC Lookaside Validation, RFC 4431 . */
+/** {@link DLVRecord DNSSEC Lookaside Validation} */
 public static final int DLV		= 32769;
 
 
