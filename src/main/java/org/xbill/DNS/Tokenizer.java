@@ -29,7 +29,7 @@ import org.xbill.DNS.utils.*;
  * @author Bob Halley
  */
 
-public class Tokenizer {
+public class Tokenizer implements AutoCloseable{
 
 private static String delim = " \t\n;()\"";
 private static String quotes = "\"";
@@ -714,6 +714,7 @@ exception(String s) {
 /**
  * Closes any files opened by this tokenizer.
  */
+@Override
 public void
 close() {
 	if (wantClose) {
@@ -723,12 +724,6 @@ close() {
 		catch (IOException e) {
 		}
 	}
-}
-
-@Override
-protected void
-finalize() {
-	close();
 }
 
 }

@@ -107,7 +107,7 @@ main(String[] argv) throws IOException {
 				else
 					portStr = argv[++arg];
 				port = Integer.parseInt(portStr);
-				if (port < 0 || port > 65536) {
+				if (port < 0 || port > 65535) {
 					System.out.println("Invalid port");
 					return;
 				}

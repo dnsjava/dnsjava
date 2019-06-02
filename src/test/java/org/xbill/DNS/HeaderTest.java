@@ -389,17 +389,17 @@ class HeaderTest
 
 	String text = m_h.toString();
 
-	assertFalse(!text.contains("id: 43981"));
-	assertFalse(!text.contains("opcode: STATUS"));
-	assertFalse(!text.contains("status: NXDOMAIN"));
-	assertFalse(!text.contains(" qr "));
-	assertFalse(!text.contains(" rd "));
-	assertFalse(!text.contains(" ra "));
-	assertFalse(!text.contains(" cd "));
-	assertFalse(!text.contains("qd: 0 "));
-	assertFalse(!text.contains("an: 255 "));
-	assertFalse(!text.contains("au: 10 "));
-	assertFalse(!text.contains("ad: 0 "));
+	    assertTrue(text.contains("id: 43981"));
+	    assertTrue(text.contains("opcode: STATUS"));
+	    assertTrue(text.contains("status: NXDOMAIN"));
+	    assertTrue(text.contains(" qr "));
+	    assertTrue(text.contains(" rd "));
+	    assertTrue(text.contains(" ra "));
+	    assertTrue(text.contains(" cd "));
+	    assertTrue(text.contains("qd: 0 "));
+	    assertTrue(text.contains("an: 255 "));
+	    assertTrue(text.contains("au: 10 "));
+	    assertTrue(text.contains("ad: 0 "));
     }
     
     @Test
