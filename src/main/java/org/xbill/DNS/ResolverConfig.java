@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  *       (which are resolved using Java's built in DNS support).
  *   <LI>The sun.net.dns.ResolverConfiguration class is queried.
  *   <LI>On Unix, /etc/resolv.conf is parsed.
- *   <LI>On Windows, ipconfig/winipcfg is called and its output parsed.  This
+ *   <LI>On Windows, ipconfig is called and its output parsed.  This
  *       may fail for non-English versions on Windows.
  *   <LI>"localhost" is used as the nameserver, and the search path is empty.
  * </UL>
@@ -56,10 +56,7 @@ ResolverConfig() {
 		String OS = System.getProperty("os.name");
 		String vendor = System.getProperty("java.vendor");
 		if (OS.contains("Windows")) {
-			if (Stream.of("95", "98", "ME").anyMatch(OS::contains))
-				find95();
-			else
-				findNT();
+			findWin();
 		} else if (OS.contains("NetWare")) {
 			findNetware();
 		} else if (vendor.contains("Android")) {
@@ -395,30 +392,10 @@ findWin(InputStream in) {
 }
 
 /**
- * Calls winipcfg and parses the result to find servers and a search path.
- */
-boolean
-find95() {
-	String s = "winipcfg.out";
-	try {
-		Process p;
-		p = Runtime.getRuntime().exec("winipcfg /all /batch " + s);
-		p.waitFor();
-		File f = new File(s);
-		findWin(new FileInputStream(f));
-		new File(s).delete();
-	}
-	catch (Exception e) {
-		return false;
-	}
-	return true;
-}
-
-/**
  * Calls ipconfig and parses the result to find servers and a search path.
  */
 boolean
-findNT() {
+findWin() {
 	boolean found;
 	try {
 		Process p;

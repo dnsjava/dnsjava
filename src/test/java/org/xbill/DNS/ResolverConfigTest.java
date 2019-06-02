@@ -52,13 +52,13 @@ class ResolverConfigTest {
 	@Test
 	@EnabledOnOs({OS.WINDOWS})
 	void findNT_Windows() {
-		assertTrue(ResolverConfig.getCurrentConfig().findNT());
+		assertTrue(ResolverConfig.getCurrentConfig().findWin());
 	}
 
 	@Test
 	@DisabledOnOs({OS.WINDOWS})
 	void findNT_NotWindows() {
-		assertFalse(ResolverConfig.getCurrentConfig().findNT());
+		assertFalse(ResolverConfig.getCurrentConfig().findWin());
 	}
 
 	@Test
@@ -74,11 +74,6 @@ class ResolverConfigTest {
 				.getResource("/test_loaded_resolv.conf")
 				.toURI()).toString()));
 		assertEquals(5, ResolverConfig.getCurrentConfig().ndots());
-	}
-
-	@Test
-	void findAncientWindows() {
-		assumeFalse(ResolverConfig.getCurrentConfig().find95());
 	}
 
 	@Test
