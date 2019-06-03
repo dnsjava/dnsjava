@@ -414,15 +414,11 @@ follow(Name name, Name oldname) {
 private void
 processResponse(Name name, SetResponse response) {
 	if (response.isSuccessful()) {
-		RRset[] rrsets = response.answers();
+		List<RRset<?>> rrsets = response.answers();
 		List<Record> l = new ArrayList<>();
-		Iterator<Record> it;
-		int i;
 
-		for (i = 0; i < rrsets.length; i++) {
-			it = rrsets[i].rrs();
-			while (it.hasNext())
-				l.add(it.next());
+		for (RRset<?> set : rrsets) {
+			l.addAll(set.rrs());
 		}
 
 		result = SUCCESSFUL;

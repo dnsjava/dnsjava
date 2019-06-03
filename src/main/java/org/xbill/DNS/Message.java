@@ -365,7 +365,7 @@ public RRset []
 getSectionRRsets(int section) {
 	if (sections[section] == null)
 		return emptyRRsetArray;
-	List<RRset> sets = new LinkedList<>();
+	List<RRset<Record>> sets = new LinkedList<>();
 	Record [] recs = getSectionArray(section);
 	Set<Name> hash = new HashSet<>();
 	for (Record rec : recs) {
@@ -373,7 +373,7 @@ getSectionRRsets(int section) {
 		boolean newset = true;
 		if (hash.contains(name)) {
 			for (int j = sets.size() - 1; j >= 0; j--) {
-				RRset set = sets.get(j);
+				RRset<Record> set = sets.get(j);
 				if (set.getType() == rec.getRRsetType() &&
 					set.getDClass() == rec.getDClass() &&
 					set.getName().equals(name))
@@ -385,7 +385,7 @@ getSectionRRsets(int section) {
 			}
 		}
 		if (newset) {
-			RRset set = new RRset(rec);
+			RRset<Record> set = new RRset<>(rec);
 			sets.add(set);
 			hash.add(name);
 		}
@@ -397,11 +397,10 @@ void
 toWire(DNSOutput out) {
 	header.toWire(out);
 	Compression c = new Compression();
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < sections.length; i++) {
 		if (sections[i] == null)
 			continue;
-		for (int j = 0; j < sections[i].size(); j++) {
-			Record rec = (Record)sections[i].get(j);
+		for (Record rec : sections[i]) {
 			rec.toWire(out, i, c);
 		}
 	}

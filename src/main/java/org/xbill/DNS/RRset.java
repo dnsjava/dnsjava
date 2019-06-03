@@ -13,8 +13,7 @@ import java.util.*;
  *
  * @author Brian Wellington
  */
-
-public class RRset implements Serializable {
+public class RRset<T extends Record> implements Serializable {
 
 private static final long serialVersionUID = -3270249290171239695L;
 
@@ -22,46 +21,42 @@ private static final long serialVersionUID = -3270249290171239695L;
  * rrs contains both normal and RRSIG records, with the RRSIG records
  * at the end.
  */
-private ArrayList<Record> rrs;
-private short nsigs;
+private final ArrayList<T> rrs;
+private final ArrayList<RRSIGRecord> sigs;
 private short position;
+private long ttl;
 
 /** Creates an empty RRset */
 public
 RRset() {
 	rrs = new ArrayList<>(1);
-	nsigs = 0;
-	position = 0;
+	sigs = new ArrayList<>(0);
 }
 
 /** Creates an RRset and sets its contents to the specified record */
 public
-RRset(Record record) {
+RRset(T record) {
 	this();
-	safeAddRR(record);
+	addRR(record);
 }
 
 /** Creates an RRset with the contents of an existing RRset */
 public
-RRset(RRset rrset) {
-	synchronized (rrset) {
-		rrs = new ArrayList<>(rrset.rrs);
-		nsigs = rrset.nsigs;
-		position = rrset.position;
-	}
+RRset(RRset<T> rrset) {
+	rrs = new ArrayList<>(rrset.rrs);
+	sigs = new ArrayList<>(rrset.sigs);
+	position = rrset.position;
+	ttl = rrset.ttl;
 }
 
-private void
-safeAddRR(Record r) {
-	if (!(r instanceof RRSIGRecord)) {
-		if (nsigs == 0)
-			rrs.add(r);
-		else
-			rrs.add(rrs.size() - nsigs, r);
-	} else {
-		rrs.add(r);
-		nsigs++;
-	}
+/**
+ * Adds a signature to this RRset. If the TTL of the added signature is not the
+ * same as existing records in the RRset, all records are set to the lowest
+ * TTL of either the added record or the existing records.
+ */
+public void
+addRR(RRSIGRecord r) {
+	addRR(r, sigs);
 }
 
 /**
@@ -69,119 +64,129 @@ safeAddRR(Record r) {
  * same as existing records in the RRset, all records are set to the lowest
  * TTL of either the added record or the existing records.
  */
-public synchronized void
-addRR(Record r) {
-	if (rrs.size() == 0) {
-		safeAddRR(r);
+public void
+addRR(T r) {
+	if (r instanceof RRSIGRecord) {
+		addRR((RRSIGRecord)r, sigs);
 		return;
 	}
-	Record first = first();
-	if (!r.sameRRset(first))
-		throw new IllegalArgumentException("record does not match " +
-						   "rrset");
+
+	addRR(r, rrs);
+}
+
+@SuppressWarnings("unchecked")
+private <X extends Record> void
+addRR(final X r, List<X> rs) {
+	if (sigs.isEmpty() && rrs.isEmpty()) {
+		rs.add(r);
+		ttl = r.getTTL();
+		return;
+	}
+
+	checkSameRRset(r, rrs);
+	checkSameRRset(r, sigs);
 
 	// rfc2181#section-5.2:
 	// [...] treat the RRs for all purposes as if all TTLs in the
 	// RRSet had been set to the value of the lowest TTL in the RRSet.
-	if (r.getTTL() != first.getTTL()) {
-		if (r.getTTL() > first.getTTL()) {
-			r = r.cloneRecord();
-			r.setTTL(first.getTTL());
-		} else {
-			for (int i = 0; i < rrs.size(); i++) {
-				Record tmp = rrs.get(i);
-				tmp = tmp.cloneRecord();
-				tmp.setTTL(r.getTTL());
-				rrs.set(i, tmp);
-			}
-		}
+	X copy = r;
+	if (copy.getTTL() > ttl) {
+		copy = (X)r.cloneRecord();
+		copy.setTTL(ttl);
+	} else if (copy.getTTL() < ttl) {
+		ttl = copy.getTTL();
+		adjustTtl(copy.getTTL(), rrs);
+		adjustTtl(copy.getTTL(), sigs);
 	}
 
-	if (!rrs.contains(r))
-		safeAddRR(r);
+	if (!rs.contains(copy))
+		rs.add(copy);
 }
 
-/** Deletes a Record from an RRset */
-public synchronized void
-deleteRR(Record r) {
-	if (rrs.remove(r) && (r instanceof RRSIGRecord))
-		nsigs--;
+private <X extends Record> void
+adjustTtl(long ttl, List<X> rs) {
+	for (int i = 0; i < rs.size(); i++) {
+		@SuppressWarnings("unchecked")
+		X tmp = (X)rs.get(i).cloneRecord();
+		tmp.setTTL(ttl);
+		rs.set(i, tmp);
+	}
 }
 
-/** Deletes all Records from an RRset */
-public synchronized void
+private void
+checkSameRRset(Record r, List<? extends Record> rs) {
+	if (rs.isEmpty()) {
+		return;
+	}
+
+	if (!r.sameRRset(rs.get(0))) {
+		throw new IllegalArgumentException(
+			"record does not match rrset");
+	}
+}
+
+/** Deletes a signature from this RRset */
+public void
+deleteRR(RRSIGRecord r) {
+	sigs.remove(r);
+}
+
+/** Deletes a record from this RRset */
+public void
+deleteRR(T r) {
+	if (r instanceof RRSIGRecord) {
+		sigs.remove(r);
+		return;
+	}
+
+	rrs.remove(r);
+}
+
+/** Deletes all records (including signatures) from this RRset */
+public void
 clear() {
 	rrs.clear();
-	position = 0;
-	nsigs = 0;
-}
-
-private synchronized Iterator<Record>
-iterator(boolean data, boolean cycle) {
-	int size, start, total;
-
-	total = rrs.size();
-
-	if (data)
-		size = total - nsigs;
-	else
-		size = nsigs;
-	if (size == 0)
-		return Collections.emptyIterator();
-
-	if (data) {
-		if (!cycle)
-			start = 0;
-		else {
-			if (position >= size)
-				position = 0;
-			start = position++;
-		}
-	} else {
-		start = total - nsigs;
-	}
-
-	List<Record> list = new ArrayList<>(size);
-	if (data) {
-		list.addAll(rrs.subList(start, size));
-		if (start != 0)
-			list.addAll(rrs.subList(0, start));
-	} else {
-		list.addAll(rrs.subList(start, total));
-	}
-
-	return list.iterator();
+	sigs.clear();
 }
 
 /**
- * Returns an Iterator listing all (data) records.
- * @param cycle If true, cycle through the records so that each Iterator will
+ * Returns a list of all data records.
+ * @param cycle If true, cycle through the records so that each list will
  * start with a different record.
  */
-public synchronized Iterator<Record>
+public List<T>
 rrs(boolean cycle) {
-	return iterator(true, cycle);
+	if (!cycle || rrs.size() <= 1) {
+		return Collections.unmodifiableList(rrs);
+	}
+
+	List<T> l = new ArrayList<>(rrs.size());
+	int start = position++ % rrs.size();
+	l.addAll(rrs.subList(start, rrs.size()));
+	l.addAll(rrs.subList(0, start));
+	return l;
 }
 
 /**
- * Returns an Iterator listing all (data) records.  This cycles through
- * the records, so each Iterator will start with a different record.
+ * Returns a list of all data records. This cycles through
+ * the records, so that each returned list will start with a
+ * different record.
  */
-public synchronized Iterator<Record>
+public List<T>
 rrs() {
-	return iterator(true, true);
+	return rrs(true);
 }
 
-/** Returns an Iterator listing all signature records */
-public synchronized Iterator<Record>
+/** Returns a list of all signature records. */
+public List<RRSIGRecord>
 sigs() {
-	return iterator(false, false);
+	return Collections.unmodifiableList(sigs);
 }
 
 /** Returns the number of (data) records */
-public synchronized int
+public int
 size() {
-	return rrs.size() - nsigs;
+	return rrs.size();
 }
 
 /**
@@ -212,34 +217,35 @@ getDClass() {
 }
 
 /** Returns the ttl of the records */
-public synchronized long
+public long
 getTTL() {
 	return first().getTTL();
 }
 
 /**
- * Returns the first record
- * @throws IllegalStateException if the rrset is empty
+ * Returns the first record in this RRset, either an RR or a signature.
+ * @throws IllegalStateException if the RRset is empty
  */
-public synchronized Record
+public Record
 first() {
-	if (rrs.size() == 0)
-		throw new IllegalStateException("rrset is empty");
-	return rrs.get(0);
+	if (!rrs.isEmpty())
+		return rrs.get(0);
+	if (!sigs.isEmpty())
+		return sigs.get(0);
+
+	throw new IllegalStateException("rrset is empty");
 }
 
-private String
-iteratorToString(Iterator it) {
-	StringBuilder sb = new StringBuilder();
+private void
+appendRrList(Iterator<? extends Record> it, StringBuilder sb) {
 	while (it.hasNext()) {
-		Record rr = (Record) it.next();
+		Record rr = it.next();
 		sb.append("[");
 		sb.append(rr.rdataToString());
 		sb.append("]");
 		if (it.hasNext())
 			sb.append(" ");
 	}
-	return sb.toString();
 }
 
 /** Converts the RRset to a String */
@@ -248,17 +254,19 @@ public String
 toString() {
 	if (rrs.size() == 0)
 		return ("{empty}");
+
 	StringBuilder sb = new StringBuilder();
 	sb.append("{ ");
 	sb.append(getName()).append(" ");
 	sb.append(getTTL()).append(" ");
 	sb.append(DClass.string(getDClass())).append(" ");
 	sb.append(Type.string(getType())).append(" ");
-	sb.append(iteratorToString(iterator(true, false)));
-	if (nsigs > 0) {
+	appendRrList(rrs.iterator(), sb);
+	if (!sigs.isEmpty()) {
 		sb.append(" sigs: ");
-		sb.append(iteratorToString(iterator(false, false)));
+		appendRrList(sigs.iterator(), sb);
 	}
+
 	sb.append(" }");
 	return sb.toString();
 }

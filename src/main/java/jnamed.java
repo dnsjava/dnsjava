@@ -163,13 +163,13 @@ findBestZone(Name name) {
 	return null;
 }
 
-public RRset
+public <T extends Record> RRset<T>
 findExactMatch(Name name, int type, int dclass, boolean glue) {
 	Zone zone = findBestZone(name);
 	if (zone != null)
 		return zone.findExactMatch(name, type);
 	else {
-		RRset [] rrsets;
+		List<RRset<T>> rrsets;
 		Cache cache = getCache(dclass);
 		if (glue)
 			rrsets = cache.findAnyRecords(name, type);
@@ -178,28 +178,24 @@ findExactMatch(Name name, int type, int dclass, boolean glue) {
 		if (rrsets == null)
 			return null;
 		else
-			return rrsets[0]; /* not quite right */
+			return rrsets.get(0); /* not quite right */
 	}
 }
 
-void
-addRRset(Name name, Message response, RRset rrset, int section, int flags) {
+<T extends Record> void
+addRRset(Name name, Message response, RRset<T> rrset, int section, int flags) {
 	for (int s = 1; s <= section; s++)
 		if (response.findRRset(name, rrset.getType(), s))
 			return;
 	if ((flags & FLAG_SIGONLY) == 0) {
-		Iterator<Record> it = rrset.rrs();
-		while (it.hasNext()) {
-			Record r = (Record) it.next();
+		for (Record r : rrset.rrs()) {
 			if (r.getName().isWild() && !name.isWild())
 				r = r.withName(name);
 			response.addRecord(r, section);
 		}
 	}
 	if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
-		Iterator<Record> it = rrset.sigs();
-		while (it.hasNext()) {
-			Record r = (Record) it.next();
+		for (Record r : rrset.sigs()) {
 			if (r.getName().isWild() && !name.isWild())
 				r = r.withName(name);
 			response.addRecord(r, section);
@@ -214,7 +210,7 @@ addSOA(Message response, Zone zone) {
 
 private void
 addNS(Message response, Zone zone, int flags) {
-	RRset nsRecords = zone.getNS();
+	RRset<NSRecord> nsRecords = zone.getNS();
 	addRRset(nsRecords.getName(), response, nsRecords,
 		 Section.AUTHORITY, flags);
 }
@@ -224,17 +220,15 @@ addCacheNS(Message response, Cache cache, Name name) {
 	SetResponse sr = cache.lookupRecords(name, Type.NS, Credibility.HINT);
 	if (!sr.isDelegation())
 		return;
-	RRset nsRecords = sr.getNS();
-	Iterator<Record> it = nsRecords.rrs();
-	while (it.hasNext()) {
-		Record r = (Record) it.next();
+	RRset<?> nsRecords = sr.getNS();
+	for (Record r : nsRecords.rrs()) {
 		response.addRecord(r, Section.AUTHORITY);
 	}
 }
 
 private void
 addGlue(Message response, Name name, int flags) {
-	RRset a = findExactMatch(name, Type.A, DClass.IN, true);
+	RRset<ARecord> a = findExactMatch(name, Type.A, DClass.IN, true);
 	if (a == null)
 		return;
 	addRRset(name, response, a, Section.ADDITIONAL, flags);
@@ -299,13 +293,13 @@ addAnswer(Message response, Name name, int type, int dclass,
 		}
 	}
 	else if (sr.isDelegation()) {
-		RRset nsRecords = sr.getNS();
+		RRset<NSRecord> nsRecords = sr.getNS();
 		addRRset(nsRecords.getName(), response, nsRecords,
 			 Section.AUTHORITY, flags);
 	}
 	else if (sr.isCNAME()) {
 		CNAMERecord cname = sr.getCNAME();
-		RRset rrset = new RRset(cname);
+		RRset<CNAMERecord> rrset = new RRset<>(cname);
 		addRRset(name, response, rrset, Section.ANSWER, flags);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
@@ -314,7 +308,7 @@ addAnswer(Message response, Name name, int type, int dclass,
 	}
 	else if (sr.isDNAME()) {
 		DNAMERecord dname = sr.getDNAME();
-		RRset rrset = new RRset(dname);
+		RRset<DNAMERecord> rrset = new RRset<>(dname);
 		addRRset(name, response, rrset, Section.ANSWER, flags);
 		Name newname;
 		try {
@@ -323,17 +317,19 @@ addAnswer(Message response, Name name, int type, int dclass,
 		catch (NameTooLongException e) {
 			return Rcode.YXDOMAIN;
 		}
-		rrset = new RRset(new CNAMERecord(name, dclass, 0, newname));
-		addRRset(name, response, rrset, Section.ANSWER, flags);
+
+		CNAMERecord cname = new CNAMERecord(name, dclass, 0, newname);
+		RRset<CNAMERecord> cnamerrset = new RRset<>(cname);
+		addRRset(name, response, cnamerrset, Section.ANSWER, flags);
 		if (zone != null && iterations == 0)
 			response.getHeader().setFlag(Flags.AA);
 		rcode = addAnswer(response, newname, type, dclass,
 				  iterations + 1, flags);
 	}
 	else if (sr.isSuccessful()) {
-		RRset [] rrsets = sr.answers();
-		for (RRset rrset : rrsets)
-			addRRset(name, response, rrset,	Section.ANSWER, flags);
+		List<RRset<?>> rrsets = sr.answers();
+		for (RRset<?> rrset : rrsets)
+			addRRset(name, response, rrset, Section.ANSWER, flags);
 		if (zone != null) {
 			addNS(response, zone, flags);
 			if (iterations == 0)
@@ -351,13 +347,13 @@ doAXFR(Name name, Message query, TSIG tsig, TSIGRecord qtsig, Socket s) {
 	boolean first = true;
 	if (zone == null)
 		return errorMessage(query, Rcode.REFUSED);
-	Iterator<RRset> it = zone.AXFR();
 	try {
 		DataOutputStream dataOut;
 		dataOut = new DataOutputStream(s.getOutputStream());
 		int id = query.getHeader().getID();
+		Iterator<RRset<?>> it = zone.AXFR();
 		while (it.hasNext()) {
-			RRset rrset = (RRset) it.next();
+			RRset<?> rrset = it.next();
 			Message response = new Message(id);
 			Header header = response.getHeader();
 			header.setFlag(Flags.QR);

@@ -183,7 +183,7 @@ class SetResponseTest
     @Test
     void test_addRRset() throws TextParseException, UnknownHostException
     {
-	RRset rrs = new RRset();
+	RRset<ARecord> rrs = new RRset<>();
 	rrs.addRR(new ARecord(Name.fromString("The.Name."),
 			      DClass.IN,
 			      0xABCD,
@@ -196,13 +196,13 @@ class SetResponseTest
 	sr.addRRset(rrs);
 
 	RRset[] exp = new RRset[] { rrs };
-	    assertArrayEquals(exp, sr.answers());
+	    assertArrayEquals(exp, sr.answers().toArray());
     }
 
     @Test
     void test_addRRset_multiple() throws TextParseException, UnknownHostException
     {
-	RRset rrs = new RRset();
+	RRset<ARecord> rrs = new RRset<>();
 	rrs.addRR(new ARecord(Name.fromString("The.Name."),
 			      DClass.IN,
 			      0xABCD,
@@ -212,7 +212,7 @@ class SetResponseTest
 			      0xABCD,
 			      InetAddress.getByName("192.168.0.2")));
 
-	RRset rrs2 = new RRset();
+	RRset<ARecord> rrs2 = new RRset<>();
 	rrs2.addRR(new ARecord(Name.fromString("The.Other.Name."),
 			      DClass.IN,
 			      0xABCE,
@@ -227,7 +227,7 @@ class SetResponseTest
 	sr.addRRset(rrs2);
 
 	RRset[] exp = new RRset[] { rrs, rrs2 };
-	    assertArrayEquals(exp, sr.answers());
+	    assertArrayEquals(exp, sr.answers().toArray());
     }
 
     @Test
@@ -239,7 +239,7 @@ class SetResponseTest
 
     @Test
     void test_getCNAME() throws TextParseException {
-	RRset rrs = new RRset();
+	RRset<CNAMERecord> rrs = new RRset<>();
 	CNAMERecord cr = new CNAMERecord(Name.fromString("The.Name."),
 					 DClass.IN,
 					 0xABCD,
@@ -251,7 +251,7 @@ class SetResponseTest
 
     @Test
     void test_getDNAME() throws TextParseException {
-	RRset rrs = new RRset();
+	RRset<DNAMERecord> rrs = new RRset<>();
 	DNAMERecord dr = new DNAMERecord(Name.fromString("The.Name."),
 					 DClass.IN,
 					 0xABCD,
@@ -271,7 +271,7 @@ class SetResponseTest
 					SetResponse.CNAME,
 					SetResponse.DNAME,
 					SetResponse.SUCCESSFUL };
-	RRset rrs = new RRset();
+	RRset<ARecord> rrs = new RRset<>();
 	rrs.addRR(new ARecord(Name.fromString("The.Name."),
 			      DClass.IN,
 			      0xABCD,

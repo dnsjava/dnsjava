@@ -19,7 +19,7 @@ class DNSSECTest
 		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600,
 			"TXT 13 0 3600 19700101000003 19700101000000 46271 . dRwMEthIeGiucMcEcDmwixM8/LZcZ+W6lMM0KDSY5rwAGrm1j7tS/VU6xs+rpD5dSRmBYosinkWD6Jk3zRmyBQ==", Name.root);
 
-		RRset rrset = new RRset();
+		RRset<TXTRecord> rrset = new RRset<>();
 		rrset.addRR(txt);
 		rrset.addRR(rrsig);
 		DNSSEC.verify(rrset, rrsig, dnskey, new Date(60));
@@ -33,7 +33,7 @@ class DNSSECTest
 		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600,
 			"TXT 13 0 3600 19700101000003 19700101000000 25719 . m6sD/b0ZbfBXsQruhq5dYTnHGaA+PRTL5Y1W36rMdnGBb7eOJRRzDS5Wk5hZlrS4RUKQ/tKMCn7lsl9fn4U2lw==", Name.root);
 
-		RRset rrset = new RRset();
+		RRset<TXTRecord> rrset = new RRset<>();
 		rrset.addRR(txt);
 		rrset.addRR(rrsig);
 		DNSSEC.verify(rrset, rrsig, dnskey, new Date(60));
@@ -47,7 +47,7 @@ class DNSSECTest
 		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600L,
 			"TXT 3 0 3600 19700101000003 19700101000000 36714 . AAAycZeIdBGB7vjlFzd5+ZgV8IxGRLpLierdV1KO4SGIy707hKUXJRc=", Name.root);
 
-		RRset set = new RRset();
+		RRset<TXTRecord> set = new RRset<>();
 		set.addRR(txt);
 		set.addRR(rrsig);
 		DNSSEC.verify(set, rrsig, dnskey, new Date(60));
@@ -61,7 +61,7 @@ class DNSSECTest
 		RRSIGRecord rrsig = (RRSIGRecord) Record.fromString(Name.root, Type.RRSIG, DClass.IN, 3600L,
 			"TXT 3 0 3600 19700101000003 19700101000000 57407 . AIh8Bp0EFNszs3cB0gNatjWy8tBrgUAUe1gTHkVsm1pva1GYWOW/FbA=", Name.root);
 
-		RRset set = new RRset();
+		RRset<TXTRecord> set = new RRset<>();
 		set.addRR(txt);
 		set.addRR(rrsig);
 		DNSSEC.verify(set, rrsig, dnskey, new Date(60));

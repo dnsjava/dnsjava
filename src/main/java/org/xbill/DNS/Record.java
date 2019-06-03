@@ -632,7 +632,7 @@ setTTL(long ttl) {
 
 /**
  * Compares this Record to another Object.
- * @param o The Object to be compared.
+ * @param arg The Object to be compared.
  * @return The value 0 if the argument is a record equivalent to this record;
  * a value less than 0 if the argument is less than this record in the
  * canonical ordering, and a value greater than 0 if the argument is greater
@@ -711,7 +711,8 @@ checkU32(String field, long val) {
 static Name
 checkName(String field, Name name) {
 	if (!name.isAbsolute())
-		throw new RelativeNameException(name);
+		throw new RelativeNameException("'" + name + "' on field "
+			+ field + " is not an absolute name");
 	return name;
 }
 

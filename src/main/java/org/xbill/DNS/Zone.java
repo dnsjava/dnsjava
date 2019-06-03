@@ -25,11 +25,11 @@ private Map<Name, Object> data;
 private Name origin;
 private Object originNode;
 private int dclass = DClass.IN;
-private RRset NS;
+private RRset<NSRecord> NS;
 private SOARecord SOA;
 private boolean hasWild;
 
-class ZoneIterator implements Iterator<RRset> {
+class ZoneIterator implements Iterator<RRset<?>> {
 	private Iterator zentries;
 	private RRset [] current;
 	private int count;
@@ -104,8 +104,7 @@ validate() throws IOException {
 	if (rrset == null || rrset.size() != 1)
 		throw new IOException(origin +
 				      ": exactly 1 SOA must be specified");
-	Iterator<Record> it = rrset.rrs();
-	SOA = (SOARecord) it.next();
+	SOA = (SOARecord) rrset.rrs().get(0);
 
 	NS = oneRRset(originNode, Type.NS);
 	if (NS == null)
@@ -211,7 +210,7 @@ getOrigin() {
 }
 
 /** Returns the Zone origin's NS records */
-public RRset
+public RRset<NSRecord>
 getNS() {
 	return NS;
 }
@@ -233,11 +232,11 @@ exactName(Name name) {
 	return data.get(name);
 }
 
-private synchronized RRset []
+private synchronized RRset<?>[]
 allRRsets(Object types) {
 	if (types instanceof List) {
 		@SuppressWarnings("unchecked")
-		List<RRset> typelist = (List<RRset>) types;
+		List<RRset<?>> typelist = (List<RRset<?>>) types;
 		return typelist.toArray(new RRset[0]);
 	} else {
 		RRset set = (RRset) types;
@@ -245,26 +244,27 @@ allRRsets(Object types) {
 	}
 }
 
-private synchronized RRset
+private synchronized <T extends Record> RRset<T>
 oneRRset(Object types, int type) {
 	if (type == Type.ANY)
 		throw new IllegalArgumentException("oneRRset(ANY)");
 	if (types instanceof List) {
-		List list = (List) types;
-		for (Object o : list) {
-			RRset set = (RRset) o;
+		@SuppressWarnings("unchecked")
+		List<RRset<T>> list = (List<RRset<T>>) types;
+		for (RRset<T> set : list) {
 			if (set.getType() == type)
 				return set;
 		}
 	} else {
-		RRset set = (RRset) types;
+		@SuppressWarnings("unchecked")
+		RRset<T> set = (RRset<T>) types;
 		if (set.getType() == type)
 			return set;
 	}
 	return null;
 }
 
-private synchronized RRset
+private synchronized <T extends Record> RRset<T>
 findRRset(Name name, int type) {
 	Object types = exactName(name);
 	if (types == null)
@@ -364,17 +364,17 @@ lookup(Name name, int type) {
 
 		/* If this is a delegation, return that. */
 		if (!isOrigin) {
-			RRset ns = oneRRset(types, Type.NS);
+			RRset<NSRecord> ns = oneRRset(types, Type.NS);
 			if (ns != null)
 				return new SetResponse(SetResponse.DELEGATION,
-						       ns);
+					ns);
 		}
 
 		/* If this is an ANY lookup, return everything. */
 		if (isExact && type == Type.ANY) {
 			sr = new SetResponse(SetResponse.SUCCESSFUL);
-			RRset [] sets = allRRsets(types);
-			for (RRset set : sets)
+			RRset<?>[] sets = allRRsets(types);
+			for (RRset<?> set : sets)
 				sr.addRRset(set);
 			return sr;
 		}
@@ -426,13 +426,13 @@ lookup(Name name, int type) {
 	return SetResponse.ofType(SetResponse.NXDOMAIN);
 }
 
-/**     
+/**
  * Looks up Records in the Zone.  This follows CNAMEs and wildcards.
  * @param name The name to look up
  * @param type The type to look up
  * @return A SetResponse object
  * @see SetResponse
- */ 
+ */
 public SetResponse
 findRecords(Name name, int type) {
 	return lookup(name, type);
@@ -445,7 +445,7 @@ findRecords(Name name, int type) {
  * @return The matching RRset
  * @see RRset
  */ 
-public RRset
+public <T extends Record> RRset<T>
 findExactMatch(Name name, int type) {
 	Object types = exactName(name);
 	if (types == null)
@@ -459,7 +459,7 @@ findExactMatch(Name name, int type) {
  * @see RRset
  */
 public void
-addRRset(RRset rrset) {
+addRRset(RRset<?> rrset) {
 	Name name = rrset.getName();
 	addRRset(name, rrset);
 }
@@ -469,14 +469,14 @@ addRRset(RRset rrset) {
  * @param r The record to be added
  * @see Record
  */
-public void
-addRecord(Record r) {
+public <T extends Record> void
+addRecord(T r) {
 	Name name = r.getName();
 	int rtype = r.getRRsetType();
 	synchronized (this) {
-		RRset rrset = findRRset(name, rtype);
+		RRset<T> rrset = findRRset(name, rtype);
 		if (rrset == null) {
-			rrset = new RRset(r);
+			rrset = new RRset<>(r);
 			addRRset(name, rrset);
 		} else {
 			rrset.addRR(r);
@@ -489,12 +489,12 @@ addRecord(Record r) {
  * @param r The record to be removed
  * @see Record
  */
-public void
-removeRecord(Record r) {
+public <T extends Record> void
+removeRecord(T r) {
 	Name name = r.getName();
 	int rtype = r.getRRsetType();
 	synchronized (this) {
-		RRset rrset = findRRset(name, rtype);
+		RRset<T> rrset = findRRset(name, rtype);
 		if (rrset == null)
 			return;
 		if (rrset.size() == 1 && rrset.first().equals(r))
@@ -507,7 +507,7 @@ removeRecord(Record r) {
 /**
  * Returns an Iterator over the RRsets in the zone.
  */
-public Iterator<RRset>
+public Iterator<RRset<?>>
 iterator() {
 	return new ZoneIterator(false);
 }
@@ -517,7 +517,7 @@ iterator() {
  * construct an AXFR response.  This is identical to {@link #iterator} except
  * that the SOA is returned at the end as well as the beginning.
  */
-public Iterator<RRset>
+public Iterator<RRset<?>>
 AXFR() {
 	return new ZoneIterator(true);
 }
@@ -525,13 +525,9 @@ AXFR() {
 private void
 nodeToString(StringBuffer sb, Object node) {
 	RRset [] sets = allRRsets(node);
-	for (RRset rrset : sets) {
-		Iterator<Record> it = rrset.rrs();
-		while (it.hasNext())
-			sb.append(it.next()).append("\n");
-		it = rrset.sigs();
-		while (it.hasNext())
-			sb.append(it.next()).append("\n");
+	for (RRset<?> rrset : sets) {
+		rrset.rrs().forEach(r -> sb.append(r).append('\n'));
+		rrset.sigs().forEach(r -> sb.append(r).append('\n'));
 	}
 }
 

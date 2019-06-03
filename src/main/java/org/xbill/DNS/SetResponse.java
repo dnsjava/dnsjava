@@ -5,7 +5,8 @@ package org.xbill.DNS;
 import java.util.*;
 
 /**
- * The Response from a query to Cache.lookupRecords() or Zone.findRecords()
+ * The Response from a query to {@link Cache#lookupRecords(Name, int, int)} or
+ * {@link Zone#findRecords(Name, int)}.
  * @see Cache
  * @see Zone
  *
@@ -59,16 +60,17 @@ private static final SetResponse nxdomain = new SetResponse(NXDOMAIN);
 private static final SetResponse nxrrset = new SetResponse(NXRRSET);
 
 private int type;
-private List<RRset> data;
+private List<RRset<?>> data;
 
 private
 SetResponse() {}
 
-SetResponse(int type, RRset rrset) {
+SetResponse(int type, RRset<?> rrset) {
 	if (type < 0 || type > 6)
 		throw new IllegalArgumentException("invalid type");
 	this.type = type;
-	this.data = Collections.singletonList(rrset);
+	this.data = new ArrayList<>();
+	this.data.add(rrset);
 }
 
 SetResponse(int type) {
@@ -101,11 +103,10 @@ ofType(int type) {
 }
 
 void
-addRRset(RRset rrset) {
+addRRset(RRset<?> rrset) {
 	if (data == null)
 		data = new ArrayList<>();
-	List<RRset> l = data;
-	l.add(rrset);
+	data.add(rrset);
 }
 
 /** Is the answer to the query unknown? */
@@ -151,12 +152,11 @@ isSuccessful() {
 }
 
 /** If the query was successful, return the answers */
-public RRset []
+public List<RRset<?>>
 answers() {
 	if (type != SUCCESSFUL)
 		return null;
-	List<RRset> l = data;
-	return l.toArray(new RRset[0]);
+	return data;
 }
 
 /**
@@ -178,9 +178,10 @@ getDNAME() {
 /**
  * If the query hit a delegation point, return the NS set.
  */
-public RRset
+@SuppressWarnings("unchecked")
+public RRset<NSRecord>
 getNS() {
-	return (data != null) ? data.get(0) : null;
+	return (data != null) ? (RRset<NSRecord>) data.get(0) : null;
 }
 
 /** Prints the value of the SetResponse */

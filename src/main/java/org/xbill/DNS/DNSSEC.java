@@ -136,23 +136,16 @@ digestSIG(DNSOutput out, SIGBase sig) {
  * @param rrset The data to be signed/verified.
  * @return The data to be cryptographically signed or verified.
  */
-public static byte []
-digestRRset(RRSIGRecord rrsig, RRset rrset) {
+public static <T extends Record> byte []
+digestRRset(RRSIGRecord rrsig, RRset<T> rrset) {
 	DNSOutput out = new DNSOutput();
 	digestSIG(out, rrsig);
 
-	int size = rrset.size();
-	Record [] records = new Record[size];
-
-	Iterator<Record> it = rrset.rrs();
 	Name name = rrset.getName();
 	Name wild = null;
 	int sigLabels = rrsig.getLabels() + 1; // Add the root label back.
 	if (name.labels() > sigLabels)
 		wild = name.wild(name.labels() - sigLabels);
-	while (it.hasNext())
-		records[--size] = (Record) it.next();
-	Arrays.sort(records);
 
 	DNSOutput header = new DNSOutput();
 	if (wild != null)
@@ -162,7 +155,7 @@ digestRRset(RRSIGRecord rrsig, RRset rrset) {
 	header.writeU16(rrset.getType());
 	header.writeU16(rrset.getDClass());
 	header.writeU32(rrsig.getOrigTTL());
-	for (Record record : records) {
+	rrset.rrs().stream().sorted().forEach(record -> {
 		out.writeByteArray(header.toByteArray());
 		int lengthPosition = out.current();
 		out.writeU16(0);
@@ -172,7 +165,7 @@ digestRRset(RRSIGRecord rrsig, RRset rrset) {
 		out.jump(lengthPosition);
 		out.writeU16(rrlength);
 		out.restore();
-	}
+	});
 	return out.toByteArray();
 }
 
@@ -987,7 +980,7 @@ verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key) throws DNSSECException
  * @throws DNSSECException Some other error occurred.
  */
 public static void
-verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key, Date date) throws DNSSECException
+verify(RRset<?> rrset, RRSIGRecord rrsig, DNSKEYRecord key, Date date) throws DNSSECException
 {
 	if (!matches(rrsig, key))
 		throw new KeyMismatchException(key, rrsig);
@@ -1119,7 +1112,7 @@ sign(RRset rrset, DNSKEYRecord key, PrivateKey privkey,
  * @return The generated signature
  */
 public static RRSIGRecord
-sign(RRset rrset, DNSKEYRecord key, PrivateKey privkey,
+sign(RRset<?> rrset, DNSKEYRecord key, PrivateKey privkey,
      Date inception, Date expiration, String provider) throws DNSSECException
 {
 	int alg = key.getAlgorithm();
