@@ -21,7 +21,7 @@ public static final int PRIMARY = 1;
 /** A secondary zone */
 public static final int SECONDARY = 2;
 
-private Map data;
+private Map<Name, Object> data;
 private Name origin;
 private Object originNode;
 private int dclass = DClass.IN;
@@ -134,7 +134,7 @@ maybeAddRecord(Record record) throws IOException {
  */
 public
 Zone(Name zone, String file) throws IOException {
-	data = new TreeMap();
+	data = new TreeMap<>();
 
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
@@ -155,7 +155,7 @@ Zone(Name zone, String file) throws IOException {
  */
 public
 Zone(Name zone, Record [] records) throws IOException {
-	data = new TreeMap();
+	data = new TreeMap<>();
 
 	if (zone == null)
 		throw new IllegalArgumentException("no zone name specified");
@@ -167,7 +167,7 @@ Zone(Name zone, Record [] records) throws IOException {
 
 private void
 fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
-	data = new TreeMap();
+	data = new TreeMap<>();
 
 	origin = xfrin.getName();
 	List records = xfrin.run();
@@ -236,8 +236,9 @@ exactName(Name name) {
 private synchronized RRset []
 allRRsets(Object types) {
 	if (types instanceof List) {
-		List typelist = (List) types;
-		return (RRset []) typelist.toArray(new RRset[0]);
+		@SuppressWarnings("unchecked")
+		List<RRset> typelist = (List<RRset>) types;
+		return typelist.toArray(new RRset[0]);
 	} else {
 		RRset set = (RRset) types;
 		return new RRset [] {set};
@@ -282,6 +283,7 @@ addRRset(Name name, RRset rrset) {
 	}
 	int rtype = rrset.getType();
 	if (types instanceof List) {
+		@SuppressWarnings("unchecked")
 		List<RRset> list = (List<RRset>) types;
 		for (int i = 0; i < list.size(); i++) {
 			RRset set = (RRset) list.get(i);

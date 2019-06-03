@@ -53,6 +53,7 @@ static final int TSIG_FAILED = 4;
 private static Record [] emptyRecordArray = new Record[0];
 private static RRset [] emptyRRsetArray = new RRset[0];
 
+@SuppressWarnings("unchecked")
 private
 Message(Header header) {
 	sections = new List[4];
@@ -343,8 +344,8 @@ public Record []
 getSectionArray(int section) {
 	if (sections[section] == null)
 		return emptyRecordArray;
-	List l = sections[section];
-	return (Record []) l.toArray(new Record[0]);
+	List<Record> l = sections[section];
+	return l.toArray(new Record[0]);
 }
 
 private static boolean

@@ -157,6 +157,7 @@ findProperty() {
  * Uses the undocumented Sun DNS implementation to determine the configuration.
  * This doesn't work or even compile with all JVMs (gcj, for example).
  */
+@SuppressWarnings("unchecked")
 private boolean
 findSunJVM() {
 	List<String> lserver = new ArrayList<>(0);

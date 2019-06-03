@@ -132,7 +132,7 @@ private static class NegativeElement implements Element {
 	}
 }
 
-private static class CacheMap extends LinkedHashMap {
+private static class CacheMap extends LinkedHashMap<Name, Object> {
 	private int maxsize;
 
 	CacheMap(int maxsize) {
@@ -214,9 +214,10 @@ removeName(Name name) {
 private synchronized Element []
 allElements(Object types) {
 	if (types instanceof List) {
-		List typelist = (List) types;
+		@SuppressWarnings("unchecked")
+		List<Element> typelist = (List<Element>) types;
 		int size = typelist.size();
-		return (Element []) typelist.toArray(new Element[size]);
+		return typelist.toArray(new Element[size]);
 	} else {
 		Element set = (Element) types;
 		return new Element[] {set};
@@ -271,6 +272,7 @@ addElement(Name name, Element element) {
 	}
 	int type = element.getType();
 	if (types instanceof List) {
+		@SuppressWarnings("unchecked")
 		List<Element> list = (List<Element>) types;
 		for (int i = 0; i < list.size(); i++) {
 			Element elt = (Element) list.get(i);

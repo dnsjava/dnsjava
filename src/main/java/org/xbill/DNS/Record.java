@@ -13,7 +13,7 @@ import org.xbill.DNS.utils.*;
  *
  * @author Brian Wellington
  */
-public abstract class Record implements Cloneable, Comparable, Serializable {
+public abstract class Record implements Cloneable, Comparable<Record>, Serializable {
 
 private static final long serialVersionUID = 2694906050116005466L;
 
@@ -642,9 +642,7 @@ setTTL(long ttl) {
  */
 @Override
 public int
-compareTo(Object o) {
-	Record arg = (Record) o;
-
+compareTo(Record arg) {
 	if (this == arg)
 		return (0);
 
