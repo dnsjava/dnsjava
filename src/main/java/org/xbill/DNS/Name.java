@@ -323,7 +323,7 @@ fromString(String s) throws TextParseException {
 
 /**
  * Create a new name from a constant string.  This should only be used when
- the name is known to be good - that is, when it is constant.
+ * the name is known to be good - that is, when it is constant.
  * @param s The string to be converted
  * @throws IllegalArgumentException The name is invalid.
  */
