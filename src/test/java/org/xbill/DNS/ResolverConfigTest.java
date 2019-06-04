@@ -28,7 +28,7 @@ class ResolverConfigTest {
 		String[] dnsSearch = { "dnsjava.org", "example.com",
 			"dnsjava.org" };
 		Name[] searchPath = Arrays.stream(dnsSearch)
-			.map(s -> Name.fromConstantString(s, Name.root))
+			.map(s -> Name.fromConstantString(s + "."))
 			.toArray(Name[]::new);
 		System.setProperty(ResolverConfig.DNS_SERVER_PROP,
 			String.join(",", dnsServers));

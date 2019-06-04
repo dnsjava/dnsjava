@@ -329,13 +329,8 @@ fromString(String s) throws TextParseException {
  */
 public static Name
 fromConstantString(String s) {
-	return fromConstantString(s, null);
-}
-
-static Name
-fromConstantString(String s, Name origin) {
 	try {
-		return fromString(s, origin);
+		return fromString(s, null);
 	}
 	catch (TextParseException e) {
 		throw new IllegalArgumentException("Invalid name '" + s + "'");
