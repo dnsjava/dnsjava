@@ -10,18 +10,20 @@ import java.util.*;
  * Key - contains a cryptographic public key.  The data can be converted
  * to objects implementing java.security.interfaces.PublicKey
  * @see DNSSEC
+ * @see DNSKEYRecord
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc2535">RFC 2535: Domain Name System Security Extensions</a>
+ * @see <a href="https://tools.ietf.org/html/rfc3755">RFC 3755: Legacy Resolver Compatibility for Delegation Signer (DS)</a>
  */
-
 public class KEYRecord extends KEYBase {
 
 private static final long serialVersionUID = 6385613447571488906L;
 
+/**
+ * KEY protocol identifiers.
+ */
 public static class Protocol {
-	/**
-	 * KEY protocol identifiers.
-	 */
 
 	private Protocol() {}
 
@@ -77,11 +79,11 @@ public static class Protocol {
 		return protocols.getValue(s);
 	}
 }
-	
+
+/**
+ * KEY flags identifiers.
+ */
 public static class Flags {
-	/**
-	 * KEY flags identifiers.
-	 */
 
 	private Flags() {}
 

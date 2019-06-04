@@ -8,8 +8,8 @@ import java.util.*;
  * Text - stores text strings
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and Specification</a>
  */
-
 public class TXTRecord extends TXTBase {
 
 private static final long serialVersionUID = -5780785764284221342L;

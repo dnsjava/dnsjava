@@ -6,10 +6,11 @@ import java.io.*;
 
 /**
  * Geographical Location - describes the physical location of a host.
+ * (withdrawn -- this was a limited early version of {@link LOCRecord})
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1712">RFC 1712: DNS Encoding of Geographical Location</a>
  */
-
 public class GPOSRecord extends Record {
 
 private static final long serialVersionUID = -6349714958085750705L;

@@ -10,7 +10,6 @@ import java.io.*;
  *
  * @author Brian Wellington
  */
-
 public class UNKRecord extends Record {
 
 private static final long serialVersionUID = -4193583311594626915L;

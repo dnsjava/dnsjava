@@ -6,8 +6,8 @@ package org.xbill.DNS;
  * CNAME Record  - maps an alias to its real name
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and Specification</a>
  */
-
 public class CNAMERecord extends SingleCompressedNameBase {
 
 private static final long serialVersionUID = -4020373886892538580L;

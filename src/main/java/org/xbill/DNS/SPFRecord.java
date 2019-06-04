@@ -5,11 +5,12 @@ package org.xbill.DNS;
 import java.util.*;
 
 /**
- * Sender Policy Framework (RFC 4408, experimental)
+ * Sender Policy Framework (discontinued in RFC 7208)
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc7208">RFC 7208: Sender Policy Framework (SPF)
+ *            for Authorizing Use of Domains in Email, Version 1</a>
  */
-
 public class SPFRecord extends TXTBase {
 
 private static final long serialVersionUID = -2100754352801658722L;

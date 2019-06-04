@@ -16,8 +16,9 @@ import org.xbill.DNS.utils.base16;
  * 
  * @author Brian Wellington
  * @author David Blacka
+ *
+ * @see <a href="https://tools.ietf.org/html/rfc5155">RFC 5155: DNS Security (DNSSEC) Hashed Authenticated Denial of Existence</a>
  */
-
 public class NSEC3PARAMRecord extends Record {
 
 private static final long serialVersionUID = -8689038598776316533L;

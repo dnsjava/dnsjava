@@ -9,8 +9,8 @@ import java.text.*;
  * Location - describes the physical location of hosts, networks, subnets.
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1876">RFC 1876: A Means for Expressing Location Information in the Domain Name System</a>
  */
-
 public class LOCRecord extends Record {
 
 private static final long serialVersionUID = 9058224788126750409L;

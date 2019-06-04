@@ -6,11 +6,11 @@ import java.io.*;
 import java.net.*;
 
 /**
- * A6 Record - maps a domain name to an IPv6 address (experimental)
+ * A6 Record - maps a domain name to an IPv6 address (historic)
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc6563">RFC 6563: Moving A6 to Historic Status</a>
  */
-
 public class A6Record extends Record {
 
 private static final long serialVersionUID = -8815026887337346789L;

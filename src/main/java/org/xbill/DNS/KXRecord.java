@@ -6,8 +6,8 @@ package org.xbill.DNS;
  * Key Exchange - delegation of authority
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc2230">RFC 2230: Key Exchange Delegation Record for the DNS</a>
  */
-
 public class KXRecord extends U16NameBase {
 
 private static final long serialVersionUID = 7448568832769757809L;

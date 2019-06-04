@@ -12,7 +12,6 @@ import org.xbill.DNS.utils.*;
  *
  * @author Brian Wellington
  */
-
 abstract class KEYBase extends Record {
 
 private static final long serialVersionUID = 3469321722693285454L;

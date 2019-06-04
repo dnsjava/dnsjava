@@ -11,12 +11,12 @@ import org.xbill.DNS.utils.*;
  * @see KEYRecord
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc4398">RFC 4398: Storing Certificates in the Domain Name System (DNS)</a>
  */
-
 public class CERTRecord extends Record {
 
+/** Certificate type identifiers. */
 public static class CertificateType {
-	/** Certificate type identifiers.  See RFC 4398 for more detail. */
 
 	private CertificateType() {}
 

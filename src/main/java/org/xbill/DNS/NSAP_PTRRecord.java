@@ -4,11 +4,11 @@ package org.xbill.DNS;
 
 /**
  * NSAP Pointer Record  - maps a domain name representing an NSAP Address to
- * a hostname.
+ * a hostname. (obsolete)
  *
  * @author Brian Wellington
+ * @see <a href="https://tools.ietf.org/html/rfc1706">RFC 1706: DNS NSAP Resource Records</a>
  */
-
 public class NSAP_PTRRecord extends SingleNameBase {
 
 private static final long serialVersionUID = 2386284746382064904L;

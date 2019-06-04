@@ -9,8 +9,9 @@ import java.io.*;
  * to an existing string will produce a new domain.
  *
  * @author Chuck Santos
+ * @see <a href="https://tools.ietf.org/html/rfc3403">RFC 3403: Dynamic Delegation Discovery System (DDDS)
+ *            Part Three: The Domain Name System (DNS) Database</a>
  */
-
 public class NAPTRRecord extends Record {
 
 private static final long serialVersionUID = 5191232392044947002L;
