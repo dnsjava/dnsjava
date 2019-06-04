@@ -6,7 +6,7 @@ package org.xbill.DNS;
  * Name Server Record  - contains the name server serving the named zone
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and Specification</a>
  */
 public class NSRecord extends SingleCompressedNameBase {
 

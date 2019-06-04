@@ -11,7 +11,7 @@ import java.io.*;
  * @author Tom Scola (tscola@research.att.com)
  * @author Brian Wellington
  *
- * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183</a>
+ * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class RPRecord extends Record {
 

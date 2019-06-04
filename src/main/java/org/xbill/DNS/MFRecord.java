@@ -7,7 +7,7 @@ package org.xbill.DNS;
  * for a domain (obsolete)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc973">RFC 973</a>
+ * @see <a href="https://tools.ietf.org/html/rfc973">RFC 973: Domain System Changes and Observations</a>
  */
 public class MFRecord extends SingleNameBase {
 

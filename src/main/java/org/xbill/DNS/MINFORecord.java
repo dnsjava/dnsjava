@@ -10,7 +10,7 @@ import java.io.*;
  * mailing list/mailbox.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883</a>
+ * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883: Domain Names - Implementation and Specification</a>
  */
 public class MINFORecord extends Record {
 

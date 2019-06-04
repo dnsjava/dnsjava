@@ -9,7 +9,8 @@ import org.xbill.DNS.utils.*;
  * Transport Layer Security Authentication
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc6698">RFC 6698</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6698">RFC 6698: The DNS-Based Authentication of Named Entities (DANE)
+ *              Transport Layer Security (TLS) Protocol: TLSA</a>
  */
 public class TLSARecord extends Record {
 

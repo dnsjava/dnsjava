@@ -11,7 +11,7 @@ import java.util.*;
  * @see RRset
  * @see DNSSEC
  * @see KEYRecord
- * @see <a href="https://tools.ietf.org/html/rfc4034">RFC 4034</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4034">RFC 4034: Resource Records for the DNS Security Extensions</a>
  *
  * @author Brian Wellington
  */

@@ -18,7 +18,7 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  * @author David Blacka
  *
- * @see <a href="https://tools.ietf.org/html/rfc5155">RFC 5155</a>
+ * @see <a href="https://tools.ietf.org/html/rfc5155">RFC 5155: DNS Security (DNSSEC) Hashed Authenticated Denial of Existence</a>
  */
 public class NSEC3Record extends Record {
 

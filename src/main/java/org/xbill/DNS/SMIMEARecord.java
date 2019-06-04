@@ -8,7 +8,7 @@ import org.xbill.DNS.utils.*;
 /**
  * S/MIME cert association
  *
- * @see <a href="https://tools.ietf.org/html/rfc8162">RFC 8162</a>
+ * @see <a href="https://tools.ietf.org/html/rfc8162">RFC 8162: Using Secure DNS to Associate Certificates with Domain Names for S/MIME</a>
  *
  * @author Brian Wellington
  */

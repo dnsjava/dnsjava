@@ -15,7 +15,7 @@ import java.io.*;
  * @author Brian Wellington
  * @author David Blacka
  *
- * @see <a href="https://tools.ietf.org/html/rfc4034">RFC 4034</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4034">RFC 4034: Resource Records for the DNS Security Extensions</a>
  */
 public class NSECRecord extends Record {
 

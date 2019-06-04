@@ -4,7 +4,7 @@ package org.xbill.DNS;
 
 /**
  * NSAP Pointer Record  - maps a domain name representing an NSAP Address to
- * a hostname.
+ * a hostname. (obsolete)
  *
  * @author Brian Wellington
  * @see <a href="https://tools.ietf.org/html/rfc1706">RFC 1706: DNS NSAP Resource Records</a>

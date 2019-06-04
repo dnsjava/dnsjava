@@ -9,7 +9,8 @@ import org.xbill.DNS.utils.base64;
  * DHCID - Dynamic Host Configuration Protocol (DHCP) ID (RFC 4701)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc4701">RFC 4701</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4701">RFC 4701: A DNS Resource Record (RR) for Encoding
+ *    Dynamic Host Configuration Protocol (DHCP) Information (DHCID RR)</a>
  */
 public class DHCIDRecord extends Record {
 

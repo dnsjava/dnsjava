@@ -8,7 +8,7 @@ import java.io.*;
  * Certification Authority Authorization
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc6844">RFC 6844</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6844">RFC 6844: DNS Certification Authority Authorization (CAA) Resource Record</a>
  */
 public class CAARecord extends Record {
 

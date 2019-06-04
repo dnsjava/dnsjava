@@ -10,7 +10,7 @@ import org.xbill.DNS.utils.*;
  * IPsec Keying Material (RFC 4025)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc4025">RFC 4025</a>
+ * @see <a href="https://tools.ietf.org/html/rfc4025">RFC 4025: A Method for Storing IPsec Keying Material in DNS</a>
  */
 public class IPSECKEYRecord extends Record {
 

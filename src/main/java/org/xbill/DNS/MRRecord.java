@@ -6,7 +6,7 @@ package org.xbill.DNS;
  * Mailbox Rename Record  - specifies a rename of a mailbox.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883</a>
+ * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883: Domain Names - Implementation and Specification</a>
  */
 public class MRRecord extends SingleNameBase {
 

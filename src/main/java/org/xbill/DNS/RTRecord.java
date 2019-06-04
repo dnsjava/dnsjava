@@ -6,7 +6,7 @@ package org.xbill.DNS;
  * Route Through Record - lists a route preference and intermediate host.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035</a>
+ * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and Specification</a>
  */
 public class RTRecord extends U16NameBase {
 

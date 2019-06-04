@@ -77,7 +77,7 @@ public static final int RT		= 21;
 /** {@link NSAPRecord NSAP address} */
 public static final int NSAP		= 22;
 
-/** {@link NSAP_PTRRecord Reverse NSAP address (deprecated)} */
+/** {@link NSAP_PTRRecord Reverse NSAP address} */
 public static final int NSAP_PTR	= 23;
 
 /** {@link SIGRecord Signature} */
@@ -89,7 +89,7 @@ public static final int KEY		= 25;
 /** {@link PXRecord X.400 mail mapping} */
 public static final int PX		= 26;
 
-/** {@link GPOSRecord Geographical position (withdrawn)} */
+/** {@link GPOSRecord Geographical position} */
 public static final int GPOS		= 27;
 
 /** {@link AAAARecord IPv6 address} */
@@ -101,12 +101,14 @@ public static final int LOC		= 29;
 /** {@link NXTRecord Next valid name in zone} */
 public static final int NXT		= 30;
 
-/** Endpoint identifier
+/**
+ * Endpoint identifier
  * @see <a href="https://tools.ietf.org/html/draft-ietf-nimrod-dns-00">DNS Resource Records for Nimrod Routing Architecture</a>
  */
 public static final int EID		= 31;
 
-/** Nimrod locator
+/**
+ * Nimrod locator
  * @see <a href="https://tools.ietf.org/html/draft-ietf-nimrod-dns-00">DNS Resource Records for Nimrod Routing Architecture</a>
  */
 public static final int NIMLOC		= 32;
@@ -180,7 +182,7 @@ public static final int CDNSKEY		= 60;
 /** {@link OPENPGPKEYRecord OpenPGP Key} */
 public static final int OPENPGPKEY	= 61;
 
-/** {@link SPFRecord Sender Policy Framework (experimental)} */
+/** {@link SPFRecord Sender Policy Framework} */
 public static final int SPF		= 99;
 
 /** {@link TKEYRecord Transaction key} */

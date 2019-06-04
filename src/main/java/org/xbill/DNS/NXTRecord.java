@@ -12,7 +12,7 @@ import java.util.*;
  * failed query for data in a DNSSEC-signed zone. 
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc2065">RFC 2065</a>
+ * @see <a href="https://tools.ietf.org/html/rfc2065">RFC 2065: Domain Name System Security Extensions</a>
  */
 public class NXTRecord extends Record {
 
