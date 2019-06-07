@@ -28,7 +28,6 @@ import org.xbill.DNS.utils.*;
  * @author Brian Wellington
  * @author Bob Halley
  */
-
 public class Tokenizer implements AutoCloseable{
 
 private static String delim = " \t\n;()\"";
@@ -121,21 +120,6 @@ public static class Token {
 	public boolean
 	isEOL() {
 		return (type == EOL || type == EOF);
-	}
-}
-
-static class TokenizerException extends TextParseException {
-	String message;
-
-	public
-	TokenizerException(String filename, int line, String message) {
-		super(filename + ":" + line + ": " + message);
-		this.message = message;
-	}
-
-	public String
-	getBaseMessage() {
-		return message;
 	}
 }
 
@@ -708,7 +692,7 @@ getBase32String(base32 b32) throws IOException {
  */
 public TextParseException
 exception(String s) {
-	return new TokenizerException(filename, line, s);
+	return new TextParseException(filename + ":" + line + ": " + s);
 }
 
 /**

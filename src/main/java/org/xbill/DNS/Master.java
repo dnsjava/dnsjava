@@ -12,7 +12,6 @@ import java.util.*;
  *
  * @author Brian Wellington
  */
-
 public class Master implements AutoCloseable {
 
 private Name origin;
@@ -253,9 +252,6 @@ private Record
 nextGenerated() throws IOException {
 	try {
 		return generator.nextRecord();
-	}
-	catch (Tokenizer.TokenizerException e) {
-		throw st.exception("Parsing $GENERATE: " + e.getBaseMessage());
 	}
 	catch (TextParseException e) {
 		throw st.exception("Parsing $GENERATE: " + e.getMessage());
