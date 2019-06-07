@@ -90,7 +90,7 @@
                         <Import-Package>
                             !org.xbill.DNS*,!sun.*,*
                         </Import-Package>
-                        <Bundle-RequiredExecutionEnvironment>J2SE-1.4</Bundle-RequiredExecutionEnvironment>
+                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <_removeheaders>Bnd-*, Tool, Require-Capability</_removeheaders>
                     </instructions>
                 </configuration>
