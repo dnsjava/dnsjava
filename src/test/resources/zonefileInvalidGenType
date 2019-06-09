@@ -1,2 +1,0 @@
-$TTL 1h
-$GENERATE 1-3 example.com.  MX    10 mail.example.com.
