@@ -34,10 +34,11 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class TTLTest
 {
@@ -76,23 +77,17 @@ class TTLTest
     @Test
     void test_parseTTL_invalid()
     {
-	try {TTL.parseTTL(null); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	assertThrows(NumberFormatException.class, () -> TTL.parseTTL(null));
 
-	try {TTL.parseTTL(""); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	assertThrows(NumberFormatException.class, () -> TTL.parseTTL(""));
 
-	try {TTL.parseTTL("S"); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	assertThrows(NumberFormatException.class, () -> TTL.parseTTL("S"));
 
-	try {TTL.parseTTL("10S4B"); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	assertThrows(NumberFormatException.class, () -> TTL.parseTTL("10S4B"));
 
-	try {TTL.parseTTL("1S"+0xFFFFFFFFL+"S"); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	assertThrows(NumberFormatException.class, () -> TTL.parseTTL("1S"+0xFFFFFFFFL+"S"));
 
-	try {TTL.parseTTL(""+0x100000000L); fail("NumberFormatException not throw");}
-	catch( NumberFormatException e ){}
+	assertThrows(NumberFormatException.class, () -> TTL.parseTTL(""+0x100000000L));
     }
 
     @Test
@@ -119,10 +114,8 @@ class TTLTest
     @Test
     void test_format_invalid()
     {
-	try {TTL.format(-1); fail("InvalidTTLException not thrown");
-	} catch( InvalidTTLException e ){}
+	assertThrows(InvalidTTLException.class, () -> TTL.format(-1));
 
-	try {TTL.format(0x100000000L); fail("InvalidTTLException not thrown");
-	} catch( InvalidTTLException e ){}
+	assertThrows(InvalidTTLException.class, () -> TTL.format(0x100000000L));
     }
 }

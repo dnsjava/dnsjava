@@ -34,15 +34,15 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
 class SingleNameBaseTest
 {
@@ -121,13 +121,7 @@ class SingleNameBaseTest
 	tc.rdataFromString(t, null);
 	assertEquals(exp, tc.getSingleName());
 
-	t = new Tokenizer("my.relative.name");
-	tc = new TestClass();
-	try {
-	    tc.rdataFromString(t, null);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new TestClass().rdataFromString(new Tokenizer("my.relative.name"), null));
     }
 
     @Test

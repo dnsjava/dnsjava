@@ -34,15 +34,15 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class GPOSRecordTest
 {
@@ -98,54 +98,34 @@ class GPOSRecordTest
 
     @Test
     void test_toosmall_longitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       -90.001, m_lat, m_alt);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
+			       -90.001, m_lat, m_alt));
 	}
 
     @Test
     void test_toobig_longitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       90.001, m_lat, m_alt);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
+			       90.001, m_lat, m_alt));
 	}
 
     @Test
     void test_toosmall_latitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       m_long, -180.001, m_alt);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
+			       m_long, -180.001, m_alt));
 	}
 
     @Test
     void test_toobig_latitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			       m_long, 180.001, m_alt);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
+			       m_long, 180.001, m_alt));
 	}
 
     @Test
     void test_invalid_string()
 	{
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
 			Double.toString(m_long),
-			       "120.\\00ABC", Double.toString(m_alt));
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+			       "120.\\00ABC", Double.toString(m_alt)));
 	}
     }
 
@@ -185,45 +165,29 @@ class GPOSRecordTest
 
     @Test
     void test_toosmall_longitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
 			       "-90.001", Double.toString(m_lat),
-			Double.toString(m_alt));
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+			Double.toString(m_alt)));
 	}
 
     @Test
     void test_toobig_longitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
 			       "90.001", Double.toString(m_lat),
-			Double.toString(m_alt));
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+			Double.toString(m_alt)));
 	}
 
     @Test
     void test_toosmall_latitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
 			Double.toString(m_long), "-180.001",
-			Double.toString(m_alt));
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+			Double.toString(m_alt)));
 	}
 
     @Test
     void test_toobig_latitude() {
-	    try {
-		new GPOSRecord(m_n, DClass.IN, m_ttl,
-			Double.toString(m_long), "180.001", Double.toString(m_alt));
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new GPOSRecord(m_n, DClass.IN, m_ttl,
+			Double.toString(m_long), "180.001", Double.toString(m_alt)));
 	}
     }
 
@@ -253,11 +217,7 @@ class GPOSRecordTest
 	    DNSInput in = new DNSInput(raw);
 	    
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rrFromWire(in);
-		fail("WireParseException not thrown");
-	    }
-	    catch(WireParseException e){}
+	    assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
 	}
 
     @Test
@@ -269,11 +229,7 @@ class GPOSRecordTest
 	    DNSInput in = new DNSInput(raw);
 
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rrFromWire(in);
-		fail("WireParseException not thrown");
-	    }
-	    catch(WireParseException e){}
+	    assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
 	}
 
     @Test
@@ -285,11 +241,7 @@ class GPOSRecordTest
 	    DNSInput in = new DNSInput(raw);
 
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rrFromWire(in);
-		fail("WireParseException not thrown");
-	    }
-	    catch(WireParseException e){}
+	    assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
 	}
 
     @Test
@@ -301,11 +253,7 @@ class GPOSRecordTest
 	    DNSInput in = new DNSInput(raw);
 
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rrFromWire(in);
-		fail("WireParseException not thrown");
-	    }
-	    catch(WireParseException e){}
+	    assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
 	}
     }
 
@@ -328,11 +276,7 @@ class GPOSRecordTest
 	    Tokenizer t = new Tokenizer("-100.390 171.121212 1010787");
 	    
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rdataFromString(t, null);
-		fail("IOException not thrown");
-	    }
-	    catch(IOException e){}
+	    assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
 	}
 
     @Test
@@ -340,11 +284,7 @@ class GPOSRecordTest
 	    Tokenizer t = new Tokenizer("90.00001 171.121212 1010787");
 	    
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rdataFromString(t, null);
-		fail("IOException not thrown");
-	    }
-	    catch(IOException e){}
+	    assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
 	}
 
     @Test
@@ -352,11 +292,7 @@ class GPOSRecordTest
 	    Tokenizer t = new Tokenizer("0.0 -180.01 1010787");
 	    
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rdataFromString(t, null);
-		fail("IOException not thrown");
-	    }
-	    catch(IOException e){}
+	    assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
 	}
 
     @Test
@@ -364,11 +300,7 @@ class GPOSRecordTest
 	    Tokenizer t = new Tokenizer("0.0 180.01 1010787");
 	    
 	    GPOSRecord gr = new GPOSRecord();
-	    try {
-		gr.rdataFromString(t, null);
-		fail("IOException not thrown");
-	    }
-	    catch(IOException e){}
+	    assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
 	}
 
     @Test

@@ -34,13 +34,7 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,6 +43,12 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
+import org.junit.jupiter.api.Test;
 
 class RecordTest
 {
@@ -141,29 +141,13 @@ class RecordTest
 	int d = DClass.IN;
 	long ttl = 0xABCDEL;
 
-	try {
-	    new SubRecord(r, t, d, ttl);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new SubRecord(r, t, d, ttl));
 
-	try {
-	    new SubRecord(n, -1, d, ttl);
-	    fail("InvalidTypeException not thrown");
-	}
-	catch( InvalidTypeException e ){}
+	assertThrows(InvalidTypeException.class, () -> new SubRecord(n, -1, d, ttl));
 
-	try {
-	    new SubRecord(n, t, -1, ttl);
-	    fail("InvalidDClassException not thrown");
-	}
-	catch( InvalidDClassException e ){}
+	assertThrows(InvalidDClassException.class, () -> new SubRecord(n, t, -1, ttl));
 
-	try {
-	    new SubRecord(n, t, d, -1);
-	    fail("InvalidTTLException not thrown");
-	}
-	catch( InvalidTTLException e ){}
+	assertThrows(InvalidTTLException.class, () -> new SubRecord(n, t, d, -1));
     }
 
     @Test
@@ -181,11 +165,7 @@ class RecordTest
 	assertEquals(d, rec.getDClass());
 	assertEquals(0, rec.getTTL());
 
-	try {
-	    Record.newRecord(r, t, d);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> Record.newRecord(r, t, d));
     }
 
     @Test
@@ -204,11 +184,7 @@ class RecordTest
 	assertEquals(d, rec.getDClass());
 	assertEquals(ttl, rec.getTTL());
 
-	try {
-	    Record.newRecord(r, t, d, ttl);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> Record.newRecord(r, t, d, ttl));
     }
 
     @Test
@@ -280,11 +256,7 @@ class RecordTest
 	assertNull(Record.newRecord(n, t, d, ttl, 1, new byte[ 0 ]));
 	assertNull(Record.newRecord(n, t, d, ttl, data.length+1, data));
 	assertNull(Record.newRecord(n, t, d, ttl, 5, new byte[] { data[0], data[1], data[2], data[3], 0 }));
-	try {
-	    Record.newRecord(r, t, d, ttl, 0, null);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> Record.newRecord(r, t, d, ttl, 0, null));
 
     }
 
@@ -526,34 +498,14 @@ class RecordTest
 	for( int i=0; i<257; ++i){
 	    b.append('A');
 	}
-	try {
-	    SubRecord.byteArrayFromString(b.toString());
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString(b.toString()));
 
-	try {
-	    SubRecord.byteArrayFromString("\\256");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-	try {
-	    SubRecord.byteArrayFromString("\\25a");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-	try {
-	    SubRecord.byteArrayFromString("\\25");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString("\\256"));
+	assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString("\\25a"));
+	assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString("\\25"));
 
 	b.append("\\233");
-	try {
-	    SubRecord.byteArrayFromString(b.toString());
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString(b.toString()));
 	
     }
 
@@ -617,33 +569,13 @@ class RecordTest
 	int ttl = 0xABE99;
 	InetAddress addr = InetAddress.getByName("191.234.43.10");
 
-	Tokenizer st = new Tokenizer("191.234.43.10");
+	assertThrows(RelativeNameException.class, () -> Record.fromString(rel, t, d, ttl, new Tokenizer("191.234.43.10"), n2));
 
-	try {
-	    Record.fromString(rel, t, d, ttl, st, n2);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(TextParseException.class, () -> Record.fromString(n, t, d, ttl, new Tokenizer("191.234.43.10 another_token"), n2));
 
-	st = new Tokenizer("191.234.43.10 another_token");
-	try {
-	    Record.fromString(n, t, d, ttl, st, n2);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> Record.fromString(n, t, d, ttl, new Tokenizer("\\# 100 ABCDE"), n2));
 
-	st = new Tokenizer("\\# 100 ABCDE");
-	try {
-	    Record.fromString(n, t, d, ttl, st, n2);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
-
-	try {
-	    Record.fromString(n, t, d, ttl, "\\# 100", n2);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> Record.fromString(n, t, d, ttl, "\\# 100", n2));
     }
 
     @Test
@@ -790,11 +722,7 @@ class RecordTest
 
 	r = new SubRecord(n, Type.A, DClass.IN, 0xABCDE9);
 
-	try {
-	    r.cloneRecord();
-	    fail("IllegalStateException not thrown");
-	}
-	catch( IllegalStateException e ){}
+	assertThrows(IllegalStateException.class, r::cloneRecord);
     }
 
     @Test
@@ -814,11 +742,7 @@ class RecordTest
 	assertEquals(0xABCDE9, r1.getTTL());
 	assertEquals(((ARecord)r).getAddress(), ((ARecord)r1).getAddress());
 
-	try {
-	    r.withName(rel);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> r.withName(rel));
     }
 
     @Test
@@ -918,37 +842,31 @@ class RecordTest
     @Test
     void test_checkU8()
     {
-	try {Record.checkU8("field", -1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> Record.checkU8("field", -1));
 	assertEquals(0, Record.checkU8("field", 0));
 	assertEquals(0x9D, Record.checkU8("field", 0x9D));
 	assertEquals(0xFF, Record.checkU8("field", 0xFF));
-	try {Record.checkU8("field", 0x100); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> Record.checkU8("field", 0x100));
     }
 
     @Test
     void test_checkU16()
     {
-	try {Record.checkU16("field", -1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> Record.checkU16("field", -1));
 	assertEquals(0, Record.checkU16("field", 0));
 	assertEquals(0x9DA1, Record.checkU16("field", 0x9DA1));
 	assertEquals(0xFFFF, Record.checkU16("field", 0xFFFF));
-	try {Record.checkU16("field", 0x10000); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> Record.checkU16("field", 0x10000));
     }
 
     @Test
     void test_checkU32()
     {
-	try {Record.checkU32("field", -1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> Record.checkU32("field", -1));
 	assertEquals(0, Record.checkU32("field", 0));
 	assertEquals(0x9DA1F02DL, Record.checkU32("field", 0x9DA1F02DL));
 	assertEquals(0xFFFFFFFFL, Record.checkU32("field", 0xFFFFFFFFL));
-	try {Record.checkU32("field", 0x100000000L); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> Record.checkU32("field", 0x100000000L));
     }
 
     @Test
@@ -959,10 +877,6 @@ class RecordTest
 
 	assertEquals(n, Record.checkName("field", n));
 
-	try {
-	    Record.checkName("field", m);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> Record.checkName("field", m));
     }
 }

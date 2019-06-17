@@ -34,12 +34,13 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class FlagsTest
 {
@@ -52,20 +53,10 @@ class FlagsTest
 	// one that doesn't exist
 	assertTrue(Flags.string(12).startsWith("flag"));
 
-	try {
-	    Flags.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Flags.string(-1));
 	
 	//  (max is 0xF)
-	try {
-	    Flags.string(0x10);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Flags.string(0x10));
     }
 
     @Test
@@ -90,12 +81,7 @@ class FlagsTest
     @Test
     void test_isFlag()
     {
-	try {
-	    Flags.isFlag(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Flags.isFlag(-1));
 	assertTrue(Flags.isFlag(0));
 	assertFalse(Flags.isFlag(1)); // opcode
 	assertFalse(Flags.isFlag(2));
@@ -112,11 +98,6 @@ class FlagsTest
 	assertFalse(Flags.isFlag(13));
 	assertFalse(Flags.isFlag(14));
 	assertFalse(Flags.isFlag(14));
-	try {
-	    Flags.isFlag(16);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Flags.isFlag(16));
     }
 }

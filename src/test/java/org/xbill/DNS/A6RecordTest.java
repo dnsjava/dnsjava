@@ -34,18 +34,18 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class A6RecordTest
 {
@@ -115,25 +115,13 @@ class A6RecordTest
 	assertEquals(m_an2, ar.getPrefix());
 
 	// a relative name
-	try {
-	    new A6Record(m_rn, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new A6Record(m_rn, DClass.IN, m_ttl, m_prefix_bits, m_addr, null));
 
 	// a relative prefix name
-	try {
-	    new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn));
 
 	// invalid prefix bits
-	try {
-	    new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null));
 
 	// an IPv4 address
 	try {
@@ -200,22 +188,10 @@ class A6RecordTest
 	assertEquals(m_an2, ar.getPrefix());
 
 	// record with invalid prefixBits
-	t = new Tokenizer("129");
-	ar = new A6Record();
-	try {
-	    ar.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> new A6Record().rdataFromString(new Tokenizer("129"), null));
 
 	// record with invalid ipv6 address
-	t = new Tokenizer("0 " + m_addr_string.substring(4));
-	ar = new A6Record();
-	try {
-	    ar.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> new A6Record().rdataFromString(new Tokenizer("0 " + m_addr_string.substring(4)), null));
     }
 
     @Test

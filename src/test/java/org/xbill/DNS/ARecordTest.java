@@ -34,18 +34,18 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class ARecordTest
 {
@@ -98,11 +98,7 @@ class ARecordTest
 	assertEquals(m_addr, ar.getAddress());
 
 	// a relative name
-	try {
-	    new ARecord(m_rn, DClass.IN, m_ttl, m_addr);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new ARecord(m_rn, DClass.IN, m_ttl, m_addr));
 
 	// an IPv6 address
 	try {
@@ -136,13 +132,7 @@ class ARecordTest
 	assertEquals(m_addr, ar.getAddress());
 
 	// invalid address
-	t = new Tokenizer("193.160.232");
-	ar = new ARecord();
-	try {
-	    ar.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> new ARecord().rdataFromString(new Tokenizer("193.160.232"), null));
     }
 
     @Test

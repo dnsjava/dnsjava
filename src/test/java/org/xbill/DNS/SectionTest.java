@@ -34,10 +34,11 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class SectionTest
 {
@@ -47,20 +48,10 @@ class SectionTest
 	// a regular one
 	assertEquals("au", Section.string(Section.AUTHORITY));
 
-	try {
-	    Section.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Section.string(-1));
 	
 	//  (max is 3)
-	try {
-	    Section.string(4);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Section.string(4));
     }
 
     @Test

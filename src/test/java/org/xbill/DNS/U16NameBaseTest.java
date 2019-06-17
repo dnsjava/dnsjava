@@ -34,15 +34,15 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
 class U16NameBaseTest
 {
@@ -125,23 +125,15 @@ class U16NameBaseTest
 	assertEquals(m, tc.getNameField());
 
 	// an invalid u16 value
-	try {
-	    new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
+	assertThrows(IllegalArgumentException.class, () -> new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
 			  0x10000, "u16 description",
-			  m, "name description");
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){}
+			  m, "name description"));
 
 	// a relative name
 	Name rel = Name.fromString("My.relative.Name");
-	try {
-	    new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
+	assertThrows(RelativeNameException.class, () -> new TestClass(n, Type.MX, DClass.IN, 0xB12FL,
 			  0x1F2B, "u16 description",
-			  rel, "name description");
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+			  rel, "name description"));
 	
     }
 
@@ -171,13 +163,7 @@ class U16NameBaseTest
 	assertEquals(0x19A2, tc.getU16Field());
 	assertEquals(exp, tc.getNameField());
 
-	t = new Tokenizer("10 My.Relative.Name");
-	tc = new TestClass();
-	try {
-	    tc.rdataFromString(t, null);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new TestClass().rdataFromString(new Tokenizer("10 My.Relative.Name"), null));
     }
 
     @Test

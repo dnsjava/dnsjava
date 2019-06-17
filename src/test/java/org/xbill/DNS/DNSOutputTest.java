@@ -34,12 +34,13 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class DNSOutputTest
 {
@@ -62,20 +63,8 @@ class DNSOutputTest
     void test_initial_state()
     {
 	assertEquals( 0, m_do.current() );
-	try {
-	    m_do.restore();
-	    fail("IllegalStateException not thrown");
-	}
-	catch( IllegalStateException e ){
-	    // pass
-	}
-	try {
-	    m_do.jump(1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalStateException.class, () -> m_do.restore());
+	assertThrows(IllegalArgumentException.class, () -> m_do.jump(1));
     }
 
     @Test
@@ -115,13 +104,7 @@ class DNSOutputTest
     @Test
     void test_writeU8_toobig()
     {
-	try {
-	    m_do.writeU8( 0x1FF );
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_do.writeU8( 0x1FF ));
     }
 
     @Test
@@ -148,13 +131,7 @@ class DNSOutputTest
     @Test
     void test_writeU16_toobig()
     {
-	try {
-	    m_do.writeU16( 0x1FFFF );
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_do.writeU16( 0x1FFFF ));
     }
 
     @Test
@@ -185,13 +162,7 @@ class DNSOutputTest
     @Test
     void test_writeU32_toobig()
     {
-	try {
-	    m_do.writeU32( 0x1FFFFFFFFL );
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_do.writeU32( 0x1FFFFFFFFL ));
     }
 
     @Test
@@ -257,13 +228,7 @@ class DNSOutputTest
     void test_writeCountedString_toobig()
     {
 	byte[] in = new byte [ 256 ];
-	try {
-	    m_do.writeCountedString(in);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_do.writeCountedString(in));
     }
 
     @Test
@@ -276,13 +241,7 @@ class DNSOutputTest
 	assertEquals( 6, m_do.current() );
 	m_do.restore();
 	assertEquals( 4, m_do.current() );
-	try {
-	    m_do.restore();
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalStateException e ){
-	    // pass
-	}
+	assertThrows(IllegalStateException.class, () -> m_do.restore());
     }
 
 }

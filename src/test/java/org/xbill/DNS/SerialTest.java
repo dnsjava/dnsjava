@@ -34,11 +34,12 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class SerialTest
 {
@@ -47,13 +48,7 @@ class SerialTest
     {
 	long arg1 = -1;
 	long arg2 = 1;
-	try {
-	    Serial.compare( arg1, arg2 );
-	    fail("compare accepted negative argument 1");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> Serial.compare( arg1, arg2 ));
     }
 
     @Test
@@ -61,13 +56,7 @@ class SerialTest
     {
 	long arg1 = 0xFFFFFFFFL + 1;
 	long arg2 = 1;
-	try {
-	    Serial.compare( arg1, arg2 );
-	    fail("compare accepted out-of-bounds argument 1");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> Serial.compare( arg1, arg2 ));
     }
 
     @Test
@@ -75,13 +64,7 @@ class SerialTest
     {
 	long arg1 = 1;
 	long arg2 = -1;
-	try {
-	    Serial.compare( arg1, arg2 );
-	    fail("compare accepted negative argument 2");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> Serial.compare( arg1, arg2 ));
     }
 
     @Test
@@ -89,13 +72,7 @@ class SerialTest
     {
 	long arg1 = 1;
 	long arg2 = 0xFFFFFFFFL + 1;
-	try {
-	    Serial.compare( arg1, arg2 );
-	    fail("compare accepted out-of-bounds argument 1");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> Serial.compare( arg1, arg2 ));
     }
 
     @Test
@@ -140,26 +117,14 @@ class SerialTest
     void test_increment_NegativeArg()
     {
 	long arg = -1;
-	try {
-	    Serial.increment( arg );
-	    fail("increment accepted negative argument");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> Serial.increment( arg ));
     }
 
     @Test
     void test_increment_OOBArg()
     {
 	long arg = 0xFFFFFFFFL + 1;
-	try {
-	    Serial.increment( arg );
-	    fail("increment accepted out-of-bounds argument");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> Serial.increment( arg ));
     }
 
     @Test

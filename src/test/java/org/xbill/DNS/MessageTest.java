@@ -34,16 +34,16 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import org.junit.jupiter.api.Test;
 
 public class MessageTest
 {
@@ -57,11 +57,7 @@ public class MessageTest
 		assertArrayEquals(new Record[0], m.getSectionArray(1));
 		assertArrayEquals(new Record[0], m.getSectionArray(3));
 		assertArrayEquals(new Record[0], m.getSectionArray(2));
-	    try {
-		m.getSectionArray(4);
-		fail("IndexOutOfBoundsException not thrown");
-	    }
-	    catch(IndexOutOfBoundsException e){}
+	    assertThrows(IndexOutOfBoundsException.class, () -> m.getSectionArray(4));
 	    Header h = m.getHeader();
 	    assertEquals(0, h.getCount(0));
 	    assertEquals(0, h.getCount(1));
@@ -78,11 +74,7 @@ public class MessageTest
 		assertArrayEquals(new Record[0], m.getSectionArray(1));
 		assertArrayEquals(new Record[0], m.getSectionArray(2));
 		assertArrayEquals(new Record[0], m.getSectionArray(3));
-	    try {
-		m.getSectionArray(4);
-		fail("IndexOutOfBoundsException not thrown");
-	    }
-	    catch(IndexOutOfBoundsException e){}
+	    assertThrows(IndexOutOfBoundsException.class, () -> m.getSectionArray(4));
 	    Header h = m.getHeader();
 	    assertEquals(0, h.getCount(0));
 	    assertEquals(0, h.getCount(1));

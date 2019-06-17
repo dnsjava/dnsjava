@@ -34,13 +34,14 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 // Mnemonic has package-level access.
 
@@ -57,7 +58,7 @@ class MnemonicTest
     @Test
     void test_no_maximum()
     {
-	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> m_mn.check(-1));
 	try {m_mn.check(0);} catch( IllegalArgumentException e ){
 		fail(e.getMessage());}
 	try {m_mn.check(Integer.MAX_VALUE);} catch( IllegalArgumentException e ){
@@ -79,12 +80,12 @@ class MnemonicTest
     void test_setMaximum()
     {
 	m_mn.setMaximum(15);
-	try {m_mn.check(-1); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> m_mn.check(-1));
 	try {m_mn.check(0);} catch( IllegalArgumentException e ){
 		fail(e.getMessage());}
 	try {m_mn.check(15);} catch( IllegalArgumentException e ){
 		fail(e.getMessage());}
-	try {m_mn.check(16); fail("IllegalArgumentException not thrown");} catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> m_mn.check(16));
 
 	// need numericok to exercise the usage of max in parseNumeric
 	m_mn.setNumericAllowed(true);

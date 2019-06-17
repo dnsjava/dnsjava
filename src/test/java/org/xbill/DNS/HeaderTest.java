@@ -34,16 +34,16 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class HeaderTest
 {
@@ -203,24 +203,15 @@ class HeaderTest
     @Test
     void test_flags_invalid()
     {
-	try {m_h.setFlag(-1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.setFlag(1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.setFlag(16); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.unsetFlag(-1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.unsetFlag(13); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.unsetFlag(16); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.getFlag(-1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.getFlag(4); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.getFlag(16); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(-1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(16));
+	assertThrows(IllegalArgumentException.class, () -> m_h.unsetFlag(-1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.unsetFlag(13));
+	assertThrows(IllegalArgumentException.class, () -> m_h.unsetFlag(16));
+	assertThrows(IllegalArgumentException.class, () -> m_h.getFlag(-1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.getFlag(4));
+	assertThrows(IllegalArgumentException.class, () -> m_h.getFlag(16));
     }
 
     @Test
@@ -241,18 +232,8 @@ class HeaderTest
     @Test
     void test_setID_invalid()
     {
-	try {
-	    m_h.setID(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	try {
-	    m_h.setID(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_h.setID(0x10000));
+	assertThrows(IllegalArgumentException.class, () -> m_h.setID(-1));
     }
 
     @Test
@@ -273,18 +254,8 @@ class HeaderTest
     @Test
     void test_setRcode_invalid()
     {
-	try {
-	    m_h.setRcode(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	try {
-	    m_h.setRcode(0x100);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_h.setRcode(-1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.setRcode(0x100));
     }
 
     @Test
@@ -305,18 +276,8 @@ class HeaderTest
     @Test
     void test_setOpcode_invalid()
     {
-	try {
-	    m_h.setOpcode(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
-	try {
-	    m_h.setOpcode(0x100);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_h.setOpcode(-1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.setOpcode(0x100));
     }
 
     @Test
@@ -338,40 +299,32 @@ class HeaderTest
     @Test
     void test_setCount_invalid()
     {
-	try {m_h.setCount(-1, 0); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
-	try {m_h.setCount(4, 0); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
+	assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.setCount(-1, 0));
+	assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.setCount(4, 0));
 
-	try {m_h.setCount(0, -1); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {m_h.setCount(3, 0x10000); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(IllegalArgumentException.class, () -> m_h.setCount(0, -1));
+	assertThrows(IllegalArgumentException.class, () -> m_h.setCount(3, 0x10000));
     }
 
     @Test
     void test_getCount_invalid()
     {
-	try {m_h.getCount(-1); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
-	try {m_h.getCount(4); fail("ArrayIndexOutOfBoundsException not thrown");}
-	catch( ArrayIndexOutOfBoundsException e ){}
+	assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.getCount(-1));
+	assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.getCount(4));
     }
 
     @Test
     void test_incCount_invalid()
     {
 	m_h.setCount(1, 0xFFFF);
-	try {m_h.incCount(1); fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
+	assertThrows(IllegalStateException.class, () -> m_h.incCount(1));
     }
 
     @Test
     void test_decCount_invalid()
     {
 	m_h.setCount(2, 0);
-	try {m_h.decCount(2); fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
+	assertThrows(IllegalStateException.class, () -> m_h.decCount(2));
     }
 
     @Test
