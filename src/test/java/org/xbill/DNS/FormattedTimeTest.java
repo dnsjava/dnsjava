@@ -34,15 +34,15 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 
 class FormattedTimeTest
 {
@@ -75,23 +75,8 @@ class FormattedTimeTest
     @Test
     void test_parse_invalid()
     {
-	try {
-	    FormattedTime.parse("2004010101010");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){
-	}
-	try {
-	    FormattedTime.parse("200401010101010");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){
-	}
-	try {
-	    FormattedTime.parse("2004010101010A");
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){
-	}
+	assertThrows(TextParseException.class, () -> FormattedTime.parse("2004010101010"));
+	assertThrows(TextParseException.class, () -> FormattedTime.parse("200401010101010"));
+	assertThrows(TextParseException.class, () -> FormattedTime.parse("2004010101010A"));
     }
 }

@@ -34,19 +34,19 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.Iterator;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
+import java.util.Iterator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class RRsetTest
 {
@@ -83,20 +83,11 @@ class RRsetTest
     void test_ctor_0arg()
     {
 	assertEquals(0, m_rs.size());
-	try {m_rs.getDClass(); fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.getType();
-		fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.getTTL();
-		fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.getName();
-		fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
-	try {m_rs.first();
-		fail("IllegalStateException not thrown");}
-	catch( IllegalStateException e ){}
+	assertThrows(IllegalStateException.class, () -> m_rs.getDClass());
+	assertThrows(IllegalStateException.class, () -> m_rs.getType());
+	assertThrows(IllegalStateException.class, () -> m_rs.getTTL());
+	assertThrows(IllegalStateException.class, () -> m_rs.getName());
+	assertThrows(IllegalStateException.class, () -> m_rs.first());
 
 	assertEquals("{empty}", m_rs.toString());
 
@@ -240,12 +231,7 @@ class RRsetTest
 	
 	CNAMERecord c = new CNAMERecord(m_name, DClass.IN, m_ttl, Name.fromString("an.alias."));
 	
-	try {
-	    m_rs.addRR(c);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(c));
     }
 
     @Test
@@ -256,12 +242,7 @@ class RRsetTest
 	m_a2 = new ARecord(m_name2, DClass.IN, m_ttl,
 			   InetAddress.getByName("192.169.232.11"));
 	
-	try {
-	    m_rs.addRR(m_a2);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(m_a2));
     }
 
     @Test
@@ -272,12 +253,7 @@ class RRsetTest
 	m_a2 = new ARecord(m_name, DClass.CHAOS, m_ttl,
 			   InetAddress.getByName("192.169.232.11"));
 	
-	try {
-	    m_rs.addRR(m_a2);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(m_a2));
     }
 
     @Test

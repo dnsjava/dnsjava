@@ -34,11 +34,12 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class RcodeTest
 {
@@ -54,20 +55,10 @@ class RcodeTest
 	// one that doesn't exist
 	assertTrue(Rcode.string(20).startsWith("RESERVED"));
 
-	try {
-	    Rcode.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Rcode.string(-1));
 	
 	//  (max is 0xFFF)
-	try {
-	    Rcode.string(0x1000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x1000));
     }
 
     @Test
@@ -79,20 +70,10 @@ class RcodeTest
 	// one that doesn't exist
 	assertTrue(Rcode.TSIGstring(20).startsWith("RESERVED"));
 
-	try {
-	    Rcode.TSIGstring(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Rcode.TSIGstring(-1));
 	
 	//  (max is 0xFFFF)
-	try {
-	    Rcode.string(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x10000));
     }
 
     @Test

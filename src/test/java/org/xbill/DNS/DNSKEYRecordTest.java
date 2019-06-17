@@ -34,16 +34,16 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import org.junit.jupiter.api.Test;
 
 class DNSKEYRecordTest
 {
@@ -87,11 +87,7 @@ class DNSKEYRecordTest
 	    assertArrayEquals(key, kr.getKey());
 
 	// a relative name
-	try {
-	    new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
-	    fail("RelativeNameException not thrown");
-	}
-	catch( RelativeNameException e ){}
+	assertThrows(RelativeNameException.class, () -> new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
     }
 
     @Test
@@ -106,12 +102,6 @@ class DNSKEYRecordTest
 	    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
 
 	// invalid algorithm
-	kr = new DNSKEYRecord();
-	st = new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ");
-	try {
-	    kr.rdataFromString(st, null);
-	    fail("TextParseException not thrown");
-	}
-	catch( TextParseException e ){}
+	assertThrows(TextParseException.class, () -> new DNSKEYRecord().rdataFromString(new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));
     }
 }

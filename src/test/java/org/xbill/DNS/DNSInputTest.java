@@ -34,12 +34,13 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class DNSInputTest
 {
@@ -79,13 +80,7 @@ class DNSInputTest
     @Test
     void test_jump_invalid()
     {
-	try {
-	    m_di.jump( 10 );
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_di.jump( 10 ));
     }
 
     @Test
@@ -115,13 +110,7 @@ class DNSInputTest
     @Test
     void test_setActive_invalid()
     {
-	try {
-	    m_di.setActive( 11 );
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	    // pass
-	}
+	assertThrows(IllegalArgumentException.class, () -> m_di.setActive( 11 ));
     }
 
     @Test
@@ -141,13 +130,7 @@ class DNSInputTest
     @Test
     void test_restore_invalid()
     {
-	try {
-	    m_di.restore();
-	    fail("IllegalStateException not thrown");
-	}
-	catch( IllegalStateException e ){
-	    // pass
-	}
+	assertThrows(IllegalStateException.class, () -> m_di.restore());
     }
 
     @Test
@@ -180,18 +163,12 @@ class DNSInputTest
     void test_readU8_maxval() throws WireParseException
     {
 	m_di.jump( 9 );
-	int v1 = m_di.readU8();
+	final int[] v1 = {m_di.readU8()};
 	assertEquals( 10, m_di.current() );
 	assertEquals( 0, m_di.remaining() );
-	assertEquals( 255, v1 );
+	assertEquals( 255, v1[0]);
 
-	try {
-	    v1 = m_di.readU8();
-	    fail("WireParseException not thrown");
-	}
-	catch( WireParseException e ){
-	    // pass
-	}
+	assertThrows(WireParseException.class, () -> v1[0] = m_di.readU8());
     }
     
     @Test
@@ -216,14 +193,8 @@ class DNSInputTest
 	assertEquals( 0, m_di.remaining() );
 	assertEquals( 0xFFFF, v );
 	
-	try {
-	    m_di.jump( 9 );
-	    m_di.readU16();
-	    fail("WireParseException not thrown");
-	}
-	catch( WireParseException e ){
-	    // pass 
-	}
+	assertThrows(WireParseException.class, () -> {m_di.jump( 9 );
+	    m_di.readU16();});
     }
 
     @Test
@@ -244,14 +215,8 @@ class DNSInputTest
 	assertEquals( 0, m_di.remaining() );
 	assertEquals( 0xFFFFFFFFL, v );
 	
-	try {
-	    m_di.jump( 7 );
-	    m_di.readU32();
-	    fail("WireParseException not thrown");
-	}
-	catch( WireParseException e ){
-	    // pass 
-	}
+	assertThrows(WireParseException.class, () -> {m_di.jump( 7 );
+	    m_di.readU32();});
     }
     
     @Test
@@ -298,13 +263,7 @@ class DNSInputTest
     @Test
     void test_readByteArray_1arg_invalid()
     {
-	try {
-	    m_di.readByteArray( 11 );
-	    fail("WireParseException not thrown");
-	}
-	catch( WireParseException e ){
-	    // pass
-	}
+	assertThrows(WireParseException.class, () -> m_di.readByteArray( 11 ));
     }
 
     @Test
