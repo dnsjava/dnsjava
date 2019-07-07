@@ -34,11 +34,12 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class OpcodeTest
 {
@@ -51,20 +52,10 @@ class OpcodeTest
 	// one that doesn't exist
 	assertTrue(Opcode.string(6).startsWith("RESERVED"));
 
-	try {
-	    Opcode.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Opcode.string(-1));
 	
 	//  (max is 0xF)
-	try {
-	    Opcode.string(0x10);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> Opcode.string(0x10));
     }
 
     @Test

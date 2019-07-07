@@ -34,22 +34,22 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.xbill.DNS.APLRecord.Element;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.xbill.DNS.APLRecord.Element;
 
 public class APLRecordTest
 {
@@ -79,11 +79,7 @@ public class APLRecordTest
     @Test
     void test_invalid_IPv4()
 	{
-	    try {
-		new Element(true, m_addr4, 33);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+	    assertThrows(IllegalArgumentException.class, () -> new Element(true, m_addr4, 33));
 	}
 	
     @Test
@@ -99,11 +95,7 @@ public class APLRecordTest
     @Test
     void test_invalid_IPv6()
 	{
-	    try {
-		new Element(true, m_addr6, 129);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+	    assertThrows(IllegalArgumentException.class, () -> new Element(true, m_addr6, 129));
 	}
     }
 
@@ -181,11 +173,7 @@ public class APLRecordTest
     @Test
     void test_4arg_relative_name()
 	{
-	    try {
-		new APLRecord(m_rn, DClass.IN, m_ttl, m_elements);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
+	    assertThrows(RelativeNameException.class, () -> new APLRecord(m_rn, DClass.IN, m_ttl, m_elements));
 	}
     }
 
@@ -250,11 +238,7 @@ public class APLRecordTest
 	    
 	    DNSInput di = new DNSInput(raw);
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rrFromWire(di);
-		fail("WireParseException not thrown");
-	    }
-	    catch( WireParseException e ){}
+	    assertThrows(WireParseException.class, () -> ar.rrFromWire(di));
 	}
 	
     @Test
@@ -266,11 +250,7 @@ public class APLRecordTest
 	    
 	    DNSInput di = new DNSInput(raw);
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rrFromWire(di);
-		fail("WireParseException not thrown");
-	    }
-	    catch( WireParseException e ){}
+	    assertThrows(WireParseException.class, () -> ar.rrFromWire(di));
 	}
 	
     @Test
@@ -410,11 +390,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("!1192.68.0.1/20");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -422,11 +398,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("!1/192.68.0.1:20");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -434,11 +406,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("!1:192.68.0.1|20");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -446,11 +414,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("!:192.68.0.1/20");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -458,11 +422,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("family:192.68.0.1/20");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -470,11 +430,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("3:192.68.0.1/20");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -482,11 +438,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("1:192.68.0.1/");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 
     @Test
@@ -494,11 +446,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("1:192.68.0.1/prefix");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -506,11 +454,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("1:192.68.0.1/33");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -518,11 +462,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("1:/33");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
 	
     @Test
@@ -530,11 +470,7 @@ public class APLRecordTest
 	{
 	    Tokenizer t = new Tokenizer("1:A.B.C.D/33");
 	    APLRecord ar = new APLRecord();
-	    try {
-		ar.rdataFromString(t, null);
-		fail("TextParseException not thrown");
-	    }
-	    catch( TextParseException e ){}
+	    assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
 	}
     }
 

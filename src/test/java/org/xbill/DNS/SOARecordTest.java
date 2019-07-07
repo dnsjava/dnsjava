@@ -34,17 +34,17 @@
 //
 package	org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.Random;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.util.Random;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class SOARecordTest
 {
@@ -125,157 +125,105 @@ public class SOARecordTest
     @Test
     void test_10arg_relative_name()
 	{
-	    try {
-		new SOARecord(m_rn, DClass.IN, m_ttl,
+	    assertThrows(RelativeNameException.class, () -> new SOARecord(m_rn, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      m_retry, m_expire, m_minimum);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_relative_host()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(RelativeNameException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_rn, m_admin, m_serial, m_refresh,
-			      m_retry, m_expire, m_minimum);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_relative_admin()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(RelativeNameException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_rn, m_serial, m_refresh,
-			      m_retry, m_expire, m_minimum);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch( RelativeNameException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_negative_serial()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, -1, m_refresh,
-			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_toobig_serial()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, 0x100000000L, m_refresh,
-			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_negative_refresh()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, -1,
-			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_toobig_refresh()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, 0x100000000L,
-			      m_retry, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_negative_retry()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      -1, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      -1, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_toobig_retry()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      0x100000000L, m_expire, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      0x100000000L, m_expire, m_minimum));
 	}
 	
     @Test
     void test_10arg_negative_expire()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      m_retry, -1, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, -1, m_minimum));
 	}
 	
     @Test
     void test_10arg_toobig_expire()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      m_retry, 0x100000000L, m_minimum);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, 0x100000000L, m_minimum));
 	}
 	
     @Test
     void test_10arg_negative_minimun()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      m_retry, m_expire, -1);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, m_expire, -1));
 	}
 	
     @Test
     void test_10arg_toobig_minimum()
 	{
-	    try {
-		new SOARecord(m_an, DClass.IN, m_ttl,
+	    assertThrows(IllegalArgumentException.class, () -> new SOARecord(m_an, DClass.IN, m_ttl,
 			      m_host, m_admin, m_serial, m_refresh,
-			      m_retry, m_expire, 0x100000000L);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch( IllegalArgumentException e ){}
+			      m_retry, m_expire, 0x100000000L));
 	}
     }
 
@@ -372,11 +320,7 @@ public class SOARecordTest
 					m_minimum);
 	    SOARecord ar = new SOARecord();
 	    
-	    try {
-		ar.rdataFromString(t, null);
-		fail("RelativeNameException not thrown");
-	    }
-	    catch(RelativeNameException e){}
+	    assertThrows(RelativeNameException.class, () -> ar.rdataFromString(t, null));
 	}
     }
 

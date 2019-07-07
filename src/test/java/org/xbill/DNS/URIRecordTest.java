@@ -1,14 +1,14 @@
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
 class URIRecordTest
 {
@@ -96,43 +96,27 @@ class URIRecordTest
     @Test
     void test_toobig_priority() throws TextParseException
 	{
-	    try {
-		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
-			     0x10000, 42, "http://foo");
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
+			     0x10000, 42, "http://foo"));
 	}
     @Test
     void test_toosmall_priority() throws TextParseException
 	{
-	    try {
-		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
-			     -1, 42, "http://foo");
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
+			     -1, 42, "http://foo"));
 	}
 
     @Test
     void test_toobig_weight() throws TextParseException
 	{
-	    try {
-		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
-			     42, 0x10000, "http://foo");
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
+			     42, 0x10000, "http://foo"));
 	}
     @Test
     void test_toosmall_weight() throws TextParseException
 	{
-	    try {
-		new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
-			     42, -1, "http://foo");
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234,
+			     42, -1, "http://foo"));
 	}
 
 }

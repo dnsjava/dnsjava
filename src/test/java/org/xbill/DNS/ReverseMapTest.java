@@ -34,13 +34,13 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
 
 class ReverseMapTest
 {
@@ -81,29 +81,14 @@ class ReverseMapTest
     @Test
     void test_fromAddress_invalid()
     {
-	try {
-	    ReverseMap.fromAddress("A.B.C.D", Address.IPv4);
-	    fail("UnknownHostException not thrown");
-	}
-	catch( UnknownHostException e ){
-	}
-	try {ReverseMap.fromAddress(new byte [ 0 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 3 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 5 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 15 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
-	try {ReverseMap.fromAddress(new byte [ 17 ] ); fail("IllegalArgumentException not thrown");}
-	catch( IllegalArgumentException e ){}
+	assertThrows(UnknownHostException.class, () -> ReverseMap.fromAddress("A.B.C.D", Address.IPv4));
+	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 0 ] ));
+	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 3 ] ));
+	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 5 ] ));
+	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 15 ] ));
+	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 17 ] ));
 
-	try {
-	    int[] dat = new int[] { 0, 1, 2, 256 };
-	    ReverseMap.fromAddress(dat);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> {int[] dat = new int[] { 0, 1, 2, 256 };
+	    ReverseMap.fromAddress(dat);});
     }
 }

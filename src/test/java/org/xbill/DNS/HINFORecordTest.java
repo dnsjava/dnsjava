@@ -34,15 +34,15 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
 class HINFORecordTest
 {
@@ -89,11 +89,7 @@ class HINFORecordTest
 	String cpu = "i686 Intel(R) Pentium(R) M \\256 processor 1.70GHz GenuineIntel GNU/Linux";
 	String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
 	
-	try {
-	    new HINFORecord(n, DClass.IN, ttl, cpu, os);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException e){}
+	assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
     }
 
     @Test
@@ -104,11 +100,7 @@ class HINFORecordTest
 	String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
 	String os = "Linux troy 2.6.10-gentoo-r6 \\1 #8 Wed Apr 6 21:25:04 MDT 2005";
 	
-	try {
-	    new HINFORecord(n, DClass.IN, ttl, cpu, os);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch(IllegalArgumentException e){}
+	assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
     }
 
     @Test
@@ -151,11 +143,7 @@ class HINFORecordTest
 	Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
 
 	HINFORecord dr = new HINFORecord();
-	try {
-	    dr.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch(TextParseException e){}
+	assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
     }
 
     @Test
@@ -166,11 +154,7 @@ class HINFORecordTest
 	Tokenizer t = new Tokenizer("\"" + cpu + "\"");
 
 	HINFORecord dr = new HINFORecord();
-	try {
-	    dr.rdataFromString(t, null);
-	    fail("TextParseException not thrown");
-	}
-	catch(TextParseException e){}
+	assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
     }
 
     @Test

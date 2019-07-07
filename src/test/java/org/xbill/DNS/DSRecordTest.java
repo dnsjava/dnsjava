@@ -34,16 +34,16 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class DSRecordTest
 {
@@ -105,62 +105,38 @@ class DSRecordTest
 
     @Test
     void test_toosmall_footprint() {
-	    try {
-		new DSRecord(m_n, DClass.IN, m_ttl,
-			     -1, m_algorithm, m_digestid, m_digest);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new DSRecord(m_n, DClass.IN, m_ttl,
+			     -1, m_algorithm, m_digestid, m_digest));
 	}
 
     @Test
     void test_toobig_footprint() {
-	    try {
-		new DSRecord(m_n, DClass.IN, m_ttl,
-			     0x10000, m_algorithm, m_digestid, m_digest);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new DSRecord(m_n, DClass.IN, m_ttl,
+			     0x10000, m_algorithm, m_digestid, m_digest));
 	}
 
     @Test
     void test_toosmall_algorithm() {
-	    try {
-		new DSRecord(m_n, DClass.IN, m_ttl,
-			     m_footprint, -1, m_digestid, m_digest);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new DSRecord(m_n, DClass.IN, m_ttl,
+			     m_footprint, -1, m_digestid, m_digest));
 	}
 
     @Test
     void test_toobig_algorithm() {
-	    try {
-		new DSRecord(m_n, DClass.IN, m_ttl,
-			     m_footprint, 0x10000, m_digestid, m_digest);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new DSRecord(m_n, DClass.IN, m_ttl,
+			     m_footprint, 0x10000, m_digestid, m_digest));
 	}
 
     @Test
     void test_toosmall_digestid() {
-	    try {
-		new DSRecord(m_n, DClass.IN, m_ttl,
-			     m_footprint, m_algorithm, -1, m_digest);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new DSRecord(m_n, DClass.IN, m_ttl,
+			     m_footprint, m_algorithm, -1, m_digest));
 	}
 
     @Test
     void test_toobig_digestid() {
-	    try {
-		new DSRecord(m_n, DClass.IN, m_ttl,
-			     m_footprint, m_algorithm, 0x10000, m_digest);
-		fail("IllegalArgumentException not thrown");
-	    }
-	    catch(IllegalArgumentException e){}
+	    assertThrows(IllegalArgumentException.class, () -> new DSRecord(m_n, DClass.IN, m_ttl,
+			     m_footprint, m_algorithm, 0x10000, m_digest));
 	}
 
     @Test

@@ -34,11 +34,12 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.Test;
 
 class ExtendedFlagsTest
 {
@@ -51,20 +52,10 @@ class ExtendedFlagsTest
 	// one that doesn't exist
 	assertTrue(ExtendedFlags.string(1).startsWith("flag"));
 
-	try {
-	    ExtendedFlags.string(-1);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> ExtendedFlags.string(-1));
 	
 	//  (max is 0xFFFF)
-	try {
-	    ExtendedFlags.string(0x10000);
-	    fail("IllegalArgumentException not thrown");
-	}
-	catch( IllegalArgumentException e ){
-	}
+	assertThrows(IllegalArgumentException.class, () -> ExtendedFlags.string(0x10000));
     }
 
     @Test
