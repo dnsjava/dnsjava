@@ -36,8 +36,11 @@ package	org.xbill.DNS;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MXRecordTest
@@ -88,4 +91,14 @@ class MXRecordTest
 	exp = new byte[] { 0x1F, 0x2B, 1, 'M', 1, 'O', 1, 'n', 0 };
 	    assertArrayEquals(exp, out);
     }
+
+	@Test
+	void rdataFromString_nullMXRecord() throws IOException {
+		Tokenizer t = new Tokenizer("0 .");
+		MXRecord record = new MXRecord();
+		record.rdataFromString(t, null);
+		assertEquals(Name.fromConstantString("."), record.getTarget());
+		assertEquals(record.getTarget(), record.getAdditionalName());
+		assertEquals(0, record.getPriority());
+	}
 }

@@ -37,7 +37,6 @@ package	org.xbill.DNS;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,6 +103,7 @@ class DNSKEYRecordTest
 	assertEquals(0x81, kr.getProtocol());
 	assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
 	    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
+	    assertEquals(17895, kr.getFootprint());
 
 	// invalid algorithm
 	kr = new DNSKEYRecord();
