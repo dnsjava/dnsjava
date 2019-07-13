@@ -82,10 +82,10 @@ until one succeeds.
 - The properties `dns.server` and `dns.search` (comma delimited lists) are
   checked.  The servers can either be IP addresses or hostnames (which are
   resolved using Java's built in DNS support).
-- The `sun.net.dns.ResolverConfiguration` class is queried.
 - On Unix, `/etc/resolv.conf` is parsed.
 - On Windows, `ipconfig`/`winipcfg` is called and its output parsed.  This may
   fail for non-English versions on Windows.
+- The `sun.net.dns.ResolverConfiguration` class is queried.
 - As a last resort, `localhost` is used as the nameserver, and the search
   path is empty.
 

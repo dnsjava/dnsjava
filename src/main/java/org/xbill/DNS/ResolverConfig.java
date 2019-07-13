@@ -18,10 +18,10 @@ import java.util.stream.Stream;
  *   <LI>The properties 'dns.server' and 'dns.search' (comma delimited lists)
  *       are checked.  The servers can either be IP addresses or hostnames
  *       (which are resolved using Java's built in DNS support).
- *   <LI>The sun.net.dns.ResolverConfiguration class is queried.
  *   <LI>On Unix, /etc/resolv.conf is parsed.
  *   <LI>On Windows, ipconfig is called and its output parsed.  This
  *       may fail for non-English versions on Windows.
+ *   <LI>The sun.net.dns.ResolverConfiguration class is queried.
  *   <LI>"localhost" is used as the nameserver, and the search path is empty.
  * </UL>
  *
@@ -52,20 +52,19 @@ public
 ResolverConfig() {
 	if (findProperty())
 		return;
-	if (findSunJVM())
+	if (findUnix())
 		return;
 	if (servers == null || searchlist == null) {
 		String OS = System.getProperty("os.name");
 		String vendor = System.getProperty("java.vendor");
-		if (OS.contains("Windows")) {
-			findWin();
-		} else if (OS.contains("NetWare")) {
-			findNetware();
-		} else if (vendor.contains("Android")) {
-			findAndroid();
-		} else {
-			findUnix();
+		if (OS.contains("Windows") && findWin()) {
+			return;
+		} else if (OS.contains("NetWare") && findNetware()) {
+			return;
+		} else if (vendor.contains("Android") && findAndroid()) {
+			return;
 		}
+		findSunJVM();
 	}
 }
 
