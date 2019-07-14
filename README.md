@@ -5,8 +5,6 @@
 
 # dnsjava
 
-http://www.dnsjava.org/
-
 ## Overview
 
 dnsjava is an implementation of DNS in Java.  It supports all defined record
