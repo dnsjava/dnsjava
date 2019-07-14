@@ -100,6 +100,7 @@ class DNSKEYRecordTest
 	assertEquals(0x81, kr.getProtocol());
 	assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
 	    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
+	    assertEquals(17895, kr.getFootprint());
 
 	// invalid algorithm
 	assertThrows(TextParseException.class, () -> new DNSKEYRecord().rdataFromString(new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));

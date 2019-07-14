@@ -2,8 +2,11 @@ package org.xbill.DNS;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,29 +49,103 @@ class MasterTest {
 	}
 
 	@Test
+	void includeDirective() throws IOException, URISyntaxException {
+		try (Master master = new Master(
+			Paths.get(MasterTest.class.getResource("/zonefileIncludeDirective")
+				.toURI()).toString())) {
+			Record rr = master.nextRecord();
+			assertEquals(Type.SOA, rr.getType());
+		}
+	}
+
+	@Test
+	void expandGenerated() throws IOException {
+		try (Master master = new Master(MasterTest.class.getResourceAsStream("/zonefileEx1"))) {
+			master.expandGenerate(true);
+			// until we get to the generator directive, it's empty
+			assertFalse(master.generators().hasNext());
+			Record rr = skipTo(master, Type.PTR);
+			assertTrue(master.generators().hasNext());
+			assertEquals(Type.PTR, rr.getType());
+			assertEquals(Name.fromConstantString("host-1.dsl.example.com."), ((PTRRecord) rr).getTarget());
+		}
+	}
+
+	@Test
 	void invalidGenRange() {
-		try (Master master = new Master(MasterTest.class.getResourceAsStream("/zonefileInvalidGenRange"))) {
-			assertThrows(TextParseException.class, master::nextRecord);
+		try (Master master = new Master(new ByteArrayInputStream("$GENERATE 3-1".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("Invalid $GENERATE range specifier: 3-1"));
 		}
 	}
 
 	@Test
 	void invalidGenType() {
-		try (Master master = new Master(MasterTest.class.getResourceAsStream("/zonefileInvalidGenType"))) {
-			assertThrows(TextParseException.class, master::nextRecord);
+		try (Master master = new Master(
+			new ByteArrayInputStream("$TTL 1h\n$GENERATE 1-3 example.com. MX 10 mail.example.com.".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("$GENERATE does not support MX records"));
 		}
 	}
 
 	@Test
-	void invalidTSIG() {
-		try (Master master = new Master(MasterTest.class.getResourceAsStream("/zonefileInvalidTSIG"))) {
-			assertThrows(TextParseException.class, master::nextRecord);
+	void invalidGenerateRangeSpecifier() {
+		try (Master master = new Master(new ByteArrayInputStream("$GENERATE 1to20".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("Invalid $GENERATE range specifier"));
 		}
 	}
 
 	@Test
-	void invalidOriginNotAbsolute() {
-		assertThrows(RelativeNameException.class, () ->
+	void invalidDirective() {
+		try (Master master = new Master(new ByteArrayInputStream("$INVALID".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("Invalid directive: $INVALID"));
+		}
+	}
+
+	@Test
+	void missingTTL() {
+		try (Master master = new Master(new ByteArrayInputStream("example.com. IN NS ns".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("missing TTL"));
+		}
+	}
+
+	@Test
+	void invalidType() {
+		try (Master master = new Master(new ByteArrayInputStream("example.com. IN INVALID".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("Invalid type"));
+		}
+	}
+
+	@Test
+	void noOwner() {
+		try (Master master = new Master(new ByteArrayInputStream(" \n ^".getBytes()))) {
+			TextParseException thrown = assertThrows(TextParseException.class, master::nextRecord);
+			assertTrue(thrown.getMessage().contains("no owner"));
+		}
+	}
+
+	@Test
+	void invalidOriginNotAbsolute_ctorInputStream() {
+		RelativeNameException thrown = assertThrows(RelativeNameException.class, () ->
 			new Master((InputStream) null, Name.fromConstantString("notabsolute")));
+		assertTrue(thrown.getMessage().contains("'notabsolute' is not an absolute name"));
+	}
+
+	@Test
+	void invalidOriginNotAbsolute_ctorString() {
+		RelativeNameException thrown = assertThrows(RelativeNameException.class, () ->
+			new Master("zonefileEx1", Name.fromConstantString("notabsolute")));
+		assertTrue(thrown.getMessage().contains("'notabsolute' is not an absolute name"));
+	}
+
+	private Record skipTo(Master master, int type) throws IOException {
+		Record record;
+		do record = master.nextRecord();
+		while (record != null && record.getType() != type);
+		return record;
 	}
 }

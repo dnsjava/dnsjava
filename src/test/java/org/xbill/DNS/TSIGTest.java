@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TSIGTest
@@ -83,4 +84,10 @@ class TSIGTest
 	assertEquals(result, Rcode.NOERROR);
 	assertTrue(parsed.isSigned());
     }
+
+	@Test
+	void rdataFromString() throws IOException {
+		TextParseException thrown = assertThrows(TextParseException.class, () -> new TSIGRecord().rdataFromString(new Tokenizer(" "), null));
+		assertTrue(thrown.getMessage().contains("no text format defined for TSIG"));
+	}
 }

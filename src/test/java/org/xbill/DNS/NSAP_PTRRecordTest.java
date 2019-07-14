@@ -36,7 +36,10 @@ package	org.xbill.DNS;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,4 +74,12 @@ class NSAP_PTRRecordTest
 	Record r = d.getObject();
 	assertTrue(r instanceof NSAP_PTRRecord);
     }
+
+	@Test
+	void rdataFromString() throws IOException {
+		Tokenizer t = new Tokenizer("foo.bar.com.");
+		NSAP_PTRRecord record = new NSAP_PTRRecord();
+		record.rdataFromString(t, null);
+		assertEquals(Name.fromConstantString("foo.bar.com."), record.getTarget());
+	}
 }
