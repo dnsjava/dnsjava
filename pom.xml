@@ -65,6 +65,7 @@
                 <configuration>
                     <source>${target.jdk}</source>
                     <target>${target.jdk}</target>
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
             </plugin>
 

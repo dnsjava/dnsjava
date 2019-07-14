@@ -35,14 +35,14 @@ limitExpire(long ttl, long maxttl) {
 	return (int)expire;
 }
 
-private static class CacheRRset extends RRset implements Element {
+private static class CacheRRset<T extends Record> extends RRset<T> implements Element {
 	private static final long serialVersionUID = 5971755205903597024L;
 	
 	int credibility;
 	int expire;
 
 	public
-	CacheRRset(Record rec, int cred, long maxttl) {
+	CacheRRset(T rec, int cred, long maxttl) {
 		super();
 		this.credibility = cred;
 		this.expire = limitExpire(rec.getTTL(), maxttl);
@@ -50,7 +50,7 @@ private static class CacheRRset extends RRset implements Element {
 	}
 
 	public
-	CacheRRset(RRset rrset, int cred, long maxttl) {
+	CacheRRset(RRset<T> rrset, int cred, long maxttl) {
 		super(rrset);
 		this.credibility = cred;
 		this.expire = limitExpire(rrset.getTTL(), maxttl);
@@ -132,7 +132,7 @@ private static class NegativeElement implements Element {
 	}
 }
 
-private static class CacheMap extends LinkedHashMap {
+private static class CacheMap extends LinkedHashMap<Name, Object> {
 	private int maxsize;
 
 	CacheMap(int maxsize) {
@@ -198,7 +198,7 @@ Cache(String file) throws IOException {
 	Master m = new Master(file);
 	Record record;
 	while ((record = m.nextRecord()) != null)
-		addRecord(record, Credibility.HINT, m);
+		addRecord(record, Credibility.HINT);
 }
 
 private synchronized Object
@@ -214,9 +214,10 @@ removeName(Name name) {
 private synchronized Element []
 allElements(Object types) {
 	if (types instanceof List) {
-		List typelist = (List) types;
+		@SuppressWarnings("unchecked")
+		List<Element> typelist = (List<Element>) types;
 		int size = typelist.size();
-		return (Element []) typelist.toArray(new Element[size]);
+		return typelist.toArray(new Element[size]);
 	} else {
 		Element set = (Element) types;
 		return new Element[] {set};
@@ -271,9 +272,10 @@ addElement(Name name, Element element) {
 	}
 	int type = element.getType();
 	if (types instanceof List) {
+		@SuppressWarnings("unchecked")
 		List<Element> list = (List<Element>) types;
 		for (int i = 0; i < list.size(); i++) {
-			Element elt = (Element) list.get(i);
+			Element elt = list.get(i);
 			if (elt.getType() == type) {
 				list.set(i, element);
 				return;
@@ -328,22 +330,22 @@ clearCache() {
  * Adds a record to the Cache.
  * @param r The record to be added
  * @param cred The credibility of the record
- * @param o The source of the record (this could be a Message, for example)
  * @see Record
  */
 public synchronized void
-addRecord(Record r, int cred, Object o) {
+addRecord(Record r, int cred) {
 	Name name = r.getName();
 	int type = r.getRRsetType();
 	if (!Type.isRR(type))
 		return;
 	Element element = findElement(name, type, cred);
 	if (element == null) {
-		CacheRRset crrset = new CacheRRset(r, cred, maxcache);
+		CacheRRset<Record> crrset = new CacheRRset<>(r, cred, maxcache);
 		addRRset(crrset, cred);
 	} else if (element.compareCredibility(cred) == 0) {
 		if (element instanceof CacheRRset) {
-			CacheRRset crrset = (CacheRRset) element;
+			@SuppressWarnings("unchecked")
+			CacheRRset<Record> crrset = (CacheRRset<Record>) element;
 			crrset.addRR(r);
 		}
 	}
@@ -355,8 +357,8 @@ addRecord(Record r, int cred, Object o) {
  * @param cred The credibility of these records
  * @see RRset
  */
-public synchronized void
-addRRset(RRset rrset, int cred) {
+public synchronized <T extends Record> void
+addRRset(RRset<T> rrset, int cred) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
@@ -368,11 +370,11 @@ addRRset(RRset rrset, int cred) {
 		if (element != null && element.compareCredibility(cred) <= 0)
 			element = null;
 		if (element == null) {
-			CacheRRset crrset;
+			CacheRRset<T> crrset;
 			if (rrset instanceof CacheRRset)
-				crrset = (CacheRRset) rrset;
+				crrset = (CacheRRset<T>) rrset;
 			else
-				crrset = new CacheRRset(rrset, cred, maxcache);
+				crrset = new CacheRRset<>(rrset, cred, maxcache);
 			addElement(name, crrset);
 		}
 	}
@@ -453,7 +455,7 @@ lookup(Name name, int type, int minCred) {
 					continue;
 				if (element.compareCredibility(minCred) < 0)
 					continue;
-				sr.addRRset((CacheRRset) element);
+				sr.addRRset((CacheRRset<?>) element);
 				added++;
 			}
 			/* There were positive entries */
@@ -518,11 +520,12 @@ lookupRecords(Name name, int type, int minCred) {
 	return lookup(name, type, minCred);
 }
 
-private RRset []
+@SuppressWarnings("unchecked")
+private <T extends Record> List<RRset<T>>
 findRecords(Name name, int type, int minCred) {
 	SetResponse cr = lookupRecords(name, type, minCred);
 	if (cr.isSuccessful())
-		return cr.answers();
+		return (List<RRset<T>>)(List) cr.answers();
 	else
 		return null;
 }
@@ -535,7 +538,7 @@ findRecords(Name name, int type, int minCred) {
  * @return An array of RRsets, or null
  * @see Credibility
  */
-public RRset []
+public <T extends Record> List<RRset<T>>
 findRecords(Name name, int type) {
 	return findRecords(name, type, Credibility.NORMAL);
 }
@@ -548,7 +551,7 @@ findRecords(Name name, int type) {
  * @return An array of RRsets, or null
  * @see Credibility
  */
-public RRset []
+public <T extends Record>List<RRset<T>>
 findAnyRecords(Name name, int type) {
 	return findRecords(name, type, Credibility.GLUE);
 }
@@ -572,14 +575,12 @@ getCred(int section, boolean isAuth) {
 }
 
 private static void
-markAdditional(RRset rrset, Set<Name> names) {
+markAdditional(RRset<?> rrset, Set<Name> names) {
 	Record first = rrset.first();
 	if (first.getAdditionalName() == null)
 		return;
 
-	Iterator<Record> it = rrset.rrs();
-	while (it.hasNext()) {
-		Record r = it.next();
+	for (Record r : rrset.rrs()) {
 		Name name = r.getAdditionalName();
 		if (name != null)
 			names.add(name);
@@ -594,6 +595,7 @@ markAdditional(RRset rrset, Set<Name> names) {
  * lookup, or null if nothing useful could be cached from the message.
  * @see Message
  */
+@SuppressWarnings("unchecked")
 public SetResponse
 addMessage(Message in) {
 	boolean isAuth = in.getHeader().getFlag(Flags.AA);
@@ -623,7 +625,7 @@ addMessage(Message in) {
 	additionalNames = new HashSet<>();
 
 	answers = in.getSectionRRsets(Section.ANSWER);
-	for (RRset answer : answers) {
+	for (RRset<?> answer : answers) {
 		if (answer.getDClass() != qclass)
 			continue;
 		int type = answer.getType();
@@ -664,14 +666,15 @@ addMessage(Message in) {
 	}
 
 	auth = in.getSectionRRsets(Section.AUTHORITY);
-	RRset soa = null, ns = null;
-	for (RRset rset : auth) {
+	RRset<SOARecord> soa = null;
+	RRset<NSRecord> ns = null;
+	for (RRset<?> rset : auth) {
 		if (rset.getType() == Type.SOA &&
 			curname.subdomain(rset.getName()))
-			soa = rset;
+			soa = (RRset<SOARecord>) rset;
 		else if (rset.getType() == Type.NS &&
 			curname.subdomain(rset.getName()))
-			ns = rset;
+			ns = (RRset<NSRecord>) rset;
 	}
 	if (!completed) {
 		/* This is a negative response or a referral. */
@@ -710,7 +713,7 @@ addMessage(Message in) {
 	}
 
 	addl = in.getSectionRRsets(Section.ADDITIONAL);
-	for (RRset rRset : addl) {
+	for (RRset<?> rRset : addl) {
 		int type = rRset.getType();
 		if (type != Type.A && type != Type.AAAA && type != Type.A6)
 			continue;

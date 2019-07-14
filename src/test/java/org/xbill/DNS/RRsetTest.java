@@ -34,23 +34,22 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.Iterator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RRsetTest
 {
-    private RRset m_rs;
+    private RRset<ARecord> m_rs;
     private Name m_name;
 	private Name m_name2;
     private long m_ttl;
@@ -62,7 +61,7 @@ class RRsetTest
    @BeforeEach
    void setUp() throws TextParseException, UnknownHostException
     {
-	m_rs = new RRset();
+	m_rs = new RRset<>();
 	m_name = Name.fromString("this.is.a.test.");
 	m_name2 = Name.fromString("this.is.another.test.");
 	m_ttl = 0xABCDL;
@@ -91,13 +90,13 @@ class RRsetTest
 
 	assertEquals("{empty}", m_rs.toString());
 
-	Iterator<Record> itr = m_rs.rrs();
-	assertNotNull(itr);
-	assertFalse(itr.hasNext());
+	List<ARecord> rrs = m_rs.rrs();
+	assertNotNull(rrs);
+	assertEquals(0, rrs.size());
 
-	itr = m_rs.sigs();
-	assertNotNull(itr);
-	assertFalse(itr.hasNext());
+	List<RRSIGRecord> sigs = m_rs.sigs();
+	assertNotNull(sigs);
+	assertEquals(0, sigs.size());
     }
 
     @Test
@@ -131,17 +130,17 @@ class RRsetTest
 	assertEquals(m_ttl, m_rs.getTTL());
 	assertEquals(Type.A, m_rs.getType());
 
-	Iterator<Record> itr = m_rs.rrs();
-	assertEquals(m_a1, itr.next());
-	assertEquals(m_a2, itr.next());
+	List<ARecord> itr = m_rs.rrs();
+	assertEquals(m_a1, itr.get(0));
+	assertEquals(m_a2, itr.get(1));
 
 	// make sure that it rotates
 	itr = m_rs.rrs();
-	assertEquals(m_a2, itr.next());
-	assertEquals(m_a1, itr.next());
+	assertEquals(m_a2, itr.get(0));
+	assertEquals(m_a1, itr.get(1));
 	itr = m_rs.rrs();
-	assertEquals(m_a1, itr.next());
-	assertEquals(m_a2, itr.next());
+	assertEquals(m_a1, itr.get(0));
+	assertEquals(m_a2, itr.get(1));
 
 	m_rs.deleteRR(m_a1);
 	assertEquals(1, m_rs.size());
@@ -154,32 +153,32 @@ class RRsetTest
 	// the signature records
 	m_rs.addRR(m_s1);
 	assertEquals(1, m_rs.size());
-	itr = m_rs.sigs();
-	assertEquals(m_s1, itr.next());
-	assertFalse(itr.hasNext());
+	List<RRSIGRecord> sigs = m_rs.sigs();
+	assertEquals(m_s1, sigs.get(0));
+	assertEquals(1, sigs.size());
 
 	m_rs.addRR(m_s1);
-	itr = m_rs.sigs();
-	assertEquals(m_s1, itr.next());
-	assertFalse(itr.hasNext());
+	sigs = m_rs.sigs();
+	assertEquals(m_s1, sigs.get(0));
+	assertEquals(1, sigs.size());
 
 	m_rs.addRR(m_s2);
-	itr = m_rs.sigs();
-	assertEquals(m_s1, itr.next());
-	assertEquals(m_s2, itr.next());
-	assertFalse(itr.hasNext());
+	sigs = m_rs.sigs();
+	assertEquals(m_s1, sigs.get(0));
+	assertEquals(m_s2, sigs.get(1));
+	assertEquals(2, sigs.size());
 
 	m_rs.deleteRR(m_s1);
-	itr = m_rs.sigs();
-	assertEquals(m_s2, itr.next());
-	assertFalse(itr.hasNext());
+	sigs = m_rs.sigs();
+	assertEquals(m_s2, sigs.get(0));
+	assertEquals(1, sigs.size());
 
 	
 	// clear it all
 	m_rs.clear();
 	assertEquals(0, m_rs.size());
-	assertFalse(m_rs.rrs().hasNext());
-	assertFalse(m_rs.sigs().hasNext());
+	assertEquals(0, m_rs.rrs().size());
+	assertEquals(0, m_rs.sigs().size());
 
     }
 
@@ -191,21 +190,19 @@ class RRsetTest
 	m_rs.addRR(m_s1);
 	m_rs.addRR(m_s2);
 
-	RRset rs2 = new RRset( m_rs );
+	RRset<ARecord> rs2 = new RRset<>( m_rs );
 
 	assertEquals(2, rs2.size());
 	assertEquals(m_a1, rs2.first());
-	Iterator<Record> itr = rs2.rrs();
-	assertEquals(m_a1, itr.next());
-	assertEquals(m_a2, itr.next());
-	assertFalse(itr.hasNext());
+	List<ARecord> itr = rs2.rrs();
+	assertEquals(m_a1, itr.get(0));
+	assertEquals(m_a2, itr.get(1));
+	assertEquals(2, itr.size());
 	
-	itr = rs2.sigs();
-	assertTrue(itr.hasNext());
-	assertEquals(m_s1, itr.next());
-	assertTrue(itr.hasNext());
-	assertEquals(m_s2, itr.next());
-	assertFalse(itr.hasNext());
+	List<RRSIGRecord> sigs = rs2.sigs();
+	assertEquals(m_s1, sigs.get(0));
+	assertEquals(m_s2, sigs.get(1));
+	assertEquals(2, sigs.size());
     }
 
     @Test
@@ -224,6 +221,7 @@ class RRsetTest
 	assertTrue(out.contains("[192.169.232.12]"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void test_addRR_invalidType() throws TextParseException
     {
@@ -231,7 +229,7 @@ class RRsetTest
 	
 	CNAMERecord c = new CNAMERecord(m_name, DClass.IN, m_ttl, Name.fromString("an.alias."));
 	
-	assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(c));
+	assertThrows(IllegalArgumentException.class, () -> ((RRset)m_rs).addRR(c));
     }
 
     @Test
@@ -264,9 +262,7 @@ class RRsetTest
 	m_rs.addRR(m_a1);
 	assertEquals(m_a1.getTTL(), m_rs.getTTL());
 
-	Iterator<Record> itr = m_rs.rrs();
-	while( itr.hasNext() ){
-	    Record r = (Record)itr.next();
+	for (Record r : m_rs.rrs()){
 	    assertEquals( m_a1.getTTL(), r.getTTL());
 	}
     }
@@ -278,17 +274,14 @@ class RRsetTest
 	m_rs.addRR(m_s1);
 	m_rs.addRR(m_a2);
 
-	Iterator<Record> itr = m_rs.rrs();
-	assertTrue(itr.hasNext());
-	assertEquals(m_a1, itr.next());
-	assertTrue(itr.hasNext());
-	assertEquals(m_a2, itr.next());
-	assertFalse(itr.hasNext());
+	List<ARecord> itr = m_rs.rrs();
+	assertEquals(m_a1, itr.get(0));
+	assertEquals(m_a2, itr.get(1));
+	assertEquals(2, itr.size());
 
-	itr = m_rs.sigs();
-	assertTrue(itr.hasNext());
-	assertEquals(m_s1, itr.next());
-	assertFalse(itr.hasNext());
+	List<RRSIGRecord> sigs = m_rs.sigs();
+	assertEquals(m_s1, sigs.get(0));
+	assertEquals(1, sigs.size());
     }
 
     @Test
@@ -297,16 +290,12 @@ class RRsetTest
 	m_rs.addRR(m_a1);
 	m_rs.addRR(m_a2);
 
-	Iterator<Record> itr = m_rs.rrs(false);
-	assertTrue(itr.hasNext());
-	assertEquals(m_a1, itr.next());
-	assertTrue(itr.hasNext());
-	assertEquals(m_a2, itr.next());
+	List<ARecord> itr = m_rs.rrs(false);
+	assertEquals(m_a1, itr.get(0));
+	assertEquals(m_a2, itr.get(1));
 
 	itr = m_rs.rrs(false);
-	assertTrue(itr.hasNext());
-	assertEquals(m_a1, itr.next());
-	assertTrue(itr.hasNext());
-	assertEquals(m_a2, itr.next());
+	assertEquals(m_a1, itr.get(0));
+	assertEquals(m_a2, itr.get(1));
     }
 }

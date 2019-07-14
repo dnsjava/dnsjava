@@ -3,7 +3,6 @@
 package org.xbill.DNS;
 
 import java.io.*;
-import java.util.*;
 
 /**
  * A helper class for constructing dynamic DNS (DDNS) update messages.
@@ -168,10 +167,9 @@ add(Record [] records) {
  * Indicates that all of the records in the rrset should be inserted into the
  * zone.
  */
-public void
-add(RRset rrset) {
-	for (Iterator<Record> it = rrset.rrs(); it.hasNext(); )
-		add(it.next());
+public <T extends Record> void
+add(RRset<T> rrset) {
+	rrset.rrs().forEach(this::add);
 }
 
 /**
@@ -235,10 +233,9 @@ delete(Record [] records) {
  * Indicates that all of the records in the rrset should be deleted from the
  * zone.
  */
-public void
-delete(RRset rrset) {
-	for (Iterator<Record> it = rrset.rrs(); it.hasNext(); )
-		delete(it.next());
+public <T extends Record> void
+delete(RRset<T> rrset) {
+	rrset.rrs().forEach(this::delete);
 }
 
 /**
@@ -260,8 +257,7 @@ replace(Name name, int type, long ttl, String record) throws IOException {
  * @throws IOException The record could not be parsed.
  */
 public void
-replace(Name name, int type, long ttl, Tokenizer tokenizer) throws IOException
-{
+replace(Name name, int type, long ttl, Tokenizer tokenizer) throws IOException {
 	delete(name, type);
 	add(name, type, ttl, tokenizer);
 }
@@ -290,11 +286,10 @@ replace(Record [] records) {
  * Indicates that all of the records in the rrset should be inserted into the
  * zone replacing any other records with the same name and type.
  */
-public void
-replace(RRset rrset) {
+public <T extends Record> void
+replace(RRset<T> rrset) {
 	delete(rrset.getName(), rrset.getType());
-	for (Iterator<Record> it = rrset.rrs(); it.hasNext(); )
-		add(it.next());
+	rrset.rrs().forEach(this::add);
 }
 
 }

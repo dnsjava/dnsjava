@@ -13,7 +13,7 @@ import org.xbill.DNS.utils.*;
  *
  * @author Brian Wellington
  */
-public abstract class Record implements Cloneable, Comparable, Serializable {
+public abstract class Record implements Cloneable, Comparable<Record>, Serializable {
 
 private static final long serialVersionUID = 2694906050116005466L;
 
@@ -632,7 +632,7 @@ setTTL(long ttl) {
 
 /**
  * Compares this Record to another Object.
- * @param o The Object to be compared.
+ * @param arg The Object to be compared.
  * @return The value 0 if the argument is a record equivalent to this record;
  * a value less than 0 if the argument is less than this record in the
  * canonical ordering, and a value greater than 0 if the argument is greater
@@ -642,9 +642,7 @@ setTTL(long ttl) {
  */
 @Override
 public int
-compareTo(Object o) {
-	Record arg = (Record) o;
-
+compareTo(Record arg) {
 	if (this == arg)
 		return (0);
 
@@ -713,7 +711,8 @@ checkU32(String field, long val) {
 static Name
 checkName(String field, Name name) {
 	if (!name.isAbsolute())
-		throw new RelativeNameException(name);
+		throw new RelativeNameException("'" + name + "' on field "
+			+ field + " is not an absolute name");
 	return name;
 }
 
