@@ -28,6 +28,8 @@ private boolean needSOATTL;
 private Generator generator;
 private List<Generator> generators;
 private boolean noExpandGenerate;
+private boolean noExpandIncludes;
+private boolean includeThrowsException;
 
 Master(File file, Name origin, long initialTTL) throws IOException {
 	if (origin != null && !origin.isAbsolute()) {
@@ -314,6 +316,12 @@ _nextRecord() throws IOException {
 				st.getEOL();
 				continue;
 			} else  if (s.equalsIgnoreCase("$INCLUDE")) {
+				if (noExpandIncludes) {
+					if (includeThrowsException) {
+						throw st.exception("$INCLUDE encountered, but processing disabled in strict mode");
+					}
+					continue;
+				}
 				String filename = st.getString();
 				File newfile;
 				if (file != null) {
@@ -389,6 +397,33 @@ nextRecord() throws IOException {
 		}
 	}
 	return rec;
+}
+
+/**
+ * Disable processing of $INCLUDE directives.
+ * When disabled, $INCUDE statements will not be processed.
+ * Depending on the contents of the file that would have been included,
+ * this may cause the zone to be invalid.
+ * (e.g. if there is no SOA or NS at the apex)
+ */
+public void
+disableIncludes() {
+	disableIncludes(false);
+}
+
+/**
+ * Disable processing of $INCLUDE directives.
+ * When disabled, $INCUDE statements will not be processed.
+ * Depending on the contents of the file that would have been included,
+ * this may cause the zone to be invalid.
+ * (e.g. if there's no SOA or NS at the apex)
+ *
+ * @param strict If true, an exception will be thrown if $INCLUDE is encountered.
+ */
+public void
+disableIncludes(boolean strict) {
+	noExpandIncludes = true;
+	includeThrowsException = strict;
 }
 
 /**
