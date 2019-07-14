@@ -408,8 +408,7 @@ nextRecord() throws IOException {
  */
 public void
 disableIncludes() {
-	noExpandIncludes = true;
-	includeThrowsException = false;
+	disableIncludes(false);
 }
 
 /**
