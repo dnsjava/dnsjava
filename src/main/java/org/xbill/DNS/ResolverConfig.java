@@ -19,9 +19,9 @@ import java.util.stream.Stream;
  *       are checked.  The servers can either be IP addresses or hostnames
  *       (which are resolved using Java's built in DNS support).
  *   <LI>On Unix, /etc/resolv.conf is parsed.
+ *   <LI>The sun.net.dns.ResolverConfiguration class is queried.
  *   <LI>On Windows, ipconfig is called and its output parsed.  This
  *       may fail for non-English versions on Windows.
- *   <LI>The sun.net.dns.ResolverConfiguration class is queried.
  *   <LI>"localhost" is used as the nameserver, and the search path is empty.
  * </UL>
  *
@@ -52,20 +52,25 @@ public
 ResolverConfig() {
 	if (findProperty())
 		return;
-	if (findUnix())
-		return;
+	boolean attemptedSun = false;
 	if (servers == null || searchlist == null) {
 		String OS = System.getProperty("os.name");
 		String vendor = System.getProperty("java.vendor");
-		if (OS.contains("Windows") && findWin()) {
-			return;
+		if (OS.contains("Windows")) {
+			if (findSunJVM() || findWin())
+				return;
+			else
+				attemptedSun = true;
 		} else if (OS.contains("NetWare") && findNetware()) {
 			return;
 		} else if (vendor.contains("Android") && findAndroid()) {
 			return;
-		}
-		findSunJVM();
+		} else if (findUnix())
+			return;
 	}
+
+	if(!attemptedSun)
+		findSunJVM();
 }
 
 private void
