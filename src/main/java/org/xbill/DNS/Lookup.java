@@ -472,6 +472,9 @@ lookup(Name current) {
 		response = resolver.send(query);
 	}
 	catch (IOException e) {
+		if (verbose) {
+			System.err.println("Lookup: got " + e);
+		}
 		// A network error occurred.  Press on.
 		if (e instanceof InterruptedIOException)
 			timedout = true;
