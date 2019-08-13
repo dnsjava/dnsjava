@@ -302,8 +302,10 @@ class AddressTest
 
     @Test
     void test_getAllByName_invalid() {
+        System.setProperty("dnsjava.options","verbose");
 	assertThrows(UnknownHostException.class, () -> Address.getAllByName("example.invalid"));
 	assertThrows(UnknownHostException.class, () -> Address.getAllByName(""));
+	System.clearProperty("dnsjava.options");
     }
 
     @Test
