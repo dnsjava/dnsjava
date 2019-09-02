@@ -9,7 +9,11 @@
     <packaging>bundle</packaging>
     <version>3.0.0-SNAPSHOT</version>
     <name>dnsjava</name>
-    <description>dnsjava is an implementation of DNS in Java. It supports all defined record types (including the DNSSEC types), and unknown types. It can be used for queries, zone transfers, and dynamic updates. It includes a cache which can be used by clients, and a minimal implementation of a server. It supports TSIG authenticated messages, partial DNSSEC verification, and EDNS0. </description>
+    <description>dnsjava is an implementation of DNS in Java. It supports all defined record types (including the DNSSEC
+        types), and unknown types. It can be used for queries, zone transfers, and dynamic updates. It includes a cache
+        which can be used by clients, and a minimal implementation of a server. It supports TSIG authenticated messages,
+        partial DNSSEC verification, and EDNS0.
+    </description>
     <url>http://www.dnsjava.org</url>
     <organization>
         <name>dnsjava.org</name>
@@ -92,7 +96,9 @@
                             !org.xbill.DNS*,!sun.*,android.os;resolution:=optional,*
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
-                        <Bundle-License>BSD-2-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"</Bundle-License>
+                        <Bundle-License>
+                            BSD-2-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
+                        </Bundle-License>
                         <_removeheaders>Bnd-*, Tool, Require-Capability</_removeheaders>
                         <Include-Resource>
                             {maven-resources},
@@ -174,6 +180,19 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -230,7 +249,7 @@
                         </configuration>
                     </plugin>
                 </plugins>
-                
+
                 <resources>
                     <resource>
                         <directory>src/main/resources</directory>

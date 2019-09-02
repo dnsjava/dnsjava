@@ -2,87 +2,78 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
+import java.io.IOException;
 
 /**
- * Responsible Person Record - lists the mail address of a responsible person
- * and a domain where TXT records are available.
+ * Responsible Person Record - lists the mail address of a responsible person and a domain where TXT
+ * records are available.
  *
  * @author Tom Scola (tscola@research.att.com)
  * @author Brian Wellington
- *
  * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class RPRecord extends Record {
 
-private static final long serialVersionUID = 8124584364211337460L;
+  private static final long serialVersionUID = 8124584364211337460L;
 
-private Name mailbox;
-private Name textDomain;
+  private Name mailbox;
+  private Name textDomain;
 
-RPRecord() {}
+  RPRecord() {}
 
-@Override
-Record
-getObject() {
-	return new RPRecord();
-}
+  @Override
+  Record getObject() {
+    return new RPRecord();
+  }
 
-/**
- * Creates an RP Record from the given data
- * @param mailbox The responsible person
- * @param textDomain The address where TXT records can be found
- */
-public
-RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
-	super(name, Type.RP, dclass, ttl);
+  /**
+   * Creates an RP Record from the given data
+   *
+   * @param mailbox The responsible person
+   * @param textDomain The address where TXT records can be found
+   */
+  public RPRecord(Name name, int dclass, long ttl, Name mailbox, Name textDomain) {
+    super(name, Type.RP, dclass, ttl);
 
-	this.mailbox = checkName("mailbox", mailbox);
-	this.textDomain = checkName("textDomain", textDomain);
-}
+    this.mailbox = checkName("mailbox", mailbox);
+    this.textDomain = checkName("textDomain", textDomain);
+  }
 
-@Override
-void
-rrFromWire(DNSInput in) throws IOException {
-	mailbox = new Name(in);
-	textDomain = new Name(in);
-}
+  @Override
+  void rrFromWire(DNSInput in) throws IOException {
+    mailbox = new Name(in);
+    textDomain = new Name(in);
+  }
 
-@Override
-void
-rdataFromString(Tokenizer st, Name origin) throws IOException {
-	mailbox = st.getName(origin);
-	textDomain = st.getName(origin);
-}
+  @Override
+  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+    mailbox = st.getName(origin);
+    textDomain = st.getName(origin);
+  }
 
-/** Converts the RP Record to a String */
-@Override
-String
-rrToString() {
-	StringBuilder sb = new StringBuilder();
-	sb.append(mailbox);
-	sb.append(" ");
-	sb.append(textDomain);
-	return sb.toString();
-}
+  /** Converts the RP Record to a String */
+  @Override
+  String rrToString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(mailbox);
+    sb.append(" ");
+    sb.append(textDomain);
+    return sb.toString();
+  }
 
-/** Gets the mailbox address of the RP Record */
-public Name
-getMailbox() {
-	return mailbox;
-}
+  /** Gets the mailbox address of the RP Record */
+  public Name getMailbox() {
+    return mailbox;
+  }
 
-/** Gets the text domain info of the RP Record */
-public Name
-getTextDomain() {
-	return textDomain;
-}
+  /** Gets the text domain info of the RP Record */
+  public Name getTextDomain() {
+    return textDomain;
+  }
 
-@Override
-void
-rrToWire(DNSOutput out, Compression c, boolean canonical) {
-	mailbox.toWire(out, null, canonical);
-	textDomain.toWire(out, null, canonical);
-}
-
+  @Override
+  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+    mailbox.toWire(out, null, canonical);
+    textDomain.toWire(out, null, canonical);
+  }
 }

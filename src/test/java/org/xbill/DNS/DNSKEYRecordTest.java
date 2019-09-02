@@ -3,23 +3,23 @@
 // Copyright (c) 2005, Matthew J. Rutherford <rutherfo@cs.colorado.edu>
 // Copyright (c) 2005, University of Colorado at Boulder
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 // * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// 
+//
 // * Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimer in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // * Neither the name of the University of Colorado at Boulder nor the
 //   names of its contributors may be used to endorse or promote
 //   products derived from this software without specific prior written
 //   permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,77 +32,78 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-package	org.xbill.DNS;
+package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
-class DNSKEYRecordTest
-{
-    @Test
-    void test_ctor_0arg() {
-	DNSKEYRecord ar = new DNSKEYRecord();
-	assertNull(ar.getName());
-	assertEquals(0, ar.getType());
-	assertEquals(0, ar.getDClass());
-	assertEquals(0, ar.getTTL());
-	assertEquals(0, ar.getAlgorithm());
-	assertEquals(0, ar.getFlags());
-	assertEquals(0, ar.getFootprint());
-	assertEquals(0, ar.getProtocol());
-	assertNull(ar.getKey());
-    }
+class DNSKEYRecordTest {
+  @Test
+  void test_ctor_0arg() {
+    DNSKEYRecord ar = new DNSKEYRecord();
+    assertNull(ar.getName());
+    assertEquals(0, ar.getType());
+    assertEquals(0, ar.getDClass());
+    assertEquals(0, ar.getTTL());
+    assertEquals(0, ar.getAlgorithm());
+    assertEquals(0, ar.getFlags());
+    assertEquals(0, ar.getFootprint());
+    assertEquals(0, ar.getProtocol());
+    assertNull(ar.getKey());
+  }
 
-    @Test
-    void test_getObject()
-    {
-	DNSKEYRecord ar = new DNSKEYRecord();
-	Record r = ar.getObject();
-	assertTrue(r instanceof DNSKEYRecord);
-    }
+  @Test
+  void test_getObject() {
+    DNSKEYRecord ar = new DNSKEYRecord();
+    Record r = ar.getObject();
+    assertTrue(r instanceof DNSKEYRecord);
+  }
 
-    @Test
-    void test_ctor_7arg() throws TextParseException
-    {
-	Name n = Name.fromString("My.Absolute.Name.");
-	Name r = Name.fromString("My.Relative.Name");
-	byte[] key = new byte[] { 0, 1, 3, 5, 7, 9 };
+  @Test
+  void test_ctor_7arg() throws TextParseException {
+    Name n = Name.fromString("My.Absolute.Name.");
+    Name r = Name.fromString("My.Relative.Name");
+    byte[] key = new byte[] {0, 1, 3, 5, 7, 9};
 
-	DNSKEYRecord kr = new DNSKEYRecord(n, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
-	assertEquals(n, kr.getName());
-	assertEquals(Type.DNSKEY, kr.getType());
-	assertEquals(DClass.IN, kr.getDClass());
-	assertEquals(0x24AC, kr.getTTL());
-	assertEquals(0x9832, kr.getFlags());
-	assertEquals(0x12, kr.getProtocol());
-	assertEquals(0x67, kr.getAlgorithm());
-	    assertArrayEquals(key, kr.getKey());
+    DNSKEYRecord kr = new DNSKEYRecord(n, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
+    assertEquals(n, kr.getName());
+    assertEquals(Type.DNSKEY, kr.getType());
+    assertEquals(DClass.IN, kr.getDClass());
+    assertEquals(0x24AC, kr.getTTL());
+    assertEquals(0x9832, kr.getFlags());
+    assertEquals(0x12, kr.getProtocol());
+    assertEquals(0x67, kr.getAlgorithm());
+    assertArrayEquals(key, kr.getKey());
 
-	// a relative name
-	assertThrows(RelativeNameException.class, () -> new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
-    }
+    // a relative name
+    assertThrows(
+        RelativeNameException.class,
+        () -> new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
+  }
 
-    @Test
-    void test_rdataFromString() throws IOException {
-	// basic
-	DNSKEYRecord kr = new DNSKEYRecord();
-	Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " RSASHA1 AQIDBAUGBwgJ");
-	kr.rdataFromString(st, null);
-	assertEquals(0xABCD, kr.getFlags());
-	assertEquals(0x81, kr.getProtocol());
-	assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
-	    assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
-	    assertEquals(17895, kr.getFootprint());
+  @Test
+  void test_rdataFromString() throws IOException {
+    // basic
+    DNSKEYRecord kr = new DNSKEYRecord();
+    Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " RSASHA1 AQIDBAUGBwgJ");
+    kr.rdataFromString(st, null);
+    assertEquals(0xABCD, kr.getFlags());
+    assertEquals(0x81, kr.getProtocol());
+    assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
+    assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
+    assertEquals(17895, kr.getFootprint());
 
-	// invalid algorithm
-	assertThrows(TextParseException.class, () -> new DNSKEYRecord().rdataFromString(new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));
-    }
+    // invalid algorithm
+    assertThrows(
+        TextParseException.class,
+        () ->
+            new DNSKEYRecord()
+                .rdataFromString(new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));
+  }
 }

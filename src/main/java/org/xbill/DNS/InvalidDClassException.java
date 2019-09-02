@@ -7,12 +7,9 @@ package org.xbill.DNS;
  *
  * @author Brian Wellington
  */
-
 public class InvalidDClassException extends IllegalArgumentException {
 
-public
-InvalidDClassException(int dclass) {
-	super("Invalid DNS class: " + dclass);
-}
-
+  public InvalidDClassException(int dclass) {
+    super("Invalid DNS class: " + dclass);
+  }
 }

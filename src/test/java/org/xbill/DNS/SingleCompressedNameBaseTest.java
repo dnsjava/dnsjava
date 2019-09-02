@@ -3,23 +3,23 @@
 // Copyright (c) 2005, Matthew J. Rutherford <rutherfo@cs.colorado.edu>
 // Copyright (c) 2005, University of Colorado at Boulder
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 // * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// 
+//
 // * Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimer in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // * Neither the name of the University of Colorado at Boulder nor the
 //   names of its contributors may be used to endorse or promote
 //   products derived from this software without specific prior written
 //   permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,80 +34,74 @@
 //
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-class SingleCompressedNameBaseTest
-{
-    private static class TestClass extends SingleCompressedNameBase
-    {
-	TestClass(){}
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
-	TestClass(Name name, int type, int dclass, long ttl, Name singleName, String desc)
-	{
-	    super(name, type, dclass, ttl, singleName, desc);
-	}
-	
-	@Override
-	public Name getSingleName()
-	{
-	    return super.getSingleName();
-	}
+class SingleCompressedNameBaseTest {
+  private static class TestClass extends SingleCompressedNameBase {
+    TestClass() {}
 
-	@Override
-	public Record getObject()
-	{
-	    return null;
-	}
+    TestClass(Name name, int type, int dclass, long ttl, Name singleName, String desc) {
+      super(name, type, dclass, ttl, singleName, desc);
     }
 
-    @Test
-    void test_ctor() throws TextParseException
-    {
-	TestClass tc = new TestClass();
-	assertNull(tc.getSingleName());
-
-	Name n = Name.fromString("my.name.");
-	Name sn = Name.fromString("my.single.name.");
-
-	tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
-
-	assertSame(n, tc.getName());
-	assertEquals(Type.A, tc.getType());
-	assertEquals(DClass.IN, tc.getDClass());
-	assertEquals(100L, tc.getTTL());
-	assertSame(sn, tc.getSingleName());
+    @Override
+    public Name getSingleName() {
+      return super.getSingleName();
     }
 
-    @Test
-    void test_rrToWire() throws IOException {
-	Name n = Name.fromString("my.name.");
-	Name sn = Name.fromString("My.Single.Name.");
-
-	// non-canonical (case sensitive)
-	TestClass tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
-	byte[] exp = new byte[] { 2, 'M', 'y', 6, 'S', 'i', 'n', 'g', 'l', 'e', 4, 'N', 'a', 'm', 'e', 0 };
-
-	DNSOutput dout = new DNSOutput();
-	tc.rrToWire(dout, null, false);
-	
-	byte[] out = dout.toByteArray();
-	assertArrayEquals(exp, out);
-
-	// canonical (lowercase)
-	tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
-	exp = new byte[] { 2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0 };
-
-	dout = new DNSOutput();
-	tc.rrToWire(dout, null, true);
-	
-	out = dout.toByteArray();
-	assertArrayEquals(exp, out);
+    @Override
+    public Record getObject() {
+      return null;
     }
+  }
+
+  @Test
+  void test_ctor() throws TextParseException {
+    TestClass tc = new TestClass();
+    assertNull(tc.getSingleName());
+
+    Name n = Name.fromString("my.name.");
+    Name sn = Name.fromString("my.single.name.");
+
+    tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
+
+    assertSame(n, tc.getName());
+    assertEquals(Type.A, tc.getType());
+    assertEquals(DClass.IN, tc.getDClass());
+    assertEquals(100L, tc.getTTL());
+    assertSame(sn, tc.getSingleName());
+  }
+
+  @Test
+  void test_rrToWire() throws IOException {
+    Name n = Name.fromString("my.name.");
+    Name sn = Name.fromString("My.Single.Name.");
+
+    // non-canonical (case sensitive)
+    TestClass tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
+    byte[] exp =
+        new byte[] {2, 'M', 'y', 6, 'S', 'i', 'n', 'g', 'l', 'e', 4, 'N', 'a', 'm', 'e', 0};
+
+    DNSOutput dout = new DNSOutput();
+    tc.rrToWire(dout, null, false);
+
+    byte[] out = dout.toByteArray();
+    assertArrayEquals(exp, out);
+
+    // canonical (lowercase)
+    tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
+    exp = new byte[] {2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0};
+
+    dout = new DNSOutput();
+    tc.rrToWire(dout, null, true);
+
+    out = dout.toByteArray();
+    assertArrayEquals(exp, out);
+  }
 }

@@ -1,16 +1,19 @@
 package org.xbill.DNS;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class NULLRecordTest {
 
-	@Test
-	void rdataFromString() throws IOException {
-		TextParseException thrown = assertThrows(TextParseException.class, () -> new NULLRecord().rdataFromString(new Tokenizer(" "), null));
-		assertTrue(thrown.getMessage().contains("no defined text format for NULL records"));
-	}
+  @Test
+  void rdataFromString() throws IOException {
+    TextParseException thrown =
+        assertThrows(
+            TextParseException.class,
+            () -> new NULLRecord().rdataFromString(new Tokenizer(" "), null));
+    assertTrue(thrown.getMessage().contains("no defined text format for NULL records"));
+  }
 }

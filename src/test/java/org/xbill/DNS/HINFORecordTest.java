@@ -3,23 +3,23 @@
 // Copyright (c) 2005, Matthew J. Rutherford <rutherfo@cs.colorado.edu>
 // Copyright (c) 2005, University of Colorado at Boulder
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 // * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// 
+//
 // * Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimer in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // * Neither the name of the University of Colorado at Boulder nor the
 //   names of its contributors may be used to endorse or promote
 //   products derived from this software without specific prior written
 //   permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,156 +34,151 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-class HINFORecordTest
-{
-    @Test
-    void test_ctor_0arg()
-    {
-	HINFORecord dr = new HINFORecord();
-	assertNull(dr.getName());
-	assertEquals(0, dr.getType());
-	assertEquals(0, dr.getDClass());
-	assertEquals(0, dr.getTTL());
-    }
-    
-    @Test
-    void test_getObject()
-    {
-	HINFORecord dr = new HINFORecord();
-	Record r = dr.getObject();
-	assertTrue(r instanceof HINFORecord);
-    }
+class HINFORecordTest {
+  @Test
+  void test_ctor_0arg() {
+    HINFORecord dr = new HINFORecord();
+    assertNull(dr.getName());
+    assertEquals(0, dr.getType());
+    assertEquals(0, dr.getDClass());
+    assertEquals(0, dr.getTTL());
+  }
 
-    @Test
-    void test_ctor_5arg() throws TextParseException
-    {
-	Name n = Name.fromString("The.Name.");
-	long ttl = 0xABCDL;
-	String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
-	String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
-	
-	HINFORecord dr = new HINFORecord(n, DClass.IN, ttl, cpu, os);
-	assertEquals(n, dr.getName());
-	assertEquals(DClass.IN, dr.getDClass());
-	assertEquals(Type.HINFO, dr.getType());
-	assertEquals(ttl, dr.getTTL());
-	assertEquals(cpu, dr.getCPU());
-	assertEquals(os, dr.getOS());
-    }
+  @Test
+  void test_getObject() {
+    HINFORecord dr = new HINFORecord();
+    Record r = dr.getObject();
+    assertTrue(r instanceof HINFORecord);
+  }
 
-    @Test
-    void test_ctor_5arg_invalid_CPU() throws TextParseException
-    {
-	Name n = Name.fromString("The.Name.");
-	long ttl = 0xABCDL;
-	String cpu = "i686 Intel(R) Pentium(R) M \\256 processor 1.70GHz GenuineIntel GNU/Linux";
-	String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
-	
-	assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
-    }
+  @Test
+  void test_ctor_5arg() throws TextParseException {
+    Name n = Name.fromString("The.Name.");
+    long ttl = 0xABCDL;
+    String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
+    String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
 
-    @Test
-    void test_ctor_5arg_invalid_OS() throws TextParseException
-    {
-	Name n = Name.fromString("The.Name.");
-	long ttl = 0xABCDL;
-	String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
-	String os = "Linux troy 2.6.10-gentoo-r6 \\1 #8 Wed Apr 6 21:25:04 MDT 2005";
-	
-	assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
-    }
+    HINFORecord dr = new HINFORecord(n, DClass.IN, ttl, cpu, os);
+    assertEquals(n, dr.getName());
+    assertEquals(DClass.IN, dr.getDClass());
+    assertEquals(Type.HINFO, dr.getType());
+    assertEquals(ttl, dr.getTTL());
+    assertEquals(cpu, dr.getCPU());
+    assertEquals(os, dr.getOS());
+  }
 
-    @Test
-    void test_rrFromWire() throws IOException
-    {
-	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
-	String os = "Linux troy 2.6.10-gentoo-r6";
+  @Test
+  void test_ctor_5arg_invalid_CPU() throws TextParseException {
+    Name n = Name.fromString("The.Name.");
+    long ttl = 0xABCDL;
+    String cpu = "i686 Intel(R) Pentium(R) M \\256 processor 1.70GHz GenuineIntel GNU/Linux";
+    String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
 
-	byte[] raw = new byte[] { 39, 'I', 'n', 't', 'e', 'l', '(', 'R', ')', ' ', 'P', 'e', 'n', 't', 'i', 'u', 'm', '(', 'R', ')', ' ', 'M', ' ', 'p', 'r', 'o', 'c', 'e', 's', 's', 'o', 'r', ' ', '1', '.', '7', '0', 'G', 'H', 'z',
-				  27, 'L', 'i', 'n', 'u', 'x', ' ', 't', 'r', 'o', 'y', ' ', '2', '.', '6', '.', '1', '0', '-', 'g', 'e', 'n', 't', 'o', 'o', '-', 'r', '6' };
-				  
-	DNSInput in = new DNSInput(raw);
+    assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
+  }
 
-	HINFORecord dr = new HINFORecord();
-	dr.rrFromWire(in);
-	assertEquals(cpu, dr.getCPU());
-	assertEquals(os, dr.getOS());
-    }
+  @Test
+  void test_ctor_5arg_invalid_OS() throws TextParseException {
+    Name n = Name.fromString("The.Name.");
+    long ttl = 0xABCDL;
+    String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
+    String os = "Linux troy 2.6.10-gentoo-r6 \\1 #8 Wed Apr 6 21:25:04 MDT 2005";
 
-    @Test
-    void test_rdataFromString() throws IOException
-    {
-	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
-	String os = "Linux troy 2.6.10-gentoo-r6";
+    assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
+  }
 
-	Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
+  @Test
+  void test_rrFromWire() throws IOException {
+    String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
+    String os = "Linux troy 2.6.10-gentoo-r6";
 
-	HINFORecord dr = new HINFORecord();
-	dr.rdataFromString(t, null);
-	assertEquals(cpu, dr.getCPU());
-	assertEquals(os, dr.getOS());
-    }
+    byte[] raw =
+        new byte[] {
+          39, 'I', 'n', 't', 'e', 'l', '(', 'R', ')', ' ', 'P', 'e', 'n', 't', 'i', 'u', 'm', '(',
+          'R', ')', ' ', 'M', ' ', 'p', 'r', 'o', 'c', 'e', 's', 's', 'o', 'r', ' ', '1', '.', '7',
+          '0', 'G', 'H', 'z', 27, 'L', 'i', 'n', 'u', 'x', ' ', 't', 'r', 'o', 'y', ' ', '2', '.',
+          '6', '.', '1', '0', '-', 'g', 'e', 'n', 't', 'o', 'o', '-', 'r', '6'
+        };
 
-    @Test
-    void test_rdataFromString_invalid_CPU() throws IOException
-    {
-	String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
-	String os = "Linux troy 2.6.10-gentoo-r6";
+    DNSInput in = new DNSInput(raw);
 
-	Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
+    HINFORecord dr = new HINFORecord();
+    dr.rrFromWire(in);
+    assertEquals(cpu, dr.getCPU());
+    assertEquals(os, dr.getOS());
+  }
 
-	HINFORecord dr = new HINFORecord();
-	assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
-    }
+  @Test
+  void test_rdataFromString() throws IOException {
+    String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
+    String os = "Linux troy 2.6.10-gentoo-r6";
 
-    @Test
-    void test_rdataFromString_invalid_OS() throws IOException
-    {
-	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
+    Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
 
-	Tokenizer t = new Tokenizer("\"" + cpu + "\"");
+    HINFORecord dr = new HINFORecord();
+    dr.rdataFromString(t, null);
+    assertEquals(cpu, dr.getCPU());
+    assertEquals(os, dr.getOS());
+  }
 
-	HINFORecord dr = new HINFORecord();
-	assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
-    }
+  @Test
+  void test_rdataFromString_invalid_CPU() throws IOException {
+    String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
+    String os = "Linux troy 2.6.10-gentoo-r6";
 
-    @Test
-    void test_rrToString() throws TextParseException
-    {
-	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
-	String os = "Linux troy 2.6.10-gentoo-r6";
+    Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
 
-	String exp = "\"" + cpu + "\" \"" + os + "\"";
+    HINFORecord dr = new HINFORecord();
+    assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
+  }
 
-	HINFORecord dr = new HINFORecord(Name.fromString("The.Name."), DClass.IN, 0x123,
-					 cpu, os);
-	assertEquals(exp, dr.rrToString());
-    }
+  @Test
+  void test_rdataFromString_invalid_OS() throws IOException {
+    String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
 
-    @Test
-    void test_rrToWire() throws TextParseException
-    {
-	String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
-	String os = "Linux troy 2.6.10-gentoo-r6";
-	byte[] raw = new byte[] { 39, 'I', 'n', 't', 'e', 'l', '(', 'R', ')', ' ', 'P', 'e', 'n', 't', 'i', 'u', 'm', '(', 'R', ')', ' ', 'M', ' ', 'p', 'r', 'o', 'c', 'e', 's', 's', 'o', 'r', ' ', '1', '.', '7', '0', 'G', 'H', 'z',
-				  27, 'L', 'i', 'n', 'u', 'x', ' ', 't', 'r', 'o', 'y', ' ', '2', '.', '6', '.', '1', '0', '-', 'g', 'e', 'n', 't', 'o', 'o', '-', 'r', '6' };
-				  
-	HINFORecord dr = new HINFORecord(Name.fromString("The.Name."), DClass.IN, 0x123,
-					 cpu, os);
+    Tokenizer t = new Tokenizer("\"" + cpu + "\"");
 
-	DNSOutput out = new DNSOutput();
-	dr.rrToWire(out, null, true);
+    HINFORecord dr = new HINFORecord();
+    assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
+  }
 
-	    assertArrayEquals(raw, out.toByteArray());
-    }
+  @Test
+  void test_rrToString() throws TextParseException {
+    String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
+    String os = "Linux troy 2.6.10-gentoo-r6";
+
+    String exp = "\"" + cpu + "\" \"" + os + "\"";
+
+    HINFORecord dr = new HINFORecord(Name.fromString("The.Name."), DClass.IN, 0x123, cpu, os);
+    assertEquals(exp, dr.rrToString());
+  }
+
+  @Test
+  void test_rrToWire() throws TextParseException {
+    String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
+    String os = "Linux troy 2.6.10-gentoo-r6";
+    byte[] raw =
+        new byte[] {
+          39, 'I', 'n', 't', 'e', 'l', '(', 'R', ')', ' ', 'P', 'e', 'n', 't', 'i', 'u', 'm', '(',
+          'R', ')', ' ', 'M', ' ', 'p', 'r', 'o', 'c', 'e', 's', 's', 'o', 'r', ' ', '1', '.', '7',
+          '0', 'G', 'H', 'z', 27, 'L', 'i', 'n', 'u', 'x', ' ', 't', 'r', 'o', 'y', ' ', '2', '.',
+          '6', '.', '1', '0', '-', 'g', 'e', 'n', 't', 'o', 'o', '-', 'r', '6'
+        };
+
+    HINFORecord dr = new HINFORecord(Name.fromString("The.Name."), DClass.IN, 0x123, cpu, os);
+
+    DNSOutput out = new DNSOutput();
+    dr.rrToWire(out, null, true);
+
+    assertArrayEquals(raw, out.toByteArray());
+  }
 }

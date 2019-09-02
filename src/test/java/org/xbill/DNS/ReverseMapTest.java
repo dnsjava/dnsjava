@@ -3,23 +3,23 @@
 // Copyright (c) 2005, Matthew J. Rutherford <rutherfo@cs.colorado.edu>
 // Copyright (c) 2005, University of Colorado at Boulder
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 // * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// 
+//
 // * Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimer in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // * Neither the name of the University of Colorado at Boulder nor the
 //   names of its contributors may be used to endorse or promote
 //   products derived from this software without specific prior written
 //   permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,61 +34,60 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
-class ReverseMapTest
-{
-    @Test
-    void test_fromAddress_ipv4() throws UnknownHostException,
-						    TextParseException
-    {
-	Name exp = Name.fromString("1.0.168.192.in-addr.arpa.");
-	String addr = "192.168.0.1";
-	assertEquals(exp, ReverseMap.fromAddress(addr));
+class ReverseMapTest {
+  @Test
+  void test_fromAddress_ipv4() throws UnknownHostException, TextParseException {
+    Name exp = Name.fromString("1.0.168.192.in-addr.arpa.");
+    String addr = "192.168.0.1";
+    assertEquals(exp, ReverseMap.fromAddress(addr));
 
-	assertEquals(exp, ReverseMap.fromAddress(addr, Address.IPv4));
-	assertEquals(exp, ReverseMap.fromAddress(InetAddress.getByName(addr)));
-	assertEquals(exp, ReverseMap.fromAddress(new byte[] { (byte)192, (byte)168, (byte)0, (byte)1 }));
-	assertEquals(exp, ReverseMap.fromAddress(new int[] { 192, 168, 0, 1 }));
-    }
+    assertEquals(exp, ReverseMap.fromAddress(addr, Address.IPv4));
+    assertEquals(exp, ReverseMap.fromAddress(InetAddress.getByName(addr)));
+    assertEquals(
+        exp, ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, (byte) 0, (byte) 1}));
+    assertEquals(exp, ReverseMap.fromAddress(new int[] {192, 168, 0, 1}));
+  }
 
-    @Test
-    void test_fromAddress_ipv6() throws UnknownHostException,
-						    TextParseException
-    {
-	Name exp = Name.fromString("4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa.");
-	String addr = "2001:0db8:85a3:08d3:1319:8a2e:0370:7334";
-	byte[] dat = new byte[] { (byte)32, (byte)1, (byte)13, (byte)184,
-				  (byte)133, (byte)163, (byte)8, (byte)211,
-				  (byte)19, (byte)25, (byte)138, (byte)46, 
-				  (byte)3, (byte)112, (byte)115, (byte)52 };
-	int[] idat = new int[] { 32, 1, 13, 184, 133, 163, 8, 211,
-				  19, 25, 138, 46, 3, 112, 115, 52 };
-	
+  @Test
+  void test_fromAddress_ipv6() throws UnknownHostException, TextParseException {
+    Name exp =
+        Name.fromString(
+            "4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa.");
+    String addr = "2001:0db8:85a3:08d3:1319:8a2e:0370:7334";
+    byte[] dat =
+        new byte[] {
+          (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
+          (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
+        };
+    int[] idat = new int[] {32, 1, 13, 184, 133, 163, 8, 211, 19, 25, 138, 46, 3, 112, 115, 52};
 
-	assertEquals(exp, ReverseMap.fromAddress(addr, Address.IPv6));
-	assertEquals(exp, ReverseMap.fromAddress(InetAddress.getByName(addr)));
-	assertEquals(exp, ReverseMap.fromAddress(dat));
-	assertEquals(exp, ReverseMap.fromAddress(idat));
-    }
+    assertEquals(exp, ReverseMap.fromAddress(addr, Address.IPv6));
+    assertEquals(exp, ReverseMap.fromAddress(InetAddress.getByName(addr)));
+    assertEquals(exp, ReverseMap.fromAddress(dat));
+    assertEquals(exp, ReverseMap.fromAddress(idat));
+  }
 
-    @Test
-    void test_fromAddress_invalid()
-    {
-	assertThrows(UnknownHostException.class, () -> ReverseMap.fromAddress("A.B.C.D", Address.IPv4));
-	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 0 ] ));
-	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 3 ] ));
-	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 5 ] ));
-	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 15 ] ));
-	assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte [ 17 ] ));
+  @Test
+  void test_fromAddress_invalid() {
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromAddress("A.B.C.D", Address.IPv4));
+    assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[0]));
+    assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[3]));
+    assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[5]));
+    assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[15]));
+    assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[17]));
 
-	assertThrows(IllegalArgumentException.class, () -> {int[] dat = new int[] { 0, 1, 2, 256 };
-	    ReverseMap.fromAddress(dat);});
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          int[] dat = new int[] {0, 1, 2, 256};
+          ReverseMap.fromAddress(dat);
+        });
+  }
 }

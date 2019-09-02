@@ -1,15 +1,11 @@
 root = true
 
 [*]
-indent_style = tab
-indent_size = 8
+indent_style = space
+indent_size = 2
 insert_final_newline = true
 charset = utf-8
 end_of_line = lf
-
-[*.yml]
-indent_style = space
-indent_size = 2
 
 [{pom.xml,*.md}]
 indent_style = space

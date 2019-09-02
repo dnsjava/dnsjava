@@ -2,46 +2,34 @@
 
 package org.xbill.DNS;
 
-import java.io.*;
-
 /**
- * A class implementing Records with no data; that is, records used in
- * the question section of messages and meta-records in dynamic update.
+ * A class implementing Records with no data; that is, records used in the question section of
+ * messages and meta-records in dynamic update.
  *
  * @author Brian Wellington
  */
-
 class EmptyRecord extends Record {
 
-private static final long serialVersionUID = 3601852050646429582L;
+  private static final long serialVersionUID = 3601852050646429582L;
 
-EmptyRecord() {}
+  EmptyRecord() {}
 
-@Override
-Record
-getObject() {
-	return new EmptyRecord();
-}
+  @Override
+  Record getObject() {
+    return new EmptyRecord();
+  }
 
-@Override
-void
-rrFromWire(DNSInput in) {
-}
+  @Override
+  void rrFromWire(DNSInput in) {}
 
-@Override
-void
-rdataFromString(Tokenizer st, Name origin) {
-}
+  @Override
+  void rdataFromString(Tokenizer st, Name origin) {}
 
-@Override
-String
-rrToString() {
-	return "";
-}
+  @Override
+  String rrToString() {
+    return "";
+  }
 
-@Override
-void
-rrToWire(DNSOutput out, Compression c, boolean canonical) {
-}
-
+  @Override
+  void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
 }

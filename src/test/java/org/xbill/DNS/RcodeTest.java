@@ -3,23 +3,23 @@
 // Copyright (c) 2005, Matthew J. Rutherford <rutherfo@cs.colorado.edu>
 // Copyright (c) 2005, University of Colorado at Boulder
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 // * Redistributions of source code must retain the above copyright
 //   notice, this list of conditions and the following disclaimer.
-// 
+//
 // * Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimer in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // * Neither the name of the University of Colorado at Boulder nor the
 //   names of its contributors may be used to endorse or promote
 //   products derived from this software without specific prior written
 //   permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,68 +34,63 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
-class RcodeTest
-{
-    @Test
-    void test_string()
-    {
-	// a regular one
-	assertEquals("NXDOMAIN", Rcode.string(Rcode.NXDOMAIN));
+class RcodeTest {
+  @Test
+  void test_string() {
+    // a regular one
+    assertEquals("NXDOMAIN", Rcode.string(Rcode.NXDOMAIN));
 
-	// one with an alias
-	assertEquals("NOTIMP", Rcode.string(Rcode.NOTIMP));
+    // one with an alias
+    assertEquals("NOTIMP", Rcode.string(Rcode.NOTIMP));
 
-	// one that doesn't exist
-	assertTrue(Rcode.string(20).startsWith("RESERVED"));
+    // one that doesn't exist
+    assertTrue(Rcode.string(20).startsWith("RESERVED"));
 
-	assertThrows(IllegalArgumentException.class, () -> Rcode.string(-1));
-	
-	//  (max is 0xFFF)
-	assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x1000));
-    }
+    assertThrows(IllegalArgumentException.class, () -> Rcode.string(-1));
 
-    @Test
-    void test_TSIGstring()
-    {
-	// a regular one
-	assertEquals("BADSIG", Rcode.TSIGstring(Rcode.BADSIG));
+    //  (max is 0xFFF)
+    assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x1000));
+  }
 
-	// one that doesn't exist
-	assertTrue(Rcode.TSIGstring(20).startsWith("RESERVED"));
+  @Test
+  void test_TSIGstring() {
+    // a regular one
+    assertEquals("BADSIG", Rcode.TSIGstring(Rcode.BADSIG));
 
-	assertThrows(IllegalArgumentException.class, () -> Rcode.TSIGstring(-1));
-	
-	//  (max is 0xFFFF)
-	assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x10000));
-    }
+    // one that doesn't exist
+    assertTrue(Rcode.TSIGstring(20).startsWith("RESERVED"));
 
-    @Test
-    void test_value()
-    {
-	// regular one
-	assertEquals(Rcode.FORMERR, Rcode.value("FORMERR"));
+    assertThrows(IllegalArgumentException.class, () -> Rcode.TSIGstring(-1));
 
-	// one with alias
-	assertEquals(Rcode.NOTIMP, Rcode.value("NOTIMP"));
-	assertEquals(Rcode.NOTIMP, Rcode.value("NOTIMPL"));
+    //  (max is 0xFFFF)
+    assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x10000));
+  }
 
-	// one thats undefined but within range
-	assertEquals(35, Rcode.value("RESERVED35"));
+  @Test
+  void test_value() {
+    // regular one
+    assertEquals(Rcode.FORMERR, Rcode.value("FORMERR"));
 
-	// one thats undefined but out of range
-	assertEquals(-1, Rcode.value("RESERVED" + 0x1000));
+    // one with alias
+    assertEquals(Rcode.NOTIMP, Rcode.value("NOTIMP"));
+    assertEquals(Rcode.NOTIMP, Rcode.value("NOTIMPL"));
 
-	// something that unknown
-	assertEquals(-1, Rcode.value("THIS IS DEFINITELY UNKNOWN"));
+    // one thats undefined but within range
+    assertEquals(35, Rcode.value("RESERVED35"));
 
-	// empty string
-	assertEquals(-1, Rcode.value(""));
-    }
+    // one thats undefined but out of range
+    assertEquals(-1, Rcode.value("RESERVED" + 0x1000));
+
+    // something that unknown
+    assertEquals(-1, Rcode.value("THIS IS DEFINITELY UNKNOWN"));
+
+    // empty string
+    assertEquals(-1, Rcode.value(""));
+  }
 }
