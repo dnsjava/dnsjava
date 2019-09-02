@@ -99,7 +99,7 @@
                         <Bundle-License>
                             BSD-2-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
                         </Bundle-License>
-                        <_removeheaders>Bnd-*, Tool, Require-Capability</_removeheaders>
+                        <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource</_removeheaders>
                         <Include-Resource>
                             {maven-resources},
                             META-INF/LICENSE=LICENSE
