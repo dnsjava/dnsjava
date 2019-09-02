@@ -193,6 +193,7 @@ update(InputStream in) {
 				try {
 					Thread.sleep(interval);
 				} catch (InterruptedException e) {
+					throw new IOException(e);
 				}
 				break;
 			case "date":

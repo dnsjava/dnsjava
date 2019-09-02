@@ -110,6 +110,7 @@ private static class Resolution implements ResolverListener {
 					wait();
 				}
 				catch (InterruptedException e) {
+					throw new IOException(e);
 				}
 			}
 		}
