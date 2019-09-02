@@ -1,6 +1,6 @@
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
 
-package org.xbill.DNS.apps;
+package org.xbill.DNS.tools;
 
 import java.util.Iterator;
 import java.util.List;

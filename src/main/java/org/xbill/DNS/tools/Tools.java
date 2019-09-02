@@ -9,7 +9,9 @@ public class Tools {
       System.out.println("    dig");
       System.out.println("    jnamed");
       System.out.println("    lookup");
+      System.out.println("    primary");
       System.out.println("    update");
+      System.out.println("    xfrin");
       System.exit(1);
       return;
     }
@@ -27,8 +29,14 @@ public class Tools {
       case "lookup":
         lookup.main(programArgs);
         break;
+      case "primary":
+        primary.main(programArgs);
+        break;
       case "update":
         update.main(programArgs);
+        break;
+      case "xfrin":
+        xfrin.main(programArgs);
         break;
     }
   }
