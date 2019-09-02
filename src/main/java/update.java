@@ -49,8 +49,8 @@ update(InputStream in) {
 			String line;
 			do {
 				InputStream is;
-				is = (InputStream)istreams.get(0);
-				br = (BufferedReader)inputs.get(0);
+				is = istreams.get(0);
+				br = inputs.get(0);
 
 				if (is == System.in)
 					System.out.print("> ");

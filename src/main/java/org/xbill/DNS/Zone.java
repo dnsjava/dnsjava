@@ -286,7 +286,7 @@ addRRset(Name name, RRset rrset) {
 		@SuppressWarnings("unchecked")
 		List<RRset> list = (List<RRset>) types;
 		for (int i = 0; i < list.size(); i++) {
-			RRset set = (RRset) list.get(i);
+			RRset set = list.get(i);
 			if (set.getType() == rtype) {
 				list.set(i, rrset);
 				return;

@@ -236,7 +236,7 @@ findRRset(Name name, int type, int section) {
 	if (sections[section] == null)
 		return false;
 	for (int i = 0; i < sections[section].size(); i++) {
-		Record r = (Record) sections[section].get(i);
+		Record r = sections[section].get(i);
 		if (r.getType() == type && name.equals(r.getName()))
 			return true;
 	}
@@ -418,7 +418,7 @@ sectionToWire(DNSOutput out, int section, Compression c,
 	Record lastrec = null;
 
 	for (int i = 0; i < n; i++) {
-		Record rec = (Record)sections[section].get(i);
+		Record rec = sections[section].get(i);
 		if (section == Section.ADDITIONAL && rec instanceof OPTRecord) {
 			continue;
 		}

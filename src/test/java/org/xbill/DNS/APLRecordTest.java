@@ -309,7 +309,7 @@ public class APLRecordTest
 	    List<Element> l = ar.getElements();
 	    assertEquals(1, l.size());
 	    
-	    Element el = (Element)l.get(0);
+	    Element el = l.get(0);
 	    assertEquals(3, el.family);
 	    assertTrue(el.negative);
 	    assertEquals(130, el.prefixLength);
