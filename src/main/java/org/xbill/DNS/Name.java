@@ -5,12 +5,14 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A representation of a domain name. It may either be absolute (fully qualified) or relative.
  *
  * @author Brian Wellington
  */
+@Slf4j
 public class Name implements Comparable, Serializable {
 
   private static final long serialVersionUID = -7257019940971525644L;
@@ -369,9 +371,7 @@ public class Name implements Comparable, Serializable {
         case LABEL_COMPRESSION:
           pos = in.readU8();
           pos += ((len & ~LABEL_MASK) << 8);
-          if (Options.check("verbosecompression")) {
-            System.err.println("currently " + in.current() + ", pointer to " + pos);
-          }
+          log.debug("currently {}, pointer to {}", in.current(), pos);
 
           if (pos >= in.current() - 2) {
             throw new WireParseException("bad compression");
@@ -381,9 +381,7 @@ public class Name implements Comparable, Serializable {
             savedState = true;
           }
           in.jump(pos);
-          if (Options.check("verbosecompression")) {
-            System.err.println("current name '" + this + "', seeking to " + pos);
-          }
+          log.debug("current name '{}', seeking to {}", this, pos);
           break;
         default:
           throw new WireParseException("bad label type");

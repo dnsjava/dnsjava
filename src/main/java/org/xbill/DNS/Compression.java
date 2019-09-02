@@ -2,6 +2,8 @@
 
 package org.xbill.DNS;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * DNS Name Compression object.
  *
@@ -9,6 +11,7 @@ package org.xbill.DNS;
  * @see Name
  * @author Brian Wellington
  */
+@Slf4j
 public class Compression {
 
   private static class Entry {
@@ -20,7 +23,6 @@ public class Compression {
   private static final int TABLE_SIZE = 17;
   private static final int MAX_POINTER = 0x3FFF;
   private Entry[] table;
-  private boolean verbose = Options.check("verbosecompression");
 
   /** Creates a new Compression object. */
   public Compression() {
@@ -43,9 +45,7 @@ public class Compression {
     entry.pos = pos;
     entry.next = table[row];
     table[row] = entry;
-    if (verbose) {
-      System.err.println("Adding " + name + " at " + pos);
-    }
+    log.debug("Adding {} at {}", name, pos);
   }
 
   /**
@@ -62,9 +62,7 @@ public class Compression {
         pos = entry.pos;
       }
     }
-    if (verbose) {
-      System.err.println("Looking for " + name + ", found " + pos);
-    }
+    log.debug("Looking for {}, found {}", name, pos);
     return pos;
   }
 }

@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
+import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.ExtendedResolver;
@@ -31,6 +32,7 @@ import org.xbill.DNS.Type;
  * @author Brian Wellington
  * @author Paul Cowan (pwc21@yahoo.com)
  */
+@Slf4j
 public class DNSJavaNameService implements InvocationHandler {
 
   private static final String nsProperty = "sun.net.spi.nameservice.nameservers";
@@ -61,7 +63,7 @@ public class DNSJavaNameService implements InvocationHandler {
         Resolver res = new ExtendedResolver(servers);
         Lookup.setDefaultResolver(res);
       } catch (UnknownHostException e) {
-        System.err.println("DNSJavaNameService: invalid " + nsProperty);
+        log.error("DNSJavaNameService: invalid {}", nsProperty);
       }
     }
 
@@ -69,7 +71,7 @@ public class DNSJavaNameService implements InvocationHandler {
       try {
         Lookup.setDefaultSearchPath(new String[] {domain});
       } catch (TextParseException e) {
-        System.err.println("DNSJavaNameService: invalid " + domainProperty);
+        log.error("DNSJavaNameService: invalid {}", domainProperty);
       }
     }
 
@@ -80,32 +82,26 @@ public class DNSJavaNameService implements InvocationHandler {
 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    try {
-      if (method.getName().equals("getHostByAddr")) {
-        return this.getHostByAddr((byte[]) args[0]);
-      } else if (method.getName().equals("lookupAllHostAddr")) {
-        InetAddress[] addresses;
-        addresses = this.lookupAllHostAddr((String) args[0]);
-        Class<?> returnType = method.getReturnType();
-        if (returnType.equals(InetAddress[].class)) {
-          // method for Java >= 1.6
-          return addresses;
-        } else if (returnType.equals(byte[][].class)) {
-          // method for Java <= 1.5
-          int naddrs = addresses.length;
-          byte[][] byteAddresses = new byte[naddrs][];
-          byte[] addr;
-          for (int i = 0; i < naddrs; i++) {
-            addr = addresses[i].getAddress();
-            byteAddresses[i] = addr;
-          }
-          return byteAddresses;
+    if (method.getName().equals("getHostByAddr")) {
+      return this.getHostByAddr((byte[]) args[0]);
+    } else if (method.getName().equals("lookupAllHostAddr")) {
+      InetAddress[] addresses;
+      addresses = this.lookupAllHostAddr((String) args[0]);
+      Class<?> returnType = method.getReturnType();
+      if (returnType.equals(InetAddress[].class)) {
+        // method for Java >= 1.6
+        return addresses;
+      } else if (returnType.equals(byte[][].class)) {
+        // method for Java <= 1.5
+        int naddrs = addresses.length;
+        byte[][] byteAddresses = new byte[naddrs][];
+        byte[] addr;
+        for (int i = 0; i < naddrs; i++) {
+          addr = addresses[i].getAddress();
+          byteAddresses[i] = addr;
         }
+        return byteAddresses;
       }
-    } catch (Throwable e) {
-      System.err.println("DNSJavaNameService: Unexpected error.");
-      e.printStackTrace();
-      throw e;
     }
     throw new IllegalArgumentException("Unknown function name or arguments.");
   }

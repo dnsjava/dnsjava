@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * An implementation of Resolver that can send queries to multiple servers, sending the queries
@@ -16,6 +17,7 @@ import java.util.List;
  * @see Resolver
  * @author Brian Wellington
  */
+@Slf4j
 public class ExtendedResolver implements Resolver {
 
   private static class Resolution implements ResolverListener {
@@ -137,9 +139,7 @@ public class ExtendedResolver implements Resolver {
      */
     @Override
     public void receiveMessage(Object id, Message m) {
-      if (Options.check("verbose")) {
-        System.err.println("ExtendedResolver: " + "received message");
-      }
+      log.debug("received message");
       synchronized (this) {
         if (done) {
           return;
@@ -160,9 +160,7 @@ public class ExtendedResolver implements Resolver {
      */
     @Override
     public void handleException(Object id, Exception e) {
-      if (Options.check("verbose")) {
-        System.err.println("ExtendedResolver: got " + e);
-      }
+      log.debug("resolving failed", e);
       synchronized (this) {
         outstanding--;
         if (done) {

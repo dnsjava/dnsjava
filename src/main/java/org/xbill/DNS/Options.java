@@ -8,14 +8,9 @@ import java.util.StringTokenizer;
 
 /**
  * Boolean options:<br>
- * bindttl - Print TTLs in BIND format<br>
+ * BINDTTL - Print TTLs in BIND format<br>
  * multiline - Print records in multiline format<br>
- * noprintin - Don't print the class of a record if it's IN<br>
- * verbose - Turn on general debugging statements<br>
- * verbosemsg - Print all messages sent or received by SimpleResolver<br>
- * verbosecompression - Print messages related to name compression<br>
- * verbosesec - Print messages related to signature verification<br>
- * verbosecache - Print messages related to cache lookups<br>
+ * noPrintIN - Don't print the class of a record if it's IN<br>
  * <br>
  * Valued options:<br>
  * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<br>

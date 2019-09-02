@@ -8,8 +8,10 @@ import java.net.SocketTimeoutException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.hexdump;
 
+@Slf4j
 class Client {
 
   protected long endTime;
@@ -52,8 +54,8 @@ class Client {
 
   protected static void verboseLog(
       String prefix, SocketAddress local, SocketAddress remote, byte[] data) {
-    if (Options.check("verbosemsg")) {
-      System.err.println(hexdump.dump(prefix, data));
+    if (log.isDebugEnabled()) {
+      log.debug(hexdump.dump(prefix, data));
     }
     if (packetLogger != null) {
       packetLogger.log(prefix, local, remote, data);

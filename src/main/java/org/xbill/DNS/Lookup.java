@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The Lookup object issues queries to caching DNS servers. The input consists of a name, an
@@ -25,6 +26,7 @@ import java.util.Map;
  * @see ResolverConfig
  * @author Brian Wellington
  */
+@Slf4j
 public final class Lookup {
 
   private static Resolver defaultResolver;
@@ -40,7 +42,6 @@ public final class Lookup {
   private Name name;
   private int type;
   private int dclass;
-  private boolean verbose;
   private int iterations;
   private boolean foundAlias;
   private boolean done;
@@ -232,7 +233,6 @@ public final class Lookup {
       this.cache = getDefaultCache(dclass);
     }
     this.credibility = Credibility.NORMAL;
-    this.verbose = Options.check("verbose");
     this.result = -1;
   }
 
@@ -436,9 +436,9 @@ public final class Lookup {
 
   private void lookup(Name current) {
     SetResponse sr = cache.lookupRecords(current, type, credibility);
-    if (verbose) {
-      System.err.println("lookup " + current + " " + Type.string(type));
-      System.err.println(sr);
+    if (log.isDebugEnabled()) {
+      log.debug("lookup {} {}", current, Type.string(type));
+      log.debug(sr.toString());
     }
     processResponse(current, sr);
     if (done || doneCurrent) {
@@ -451,6 +451,8 @@ public final class Lookup {
     try {
       response = resolver.send(query);
     } catch (IOException e) {
+      log.debug("Lookup failed", e);
+
       // A network error occurred.  Press on.
       if (e instanceof InterruptedIOException) {
         timedout = true;
@@ -479,9 +481,9 @@ public final class Lookup {
     if (sr == null) {
       sr = cache.lookupRecords(current, type, credibility);
     }
-    if (verbose) {
-      System.err.println("queried " + current + " " + Type.string(type));
-      System.err.println(sr);
+    if (log.isDebugEnabled()) {
+      log.debug("queried {} {}", current, Type.string(type));
+      log.debug(sr.toString());
     }
     processResponse(current, sr);
   }

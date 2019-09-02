@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A cache of DNS records. The cache obeys TTLs, so items are purged after their validity period is
@@ -20,6 +21,7 @@ import java.util.Set;
  * @see Credibility
  * @author Brian Wellington
  */
+@Slf4j
 public class Cache {
 
   private interface Element {
@@ -604,7 +606,6 @@ public class Cache {
     boolean completed = false;
     RRset[] answers, auth, addl;
     SetResponse response = null;
-    boolean verbose = Options.check("verbosecache");
     HashSet<Name> additionalNames;
 
     if ((rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) || question == null) {
@@ -720,9 +721,7 @@ public class Cache {
       cred = getCred(Section.ADDITIONAL, isAuth);
       addRRset(rRset, cred);
     }
-    if (verbose) {
-      System.out.println("addMessage: " + response);
-    }
+    log.debug("addMessage: {}", response);
     return (response);
   }
 

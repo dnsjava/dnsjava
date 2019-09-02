@@ -36,15 +36,9 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CompressionTest {
-  @BeforeEach
-  void setUp() {
-    Options.set("verbosecompression");
-  }
-
   @Test
   void test() throws TextParseException {
     Compression c = new Compression();

@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * An implementation of Resolver that sends one query to one server. SimpleResolver handles TCP
@@ -17,6 +18,7 @@ import java.util.List;
  * @see OPTRecord
  * @author Brian Wellington
  */
+@Slf4j
 public class SimpleResolver implements Resolver {
 
   /** The default port to send queries to */
@@ -178,9 +180,6 @@ public class SimpleResolver implements Resolver {
     try {
       return (new Message(b));
     } catch (IOException e) {
-      if (Options.check("verbose")) {
-        e.printStackTrace();
-      }
       if (!(e instanceof WireParseException)) {
         e = new WireParseException("Error parsing message");
       }
@@ -193,9 +192,7 @@ public class SimpleResolver implements Resolver {
       return;
     }
     int error = tsig.verify(response, b, query.getTSIG());
-    if (Options.check("verbose")) {
-      System.err.println("TSIG verify: " + Rcode.TSIGstring(error));
-    }
+    log.debug("TSIG verify: {}", Rcode.TSIGstring(error));
   }
 
   private void applyEDNS(Message query) {
@@ -224,10 +221,7 @@ public class SimpleResolver implements Resolver {
    */
   @Override
   public Message send(Message query) throws IOException {
-    if (Options.check("verbose")) {
-      System.err.println(
-          "Sending to " + address.getAddress().getHostAddress() + ":" + address.getPort());
-    }
+    log.debug("Sending to {}:{}", address.getAddress().getHostAddress(), address.getPort());
 
     if (query.getHeader().getOpcode() == Opcode.QUERY) {
       Record question = query.getQuestion();
@@ -277,9 +271,7 @@ public class SimpleResolver implements Resolver {
         if (tcp) {
           throw new WireParseException(error);
         } else {
-          if (Options.check("verbose")) {
-            System.err.println(error);
-          }
+          log.debug(error);
           continue;
         }
       }

@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -20,6 +21,7 @@ import org.xbill.DNS.utils.base64;
  * @see TSIGRecord
  * @author Brian Wellington
  */
+@Slf4j
 public class TSIG {
 
   /** The domain name representing the HMAC-MD5 algorithm. */
@@ -442,18 +444,14 @@ public class TSIG {
     }
 
     if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
-      if (Options.check("verbose")) {
-        System.err.println("BADKEY failure");
-      }
+      log.debug("BADKEY failure");
       return Rcode.BADKEY;
     }
     long now = System.currentTimeMillis();
     long then = tsig.getTimeSigned().getTime();
     long fudge = tsig.getFudge();
     if (Math.abs(now - then) > fudge * 1000) {
-      if (Options.check("verbose")) {
-        System.err.println("BADTIME failure");
-      }
+      log.debug("BADTIME failure");
       return Rcode.BADTIME;
     }
 
@@ -502,19 +500,13 @@ public class TSIG {
     }
 
     if (signature.length > digestLength) {
-      if (Options.check("verbose")) {
-        System.err.println("BADSIG: signature too long");
-      }
+      log.debug("BADSIG: signature too long");
       return Rcode.BADSIG;
     } else if (signature.length < minDigestLength) {
-      if (Options.check("verbose")) {
-        System.err.println("BADSIG: signature too short");
-      }
+      log.debug("BADSIG: signature too short");
       return Rcode.BADSIG;
     } else if (!verify(hmac, signature, true)) {
-      if (Options.check("verbose")) {
-        System.err.println("BADSIG: signature verification");
-      }
+      log.debug("BADSIG: signature verification");
       return Rcode.BADSIG;
     }
 
@@ -633,9 +625,7 @@ public class TSIG {
       }
 
       if (!tsig.getName().equals(key.name) || !tsig.getAlgorithm().equals(key.alg)) {
-        if (Options.check("verbose")) {
-          System.err.println("BADKEY failure");
-        }
+        log.debug("BADKEY failure");
         m.tsigState = Message.TSIG_FAILED;
         return Rcode.BADKEY;
       }
@@ -650,9 +640,7 @@ public class TSIG {
       verifier.update(out.toByteArray());
 
       if (!TSIG.verify(verifier, tsig.getSignature())) {
-        if (Options.check("verbose")) {
-          System.err.println("BADSIG failure");
-        }
+        log.debug("BADSIG failure");
         m.tsigState = Message.TSIG_FAILED;
         return Rcode.BADSIG;
       }

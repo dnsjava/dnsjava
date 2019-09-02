@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * A class that tries to locate name servers and the search path to be appended to unqualified
@@ -40,6 +41,7 @@ import java.util.StringTokenizer;
  * @author <a href="mailto:yannick@meudal.net">Yannick Meudal</a>
  * @author <a href="mailto:arnt@gulbrandsen.priv.no">Arnt Gulbrandsen</a>
  */
+@Slf4j
 public class ResolverConfig {
 
   public static final String DNS_SERVER_PROP = "dns.server";
@@ -81,17 +83,13 @@ public class ResolverConfig {
     if (list.contains(server)) {
       return;
     }
-    if (Options.check("verbose")) {
-      System.out.println("adding server " + server);
-    }
+    log.debug("adding server {}", server);
     list.add(server);
   }
 
   private void addSearch(String search, List<Name> list) {
     Name name;
-    if (Options.check("verbose")) {
-      System.out.println("adding search " + search);
-    }
+    log.debug("adding search {}", search);
     try {
       name = Name.fromString(search, Name.root);
     } catch (TextParseException e) {
@@ -108,9 +106,7 @@ public class ResolverConfig {
     try {
       int ndots = Integer.parseInt(token);
       if (ndots >= 0) {
-        if (Options.check("verbose")) {
-          System.out.println("setting ndots " + token);
-        }
+        log.debug("setting ndots {}", token);
         return ndots;
       }
     } catch (NumberFormatException e) {

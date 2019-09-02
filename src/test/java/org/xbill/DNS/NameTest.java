@@ -654,9 +654,7 @@ class NameTest {
       DNSInput in = new DNSInput(raw);
       in.jump(6);
 
-      Options.set("verbosecompression");
       Name n = new Name(in);
-      Options.unset("verbosecompression");
       assertEquals(e, n);
     }
 
