@@ -1,4 +1,5 @@
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
+package org.xbill.DNS.tools;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

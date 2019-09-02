@@ -1,4 +1,5 @@
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
+package org.xbill.DNS.tools;
 
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;

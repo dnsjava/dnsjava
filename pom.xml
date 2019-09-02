@@ -104,6 +104,7 @@
                             {maven-resources},
                             META-INF/LICENSE=LICENSE
                         </Include-Resource>
+                        <Main-Class>org.xbill.DNS.tools.Tools</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>
