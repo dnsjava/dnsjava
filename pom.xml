@@ -89,7 +89,7 @@
                             org.xbill.DNS.*
                         </Export-Package>
                         <Import-Package>
-                            !org.xbill.DNS*,!sun.*,*
+                            !org.xbill.DNS*,!sun.*,android.os;resolution:=optional,*
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>BSD-2-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"</Bundle-License>
