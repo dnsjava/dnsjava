@@ -24,7 +24,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Constants and methods relating to DNSSEC.
@@ -129,8 +129,8 @@ public class DNSSEC {
     out.writeU8(sig.getAlgorithm());
     out.writeU8(sig.getLabels());
     out.writeU32(sig.getOrigTTL());
-    out.writeU32(sig.getExpire().getTime() / 1000);
-    out.writeU32(sig.getTimeSigned().getTime() / 1000);
+    out.writeU32(sig.getExpire().getEpochSecond());
+    out.writeU32(sig.getTimeSigned().getEpochSecond());
     out.writeU16(sig.getFootprint());
     sig.getSigner().toWireCanonical(out);
   }
@@ -247,42 +247,42 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the signature has expired. */
   public static class SignatureExpiredException extends DNSSECException {
-    private Date when, now;
+    private Instant when, now;
 
-    SignatureExpiredException(Date when, Date now) {
+    SignatureExpiredException(Instant when, Instant now) {
       super("signature expired");
       this.when = when;
       this.now = now;
     }
 
     /** @return When the signature expired */
-    public Date getExpiration() {
+    public Instant getExpiration() {
       return when;
     }
 
     /** @return When the verification was attempted */
-    public Date getVerifyTime() {
+    public Instant getVerifyTime() {
       return now;
     }
   }
 
   /** A DNSSEC verification failed because the signature has not yet become valid. */
   public static class SignatureNotYetValidException extends DNSSECException {
-    private Date when, now;
+    private Instant when, now;
 
-    SignatureNotYetValidException(Date when, Date now) {
+    SignatureNotYetValidException(Instant when, Instant now) {
       super("signature is not yet valid");
       this.when = when;
       this.now = now;
     }
 
     /** @return When the signature will become valid */
-    public Date getExpiration() {
+    public Instant getExpiration() {
       return when;
     }
 
     /** @return When the verification was attempted */
-    public Date getVerifyTime() {
+    public Instant getVerifyTime() {
       return now;
     }
   }
@@ -955,7 +955,7 @@ public class DNSSEC {
    */
   public static void verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key)
       throws DNSSECException {
-    verify(rrset, rrsig, key, new Date());
+    verify(rrset, rrsig, key, Instant.now());
   }
 
   /**
@@ -973,7 +973,7 @@ public class DNSSEC {
    * @throws SignatureVerificationException The signature does not verify.
    * @throws DNSSECException Some other error occurred.
    */
-  public static void verify(RRset<?> rrset, RRSIGRecord rrsig, DNSKEYRecord key, Date date)
+  public static void verify(RRset<?> rrset, RRSIGRecord rrsig, DNSKEYRecord key, Instant date)
       throws DNSSECException {
     if (!matches(rrsig, key)) {
       throw new KeyMismatchException(key, rrsig);
@@ -1084,7 +1084,7 @@ public class DNSSEC {
    * @return The generated signature
    */
   public static RRSIGRecord sign(
-      RRset rrset, DNSKEYRecord key, PrivateKey privkey, Date inception, Date expiration)
+      RRset rrset, DNSKEYRecord key, PrivateKey privkey, Instant inception, Instant expiration)
       throws DNSSECException {
     return sign(rrset, key, privkey, inception, expiration, null);
   }
@@ -1109,8 +1109,8 @@ public class DNSSEC {
       RRset<?> rrset,
       DNSKEYRecord key,
       PrivateKey privkey,
-      Date inception,
-      Date expiration,
+      Instant inception,
+      Instant expiration,
       String provider)
       throws DNSSECException {
     int alg = key.getAlgorithm();
@@ -1139,8 +1139,8 @@ public class DNSSEC {
       SIGRecord previous,
       KEYRecord key,
       PrivateKey privkey,
-      Date inception,
-      Date expiration)
+      Instant inception,
+      Instant expiration)
       throws DNSSECException {
     int alg = key.getAlgorithm();
     checkAlgorithm(privkey, alg);
@@ -1180,7 +1180,7 @@ public class DNSSEC {
       throw new KeyMismatchException(key, sig);
     }
 
-    Date now = new Date();
+    Instant now = Instant.now();
 
     if (now.compareTo(sig.getExpire()) > 0) {
       throw new SignatureExpiredException(sig.getExpire(), now);

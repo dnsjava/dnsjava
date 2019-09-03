@@ -2,7 +2,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.DNSSECException;
 
@@ -33,7 +33,7 @@ class DNSSECTest {
     RRset<TXTRecord> rrset = new RRset<>();
     rrset.addRR(txt);
     rrset.addRR(rrsig);
-    DNSSEC.verify(rrset, rrsig, dnskey, new Date(60));
+    DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60));
   }
 
   @Test
@@ -60,7 +60,7 @@ class DNSSECTest {
     RRset<TXTRecord> rrset = new RRset<>();
     rrset.addRR(txt);
     rrset.addRR(rrsig);
-    DNSSEC.verify(rrset, rrsig, dnskey, new Date(60));
+    DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60));
   }
 
   @Test
@@ -87,7 +87,7 @@ class DNSSECTest {
     RRset<TXTRecord> set = new RRset<>();
     set.addRR(txt);
     set.addRR(rrsig);
-    DNSSEC.verify(set, rrsig, dnskey, new Date(60));
+    DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochMilli(60));
   }
 
   @Test
@@ -114,6 +114,6 @@ class DNSSECTest {
     RRset<TXTRecord> set = new RRset<>();
     set.addRR(txt);
     set.addRR(rrsig);
-    DNSSEC.verify(set, rrsig, dnskey, new Date(60));
+    DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochMilli(60));
   }
 }

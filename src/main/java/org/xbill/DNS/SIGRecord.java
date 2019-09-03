@@ -2,7 +2,7 @@
 
 package org.xbill.DNS;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Signature - A SIG provides the digital signature of an RRset, so that the data can be
@@ -45,8 +45,8 @@ public class SIGRecord extends SIGBase {
       int covered,
       int alg,
       long origttl,
-      Date expire,
-      Date timeSigned,
+      Instant expire,
+      Instant timeSigned,
       int footprint,
       Name signer,
       byte[] signature) {

@@ -2,12 +2,10 @@
 
 package org.xbill.DNS;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Routines for converting time values to and from YYYYMMDDHHMMSS format.
@@ -15,65 +13,29 @@ import java.util.TimeZone;
  * @author Brian Wellington
  */
 final class FormattedTime {
-
-  private static NumberFormat w2, w4;
-
-  static {
-    w2 = new DecimalFormat();
-    w2.setMinimumIntegerDigits(2);
-
-    w4 = new DecimalFormat();
-    w4.setMinimumIntegerDigits(4);
-    w4.setGroupingUsed(false);
-  }
+  private static final DateTimeFormatter DEFAULT_FORMAT =
+      DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
 
   private FormattedTime() {}
 
   /**
    * Converts a Date into a formatted string.
    *
-   * @param date The Date to convert.
+   * @param date The Instant to convert.
    * @return The formatted string.
    */
-  public static String format(Date date) {
-    Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-    StringBuilder sb = new StringBuilder();
-
-    c.setTime(date);
-    sb.append(w4.format(c.get(Calendar.YEAR)));
-    sb.append(w2.format(c.get(Calendar.MONTH) + 1));
-    sb.append(w2.format(c.get(Calendar.DAY_OF_MONTH)));
-    sb.append(w2.format(c.get(Calendar.HOUR_OF_DAY)));
-    sb.append(w2.format(c.get(Calendar.MINUTE)));
-    sb.append(w2.format(c.get(Calendar.SECOND)));
-    return sb.toString();
+  public static String format(Instant date) {
+    return DEFAULT_FORMAT.format(date);
   }
 
   /**
-   * Parses a formatted time string into a Date.
+   * Parses a formatted time string into an Instant.
    *
    * @param s The string, in the form YYYYMMDDHHMMSS.
-   * @return The Date object.
-   * @throws TextParseException The string was invalid.
+   * @return The Instant object.
+   * @throws DateTimeParseException The string was invalid.
    */
-  public static Date parse(String s) throws TextParseException {
-    if (s.length() != 14) {
-      throw new TextParseException("Invalid time encoding: " + s);
-    }
-
-    Calendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-    c.clear();
-    try {
-      int year = Integer.parseInt(s.substring(0, 4));
-      int month = Integer.parseInt(s.substring(4, 6)) - 1;
-      int date = Integer.parseInt(s.substring(6, 8));
-      int hour = Integer.parseInt(s.substring(8, 10));
-      int minute = Integer.parseInt(s.substring(10, 12));
-      int second = Integer.parseInt(s.substring(12, 14));
-      c.set(year, month, date, hour, minute, second);
-    } catch (NumberFormatException e) {
-      throw new TextParseException("Invalid time encoding: " + s);
-    }
-    return c.getTime();
+  public static Instant parse(String s) throws DateTimeParseException {
+    return DEFAULT_FORMAT.parse(s, Instant::from);
   }
 }

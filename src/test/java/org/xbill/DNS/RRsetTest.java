@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,8 +73,8 @@ class RRsetTest {
             Type.A,
             0xF,
             0xABCDEL,
-            new Date(),
-            new Date(),
+            Instant.now(),
+            Instant.now(),
             0xA,
             m_name,
             new byte[0]);
@@ -86,8 +86,8 @@ class RRsetTest {
             Type.A,
             0xF,
             0xABCDEL,
-            new Date(),
-            new Date(),
+            Instant.now(),
+            Instant.now(),
             0xA,
             m_name2,
             new byte[0]);

@@ -24,7 +24,7 @@ class RRSIGRecordTest {
     assertEquals(50, record.getTypeCovered());
     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddhhmmss", Locale.US);
     formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-    assertEquals(formatter.parse("20161207204758"), record.getExpire());
-    assertEquals(formatter.parse("20161107195347"), record.getTimeSigned());
+    assertEquals(formatter.parse("20161207204758").toInstant(), record.getExpire());
+    assertEquals(formatter.parse("20161107195347").toInstant(), record.getTimeSigned());
   }
 }

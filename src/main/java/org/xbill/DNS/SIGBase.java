@@ -3,7 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -18,7 +18,7 @@ abstract class SIGBase extends Record {
   protected int covered;
   protected int alg, labels;
   protected long origttl;
-  protected Date expire, timeSigned;
+  protected Instant expire, timeSigned;
   protected int footprint;
   protected Name signer;
   protected byte[] signature;
@@ -33,8 +33,8 @@ abstract class SIGBase extends Record {
       int covered,
       int alg,
       long origttl,
-      Date expire,
-      Date timeSigned,
+      Instant expire,
+      Instant timeSigned,
       int footprint,
       Name signer,
       byte[] signature) {
@@ -61,8 +61,8 @@ abstract class SIGBase extends Record {
     alg = in.readU8();
     labels = in.readU8();
     origttl = in.readU32();
-    expire = new Date(1000 * in.readU32());
-    timeSigned = new Date(1000 * in.readU32());
+    expire = Instant.ofEpochSecond(in.readU32());
+    timeSigned = Instant.ofEpochSecond(in.readU32());
     footprint = in.readU16();
     signer = new Name(in);
     signature = in.readByteArray();
@@ -159,12 +159,12 @@ abstract class SIGBase extends Record {
   }
 
   /** Returns the time at which the signature expires */
-  public Date getExpire() {
+  public Instant getExpire() {
     return expire;
   }
 
   /** Returns the time at which this signature was generated */
-  public Date getTimeSigned() {
+  public Instant getTimeSigned() {
     return timeSigned;
   }
 
@@ -193,8 +193,8 @@ abstract class SIGBase extends Record {
     out.writeU8(alg);
     out.writeU8(labels);
     out.writeU32(origttl);
-    out.writeU32(expire.getTime() / 1000);
-    out.writeU32(timeSigned.getTime() / 1000);
+    out.writeU32(expire.getEpochSecond());
+    out.writeU32(timeSigned.getEpochSecond());
     out.writeU16(footprint);
     signer.toWire(out, null, canonical);
     out.writeByteArray(signature);

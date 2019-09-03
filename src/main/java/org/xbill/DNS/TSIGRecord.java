@@ -3,7 +3,8 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -21,8 +22,8 @@ public class TSIGRecord extends Record {
   private static final long serialVersionUID = -88820909016649306L;
 
   private Name alg;
-  private Date timeSigned;
-  private int fudge;
+  private Instant timeSigned;
+  private Duration fudge;
   private byte[] signature;
   private int originalID;
   private int error;
@@ -53,8 +54,8 @@ public class TSIGRecord extends Record {
       int dclass,
       long ttl,
       Name alg,
-      Date timeSigned,
-      int fudge,
+      Instant timeSigned,
+      Duration fudge,
       byte[] signature,
       int originalID,
       int error,
@@ -62,7 +63,8 @@ public class TSIGRecord extends Record {
     super(name, Type.TSIG, dclass, ttl);
     this.alg = checkName("alg", alg);
     this.timeSigned = timeSigned;
-    this.fudge = checkU16("fudge", fudge);
+    checkU16("fudge", (int) fudge.getSeconds());
+    this.fudge = fudge;
     this.signature = signature;
     this.originalID = checkU16("originalID", originalID);
     this.error = checkU16("error", error);
@@ -76,8 +78,8 @@ public class TSIGRecord extends Record {
     long timeHigh = in.readU16();
     long timeLow = in.readU32();
     long time = (timeHigh << 32) + timeLow;
-    timeSigned = new Date(time * 1000);
-    fudge = in.readU16();
+    timeSigned = Instant.ofEpochSecond(time);
+    fudge = Duration.ofSeconds(in.readU16());
 
     int sigLen = in.readU16();
     signature = in.readByteArray(sigLen);
@@ -108,7 +110,7 @@ public class TSIGRecord extends Record {
       sb.append("(\n\t");
     }
 
-    sb.append(timeSigned.getTime() / 1000);
+    sb.append(timeSigned.getEpochSecond());
     sb.append(" ");
     sb.append(fudge);
     sb.append(" ");
@@ -144,7 +146,7 @@ public class TSIGRecord extends Record {
                   + ((other[4] & 0xFF) << 8)
                   + ((other[5] & 0xFF));
           sb.append("<server time: ");
-          sb.append(new Date(time * 1000));
+          sb.append(Instant.ofEpochSecond(time));
           sb.append(">");
         }
       } else {
@@ -165,12 +167,12 @@ public class TSIGRecord extends Record {
   }
 
   /** Returns the time that this record was generated */
-  public Date getTimeSigned() {
+  public Instant getTimeSigned() {
     return timeSigned;
   }
 
   /** Returns the time fudge factor */
-  public int getFudge() {
+  public Duration getFudge() {
     return fudge;
   }
 
@@ -198,12 +200,12 @@ public class TSIGRecord extends Record {
   void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     alg.toWire(out, null, canonical);
 
-    long time = timeSigned.getTime() / 1000;
+    long time = timeSigned.getEpochSecond();
     int timeHigh = (int) (time >> 32);
     long timeLow = (time & 0xFFFFFFFFL);
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
-    out.writeU16(fudge);
+    out.writeU16((int) fudge.getSeconds());
 
     out.writeU16(signature.length);
     out.writeByteArray(signature);

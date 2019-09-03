@@ -2,7 +2,7 @@
 
 package org.xbill.DNS;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Resource Record Signature - An RRSIG provides the digital signature of an RRset, so that the data
@@ -46,8 +46,8 @@ public class RRSIGRecord extends SIGBase {
       int covered,
       int alg,
       long origttl,
-      Date expire,
-      Date timeSigned,
+      Instant expire,
+      Instant timeSigned,
       int footprint,
       Name signer,
       byte[] signature) {

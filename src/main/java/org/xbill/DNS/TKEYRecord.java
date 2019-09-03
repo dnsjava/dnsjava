@@ -3,7 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -19,8 +19,8 @@ public class TKEYRecord extends Record {
   private static final long serialVersionUID = 8828458121926391756L;
 
   private Name alg;
-  private Date timeInception;
-  private Date timeExpire;
+  private Instant timeInception;
+  private Instant timeExpire;
   private int mode, error;
   private byte[] key;
   private byte[] other;
@@ -64,8 +64,8 @@ public class TKEYRecord extends Record {
       int dclass,
       long ttl,
       Name alg,
-      Date timeInception,
-      Date timeExpire,
+      Instant timeInception,
+      Instant timeExpire,
       int mode,
       int error,
       byte[] key,
@@ -83,8 +83,8 @@ public class TKEYRecord extends Record {
   @Override
   void rrFromWire(DNSInput in) throws IOException {
     alg = new Name(in);
-    timeInception = new Date(1000 * in.readU32());
-    timeExpire = new Date(1000 * in.readU32());
+    timeInception = Instant.ofEpochSecond(in.readU32());
+    timeExpire = Instant.ofEpochSecond(in.readU32());
     mode = in.readU16();
     error = in.readU16();
 
@@ -170,12 +170,12 @@ public class TKEYRecord extends Record {
   }
 
   /** Returns the beginning of the validity period of the shared secret or keying material */
-  public Date getTimeInception() {
+  public Instant getTimeInception() {
     return timeInception;
   }
 
   /** Returns the end of the validity period of the shared secret or keying material */
-  public Date getTimeExpire() {
+  public Instant getTimeExpire() {
     return timeExpire;
   }
 
@@ -203,8 +203,8 @@ public class TKEYRecord extends Record {
   void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     alg.toWire(out, null, canonical);
 
-    out.writeU32(timeInception.getTime() / 1000);
-    out.writeU32(timeExpire.getTime() / 1000);
+    out.writeU32(timeInception.getEpochSecond());
+    out.writeU32(timeExpire.getEpochSecond());
 
     out.writeU16(mode);
     out.writeU16(error);

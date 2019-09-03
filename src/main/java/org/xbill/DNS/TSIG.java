@@ -3,9 +3,10 @@
 package org.xbill.DNS;
 
 import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.crypto.Mac;
@@ -77,7 +78,7 @@ public class TSIG {
   }
 
   /** The default fudge value for outgoing packets. Can be overriden by the tsigfudge option. */
-  public static final short FUDGE = 300;
+  public static final Duration FUDGE = Duration.ofSeconds(300);
 
   private Name name, alg;
   private Mac hmac;
@@ -259,22 +260,24 @@ public class TSIG {
    * @return The TSIG record to be added to the message
    */
   public TSIGRecord generate(Message m, byte[] b, int error, TSIGRecord old) {
-    Date timeSigned;
+    Instant timeSigned;
     if (error != Rcode.BADTIME) {
-      timeSigned = new Date();
+      timeSigned = Instant.now();
     } else {
       timeSigned = old.getTimeSigned();
     }
-    int fudge;
+    Duration fudge;
     boolean signing = false;
     if (error == Rcode.NOERROR || error == Rcode.BADTIME) {
       signing = true;
       hmac.reset();
     }
 
-    fudge = Options.intValue("tsigfudge");
-    if (fudge < 0 || fudge > 0x7FFF) {
+    int fudgeOption = Options.intValue("tsigfudge");
+    if (fudgeOption < 0 || fudgeOption > 0x7FFF) {
       fudge = FUDGE;
+    } else {
+      fudge = Duration.ofSeconds(fudgeOption);
     }
 
     if (old != null) {
@@ -296,12 +299,12 @@ public class TSIG {
     out.writeU16(DClass.ANY); /* class */
     out.writeU32(0); /* ttl */
     alg.toWireCanonical(out);
-    long time = timeSigned.getTime() / 1000;
+    long time = timeSigned.getEpochSecond();
     int timeHigh = (int) (time >> 32);
     long timeLow = (time & 0xFFFFFFFFL);
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
-    out.writeU16(fudge);
+    out.writeU16((int) fudge.getSeconds());
 
     out.writeU16(error);
     out.writeU16(0); /* No other data */
@@ -320,7 +323,7 @@ public class TSIG {
     byte[] other = null;
     if (error == Rcode.BADTIME) {
       out = new DNSOutput();
-      time = new Date().getTime() / 1000;
+      time = Instant.now().getEpochSecond();
       timeHigh = (int) (time >> 32);
       timeLow = (time & 0xFFFFFFFFL);
       out.writeU16(timeHigh);
@@ -375,13 +378,15 @@ public class TSIG {
       apply(m, old);
       return;
     }
-    Date timeSigned = new Date();
-    int fudge;
+    Instant timeSigned = Instant.now();
+    Duration fudge;
     hmac.reset();
 
-    fudge = Options.intValue("tsigfudge");
-    if (fudge < 0 || fudge > 0x7FFF) {
+    int fudgeOption = Options.intValue("tsigfudge");
+    if (fudgeOption < 0 || fudgeOption > 0x7FFF) {
       fudge = FUDGE;
+    } else {
+      fudge = Duration.ofSeconds(fudgeOption);
     }
 
     DNSOutput out = new DNSOutput();
@@ -393,12 +398,12 @@ public class TSIG {
     hmac.update(m.toWire());
 
     out = new DNSOutput();
-    long time = timeSigned.getTime() / 1000;
+    long time = timeSigned.getEpochSecond();
     int timeHigh = (int) (time >> 32);
     long timeLow = (time & 0xFFFFFFFFL);
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
-    out.writeU16(fudge);
+    out.writeU16((int) fudge.getSeconds());
 
     hmac.update(out.toByteArray());
 
@@ -447,10 +452,8 @@ public class TSIG {
       log.debug("BADKEY failure");
       return Rcode.BADKEY;
     }
-    long now = System.currentTimeMillis();
-    long then = tsig.getTimeSigned().getTime();
-    long fudge = tsig.getFudge();
-    if (Math.abs(now - then) > fudge * 1000) {
+    Duration delta = Duration.between(Instant.now(), tsig.getTimeSigned()).abs();
+    if (delta.compareTo(tsig.getFudge()) > 0) {
       log.debug("BADTIME failure");
       return Rcode.BADTIME;
     }
@@ -474,12 +477,12 @@ public class TSIG {
     out.writeU16(tsig.dclass);
     out.writeU32(tsig.ttl);
     tsig.getAlgorithm().toWireCanonical(out);
-    long time = tsig.getTimeSigned().getTime() / 1000;
+    long time = tsig.getTimeSigned().getEpochSecond();
     int timeHigh = (int) (time >> 32);
     long timeLow = (time & 0xFFFFFFFFL);
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
-    out.writeU16(tsig.getFudge());
+    out.writeU16((int) tsig.getFudge().getSeconds());
     out.writeU16(tsig.getError());
     if (tsig.getOther() != null) {
       out.writeU16(tsig.getOther().length);
@@ -631,12 +634,12 @@ public class TSIG {
       }
 
       DNSOutput out = new DNSOutput();
-      long time = tsig.getTimeSigned().getTime() / 1000;
+      long time = tsig.getTimeSigned().getEpochSecond();
       int timeHigh = (int) (time >> 32);
       long timeLow = (time & 0xFFFFFFFFL);
       out.writeU16(timeHigh);
       out.writeU32(timeLow);
-      out.writeU16(tsig.getFudge());
+      out.writeU16((int) tsig.getFudge().getSeconds());
       verifier.update(out.toByteArray());
 
       if (!TSIG.verify(verifier, tsig.getSignature())) {

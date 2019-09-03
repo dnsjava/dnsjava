@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 class RecordTest {
@@ -572,7 +572,8 @@ class RecordTest {
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0);
     assertEquals(Type.A, r.getRRsetType());
 
-    r = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(), new Date(), 10, n, new byte[0]);
+    Instant now = Instant.now();
+    r = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
     assertEquals(Type.A, r.getRRsetType());
 
     // create an "EmptyRecord" instance with RRSIG type. As it has no RDATA,
@@ -586,19 +587,19 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Name m = Name.fromString("My.M.");
 
+    Instant now = Instant.now();
     Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
-    Record r2 =
-        new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(), new Date(), 10, n, new byte[0]);
+    Record r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
     assertTrue(r1.sameRRset(r2));
     assertTrue(r2.sameRRset(r1));
 
     r1 = Record.newRecord(n, Type.A, DClass.HS, 0);
-    r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, new Date(), new Date(), 10, n, new byte[0]);
+    r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
     assertFalse(r1.sameRRset(r2));
     assertFalse(r2.sameRRset(r1));
 
     r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
-    r2 = new RRSIGRecord(m, DClass.IN, 0, Type.A, 1, 0, new Date(), new Date(), 10, n, new byte[0]);
+    r2 = new RRSIGRecord(m, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
     assertFalse(r1.sameRRset(r2));
     assertFalse(r2.sameRRset(r1));
   }

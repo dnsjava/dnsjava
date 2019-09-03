@@ -37,8 +37,9 @@ package org.xbill.DNS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
@@ -48,12 +49,12 @@ class FormattedTimeTest {
   void test_format() {
     GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     cal.set(2005, 2, 19, 4, 4, 5);
-    String out = FormattedTime.format(cal.getTime());
+    String out = FormattedTime.format(cal.toInstant());
     assertEquals("20050319040405", out);
   }
 
   @Test
-  void test_parse() throws TextParseException {
+  void test_parse() throws DateTimeParseException, TextParseException {
     // have to make sure to clear out the milliseconds since there
     // is occasionally a difference between when cal and cal2 are
     // instantiated.
@@ -61,17 +62,17 @@ class FormattedTimeTest {
     cal.set(2005, 2, 19, 4, 4, 5);
     cal.set(Calendar.MILLISECOND, 0);
 
-    Date out = FormattedTime.parse("20050319040405");
+    Instant out = FormattedTime.parse("20050319040405");
     GregorianCalendar cal2 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-    cal2.setTimeInMillis(out.getTime());
+    cal2.setTimeInMillis(out.toEpochMilli());
     cal2.set(Calendar.MILLISECOND, 0);
     assertEquals(cal, cal2);
   }
 
   @Test
   void test_parse_invalid() {
-    assertThrows(TextParseException.class, () -> FormattedTime.parse("2004010101010"));
-    assertThrows(TextParseException.class, () -> FormattedTime.parse("200401010101010"));
-    assertThrows(TextParseException.class, () -> FormattedTime.parse("2004010101010A"));
+    assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("2004010101010"));
+    assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("200401010101010"));
+    assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("2004010101010A"));
   }
 }

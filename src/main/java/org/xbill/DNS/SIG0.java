@@ -3,7 +3,8 @@
 package org.xbill.DNS;
 
 import java.security.PrivateKey;
-import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Creates SIG(0) transaction signatures.
@@ -17,7 +18,7 @@ public class SIG0 {
    * The default validity period for outgoing SIG(0) signed messages. Can be overriden by the
    * sig0validity option.
    */
-  private static final short VALIDITY = 300;
+  private static final Duration VALIDITY = Duration.ofSeconds(300);
 
   private SIG0() {}
 
@@ -34,14 +35,16 @@ public class SIG0 {
       Message message, KEYRecord key, PrivateKey privkey, SIGRecord previous)
       throws DNSSEC.DNSSECException {
 
-    int validity = Options.intValue("sig0validity");
-    if (validity < 0) {
+    int validityOption = Options.intValue("sig0validity");
+    Duration validity;
+    if (validityOption < 0) {
       validity = VALIDITY;
+    } else {
+      validity = Duration.ofSeconds(validityOption);
     }
 
-    long now = System.currentTimeMillis();
-    Date timeSigned = new Date(now);
-    Date timeExpires = new Date(now + validity * 1000);
+    Instant timeSigned = Instant.now();
+    Instant timeExpires = timeSigned.plus(validity);
 
     SIGRecord sig = DNSSEC.signMessage(message, previous, key, privkey, timeSigned, timeExpires);
 

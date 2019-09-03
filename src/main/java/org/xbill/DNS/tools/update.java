@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.net.SocketException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import org.xbill.DNS.DClass;
@@ -233,10 +233,10 @@ public class update {
             }
             break;
           case "date":
-            Date now = new Date();
+            Instant now = Instant.now();
             token = st.get();
             if (token.isString() && token.value.equals("-ms")) {
-              print(Long.toString(now.getTime()));
+              print(Long.toString(now.toEpochMilli()));
             } else {
               print(now);
             }
