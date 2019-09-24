@@ -1047,20 +1047,20 @@ public class DNSSEC {
       case Algorithm.RSA_NSEC3_SHA1:
       case Algorithm.RSASHA256:
       case Algorithm.RSASHA512:
-        if (!(key instanceof RSAPrivateKey)) {
+        if (!("RSA".equals(key.getAlgorithm()))) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.DSA:
       case Algorithm.DSA_NSEC3_SHA1:
-        if (!(key instanceof DSAPrivateKey)) {
+        if (!("DSA".equals(key.getAlgorithm()))) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.ECC_GOST:
       case Algorithm.ECDSAP256SHA256:
       case Algorithm.ECDSAP384SHA384:
-        if (!(key instanceof ECPrivateKey)) {
+        if (!("EC".equals(key.getAlgorithm()))) {
           throw new IncompatibleKeyException();
         }
         break;
