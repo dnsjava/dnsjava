@@ -11,11 +11,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
-import java.security.interfaces.DSAPrivateKey;
 import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.DSAPublicKeySpec;
 import java.security.spec.ECFieldFp;
@@ -1047,20 +1044,20 @@ public class DNSSEC {
       case Algorithm.RSA_NSEC3_SHA1:
       case Algorithm.RSASHA256:
       case Algorithm.RSASHA512:
-        if (!(key instanceof RSAPrivateKey)) {
+        if (!("RSA".equals(key.getAlgorithm()))) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.DSA:
       case Algorithm.DSA_NSEC3_SHA1:
-        if (!(key instanceof DSAPrivateKey)) {
+        if (!("DSA".equals(key.getAlgorithm()))) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.ECC_GOST:
       case Algorithm.ECDSAP256SHA256:
       case Algorithm.ECDSAP384SHA384:
-        if (!(key instanceof ECPrivateKey)) {
+        if (!("EC".equals(key.getAlgorithm()))) {
           throw new IncompatibleKeyException();
         }
         break;
