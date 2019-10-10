@@ -132,6 +132,9 @@ public abstract class EDNSOption {
       case Code.COOKIE:
         option = new CookieOption();
         break;
+      case Code.TCP_KEEPALIVE:
+        option = new TcpKeepaliveOption();
+        break;
       default:
         option = new GenericEDNSOption(code);
         break;
