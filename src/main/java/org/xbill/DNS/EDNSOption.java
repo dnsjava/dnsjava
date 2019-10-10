@@ -22,6 +22,12 @@ public abstract class EDNSOption {
     /** Client Subnet, defined in draft-vandergaast-edns-client-subnet-02 */
     public static final int CLIENT_SUBNET = 8;
 
+    /** Cookie, RFC 7873 */
+    public static final int COOKIE = 10;
+
+    /** TCP Keepalive, RFC 7828 */
+    public static final int TCP_KEEPALIVE = 11;
+
     private static Mnemonic codes = new Mnemonic("EDNS Option Codes", Mnemonic.CASE_UPPER);
 
     static {
@@ -31,6 +37,8 @@ public abstract class EDNSOption {
 
       codes.add(NSID, "NSID");
       codes.add(CLIENT_SUBNET, "CLIENT_SUBNET");
+      codes.add(COOKIE, "COOKIE");
+      codes.add(TCP_KEEPALIVE, "TCP_KEEPALIVE");
     }
 
     /** Converts an EDNS Option Code into its textual representation */
@@ -120,6 +128,9 @@ public abstract class EDNSOption {
         break;
       case Code.CLIENT_SUBNET:
         option = new ClientSubnetOption();
+        break;
+      case Code.COOKIE:
+        option = new CookieOption();
         break;
       default:
         option = new GenericEDNSOption(code);
