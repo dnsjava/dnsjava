@@ -50,7 +50,7 @@ class RcodeTest {
     assertEquals("NOTIMP", Rcode.string(Rcode.NOTIMP));
 
     // one that doesn't exist
-    assertTrue(Rcode.string(20).startsWith("RESERVED"));
+    assertTrue(Rcode.string(30).startsWith("RESERVED"));
 
     assertThrows(IllegalArgumentException.class, () -> Rcode.string(-1));
 
@@ -64,7 +64,7 @@ class RcodeTest {
     assertEquals("BADSIG", Rcode.TSIGstring(Rcode.BADSIG));
 
     // one that doesn't exist
-    assertTrue(Rcode.TSIGstring(20).startsWith("RESERVED"));
+    assertTrue(Rcode.TSIGstring(30).startsWith("RESERVED"));
 
     assertThrows(IllegalArgumentException.class, () -> Rcode.TSIGstring(-1));
 

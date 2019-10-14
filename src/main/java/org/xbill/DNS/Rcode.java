@@ -66,6 +66,19 @@ public final class Rcode {
   /** The mode is invalid (TKEY extended error) */
   public static final int BADMODE = 19;
 
+  /** Duplicate key name (TKEY extended error) */
+  public static final int BADNAME = 20;
+
+  /** Algorithm not supported (TKEY extended error) */
+  public static final int BADALG = 21;
+
+  /** Bad truncation (RFC 4635) */
+  public static final int BADTRUNC = 22;
+
+  /** Bad or missing server cookie (RFC 7873) */
+  public static final int BADCOOKIE = 23;
+
+
   static {
     rcodes.setMaximum(0xFFF);
     rcodes.setPrefix("RESERVED");
@@ -84,6 +97,10 @@ public final class Rcode {
     rcodes.add(NOTAUTH, "NOTAUTH");
     rcodes.add(NOTZONE, "NOTZONE");
     rcodes.add(BADVERS, "BADVERS");
+    rcodes.add(BADMODE, "BADMODE");
+    rcodes.add(BADNAME, "BADNAME");
+    rcodes.add(BADALG, "BADALG");
+    rcodes.add(BADCOOKIE, "BADCOOKIE");
 
     tsigrcodes.setMaximum(0xFFFF);
     tsigrcodes.setPrefix("RESERVED");
@@ -93,7 +110,6 @@ public final class Rcode {
     tsigrcodes.add(BADSIG, "BADSIG");
     tsigrcodes.add(BADKEY, "BADKEY");
     tsigrcodes.add(BADTIME, "BADTIME");
-    tsigrcodes.add(BADMODE, "BADMODE");
   }
 
   private Rcode() {}
