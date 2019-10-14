@@ -78,7 +78,6 @@ public final class Rcode {
   /** Bad or missing server cookie (RFC 7873) */
   public static final int BADCOOKIE = 23;
 
-
   static {
     rcodes.setMaximum(0xFFF);
     rcodes.setPrefix("RESERVED");

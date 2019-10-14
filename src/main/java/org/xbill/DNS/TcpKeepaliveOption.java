@@ -2,7 +2,6 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 
-
 /**
  * TCP Keepalive EDNS0 Option, as defined in https://tools.ietf.org/html/rfc7828
  *
@@ -17,21 +16,16 @@ public class TcpKeepaliveOption extends EDNSOption {
   /** the timeout in 100ms units */
   private int timeout;
 
-
-  /**
-   * Constructor for an option with no timeout
-   */
+  /** Constructor for an option with no timeout */
   public TcpKeepaliveOption() {
     super(EDNSOption.Code.TCP_KEEPALIVE);
     hasTimeout = false;
   }
 
-
   /**
    * Constructor for an option with a given timeout.
    *
-   * @param t   the timeout time in 100ms units, may not be negative or
-   *            larger than 65535
+   * @param t the timeout time in 100ms units, may not be negative or larger than 65535
    */
   public TcpKeepaliveOption(int t) {
     super(EDNSOption.Code.TCP_KEEPALIVE);
@@ -41,29 +35,24 @@ public class TcpKeepaliveOption extends EDNSOption {
     timeout = t;
   }
 
-
   /**
    * Returns whether the option contains a timeout.
    *
-   * @return   {@code true} if the option contains a timeout
+   * @return {@code true} if the option contains a timeout
    */
   public boolean hasTimeout() {
     return hasTimeout;
   }
 
-
   /**
    * Returns the timeout.
    *
-   * @return    the timeout in 100ms units
+   * @return the timeout in 100ms units
    */
-  public int getTimeout()
-  {
-    if (!hasTimeout)
-      throw new IllegalStateException("option does not have the timeout set");
+  public int getTimeout() {
+    if (!hasTimeout) throw new IllegalStateException("option does not have the timeout set");
     return timeout;
   }
-
 
   /**
    * Converts the wire format of an EDNS Option (the option data only) into the type-specific
@@ -84,11 +73,10 @@ public class TcpKeepaliveOption extends EDNSOption {
         timeout = in.readU16();
         break;
       default:
-        throw new WireParseException("invalid length (" + length + 
-          ") of the data in the edns_tcp_keepalive option");
+        throw new WireParseException(
+            "invalid length (" + length + ") of the data in the edns_tcp_keepalive option");
     }
   }
-
 
   /**
    * Converts an EDNS Option (the type-specific option data only) into wire format.
@@ -97,21 +85,16 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   @Override
   void optionToWire(DNSOutput out) {
-    if (hasTimeout)
-      out.writeU16(timeout);
+    if (hasTimeout) out.writeU16(timeout);
   }
-
 
   /**
    * Returns a string representation of the option parameters.
    *
-   * @return    the string representation
+   * @return the string representation
    */
   @Override
   String optionToString() {
-    return hasTimeout ? String.valueOf (timeout) : "-";
+    return hasTimeout ? String.valueOf(timeout) : "-";
   }
-
 }
-
-
