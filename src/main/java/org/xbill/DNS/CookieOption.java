@@ -1,6 +1,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.util.Optional;
 import org.xbill.DNS.utils.base16;
 
 /**
@@ -14,8 +15,8 @@ public class CookieOption extends EDNSOption {
   /** client cookie */
   private byte[] clientCookie;
 
-  /** server cookie, may be {@code null} */
-  private byte[] serverCookie;
+  /** server cookie */
+  private Optional<byte[]> serverCookie;
 
   /** Default constructor for constructing instance from binary representation. */
   CookieOption() {
@@ -28,25 +29,27 @@ public class CookieOption extends EDNSOption {
    * @param clientCookie the client cookie, which must consist of eight bytes
    */
   public CookieOption(byte[] clientCookie) {
-    this(clientCookie, null);
+    this(clientCookie, Optional.empty());
   }
 
   /**
    * Constructor.
    *
    * @param clientCookie the client cookie, which must consist of eight bytes
-   * @param serverCookie the server cookie, which either must be {@code null} or must consist of 8
-   *     to 32 bytes
+   * @param serverCookie the server cookie, which must consist of 8 to 32 bytes if present
    */
-  public CookieOption(byte[] clientCookie, byte[] serverCookie) {
+  public CookieOption(byte[] clientCookie, Optional<byte[]> serverCookie) {
     this();
-    if (clientCookie == null) throw new IllegalArgumentException("cookie must not be null");
+    if (clientCookie == null) throw new IllegalArgumentException("client cookie must not be null");
     if (clientCookie.length != 8)
-      throw new IllegalArgumentException("cookie must consist of eight bytes");
+      throw new IllegalArgumentException("client cookie must consist of eight bytes");
     this.clientCookie = clientCookie;
 
-    if (serverCookie != null && (serverCookie.length < 8 || serverCookie.length > 32))
-      throw new IllegalArgumentException("cookie must consist of 8 to 32 bytes");
+    if (serverCookie.isPresent()) {
+      int length = serverCookie.get().length;
+      if (length < 8 || length > 32)
+        throw new IllegalArgumentException("server cookie must consist of 8 to 32 bytes");
+    }
     this.serverCookie = serverCookie;
   }
 
@@ -62,9 +65,9 @@ public class CookieOption extends EDNSOption {
   /**
    * Returns the server cookie.
    *
-   * @return the server cookie, may be {@code null}
+   * @return the server cookie
    */
-  public byte[] getServerCookie() {
+  public Optional<byte[]> getServerCookie() {
     return serverCookie;
   }
 
@@ -82,7 +85,9 @@ public class CookieOption extends EDNSOption {
     if (length > 8) {
       if (length < 16 || length > 40)
         throw new WireParseException("invalid length of server cookie");
-      serverCookie = in.readByteArray();
+      serverCookie = Optional.of(in.readByteArray());
+    } else {
+      serverCookie = Optional.empty();
     }
   }
 
@@ -94,7 +99,7 @@ public class CookieOption extends EDNSOption {
   @Override
   void optionToWire(DNSOutput out) {
     out.writeByteArray(clientCookie);
-    if (serverCookie != null) out.writeByteArray(serverCookie);
+    if (serverCookie.isPresent()) out.writeByteArray(serverCookie.get());
   }
 
   /**
@@ -104,8 +109,8 @@ public class CookieOption extends EDNSOption {
    */
   @Override
   String optionToString() {
-    return serverCookie != null
-        ? base16.toString(clientCookie) + " " + base16.toString(serverCookie)
+    return serverCookie.isPresent()
+        ? base16.toString(clientCookie) + " " + base16.toString(serverCookie.get())
         : base16.toString(clientCookie);
   }
 }

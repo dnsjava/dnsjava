@@ -1,6 +1,9 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.time.Duration;
 
 /**
  * TCP Keepalive EDNS0 Option, as defined in https://tools.ietf.org/html/rfc7828
@@ -10,16 +13,16 @@ import java.io.IOException;
  */
 public class TcpKeepaliveOption extends EDNSOption {
 
-  /** flag whether the timeout has been provided */
-  private boolean hasTimeout;
+  /** the timeout */
+  private OptionalInt timeout;
 
-  /** the timeout in 100ms units */
-  private int timeout;
+  /** upper limit of the duration (exclusive) */
+  private static final Duration UPPER_LIMIT = Duration.ofMillis(6553600);
 
   /** Constructor for an option with no timeout */
   public TcpKeepaliveOption() {
     super(EDNSOption.Code.TCP_KEEPALIVE);
-    hasTimeout = false;
+    timeout = OptionalInt.empty();
   }
 
   /**
@@ -31,28 +34,42 @@ public class TcpKeepaliveOption extends EDNSOption {
     super(EDNSOption.Code.TCP_KEEPALIVE);
     if (t < 0 || t > 65535)
       throw new IllegalArgumentException("timeout must be betwee 0 and 65535");
-    hasTimeout = true;
-    timeout = t;
+    timeout = OptionalInt.of(t);
   }
 
   /**
-   * Returns whether the option contains a timeout.
+   * Constructor for an option with a given timeout. As the timeout has a coarser
+   * granularity than the {@link Duration} class, values are rounded down.
    *
-   * @return {@code true} if the option contains a timeout
+   * @param t the timeout time, must not be negative and must be lower than
+   * 6553.5 seconds
    */
-  public boolean hasTimeout() {
-    return hasTimeout;
+  public TcpKeepaliveOption(Duration t) {
+    super(EDNSOption.Code.TCP_KEEPALIVE);
+    if (t.isNegative() || t.compareTo(UPPER_LIMIT) >= 0)
+      throw new IllegalArgumentException("timeout must be between 0 and 6553.6 seconds (exclusively)");
+    timeout = OptionalInt.of((int)t.toMillis()/100);
   }
+
 
   /**
    * Returns the timeout.
    *
    * @return the timeout in 100ms units
    */
-  public int getTimeout() {
-    if (!hasTimeout) throw new IllegalStateException("option does not have the timeout set");
+  public OptionalInt getTimeout() {
     return timeout;
   }
+
+  /**
+   * Returns the timeout as a {@link Duration}.
+   *
+   * @reutrn the timeout
+   */
+  public Optional<Duration> getTimeoutDuration() {
+    return timeout.isPresent() ? Optional.of(Duration.ofMillis(timeout.getAsInt() * 100)) : Optional.empty();
+  }
+
 
   /**
    * Converts the wire format of an EDNS Option (the option data only) into the type-specific
@@ -66,11 +83,10 @@ public class TcpKeepaliveOption extends EDNSOption {
 
     switch (length) {
       case 0:
-        hasTimeout = false;
+        timeout = OptionalInt.empty();
         break;
       case 2:
-        hasTimeout = true;
-        timeout = in.readU16();
+        timeout = OptionalInt.of(in.readU16());
         break;
       default:
         throw new WireParseException(
@@ -85,7 +101,7 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   @Override
   void optionToWire(DNSOutput out) {
-    if (hasTimeout) out.writeU16(timeout);
+    if (timeout.isPresent()) out.writeU16(timeout.getAsInt());
   }
 
   /**
@@ -95,6 +111,6 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   @Override
   String optionToString() {
-    return hasTimeout ? String.valueOf(timeout) : "-";
+    return timeout.isPresent() ? String.valueOf(timeout.getAsInt()) : "-";
   }
 }
