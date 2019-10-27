@@ -129,7 +129,9 @@ public class ExtendedResolver implements Resolver {
 
     /* Start an asynchronous resolution */
     public void startAsync(ResolverListener listener) {
-      this.listener = listener;
+      synchronized (this) {
+        this.listener = listener;
+      }
       send(0);
     }
 
@@ -140,6 +142,7 @@ public class ExtendedResolver implements Resolver {
     @Override
     public void receiveMessage(Object id, Message m) {
       log.debug("received message");
+      ResolverListener listenerCopy;
       synchronized (this) {
         if (done) {
           return;
@@ -149,9 +152,11 @@ public class ExtendedResolver implements Resolver {
         if (listener == null) {
           notifyAll();
           return;
+        } else {
+          listenerCopy = listener;
         }
       }
-      listener.receiveMessage(this, response);
+      listenerCopy.receiveMessage(this, response);
     }
 
     /*
@@ -161,6 +166,7 @@ public class ExtendedResolver implements Resolver {
     @Override
     public void handleException(Object id, Exception e) {
       log.debug("resolving failed", e);
+      ResolverListener listenerCopy = null;
       synchronized (this) {
         outstanding--;
         if (done) {
@@ -225,6 +231,8 @@ public class ExtendedResolver implements Resolver {
           if (listener == null) {
             notifyAll();
             return;
+          } else {
+            listenerCopy = listener;
           }
         }
         if (!done) {
@@ -233,9 +241,9 @@ public class ExtendedResolver implements Resolver {
       }
       /* If we're done and this is asynchronous, call the callback. */
       if (!(thrown instanceof Exception)) {
-        thrown = new RuntimeException(thrown.getMessage());
+        thrown = new RuntimeException(thrown);
       }
-      listener.handleException(this, (Exception) thrown);
+      listenerCopy.handleException(this, (Exception) thrown);
     }
   }
 
