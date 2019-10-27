@@ -40,10 +40,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
 class AddressTest {
   @Test
@@ -302,36 +309,105 @@ class AddressTest {
   }
 
   @Test
-  void getByName() throws UnknownHostException {
+  void getByName() throws IOException {
     InetAddress out = Address.getByName("128.145.198.231");
     assertEquals("128.145.198.231", out.getHostAddress());
 
+    Name aRootServer = Name.fromString("a.root-servers.net.");
+    Message aMessage = new Message();
+    aMessage.getHeader().setRcode(Rcode.NOERROR);
+    aMessage.addRecord(Record.newRecord(aRootServer, Type.A, DClass.IN), Section.QUESTION);
+    aMessage.addRecord(
+        new ARecord(
+            aRootServer,
+            DClass.IN,
+            60,
+            InetAddress.getByAddress(new byte[] {(byte) 198, 41, 0, 4})),
+        Section.ANSWER);
+
+    Resolver mockResolver = Mockito.mock(Resolver.class);
+    when(mockResolver.send(ArgumentMatchers.any(Message.class))).thenReturn(aMessage);
+    Lookup.setDefaultResolver(mockResolver);
+
     out = Address.getByName("a.root-servers.net");
     assertEquals("198.41.0.4", out.getHostAddress());
+
+    // reset resolver
+    Lookup.refreshDefault();
   }
 
   @Test
-  void getByName_invalid() {
+  void getByName_invalid() throws IOException {
+    Message m = new Message();
+    m.getHeader().setRcode(Rcode.NXDOMAIN);
+    Resolver mockResolver = Mockito.mock(Resolver.class);
+    when(mockResolver.send(ArgumentMatchers.any(Message.class))).thenReturn(m);
+    Lookup.setDefaultResolver(mockResolver);
     assertThrows(UnknownHostException.class, () -> Address.getByName("example.invalid"));
+    // reset resolver
+    Lookup.refreshDefault();
+
     assertThrows(UnknownHostException.class, () -> Address.getByName(""));
   }
 
   @Test
-  void getAllByName() throws UnknownHostException {
+  void getAllByName() throws IOException {
     InetAddress[] out = Address.getAllByName("128.145.198.231");
     assertEquals(1, out.length);
     assertEquals("128.145.198.231", out[0].getHostAddress());
+
+    Name aRootServer = Name.fromString("a.root-servers.net.");
+    Message aMessage = new Message();
+    aMessage.getHeader().setRcode(Rcode.NOERROR);
+    aMessage.addRecord(Record.newRecord(aRootServer, Type.A, DClass.IN), Section.QUESTION);
+    aMessage.addRecord(
+        new ARecord(
+            aRootServer,
+            DClass.IN,
+            60,
+            InetAddress.getByAddress(new byte[] {(byte) 198, 41, 0, 4})),
+        Section.ANSWER);
+    Message aaaaMessage = new Message();
+    aaaaMessage.getHeader().setRcode(Rcode.NOERROR);
+    aaaaMessage.addRecord(Record.newRecord(aRootServer, Type.AAAA, DClass.IN), Section.QUESTION);
+    aaaaMessage.addRecord(
+        new AAAARecord(
+            aRootServer,
+            DClass.IN,
+            60,
+            InetAddress.getByAddress(
+                new byte[] {0x20, 1, 5, 3, (byte) 0xba, 0x3e, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0x30})),
+        Section.ANSWER);
+    Resolver mockResolver = Mockito.mock(Resolver.class);
+    doReturn(aMessage)
+        .when(mockResolver)
+        .send(argThat(message -> message.getQuestion().getType() == Type.A));
+    doReturn(aaaaMessage)
+        .when(mockResolver)
+        .send(argThat(message -> message.getQuestion().getType() == Type.AAAA));
+    Lookup.setDefaultResolver(mockResolver);
 
     out = Address.getAllByName("a.root-servers.net");
     assertEquals(2, out.length);
     assertEquals("198.41.0.4", out[0].getHostAddress());
     assertEquals("2001:503:ba3e:0:0:0:2:30", out[1].getHostAddress());
 
+    // reset resolver
+    Lookup.refreshDefault();
   }
 
   @Test
-  void getAllByName_invalid() {
+  void getAllByName_invalid() throws IOException {
+    Message m = new Message();
+    m.getHeader().setRcode(Rcode.NXDOMAIN);
+    Resolver mockResolver = Mockito.mock(Resolver.class);
+    when(mockResolver.send(ArgumentMatchers.any(Message.class))).thenReturn(m);
+    Lookup.setDefaultResolver(mockResolver);
     assertThrows(UnknownHostException.class, () -> Address.getAllByName("example.invalid"));
+
+    // reset resolver
+    Lookup.refreshDefault();
+
     assertThrows(UnknownHostException.class, () -> Address.getAllByName(""));
   }
 
@@ -343,12 +419,33 @@ class AddressTest {
   }
 
   @Test
-  void getHostName() throws UnknownHostException {
+  void getHostName() throws IOException {
+    Name aRootServer = Name.fromString("a.root-servers.net.");
+    Name aRootServerPtr = Name.fromString("4.0.41.198.in-addr.arpa.");
+    Message ptrMessage = new Message();
+    ptrMessage.getHeader().setRcode(Rcode.NOERROR);
+    ptrMessage.addRecord(Record.newRecord(aRootServerPtr, Type.PTR, DClass.IN), Section.QUESTION);
+    ptrMessage.addRecord(new PTRRecord(aRootServerPtr, DClass.IN, 60, aRootServer), Section.ANSWER);
+    Resolver mockResolver = Mockito.mock(Resolver.class);
+    when(mockResolver.send(any(Message.class))).thenReturn(ptrMessage);
+    Lookup.setDefaultResolver(mockResolver);
+
     String out = Address.getHostName(InetAddress.getByName("198.41.0.4"));
     assertEquals("a.root-servers.net.", out);
 
+    Message ptrMessage2 = new Message();
+    ptrMessage.getHeader().setRcode(Rcode.NXDOMAIN);
+    ptrMessage.addRecord(
+        Record.newRecord(Name.fromString("1.1.168.192.in-addr.arpa."), Type.PTR, DClass.IN),
+        Section.QUESTION);
+    mockResolver = Mockito.mock(Resolver.class);
+    when(mockResolver.send(any())).thenReturn(ptrMessage2);
+    Lookup.setDefaultResolver(mockResolver);
     assertThrows(
         UnknownHostException.class,
         () -> Address.getHostName(InetAddress.getByName("192.168.1.1")));
+
+    // reset resolver
+    Lookup.refreshDefault();
   }
 }
