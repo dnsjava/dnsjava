@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 
 class HINFORecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     HINFORecord dr = new HINFORecord();
     assertNull(dr.getName());
     assertEquals(0, dr.getType());
@@ -54,14 +54,14 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     HINFORecord dr = new HINFORecord();
     Record r = dr.getObject();
     assertTrue(r instanceof HINFORecord);
   }
 
   @Test
-  void test_ctor_5arg() throws TextParseException {
+  void ctor_5arg() throws TextParseException {
     Name n = Name.fromString("The.Name.");
     long ttl = 0xABCDL;
     String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
@@ -77,7 +77,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_ctor_5arg_invalid_CPU() throws TextParseException {
+  void ctor_5arg_invalid_CPU() throws TextParseException {
     Name n = Name.fromString("The.Name.");
     long ttl = 0xABCDL;
     String cpu = "i686 Intel(R) Pentium(R) M \\256 processor 1.70GHz GenuineIntel GNU/Linux";
@@ -87,7 +87,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_ctor_5arg_invalid_OS() throws TextParseException {
+  void ctor_5arg_invalid_OS() throws TextParseException {
     Name n = Name.fromString("The.Name.");
     long ttl = 0xABCDL;
     String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
@@ -97,7 +97,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
 
@@ -118,7 +118,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
 
@@ -131,7 +131,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_rdataFromString_invalid_CPU() throws IOException {
+  void rdataFromString_invalid_CPU() throws IOException {
     String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
 
@@ -142,7 +142,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_rdataFromString_invalid_OS() throws IOException {
+  void rdataFromString_invalid_OS() throws IOException {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
 
     Tokenizer t = new Tokenizer("\"" + cpu + "\"");
@@ -152,7 +152,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_rrToString() throws TextParseException {
+  void rrToString() throws TextParseException {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
 
@@ -163,7 +163,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void test_rrToWire() throws TextParseException {
+  void rrToWire() throws TextParseException {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
     byte[] raw =

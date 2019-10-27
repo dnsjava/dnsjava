@@ -98,7 +98,7 @@ class RecordTest {
   }
 
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     SubRecord sr = new SubRecord();
     assertNull(sr.getName());
     assertEquals(0, sr.getType());
@@ -107,7 +107,7 @@ class RecordTest {
   }
 
   @Test
-  void test_ctor_4arg() throws TextParseException {
+  void ctor_4arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
     int t = Type.A;
     int d = DClass.IN;
@@ -121,7 +121,7 @@ class RecordTest {
   }
 
   @Test
-  void test_ctor_4arg_invalid() throws TextParseException {
+  void ctor_4arg_invalid() throws TextParseException {
     Name n = Name.fromString("my.name.");
     Name r = Name.fromString("my.relative.name");
     int t = Type.A;
@@ -138,7 +138,7 @@ class RecordTest {
   }
 
   @Test
-  void test_newRecord_3arg() throws TextParseException {
+  void newRecord_3arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
     Name r = Name.fromString("my.relative.name");
     int t = Type.A;
@@ -155,7 +155,7 @@ class RecordTest {
   }
 
   @Test
-  void test_newRecord_4arg() throws TextParseException {
+  void newRecord_4arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
     Name r = Name.fromString("my.relative.name");
     int t = Type.A;
@@ -173,7 +173,7 @@ class RecordTest {
   }
 
   @Test
-  void test_newRecord_5arg() throws TextParseException, UnknownHostException {
+  void newRecord_5arg() throws TextParseException, UnknownHostException {
     Name n = Name.fromString("my.name.");
     int t = Type.A;
     int d = DClass.IN;
@@ -191,7 +191,7 @@ class RecordTest {
   }
 
   @Test
-  void test_newRecord_6arg() throws TextParseException, UnknownHostException {
+  void newRecord_6arg() throws TextParseException, UnknownHostException {
     Name n = Name.fromString("my.name.");
     int t = Type.A;
     int d = DClass.IN;
@@ -224,7 +224,7 @@ class RecordTest {
   }
 
   @Test
-  void test_newRecord_6arg_invalid() throws TextParseException {
+  void newRecord_6arg_invalid() throws TextParseException {
     Name n = Name.fromString("my.name.");
     Name r = Name.fromString("my.relative.name");
     int t = Type.A;
@@ -241,7 +241,7 @@ class RecordTest {
   }
 
   @Test
-  void test_fromWire() throws IOException {
+  void fromWire() throws IOException {
     Name n = Name.fromString("my.name.");
     int t = Type.A;
     int d = DClass.IN;
@@ -308,7 +308,7 @@ class RecordTest {
   }
 
   @Test
-  void test_toWire() throws IOException {
+  void toWire() throws IOException {
     Name n = Name.fromString("my.name.");
     int t = Type.A;
     int d = DClass.IN;
@@ -355,7 +355,7 @@ class RecordTest {
   }
 
   @Test
-  void test_toWireCanonical() throws IOException {
+  void toWireCanonical() throws IOException {
     Name n = Name.fromString("My.Name.");
     int t = Type.A;
     int d = DClass.IN;
@@ -379,7 +379,7 @@ class RecordTest {
   }
 
   @Test
-  void test_rdataToWireCanonical() throws IOException {
+  void rdataToWireCanonical() throws IOException {
     Name n = Name.fromString("My.Name.");
     Name n2 = Name.fromString("My.Second.Name.");
     int t = Type.NS;
@@ -402,7 +402,7 @@ class RecordTest {
   }
 
   @Test
-  void test_rdataToString() throws IOException {
+  void rdataToString() throws IOException {
     Name n = Name.fromString("My.Name.");
     Name n2 = Name.fromString("My.Second.Name.");
     int t = Type.NS;
@@ -456,7 +456,7 @@ class RecordTest {
   }
 
   @Test
-  void test_byteArrayFromString() throws TextParseException {
+  void byteArrayFromString() throws TextParseException {
     String in = "the 98 \" \' quick 0xAB brown";
     byte[] out = SubRecord.byteArrayFromString(in);
     assertArrayEquals(in.getBytes(), out);
@@ -468,7 +468,7 @@ class RecordTest {
   }
 
   @Test
-  void test_byteArrayFromString_invalid() {
+  void byteArrayFromString_invalid() {
     StringBuilder b = new StringBuilder();
     for (int i = 0; i < 257; ++i) {
       b.append('A');
@@ -484,14 +484,14 @@ class RecordTest {
   }
 
   @Test
-  void test_byteArrayToString() {
+  void byteArrayToString() {
     byte[] in = new byte[] {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
     String exp = "\" \\031Aa;\\\"\\\\~\\127\\255\"";
     assertEquals(exp, SubRecord.byteArrayToString(in, true));
   }
 
   @Test
-  void test_unknownToString() {
+  void unknownToString() {
     byte[] data =
         new byte[] {
           (byte) 0x12,
@@ -510,7 +510,7 @@ class RecordTest {
   }
 
   @Test
-  void test_fromString() throws IOException {
+  void fromString() throws IOException {
     Name n = Name.fromString("My.N.");
     Name n2 = Name.fromString("My.Second.Name.");
     int t = Type.A;
@@ -541,7 +541,7 @@ class RecordTest {
   }
 
   @Test
-  void test_fromString_invalid() throws IOException {
+  void fromString_invalid() throws IOException {
     Name n = Name.fromString("My.N.");
     Name rel = Name.fromString("My.R");
     Name n2 = Name.fromString("My.Second.Name.");
@@ -566,7 +566,7 @@ class RecordTest {
   }
 
   @Test
-  void test_getRRsetType() throws TextParseException {
+  void getRRsetType() throws TextParseException {
     Name n = Name.fromString("My.N.");
 
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0);
@@ -583,7 +583,7 @@ class RecordTest {
   }
 
   @Test
-  void test_sameRRset() throws TextParseException {
+  void sameRRset() throws TextParseException {
     Name n = Name.fromString("My.N.");
     Name m = Name.fromString("My.M.");
 
@@ -605,7 +605,7 @@ class RecordTest {
   }
 
   @Test
-  void test_equals() throws TextParseException {
+  void equals() throws TextParseException {
     Name n = Name.fromString("My.N.");
     Name n2 = Name.fromString("my.n.");
     Name m = Name.fromString("My.M.");
@@ -690,7 +690,7 @@ class RecordTest {
   }
 
   @Test
-  void test_cloneRecord() throws TextParseException {
+  void cloneRecord() throws TextParseException {
     Name n = Name.fromString("My.N.");
     byte[] d = new byte[] {23, 12, 9, (byte) 129};
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
@@ -706,7 +706,7 @@ class RecordTest {
   }
 
   @Test
-  void test_withName() throws TextParseException {
+  void withName() throws TextParseException {
     Name n = Name.fromString("My.N.");
     Name m = Name.fromString("My.M.Name.");
     Name rel = Name.fromString("My.Relative.Name");
@@ -725,7 +725,7 @@ class RecordTest {
   }
 
   @Test
-  void test_withDClass() throws TextParseException {
+  void withDClass() throws TextParseException {
     Name n = Name.fromString("My.N.");
     byte[] d = new byte[] {23, 12, 9, (byte) 129};
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
@@ -740,7 +740,7 @@ class RecordTest {
   }
 
   @Test
-  void test_setTTL() throws TextParseException, UnknownHostException {
+  void setTTL() throws TextParseException, UnknownHostException {
     Name n = Name.fromString("My.N.");
     byte[] d = new byte[] {23, 12, 9, (byte) 129};
     InetAddress exp = InetAddress.getByName("23.12.9.129");
@@ -758,7 +758,7 @@ class RecordTest {
   }
 
   @Test
-  void test_compareTo() throws TextParseException {
+  void compareTo() throws TextParseException {
     Name n = Name.fromString("My.N.");
     Name n2 = Name.fromString("my.n.");
     Name m = Name.fromString("My.M.");
@@ -806,7 +806,7 @@ class RecordTest {
   }
 
   @Test
-  void test_getAdditionalName() throws TextParseException {
+  void getAdditionalName() throws TextParseException {
     Name n = Name.fromString("My.N.");
     Record r = new SubRecord(n, Type.A, DClass.IN, 0xABCDE9);
 
@@ -814,7 +814,7 @@ class RecordTest {
   }
 
   @Test
-  void test_checkU8() {
+  void checkU8() {
     assertThrows(IllegalArgumentException.class, () -> Record.checkU8("field", -1));
     assertEquals(0, Record.checkU8("field", 0));
     assertEquals(0x9D, Record.checkU8("field", 0x9D));
@@ -823,7 +823,7 @@ class RecordTest {
   }
 
   @Test
-  void test_checkU16() {
+  void checkU16() {
     assertThrows(IllegalArgumentException.class, () -> Record.checkU16("field", -1));
     assertEquals(0, Record.checkU16("field", 0));
     assertEquals(0x9DA1, Record.checkU16("field", 0x9DA1));
@@ -832,7 +832,7 @@ class RecordTest {
   }
 
   @Test
-  void test_checkU32() {
+  void checkU32() {
     assertThrows(IllegalArgumentException.class, () -> Record.checkU32("field", -1));
     assertEquals(0, Record.checkU32("field", 0));
     assertEquals(0x9DA1F02DL, Record.checkU32("field", 0x9DA1F02DL));
@@ -841,7 +841,7 @@ class RecordTest {
   }
 
   @Test
-  void test_checkName() throws TextParseException {
+  void checkName() throws TextParseException {
     Name n = Name.fromString("My.N.");
     Name m = Name.fromString("My.m");
 

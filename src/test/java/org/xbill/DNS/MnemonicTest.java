@@ -52,7 +52,7 @@ class MnemonicTest {
   }
 
   @Test
-  void test_no_maximum() {
+  void no_maximum() {
     assertThrows(IllegalArgumentException.class, () -> m_mn.check(-1));
     try {
       m_mn.check(0);
@@ -78,7 +78,7 @@ class MnemonicTest {
   }
 
   @Test
-  void test_setMaximum() {
+  void setMaximum() {
     m_mn.setMaximum(15);
     assertThrows(IllegalArgumentException.class, () -> m_mn.check(-1));
     try {
@@ -110,7 +110,7 @@ class MnemonicTest {
   }
 
   @Test
-  void test_setPrefix() {
+  void setPrefix() {
     final String prefix = "A mixed CASE Prefix".toUpperCase();
     m_mn.setPrefix(prefix);
 
@@ -122,7 +122,7 @@ class MnemonicTest {
   }
 
   @Test
-  void test_basic_operation() {
+  void basic_operation() {
     // setUp creates Mnemonic with CASE_UPPER
     m_mn.add(10, "Ten");
     m_mn.add(20, "Twenty");
@@ -155,7 +155,7 @@ class MnemonicTest {
   }
 
   @Test
-  void test_basic_operation_lower() {
+  void basic_operation_lower() {
     m_mn = new Mnemonic(MnemonicTest.class.getName() + " LOWER", Mnemonic.CASE_LOWER);
     m_mn.add(10, "Ten");
     m_mn.add(20, "Twenty");
@@ -188,7 +188,7 @@ class MnemonicTest {
   }
 
   @Test
-  void test_basic_operation_sensitive() {
+  void basic_operation_sensitive() {
     m_mn = new Mnemonic(MnemonicTest.class.getName() + " SENSITIVE", Mnemonic.CASE_SENSITIVE);
     m_mn.add(10, "Ten");
     m_mn.add(20, "Twenty");
@@ -227,14 +227,14 @@ class MnemonicTest {
   }
 
   @Test
-  void test_invalid_numeric() {
+  void invalid_numeric() {
     m_mn.setNumericAllowed(true);
     int value = m_mn.getValue("Not-A-Number");
     assertEquals(-1, value);
   }
 
   @Test
-  void test_addAll() {
+  void addAll() {
     m_mn.add(10, "Ten");
     m_mn.add(20, "Twenty");
 

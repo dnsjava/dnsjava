@@ -46,7 +46,7 @@ class hexdumpTest {
    */
 
   @Test
-  void test_shortform() {
+  void shortform() {
     byte[] data =
         new byte[] {
           1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
@@ -171,11 +171,5 @@ class hexdumpTest {
     byte[] data = new byte[] {1, 15, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0F \n", out);
-  }
-
-  // strictly for stupid code coverage...a useless test
-  @Test
-  void test_default_constructor() {
-    new hexdump();
   }
 }

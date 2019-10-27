@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 
 class DNSKEYRecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     DNSKEYRecord ar = new DNSKEYRecord();
     assertNull(ar.getName());
     assertEquals(0, ar.getType());
@@ -59,14 +59,14 @@ class DNSKEYRecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     DNSKEYRecord ar = new DNSKEYRecord();
     Record r = ar.getObject();
     assertTrue(r instanceof DNSKEYRecord);
   }
 
   @Test
-  void test_ctor_7arg() throws TextParseException {
+  void ctor_7arg() throws TextParseException {
     Name n = Name.fromString("My.Absolute.Name.");
     Name r = Name.fromString("My.Relative.Name");
     byte[] key = new byte[] {0, 1, 3, 5, 7, 9};
@@ -88,7 +88,7 @@ class DNSKEYRecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     // basic
     DNSKEYRecord kr = new DNSKEYRecord();
     Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " RSASHA1 AQIDBAUGBwgJ");

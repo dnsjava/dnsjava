@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 
 class GPOSRecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     GPOSRecord gr = new GPOSRecord();
     assertNull(gr.getName());
     assertEquals(0, gr.getType());
@@ -54,7 +54,7 @@ class GPOSRecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     GPOSRecord gr = new GPOSRecord();
     Record r = gr.getObject();
     assertTrue(r instanceof GPOSRecord);
@@ -75,7 +75,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_basic() {
+    void basic() {
       GPOSRecord gr = new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, m_lat, m_alt);
       assertEquals(m_n, gr.getName());
       assertEquals(DClass.IN, gr.getDClass());
@@ -90,35 +90,35 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_toosmall_longitude() {
+    void toosmall_longitude() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new GPOSRecord(m_n, DClass.IN, m_ttl, -90.001, m_lat, m_alt));
     }
 
     @Test
-    void test_toobig_longitude() {
+    void toobig_longitude() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new GPOSRecord(m_n, DClass.IN, m_ttl, 90.001, m_lat, m_alt));
     }
 
     @Test
-    void test_toosmall_latitude() {
+    void toosmall_latitude() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, -180.001, m_alt));
     }
 
     @Test
-    void test_toobig_latitude() {
+    void toobig_latitude() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, 180.001, m_alt));
     }
 
     @Test
-    void test_invalid_string() {
+    void invalid_string() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -147,7 +147,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_basic() {
+    void basic() {
       GPOSRecord gr =
           new GPOSRecord(
               m_n,
@@ -169,7 +169,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_toosmall_longitude() {
+    void toosmall_longitude() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -183,7 +183,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_toobig_longitude() {
+    void toobig_longitude() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -192,7 +192,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_toosmall_latitude() {
+    void toosmall_latitude() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -206,7 +206,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_toobig_latitude() {
+    void toobig_latitude() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -222,7 +222,7 @@ class GPOSRecordTest {
 
   static class Test_rrFromWire {
     @Test
-    void test_basic() throws IOException {
+    void basic() throws IOException {
       byte[] raw =
           new byte[] {
             5, '-', '8', '.', '1', '2', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
@@ -237,7 +237,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_longitude_toosmall() throws IOException {
+    void longitude_toosmall() throws IOException {
       byte[] raw =
           new byte[] {
             5, '-', '9', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
@@ -249,7 +249,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_longitude_toobig() throws IOException {
+    void longitude_toobig() throws IOException {
       byte[] raw =
           new byte[] {
             5, '1', '8', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
@@ -261,7 +261,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_latitude_toosmall() throws IOException {
+    void latitude_toosmall() throws IOException {
       byte[] raw =
           new byte[] {
             5, '-', '8', '5', '.', '0', 6, '-', '1', '9', '0', '.', '0', 3, '0', '.', '0'
@@ -273,7 +273,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_latitude_toobig() throws IOException {
+    void latitude_toobig() throws IOException {
       byte[] raw =
           new byte[] {
             5, '-', '8', '5', '.', '0', 6, '2', '1', '9', '0', '.', '0', 3, '0', '.', '0'
@@ -287,7 +287,7 @@ class GPOSRecordTest {
 
   static class Test_rdataFromString {
     @Test
-    void test_basic() throws IOException {
+    void basic() throws IOException {
       Tokenizer t = new Tokenizer("10.45 171.121212 1010787");
 
       GPOSRecord gr = new GPOSRecord();
@@ -298,7 +298,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_longitude_toosmall() {
+    void longitude_toosmall() {
       Tokenizer t = new Tokenizer("-100.390 171.121212 1010787");
 
       GPOSRecord gr = new GPOSRecord();
@@ -306,7 +306,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_longitude_toobig() {
+    void longitude_toobig() {
       Tokenizer t = new Tokenizer("90.00001 171.121212 1010787");
 
       GPOSRecord gr = new GPOSRecord();
@@ -314,7 +314,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_latitude_toosmall() {
+    void latitude_toosmall() {
       Tokenizer t = new Tokenizer("0.0 -180.01 1010787");
 
       GPOSRecord gr = new GPOSRecord();
@@ -322,7 +322,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_latitude_toobig() {
+    void latitude_toobig() {
       Tokenizer t = new Tokenizer("0.0 180.01 1010787");
 
       GPOSRecord gr = new GPOSRecord();
@@ -330,7 +330,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void test_invalid_string() throws IOException {
+    void invalid_string() throws IOException {
       Tokenizer t = new Tokenizer("1.0 2.0 \\435");
       try {
         GPOSRecord gr = new GPOSRecord();
@@ -341,7 +341,7 @@ class GPOSRecordTest {
   }
 
   @Test
-  void test_rrToString() throws TextParseException {
+  void rrToString() throws TextParseException {
     String exp = "\"10.45\" \"171.121212\" \"1010787.0\"";
 
     GPOSRecord gr =
@@ -350,7 +350,7 @@ class GPOSRecordTest {
   }
 
   @Test
-  void test_rrToWire() throws TextParseException {
+  void rrToWire() throws TextParseException {
     GPOSRecord gr =
         new GPOSRecord(Name.fromString("The.Name."), DClass.IN, 0x123, -10.45, 120.0, 111.0);
 

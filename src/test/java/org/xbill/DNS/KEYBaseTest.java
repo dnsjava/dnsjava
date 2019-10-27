@@ -62,7 +62,7 @@ class KEYBaseTest {
   }
 
   @Test
-  void test_ctor() throws TextParseException {
+  void ctor() throws TextParseException {
     TestClass tc = new TestClass();
     assertEquals(0, tc.getFlags());
     assertEquals(0, tc.getProtocol());
@@ -86,7 +86,7 @@ class KEYBaseTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     byte[] raw = new byte[] {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x19, 1, 2, 3, 4, 5};
     DNSInput in = new DNSInput(raw);
 
@@ -111,7 +111,7 @@ class KEYBaseTest {
   }
 
   @Test
-  void test_rrToString() throws IOException {
+  void rrToString() throws IOException {
     Name n = Name.fromString("my.name.");
     byte[] key =
         new byte[] {0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
@@ -135,7 +135,7 @@ class KEYBaseTest {
   }
 
   @Test
-  void test_getFootprint() throws TextParseException {
+  void getFootprint() throws TextParseException {
     Name n = Name.fromString("my.name.");
     byte[] key =
         new byte[] {0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
@@ -166,7 +166,7 @@ class KEYBaseTest {
   }
 
   @Test
-  void test_rrToWire() throws IOException {
+  void rrToWire() throws IOException {
     Name n = Name.fromString("my.name.");
     byte[] key =
         new byte[] {0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};

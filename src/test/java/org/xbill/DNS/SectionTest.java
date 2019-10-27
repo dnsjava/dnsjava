@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
 
 class SectionTest {
   @Test
-  void test_string() {
+  void string() {
     // a regular one
     assertEquals("au", Section.string(Section.AUTHORITY));
 
@@ -52,7 +52,7 @@ class SectionTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     // regular one
     assertEquals(Section.ADDITIONAL, Section.value("ad"));
 
@@ -64,7 +64,7 @@ class SectionTest {
   }
 
   @Test
-  void test_longString() {
+  void longString() {
     assertEquals("ADDITIONAL RECORDS", Section.longString(Section.ADDITIONAL));
 
     try {
@@ -78,7 +78,7 @@ class SectionTest {
   }
 
   @Test
-  void test_updString() {
+  void updString() {
     assertEquals("ZONE", Section.updString(Section.ZONE));
 
     try {

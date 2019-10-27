@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 
 class OpcodeTest {
   @Test
-  void test_string() {
+  void string() {
     // a regular one
     assertEquals("IQUERY", Opcode.string(Opcode.IQUERY));
 
@@ -56,7 +56,7 @@ class OpcodeTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     // regular one
     assertEquals(Opcode.STATUS, Opcode.value("STATUS"));
 

@@ -66,7 +66,7 @@ class AAAARecordTest {
   }
 
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     AAAARecord ar = new AAAARecord();
     assertNull(ar.getName());
     assertEquals(0, ar.getType());
@@ -76,14 +76,14 @@ class AAAARecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     AAAARecord ar = new AAAARecord();
     Record r = ar.getObject();
     assertTrue(r instanceof AAAARecord);
   }
 
   @Test
-  void test_ctor_4arg() {
+  void ctor_4arg() {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
     assertEquals(m_an, ar.getName());
     assertEquals(Type.AAAA, ar.getType());
@@ -105,7 +105,7 @@ class AAAARecordTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     DNSInput di = new DNSInput(m_addr_bytes);
     AAAARecord ar = new AAAARecord();
 
@@ -115,7 +115,7 @@ class AAAARecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer(m_addr_string);
     AAAARecord ar = new AAAARecord();
 
@@ -130,13 +130,13 @@ class AAAARecordTest {
   }
 
   @Test
-  void test_rrToString() {
+  void rrToString() {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
     assertEquals(m_addr_string, ar.rrToString());
   }
 
   @Test
-  void test_rrToWire() {
+  void rrToWire() {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
 
     // canonical

@@ -42,14 +42,14 @@ import org.junit.jupiter.api.Test;
 
 class MRRecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     MRRecord d = new MRRecord();
     assertNull(d.getName());
     assertNull(d.getNewName());
   }
 
   @Test
-  void test_ctor_4arg() throws TextParseException {
+  void ctor_4arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
     Name a = Name.fromString("my.alias.");
 
@@ -62,7 +62,7 @@ class MRRecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     MRRecord d = new MRRecord();
     Record r = d.getObject();
     assertTrue(r instanceof MRRecord);

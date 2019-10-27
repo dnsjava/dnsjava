@@ -52,58 +52,58 @@ class DNSInputTest {
   }
 
   @Test
-  void test_initial_state() {
+  void initial_state() {
     assertEquals(0, m_di.current());
     assertEquals(10, m_di.remaining());
   }
 
   @Test
-  void test_jump1() {
+  void jump1() {
     m_di.jump(1);
     assertEquals(1, m_di.current());
     assertEquals(9, m_di.remaining());
   }
 
   @Test
-  void test_jump2() {
+  void jump2() {
     m_di.jump(9);
     assertEquals(9, m_di.current());
     assertEquals(1, m_di.remaining());
   }
 
   @Test
-  void test_jump_invalid() {
+  void jump_invalid() {
     assertThrows(IllegalArgumentException.class, () -> m_di.jump(10));
   }
 
   @Test
-  void test_setActive() {
+  void setActive() {
     m_di.setActive(5);
     assertEquals(0, m_di.current());
     assertEquals(5, m_di.remaining());
   }
 
   @Test
-  void test_setActive_boundary1() {
+  void setActive_boundary1() {
     m_di.setActive(10);
     assertEquals(0, m_di.current());
     assertEquals(10, m_di.remaining());
   }
 
   @Test
-  void test_setActive_boundary2() {
+  void setActive_boundary2() {
     m_di.setActive(0);
     assertEquals(0, m_di.current());
     assertEquals(0, m_di.remaining());
   }
 
   @Test
-  void test_setActive_invalid() {
+  void setActive_invalid() {
     assertThrows(IllegalArgumentException.class, () -> m_di.setActive(11));
   }
 
   @Test
-  void test_clearActive() {
+  void clearActive() {
     // first without setting active:
     m_di.clearActive();
     assertEquals(0, m_di.current());
@@ -116,12 +116,12 @@ class DNSInputTest {
   }
 
   @Test
-  void test_restore_invalid() {
+  void restore_invalid() {
     assertThrows(IllegalStateException.class, () -> m_di.restore());
   }
 
   @Test
-  void test_save_restore() {
+  void save_restore() {
     m_di.jump(4);
     assertEquals(4, m_di.current());
     assertEquals(6, m_di.remaining());
@@ -137,7 +137,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readU8_basic() throws WireParseException {
+  void readU8_basic() throws WireParseException {
     int v1 = m_di.readU8();
     assertEquals(1, m_di.current());
     assertEquals(9, m_di.remaining());
@@ -145,7 +145,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readU8_maxval() throws WireParseException {
+  void readU8_maxval() throws WireParseException {
     m_di.jump(9);
     final int[] v1 = {m_di.readU8()};
     assertEquals(10, m_di.current());
@@ -156,7 +156,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readU16_basic() throws WireParseException {
+  void readU16_basic() throws WireParseException {
     int v1 = m_di.readU16();
     assertEquals(2, m_di.current());
     assertEquals(8, m_di.remaining());
@@ -168,7 +168,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readU16_maxval() throws WireParseException {
+  void readU16_maxval() throws WireParseException {
     m_di.jump(8);
     int v = m_di.readU16();
     assertEquals(10, m_di.current());
@@ -184,7 +184,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readU32_basic() throws WireParseException {
+  void readU32_basic() throws WireParseException {
     long v1 = m_di.readU32();
     assertEquals(4, m_di.current());
     assertEquals(6, m_di.remaining());
@@ -192,7 +192,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readU32_maxval() throws WireParseException {
+  void readU32_maxval() throws WireParseException {
     m_di.jump(6);
     long v = m_di.readU32();
     assertEquals(10, m_di.current());
@@ -208,7 +208,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readByteArray_0arg() {
+  void readByteArray_0arg() {
     m_di.jump(1);
     byte[] out = m_di.readByteArray();
     assertEquals(10, m_di.current());
@@ -220,7 +220,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readByteArray_0arg_boundary() throws WireParseException {
+  void readByteArray_0arg_boundary() throws WireParseException {
     m_di.jump(9);
     m_di.readU8();
     byte[] out = m_di.readByteArray();
@@ -228,7 +228,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readByteArray_1arg() throws WireParseException {
+  void readByteArray_1arg() throws WireParseException {
     byte[] out = m_di.readByteArray(2);
     assertEquals(2, m_di.current());
     assertEquals(8, m_di.remaining());
@@ -238,7 +238,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readByteArray_1arg_boundary() throws WireParseException {
+  void readByteArray_1arg_boundary() throws WireParseException {
     byte[] out = m_di.readByteArray(10);
     assertEquals(10, m_di.current());
     assertEquals(0, m_di.remaining());
@@ -246,12 +246,12 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readByteArray_1arg_invalid() {
+  void readByteArray_1arg_invalid() {
     assertThrows(WireParseException.class, () -> m_di.readByteArray(11));
   }
 
   @Test
-  void test_readByteArray_3arg() throws WireParseException {
+  void readByteArray_3arg() throws WireParseException {
     byte[] data = new byte[5];
     m_di.jump(4);
 
@@ -264,7 +264,7 @@ class DNSInputTest {
   }
 
   @Test
-  void test_readCountedSting() throws WireParseException {
+  void readCountedSting() throws WireParseException {
     m_di.jump(1);
     byte[] out = m_di.readCountedString();
     assertEquals(1, out.length);

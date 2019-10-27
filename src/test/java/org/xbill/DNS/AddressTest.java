@@ -47,12 +47,12 @@ import org.junit.jupiter.api.Test;
 
 class AddressTest {
   @Test
-  void test_toByteArray_invalid() {
+  void toByteArray_invalid() {
     assertThrows(IllegalArgumentException.class, () -> Address.toByteArray("doesn't matter", 3));
   }
 
   @Test
-  void test_toByteArray_IPv4() {
+  void toByteArray_IPv4() {
     byte[] exp = new byte[] {(byte) 198, (byte) 121, (byte) 10, (byte) 234};
     byte[] ret = Address.toByteArray("198.121.10.234", Address.IPv4);
     assertArrayEquals(exp, ret);
@@ -67,7 +67,7 @@ class AddressTest {
   }
 
   @Test
-  void test_toByteArray_IPv4_invalid() {
+  void toByteArray_IPv4_invalid() {
     assertNull(Address.toByteArray("A.B.C.D", Address.IPv4));
 
     assertNull(Address.toByteArray("128...", Address.IPv4));
@@ -106,7 +106,7 @@ class AddressTest {
   }
 
   @Test
-  void test_toByteArray_IPv6() {
+  void toByteArray_IPv6() {
     byte[] exp =
         new byte[] {
           (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
@@ -237,7 +237,7 @@ class AddressTest {
   }
 
   @Test
-  void test_toByteArray_IPv6_invalid() {
+  void toByteArray_IPv6_invalid() {
     // not enough groups
     assertNull(Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:0370", Address.IPv6));
     // too many groups
@@ -257,7 +257,7 @@ class AddressTest {
   }
 
   @Test
-  void test_toArray() {
+  void toArray() {
     int[] exp = new int[] {1, 2, 3, 4};
     int[] ret = Address.toArray("1.2.3.4", Address.IPv4);
     assertArrayEquals(exp, ret);
@@ -272,20 +272,20 @@ class AddressTest {
   }
 
   @Test
-  void test_toArray_invalid() {
+  void toArray_invalid() {
     assertNull(Address.toArray("128.121.1", Address.IPv4));
 
     assertNull(Address.toArray(""));
   }
 
   @Test
-  void test_isDottedQuad() {
+  void isDottedQuad() {
     assertTrue(Address.isDottedQuad("1.2.3.4"));
     assertFalse(Address.isDottedQuad("256.2.3.4"));
   }
 
   @Test
-  void test_toDottedQuad() {
+  void toDottedQuad() {
     assertEquals(
         "128.176.201.1",
         Address.toDottedQuad(new byte[] {(byte) 128, (byte) 176, (byte) 201, (byte) 1}));
@@ -294,7 +294,7 @@ class AddressTest {
   }
 
   @Test
-  void test_addressLength() {
+  void addressLength() {
     assertEquals(4, Address.addressLength(Address.IPv4));
     assertEquals(16, Address.addressLength(Address.IPv6));
 
@@ -302,7 +302,7 @@ class AddressTest {
   }
 
   @Test
-  void test_getByName() throws UnknownHostException {
+  void getByName() throws UnknownHostException {
     InetAddress out = Address.getByName("128.145.198.231");
     assertEquals("128.145.198.231", out.getHostAddress());
 
@@ -311,13 +311,13 @@ class AddressTest {
   }
 
   @Test
-  void test_getByName_invalid() {
+  void getByName_invalid() {
     assertThrows(UnknownHostException.class, () -> Address.getByName("example.invalid"));
     assertThrows(UnknownHostException.class, () -> Address.getByName(""));
   }
 
   @Test
-  void test_getAllByName() throws UnknownHostException {
+  void getAllByName() throws UnknownHostException {
     InetAddress[] out = Address.getAllByName("128.145.198.231");
     assertEquals(1, out.length);
     assertEquals("128.145.198.231", out[0].getHostAddress());
@@ -335,20 +335,20 @@ class AddressTest {
   }
 
   @Test
-  void test_getAllByName_invalid() {
+  void getAllByName_invalid() {
     assertThrows(UnknownHostException.class, () -> Address.getAllByName("example.invalid"));
     assertThrows(UnknownHostException.class, () -> Address.getAllByName(""));
   }
 
   @Test
-  void test_familyOf() throws UnknownHostException {
+  void familyOf() throws UnknownHostException {
     assertEquals(Address.IPv4, Address.familyOf(InetAddress.getByName("192.168.0.1")));
     assertEquals(Address.IPv6, Address.familyOf(InetAddress.getByName("1:2:3:4:5:6:7:8")));
     assertThrows(IllegalArgumentException.class, () -> Address.familyOf(null));
   }
 
   @Test
-  void test_getHostName() throws UnknownHostException {
+  void getHostName() throws UnknownHostException {
     String out = Address.getHostName(InetAddress.getByName("198.41.0.4"));
     assertEquals("a.root-servers.net.", out);
 

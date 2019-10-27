@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 
 class RcodeTest {
   @Test
-  void test_string() {
+  void string() {
     // a regular one
     assertEquals("NXDOMAIN", Rcode.string(Rcode.NXDOMAIN));
 
@@ -59,7 +59,7 @@ class RcodeTest {
   }
 
   @Test
-  void test_TSIGstring() {
+  void TSIGstring() {
     // a regular one
     assertEquals("BADSIG", Rcode.TSIGstring(Rcode.BADSIG));
 
@@ -73,7 +73,7 @@ class RcodeTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     // regular one
     assertEquals(Rcode.FORMERR, Rcode.value("FORMERR"));
 

@@ -42,25 +42,25 @@ import org.junit.jupiter.api.Test;
 
 class ExceptionTest {
   @Test
-  void test_InvalidDClassException() {
+  void InvalidDClassException() {
     IllegalArgumentException e = new InvalidDClassException(10);
     assertEquals("Invalid DNS class: 10", e.getMessage());
   }
 
   @Test
-  void test_InvalidTTLException() {
+  void InvalidTTLException() {
     IllegalArgumentException e = new InvalidTTLException(32345);
     assertEquals("Invalid DNS TTL: 32345", e.getMessage());
   }
 
   @Test
-  void test_InvalidTypeException() {
+  void InvalidTypeException() {
     IllegalArgumentException e = new InvalidTypeException(32345);
     assertEquals("Invalid DNS type: 32345", e.getMessage());
   }
 
   @Test
-  void test_NameTooLongException() {
+  void NameTooLongException() {
     WireParseException e = new NameTooLongException();
     assertNull(e.getMessage());
 
@@ -69,7 +69,7 @@ class ExceptionTest {
   }
 
   @Test
-  void test_RelativeNameException() throws TextParseException {
+  void RelativeNameException() throws TextParseException {
     IllegalArgumentException e = new RelativeNameException("This is my relative name");
     assertEquals("This is my relative name", e.getMessage());
 
@@ -78,7 +78,7 @@ class ExceptionTest {
   }
 
   @Test
-  void test_TextParseException() {
+  void TextParseException() {
     IOException e = new TextParseException();
     assertNull(e.getMessage());
 
@@ -87,7 +87,7 @@ class ExceptionTest {
   }
 
   @Test
-  void test_WireParseException() {
+  void WireParseException() {
     IOException e = new WireParseException();
     assertNull(e.getMessage());
 
@@ -96,7 +96,7 @@ class ExceptionTest {
   }
 
   @Test
-  void test_ZoneTransferException() {
+  void ZoneTransferException() {
     Exception e = new ZoneTransferException();
     assertNull(e.getMessage());
 

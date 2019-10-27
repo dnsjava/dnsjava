@@ -62,7 +62,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_valid_IPv4() {
+    void valid_IPv4() {
       Element el = new Element(true, m_addr4, 16);
       assertEquals(Address.IPv4, el.family);
       assertTrue(el.negative);
@@ -71,12 +71,12 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_invalid_IPv4() {
+    void invalid_IPv4() {
       assertThrows(IllegalArgumentException.class, () -> new Element(true, m_addr4, 33));
     }
 
     @Test
-    void test_valid_IPv6() {
+    void valid_IPv6() {
       Element el = new Element(false, m_addr6, 74);
       assertEquals(Address.IPv6, el.family);
       assertFalse(el.negative);
@@ -85,7 +85,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_invalid_IPv6() {
+    void invalid_IPv6() {
       assertThrows(IllegalArgumentException.class, () -> new Element(true, m_addr6, 129));
     }
   }
@@ -123,7 +123,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_0arg() {
+    void ctor_0arg() {
       APLRecord ar = new APLRecord();
       assertNull(ar.getName());
       assertEquals(0, ar.getType());
@@ -133,14 +133,14 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_getObject() {
+    void getObject() {
       APLRecord ar = new APLRecord();
       Record r = ar.getObject();
       assertTrue(r instanceof APLRecord);
     }
 
     @Test
-    void test_4arg_basic() {
+    void ctor_4arg_basic() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
       assertEquals(m_an, ar.getName());
       assertEquals(Type.APL, ar.getType());
@@ -150,13 +150,13 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_4arg_empty_elements() {
+    void ctor_4arg_empty_elements() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList<>());
       assertEquals(new ArrayList(), ar.getElements());
     }
 
     @Test
-    void test_4arg_relative_name() {
+    void ctor_4arg_relative_name() {
       assertThrows(
           RelativeNameException.class, () -> new APLRecord(m_rn, DClass.IN, m_ttl, m_elements));
     }
@@ -178,7 +178,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_validIPv4() throws IOException {
+    void validIPv4() throws IOException {
       byte[] raw =
           new byte[] {
             0,
@@ -201,7 +201,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_validIPv4_short_address() throws IOException {
+    void validIPv4_short_address() throws IOException {
       byte[] raw =
           new byte[] {0, 1, 20, (byte) 0x83, m_addr4_bytes[0], m_addr4_bytes[1], m_addr4_bytes[2]};
 
@@ -217,7 +217,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_invalid_IPv4_prefix() throws IOException {
+    void invalid_IPv4_prefix() throws IOException {
       byte[] raw =
           new byte[] {
             0,
@@ -236,7 +236,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_invalid_IPv4_length() throws IOException {
+    void invalid_IPv4_length() throws IOException {
       byte[] raw =
           new byte[] {
             0,
@@ -256,7 +256,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_multiple_validIPv4() throws IOException {
+    void multiple_validIPv4() throws IOException {
       byte[] raw =
           new byte[] {
             0,
@@ -288,7 +288,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_validIPv6() throws IOException {
+    void validIPv6() throws IOException {
       byte[] raw =
           new byte[] {
             0,
@@ -323,7 +323,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_valid_nonIP() throws IOException {
+    void valid_nonIP() throws IOException {
       byte[] raw = new byte[] {0, 3, (byte) 130, (byte) 0x85, 1, 2, 3, 4, 5};
 
       DNSInput di = new DNSInput(raw);
@@ -361,7 +361,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_validIPv4() throws IOException {
+    void validIPv4() throws IOException {
       Tokenizer t = new Tokenizer("1:" + m_addr4_string + "/11\n");
       APLRecord ar = new APLRecord();
       ar.rdataFromString(t, null);
@@ -376,7 +376,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_valid_multi() throws IOException {
+    void valid_multi() throws IOException {
       Tokenizer t = new Tokenizer("1:" + m_addr4_string + "/11 !2:" + m_addr6_string + "/100");
       APLRecord ar = new APLRecord();
       ar.rdataFromString(t, null);
@@ -389,7 +389,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_validIPv6() throws IOException {
+    void validIPv6() throws IOException {
       Tokenizer t = new Tokenizer("!2:" + m_addr6_string + "/36\n");
       APLRecord ar = new APLRecord();
       ar.rdataFromString(t, null);
@@ -404,77 +404,77 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_no_colon() throws IOException {
+    void no_colon() throws IOException {
       Tokenizer t = new Tokenizer("!1192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_colon_and_slash_swapped() throws IOException {
+    void colon_and_slash_swapped() throws IOException {
       Tokenizer t = new Tokenizer("!1/192.68.0.1:20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_no_slash() throws IOException {
+    void no_slash() throws IOException {
       Tokenizer t = new Tokenizer("!1:192.68.0.1|20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_empty_family() throws IOException {
+    void empty_family() throws IOException {
       Tokenizer t = new Tokenizer("!:192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_malformed_family() throws IOException {
+    void malformed_family() throws IOException {
       Tokenizer t = new Tokenizer("family:192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_invalid_family() throws IOException {
+    void invalid_family() throws IOException {
       Tokenizer t = new Tokenizer("3:192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_empty_prefix() throws IOException {
+    void empty_prefix() throws IOException {
       Tokenizer t = new Tokenizer("1:192.68.0.1/");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_malformed_prefix() throws IOException {
+    void malformed_prefix() throws IOException {
       Tokenizer t = new Tokenizer("1:192.68.0.1/prefix");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_invalid_prefix() throws IOException {
+    void invalid_prefix() throws IOException {
       Tokenizer t = new Tokenizer("1:192.68.0.1/33");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_empty_address() throws IOException {
+    void empty_address() throws IOException {
       Tokenizer t = new Tokenizer("1:/33");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void test_malformed_address() throws IOException {
+    void malformed_address() throws IOException {
       Tokenizer t = new Tokenizer("1:A.B.C.D/33");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
@@ -553,7 +553,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_empty() {
+    void empty() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList<>());
       DNSOutput dout = new DNSOutput();
 
@@ -562,7 +562,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_basic() {
+    void basic() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
 
       byte[] exp =
@@ -604,7 +604,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_non_IP() throws IOException {
+    void non_IP() throws IOException {
       byte[] exp = new byte[] {0, 3, (byte) 130, (byte) 0x85, 1, 2, 3, 4, 5};
 
       DNSInput di = new DNSInput(exp);
@@ -618,7 +618,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_address_with_embedded_zero() throws UnknownHostException {
+    void address_with_embedded_zero() throws UnknownHostException {
       InetAddress a = InetAddress.getByName("232.0.11.1");
       ArrayList<Element> elements = new ArrayList<>();
       elements.add(new Element(true, a, 31));
@@ -634,7 +634,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_short_address() throws UnknownHostException {
+    void short_address() throws UnknownHostException {
       InetAddress a = InetAddress.getByName("232.0.11.0");
       ArrayList<Element> elements = new ArrayList<>();
       elements.add(new Element(true, a, 31));
@@ -650,7 +650,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void test_wildcard_address() throws UnknownHostException {
+    void wildcard_address() throws UnknownHostException {
       InetAddress a = InetAddress.getByName("0.0.0.0");
       ArrayList<Element> elements = new ArrayList<>();
       elements.add(new Element(true, a, 31));

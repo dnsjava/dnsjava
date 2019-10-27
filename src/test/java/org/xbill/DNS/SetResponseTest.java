@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 
 class SetResponseTest {
   @Test
-  void test_ctor_1arg() {
+  void ctor_1arg() {
     final int[] types =
         new int[] {
           SetResponse.UNKNOWN,
@@ -73,17 +73,17 @@ class SetResponseTest {
   }
 
   @Test
-  void test_ctor_1arg_toosmall() {
+  void ctor_1arg_toosmall() {
     assertThrows(IllegalArgumentException.class, () -> new SetResponse(-1));
   }
 
   @Test
-  void test_ctor_1arg_toobig() {
+  void ctor_1arg_toobig() {
     assertThrows(IllegalArgumentException.class, () -> new SetResponse(7));
   }
 
   @Test
-  void test_ctor_2arg() {
+  void ctor_2arg() {
     final int[] types =
         new int[] {
           SetResponse.UNKNOWN,
@@ -110,17 +110,17 @@ class SetResponseTest {
   }
 
   @Test
-  void test_ctor_2arg_toosmall() {
+  void ctor_2arg_toosmall() {
     assertThrows(IllegalArgumentException.class, () -> new SetResponse(-1, new RRset()));
   }
 
   @Test
-  void test_ctor_2arg_toobig() {
+  void ctor_2arg_toobig() {
     assertThrows(IllegalArgumentException.class, () -> new SetResponse(7, new RRset()));
   }
 
   @Test
-  void test_ofType_basic() {
+  void ofType_basic() {
     final int[] types =
         new int[] {
           SetResponse.DELEGATION, SetResponse.CNAME, SetResponse.DNAME, SetResponse.SUCCESSFUL
@@ -143,7 +143,7 @@ class SetResponseTest {
   }
 
   @Test
-  void test_ofType_singleton() {
+  void ofType_singleton() {
     final int[] types = new int[] {SetResponse.UNKNOWN, SetResponse.NXDOMAIN, SetResponse.NXRRSET};
 
     for (int type : types) {
@@ -163,17 +163,17 @@ class SetResponseTest {
   }
 
   @Test
-  void test_ofType_toosmall() {
+  void ofType_toosmall() {
     assertThrows(IllegalArgumentException.class, () -> SetResponse.ofType(-1));
   }
 
   @Test
-  void test_ofType_toobig() {
+  void ofType_toobig() {
     assertThrows(IllegalArgumentException.class, () -> SetResponse.ofType(7));
   }
 
   @Test
-  void test_addRRset() throws TextParseException, UnknownHostException {
+  void addRRset() throws TextParseException, UnknownHostException {
     RRset<ARecord> rrs = new RRset<>();
     rrs.addRR(
         new ARecord(
@@ -189,7 +189,7 @@ class SetResponseTest {
   }
 
   @Test
-  void test_addRRset_multiple() throws TextParseException, UnknownHostException {
+  void addRRset_multiple() throws TextParseException, UnknownHostException {
     RRset<ARecord> rrs = new RRset<>();
     rrs.addRR(
         new ARecord(
@@ -221,13 +221,13 @@ class SetResponseTest {
   }
 
   @Test
-  void test_answers_nonSUCCESSFUL() {
+  void answers_nonSUCCESSFUL() {
     SetResponse sr = new SetResponse(SetResponse.UNKNOWN, new RRset());
     assertNull(sr.answers());
   }
 
   @Test
-  void test_getCNAME() throws TextParseException {
+  void getCNAME() throws TextParseException {
     RRset<CNAMERecord> rrs = new RRset<>();
     CNAMERecord cr =
         new CNAMERecord(
@@ -238,7 +238,7 @@ class SetResponseTest {
   }
 
   @Test
-  void test_getDNAME() throws TextParseException {
+  void getDNAME() throws TextParseException {
     RRset<DNAMERecord> rrs = new RRset<>();
     DNAMERecord dr =
         new DNAMERecord(

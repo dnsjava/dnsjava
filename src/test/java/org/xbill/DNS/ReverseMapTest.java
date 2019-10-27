@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 
 class ReverseMapTest {
   @Test
-  void test_fromAddress_ipv4() throws UnknownHostException, TextParseException {
+  void fromAddress_ipv4() throws UnknownHostException, TextParseException {
     Name exp = Name.fromString("1.0.168.192.in-addr.arpa.");
     String addr = "192.168.0.1";
     assertEquals(exp, ReverseMap.fromAddress(addr));
@@ -56,7 +56,7 @@ class ReverseMapTest {
   }
 
   @Test
-  void test_fromAddress_ipv6() throws UnknownHostException, TextParseException {
+  void fromAddress_ipv6() throws UnknownHostException, TextParseException {
     Name exp =
         Name.fromString(
             "4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa.");
@@ -75,7 +75,7 @@ class ReverseMapTest {
   }
 
   @Test
-  void test_fromAddress_invalid() {
+  void fromAddress_invalid() {
     assertThrows(UnknownHostException.class, () -> ReverseMap.fromAddress("A.B.C.D", Address.IPv4));
     assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[0]));
     assertThrows(IllegalArgumentException.class, () -> ReverseMap.fromAddress(new byte[3]));

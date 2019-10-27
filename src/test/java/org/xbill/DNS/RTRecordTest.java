@@ -41,14 +41,14 @@ import org.junit.jupiter.api.Test;
 
 class RTRecordTest {
   @Test
-  void test_getObject() {
+  void getObject() {
     RTRecord d = new RTRecord();
     Record r = d.getObject();
     assertTrue(r instanceof RTRecord);
   }
 
   @Test
-  void test_ctor_5arg() throws TextParseException {
+  void ctor_5arg() throws TextParseException {
     Name n = Name.fromString("My.Name.");
     Name m = Name.fromString("My.OtherName.");
 

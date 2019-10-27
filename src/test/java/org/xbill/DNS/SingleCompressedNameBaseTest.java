@@ -62,7 +62,7 @@ class SingleCompressedNameBaseTest {
   }
 
   @Test
-  void test_ctor() throws TextParseException {
+  void ctor() throws TextParseException {
     TestClass tc = new TestClass();
     assertNull(tc.getSingleName());
 
@@ -79,7 +79,7 @@ class SingleCompressedNameBaseTest {
   }
 
   @Test
-  void test_rrToWire() throws IOException {
+  void rrToWire() throws IOException {
     Name n = Name.fromString("my.name.");
     Name sn = Name.fromString("My.Single.Name.");
 

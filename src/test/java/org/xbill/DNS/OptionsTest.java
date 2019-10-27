@@ -50,7 +50,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_set_1arg() {
+  void set_1arg() {
     Options.set("Option1");
     assertEquals("true", Options.value("option1"));
 
@@ -63,7 +63,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_set_2arg() {
+  void set_2arg() {
     Options.set("OPTION1", "Value1");
     assertEquals("value1", Options.value("Option1"));
 
@@ -77,7 +77,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_check() {
+  void check() {
     assertFalse(Options.check("No Options yet"));
 
     Options.set("First Option");
@@ -87,7 +87,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_unset() {
+  void unset() {
     // unset something non-existant
     Options.unset("Not an option Name");
 
@@ -106,7 +106,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     assertNull(Options.value("Table is Null"));
 
     Options.set("Testing Option");
@@ -116,7 +116,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_intValue() {
+  void intValue() {
     assertEquals(-1, Options.intValue("Table is Null"));
 
     Options.set("A Boolean Option");
@@ -132,7 +132,7 @@ class OptionsTest {
   }
 
   @Test
-  void test_systemProperty() {
+  void systemProperty() {
     System.setProperty(
         "dnsjava.options", "booleanOption,valuedOption1=10,valuedOption2=NotAnInteger");
 

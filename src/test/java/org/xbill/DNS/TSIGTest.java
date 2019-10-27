@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class TSIGTest {
   @Test
-  void test_TSIG_query() throws IOException {
+  void TSIG_query() throws IOException {
     TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 
     Name qname = Name.fromString("www.example.");
@@ -26,7 +26,7 @@ class TSIGTest {
   }
 
   @Test
-  void test_TSIG_response() throws IOException {
+  void TSIG_response() throws IOException {
     TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 
     Name qname = Name.fromString("www.example.");
@@ -51,7 +51,7 @@ class TSIGTest {
   }
 
   @Test
-  void test_TSIG_truncated() throws IOException {
+  void TSIG_truncated() throws IOException {
     TSIG key = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 
     Name qname = Name.fromString("www.example.");

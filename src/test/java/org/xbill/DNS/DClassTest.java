@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 
 class DClassTest {
   @Test
-  void test_string() {
+  void string() {
     // a regular one
     assertEquals("IN", DClass.string(DClass.IN));
 
@@ -59,7 +59,7 @@ class DClassTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     // regular one
     assertEquals(DClass.NONE, DClass.value("NONE"));
 

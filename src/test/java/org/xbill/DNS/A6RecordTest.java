@@ -72,7 +72,7 @@ class A6RecordTest {
   }
 
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     A6Record ar = new A6Record();
     assertNull(ar.getName());
     assertEquals(0, ar.getType());
@@ -81,14 +81,14 @@ class A6RecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     A6Record ar = new A6Record();
     Record r = ar.getObject();
     assertTrue(r instanceof A6Record);
   }
 
   @Test
-  void test_ctor_6arg() {
+  void ctor_6arg() {
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
     assertEquals(m_an, ar.getName());
     assertEquals(Type.A6, ar.getType());
@@ -135,7 +135,7 @@ class A6RecordTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     // record with no prefix
     DNSOutput dout = new DNSOutput();
     dout.writeU8(0);
@@ -167,7 +167,7 @@ class A6RecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     // record with no prefix
     Tokenizer t = new Tokenizer("0 " + m_addr_string);
     A6Record ar = new A6Record();
@@ -198,7 +198,7 @@ class A6RecordTest {
   }
 
   @Test
-  void test_rrToString() {
+  void rrToString() {
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
     String exp = "" + m_prefix_bits + " " + m_addr_string_canonical + " " + m_an2;
     String out = ar.rrToString();
@@ -206,7 +206,7 @@ class A6RecordTest {
   }
 
   @Test
-  void test_rrToWire() {
+  void rrToWire() {
     // canonical form
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
     DNSOutput dout = new DNSOutput();

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 class URIRecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     URIRecord r = new URIRecord();
     assertNull(r.getName());
     assertEquals(0, r.getType());
@@ -23,14 +23,14 @@ class URIRecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     URIRecord dr = new URIRecord();
     Record r = dr.getObject();
     assertTrue(r instanceof URIRecord);
   }
 
   @Test
-  void test_ctor_6arg() throws TextParseException {
+  void ctor_6arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
     String target = ("http://foo");
 
@@ -45,7 +45,7 @@ class URIRecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF01 + " \"http://foo:1234/bar?baz=bum\"");
 
     URIRecord r = new URIRecord();
@@ -56,7 +56,7 @@ class URIRecordTest {
   }
 
   @Test
-  void test_rdataToWire() throws TextParseException {
+  void rdataToWire() throws TextParseException {
     Name n = Name.fromString("my.name.");
     String target = ("http://foo");
     byte[] exp =
@@ -84,7 +84,7 @@ class URIRecordTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     byte[] raw =
         new byte[] {
           (byte) 0xbe,
@@ -112,7 +112,7 @@ class URIRecordTest {
   }
 
   @Test
-  void test_toobig_priority() throws TextParseException {
+  void toobig_priority() throws TextParseException {
     assertThrows(
         IllegalArgumentException.class,
         () ->
@@ -121,14 +121,14 @@ class URIRecordTest {
   }
 
   @Test
-  void test_toosmall_priority() throws TextParseException {
+  void toosmall_priority() throws TextParseException {
     assertThrows(
         IllegalArgumentException.class,
         () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234, -1, 42, "http://foo"));
   }
 
   @Test
-  void test_toobig_weight() throws TextParseException {
+  void toobig_weight() throws TextParseException {
     assertThrows(
         IllegalArgumentException.class,
         () ->
@@ -137,7 +137,7 @@ class URIRecordTest {
   }
 
   @Test
-  void test_toosmall_weight() throws TextParseException {
+  void toosmall_weight() throws TextParseException {
     assertThrows(
         IllegalArgumentException.class,
         () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234, 42, -1, "http://foo"));

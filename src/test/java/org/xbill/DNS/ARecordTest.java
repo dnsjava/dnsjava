@@ -66,7 +66,7 @@ class ARecordTest {
   }
 
   @Test
-  void test_ctor_0arg() throws UnknownHostException {
+  void ctor_0arg() throws UnknownHostException {
     ARecord ar = new ARecord();
     assertNull(ar.getName());
     assertEquals(0, ar.getType());
@@ -76,14 +76,14 @@ class ARecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     ARecord ar = new ARecord();
     Record r = ar.getObject();
     assertTrue(r instanceof ARecord);
   }
 
   @Test
-  void test_ctor_4arg() {
+  void ctor_4arg() {
     ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
     assertEquals(m_an, ar.getName());
     assertEquals(Type.A, ar.getType());
@@ -106,7 +106,7 @@ class ARecordTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     DNSInput di = new DNSInput(m_addr_bytes);
     ARecord ar = new ARecord();
 
@@ -116,7 +116,7 @@ class ARecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer(m_addr_string);
     ARecord ar = new ARecord();
 
@@ -131,13 +131,13 @@ class ARecordTest {
   }
 
   @Test
-  void test_rrToString() {
+  void rrToString() {
     ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
     assertEquals(m_addr_string, ar.rrToString());
   }
 
   @Test
-  void test_rrToWire() {
+  void rrToWire() {
     ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
     DNSOutput dout = new DNSOutput();
 

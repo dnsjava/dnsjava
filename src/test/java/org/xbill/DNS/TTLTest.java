@@ -47,7 +47,7 @@ class TTLTest {
   private final long W = 7 * D;
 
   @Test
-  void test_parseTTL() {
+  void parseTTL() {
     assertEquals(9876, TTL.parseTTL("9876"));
 
     assertEquals(0, TTL.parseTTL("0S"));
@@ -72,7 +72,7 @@ class TTLTest {
   }
 
   @Test
-  void test_parseTTL_invalid() {
+  void parseTTL_invalid() {
     assertThrows(NumberFormatException.class, () -> TTL.parseTTL(null));
 
     assertThrows(NumberFormatException.class, () -> TTL.parseTTL(""));
@@ -87,7 +87,7 @@ class TTLTest {
   }
 
   @Test
-  void test_format() {
+  void format() {
     assertEquals("0S", TTL.format(0));
     assertEquals("1S", TTL.format(1));
     assertEquals("59S", TTL.format(59));
@@ -107,7 +107,7 @@ class TTLTest {
   }
 
   @Test
-  void test_format_invalid() {
+  void format_invalid() {
     assertThrows(InvalidTTLException.class, () -> TTL.format(-1));
 
     assertThrows(InvalidTTLException.class, () -> TTL.format(0x100000000L));

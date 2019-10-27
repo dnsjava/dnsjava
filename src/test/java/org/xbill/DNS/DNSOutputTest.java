@@ -50,20 +50,20 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_default_ctor() {
+  void default_ctor() {
     m_do = new DNSOutput();
     assertEquals(0, m_do.current());
   }
 
   @Test
-  void test_initial_state() {
+  void initial_state() {
     assertEquals(0, m_do.current());
     assertThrows(IllegalStateException.class, () -> m_do.restore());
     assertThrows(IllegalArgumentException.class, () -> m_do.jump(1));
   }
 
   @Test
-  void test_writeU8_basic() {
+  void writeU8_basic() {
     m_do.writeU8(1);
     assertEquals(1, m_do.current());
 
@@ -73,7 +73,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeU8_expand() {
+  void writeU8_expand() {
     // starts off at 1;
     m_do.writeU8(1);
     m_do.writeU8(2);
@@ -87,19 +87,19 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeU8_max() {
+  void writeU8_max() {
     m_do.writeU8(0xFF);
     byte[] curr = m_do.toByteArray();
     assertEquals((byte) 0xFF, curr[0]);
   }
 
   @Test
-  void test_writeU8_toobig() {
+  void writeU8_toobig() {
     assertThrows(IllegalArgumentException.class, () -> m_do.writeU8(0x1FF));
   }
 
   @Test
-  void test_writeU16_basic() {
+  void writeU16_basic() {
     m_do.writeU16(0x100);
     assertEquals(2, m_do.current());
 
@@ -110,7 +110,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeU16_max() {
+  void writeU16_max() {
     m_do.writeU16(0xFFFF);
     byte[] curr = m_do.toByteArray();
     assertEquals((byte) 0xFF, curr[0]);
@@ -118,12 +118,12 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeU16_toobig() {
+  void writeU16_toobig() {
     assertThrows(IllegalArgumentException.class, () -> m_do.writeU16(0x1FFFF));
   }
 
   @Test
-  void test_writeU32_basic() {
+  void writeU32_basic() {
     m_do.writeU32(0x11001011);
     assertEquals(4, m_do.current());
 
@@ -136,7 +136,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeU32_max() {
+  void writeU32_max() {
     m_do.writeU32(0xFFFFFFFFL);
     byte[] curr = m_do.toByteArray();
     assertEquals((byte) 0xFF, curr[0]);
@@ -146,12 +146,12 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeU32_toobig() {
+  void writeU32_toobig() {
     assertThrows(IllegalArgumentException.class, () -> m_do.writeU32(0x1FFFFFFFFL));
   }
 
   @Test
-  void test_jump_basic() {
+  void jump_basic() {
     m_do.writeU32(0x11223344L);
     assertEquals(4, m_do.current());
     m_do.jump(2);
@@ -165,7 +165,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeByteArray_1arg() {
+  void writeByteArray_1arg() {
     byte[] in = new byte[] {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
     m_do.writeByteArray(in);
     assertEquals(5, m_do.current());
@@ -174,7 +174,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeByteArray_3arg() {
+  void writeByteArray_3arg() {
     byte[] in = new byte[] {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
     m_do.writeByteArray(in, 2, 3);
     assertEquals(3, m_do.current());
@@ -184,7 +184,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeCountedString_basic() {
+  void writeCountedString_basic() {
     byte[] in = new byte[] {'h', 'e', 'l', 'L', '0'};
     m_do.writeCountedString(in);
     assertEquals(in.length + 1, m_do.current());
@@ -194,7 +194,7 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeCountedString_empty() {
+  void writeCountedString_empty() {
     byte[] in = new byte[] {};
     m_do.writeCountedString(in);
     assertEquals(in.length + 1, m_do.current());
@@ -204,13 +204,13 @@ class DNSOutputTest {
   }
 
   @Test
-  void test_writeCountedString_toobig() {
+  void writeCountedString_toobig() {
     byte[] in = new byte[256];
     assertThrows(IllegalArgumentException.class, () -> m_do.writeCountedString(in));
   }
 
   @Test
-  void test_save_restore() {
+  void save_restore() {
     m_do.writeU32(0x12345678L);
     assertEquals(4, m_do.current());
     m_do.save();

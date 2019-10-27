@@ -80,7 +80,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     TestClass tc = new TestClass();
     assertNull(tc.getName());
     assertEquals(0, tc.getType());
@@ -91,7 +91,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_ctor_4arg() throws TextParseException {
+  void ctor_4arg() throws TextParseException {
     Name n = Name.fromString("My.Name.");
 
     TestClass tc = new TestClass(n, Type.MX, DClass.IN, 0xBCDA);
@@ -105,7 +105,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_ctor_8arg() throws TextParseException {
+  void ctor_8arg() throws TextParseException {
     Name n = Name.fromString("My.Name.");
     Name m = Name.fromString("My.Other.Name.");
 
@@ -144,7 +144,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     byte[] raw =
         new byte[] {
           (byte) 0xBC,
@@ -177,7 +177,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     Name exp = Name.fromString("My.Single.Name.");
 
     Tokenizer t = new Tokenizer(0x19A2 + " My.Single.Name.");
@@ -193,7 +193,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_rrToString() throws IOException {
+  void rrToString() throws IOException {
     Name n = Name.fromString("My.Name.");
     Name m = Name.fromString("My.Other.Name.");
 
@@ -208,7 +208,7 @@ class U16NameBaseTest {
   }
 
   @Test
-  void test_rrToWire() throws IOException {
+  void rrToWire() throws IOException {
     Name n = Name.fromString("My.Name.");
     Name m = Name.fromString("M.O.n.");
 

@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 
 class DNAMERecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     DNAMERecord d = new DNAMERecord();
     assertNull(d.getName());
     assertNull(d.getTarget());
@@ -50,7 +50,7 @@ class DNAMERecordTest {
   }
 
   @Test
-  void test_ctor_4arg() throws TextParseException {
+  void ctor_4arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
     Name a = Name.fromString("my.alias.");
 
@@ -64,7 +64,7 @@ class DNAMERecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     DNAMERecord d = new DNAMERecord();
     Record r = d.getObject();
     assertTrue(r instanceof DNAMERecord);

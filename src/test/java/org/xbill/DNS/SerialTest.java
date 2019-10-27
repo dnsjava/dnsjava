@@ -42,35 +42,35 @@ import org.junit.jupiter.api.Test;
 
 class SerialTest {
   @Test
-  void test_compare_NegativeArg1() {
+  void compare_NegativeArg1() {
     long arg1 = -1;
     long arg2 = 1;
     assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
   }
 
   @Test
-  void test_compare_OOBArg1() {
+  void compare_OOBArg1() {
     long arg1 = 0xFFFFFFFFL + 1;
     long arg2 = 1;
     assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
   }
 
   @Test
-  void test_compare_NegativeArg2() {
+  void compare_NegativeArg2() {
     long arg1 = 1;
     long arg2 = -1;
     assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
   }
 
   @Test
-  void test_compare_OOBArg2() {
+  void compare_OOBArg2() {
     long arg1 = 1;
     long arg2 = 0xFFFFFFFFL + 1;
     assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
   }
 
   @Test
-  void test_compare_Arg1Greater() {
+  void compare_Arg1Greater() {
     long arg1 = 10;
     long arg2 = 9;
     int ret = Serial.compare(arg1, arg2);
@@ -78,7 +78,7 @@ class SerialTest {
   }
 
   @Test
-  void test_compare_Arg2Greater() {
+  void compare_Arg2Greater() {
     long arg1 = 9;
     long arg2 = 10;
     int ret = Serial.compare(arg1, arg2);
@@ -86,7 +86,7 @@ class SerialTest {
   }
 
   @Test
-  void test_compare_ArgsEqual() {
+  void compare_ArgsEqual() {
     long arg1 = 10;
     long arg2 = 10;
     int ret = Serial.compare(arg1, arg2);
@@ -94,7 +94,7 @@ class SerialTest {
   }
 
   @Test
-  void test_compare_boundary() {
+  void compare_boundary() {
     long arg1 = 0xFFFFFFFFL;
     long arg2 = 0;
     int ret = Serial.compare(arg1, arg2);
@@ -104,26 +104,26 @@ class SerialTest {
   }
 
   @Test
-  void test_increment_NegativeArg() {
+  void increment_NegativeArg() {
     long arg = -1;
     assertThrows(IllegalArgumentException.class, () -> Serial.increment(arg));
   }
 
   @Test
-  void test_increment_OOBArg() {
+  void increment_OOBArg() {
     long arg = 0xFFFFFFFFL + 1;
     assertThrows(IllegalArgumentException.class, () -> Serial.increment(arg));
   }
 
   @Test
-  void test_increment_reset() {
+  void increment_reset() {
     long arg = 0xFFFFFFFFL;
     long ret = Serial.increment(arg);
     assertEquals(0, ret);
   }
 
   @Test
-  void test_increment_normal() {
+  void increment_normal() {
     long arg = 10;
     long ret = Serial.increment(arg);
     assertEquals(arg + 1, ret);

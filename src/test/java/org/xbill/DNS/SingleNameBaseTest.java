@@ -67,7 +67,7 @@ class SingleNameBaseTest {
   }
 
   @Test
-  void test_ctor() throws TextParseException {
+  void ctor() throws TextParseException {
     TestClass tc = new TestClass();
     assertNull(tc.getSingleName());
 
@@ -91,7 +91,7 @@ class SingleNameBaseTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     byte[] raw =
         new byte[] {2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0};
     DNSInput in = new DNSInput(raw);
@@ -104,7 +104,7 @@ class SingleNameBaseTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     Name exp = Name.fromString("my.single.name.");
 
     Tokenizer t = new Tokenizer("my.single.name.");
@@ -118,7 +118,7 @@ class SingleNameBaseTest {
   }
 
   @Test
-  void test_rrToString() throws IOException {
+  void rrToString() throws IOException {
     Name exp = Name.fromString("my.single.name.");
 
     Tokenizer t = new Tokenizer("my.single.name.");
@@ -131,7 +131,7 @@ class SingleNameBaseTest {
   }
 
   @Test
-  void test_rrToWire() throws IOException {
+  void rrToWire() throws IOException {
     Name n = Name.fromString("my.name.");
     Name sn = Name.fromString("My.Single.Name.");
 

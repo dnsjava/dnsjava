@@ -53,7 +53,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_fixture_state() {
+  void fixture_state() {
     assertEquals(0xABCD, m_h.getID());
 
     boolean[] flags = m_h.getFlags();
@@ -69,7 +69,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     m_h = new Header();
     assertTrue(0 <= m_h.getID() && m_h.getID() < 0xFFFF);
 
@@ -86,7 +86,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_ctor_DNSInput() throws IOException {
+  void ctor_DNSInput() throws IOException {
     byte[] raw =
         new byte[] {
           (byte) 0x12,
@@ -134,7 +134,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_toWire() throws IOException {
+  void toWire() throws IOException {
     byte[] raw =
         new byte[] {
           (byte) 0x12,
@@ -181,7 +181,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_flags() {
+  void flags() {
     m_h.setFlag(0);
     m_h.setFlag(5);
     assertTrue(m_h.getFlag(0));
@@ -211,7 +211,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_flags_invalid() {
+  void flags_invalid() {
     assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(-1));
     assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(1));
     assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(16));
@@ -224,7 +224,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_ID() {
+  void ID() {
     assertEquals(0xABCD, m_h.getID());
 
     m_h = new Header();
@@ -238,13 +238,13 @@ class HeaderTest {
   }
 
   @Test
-  void test_setID_invalid() {
+  void setID_invalid() {
     assertThrows(IllegalArgumentException.class, () -> m_h.setID(0x10000));
     assertThrows(IllegalArgumentException.class, () -> m_h.setID(-1));
   }
 
   @Test
-  void test_Rcode() {
+  void Rcode() {
     assertEquals(0, m_h.getRcode());
 
     m_h.setRcode(0xA); // 1010
@@ -258,13 +258,13 @@ class HeaderTest {
   }
 
   @Test
-  void test_setRcode_invalid() {
+  void setRcode_invalid() {
     assertThrows(IllegalArgumentException.class, () -> m_h.setRcode(-1));
     assertThrows(IllegalArgumentException.class, () -> m_h.setRcode(0x100));
   }
 
   @Test
-  void test_Opcode() {
+  void Opcode() {
     assertEquals(0, m_h.getOpcode());
 
     m_h.setOpcode(0xE); // 1110
@@ -278,13 +278,13 @@ class HeaderTest {
   }
 
   @Test
-  void test_setOpcode_invalid() {
+  void setOpcode_invalid() {
     assertThrows(IllegalArgumentException.class, () -> m_h.setOpcode(-1));
     assertThrows(IllegalArgumentException.class, () -> m_h.setOpcode(0x100));
   }
 
   @Test
-  void test_Count() {
+  void Count() {
     m_h.setCount(2, 0x1E);
     assertEquals(0, m_h.getCount(0));
     assertEquals(0, m_h.getCount(1));
@@ -299,7 +299,7 @@ class HeaderTest {
   }
 
   @Test
-  void test_setCount_invalid() {
+  void setCount_invalid() {
     assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.setCount(-1, 0));
     assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.setCount(4, 0));
 
@@ -308,19 +308,19 @@ class HeaderTest {
   }
 
   @Test
-  void test_getCount_invalid() {
+  void getCount_invalid() {
     assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.getCount(-1));
     assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.getCount(4));
   }
 
   @Test
-  void test_incCount_invalid() {
+  void incCount_invalid() {
     m_h.setCount(1, 0xFFFF);
     assertThrows(IllegalStateException.class, () -> m_h.incCount(1));
   }
 
   @Test
-  void test_decCount_invalid() {
+  void decCount_invalid() {
     m_h.setCount(2, 0);
     assertThrows(IllegalStateException.class, () -> m_h.decCount(2));
   }

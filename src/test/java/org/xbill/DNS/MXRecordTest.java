@@ -43,14 +43,14 @@ import org.junit.jupiter.api.Test;
 
 class MXRecordTest {
   @Test
-  void test_getObject() {
+  void getObject() {
     MXRecord d = new MXRecord();
     Record r = d.getObject();
     assertTrue(r instanceof MXRecord);
   }
 
   @Test
-  void test_ctor_5arg() throws TextParseException {
+  void ctor_5arg() throws TextParseException {
     Name n = Name.fromString("My.Name.");
     Name m = Name.fromString("My.OtherName.");
 
@@ -65,7 +65,7 @@ class MXRecordTest {
   }
 
   @Test
-  void test_rrToWire() throws TextParseException {
+  void rrToWire() throws TextParseException {
     Name n = Name.fromString("My.Name.");
     Name m = Name.fromString("M.O.n.");
 

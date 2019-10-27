@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 public class MessageTest {
   static class Test_init {
     @Test
-    void test_0arg() {
+    void ctor_0arg() {
       Message m = new Message();
       assertArrayEquals(new Record[0], m.getSectionArray(0));
       assertArrayEquals(new Record[0], m.getSectionArray(1));
@@ -62,7 +62,7 @@ public class MessageTest {
     }
 
     @Test
-    void test_1arg() {
+    void ctor_1arg() {
       Message m = new Message(10);
       assertEquals(new Header(10).toString(), m.getHeader().toString());
       assertArrayEquals(new Record[0], m.getSectionArray(0));
@@ -78,7 +78,7 @@ public class MessageTest {
     }
 
     @Test
-    void test_newQuery() throws TextParseException, UnknownHostException {
+    void newQuery() throws TextParseException, UnknownHostException {
       Name n = Name.fromString("The.Name.");
       ARecord ar = new ARecord(n, DClass.IN, 1, InetAddress.getByName("192.168.101.110"));
 
@@ -98,7 +98,7 @@ public class MessageTest {
     }
 
     @Test
-    void test_sectionToWire() throws IOException {
+    void sectionToWire() throws IOException {
       Message m = new Message(4711);
       Name n2 = Name.fromConstantString("test2.example.");
       m.addRecord(new TXTRecord(n2, DClass.IN, 86400, "other record"), Section.ADDITIONAL);

@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test;
 
 class FormattedTimeTest {
   @Test
-  void test_format() {
+  void format() {
     GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     cal.set(2005, 2, 19, 4, 4, 5);
     String out = FormattedTime.format(cal.toInstant());
@@ -54,7 +54,7 @@ class FormattedTimeTest {
   }
 
   @Test
-  void test_parse() throws DateTimeParseException, TextParseException {
+  void parse() throws DateTimeParseException, TextParseException {
     // have to make sure to clear out the milliseconds since there
     // is occasionally a difference between when cal and cal2 are
     // instantiated.
@@ -70,7 +70,7 @@ class FormattedTimeTest {
   }
 
   @Test
-  void test_parse_invalid() {
+  void parse_invalid() {
     assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("2004010101010"));
     assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("200401010101010"));
     assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("2004010101010A"));

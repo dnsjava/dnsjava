@@ -75,7 +75,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_0arg() {
+    void ctor_0arg() {
       SOARecord ar = new SOARecord();
       assertNull(ar.getName());
       assertEquals(0, ar.getType());
@@ -91,14 +91,14 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_getObject() {
+    void getObject() {
       SOARecord ar = new SOARecord();
       Record r = ar.getObject();
       assertTrue(r instanceof SOARecord);
     }
 
     @Test
-    void test_10arg() {
+    void ctor_10arg() {
       SOARecord ar =
           new SOARecord(
               m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, m_expire,
@@ -117,7 +117,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_relative_name() {
+    void ctor_10arg_relative_name() {
       assertThrows(
           RelativeNameException.class,
           () ->
@@ -127,7 +127,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_relative_host() {
+    void ctor_10arg_relative_host() {
       assertThrows(
           RelativeNameException.class,
           () ->
@@ -137,7 +137,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_relative_admin() {
+    void ctor_10arg_relative_admin() {
       assertThrows(
           RelativeNameException.class,
           () ->
@@ -147,7 +147,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_negative_serial() {
+    void ctor_10arg_negative_serial() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -157,7 +157,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_toobig_serial() {
+    void ctor_10arg_toobig_serial() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -175,7 +175,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_negative_refresh() {
+    void ctor_10arg_negative_refresh() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -185,7 +185,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_toobig_refresh() {
+    void ctor_10arg_toobig_refresh() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -203,7 +203,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_negative_retry() {
+    void ctor_10arg_negative_retry() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -213,7 +213,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_toobig_retry() {
+    void ctor_10arg_toobig_retry() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -231,7 +231,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_negative_expire() {
+    void ctor_10arg_negative_expire() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -241,7 +241,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_toobig_expire() {
+    void ctor_10arg_toobig_expire() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -259,7 +259,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_negative_minimun() {
+    void ctor_10arg_negative_minimun() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -269,7 +269,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_10arg_toobig_minimum() {
+    void ctor_10arg_toobig_minimum() {
       assertThrows(
           IllegalArgumentException.class,
           () ->
@@ -374,7 +374,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_valid() throws IOException {
+    void valid() throws IOException {
       Tokenizer t =
           new Tokenizer(
               "M.h " + m_admin + " " + m_serial + " " + m_refresh + " " + m_retry + " " + m_expire
@@ -393,7 +393,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_relative_name() throws IOException {
+    void relative_name() {
       Tokenizer t =
           new Tokenizer(
               "M.h " + m_admin + " " + m_serial + " " + m_refresh + " " + m_retry + " " + m_expire
@@ -422,7 +422,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_singleLine() {
+    void singleLine() {
       SOARecord ar =
           new SOARecord(
               m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, m_expire,
@@ -437,7 +437,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_multiLine() {
+    void multiLine() {
       SOARecord ar =
           new SOARecord(
               m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, m_expire,
@@ -490,7 +490,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_canonical() {
+    void canonical() {
       byte[] exp =
           new byte[] {
             1,
@@ -540,7 +540,7 @@ public class SOARecordTest {
     }
 
     @Test
-    void test_case_sensitive() {
+    void case_sensitive() {
       byte[] exp =
           new byte[] {
             1,

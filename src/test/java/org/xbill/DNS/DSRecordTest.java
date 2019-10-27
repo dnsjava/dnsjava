@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Test;
 
 class DSRecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     DSRecord dr = new DSRecord();
     assertNull(dr.getName());
     assertEquals(0, dr.getType());
@@ -59,7 +59,7 @@ class DSRecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     DSRecord dr = new DSRecord();
     Record r = dr.getObject();
     assertTrue(r instanceof DSRecord);
@@ -84,7 +84,7 @@ class DSRecordTest {
     }
 
     @Test
-    void test_basic() {
+    void basic() {
       DSRecord dr =
           new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, m_digestid, m_digest);
       assertEquals(m_n, dr.getName());
@@ -98,49 +98,49 @@ class DSRecordTest {
     }
 
     @Test
-    void test_toosmall_footprint() {
+    void toosmall_footprint() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new DSRecord(m_n, DClass.IN, m_ttl, -1, m_algorithm, m_digestid, m_digest));
     }
 
     @Test
-    void test_toobig_footprint() {
+    void toobig_footprint() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new DSRecord(m_n, DClass.IN, m_ttl, 0x10000, m_algorithm, m_digestid, m_digest));
     }
 
     @Test
-    void test_toosmall_algorithm() {
+    void toosmall_algorithm() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, -1, m_digestid, m_digest));
     }
 
     @Test
-    void test_toobig_algorithm() {
+    void toobig_algorithm() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, 0x10000, m_digestid, m_digest));
     }
 
     @Test
-    void test_toosmall_digestid() {
+    void toosmall_digestid() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, -1, m_digest));
     }
 
     @Test
-    void test_toobig_digestid() {
+    void toobig_digestid() {
       assertThrows(
           IllegalArgumentException.class,
           () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, 0x10000, m_digest));
     }
 
     @Test
-    void test_null_digest() {
+    void null_digest() {
       DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, m_digestid, null);
       assertEquals(m_n, dr.getName());
       assertEquals(DClass.IN, dr.getDClass());
@@ -154,7 +154,7 @@ class DSRecordTest {
   }
 
   @Test
-  void test_rrFromWire() throws IOException {
+  void rrFromWire() throws IOException {
     byte[] raw =
         new byte[] {
           (byte) 0xAB,
@@ -178,7 +178,7 @@ class DSRecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     byte[] raw =
         new byte[] {
           (byte) 0xAB,
@@ -203,7 +203,7 @@ class DSRecordTest {
   }
 
   @Test
-  void test_rrToString() throws TextParseException {
+  void rrToString() throws TextParseException {
     String exp = 0xABCD + " " + 0xEF + " " + 0x01 + " 23456789AB";
 
     DSRecord dr =
@@ -219,7 +219,7 @@ class DSRecordTest {
   }
 
   @Test
-  void test_rrToWire() throws TextParseException {
+  void rrToWire() throws TextParseException {
     DSRecord dr =
         new DSRecord(
             Name.fromString("The.Name."),

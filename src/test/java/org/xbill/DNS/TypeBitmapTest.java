@@ -39,19 +39,19 @@ import org.junit.jupiter.api.Test;
 
 class TypeBitmapTest {
   @Test
-  void test_empty() {
+  void empty() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {});
     assertEquals(typeBitmap.toString(), "");
   }
 
   @Test
-  void test_typeA() {
+  void typeA() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {1});
     assertEquals(typeBitmap.toString(), "A");
   }
 
   @Test
-  void test_typeNSandSOA() {
+  void typeNSandSOA() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {2, 6});
     assertEquals(typeBitmap.toString(), "NS SOA");
   }

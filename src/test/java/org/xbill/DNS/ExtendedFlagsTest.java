@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 
 class ExtendedFlagsTest {
   @Test
-  void test_string() {
+  void string() {
     // a regular one
     assertEquals("do", ExtendedFlags.string(ExtendedFlags.DO));
 
@@ -56,7 +56,7 @@ class ExtendedFlagsTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     // regular one
     assertEquals(ExtendedFlags.DO, ExtendedFlags.value("do"));
 

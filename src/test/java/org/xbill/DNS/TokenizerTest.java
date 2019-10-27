@@ -59,7 +59,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_get() throws IOException {
+  void get() throws IOException {
     m_t =
         new Tokenizer(
             new BufferedInputStream(
@@ -195,7 +195,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_get_invalid() throws IOException {
+  void get_invalid() throws IOException {
     m_t = new Tokenizer("(this ;");
     m_t.get();
     assertThrows(TextParseException.class, () -> m_t.get());
@@ -214,7 +214,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_File_input() throws IOException {
+  void File_input() throws IOException {
     File tmp = File.createTempFile("dnsjava", "tmp");
     try {
       FileWriter fw = new FileWriter(tmp);
@@ -245,7 +245,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_unwanted_comment() throws IOException {
+  void unwanted_comment() throws IOException {
     m_t = new Tokenizer("; this whole thing is a comment\n");
     Tokenizer.Token tt = m_t.get();
 
@@ -253,7 +253,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_unwanted_ungotten_whitespace() throws IOException {
+  void unwanted_ungotten_whitespace() throws IOException {
     m_t = new Tokenizer(" ");
     Tokenizer.Token tt = m_t.get(true, true);
     m_t.unget();
@@ -262,7 +262,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_unwanted_ungotten_comment() throws IOException {
+  void unwanted_ungotten_comment() throws IOException {
     m_t = new Tokenizer("; this whole thing is a comment");
     Tokenizer.Token tt = m_t.get(true, true);
     m_t.unget();
@@ -271,7 +271,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_empty_string() throws IOException {
+  void empty_string() throws IOException {
     m_t = new Tokenizer("");
     Tokenizer.Token tt = m_t.get();
     assertEquals(Tokenizer.EOF, tt.type);
@@ -282,7 +282,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_multiple_ungets() throws IOException {
+  void multiple_ungets() throws IOException {
     m_t = new Tokenizer("a simple one");
     Tokenizer.Token tt = m_t.get();
 
@@ -291,7 +291,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getString() throws IOException {
+  void getString() throws IOException {
     m_t = new Tokenizer("just_an_identifier");
     final String[] out = {m_t.getString()};
     assertEquals("just_an_identifier", out[0]);
@@ -305,7 +305,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getIdentifier() throws IOException {
+  void getIdentifier() throws IOException {
     m_t = new Tokenizer("just_an_identifier");
     String out = m_t.getIdentifier();
     assertEquals("just_an_identifier", out);
@@ -315,7 +315,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getLong() throws IOException {
+  void getLong() throws IOException {
     m_t = new Tokenizer((Integer.MAX_VALUE + 1L) + "");
     long out = m_t.getLong();
     assertEquals((Integer.MAX_VALUE + 1L), out);
@@ -328,7 +328,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getUInt32() throws IOException {
+  void getUInt32() throws IOException {
     m_t = new Tokenizer(0xABCDEF12L + "");
     long out = m_t.getUInt32();
     assertEquals(0xABCDEF12L, out);
@@ -341,7 +341,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getUInt16() throws IOException {
+  void getUInt16() throws IOException {
     m_t = new Tokenizer(0xABCDL + "");
     int out = m_t.getUInt16();
     assertEquals(0xABCDL, out);
@@ -354,7 +354,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getUInt8() throws IOException {
+  void getUInt8() throws IOException {
     m_t = new Tokenizer(0xCDL + "");
     int out = m_t.getUInt8();
     assertEquals(0xCDL, out);
@@ -367,7 +367,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getTTL() throws IOException {
+  void getTTL() throws IOException {
     m_t = new Tokenizer("59S");
     assertEquals(59, m_t.getTTL());
 
@@ -382,7 +382,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getTTLLike() throws IOException {
+  void getTTLLike() throws IOException {
     m_t = new Tokenizer("59S");
     assertEquals(59, m_t.getTTLLike());
 
@@ -397,7 +397,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getName() throws IOException {
+  void getName() throws IOException {
     Name root = Name.fromString(".");
     m_t = new Tokenizer("junk");
     Name exp = Name.fromString("junk.");
@@ -413,7 +413,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getEOL() throws IOException {
+  void getEOL() throws IOException {
     m_t = new Tokenizer("id");
     m_t.getIdentifier();
     try {
@@ -435,7 +435,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getBase64() throws IOException {
+  void getBase64() throws IOException {
     byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     // basic
     m_t = new Tokenizer("AQIDBAUGBwgJ");
@@ -468,7 +468,7 @@ class TokenizerTest {
   }
 
   @Test
-  void test_getHex() throws IOException {
+  void getHex() throws IOException {
     byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     // basic
     m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F");

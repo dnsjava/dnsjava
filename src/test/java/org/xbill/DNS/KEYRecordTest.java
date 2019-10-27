@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 
 class KEYRecordTest {
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     KEYRecord ar = new KEYRecord();
     assertNull(ar.getName());
     assertEquals(0, ar.getType());
@@ -59,14 +59,14 @@ class KEYRecordTest {
   }
 
   @Test
-  void test_getObject() {
+  void getObject() {
     KEYRecord ar = new KEYRecord();
     Record r = ar.getObject();
     assertTrue(r instanceof KEYRecord);
   }
 
   @Test
-  void test_ctor_7arg() throws TextParseException {
+  void ctor_7arg() throws TextParseException {
     Name n = Name.fromString("My.Absolute.Name.");
     Name r = Name.fromString("My.Relative.Name");
     byte[] key = new byte[] {0, 1, 3, 5, 7, 9};
@@ -88,7 +88,7 @@ class KEYRecordTest {
   }
 
   @Test
-  void test_Protocol_string() {
+  void Protocol_string() {
     // a regular one
     assertEquals("DNSSEC", KEYRecord.Protocol.string(KEYRecord.Protocol.DNSSEC));
     // a unassigned value within range
@@ -100,7 +100,7 @@ class KEYRecordTest {
   }
 
   @Test
-  void test_Protocol_value() {
+  void Protocol_value() {
     // a regular one
     assertEquals(KEYRecord.Protocol.IPSEC, KEYRecord.Protocol.value("IPSEC"));
     // a unassigned value within range
@@ -112,7 +112,7 @@ class KEYRecordTest {
   }
 
   @Test
-  void test_Flags_value() {
+  void Flags_value() {
     // numeric
 
     // lower bound
@@ -141,7 +141,7 @@ class KEYRecordTest {
   }
 
   @Test
-  void test_rdataFromString() throws IOException {
+  void rdataFromString() throws IOException {
     // basic
     KEYRecord kr = new KEYRecord();
     Tokenizer st = new Tokenizer("NOAUTH|ZONE|FLAG10 EMAIL RSASHA1 AQIDBAUGBwgJ");

@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 
 class FlagsTest {
   @Test
-  void test_string() {
+  void string() {
     // a regular one
     assertEquals("aa", Flags.string(Flags.AA));
 
@@ -57,7 +57,7 @@ class FlagsTest {
   }
 
   @Test
-  void test_value() {
+  void value() {
     // regular one
     assertEquals(Flags.CD, Flags.value("cd"));
 
@@ -75,7 +75,7 @@ class FlagsTest {
   }
 
   @Test
-  void test_isFlag() {
+  void isFlag() {
     assertThrows(IllegalArgumentException.class, () -> Flags.isFlag(-1));
     assertTrue(Flags.isFlag(0));
     assertFalse(Flags.isFlag(1)); // opcode

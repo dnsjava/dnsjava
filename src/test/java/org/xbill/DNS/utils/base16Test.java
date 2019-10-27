@@ -41,55 +41,55 @@ import org.junit.jupiter.api.Test;
 
 class base16Test {
   @Test
-  void test_toString_emptyArray() {
+  void toString_emptyArray() {
     String out = base16.toString(new byte[0]);
     assertEquals("", out);
   }
 
   @Test
-  void test_toString_singleByte1() {
+  void toString_singleByte1() {
     byte[] data = {(byte) 1};
     String out = base16.toString(data);
     assertEquals("01", out);
   }
 
   @Test
-  void test_toString_singleByte2() {
+  void toString_singleByte2() {
     byte[] data = {(byte) 16};
     String out = base16.toString(data);
     assertEquals("10", out);
   }
 
   @Test
-  void test_toString_singleByte3() {
+  void toString_singleByte3() {
     byte[] data = {(byte) 255};
     String out = base16.toString(data);
     assertEquals("FF", out);
   }
 
   @Test
-  void test_toString_array1() {
+  void toString_array1() {
     byte[] data = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     String out = base16.toString(data);
     assertEquals("0102030405060708090A0B0C0D0E0F", out);
   }
 
   @Test
-  void test_fromString_emptyString() {
+  void fromString_emptyString() {
     String data = "";
     byte[] out = base16.fromString(data);
     assertEquals(0, out.length);
   }
 
   @Test
-  void test_fromString_invalidStringLength() {
+  void fromString_invalidStringLength() {
     String data = "1";
     byte[] out = base16.fromString(data);
     assertNull(out);
   }
 
   @Test
-  void test_fromString_nonHexChars() {
+  void fromString_nonHexChars() {
     String data = "GG";
     byte[] out = base16.fromString(data);
     /*
@@ -99,7 +99,7 @@ class base16Test {
   }
 
   @Test
-  void test_fromString_normal() {
+  void fromString_normal() {
     String data = "0102030405060708090A0B0C0D0E0F";
     byte[] out = base16.fromString(data);
     byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};

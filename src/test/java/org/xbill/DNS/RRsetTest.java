@@ -94,7 +94,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_ctor_0arg() {
+  void ctor_0arg() {
     assertEquals(0, m_rs.size());
     assertThrows(IllegalStateException.class, () -> m_rs.getDClass());
     assertThrows(IllegalStateException.class, () -> m_rs.getType());
@@ -114,7 +114,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_basics() {
+  void basics() {
     m_rs.addRR(m_a1);
 
     assertEquals(1, m_rs.size());
@@ -195,7 +195,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_ctor_1arg() {
+  void ctor_1arg() {
     m_rs.addRR(m_a1);
     m_rs.addRR(m_a2);
     m_rs.addRR(m_s1);
@@ -233,7 +233,7 @@ class RRsetTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  void test_addRR_invalidType() throws TextParseException {
+  void addRR_invalidType() throws TextParseException {
     m_rs.addRR(m_a1);
 
     CNAMERecord c = new CNAMERecord(m_name, DClass.IN, m_ttl, Name.fromString("an.alias."));
@@ -242,7 +242,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_addRR_invalidName() throws UnknownHostException {
+  void addRR_invalidName() throws UnknownHostException {
     m_rs.addRR(m_a1);
 
     m_a2 = new ARecord(m_name2, DClass.IN, m_ttl, InetAddress.getByName("192.169.232.11"));
@@ -251,7 +251,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_addRR_invalidDClass() throws UnknownHostException {
+  void addRR_invalidDClass() throws UnknownHostException {
     m_rs.addRR(m_a1);
 
     m_a2 = new ARecord(m_name, DClass.CHAOS, m_ttl, InetAddress.getByName("192.169.232.11"));
@@ -260,7 +260,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_TTLcalculation() {
+  void TTLcalculation() {
     m_rs.addRR(m_a2);
     assertEquals(m_a2.getTTL(), m_rs.getTTL());
     m_rs.addRR(m_a1);
@@ -272,7 +272,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_Record_placement() {
+  void Record_placement() {
     m_rs.addRR(m_a1);
     m_rs.addRR(m_s1);
     m_rs.addRR(m_a2);
@@ -288,7 +288,7 @@ class RRsetTest {
   }
 
   @Test
-  void test_noncycling_iterator() {
+  void noncycling_iterator() {
     m_rs.addRR(m_a1);
     m_rs.addRR(m_a2);
 
