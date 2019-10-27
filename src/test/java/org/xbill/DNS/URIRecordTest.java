@@ -46,7 +46,7 @@ class URIRecordTest {
 
   @Test
   void test_rdataFromString() throws IOException {
-    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF01 + " " + "\"http://foo:1234/bar?baz=bum\"");
+    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF01 + " \"http://foo:1234/bar?baz=bum\"");
 
     URIRecord r = new URIRecord();
     r.rdataFromString(t, null);

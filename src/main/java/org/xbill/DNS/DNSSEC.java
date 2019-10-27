@@ -200,8 +200,16 @@ public class DNSSEC {
 
   /** A DNSSEC exception. */
   public static class DNSSECException extends Exception {
-    DNSSECException(String s) {
-      super(s);
+    DNSSECException(String message, Throwable cause) {
+      super(message, cause);
+    }
+
+    DNSSECException(Throwable cause) {
+      super(cause);
+    }
+
+    DNSSECException(String message) {
+      super(message);
     }
   }
 
@@ -217,13 +225,14 @@ public class DNSSEC {
     MalformedKeyException(KEYBase rec) {
       super("Invalid key data: " + rec.rdataToString());
     }
+
+    MalformedKeyException(KEYBase rec, Throwable cause) {
+      super("Invalid key data: " + rec.rdataToString(), cause);
+    }
   }
 
   /** A DNSSEC verification failed because fields in the DNSKEY and RRSIG records do not match. */
   public static class KeyMismatchException extends DNSSECException {
-    private KEYBase key;
-    private SIGBase sig;
-
     KeyMismatchException(KEYBase key, SIGBase sig) {
       super(
           "key "
@@ -244,7 +253,8 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the signature has expired. */
   public static class SignatureExpiredException extends DNSSECException {
-    private Instant when, now;
+    private Instant when;
+    private Instant now;
 
     SignatureExpiredException(Instant when, Instant now) {
       super("signature expired");
@@ -265,7 +275,8 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the signature has not yet become valid. */
   public static class SignatureNotYetValidException extends DNSSECException {
-    private Instant when, now;
+    private Instant when;
+    private Instant now;
 
     SignatureNotYetValidException(Instant when, Instant now) {
       super("signature is not yet valid");
@@ -519,9 +530,9 @@ public class DNSSEC {
           throw new UnsupportedAlgorithmException(alg);
       }
     } catch (IOException e) {
-      throw new MalformedKeyException(r);
+      throw new MalformedKeyException(r, e);
     } catch (GeneralSecurityException e) {
-      throw new DNSSECException(e.toString());
+      throw new DNSSECException(e);
     }
   }
 
@@ -926,7 +937,7 @@ public class DNSSEC {
         throw new SignatureVerificationException();
       }
     } catch (GeneralSecurityException e) {
-      throw new DNSSECException(e.toString());
+      throw new DNSSECException(e);
     }
   }
 
@@ -1002,7 +1013,7 @@ public class DNSSEC {
       s.update(data);
       signature = s.sign();
     } catch (GeneralSecurityException e) {
-      throw new DNSSECException(e.toString());
+      throw new DNSSECException(e);
     }
 
     if (pubkey instanceof DSAPublicKey) {

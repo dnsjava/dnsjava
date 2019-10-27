@@ -435,12 +435,11 @@ public class TSIG {
    * @param b An array containing the message in unparsed form. This is necessary since TSIG signs
    *     the message in wire format, and we can't recreate the exact wire format (with the same name
    *     compression).
-   * @param length The length of the message in the array.
    * @param old If this message is a response, the TSIG from the request
    * @return The result of the verification (as an Rcode)
    * @see Rcode
    */
-  public byte verify(Message m, byte[] b, int length, TSIGRecord old) {
+  public byte verify(Message m, byte[] b, TSIGRecord old) {
     m.tsigState = Message.TSIG_FAILED;
     TSIGRecord tsig = m.getTSIG();
     hmac.reset();
@@ -515,22 +514,6 @@ public class TSIG {
 
     m.tsigState = Message.TSIG_VERIFIED;
     return Rcode.NOERROR;
-  }
-
-  /**
-   * Verifies a TSIG record on an incoming message. Since this is only called in the context where a
-   * TSIG is expected to be present, it is an error if one is not present. After calling this
-   * routine, Message.isVerified() may be called on this message.
-   *
-   * @param m The message
-   * @param b The message in unparsed form. This is necessary since TSIG signs the message in wire
-   *     format, and we can't recreate the exact wire format (with the same name compression).
-   * @param old If this message is a response, the TSIG from the request
-   * @return The result of the verification (as an Rcode)
-   * @see Rcode
-   */
-  public int verify(Message m, byte[] b, TSIGRecord old) {
-    return verify(m, b, b.length, old);
   }
 
   /**

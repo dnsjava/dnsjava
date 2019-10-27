@@ -414,7 +414,7 @@ public class jnamed {
    * anything.  Currently this only happens if this is an AXFR request over
    * TCP.
    */
-  byte[] generateReply(Message query, byte[] in, int length, Socket s) {
+  byte[] generateReply(Message query, byte[] in, Socket s) {
     Header header;
     boolean badversion;
     int maxLength;
@@ -437,7 +437,7 @@ public class jnamed {
     TSIG tsig = null;
     if (queryTSIG != null) {
       tsig = TSIGs.get(queryTSIG.getName());
-      if (tsig == null || tsig.verify(query, in, length, null) != Rcode.NOERROR) {
+      if (tsig == null || tsig.verify(query, in, null) != Rcode.NOERROR) {
         return formerrMessage(in);
       }
     }
@@ -535,7 +535,7 @@ public class jnamed {
       byte[] response;
       try {
         query = new Message(in);
-        response = generateReply(query, in, in.length, s);
+        response = generateReply(query, in, s);
         if (response == null) {
           return;
         }
@@ -595,7 +595,7 @@ public class jnamed {
         byte[] response;
         try {
           query = new Message(in);
-          response = generateReply(query, in, indp.getLength(), null);
+          response = generateReply(query, in, null);
           if (response == null) {
             continue;
           }

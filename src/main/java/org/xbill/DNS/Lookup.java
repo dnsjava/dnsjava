@@ -222,7 +222,7 @@ public final class Lookup {
     Type.check(type);
     DClass.check(dclass);
     if (!Type.isRR(type) && type != Type.ANY) {
-      throw new IllegalArgumentException("Cannot query for " + "meta-types other than ANY");
+      throw new IllegalArgumentException("Cannot query for meta-types other than ANY");
     }
     this.name = name;
     this.type = type;
