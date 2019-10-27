@@ -54,7 +54,7 @@ class FormattedTimeTest {
   }
 
   @Test
-  void parse() throws DateTimeParseException, TextParseException {
+  void parse() throws DateTimeParseException {
     // have to make sure to clear out the milliseconds since there
     // is occasionally a difference between when cal and cal2 are
     // instantiated.

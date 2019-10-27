@@ -217,7 +217,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void invalid_IPv4_prefix() throws IOException {
+    void invalid_IPv4_prefix() {
       byte[] raw =
           new byte[] {
             0,
@@ -236,7 +236,7 @@ public class APLRecordTest {
     }
 
     @Test
-    void invalid_IPv4_length() throws IOException {
+    void invalid_IPv4_length() {
       byte[] raw =
           new byte[] {
             0,
@@ -404,77 +404,77 @@ public class APLRecordTest {
     }
 
     @Test
-    void no_colon() throws IOException {
+    void no_colon() {
       Tokenizer t = new Tokenizer("!1192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void colon_and_slash_swapped() throws IOException {
+    void colon_and_slash_swapped() {
       Tokenizer t = new Tokenizer("!1/192.68.0.1:20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void no_slash() throws IOException {
+    void no_slash() {
       Tokenizer t = new Tokenizer("!1:192.68.0.1|20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void empty_family() throws IOException {
+    void empty_family() {
       Tokenizer t = new Tokenizer("!:192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void malformed_family() throws IOException {
+    void malformed_family() {
       Tokenizer t = new Tokenizer("family:192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void invalid_family() throws IOException {
+    void invalid_family() {
       Tokenizer t = new Tokenizer("3:192.68.0.1/20");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void empty_prefix() throws IOException {
+    void empty_prefix() {
       Tokenizer t = new Tokenizer("1:192.68.0.1/");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void malformed_prefix() throws IOException {
+    void malformed_prefix() {
       Tokenizer t = new Tokenizer("1:192.68.0.1/prefix");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void invalid_prefix() throws IOException {
+    void invalid_prefix() {
       Tokenizer t = new Tokenizer("1:192.68.0.1/33");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void empty_address() throws IOException {
+    void empty_address() {
       Tokenizer t = new Tokenizer("1:/33");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
     }
 
     @Test
-    void malformed_address() throws IOException {
+    void malformed_address() {
       Tokenizer t = new Tokenizer("1:A.B.C.D/33");
       APLRecord ar = new APLRecord();
       assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));

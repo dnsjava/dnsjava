@@ -131,7 +131,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void rdataFromString_invalid_CPU() throws IOException {
+  void rdataFromString_invalid_CPU() {
     String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
 
@@ -142,7 +142,7 @@ class HINFORecordTest {
   }
 
   @Test
-  void rdataFromString_invalid_OS() throws IOException {
+  void rdataFromString_invalid_OS() {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
 
     Tokenizer t = new Tokenizer("\"" + cpu + "\"");

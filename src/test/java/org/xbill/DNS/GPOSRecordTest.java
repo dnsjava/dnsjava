@@ -237,7 +237,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void longitude_toosmall() throws IOException {
+    void longitude_toosmall() {
       byte[] raw =
           new byte[] {
             5, '-', '9', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
@@ -249,7 +249,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void longitude_toobig() throws IOException {
+    void longitude_toobig() {
       byte[] raw =
           new byte[] {
             5, '1', '8', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
@@ -261,7 +261,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void latitude_toosmall() throws IOException {
+    void latitude_toosmall() {
       byte[] raw =
           new byte[] {
             5, '-', '8', '5', '.', '0', 6, '-', '1', '9', '0', '.', '0', 3, '0', '.', '0'
@@ -273,7 +273,7 @@ class GPOSRecordTest {
     }
 
     @Test
-    void latitude_toobig() throws IOException {
+    void latitude_toobig() {
       byte[] raw =
           new byte[] {
             5, '-', '8', '5', '.', '0', 6, '2', '1', '9', '0', '.', '0', 3, '0', '.', '0'

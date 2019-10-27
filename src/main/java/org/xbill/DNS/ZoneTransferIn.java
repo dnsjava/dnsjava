@@ -24,7 +24,6 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -94,31 +93,31 @@ public class ZoneTransferIn {
   public interface ZoneTransferHandler {
 
     /** Called when an AXFR transfer begins. */
-    void startAXFR() throws ZoneTransferException;
+    void startAXFR();
 
     /** Called when an IXFR transfer begins. */
-    void startIXFR() throws ZoneTransferException;
+    void startIXFR();
 
     /**
      * Called when a series of IXFR deletions begins.
      *
      * @param soa The starting SOA.
      */
-    void startIXFRDeletes(Record soa) throws ZoneTransferException;
+    void startIXFRDeletes(Record soa);
 
     /**
      * Called when a series of IXFR adds begins.
      *
      * @param soa The starting SOA.
      */
-    void startIXFRAdds(Record soa) throws ZoneTransferException;
+    void startIXFRAdds(Record soa);
 
     /**
      * Called for each content record in an AXFR.
      *
      * @param r The DNS record.
      */
-    void handleRecord(Record r) throws ZoneTransferException;
+    void handleRecord(Record r);
   }
 
   private static class BasicHandler implements ZoneTransferHandler {
@@ -270,10 +269,9 @@ public class ZoneTransferIn {
    * @param host The host from which to transfer the zone.
    * @param key The TSIG key used to authenticate the transfer, or null.
    * @return The ZoneTransferIn object.
-   * @throws UnknownHostException The host does not exist.
    */
   public static ZoneTransferIn newIXFR(
-      Name zone, long serial, boolean fallback, String host, TSIG key) throws UnknownHostException {
+      Name zone, long serial, boolean fallback, String host, TSIG key) {
     return newIXFR(zone, serial, fallback, host, 0, key);
   }
 

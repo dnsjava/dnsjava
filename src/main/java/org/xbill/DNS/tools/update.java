@@ -678,7 +678,7 @@ public class update {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
 
     InputStream in = null;
     if (args.length >= 1) {

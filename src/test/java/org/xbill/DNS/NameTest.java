@@ -516,7 +516,7 @@ class NameTest {
     }
 
     @Test
-    void incomplete() throws IOException {
+    void incomplete() {
       assertThrows(WireParseException.class, () -> new Name(new byte[] {3, 'W', 'w', 'w'}));
     }
 
@@ -528,7 +528,7 @@ class NameTest {
     }
 
     @Test
-    void invalid_length() throws IOException {
+    void invalid_length() {
       assertThrows(WireParseException.class, () -> new Name(new byte[] {4, 'W', 'w', 'w'}));
     }
 

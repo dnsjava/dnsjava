@@ -59,7 +59,7 @@ class EmptyRecordTest {
   }
 
   @Test
-  void rrFromWire() throws IOException {
+  void rrFromWire() {
     DNSInput i = new DNSInput(new byte[] {1, 2, 3, 4, 5});
     i.jump(3);
 

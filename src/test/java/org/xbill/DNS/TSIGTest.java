@@ -79,7 +79,7 @@ class TSIGTest {
   }
 
   @Test
-  void rdataFromString() throws IOException {
+  void rdataFromString() {
     TextParseException thrown =
         assertThrows(
             TextParseException.class,

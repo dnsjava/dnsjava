@@ -112,7 +112,7 @@ class URIRecordTest {
   }
 
   @Test
-  void toobig_priority() throws TextParseException {
+  void toobig_priority() {
     assertThrows(
         IllegalArgumentException.class,
         () ->
@@ -121,14 +121,14 @@ class URIRecordTest {
   }
 
   @Test
-  void toosmall_priority() throws TextParseException {
+  void toosmall_priority() {
     assertThrows(
         IllegalArgumentException.class,
         () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234, -1, 42, "http://foo"));
   }
 
   @Test
-  void toobig_weight() throws TextParseException {
+  void toobig_weight() {
     assertThrows(
         IllegalArgumentException.class,
         () ->
@@ -137,7 +137,7 @@ class URIRecordTest {
   }
 
   @Test
-  void toosmall_weight() throws TextParseException {
+  void toosmall_weight() {
     assertThrows(
         IllegalArgumentException.class,
         () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234, 42, -1, "http://foo"));
