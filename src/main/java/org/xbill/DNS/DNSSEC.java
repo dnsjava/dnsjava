@@ -1178,7 +1178,7 @@ public class DNSSEC {
   }
 
   static void verifyMessage(
-      Message message, byte[] bytes, SIGRecord sig, SIGRecord previous, KEYRecord key)
+      Message message, byte[] bytes, SIGRecord sig, SIGRecord previous, KEYRecord key, Instant now)
       throws DNSSECException {
     if (message.sig0start == 0) {
       throw new NoSignatureException();
@@ -1187,8 +1187,6 @@ public class DNSSEC {
     if (!matches(sig, key)) {
       throw new KeyMismatchException(key, sig);
     }
-
-    Instant now = Instant.now();
 
     if (now.compareTo(sig.getExpire()) > 0) {
       throw new SignatureExpiredException(sig.getExpire(), now);
