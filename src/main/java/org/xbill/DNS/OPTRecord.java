@@ -185,4 +185,14 @@ public class OPTRecord extends Record {
   public boolean equals(final Object arg) {
     return super.equals(arg) && ttl == ((OPTRecord) arg).ttl;
   }
+
+  @Override
+  public int hashCode() {
+    byte[] array = toWireCanonical();
+    int code = 0;
+    for (byte b : array) {
+      code += ((code << 3) + (b & 0xFF));
+    }
+    return code;
+  }
 }
