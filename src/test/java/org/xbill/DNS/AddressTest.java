@@ -327,11 +327,6 @@ class AddressTest {
     assertEquals("198.41.0.4", out[0].getHostAddress());
     assertEquals("2001:503:ba3e:0:0:0:2:30", out[1].getHostAddress());
 
-    out = Address.getAllByName("cnn.com");
-    assertTrue(out.length > 1);
-    for (InetAddress inetAddress : out) {
-      assertTrue(inetAddress.getHostName().endsWith("cnn.com"));
-    }
   }
 
   @Test
