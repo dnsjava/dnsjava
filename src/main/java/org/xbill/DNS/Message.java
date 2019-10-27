@@ -620,14 +620,19 @@ public class Message implements Cloneable {
    * @see OPTRecord
    */
   @Override
-  public Object clone() {
-    Message m = new Message();
+  public Message clone() {
+    Message m;
+    try {
+      m = (Message) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException(e);
+    }
     for (int i = 0; i < sections.length; i++) {
       if (sections[i] != null) {
         m.sections[i] = new LinkedList<>(sections[i]);
       }
     }
-    m.header = (Header) header.clone();
+    m.header = header.clone();
     m.size = size;
     return m;
   }

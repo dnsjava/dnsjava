@@ -230,7 +230,7 @@ public class SimpleResolver implements Resolver {
       }
     }
 
-    query = (Message) query.clone();
+    query = query.clone();
     applyEDNS(query);
     if (tsig != null) {
       tsig.apply(query, null);

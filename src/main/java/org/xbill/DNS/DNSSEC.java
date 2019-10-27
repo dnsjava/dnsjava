@@ -1201,7 +1201,7 @@ public class DNSSEC {
       out.writeByteArray(previous.getSignature());
     }
 
-    Header header = (Header) message.getHeader().clone();
+    Header header = message.getHeader().clone();
     header.decCount(Section.ADDITIONAL);
     out.writeByteArray(header.toWire());
 

@@ -362,7 +362,7 @@ class HeaderTest {
     m_h.setCount(1, 0xFF);
     m_h.setCount(2, 0x0A);
 
-    Header h2 = (Header) m_h.clone();
+    Header h2 = m_h.clone();
 
     assertNotSame(m_h, h2);
     assertEquals(m_h.getID(), h2.getID());

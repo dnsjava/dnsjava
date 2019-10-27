@@ -274,8 +274,13 @@ public class Header implements Cloneable {
 
   /* Creates a new Header identical to the current one */
   @Override
-  public Object clone() {
-    Header h = new Header();
+  public Header clone() {
+    Header h;
+    try {
+      h = (Header) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException(e);
+    }
     h.id = id;
     h.flags = flags;
     System.arraycopy(counts, 0, h.counts, 0, counts.length);
