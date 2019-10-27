@@ -211,14 +211,14 @@ public class Header implements Cloneable {
 
   void incCount(int field) {
     if (counts[field] == 0xFFFF) {
-      throw new IllegalStateException("DNS section count cannot " + "be incremented");
+      throw new IllegalStateException("DNS section count cannot be incremented");
     }
     counts[field]++;
   }
 
   void decCount(int field) {
     if (counts[field] == 0) {
-      throw new IllegalStateException("DNS section count cannot " + "be decremented");
+      throw new IllegalStateException("DNS section count cannot be decremented");
     }
     counts[field]--;
   }

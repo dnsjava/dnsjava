@@ -410,7 +410,7 @@ public class Name implements Comparable, Serializable {
   public Name(Name src, int n) {
     int slabels = src.labels();
     if (n > slabels) {
-      throw new IllegalArgumentException("attempted to remove too " + "many labels");
+      throw new IllegalArgumentException("attempted to remove too many labels");
     }
     name = src.name;
     setlabels(slabels - n);
@@ -465,7 +465,7 @@ public class Name implements Comparable, Serializable {
    */
   public Name wild(int n) {
     if (n < 1) {
-      throw new IllegalArgumentException("must replace 1 or more " + "labels");
+      throw new IllegalArgumentException("must replace 1 or more labels");
     }
     try {
       Name newname = new Name();
@@ -679,7 +679,7 @@ public class Name implements Comparable, Serializable {
    */
   public void toWire(DNSOutput out, Compression c) {
     if (!isAbsolute()) {
-      throw new IllegalArgumentException("toWire() called on " + "non-absolute name");
+      throw new IllegalArgumentException("toWire() called on non-absolute name");
     }
 
     int labels = labels();

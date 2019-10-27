@@ -140,7 +140,7 @@ public class SimpleResolver implements Resolver {
   @Override
   public void setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options) {
     if (level != 0 && level != -1) {
-      throw new IllegalArgumentException("invalid EDNS level - " + "must be 0 or -1");
+      throw new IllegalArgumentException("invalid EDNS level - must be 0 or -1");
     }
     if (payloadSize == 0) {
       payloadSize = DEFAULT_EDNS_PAYLOADSIZE;
@@ -256,7 +256,7 @@ public class SimpleResolver implements Resolver {
        * Check that the response is long enough.
        */
       if (in.length < Header.LENGTH) {
-        throw new WireParseException("invalid DNS header - " + "too short");
+        throw new WireParseException("invalid DNS header - too short");
       }
       /*
        * Check that the response ID matches the query ID.  We want

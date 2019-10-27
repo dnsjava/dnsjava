@@ -182,7 +182,7 @@ public class Zone implements Serializable {
       maybeAddRecord(record);
     }
     if (!xfrin.isAXFR()) {
-      throw new IllegalArgumentException("zones can only be " + "created from AXFRs");
+      throw new IllegalArgumentException("zones can only be created from AXFRs");
     }
     validate();
   }

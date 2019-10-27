@@ -35,7 +35,7 @@ public class APLRecord extends Record {
       this.address = address;
       this.prefixLength = prefixLength;
       if (!validatePrefixLength(family, prefixLength)) {
-        throw new IllegalArgumentException("invalid prefix " + "length");
+        throw new IllegalArgumentException("invalid prefix length");
       }
     }
 

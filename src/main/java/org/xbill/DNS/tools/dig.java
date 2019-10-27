@@ -22,7 +22,7 @@ public class dig {
   static int type = Type.A, dclass = DClass.IN;
 
   static void usage() {
-    System.out.println("Usage: dig [@server] name [<type>] [<class>] " + "[options]");
+    System.out.println("Usage: dig [@server] name [<type>] [<class>] [options]");
     System.exit(0);
   }
 
@@ -170,7 +170,7 @@ public class dig {
             }
             edns = Integer.parseInt(ednsStr);
             if (edns < 0 || edns > 1) {
-              System.out.println("Unsupported " + "EDNS level: " + edns);
+              System.out.println("Unsupported EDNS level: " + edns);
               return;
             }
             res.setEDNS(edns);

@@ -63,7 +63,7 @@ public class DNSOutput {
    */
   public void jump(int index) {
     if (index > pos) {
-      throw new IllegalArgumentException("cannot jump past " + "end of data");
+      throw new IllegalArgumentException("cannot jump past end of data");
     }
     pos = index;
   }
@@ -118,7 +118,7 @@ public class DNSOutput {
   public void writeU16At(int val, int where) {
     check(val, 16);
     if (where > pos - 2) {
-      throw new IllegalArgumentException("cannot write past " + "end of data");
+      throw new IllegalArgumentException("cannot write past end of data");
     }
     array[where++] = (byte) ((val >>> 8) & 0xFF);
     array[where++] = (byte) (val & 0xFF);

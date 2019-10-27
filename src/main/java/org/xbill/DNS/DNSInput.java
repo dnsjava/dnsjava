@@ -62,7 +62,7 @@ public class DNSInput {
    */
   public void setActive(int len) {
     if (len > byteBuffer.capacity() - byteBuffer.position()) {
-      throw new IllegalArgumentException("cannot set active " + "region past end of input");
+      throw new IllegalArgumentException("cannot set active region past end of input");
     }
     byteBuffer.limit(byteBuffer.position() + len);
   }
@@ -89,7 +89,7 @@ public class DNSInput {
    */
   public void restoreActive(int pos) {
     if (pos > byteBuffer.capacity()) {
-      throw new IllegalArgumentException("cannot set active " + "region past end of input");
+      throw new IllegalArgumentException("cannot set active region past end of input");
     }
     byteBuffer.limit(byteBuffer.position());
   }
@@ -103,7 +103,7 @@ public class DNSInput {
    */
   public void jump(int index) {
     if (index >= byteBuffer.capacity()) {
-      throw new IllegalArgumentException("cannot jump past " + "end of input");
+      throw new IllegalArgumentException("cannot jump past end of input");
     }
     byteBuffer.position(index);
     byteBuffer.limit(byteBuffer.capacity());

@@ -53,7 +53,7 @@ public class NSEC3PARAMRecord extends Record {
 
     if (salt != null) {
       if (salt.length > 255) {
-        throw new IllegalArgumentException("Invalid salt " + "length");
+        throw new IllegalArgumentException("Invalid salt length");
       }
       if (salt.length > 0) {
         this.salt = new byte[salt.length];

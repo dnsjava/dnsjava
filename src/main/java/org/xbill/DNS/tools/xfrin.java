@@ -17,7 +17,7 @@ public class xfrin {
   private static void usage(String s) {
     System.out.println("Error: " + s);
     System.out.println(
-        "usage: xfrin [-i serial] [-k keyname/secret] " + "[-s server] [-p port] [-f] zone");
+        "usage: xfrin [-i serial] [-k keyname/secret] [-s server] [-p port] [-f] zone");
     System.exit(1);
   }
 

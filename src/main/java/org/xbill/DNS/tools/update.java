@@ -561,7 +561,7 @@ public class update {
     switch (topic) {
       case "add":
         System.out.println(
-            "add <name> [ttl] [class] <type> <data>\n\n" + "specify a record to be added\n");
+            "add <name> [ttl] [class] <type> <data>\n\nspecify a record to be added\n");
         break;
       case "assert":
         System.out.println(
@@ -573,10 +573,10 @@ public class update {
                 + "<serial>, <tsig>, <qu>, <an>, <au>, or <ad>.\n");
         break;
       case "class":
-        System.out.println("class <class>\n\n" + "class of the zone to be updated (default: IN)\n");
+        System.out.println("class <class>\n\nclass of the zone to be updated (default: IN)\n");
         break;
       case "clear":
-        System.out.println("clear\n\n" + "clears the current update packet\n");
+        System.out.println("clear\n\nclears the current update packet\n");
         break;
       case "date":
         System.out.println(
@@ -594,10 +594,10 @@ public class update {
                 + "all records at a name should be deleted\n");
         break;
       case "echo":
-        System.out.println("echo <text>\n\n" + "prints the text\n");
+        System.out.println("echo <text>\n\nprints the text\n");
         break;
       case "edns":
-        System.out.println("edns <level>\n\n" + "EDNS level specified when sending messages\n");
+        System.out.println("edns <level>\n\nEDNS level specified when sending messages\n");
         break;
       case "file":
         System.out.println(
@@ -607,7 +607,7 @@ public class update {
         break;
       case "glue":
         System.out.println(
-            "glue <name> [ttl] [class] <type> <data>\n\n" + "specify an additional record\n");
+            "glue <name> [ttl] [class] <type> <data>\n\nspecify an additional record\n");
         break;
       case "help":
         System.out.println(
@@ -617,14 +617,13 @@ public class update {
                 + "command\n");
         break;
       case "key":
-        System.out.println("key <name> <data>\n\n" + "TSIG key used to sign messages\n");
+        System.out.println("key <name> <data>\n\nTSIG key used to sign messages\n");
         break;
       case "log":
-        System.out.println(
-            "log <file>\n\n" + "opens the specified file and uses it to log output\n");
+        System.out.println("log <file>\n\nopens the specified file and uses it to log output\n");
         break;
       case "port":
-        System.out.println("port <port>\n\n" + "UDP/TCP port messages are sent to (default: 53)\n");
+        System.out.println("port <port>\n\nUDP/TCP port messages are sent to (default: 53)\n");
         break;
       case "prohibit":
         System.out.println(
@@ -633,11 +632,11 @@ public class update {
                 + "require that a set or name is not present\n");
         break;
       case "query":
-        System.out.println("query <name> [type [class]] \n\n" + "issues a query\n");
+        System.out.println("query <name> [type [class]] \n\nissues a query\n");
         break;
       case "q":
       case "quit":
-        System.out.println("quit\n\n" + "quits the program\n");
+        System.out.println("quit\n\nquits the program\n");
         break;
       case "require":
         System.out.println(
@@ -647,30 +646,29 @@ public class update {
                 + "require that a record, set, or name is present\n");
         break;
       case "send":
-        System.out.println("send\n\n" + "sends and resets the current update packet\n");
+        System.out.println("send\n\nsends and resets the current update packet\n");
         break;
       case "server":
-        System.out.println(
-            "server <name> [port]\n\n" + "server that receives send updates/queries\n");
+        System.out.println("server <name> [port]\n\nserver that receives send updates/queries\n");
         break;
       case "show":
-        System.out.println("show\n\n" + "shows the current update packet\n");
+        System.out.println("show\n\nshows the current update packet\n");
         break;
       case "sleep":
-        System.out.println("sleep <milliseconds>\n\n" + "pause for interval before next command\n");
+        System.out.println("sleep <milliseconds>\n\npause for interval before next command\n");
         break;
       case "tcp":
-        System.out.println("tcp\n\n" + "TCP should be used to send all messages\n");
+        System.out.println("tcp\n\nTCP should be used to send all messages\n");
         break;
       case "ttl":
-        System.out.println("ttl <ttl>\n\n" + "default ttl of added records (default: 0)\n");
+        System.out.println("ttl <ttl>\n\ndefault ttl of added records (default: 0)\n");
         break;
       case "zone":
       case "origin":
-        System.out.println("zone <zone>\n\n" + "zone to update (default: .\n");
+        System.out.println("zone <zone>\n\nzone to update (default: .\n");
         break;
       case "#":
-        System.out.println("# <text>\n\n" + "a comment\n");
+        System.out.println("# <text>\n\na comment\n");
         break;
       default:
         System.out.println("Topic '" + topic + "' unrecognized\n");

@@ -118,7 +118,7 @@ public class TSIG {
       hmac = Mac.getInstance(macAlgorithm);
       hmac.init(key);
     } catch (GeneralSecurityException ex) {
-      throw new IllegalArgumentException("Caught security " + "exception setting up " + "HMAC.");
+      throw new IllegalArgumentException("Caught security exception setting up HMAC.");
     }
   }
 
@@ -238,7 +238,7 @@ public class TSIG {
   public static TSIG fromString(String str) {
     String[] parts = str.split("[:/]", 3);
     if (parts.length < 2) {
-      throw new IllegalArgumentException("Invalid TSIG key " + "specification");
+      throw new IllegalArgumentException("Invalid TSIG key specification");
     }
     if (parts.length == 3) {
       try {

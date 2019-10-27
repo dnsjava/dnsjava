@@ -251,7 +251,7 @@ public class Tokenizer implements AutoCloseable {
       if (c == -1 || delimiters.indexOf(c) != -1) {
         if (c == -1) {
           if (quoting) {
-            throw exception("EOF in " + "quoted string");
+            throw exception("EOF in quoted string");
           } else if (sb.length() == 0) {
             return current.set(EOF, null);
           } else {
@@ -265,7 +265,7 @@ public class Tokenizer implements AutoCloseable {
             continue;
           } else if (c == ')') {
             if (multiline <= 0) {
-              throw exception("invalid " + "close " + "parenthesis");
+              throw exception("invalid close parenthesis");
             }
             multiline--;
             skipWhitespace();

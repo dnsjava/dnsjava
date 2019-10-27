@@ -176,7 +176,7 @@ public class ZoneTransferIn {
       try {
         zname = Name.concatenate(zone, Name.root);
       } catch (NameTooLongException e) {
-        throw new IllegalArgumentException("ZoneTransferIn: " + "name too long");
+        throw new IllegalArgumentException("ZoneTransferIn: name too long");
       }
     }
     qtype = xfrtype;
@@ -292,7 +292,7 @@ public class ZoneTransferIn {
    */
   public void setTimeout(int secs) {
     if (secs < 0) {
-      throw new IllegalArgumentException("timeout cannot be " + "negative");
+      throw new IllegalArgumentException("timeout cannot be negative");
     }
     timeout = 1000L * secs;
   }
@@ -573,7 +573,7 @@ public class ZoneTransferIn {
     if (handler instanceof BasicHandler) {
       return (BasicHandler) handler;
     }
-    throw new IllegalArgumentException("ZoneTransferIn used callback " + "interface");
+    throw new IllegalArgumentException("ZoneTransferIn used callback interface");
   }
 
   /**

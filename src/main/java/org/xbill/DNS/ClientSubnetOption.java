@@ -42,7 +42,7 @@ public class ClientSubnetOption extends EDNSOption {
     int max = Address.addressLength(family) * 8;
     if (val < 0 || val > max) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be in the range " + "[0.." + max + "]");
+          "\"" + field + "\" " + val + " must be in the range [0.." + max + "]");
     }
     return val;
   }
@@ -67,7 +67,7 @@ public class ClientSubnetOption extends EDNSOption {
     this.address = Address.truncate(address, sourceNetmask);
 
     if (!address.equals(this.address)) {
-      throw new IllegalArgumentException("source netmask is not " + "valid for address");
+      throw new IllegalArgumentException("source netmask is not valid for address");
     }
   }
 

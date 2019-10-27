@@ -436,7 +436,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
         data = new byte[0];
       }
       if (length != data.length) {
-        throw st.exception("invalid unknown RR encoding: " + "length mismatch");
+        throw st.exception("invalid unknown RR encoding: length mismatch");
       }
       DNSInput in = new DNSInput(data);
       return newRecord(name, type, dclass, ttl, length, in);
@@ -643,7 +643,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static int checkU8(String field, int val) {
     if (val < 0 || val > 0xFF) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be an unsigned 8 " + "bit value");
+          "\"" + field + "\" " + val + " must be an unsigned 8 bit value");
     }
     return val;
   }
@@ -652,7 +652,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static int checkU16(String field, int val) {
     if (val < 0 || val > 0xFFFF) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be an unsigned 16 " + "bit value");
+          "\"" + field + "\" " + val + " must be an unsigned 16 bit value");
     }
     return val;
   }
@@ -661,7 +661,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static long checkU32(String field, long val) {
     if (val < 0 || val > 0xFFFFFFFFL) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be an unsigned 32 " + "bit value");
+          "\"" + field + "\" " + val + " must be an unsigned 32 bit value");
     }
     return val;
   }
@@ -678,7 +678,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static byte[] checkByteArrayLength(String field, byte[] array, int maxLength) {
     if (array.length > 0xFFFF) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" array " + "must have no more than " + maxLength + " elements");
+          "\"" + field + "\" array must have no more than " + maxLength + " elements");
     }
     byte[] out = new byte[array.length];
     System.arraycopy(array, 0, out, 0, array.length);

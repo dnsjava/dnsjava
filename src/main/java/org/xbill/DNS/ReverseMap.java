@@ -29,7 +29,7 @@ public final class ReverseMap {
    */
   public static Name fromAddress(byte[] addr) {
     if (addr.length != 4 && addr.length != 16) {
-      throw new IllegalArgumentException("array must contain " + "4 or 16 elements");
+      throw new IllegalArgumentException("array must contain 4 or 16 elements");
     }
 
     StringBuilder sb = new StringBuilder();
@@ -76,7 +76,7 @@ public final class ReverseMap {
     byte[] bytes = new byte[addr.length];
     for (int i = 0; i < addr.length; i++) {
       if (addr[i] < 0 || addr[i] > 0xFF) {
-        throw new IllegalArgumentException("array must " + "contain values " + "between 0 and 255");
+        throw new IllegalArgumentException("array must contain values between 0 and 255");
       }
       bytes[i] = (byte) addr[i];
     }

@@ -75,24 +75,24 @@ public class IPSECKEYRecord extends Record {
         break;
       case Gateway.IPv4:
         if (!(gateway instanceof InetAddress)) {
-          throw new IllegalArgumentException("\"gateway\" " + "must be an IPv4 " + "address");
+          throw new IllegalArgumentException("\"gateway\" must be an IPv4 address");
         }
         this.gateway = gateway;
         break;
       case Gateway.IPv6:
         if (!(gateway instanceof Inet6Address)) {
-          throw new IllegalArgumentException("\"gateway\" " + "must be an IPv6 " + "address");
+          throw new IllegalArgumentException("\"gateway\" must be an IPv6 address");
         }
         this.gateway = gateway;
         break;
       case Gateway.Name:
         if (!(gateway instanceof Name)) {
-          throw new IllegalArgumentException("\"gateway\" " + "must be a DNS " + "name");
+          throw new IllegalArgumentException("\"gateway\" must be a DNS name");
         }
         this.gateway = checkName("gateway", (Name) gateway);
         break;
       default:
-        throw new IllegalArgumentException("\"gatewayType\" " + "must be between 0 and 3");
+        throw new IllegalArgumentException("\"gatewayType\" must be between 0 and 3");
     }
 
     this.key = key;
