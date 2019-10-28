@@ -38,6 +38,9 @@ public class Tools {
       case "xfrin":
         xfrin.main(programArgs);
         break;
+      default:
+        System.out.println("invalid command");
+        break;
     }
   }
 }

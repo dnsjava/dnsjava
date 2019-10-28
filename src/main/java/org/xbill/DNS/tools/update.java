@@ -689,6 +689,6 @@ public class update {
     } else {
       in = System.in;
     }
-    update u = new update(in);
+    new update(in);
   }
 }

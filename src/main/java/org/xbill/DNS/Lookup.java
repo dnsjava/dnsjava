@@ -355,7 +355,7 @@ public final class Lookup {
    *
    * @param ndots The ndots value to use, which must be greater than or equal to 0.
    */
-  public void setNdots(int ndots) {
+  public static void setNdots(int ndots) {
     if (ndots < 0) {
       throw new IllegalArgumentException("Illegal ndots value: " + ndots);
     }

@@ -17,16 +17,10 @@ public class Header implements Cloneable {
   private int flags;
   private int[] counts;
 
-  private static Random random = new Random();
+  private static final Random random = new Random();
 
   /** The length of a DNS Header in wire format. */
   public static final int LENGTH = 12;
-
-  private void init() {
-    counts = new int[4];
-    flags = 0;
-    id = -1;
-  }
 
   /**
    * Create a new empty header.
@@ -34,13 +28,15 @@ public class Header implements Cloneable {
    * @param id The message id
    */
   public Header(int id) {
-    init();
+    this();
     setID(id);
   }
 
   /** Create a new empty header with a random message id */
   public Header() {
-    init();
+    counts = new int[4];
+    flags = 0;
+    id = -1;
   }
 
   /** Parses a Header from a stream containing DNS wire format. */
@@ -90,9 +86,9 @@ public class Header implements Cloneable {
 
     // bits are indexed from left to right
     if (value) {
-      return flags |= (1 << (15 - bit));
+      return flags | (1 << (15 - bit));
     } else {
-      return flags &= ~(1 << (15 - bit));
+      return flags & ~(1 << (15 - bit));
     }
   }
 
@@ -139,10 +135,7 @@ public class Header implements Cloneable {
 
   /** Retrieves the message ID */
   public int getID() {
-    if (id >= 0) {
-      return id;
-    }
-    synchronized (this) {
+    synchronized (random) {
       if (id < 0) {
         id = random.nextInt(0xffff);
       }

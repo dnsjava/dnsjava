@@ -443,8 +443,6 @@ public class jnamed {
     }
 
     OPTRecord queryOPT = query.getOPT();
-    if (queryOPT != null && queryOPT.getVersion() > 0) {}
-
     if (s != null) {
       maxLength = 65535;
     } else if (queryOPT != null) {

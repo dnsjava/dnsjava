@@ -173,7 +173,9 @@ public class Zone implements Serializable {
   }
 
   private void fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
-    data = new TreeMap<>();
+    synchronized (this) {
+      data = new TreeMap<>();
+    }
 
     origin = xfrin.getName();
     List records = xfrin.run();

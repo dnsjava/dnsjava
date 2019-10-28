@@ -677,7 +677,7 @@ public class DNSSEC {
     DNSInput in = new DNSInput(dns);
     DNSOutput out = new DNSOutput();
 
-    int t = in.readU8();
+    /*int t =*/ in.readU8();
 
     byte[] r = in.readByteArray(DSA_LEN);
     int rlen = DSA_LEN;
@@ -737,7 +737,7 @@ public class DNSSEC {
     if (tmp != ASN1_SEQ) {
       throw new IOException("Invalid ASN.1 data, expected " + ASN1_SEQ + " got " + tmp);
     }
-    int seqlen = in.readU8();
+    /*int seqlen =*/ in.readU8();
 
     tmp = in.readU8();
     if (tmp != ASN1_INT) {
@@ -859,7 +859,7 @@ public class DNSSEC {
     if (tmp != ASN1_SEQ) {
       throw new IOException("Invalid ASN.1 data, expected " + ASN1_SEQ + " got " + tmp);
     }
-    int seqlen = in.readU8();
+    /*int seqlen =*/ in.readU8();
 
     tmp = in.readU8();
     if (tmp != ASN1_INT) {

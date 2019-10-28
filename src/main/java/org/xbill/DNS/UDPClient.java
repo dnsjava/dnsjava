@@ -41,7 +41,7 @@ final class UDPClient extends Client {
             new Runnable() {
               @Override
               public void run() {
-                int n = prng.nextInt();
+                /*int n =*/ prng.nextInt();
                 prng_initializing = false;
               }
             })
