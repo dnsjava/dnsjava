@@ -4,9 +4,11 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -264,19 +266,14 @@ public class ExtendedResolver implements Resolver {
    *
    * @see SimpleResolver
    * @see ResolverConfig
-   * @exception UnknownHostException Failure occured initializing SimpleResolvers
    */
-  public ExtendedResolver() throws UnknownHostException {
+  public ExtendedResolver() {
     init();
-    String[] servers = ResolverConfig.getCurrentConfig().servers();
-    if (servers != null) {
-      for (String server : servers) {
-        Resolver r = new SimpleResolver(server);
-        r.setTimeout(quantum);
-        resolvers.add(r);
-      }
-    } else {
-      resolvers.add(new SimpleResolver());
+    List<InetSocketAddress> servers = ResolverConfig.getCurrentConfig().servers();
+    for (InetSocketAddress server : servers) {
+      Resolver r = new SimpleResolver(server);
+      r.setTimeout(quantum);
+      resolvers.add(r);
     }
   }
 
@@ -286,7 +283,7 @@ public class ExtendedResolver implements Resolver {
    * @param servers An array of server names for which SimpleResolver contexts should be
    *     initialized.
    * @see SimpleResolver
-   * @exception UnknownHostException Failure occured initializing SimpleResolvers
+   * @exception UnknownHostException Failure occurred initializing SimpleResolvers
    */
   public ExtendedResolver(String[] servers) throws UnknownHostException {
     init();
@@ -305,9 +302,7 @@ public class ExtendedResolver implements Resolver {
    */
   public ExtendedResolver(Resolver[] res) {
     init();
-    for (Resolver re : res) {
-      resolvers.add(re);
-    }
+    resolvers.addAll(Arrays.asList(res));
   }
 
   @Override
