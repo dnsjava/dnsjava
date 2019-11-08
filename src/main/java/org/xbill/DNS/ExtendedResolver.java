@@ -428,4 +428,9 @@ public class ExtendedResolver implements Resolver {
   public void setRetries(int retries) {
     this.retries = retries;
   }
+
+  @Override
+  public String toString() {
+    return "ExtendedResolver of " + resolvers;
+  }
 }

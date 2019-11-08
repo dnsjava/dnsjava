@@ -344,4 +344,9 @@ public class SimpleResolver implements Resolver {
     }
     return response;
   }
+
+  @Override
+  public String toString() {
+    return "SimpleResolver [" + address + "]";
+  }
 }

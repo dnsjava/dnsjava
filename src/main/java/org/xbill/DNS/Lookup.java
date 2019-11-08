@@ -433,10 +433,8 @@ public final class Lookup {
 
   private void lookup(Name current) {
     SetResponse sr = cache.lookupRecords(current, type, credibility);
-    if (log.isDebugEnabled()) {
-      log.debug("lookup {} {}", current, Type.string(type));
-      log.debug(sr.toString());
-    }
+    log.debug("lookup {} {}, cache answer: {}", current, Type.string(type), sr);
+
     processResponse(current, sr);
     if (done || doneCurrent) {
       return;
@@ -448,7 +446,7 @@ public final class Lookup {
     try {
       response = resolver.send(query);
     } catch (IOException e) {
-      log.debug("Lookup failed", e);
+      log.debug("Lookup failed using resolver {}", resolver, e);
 
       // A network error occurred.  Press on.
       if (e instanceof InterruptedIOException) {
@@ -478,10 +476,8 @@ public final class Lookup {
     if (sr == null) {
       sr = cache.lookupRecords(current, type, credibility);
     }
-    if (log.isDebugEnabled()) {
-      log.debug("queried {} {}", current, Type.string(type));
-      log.debug(sr.toString());
-    }
+
+    log.debug("Queried {} {}: {}", current, Type.string(type), sr);
     processResponse(current, sr);
   }
 
