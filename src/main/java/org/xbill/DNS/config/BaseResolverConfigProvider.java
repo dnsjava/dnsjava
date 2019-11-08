@@ -30,6 +30,10 @@ abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
   }
 
   void addSearchPath(String searchPath) {
+    if (searchPath == null || searchPath.isEmpty()) {
+      return;
+    }
+
     try {
       Name n = Name.fromString(searchPath, Name.root);
       if (!searchlist.contains(n)) {
