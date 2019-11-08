@@ -51,6 +51,7 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 class AddressTest {
   @Test
@@ -326,7 +327,15 @@ class AddressTest {
         Section.ANSWER);
 
     Resolver mockResolver = Mockito.mock(Resolver.class);
-    when(mockResolver.send(ArgumentMatchers.any(Message.class))).thenReturn(aMessage);
+    when(mockResolver.send(ArgumentMatchers.any(Message.class)))
+        .thenAnswer(
+            (Answer<Message>)
+                invocation -> {
+                  Message query = invocation.getArgument(0);
+                  Message answer = aMessage.clone();
+                  answer.addRecord(query.getQuestion(), Section.QUESTION);
+                  return answer;
+                });
     Lookup.setDefaultResolver(mockResolver);
 
     out = Address.getByName("a.root-servers.net");
@@ -341,7 +350,15 @@ class AddressTest {
     Message m = new Message();
     m.getHeader().setRcode(Rcode.NXDOMAIN);
     Resolver mockResolver = Mockito.mock(Resolver.class);
-    when(mockResolver.send(ArgumentMatchers.any(Message.class))).thenReturn(m);
+    when(mockResolver.send(ArgumentMatchers.any(Message.class)))
+        .thenAnswer(
+            (Answer<Message>)
+                invocation -> {
+                  Message query = invocation.getArgument(0);
+                  Message answer = m.clone();
+                  answer.addRecord(query.getQuestion(), Section.QUESTION);
+                  return answer;
+                });
     Lookup.setDefaultResolver(mockResolver);
     assertThrows(UnknownHostException.class, () -> Address.getByName("example.invalid"));
     // reset resolver
@@ -401,7 +418,15 @@ class AddressTest {
     Message m = new Message();
     m.getHeader().setRcode(Rcode.NXDOMAIN);
     Resolver mockResolver = Mockito.mock(Resolver.class);
-    when(mockResolver.send(ArgumentMatchers.any(Message.class))).thenReturn(m);
+    when(mockResolver.send(ArgumentMatchers.any(Message.class)))
+        .thenAnswer(
+            (Answer<Message>)
+                invocation -> {
+                  Message query = invocation.getArgument(0);
+                  Message answer = m.clone();
+                  answer.addRecord(query.getQuestion(), Section.QUESTION);
+                  return answer;
+                });
     Lookup.setDefaultResolver(mockResolver);
     assertThrows(UnknownHostException.class, () -> Address.getAllByName("example.invalid"));
 
@@ -427,7 +452,15 @@ class AddressTest {
     ptrMessage.addRecord(Record.newRecord(aRootServerPtr, Type.PTR, DClass.IN), Section.QUESTION);
     ptrMessage.addRecord(new PTRRecord(aRootServerPtr, DClass.IN, 60, aRootServer), Section.ANSWER);
     Resolver mockResolver = Mockito.mock(Resolver.class);
-    when(mockResolver.send(any(Message.class))).thenReturn(ptrMessage);
+    when(mockResolver.send(any(Message.class)))
+        .thenAnswer(
+            (Answer<Message>)
+                invocation -> {
+                  Message query = invocation.getArgument(0);
+                  Message answer = ptrMessage.clone();
+                  answer.addRecord(query.getQuestion(), Section.QUESTION);
+                  return answer;
+                });
     Lookup.setDefaultResolver(mockResolver);
 
     String out = Address.getHostName(InetAddress.getByName("198.41.0.4"));
@@ -439,7 +472,15 @@ class AddressTest {
         Record.newRecord(Name.fromString("1.1.168.192.in-addr.arpa."), Type.PTR, DClass.IN),
         Section.QUESTION);
     mockResolver = Mockito.mock(Resolver.class);
-    when(mockResolver.send(any())).thenReturn(ptrMessage2);
+    when(mockResolver.send(any()))
+        .thenAnswer(
+            (Answer<Message>)
+                invocation -> {
+                  Message query = invocation.getArgument(0);
+                  Message answer = ptrMessage2.clone();
+                  answer.addRecord(query.getQuestion(), Section.QUESTION);
+                  return answer;
+                });
     Lookup.setDefaultResolver(mockResolver);
     assertThrows(
         UnknownHostException.class,
