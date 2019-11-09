@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.TextParseException;
 
 /**
  * Resolver config provider that queries the traditional class {@code
@@ -35,7 +36,17 @@ public class SunJvmResolverConfigProvider implements ResolverConfigProvider {
       Method searchlistMethod = resConfClass.getMethod("searchlist");
       @SuppressWarnings("unchecked")
       List<String> jvmSearchlist = (List<String>) searchlistMethod.invoke(resConf);
-      searchlist = jvmSearchlist.stream().map(Name::fromConstantString).collect(toList());
+      searchlist =
+          jvmSearchlist.stream()
+              .map(
+                  n -> {
+                    try {
+                      return Name.fromString(n, Name.root);
+                    } catch (TextParseException e) {
+                      throw new IllegalArgumentException(e);
+                    }
+                  })
+              .collect(toList());
     } catch (Exception e) {
       throw new InitializationException(e);
     }
