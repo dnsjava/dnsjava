@@ -93,7 +93,11 @@
                             org.xbill.DNS.*
                         </Export-Package>
                         <Import-Package>
-                            !org.xbill.DNS*,!sun.*,android.os;resolution:=optional,*
+                            !org.xbill.DNS*,
+                            !sun.*,
+                            android.*;resolution:=optional,
+                            javax.naming.*;resolution:=optional,
+                            com.sun.jna.*;resolution:=optional,*
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>
@@ -201,13 +205,25 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.28</version>
+            <version>1.7.29</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.5.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.5.0</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -231,6 +247,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.29</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

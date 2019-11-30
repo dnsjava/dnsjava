@@ -307,7 +307,7 @@ public class Name implements Comparable, Serializable {
     if (s.equals("@") && origin != null) {
       return origin;
     } else if (s.equals(".")) {
-      return (root);
+      return root;
     }
 
     return new Name(s, origin);

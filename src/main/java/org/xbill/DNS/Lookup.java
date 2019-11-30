@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 public final class Lookup {
 
   private static Resolver defaultResolver;
-  private static Name[] defaultSearchPath;
+  private static List<Name> defaultSearchPath;
   private static Map<Integer, Cache> defaultCaches;
   private static int defaultNdots;
 
   private Resolver resolver;
-  private Name[] searchPath;
+  private List<Name> searchPath;
   private Cache cache;
   private boolean temporary_cache;
   private int credibility;
@@ -76,12 +75,7 @@ public final class Lookup {
   public static final int TYPE_NOT_FOUND = 4;
 
   public static synchronized void refreshDefault() {
-
-    try {
-      defaultResolver = new ExtendedResolver();
-    } catch (UnknownHostException e) {
-      throw new RuntimeException("Failed to initialize resolver");
-    }
+    defaultResolver = new ExtendedResolver();
     defaultSearchPath = ResolverConfig.getCurrentConfig().searchPath();
     defaultCaches = new HashMap<>();
     defaultNdots = ResolverConfig.getCurrentConfig().ndots();
@@ -141,7 +135,7 @@ public final class Lookup {
    *
    * @return The default search path.
    */
-  public static synchronized Name[] getDefaultSearchPath() {
+  public static synchronized List<Name> getDefaultSearchPath() {
     return defaultSearchPath;
   }
 
@@ -150,7 +144,7 @@ public final class Lookup {
    *
    * @param domains The default search path.
    */
-  public static synchronized void setDefaultSearchPath(Name[] domains) {
+  public static synchronized void setDefaultSearchPath(List<Name> domains) {
     defaultSearchPath = domains;
   }
 
@@ -165,10 +159,12 @@ public final class Lookup {
       defaultSearchPath = null;
       return;
     }
-    Name[] newdomains = new Name[domains.length];
-    for (int i = 0; i < domains.length; i++) {
-      newdomains[i] = Name.fromString(domains[i], Name.root);
+
+    List<Name> newdomains = new ArrayList<>(domains.length);
+    for (String domain : domains) {
+      newdomains.add(Name.fromString(domain, Name.root));
     }
+
     defaultSearchPath = newdomains;
   }
 
@@ -310,7 +306,7 @@ public final class Lookup {
    *
    * @param domains An array of names containing the search path.
    */
-  public void setSearchPath(Name[] domains) {
+  public void setSearchPath(List<Name> domains) {
     this.searchPath = domains;
   }
 
@@ -325,9 +321,10 @@ public final class Lookup {
       this.searchPath = null;
       return;
     }
-    Name[] newdomains = new Name[domains.length];
-    for (int i = 0; i < domains.length; i++) {
-      newdomains[i] = Name.fromString(domains[i], Name.root);
+
+    List<Name> newdomains = new ArrayList<>(domains.length);
+    for (String domain : domains) {
+      newdomains.add(Name.fromString(domain, Name.root));
     }
     this.searchPath = newdomains;
   }
@@ -436,10 +433,8 @@ public final class Lookup {
 
   private void lookup(Name current) {
     SetResponse sr = cache.lookupRecords(current, type, credibility);
-    if (log.isDebugEnabled()) {
-      log.debug("lookup {} {}", current, Type.string(type));
-      log.debug(sr.toString());
-    }
+    log.debug("lookup {} {}, cache answer: {}", current, Type.string(type), sr);
+
     processResponse(current, sr);
     if (done || doneCurrent) {
       return;
@@ -451,7 +446,7 @@ public final class Lookup {
     try {
       response = resolver.send(query);
     } catch (IOException e) {
-      log.debug("Lookup failed", e);
+      log.debug("Lookup failed using resolver {}", resolver, e);
 
       // A network error occurred.  Press on.
       if (e instanceof InterruptedIOException) {
@@ -481,10 +476,8 @@ public final class Lookup {
     if (sr == null) {
       sr = cache.lookupRecords(current, type, credibility);
     }
-    if (log.isDebugEnabled()) {
-      log.debug("queried {} {}", current, Type.string(type));
-      log.debug(sr.toString());
-    }
+
+    log.debug("Queried {} {}: {}", current, Type.string(type), sr);
     processResponse(current, sr);
   }
 

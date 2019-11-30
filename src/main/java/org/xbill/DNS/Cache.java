@@ -721,8 +721,9 @@ public class Cache {
       cred = getCred(Section.ADDITIONAL, isAuth);
       addRRset(rRset, cred);
     }
-    log.debug("addMessage: {}", response);
-    return (response);
+
+    log.debug("caching {} for {}", response, in.getQuestion().getName());
+    return response;
   }
 
   /**

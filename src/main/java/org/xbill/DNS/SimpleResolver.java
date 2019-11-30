@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,29 +37,9 @@ public class SimpleResolver implements Resolver {
 
   private static final short DEFAULT_UDPSIZE = 512;
 
-  private static String defaultResolver = "localhost";
+  private static InetSocketAddress defaultResolver =
+      new InetSocketAddress(InetAddress.getLoopbackAddress(), DEFAULT_PORT);
   private static int uniqueID = 0;
-
-  /**
-   * Creates a SimpleResolver that will query the specified host
-   *
-   * @exception UnknownHostException Failure occurred while finding the host
-   */
-  public SimpleResolver(String hostname) throws UnknownHostException {
-    if (hostname == null) {
-      hostname = ResolverConfig.getCurrentConfig().server();
-      if (hostname == null) {
-        hostname = defaultResolver;
-      }
-    }
-    InetAddress addr;
-    if (hostname.equals("0")) {
-      addr = InetAddress.getLocalHost();
-    } else {
-      addr = InetAddress.getByName(hostname);
-    }
-    address = new InetSocketAddress(addr, DEFAULT_PORT);
-  }
 
   /**
    * Creates a SimpleResolver. The host to query is either found by using ResolverConfig, or the
@@ -68,7 +49,35 @@ public class SimpleResolver implements Resolver {
    * @exception UnknownHostException Failure occurred while finding the host
    */
   public SimpleResolver() throws UnknownHostException {
-    this(null);
+    this((String) null);
+  }
+
+  /**
+   * Creates a SimpleResolver that will query the specified host
+   *
+   * @exception UnknownHostException Failure occurred while finding the host
+   */
+  public SimpleResolver(String hostname) throws UnknownHostException {
+    if (hostname == null) {
+      address = ResolverConfig.getCurrentConfig().server();
+    }
+
+    if ("0".equals(hostname)) {
+      address = defaultResolver;
+    } else {
+      address = new InetSocketAddress(InetAddress.getByName(hostname), DEFAULT_PORT);
+    }
+  }
+
+  /** Creates a SimpleResolver that will query the specified host */
+  public SimpleResolver(InetSocketAddress host) {
+    address = Objects.requireNonNull(host, "host must not be null");
+  }
+
+  /** Creates a SimpleResolver that will query the specified host */
+  public SimpleResolver(InetAddress host) {
+    Objects.requireNonNull(host, "host must not be null");
+    address = new InetSocketAddress(host, DEFAULT_PORT);
   }
 
   /**
@@ -82,7 +91,7 @@ public class SimpleResolver implements Resolver {
   }
 
   /** Sets the default host (initially localhost) to query */
-  public static void setDefaultResolver(String hostname) {
+  public static void setDefaultResolver(InetSocketAddress hostname) {
     defaultResolver = hostname;
   }
 
@@ -334,5 +343,10 @@ public class SimpleResolver implements Resolver {
       response.addRecord((Record) record, Section.ANSWER);
     }
     return response;
+  }
+
+  @Override
+  public String toString() {
+    return "SimpleResolver [" + address + "]";
   }
 }
