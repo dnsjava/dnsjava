@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.StringTokenizer;
 import org.xbill.DNS.SimpleResolver;
 
@@ -24,16 +23,15 @@ public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider
   }
 
   private boolean tryParseResolveConf(String path) {
-    Path p = Paths.get(path);
-    if (Files.exists(p)) {
-      try (InputStream in = Files.newInputStream(p)) {
+    File f = new File(path);
+    if (f.exists()) {
+      try (InputStream in = new FileInputStream(f)) {
         parseResolvConf(in);
         return true;
       } catch (IOException e) {
         // ignore
       }
     }
-
     return false;
   }
 
