@@ -123,6 +123,7 @@ public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider
 
   @Override
   public boolean isEnabled() {
-    return !System.getProperty("os.name").contains("Windows");
+    return !System.getProperty("os.name").contains("Windows")
+        && !System.getProperty("java.specification.vendor").toLowerCase().contains("android");
   }
 }
