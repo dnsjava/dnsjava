@@ -2,7 +2,6 @@
 
 package org.xbill.DNS.spi;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -19,6 +18,7 @@ import org.xbill.DNS.Resolver;
 import org.xbill.DNS.ReverseMap;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+import sun.net.spi.nameservice.NameService;
 
 /**
  * This class implements a Name Service Provider, which Java can use (starting with version 1.4), to
@@ -33,13 +33,18 @@ import org.xbill.DNS.Type;
  * @author Paul Cowan (pwc21@yahoo.com)
  */
 @Slf4j
-public class DNSJavaNameService implements InvocationHandler {
+public class DNSJavaNameService implements NameService {
 
   private static final String nsProperty = "sun.net.spi.nameservice.nameservers";
   private static final String domainProperty = "sun.net.spi.nameservice.domain";
   private static final String v6Property = "java.net.preferIPv6Addresses";
 
   private boolean preferV6 = false;
+
+  private Name localhostName = null;
+  private InetAddress[] localhostNamedAddresses = null;
+  private InetAddress[] localhostAddresses = null;
+  private boolean addressesLoaded = false;
 
   /**
    * Creates a DNSJavaNameService instance.
@@ -78,32 +83,31 @@ public class DNSJavaNameService implements InvocationHandler {
     if (v6 != null && v6.equalsIgnoreCase("true")) {
       preferV6 = true;
     }
-  }
 
-  @Override
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    if (method.getName().equals("getHostByAddr")) {
-      return this.getHostByAddr((byte[]) args[0]);
-    } else if (method.getName().equals("lookupAllHostAddr")) {
-      InetAddress[] addresses;
-      addresses = this.lookupAllHostAddr((String) args[0]);
-      Class<?> returnType = method.getReturnType();
-      if (returnType.equals(InetAddress[].class)) {
-        // method for Java >= 1.6
-        return addresses;
-      } else if (returnType.equals(byte[][].class)) {
-        // method for Java <= 1.5
-        int naddrs = addresses.length;
-        byte[][] byteAddresses = new byte[naddrs][];
-        byte[] addr;
-        for (int i = 0; i < naddrs; i++) {
-          addr = addresses[i].getAddress();
-          byteAddresses[i] = addr;
-        }
-        return byteAddresses;
-      }
+    try {
+      // retrieve the name from the system that is used as localhost
+      Class<?> inetAddressImplFactoryClass = Class.forName("java.net.InetAddressImplFactory");
+      Method createMethod = inetAddressImplFactoryClass.getDeclaredMethod("create");
+      createMethod.setAccessible(true);
+
+      Object inetAddressImpl = createMethod.invoke(null);
+      Class<?> inetAddressImplClass = Class.forName("java.net.InetAddressImpl");
+      Method hostnameMethod = inetAddressImplClass.getMethod("getLocalHostName");
+      hostnameMethod.setAccessible(true);
+
+      localhostName = Name.fromString((String) hostnameMethod.invoke(inetAddressImpl));
+      Method lookupAllHostAddrMethod =
+          inetAddressImplClass.getMethod("lookupAllHostAddr", String.class);
+      lookupAllHostAddrMethod.setAccessible(true);
+
+      localhostNamedAddresses =
+          (InetAddress[]) lookupAllHostAddrMethod.invoke(inetAddressImpl, localhostName.toString());
+      localhostAddresses =
+          (InetAddress[]) lookupAllHostAddrMethod.invoke(inetAddressImpl, "localhost");
+      addressesLoaded = true;
+    } catch (Exception e) {
+      log.error("Could not obtain localhost", e);
     }
-    throw new IllegalArgumentException("Unknown function name or arguments.");
   }
 
   /**
@@ -114,11 +118,20 @@ public class DNSJavaNameService implements InvocationHandler {
    */
   public InetAddress[] lookupAllHostAddr(String host) throws UnknownHostException {
     Name name;
-
     try {
       name = new Name(host);
     } catch (TextParseException e) {
       throw new UnknownHostException(host);
+    }
+
+    // avoid asking a dns server (causing a probable timeout) when host is the name of the local
+    // host
+    if (addressesLoaded) {
+      if (name.equals(localhostName)) {
+        return localhostNamedAddresses;
+      } else if ("localhost".equalsIgnoreCase(host)) {
+        return localhostAddresses;
+      }
     }
 
     Record[] records = null;
@@ -137,7 +150,6 @@ public class DNSJavaNameService implements InvocationHandler {
 
     InetAddress[] array = new InetAddress[records.length];
     for (int i = 0; i < records.length; i++) {
-      Record record = records[i];
       if (records[i] instanceof ARecord) {
         ARecord a = (ARecord) records[i];
         array[i] = a.getAddress();
