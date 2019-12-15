@@ -169,7 +169,7 @@ public final class Lookup {
   }
 
   /**
-   * Sets a custom logger that will be used to log the send and received packets.
+   * Sets a custom logger that will be used to log the sent and received packets.
    *
    * @param logger The logger
    */
