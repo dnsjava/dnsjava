@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,13 +36,12 @@ public class SimpleResolver implements Resolver {
   private boolean useTCP, ignoreTruncation;
   private OPTRecord queryOPT;
   private TSIG tsig;
-  private long timeoutValue = 10 * 1000;
+  private Duration timeoutValue = Duration.ofSeconds(10);
 
   private static final short DEFAULT_UDPSIZE = 512;
 
   private static InetSocketAddress defaultResolver =
       new InetSocketAddress(InetAddress.getLoopbackAddress(), DEFAULT_PORT);
-  private static int uniqueID = 0;
 
   /**
    * Creates a SimpleResolver. The host to query is either found by using ResolverConfig, or the
@@ -159,7 +161,7 @@ public class SimpleResolver implements Resolver {
 
   @Override
   public void setEDNS(int level) {
-    setEDNS(level, 0, 0, null);
+    setEDNS(level, 0, 0);
   }
 
   @Override
@@ -172,16 +174,12 @@ public class SimpleResolver implements Resolver {
   }
 
   @Override
-  public void setTimeout(int secs, int msecs) {
-    timeoutValue = (long) secs * 1000 + msecs;
+  public void setTimeout(Duration timeout) {
+    timeoutValue = timeout;
   }
 
   @Override
-  public void setTimeout(int secs) {
-    setTimeout(secs, 0);
-  }
-
-  long getTimeout() {
+  public Duration getTimeout() {
     return timeoutValue;
   }
 
@@ -221,113 +219,109 @@ public class SimpleResolver implements Resolver {
   }
 
   /**
-   * Sends a message to a single server and waits for a response. No checking is done to ensure that
-   * the response is associated with the query.
-   *
-   * @param query The query to send.
-   * @return The response.
-   * @throws IOException An error occurred while sending or receiving.
-   */
-  @Override
-  public Message send(Message query) throws IOException {
-    log.debug("Sending to {}:{}", address.getAddress().getHostAddress(), address.getPort());
-
-    if (query.getHeader().getOpcode() == Opcode.QUERY) {
-      Record question = query.getQuestion();
-      if (question != null && question.getType() == Type.AXFR) {
-        return sendAXFR(query);
-      }
-    }
-
-    query = query.clone();
-    applyEDNS(query);
-    if (tsig != null) {
-      tsig.apply(query, null);
-    }
-
-    byte[] out = query.toWire(Message.MAXLENGTH);
-    int udpSize = maxUDPSize(query);
-    boolean tcp = false;
-    long endTime = System.currentTimeMillis() + timeoutValue;
-    do {
-      byte[] in;
-
-      if (useTCP || out.length > udpSize) {
-        tcp = true;
-      }
-      if (tcp) {
-        in = TCPClient.sendrecv(localAddress, address, out, endTime);
-      } else {
-        in = UDPClient.sendrecv(localAddress, address, out, udpSize, endTime);
-      }
-
-      /*
-       * Check that the response is long enough.
-       */
-      if (in.length < Header.LENGTH) {
-        throw new WireParseException("invalid DNS header - too short");
-      }
-      /*
-       * Check that the response ID matches the query ID.  We want
-       * to check this before actually parsing the message, so that
-       * if there's a malformed response that's not ours, it
-       * doesn't confuse us.
-       */
-      int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
-      int qid = query.getHeader().getID();
-      if (id != qid) {
-        String error = "invalid message id: expected " + qid + "; got id " + id;
-        if (tcp) {
-          throw new WireParseException(error);
-        } else {
-          log.debug(error);
-          continue;
-        }
-      }
-      Message response = parseMessage(in);
-      verifyTSIG(query, response, in, tsig);
-      if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
-        tcp = true;
-        continue;
-      }
-      return response;
-    } while (true);
-  }
-
-  /**
    * Asynchronously sends a message to a single server, registering a listener to receive a callback
    * on success or exception. Multiple asynchronous lookups can be performed in parallel. Since the
    * callback may be invoked before the function returns, external synchronization is necessary.
    *
    * @param query The query to send
-   * @param listener The object containing the callbacks.
-   * @return An identifier, which is also a parameter in the callback
+   * @return A future that completes when the response has arrived.
    */
   @Override
-  public Integer sendAsync(final Message query, final ResolverListener listener) {
-    final Integer id;
-    synchronized (this) {
-      id = uniqueID++;
+  public CompletionStage<Message> sendAsync(Message query) {
+    Message ednsTsigQuery = query.clone();
+    applyEDNS(ednsTsigQuery);
+    if (tsig != null) {
+      tsig.apply(ednsTsigQuery, null);
     }
-    Record question = query.getQuestion();
-    String qname;
-    if (question != null) {
-      qname = question.getName().toString();
+
+    if (query.getHeader().getOpcode() == Opcode.QUERY) {
+      Record question = query.getQuestion();
+      if (question != null && question.getType() == Type.AXFR) {
+        CompletableFuture<Message> f = new CompletableFuture<>();
+        CompletableFuture.runAsync(
+            () -> {
+              try {
+                f.complete(sendAXFR(query));
+              } catch (IOException e) {
+                f.completeExceptionally(e);
+              }
+            });
+
+        return f;
+      }
+    }
+
+    return sendAsync(ednsTsigQuery, useTCP);
+  }
+
+  private CompletableFuture<Message> sendAsync(Message query, boolean forceTcp) {
+    int qid = query.getHeader().getID();
+    byte[] out = query.toWire(Message.MAXLENGTH);
+    int udpSize = maxUDPSize(query);
+    boolean tcp = forceTcp || out.length > udpSize;
+    log.debug(
+        "Sending {}/{}, id={} to {}/{}:{}",
+        query.getQuestion().getName(),
+        Type.string(query.getQuestion().getType()),
+        qid,
+        tcp ? "tcp" : "udp",
+        address.getAddress().getHostAddress(),
+        address.getPort());
+    log.trace("Query:\n{}", query);
+
+    CompletableFuture<byte[]> result;
+    if (tcp) {
+      result = NioTcpClient.sendrecv(localAddress, address, query, out, timeoutValue);
     } else {
-      qname = "(none)";
+      result = NioUdpClient.sendrecv(localAddress, address, out, udpSize, timeoutValue);
     }
-    String name = this.getClass() + ": " + qname;
-    Thread thread = new ResolveThread(this, query, id, listener);
-    thread.setName(name);
-    thread.setDaemon(true);
-    thread.start();
-    return id;
+
+    return result.thenComposeAsync(
+        in -> {
+          CompletableFuture<Message> f = new CompletableFuture<>();
+
+          // Check that the response is long enough.
+          if (in.length < Header.LENGTH) {
+            f.completeExceptionally(new WireParseException("invalid DNS header - too short"));
+            return f;
+          }
+
+          // Check that the response ID matches the query ID. We want
+          // to check this before actually parsing the message, so that
+          // if there's a malformed response that's not ours, it
+          // doesn't confuse us.
+          int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
+          if (id != qid) {
+            f.completeExceptionally(
+                new WireParseException("invalid message id: expected " + qid + "; got id " + id));
+            return f;
+          }
+
+          Message response;
+          try {
+            response = parseMessage(in);
+          } catch (WireParseException e) {
+            f.completeExceptionally(e);
+            return f;
+          }
+
+          verifyTSIG(query, response, in, tsig);
+          if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
+            log.debug("Got truncated response for id {}, retrying via TCP", qid);
+            log.trace("Truncated response: {}", response);
+            return sendAsync(query, true);
+          }
+
+          response.setResolver(this);
+          f.complete(response);
+          return f;
+        });
   }
 
   private Message sendAXFR(Message query) throws IOException {
     Name qname = query.getQuestion().getName();
     ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(qname, address, tsig);
-    xfrin.setTimeout((int) (getTimeout() / 1000));
+    xfrin.setTimeout(timeoutValue);
     xfrin.setLocalAddress(localAddress);
     try {
       xfrin.run();

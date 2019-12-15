@@ -9,7 +9,9 @@ import java.util.EventListener;
  *
  * @see Resolver
  * @author Brian Wellington
+ * @deprecated Use {@link Resolver#sendAsync(Message)}
  */
+@Deprecated
 public interface ResolverListener extends EventListener {
 
   /**

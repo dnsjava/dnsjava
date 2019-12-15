@@ -4,67 +4,87 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketTimeoutException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.hexdump;
 
 @Slf4j
 class Client {
-
-  protected long endTime;
-  protected SelectionKey key;
-
   /** Packet logger, if available. */
   private static PacketLogger packetLogger = null;
 
-  protected Client(SelectableChannel channel, long endTime) throws IOException {
-    boolean done = false;
-    Selector selector = null;
-    this.endTime = endTime;
-    try {
-      selector = Selector.open();
-      channel.configureBlocking(false);
-      key = channel.register(selector, SelectionKey.OP_READ);
-      done = true;
-    } finally {
-      if (!done && selector != null) {
-        selector.close();
-      }
-      if (!done) {
-        channel.close();
+  private static volatile boolean run;
+  private static Thread selectorThread;
+  private static List<Runnable> timeoutTasks = new CopyOnWriteArrayList<>();
+  static Selector selector;
+
+  protected interface KeyProcessor {
+    void processReadyKey(SelectionKey key);
+  }
+
+  protected static void start() throws IOException {
+    if (run) {
+      return;
+    }
+
+    run = true;
+    selector = Selector.open();
+    selectorThread = new Thread(Client::runSelector);
+    selectorThread.setDaemon(true);
+    selectorThread.setName("dnsjava NIO selector");
+    selectorThread.start();
+  }
+
+  protected static void close() throws Exception {
+    if (!run) {
+      return;
+    }
+
+    run = false;
+    timeoutTasks.clear();
+    selector.wakeup();
+    selector.close();
+    selectorThread.join();
+  }
+
+  private static void runSelector() {
+    while (run) {
+      try {
+        if (selector.select(100) == 0) {
+          timeoutTasks.forEach(Runnable::run);
+          continue;
+        }
+
+        processReadyKeys();
+      } catch (IOException e) {
+        log.error("A selection operation failed", e);
       }
     }
   }
 
-  protected static void blockUntil(SelectionKey key, long endTime) throws IOException {
-    long timeout = endTime - System.currentTimeMillis();
-    int nkeys = 0;
-    if (timeout > 0) {
-      nkeys = key.selector().select(timeout);
-    } else if (timeout == 0) {
-      nkeys = key.selector().selectNow();
-    }
-    if (nkeys == 0) {
-      throw new SocketTimeoutException();
+  static void addSelectorTimeoutTask(Runnable r) {
+    timeoutTasks.add(r);
+  }
+
+  private static void processReadyKeys() {
+    Set<SelectionKey> keys = selector.selectedKeys();
+    for (SelectionKey key : keys) {
+      KeyProcessor t = (KeyProcessor) key.attachment();
+      t.processReadyKey(key);
     }
   }
 
-  protected static void verboseLog(
-      String prefix, SocketAddress local, SocketAddress remote, byte[] data) {
-    if (log.isDebugEnabled()) {
-      log.debug(hexdump.dump(prefix, data));
+  static void verboseLog(String prefix, SocketAddress local, SocketAddress remote, byte[] data) {
+    if (log.isTraceEnabled()) {
+      log.trace(hexdump.dump(prefix, data));
     }
     if (packetLogger != null) {
       packetLogger.log(prefix, local, remote, data);
     }
-  }
-
-  void cleanup() throws IOException {
-    key.selector().close();
-    key.channel().close();
   }
 
   static void setPacketLogger(PacketLogger logger) {

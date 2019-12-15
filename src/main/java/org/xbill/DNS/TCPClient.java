@@ -8,12 +8,32 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.TimeUnit;
 
 final class TCPClient extends Client {
+  private long endTime;
+  private SelectionKey key;
 
-  public TCPClient(long endTime) throws IOException {
-    super(SocketChannel.open(), endTime);
+  TCPClient(long timeout) throws IOException {
+    endTime = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+    boolean done = false;
+    Selector selector = null;
+    SocketChannel channel = SocketChannel.open();
+    try {
+      selector = Selector.open();
+      channel.configureBlocking(false);
+      key = channel.register(selector, SelectionKey.OP_READ);
+      done = true;
+    } finally {
+      if (!done && selector != null) {
+        selector.close();
+      }
+      if (!done) {
+        channel.close();
+      }
+    }
   }
 
   void bind(SocketAddress addr) throws IOException {
@@ -63,7 +83,7 @@ final class TCPClient extends Client {
             throw new EOFException();
           }
           nsent += (int) n;
-          if (nsent < data.length + 2 && System.currentTimeMillis() > endTime) {
+          if (nsent < data.length + 2 && endTime - System.nanoTime() < 0) {
             throw new SocketTimeoutException();
           }
         } else {
@@ -106,6 +126,24 @@ final class TCPClient extends Client {
     return data;
   }
 
+  private static void blockUntil(SelectionKey key, long endTime) throws IOException {
+    long timeout = TimeUnit.NANOSECONDS.toMillis(endTime - System.nanoTime());
+    int nkeys = 0;
+    if (timeout > 0) {
+      nkeys = key.selector().select(timeout);
+    } else if (timeout == 0) {
+      nkeys = key.selector().selectNow();
+    }
+    if (nkeys == 0) {
+      throw new SocketTimeoutException();
+    }
+  }
+
+  void cleanup() throws IOException {
+    key.selector().close();
+    key.channel().close();
+  }
+
   byte[] recv() throws IOException {
     byte[] buf = _recv(2);
     int length = ((buf[0] & 0xFF) << 8) + (buf[1] & 0xFF);
@@ -117,24 +155,5 @@ final class TCPClient extends Client {
         channel.socket().getRemoteSocketAddress(),
         data);
     return data;
-  }
-
-  static byte[] sendrecv(SocketAddress local, SocketAddress remote, byte[] data, long endTime)
-      throws IOException {
-    TCPClient client = new TCPClient(endTime);
-    try {
-      if (local != null) {
-        client.bind(local);
-      }
-      client.connect(remote);
-      client.send(data);
-      return client.recv();
-    } finally {
-      client.cleanup();
-    }
-  }
-
-  static byte[] sendrecv(SocketAddress addr, byte[] data, long endTime) throws IOException {
-    return sendrecv(null, addr, data, endTime);
   }
 }
