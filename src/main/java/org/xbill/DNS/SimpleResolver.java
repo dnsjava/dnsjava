@@ -305,6 +305,37 @@ public class SimpleResolver implements Resolver {
             return f;
           }
 
+          // validate name, class and type (rfc5452#section-9.1)
+          if (!query.getQuestion().getName().equals(response.getQuestion().getName())) {
+            f.completeExceptionally(
+                new WireParseException(
+                    "invalid name in message: expected "
+                        + query.getQuestion().getName()
+                        + "; got "
+                        + response.getQuestion().getName()));
+            return f;
+          }
+
+          if (query.getQuestion().getDClass() != response.getQuestion().getDClass()) {
+            f.completeExceptionally(
+                new WireParseException(
+                    "invalid class in message: expected "
+                        + DClass.string(query.getQuestion().getDClass())
+                        + "; got "
+                        + DClass.string(response.getQuestion().getDClass())));
+            return f;
+          }
+
+          if (query.getQuestion().getType() != response.getQuestion().getType()) {
+            f.completeExceptionally(
+                new WireParseException(
+                    "invalid type in message: expected "
+                        + Type.string(query.getQuestion().getType())
+                        + "; got "
+                        + Type.string(response.getQuestion().getType())));
+            return f;
+          }
+
           verifyTSIG(query, response, in, tsig);
           if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
             log.debug("Got truncated response for id {}, retrying via TCP", qid);
