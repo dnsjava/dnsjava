@@ -45,7 +45,7 @@ public class Compression {
     entry.pos = pos;
     entry.next = table[row];
     table[row] = entry;
-    log.debug("Adding {} at {}", name, pos);
+    log.trace("Adding {} at {}", name, pos);
   }
 
   /**
@@ -62,7 +62,7 @@ public class Compression {
         pos = entry.pos;
       }
     }
-    log.debug("Looking for {}, found {}", name, pos);
+    log.trace("Looking for {}, found {}", name, pos);
     return pos;
   }
 }
