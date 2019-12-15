@@ -171,7 +171,7 @@ public class DNSJavaNameService implements NameService {
     Name name = ReverseMap.fromAddress(InetAddress.getByAddress(addr));
     Record[] records = new Lookup(name, Type.PTR).run();
     if (records == null) {
-      throw new UnknownHostException();
+      throw new UnknownHostException("Unknown address: " + name);
     }
     return ((PTRRecord) records[0]).getTarget().toString();
   }
