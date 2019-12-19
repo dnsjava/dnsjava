@@ -56,6 +56,7 @@ public final class Lookup {
   private boolean timedout;
   private boolean nametoolong;
   private boolean referral;
+  private boolean cycleResults = true;
 
   private static final Name[] noAliases = new Name[0];
 
@@ -369,6 +370,16 @@ public final class Lookup {
     this.credibility = credibility;
   }
 
+  /**
+   * Controls the behavior of is results being returned from the cache should be cycled in a
+   * round-robin style (true) or if the raw lookup results should be returned (false)
+   *
+   * @param cycleResults The desired behavior of the order of the results
+   */
+  public void setCycleResults(boolean cycleResults) {
+    this.cycleResults = cycleResults;
+  }
+
   private void follow(Name name, Name oldname) {
     foundAlias = true;
     badresponse = false;
@@ -396,7 +407,7 @@ public final class Lookup {
       List<Record> l = new ArrayList<>();
 
       for (RRset<?> set : rrsets) {
-        l.addAll(set.rrs());
+        l.addAll(set.rrs(cycleResults));
       }
 
       result = SUCCESSFUL;
