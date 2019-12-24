@@ -70,6 +70,33 @@ public class TLSARecord extends Record {
    * @param matchingType How the certificate association is presented.
    * @param certificateAssociationData The "certificate association data" to be matched.
    */
+  protected TLSARecord(
+      Name name,
+      int type,
+      int dclass,
+      long ttl,
+      int certificateUsage,
+      int selector,
+      int matchingType,
+      byte[] certificateAssociationData) {
+    super(name, type, dclass, ttl);
+    this.certificateUsage = checkU8("certificateUsage", certificateUsage);
+    this.selector = checkU8("selector", selector);
+    this.matchingType = checkU8("matchingType", matchingType);
+    this.certificateAssociationData =
+        checkByteArrayLength("certificateAssociationData", certificateAssociationData, 0xFFFF);
+  }
+
+  /**
+   * Creates an TLSA Record from the given data
+   *
+   * @param certificateUsage The provided association that will be used to match the certificate
+   *     presented in the TLS handshake.
+   * @param selector The part of the TLS certificate presented by the server that will be matched
+   *     against the association data.
+   * @param matchingType How the certificate association is presented.
+   * @param certificateAssociationData The "certificate association data" to be matched.
+   */
   public TLSARecord(
       Name name,
       int dclass,
@@ -78,12 +105,15 @@ public class TLSARecord extends Record {
       int selector,
       int matchingType,
       byte[] certificateAssociationData) {
-    super(name, Type.TLSA, dclass, ttl);
-    this.certificateUsage = checkU8("certificateUsage", certificateUsage);
-    this.selector = checkU8("selector", selector);
-    this.matchingType = checkU8("matchingType", matchingType);
-    this.certificateAssociationData =
-        checkByteArrayLength("certificateAssociationData", certificateAssociationData, 0xFFFF);
+    this(
+        name,
+        Type.TLSA,
+        dclass,
+        ttl,
+        certificateUsage,
+        selector,
+        matchingType,
+        certificateAssociationData);
   }
 
   @Override
