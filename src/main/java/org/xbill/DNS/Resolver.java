@@ -53,7 +53,7 @@ public interface Resolver {
   /**
    * Sets the EDNS information on outgoing messages.
    *
-   * @param level The EDNS level to use. 0 indicates EDNS0 and -1 indicates no EDNS.
+   * @param version The EDNS version to use. 0 indicates EDNS0 and -1 indicates no EDNS.
    * @param payloadSize The maximum DNS packet size that this host is capable of receiving over UDP.
    *     If 0 is specified, the default (1280) is used.
    * @param flags EDNS extended flags to be set in the OPT record.
@@ -62,12 +62,12 @@ public interface Resolver {
    * @throws IllegalArgumentException An invalid field was specified.
    * @see OPTRecord
    */
-  void setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options);
+  void setEDNS(int version, int payloadSize, int flags, List<EDNSOption> options);
 
   /**
    * Sets the EDNS information on outgoing messages.
    *
-   * @param level The EDNS level to use. 0 indicates EDNS0 and -1 indicates no EDNS.
+   * @param version The EDNS version to use. 0 indicates EDNS0 and -1 indicates no EDNS.
    * @param payloadSize The maximum DNS packet size that this host is capable of receiving over UDP.
    *     If 0 is specified, the default (1280) is used.
    * @param flags EDNS extended flags to be set in the OPT record.
@@ -76,8 +76,8 @@ public interface Resolver {
    * @throws IllegalArgumentException An invalid field was specified.
    * @see OPTRecord
    */
-  default void setEDNS(int level, int payloadSize, int flags, EDNSOption... options) {
-    setEDNS(level, payloadSize, flags, Arrays.asList(options));
+  default void setEDNS(int version, int payloadSize, int flags, EDNSOption... options) {
+    setEDNS(version, payloadSize, flags, Arrays.asList(options));
   }
 
   /**
