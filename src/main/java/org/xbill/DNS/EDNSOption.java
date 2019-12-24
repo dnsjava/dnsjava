@@ -154,6 +154,11 @@ public abstract class EDNSOption {
       case Code.CLIENT_SUBNET:
         option = new ClientSubnetOption();
         break;
+      case Code.DAU:
+      case Code.DHU:
+      case Code.N3U:
+        option = new DnssecAlgorithmOption(code);
+        break;
       case Code.COOKIE:
         option = new CookieOption();
         break;
