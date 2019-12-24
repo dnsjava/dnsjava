@@ -34,7 +34,7 @@ public class SimpleResolver implements Resolver {
   private InetSocketAddress address;
   private InetSocketAddress localAddress;
   private boolean useTCP, ignoreTruncation;
-  private OPTRecord queryOPT;
+  private OPTRecord queryOPT = new OPTRecord(DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0);
   private TSIG tsig;
   private Duration timeoutValue = Duration.ofSeconds(10);
 
@@ -163,13 +163,21 @@ public class SimpleResolver implements Resolver {
 
   @Override
   public void setEDNS(int version, int payloadSize, int flags, List<EDNSOption> options) {
-    if (version != 0 && version != -1) {
-      throw new IllegalArgumentException("invalid EDNS version - must be 0 or -1");
+    switch (version) {
+      case -1:
+        queryOPT = null;
+        break;
+
+      case 0:
+        if (payloadSize == 0) {
+          payloadSize = DEFAULT_EDNS_PAYLOADSIZE;
+        }
+        queryOPT = new OPTRecord(payloadSize, 0, version, flags, options);
+        break;
+
+      default:
+        throw new IllegalArgumentException("invalid EDNS version - must be 0 or -1 to disable");
     }
-    if (payloadSize == 0) {
-      payloadSize = DEFAULT_EDNS_PAYLOADSIZE;
-    }
-    queryOPT = new OPTRecord(payloadSize, 0, version, flags, options);
   }
 
   @Override
