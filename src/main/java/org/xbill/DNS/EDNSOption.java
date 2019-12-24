@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * DNS extension options, as described in RFC 2671. The rdata of an OPT record is defined as a list
+ * DNS extension options, as described in RFC 6891. The rdata of an OPT record is defined as a list
  * of options; this represents a single option.
  *
  * @author Brian Wellington
@@ -13,14 +13,31 @@ import java.util.Arrays;
  */
 public abstract class EDNSOption {
 
+  /**
+   * @see <a
+   *     href="https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-11">IANA
+   *     DNS EDNS0 Option Codes (OPT)</a>
+   */
   public static class Code {
     private Code() {}
 
     /** Name Server Identifier, RFC 5001 */
     public static final int NSID = 3;
 
-    /** Client Subnet, defined in draft-vandergaast-edns-client-subnet-02 */
+    /** DNSSEC Algorithm Understood (DAU), RFC 6975 */
+    public static final int DAU = 5;
+
+    /** DNSSEC DS Hash Understood (DHU), RFC 6975 */
+    public static final int DHU = 6;
+
+    /** DNSSEC NSEC3 Hash Understood (N3U), RFC 6975 */
+    public static final int N3U = 7;
+
+    /** Client Subnet, RFC 7871 */
     public static final int CLIENT_SUBNET = 8;
+
+    /** (EDNS) EXPIRE Option, RFC 7314 */
+    public static final int EDNS_EXPIRE = 9;
 
     /** Cookie, RFC 7873 */
     public static final int COOKIE = 10;
@@ -28,7 +45,16 @@ public abstract class EDNSOption {
     /** TCP Keepalive, RFC 7828 */
     public static final int TCP_KEEPALIVE = 11;
 
-    private static Mnemonic codes = new Mnemonic("EDNS Option Codes", Mnemonic.CASE_UPPER);
+    /** EDNS(0) Padding Option, RFC 7830 */
+    public static final int PADDING = 12;
+
+    /** CHAIN Query Requests in DNS, RFC 7901 */
+    public static final int CHAIN = 13;
+
+    /** Signaling Trust Anchor Knowledge in DNS Security Extensions (DNSSEC), RFC 8145 */
+    public static final int EDNS_KEY_TAG = 14;
+
+    private static Mnemonic codes = new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
 
     static {
       codes.setMaximum(0xFFFF);
@@ -36,9 +62,16 @@ public abstract class EDNSOption {
       codes.setNumericAllowed(true);
 
       codes.add(NSID, "NSID");
-      codes.add(CLIENT_SUBNET, "CLIENT_SUBNET");
+      codes.add(DAU, "DAU");
+      codes.add(DHU, "DHU");
+      codes.add(N3U, "N3U");
+      codes.add(CLIENT_SUBNET, "edns-client-subnet");
+      codes.add(EDNS_EXPIRE, "EDNS_EXPIRE");
       codes.add(COOKIE, "COOKIE");
-      codes.add(TCP_KEEPALIVE, "TCP_KEEPALIVE");
+      codes.add(TCP_KEEPALIVE, "edns-tcp-keepalive");
+      codes.add(PADDING, "Padding");
+      codes.add(CHAIN, "CHAIN");
+      codes.add(EDNS_KEY_TAG, "edns-key-tag");
     }
 
     /** Converts an EDNS Option Code into its textual representation */
@@ -66,15 +99,7 @@ public abstract class EDNSOption {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-
-    sb.append("{");
-    sb.append(EDNSOption.Code.string(code));
-    sb.append(": ");
-    sb.append(optionToString());
-    sb.append("}");
-
-    return sb.toString();
+    return "{" + Code.string(code) + ": " + optionToString() + "}";
   }
 
   /**
