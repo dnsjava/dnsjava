@@ -6,16 +6,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * The Client Subnet EDNS Option, defined in
- * http://tools.ietf.org/html/draft-vandergaast-edns-client-subnet-00 ("Client subnet in DNS
- * requests").
+ * The Client Subnet EDNS Option, defined in <a href="https://tools.ietf.org/html/rfc7871>Client
+ * subnet in DNS requests</a>.
  *
  * <p>The option is used to convey information about the IP address of the originating client, so
  * that an authoritative server can make decisions based on this address, rather than the address of
  * the intermediate caching name server.
  *
  * <p>The option is transmitted as part of an OPTRecord in the additional section of a DNS message,
- * as defined by RFC 2671 (EDNS0).
+ * as defined by RFC 6891 (EDNS0).
  *
  * <p>The wire format of the option contains a 2-byte length field (1 for IPv4, 2 for IPv6), a
  * 1-byte source netmask, a 1-byte scope netmask, and an address truncated to the source netmask
@@ -26,12 +25,9 @@ import java.net.UnknownHostException;
  * @author Ming Zhou &lt;mizhou@bnivideo.com&gt;, Beaumaris Networks
  */
 public class ClientSubnetOption extends EDNSOption {
-
-  private static final long serialVersionUID = -3868158449890266347L;
-
   private int family;
-  private int sourceNetmask;
-  private int scopeNetmask;
+  private int sourcePrefixLength;
+  private int scopePrefixLength;
   private InetAddress address;
 
   ClientSubnetOption() {
@@ -52,19 +48,19 @@ public class ClientSubnetOption extends EDNSOption {
    * not be greater than the supplied source netmask. There may also be issues related to Java's
    * handling of mapped addresses
    *
-   * @param sourceNetmask The length of the netmask pertaining to the query. In replies, it mirrors
-   *     the same value as in the requests.
-   * @param scopeNetmask The length of the netmask pertaining to the reply. In requests, it MUST be
-   *     set to 0. In responses, this may or may not match the source netmask.
+   * @param sourcePrefixLength The length of the netmask pertaining to the query. In replies, it
+   *     mirrors the same value as in the requests.
+   * @param scopePrefixLength The length of the netmask pertaining to the reply. In requests, it
+   *     MUST be set to 0. In responses, this may or may not match the source netmask.
    * @param address The address of the client.
    */
-  public ClientSubnetOption(int sourceNetmask, int scopeNetmask, InetAddress address) {
+  public ClientSubnetOption(int sourcePrefixLength, int scopePrefixLength, InetAddress address) {
     super(EDNSOption.Code.CLIENT_SUBNET);
 
     this.family = Address.familyOf(address);
-    this.sourceNetmask = checkMaskLength("source netmask", this.family, sourceNetmask);
-    this.scopeNetmask = checkMaskLength("scope netmask", this.family, scopeNetmask);
-    this.address = Address.truncate(address, sourceNetmask);
+    this.sourcePrefixLength = checkMaskLength("source netmask", this.family, sourcePrefixLength);
+    this.scopePrefixLength = checkMaskLength("scope netmask", this.family, scopePrefixLength);
+    this.address = Address.truncate(address, sourcePrefixLength);
 
     if (!address.equals(this.address)) {
       throw new IllegalArgumentException("source netmask is not valid for address");
@@ -74,13 +70,13 @@ public class ClientSubnetOption extends EDNSOption {
   /**
    * Construct a Client Subnet option with scope netmask set to 0.
    *
-   * @param sourceNetmask The length of the netmask pertaining to the query. In replies, it mirrors
-   *     the same value as in the requests.
+   * @param sourcePrefixLength The length of the netmask pertaining to the query. In replies, it
+   *     mirrors the same value as in the requests.
    * @param address The address of the client.
    * @see ClientSubnetOption
    */
-  public ClientSubnetOption(int sourceNetmask, InetAddress address) {
-    this(sourceNetmask, 0, address);
+  public ClientSubnetOption(int sourcePrefixLength, InetAddress address) {
+    this(sourcePrefixLength, 0, address);
   }
 
   /** Returns the family of the network address. This will be either IPv4 (1) or IPv6 (2). */
@@ -89,13 +85,13 @@ public class ClientSubnetOption extends EDNSOption {
   }
 
   /** Returns the source netmask. */
-  public int getSourceNetmask() {
-    return sourceNetmask;
+  public int getSourcePrefixLength() {
+    return sourcePrefixLength;
   }
 
   /** Returns the scope netmask. */
-  public int getScopeNetmask() {
-    return scopeNetmask;
+  public int getScopePrefixLength() {
+    return scopePrefixLength;
   }
 
   /** Returns the IP address of the client. */
@@ -109,18 +105,18 @@ public class ClientSubnetOption extends EDNSOption {
     if (family != Address.IPv4 && family != Address.IPv6) {
       throw new WireParseException("unknown address family");
     }
-    sourceNetmask = in.readU8();
-    if (sourceNetmask > Address.addressLength(family) * 8) {
+    sourcePrefixLength = in.readU8();
+    if (sourcePrefixLength > Address.addressLength(family) * 8) {
       throw new WireParseException("invalid source netmask");
     }
-    scopeNetmask = in.readU8();
-    if (scopeNetmask > Address.addressLength(family) * 8) {
+    scopePrefixLength = in.readU8();
+    if (scopePrefixLength > Address.addressLength(family) * 8) {
       throw new WireParseException("invalid scope netmask");
     }
 
     // Read the truncated address
     byte[] addr = in.readByteArray();
-    if (addr.length != (sourceNetmask + 7) / 8) {
+    if (addr.length != (sourcePrefixLength + 7) / 8) {
       throw new WireParseException("invalid address");
     }
 
@@ -134,7 +130,7 @@ public class ClientSubnetOption extends EDNSOption {
       throw new WireParseException("invalid address", e);
     }
 
-    InetAddress tmp = Address.truncate(address, sourceNetmask);
+    InetAddress tmp = Address.truncate(address, sourcePrefixLength);
     if (!tmp.equals(address)) {
       throw new WireParseException("invalid padding");
     }
@@ -143,9 +139,9 @@ public class ClientSubnetOption extends EDNSOption {
   @Override
   void optionToWire(DNSOutput out) {
     out.writeU16(family);
-    out.writeU8(sourceNetmask);
-    out.writeU8(scopeNetmask);
-    out.writeByteArray(address.getAddress(), 0, (sourceNetmask + 7) / 8);
+    out.writeU8(sourcePrefixLength);
+    out.writeU8(scopePrefixLength);
+    out.writeByteArray(address.getAddress(), 0, (sourcePrefixLength + 7) / 8);
   }
 
   @Override
@@ -153,9 +149,9 @@ public class ClientSubnetOption extends EDNSOption {
     StringBuilder sb = new StringBuilder();
     sb.append(address.getHostAddress());
     sb.append("/");
-    sb.append(sourceNetmask);
+    sb.append(sourcePrefixLength);
     sb.append(", scope netmask ");
-    sb.append(scopeNetmask);
+    sb.append(scopePrefixLength);
     return sb.toString();
   }
 }
