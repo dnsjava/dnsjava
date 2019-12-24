@@ -16,7 +16,7 @@ public class CookieOption extends EDNSOption {
   private byte[] clientCookie;
 
   /** server cookie */
-  private Optional<byte[]> serverCookie;
+  private byte[] serverCookie;
 
   /** Default constructor for constructing instance from binary representation. */
   CookieOption() {
@@ -29,7 +29,7 @@ public class CookieOption extends EDNSOption {
    * @param clientCookie the client cookie, which must consist of eight bytes
    */
   public CookieOption(byte[] clientCookie) {
-    this(clientCookie, Optional.empty());
+    this(clientCookie, null);
   }
 
   /**
@@ -38,15 +38,15 @@ public class CookieOption extends EDNSOption {
    * @param clientCookie the client cookie, which must consist of eight bytes
    * @param serverCookie the server cookie, which must consist of 8 to 32 bytes if present
    */
-  public CookieOption(byte[] clientCookie, Optional<byte[]> serverCookie) {
+  public CookieOption(byte[] clientCookie, byte[] serverCookie) {
     this();
     if (clientCookie == null) throw new IllegalArgumentException("client cookie must not be null");
     if (clientCookie.length != 8)
       throw new IllegalArgumentException("client cookie must consist of eight bytes");
     this.clientCookie = clientCookie;
 
-    if (serverCookie.isPresent()) {
-      int length = serverCookie.get().length;
+    if (serverCookie != null) {
+      int length = serverCookie.length;
       if (length < 8 || length > 32)
         throw new IllegalArgumentException("server cookie must consist of 8 to 32 bytes");
     }
@@ -68,7 +68,7 @@ public class CookieOption extends EDNSOption {
    * @return the server cookie
    */
   public Optional<byte[]> getServerCookie() {
-    return serverCookie;
+    return Optional.ofNullable(serverCookie);
   }
 
   /**
@@ -85,9 +85,7 @@ public class CookieOption extends EDNSOption {
     if (length > 8) {
       if (length < 16 || length > 40)
         throw new WireParseException("invalid length of server cookie");
-      serverCookie = Optional.of(in.readByteArray());
-    } else {
-      serverCookie = Optional.empty();
+      serverCookie = in.readByteArray();
     }
   }
 
@@ -99,7 +97,9 @@ public class CookieOption extends EDNSOption {
   @Override
   void optionToWire(DNSOutput out) {
     out.writeByteArray(clientCookie);
-    if (serverCookie.isPresent()) out.writeByteArray(serverCookie.get());
+    if (serverCookie != null) {
+      out.writeByteArray(serverCookie);
+    }
   }
 
   /**
@@ -109,8 +109,8 @@ public class CookieOption extends EDNSOption {
    */
   @Override
   String optionToString() {
-    return serverCookie.isPresent()
-        ? base16.toString(clientCookie) + " " + base16.toString(serverCookie.get())
+    return serverCookie != null
+        ? base16.toString(clientCookie) + " " + base16.toString(serverCookie)
         : base16.toString(clientCookie);
   }
 }

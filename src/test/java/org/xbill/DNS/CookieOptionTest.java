@@ -28,30 +28,27 @@ class CookieOptionTest {
     CookieOption option = new CookieOption(eightBytes);
     assertArrayEquals(eightBytes, option.getClientCookie());
     assertFalse(option.getServerCookie().isPresent());
-    new CookieOption(eightBytes, Optional.empty());
+    new CookieOption(eightBytes, null);
 
-    option = new CookieOption(eightBytes, Optional.empty());
+    option = new CookieOption(eightBytes, null);
     assertArrayEquals(eightBytes, option.getClientCookie());
     assertFalse(option.getServerCookie().isPresent());
 
-    option = new CookieOption(eightBytes, Optional.of(eightBytes2));
+    option = new CookieOption(eightBytes, eightBytes2);
     Optional<byte[]> serverCookie = option.getServerCookie();
     assertTrue(serverCookie.isPresent());
     assertArrayEquals(eightBytes2, serverCookie.get());
 
-    option = new CookieOption(eightBytes, Optional.of(thirtyTwoBytes));
+    option = new CookieOption(eightBytes, thirtyTwoBytes);
     serverCookie = option.getServerCookie();
     assertTrue(serverCookie.isPresent());
     assertArrayEquals(thirtyTwoBytes, serverCookie.get());
 
     assertThrows(IllegalArgumentException.class, () -> new CookieOption(sevenBytes));
     assertThrows(IllegalArgumentException.class, () -> new CookieOption(nineBytes));
+    assertThrows(IllegalArgumentException.class, () -> new CookieOption(eightBytes, sevenBytes));
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new CookieOption(eightBytes, Optional.of(sevenBytes)));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new CookieOption(eightBytes, Optional.of(thirtyThreeBytes)));
+        IllegalArgumentException.class, () -> new CookieOption(eightBytes, thirtyThreeBytes));
   }
 
   @Test
@@ -99,7 +96,7 @@ class CookieOptionTest {
     cookieOption = new CookieOption(clientCookie1);
     assertArrayEquals(clientOnlyCookieOption, cookieOption.toWire());
 
-    cookieOption = new CookieOption(clientCookie2, Optional.of(serverCookie2));
+    cookieOption = new CookieOption(clientCookie2, serverCookie2);
     assertArrayEquals(clientServerCookieOption, cookieOption.toWire());
   }
 }
