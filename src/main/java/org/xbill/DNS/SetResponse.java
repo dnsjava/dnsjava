@@ -55,11 +55,11 @@ public class SetResponse {
   private static final SetResponse nxrrset = new SetResponse(NXRRSET);
 
   private int type;
-  private List<RRset<?>> data;
+  private List<RRset> data;
 
   private SetResponse() {}
 
-  SetResponse(int type, RRset<?> rrset) {
+  SetResponse(int type, RRset rrset) {
     if (type < 0 || type > 6) {
       throw new IllegalArgumentException("invalid type");
     }
@@ -97,7 +97,7 @@ public class SetResponse {
     }
   }
 
-  void addRRset(RRset<?> rrset) {
+  void addRRset(RRset rrset) {
     if (data == null) {
       data = new ArrayList<>();
     }
@@ -140,7 +140,7 @@ public class SetResponse {
   }
 
   /** If the query was successful, return the answers */
-  public List<RRset<?>> answers() {
+  public List<RRset> answers() {
     if (type != SUCCESSFUL) {
       return null;
     }
@@ -158,9 +158,8 @@ public class SetResponse {
   }
 
   /** If the query hit a delegation point, return the NS set. */
-  @SuppressWarnings("unchecked")
-  public RRset<NSRecord> getNS() {
-    return (data != null) ? (RRset<NSRecord>) data.get(0) : null;
+  public RRset getNS() {
+    return (data != null) ? data.get(0) : null;
   }
 
   /** Prints the value of the SetResponse */

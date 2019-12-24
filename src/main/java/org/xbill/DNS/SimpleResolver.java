@@ -62,13 +62,21 @@ public class SimpleResolver implements Resolver {
   public SimpleResolver(String hostname) throws UnknownHostException {
     if (hostname == null) {
       address = ResolverConfig.getCurrentConfig().server();
+      if (address == null) {
+        address = defaultResolver;
+      }
+
+      return;
     }
 
+    InetAddress addr;
     if ("0".equals(hostname)) {
-      address = defaultResolver;
+      addr = InetAddress.getLoopbackAddress();
     } else {
-      address = new InetSocketAddress(InetAddress.getByName(hostname), DEFAULT_PORT);
+      addr = InetAddress.getByName(hostname);
     }
+
+    address = new InetSocketAddress(addr, DEFAULT_PORT);
   }
 
   /** Creates a SimpleResolver that will query the specified host */
@@ -95,6 +103,11 @@ public class SimpleResolver implements Resolver {
   /** Sets the default host (initially localhost) to query */
   public static void setDefaultResolver(InetSocketAddress hostname) {
     defaultResolver = hostname;
+  }
+
+  /** Sets the default host (initially localhost) to query */
+  public static void setDefaultResolver(String hostname) {
+    defaultResolver = new InetSocketAddress(hostname, DEFAULT_PORT);
   }
 
   @Override

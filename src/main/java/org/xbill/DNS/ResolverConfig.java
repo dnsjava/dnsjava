@@ -131,7 +131,7 @@ public final class ResolverConfig {
    * name will be tried first as an absolute name.
    *
    * <p>Note that ndots can only be configured in a resolv.conf file or the property {@link
-   * #DNS_NDOTS_PROP}.
+   * PropertyResolverConfigProvider#DNS_NDOTS_PROP}.
    */
   public int ndots() {
     return ndots;

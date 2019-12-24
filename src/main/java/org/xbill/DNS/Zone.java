@@ -30,11 +30,11 @@ public class Zone implements Serializable {
   private Name origin;
   private Object originNode;
   private int dclass = DClass.IN;
-  private RRset<NSRecord> NS;
+  private RRset NS;
   private SOARecord SOA;
   private boolean hasWild;
 
-  class ZoneIterator implements Iterator<RRset<?>> {
+  class ZoneIterator implements Iterator<RRset> {
     private Iterator zentries;
     private RRset[] current;
     private int count;
@@ -216,7 +216,7 @@ public class Zone implements Serializable {
   }
 
   /** Returns the Zone origin's NS records */
-  public RRset<NSRecord> getNS() {
+  public RRset getNS() {
     return NS;
   }
 
@@ -234,10 +234,10 @@ public class Zone implements Serializable {
     return data.get(name);
   }
 
-  private synchronized RRset<?>[] allRRsets(Object types) {
+  private synchronized RRset[] allRRsets(Object types) {
     if (types instanceof List) {
       @SuppressWarnings("unchecked")
-      List<RRset<?>> typelist = (List<RRset<?>>) types;
+      List<RRset> typelist = (List<RRset>) types;
       return typelist.toArray(new RRset[0]);
     } else {
       RRset set = (RRset) types;
@@ -245,21 +245,20 @@ public class Zone implements Serializable {
     }
   }
 
-  private synchronized <T extends Record> RRset<T> oneRRset(Object types, int type) {
+  private synchronized <T extends Record> RRset oneRRset(Object types, int type) {
     if (type == Type.ANY) {
       throw new IllegalArgumentException("oneRRset(ANY)");
     }
     if (types instanceof List) {
       @SuppressWarnings("unchecked")
-      List<RRset<T>> list = (List<RRset<T>>) types;
-      for (RRset<T> set : list) {
+      List<RRset> list = (List<RRset>) types;
+      for (RRset set : list) {
         if (set.getType() == type) {
           return set;
         }
       }
     } else {
-      @SuppressWarnings("unchecked")
-      RRset<T> set = (RRset<T>) types;
+      RRset set = (RRset) types;
       if (set.getType() == type) {
         return set;
       }
@@ -267,7 +266,7 @@ public class Zone implements Serializable {
     return null;
   }
 
-  private synchronized <T extends Record> RRset<T> findRRset(Name name, int type) {
+  private synchronized <T extends Record> RRset findRRset(Name name, int type) {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -370,7 +369,7 @@ public class Zone implements Serializable {
 
       /* If this is a delegation, return that. */
       if (!isOrigin) {
-        RRset<NSRecord> ns = oneRRset(types, Type.NS);
+        RRset ns = oneRRset(types, Type.NS);
         if (ns != null) {
           return new SetResponse(SetResponse.DELEGATION, ns);
         }
@@ -379,8 +378,8 @@ public class Zone implements Serializable {
       /* If this is an ANY lookup, return everything. */
       if (isExact && type == Type.ANY) {
         sr = new SetResponse(SetResponse.SUCCESSFUL);
-        RRset<?>[] sets = allRRsets(types);
-        for (RRset<?> set : sets) {
+        RRset[] sets = allRRsets(types);
+        for (RRset set : sets) {
           sr.addRRset(set);
         }
         return sr;
@@ -455,7 +454,7 @@ public class Zone implements Serializable {
    * @return The matching RRset
    * @see RRset
    */
-  public <T extends Record> RRset<T> findExactMatch(Name name, int type) {
+  public <T extends Record> RRset findExactMatch(Name name, int type) {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -469,7 +468,7 @@ public class Zone implements Serializable {
    * @param rrset The RRset to be added
    * @see RRset
    */
-  public void addRRset(RRset<?> rrset) {
+  public void addRRset(RRset rrset) {
     Name name = rrset.getName();
     addRRset(name, rrset);
   }
@@ -484,9 +483,9 @@ public class Zone implements Serializable {
     Name name = r.getName();
     int rtype = r.getRRsetType();
     synchronized (this) {
-      RRset<T> rrset = findRRset(name, rtype);
+      RRset rrset = findRRset(name, rtype);
       if (rrset == null) {
-        rrset = new RRset<>(r);
+        rrset = new RRset(r);
         addRRset(name, rrset);
       } else {
         rrset.addRR(r);
@@ -504,7 +503,7 @@ public class Zone implements Serializable {
     Name name = r.getName();
     int rtype = r.getRRsetType();
     synchronized (this) {
-      RRset<T> rrset = findRRset(name, rtype);
+      RRset rrset = findRRset(name, rtype);
       if (rrset == null) {
         return;
       }
@@ -517,7 +516,7 @@ public class Zone implements Serializable {
   }
 
   /** Returns an Iterator over the RRsets in the zone. */
-  public Iterator<RRset<?>> iterator() {
+  public Iterator<RRset> iterator() {
     return new ZoneIterator(false);
   }
 
@@ -526,13 +525,13 @@ public class Zone implements Serializable {
    * This is identical to {@link #iterator} except that the SOA is returned at the end as well as
    * the beginning.
    */
-  public Iterator<RRset<?>> AXFR() {
+  public Iterator<RRset> AXFR() {
     return new ZoneIterator(true);
   }
 
   private void nodeToString(StringBuffer sb, Object node) {
     RRset[] sets = allRRsets(node);
-    for (RRset<?> rrset : sets) {
+    for (RRset rrset : sets) {
       rrset.rrs().forEach(r -> sb.append(r).append('\n'));
       rrset.sigs().forEach(r -> sb.append(r).append('\n'));
     }

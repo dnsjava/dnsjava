@@ -48,8 +48,7 @@ public class dig {
       return;
     }
 
-    Record[] records = response.getSectionArray(Section.ANSWER);
-    for (Record record : records) {
+    for (Record record : response.getSection(Section.ANSWER)) {
       System.out.println(record);
     }
 

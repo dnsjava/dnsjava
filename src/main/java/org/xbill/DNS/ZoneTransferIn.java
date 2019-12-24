@@ -94,31 +94,31 @@ public class ZoneTransferIn {
   public interface ZoneTransferHandler {
 
     /** Called when an AXFR transfer begins. */
-    void startAXFR();
+    void startAXFR() throws ZoneTransferException;
 
     /** Called when an IXFR transfer begins. */
-    void startIXFR();
+    void startIXFR() throws ZoneTransferException;
 
     /**
      * Called when a series of IXFR deletions begins.
      *
      * @param soa The starting SOA.
      */
-    void startIXFRDeletes(Record soa);
+    void startIXFRDeletes(Record soa) throws ZoneTransferException;
 
     /**
      * Called when a series of IXFR adds begins.
      *
      * @param soa The starting SOA.
      */
-    void startIXFRAdds(Record soa);
+    void startIXFRAdds(Record soa) throws ZoneTransferException;
 
     /**
      * Called for each content record in an AXFR.
      *
      * @param r The DNS record.
      */
-    void handleRecord(Record r);
+    void handleRecord(Record r) throws ZoneTransferException;
   }
 
   private static class BasicHandler implements ZoneTransferHandler {
@@ -507,8 +507,7 @@ public class ZoneTransferIn {
         }
       }
 
-      Record[] answers = response.getSectionArray(Section.ANSWER);
-
+      List<Record> answers = response.getSection(Section.ANSWER);
       if (state == INITIALSOA) {
         int rcode = response.getRcode();
         if (rcode != Rcode.NOERROR) {
@@ -525,7 +524,7 @@ public class ZoneTransferIn {
           fail("invalid question section");
         }
 
-        if (answers.length == 0 && qtype == Type.IXFR) {
+        if (answers.isEmpty() && qtype == Type.IXFR) {
           fallback();
           doxfr();
           return;

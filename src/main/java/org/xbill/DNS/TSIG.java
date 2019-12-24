@@ -24,12 +24,16 @@ import org.xbill.DNS.utils.base64;
  */
 @Slf4j
 public class TSIG {
+  // https://www.iana.org/assignments/tsig-algorithm-names/tsig-algorithm-names.xml
+
+  /** The domain name representing the gss-tsig algorithm. */
+  public static final Name GSS_TSIG = Name.fromConstantString("gss-tsig.");
 
   /** The domain name representing the HMAC-MD5 algorithm. */
   public static final Name HMAC_MD5 = Name.fromConstantString("HMAC-MD5.SIG-ALG.REG.INT.");
 
   /** The domain name representing the HMAC-MD5 algorithm (deprecated). */
-  public static final Name HMAC = HMAC_MD5;
+  @Deprecated public static final Name HMAC = HMAC_MD5;
 
   /** The domain name representing the HMAC-SHA1 algorithm. */
   public static final Name HMAC_SHA1 = Name.fromConstantString("hmac-sha1.");
@@ -46,7 +50,7 @@ public class TSIG {
   /** The domain name representing the HMAC-SHA512 algorithm. */
   public static final Name HMAC_SHA512 = Name.fromConstantString("hmac-sha512.");
 
-  private static Map algMap;
+  private static Map<Name, String> algMap;
 
   static {
     Map<Name, String> out = new HashMap<>();
@@ -60,17 +64,16 @@ public class TSIG {
   }
 
   public static Name algorithmToName(String alg) {
-    for (Object o : algMap.entrySet()) {
-      Map.Entry entry = (Map.Entry) o;
-      if (alg.equalsIgnoreCase((String) entry.getValue())) {
-        return (Name) entry.getKey();
+    for (Map.Entry<Name, String> entry : algMap.entrySet()) {
+      if (alg.equalsIgnoreCase(entry.getValue())) {
+        return entry.getKey();
       }
     }
     throw new IllegalArgumentException("Unknown algorithm");
   }
 
   public static String nameToAlgorithm(Name name) {
-    String alg = (String) algMap.get(name);
+    String alg = algMap.get(name);
     if (alg != null) {
       return alg;
     }
@@ -408,8 +411,6 @@ public class TSIG {
     hmac.update(out.toByteArray());
 
     byte[] signature = hmac.doFinal();
-    byte[] other = null;
-
     Record r =
         new TSIGRecord(
             name,
@@ -421,9 +422,29 @@ public class TSIG {
             signature,
             m.getHeader().getID(),
             Rcode.NOERROR,
-            other);
+            null);
     m.addRecord(r, Section.ADDITIONAL);
     m.tsigState = Message.TSIG_SIGNED;
+  }
+
+  /**
+   * Verifies a TSIG record on an incoming message. Since this is only called in the context where a
+   * TSIG is expected to be present, it is an error if one is not present. After calling this
+   * routine, Message.isVerified() may be called on this message.
+   *
+   * @param m The message
+   * @param b An array containing the message in unparsed form. This is necessary since TSIG signs
+   *     the message in wire format, and we can't recreate the exact wire format (with the same name
+   *     compression).
+   * @param length unused
+   * @param old If this message is a response, the TSIG from the request
+   * @return The result of the verification (as an Rcode)
+   * @see Rcode
+   * @deprecated use {@link #verify(Message, byte[], TSIGRecord)}
+   */
+  @Deprecated
+  public byte verify(Message m, byte[] b, int length, TSIGRecord old) {
+    return (byte) verify(m, b, old);
   }
 
   /**
@@ -439,7 +460,7 @@ public class TSIG {
    * @return The result of the verification (as an Rcode)
    * @see Rcode
    */
-  public byte verify(Message m, byte[] b, TSIGRecord old) {
+  public int verify(Message m, byte[] b, TSIGRecord old) {
     m.tsigState = Message.TSIG_FAILED;
     TSIGRecord tsig = m.getTSIG();
     hmac.reset();

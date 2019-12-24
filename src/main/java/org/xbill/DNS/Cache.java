@@ -43,20 +43,20 @@ public class Cache {
     return (int) expire;
   }
 
-  private static class CacheRRset<T extends Record> extends RRset<T> implements Element {
+  private static class CacheRRset extends RRset implements Element {
     private static final long serialVersionUID = 5971755205903597024L;
 
     int credibility;
     int expire;
 
-    public CacheRRset(T rec, int cred, long maxttl) {
+    public CacheRRset(Record rec, int cred, long maxttl) {
       super();
       this.credibility = cred;
       this.expire = limitExpire(rec.getTTL(), maxttl);
       addRR(rec);
     }
 
-    public CacheRRset(RRset<T> rrset, int cred, long maxttl) {
+    public CacheRRset(RRset rrset, int cred, long maxttl) {
       super(rrset);
       this.credibility = cred;
       this.expire = limitExpire(rrset.getTTL(), maxttl);
@@ -75,11 +75,7 @@ public class Cache {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append(super.toString());
-      sb.append(" cl = ");
-      sb.append(credibility);
-      return sb.toString();
+      return super.toString() + " cl = " + credibility;
     }
   }
 
@@ -187,10 +183,11 @@ public class Cache {
   /** Creates a Cache which initially contains all records in the specified file. */
   public Cache(String file) throws IOException {
     data = new CacheMap(defaultMaxEntries);
-    Master m = new Master(file);
-    Record record;
-    while ((record = m.nextRecord()) != null) {
-      addRecord(record, Credibility.HINT);
+    try (Master m = new Master(file)) {
+      Record record;
+      while ((record = m.nextRecord()) != null) {
+        addRecord(record, Credibility.HINT);
+      }
     }
   }
 
@@ -317,6 +314,18 @@ public class Cache {
   public synchronized void clearCache() {
     data.clear();
   }
+  /**
+   * Adds a record to the Cache.
+   *
+   * @param r The record to be added
+   * @param cred The credibility of the record
+   * @param o unused
+   * @deprecated use {@link #addRecord(Record, int)}
+   */
+  @Deprecated
+  public synchronized void addRecord(Record r, int cred, Object o) {
+    addRecord(r, cred);
+  }
 
   /**
    * Adds a record to the Cache.
@@ -333,12 +342,11 @@ public class Cache {
     }
     Element element = findElement(name, type, cred);
     if (element == null) {
-      CacheRRset<Record> crrset = new CacheRRset<>(r, cred, maxcache);
+      CacheRRset crrset = new CacheRRset(r, cred, maxcache);
       addRRset(crrset, cred);
     } else if (element.compareCredibility(cred) == 0) {
       if (element instanceof CacheRRset) {
-        @SuppressWarnings("unchecked")
-        CacheRRset<Record> crrset = (CacheRRset<Record>) element;
+        CacheRRset crrset = (CacheRRset) element;
         crrset.addRR(r);
       }
     }
@@ -351,7 +359,7 @@ public class Cache {
    * @param cred The credibility of these records
    * @see RRset
    */
-  public synchronized <T extends Record> void addRRset(RRset<T> rrset, int cred) {
+  public synchronized <T extends Record> void addRRset(RRset rrset, int cred) {
     long ttl = rrset.getTTL();
     Name name = rrset.getName();
     int type = rrset.getType();
@@ -365,11 +373,11 @@ public class Cache {
         element = null;
       }
       if (element == null) {
-        CacheRRset<T> crrset;
+        CacheRRset crrset;
         if (rrset instanceof CacheRRset) {
-          crrset = (CacheRRset<T>) rrset;
+          crrset = (CacheRRset) rrset;
         } else {
-          crrset = new CacheRRset<>(rrset, cred, maxcache);
+          crrset = new CacheRRset(rrset, cred, maxcache);
         }
         addElement(name, crrset);
       }
@@ -454,7 +462,7 @@ public class Cache {
           if (element.compareCredibility(minCred) < 0) {
             continue;
           }
-          sr.addRRset((CacheRRset<?>) element);
+          sr.addRRset((CacheRRset) element);
           added++;
         }
         /* There were positive entries */
@@ -514,11 +522,10 @@ public class Cache {
     return lookup(name, type, minCred);
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends Record> List<RRset<T>> findRecords(Name name, int type, int minCred) {
+  private List<RRset> findRecords(Name name, int type, int minCred) {
     SetResponse cr = lookupRecords(name, type, minCred);
     if (cr.isSuccessful()) {
-      return (List<RRset<T>>) (List) cr.answers();
+      return cr.answers();
     } else {
       return null;
     }
@@ -533,7 +540,7 @@ public class Cache {
    * @return An array of RRsets, or null
    * @see Credibility
    */
-  public <T extends Record> List<RRset<T>> findRecords(Name name, int type) {
+  public List<RRset> findRecords(Name name, int type) {
     return findRecords(name, type, Credibility.NORMAL);
   }
 
@@ -546,7 +553,7 @@ public class Cache {
    * @return An array of RRsets, or null
    * @see Credibility
    */
-  public <T extends Record> List<RRset<T>> findAnyRecords(Name name, int type) {
+  public List<RRset> findAnyRecords(Name name, int type) {
     return findRecords(name, type, Credibility.GLUE);
   }
 
@@ -570,7 +577,7 @@ public class Cache {
     }
   }
 
-  private static void markAdditional(RRset<?> rrset, Set<Name> names) {
+  private static void markAdditional(RRset rrset, Set<Name> names) {
     Record first = rrset.first();
     if (first.getAdditionalName() == null) {
       return;
@@ -593,7 +600,6 @@ public class Cache {
    *     nothing useful could be cached from the message.
    * @see Message
    */
-  @SuppressWarnings("unchecked")
   public SetResponse addMessage(Message in) {
     boolean isAuth = in.getHeader().getFlag(Flags.AA);
     Record question = in.getQuestion();
@@ -604,7 +610,7 @@ public class Cache {
     int cred;
     int rcode = in.getHeader().getRcode();
     boolean completed = false;
-    RRset[] answers, auth, addl;
+    List<RRset> answers, auth, addl;
     SetResponse response = null;
     HashSet<Name> additionalNames;
 
@@ -621,7 +627,7 @@ public class Cache {
     additionalNames = new HashSet<>();
 
     answers = in.getSectionRRsets(Section.ANSWER);
-    for (RRset<?> answer : answers) {
+    for (RRset answer : answers) {
       if (answer.getDClass() != qclass) {
         continue;
       }
@@ -662,13 +668,13 @@ public class Cache {
     }
 
     auth = in.getSectionRRsets(Section.AUTHORITY);
-    RRset<SOARecord> soa = null;
-    RRset<NSRecord> ns = null;
-    for (RRset<?> rset : auth) {
+    RRset soa = null;
+    RRset ns = null;
+    for (RRset rset : auth) {
       if (rset.getType() == Type.SOA && curname.subdomain(rset.getName())) {
-        soa = (RRset<SOARecord>) rset;
+        soa = rset;
       } else if (rset.getType() == Type.NS && curname.subdomain(rset.getName())) {
-        ns = (RRset<NSRecord>) rset;
+        ns = rset;
       }
     }
     if (!completed) {
@@ -709,7 +715,7 @@ public class Cache {
     }
 
     addl = in.getSectionRRsets(Section.ADDITIONAL);
-    for (RRset<?> rRset : addl) {
+    for (RRset rRset : addl) {
       int type = rRset.getType();
       if (type != Type.A && type != Type.AAAA && type != Type.A6) {
         continue;

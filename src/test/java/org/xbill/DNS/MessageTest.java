@@ -34,7 +34,6 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class MessageTest {
@@ -49,11 +49,11 @@ public class MessageTest {
     @Test
     void ctor_0arg() {
       Message m = new Message();
-      assertArrayEquals(new Record[0], m.getSectionArray(0));
-      assertArrayEquals(new Record[0], m.getSectionArray(1));
-      assertArrayEquals(new Record[0], m.getSectionArray(3));
-      assertArrayEquals(new Record[0], m.getSectionArray(2));
-      assertThrows(IndexOutOfBoundsException.class, () -> m.getSectionArray(4));
+      assertTrue(m.getSection(0).isEmpty());
+      assertTrue(m.getSection(1).isEmpty());
+      assertTrue(m.getSection(3).isEmpty());
+      assertTrue(m.getSection(2).isEmpty());
+      assertThrows(IndexOutOfBoundsException.class, () -> m.getSection(4));
       Header h = m.getHeader();
       assertEquals(0, h.getCount(0));
       assertEquals(0, h.getCount(1));
@@ -65,11 +65,11 @@ public class MessageTest {
     void ctor_1arg() {
       Message m = new Message(10);
       assertEquals(new Header(10).toString(), m.getHeader().toString());
-      assertArrayEquals(new Record[0], m.getSectionArray(0));
-      assertArrayEquals(new Record[0], m.getSectionArray(1));
-      assertArrayEquals(new Record[0], m.getSectionArray(2));
-      assertArrayEquals(new Record[0], m.getSectionArray(3));
-      assertThrows(IndexOutOfBoundsException.class, () -> m.getSectionArray(4));
+      assertTrue(m.getSection(0).isEmpty());
+      assertTrue(m.getSection(1).isEmpty());
+      assertTrue(m.getSection(2).isEmpty());
+      assertTrue(m.getSection(3).isEmpty());
+      assertThrows(IndexOutOfBoundsException.class, () -> m.getSection(4));
       Header h = m.getHeader();
       assertEquals(0, h.getCount(0));
       assertEquals(0, h.getCount(1));
@@ -83,10 +83,11 @@ public class MessageTest {
       ARecord ar = new ARecord(n, DClass.IN, 1, InetAddress.getByName("192.168.101.110"));
 
       Message m = Message.newQuery(ar);
-      assertArrayEquals(new Record[] {ar}, m.getSectionArray(0));
-      assertArrayEquals(new Record[0], m.getSectionArray(1));
-      assertArrayEquals(new Record[0], m.getSectionArray(2));
-      assertArrayEquals(new Record[0], m.getSectionArray(3));
+      assertEquals(1, m.getSection(0).size());
+      assertEquals(ar, m.getSection(0).get(0));
+      assertTrue(m.getSection(1).isEmpty());
+      assertTrue(m.getSection(2).isEmpty());
+      assertTrue(m.getSection(3).isEmpty());
 
       Header h = m.getHeader();
       assertEquals(1, h.getCount(0));
@@ -117,10 +118,10 @@ public class MessageTest {
       byte[] binary = m.toWire(512);
       Message m2 = new Message(binary);
       assertEquals(2, m2.getHeader().getCount(Section.ADDITIONAL));
-      Record[] records = m2.getSectionArray(Section.ADDITIONAL);
-      assertEquals(2, records.length);
-      assertEquals(TXTRecord.class, records[0].getClass());
-      assertEquals(OPTRecord.class, records[1].getClass());
+      List<Record> records = m2.getSection(Section.ADDITIONAL);
+      assertEquals(2, records.size());
+      assertEquals(TXTRecord.class, records.get(0).getClass());
+      assertEquals(OPTRecord.class, records.get(1).getClass());
     }
   }
 }

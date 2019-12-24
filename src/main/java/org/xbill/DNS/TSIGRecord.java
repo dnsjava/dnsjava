@@ -5,6 +5,7 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -19,7 +20,7 @@ import org.xbill.DNS.utils.base64;
  */
 public class TSIGRecord extends Record {
 
-  private static final long serialVersionUID = -88820909016649306L;
+  private static final long serialVersionUID = -2649450085333713717L;
 
   private Name alg;
   private Instant timeSigned;
@@ -34,6 +35,46 @@ public class TSIGRecord extends Record {
   @Override
   Record getObject() {
     return new TSIGRecord();
+  }
+
+  /**
+   * Creates a TSIG Record from the given data. This is normally called by the TSIG class
+   *
+   * @param alg The shared key's algorithm
+   * @param timeSigned The time that this record was generated
+   * @param fudge The fudge factor for time - if the time that the message is received is not in the
+   *     range [now - fudge, now + fudge], the signature fails
+   * @param signature The signature
+   * @param originalID The message ID at the time of its generation
+   * @param error The extended error field. Should be 0 in queries.
+   * @param other The other data field. Currently used only in BADTIME responses.
+   * @see TSIG
+   * @deprecated use {@link #TSIGRecord(Name, int, long, Name, Instant, Duration, byte[], int, int,
+   *     byte[])}
+   */
+  @Deprecated
+  public TSIGRecord(
+      Name name,
+      int dclass,
+      long ttl,
+      Name alg,
+      Date timeSigned,
+      int fudge,
+      byte[] signature,
+      int originalID,
+      int error,
+      byte[] other) {
+    this(
+        name,
+        dclass,
+        ttl,
+        alg,
+        timeSigned.toInstant(),
+        Duration.ofSeconds(fudge),
+        signature,
+        originalID,
+        error,
+        other);
   }
 
   /**

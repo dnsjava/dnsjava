@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.Cache;
@@ -31,7 +30,6 @@ import org.xbill.DNS.ExtendedFlags;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
 import org.xbill.DNS.Message;
-import org.xbill.DNS.NSRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
 import org.xbill.DNS.OPTRecord;
@@ -198,12 +196,12 @@ public class jnamed {
     return null;
   }
 
-  public <T extends Record> RRset<T> findExactMatch(Name name, int type, int dclass, boolean glue) {
+  public <T extends Record> RRset findExactMatch(Name name, int type, int dclass, boolean glue) {
     Zone zone = findBestZone(name);
     if (zone != null) {
       return zone.findExactMatch(name, type);
     } else {
-      List<RRset<T>> rrsets;
+      List<RRset> rrsets;
       Cache cache = getCache(dclass);
       if (glue) {
         rrsets = cache.findAnyRecords(name, type);
@@ -219,7 +217,7 @@ public class jnamed {
   }
 
   <T extends Record> void addRRset(
-      Name name, Message response, RRset<T> rrset, int section, int flags) {
+      Name name, Message response, RRset rrset, int section, int flags) {
     for (int s = 1; s <= section; s++) {
       if (response.findRRset(name, rrset.getType(), s)) {
         return;
@@ -248,7 +246,7 @@ public class jnamed {
   }
 
   private void addNS(Message response, Zone zone, int flags) {
-    RRset<NSRecord> nsRecords = zone.getNS();
+    RRset nsRecords = zone.getNS();
     addRRset(nsRecords.getName(), response, nsRecords, Section.AUTHORITY, flags);
   }
 
@@ -257,14 +255,14 @@ public class jnamed {
     if (!sr.isDelegation()) {
       return;
     }
-    RRset<?> nsRecords = sr.getNS();
+    RRset nsRecords = sr.getNS();
     for (Record r : nsRecords.rrs()) {
       response.addRecord(r, Section.AUTHORITY);
     }
   }
 
   private void addGlue(Message response, Name name, int flags) {
-    RRset<ARecord> a = findExactMatch(name, Type.A, DClass.IN, true);
+    RRset a = findExactMatch(name, Type.A, DClass.IN, true);
     if (a == null) {
       return;
     }
@@ -272,8 +270,7 @@ public class jnamed {
   }
 
   private void addAdditional2(Message response, int section, int flags) {
-    Record[] records = response.getSectionArray(section);
-    for (Record r : records) {
+    for (Record r : response.getSection(section)) {
       Name glueName = r.getAdditionalName();
       if (glueName != null) {
         addGlue(response, glueName, flags);
@@ -327,11 +324,11 @@ public class jnamed {
         }
       }
     } else if (sr.isDelegation()) {
-      RRset<NSRecord> nsRecords = sr.getNS();
+      RRset nsRecords = sr.getNS();
       addRRset(nsRecords.getName(), response, nsRecords, Section.AUTHORITY, flags);
     } else if (sr.isCNAME()) {
       CNAMERecord cname = sr.getCNAME();
-      RRset<CNAMERecord> rrset = new RRset<>(cname);
+      RRset rrset = new RRset(cname);
       addRRset(name, response, rrset, Section.ANSWER, flags);
       if (zone != null && iterations == 0) {
         response.getHeader().setFlag(Flags.AA);
@@ -339,7 +336,7 @@ public class jnamed {
       rcode = addAnswer(response, cname.getTarget(), type, dclass, iterations + 1, flags);
     } else if (sr.isDNAME()) {
       DNAMERecord dname = sr.getDNAME();
-      RRset<DNAMERecord> rrset = new RRset<>(dname);
+      RRset rrset = new RRset(dname);
       addRRset(name, response, rrset, Section.ANSWER, flags);
       Name newname;
       try {
@@ -349,15 +346,15 @@ public class jnamed {
       }
 
       CNAMERecord cname = new CNAMERecord(name, dclass, 0, newname);
-      RRset<CNAMERecord> cnamerrset = new RRset<>(cname);
+      RRset cnamerrset = new RRset(cname);
       addRRset(name, response, cnamerrset, Section.ANSWER, flags);
       if (zone != null && iterations == 0) {
         response.getHeader().setFlag(Flags.AA);
       }
       rcode = addAnswer(response, newname, type, dclass, iterations + 1, flags);
     } else if (sr.isSuccessful()) {
-      List<RRset<?>> rrsets = sr.answers();
-      for (RRset<?> rrset : rrsets) {
+      List<RRset> rrsets = sr.answers();
+      for (RRset rrset : rrsets) {
         addRRset(name, response, rrset, Section.ANSWER, flags);
       }
       if (zone != null) {
@@ -382,9 +379,9 @@ public class jnamed {
       DataOutputStream dataOut;
       dataOut = new DataOutputStream(s.getOutputStream());
       int id = query.getHeader().getID();
-      Iterator<RRset<?>> it = zone.AXFR();
+      Iterator<RRset> it = zone.AXFR();
       while (it.hasNext()) {
-        RRset<?> rrset = it.next();
+        RRset rrset = it.next();
         Message response = new Message(id);
         Header header = response.getHeader();
         header.setFlag(Flags.QR);
