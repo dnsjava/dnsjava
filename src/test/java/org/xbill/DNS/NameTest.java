@@ -1444,18 +1444,6 @@ class NameTest {
 
   static class Test_compareTo {
     @Test
-    void notName() throws TextParseException {
-      Name n = new Name("A.Name");
-      assertThrows(ClassCastException.class, () -> n.compareTo(new Object()));
-    }
-
-    @Test
-    void same() throws TextParseException {
-      Name n = new Name("A.Name");
-      assertEquals(0, n.compareTo(n));
-    }
-
-    @Test
     void equal() throws TextParseException {
       Name n1 = new Name("A.Name.");
       Name n2 = new Name("a.name.");

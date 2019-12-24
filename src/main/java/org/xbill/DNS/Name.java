@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Brian Wellington
  */
 @Slf4j
-public class Name implements Comparable, Serializable {
+public class Name implements Comparable<Name>, Serializable {
 
   private static final long serialVersionUID = -7257019940971525644L;
 
@@ -800,13 +800,7 @@ public class Name implements Comparable, Serializable {
       return false;
     }
     Name d = (Name) arg;
-    if (d.hashcode == 0) {
-      d.hashCode();
-    }
-    if (hashcode == 0) {
-      hashCode();
-    }
-    if (d.hashcode != hashcode) {
+    if (d.hashCode() != hashCode()) {
       return false;
     }
     if (d.labels() != labels()) {
@@ -819,7 +813,7 @@ public class Name implements Comparable, Serializable {
   @Override
   public int hashCode() {
     if (hashcode != 0) {
-      return (hashcode);
+      return hashcode;
     }
     int code = 0;
     for (int i = offset(0); i < name.length; i++) {
@@ -832,23 +826,21 @@ public class Name implements Comparable, Serializable {
   /**
    * Compares this Name to another Object.
    *
-   * @param o The Object to be compared.
+   * @param arg The name to be compared.
    * @return The value 0 if the argument is a name equivalent to this name; a value less than 0 if
    *     the argument is less than this name in the canonical ordering, and a value greater than 0
    *     if the argument is greater than this name in the canonical ordering.
    * @throws ClassCastException if the argument is not a Name.
    */
   @Override
-  public int compareTo(Object o) {
-    Name arg = (Name) o;
-
+  public int compareTo(Name arg) {
     if (this == arg) {
       return (0);
     }
 
     int labels = labels();
     int alabels = arg.labels();
-    int compares = labels > alabels ? alabels : labels;
+    int compares = Math.min(labels, alabels);
 
     for (int i = 1; i <= compares; i++) {
       int start = offset(labels - i);
