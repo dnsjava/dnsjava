@@ -539,11 +539,9 @@ public class Zone implements Serializable {
 
   /** Returns the contents of the Zone in master file format. */
   public synchronized String toMasterFile() {
-    Iterator zentries = data.entrySet().iterator();
     StringBuffer sb = new StringBuffer();
     nodeToString(sb, originNode);
-    while (zentries.hasNext()) {
-      Map.Entry entry = (Map.Entry) zentries.next();
+    for (Map.Entry<Name, Object> entry : data.entrySet()) {
       if (!origin.equals(entry.getKey())) {
         nodeToString(sb, entry.getValue());
       }
