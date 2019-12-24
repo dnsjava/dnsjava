@@ -375,5 +375,10 @@ class HeaderTest {
     for (int i = 0; i < 4; ++i) {
       assertEquals(m_h.getCount(i), h2.getCount(i));
     }
+
+    h2.setCount(1, 1);
+    h2.setCount(2, 1);
+    assertEquals(0xFF, m_h.getCount(1));
+    assertEquals(0x0A, m_h.getCount(2));
   }
 }

@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.SneakyThrows;
 
 /**
  * A DNS Message. A message is the basic unit of communication between the client and server of a
@@ -622,25 +623,24 @@ public class Message implements Cloneable {
    * @see OPTRecord
    */
   @Override
+  @SneakyThrows(CloneNotSupportedException.class)
+  @SuppressWarnings("unchecked")
   public Message clone() {
-    Message m;
-    try {
-      m = (Message) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException(e);
-    }
+    Message m = (Message) super.clone();
+    m.sections = (List<Record>[]) new List[sections.length];
     for (int i = 0; i < sections.length; i++) {
       if (sections[i] != null) {
         m.sections[i] = new LinkedList<>(sections[i]);
       }
     }
     m.header = header.clone();
-    m.size = size;
-    m.resolver = this.resolver;
+    if (querytsig != null) {
+      m.querytsig = (TSIGRecord) querytsig.cloneRecord();
+    }
     return m;
   }
 
-  /** Sets the resolver that originally received this Message a server. */
+  /** Sets the resolver that originally received this Message from a server. */
   public void setResolver(Resolver resolver) {
     this.resolver = resolver;
   }
