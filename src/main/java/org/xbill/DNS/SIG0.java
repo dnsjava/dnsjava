@@ -97,8 +97,7 @@ public class SIG0 {
       Message message, byte[] b, KEYRecord key, SIGRecord previous, Instant now)
       throws DNSSEC.DNSSECException {
     SIGRecord sig = null;
-    Record[] additional = message.getSectionArray(Section.ADDITIONAL);
-    for (Record record : additional) {
+    for (Record record : message.getSection(Section.ADDITIONAL)) {
       if (record.getType() != Type.SIG) {
         continue;
       }

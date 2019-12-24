@@ -16,15 +16,8 @@ import java.util.List;
  * @see RRSIGRecord
  * @author Brian Wellington
  */
-public class RRset<T extends Record> implements Serializable {
-
-  private static final long serialVersionUID = -3270249290171239695L;
-
-  /*
-   * rrs contains both normal and RRSIG records, with the RRSIG records
-   * at the end.
-   */
-  private final ArrayList<T> rrs;
+public class RRset implements Serializable {
+  private final ArrayList<Record> rrs;
   private final ArrayList<RRSIGRecord> sigs;
   private short position;
   private long ttl;
@@ -36,13 +29,13 @@ public class RRset<T extends Record> implements Serializable {
   }
 
   /** Creates an RRset and sets its contents to the specified record */
-  public RRset(T record) {
+  public RRset(Record record) {
     this();
     addRR(record);
   }
 
   /** Creates an RRset with the contents of an existing RRset */
-  public RRset(RRset<T> rrset) {
+  public RRset(RRset rrset) {
     rrs = new ArrayList<>(rrset.rrs);
     sigs = new ArrayList<>(rrset.sigs);
     position = rrset.position;
@@ -63,7 +56,7 @@ public class RRset<T extends Record> implements Serializable {
    * in the RRset, all records are set to the lowest TTL of either the added record or the existing
    * records.
    */
-  public void addRR(T r) {
+  public void addRR(Record r) {
     if (r instanceof RRSIGRecord) {
       addRR((RRSIGRecord) r, sigs);
       return;
@@ -126,7 +119,7 @@ public class RRset<T extends Record> implements Serializable {
   }
 
   /** Deletes a record from this RRset */
-  public void deleteRR(T r) {
+  public void deleteRR(Record r) {
     if (r instanceof RRSIGRecord) {
       sigs.remove(r);
       return;
@@ -147,12 +140,12 @@ public class RRset<T extends Record> implements Serializable {
    * @param cycle If true, cycle through the records so that each list will start with a different
    *     record.
    */
-  public List<T> rrs(boolean cycle) {
+  public List<Record> rrs(boolean cycle) {
     if (!cycle || rrs.size() <= 1) {
       return Collections.unmodifiableList(rrs);
     }
 
-    List<T> l = new ArrayList<>(rrs.size());
+    List<Record> l = new ArrayList<>(rrs.size());
     int start = position++ % rrs.size();
     l.addAll(rrs.subList(start, rrs.size()));
     l.addAll(rrs.subList(0, start));
@@ -163,7 +156,7 @@ public class RRset<T extends Record> implements Serializable {
    * Returns a list of all data records. This cycles through the records, so that each returned list
    * will start with a different record.
    */
-  public List<T> rrs() {
+  public List<Record> rrs() {
     return rrs(true);
   }
 

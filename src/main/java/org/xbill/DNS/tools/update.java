@@ -220,7 +220,7 @@ public class update {
             doLog(st);
             break;
           case "assert":
-            if (doAssert(st) == false) {
+            if (!doAssert(st)) {
               return;
             }
             break;
@@ -267,8 +267,7 @@ public class update {
       updzone = zone;
       int dclass = defaultClass;
       if (updzone == null) {
-        Record[] recs = query.getSectionArray(Section.UPDATE);
-        for (Record rec : recs) {
+        for (Record rec : query.getSection(Section.UPDATE)) {
           if (updzone == null) {
             updzone = new Name(rec.getName(), 1);
           }
@@ -297,7 +296,6 @@ public class update {
     Name name = st.getName(zone);
     long ttl;
     int type;
-    Record record;
 
     String s = st.getString();
 
@@ -317,12 +315,7 @@ public class update {
       throw new IOException("Invalid type: " + s);
     }
 
-    record = Record.fromString(name, type, classValue, ttl, st, zone);
-    if (record != null) {
-      return (record);
-    } else {
-      throw new IOException("Parse error");
-    }
+    return Record.fromString(name, type, classValue, ttl, st, zone);
   }
 
   void doRequire(Tokenizer st) throws IOException {
@@ -496,11 +489,11 @@ public class update {
         flag = false;
       }
     } else if (field.equalsIgnoreCase("serial")) {
-      Record[] answers = response.getSectionArray(Section.ANSWER);
-      if (answers.length < 1 || !(answers[0] instanceof SOARecord)) {
+      List<Record> answers = response.getSection(Section.ANSWER);
+      if (answers.isEmpty() || !(answers.get(0) instanceof SOARecord)) {
         print("Invalid response (no SOA)");
       } else {
-        SOARecord soa = (SOARecord) answers[0];
+        SOARecord soa = (SOARecord) answers.get(0);
         long serial = soa.getSerial();
         if (serial != Long.parseLong(expected)) {
           value = Long.toString(serial);

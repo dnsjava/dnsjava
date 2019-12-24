@@ -5,6 +5,7 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ public final class Lookup {
 
   private Resolver resolver;
   private List<Name> searchPath;
+  private int ndots;
   private Cache cache;
   private boolean temporary_cache;
   private int credibility;
@@ -149,6 +151,15 @@ public final class Lookup {
   }
 
   /**
+   * Sets the search path to be used as the default by future Lookups.
+   *
+   * @param domains The default search path.
+   */
+  public static synchronized void setDefaultSearchPath(org.xbill.DNS.Name[] domains) {
+    setDefaultSearchPath(Arrays.asList(domains));
+  }
+
+  /**
    * Sets the search path that will be used as the default by future Lookups.
    *
    * @param domains The default search path.
@@ -228,6 +239,7 @@ public final class Lookup {
       this.searchPath = getDefaultSearchPath();
       this.cache = getDefaultCache(dclass);
     }
+    this.ndots = defaultNdots;
     this.credibility = Credibility.NORMAL;
     this.result = -1;
   }
@@ -314,6 +326,15 @@ public final class Lookup {
    * Sets the search path to use when performing this lookup. This overrides the default value.
    *
    * @param domains An array of names containing the search path.
+   */
+  public void setSearchPath(Name[] domains) {
+    setSearchPath(Arrays.asList(domains));
+  }
+
+  /**
+   * Sets the search path to use when performing this lookup. This overrides the default value.
+   *
+   * @param domains An array of names containing the search path.
    * @throws TextParseException A name in the array is not a valid DNS name.
    */
   public void setSearchPath(String[] domains) throws TextParseException {
@@ -346,17 +367,31 @@ public final class Lookup {
   }
 
   /**
+   * Sets the default ndots to use when performing a lookup, overriding the default value.
+   * Specifically, this refers to the number of "dots" which, if present in a name, indicate that a
+   * lookup for the absolute name should be attempted before appending any search path elements.
+   *
+   * @param ndots The ndots value to use, which must be greater than or equal to 0.
+   */
+  public static void setDefaultNdots(int ndots) {
+    if (ndots < 0) {
+      throw new IllegalArgumentException("Illegal ndots value: " + ndots);
+    }
+    defaultNdots = ndots;
+  }
+
+  /**
    * Sets ndots to use when performing this lookup, overriding the default value. Specifically, this
    * refers to the number of "dots" which, if present in a name, indicate that a lookup for the
    * absolute name should be attempted before appending any search path elements.
    *
    * @param ndots The ndots value to use, which must be greater than or equal to 0.
    */
-  public static void setNdots(int ndots) {
+  public void setNdots(int ndots) {
     if (ndots < 0) {
       throw new IllegalArgumentException("Illegal ndots value: " + ndots);
     }
-    defaultNdots = ndots;
+    this.ndots = ndots;
   }
 
   /**
@@ -392,10 +427,10 @@ public final class Lookup {
 
   private void processResponse(Name name, SetResponse response) {
     if (response.isSuccessful()) {
-      List<RRset<?>> rrsets = response.answers();
+      List<RRset> rrsets = response.answers();
       List<Record> l = new ArrayList<>();
 
-      for (RRset<?> set : rrsets) {
+      for (RRset set : rrsets) {
         l.addAll(set.rrs());
       }
 
@@ -511,7 +546,7 @@ public final class Lookup {
     } else if (searchPath == null) {
       resolve(name, Name.root);
     } else {
-      if (name.labels() > defaultNdots) {
+      if (name.labels() > ndots) {
         resolve(name, Name.root);
       }
       if (done) {

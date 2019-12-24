@@ -4,6 +4,7 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Date;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -16,7 +17,7 @@ import org.xbill.DNS.utils.base64;
  */
 public class TKEYRecord extends Record {
 
-  private static final long serialVersionUID = 8828458121926391756L;
+  private static final long serialVersionUID = -7330934927273584334L;
 
   private Name alg;
   private Instant timeInception;
@@ -78,6 +79,45 @@ public class TKEYRecord extends Record {
     this.error = checkU16("error", error);
     this.key = key;
     this.other = other;
+  }
+
+  /**
+   * Creates a TKEY Record from the given data.
+   *
+   * @param alg The shared key's algorithm
+   * @param timeInception The beginning of the validity period of the shared secret or keying
+   *     material
+   * @param timeExpire The end of the validity period of the shared secret or keying material
+   * @param mode The mode of key agreement
+   * @param error The extended error field. Should be 0 in queries
+   * @param key The shared secret
+   * @param other The other data field. Currently unused responses.
+   * @deprecated use {@link #TKEYRecord(Name, int, long, Name, Instant, Instant, int, int, byte[],
+   *     byte[])}
+   */
+  @Deprecated
+  public TKEYRecord(
+      Name name,
+      int dclass,
+      long ttl,
+      Name alg,
+      Date timeInception,
+      Date timeExpire,
+      int mode,
+      int error,
+      byte[] key,
+      byte[] other) {
+    this(
+        name,
+        dclass,
+        ttl,
+        alg,
+        timeInception.toInstant(),
+        timeExpire.toInstant(),
+        mode,
+        error,
+        key,
+        other);
   }
 
   @Override

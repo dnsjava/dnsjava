@@ -47,7 +47,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RRsetTest {
-  private RRset<ARecord> m_rs;
+  private RRset m_rs;
   private Name m_name;
   private Name m_name2;
   private long m_ttl;
@@ -58,7 +58,7 @@ class RRsetTest {
 
   @BeforeEach
   void setUp() throws TextParseException, UnknownHostException {
-    m_rs = new RRset<>();
+    m_rs = new RRset();
     m_name = Name.fromString("this.is.a.test.");
     m_name2 = Name.fromString("this.is.another.test.");
     m_ttl = 0xABCDL;
@@ -104,7 +104,7 @@ class RRsetTest {
 
     assertEquals("{empty}", m_rs.toString());
 
-    List<ARecord> rrs = m_rs.rrs();
+    List<Record> rrs = m_rs.rrs();
     assertNotNull(rrs);
     assertEquals(0, rrs.size());
 
@@ -144,7 +144,7 @@ class RRsetTest {
     assertEquals(m_ttl, m_rs.getTTL());
     assertEquals(Type.A, m_rs.getType());
 
-    List<ARecord> itr = m_rs.rrs();
+    List<Record> itr = m_rs.rrs();
     assertEquals(m_a1, itr.get(0));
     assertEquals(m_a2, itr.get(1));
 
@@ -201,11 +201,11 @@ class RRsetTest {
     m_rs.addRR(m_s1);
     m_rs.addRR(m_s2);
 
-    RRset<ARecord> rs2 = new RRset<>(m_rs);
+    RRset rs2 = new RRset(m_rs);
 
     assertEquals(2, rs2.size());
     assertEquals(m_a1, rs2.first());
-    List<ARecord> itr = rs2.rrs();
+    List<Record> itr = rs2.rrs();
     assertEquals(m_a1, itr.get(0));
     assertEquals(m_a2, itr.get(1));
     assertEquals(2, itr.size());
@@ -231,7 +231,6 @@ class RRsetTest {
     assertTrue(out.contains("[192.169.232.12]"));
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   void addRR_invalidType() throws TextParseException {
     m_rs.addRR(m_a1);
@@ -277,7 +276,7 @@ class RRsetTest {
     m_rs.addRR(m_s1);
     m_rs.addRR(m_a2);
 
-    List<ARecord> itr = m_rs.rrs();
+    List<Record> itr = m_rs.rrs();
     assertEquals(m_a1, itr.get(0));
     assertEquals(m_a2, itr.get(1));
     assertEquals(2, itr.size());
@@ -292,7 +291,7 @@ class RRsetTest {
     m_rs.addRR(m_a1);
     m_rs.addRR(m_a2);
 
-    List<ARecord> itr = m_rs.rrs(false);
+    List<Record> itr = m_rs.rrs(false);
     assertEquals(m_a1, itr.get(0));
     assertEquals(m_a2, itr.get(1));
 

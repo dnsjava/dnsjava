@@ -63,7 +63,7 @@ public class TcpKeepaliveOption extends EDNSOption {
   /**
    * Returns the timeout as a {@link Duration}.
    *
-   * @reutrn the timeout
+   * @return the timeout
    */
   public Optional<Duration> getTimeoutDuration() {
     return timeout.isPresent()

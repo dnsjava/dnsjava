@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.time.Instant;
+import java.util.Date;
 
 /**
  * Resource Record Signature - An RRSIG provides the digital signature of an RRset, so that the data
@@ -18,7 +19,7 @@ import java.time.Instant;
  */
 public class RRSIGRecord extends SIGBase {
 
-  private static final long serialVersionUID = -2609150673537226317L;
+  private static final long serialVersionUID = 7453923738152214746L;
 
   RRSIGRecord() {}
 
@@ -61,6 +62,48 @@ public class RRSIGRecord extends SIGBase {
         origttl,
         expire,
         timeSigned,
+        footprint,
+        signer,
+        signature);
+  }
+
+  /**
+   * Creates an RRSIG Record from the given data
+   *
+   * @param covered The RRset type covered by this signature
+   * @param alg The cryptographic algorithm of the key that generated the signature
+   * @param origttl The original TTL of the RRset
+   * @param expire The time at which the signature expires
+   * @param timeSigned The time at which this signature was generated
+   * @param footprint The footprint/key id of the signing key.
+   * @param signer The owner of the signing key
+   * @param signature Binary data representing the signature
+   * @deprecated use {@link #RRSIGRecord(Name, int, long, int, int, long, Instant, Instant, int,
+   *     Name, byte[])}
+   */
+  @Deprecated
+  public RRSIGRecord(
+      Name name,
+      int dclass,
+      long ttl,
+      int covered,
+      int alg,
+      long origttl,
+      Date expire,
+      Date timeSigned,
+      int footprint,
+      Name signer,
+      byte[] signature) {
+    super(
+        name,
+        Type.RRSIG,
+        dclass,
+        ttl,
+        covered,
+        alg,
+        origttl,
+        expire.toInstant(),
+        timeSigned.toInstant(),
         footprint,
         signer,
         signature);

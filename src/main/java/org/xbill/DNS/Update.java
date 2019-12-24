@@ -149,7 +149,7 @@ public class Update extends Message {
   }
 
   /** Indicates that all of the records in the rrset should be inserted into the zone. */
-  public <T extends Record> void add(RRset<T> rrset) {
+  public <T extends Record> void add(RRset rrset) {
     rrset.rrs().forEach(this::add);
   }
 
@@ -195,7 +195,7 @@ public class Update extends Message {
   }
 
   /** Indicates that all of the records in the rrset should be deleted from the zone. */
-  public <T extends Record> void delete(RRset<T> rrset) {
+  public <T extends Record> void delete(RRset rrset) {
     rrset.rrs().forEach(this::delete);
   }
 
@@ -244,7 +244,7 @@ public class Update extends Message {
    * Indicates that all of the records in the rrset should be inserted into the zone replacing any
    * other records with the same name and type.
    */
-  public <T extends Record> void replace(RRset<T> rrset) {
+  public <T extends Record> void replace(RRset rrset) {
     delete(rrset.getName(), rrset.getType());
     rrset.rrs().forEach(this::add);
   }

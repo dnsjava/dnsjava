@@ -30,7 +30,7 @@ class DNSSECTest {
                 "TXT 13 0 3600 19700101000003 19700101000000 46271 . dRwMEthIeGiucMcEcDmwixM8/LZcZ+W6lMM0KDSY5rwAGrm1j7tS/VU6xs+rpD5dSRmBYosinkWD6Jk3zRmyBQ==",
                 Name.root);
 
-    RRset<TXTRecord> rrset = new RRset<>();
+    RRset rrset = new RRset();
     rrset.addRR(txt);
     rrset.addRR(rrsig);
     DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60));
@@ -57,7 +57,7 @@ class DNSSECTest {
                 "TXT 13 0 3600 19700101000003 19700101000000 25719 . m6sD/b0ZbfBXsQruhq5dYTnHGaA+PRTL5Y1W36rMdnGBb7eOJRRzDS5Wk5hZlrS4RUKQ/tKMCn7lsl9fn4U2lw==",
                 Name.root);
 
-    RRset<TXTRecord> rrset = new RRset<>();
+    RRset rrset = new RRset();
     rrset.addRR(txt);
     rrset.addRR(rrsig);
     DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60));
@@ -84,7 +84,7 @@ class DNSSECTest {
                 "TXT 3 0 3600 19700101000003 19700101000000 36714 . AAAycZeIdBGB7vjlFzd5+ZgV8IxGRLpLierdV1KO4SGIy707hKUXJRc=",
                 Name.root);
 
-    RRset<TXTRecord> set = new RRset<>();
+    RRset set = new RRset();
     set.addRR(txt);
     set.addRR(rrsig);
     DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochMilli(60));
@@ -111,7 +111,7 @@ class DNSSECTest {
                 "TXT 3 0 3600 19700101000003 19700101000000 57407 . AIh8Bp0EFNszs3cB0gNatjWy8tBrgUAUe1gTHkVsm1pva1GYWOW/FbA=",
                 Name.root);
 
-    RRset<TXTRecord> set = new RRset<>();
+    RRset set = new RRset();
     set.addRR(txt);
     set.addRR(rrsig);
     DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochMilli(60));

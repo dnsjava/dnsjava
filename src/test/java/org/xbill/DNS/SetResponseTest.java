@@ -174,7 +174,7 @@ class SetResponseTest {
 
   @Test
   void addRRset() throws TextParseException, UnknownHostException {
-    RRset<ARecord> rrs = new RRset<>();
+    RRset rrs = new RRset();
     rrs.addRR(
         new ARecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.1")));
@@ -190,7 +190,7 @@ class SetResponseTest {
 
   @Test
   void addRRset_multiple() throws TextParseException, UnknownHostException {
-    RRset<ARecord> rrs = new RRset<>();
+    RRset rrs = new RRset();
     rrs.addRR(
         new ARecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.1")));
@@ -198,7 +198,7 @@ class SetResponseTest {
         new ARecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.2")));
 
-    RRset<ARecord> rrs2 = new RRset<>();
+    RRset rrs2 = new RRset();
     rrs2.addRR(
         new ARecord(
             Name.fromString("The.Other.Name."),
@@ -228,7 +228,7 @@ class SetResponseTest {
 
   @Test
   void getCNAME() throws TextParseException {
-    RRset<CNAMERecord> rrs = new RRset<>();
+    RRset rrs = new RRset();
     CNAMERecord cr =
         new CNAMERecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, Name.fromString("The.Alias."));
@@ -239,7 +239,7 @@ class SetResponseTest {
 
   @Test
   void getDNAME() throws TextParseException {
-    RRset<DNAMERecord> rrs = new RRset<>();
+    RRset rrs = new RRset();
     DNAMERecord dr =
         new DNAMERecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, Name.fromString("The.Alias."));
@@ -260,7 +260,7 @@ class SetResponseTest {
           SetResponse.DNAME,
           SetResponse.SUCCESSFUL
         };
-    RRset<ARecord> rrs = new RRset<>();
+    RRset rrs = new RRset();
     rrs.addRR(
         new ARecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.1")));

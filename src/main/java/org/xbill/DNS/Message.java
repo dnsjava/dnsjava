@@ -5,11 +5,13 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import lombok.SneakyThrows;
 
 /**
  * A DNS Message. A message is the basic unit of communication between the client and server of a
@@ -56,7 +58,6 @@ public class Message implements Cloneable {
   static final int TSIG_FAILED = 4;
 
   private static Record[] emptyRecordArray = new Record[0];
-  private static RRset[] emptyRRsetArray = new RRset[0];
 
   @SuppressWarnings("unchecked")
   private Message(Header header) {
@@ -271,11 +272,11 @@ public class Message implements Cloneable {
    * @see Section
    */
   public Record getQuestion() {
-    List l = sections[Section.QUESTION];
+    List<Record> l = sections[Section.QUESTION];
     if (l == null || l.size() == 0) {
       return null;
     }
-    return (Record) l.get(0);
+    return l.get(0);
   }
 
   /**
@@ -290,8 +291,8 @@ public class Message implements Cloneable {
     if (count == 0) {
       return null;
     }
-    List l = sections[Section.ADDITIONAL];
-    Record rec = (Record) l.get(count - 1);
+    List<Record> l = sections[Section.ADDITIONAL];
+    Record rec = l.get(count - 1);
     if (rec.type != Type.TSIG) {
       return null;
     }
@@ -323,8 +324,7 @@ public class Message implements Cloneable {
    * @see Section
    */
   public OPTRecord getOPT() {
-    Record[] additional = getSectionArray(Section.ADDITIONAL);
-    for (Record record : additional) {
+    for (Record record : getSection(Section.ADDITIONAL)) {
       if (record instanceof OPTRecord) {
         return (OPTRecord) record;
       }
@@ -348,13 +348,28 @@ public class Message implements Cloneable {
    *
    * @see Record
    * @see Section
+   * @deprecated use {@link #getSection(int)}
    */
+  @Deprecated
   public Record[] getSectionArray(int section) {
     if (sections[section] == null) {
       return emptyRecordArray;
     }
     List<Record> l = sections[section];
     return l.toArray(new Record[0]);
+  }
+
+  /**
+   * Returns all records in the given section, or an empty list if the section is empty.
+   *
+   * @see Record
+   * @see Section
+   */
+  public List<Record> getSection(int section) {
+    if (sections[section] == null) {
+      return Collections.emptyList();
+    }
+    return Collections.unmodifiableList(sections[section]);
   }
 
   private static boolean sameSet(Record r1, Record r2) {
@@ -369,19 +384,18 @@ public class Message implements Cloneable {
    * @see RRset
    * @see Section
    */
-  public RRset[] getSectionRRsets(int section) {
+  public List<RRset> getSectionRRsets(int section) {
     if (sections[section] == null) {
-      return emptyRRsetArray;
+      return Collections.emptyList();
     }
-    List<RRset<Record>> sets = new LinkedList<>();
-    Record[] recs = getSectionArray(section);
+    List<RRset> sets = new LinkedList<>();
     Set<Name> hash = new HashSet<>();
-    for (Record rec : recs) {
+    for (Record rec : getSection(section)) {
       Name name = rec.getName();
       boolean newset = true;
       if (hash.contains(name)) {
         for (int j = sets.size() - 1; j >= 0; j--) {
-          RRset<Record> set = sets.get(j);
+          RRset set = sets.get(j);
           if (set.getType() == rec.getRRsetType()
               && set.getDClass() == rec.getDClass()
               && set.getName().equals(name)) {
@@ -392,12 +406,12 @@ public class Message implements Cloneable {
         }
       }
       if (newset) {
-        RRset<Record> set = new RRset<>(rec);
+        RRset set = new RRset(rec);
         sets.add(set);
         hash.add(name);
       }
     }
-    return sets.toArray(new RRset[0]);
+    return sets;
   }
 
   void toWire(DNSOutput out) {
@@ -443,9 +457,9 @@ public class Message implements Cloneable {
   }
 
   /* Returns true if the message could be rendered. */
-  private boolean toWire(DNSOutput out, int maxLength) {
+  private void toWire(DNSOutput out, int maxLength) {
     if (maxLength < Header.LENGTH) {
-      return false;
+      return;
     }
 
     int tempMaxLength = maxLength;
@@ -503,8 +517,6 @@ public class Message implements Cloneable {
       tsigrec.toWire(out, Section.ADDITIONAL, c);
       out.writeU16At(additionalCount + 1, startpos + 10);
     }
-
-    return true;
   }
 
   /** Returns an array containing the wire format representation of the Message. */
@@ -567,9 +579,7 @@ public class Message implements Cloneable {
     }
 
     StringBuilder sb = new StringBuilder();
-
-    Record[] records = getSectionArray(i);
-    for (Record rec : records) {
+    for (Record rec : getSection(i)) {
       if (i == Section.QUESTION) {
         sb.append(";;\t").append(rec.name);
         sb.append(", type = ").append(Type.string(rec.type));
@@ -622,25 +632,24 @@ public class Message implements Cloneable {
    * @see OPTRecord
    */
   @Override
+  @SneakyThrows(CloneNotSupportedException.class)
+  @SuppressWarnings("unchecked")
   public Message clone() {
-    Message m;
-    try {
-      m = (Message) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException(e);
-    }
+    Message m = (Message) super.clone();
+    m.sections = (List<Record>[]) new List[sections.length];
     for (int i = 0; i < sections.length; i++) {
       if (sections[i] != null) {
         m.sections[i] = new LinkedList<>(sections[i]);
       }
     }
     m.header = header.clone();
-    m.size = size;
-    m.resolver = this.resolver;
+    if (querytsig != null) {
+      m.querytsig = (TSIGRecord) querytsig.cloneRecord();
+    }
     return m;
   }
 
-  /** Sets the resolver that originally received this Message a server. */
+  /** Sets the resolver that originally received this Message from a server. */
   public void setResolver(Resolver resolver) {
     this.resolver = resolver;
   }

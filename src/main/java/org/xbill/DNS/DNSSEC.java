@@ -22,6 +22,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.RSAPublicKeySpec;
 import java.time.Instant;
+import java.util.Date;
 
 /**
  * Constants and methods relating to DNSSEC.
@@ -140,7 +141,7 @@ public class DNSSEC {
    * @param rrset The data to be signed/verified.
    * @return The data to be cryptographically signed or verified.
    */
-  public static <T extends Record> byte[] digestRRset(RRSIGRecord rrsig, RRset<T> rrset) {
+  public static <T extends Record> byte[] digestRRset(RRSIGRecord rrsig, RRset rrset) {
     DNSOutput out = new DNSOutput();
     digestSIG(out, rrsig);
 
@@ -980,8 +981,30 @@ public class DNSSEC {
    * @throws SignatureNotYetValidException The signature is not yet valid
    * @throws SignatureVerificationException The signature does not verify.
    * @throws DNSSECException Some other error occurred.
+   * @deprecated use {@link #verify(RRset, RRSIGRecord, DNSKEYRecord, Instant)}
    */
-  public static void verify(RRset<?> rrset, RRSIGRecord rrsig, DNSKEYRecord key, Instant date)
+  @Deprecated
+  public static void verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key, Date date)
+      throws DNSSECException {
+    verify(rrset, rrsig, key, date.toInstant());
+  }
+
+  /**
+   * Verify a DNSSEC signature.
+   *
+   * @param rrset The data to be verified.
+   * @param rrsig The RRSIG record containing the signature.
+   * @param key The DNSKEY record to verify the signature with.
+   * @param date The date against which the signature is verified.
+   * @throws UnsupportedAlgorithmException The algorithm is unknown
+   * @throws MalformedKeyException The key is malformed
+   * @throws KeyMismatchException The key and signature do not match
+   * @throws SignatureExpiredException The signature has expired
+   * @throws SignatureNotYetValidException The signature is not yet valid
+   * @throws SignatureVerificationException The signature does not verify.
+   * @throws DNSSECException Some other error occurred.
+   */
+  public static void verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key, Instant date)
       throws DNSSECException {
     if (!matches(rrsig, key)) {
       throw new KeyMismatchException(key, rrsig);
@@ -1090,6 +1113,55 @@ public class DNSSEC {
    * @throws MalformedKeyException The key is malformed
    * @throws DNSSECException Some other error occurred.
    * @return The generated signature
+   * @deprecated use {@link #sign(RRset, DNSKEYRecord, PrivateKey, Instant, Instant)}
+   */
+  @Deprecated
+  public static RRSIGRecord sign(
+      RRset rrset, DNSKEYRecord key, PrivateKey privkey, Date inception, Date expiration)
+      throws DNSSECException {
+    return sign(rrset, key, privkey, inception.toInstant(), expiration.toInstant(), null);
+  }
+
+  /**
+   * Generate a DNSSEC signature. key and privateKey must refer to the same underlying cryptographic
+   * key.
+   *
+   * @param rrset The data to be signed
+   * @param key The DNSKEY record to use as part of signing
+   * @param privkey The PrivateKey to use when signing
+   * @param inception The time at which the signatures should become valid
+   * @param expiration The time at which the signatures should expire
+   * @throws UnsupportedAlgorithmException The algorithm is unknown
+   * @throws MalformedKeyException The key is malformed
+   * @throws DNSSECException Some other error occurred.
+   * @return The generated signature
+   * @deprecated use {@link #sign(RRset, DNSKEYRecord, PrivateKey, Instant, Instant, String)}
+   */
+  @Deprecated
+  public static RRSIGRecord sign(
+      RRset rrset,
+      DNSKEYRecord key,
+      PrivateKey privkey,
+      Date inception,
+      Date expiration,
+      String provider)
+      throws DNSSECException {
+    return sign(rrset, key, privkey, inception.toInstant(), expiration.toInstant(), provider);
+  }
+
+  /**
+   * Generate a DNSSEC signature. key and privateKey must refer to the same underlying cryptographic
+   * key.
+   *
+   * @param rrset The data to be signed
+   * @param key The DNSKEY record to use as part of signing
+   * @param privkey The PrivateKey to use when signing
+   * @param inception The time at which the signatures should become valid
+   * @param expiration The time at which the signatures should expire
+   * @throws UnsupportedAlgorithmException The algorithm is unknown
+   * @throws MalformedKeyException The key is malformed
+   * @throws DNSSECException Some other error occurred.
+   * @return The generated signature
    */
   public static RRSIGRecord sign(
       RRset rrset, DNSKEYRecord key, PrivateKey privkey, Instant inception, Instant expiration)
@@ -1114,7 +1186,7 @@ public class DNSSEC {
    * @return The generated signature
    */
   public static RRSIGRecord sign(
-      RRset<?> rrset,
+      RRset rrset,
       DNSKEYRecord key,
       PrivateKey privkey,
       Instant inception,
