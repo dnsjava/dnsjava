@@ -2,416 +2,297 @@
 
 package org.xbill.DNS;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * An implementation of Resolver that can send queries to multiple servers, sending the queries
- * multiple times if necessary.
+ * An implementation of {@link Resolver} that can send queries to multiple servers, sending the
+ * queries multiple times if necessary.
  *
  * @see Resolver
  * @author Brian Wellington
  */
 @Slf4j
 public class ExtendedResolver implements Resolver {
+  private static class Resolution {
+    private final Message query;
+    private final int[] attempts;
+    private final int retriesPerResolver;
+    private List<ResolverEntry> resolvers;
+    private int currentResolver;
 
-  private static class Resolution implements ResolverListener {
-    Resolver[] resolvers;
-    int[] sent;
-    Object[] inprogress;
-    int retries;
-    int outstanding;
-    boolean done;
-    Message query;
-    Message response;
-    Throwable thrown;
-    ResolverListener listener;
-
-    public Resolution(ExtendedResolver eres, Message query) {
-      List<Resolver> l = eres.resolvers;
-      resolvers = l.toArray(new Resolver[0]);
+    Resolution(ExtendedResolver eres, Message query) {
+      resolvers = new ArrayList<>(eres.resolvers);
       if (eres.loadBalance) {
-        int nresolvers = resolvers.length;
-        /*
-         * Note: this is not synchronized, since the
-         * worst thing that can happen is a random
-         * ordering, which is ok.
-         */
-        int start = eres.lbStart++ % nresolvers;
-        if (eres.lbStart > nresolvers) {
-          eres.lbStart %= nresolvers;
-        }
+        int start = eres.lbStart.updateAndGet(i -> i++ % resolvers.size());
         if (start > 0) {
-          Resolver[] shuffle = new Resolver[nresolvers];
-          for (int i = 0; i < nresolvers; i++) {
-            int pos = (i + start) % nresolvers;
-            shuffle[i] = resolvers[pos];
+          List<ResolverEntry> shuffle = new ArrayList<>(resolvers.size());
+          for (int i = 0; i < resolvers.size(); i++) {
+            int pos = (i + start) % resolvers.size();
+            shuffle.add(resolvers.get(pos));
           }
+
           resolvers = shuffle;
         }
+      } else {
+        Collections.shuffle(resolvers);
+        resolvers =
+            resolvers.stream()
+                .sorted(Comparator.comparingInt(re -> re.failures.get()))
+                .collect(Collectors.toList());
       }
-      sent = new int[resolvers.length];
-      inprogress = new Object[resolvers.length];
-      retries = eres.retries;
+
+      attempts = new int[resolvers.size()];
+      retriesPerResolver = eres.retries;
       this.query = query;
     }
 
     /* Asynchronously sends a message. */
-    public void send(int n) {
-      sent[n]++;
-      outstanding++;
-      try {
-        inprogress[n] = resolvers[n].sendAsync(query, this);
-      } catch (Throwable t) {
-        synchronized (this) {
-          thrown = t;
-          done = true;
-          if (listener == null) {
-            notifyAll();
-          }
-        }
-      }
-    }
-
-    /* Start a synchronous resolution */
-    public Message start() throws IOException {
-      try {
-        /*
-         * First, try sending synchronously.  If this works,
-         * we're done.  Otherwise, we'll get an exception
-         * and continue.  It would be easier to call send(0),
-         * but this avoids a thread creation.  If and when
-         * SimpleResolver.sendAsync() can be made to not
-         * create a thread, this could be changed.
-         */
-        sent[0]++;
-        outstanding++;
-        inprogress[0] = new Object();
-        return resolvers[0].send(query);
-      } catch (Exception e) {
-        /*
-         * This will either cause more queries to be sent
-         * asynchronously or will set the 'done' flag.
-         */
-        handleException(inprogress[0], e);
-      }
-      /*
-       * Wait for a successful response or for each
-       * subresolver to fail.
-       */
-      synchronized (this) {
-        while (!done) {
-          try {
-            wait();
-          } catch (InterruptedException e) {
-            throw new IOException(e);
-          }
-        }
-      }
-      /* Return the response or throw an exception */
-      if (response != null) {
-        return response;
-      } else if (thrown instanceof IOException) {
-        throw (IOException) thrown;
-      } else if (thrown instanceof RuntimeException) {
-        throw (RuntimeException) thrown;
-      } else if (thrown instanceof Error) {
-        throw (Error) thrown;
-      } else {
-        throw new IllegalStateException("ExtendedResolver failure");
-      }
+    private CompletableFuture<Message> send() {
+      ResolverEntry r = resolvers.get(currentResolver);
+      log.debug(
+          "Sending {}/{}, id={} to resolver {} ({}), attempt {} of {}",
+          query.getQuestion().getName(),
+          Type.string(query.getQuestion().getType()),
+          query.getHeader().getID(),
+          currentResolver,
+          r.resolver,
+          attempts[currentResolver] + 1,
+          retriesPerResolver);
+      attempts[currentResolver]++;
+      return r.resolver.sendAsync(query).toCompletableFuture();
     }
 
     /* Start an asynchronous resolution */
-    public void startAsync(ResolverListener listener) {
-      synchronized (this) {
-        this.listener = listener;
-      }
-      send(0);
+    private CompletionStage<Message> startAsync() {
+      CompletableFuture<Message> f = new CompletableFuture<>();
+      send().handleAsync((result, ex) -> handle(result, ex, f));
+      return f;
     }
 
-    /*
-     * Receive a response.  If the resolution hasn't been completed,
-     * either wake up the blocking thread or call the callback.
-     */
-    @Override
-    public void receiveMessage(Object id, Message m) {
-      log.debug("received message");
-      ResolverListener listenerCopy;
-      synchronized (this) {
-        if (done) {
-          return;
-        }
-        response = m;
-        done = true;
-        if (listener == null) {
-          notifyAll();
-          return;
-        } else {
-          listenerCopy = listener;
-        }
-      }
-      listenerCopy.receiveMessage(this, response);
-    }
+    private Void handle(Message result, Throwable ex, CompletableFuture<Message> f) {
+      AtomicInteger failureCounter = resolvers.get(currentResolver).failures;
+      if (ex != null) {
+        log.debug(
+            "Failed to resolve {}/{}, id={} with resolver {} ({}) on attempt {} of {}, reason={}",
+            query.getQuestion().getName(),
+            Type.string(query.getQuestion().getType()),
+            query.getHeader().getID(),
+            currentResolver,
+            resolvers.get(currentResolver).resolver,
+            attempts[currentResolver],
+            retriesPerResolver,
+            ex.getMessage());
 
-    /*
-     * Receive an exception.  If the resolution has been completed,
-     * do nothing.  Otherwise make progress.
-     */
-    @Override
-    public void handleException(Object id, Exception e) {
-      log.debug("resolving failed", e);
-      ResolverListener listenerCopy = null;
-      synchronized (this) {
-        outstanding--;
-        if (done) {
-          return;
+        failureCounter.incrementAndGet();
+        // go to next resolver, until retries on all resolvers are exhausted
+        currentResolver = (currentResolver + 1) % resolvers.size();
+        if (attempts[currentResolver] < retriesPerResolver) {
+          send().handleAsync((r, t) -> handle(r, t, f));
+          return null;
         }
-        int n;
-        for (n = 0; n < inprogress.length; n++) {
-          if (inprogress[n] == id) {
-            break;
-          }
-        }
-        /* If we don't know what this is, do nothing. */
-        if (n == inprogress.length) {
-          return;
-        }
-        boolean startnext = false;
-        /*
-         * If this is the first response from server n,
-         * we should start sending queries to server n + 1.
-         */
-        if (sent[n] == 1 && n < resolvers.length - 1) {
-          startnext = true;
-        }
-        if (e instanceof InterruptedIOException) {
-          /* Got a timeout; resend */
-          if (sent[n] < retries) {
-            send(n);
-          }
-          if (thrown == null) {
-            thrown = e;
-          }
-        } else if (e instanceof SocketException) {
-          /*
-           * Problem with the socket; don't resend
-           * on it
-           */
-          if (thrown == null || thrown instanceof InterruptedIOException) {
-            thrown = e;
-          }
-        } else {
-          /*
-           * Problem with the response; don't resend
-           * on the same socket.
-           */
-          thrown = e;
-        }
-        if (done) {
-          return;
-        }
-        if (startnext) {
-          send(n + 1);
-        }
-        if (done) {
-          return;
-        }
-        if (outstanding == 0) {
-          /*
-           * If we're done and this is synchronous,
-           * wake up the blocking thread.
-           */
-          done = true;
-          if (listener == null) {
-            notifyAll();
-            return;
-          } else {
-            listenerCopy = listener;
-          }
-        }
-        if (!done) {
-          return;
-        }
+
+        f.completeExceptionally(ex);
+      } else {
+        failureCounter.updateAndGet(i -> i > 0 ? (int) Math.log(i) : 0);
+        f.complete(result);
       }
-      /* If we're done and this is asynchronous, call the callback. */
-      if (!(thrown instanceof Exception)) {
-        thrown = new RuntimeException(thrown);
-      }
-      listenerCopy.handleException(this, (Exception) thrown);
+
+      return null;
     }
   }
 
-  private static final int quantum = 5;
+  @RequiredArgsConstructor
+  private static class ResolverEntry {
+    private final Resolver resolver;
+    private final AtomicInteger failures;
 
-  private List<Resolver> resolvers;
-  private boolean loadBalance = false;
-  private int lbStart = 0;
+    ResolverEntry(Resolver r) {
+      this(r, new AtomicInteger(0));
+    }
+
+    @Override
+    public String toString() {
+      return resolver.toString();
+    }
+  }
+
+  private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
+
+  private List<ResolverEntry> resolvers = new CopyOnWriteArrayList<>();
+  private boolean loadBalance;
+  private AtomicInteger lbStart = new AtomicInteger();
   private int retries = 3;
 
-  private void init() {
-    resolvers = new ArrayList<>();
-  }
-
   /**
-   * Creates a new Extended Resolver. The default ResolverConfig is used to determine the servers
-   * for which SimpleResolver contexts should be initialized.
-   *
-   * @see SimpleResolver
-   * @see ResolverConfig
+   * Creates a new Extended Resolver. The default {@link ResolverConfig} is used to determine the
+   * servers for which {@link SimpleResolver}s are initialized.
    */
   public ExtendedResolver() {
-    init();
     List<InetSocketAddress> servers = ResolverConfig.getCurrentConfig().servers();
-    for (InetSocketAddress server : servers) {
-      Resolver r = new SimpleResolver(server);
-      r.setTimeout(quantum);
-      resolvers.add(r);
-    }
+    resolvers.addAll(
+        servers.stream()
+            .map(
+                server -> {
+                  Resolver r = new SimpleResolver(server);
+                  r.setTimeout(DEFAULT_TIMEOUT);
+                  return new ResolverEntry(r);
+                })
+            .collect(Collectors.toSet()));
   }
 
   /**
    * Creates a new Extended Resolver
    *
-   * @param servers An array of server names for which SimpleResolver contexts should be
+   * @param servers An array of server names or IP addresses for which {@link SimpleResolver}s are
    *     initialized.
-   * @see SimpleResolver
-   * @exception UnknownHostException Failure occurred initializing SimpleResolvers
+   * @exception UnknownHostException A server name could not be resolved
    */
   public ExtendedResolver(String[] servers) throws UnknownHostException {
-    init();
-    for (String server : servers) {
-      Resolver r = new SimpleResolver(server);
-      r.setTimeout(quantum);
-      resolvers.add(r);
+    try {
+      resolvers.addAll(
+          Arrays.stream(servers)
+              .map(
+                  server -> {
+                    try {
+                      Resolver r = new SimpleResolver(server);
+                      r.setTimeout(DEFAULT_TIMEOUT);
+                      return new ResolverEntry(r);
+                    } catch (UnknownHostException e) {
+                      throw new RuntimeException(e);
+                    }
+                  })
+              .collect(Collectors.toSet()));
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof UnknownHostException) {
+        throw (UnknownHostException) e.getCause();
+      }
+      throw e;
     }
   }
 
   /**
    * Creates a new Extended Resolver
    *
-   * @param res An array of pre-initialized Resolvers is provided.
-   * @see SimpleResolver
+   * @param resolvers An array of pre-initialized {@link Resolver}s.
    */
-  public ExtendedResolver(Resolver[] res) {
-    init();
-    resolvers.addAll(Arrays.asList(res));
+  public ExtendedResolver(Resolver[] resolvers) {
+    this(Arrays.asList(resolvers));
+  }
+
+  /**
+   * Creates a new Extended Resolver
+   *
+   * @param resolvers An iterable of pre-initialized {@link Resolver}s.
+   */
+  public ExtendedResolver(Iterable<Resolver> resolvers) {
+    this.resolvers.addAll(
+        StreamSupport.stream(resolvers.spliterator(), false)
+            .map(
+                resolver -> {
+                  resolver.setTimeout(DEFAULT_TIMEOUT);
+                  return new ResolverEntry(resolver);
+                })
+            .collect(Collectors.toSet()));
   }
 
   @Override
   public void setPort(int port) {
-    for (Resolver resolver : resolvers) {
-      resolver.setPort(port);
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setPort(port);
     }
   }
 
   @Override
   public void setTCP(boolean flag) {
-    for (Resolver resolver : resolvers) {
-      resolver.setTCP(flag);
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setTCP(flag);
     }
   }
 
   @Override
   public void setIgnoreTruncation(boolean flag) {
-    for (Resolver resolver : resolvers) {
-      resolver.setIgnoreTruncation(flag);
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setIgnoreTruncation(flag);
     }
   }
 
   @Override
   public void setEDNS(int level) {
-    for (Resolver resolver : resolvers) {
-      resolver.setEDNS(level);
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setEDNS(level);
     }
   }
 
   @Override
   public void setEDNS(int level, int payloadSize, int flags, List<EDNSOption> options) {
-    for (Resolver resolver : resolvers) {
-      resolver.setEDNS(level, payloadSize, flags, options);
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setEDNS(level, payloadSize, flags, options);
     }
   }
 
   @Override
   public void setTSIGKey(TSIG key) {
-    for (Resolver resolver : resolvers) {
-      resolver.setTSIGKey(key);
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setTSIGKey(key);
     }
   }
 
   @Override
-  public void setTimeout(int secs, int msecs) {
-    for (Resolver resolver : resolvers) {
-      resolver.setTimeout(secs, msecs);
+  public void setTimeout(Duration timeout) {
+    for (ResolverEntry re : resolvers) {
+      re.resolver.setTimeout(timeout);
     }
-  }
-
-  @Override
-  public void setTimeout(int secs) {
-    setTimeout(secs, 0);
   }
 
   /**
-   * Sends a message and waits for a response. Multiple servers are queried, and queries are sent
-   * multiple times until either a successful response is received, or it is clear that there is no
-   * successful response.
+   * Sends a message to multiple servers, and queries are sent multiple times until either a
+   * successful response is received, or it is clear that there is no successful response.
    *
    * @param query The query to send.
-   * @return The response.
-   * @throws IOException An error occurred while sending or receiving.
+   * @return A future that completes when the query is finished.
    */
   @Override
-  public Message send(Message query) throws IOException {
+  public CompletionStage<Message> sendAsync(Message query) {
     Resolution res = new Resolution(this, query);
-    return res.start();
-  }
-
-  /**
-   * Asynchronously sends a message to multiple servers, potentially multiple times, registering a
-   * listener to receive a callback on success or exception. Multiple asynchronous lookups can be
-   * performed in parallel. Since the callback may be invoked before the function returns, external
-   * synchronization is necessary.
-   *
-   * @param query The query to send
-   * @param listener The object containing the callbacks.
-   * @return An identifier, which is also a parameter in the callback
-   */
-  @Override
-  public Resolution sendAsync(final Message query, final ResolverListener listener) {
-    Resolution res = new Resolution(this, query);
-    res.startAsync(listener);
-    return res;
+    return res.startAsync();
   }
 
   /** Returns the nth resolver used by this ExtendedResolver */
   public Resolver getResolver(int n) {
     if (n < resolvers.size()) {
-      return resolvers.get(n);
+      return resolvers.get(n).resolver;
     }
     return null;
   }
 
   /** Returns all resolvers used by this ExtendedResolver */
   public Resolver[] getResolvers() {
-    return resolvers.toArray(new Resolver[0]);
+    return (Resolver[]) resolvers.stream().map(re -> re.resolver).toArray();
   }
 
   /** Adds a new resolver to be used by this ExtendedResolver */
   public void addResolver(Resolver r) {
-    resolvers.add(r);
+    resolvers.add(new ResolverEntry(r));
   }
 
   /** Deletes a resolver used by this ExtendedResolver */
   public void deleteResolver(Resolver r) {
-    resolvers.remove(r);
+    resolvers.removeIf(re -> re.resolver == r);
   }
 
   /**

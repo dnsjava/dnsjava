@@ -24,6 +24,7 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -289,12 +290,23 @@ public class ZoneTransferIn {
    * Sets a timeout on this zone transfer. The default is 900 seconds (15 minutes).
    *
    * @param secs The maximum amount of time that this zone transfer can take.
+   * @deprecated use {@link #setTimeout(Duration)}
    */
+  @Deprecated
   public void setTimeout(int secs) {
     if (secs < 0) {
       throw new IllegalArgumentException("timeout cannot be negative");
     }
     timeout = 1000L * secs;
+  }
+
+  /**
+   * Sets a timeout on this zone transfer. The default is 900 seconds (15 minutes).
+   *
+   * @param t The maximum amount of time that this zone transfer can take.
+   */
+  public void setTimeout(Duration t) {
+    timeout = (int) t.toMillis();
   }
 
   /**
@@ -317,8 +329,7 @@ public class ZoneTransferIn {
   }
 
   private void openConnection() throws IOException {
-    long endTime = System.currentTimeMillis() + timeout;
-    client = new TCPClient(endTime);
+    client = new TCPClient(timeout);
     if (localAddress != null) {
       client.bind(localAddress);
     }
@@ -368,7 +379,6 @@ public class ZoneTransferIn {
 
   private void parseRR(Record rec) throws ZoneTransferException {
     int type = rec.getType();
-    Delta delta;
 
     switch (state) {
       case INITIALSOA:

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -30,6 +31,7 @@ public class Message implements Cloneable {
   private TSIG tsigkey;
   private TSIGRecord querytsig;
   private int tsigerror;
+  private Resolver resolver;
 
   int tsigstart;
   int tsigState;
@@ -634,6 +636,17 @@ public class Message implements Cloneable {
     }
     m.header = header.clone();
     m.size = size;
+    m.resolver = this.resolver;
     return m;
+  }
+
+  /** Sets the resolver that originally received this Message a server. */
+  public void setResolver(Resolver resolver) {
+    this.resolver = resolver;
+  }
+
+  /** Gets the resolver that originally received this Message from a server. */
+  public Optional<Resolver> getResolver() {
+    return Optional.ofNullable(resolver);
   }
 }

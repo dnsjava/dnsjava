@@ -103,7 +103,7 @@ public final class ReverseMap {
   public static Name fromAddress(String addr, int family) throws UnknownHostException {
     byte[] array = Address.toByteArray(addr, family);
     if (array == null) {
-      throw new UnknownHostException("Invalid IP address");
+      throw new UnknownHostException("Invalid IP address: " + addr);
     }
     return fromAddress(array);
   }
@@ -121,7 +121,7 @@ public final class ReverseMap {
       array = Address.toByteArray(addr, Address.IPv6);
     }
     if (array == null) {
-      throw new UnknownHostException("Invalid IP address");
+      throw new UnknownHostException("Invalid IP address:" + addr);
     }
     return fromAddress(array);
   }

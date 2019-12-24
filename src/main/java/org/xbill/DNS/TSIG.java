@@ -431,7 +431,7 @@ public class TSIG {
    * TSIG is expected to be present, it is an error if one is not present. After calling this
    * routine, Message.isVerified() may be called on this message.
    *
-   * @param m The message
+   * @param m The message to verify
    * @param b An array containing the message in unparsed form. This is necessary since TSIG signs
    *     the message in wire format, and we can't recreate the exact wire format (with the same name
    *     compression).
@@ -525,13 +525,10 @@ public class TSIG {
     return (name.length()
         + 10
         + alg.length()
-        + 8
-        + // time signed, fudge
-        18
-        + // 2 byte MAC length, 16 byte MAC
-        4
-        + // original id, error
-        8); // 2 byte error length, 6 byte max error field.
+        + 8 // time signed, fudge
+        + 18 // 2 byte MAC length, 16 byte MAC
+        + 4 // original id, error
+        + 8); // 2 byte error length, 6 byte max error field.
   }
 
   public static class StreamVerifier {

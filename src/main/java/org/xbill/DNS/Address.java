@@ -267,7 +267,7 @@ public final class Address {
             return aaaa;
           }
         }
-        throw new UnknownHostException("unknown host");
+        throw new UnknownHostException("<" + name + "> could not be resolved");
       }
       if (!all) {
         return a;
@@ -281,7 +281,7 @@ public final class Address {
       System.arraycopy(aaaa, 0, merged, a.length, aaaa.length);
       return merged;
     } catch (TextParseException e) {
-      throw new UnknownHostException("invalid name");
+      throw new UnknownHostException("<" + name + "> is invalid");
     }
   }
 
@@ -385,7 +385,7 @@ public final class Address {
     Name name = ReverseMap.fromAddress(addr);
     Record[] records = new Lookup(name, Type.PTR).run();
     if (records == null) {
-      throw new UnknownHostException("unknown address");
+      throw new UnknownHostException("unknown address: " + name);
     }
     PTRRecord ptr = (PTRRecord) records[0];
     return ptr.getTarget().toString();
