@@ -4,7 +4,8 @@ package org.xbill.DNS;
 
 /**
  * Helper functions for doing serial arithmetic. These should be used when setting/checking SOA
- * serial numbers. SOA serial number arithmetic is defined in RFC 1982.
+ * serial numbers. SOA serial number arithmetic is defined in RFC 1982 and also referenced in RFC
+ * 2136.
  *
  * @author Brian Wellington
  */
@@ -42,7 +43,8 @@ public final class Serial {
 
   /**
    * Increments a serial number. The number is assumed to be a 32 bit unsigned integer stored in a
-   * long. This basically adds 1 and resets the value to 0 if it is 2^32.
+   * long. This basically adds 1 and resets the value to 1 if it is 2^32. A zero value is explicitly
+   * forbidden as per * RFC 2136 section 4.2 & 7.11.
    *
    * @param serial The serial number
    * @return The incremented serial number
@@ -53,7 +55,7 @@ public final class Serial {
       throw new IllegalArgumentException(serial + " out of range");
     }
     if (serial == MAX32) {
-      return 0;
+      return 1;
     }
     return serial + 1;
   }
