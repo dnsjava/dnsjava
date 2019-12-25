@@ -74,6 +74,14 @@ class MasterTest {
   }
 
   @Test
+  void relativeIncludeDirectiveViaStream() throws IOException {
+    try (InputStream is = MasterTest.class.getResourceAsStream("/zonefileIncludeDirective");
+        Master m = new Master(is)) {
+      assertThrows(TextParseException.class, m::nextRecord);
+    }
+  }
+
+  @Test
   void includeDirectiveDisabled() throws IOException {
     try (InputStream is = MasterTest.class.getResourceAsStream("/zonefileIncludeDirective");
         Master m = new Master(is)) {

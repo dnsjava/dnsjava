@@ -330,20 +330,22 @@ public class Master implements AutoCloseable {
           }
 
           String filename = st.getString();
-          File newfile;
-          if (file != null) {
-            String parent = file.getParent();
-            newfile = new File(parent, filename);
-          } else {
-            newfile = new File(filename);
+          File includeFile = new File(filename);
+          if (!includeFile.isAbsolute()) {
+            if (file != null) {
+              includeFile = new File(file.getParent(), filename);
+            } else {
+              throw st.exception("Cannot $INCLUDE using relative path when parsing from stream");
+            }
           }
-          Name incorigin = origin;
+
+          Name includeOrigin = origin;
           token = st.get();
           if (token.isString()) {
-            incorigin = parseName(token.value, Name.root);
+            includeOrigin = parseName(token.value, Name.root);
             st.getEOL();
           }
-          included = new Master(newfile, incorigin, defaultTTL);
+          included = new Master(includeFile, includeOrigin, defaultTTL);
           /*
            * If we continued, we wouldn't be looking in
            * the new file.  Recursing works better.
