@@ -232,9 +232,9 @@ public class ExtendedResolver implements Resolver {
   }
 
   @Override
-  public void setEDNS(int level) {
+  public void setEDNS(int version) {
     for (ResolverEntry re : resolvers) {
-      re.resolver.setEDNS(level);
+      re.resolver.setEDNS(version);
     }
   }
 

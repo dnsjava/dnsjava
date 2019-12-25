@@ -181,8 +181,8 @@ public class SimpleResolver implements Resolver {
   }
 
   @Override
-  public void setEDNS(int level) {
-    setEDNS(level, 0, 0);
+  public void setEDNS(int version) {
+    setEDNS(version, 0, 0);
   }
 
   @Override

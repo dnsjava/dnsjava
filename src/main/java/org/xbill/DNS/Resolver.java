@@ -45,10 +45,10 @@ public interface Resolver {
   /**
    * Sets the EDNS version used on outgoing messages.
    *
-   * @param level The EDNS level to use. 0 indicates EDNS0 and -1 indicates no EDNS.
+   * @param version The EDNS level to use. 0 indicates EDNS0 and -1 indicates no EDNS.
    * @throws IllegalArgumentException An invalid level was indicated.
    */
-  void setEDNS(int level);
+  void setEDNS(int version);
 
   /**
    * Sets the EDNS information on outgoing messages.
