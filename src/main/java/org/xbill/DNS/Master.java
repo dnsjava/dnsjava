@@ -324,8 +324,11 @@ public class Master implements AutoCloseable {
             if (includeThrowsException) {
               throw st.exception("$INCLUDE encountered, but processing disabled in strict mode");
             }
+            st.getString();
+            st.getEOL();
             continue;
           }
+
           String filename = st.getString();
           File newfile;
           if (file != null) {
@@ -399,7 +402,7 @@ public class Master implements AutoCloseable {
   }
 
   /**
-   * Disable processing of $INCLUDE directives. When disabled, $INCUDE statements will not be
+   * Disable processing of $INCLUDE directives. When disabled, $INCLUDE statements will not be
    * processed. Depending on the contents of the file that would have been included, this may cause
    * the zone to be invalid. (e.g. if there is no SOA or NS at the apex)
    */

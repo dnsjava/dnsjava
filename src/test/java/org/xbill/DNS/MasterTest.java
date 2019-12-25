@@ -63,6 +63,44 @@ class MasterTest {
   }
 
   @Test
+  void includeDirectiveComment() throws IOException, URISyntaxException {
+    try (Master master =
+        new Master(
+            Paths.get(MasterTest.class.getResource("/zonefileIncludeDirectiveComment").toURI())
+                .toString())) {
+      Record rr = master.nextRecord();
+      assertEquals(Type.SOA, rr.getType());
+    }
+  }
+
+  @Test
+  void includeDirectiveDisabled() throws IOException {
+    try (InputStream is = MasterTest.class.getResourceAsStream("/zonefileIncludeDirective");
+        Master m = new Master(is)) {
+      m.disableIncludes();
+      assertNull(m.nextRecord());
+    }
+  }
+
+  @Test
+  void includeDirectiveDisabledStrict() throws IOException {
+    try (InputStream is = MasterTest.class.getResourceAsStream("/zonefileIncludeDirective");
+        Master m = new Master(is)) {
+      m.disableIncludes(true);
+      assertThrows(TextParseException.class, m::nextRecord);
+    }
+  }
+
+  @Test
+  void includeDirectiveDisabledComment() throws IOException {
+    try (InputStream is = MasterTest.class.getResourceAsStream("/zonefileIncludeDirectiveComment");
+        Master m = new Master(is)) {
+      m.disableIncludes();
+      assertNull(m.nextRecord());
+    }
+  }
+
+  @Test
   void expandGenerated() throws IOException {
     try (Master master = new Master(MasterTest.class.getResourceAsStream("/zonefileEx1"))) {
       master.expandGenerate(true);
