@@ -177,6 +177,9 @@ public final class Type {
   /** {@link SMIMEARecord S/MIME cert association} */
   public static final int SMIMEA = 53;
 
+  /** {@link HIPRecord Host Identity Protocol (HIP)} */
+  public static final int HIP = 55;
+
   /** {@link CDSRecord Child Delegation Signer} */
   public static final int CDS = 59;
 
@@ -299,6 +302,7 @@ public final class Type {
     types.add(NSEC3PARAM, "NSEC3PARAM", new NSEC3PARAMRecord());
     types.add(TLSA, "TLSA", new TLSARecord());
     types.add(SMIMEA, "SMIMEA", new SMIMEARecord());
+    types.add(HIP, "HIP", new HIPRecord());
     types.add(CDNSKEY, "CDNSKEY", new CDNSKEYRecord());
     types.add(CDS, "CDS", new CDSRecord());
     types.add(OPENPGPKEY, "OPENPGPKEY", new OPENPGPKEYRecord());

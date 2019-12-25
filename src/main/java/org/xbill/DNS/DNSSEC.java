@@ -223,11 +223,11 @@ public class DNSSEC {
 
   /** The cryptographic data in a DNSSEC key is malformed. */
   public static class MalformedKeyException extends DNSSECException {
-    MalformedKeyException(KEYBase rec) {
-      super("Invalid key data: " + rec.rdataToString());
+    MalformedKeyException(String message) {
+      super(message);
     }
 
-    MalformedKeyException(KEYBase rec, Throwable cause) {
+    MalformedKeyException(Record rec, Throwable cause) {
       super("Invalid key data: " + rec.rdataToString(), cause);
     }
   }
@@ -392,8 +392,8 @@ public class DNSSEC {
     }
   }
 
-  private static PublicKey toRSAPublicKey(KEYBase r) throws IOException, GeneralSecurityException {
-    DNSInput in = new DNSInput(r.getKey());
+  private static PublicKey toRSAPublicKey(byte[] key) throws IOException, GeneralSecurityException {
+    DNSInput in = new DNSInput(key);
     int exponentLength = in.readU8();
     if (exponentLength == 0) {
       exponentLength = in.readU16();
@@ -405,13 +405,13 @@ public class DNSSEC {
     return factory.generatePublic(new RSAPublicKeySpec(modulus, exponent));
   }
 
-  private static PublicKey toDSAPublicKey(KEYBase r)
+  private static PublicKey toDSAPublicKey(byte[] key)
       throws IOException, GeneralSecurityException, MalformedKeyException {
-    DNSInput in = new DNSInput(r.getKey());
+    DNSInput in = new DNSInput(key);
 
     int t = in.readU8();
     if (t > 8) {
-      throw new MalformedKeyException(r);
+      throw new MalformedKeyException("t is too large");
     }
 
     BigInteger q = readBigInteger(in, 20);
@@ -482,9 +482,9 @@ public class DNSSEC {
           "3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F",
           "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973");
 
-  private static PublicKey toECGOSTPublicKey(KEYBase r, ECKeyInfo keyinfo)
+  private static PublicKey toECGOSTPublicKey(byte[] key, ECKeyInfo keyinfo)
       throws IOException, GeneralSecurityException {
-    DNSInput in = new DNSInput(r.getKey());
+    DNSInput in = new DNSInput(key);
 
     BigInteger x = readBigIntegerLittleEndian(in, keyinfo.length);
     BigInteger y = readBigIntegerLittleEndian(in, keyinfo.length);
@@ -494,9 +494,9 @@ public class DNSSEC {
     return factory.generatePublic(new ECPublicKeySpec(q, keyinfo.spec));
   }
 
-  private static PublicKey toECDSAPublicKey(KEYBase r, ECKeyInfo keyinfo)
+  private static PublicKey toECDSAPublicKey(byte[] key, ECKeyInfo keyinfo)
       throws IOException, GeneralSecurityException {
-    DNSInput in = new DNSInput(r.getKey());
+    DNSInput in = new DNSInput(key);
 
     // RFC 6605 Section 4
     BigInteger x = readBigInteger(in, keyinfo.length);
@@ -506,10 +506,13 @@ public class DNSSEC {
     KeyFactory factory = KeyFactory.getInstance("EC");
     return factory.generatePublic(new ECPublicKeySpec(q, keyinfo.spec));
   }
-
   /** Converts a KEY/DNSKEY record into a PublicKey */
   static PublicKey toPublicKey(KEYBase r) throws DNSSECException {
-    int alg = r.getAlgorithm();
+    return toPublicKey(r.getAlgorithm(), r.getKey(), r);
+  }
+
+  /** Converts a KEY/DNSKEY record into a PublicKey */
+  static PublicKey toPublicKey(int alg, byte[] key, Record r) throws DNSSECException {
     try {
       switch (alg) {
         case Algorithm.RSAMD5:
@@ -517,16 +520,16 @@ public class DNSSEC {
         case Algorithm.RSA_NSEC3_SHA1:
         case Algorithm.RSASHA256:
         case Algorithm.RSASHA512:
-          return toRSAPublicKey(r);
+          return toRSAPublicKey(key);
         case Algorithm.DSA:
         case Algorithm.DSA_NSEC3_SHA1:
-          return toDSAPublicKey(r);
+          return toDSAPublicKey(key);
         case Algorithm.ECC_GOST:
-          return toECGOSTPublicKey(r, GOST);
+          return toECGOSTPublicKey(key, GOST);
         case Algorithm.ECDSAP256SHA256:
-          return toECDSAPublicKey(r, ECDSA_P256);
+          return toECDSAPublicKey(key, ECDSA_P256);
         case Algorithm.ECDSAP384SHA384:
-          return toECDSAPublicKey(r, ECDSA_P384);
+          return toECDSAPublicKey(key, ECDSA_P384);
         default:
           throw new UnsupportedAlgorithmException(alg);
       }

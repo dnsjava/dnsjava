@@ -18,19 +18,42 @@ public class IPSECKEYRecord extends Record {
 
   private static final long serialVersionUID = 3050449702765909687L;
 
+  /**
+   * Algorithm types for IPSECKEY RRs as defined in <a
+   * href="https://www.iana.org/assignments/ipseckey-rr-parameters/ipseckey-rr-parameters.xhtml#ipseckey-rr-parameters-1">IPSECKEY
+   * Resource Record Parameters</a>.
+   */
   public static class Algorithm {
     private Algorithm() {}
 
+    /** A DSA key is present, in the format defined in [RFC2536] */
     public static final int DSA = 1;
+
+    /** A RSA key is present, in the format defined in [RFC3110] */
     public static final int RSA = 2;
+
+    /** An ECDSA key is present, in the format defined in [RFC6605] */
+    public static final int ECDSA = 3;
   }
 
+  /**
+   * Gateway types for IPSECKEY RRs as defined in <a
+   * href="https://www.iana.org/assignments/ipseckey-rr-parameters/ipseckey-rr-parameters.xhtml#ipseckey-rr-parameters-2">IPSECKEY
+   * Resource Record Parameters</a>.
+   */
   public static class Gateway {
     private Gateway() {}
 
+    /** No gateway is present */
     public static final int None = 0;
+
+    /** A 4-byte IPv4 address is present */
     public static final int IPv4 = 1;
+
+    /** A 16-byte IPv6 address is present */
     public static final int IPv6 = 2;
+
+    /** A wire-encoded domain name is present */
     public static final int Name = 3;
   }
 
