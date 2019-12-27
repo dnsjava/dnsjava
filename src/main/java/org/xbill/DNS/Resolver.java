@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -48,14 +49,16 @@ public interface Resolver {
    * @param version The EDNS level to use. 0 indicates EDNS0 and -1 indicates no EDNS.
    * @throws IllegalArgumentException An invalid level was indicated.
    */
-  void setEDNS(int version);
+  default void setEDNS(int version) {
+    setEDNS(version, 0, 0, Collections.emptyList());
+  }
 
   /**
    * Sets the EDNS information on outgoing messages.
    *
    * @param version The EDNS version to use. 0 indicates EDNS0 and -1 indicates no EDNS.
    * @param payloadSize The maximum DNS packet size that this host is capable of receiving over UDP.
-   *     If 0 is specified, the default (1280) is used.
+   *     If 0 is specified, the default ({@value SimpleResolver#DEFAULT_EDNS_PAYLOADSIZE}) is used.
    * @param flags EDNS extended flags to be set in the OPT record.
    * @param options EDNS options to be set in the OPT record, specified as a List of
    *     OPTRecord.Option elements.
@@ -77,7 +80,11 @@ public interface Resolver {
    * @see OPTRecord
    */
   default void setEDNS(int version, int payloadSize, int flags, EDNSOption... options) {
-    setEDNS(version, payloadSize, flags, Arrays.asList(options));
+    setEDNS(
+        version,
+        payloadSize,
+        flags,
+        options == null ? Collections.emptyList() : Arrays.asList(options));
   }
 
   /**

@@ -232,13 +232,6 @@ public class ExtendedResolver implements Resolver {
   }
 
   @Override
-  public void setEDNS(int version) {
-    for (ResolverEntry re : resolvers) {
-      re.resolver.setEDNS(version);
-    }
-  }
-
-  @Override
   public void setEDNS(int version, int payloadSize, int flags, List<EDNSOption> options) {
     for (ResolverEntry re : resolvers) {
       re.resolver.setEDNS(version, payloadSize, flags, options);

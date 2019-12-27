@@ -181,17 +181,8 @@ public class SimpleResolver implements Resolver {
   }
 
   @Override
-  public void setEDNS(int version) {
-    setEDNS(version, 0, 0);
-  }
-
-  @Override
   public void setTSIGKey(TSIG key) {
     tsig = key;
-  }
-
-  TSIG getTSIGKey() {
-    return tsig;
   }
 
   @Override
