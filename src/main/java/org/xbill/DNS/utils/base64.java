@@ -15,6 +15,8 @@ public class base64 {
 
   private static final String Base64 =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  private static final String Base64Url =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
   private base64() {}
 
@@ -25,8 +27,19 @@ public class base64 {
    * @return A String containing the encoded data
    */
   public static String toString(byte[] b) {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    return toString(b, false);
+  }
 
+  /**
+   * Convert binary data to a base64-encoded String
+   *
+   * @param b An array containing binary data
+   * @param useUrl True to use Base64URL encoding (i.e. no trailing =, -_ instead of +/)
+   * @return A String containing the encoded data
+   */
+  public static String toString(byte[] b, boolean useUrl) {
+    String base = useUrl ? Base64Url : Base64;
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
     for (int i = 0; i < (b.length + 2) / 3; i++) {
       short[] s = new short[3];
       short[] t = new short[4];
@@ -54,7 +67,10 @@ public class base64 {
         t[3] = (short) (s[2] & 0x3F);
       }
       for (int j = 0; j < 4; j++) {
-        os.write(Base64.charAt(t[j]));
+        if (t[j] == 64 && useUrl) {
+          continue;
+        }
+        os.write(base.charAt(t[j]));
       }
     }
     return new String(os.toByteArray());
