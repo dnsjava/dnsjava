@@ -45,12 +45,9 @@ final class NioTcpClient extends Client {
     while (!registrationQueue.isEmpty()) {
       ChannelState state = registrationQueue.remove();
       try {
-        state.channel.register(
-            selector,
-            state.channel.isConnected()
-                ? SelectionKey.OP_READ | SelectionKey.OP_WRITE
-                : SelectionKey.OP_CONNECT,
-            state);
+        if (!state.channel.isConnected()) {
+          state.channel.register(selector, SelectionKey.OP_CONNECT, state);
+        }
       } catch (ClosedChannelException e) {
         state.handleChannelException(e);
       }
@@ -128,15 +125,17 @@ final class NioTcpClient extends Client {
     int readState = 0;
 
     public void processReadyKey(SelectionKey key) {
-      if (key.isConnectable()) {
-        processConnect(key);
-      }
-      if (key.isWritable()) {
-        processWrite();
-      }
-      if (key.isReadable()) {
-        processRead();
-      }
+      if (key.isValid())
+        if (key.isConnectable()) {
+          processConnect(key);
+        } else {
+          if (key.isWritable()) {
+            processWrite();
+          }
+          if (key.isReadable()) {
+            processRead();
+          }
+        }
     }
 
     void handleTransactionException(IOException e) {
@@ -259,6 +258,7 @@ final class NioTcpClient extends Client {
               new ChannelKey(local, remote),
               key -> {
                 try {
+                  log.trace("Opening async channel for l={}/r={}", local, remote);
                   SocketChannel c = SocketChannel.open();
                   c.configureBlocking(false);
                   if (local != null) {
@@ -273,6 +273,10 @@ final class NioTcpClient extends Client {
                 }
               });
       if (channel != null) {
+        log.trace(
+            "Creating transaction for {}/{}",
+            query.getQuestion().getName(),
+            Type.string(query.getQuestion().getType()));
         Transaction t = new Transaction(query, data, endTime, channel.channel, f);
         channel.pendingTransactions.add(t);
         registrationQueue.add(channel);

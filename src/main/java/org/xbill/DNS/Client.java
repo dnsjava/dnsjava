@@ -7,7 +7,6 @@ import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.hexdump;
@@ -31,6 +30,7 @@ class Client {
       return;
     }
 
+    log.debug("Starting dnsjava NIO selector thread");
     run = true;
     selector = Selector.open();
     selectorThread = new Thread(Client::runSelector);
@@ -54,9 +54,8 @@ class Client {
   private static void runSelector() {
     while (run) {
       try {
-        if (selector.select(100) == 0) {
+        if (selector.select(1000) == 0) {
           timeoutTasks.forEach(Runnable::run);
-          continue;
         }
 
         processReadyKeys();
@@ -71,8 +70,7 @@ class Client {
   }
 
   private static void processReadyKeys() {
-    Set<SelectionKey> keys = selector.selectedKeys();
-    for (SelectionKey key : keys) {
+    for (SelectionKey key : selector.selectedKeys()) {
       KeyProcessor t = (KeyProcessor) key.attachment();
       t.processReadyKey(key);
     }
