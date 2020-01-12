@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,10 @@ class Client {
   }
 
   private static void processReadyKeys() {
-    for (SelectionKey key : selector.selectedKeys()) {
+    Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+    while (it.hasNext()) {
+      SelectionKey key = it.next();
+      it.remove();
       KeyProcessor t = (KeyProcessor) key.attachment();
       t.processReadyKey(key);
     }

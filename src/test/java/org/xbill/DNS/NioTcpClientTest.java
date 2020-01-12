@@ -13,14 +13,13 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 public class NioTcpClientTest {
   @Test
-  void testResponseStream() throws InterruptedException, IOException, ExecutionException {
+  void testResponseStream() throws InterruptedException, IOException {
     Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
     Message[] q = new Message[] {Message.newQuery(qr), Message.newQuery(qr)};
     CountDownLatch cdl1 = new CountDownLatch(q.length);
