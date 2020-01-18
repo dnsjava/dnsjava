@@ -45,7 +45,7 @@ final class NioUdpClient extends Client {
     int ephemeralEnd = Integer.getInteger("dnsjava.udp.ephemeral.end", ephemeralEndDefault);
     EPHEMERAL_RANGE = ephemeralEnd - EPHEMERAL_START;
 
-    if (Boolean.parseBoolean("dnsjava.udp.ephemeral.use_ephemeral_port")) {
+    if (Boolean.getBoolean("dnsjava.udp.ephemeral.use_ephemeral_port")) {
       prng = null;
     } else {
       prng = new SecureRandom();
