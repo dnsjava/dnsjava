@@ -72,6 +72,6 @@ public class SunJvmResolverConfigProvider implements ResolverConfigProvider {
 
   @Override
   public boolean isEnabled() {
-    return !System.getProperty("java.vendor").contains("Android");
+    return Boolean.getBoolean("dnsjava.configprovider.sunjvm.enabled");
   }
 }

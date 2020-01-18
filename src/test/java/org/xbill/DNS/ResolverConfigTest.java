@@ -154,7 +154,7 @@ class ResolverConfigTest {
   @Test
   void sunJvm() throws InitializationException {
     SunJvmResolverConfigProvider rc = new SunJvmResolverConfigProvider();
-    assertTrue(rc.isEnabled());
+    assertFalse(rc.isEnabled());
     rc.initialize();
   }
 
