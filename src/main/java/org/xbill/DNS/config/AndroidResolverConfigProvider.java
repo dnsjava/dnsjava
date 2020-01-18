@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS.config;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
+import android.os.Build;
+import android.os.SystemProperties;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.ResolverConfig;
 import org.xbill.DNS.SimpleResolver;
 
 /**
  * Resolver config provider for Android. Contrary to all other providers, this provider needs a
- * context to operate on which must be set by calling {@link #setContext(Object)}.
+ * context to operate on which must be set by calling {@link #setContext(Context)}.
  *
  * <p>If you are developing for Android, consider implementing your own {@link
  * ResolverConfigProvider} that listens to network callbacks and properly refreshes on link changes.
@@ -22,10 +24,10 @@ import org.xbill.DNS.SimpleResolver;
  */
 @Slf4j
 public class AndroidResolverConfigProvider extends BaseResolverConfigProvider {
-  private static Object context = null;
+  private static Context context = null;
 
   /** Gets the current configuration */
-  public static void setContext(Object ctx) {
+  public static void setContext(Context ctx) {
     context = ctx;
   }
 
@@ -36,76 +38,45 @@ public class AndroidResolverConfigProvider extends BaseResolverConfigProvider {
     // that net.dns* should always be the active nameservers, so we use those.
     // Starting with Android 8 (API 26), the net.dns[1234] properties are no longer available:
     // https://developer.android.com/about/versions/oreo/android-8.0-changes.html#o-pri
-    try {
-      Class<?> Version = Class.forName("android.os.Build$VERSION");
-      Field SDK_INT = Version.getField("SDK_INT");
-
-      if (SDK_INT.getInt(null) >= 26) {
-        initializeApi26Nameservers();
-      } else {
-        initializeNameservers();
-      }
-    } catch (NoSuchMethodException
-        | InvocationTargetException
-        | NoSuchFieldException
-        | IllegalAccessException
-        | ClassNotFoundException e) {
-      throw new InitializationException(e);
+    if (Build.VERSION.SDK_INT >= 26) {
+      initializeApi26Nameservers();
+    } else {
+      initializeNameservers();
     }
   }
 
-  private void initializeNameservers()
-      throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-          InvocationTargetException {
-    Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
-    Method method = systemPropertiesClass.getMethod("get", String.class);
+  private void initializeNameservers() {
     for (int i = 1; i <= 4; i++) {
-      String server = (String) method.invoke(null, "net.dns" + i);
+      String server = SystemProperties.get("net.dns" + i);
       if (server != null && !server.isEmpty()) {
         nameservers.add(new InetSocketAddress(server, SimpleResolver.DEFAULT_PORT));
       }
     }
   }
 
-  private void initializeApi26Nameservers()
-      throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
-          InvocationTargetException, InitializationException {
+  private void initializeApi26Nameservers() throws InitializationException {
     if (context == null) {
       throw new InitializationException("Context must be initialized by calling setContext");
     }
 
-    Class<?> contextClass = Class.forName("android.content.Context");
-    Method getSystemService = contextClass.getDeclaredMethod("getSystemService", String.class);
-    Object cm = getSystemService.invoke(context, "connectivity");
-
-    Class<?> connectivityManagerClass = Class.forName("android.net.ConnectivityManager");
-    Method getActiveNetwork = connectivityManagerClass.getDeclaredMethod("getActiveNetwork");
-    Object network = getActiveNetwork.invoke(cm);
+    ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
+    Network network = cm.getActiveNetwork();
     if (network == null) {
       // if the device is offline, there's no active network
       return;
     }
 
-    Class<?> networkClass = Class.forName("android.net.Network");
-    Method getLinkProperties =
-        connectivityManagerClass.getDeclaredMethod("getLinkProperties", networkClass);
-    Object lp = getLinkProperties.invoke(cm, network);
+    LinkProperties lp = cm.getLinkProperties(network);
     if (lp == null) {
       // can be null for an unknown network, which may happen if networks change
       return;
     }
 
-    Class<?> linkPropertiesClass = Class.forName("android.net.LinkProperties");
-    Method getDnsServers = linkPropertiesClass.getDeclaredMethod("getDnsServers");
-    @SuppressWarnings("unchecked")
-    List<InetAddress> addresses = (List<InetAddress>) getDnsServers.invoke(lp);
-
-    for (InetAddress address : addresses) {
+    for (InetAddress address : lp.getDnsServers()) {
       addNameserver(new InetSocketAddress(address, SimpleResolver.DEFAULT_PORT));
     }
 
-    Method getDomains = linkPropertiesClass.getDeclaredMethod("getDomains");
-    parseSearchPathList((String) getDomains.invoke(lp), ",");
+    parseSearchPathList(lp.getDomains(), ",");
   }
 
   @Override

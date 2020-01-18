@@ -216,6 +216,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.robolectric</groupId>
+            <artifactId>android-all</artifactId>
+            <version>10-robolectric-5803371</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>5.5.0</version>

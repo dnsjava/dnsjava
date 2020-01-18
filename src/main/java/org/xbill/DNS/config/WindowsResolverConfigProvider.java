@@ -72,7 +72,7 @@ public class WindowsResolverConfigProvider implements ResolverConfigProvider {
         if (result.OperStatus == 1) {
           IP_ADAPTER_DNS_SERVER_ADDRESS_XP dns = result.FirstDnsServerAddress;
           while (dns != null) {
-            InetAddress address = null;
+            InetAddress address;
             try {
               address = dns.Address.toAddress();
               if (!address.isSiteLocalAddress()) {
