@@ -13,9 +13,6 @@ import org.xbill.DNS.utils.base16;
  *     Shell (SSH) Key Fingerprints</a>
  */
 public class SSHFPRecord extends Record {
-
-  private static final long serialVersionUID = -8104701402654687025L;
-
   public static class Algorithm {
     private Algorithm() {}
 

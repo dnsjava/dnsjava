@@ -9,9 +9,6 @@ package org.xbill.DNS;
  * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class AFSDBRecord extends U16NameBase {
-
-  private static final long serialVersionUID = 3034379930729102437L;
-
   AFSDBRecord() {}
 
   @Override

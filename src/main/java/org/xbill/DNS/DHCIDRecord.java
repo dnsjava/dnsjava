@@ -13,9 +13,6 @@ import org.xbill.DNS.utils.base64;
  *     Encoding Dynamic Host Configuration Protocol (DHCP) Information (DHCID RR)</a>
  */
 public class DHCIDRecord extends Record {
-
-  private static final long serialVersionUID = -8214820200808997707L;
-
   private byte[] data;
 
   DHCIDRecord() {}

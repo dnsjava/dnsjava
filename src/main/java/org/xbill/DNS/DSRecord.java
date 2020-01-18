@@ -38,8 +38,6 @@ public class DSRecord extends Record {
   public static final int GOST3411_DIGEST_ID = Digest.GOST3411;
   public static final int SHA384_DIGEST_ID = Digest.SHA384;
 
-  private static final long serialVersionUID = -9001819329700081493L;
-
   private int footprint;
   private int alg;
   private int digestid;

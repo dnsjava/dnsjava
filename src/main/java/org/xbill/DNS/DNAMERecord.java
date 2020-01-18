@@ -9,9 +9,6 @@ package org.xbill.DNS;
  * @see <a href="https://tools.ietf.org/html/rfc6672">RFC 6672: DNAME Redirection in the DNS</a>
  */
 public class DNAMERecord extends SingleNameBase {
-
-  private static final long serialVersionUID = 2670767677200844154L;
-
   DNAMERecord() {}
 
   @Override

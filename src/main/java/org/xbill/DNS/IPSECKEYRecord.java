@@ -15,9 +15,6 @@ import org.xbill.DNS.utils.base64;
  *     Material in DNS</a>
  */
 public class IPSECKEYRecord extends Record {
-
-  private static final long serialVersionUID = 3050449702765909687L;
-
   /**
    * Algorithm types for IPSECKEY RRs as defined in <a
    * href="https://www.iana.org/assignments/ipseckey-rr-parameters/ipseckey-rr-parameters.xhtml#ipseckey-rr-parameters-1">IPSECKEY

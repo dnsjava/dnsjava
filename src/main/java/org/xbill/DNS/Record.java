@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import org.xbill.DNS.utils.base16;
@@ -15,7 +14,7 @@ import org.xbill.DNS.utils.base16;
  *
  * @author Brian Wellington
  */
-public abstract class Record implements Cloneable, Comparable<Record>, Serializable {
+public abstract class Record implements Cloneable, Comparable<Record> {
   protected Name name;
   protected int type, dclass;
   protected long ttl;

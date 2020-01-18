@@ -12,9 +12,6 @@ import java.io.IOException;
  *     Authorization (CAA) Resource Record</a>
  */
 public class CAARecord extends Record {
-
-  private static final long serialVersionUID = 8544304287274216443L;
-
   public static class Flags {
     private Flags() {}
 

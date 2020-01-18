@@ -17,9 +17,6 @@ import java.io.IOException;
  *     Security Extensions</a>
  */
 public class NSECRecord extends Record {
-
-  private static final long serialVersionUID = -5165065768816265385L;
-
   private Name next;
   private TypeBitmap types;
 

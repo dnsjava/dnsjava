@@ -14,9 +14,6 @@ import java.text.NumberFormat;
  *     Information in the Domain Name System</a>
  */
 public class LOCRecord extends Record {
-
-  private static final long serialVersionUID = 9058224788126750409L;
-
   private static NumberFormat w2, w3;
   private long size, hPrecision, vPrecision;
   private long latitude, longitude, altitude;

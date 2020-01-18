@@ -13,9 +13,6 @@ import java.net.UnknownHostException;
  * @see <a href="https://tools.ietf.org/html/rfc6563">RFC 6563: Moving A6 to Historic Status</a>
  */
 public class A6Record extends Record {
-
-  private static final long serialVersionUID = -8815026887337346789L;
-
   private int prefixBits;
   private InetAddress suffix;
   private Name prefix;

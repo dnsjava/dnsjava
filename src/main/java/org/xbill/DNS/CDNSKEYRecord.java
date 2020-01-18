@@ -11,9 +11,6 @@ import java.security.PublicKey;
  *     via CDS/CDNSKEY</a>
  */
 public class CDNSKEYRecord extends DNSKEYRecord {
-
-  private static final long serialVersionUID = 1307874430666933615L;
-
   CDNSKEYRecord() {}
 
   @Override

@@ -10,9 +10,6 @@ package org.xbill.DNS;
  *     Specification</a>
  */
 public class RTRecord extends U16NameBase {
-
-  private static final long serialVersionUID = -3206215651648278098L;
-
   RTRecord() {}
 
   @Override

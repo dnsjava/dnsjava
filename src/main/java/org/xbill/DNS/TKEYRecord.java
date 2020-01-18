@@ -16,9 +16,6 @@ import org.xbill.DNS.utils.base64;
  *     (TKEY RR)</a>
  */
 public class TKEYRecord extends Record {
-
-  private static final long serialVersionUID = -7330934927273584334L;
-
   private Name alg;
   private Instant timeInception;
   private Instant timeExpire;

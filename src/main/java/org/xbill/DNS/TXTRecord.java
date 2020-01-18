@@ -12,9 +12,6 @@ import java.util.List;
  *     Specification</a>
  */
 public class TXTRecord extends TXTBase {
-
-  private static final long serialVersionUID = -5780785764284221342L;
-
   TXTRecord() {}
 
   @Override

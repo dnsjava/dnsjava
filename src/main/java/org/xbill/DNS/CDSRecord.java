@@ -9,9 +9,6 @@ package org.xbill.DNS;
  *     via CDS/CDNSKEY</a>
  */
 public class CDSRecord extends DSRecord {
-
-  private static final long serialVersionUID = -3156174257356976006L;
-
   CDSRecord() {}
 
   @Override

@@ -18,9 +18,6 @@ import java.util.Date;
  * @author Brian Wellington
  */
 public class RRSIGRecord extends SIGBase {
-
-  private static final long serialVersionUID = 7453923738152214746L;
-
   RRSIGRecord() {}
 
   @Override

@@ -20,9 +20,6 @@ import java.util.List;
  * @author Brian Wellington
  */
 public class OPTRecord extends Record {
-
-  private static final long serialVersionUID = -6254521894809367938L;
-
   private List<EDNSOption> options;
 
   OPTRecord() {}

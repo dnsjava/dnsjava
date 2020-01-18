@@ -12,9 +12,6 @@ import org.xbill.DNS.utils.base64;
  *     Entities (DANE) Bindings for OpenPGP</a>
  */
 public class OPENPGPKEYRecord extends Record {
-
-  private static final long serialVersionUID = -1277262990243423062L;
-
   private byte[] cert;
 
   OPENPGPKEYRecord() {}

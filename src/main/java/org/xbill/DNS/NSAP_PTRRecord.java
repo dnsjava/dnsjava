@@ -9,9 +9,6 @@ package org.xbill.DNS;
  * @see <a href="https://tools.ietf.org/html/rfc1706">RFC 1706: DNS NSAP Resource Records</a>
  */
 public class NSAP_PTRRecord extends SingleNameBase {
-
-  private static final long serialVersionUID = 2386284746382064904L;
-
   NSAP_PTRRecord() {}
 
   @Override

@@ -12,9 +12,6 @@ package org.xbill.DNS;
  *     Record for Domains That Accept No Mail</a>
  */
 public class MXRecord extends U16NameBase {
-
-  private static final long serialVersionUID = 2914841027584208546L;
-
   MXRecord() {}
 
   @Override

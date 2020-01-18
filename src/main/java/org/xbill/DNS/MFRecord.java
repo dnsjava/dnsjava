@@ -10,9 +10,6 @@ package org.xbill.DNS;
  *     Observations</a>
  */
 public class MFRecord extends SingleNameBase {
-
-  private static final long serialVersionUID = -6670449036843028169L;
-
   MFRecord() {}
 
   @Override

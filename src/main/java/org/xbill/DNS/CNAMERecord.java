@@ -10,9 +10,6 @@ package org.xbill.DNS;
  *     Specification</a>
  */
 public class CNAMERecord extends SingleCompressedNameBase {
-
-  private static final long serialVersionUID = -4020373886892538580L;
-
   CNAMERecord() {}
 
   @Override

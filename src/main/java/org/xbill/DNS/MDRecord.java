@@ -10,9 +10,6 @@ package org.xbill.DNS;
  *     Observations</a>
  */
 public class MDRecord extends SingleNameBase {
-
-  private static final long serialVersionUID = 5268878603762942202L;
-
   MDRecord() {}
 
   @Override

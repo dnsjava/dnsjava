@@ -11,9 +11,6 @@ package org.xbill.DNS;
  *     Option</a>
  */
 public class NSIDOption extends GenericEDNSOption {
-
-  private static final long serialVersionUID = 74739759292589056L;
-
   NSIDOption() {
     super(EDNSOption.Code.NSID);
   }

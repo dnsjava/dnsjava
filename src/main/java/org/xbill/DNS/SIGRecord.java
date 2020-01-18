@@ -17,9 +17,6 @@ import java.util.Date;
  * @author Brian Wellington
  */
 public class SIGRecord extends SIGBase {
-
-  private static final long serialVersionUID = -2121567461284199774L;
-
   SIGRecord() {}
 
   @Override

@@ -9,9 +9,6 @@ package org.xbill.DNS;
  * @author Brian Wellington
  */
 abstract class SingleCompressedNameBase extends SingleNameBase {
-
-  private static final long serialVersionUID = -236435396815460677L;
-
   protected SingleCompressedNameBase() {}
 
   protected SingleCompressedNameBase(

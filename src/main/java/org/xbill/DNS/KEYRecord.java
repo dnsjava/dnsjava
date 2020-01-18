@@ -19,9 +19,6 @@ import java.util.StringTokenizer;
  *     Delegation Signer (DS)</a>
  */
 public class KEYRecord extends KEYBase {
-
-  private static final long serialVersionUID = 6385613447571488906L;
-
   /** KEY protocol identifiers. */
   public static class Protocol {
 

@@ -87,8 +87,6 @@ public class APLRecord extends Record {
     }
   }
 
-  private static final long serialVersionUID = -1348173791712935864L;
-
   private List<Element> elements;
 
   APLRecord() {}

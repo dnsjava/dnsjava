@@ -12,9 +12,6 @@ import java.io.IOException;
  *     Specification</a>
  */
 public class NULLRecord extends Record {
-
-  private static final long serialVersionUID = -5796493183235216538L;
-
   private byte[] data;
 
   NULLRecord() {}

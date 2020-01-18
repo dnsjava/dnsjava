@@ -12,9 +12,6 @@ import java.io.IOException;
  *     MIXER Conformant Global Address Mapping (MCGAM)</a>
  */
 public class PXRecord extends Record {
-
-  private static final long serialVersionUID = 1811540008806660667L;
-
   private int preference;
   private Name map822;
   private Name mapX400;

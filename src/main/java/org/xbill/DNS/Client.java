@@ -22,11 +22,11 @@ class Client {
   private static List<Runnable> timeoutTasks = new CopyOnWriteArrayList<>();
   static Selector selector;
 
-  protected interface KeyProcessor {
+  interface KeyProcessor {
     void processReadyKey(SelectionKey key);
   }
 
-  protected static void start() throws IOException {
+  static void start() throws IOException {
     if (run) {
       return;
     }

@@ -13,9 +13,6 @@ import org.xbill.DNS.utils.base16;
  * @see <a href="https://tools.ietf.org/html/rfc1706">RFC 1706: DNS NSAP Resource Records</a>
  */
 public class NSAPRecord extends Record {
-
-  private static final long serialVersionUID = -1037209403185658593L;
-
   private byte[] address;
 
   NSAPRecord() {}

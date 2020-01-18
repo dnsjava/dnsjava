@@ -13,9 +13,6 @@ import org.xbill.DNS.utils.base16;
  *     Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA</a>
  */
 public class TLSARecord extends Record {
-
-  private static final long serialVersionUID = 356494267028580169L;
-
   public static class CertificateUsage {
     private CertificateUsage() {}
 

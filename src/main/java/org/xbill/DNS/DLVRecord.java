@@ -21,8 +21,6 @@ public class DLVRecord extends Record {
   public static final int SHA1_DIGEST_ID = DSRecord.Digest.SHA1;
   public static final int SHA256_DIGEST_ID = DSRecord.Digest.SHA1;
 
-  private static final long serialVersionUID = 1960742375677534148L;
-
   private int footprint;
   private int alg;
   private int digestid;

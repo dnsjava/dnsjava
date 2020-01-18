@@ -39,8 +39,6 @@ public class NSEC3Record extends Record {
 
   public static final int SHA1_DIGEST_ID = Digest.SHA1;
 
-  private static final long serialVersionUID = -7123504635968932855L;
-
   private int hashAlg;
   private int flags;
   private int iterations;
