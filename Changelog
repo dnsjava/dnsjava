@@ -1,3 +1,19 @@
+01/19/2019:
+	- 3.0.0-next.1 released
+	- Requires Java 8 and slf4j-api
+	- Adds support for Java 9+ and Android O+ via a new server config
+	  lookup system (#6, #9, 
+	- Resolving is now fully asynchronous, no new thread per query anymore
+	- Message provides information about the resolver that produced it (#41)
+	- Add support for Host Identity Protocol (HIP) records (RFC 8005, #47)
+	- Adds a DNS over HTTP (DoH) resolver (#66)
+	- Fixes some issues with the OSGi manifest (#70)
+	- Add support for the RES_OPTIONS environment variable (#57)
+	- Add support for relative $INCLUDE paths in master files (#75)
+	- Add support for custom DNS server port in config properties (#80)
+	- Adds new EDNS(0) options
+	- See the README for hints on migrating from v2.1.x to v3
+
 05/25/2019:
 	- 2.1.9 released
 	- Fix getRRsetType for empty RRSIG records.
