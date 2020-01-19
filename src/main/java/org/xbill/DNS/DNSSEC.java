@@ -72,6 +72,12 @@ public class DNSSEC {
     /** ECDSA Curve P-384 with SHA-384 public key * */
     public static final int ECDSAP384SHA384 = 14;
 
+    /** Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC, RFC8080 */
+    public static final int ED25519 = 15;
+
+    /** Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC, RFC8080 */
+    public static final int ED448 = 16;
+
     /** Indirect keys; the actual key is elsewhere. */
     public static final int INDIRECT = 252;
 
@@ -98,6 +104,8 @@ public class DNSSEC {
       algs.add(ECC_GOST, "ECC-GOST");
       algs.add(ECDSAP256SHA256, "ECDSAP256SHA256");
       algs.add(ECDSAP384SHA384, "ECDSAP384SHA384");
+      algs.add(ED25519, "ED25519");
+      algs.add(ED448, "ED448");
       algs.add(INDIRECT, "INDIRECT");
       algs.add(PRIVATEDNS, "PRIVATEDNS");
       algs.add(PRIVATEOID, "PRIVATEOID");
@@ -506,6 +514,7 @@ public class DNSSEC {
     KeyFactory factory = KeyFactory.getInstance("EC");
     return factory.generatePublic(new ECPublicKeySpec(q, keyinfo.spec));
   }
+
   /** Converts a KEY/DNSKEY record into a PublicKey */
   static PublicKey toPublicKey(KEYBase r) throws DNSSECException {
     return toPublicKey(r.getAlgorithm(), r.getKey(), r);
@@ -530,6 +539,9 @@ public class DNSSEC {
           return toECDSAPublicKey(key, ECDSA_P256);
         case Algorithm.ECDSAP384SHA384:
           return toECDSAPublicKey(key, ECDSA_P384);
+        case Algorithm.ED25519:
+        case Algorithm.ED448:
+          return DNSSECWithBC.toPublicKey(alg, key);
         default:
           throw new UnsupportedAlgorithmException(alg);
       }
@@ -632,6 +644,9 @@ public class DNSSEC {
           throw new IncompatibleKeyException();
         }
         return fromECDSAPublicKey((ECPublicKey) key, ECDSA_P384);
+      case Algorithm.ED25519:
+      case Algorithm.ED448:
+        return DNSSECWithBC.fromPublicKey(key, alg);
       default:
         throw new UnsupportedAlgorithmException(alg);
     }
@@ -663,6 +678,9 @@ public class DNSSEC {
         return "SHA256withECDSA";
       case Algorithm.ECDSAP384SHA384:
         return "SHA384withECDSA";
+      case Algorithm.ED25519:
+      case Algorithm.ED448:
+        return "EdDSA";
       default:
         throw new UnsupportedAlgorithmException(alg);
     }
