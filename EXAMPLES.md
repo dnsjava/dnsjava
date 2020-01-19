@@ -1,6 +1,6 @@
-# dnsjava examples
+# dnsjava Examples
 
-All of these examples are code fragments.  Code using these fragments should
+All of these examples are code fragments. Code using these fragments should
 check exceptions when appropriate, and should:
 
 ```java
@@ -16,8 +16,8 @@ InetAddress addr = Address.getByName("www.dnsjava.org");
 ## Get the MX target and preference of a name
 
 ```java
-Record [] records = new Lookup("gmail.com", Type.MX).run();
-for (int i = 0; i &lt; records.length; i++) {
+Record[] records = new Lookup("gmail.com", Type.MX).run();
+for (int i = 0; i < records.length; i++) {
     MXRecord mx = (MXRecord) records[i];
     System.out.println("Host " + mx.getTarget() + " has preference " + mx.getPriority());
 }
@@ -29,17 +29,19 @@ for (int i = 0; i &lt; records.length; i++) {
 Lookup l = new Lookup("version.bind.", Type.TXT, DClass.CH);
 l.setResolver(new SimpleResolver(args[0]));
 l.run();
-if (l.getResult() == Lookup.SUCCESSFUL)
+if (l.getResult() == Lookup.SUCCESSFUL) {
     System.out.println(l.getAnswers()[0].rdataToString());
+}
 ```
 
 ## Transfer a zone from a server and print it
 
 ```java
-ZoneTransferIn xfr = ZoneTransferIn.newAXFR(new Name("."), "192.5.5.241", null);
+ZoneTransferIn xfr = ZoneTransferIn.newAXFR(Name.root, "192.5.5.241", null);
 List records = xfr.run();
-for (Iterator it = records.iterator(); it.hasNext(); )
+for (Iterator it = records.iterator(); it.hasNext();) {
     System.out.println(it.next());
+}
 ```
 
 ## Use DNS dynamic update to set the address of a host to a value specified on the command line
@@ -73,6 +75,7 @@ System.out.println(n2.equals(n));              // True
 // www
 // dnsjava
 // org
-for (int i = 0; i &lt; n.labels(); i++)
+for (int i = 0; i < n.labels(); i++) {
     System.out.println(n.getLabelString(i));
+}
 ```

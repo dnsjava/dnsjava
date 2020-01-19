@@ -14,10 +14,10 @@
         which can be used by clients, and a minimal implementation of a server. It supports TSIG authenticated messages,
         partial DNSSEC verification, and EDNS0.
     </description>
-    <url>http://www.dnsjava.org</url>
+    <url>https://github.com/dnsjava/dnsjava</url>
     <organization>
         <name>dnsjava.org</name>
-        <url>http://www.dnsjava.org</url>
+        <url>https://github.com/dnsjava/dnsjava</url>
     </organization>
     <licenses>
         <license>
@@ -36,6 +36,10 @@
         <developer>
             <id>bwelling</id>
             <name>Brian Wellington</name>
+        </developer>
+        <developer>
+            <id>ibauersachs</id>
+            <name>Ingo Bauersachs</name>
         </developer>
     </developers>
 
