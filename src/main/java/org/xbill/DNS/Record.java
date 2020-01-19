@@ -442,7 +442,8 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     rec.rdataFromString(st, origin);
     t = st.get();
     if (t.type != Tokenizer.EOL && t.type != Tokenizer.EOF) {
-      throw st.exception("unexpected tokens at end of record");
+      throw st.exception(
+          "unexpected tokens at end of record (wanted EOL/EOF, got " + t.toString() + ")");
     }
     return rec;
   }
