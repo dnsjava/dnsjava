@@ -218,9 +218,9 @@ public class Cache {
       throw new IllegalArgumentException("oneElement(ANY)");
     }
     if (types instanceof List) {
-      List list = (List) types;
-      for (Object o : list) {
-        Element set = (Element) o;
+      @SuppressWarnings("unchecked")
+      List<Element> list = (List<Element>) types;
+      for (Element set : list) {
         if (set.getType() == type) {
           found = set;
           break;
@@ -290,9 +290,10 @@ public class Cache {
       return;
     }
     if (types instanceof List) {
-      List list = (List) types;
+      @SuppressWarnings("unchecked")
+      List<Element> list = (List<Element>) types;
       for (int i = 0; i < list.size(); i++) {
-        Element elt = (Element) list.get(i);
+        Element elt = list.get(i);
         if (elt.getType() == type) {
           list.remove(i);
           if (list.size() == 0) {

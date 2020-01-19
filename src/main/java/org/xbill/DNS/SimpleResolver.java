@@ -371,13 +371,13 @@ public class SimpleResolver implements Resolver {
     } catch (ZoneTransferException e) {
       throw new WireParseException(e.getMessage());
     }
-    List records = xfrin.getAXFR();
+    List<Record> records = xfrin.getAXFR();
     Message response = new Message(query.getHeader().getID());
     response.getHeader().setFlag(Flags.AA);
     response.getHeader().setFlag(Flags.QR);
     response.addRecord(query.getQuestion(), Section.QUESTION);
-    for (Object record : records) {
-      response.addRecord((Record) record, Section.ANSWER);
+    for (Record record : records) {
+      response.addRecord(record, Section.ANSWER);
     }
     return response;
   }

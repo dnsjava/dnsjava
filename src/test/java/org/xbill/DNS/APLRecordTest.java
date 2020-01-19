@@ -152,7 +152,7 @@ public class APLRecordTest {
     @Test
     void ctor_4arg_empty_elements() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList<>());
-      assertEquals(new ArrayList(), ar.getElements());
+      assertEquals(new ArrayList<>(), ar.getElements());
     }
 
     @Test

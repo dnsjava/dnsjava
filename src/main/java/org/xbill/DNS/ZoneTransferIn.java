@@ -560,22 +560,16 @@ public class ZoneTransferIn {
   }
 
   /**
-   * Does the zone transfer.
+   * Does the zone transfer using an internal handler. Results can be obtained by calling {@link
+   * #getAXFR()} or getIXFR
    *
-   * @return A list, which is either an AXFR-style response (List of Records), and IXFR-style
-   *     response (List of Deltas), or null, which indicates that an IXFR was performed and the zone
-   *     is up to date.
    * @throws IOException The zone transfer failed to due an IO problem.
    * @throws ZoneTransferException The zone transfer failed to due a problem with the zone transfer
    *     itself.
    */
-  public List run() throws IOException, ZoneTransferException {
+  public void run() throws IOException, ZoneTransferException {
     BasicHandler handler = new BasicHandler();
     run(handler);
-    if (handler.axfr != null) {
-      return handler.axfr;
-    }
-    return handler.ixfr;
   }
 
   private BasicHandler getBasicHandler() throws IllegalArgumentException {
@@ -600,7 +594,7 @@ public class ZoneTransferIn {
    * @throws IllegalArgumentException The transfer used the callback interface, so the response was
    *     not stored.
    */
-  public List getAXFR() {
+  public List<Record> getAXFR() {
     BasicHandler handler = getBasicHandler();
     return handler.axfr;
   }
@@ -619,7 +613,7 @@ public class ZoneTransferIn {
    * @throws IllegalArgumentException The transfer used the callback interface, so the response was
    *     not stored.
    */
-  public List getIXFR() {
+  public List<Delta> getIXFR() {
     BasicHandler handler = getBasicHandler();
     return handler.ixfr;
   }

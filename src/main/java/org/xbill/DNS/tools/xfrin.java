@@ -3,7 +3,6 @@
 package org.xbill.DNS.tools;
 
 import java.util.Iterator;
-import java.util.List;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
@@ -11,6 +10,7 @@ import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.ZoneTransferIn;
+import org.xbill.DNS.ZoneTransferIn.Delta;
 
 public class xfrin {
 
@@ -82,21 +82,19 @@ public class xfrin {
       xfrin = ZoneTransferIn.newAXFR(zname, server, port, key);
     }
 
-    List response = xfrin.run();
+    xfrin.run();
     if (xfrin.isAXFR()) {
       if (ixfr_serial >= 0) {
         System.out.println("AXFR-like IXFR response");
       } else {
         System.out.println("AXFR response");
       }
-      for (Object o : response) {
-        System.out.println(o);
+      for (Record record : xfrin.getAXFR()) {
+        System.out.println(record);
       }
     } else if (xfrin.isIXFR()) {
       System.out.println("IXFR response");
-      for (Object o : response) {
-        ZoneTransferIn.Delta delta;
-        delta = (ZoneTransferIn.Delta) o;
+      for (Delta delta : xfrin.getIXFR()) {
         System.out.println("delta from " + delta.start + " to " + delta.end);
         System.out.println("deletes");
         Iterator<Record> it2 = delta.deletes.iterator();

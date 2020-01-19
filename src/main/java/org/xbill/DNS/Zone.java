@@ -29,13 +29,12 @@ public class Zone implements Serializable {
   private Map<Name, Object> data;
   private Name origin;
   private Object originNode;
-  private int dclass = DClass.IN;
   private RRset NS;
   private SOARecord SOA;
   private boolean hasWild;
 
   class ZoneIterator implements Iterator<RRset> {
-    private Iterator zentries;
+    private Iterator<Map.Entry<Name, Object>> zentries;
     private RRset[] current;
     private int count;
     private boolean wantLastSOA;
@@ -77,7 +76,7 @@ public class Zone implements Serializable {
       if (count == current.length) {
         current = null;
         while (zentries.hasNext()) {
-          Map.Entry entry = (Map.Entry) zentries.next();
+          Map.Entry<Name, Object> entry = zentries.next();
           if (entry.getKey().equals(origin)) {
             continue;
           }
@@ -178,13 +177,13 @@ public class Zone implements Serializable {
     }
 
     origin = xfrin.getName();
-    List records = xfrin.run();
-    for (Object o : records) {
-      Record record = (Record) o;
-      maybeAddRecord(record);
-    }
+    xfrin.run();
     if (!xfrin.isAXFR()) {
       throw new IllegalArgumentException("zones can only be created from AXFRs");
+    }
+
+    for (Record record : xfrin.getAXFR()) {
+      maybeAddRecord(record);
     }
     validate();
   }
@@ -227,7 +226,7 @@ public class Zone implements Serializable {
 
   /** Returns the Zone's class */
   public int getDClass() {
-    return dclass;
+    return DClass.IN;
   }
 
   private synchronized Object exactName(Name name) {
@@ -245,7 +244,7 @@ public class Zone implements Serializable {
     }
   }
 
-  private synchronized <T extends Record> RRset oneRRset(Object types, int type) {
+  private synchronized RRset oneRRset(Object types, int type) {
     if (type == Type.ANY) {
       throw new IllegalArgumentException("oneRRset(ANY)");
     }
@@ -266,7 +265,7 @@ public class Zone implements Serializable {
     return null;
   }
 
-  private synchronized <T extends Record> RRset findRRset(Name name, int type) {
+  private synchronized RRset findRRset(Name name, int type) {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -314,9 +313,10 @@ public class Zone implements Serializable {
       return;
     }
     if (types instanceof List) {
-      List list = (List) types;
+      @SuppressWarnings("unchecked")
+      List<RRset> list = (List<RRset>) types;
       for (int i = 0; i < list.size(); i++) {
-        RRset set = (RRset) list.get(i);
+        RRset set = list.get(i);
         if (set.getType() == type) {
           list.remove(i);
           if (list.size() == 0) {
@@ -454,7 +454,7 @@ public class Zone implements Serializable {
    * @return The matching RRset
    * @see RRset
    */
-  public <T extends Record> RRset findExactMatch(Name name, int type) {
+  public RRset findExactMatch(Name name, int type) {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -499,7 +499,7 @@ public class Zone implements Serializable {
    * @param r The record to be removed
    * @see Record
    */
-  public <T extends Record> void removeRecord(T r) {
+  public void removeRecord(Record r) {
     Name name = r.getName();
     int rtype = r.getRRsetType();
     synchronized (this) {

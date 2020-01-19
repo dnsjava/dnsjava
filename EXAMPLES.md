@@ -38,9 +38,9 @@ if (l.getResult() == Lookup.SUCCESSFUL) {
 
 ```java
 ZoneTransferIn xfr = ZoneTransferIn.newAXFR(Name.root, "192.5.5.241", null);
-List records = xfr.run();
-for (Iterator it = records.iterator(); it.hasNext();) {
-    System.out.println(it.next());
+xfr.run();
+for (Record r : xfr.getAXFR()) {
+    System.out.println(r);
 }
 ```
 
