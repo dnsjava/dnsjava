@@ -31,11 +31,18 @@ final class FormattedTime {
   /**
    * Parses a formatted time string into an Instant.
    *
-   * @param s The string, in the form YYYYMMDDHHMMSS.
+   * @param s The string, in the form YYYYMMDDHHMMSS or seconds since epoch (1 January 1970 00:00:00
+   *     UTC).
    * @return The Instant object.
    * @throws DateTimeParseException The string was invalid.
    */
   public static Instant parse(String s) throws DateTimeParseException {
-    return DEFAULT_FORMAT.parse(s, Instant::from);
+    // rfc4034#section-3.2
+    if (s.length() == 14) {
+      return DEFAULT_FORMAT.parse(s, Instant::from);
+    } else if (s.length() <= 10) {
+      return Instant.ofEpochSecond(Long.parseLong(s));
+    }
+    throw new DateTimeParseException("Invalid time encoding: ", s, 0);
   }
 }

@@ -48,7 +48,7 @@ class FormattedTimeTest {
   @Test
   void format() {
     GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-    cal.set(2005, 2, 19, 4, 4, 5);
+    cal.set(2005, Calendar.MARCH, 19, 4, 4, 5);
     String out = FormattedTime.format(cal.toInstant());
     assertEquals("20050319040405", out);
   }
@@ -59,10 +59,26 @@ class FormattedTimeTest {
     // is occasionally a difference between when cal and cal2 are
     // instantiated.
     GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-    cal.set(2005, 2, 19, 4, 4, 5);
+    cal.set(2005, Calendar.MARCH, 19, 4, 4, 5);
     cal.set(Calendar.MILLISECOND, 0);
 
     Instant out = FormattedTime.parse("20050319040405");
+    GregorianCalendar cal2 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+    cal2.setTimeInMillis(out.toEpochMilli());
+    cal2.set(Calendar.MILLISECOND, 0);
+    assertEquals(cal, cal2);
+  }
+
+  @Test()
+  void parseEpoch() throws DateTimeParseException {
+    // have to make sure to clear out the milliseconds since there
+    // is occasionally a difference between when cal and cal2 are
+    // instantiated.
+    GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+    cal.set(2005, Calendar.MARCH, 19, 4, 4, 5);
+    cal.set(Calendar.MILLISECOND, 0);
+
+    Instant out = FormattedTime.parse("1111205045");
     GregorianCalendar cal2 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     cal2.setTimeInMillis(out.toEpochMilli());
     cal2.set(Calendar.MILLISECOND, 0);
