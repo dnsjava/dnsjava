@@ -91,13 +91,6 @@ public class SOARecordTest {
     }
 
     @Test
-    void getObject() {
-      SOARecord ar = new SOARecord();
-      Record r = ar.getObject();
-      assertTrue(r instanceof SOARecord);
-    }
-
-    @Test
     void ctor_10arg() {
       SOARecord ar =
           new SOARecord(

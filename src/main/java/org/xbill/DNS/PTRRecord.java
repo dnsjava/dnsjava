@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class PTRRecord extends SingleCompressedNameBase {
   PTRRecord() {}
 
-  @Override
-  Record getObject() {
-    return new PTRRecord();
-  }
-
   /**
    * Creates a new PTR Record with the given data
    *

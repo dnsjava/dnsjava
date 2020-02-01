@@ -16,11 +16,6 @@ public class ISDNRecord extends Record {
 
   ISDNRecord() {}
 
-  @Override
-  Record getObject() {
-    return new ISDNRecord();
-  }
-
   /**
    * Creates an ISDN Record from the given data
    *

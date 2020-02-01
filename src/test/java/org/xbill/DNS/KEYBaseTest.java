@@ -53,11 +53,6 @@ class KEYBaseTest {
     }
 
     @Override
-    public Record getObject() {
-      return null;
-    }
-
-    @Override
     void rdataFromString(Tokenizer st, Name origin) {}
   }
 

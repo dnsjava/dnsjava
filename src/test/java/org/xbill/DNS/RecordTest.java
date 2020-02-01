@@ -38,15 +38,19 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
+import junit.framework.Assert;
 import org.junit.jupiter.api.Test;
 
 class RecordTest {
@@ -55,11 +59,6 @@ class RecordTest {
 
     SubRecord(Name name, int type, int dclass, long ttl) {
       super(name, type, dclass, ttl);
-    }
-
-    @Override
-    public Record getObject() {
-      return null;
     }
 
     @Override
@@ -848,5 +847,31 @@ class RecordTest {
     assertEquals(n, Record.checkName("field", n));
 
     assertThrows(RelativeNameException.class, () -> Record.checkName("field", m));
+  }
+
+  @Test
+  void testAllTypesHaveNoArgConstructor() {
+    for (int i = 1; i < 65535; i++) {
+      Class<? extends Record> proto = Type.getProto(i);
+      if (proto != null) {
+        try {
+          Constructor<? extends Record> noArgCtor = proto.getDeclaredConstructor();
+          assertNotNull(noArgCtor.newInstance());
+        } catch (NoSuchMethodException
+            | InstantiationException
+            | IllegalAccessException
+            | InvocationTargetException e) {
+          Assert.fail(
+              "Record type "
+                  + Type.string(i)
+                  + " ("
+                  + i
+                  + ", "
+                  + proto.getSimpleName()
+                  + ")"
+                  + " seems to have no or invalid 0arg ctor");
+        }
+      }
+    }
   }
 }

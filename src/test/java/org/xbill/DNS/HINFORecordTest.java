@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -51,13 +50,6 @@ class HINFORecordTest {
     assertEquals(0, dr.getType());
     assertEquals(0, dr.getDClass());
     assertEquals(0, dr.getTTL());
-  }
-
-  @Test
-  void getObject() {
-    HINFORecord dr = new HINFORecord();
-    Record r = dr.getObject();
-    assertTrue(r instanceof HINFORecord);
   }
 
   @Test

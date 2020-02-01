@@ -13,11 +13,6 @@ import java.security.PublicKey;
 public class CDNSKEYRecord extends DNSKEYRecord {
   CDNSKEYRecord() {}
 
-  @Override
-  Record getObject() {
-    return new CDNSKEYRecord();
-  }
-
   /**
    * Creates a CDNSKEY Record from the given data
    *

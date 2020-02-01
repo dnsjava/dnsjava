@@ -19,11 +19,6 @@ public class SRVRecord extends Record {
 
   SRVRecord() {}
 
-  @Override
-  Record getObject() {
-    return new SRVRecord();
-  }
-
   /**
    * Creates an SRV Record from the given data
    *

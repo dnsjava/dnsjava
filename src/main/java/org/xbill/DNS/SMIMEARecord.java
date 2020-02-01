@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class SMIMEARecord extends TLSARecord {
   SMIMEARecord() {}
 
-  @Override
-  Record getObject() {
-    return new SMIMEARecord();
-  }
-
   /**
    * Creates an SMIMEA Record from the given data
    *

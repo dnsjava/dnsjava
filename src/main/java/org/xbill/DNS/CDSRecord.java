@@ -11,11 +11,6 @@ package org.xbill.DNS;
 public class CDSRecord extends DSRecord {
   CDSRecord() {}
 
-  @Override
-  Record getObject() {
-    return new CDSRecord();
-  }
-
   /**
    * Creates a CDS Record from the given data
    *

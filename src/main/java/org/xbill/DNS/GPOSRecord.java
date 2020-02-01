@@ -17,11 +17,6 @@ public class GPOSRecord extends Record {
 
   GPOSRecord() {}
 
-  @Override
-  Record getObject() {
-    return new GPOSRecord();
-  }
-
   private void validate(double longitude, double latitude) throws IllegalArgumentException {
     if (longitude < -90.0 || longitude > 90.0) {
       throw new IllegalArgumentException("illegal longitude " + longitude);

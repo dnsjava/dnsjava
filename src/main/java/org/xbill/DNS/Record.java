@@ -4,6 +4,7 @@ package org.xbill.DNS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import org.xbill.DNS.utils.base16;
@@ -40,16 +41,19 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     this.ttl = ttl;
   }
 
-  /** Creates an empty record of the correct type; must be overriden */
-  abstract Record getObject();
-
   private static Record getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
-    Record proto, rec;
-
+    Record rec;
     if (hasData) {
-      proto = Type.getProto(type);
+      Class<? extends Record> proto = Type.getProto(type);
       if (proto != null) {
-        rec = proto.getObject();
+        try {
+          rec = proto.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException
+            | IllegalAccessException
+            | InvocationTargetException
+            | NoSuchMethodException e) {
+          rec = new UNKRecord();
+        }
       } else {
         rec = new UNKRecord();
       }

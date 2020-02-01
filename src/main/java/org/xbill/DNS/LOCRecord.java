@@ -28,11 +28,6 @@ public class LOCRecord extends Record {
 
   LOCRecord() {}
 
-  @Override
-  Record getObject() {
-    return new LOCRecord();
-  }
-
   /**
    * Creates an LOC Record from the given data
    *

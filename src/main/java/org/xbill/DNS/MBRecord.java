@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class MBRecord extends SingleNameBase {
   MBRecord() {}
 
-  @Override
-  Record getObject() {
-    return new MBRecord();
-  }
-
   /**
    * Creates a new MB Record with the given data
    *

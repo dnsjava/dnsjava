@@ -17,11 +17,6 @@ public class SOARecord extends Record {
 
   SOARecord() {}
 
-  @Override
-  Record getObject() {
-    return new SOARecord();
-  }
-
   /**
    * Creates an SOA Record from the given data
    *

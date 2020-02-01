@@ -14,11 +14,6 @@ import java.util.List;
 public class SPFRecord extends TXTBase {
   SPFRecord() {}
 
-  @Override
-  Record getObject() {
-    return new SPFRecord();
-  }
-
   /**
    * Creates a SPF Record from the given data
    *

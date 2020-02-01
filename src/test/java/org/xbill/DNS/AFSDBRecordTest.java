@@ -35,18 +35,10 @@
 package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
 class AFSDBRecordTest {
-  @Test
-  void getObject() {
-    AFSDBRecord d = new AFSDBRecord();
-    Record r = d.getObject();
-    assertTrue(r instanceof AFSDBRecord);
-  }
-
   @Test
   void ctor_5arg() throws TextParseException {
     Name n = Name.fromString("My.Name.");

@@ -14,11 +14,6 @@ import java.util.List;
 public class TXTRecord extends TXTBase {
   TXTRecord() {}
 
-  @Override
-  Record getObject() {
-    return new TXTRecord();
-  }
-
   /**
    * Creates a TXT Record from the given data
    *

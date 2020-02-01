@@ -16,11 +16,6 @@ public class X25Record extends Record {
 
   X25Record() {}
 
-  @Override
-  Record getObject() {
-    return new X25Record();
-  }
-
   private static byte[] checkAndConvertAddress(String address) {
     int length = address.length();
     byte[] out = new byte[length];

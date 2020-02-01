@@ -107,11 +107,6 @@ public class CERTRecord extends Record {
 
   CERTRecord() {}
 
-  @Override
-  Record getObject() {
-    return new CERTRecord();
-  }
-
   /**
    * Creates a CERT Record from the given data
    *

@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -73,13 +72,6 @@ class AAAARecordTest {
     assertEquals(0, ar.getDClass());
     assertEquals(0, ar.getTTL());
     assertNull(ar.getAddress());
-  }
-
-  @Test
-  void getObject() {
-    AAAARecord ar = new AAAARecord();
-    Record r = ar.getObject();
-    assertTrue(r instanceof AAAARecord);
   }
 
   @Test

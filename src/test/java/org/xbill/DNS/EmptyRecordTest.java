@@ -36,7 +36,6 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -49,13 +48,6 @@ class EmptyRecordTest {
     assertEquals(0, ar.getType());
     assertEquals(0, ar.getDClass());
     assertEquals(0, ar.getTTL());
-  }
-
-  @Test
-  void getObject() {
-    EmptyRecord ar = new EmptyRecord();
-    Record r = ar.getObject();
-    assertTrue(r instanceof EmptyRecord);
   }
 
   @Test

@@ -52,11 +52,6 @@ public class TLSARecord extends Record {
 
   TLSARecord() {}
 
-  @Override
-  Record getObject() {
-    return new TLSARecord();
-  }
-
   /**
    * Creates an TLSA Record from the given data
    *

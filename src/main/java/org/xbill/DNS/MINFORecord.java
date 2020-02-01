@@ -18,11 +18,6 @@ public class MINFORecord extends Record {
 
   MINFORecord() {}
 
-  @Override
-  Record getObject() {
-    return new MINFORecord();
-  }
-
   /**
    * Creates an MINFO Record from the given data
    *

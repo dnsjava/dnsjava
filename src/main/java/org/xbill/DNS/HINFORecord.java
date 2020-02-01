@@ -16,11 +16,6 @@ public class HINFORecord extends Record {
 
   HINFORecord() {}
 
-  @Override
-  Record getObject() {
-    return new HINFORecord();
-  }
-
   /**
    * Creates an HINFO Record from the given data
    *

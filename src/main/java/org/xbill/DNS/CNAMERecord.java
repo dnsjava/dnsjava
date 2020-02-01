@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class CNAMERecord extends SingleCompressedNameBase {
   CNAMERecord() {}
 
-  @Override
-  Record getObject() {
-    return new CNAMERecord();
-  }
-
   /**
    * Creates a new CNAMERecord with the given data
    *

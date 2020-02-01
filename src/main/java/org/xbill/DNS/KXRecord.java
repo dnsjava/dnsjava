@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class KXRecord extends U16NameBase {
   KXRecord() {}
 
-  @Override
-  Record getObject() {
-    return new KXRecord();
-  }
-
   /**
    * Creates a KX Record from the given data
    *

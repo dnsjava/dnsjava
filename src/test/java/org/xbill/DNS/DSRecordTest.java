@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,13 +55,6 @@ class DSRecordTest {
     assertEquals(0, dr.getDigestID());
     assertNull(dr.getDigest());
     assertEquals(0, dr.getFootprint());
-  }
-
-  @Test
-  void getObject() {
-    DSRecord dr = new DSRecord();
-    Record r = dr.getObject();
-    assertTrue(r instanceof DSRecord);
   }
 
   static class Test_Ctor_7arg {

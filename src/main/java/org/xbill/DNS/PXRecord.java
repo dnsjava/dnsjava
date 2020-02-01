@@ -18,11 +18,6 @@ public class PXRecord extends Record {
 
   PXRecord() {}
 
-  @Override
-  Record getObject() {
-    return new PXRecord();
-  }
-
   /**
    * Creates an PX Record from the given data
    *

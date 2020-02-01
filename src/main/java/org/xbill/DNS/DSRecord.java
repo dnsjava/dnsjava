@@ -45,11 +45,6 @@ public class DSRecord extends Record {
 
   DSRecord() {}
 
-  @Override
-  Record getObject() {
-    return new DSRecord();
-  }
-
   /**
    * Creates a DS Record from the given data
    *

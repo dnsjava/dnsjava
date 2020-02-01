@@ -11,11 +11,6 @@ package org.xbill.DNS;
 public class DNAMERecord extends SingleNameBase {
   DNAMERecord() {}
 
-  @Override
-  Record getObject() {
-    return new DNAMERecord();
-  }
-
   /**
    * Creates a new DNAMERecord with the given data
    *

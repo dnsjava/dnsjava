@@ -36,7 +36,6 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -59,12 +58,5 @@ class MGRecordTest {
     assertEquals(DClass.IN, d.getDClass());
     assertEquals(0xABCDEL, d.getTTL());
     assertEquals(a, d.getMailbox());
-  }
-
-  @Test
-  void getObject() {
-    MGRecord d = new MGRecord();
-    Record r = d.getObject();
-    assertTrue(r instanceof MGRecord);
   }
 }

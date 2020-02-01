@@ -11,11 +11,6 @@ package org.xbill.DNS;
 public class NSAP_PTRRecord extends SingleNameBase {
   NSAP_PTRRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NSAP_PTRRecord();
-  }
-
   /**
    * Creates a new NSAP_PTR Record with the given data
    *

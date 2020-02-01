@@ -50,11 +50,6 @@ public class NSEC3Record extends Record {
 
   NSEC3Record() {}
 
-  @Override
-  Record getObject() {
-    return new NSEC3Record();
-  }
-
   /**
    * Creates an NSEC3 record from the given data.
    *

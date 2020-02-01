@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class MRRecord extends SingleNameBase {
   MRRecord() {}
 
-  @Override
-  Record getObject() {
-    return new MRRecord();
-  }
-
   /**
    * Creates a new MR Record with the given data
    *

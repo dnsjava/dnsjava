@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class MFRecord extends SingleNameBase {
   MFRecord() {}
 
-  @Override
-  Record getObject() {
-    return new MFRecord();
-  }
-
   /**
    * Creates a new MF Record with the given data
    *

@@ -16,11 +16,6 @@ public class NULLRecord extends Record {
 
   NULLRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NULLRecord();
-  }
-
   /**
    * Creates a NULL record from the given data.
    *

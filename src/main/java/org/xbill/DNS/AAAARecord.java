@@ -18,11 +18,6 @@ public class AAAARecord extends Record {
 
   AAAARecord() {}
 
-  @Override
-  Record getObject() {
-    return new AAAARecord();
-  }
-
   /**
    * Creates an AAAA Record from the given data
    *

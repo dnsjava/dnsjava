@@ -18,11 +18,6 @@ public class RPRecord extends Record {
 
   RPRecord() {}
 
-  @Override
-  Record getObject() {
-    return new RPRecord();
-  }
-
   /**
    * Creates an RP Record from the given data
    *

@@ -16,11 +16,6 @@ public class UNKRecord extends Record {
   UNKRecord() {}
 
   @Override
-  Record getObject() {
-    return new UNKRecord();
-  }
-
-  @Override
   void rrFromWire(DNSInput in) {
     data = in.readByteArray();
   }

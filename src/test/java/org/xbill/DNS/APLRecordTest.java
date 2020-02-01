@@ -133,13 +133,6 @@ public class APLRecordTest {
     }
 
     @Test
-    void getObject() {
-      APLRecord ar = new APLRecord();
-      Record r = ar.getObject();
-      assertTrue(r instanceof APLRecord);
-    }
-
-    @Test
     void ctor_4arg_basic() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
       assertEquals(m_an, ar.getName());

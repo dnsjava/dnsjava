@@ -25,11 +25,6 @@ public class NSEC3PARAMRecord extends Record {
 
   NSEC3PARAMRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NSEC3PARAMRecord();
-  }
-
   /**
    * Creates an NSEC3PARAM record from the given data.
    *

@@ -28,11 +28,6 @@ public class DLVRecord extends Record {
 
   DLVRecord() {}
 
-  @Override
-  Record getObject() {
-    return new DLVRecord();
-  }
-
   /**
    * Creates a DLV Record from the given data
    *

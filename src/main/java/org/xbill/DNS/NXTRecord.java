@@ -20,11 +20,6 @@ public class NXTRecord extends Record {
 
   NXTRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NXTRecord();
-  }
-
   /**
    * Creates an NXT Record from the given data
    *

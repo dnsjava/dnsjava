@@ -38,11 +38,6 @@ public class DNSKEYRecord extends KEYBase {
 
   DNSKEYRecord() {}
 
-  @Override
-  Record getObject() {
-    return new DNSKEYRecord();
-  }
-
   /**
    * Creates a DNSKEY Record from the given data
    *

@@ -18,11 +18,6 @@ public class ARecord extends Record {
 
   ARecord() {}
 
-  @Override
-  Record getObject() {
-    return new ARecord();
-  }
-
   private static int fromArray(byte[] array) {
     return (((array[0] & 0xFF) << 24)
         | ((array[1] & 0xFF) << 16)

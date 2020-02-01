@@ -29,11 +29,6 @@ public class TSIGRecord extends Record {
 
   TSIGRecord() {}
 
-  @Override
-  Record getObject() {
-    return new TSIGRecord();
-  }
-
   /**
    * Creates a TSIG Record from the given data. This is normally called by the TSIG class
    *

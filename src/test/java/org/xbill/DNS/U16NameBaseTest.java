@@ -72,11 +72,6 @@ class U16NameBaseTest {
     public Name getNameField() {
       return super.getNameField();
     }
-
-    @Override
-    public Record getObject() {
-      return null;
-    }
   }
 
   @Test

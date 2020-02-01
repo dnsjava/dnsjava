@@ -62,11 +62,6 @@ public class IPSECKEYRecord extends Record {
 
   IPSECKEYRecord() {}
 
-  @Override
-  Record getObject() {
-    return new IPSECKEYRecord();
-  }
-
   /**
    * Creates an IPSECKEY Record from the given data.
    *

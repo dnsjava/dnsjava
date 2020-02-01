@@ -36,7 +36,6 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -60,13 +59,6 @@ class NSAP_PTRRecordTest {
     assertEquals(DClass.IN, d.getDClass());
     assertEquals(0xABCDEL, d.getTTL());
     assertEquals(a, d.getTarget());
-  }
-
-  @Test
-  void getObject() {
-    NSAP_PTRRecord d = new NSAP_PTRRecord();
-    Record r = d.getObject();
-    assertTrue(r instanceof NSAP_PTRRecord);
   }
 
   @Test

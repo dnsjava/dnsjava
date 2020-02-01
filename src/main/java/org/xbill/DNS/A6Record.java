@@ -19,11 +19,6 @@ public class A6Record extends Record {
 
   A6Record() {}
 
-  @Override
-  Record getObject() {
-    return new A6Record();
-  }
-
   /**
    * Creates an A6 Record from the given data
    *

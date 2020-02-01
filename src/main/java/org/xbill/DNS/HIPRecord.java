@@ -27,11 +27,6 @@ public class HIPRecord extends Record {
 
   HIPRecord() {}
 
-  @Override
-  Record getObject() {
-    return new HIPRecord();
-  }
-
   public HIPRecord(
       Name name, int dclass, long ttl, byte[] hit, int alg, byte[] key, List<Name> servers) {
     super(name, Type.HIP, dclass, ttl);

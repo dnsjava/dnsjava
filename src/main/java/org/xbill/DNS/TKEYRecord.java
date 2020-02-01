@@ -40,11 +40,6 @@ public class TKEYRecord extends Record {
 
   TKEYRecord() {}
 
-  @Override
-  Record getObject() {
-    return new TKEYRecord();
-  }
-
   /**
    * Creates a TKEY Record from the given data.
    *

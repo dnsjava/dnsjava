@@ -11,11 +11,6 @@ package org.xbill.DNS;
 public class AFSDBRecord extends U16NameBase {
   AFSDBRecord() {}
 
-  @Override
-  Record getObject() {
-    return new AFSDBRecord();
-  }
-
   /**
    * Creates an AFSDB Record from the given data.
    *

@@ -17,11 +17,6 @@ public class NSAPRecord extends Record {
 
   NSAPRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NSAPRecord();
-  }
-
   private static byte[] checkAndConvertAddress(String address) {
     if (!address.substring(0, 2).equalsIgnoreCase("0x")) {
       return null;

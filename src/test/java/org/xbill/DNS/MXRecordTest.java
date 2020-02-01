@@ -36,19 +36,11 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 class MXRecordTest {
-  @Test
-  void getObject() {
-    MXRecord d = new MXRecord();
-    Record r = d.getObject();
-    assertTrue(r instanceof MXRecord);
-  }
-
   @Test
   void ctor_5arg() throws TextParseException {
     Name n = Name.fromString("My.Name.");

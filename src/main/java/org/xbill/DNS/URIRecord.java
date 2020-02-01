@@ -20,11 +20,6 @@ public class URIRecord extends Record {
     target = new byte[] {};
   }
 
-  @Override
-  Record getObject() {
-    return new URIRecord();
-  }
-
   /**
    * Creates a URI Record from the given data
    *

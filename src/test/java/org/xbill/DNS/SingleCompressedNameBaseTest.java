@@ -54,11 +54,6 @@ class SingleCompressedNameBaseTest {
     public Name getSingleName() {
       return super.getSingleName();
     }
-
-    @Override
-    public Record getObject() {
-      return null;
-    }
   }
 
   @Test

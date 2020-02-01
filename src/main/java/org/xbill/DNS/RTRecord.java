@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class RTRecord extends U16NameBase {
   RTRecord() {}
 
-  @Override
-  Record getObject() {
-    return new RTRecord();
-  }
-
   /**
    * Creates an RT Record from the given data
    *

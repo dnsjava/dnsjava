@@ -12,11 +12,6 @@ class EmptyRecord extends Record {
   EmptyRecord() {}
 
   @Override
-  Record getObject() {
-    return new EmptyRecord();
-  }
-
-  @Override
   void rrFromWire(DNSInput in) {}
 
   @Override

@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class NSRecord extends SingleCompressedNameBase {
   NSRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NSRecord();
-  }
-
   /**
    * Creates a new NS Record with the given data
    *

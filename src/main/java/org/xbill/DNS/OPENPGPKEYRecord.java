@@ -16,11 +16,6 @@ public class OPENPGPKEYRecord extends Record {
 
   OPENPGPKEYRecord() {}
 
-  @Override
-  Record getObject() {
-    return new OPENPGPKEYRecord();
-  }
-
   /**
    * Creates an OPENPGPKEY Record from the given data
    *

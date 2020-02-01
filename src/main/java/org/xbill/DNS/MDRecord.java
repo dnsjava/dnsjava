@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class MDRecord extends SingleNameBase {
   MDRecord() {}
 
-  @Override
-  Record getObject() {
-    return new MDRecord();
-  }
-
   /**
    * Creates a new MD Record with the given data
    *

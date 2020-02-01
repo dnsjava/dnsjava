@@ -14,11 +14,6 @@ package org.xbill.DNS;
 public class MXRecord extends U16NameBase {
   MXRecord() {}
 
-  @Override
-  Record getObject() {
-    return new MXRecord();
-  }
-
   /**
    * Creates an MX Record from the given data
    *

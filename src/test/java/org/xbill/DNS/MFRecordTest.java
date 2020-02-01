@@ -36,7 +36,6 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -61,12 +60,5 @@ class MFRecordTest {
     assertEquals(0xABCDEL, d.getTTL());
     assertEquals(a, d.getAdditionalName());
     assertEquals(a, d.getMailAgent());
-  }
-
-  @Test
-  void getObject() {
-    MFRecord d = new MFRecord();
-    Record r = d.getObject();
-    assertTrue(r instanceof MFRecord);
   }
 }

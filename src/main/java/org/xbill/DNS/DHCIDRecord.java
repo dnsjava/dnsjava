@@ -17,11 +17,6 @@ public class DHCIDRecord extends Record {
 
   DHCIDRecord() {}
 
-  @Override
-  Record getObject() {
-    return new DHCIDRecord();
-  }
-
   /**
    * Creates an DHCID Record from the given data
    *

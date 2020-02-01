@@ -19,11 +19,6 @@ public class NAPTRRecord extends Record {
 
   NAPTRRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NAPTRRecord();
-  }
-
   /**
    * Creates an NAPTR Record from the given data
    *

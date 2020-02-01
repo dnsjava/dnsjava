@@ -22,11 +22,6 @@ public class NSECRecord extends Record {
 
   NSECRecord() {}
 
-  @Override
-  Record getObject() {
-    return new NSECRecord();
-  }
-
   /**
    * Creates an NSEC Record from the given data.
    *

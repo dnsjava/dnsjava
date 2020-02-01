@@ -283,11 +283,6 @@ public class KEYRecord extends KEYBase {
 
   KEYRecord() {}
 
-  @Override
-  Record getObject() {
-    return new KEYRecord();
-  }
-
   /**
    * Creates a KEY Record from the given data
    *

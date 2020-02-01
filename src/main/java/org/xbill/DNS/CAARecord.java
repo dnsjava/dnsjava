@@ -24,11 +24,6 @@ public class CAARecord extends Record {
 
   CAARecord() {}
 
-  @Override
-  Record getObject() {
-    return new CAARecord();
-  }
-
   /**
    * Creates an CAA Record from the given data.
    *

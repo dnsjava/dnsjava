@@ -12,11 +12,6 @@ package org.xbill.DNS;
 public class MGRecord extends SingleNameBase {
   MGRecord() {}
 
-  @Override
-  Record getObject() {
-    return new MGRecord();
-  }
-
   /**
    * Creates a new MG Record with the given data
    *

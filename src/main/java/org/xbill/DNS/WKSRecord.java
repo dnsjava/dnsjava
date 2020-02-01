@@ -573,11 +573,6 @@ public class WKSRecord extends Record {
 
   WKSRecord() {}
 
-  @Override
-  Record getObject() {
-    return new WKSRecord();
-  }
-
   /**
    * Creates a WKS Record from the given data
    *

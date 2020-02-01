@@ -20,11 +20,6 @@ import java.util.Date;
 public class RRSIGRecord extends SIGBase {
   RRSIGRecord() {}
 
-  @Override
-  Record getObject() {
-    return new RRSIGRecord();
-  }
-
   /**
    * Creates an RRSIG Record from the given data
    *

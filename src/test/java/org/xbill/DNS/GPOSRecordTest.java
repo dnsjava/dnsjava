@@ -37,7 +37,6 @@ package org.xbill.DNS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,13 +50,6 @@ class GPOSRecordTest {
     assertEquals(0, gr.getType());
     assertEquals(0, gr.getDClass());
     assertEquals(0, gr.getTTL());
-  }
-
-  @Test
-  void getObject() {
-    GPOSRecord gr = new GPOSRecord();
-    Record r = gr.getObject();
-    assertTrue(r instanceof GPOSRecord);
   }
 
   static class Test_Ctor_6arg_doubles {

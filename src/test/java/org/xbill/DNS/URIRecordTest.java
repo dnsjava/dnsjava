@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -20,13 +19,6 @@ class URIRecordTest {
     assertEquals(0, r.getPriority());
     assertEquals(0, r.getWeight());
     assertEquals("", r.getTarget());
-  }
-
-  @Test
-  void getObject() {
-    URIRecord dr = new URIRecord();
-    Record r = dr.getObject();
-    assertTrue(r instanceof URIRecord);
   }
 
   @Test

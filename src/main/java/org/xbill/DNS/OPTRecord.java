@@ -24,11 +24,6 @@ public class OPTRecord extends Record {
 
   OPTRecord() {}
 
-  @Override
-  Record getObject() {
-    return new OPTRecord();
-  }
-
   /**
    * Creates an OPT Record. This is normally called by SimpleResolver, but can also be called by a
    * server.

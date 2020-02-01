@@ -223,7 +223,7 @@ public final class Type {
   public static final int DLV = 32769;
 
   private static class TypeMnemonic extends Mnemonic {
-    private HashMap<Integer, Record> objects;
+    private HashMap<Integer, Class<? extends Record>> objects;
 
     public TypeMnemonic() {
       super("Type", CASE_UPPER);
@@ -231,7 +231,7 @@ public final class Type {
       objects = new HashMap<>();
     }
 
-    public void add(int val, String str, Record proto) {
+    public void add(int val, String str, Class<? extends Record> proto) {
       super.add(val, str);
       objects.put(val, proto);
     }
@@ -241,7 +241,7 @@ public final class Type {
       Type.check(val);
     }
 
-    public Record getProto(int val) {
+    public Class<? extends Record> getProto(int val) {
       check(val);
       return objects.get(val);
     }
@@ -250,73 +250,73 @@ public final class Type {
   private static TypeMnemonic types = new TypeMnemonic();
 
   static {
-    types.add(A, "A", new ARecord());
-    types.add(NS, "NS", new NSRecord());
-    types.add(MD, "MD", new MDRecord());
-    types.add(MF, "MF", new MFRecord());
-    types.add(CNAME, "CNAME", new CNAMERecord());
-    types.add(SOA, "SOA", new SOARecord());
-    types.add(MB, "MB", new MBRecord());
-    types.add(MG, "MG", new MGRecord());
-    types.add(MR, "MR", new MRRecord());
-    types.add(NULL, "NULL", new NULLRecord());
-    types.add(WKS, "WKS", new WKSRecord());
-    types.add(PTR, "PTR", new PTRRecord());
-    types.add(HINFO, "HINFO", new HINFORecord());
-    types.add(MINFO, "MINFO", new MINFORecord());
-    types.add(MX, "MX", new MXRecord());
-    types.add(TXT, "TXT", new TXTRecord());
-    types.add(RP, "RP", new RPRecord());
-    types.add(AFSDB, "AFSDB", new AFSDBRecord());
-    types.add(X25, "X25", new X25Record());
-    types.add(ISDN, "ISDN", new ISDNRecord());
-    types.add(RT, "RT", new RTRecord());
-    types.add(NSAP, "NSAP", new NSAPRecord());
-    types.add(NSAP_PTR, "NSAP-PTR", new NSAP_PTRRecord());
-    types.add(SIG, "SIG", new SIGRecord());
-    types.add(KEY, "KEY", new KEYRecord());
-    types.add(PX, "PX", new PXRecord());
-    types.add(GPOS, "GPOS", new GPOSRecord());
-    types.add(AAAA, "AAAA", new AAAARecord());
-    types.add(LOC, "LOC", new LOCRecord());
-    types.add(NXT, "NXT", new NXTRecord());
+    types.add(A, "A", ARecord.class);
+    types.add(NS, "NS", NSRecord.class);
+    types.add(MD, "MD", MDRecord.class);
+    types.add(MF, "MF", MFRecord.class);
+    types.add(CNAME, "CNAME", CNAMERecord.class);
+    types.add(SOA, "SOA", SOARecord.class);
+    types.add(MB, "MB", MBRecord.class);
+    types.add(MG, "MG", MGRecord.class);
+    types.add(MR, "MR", MRRecord.class);
+    types.add(NULL, "NULL", NULLRecord.class);
+    types.add(WKS, "WKS", WKSRecord.class);
+    types.add(PTR, "PTR", PTRRecord.class);
+    types.add(HINFO, "HINFO", HINFORecord.class);
+    types.add(MINFO, "MINFO", MINFORecord.class);
+    types.add(MX, "MX", MXRecord.class);
+    types.add(TXT, "TXT", TXTRecord.class);
+    types.add(RP, "RP", RPRecord.class);
+    types.add(AFSDB, "AFSDB", AFSDBRecord.class);
+    types.add(X25, "X25", X25Record.class);
+    types.add(ISDN, "ISDN", ISDNRecord.class);
+    types.add(RT, "RT", RTRecord.class);
+    types.add(NSAP, "NSAP", NSAPRecord.class);
+    types.add(NSAP_PTR, "NSAP-PTR", NSAP_PTRRecord.class);
+    types.add(SIG, "SIG", SIGRecord.class);
+    types.add(KEY, "KEY", KEYRecord.class);
+    types.add(PX, "PX", PXRecord.class);
+    types.add(GPOS, "GPOS", GPOSRecord.class);
+    types.add(AAAA, "AAAA", AAAARecord.class);
+    types.add(LOC, "LOC", LOCRecord.class);
+    types.add(NXT, "NXT", NXTRecord.class);
     types.add(EID, "EID");
     types.add(NIMLOC, "NIMLOC");
-    types.add(SRV, "SRV", new SRVRecord());
+    types.add(SRV, "SRV", SRVRecord.class);
     types.add(ATMA, "ATMA");
-    types.add(NAPTR, "NAPTR", new NAPTRRecord());
-    types.add(KX, "KX", new KXRecord());
-    types.add(CERT, "CERT", new CERTRecord());
-    types.add(A6, "A6", new A6Record());
-    types.add(DNAME, "DNAME", new DNAMERecord());
-    types.add(OPT, "OPT", new OPTRecord());
-    types.add(APL, "APL", new APLRecord());
-    types.add(DS, "DS", new DSRecord());
-    types.add(SSHFP, "SSHFP", new SSHFPRecord());
-    types.add(IPSECKEY, "IPSECKEY", new IPSECKEYRecord());
-    types.add(RRSIG, "RRSIG", new RRSIGRecord());
-    types.add(NSEC, "NSEC", new NSECRecord());
-    types.add(DNSKEY, "DNSKEY", new DNSKEYRecord());
-    types.add(DHCID, "DHCID", new DHCIDRecord());
-    types.add(NSEC3, "NSEC3", new NSEC3Record());
-    types.add(NSEC3PARAM, "NSEC3PARAM", new NSEC3PARAMRecord());
-    types.add(TLSA, "TLSA", new TLSARecord());
-    types.add(SMIMEA, "SMIMEA", new SMIMEARecord());
-    types.add(HIP, "HIP", new HIPRecord());
-    types.add(CDNSKEY, "CDNSKEY", new CDNSKEYRecord());
-    types.add(CDS, "CDS", new CDSRecord());
-    types.add(OPENPGPKEY, "OPENPGPKEY", new OPENPGPKEYRecord());
-    types.add(SPF, "SPF", new SPFRecord());
-    types.add(TKEY, "TKEY", new TKEYRecord());
-    types.add(TSIG, "TSIG", new TSIGRecord());
+    types.add(NAPTR, "NAPTR", NAPTRRecord.class);
+    types.add(KX, "KX", KXRecord.class);
+    types.add(CERT, "CERT", CERTRecord.class);
+    types.add(A6, "A6", A6Record.class);
+    types.add(DNAME, "DNAME", DNAMERecord.class);
+    types.add(OPT, "OPT", OPTRecord.class);
+    types.add(APL, "APL", APLRecord.class);
+    types.add(DS, "DS", DSRecord.class);
+    types.add(SSHFP, "SSHFP", SSHFPRecord.class);
+    types.add(IPSECKEY, "IPSECKEY", IPSECKEYRecord.class);
+    types.add(RRSIG, "RRSIG", RRSIGRecord.class);
+    types.add(NSEC, "NSEC", NSECRecord.class);
+    types.add(DNSKEY, "DNSKEY", DNSKEYRecord.class);
+    types.add(DHCID, "DHCID", DHCIDRecord.class);
+    types.add(NSEC3, "NSEC3", NSEC3Record.class);
+    types.add(NSEC3PARAM, "NSEC3PARAM", NSEC3PARAMRecord.class);
+    types.add(TLSA, "TLSA", TLSARecord.class);
+    types.add(SMIMEA, "SMIMEA", SMIMEARecord.class);
+    types.add(HIP, "HIP", HIPRecord.class);
+    types.add(CDNSKEY, "CDNSKEY", CDNSKEYRecord.class);
+    types.add(CDS, "CDS", CDSRecord.class);
+    types.add(OPENPGPKEY, "OPENPGPKEY", OPENPGPKEYRecord.class);
+    types.add(SPF, "SPF", SPFRecord.class);
+    types.add(TKEY, "TKEY", TKEYRecord.class);
+    types.add(TSIG, "TSIG", TSIGRecord.class);
     types.add(IXFR, "IXFR");
     types.add(AXFR, "AXFR");
     types.add(MAILB, "MAILB");
     types.add(MAILA, "MAILA");
     types.add(ANY, "ANY");
-    types.add(URI, "URI", new URIRecord());
-    types.add(CAA, "CAA", new CAARecord());
-    types.add(DLV, "DLV", new DLVRecord());
+    types.add(URI, "URI", URIRecord.class);
+    types.add(CAA, "CAA", CAARecord.class);
+    types.add(DLV, "DLV", DLVRecord.class);
   }
 
   private Type() {}
@@ -367,7 +367,7 @@ public final class Type {
     return value(s, false);
   }
 
-  static Record getProto(int val) {
+  static Class<? extends Record> getProto(int val) {
     return types.getProto(val);
   }
 

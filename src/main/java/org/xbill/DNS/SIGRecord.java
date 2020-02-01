@@ -19,11 +19,6 @@ import java.util.Date;
 public class SIGRecord extends SIGBase {
   SIGRecord() {}
 
-  @Override
-  Record getObject() {
-    return new SIGRecord();
-  }
-
   /**
    * Creates an SIG Record from the given data
    *

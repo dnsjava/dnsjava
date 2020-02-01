@@ -32,11 +32,6 @@ public class SSHFPRecord extends Record {
 
   SSHFPRecord() {}
 
-  @Override
-  Record getObject() {
-    return new SSHFPRecord();
-  }
-
   /**
    * Creates an SSHFP Record from the given data.
    *

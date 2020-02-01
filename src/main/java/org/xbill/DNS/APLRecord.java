@@ -91,11 +91,6 @@ public class APLRecord extends Record {
 
   APLRecord() {}
 
-  @Override
-  Record getObject() {
-    return new APLRecord();
-  }
-
   private static boolean validatePrefixLength(int family, int prefixLength) {
     if (prefixLength < 0 || prefixLength >= 256) {
       return false;
