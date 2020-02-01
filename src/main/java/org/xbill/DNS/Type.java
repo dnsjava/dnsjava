@@ -138,6 +138,9 @@ public final class Type {
   /** {@link DNAMERecord Non-terminal name redirection} */
   public static final int DNAME = 39;
 
+  /** Kitchen Sink (April Fools' Day RR) */
+  public static final int SINK = 40;
+
   /** {@link OPTRecord Options - contains EDNS metadata} */
   public static final int OPT = 41;
 
@@ -180,6 +183,29 @@ public final class Type {
   /** {@link HIPRecord Host Identity Protocol (HIP)} */
   public static final int HIP = 55;
 
+  /**
+   * Zone Status (ZS).
+   *
+   * @see <a href="https://tools.ietf.org/html/draft-reid-dnsext-zs-01">draft-reid-dnsext-zs-01</a>
+   */
+  public static final int NINFO = 56;
+
+  /**
+   * RKEY DNS Resource Record, used for encryption of NAPTR records.
+   *
+   * @see <a
+   *     href="https://tools.ietf.org/html/draft-reid-dnsext-rkey-00">draft-reid-dnsext-rkey-00</a>
+   */
+  public static final int RKEY = 57;
+
+  /**
+   * DNSSEC Trust Anchor History Service.
+   *
+   * @see <a
+   *     href="https://tools.ietf.org/html/draft-wijngaards-dnsop-trust-history-02">draft-wijngaards-dnsop-trust-history-02</a>
+   */
+  public static final int TALINK = 58;
+
   /** {@link CDSRecord Child Delegation Signer} */
   public static final int CDS = 59;
 
@@ -189,8 +215,44 @@ public final class Type {
   /** {@link OPENPGPKEYRecord OpenPGP Key} */
   public static final int OPENPGPKEY = 61;
 
+  /** Child-to-Parent Synchronization. */
+  public static final int CSYNC = 62;
+
+  /** Message Digest for DNS Zones. */
+  public static final int ZONEMD = 63;
+
   /** {@link SPFRecord Sender Policy Framework} */
   public static final int SPF = 99;
+
+  /** IANA-Reserved */
+  public static final int UINFO = 100;
+
+  /** IANA-Reserved */
+  public static final int UID = 101;
+
+  /** IANA-Reserved */
+  public static final int GID = 102;
+
+  /** IANA-Reserved */
+  public static final int UNSPEC = 103;
+
+  /** Node Identifier (NID). */
+  public static final int NID = 104;
+
+  /** 32-bit Locator value for ILNPv4-capable node. */
+  public static final int L32 = 105;
+
+  /** Unsigned 64-bit Locator value for ILNPv6-capable node. */
+  public static final int L64 = 106;
+
+  /** Name of a subnetwork for ILNP. */
+  public static final int LP = 107;
+
+  /** EUI-48 Address. */
+  public static final int EUI48 = 108;
+
+  /** EUI-64 Address. */
+  public static final int EUI64 = 109;
 
   /** {@link TKEYRecord Transaction key} */
   public static final int TKEY = 249;
@@ -207,7 +269,7 @@ public final class Type {
   /** Transfer mailbox records */
   public static final int MAILB = 253;
 
-  /** Transfer mail agent records */
+  /** mail agent RRs (obsolete - {@see MX}) */
   public static final int MAILA = 254;
 
   /** Matches any type */
@@ -218,6 +280,18 @@ public final class Type {
 
   /** {@link CAARecord Certification Authority Authorization} */
   public static final int CAA = 257;
+
+  /** Application Visibility and Control */
+  public static final int AVC = 258;
+
+  /** Digital Object Architecture */
+  public static final int DOA = 259;
+
+  /** Automatic Multicast Tunneling Relay */
+  public static final int AMTRELAY = 260;
+
+  /** DNSSEC Trust Authorities */
+  public static final int TA = 32768;
 
   /** {@link DLVRecord DNSSEC Lookaside Validation} */
   public static final int DLV = 32769;
@@ -289,6 +363,7 @@ public final class Type {
     types.add(CERT, "CERT", CERTRecord.class);
     types.add(A6, "A6", A6Record.class);
     types.add(DNAME, "DNAME", DNAMERecord.class);
+    types.add(SINK, "SINK");
     types.add(OPT, "OPT", OPTRecord.class);
     types.add(APL, "APL", APLRecord.class);
     types.add(DS, "DS", DSRecord.class);
@@ -302,11 +377,29 @@ public final class Type {
     types.add(NSEC3PARAM, "NSEC3PARAM", NSEC3PARAMRecord.class);
     types.add(TLSA, "TLSA", TLSARecord.class);
     types.add(SMIMEA, "SMIMEA", SMIMEARecord.class);
+
     types.add(HIP, "HIP", HIPRecord.class);
-    types.add(CDNSKEY, "CDNSKEY", CDNSKEYRecord.class);
+    types.add(NINFO, "NINFO");
+    types.add(RKEY, "RKEY");
+    types.add(TALINK, "TALINK");
     types.add(CDS, "CDS", CDSRecord.class);
+    types.add(CDNSKEY, "CDNSKEY", CDNSKEYRecord.class);
     types.add(OPENPGPKEY, "OPENPGPKEY", OPENPGPKEYRecord.class);
+    types.add(CSYNC, "CSYNC");
+    types.add(ZONEMD, "ZONEMD");
+
     types.add(SPF, "SPF", SPFRecord.class);
+    types.add(UINFO, "UINFO");
+    types.add(UID, "UID");
+    types.add(GID, "GID");
+    types.add(UNSPEC, "UNSPEC");
+    types.add(NID, "NID");
+    types.add(L32, "L32");
+    types.add(L64, "L64");
+    types.add(LP, "LP");
+    types.add(EUI48, "EUI48");
+    types.add(EUI64, "EUI64");
+
     types.add(TKEY, "TKEY", TKEYRecord.class);
     types.add(TSIG, "TSIG", TSIGRecord.class);
     types.add(IXFR, "IXFR");
@@ -316,6 +409,11 @@ public final class Type {
     types.add(ANY, "ANY");
     types.add(URI, "URI", URIRecord.class);
     types.add(CAA, "CAA", CAARecord.class);
+    types.add(AVC, "AVC");
+    types.add(DOA, "DOA");
+    types.add(AMTRELAY, "AMTRELAY");
+
+    types.add(TA, "TA");
     types.add(DLV, "DLV", DLVRecord.class);
   }
 
