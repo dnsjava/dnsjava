@@ -47,7 +47,7 @@ class OpcodeTest {
     assertEquals("IQUERY", Opcode.string(Opcode.IQUERY));
 
     // one that doesn't exist
-    assertTrue(Opcode.string(6).startsWith("RESERVED"));
+    assertTrue(Opcode.string(7).startsWith("RESERVED"));
 
     assertThrows(IllegalArgumentException.class, () -> Opcode.string(-1));
 

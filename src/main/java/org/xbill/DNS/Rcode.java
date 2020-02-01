@@ -8,10 +8,7 @@ package org.xbill.DNS;
  * @author Brian Wellington
  */
 public final class Rcode {
-
   private static Mnemonic rcodes = new Mnemonic("DNS Rcode", Mnemonic.CASE_UPPER);
-
-  private static Mnemonic tsigrcodes = new Mnemonic("TSIG rcode", Mnemonic.CASE_UPPER);
 
   /** No error */
   public static final int NOERROR = 0;
@@ -29,7 +26,7 @@ public final class Rcode {
   public static final int NOTIMP = 4;
 
   /** Deprecated synonym for NOTIMP. */
-  public static final int NOTIMPL = 4;
+  @Deprecated public static final int NOTIMPL = 4;
 
   /** The operation was refused by the server */
   public static final int REFUSED = 5;
@@ -96,19 +93,13 @@ public final class Rcode {
     rcodes.add(NOTAUTH, "NOTAUTH");
     rcodes.add(NOTZONE, "NOTZONE");
     rcodes.add(BADVERS, "BADVERS");
+    rcodes.add(BADKEY, "BADKEY");
+    rcodes.add(BADTIME, "BADTIME");
     rcodes.add(BADMODE, "BADMODE");
     rcodes.add(BADNAME, "BADNAME");
     rcodes.add(BADALG, "BADALG");
+    rcodes.add(BADTRUNC, "BADTRUNC");
     rcodes.add(BADCOOKIE, "BADCOOKIE");
-
-    tsigrcodes.setMaximum(0xFFFF);
-    tsigrcodes.setPrefix("RESERVED");
-    tsigrcodes.setNumericAllowed(true);
-    tsigrcodes.addAll(rcodes);
-
-    tsigrcodes.add(BADSIG, "BADSIG");
-    tsigrcodes.add(BADKEY, "BADKEY");
-    tsigrcodes.add(BADTIME, "BADTIME");
   }
 
   private Rcode() {}
@@ -120,11 +111,19 @@ public final class Rcode {
 
   /** Converts a numeric TSIG extended Rcode into a String */
   public static String TSIGstring(int i) {
-    return tsigrcodes.getText(i);
+    if (i == BADSIG) {
+      return "BADSIG";
+    }
+
+    return string(i);
   }
 
   /** Converts a String representation of an Rcode into its numeric value */
   public static int value(String s) {
+    if ("BADSIG".equalsIgnoreCase(s)) {
+      return BADSIG;
+    }
+
     return rcodes.getValue(s);
   }
 }

@@ -24,6 +24,9 @@ public final class Opcode {
   /** A dynamic update message */
   public static final int UPDATE = 5;
 
+  /** DNS Stateful Operations (DSO, RFC8490) */
+  public static final int DSO = 6;
+
   private static Mnemonic opcodes = new Mnemonic("DNS Opcode", Mnemonic.CASE_UPPER);
 
   static {
@@ -36,6 +39,7 @@ public final class Opcode {
     opcodes.add(STATUS, "STATUS");
     opcodes.add(NOTIFY, "NOTIFY");
     opcodes.add(UPDATE, "UPDATE");
+    opcodes.add(DSO, "DSO");
   }
 
   private Opcode() {}

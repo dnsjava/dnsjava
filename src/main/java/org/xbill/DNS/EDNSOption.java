@@ -21,6 +21,12 @@ public abstract class EDNSOption {
   public static class Code {
     private Code() {}
 
+    /** Apple's DNS Long-Lived Queries protocol, draft-sekar-dns-llq-06 */
+    public static final int LLQ = 1;
+
+    /** Dynamic DNS Update Leases, draft-sekar-dns-ul-02 */
+    public static final int UL = 2;
+
     /** Name Server Identifier, RFC 5001 */
     public static final int NSID = 3;
 
@@ -54,6 +60,12 @@ public abstract class EDNSOption {
     /** Signaling Trust Anchor Knowledge in DNS Security Extensions (DNSSEC), RFC 8145 */
     public static final int EDNS_KEY_TAG = 14;
 
+    /** DNS EDNS Tags, draft-bellis-dnsop-edns-tags-01 */
+    public static final int EDNS_CLIENT_TAG = 16;
+
+    /** DNS EDNS Tags, draft-bellis-dnsop-edns-tags-01 */
+    public static final int EDNS_SERVER_TAG = 17;
+
     private static Mnemonic codes = new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
 
     static {
@@ -61,7 +73,10 @@ public abstract class EDNSOption {
       codes.setPrefix("CODE");
       codes.setNumericAllowed(true);
 
+      codes.add(LLQ, "LLQ");
+      codes.add(UL, "UL");
       codes.add(NSID, "NSID");
+
       codes.add(DAU, "DAU");
       codes.add(DHU, "DHU");
       codes.add(N3U, "N3U");
@@ -72,6 +87,9 @@ public abstract class EDNSOption {
       codes.add(PADDING, "Padding");
       codes.add(CHAIN, "CHAIN");
       codes.add(EDNS_KEY_TAG, "edns-key-tag");
+
+      codes.add(EDNS_CLIENT_TAG, "EDNS-Client-Tag");
+      codes.add(EDNS_SERVER_TAG, "EDNS-Server-Tag");
     }
 
     /** Converts an EDNS Option Code into its textual representation */
