@@ -1,4 +1,11 @@
-01/19/2019:
+02/15/2020
+	- 3.0.0 released
+	- Parse RRsig records with epoch time format
+	- Add support for EdDSA DNSSEC signatures if BouncyCastle is available
+	  (Ed25519 and Ed448, RFC 8080)
+	- Add missing RCode, OpCode and RR type mnemonics
+
+01/19/2020:
 	- 3.0.0-next.1 released
 	- Requires Java 8 and slf4j-api
 	- Adds support for Java 9+ and Android O+ via a new server config
