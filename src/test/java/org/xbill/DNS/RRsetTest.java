@@ -35,6 +35,7 @@
 package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -232,12 +233,28 @@ class RRsetTest {
   }
 
   @Test
+  void test_toStringOnlySig() {
+    m_rs.addRR(m_s1);
+
+    String out = m_rs.toString();
+
+    assertFalse(out.contains("{empty}"));
+    assertTrue(out.contains(" sigs: "));
+    assertTrue(out.contains(m_name.toString()));
+  }
+
+  @Test
+  void test_toStringEmpty() {
+    assertEquals("{empty}", m_rs.toString());
+  }
+
+  @Test
   void addRR_invalidType() throws TextParseException {
     m_rs.addRR(m_a1);
 
     CNAMERecord c = new CNAMERecord(m_name, DClass.IN, m_ttl, Name.fromString("an.alias."));
 
-    assertThrows(IllegalArgumentException.class, () -> ((RRset) m_rs).addRR(c));
+    assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(c));
   }
 
   @Test

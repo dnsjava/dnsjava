@@ -233,7 +233,7 @@ public class RRset implements Serializable {
   /** Converts the RRset to a String */
   @Override
   public String toString() {
-    if (rrs.size() == 0) {
+    if (rrs.isEmpty() && sigs.isEmpty()) {
       return ("{empty}");
     }
 
