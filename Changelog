@@ -1,3 +1,9 @@
+02/23/2020
+	- 3.0.1 released
+	- Fix toString of RRset reporting empty when it contains signatures
+	- Fix a potential sorting bug when creating a DNSSEC digest
+	- Fix getting the resolvers of an ExtendedResolver (#92)
+
 02/15/2020
 	- 3.0.0 released
 	- Parse RRsig records with epoch time format
