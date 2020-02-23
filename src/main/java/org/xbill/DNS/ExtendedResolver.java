@@ -275,7 +275,7 @@ public class ExtendedResolver implements Resolver {
 
   /** Returns all resolvers used by this ExtendedResolver */
   public Resolver[] getResolvers() {
-    return (Resolver[]) resolvers.stream().map(re -> re.resolver).toArray();
+    return resolvers.stream().map(re -> re.resolver).toArray(Resolver[]::new);
   }
 
   /** Adds a new resolver to be used by this ExtendedResolver */
