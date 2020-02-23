@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+
 import java.io.IOException;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -115,5 +117,45 @@ class DNSSECTest {
     set.addRR(txt);
     set.addRR(rrsig);
     DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochMilli(60));
+  }
+
+  @Test
+  void testDigestRrsetOrdering() {
+    Name name = Name.fromConstantString("a.");
+    Record a1 = new CNAMERecord(name, DClass.IN, 60, Name.fromConstantString("a.b.c."));
+    Record a2 = new CNAMERecord(name, DClass.IN, 60, Name.fromConstantString("aa.bb.cc."));
+
+    RRSIGRecord s1 =
+        new RRSIGRecord(
+            name,
+            DClass.IN,
+            60,
+            Type.CNAME,
+            0xF,
+            0x60,
+            Instant.now(),
+            Instant.now(),
+            0xA,
+            name,
+            new byte[] {0xa, 0x0});
+    RRSIGRecord s2 =
+        new RRSIGRecord(
+            name,
+            DClass.IN,
+            60,
+            Type.CNAME,
+            0xF,
+            0x60,
+            Instant.now(),
+            Instant.now(),
+            0xB,
+            name,
+            new byte[] {0x0, 0xa});
+    RRset rrset = new RRset();
+    rrset.addRR(a2);
+    rrset.addRR(a1);
+    rrset.addRR(s1);
+    rrset.addRR(s2);
+    assertArrayEquals(DNSSEC.digestRRset(s1, rrset), DNSSEC.digestRRset(s1, rrset));
   }
 }

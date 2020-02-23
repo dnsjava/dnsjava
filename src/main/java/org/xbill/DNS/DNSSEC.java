@@ -149,7 +149,7 @@ public class DNSSEC {
    * @param rrset The data to be signed/verified.
    * @return The data to be cryptographically signed or verified.
    */
-  public static <T extends Record> byte[] digestRRset(RRSIGRecord rrsig, RRset rrset) {
+  public static byte[] digestRRset(RRSIGRecord rrsig, RRset rrset) {
     DNSOutput out = new DNSOutput();
     digestSIG(out, rrsig);
 
@@ -169,9 +169,9 @@ public class DNSSEC {
     header.writeU16(rrset.getType());
     header.writeU16(rrset.getDClass());
     header.writeU32(rrsig.getOrigTTL());
-    rrset.rrs().stream()
+    rrset.rrs(false).stream()
         .sorted()
-        .forEach(
+        .forEachOrdered(
             record -> {
               out.writeByteArray(header.toByteArray());
               int lengthPosition = out.current();
