@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 /**
  * Constants and functions relating to DNS Types
@@ -297,7 +298,7 @@ public final class Type {
   public static final int DLV = 32769;
 
   private static class TypeMnemonic extends Mnemonic {
-    private HashMap<Integer, Class<? extends Record>> objects;
+    private HashMap<Integer, Supplier<? extends Record>> objects;
 
     public TypeMnemonic() {
       super("Type", CASE_UPPER);
@@ -305,7 +306,7 @@ public final class Type {
       objects = new HashMap<>();
     }
 
-    public void add(int val, String str, Class<? extends Record> proto) {
+    public void add(int val, String str, Supplier<? extends Record> proto) {
       super.add(val, str);
       objects.put(val, proto);
     }
@@ -315,7 +316,7 @@ public final class Type {
       Type.check(val);
     }
 
-    public Class<? extends Record> getProto(int val) {
+    public Supplier<? extends Record> getFactory(int val) {
       check(val);
       return objects.get(val);
     }
@@ -324,71 +325,71 @@ public final class Type {
   private static TypeMnemonic types = new TypeMnemonic();
 
   static {
-    types.add(A, "A", ARecord.class);
-    types.add(NS, "NS", NSRecord.class);
-    types.add(MD, "MD", MDRecord.class);
-    types.add(MF, "MF", MFRecord.class);
-    types.add(CNAME, "CNAME", CNAMERecord.class);
-    types.add(SOA, "SOA", SOARecord.class);
-    types.add(MB, "MB", MBRecord.class);
-    types.add(MG, "MG", MGRecord.class);
-    types.add(MR, "MR", MRRecord.class);
-    types.add(NULL, "NULL", NULLRecord.class);
-    types.add(WKS, "WKS", WKSRecord.class);
-    types.add(PTR, "PTR", PTRRecord.class);
-    types.add(HINFO, "HINFO", HINFORecord.class);
-    types.add(MINFO, "MINFO", MINFORecord.class);
-    types.add(MX, "MX", MXRecord.class);
-    types.add(TXT, "TXT", TXTRecord.class);
-    types.add(RP, "RP", RPRecord.class);
-    types.add(AFSDB, "AFSDB", AFSDBRecord.class);
-    types.add(X25, "X25", X25Record.class);
-    types.add(ISDN, "ISDN", ISDNRecord.class);
-    types.add(RT, "RT", RTRecord.class);
-    types.add(NSAP, "NSAP", NSAPRecord.class);
-    types.add(NSAP_PTR, "NSAP-PTR", NSAP_PTRRecord.class);
-    types.add(SIG, "SIG", SIGRecord.class);
-    types.add(KEY, "KEY", KEYRecord.class);
-    types.add(PX, "PX", PXRecord.class);
-    types.add(GPOS, "GPOS", GPOSRecord.class);
-    types.add(AAAA, "AAAA", AAAARecord.class);
-    types.add(LOC, "LOC", LOCRecord.class);
-    types.add(NXT, "NXT", NXTRecord.class);
+    types.add(A, "A", ARecord::new);
+    types.add(NS, "NS", NSRecord::new);
+    types.add(MD, "MD", MDRecord::new);
+    types.add(MF, "MF", MFRecord::new);
+    types.add(CNAME, "CNAME", CNAMERecord::new);
+    types.add(SOA, "SOA", SOARecord::new);
+    types.add(MB, "MB", MBRecord::new);
+    types.add(MG, "MG", MGRecord::new);
+    types.add(MR, "MR", MRRecord::new);
+    types.add(NULL, "NULL", NULLRecord::new);
+    types.add(WKS, "WKS", WKSRecord::new);
+    types.add(PTR, "PTR", PTRRecord::new);
+    types.add(HINFO, "HINFO", HINFORecord::new);
+    types.add(MINFO, "MINFO", MINFORecord::new);
+    types.add(MX, "MX", MXRecord::new);
+    types.add(TXT, "TXT", TXTRecord::new);
+    types.add(RP, "RP", RPRecord::new);
+    types.add(AFSDB, "AFSDB", AFSDBRecord::new);
+    types.add(X25, "X25", X25Record::new);
+    types.add(ISDN, "ISDN", ISDNRecord::new);
+    types.add(RT, "RT", RTRecord::new);
+    types.add(NSAP, "NSAP", NSAPRecord::new);
+    types.add(NSAP_PTR, "NSAP-PTR", NSAP_PTRRecord::new);
+    types.add(SIG, "SIG", SIGRecord::new);
+    types.add(KEY, "KEY", KEYRecord::new);
+    types.add(PX, "PX", PXRecord::new);
+    types.add(GPOS, "GPOS", GPOSRecord::new);
+    types.add(AAAA, "AAAA", AAAARecord::new);
+    types.add(LOC, "LOC", LOCRecord::new);
+    types.add(NXT, "NXT", NXTRecord::new);
     types.add(EID, "EID");
     types.add(NIMLOC, "NIMLOC");
-    types.add(SRV, "SRV", SRVRecord.class);
+    types.add(SRV, "SRV", SRVRecord::new);
     types.add(ATMA, "ATMA");
-    types.add(NAPTR, "NAPTR", NAPTRRecord.class);
-    types.add(KX, "KX", KXRecord.class);
-    types.add(CERT, "CERT", CERTRecord.class);
-    types.add(A6, "A6", A6Record.class);
-    types.add(DNAME, "DNAME", DNAMERecord.class);
+    types.add(NAPTR, "NAPTR", NAPTRRecord::new);
+    types.add(KX, "KX", KXRecord::new);
+    types.add(CERT, "CERT", CERTRecord::new);
+    types.add(A6, "A6", A6Record::new);
+    types.add(DNAME, "DNAME", DNAMERecord::new);
     types.add(SINK, "SINK");
-    types.add(OPT, "OPT", OPTRecord.class);
-    types.add(APL, "APL", APLRecord.class);
-    types.add(DS, "DS", DSRecord.class);
-    types.add(SSHFP, "SSHFP", SSHFPRecord.class);
-    types.add(IPSECKEY, "IPSECKEY", IPSECKEYRecord.class);
-    types.add(RRSIG, "RRSIG", RRSIGRecord.class);
-    types.add(NSEC, "NSEC", NSECRecord.class);
-    types.add(DNSKEY, "DNSKEY", DNSKEYRecord.class);
-    types.add(DHCID, "DHCID", DHCIDRecord.class);
-    types.add(NSEC3, "NSEC3", NSEC3Record.class);
-    types.add(NSEC3PARAM, "NSEC3PARAM", NSEC3PARAMRecord.class);
-    types.add(TLSA, "TLSA", TLSARecord.class);
-    types.add(SMIMEA, "SMIMEA", SMIMEARecord.class);
+    types.add(OPT, "OPT", OPTRecord::new);
+    types.add(APL, "APL", APLRecord::new);
+    types.add(DS, "DS", DSRecord::new);
+    types.add(SSHFP, "SSHFP", SSHFPRecord::new);
+    types.add(IPSECKEY, "IPSECKEY", IPSECKEYRecord::new);
+    types.add(RRSIG, "RRSIG", RRSIGRecord::new);
+    types.add(NSEC, "NSEC", NSECRecord::new);
+    types.add(DNSKEY, "DNSKEY", DNSKEYRecord::new);
+    types.add(DHCID, "DHCID", DHCIDRecord::new);
+    types.add(NSEC3, "NSEC3", NSEC3Record::new);
+    types.add(NSEC3PARAM, "NSEC3PARAM", NSEC3PARAMRecord::new);
+    types.add(TLSA, "TLSA", TLSARecord::new);
+    types.add(SMIMEA, "SMIMEA", SMIMEARecord::new);
 
-    types.add(HIP, "HIP", HIPRecord.class);
+    types.add(HIP, "HIP", HIPRecord::new);
     types.add(NINFO, "NINFO");
     types.add(RKEY, "RKEY");
     types.add(TALINK, "TALINK");
-    types.add(CDS, "CDS", CDSRecord.class);
-    types.add(CDNSKEY, "CDNSKEY", CDNSKEYRecord.class);
-    types.add(OPENPGPKEY, "OPENPGPKEY", OPENPGPKEYRecord.class);
+    types.add(CDS, "CDS", CDSRecord::new);
+    types.add(CDNSKEY, "CDNSKEY", CDNSKEYRecord::new);
+    types.add(OPENPGPKEY, "OPENPGPKEY", OPENPGPKEYRecord::new);
     types.add(CSYNC, "CSYNC");
     types.add(ZONEMD, "ZONEMD");
 
-    types.add(SPF, "SPF", SPFRecord.class);
+    types.add(SPF, "SPF", SPFRecord::new);
     types.add(UINFO, "UINFO");
     types.add(UID, "UID");
     types.add(GID, "GID");
@@ -400,21 +401,21 @@ public final class Type {
     types.add(EUI48, "EUI48");
     types.add(EUI64, "EUI64");
 
-    types.add(TKEY, "TKEY", TKEYRecord.class);
-    types.add(TSIG, "TSIG", TSIGRecord.class);
+    types.add(TKEY, "TKEY", TKEYRecord::new);
+    types.add(TSIG, "TSIG", TSIGRecord::new);
     types.add(IXFR, "IXFR");
     types.add(AXFR, "AXFR");
     types.add(MAILB, "MAILB");
     types.add(MAILA, "MAILA");
     types.add(ANY, "ANY");
-    types.add(URI, "URI", URIRecord.class);
-    types.add(CAA, "CAA", CAARecord.class);
+    types.add(URI, "URI", URIRecord::new);
+    types.add(CAA, "CAA", CAARecord::new);
     types.add(AVC, "AVC");
     types.add(DOA, "DOA");
     types.add(AMTRELAY, "AMTRELAY");
 
     types.add(TA, "TA");
-    types.add(DLV, "DLV", DLVRecord.class);
+    types.add(DLV, "DLV", DLVRecord::new);
   }
 
   private Type() {}
@@ -465,8 +466,8 @@ public final class Type {
     return value(s, false);
   }
 
-  static Class<? extends Record> getProto(int val) {
-    return types.getProto(val);
+  static Supplier<? extends Record> getFactory(int val) {
+    return types.getFactory(val);
   }
 
   /** Is this type valid for a record (a non-meta type)? */

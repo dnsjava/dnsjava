@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.function.Supplier;
 import org.xbill.DNS.utils.base16;
 
 /**
@@ -44,19 +45,8 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   private static Record getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
     Record rec;
     if (hasData) {
-      Class<? extends Record> proto = Type.getProto(type);
-      if (proto != null) {
-        try {
-          rec = proto.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException
-            | IllegalAccessException
-            | InvocationTargetException
-            | NoSuchMethodException e) {
-          rec = new UNKRecord();
-        }
-      } else {
-        rec = new UNKRecord();
-      }
+      Supplier<? extends Record> factory = Type.getFactory(type);
+      rec = factory != null ? factory.get() : new UNKRecord();
     } else {
       rec = new EmptyRecord();
     }

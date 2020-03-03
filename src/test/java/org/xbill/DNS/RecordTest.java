@@ -848,30 +848,4 @@ class RecordTest {
 
     assertThrows(RelativeNameException.class, () -> Record.checkName("field", m));
   }
-
-  @Test
-  void testAllTypesHaveNoArgConstructor() {
-    for (int i = 1; i < 65535; i++) {
-      Class<? extends Record> proto = Type.getProto(i);
-      if (proto != null) {
-        try {
-          Constructor<? extends Record> noArgCtor = proto.getDeclaredConstructor();
-          assertNotNull(noArgCtor.newInstance());
-        } catch (NoSuchMethodException
-            | InstantiationException
-            | IllegalAccessException
-            | InvocationTargetException e) {
-          Assert.fail(
-              "Record type "
-                  + Type.string(i)
-                  + " ("
-                  + i
-                  + ", "
-                  + proto.getSimpleName()
-                  + ")"
-                  + " seems to have no or invalid 0arg ctor");
-        }
-      }
-    }
-  }
 }
