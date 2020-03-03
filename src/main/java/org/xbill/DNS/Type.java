@@ -306,9 +306,9 @@ public final class Type {
       objects = new HashMap<>();
     }
 
-    public void add(int val, String str, Supplier<? extends Record> proto) {
+    public void add(int val, String str, Supplier<? extends Record> factory) {
       super.add(val, str);
-      objects.put(val, proto);
+      objects.put(val, factory);
     }
 
     @Override
