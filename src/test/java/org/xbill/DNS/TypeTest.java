@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 class TypeTest {
@@ -77,5 +78,36 @@ class TypeTest {
   void isRR() {
     assertTrue(Type.isRR(Type.CNAME));
     assertFalse(Type.isRR(Type.IXFR));
+  }
+
+  static class Priv1Record extends Record {
+    Integer value;
+
+    @Override
+    void rrFromWire(DNSInput in) {}
+
+    @Override
+    String rrToString() {
+      return value.toString();
+    }
+
+    @Override
+    void rdataFromString(Tokenizer st, Name origin) throws IOException {
+      value = st.getUInt16();
+    }
+
+    @Override
+    void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
+  }
+
+  @Test
+  void addPrivateType() throws IOException {
+    Type.add(65534, "PRIV1", Priv1Record::new);
+    assertEquals("PRIV1", Type.string(65534));
+    assertEquals(65534, Type.value("PRIV1"));
+    Record r =
+        Record.fromString(Name.fromConstantString("a."), 65534, DClass.IN, 60, "1", Name.root);
+    assertTrue(r instanceof Priv1Record);
+    assertEquals(1, ((Priv1Record) r).value);
   }
 }

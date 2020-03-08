@@ -432,6 +432,19 @@ public final class Type {
   }
 
   /**
+   * Registers or overrides a resource record type into dnsjava's type system. This method is NOT
+   * thread safe.
+   *
+   * @param val the numeric value of the type.
+   * @param mnemonic the canonical string representation of the type.
+   * @param constructor a reference to the no-arg constructor of the type.
+   * @throws InvalidTypeException The type is out of range.
+   */
+  public static void add(int val, String mnemonic, Supplier<Record> constructor) {
+    types.add(val, mnemonic, constructor);
+  }
+
+  /**
    * Converts a numeric Type into a String
    *
    * @param val The type value.
