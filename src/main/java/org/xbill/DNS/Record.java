@@ -4,9 +4,9 @@ package org.xbill.DNS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.function.Supplier;
 import org.xbill.DNS.utils.base16;
 
 /**
@@ -44,16 +44,9 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   private static Record getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
     Record rec;
     if (hasData) {
-      Class<? extends Record> proto = Type.getProto(type);
+      Supplier<Record> proto = Type.getProto(type);
       if (proto != null) {
-        try {
-          rec = proto.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException
-            | IllegalAccessException
-            | InvocationTargetException
-            | NoSuchMethodException e) {
-          rec = new UNKRecord();
-        }
+        rec = proto.get();
       } else {
         rec = new UNKRecord();
       }
@@ -67,7 +60,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     return rec;
   }
 
-  /** Converts the type-specific RR to wire format - must be overriden */
+  /** Converts the type-specific RR to wire format - must be overridden */
   abstract void rrFromWire(DNSInput in) throws IOException;
 
   private static Record newRecord(
