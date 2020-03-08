@@ -7,7 +7,7 @@
     <groupId>dnsjava</groupId>
     <artifactId>dnsjava</artifactId>
     <packaging>bundle</packaging>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <name>dnsjava</name>
     <description>dnsjava is an implementation of DNS in Java. It supports all defined record types (including the DNSSEC
         types), and unknown types. It can be used for queries, zone transfers, and dynamic updates. It includes a cache
@@ -30,7 +30,7 @@
         <connection>scm:git:https://github.com/dnsjava/dnsjava</connection>
         <developerConnection>scm:git:https://github.com/dnsjava/dnsjava</developerConnection>
         <url>https://github.com/dnsjava/dnsjava</url>
-        <tag>v3.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
     <developers>
         <developer>
