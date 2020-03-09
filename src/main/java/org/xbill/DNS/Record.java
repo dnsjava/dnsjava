@@ -4,7 +4,6 @@ package org.xbill.DNS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.function.Supplier;

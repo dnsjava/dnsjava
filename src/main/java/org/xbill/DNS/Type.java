@@ -298,17 +298,28 @@ public final class Type {
   public static final int DLV = 32769;
 
   private static class TypeMnemonic extends Mnemonic {
-    private HashMap<Integer, Supplier<? extends Record>> objects;
+    private HashMap<Integer, Supplier<? extends Record>> factories;
 
     public TypeMnemonic() {
       super("Type", CASE_UPPER);
       setPrefix("TYPE");
-      objects = new HashMap<>();
+      factories = new HashMap<>();
     }
 
     public void add(int val, String str, Supplier<? extends Record> factory) {
-      super.add(val, str);
-      objects.put(val, factory);
+      add(val, str);
+      if (factory != null) factories.put(val, factory);
+    }
+
+    public void replace(int val, String str, Supplier<? extends Record> factory) {
+      int oldVal = getValue(str);
+      if (oldVal != -1 && oldVal != val) {
+        throw new IllegalArgumentException(
+            "mnemnonic \"" + str + "\" already used by type " + oldVal);
+      }
+      remove(val);
+      factories.remove(val);
+      add(val, str, factory);
     }
 
     @Override
@@ -318,7 +329,7 @@ public final class Type {
 
     public Supplier<? extends Record> getFactory(int val) {
       check(val);
-      return objects.get(val);
+      return factories.get(val);
     }
   }
 
@@ -468,6 +479,22 @@ public final class Type {
 
   static Supplier<? extends Record> getFactory(int val) {
     return types.getFactory(val);
+  }
+
+  /**
+   * Registers a new record type along with the respective factory. This allows the reimplementation
+   * of existing types, the implementation of new types not (yet) supported by the library or the
+   * implementation of "private use" record types. Note that the method is not synchronized and its
+   * use may interfere with the creation of records in a multi-threaded environment. The method must
+   * be used with care in order to avoid unexpected behaviour.
+   *
+   * @param val the numeric representation of the record type
+   * @param str the textual representation of the record type
+   * @param factory the factory; {@code null} may be used if there is no implementation available.
+   *     In this case, records of the type will be represented by the {@link UNKRecord} class
+   */
+  public static void register(int val, String str, Supplier<? extends Record> factory) {
+    types.replace(val, str, factory);
   }
 
   /** Is this type valid for a record (a non-meta type)? */

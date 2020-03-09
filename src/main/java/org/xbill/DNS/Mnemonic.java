@@ -101,6 +101,17 @@ class Mnemonic {
   }
 
   /**
+   * Removes both the numeric value and its text representation. Note that aliases need to be
+   * removed separately.
+   *
+   * @param val The numeric value
+   */
+  public void remove(int val) {
+    String str = values.remove(val);
+    if (str != null) strings.remove(str);
+  }
+
+  /**
    * Defines an additional text representation of a numeric value. This will be used by getValue(),
    * but not getText().
    *
@@ -111,6 +122,16 @@ class Mnemonic {
     check(val);
     str = sanitize(str);
     strings.put(str, val);
+  }
+
+  /**
+   * Removes an additional text representation of a numeric value.
+   *
+   * @param str The text string
+   */
+  public void removeAlias(String str) {
+    str = sanitize(str);
+    strings.remove(str);
   }
 
   /**
