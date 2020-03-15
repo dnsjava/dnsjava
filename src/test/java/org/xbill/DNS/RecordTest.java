@@ -851,7 +851,7 @@ class RecordTest {
   @Test
   void testAllTypesHaveNoArgConstructor() {
     for (int i = 1; i < 65535; i++) {
-      Supplier<Record> proto = Type.getProto(i);
+      Supplier<Record> proto = Type.getFactory(i);
       if (proto != null) {
         try {
           assertNotNull(proto.get());

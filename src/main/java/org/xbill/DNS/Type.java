@@ -298,17 +298,32 @@ public final class Type {
   public static final int DLV = 32769;
 
   private static class TypeMnemonic extends Mnemonic {
-    private HashMap<Integer, Supplier<Record>> objects;
+    private HashMap<Integer, Supplier<Record>> factories;
 
     public TypeMnemonic() {
       super("Type", CASE_UPPER);
       setPrefix("TYPE");
-      objects = new HashMap<>();
+      factories = new HashMap<>();
     }
 
-    public void add(int val, String str, Supplier<Record> proto) {
+    public void add(int val, String str, Supplier<Record> factory) {
       super.add(val, str);
-      objects.put(val, proto);
+      factories.put(val, factory);
+    }
+
+    public void replace(int val, String str, Supplier<Record> factory) {
+      int oldVal = getValue(str);
+      if (oldVal != -1) {
+        if (oldVal != val) {
+          throw new IllegalArgumentException(
+              "mnemnonic \"" + str + "\" already used by type " + oldVal);
+        } else {
+          remove(val);
+          factories.remove(val);
+        }
+      }
+
+      add(val, str, factory);
     }
 
     @Override
@@ -316,9 +331,9 @@ public final class Type {
       Type.check(val);
     }
 
-    public Supplier<Record> getProto(int val) {
+    public Supplier<Record> getFactory(int val) {
       check(val);
-      return objects.get(val);
+      return factories.get(val);
     }
   }
 
@@ -432,16 +447,19 @@ public final class Type {
   }
 
   /**
-   * Registers or overrides a resource record type into dnsjava's type system. This method is NOT
-   * thread safe.
+   * Registers a new record type along with the respective factory. This allows the reimplementation
+   * of existing types, the implementation of new types not (yet) supported by the library or the
+   * implementation of "private use" record types. Note that the method is not synchronized and its
+   * use may interfere with the creation of records in a multi-threaded environment. The method must
+   * be used with care in order to avoid unexpected behaviour.
    *
-   * @param val the numeric value of the type.
-   * @param mnemonic the canonical string representation of the type.
-   * @param constructor a reference to the no-arg constructor of the type.
-   * @throws InvalidTypeException The type is out of range.
+   * @param val the numeric representation of the record type
+   * @param str the textual representation of the record type
+   * @param factory the factory; {@code null} may be used if there is no implementation available.
+   *     In this case, records of the type will be represented by the {@link UNKRecord} class
    */
-  public static void add(int val, String mnemonic, Supplier<Record> constructor) {
-    types.add(val, mnemonic, constructor);
+  public static void register(int val, String str, Supplier<Record> factory) {
+    types.replace(val, str, factory);
   }
 
   /**
@@ -479,8 +497,8 @@ public final class Type {
     return value(s, false);
   }
 
-  static Supplier<Record> getProto(int val) {
-    return types.getProto(val);
+  static Supplier<Record> getFactory(int val) {
+    return types.getFactory(val);
   }
 
   /** Is this type valid for a record (a non-meta type)? */
