@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @UtilityClass
 final class NioTcpClient extends Client {
+  private static Queue<ChannelState> registrationQueue;
   private static Map<ChannelKey, ChannelState> channelMap;
   private static volatile boolean run;
 
@@ -32,9 +34,26 @@ final class NioTcpClient extends Client {
     }
 
     run = true;
+    registrationQueue = new ConcurrentLinkedQueue<>();
     channelMap = new ConcurrentHashMap<>();
+    addSelectorTimeoutTask(NioTcpClient::processPendingRegistrations);
     addSelectorTimeoutTask(NioTcpClient::checkTransactionTimeouts);
     start();
+  }
+
+  private static void processPendingRegistrations() {
+    while (!registrationQueue.isEmpty()) {
+      ChannelState state = registrationQueue.remove();
+      try {
+        if (!state.channel.isConnected()) {
+          state.channel.register(selector, SelectionKey.OP_CONNECT, state);
+        } else {
+          state.channel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
+        }
+      } catch (ClosedChannelException e) {
+        state.handleChannelException(e);
+      }
+    }
   }
 
   private static void checkTransactionTimeouts() {
@@ -54,6 +73,7 @@ final class NioTcpClient extends Client {
       return;
     }
 
+    registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
     channelMap.forEach((key, state) -> state.handleTransactionException(closing));
     channelMap.clear();
@@ -145,8 +165,8 @@ final class NioTcpClient extends Client {
 
     private void processConnect(SelectionKey key) {
       try {
-        key.interestOps(SelectionKey.OP_WRITE);
         channel.finishConnect();
+        key.interestOps(SelectionKey.OP_WRITE);
       } catch (IOException e) {
         handleChannelException(e);
       }
@@ -206,7 +226,6 @@ final class NioTcpClient extends Client {
     }
 
     private void processWrite(SelectionKey key) {
-      key.interestOps(SelectionKey.OP_READ);
       for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
         Transaction t = it.next();
         try {
@@ -216,6 +235,7 @@ final class NioTcpClient extends Client {
           it.remove();
         }
       }
+      key.interestOps(SelectionKey.OP_READ);
     }
   }
 
@@ -248,10 +268,8 @@ final class NioTcpClient extends Client {
                     c.bind(local);
                   }
 
-                  final ChannelState channelState = new ChannelState(c);
-                  c.register(selector, SelectionKey.OP_CONNECT, channelState);
                   c.connect(remote);
-                  return channelState;
+                  return new ChannelState(c);
                 } catch (IOException e) {
                   f.completeExceptionally(e);
                   return null;
@@ -264,11 +282,7 @@ final class NioTcpClient extends Client {
             Type.string(query.getQuestion().getType()));
         Transaction t = new Transaction(query, data, endTime, channel.channel, f);
         channel.pendingTransactions.add(t);
-
-        // add read interest to the selection
-        final SelectionKey selectionKey = channel.channel.keyFor(selector);
-        selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
-
+        registrationQueue.add(channel);
         selector.wakeup();
       }
     } catch (IOException e) {
