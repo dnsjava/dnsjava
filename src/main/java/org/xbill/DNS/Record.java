@@ -44,9 +44,9 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   private static Record getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
     Record rec;
     if (hasData) {
-      Supplier<Record> proto = Type.getProto(type);
-      if (proto != null) {
-        rec = proto.get();
+      Supplier<Record> factory = Type.getFactory(type);
+      if (factory != null) {
+        rec = factory.get();
       } else {
         rec = new UNKRecord();
       }

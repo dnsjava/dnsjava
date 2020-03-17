@@ -36,9 +36,13 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class TypeTest {
@@ -77,5 +81,86 @@ class TypeTest {
   void isRR() {
     assertTrue(Type.isRR(Type.CNAME));
     assertFalse(Type.isRR(Type.IXFR));
+  }
+
+  private static final int MYTXT = 65534;
+  private static final String MYTXTName = "MYTXT";
+
+  private static class MYTXTRecord extends TXTBase {
+    MYTXTRecord() {}
+
+    public MYTXTRecord(Name name, int dclass, long ttl, List<String> strings) {
+      super(name, MYTXT, dclass, ttl, strings);
+    }
+
+    public MYTXTRecord(Name name, int dclass, long ttl, String string) {
+      super(name, MYTXT, dclass, ttl, string);
+    }
+  }
+
+  private static class TXTRecordReplacement extends TXTBase {
+    TXTRecordReplacement() {}
+
+    public TXTRecordReplacement(Name name, int dclass, long ttl, List<String> strings) {
+      super(name, Type.TXT, dclass, ttl, strings);
+    }
+
+    public TXTRecordReplacement(Name name, int dclass, long ttl, String string) {
+      super(name, Type.TXT, dclass, ttl, string);
+    }
+  }
+
+  @Test
+  void checkCustomRecords() throws Exception {
+    // test "private use" record
+
+    Type.register(MYTXT, MYTXTName, MYTXTRecord::new);
+    Name testOwner = Name.fromConstantString("example.");
+    MYTXTRecord testRecord = new MYTXTRecord(testOwner, DClass.IN, 3600, "hello world");
+
+    byte[] wireData = testRecord.toWire(Section.ANSWER);
+    Record record = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+    assertEquals(MYTXTRecord.class, record.getClass());
+    assertEquals(MYTXT, record.getType());
+
+    byte[] textData = testRecord.toString().getBytes(StandardCharsets.US_ASCII);
+    Master m = new Master(new ByteArrayInputStream(textData));
+    record = m.nextRecord();
+    assertNotNull(record);
+    assertEquals(MYTXTRecord.class, record.getClass());
+    assertEquals(MYTXT, record.getType());
+    m.close();
+
+    Type.register(MYTXT, MYTXTName, null);
+    record = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+    assertEquals(UNKRecord.class, record.getClass());
+    assertEquals(MYTXT, record.getType());
+
+    // test implementation replacement
+
+    try {
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> Type.register(Type.TXT, "SOA", TXTRecordReplacement::new));
+
+      Type.register(Type.TXT, "TXT", TXTRecordReplacement::new);
+      TXTRecord testRecord2 = new TXTRecord(testOwner, DClass.IN, 3600, "howdy");
+      wireData = testRecord2.toWire(Section.ANSWER);
+      record = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+      assertEquals(TXTRecordReplacement.class, record.getClass());
+      assertEquals(Type.TXT, record.getType());
+
+      byte[] textData2 = testRecord2.toString().getBytes(StandardCharsets.US_ASCII);
+      m = new Master(new ByteArrayInputStream(textData2));
+      record = m.nextRecord();
+      assertNotNull(record);
+      assertEquals(TXTRecordReplacement.class, record.getClass());
+      assertEquals(Type.TXT, record.getType());
+      m.close();
+
+    } finally {
+      // restore default implementation as needed by other tests
+      Type.register(Type.TXT, "TXT", TXTRecord::new);
+    }
   }
 }
