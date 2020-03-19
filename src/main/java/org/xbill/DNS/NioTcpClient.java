@@ -47,6 +47,8 @@ final class NioTcpClient extends Client {
       try {
         if (!state.channel.isConnected()) {
           state.channel.register(selector, SelectionKey.OP_CONNECT, state);
+        } else {
+          state.channel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
         }
       } catch (ClosedChannelException e) {
         state.handleChannelException(e);
@@ -130,7 +132,7 @@ final class NioTcpClient extends Client {
           processConnect(key);
         } else {
           if (key.isWritable()) {
-            processWrite();
+            processWrite(key);
           }
           if (key.isReadable()) {
             processRead();
@@ -164,7 +166,7 @@ final class NioTcpClient extends Client {
     private void processConnect(SelectionKey key) {
       try {
         channel.finishConnect();
-        key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+        key.interestOps(SelectionKey.OP_WRITE);
       } catch (IOException e) {
         handleChannelException(e);
       }
@@ -223,7 +225,7 @@ final class NioTcpClient extends Client {
       }
     }
 
-    private void processWrite() {
+    private void processWrite(SelectionKey key) {
       for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
         Transaction t = it.next();
         try {
@@ -233,6 +235,8 @@ final class NioTcpClient extends Client {
           it.remove();
         }
       }
+
+      key.interestOps(SelectionKey.OP_READ);
     }
   }
 
