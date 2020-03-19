@@ -1,3 +1,8 @@
+03/19/2020
+	- 3.0.2 released
+	- Only select for tcp write when there is something to write
+	  (PR#96, Rouzbeh Delavari)
+
 02/23/2020
 	- 3.0.1 released
 	- Fix toString of RRset reporting empty when it contains signatures
