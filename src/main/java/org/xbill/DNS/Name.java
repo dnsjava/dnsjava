@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Name implements Comparable<Name>, Serializable {
 
-  private static final long serialVersionUID = -7257019940971525644L;
+  private static final long serialVersionUID = 5149282554141851880L;
 
   private static final int LABEL_NORMAL = 0;
   private static final int LABEL_COMPRESSION = 0xC0;
@@ -24,14 +24,14 @@ public class Name implements Comparable<Name>, Serializable {
   /* The name data */
   private byte[] name;
 
-  /*
-   * Effectively an 8 byte array, where the low order byte stores the number
-   * of labels and the 7 higher order bytes store per-label offsets.
-   */
+  /* Effectively an 8 byte array, where the bytes store per-label offsets. */
   private long offsets;
 
   /* Precomputed hashcode. */
   private int hashcode;
+
+  /* The number of labels in this name. */
+  private int labels;
 
   private static final byte[] emptyLabel = new byte[] {(byte) 0};
   private static final byte[] wildLabel = new byte[] {(byte) 1, (byte) '*'};
@@ -52,7 +52,7 @@ public class Name implements Comparable<Name>, Serializable {
   private static final int MAXLABELS = 128;
 
   /** The maximum number of cached offsets */
-  private static final int MAXOFFSETS = 7;
+  private static final int MAXOFFSETS = 8;
 
   /* Used for printing non-printable characters */
   private static final DecimalFormat byteFormat = new DecimalFormat();
@@ -86,20 +86,20 @@ public class Name implements Comparable<Name>, Serializable {
     if (n >= MAXOFFSETS) {
       return;
     }
-    int shift = 8 * (7 - n);
+    int shift = 8 * n;
     offsets &= ~(0xFFL << shift);
     offsets |= (long) offset << shift;
   }
 
   private int offset(int n) {
-    if (n == 0 && labels() == 0) {
+    if (n == 0 && labels == 0) {
       return 0;
     }
-    if (n < 0 || n >= labels()) {
+    if (n < 0 || n >= labels) {
       throw new IllegalArgumentException("label out of range");
     }
     if (n < MAXOFFSETS) {
-      int shift = 8 * (7 - n);
+      int shift = 8 * n;
       return (int) (offsets >>> shift) & 0xFF;
     } else {
       int pos = offset(MAXOFFSETS - 1);
@@ -110,25 +110,20 @@ public class Name implements Comparable<Name>, Serializable {
     }
   }
 
-  private void setlabels(int labels) {
-    offsets &= ~0xFF;
-    offsets |= labels;
-  }
-
   private static void copy(Name src, Name dst) {
     if (src.offset(0) == 0) {
       dst.name = src.name;
       dst.offsets = src.offsets;
+      dst.labels = src.labels;
     } else {
       int offset0 = src.offset(0);
       int namelen = src.name.length - offset0;
-      int labels = src.labels();
       dst.name = new byte[namelen];
       System.arraycopy(src.name, offset0, dst.name, 0, namelen);
-      for (int i = 0; i < labels && i < MAXOFFSETS; i++) {
+      for (int i = 0; i < src.labels && i < MAXOFFSETS; i++) {
         dst.setoffset(i, src.offset(i) - offset0);
       }
-      dst.setlabels(labels);
+      dst.labels = src.labels;
     }
   }
 
@@ -148,7 +143,6 @@ public class Name implements Comparable<Name>, Serializable {
     if (newlength > MAXNAME) {
       throw new NameTooLongException();
     }
-    int labels = labels();
     int newlabels = labels + n;
     if (newlabels > MAXLABELS) {
       throw new IllegalStateException("too many labels");
@@ -163,7 +157,7 @@ public class Name implements Comparable<Name>, Serializable {
       setoffset(labels + i, pos);
       pos += newname[pos] + 1;
     }
-    setlabels(newlabels);
+    labels = newlabels;
   }
 
   private static TextParseException parseException(String str, String message) {
@@ -275,7 +269,7 @@ public class Name implements Comparable<Name>, Serializable {
       appendFromString(s, label, 0, 1);
     }
     if (origin != null && !absolute) {
-      appendFromString(s, origin.name, origin.offset(0), origin.labels());
+      appendFromString(s, origin.name, origin.offset(0), origin.labels);
     }
   }
 
@@ -352,7 +346,7 @@ public class Name implements Comparable<Name>, Serializable {
       len = in.readU8();
       switch (len & LABEL_MASK) {
         case LABEL_NORMAL:
-          if (labels() >= MAXLABELS) {
+          if (labels >= MAXLABELS) {
             throw new WireParseException("too many labels");
           }
           if (len == 0) {
@@ -404,12 +398,12 @@ public class Name implements Comparable<Name>, Serializable {
    * @param n The number of labels to remove from the beginning in the copy
    */
   public Name(Name src, int n) {
-    int slabels = src.labels();
+    int slabels = src.labels;
     if (n > slabels) {
       throw new IllegalArgumentException("attempted to remove too many labels");
     }
     name = src.name;
-    setlabels(slabels - n);
+    labels = slabels - n;
     for (int i = 0; i < MAXOFFSETS && i < slabels - n; i++) {
       setoffset(i, src.offset(i + n));
     }
@@ -429,7 +423,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
     Name newname = new Name();
     copy(prefix, newname);
-    newname.append(suffix.name, suffix.offset(0), suffix.labels());
+    newname.append(suffix.name, suffix.offset(0), suffix.labels);
     return newname;
   }
 
@@ -447,8 +441,7 @@ public class Name implements Comparable<Name>, Serializable {
     Name newname = new Name();
     copy(this, newname);
     int length = length() - origin.length();
-    int labels = newname.labels() - origin.labels();
-    newname.setlabels(labels);
+    newname.labels = newname.labels - origin.labels;
     newname.name = new byte[length];
     System.arraycopy(name, offset(0), newname.name, 0, length);
     return newname;
@@ -466,7 +459,7 @@ public class Name implements Comparable<Name>, Serializable {
     try {
       Name newname = new Name();
       copy(wild, newname);
-      newname.append(name, offset(n), labels() - n);
+      newname.append(name, offset(n), labels - n);
       return newname;
     } catch (NameTooLongException e) {
       throw new IllegalStateException("Name.wild: concatenate failed");
@@ -490,7 +483,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
 
     Name newname = new Name();
-    newname.appendSafe(name, offset(0), labels());
+    newname.appendSafe(name, offset(0), labels);
     for (int i = 0; i < newname.name.length; i++) {
       newname.name[i] = lowercase[newname.name[i] & 0xFF];
     }
@@ -512,11 +505,11 @@ public class Name implements Comparable<Name>, Serializable {
       return null;
     }
 
-    int plabels = labels() - dnameowner.labels();
+    int plabels = labels - dnameowner.labels;
     int plength = length() - dnameowner.length();
     int pstart = offset(0);
 
-    int dlabels = dnametarget.labels();
+    int dlabels = dnametarget.labels;
     int dlength = dnametarget.length();
 
     if (plength + dlength > MAXNAME) {
@@ -524,7 +517,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
 
     Name newname = new Name();
-    newname.setlabels(plabels + dlabels);
+    newname.labels = plabels + dlabels;
     newname.name = new byte[plength + dlength];
     System.arraycopy(name, pstart, newname.name, 0, plength);
     System.arraycopy(dnametarget.name, 0, newname.name, plength, dlength);
@@ -538,7 +531,7 @@ public class Name implements Comparable<Name>, Serializable {
 
   /** Is this name a wildcard? */
   public boolean isWild() {
-    if (labels() == 0) {
+    if (labels == 0) {
       return false;
     }
     return name[0] == (byte) 1 && name[1] == (byte) '*';
@@ -546,16 +539,15 @@ public class Name implements Comparable<Name>, Serializable {
 
   /** Is this name absolute? */
   public boolean isAbsolute() {
-    int nlabels = labels();
-    if (nlabels == 0) {
+    if (labels == 0) {
       return false;
     }
-    return name[offset(nlabels - 1)] == 0;
+    return name[offset(labels - 1)] == 0;
   }
 
   /** The length of the name. */
   public short length() {
-    if (labels() == 0) {
+    if (labels == 0) {
       return 0;
     }
     return (short) (name.length - offset(0));
@@ -563,13 +555,12 @@ public class Name implements Comparable<Name>, Serializable {
 
   /** The number of labels in the name. */
   public int labels() {
-    return (int) (offsets & 0xFF);
+    return labels;
   }
 
   /** Is the current Name a subdomain of the specified name? */
   public boolean subdomain(Name domain) {
-    int labels = labels();
-    int dlabels = domain.labels();
+    int dlabels = domain.labels;
     if (dlabels > labels) {
       return false;
     }
@@ -605,7 +596,6 @@ public class Name implements Comparable<Name>, Serializable {
    * @return The representation of this name as a (printable) String.
    */
   public String toString(boolean omitFinalDot) {
-    int labels = labels();
     if (labels == 0) {
       return "@";
     } else if (labels == 1 && name[offset(0)] == 0) {
@@ -678,7 +668,6 @@ public class Name implements Comparable<Name>, Serializable {
       throw new IllegalArgumentException("toWire() called on non-absolute name");
     }
 
-    int labels = labels();
     for (int i = 0; i < labels - 1; i++) {
       Name tname;
       if (i == 0) {
@@ -732,7 +721,6 @@ public class Name implements Comparable<Name>, Serializable {
    * @return The canonical form of the name.
    */
   public byte[] toWireCanonical() {
-    int labels = labels();
     if (labels == 0) {
       return new byte[0];
     }
@@ -767,7 +755,6 @@ public class Name implements Comparable<Name>, Serializable {
   }
 
   private boolean equals(byte[] b, int bpos) {
-    int labels = labels();
     for (int i = 0, pos = offset(0); i < labels; i++) {
       if (name[pos] != b[bpos]) {
         return false;
@@ -795,14 +782,14 @@ public class Name implements Comparable<Name>, Serializable {
     if (!(arg instanceof Name)) {
       return false;
     }
-    Name d = (Name) arg;
-    if (d.hashCode() != hashCode()) {
+    Name other = (Name) arg;
+    if (other.hashCode() != hashCode()) {
       return false;
     }
-    if (d.labels() != labels()) {
+    if (other.labels != labels) {
       return false;
     }
-    return equals(d.name, d.offset(0));
+    return equals(other.name, other.offset(0));
   }
 
   /** Computes a hashcode based on the value */
@@ -834,8 +821,7 @@ public class Name implements Comparable<Name>, Serializable {
       return 0;
     }
 
-    int labels = labels();
-    int alabels = arg.labels();
+    int alabels = arg.labels;
     int compares = Math.min(labels, alabels);
 
     for (int i = 1; i <= compares; i++) {
