@@ -327,9 +327,9 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     int digits = 0;
     int intval = 0;
     for (byte value : array) {
-      byte b = value;
       if (escaped) {
-        if (b >= '0' && b <= '9' && digits < 3) {
+        byte b = value;
+        if (b >= '0' && b <= '9') {
           digits++;
           intval *= 10;
           intval += (b - '0');
@@ -340,7 +340,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
             continue;
           }
           b = (byte) intval;
-        } else if (digits > 0 && digits < 3) {
+        } else if (digits > 0) {
           throw new TextParseException("bad escape");
         }
         os.write(b);
@@ -596,30 +596,34 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   @Override
   public int compareTo(Record arg) {
     if (this == arg) {
-      return (0);
+      return 0;
     }
 
     int n = name.compareTo(arg.name);
     if (n != 0) {
-      return (n);
+      return n;
     }
+
     n = dclass - arg.dclass;
     if (n != 0) {
-      return (n);
+      return n;
     }
+
     n = type - arg.type;
     if (n != 0) {
-      return (n);
+      return n;
     }
+
     byte[] rdata1 = rdataToWireCanonical();
     byte[] rdata2 = arg.rdataToWireCanonical();
-    for (int i = 0; i < rdata1.length && i < rdata2.length; i++) {
-      n = (rdata1[i] & 0xFF) - (rdata2[i] & 0xFF);
-      if (n != 0) {
-        return (n);
+    int minLen = Math.min(rdata1.length, rdata2.length);
+    for (int i = 0; i < minLen; i++) {
+      if (rdata1[i] != rdata2[i]) {
+        return (rdata1[i] & 0xFF) - (rdata2[i] & 0xFF);
       }
     }
-    return (rdata1.length - rdata2.length);
+
+    return rdata1.length - rdata2.length;
   }
 
   /**
