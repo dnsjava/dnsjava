@@ -49,12 +49,12 @@ public class Generator {
    */
   public static boolean supportedType(int type) {
     Type.check(type);
-    return (type == Type.PTR
+    return type == Type.PTR
         || type == Type.CNAME
         || type == Type.DNAME
         || type == Type.A
         || type == Type.AAAA
-        || type == Type.NS);
+        || type == Type.NS;
   }
 
   /**

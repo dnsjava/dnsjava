@@ -234,7 +234,7 @@ public class RRset implements Serializable {
   @Override
   public String toString() {
     if (rrs.isEmpty() && sigs.isEmpty()) {
-      return ("{empty}");
+      return "{empty}";
     }
 
     StringBuilder sb = new StringBuilder();

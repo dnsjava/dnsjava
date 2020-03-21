@@ -83,7 +83,7 @@ public final class Options {
     if (table == null) {
       return false;
     }
-    return (table.get(option.toLowerCase()) != null);
+    return table.get(option.toLowerCase()) != null;
   }
 
   /** Returns the value of an option */
@@ -91,7 +91,7 @@ public final class Options {
     if (table == null) {
       return null;
     }
-    return (table.get(option.toLowerCase()));
+    return table.get(option.toLowerCase());
   }
 
   /** Returns the value of an option as an integer, or -1 if not defined. */
@@ -101,11 +101,11 @@ public final class Options {
       try {
         int val = Integer.parseInt(s);
         if (val > 0) {
-          return (val);
+          return val;
         }
       } catch (NumberFormatException e) {
       }
     }
-    return (-1);
+    return -1;
   }
 }

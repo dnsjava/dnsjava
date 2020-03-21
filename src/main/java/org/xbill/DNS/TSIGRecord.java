@@ -177,7 +177,7 @@ public class TSIGRecord extends Record {
                   + ((other[2] & 0xFF) << 24)
                   + ((other[3] & 0xFF) << 16)
                   + ((other[4] & 0xFF) << 8)
-                  + ((other[5] & 0xFF));
+                  + (other[5] & 0xFF);
           sb.append("<server time: ");
           sb.append(Instant.ofEpochSecond(time));
           sb.append(">");
@@ -235,7 +235,7 @@ public class TSIGRecord extends Record {
 
     long time = timeSigned.getEpochSecond();
     int timeHigh = (int) (time >> 32);
-    long timeLow = (time & 0xFFFFFFFFL);
+    long timeLow = time & 0xFFFFFFFFL;
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
     out.writeU16((int) fudge.getSeconds());

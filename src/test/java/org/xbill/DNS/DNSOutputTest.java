@@ -189,7 +189,7 @@ class DNSOutputTest {
     m_do.writeCountedString(in);
     assertEquals(in.length + 1, m_do.current());
     byte[] curr = m_do.toByteArray();
-    byte[] exp = new byte[] {(byte) (in.length), in[0], in[1], in[2], in[3], in[4]};
+    byte[] exp = new byte[] {(byte) in.length, in[0], in[1], in[2], in[3], in[4]};
     assertArrayEquals(exp, curr);
   }
 
@@ -199,7 +199,7 @@ class DNSOutputTest {
     m_do.writeCountedString(in);
     assertEquals(in.length + 1, m_do.current());
     byte[] curr = m_do.toByteArray();
-    byte[] exp = new byte[] {(byte) (in.length)};
+    byte[] exp = new byte[] {(byte) in.length};
     assertArrayEquals(exp, curr);
   }
 

@@ -688,7 +688,7 @@ public class WKSRecord extends Record {
     int highestPort = services[services.length - 1];
     byte[] array = new byte[highestPort / 8 + 1];
     for (int port : services) {
-      array[port / 8] |= (1 << (7 - port % 8));
+      array[port / 8] |= 1 << (7 - port % 8);
     }
     out.writeByteArray(array);
   }

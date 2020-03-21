@@ -100,14 +100,14 @@ final class TypeBitmap implements Serializable {
   }
 
   private static void mapToWire(DNSOutput out, TreeSet<Integer> map, int mapbase) {
-    int arraymax = (map.last()) & 0xFF;
+    int arraymax = map.last() & 0xFF;
     int arraylength = (arraymax / 8) + 1;
     int[] array = new int[arraylength];
     out.writeU8(mapbase);
     out.writeU8(arraylength);
     for (Integer integer : map) {
       int typecode = integer;
-      array[(typecode & 0xFF) / 8] |= (1 << (7 - typecode % 8));
+      array[(typecode & 0xFF) / 8] |= 1 << (7 - typecode % 8);
     }
     for (int j = 0; j < arraylength; j++) {
       out.writeU8(array[j]);

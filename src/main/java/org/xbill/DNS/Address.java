@@ -43,7 +43,7 @@ public final class Address {
         }
         numDigits++;
         currentValue *= 10;
-        currentValue += (c - '0');
+        currentValue += c - '0';
         /* 255 is the maximum value for an octet. */
         if (currentValue > 255) {
           return null;
@@ -227,7 +227,7 @@ public final class Address {
    */
   public static boolean isDottedQuad(String s) {
     byte[] address = Address.toByteArray(s, IPv4);
-    return (address != null);
+    return address != null;
   }
 
   /**
@@ -237,13 +237,13 @@ public final class Address {
    * @return The string representation
    */
   public static String toDottedQuad(byte[] addr) {
-    return ((addr[0] & 0xFF)
+    return (addr[0] & 0xFF)
         + "."
         + (addr[1] & 0xFF)
         + "."
         + (addr[2] & 0xFF)
         + "."
-        + (addr[3] & 0xFF));
+        + (addr[3] & 0xFF);
   }
 
   /**
@@ -253,7 +253,7 @@ public final class Address {
    * @return The string representation
    */
   public static String toDottedQuad(int[] addr) {
-    return (addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3]);
+    return addr[0] + "." + addr[1] + "." + addr[2] + "." + addr[3];
   }
 
   private static Record[] lookupHostName(String name, boolean all) throws UnknownHostException {
@@ -446,7 +446,7 @@ public final class Address {
     int maskBits = maskLength % 8;
     int bitmask = 0;
     for (int i = 0; i < maskBits; i++) {
-      bitmask |= (1 << (7 - i));
+      bitmask |= 1 << (7 - i);
     }
     bytes[maskLength / 8] &= bitmask;
     try {

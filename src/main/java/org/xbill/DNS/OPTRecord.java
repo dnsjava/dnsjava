@@ -183,7 +183,7 @@ public class OPTRecord extends Record {
     byte[] array = toWireCanonical();
     int code = 0;
     for (byte b : array) {
-      code += ((code << 3) + (b & 0xFF));
+      code += (code << 3) + (b & 0xFF);
     }
     return code;
   }

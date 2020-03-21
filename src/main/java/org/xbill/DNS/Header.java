@@ -74,7 +74,7 @@ public class Header implements Cloneable {
   }
 
   private static boolean validFlag(int bit) {
-    return (bit >= 0 && bit <= 0xF && Flags.isFlag(bit));
+    return bit >= 0 && bit <= 0xF && Flags.isFlag(bit);
   }
 
   private static void checkFlag(int bit) {
@@ -185,7 +185,7 @@ public class Header implements Cloneable {
       throw new IllegalArgumentException("DNS Opcode " + value + "is out of range");
     }
     flags &= 0x87FF;
-    flags |= (value << 11);
+    flags |= value << 11;
   }
 
   /**

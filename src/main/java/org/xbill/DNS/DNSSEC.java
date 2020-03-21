@@ -964,9 +964,9 @@ public class DNSSEC {
   }
 
   private static boolean matches(SIGBase sig, KEYBase key) {
-    return (key.getAlgorithm() == sig.getAlgorithm()
+    return key.getAlgorithm() == sig.getAlgorithm()
         && key.getFootprint() == sig.getFootprint()
-        && key.getName().equals(sig.getSigner()));
+        && key.getName().equals(sig.getSigner());
   }
 
   /**
@@ -1099,20 +1099,20 @@ public class DNSSEC {
       case Algorithm.RSA_NSEC3_SHA1:
       case Algorithm.RSASHA256:
       case Algorithm.RSASHA512:
-        if (!("RSA".equals(key.getAlgorithm()))) {
+        if (!"RSA".equals(key.getAlgorithm())) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.DSA:
       case Algorithm.DSA_NSEC3_SHA1:
-        if (!("DSA".equals(key.getAlgorithm()))) {
+        if (!"DSA".equals(key.getAlgorithm())) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.ECC_GOST:
       case Algorithm.ECDSAP256SHA256:
       case Algorithm.ECDSAP384SHA384:
-        if (!("EC".equals(key.getAlgorithm()))) {
+        if (!"EC".equals(key.getAlgorithm())) {
           throw new IncompatibleKeyException();
         }
         break;

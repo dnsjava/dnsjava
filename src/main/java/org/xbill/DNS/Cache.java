@@ -65,7 +65,7 @@ public class Cache {
     @Override
     public final boolean expired() {
       int now = (int) (System.currentTimeMillis() / 1000);
-      return (now >= expire);
+      return now >= expire;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class Cache {
     @Override
     public final boolean expired() {
       int now = (int) (System.currentTimeMillis() / 1000);
-      return (now >= expire);
+      return now >= expire;
     }
 
     @Override
@@ -426,8 +426,8 @@ public class Cache {
     labels = name.labels();
 
     for (tlabels = labels; tlabels >= 1; tlabels--) {
-      boolean isRoot = (tlabels == 1);
-      boolean isExact = (tlabels == labels);
+      boolean isRoot = tlabels == 1;
+      boolean isExact = tlabels == labels;
 
       if (isRoot) {
         tname = Name.root;

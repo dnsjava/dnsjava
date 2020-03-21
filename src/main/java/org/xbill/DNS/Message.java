@@ -100,7 +100,7 @@ public class Message implements Cloneable {
 
   Message(DNSInput in) throws IOException {
     this(new Header(in));
-    boolean isUpdate = (header.getOpcode() == Opcode.UPDATE);
+    boolean isUpdate = header.getOpcode() == Opcode.UPDATE;
     boolean truncated = header.getFlag(Flags.TC);
     try {
       for (int i = 0; i < 4; i++) {
@@ -216,7 +216,7 @@ public class Message implements Cloneable {
    * @see Section
    */
   public boolean findRecord(Record r, int section) {
-    return (sections[section] != null && sections[section].contains(r));
+    return sections[section] != null && sections[section].contains(r);
   }
 
   /**
@@ -260,9 +260,9 @@ public class Message implements Cloneable {
    * @see Section
    */
   public boolean findRRset(Name name, int type) {
-    return (findRRset(name, type, Section.ANSWER)
+    return findRRset(name, type, Section.ANSWER)
         || findRRset(name, type, Section.AUTHORITY)
-        || findRRset(name, type, Section.ADDITIONAL));
+        || findRRset(name, type, Section.ADDITIONAL);
   }
 
   /**
@@ -305,7 +305,7 @@ public class Message implements Cloneable {
    * @see TSIG
    */
   public boolean isSigned() {
-    return (tsigState == TSIG_SIGNED || tsigState == TSIG_VERIFIED || tsigState == TSIG_FAILED);
+    return tsigState == TSIG_SIGNED || tsigState == TSIG_VERIFIED || tsigState == TSIG_FAILED;
   }
 
   /**
@@ -314,7 +314,7 @@ public class Message implements Cloneable {
    * @see TSIG
    */
   public boolean isVerified() {
-    return (tsigState == TSIG_VERIFIED);
+    return tsigState == TSIG_VERIFIED;
   }
 
   /**
@@ -337,7 +337,7 @@ public class Message implements Cloneable {
     int rcode = header.getRcode();
     OPTRecord opt = getOPT();
     if (opt != null) {
-      rcode += (opt.getExtendedRcode() << 4);
+      rcode += opt.getExtendedRcode() << 4;
     }
     return rcode;
   }
@@ -373,9 +373,9 @@ public class Message implements Cloneable {
   }
 
   private static boolean sameSet(Record r1, Record r2) {
-    return (r1.getRRsetType() == r2.getRRsetType()
+    return r1.getRRsetType() == r2.getRRsetType()
         && r1.getDClass() == r2.getDClass()
-        && r1.getName().equals(r2.getName()));
+        && r1.getName().equals(r2.getName());
   }
 
   /**

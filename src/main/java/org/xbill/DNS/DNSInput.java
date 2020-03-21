@@ -139,7 +139,7 @@ public class DNSInput {
    */
   public int readU8() throws WireParseException {
     require(1);
-    return (byteBuffer.get() & 0xFF);
+    return byteBuffer.get() & 0xFF;
   }
 
   /**
@@ -150,7 +150,7 @@ public class DNSInput {
    */
   public int readU16() throws WireParseException {
     require(2);
-    return (byteBuffer.getShort() & 0xFFFF);
+    return byteBuffer.getShort() & 0xFFFF;
   }
 
   /**
@@ -161,7 +161,7 @@ public class DNSInput {
    */
   public long readU32() throws WireParseException {
     require(4);
-    return (byteBuffer.getInt() & 0xFFFFFFFFL);
+    return byteBuffer.getInt() & 0xFFFFFFFFL;
   }
 
   /**

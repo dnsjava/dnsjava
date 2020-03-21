@@ -332,7 +332,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
         if (b >= '0' && b <= '9') {
           digits++;
           intval *= 10;
-          intval += (b - '0');
+          intval += b - '0';
           if (intval > 255) {
             throw new TextParseException("bad escape");
           }
@@ -511,7 +511,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
    * class of the Records; the ttl and rdata are not compared.
    */
   public boolean sameRRset(Record rec) {
-    return (getRRsetType() == rec.getRRsetType() && dclass == rec.dclass && name.equals(rec.name));
+    return getRRsetType() == rec.getRRsetType() && dclass == rec.dclass && name.equals(rec.name);
   }
 
   /**
@@ -541,7 +541,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     byte[] array = toWireCanonical(true);
     int code = 0;
     for (byte b : array) {
-      code += ((code << 3) + (b & 0xFF));
+      code += (code << 3) + (b & 0xFF);
     }
     return code;
   }

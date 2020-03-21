@@ -44,7 +44,7 @@ public final class ReverseMap {
       int[] nibbles = new int[2];
       for (int i = addr.length - 1; i >= 0; i--) {
         nibbles[0] = (addr[i] & 0xFF) >> 4;
-        nibbles[1] = (addr[i] & 0xFF) & 0xF;
+        nibbles[1] = addr[i] & 0xF;
         for (int j = nibbles.length - 1; j >= 0; j--) {
           sb.append(Integer.toHexString(nibbles[j]));
           if (i > 0 || j > 0) {

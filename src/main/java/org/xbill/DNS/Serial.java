@@ -34,9 +34,9 @@ public final class Serial {
     }
     long diff = serial1 - serial2;
     if (diff >= MAX32) {
-      diff -= (MAX32 + 1);
+      diff -= MAX32 + 1;
     } else if (diff < -MAX32) {
-      diff += (MAX32 + 1);
+      diff += MAX32 + 1;
     }
     return (int) diff;
   }

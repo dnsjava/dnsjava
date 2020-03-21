@@ -106,37 +106,37 @@ public class SetResponse {
 
   /** Is the answer to the query unknown? */
   public boolean isUnknown() {
-    return (type == UNKNOWN);
+    return type == UNKNOWN;
   }
 
   /** Is the answer to the query that the name does not exist? */
   public boolean isNXDOMAIN() {
-    return (type == NXDOMAIN);
+    return type == NXDOMAIN;
   }
 
   /** Is the answer to the query that the name exists, but the type does not? */
   public boolean isNXRRSET() {
-    return (type == NXRRSET);
+    return type == NXRRSET;
   }
 
   /** Is the result of the lookup that the name is below a delegation? */
   public boolean isDelegation() {
-    return (type == DELEGATION);
+    return type == DELEGATION;
   }
 
   /** Is the result of the lookup a CNAME? */
   public boolean isCNAME() {
-    return (type == CNAME);
+    return type == CNAME;
   }
 
   /** Is the result of the lookup a DNAME? */
   public boolean isDNAME() {
-    return (type == DNAME);
+    return type == DNAME;
   }
 
   /** Was the query successful? */
   public boolean isSuccessful() {
-    return (type == SUCCESSFUL);
+    return type == SUCCESSFUL;
   }
 
   /** If the query was successful, return the answers */
@@ -149,12 +149,12 @@ public class SetResponse {
 
   /** If the query encountered a CNAME, return it. */
   public CNAMERecord getCNAME() {
-    return (CNAMERecord) (data.get(0)).first();
+    return (CNAMERecord) data.get(0).first();
   }
 
   /** If the query encountered a DNAME, return it. */
   public DNAMERecord getDNAME() {
-    return (DNAMERecord) (data.get(0)).first();
+    return (DNAMERecord) data.get(0).first();
   }
 
   /** If the query hit a delegation point, return the NS set. */

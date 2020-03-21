@@ -318,7 +318,7 @@ class TokenizerTest {
   void getLong() throws IOException {
     m_t = new Tokenizer((Integer.MAX_VALUE + 1L) + "");
     long out = m_t.getLong();
-    assertEquals((Integer.MAX_VALUE + 1L), out);
+    assertEquals(Integer.MAX_VALUE + 1L, out);
 
     m_t = new Tokenizer("-10");
     assertThrows(TextParseException.class, () -> m_t.getLong());

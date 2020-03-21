@@ -116,12 +116,12 @@ public class Tokenizer implements AutoCloseable {
 
     /** Indicates whether this token contains a string. */
     public boolean isString() {
-      return (type == IDENTIFIER || type == QUOTED_STRING);
+      return type == IDENTIFIER || type == QUOTED_STRING;
     }
 
     /** Indicates whether this token contains an EOL or EOF. */
     public boolean isEOL() {
-      return (type == EOL || type == EOF);
+      return type == EOL || type == EOF;
     }
   }
 

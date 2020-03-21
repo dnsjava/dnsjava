@@ -19,10 +19,10 @@ public class ARecord extends Record {
   ARecord() {}
 
   private static int fromArray(byte[] array) {
-    return (((array[0] & 0xFF) << 24)
+    return ((array[0] & 0xFF) << 24)
         | ((array[1] & 0xFF) << 16)
         | ((array[2] & 0xFF) << 8)
-        | (array[3] & 0xFF));
+        | (array[3] & 0xFF);
   }
 
   private static byte[] toArray(int addr) {
@@ -60,7 +60,7 @@ public class ARecord extends Record {
   /** Converts rdata to a String */
   @Override
   String rrToString() {
-    return (Address.toDottedQuad(toArray(addr)));
+    return Address.toDottedQuad(toArray(addr));
   }
 
   /** Returns the Internet address */
@@ -78,6 +78,6 @@ public class ARecord extends Record {
 
   @Override
   void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-    out.writeU32(((long) addr) & 0xFFFFFFFFL);
+    out.writeU32((long) addr & 0xFFFFFFFFL);
   }
 }

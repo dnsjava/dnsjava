@@ -308,7 +308,7 @@ public class Master implements AutoCloseable {
         continue;
       } else if (token.type == Tokenizer.EOF) {
         return null;
-      } else if ((token.value).charAt(0) == '$') {
+      } else if (token.value.charAt(0) == '$') {
         s = token.value;
 
         if (s.equalsIgnoreCase("$ORIGIN")) {

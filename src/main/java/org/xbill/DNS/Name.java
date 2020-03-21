@@ -87,8 +87,8 @@ public class Name implements Comparable<Name>, Serializable {
       return;
     }
     int shift = 8 * (7 - n);
-    offsets &= (~(0xFFL << shift));
-    offsets |= ((long) offset << shift);
+    offsets &= ~(0xFFL << shift);
+    offsets |= (long) offset << shift;
   }
 
   private int offset(int n) {
@@ -100,18 +100,18 @@ public class Name implements Comparable<Name>, Serializable {
     }
     if (n < MAXOFFSETS) {
       int shift = 8 * (7 - n);
-      return ((int) (offsets >>> shift) & 0xFF);
+      return (int) (offsets >>> shift) & 0xFF;
     } else {
       int pos = offset(MAXOFFSETS - 1);
       for (int i = MAXOFFSETS - 1; i < n; i++) {
-        pos += (name[pos] + 1);
+        pos += name[pos] + 1;
       }
-      return (pos);
+      return pos;
     }
   }
 
   private void setlabels(int labels) {
-    offsets &= ~(0xFF);
+    offsets &= ~0xFF;
     offsets |= labels;
   }
 
@@ -137,7 +137,7 @@ public class Name implements Comparable<Name>, Serializable {
   }
 
   private void append(byte[] array, int start, int n) throws NameTooLongException {
-    int length = (name == null ? 0 : (name.length - offset(0)));
+    int length = name == null ? 0 : name.length - offset(0);
     int alength = 0;
     for (int i = 0, pos = start; i < n; i++) {
       int len = array[pos];
@@ -165,7 +165,7 @@ public class Name implements Comparable<Name>, Serializable {
     name = newname;
     for (int i = 0, pos = length; i < n; i++) {
       setoffset(labels + i, pos);
-      pos += (newname[pos] + 1);
+      pos += newname[pos] + 1;
     }
     setlabels(newlabels);
   }
@@ -226,7 +226,7 @@ public class Name implements Comparable<Name>, Serializable {
         if (b >= '0' && b <= '9' && digits < 3) {
           digits++;
           intval *= 10;
-          intval += (b - '0');
+          intval += b - '0';
           if (intval > 255) {
             throw parseException(s, "bad escape");
           }
@@ -370,7 +370,7 @@ public class Name implements Comparable<Name>, Serializable {
           break;
         case LABEL_COMPRESSION:
           pos = in.readU8();
-          pos += ((len & ~LABEL_MASK) << 8);
+          pos += (len & ~LABEL_MASK) << 8;
           log.trace("currently {}, pointer to {}", in.current(), pos);
 
           if (pos >= in.current() - 2) {
@@ -429,7 +429,7 @@ public class Name implements Comparable<Name>, Serializable {
    */
   public static Name concatenate(Name prefix, Name suffix) throws NameTooLongException {
     if (prefix.isAbsolute()) {
-      return (prefix);
+      return prefix;
     }
     Name newname = new Name();
     copy(prefix, newname);
@@ -535,7 +535,7 @@ public class Name implements Comparable<Name>, Serializable {
 
     for (int i = 0, pos = 0; i < MAXOFFSETS && i < plabels + dlabels; i++) {
       newname.setoffset(i, pos);
-      pos += (newname.name[pos] + 1);
+      pos += newname.name[pos] + 1;
     }
     return newname;
   }
@@ -545,7 +545,7 @@ public class Name implements Comparable<Name>, Serializable {
     if (labels() == 0) {
       return false;
     }
-    return (name[0] == (byte) 1 && name[1] == (byte) '*');
+    return name[0] == (byte) 1 && name[1] == (byte) '*';
   }
 
   /** Is this name absolute? */
@@ -631,7 +631,7 @@ public class Name implements Comparable<Name>, Serializable {
         sb.append('.');
       }
       sb.append(byteString(name, pos));
-      pos += (1 + len);
+      pos += 1 + len;
     }
     return sb.toString();
   }
@@ -695,7 +695,7 @@ public class Name implements Comparable<Name>, Serializable {
         pos = c.get(tname);
       }
       if (pos >= 0) {
-        pos |= (LABEL_MASK << 8);
+        pos |= LABEL_MASK << 8;
         out.writeU16(pos);
         return;
       } else {
@@ -738,7 +738,7 @@ public class Name implements Comparable<Name>, Serializable {
   public byte[] toWireCanonical() {
     int labels = labels();
     if (labels == 0) {
-      return (new byte[0]);
+      return new byte[0];
     }
     byte[] b = new byte[name.length - offset(0)];
     for (int i = 0, spos = offset(0), dpos = 0; i < labels; i++) {
@@ -748,7 +748,7 @@ public class Name implements Comparable<Name>, Serializable {
       }
       b[dpos++] = name[spos++];
       for (int j = 0; j < len; j++) {
-        b[dpos++] = lowercase[(name[spos++] & 0xFF)];
+        b[dpos++] = lowercase[name[spos++] & 0xFF];
       }
     }
     return b;
@@ -782,7 +782,7 @@ public class Name implements Comparable<Name>, Serializable {
         throw new IllegalStateException("invalid label");
       }
       for (int j = 0; j < len; j++) {
-        if (lowercase[(name[pos++] & 0xFF)] != lowercase[(b[bpos++] & 0xFF)]) {
+        if (lowercase[name[pos++] & 0xFF] != lowercase[b[bpos++] & 0xFF]) {
           return false;
         }
       }
@@ -817,7 +817,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
     int code = 0;
     for (int i = offset(0); i < name.length; i++) {
-      code += ((code << 3) + lowercase[(name[i] & 0xFF)]);
+      code += (code << 3) + lowercase[name[i] & 0xFF];
     }
     hashcode = code;
     return hashcode;
@@ -835,7 +835,7 @@ public class Name implements Comparable<Name>, Serializable {
   @Override
   public int compareTo(Name arg) {
     if (this == arg) {
-      return (0);
+      return 0;
     }
 
     int labels = labels();
@@ -848,16 +848,15 @@ public class Name implements Comparable<Name>, Serializable {
       int length = name[start];
       int alength = arg.name[astart];
       for (int j = 0; j < length && j < alength; j++) {
-        int n =
-            lowercase[(name[j + start + 1]) & 0xFF] - lowercase[(arg.name[j + astart + 1]) & 0xFF];
+        int n = lowercase[name[j + start + 1] & 0xFF] - lowercase[arg.name[j + astart + 1] & 0xFF];
         if (n != 0) {
-          return (n);
+          return n;
         }
       }
       if (length != alength) {
-        return (length - alength);
+        return length - alength;
       }
     }
-    return (labels - alabels);
+    return labels - alabels;
   }
 }

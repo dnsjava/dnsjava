@@ -95,7 +95,7 @@ public class NXTRecord extends Record {
     next.toWire(out, null, canonical);
     int length = bitmap.length();
     for (int i = 0, t = 0; i < length; i++) {
-      t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
+      t |= bitmap.get(i) ? (1 << (7 - i % 8)) : 0;
       if (i % 8 == 7 || i == length - 1) {
         out.writeU8(t);
         t = 0;

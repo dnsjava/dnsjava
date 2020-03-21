@@ -75,10 +75,10 @@ public class APLRecord extends Record {
         return false;
       }
       Element elt = (Element) arg;
-      return (family == elt.family
+      return family == elt.family
           && negative == elt.negative
           && prefixLength == elt.prefixLength
-          && address.equals(elt.address));
+          && address.equals(elt.address);
     }
 
     @Override

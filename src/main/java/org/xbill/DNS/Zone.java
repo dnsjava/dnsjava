@@ -60,7 +60,7 @@ public class Zone implements Serializable {
 
     @Override
     public boolean hasNext() {
-      return (current != null || wantLastSOA);
+      return current != null || wantLastSOA;
     }
 
     @Override
@@ -351,8 +351,8 @@ public class Zone implements Serializable {
     olabels = origin.labels();
 
     for (tlabels = olabels; tlabels <= labels; tlabels++) {
-      boolean isOrigin = (tlabels == olabels);
-      boolean isExact = (tlabels == labels);
+      boolean isOrigin = tlabels == olabels;
+      boolean isExact = tlabels == labels;
 
       if (isOrigin) {
         tname = origin;

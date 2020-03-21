@@ -455,7 +455,7 @@ class RecordTest {
 
   @Test
   void byteArrayFromString() throws TextParseException {
-    String in = "the 98 \" \' quick 0xAB brown";
+    String in = "the 98 \" ' quick 0xAB brown";
     byte[] out = SubRecord.byteArrayFromString(in);
     assertArrayEquals(in.getBytes(), out);
 

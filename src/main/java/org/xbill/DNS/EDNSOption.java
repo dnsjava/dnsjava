@@ -259,7 +259,7 @@ public abstract class EDNSOption {
     byte[] array = getData();
     int hashval = 0;
     for (byte b : array) {
-      hashval += ((hashval << 3) + (b & 0xFF));
+      hashval += (hashval << 3) + (b & 0xFF);
     }
     return hashval;
   }

@@ -585,7 +585,7 @@ public class ZoneTransferIn {
    * transfer, or an IXFR failed and fallback to AXFR occurred.
    */
   public boolean isAXFR() {
-    return (rtype == Type.AXFR);
+    return rtype == Type.AXFR;
   }
 
   /**
@@ -604,7 +604,7 @@ public class ZoneTransferIn {
    * if an IXFR was performed and the server provided an incremental zone transfer.
    */
   public boolean isIXFR() {
-    return (rtype == Type.IXFR);
+    return rtype == Type.IXFR;
   }
 
   /**
@@ -627,6 +627,6 @@ public class ZoneTransferIn {
    */
   public boolean isCurrent() {
     BasicHandler handler = getBasicHandler();
-    return (handler.axfr == null && handler.ixfr == null);
+    return handler.axfr == null && handler.ixfr == null;
   }
 }

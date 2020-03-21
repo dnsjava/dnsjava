@@ -102,15 +102,15 @@ abstract class KEYBase extends Record {
       for (i = 0; i < rdata.length - 1; i += 2) {
         int d1 = rdata[i] & 0xFF;
         int d2 = rdata[i + 1] & 0xFF;
-        foot += ((d1 << 8) + d2);
+        foot += (d1 << 8) + d2;
       }
       if (i < rdata.length) {
         int d1 = rdata[i] & 0xFF;
-        foot += (d1 << 8);
+        foot += d1 << 8;
       }
-      foot += ((foot >> 16) & 0xFFFF);
+      foot += (foot >> 16) & 0xFFFF;
     }
-    footprint = (foot & 0xFFFF);
+    footprint = foot & 0xFFFF;
     return footprint;
   }
 

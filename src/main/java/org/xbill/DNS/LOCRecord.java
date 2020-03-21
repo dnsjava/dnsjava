@@ -131,7 +131,7 @@ public class LOCRecord extends Record {
       throw st.exception("Invalid LOC " + type);
     }
 
-    value += (1L << 31);
+    value += 1L << 31;
 
     return value;
   }
@@ -243,32 +243,32 @@ public class LOCRecord extends Record {
 
   /** Returns the latitude */
   public double getLatitude() {
-    return ((double) (latitude - (1L << 31))) / (3600 * 1000);
+    return (double) (latitude - (1L << 31)) / (3600 * 1000);
   }
 
   /** Returns the longitude */
   public double getLongitude() {
-    return ((double) (longitude - (1L << 31))) / (3600 * 1000);
+    return (double) (longitude - (1L << 31)) / (3600 * 1000);
   }
 
   /** Returns the altitude */
   public double getAltitude() {
-    return ((double) (altitude - 10000000)) / 100;
+    return (double) (altitude - 10000000) / 100;
   }
 
   /** Returns the diameter of the enclosing sphere */
   public double getSize() {
-    return ((double) size) / 100;
+    return (double) size / 100;
   }
 
   /** Returns the horizontal precision */
   public double getHPrecision() {
-    return ((double) hPrecision) / 100;
+    return (double) hPrecision / 100;
   }
 
   /** Returns the horizontal precision */
   public double getVPrecision() {
-    return ((double) vPrecision) / 100;
+    return (double) vPrecision / 100;
   }
 
   @Override
@@ -291,7 +291,7 @@ public class LOCRecord extends Record {
     while (exp-- > 0) {
       out *= 10;
     }
-    return (out);
+    return out;
   }
 
   private int toLOCformat(long l) {

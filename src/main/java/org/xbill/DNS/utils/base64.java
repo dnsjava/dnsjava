@@ -53,14 +53,14 @@ public class base64 {
 
       t[0] = (short) (s[0] >> 2);
       if (s[1] == -1) {
-        t[1] = (short) (((s[0] & 0x3) << 4));
+        t[1] = (short) ((s[0] & 0x3) << 4);
       } else {
         t[1] = (short) (((s[0] & 0x3) << 4) + (s[1] >> 4));
       }
       if (s[1] == -1) {
         t[2] = t[3] = 64;
       } else if (s[2] == -1) {
-        t[2] = (short) (((s[1] & 0xF) << 2));
+        t[2] = (short) ((s[1] & 0xF) << 2);
         t[3] = 64;
       } else {
         t[2] = (short) (((s[1] & 0xF) << 2) + (s[2] >> 6));
@@ -135,13 +135,13 @@ public class base64 {
 
       t[0] = (short) ((s[0] << 2) + (s[1] >> 4));
       if (s[2] == 64) {
-        t[1] = t[2] = (short) (-1);
+        t[1] = t[2] = (short) -1;
         if ((s[1] & 0xF) != 0) {
           return null;
         }
       } else if (s[3] == 64) {
         t[1] = (short) (((s[1] << 4) + (s[2] >> 2)) & 0xFF);
-        t[2] = (short) (-1);
+        t[2] = (short) -1;
         if ((s[2] & 0x3) != 0) {
           return null;
         }

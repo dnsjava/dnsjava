@@ -197,7 +197,7 @@ public class SimpleResolver implements Resolver {
 
   private Message parseMessage(byte[] b) throws WireParseException {
     try {
-      return (new Message(b));
+      return new Message(b);
     } catch (IOException e) {
       if (!(e instanceof WireParseException)) {
         e = new WireParseException("Error parsing message");

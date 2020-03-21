@@ -304,7 +304,7 @@ public class TSIG {
     alg.toWireCanonical(out);
     long time = timeSigned.getEpochSecond();
     int timeHigh = (int) (time >> 32);
-    long timeLow = (time & 0xFFFFFFFFL);
+    long timeLow = time & 0xFFFFFFFFL;
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
     out.writeU16((int) fudge.getSeconds());
@@ -328,13 +328,13 @@ public class TSIG {
       out = new DNSOutput();
       time = Instant.now().getEpochSecond();
       timeHigh = (int) (time >> 32);
-      timeLow = (time & 0xFFFFFFFFL);
+      timeLow = time & 0xFFFFFFFFL;
       out.writeU16(timeHigh);
       out.writeU32(timeLow);
       other = out.toByteArray();
     }
 
-    return (new TSIGRecord(
+    return new TSIGRecord(
         name,
         DClass.ANY,
         0,
@@ -344,7 +344,7 @@ public class TSIG {
         signature,
         m.getHeader().getID(),
         error,
-        other));
+        other);
   }
 
   /**
@@ -403,7 +403,7 @@ public class TSIG {
     out = new DNSOutput();
     long time = timeSigned.getEpochSecond();
     int timeHigh = (int) (time >> 32);
-    long timeLow = (time & 0xFFFFFFFFL);
+    long timeLow = time & 0xFFFFFFFFL;
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
     out.writeU16((int) fudge.getSeconds());
@@ -499,7 +499,7 @@ public class TSIG {
     tsig.getAlgorithm().toWireCanonical(out);
     long time = tsig.getTimeSigned().getEpochSecond();
     int timeHigh = (int) (time >> 32);
-    long timeLow = (time & 0xFFFFFFFFL);
+    long timeLow = time & 0xFFFFFFFFL;
     out.writeU16(timeHigh);
     out.writeU32(timeLow);
     out.writeU16((int) tsig.getFudge().getSeconds());
@@ -543,13 +543,13 @@ public class TSIG {
    * @see TSIGRecord
    */
   public int recordLength() {
-    return (name.length()
+    return name.length()
         + 10
         + alg.length()
         + 8 // time signed, fudge
         + 18 // 2 byte MAC length, 16 byte MAC
         + 4 // original id, error
-        + 8); // 2 byte error length, 6 byte max error field.
+        + 8; // 2 byte error length, 6 byte max error field.
   }
 
   public static class StreamVerifier {
@@ -618,7 +618,7 @@ public class TSIG {
         lastsigned = nresponses;
         lastTSIG = tsig;
       } else {
-        boolean required = (nresponses - lastsigned >= 100);
+        boolean required = nresponses - lastsigned >= 100;
         if (required) {
           m.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
@@ -637,7 +637,7 @@ public class TSIG {
       DNSOutput out = new DNSOutput();
       long time = tsig.getTimeSigned().getEpochSecond();
       int timeHigh = (int) (time >> 32);
-      long timeLow = (time & 0xFFFFFFFFL);
+      long timeLow = time & 0xFFFFFFFFL;
       out.writeU16(timeHigh);
       out.writeU32(timeLow);
       out.writeU16((int) tsig.getFudge().getSeconds());

@@ -24,7 +24,7 @@ class URIRecordTest {
   @Test
   void ctor_6arg() throws TextParseException {
     Name n = Name.fromString("my.name.");
-    String target = ("http://foo");
+    String target = "http://foo";
 
     URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 42, 69, target);
     assertEquals(n, r.getName());
@@ -50,7 +50,7 @@ class URIRecordTest {
   @Test
   void rdataToWire() throws TextParseException {
     Name n = Name.fromString("my.name.");
-    String target = ("http://foo");
+    String target = "http://foo";
     byte[] exp =
         new byte[] {
           (byte) 0xbe,

@@ -40,9 +40,9 @@ public class hexdump {
           sb.append('\t');
         }
       }
-      int value = (int) (b[i + offset]) & 0xFF;
-      sb.append(hex[(value >> 4)]);
-      sb.append(hex[(value & 0xF)]);
+      int value = (int) b[i + offset] & 0xFF;
+      sb.append(hex[value >> 4]);
+      sb.append(hex[value & 0xF]);
       sb.append(' ');
     }
     sb.append('\n');
