@@ -92,10 +92,10 @@ public class Name implements Comparable<Name>, Serializable {
   }
 
   private int offset(int n) {
-    if (n == 0 && getlabels() == 0) {
+    if (n == 0 && labels() == 0) {
       return 0;
     }
-    if (n < 0 || n >= getlabels()) {
+    if (n < 0 || n >= labels()) {
       throw new IllegalArgumentException("label out of range");
     }
     if (n < MAXOFFSETS) {
@@ -113,10 +113,6 @@ public class Name implements Comparable<Name>, Serializable {
   private void setlabels(int labels) {
     offsets &= ~0xFF;
     offsets |= labels;
-  }
-
-  private int getlabels() {
-    return (int) (offsets & 0xFF);
   }
 
   private static void copy(Name src, Name dst) {
@@ -152,7 +148,7 @@ public class Name implements Comparable<Name>, Serializable {
     if (newlength > MAXNAME) {
       throw new NameTooLongException();
     }
-    int labels = getlabels();
+    int labels = labels();
     int newlabels = labels + n;
     if (newlabels > MAXLABELS) {
       throw new IllegalStateException("too many labels");
@@ -279,7 +275,7 @@ public class Name implements Comparable<Name>, Serializable {
       appendFromString(s, label, 0, 1);
     }
     if (origin != null && !absolute) {
-      appendFromString(s, origin.name, origin.offset(0), origin.getlabels());
+      appendFromString(s, origin.name, origin.offset(0), origin.labels());
     }
   }
 
@@ -356,7 +352,7 @@ public class Name implements Comparable<Name>, Serializable {
       len = in.readU8();
       switch (len & LABEL_MASK) {
         case LABEL_NORMAL:
-          if (getlabels() >= MAXLABELS) {
+          if (labels() >= MAXLABELS) {
             throw new WireParseException("too many labels");
           }
           if (len == 0) {
@@ -433,7 +429,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
     Name newname = new Name();
     copy(prefix, newname);
-    newname.append(suffix.name, suffix.offset(0), suffix.getlabels());
+    newname.append(suffix.name, suffix.offset(0), suffix.labels());
     return newname;
   }
 
@@ -470,7 +466,7 @@ public class Name implements Comparable<Name>, Serializable {
     try {
       Name newname = new Name();
       copy(wild, newname);
-      newname.append(name, offset(n), getlabels() - n);
+      newname.append(name, offset(n), labels() - n);
       return newname;
     } catch (NameTooLongException e) {
       throw new IllegalStateException("Name.wild: concatenate failed");
@@ -494,7 +490,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
 
     Name newname = new Name();
-    newname.appendSafe(name, offset(0), getlabels());
+    newname.appendSafe(name, offset(0), labels());
     for (int i = 0; i < newname.name.length; i++) {
       newname.name[i] = lowercase[newname.name[i] & 0xFF];
     }
@@ -559,7 +555,7 @@ public class Name implements Comparable<Name>, Serializable {
 
   /** The length of the name. */
   public short length() {
-    if (getlabels() == 0) {
+    if (labels() == 0) {
       return 0;
     }
     return (short) (name.length - offset(0));
@@ -567,7 +563,7 @@ public class Name implements Comparable<Name>, Serializable {
 
   /** The number of labels in the name. */
   public int labels() {
-    return getlabels();
+    return (int) (offsets & 0xFF);
   }
 
   /** Is the current Name a subdomain of the specified name? */
