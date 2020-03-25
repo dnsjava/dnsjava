@@ -113,7 +113,7 @@ public class TKEYRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     alg = new Name(in);
     timeInception = Instant.ofEpochSecond(in.readU32());
     timeExpire = Instant.ofEpochSecond(in.readU32());
@@ -136,7 +136,7 @@ public class TKEYRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     throw st.exception("no text format defined for TKEY");
   }
 
@@ -159,7 +159,7 @@ public class TKEYRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(alg);
     sb.append(" ");
@@ -232,7 +232,7 @@ public class TKEYRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     alg.toWire(out, null, canonical);
 
     out.writeU32(timeInception.getEpochSecond());

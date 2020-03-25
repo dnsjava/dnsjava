@@ -37,7 +37,7 @@ public class SRVRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     priority = in.readU16();
     weight = in.readU16();
     port = in.readU16();
@@ -45,7 +45,7 @@ public class SRVRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     priority = st.getUInt16();
     weight = st.getUInt16();
     port = st.getUInt16();
@@ -54,7 +54,7 @@ public class SRVRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(priority).append(" ");
     sb.append(weight).append(" ");
@@ -84,7 +84,7 @@ public class SRVRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(priority);
     out.writeU16(weight);
     out.writeU16(port);

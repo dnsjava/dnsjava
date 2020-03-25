@@ -48,18 +48,18 @@ public class ARecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     addr = fromArray(in.readByteArray(4));
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     addr = fromArray(st.getAddressBytes(Address.IPv4));
   }
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return Address.toDottedQuad(toArray(addr));
   }
 
@@ -77,7 +77,7 @@ public class ARecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU32((long) addr & 0xFFFFFFFFL);
   }
 }

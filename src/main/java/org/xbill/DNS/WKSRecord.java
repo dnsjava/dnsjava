@@ -597,7 +597,7 @@ public class WKSRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     address = in.readByteArray(4);
     protocol = in.readU8();
     byte[] array = in.readByteArray();
@@ -617,7 +617,7 @@ public class WKSRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     String s = st.getString();
     address = Address.toByteArray(s, Address.IPv4);
     if (address == null) {
@@ -651,7 +651,7 @@ public class WKSRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(Address.toDottedQuad(address));
     sb.append(" ");
@@ -682,7 +682,7 @@ public class WKSRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeByteArray(address);
     out.writeU8(protocol);
     int highestPort = services[services.length - 1];

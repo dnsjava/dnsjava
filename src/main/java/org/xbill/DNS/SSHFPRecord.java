@@ -47,21 +47,21 @@ public class SSHFPRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     alg = in.readU8();
     digestType = in.readU8();
     fingerprint = in.readByteArray();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     alg = st.getUInt8();
     digestType = st.getUInt8();
     fingerprint = st.getHex(true);
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(alg);
     sb.append(" ");
@@ -87,7 +87,7 @@ public class SSHFPRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(alg);
     out.writeU8(digestType);
     out.writeByteArray(fingerprint);

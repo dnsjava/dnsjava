@@ -43,14 +43,14 @@ public class CAARecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     flags = in.readU8();
     tag = in.readCountedString();
     value = in.readByteArray();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     flags = st.getUInt8();
     try {
       tag = byteArrayFromString(st.getString());
@@ -61,7 +61,7 @@ public class CAARecord extends Record {
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(flags);
     sb.append(" ");
@@ -87,7 +87,7 @@ public class CAARecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(flags);
     out.writeCountedString(tag);
     out.writeByteArray(value);

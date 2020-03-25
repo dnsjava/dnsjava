@@ -125,7 +125,7 @@ public class CERTRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     certType = in.readU16();
     keyTag = in.readU16();
     alg = in.readU8();
@@ -133,7 +133,7 @@ public class CERTRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     String certTypeString = st.getString();
     certType = CertificateType.value(certTypeString);
     if (certType < 0) {
@@ -150,7 +150,7 @@ public class CERTRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(certType);
     sb.append(" ");
@@ -190,7 +190,7 @@ public class CERTRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(certType);
     out.writeU16(keyTag);
     out.writeU8(alg);

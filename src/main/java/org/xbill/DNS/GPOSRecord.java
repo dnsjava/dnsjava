@@ -63,7 +63,7 @@ public class GPOSRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     longitude = in.readCountedString();
     latitude = in.readCountedString();
     altitude = in.readCountedString();
@@ -75,7 +75,7 @@ public class GPOSRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     try {
       longitude = byteArrayFromString(st.getString());
       latitude = byteArrayFromString(st.getString());
@@ -92,7 +92,7 @@ public class GPOSRecord extends Record {
 
   /** Convert to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(byteArrayToString(longitude, true));
     sb.append(" ");
@@ -145,7 +145,7 @@ public class GPOSRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeCountedString(longitude);
     out.writeCountedString(latitude);
     out.writeCountedString(altitude);

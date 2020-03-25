@@ -35,7 +35,7 @@ public class MXRecord extends U16NameBase {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(u16Field);
     nameField.toWire(out, c, canonical);
   }

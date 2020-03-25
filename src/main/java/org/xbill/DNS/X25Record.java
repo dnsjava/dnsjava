@@ -44,12 +44,12 @@ public class X25Record extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     address = in.readCountedString();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     String addr = st.getString();
     this.address = checkAndConvertAddress(addr);
     if (this.address == null) {
@@ -63,12 +63,12 @@ public class X25Record extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeCountedString(address);
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return byteArrayToString(address, true);
   }
 }

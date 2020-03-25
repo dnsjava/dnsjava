@@ -128,7 +128,7 @@ public class APLRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     elements = new ArrayList<>(1);
     while (in.remaining() != 0) {
       int family = in.readU16();
@@ -155,7 +155,7 @@ public class APLRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     elements = new ArrayList<>(1);
     while (true) {
       Tokenizer.Token t = st.get();
@@ -217,7 +217,7 @@ public class APLRecord extends Record {
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     for (Iterator<Element> it = elements.iterator(); it.hasNext(); ) {
       Element element = it.next();
@@ -244,7 +244,7 @@ public class APLRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     for (Element element : elements) {
       int length;
       byte[] data;

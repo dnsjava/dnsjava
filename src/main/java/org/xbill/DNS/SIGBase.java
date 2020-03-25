@@ -54,7 +54,7 @@ abstract class SIGBase extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     covered = in.readU16();
     alg = in.readU8();
     labels = in.readU8();
@@ -67,7 +67,7 @@ abstract class SIGBase extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     String typeString = st.getString();
     covered = Type.value(typeString);
     if (covered < 0) {
@@ -89,7 +89,7 @@ abstract class SIGBase extends Record {
 
   /** Converts the RRSIG/SIG Record to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(Type.string(covered));
     sb.append(" ");
@@ -186,7 +186,7 @@ abstract class SIGBase extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(covered);
     out.writeU8(alg);
     out.writeU8(labels);

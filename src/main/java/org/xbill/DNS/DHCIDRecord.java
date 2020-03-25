@@ -28,22 +28,22 @@ public class DHCIDRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) {
+  protected void rrFromWire(DNSInput in) {
     data = in.readByteArray();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     data = st.getBase64();
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeByteArray(data);
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return base64.toString(data);
   }
 

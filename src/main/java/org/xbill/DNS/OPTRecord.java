@@ -75,7 +75,7 @@ public class OPTRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     if (in.remaining() > 0) {
       options = new ArrayList<>();
     }
@@ -86,13 +86,13 @@ public class OPTRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     throw st.exception("no text format defined for OPT");
   }
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     if (options != null) {
       sb.append(options);
@@ -134,7 +134,7 @@ public class OPTRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     if (options == null) {
       return;
     }

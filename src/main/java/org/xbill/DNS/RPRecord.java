@@ -32,20 +32,20 @@ public class RPRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     mailbox = new Name(in);
     textDomain = new Name(in);
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     mailbox = st.getName(origin);
     textDomain = st.getName(origin);
   }
 
   /** Converts the RP Record to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(mailbox);
     sb.append(" ");
@@ -64,7 +64,7 @@ public class RPRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     mailbox.toWire(out, null, canonical);
     textDomain.toWire(out, null, canonical);
   }

@@ -33,7 +33,7 @@ public class NXTRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     next = new Name(in);
     bitmap = new BitSet();
     int bitmapLength = in.remaining();
@@ -48,7 +48,7 @@ public class NXTRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     next = st.getName(origin);
     bitmap = new BitSet();
     while (true) {
@@ -67,7 +67,7 @@ public class NXTRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(next);
     int length = bitmap.length();
@@ -91,7 +91,7 @@ public class NXTRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     next.toWire(out, null, canonical);
     int length = bitmap.length();
     for (int i = 0, t = 0; i < length; i++) {

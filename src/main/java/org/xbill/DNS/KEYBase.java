@@ -29,7 +29,7 @@ abstract class KEYBase extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     flags = in.readU16();
     proto = in.readU8();
     alg = in.readU8();
@@ -40,7 +40,7 @@ abstract class KEYBase extends Record {
 
   /** Converts the DNSKEY/KEY Record to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(flags);
     sb.append(" ");
@@ -129,7 +129,7 @@ abstract class KEYBase extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(flags);
     out.writeU8(proto);
     out.writeU8(alg);

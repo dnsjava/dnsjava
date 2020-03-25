@@ -16,18 +16,18 @@ public class UNKRecord extends Record {
   UNKRecord() {}
 
   @Override
-  void rrFromWire(DNSInput in) {
+  protected void rrFromWire(DNSInput in) {
     data = in.readByteArray();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     throw st.exception("invalid unknown RR encoding");
   }
 
   /** Converts this Record to the String "unknown format" */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return unknownToString(data);
   }
 
@@ -37,7 +37,7 @@ public class UNKRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeByteArray(data);
   }
 }

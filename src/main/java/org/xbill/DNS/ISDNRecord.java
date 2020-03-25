@@ -36,7 +36,7 @@ public class ISDNRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     address = in.readCountedString();
     if (in.remaining() > 0) {
       subAddress = in.readCountedString();
@@ -44,7 +44,7 @@ public class ISDNRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     try {
       address = byteArrayFromString(st.getString());
       Tokenizer.Token t = st.get();
@@ -72,7 +72,7 @@ public class ISDNRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeCountedString(address);
     if (subAddress != null) {
       out.writeCountedString(subAddress);
@@ -80,7 +80,7 @@ public class ISDNRecord extends Record {
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(byteArrayToString(address, true));
     if (subAddress != null) {

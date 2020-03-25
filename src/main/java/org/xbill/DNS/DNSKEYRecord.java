@@ -79,7 +79,7 @@ public class DNSKEYRecord extends KEYBase {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     flags = st.getUInt16();
     proto = st.getUInt8();
     String algString = st.getString();

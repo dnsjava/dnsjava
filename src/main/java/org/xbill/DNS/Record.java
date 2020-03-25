@@ -28,7 +28,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
 
   protected Record() {}
 
-  Record(Name name, int type, int dclass, long ttl) {
+  protected Record(Name name, int type, int dclass, long ttl) {
     if (!name.isAbsolute()) {
       throw new RelativeNameException(name);
     }
@@ -61,7 +61,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   }
 
   /** Converts the type-specific RR to wire format - must be overridden */
-  abstract void rrFromWire(DNSInput in) throws IOException;
+  abstract protected void rrFromWire(DNSInput in) throws IOException;
 
   private static Record newRecord(
       Name name, int type, int dclass, long ttl, int length, DNSInput in) throws IOException {
@@ -262,7 +262,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   }
 
   /** Converts the type-specific RR to text format - must be overriden */
-  abstract String rrToString();
+  abstract protected String rrToString();
 
   /** Converts the rdata portion of a Record into a String representation */
   public String rdataToString() {
@@ -301,7 +301,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   }
 
   /** Converts the text format of an RR to the internal format - must be overriden */
-  abstract void rdataFromString(Tokenizer st, Name origin) throws IOException;
+  abstract protected void rdataFromString(Tokenizer st, Name origin) throws IOException;
 
   /** Converts a String into a byte array. */
   protected static byte[] byteArrayFromString(String s) throws TextParseException {
@@ -504,7 +504,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   }
 
   /** Converts the type-specific RR to wire format - must be overriden */
-  abstract void rrToWire(DNSOutput out, Compression c, boolean canonical);
+  abstract protected void rrToWire(DNSOutput out, Compression c, boolean canonical);
 
   /**
    * Determines if two Records could be part of the same RRset. This compares the name, type, and

@@ -25,17 +25,17 @@ abstract class SingleNameBase extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     singleName = new Name(in);
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     singleName = st.getName(origin);
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return singleName.toString();
   }
 
@@ -44,7 +44,7 @@ abstract class SingleNameBase extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     singleName.toWire(out, null, canonical);
   }
 }

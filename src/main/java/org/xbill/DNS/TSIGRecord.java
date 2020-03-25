@@ -105,7 +105,7 @@ public class TSIGRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     alg = new Name(in);
 
     long timeHigh = in.readU16();
@@ -129,13 +129,13 @@ public class TSIGRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     throw st.exception("no text format defined for TSIG");
   }
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(alg);
     sb.append(" ");
@@ -230,7 +230,7 @@ public class TSIGRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     alg.toWire(out, null, canonical);
 
     long time = timeSigned.getEpochSecond();

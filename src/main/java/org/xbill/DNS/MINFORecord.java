@@ -32,20 +32,20 @@ public class MINFORecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     responsibleAddress = new Name(in);
     errorAddress = new Name(in);
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     responsibleAddress = st.getName(origin);
     errorAddress = st.getName(origin);
   }
 
   /** Converts the MINFO Record to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(responsibleAddress);
     sb.append(" ");
@@ -64,7 +64,7 @@ public class MINFORecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     responsibleAddress.toWire(out, null, canonical);
     errorAddress.toWire(out, null, canonical);
   }

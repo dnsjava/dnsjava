@@ -40,7 +40,7 @@ public class A6Record extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     prefixBits = in.readU8();
     int suffixbits = 128 - prefixBits;
     int suffixbytes = (suffixbits + 7) / 8;
@@ -55,7 +55,7 @@ public class A6Record extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     prefixBits = st.getUInt8();
     if (prefixBits > 128) {
       throw st.exception("prefix bits must be [0..128]");
@@ -74,7 +74,7 @@ public class A6Record extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(prefixBits);
     if (suffix != null) {
@@ -104,7 +104,7 @@ public class A6Record extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(prefixBits);
     if (suffix != null) {
       int suffixbits = 128 - prefixBits;

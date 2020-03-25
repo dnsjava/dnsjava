@@ -32,18 +32,18 @@ public class AAAARecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     address = in.readByteArray(16);
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     address = st.getAddressBytes(Address.IPv6);
   }
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     InetAddress addr;
     try {
       addr = InetAddress.getByAddress(null, address);
@@ -77,7 +77,7 @@ public class AAAARecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeByteArray(address);
   }
 }

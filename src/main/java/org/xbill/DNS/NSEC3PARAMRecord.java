@@ -55,7 +55,7 @@ public class NSEC3PARAMRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     hashAlg = in.readU8();
     flags = in.readU8();
     iterations = in.readU16();
@@ -69,7 +69,7 @@ public class NSEC3PARAMRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(hashAlg);
     out.writeU8(flags);
     out.writeU16(iterations);
@@ -83,7 +83,7 @@ public class NSEC3PARAMRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     hashAlg = st.getUInt8();
     flags = st.getUInt8();
     iterations = st.getUInt16();
@@ -102,7 +102,7 @@ public class NSEC3PARAMRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(hashAlg);
     sb.append(' ');

@@ -27,18 +27,18 @@ public class OPENPGPKEYRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) {
+  protected void rrFromWire(DNSInput in) {
     cert = in.readByteArray();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     cert = st.getBase64();
   }
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     if (cert != null) {
       if (Options.check("multiline")) {
@@ -57,7 +57,7 @@ public class OPENPGPKEYRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeByteArray(cert);
   }
 }

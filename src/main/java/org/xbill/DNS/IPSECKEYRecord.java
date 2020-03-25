@@ -114,7 +114,7 @@ public class IPSECKEYRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     precedence = in.readU8();
     gatewayType = in.readU8();
     algorithmType = in.readU8();
@@ -140,7 +140,7 @@ public class IPSECKEYRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     precedence = st.getUInt8();
     gatewayType = st.getUInt8();
     algorithmType = st.getUInt8();
@@ -168,7 +168,7 @@ public class IPSECKEYRecord extends Record {
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(precedence);
     sb.append(" ");
@@ -222,7 +222,7 @@ public class IPSECKEYRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(precedence);
     out.writeU8(gatewayType);
     out.writeU8(algorithmType);
