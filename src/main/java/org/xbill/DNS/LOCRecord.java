@@ -58,7 +58,7 @@ public class LOCRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     int version;
 
     version = in.readU8();
@@ -163,7 +163,7 @@ public class LOCRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     latitude = parsePosition(st, "latitude");
     longitude = parsePosition(st, "longitude");
     altitude = parseDouble(st, "altitude", true, -10000000, 4284967295L, 0) + 10000000;
@@ -211,7 +211,7 @@ public class LOCRecord extends Record {
 
   /** Convert to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuffer sb = new StringBuffer();
 
     /* Latitude */
@@ -272,7 +272,7 @@ public class LOCRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(0); /* version */
     out.writeU8(toLOCformat(size));
     out.writeU8(toLOCformat(hPrecision));

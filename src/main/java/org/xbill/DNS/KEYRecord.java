@@ -311,7 +311,7 @@ public class KEYRecord extends KEYBase {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     String flagString = st.getIdentifier();
     flags = Flags.value(flagString);
     if (flags < 0) {

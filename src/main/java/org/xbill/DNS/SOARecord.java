@@ -50,7 +50,7 @@ public class SOARecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     host = new Name(in);
     admin = new Name(in);
     serial = in.readU32();
@@ -61,7 +61,7 @@ public class SOARecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     host = st.getName(origin);
     admin = st.getName(origin);
     serial = st.getUInt32();
@@ -73,7 +73,7 @@ public class SOARecord extends Record {
 
   /** Convert to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(host);
     sb.append(" ");
@@ -141,7 +141,7 @@ public class SOARecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     host.toWire(out, c, canonical);
     admin.toWire(out, c, canonical);
     out.writeU32(serial);

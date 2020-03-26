@@ -44,7 +44,7 @@ abstract class TXTBase extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     strings = new ArrayList<>(2);
     while (in.remaining() > 0) {
       byte[] b = in.readCountedString();
@@ -53,7 +53,7 @@ abstract class TXTBase extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     strings = new ArrayList<>(2);
     while (true) {
       Tokenizer.Token t = st.get();
@@ -71,7 +71,7 @@ abstract class TXTBase extends Record {
 
   /** converts to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     Iterator<byte[]> it = strings.iterator();
     while (it.hasNext()) {
@@ -107,7 +107,7 @@ abstract class TXTBase extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     for (byte[] b : strings) {
       out.writeCountedString(b);
     }

@@ -55,7 +55,7 @@ public class NAPTRRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     order = in.readU16();
     preference = in.readU16();
     flags = in.readCountedString();
@@ -65,7 +65,7 @@ public class NAPTRRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     order = st.getUInt16();
     preference = st.getUInt16();
     try {
@@ -80,7 +80,7 @@ public class NAPTRRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(order);
     sb.append(" ");
@@ -127,7 +127,7 @@ public class NAPTRRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(order);
     out.writeU16(preference);
     out.writeCountedString(flags);

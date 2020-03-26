@@ -100,7 +100,7 @@ public class DSRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     footprint = in.readU16();
     alg = in.readU8();
     digestid = in.readU8();
@@ -108,7 +108,7 @@ public class DSRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     footprint = st.getUInt16();
     alg = st.getUInt8();
     digestid = st.getUInt8();
@@ -117,7 +117,7 @@ public class DSRecord extends Record {
 
   /** Converts rdata to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(footprint);
     sb.append(" ");
@@ -153,7 +153,7 @@ public class DSRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(footprint);
     out.writeU8(alg);
     out.writeU8(digestid);

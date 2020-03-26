@@ -34,14 +34,14 @@ public class PXRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     preference = in.readU16();
     map822 = new Name(in);
     mapX400 = new Name(in);
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     preference = st.getUInt16();
     map822 = st.getName(origin);
     mapX400 = st.getName(origin);
@@ -49,7 +49,7 @@ public class PXRecord extends Record {
 
   /** Converts the PX Record to a String */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(preference);
     sb.append(" ");
@@ -60,7 +60,7 @@ public class PXRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(preference);
     map822.toWire(out, null, canonical);
     mapX400.toWire(out, null, canonical);

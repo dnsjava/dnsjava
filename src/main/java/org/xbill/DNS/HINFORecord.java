@@ -34,13 +34,13 @@ public class HINFORecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     cpu = in.readCountedString();
     os = in.readCountedString();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     try {
       cpu = byteArrayFromString(st.getString());
       os = byteArrayFromString(st.getString());
@@ -60,14 +60,14 @@ public class HINFORecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeCountedString(cpu);
     out.writeCountedString(os);
   }
 
   /** Converts to a string */
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(byteArrayToString(cpu, true));
     sb.append(" ");

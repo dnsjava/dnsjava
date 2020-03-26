@@ -17,7 +17,7 @@ abstract class SingleCompressedNameBase extends SingleNameBase {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     singleName.toWire(out, c, canonical);
   }
 }

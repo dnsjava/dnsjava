@@ -31,17 +31,17 @@ public class NULLRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) {
+  protected void rrFromWire(DNSInput in) {
     data = in.readByteArray();
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     throw st.exception("no defined text format for NULL records");
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return unknownToString(data);
   }
 
@@ -51,7 +51,7 @@ public class NULLRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeByteArray(data);
   }
 }

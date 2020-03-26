@@ -35,19 +35,19 @@ abstract class U16NameBase extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     u16Field = in.readU16();
     nameField = new Name(in);
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     u16Field = st.getUInt16();
     nameField = st.getName(origin);
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     sb.append(u16Field);
     sb.append(" ");
@@ -64,7 +64,7 @@ abstract class U16NameBase extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(u16Field);
     nameField.toWire(out, null, canonical);
   }

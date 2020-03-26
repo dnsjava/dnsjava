@@ -12,16 +12,16 @@ class EmptyRecord extends Record {
   EmptyRecord() {}
 
   @Override
-  void rrFromWire(DNSInput in) {}
+  protected void rrFromWire(DNSInput in) {}
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) {}
+  protected void rdataFromString(Tokenizer st, Name origin) {}
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     return "";
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
 }

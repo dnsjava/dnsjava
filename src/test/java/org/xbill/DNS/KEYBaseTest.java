@@ -53,7 +53,7 @@ class KEYBaseTest {
     }
 
     @Override
-    void rdataFromString(Tokenizer st, Name origin) {}
+    protected void rdataFromString(Tokenizer st, Name origin) {}
   }
 
   @Test

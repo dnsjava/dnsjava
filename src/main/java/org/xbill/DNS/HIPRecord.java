@@ -98,7 +98,7 @@ public class HIPRecord extends Record {
   }
 
   @Override
-  String rrToString() {
+  protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     if (Options.check("multiline")) {
       sb.append("( ");
@@ -124,7 +124,7 @@ public class HIPRecord extends Record {
   }
 
   @Override
-  void rdataFromString(Tokenizer st, Name origin) throws IOException {
+  protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     pkAlgorithm = st.getUInt8();
     hit = st.getHexString();
     publicKey = base64.fromString(st.getString());
@@ -135,7 +135,7 @@ public class HIPRecord extends Record {
   }
 
   @Override
-  void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(hit.length);
     out.writeU8(pkAlgorithm);
     out.writeU16(publicKey.length);
@@ -145,7 +145,7 @@ public class HIPRecord extends Record {
   }
 
   @Override
-  void rrFromWire(DNSInput in) throws IOException {
+  protected void rrFromWire(DNSInput in) throws IOException {
     int hitLength = in.readU8();
     pkAlgorithm = in.readU8();
     int pkLength = in.readU16();
