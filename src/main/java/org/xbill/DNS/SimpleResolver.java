@@ -240,12 +240,6 @@ public class SimpleResolver implements Resolver {
    */
   @Override
   public CompletionStage<Message> sendAsync(Message query) {
-    Message ednsTsigQuery = query.clone();
-    applyEDNS(ednsTsigQuery);
-    if (tsig != null) {
-      tsig.apply(ednsTsigQuery, null);
-    }
-
     if (query.getHeader().getOpcode() == Opcode.QUERY) {
       Record question = query.getQuestion();
       if (question != null && question.getType() == Type.AXFR) {
@@ -261,6 +255,12 @@ public class SimpleResolver implements Resolver {
 
         return f;
       }
+    }
+
+    Message ednsTsigQuery = query.clone();
+    applyEDNS(ednsTsigQuery);
+    if (tsig != null) {
+      tsig.apply(ednsTsigQuery, null);
     }
 
     return sendAsync(ednsTsigQuery, useTCP);
