@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.util.Iterator;
@@ -24,33 +24,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @UtilityClass
 final class NioTcpClient extends Client {
-  private static Queue<ChannelState> registrationQueue;
-  private static Map<ChannelKey, ChannelState> channelMap;
-  private static volatile boolean run;
+  private static final Queue<ChannelState> registrationQueue = new ConcurrentLinkedQueue<>();
+  private static final Map<ChannelKey, ChannelState> channelMap = new ConcurrentHashMap<>();
 
-  private static void startTcp() throws IOException {
-    if (run) {
-      return;
-    }
-
-    run = true;
-    registrationQueue = new ConcurrentLinkedQueue<>();
-    channelMap = new ConcurrentHashMap<>();
+  static {
     addSelectorTimeoutTask(NioTcpClient::processPendingRegistrations);
     addSelectorTimeoutTask(NioTcpClient::checkTransactionTimeouts);
-    start();
+    addCloseTask(NioTcpClient::closeTcp);
   }
 
   private static void processPendingRegistrations() {
     while (!registrationQueue.isEmpty()) {
       ChannelState state = registrationQueue.remove();
       try {
+        final Selector selector = selector();
         if (!state.channel.isConnected()) {
           state.channel.register(selector, SelectionKey.OP_CONNECT, state);
         } else {
           state.channel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
         }
-      } catch (ClosedChannelException e) {
+      } catch (IOException e) {
         state.handleChannelException(e);
       }
     }
@@ -68,16 +61,11 @@ final class NioTcpClient extends Client {
     }
   }
 
-  static void closeTcp() throws Exception {
-    if (!run) {
-      return;
-    }
-
+  private static void closeTcp() {
     registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
     channelMap.forEach((key, state) -> state.handleTransactionException(closing));
     channelMap.clear();
-    close();
   }
 
   @RequiredArgsConstructor
@@ -255,7 +243,7 @@ final class NioTcpClient extends Client {
       Duration timeout) {
     CompletableFuture<byte[]> f = new CompletableFuture<>();
     try {
-      startTcp();
+      final Selector selector = selector();
       long endTime = System.nanoTime() + timeout.toNanos();
       ChannelState channel =
           channelMap.computeIfAbsent(

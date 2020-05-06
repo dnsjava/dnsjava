@@ -4,6 +4,7 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
@@ -17,39 +18,47 @@ class Client {
   /** Packet logger, if available. */
   private static PacketLogger packetLogger = null;
 
-  private static volatile boolean run;
+  private static volatile boolean run = true;
+  private static final List<Runnable> timeoutTasks = new CopyOnWriteArrayList<>();
+  private static final List<Runnable> closeTasks = new CopyOnWriteArrayList<>();
   private static Thread selectorThread;
-  private static List<Runnable> timeoutTasks = new CopyOnWriteArrayList<>();
-  static Selector selector;
+  private static volatile Selector selector;
 
   interface KeyProcessor {
     void processReadyKey(SelectionKey key);
   }
 
-  static void start() throws IOException {
-    if (run) {
-      return;
+  static Selector selector() throws IOException {
+    if (selector == null) {
+      synchronized (Client.class) {
+        if (selector == null) {
+          selector = Selector.open();
+          log.debug("Starting dnsjava NIO selector thread");
+          selectorThread = new Thread(Client::runSelector);
+          selectorThread.setDaemon(true);
+          selectorThread.setName("dnsjava NIO selector");
+          selectorThread.start();
+          Thread closeThread = new Thread(Client::close);
+          closeThread.setName("dnsjava NIO shutdown hook");
+          Runtime.getRuntime().addShutdownHook(closeThread);
+        }
+      }
     }
 
-    log.debug("Starting dnsjava NIO selector thread");
-    run = true;
-    selector = Selector.open();
-    selectorThread = new Thread(Client::runSelector);
-    selectorThread.setDaemon(true);
-    selectorThread.setName("dnsjava NIO selector");
-    selectorThread.start();
+    return selector;
   }
 
-  protected static void close() throws Exception {
-    if (!run) {
-      return;
-    }
-
+  private static void close() {
     run = false;
+    closeTasks.forEach(Runnable::run);
     timeoutTasks.clear();
     selector.wakeup();
-    selector.close();
-    selectorThread.join();
+    try {
+      selector.close();
+      selectorThread.join();
+    } catch (InterruptedException | IOException e) {
+      log.warn("Failed to properly shutdown", e);
+    }
   }
 
   private static void runSelector() {
@@ -59,15 +68,24 @@ class Client {
           timeoutTasks.forEach(Runnable::run);
         }
 
-        processReadyKeys();
+        if (run) {
+          processReadyKeys();
+        }
       } catch (IOException e) {
         log.error("A selection operation failed", e);
+      } catch (ClosedSelectorException e) {
+        // ignore
       }
     }
+    log.debug("dnsjava NIO selector thread stopped");
   }
 
   static void addSelectorTimeoutTask(Runnable r) {
     timeoutTasks.add(r);
+  }
+
+  static void addCloseTask(Runnable r) {
+    closeTasks.add(r);
   }
 
   private static void processReadyKeys() {
