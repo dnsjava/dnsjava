@@ -145,7 +145,7 @@ public class TSIGRecord extends Record {
 
     sb.append(timeSigned.getEpochSecond());
     sb.append(" ");
-    sb.append(fudge);
+    sb.append((int) fudge.getSeconds());
     sb.append(" ");
     sb.append(signature.length);
     if (Options.check("multiline")) {
