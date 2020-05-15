@@ -9,6 +9,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Iterator;
@@ -26,9 +27,8 @@ final class NioUdpClient extends Client {
   private static final int EPHEMERAL_RANGE;
 
   private static final SecureRandom prng;
-  private static volatile boolean run;
-  private static Queue<Transaction> registrationQueue;
-  private static Queue<Transaction> pendingTransactions;
+  private static final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
+  private static final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
 
   static {
     // https://tools.ietf.org/html/rfc6335#section-6
@@ -50,26 +50,16 @@ final class NioUdpClient extends Client {
     } else {
       prng = new SecureRandom();
     }
-  }
-
-  private static void startUdp() throws IOException {
-    if (run) {
-      return;
-    }
-
-    run = true;
-    registrationQueue = new ConcurrentLinkedQueue<>();
-    pendingTransactions = new ConcurrentLinkedQueue<>();
     addSelectorTimeoutTask(NioUdpClient::processPendingRegistrations);
     addSelectorTimeoutTask(NioUdpClient::checkTransactionTimeouts);
-    start();
+    addCloseTask(NioUdpClient::closeUdp);
   }
 
   private static void processPendingRegistrations() {
     while (!registrationQueue.isEmpty()) {
       Transaction t = registrationQueue.remove();
       try {
-        t.channel.register(selector, SelectionKey.OP_READ, t);
+        t.channel.register(selector(), SelectionKey.OP_READ, t);
         t.send();
       } catch (IOException e) {
         t.f.completeExceptionally(e);
@@ -160,7 +150,7 @@ final class NioUdpClient extends Client {
       InetSocketAddress local, InetSocketAddress remote, byte[] data, int max, Duration timeout) {
     CompletableFuture<byte[]> f = new CompletableFuture<>();
     try {
-      startUdp();
+      final Selector selector = selector();
       DatagramChannel channel = DatagramChannel.open();
       channel.configureBlocking(false);
       if (local == null || local.getPort() == 0) {
@@ -209,16 +199,10 @@ final class NioUdpClient extends Client {
     return f;
   }
 
-  static void closeUdp() throws Exception {
-    if (!run) {
-      return;
-    }
-
-    run = false;
+  private static void closeUdp() {
     registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
     pendingTransactions.forEach(t -> t.f.completeExceptionally(closing));
     pendingTransactions.clear();
-    close();
   }
 }
