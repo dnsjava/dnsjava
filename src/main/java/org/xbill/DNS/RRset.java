@@ -146,6 +146,9 @@ public class RRset implements Serializable {
     }
 
     List<Record> l = new ArrayList<>(rrs.size());
+    if (position == Short.MAX_VALUE) {
+      position = 0;
+    }
     int start = position++ % rrs.size();
     l.addAll(rrs.subList(start, rrs.size()));
     l.addAll(rrs.subList(0, start));

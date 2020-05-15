@@ -115,6 +115,9 @@ public class Message implements Cloneable {
           if (i == Section.ADDITIONAL) {
             if (rec.getType() == Type.TSIG) {
               tsigstart = pos;
+              if (j != count - 1) {
+                throw new WireParseException("TSIG is not the last record in the message");
+              }
             }
             if (rec.getType() == Type.SIG) {
               SIGRecord sig = (SIGRecord) rec;
@@ -519,7 +522,12 @@ public class Message implements Cloneable {
     }
   }
 
-  /** Returns an array containing the wire format representation of the Message. */
+  /**
+   * Returns an array containing the wire format representation of the {@link Message}, but does not
+   * do any additional processing (e.g. OPT/TSIG records, truncation).
+   *
+   * <p>Do NOT use this to actually transmit a message, use {@link #toWire(int)} instead.
+   */
   public byte[] toWire() {
     DNSOutput out = new DNSOutput();
     toWire(out);
@@ -531,12 +539,15 @@ public class Message implements Cloneable {
    * Returns an array containing the wire format representation of the Message with the specified
    * maximum length. This will generate a truncated message (with the TC bit) if the message doesn't
    * fit, and will also sign the message with the TSIG key set by a call to setTSIG(). This method
-   * may return null if the message could not be rendered at all; this could happen if maxLength is
-   * smaller than a DNS header, for example.
+   * may return an empty byte array if the message could not be rendered at all; this could happen
+   * if maxLength is smaller than a DNS header, for example.
+   *
+   * <p>Do NOT use this method in conjunction with {@link TSIG#apply(Message, TSIGRecord)}, it
+   * produces inconsistent results! Use {@link #setTSIG(TSIG, int, TSIGRecord)} instead.
    *
    * @param maxLength The maximum length of the message.
-   * @return The wire format of the message, or null if the message could not be rendered into the
-   *     specified length.
+   * @return The wire format of the message, or an empty array if the message could not be rendered
+   *     into the specified length.
    * @see Flags
    * @see TSIG
    */

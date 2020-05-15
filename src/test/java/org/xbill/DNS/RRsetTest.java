@@ -316,4 +316,24 @@ class RRsetTest {
     assertEquals(m_a1, itr.get(0));
     assertEquals(m_a2, itr.get(1));
   }
+
+  @Test
+  void cycleBelowShort() throws Exception {
+    runSim(100);
+  }
+
+  @Test
+  void cycleAboveShort() throws Exception {
+    runSim(50_000);
+  }
+
+  private void runSim(int numOfCalls) throws Exception {
+    RRset rrset = new RRset();
+    rrset.addRR(m_a1);
+    rrset.addRR(m_a2);
+
+    for (int i = 0; i < numOfCalls; i++) {
+      rrset.rrs(true);
+    }
+  }
 }

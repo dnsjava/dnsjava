@@ -176,7 +176,8 @@ class ResolverConfigTest {
     win.initialize();
 
     // the servers returned via Windows API must be in the JNDI list, but not necessarily the other
-    // way round
+    // way round. Unless there IPv6 servers which are not in the registry and Java <= 15 does not
+    // find.
     for (InetSocketAddress winServer : win.servers()) {
       assertTrue(
           jndi.servers().contains(winServer),
