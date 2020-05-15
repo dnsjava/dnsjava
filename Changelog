@@ -1,3 +1,11 @@
+05/15/2020
+	- 3.1.0 released
+	- Fix order of OPT and TSIG records in messages (#108)
+	- Fix RRset.cycle() short overflows (#102)
+	- Fix race condition in resolver I/O (#104)
+	- Add support for custom record types
+	  (#94, Klaus Malorny <Klaus.Malorny@knipp.de>)
+
 03/19/2020
 	- 3.0.2 released
 	- Only select for tcp write when there is something to write
