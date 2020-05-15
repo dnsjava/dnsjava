@@ -42,25 +42,26 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
 class ReverseMapTest {
-  @Test
-  void fromAddress_ipv4() throws UnknownHostException, TextParseException {
-    Name exp = Name.fromString("1.0.168.192.in-addr.arpa.");
-    String addr = "192.168.0.1";
-    assertEquals(exp, ReverseMap.fromAddress(addr));
+  private final String ipv4Addr = "192.168.0.1";
+  private final Name ipv4arpa = Name.fromConstantString("1.0.168.192.in-addr.arpa.");
+  private final Name ipv6arpa =
+      Name.fromConstantString(
+          "4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa.");
+  private final String ipv6addr = "2001:db8:85a3:8d3:1319:8a2e:370:7334";
 
-    assertEquals(exp, ReverseMap.fromAddress(addr, Address.IPv4));
-    assertEquals(exp, ReverseMap.fromAddress(InetAddress.getByName(addr)));
+  @Test
+  void fromAddress_ipv4() throws UnknownHostException {
+    assertEquals(ipv4arpa, ReverseMap.fromAddress(ipv4Addr));
+
+    assertEquals(ipv4arpa, ReverseMap.fromAddress(ipv4Addr, Address.IPv4));
+    assertEquals(ipv4arpa, ReverseMap.fromAddress(InetAddress.getByName(ipv4Addr)));
     assertEquals(
-        exp, ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, (byte) 0, (byte) 1}));
-    assertEquals(exp, ReverseMap.fromAddress(new int[] {192, 168, 0, 1}));
+        ipv4arpa, ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, (byte) 0, (byte) 1}));
+    assertEquals(ipv4arpa, ReverseMap.fromAddress(new int[] {192, 168, 0, 1}));
   }
 
   @Test
-  void fromAddress_ipv6() throws UnknownHostException, TextParseException {
-    Name exp =
-        Name.fromString(
-            "4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa.");
-    String addr = "2001:0db8:85a3:08d3:1319:8a2e:0370:7334";
+  void fromAddress_ipv6() throws UnknownHostException {
     byte[] dat =
         new byte[] {
           (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
@@ -68,10 +69,10 @@ class ReverseMapTest {
         };
     int[] idat = new int[] {32, 1, 13, 184, 133, 163, 8, 211, 19, 25, 138, 46, 3, 112, 115, 52};
 
-    assertEquals(exp, ReverseMap.fromAddress(addr, Address.IPv6));
-    assertEquals(exp, ReverseMap.fromAddress(InetAddress.getByName(addr)));
-    assertEquals(exp, ReverseMap.fromAddress(dat));
-    assertEquals(exp, ReverseMap.fromAddress(idat));
+    assertEquals(ipv6arpa, ReverseMap.fromAddress(ipv6addr, Address.IPv6));
+    assertEquals(ipv6arpa, ReverseMap.fromAddress(InetAddress.getByName(ipv6addr)));
+    assertEquals(ipv6arpa, ReverseMap.fromAddress(dat));
+    assertEquals(ipv6arpa, ReverseMap.fromAddress(idat));
   }
 
   @Test
@@ -89,5 +90,39 @@ class ReverseMapTest {
           int[] dat = new int[] {0, 1, 2, 256};
           ReverseMap.fromAddress(dat);
         });
+  }
+
+  @Test
+  void fromName_ipv4_valid() throws TextParseException, UnknownHostException {
+    assertEquals(ipv4Addr, ReverseMap.fromName(ipv4arpa).getHostAddress());
+    assertEquals("192.168.0.0", ReverseMap.fromName("168.192.in-addr.arpa.").getHostAddress());
+  }
+
+  @Test
+  void fromName_ipv6_valid() throws TextParseException, UnknownHostException {
+    assertEquals(ipv6addr, ReverseMap.fromName(ipv6arpa).getHostAddress());
+    assertEquals(
+        "2001:db8:0:0:0:0:0:0", ReverseMap.fromName("8.B.D.0.1.0.0.2.ip6.arpa.").getHostAddress());
+    assertEquals(
+        "2001:d00:0:0:0:0:0:0", ReverseMap.fromName("D.0.1.0.0.2.ip6.arpa.").getHostAddress());
+    assertEquals(
+        "2001:db0:0:0:0:0:0:0", ReverseMap.fromName("B.D.0.1.0.0.2.ip6.arpa.").getHostAddress());
+  }
+
+  @Test
+  void fromNameInvalid() {
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("host.example.com."));
+
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("ip6.arpa."));
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("caffee.ip6.arpa."));
+    assertThrows(
+        UnknownHostException.class,
+        () ->
+            ReverseMap.fromName(
+                "1.4.3.3.7.0.7.3.0.E.2.A.8.9.1.3.1.3.D.8.0.3.A.5.8.8.B.D.0.1.0.0.2.ip6.arpa."));
+
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("in-addr.arpa."));
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("caffee.in-addr.arpa."));
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("1.2.3.4.5.in-addr.arpa."));
   }
 }

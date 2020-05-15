@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * A set functions designed to deal with DNS names used in reverse mappings. For the IPv4 address
+ * A set of functions designed to deal with DNS names used in reverse mappings. For the IPv4 address
  * a.b.c.d, the reverse map name is d.c.b.a.in-addr.arpa. For an IPv6 address, the reverse map name
  * is ...ip6.arpa.
  *
@@ -14,8 +14,8 @@ import java.net.UnknownHostException;
  */
 public final class ReverseMap {
 
-  private static Name inaddr4 = Name.fromConstantString("in-addr.arpa.");
-  private static Name inaddr6 = Name.fromConstantString("ip6.arpa.");
+  private static final Name inaddr4 = Name.fromConstantString("in-addr.arpa.");
+  private static final Name inaddr6 = Name.fromConstantString("ip6.arpa.");
 
   /* Otherwise the class could be instantiated */
   private ReverseMap() {}
@@ -121,8 +121,69 @@ public final class ReverseMap {
       array = Address.toByteArray(addr, Address.IPv6);
     }
     if (array == null) {
-      throw new UnknownHostException("Invalid IP address:" + addr);
+      throw new UnknownHostException("Invalid IP address: " + addr);
     }
     return fromAddress(array);
+  }
+
+  /**
+   * Parses the address from a reverse map string.
+   *
+   * @param name The string from which to build an address.
+   * @return The address corresponding to the reverse map string.
+   * @throws UnknownHostException the passed name is not a valid reverse map.
+   */
+  public static InetAddress fromName(String name) throws UnknownHostException, TextParseException {
+    return fromName(Name.fromString(name));
+  }
+
+  /**
+   * Parses the address from a reverse map name.
+   *
+   * @param name The name from which to build an address.
+   * @return The address corresponding to the reverse map name.
+   * @throws UnknownHostException the passed name is not a valid reverse map.
+   */
+  public static InetAddress fromName(Name name) throws UnknownHostException {
+    if (name.labels() <= 3) {
+      throw new UnknownHostException("Not an arpa address: " + name.toString());
+    }
+
+    byte[] ipBytes;
+    if (name.subdomain(inaddr4)) {
+      Name ip = name.relativize(inaddr4);
+      if (ip.labels() > 4) {
+        throw new UnknownHostException("Invalid IPv4 arpa address: " + name.toString());
+      }
+
+      ipBytes = new byte[4];
+      try {
+        for (int i = 0; i < ip.labels(); i++) {
+          ipBytes[ip.labels() - i - 1] = (byte) Integer.parseInt(ip.getLabelString(i));
+        }
+      } catch (NumberFormatException e) {
+        throw new UnknownHostException("Invalid IPv4 arpa address: " + name.toString());
+      }
+      return InetAddress.getByAddress(ipBytes);
+    } else if (name.subdomain(inaddr6)) {
+      Name ip = name.relativize(inaddr6);
+      if (ip.labels() > 32) {
+        throw new UnknownHostException("Invalid IPv6 arpa address: " + name.toString());
+      }
+
+      ipBytes = new byte[16];
+      try {
+        for (int i = 0; i < ip.labels(); i++) {
+          ipBytes[(ip.labels() - i - 1) / 2] |=
+              Byte.parseByte(ip.getLabelString(i), 16) << ((ip.labels() - i) % 2 == 0 ? 0 : 4);
+        }
+      } catch (NumberFormatException e) {
+        throw new UnknownHostException("Invalid IPv6 arpa address: " + name.toString());
+      }
+    } else {
+      throw new UnknownHostException("Not an arpa address: " + name.toString());
+    }
+
+    return InetAddress.getByAddress(ipBytes);
   }
 }
