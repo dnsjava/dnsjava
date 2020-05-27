@@ -15,12 +15,12 @@ import org.xbill.DNS.TextParseException;
  * Base class for resolver config providers that provides a default implementation for the lists and
  * utility methods to prevent duplicates.
  */
-abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
+public abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
   final Logger log = LoggerFactory.getLogger(getClass());
   List<InetSocketAddress> nameservers = new ArrayList<>(3);
   List<Name> searchlist = new ArrayList<>(1);
 
-  void parseSearchPathList(String search, String delimiter) {
+  protected void parseSearchPathList(String search, String delimiter) {
     if (search != null) {
       StringTokenizer st = new StringTokenizer(search, delimiter);
       while (st.hasMoreTokens()) {
@@ -29,7 +29,7 @@ abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
     }
   }
 
-  void addSearchPath(String searchPath) {
+  protected void addSearchPath(String searchPath) {
     if (searchPath == null || searchPath.isEmpty()) {
       return;
     }
@@ -45,14 +45,14 @@ abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
     }
   }
 
-  void addNameserver(InetSocketAddress server) {
+  protected void addNameserver(InetSocketAddress server) {
     if (!nameservers.contains(server)) {
       nameservers.add(server);
       log.debug("Added {} to nameservers", server);
     }
   }
 
-  int parseNdots(String token) {
+  protected int parseNdots(String token) {
     if (token != null && !token.isEmpty()) {
       try {
         int ndots = Integer.parseInt(token);
