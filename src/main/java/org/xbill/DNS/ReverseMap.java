@@ -132,6 +132,7 @@ public final class ReverseMap {
    * @param name The string from which to build an address.
    * @return The address corresponding to the reverse map string.
    * @throws UnknownHostException the passed name is not a valid reverse map.
+   * @since 3.1
    */
   public static InetAddress fromName(String name) throws UnknownHostException, TextParseException {
     return fromName(Name.fromString(name));
@@ -143,6 +144,7 @@ public final class ReverseMap {
    * @param name The name from which to build an address.
    * @return The address corresponding to the reverse map name.
    * @throws UnknownHostException the passed name is not a valid reverse map.
+   * @since 3.1
    */
   public static InetAddress fromName(Name name) throws UnknownHostException {
     if (name.labels() <= 3) {

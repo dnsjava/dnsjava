@@ -131,6 +131,7 @@ public class ExtendedResolver implements Resolver {
     }
   }
 
+  /** @since 3.2 */
   public static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
   private List<ResolverEntry> resolvers = new CopyOnWriteArrayList<>();
@@ -288,7 +289,11 @@ public class ExtendedResolver implements Resolver {
     resolvers.removeIf(re -> re.resolver == r);
   }
 
-  /** Gets whether the servers receive queries load balanced. */
+  /**
+   * Gets whether the servers receive queries load balanced.
+   *
+   * @since 3.2
+   */
   public boolean getLoadBalance() {
     return loadBalance;
   }
@@ -303,7 +308,11 @@ public class ExtendedResolver implements Resolver {
     loadBalance = flag;
   }
 
-  /** Gets the number of retries sent to each server per query */
+  /**
+   * Gets the number of retries sent to each server per query.
+   *
+   * @since 3.2
+   */
   public int getRetries() {
     return retries;
   }

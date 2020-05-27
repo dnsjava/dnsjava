@@ -28,6 +28,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
 
   protected Record() {}
 
+  /** @since 3.1 */
   protected Record(Name name, int type, int dclass, long ttl) {
     if (!name.isAbsolute()) {
       throw new RelativeNameException(name);
@@ -60,7 +61,11 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     return rec;
   }
 
-  /** Converts the type-specific RR to wire format - must be overridden */
+  /**
+   * Converts the type-specific RR to wire format - must be overridden
+   *
+   * @since 3.1
+   */
   protected abstract void rrFromWire(DNSInput in) throws IOException;
 
   private static Record newRecord(
@@ -261,7 +266,11 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     return out.toByteArray();
   }
 
-  /** Converts the type-specific RR to text format - must be overriden */
+  /**
+   * Converts the type-specific RR to text format - must be overriden.
+   *
+   * @since 3.1
+   */
   protected abstract String rrToString();
 
   /** Converts the rdata portion of a Record into a String representation */
@@ -300,7 +309,11 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     return sb.toString();
   }
 
-  /** Converts the text format of an RR to the internal format - must be overriden */
+  /**
+   * Converts the text format of an RR to the internal format - must be overriden
+   *
+   * @since 3.1
+   */
   protected abstract void rdataFromString(Tokenizer st, Name origin) throws IOException;
 
   /** Converts a String into a byte array. */
@@ -503,7 +516,11 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     return ttl;
   }
 
-  /** Converts the type-specific RR to wire format - must be overriden */
+  /**
+   * Converts the type-specific RR to wire format - must be overriden
+   *
+   * @since 3.1
+   */
   protected abstract void rrToWire(DNSOutput out, Compression c, boolean canonical);
 
   /**

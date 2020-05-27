@@ -457,6 +457,7 @@ public final class Type {
    * @param str the textual representation of the record type
    * @param factory the factory; {@code null} may be used if there is no implementation available.
    *     In this case, records of the type will be represented by the {@link UNKRecord} class
+   * @since 3.1
    */
   public static void register(int val, String str, Supplier<Record> factory) {
     types.replace(val, str, factory);

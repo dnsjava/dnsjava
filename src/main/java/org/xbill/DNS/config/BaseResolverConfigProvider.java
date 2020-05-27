@@ -14,6 +14,8 @@ import org.xbill.DNS.TextParseException;
 /**
  * Base class for resolver config providers that provides a default implementation for the lists and
  * utility methods to prevent duplicates.
+ *
+ * @since 3.2
  */
 public abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
   final Logger log = LoggerFactory.getLogger(getClass());
