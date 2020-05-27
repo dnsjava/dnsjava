@@ -71,13 +71,7 @@ final class NioUdpClient extends Client {
     for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
       Transaction t = it.next();
       if (t.endTime - System.nanoTime() < 0) {
-        try {
-          t.channel.disconnect();
-          t.channel.close();
-        } catch (IOException e) {
-          // ignore, we timed out already
-        }
-
+        t.silentCloseChannel();
         t.f.completeExceptionally(new SocketTimeoutException("Query timed out"));
         it.remove();
       }
@@ -107,6 +101,7 @@ final class NioUdpClient extends Client {
 
     public void processReadyKey(SelectionKey key) {
       if (!key.isReadable()) {
+        silentCloseChannel();
         f.completeExceptionally(new EOFException("channel not readable"));
         pendingTransactions.remove(this);
         return;
@@ -121,8 +116,9 @@ final class NioUdpClient extends Client {
           throw new EOFException();
         }
       } catch (IOException e) {
-        pendingTransactions.remove(this);
+        silentCloseChannel();
         f.completeExceptionally(e);
+        pendingTransactions.remove(this);
         return;
       }
 
@@ -134,15 +130,18 @@ final class NioUdpClient extends Client {
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
           data);
+      silentCloseChannel();
+      f.complete(data);
+      pendingTransactions.remove(this);
+    }
+
+    private void silentCloseChannel() {
       try {
         channel.disconnect();
         channel.close();
       } catch (IOException e) {
-        // ignore, we already have everything we need
+        // ignore, we either already have everything we need or can't do anything
       }
-
-      f.complete(data);
-      pendingTransactions.remove(this);
     }
   }
 
