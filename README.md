@@ -91,6 +91,15 @@ Some settings of dnsjava can be configured via
             <td colspan="3">Comma separated key-value pairs, see below.</td>
         </tr>
         <tr>
+            <td rowspan="2">dnsjava.configprovider.skipinit</td>
+            <td>Boolean</td>
+            <td>false</td>
+            <td>true</td>
+        </tr>
+        <tr>
+            <td colspan="3">Set to true to disable static ResolverConfig initialization.</td>
+        </tr>
+        <tr>
             <td rowspan="2">dnsjava.configprovider.sunjvm.enabled</td>
             <td>Boolean</td>
             <td>false</td>

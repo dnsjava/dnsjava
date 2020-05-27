@@ -10,6 +10,7 @@ import static org.xbill.DNS.config.PropertyResolverConfigProvider.DNS_SERVER_PRO
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,20 @@ import org.xbill.DNS.config.SunJvmResolverConfigProvider;
 import org.xbill.DNS.config.WindowsResolverConfigProvider;
 
 class ResolverConfigTest {
+  @Test
+  void testSkipInit() throws Exception {
+    Field configProvidersField = ResolverConfig.class.getDeclaredField("configProviders");
+    configProvidersField.setAccessible(true);
+    configProvidersField.set(null, null);
+    try {
+      System.setProperty(ResolverConfig.CONFIGPROVIDER_SKIP_INIT, Boolean.TRUE.toString());
+      assertTrue(ResolverConfig.getConfigProviders().isEmpty());
+    } finally {
+      System.setProperty(ResolverConfig.CONFIGPROVIDER_SKIP_INIT, Boolean.FALSE.toString());
+      configProvidersField.set(null, null);
+    }
+  }
+
   @Test
   void properties() {
     String[] dnsServers = {"192.168.1.1", "192.168.1.2", "192.168.1.1"};

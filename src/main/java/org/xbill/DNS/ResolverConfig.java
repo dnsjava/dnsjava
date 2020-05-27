@@ -5,6 +5,7 @@ package org.xbill.DNS;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.config.AndroidResolverConfigProvider;
@@ -41,27 +42,43 @@ import org.xbill.DNS.config.WindowsResolverConfigProvider;
  */
 @Slf4j
 public final class ResolverConfig {
-  private List<InetSocketAddress> servers = new ArrayList<>(2);
-  private List<Name> searchlist = new ArrayList<>(0);
+  public static final String CONFIGPROVIDER_SKIP_INIT = "dnsjava.configprovider.skipinit";
+
+  private final List<InetSocketAddress> servers = new ArrayList<>(2);
+  private final List<Name> searchlist = new ArrayList<>(0);
   private int ndots = 1;
 
   private static ResolverConfig currentConfig;
   private static List<ResolverConfigProvider> configProviders;
 
-  static {
-    configProviders = new ArrayList<>(8);
-    configProviders.add(new PropertyResolverConfigProvider());
-    configProviders.add(new ResolvConfResolverConfigProvider());
-    configProviders.add(new WindowsResolverConfigProvider());
-    configProviders.add(new AndroidResolverConfigProvider());
-    configProviders.add(new JndiContextResolverConfigProvider());
-    configProviders.add(new SunJvmResolverConfigProvider());
-    refresh();
+  private static void checkInitialized() {
+    if (configProviders == null) {
+      configProviders = new ArrayList<>(8);
+      if (!Boolean.getBoolean(CONFIGPROVIDER_SKIP_INIT)) {
+        configProviders.add(new PropertyResolverConfigProvider());
+        configProviders.add(new ResolvConfResolverConfigProvider());
+        configProviders.add(new WindowsResolverConfigProvider());
+        configProviders.add(new AndroidResolverConfigProvider());
+        configProviders.add(new JndiContextResolverConfigProvider());
+        configProviders.add(new SunJvmResolverConfigProvider());
+      }
+    }
+
+    if (currentConfig == null) {
+      refresh();
+    }
   }
 
   /** Gets the current configuration */
   public static synchronized ResolverConfig getCurrentConfig() {
+    checkInitialized();
     return currentConfig;
+  }
+
+  /** Gets the ordered list of resolver config providers. */
+  public static synchronized List<ResolverConfigProvider> getConfigProviders() {
+    checkInitialized();
+    return Collections.unmodifiableList(configProviders);
   }
 
   /** Set a new ordered list of resolver config providers. */
