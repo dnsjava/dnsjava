@@ -21,7 +21,11 @@ public class PropertyResolverConfigProvider extends BaseResolverConfigProvider {
 
   @Override
   public void initialize() {
-    String servers = System.getProperty(DNS_SERVER_PROP);
+    initialize(DNS_SERVER_PROP, DNS_SEARCH_PROP, DNS_NDOTS_PROP);
+  }
+
+  protected void initialize(String serverName, String searchName, String ndotsName) {
+    String servers = System.getProperty(serverName);
     if (servers != null) {
       StringTokenizer st = new StringTokenizer(servers, ",");
       while (st.hasMoreTokens()) {
@@ -45,10 +49,10 @@ public class PropertyResolverConfigProvider extends BaseResolverConfigProvider {
       }
     }
 
-    String searchPathProperty = System.getProperty(DNS_SEARCH_PROP);
+    String searchPathProperty = System.getProperty(searchName);
     parseSearchPathList(searchPathProperty, ",");
 
-    String ndotsProperty = System.getProperty(DNS_NDOTS_PROP);
+    String ndotsProperty = System.getProperty(ndotsName);
     ndots = parseNdots(ndotsProperty);
   }
 

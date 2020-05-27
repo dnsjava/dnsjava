@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.config.AndroidResolverConfigProvider;
+import org.xbill.DNS.config.FallbackPropertyResolverConfigProvider;
 import org.xbill.DNS.config.InitializationException;
 import org.xbill.DNS.config.JndiContextResolverConfigProvider;
 import org.xbill.DNS.config.PropertyResolverConfigProvider;
@@ -61,6 +62,7 @@ public final class ResolverConfig {
         configProviders.add(new AndroidResolverConfigProvider());
         configProviders.add(new JndiContextResolverConfigProvider());
         configProviders.add(new SunJvmResolverConfigProvider());
+        configProviders.add(new FallbackPropertyResolverConfigProvider());
       }
     }
 

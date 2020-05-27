@@ -55,7 +55,7 @@ Some settings of dnsjava can be configured via
     </thead>
     <tbody class="rich-diff-level-one">
         <tr>
-            <td rowspan="2">dns.server</td>
+            <td rowspan="2">dns[.fallback].server</td>
             <td>String</td>
             <td>-</td>
             <td>8.8.8.8,[2001:4860:4860::8888]:853,dns.google</td>
@@ -64,7 +64,7 @@ Some settings of dnsjava can be configured via
             <td colspan="3">DNS server(s) to use for resolving. Comma separated list. Can be IPv4/IPv6 addresses or hostnames (which are resolved using Java's built in DNS support).</td>
         </tr>
         <tr>
-            <td rowspan="2">dns.search</td>
+            <td rowspan="2">dns[.fallback].search</td>
             <td>String</td>
             <td>-</td>
             <td>ds.example.com,example.com</td>
@@ -73,7 +73,7 @@ Some settings of dnsjava can be configured via
             <td colspan="3">Comma separated list of DNS search paths.</td>
         </tr>
         <tr>
-            <td rowspan="2">dns.ndots</td>
+            <td rowspan="2">dns[.fallback].ndots</td>
             <td>Integer</td>
             <td>1</td>
             <td>2</td>
@@ -245,6 +245,8 @@ until one succeeds.
 - The `sun.net.dns.ResolverConfiguration` class is queried if enabled.
 - If available and no servers have been found yet,
   [JNDI-DNS](https://docs.oracle.com/javase/8/docs/technotes/guides/jndi/jndi-dns.html) is used.
+- If still no servers have been found yet, use the fallback properties. This can be used to query
+  e.g. a well-known public DNS server instead of localhost. 
 - As a last resort, `localhost` is used as the nameserver, and the search
   path is empty.
 
