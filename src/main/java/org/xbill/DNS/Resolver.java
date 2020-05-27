@@ -29,7 +29,7 @@ public interface Resolver {
   void setPort(int port);
 
   /**
-   * Sets whether TCP connections will be sent by default
+   * Sets whether TCP connections will be used by default
    *
    * @param flag Indicates whether TCP connections are made
    */

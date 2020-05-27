@@ -110,6 +110,11 @@ public class SimpleResolver implements Resolver {
     defaultResolver = new InetSocketAddress(hostname, DEFAULT_PORT);
   }
 
+  /** Gets the port to communicate with on the server */
+  public int getPort() {
+    return address.getPort();
+  }
+
   @Override
   public void setPort(int port) {
     address = new InetSocketAddress(address.getAddress(), port);
@@ -151,14 +156,43 @@ public class SimpleResolver implements Resolver {
     localAddress = new InetSocketAddress(addr, 0);
   }
 
+  /** Gets whether TCP connections will be used by default */
+  public boolean getTCP() {
+    return useTCP;
+  }
+
   @Override
   public void setTCP(boolean flag) {
     this.useTCP = flag;
   }
 
+  /** Gets whether truncated responses will be ignored. */
+  public boolean getIgnoreTruncation() {
+    return ignoreTruncation;
+  }
+
   @Override
   public void setIgnoreTruncation(boolean flag) {
     this.ignoreTruncation = flag;
+  }
+
+  /**
+   * Gets the EDNS information on outgoing messages.
+   *
+   * @return The current {@link OPTRecord} for EDNS or {@code null} if EDNS is disabled.
+   */
+  public OPTRecord getEDNS() {
+    return queryOPT;
+  }
+
+  /**
+   * Sets the EDNS information on outgoing messages.
+   *
+   * @param optRecord the {@link OPTRecord} for EDNS options or null to disable EDNS.
+   * @see #setEDNS(int, int, int, List)
+   */
+  public void setEDNS(OPTRecord optRecord) {
+    queryOPT = optRecord;
   }
 
   @Override
@@ -178,6 +212,15 @@ public class SimpleResolver implements Resolver {
       default:
         throw new IllegalArgumentException("invalid EDNS version - must be 0 or -1 to disable");
     }
+  }
+
+  /**
+   * Get the TSIG key that messages will be signed with.
+   *
+   * @return the TSIG signature for outgoing messages or {@code null} if not specified.
+   */
+  public TSIG getTSIGKey() {
+    return tsig;
   }
 
   @Override
