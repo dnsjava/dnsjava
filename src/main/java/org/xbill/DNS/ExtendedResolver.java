@@ -288,6 +288,11 @@ public class ExtendedResolver implements Resolver {
     resolvers.removeIf(re -> re.resolver == r);
   }
 
+  /** Gets whether the servers receive queries load balanced. */
+  public boolean getLoadBalance() {
+    return loadBalance;
+  }
+
   /**
    * Sets whether the servers should be load balanced.
    *
@@ -296,6 +301,11 @@ public class ExtendedResolver implements Resolver {
    */
   public void setLoadBalance(boolean flag) {
     loadBalance = flag;
+  }
+
+  /** Gets the number of retries sent to each server per query */
+  public int getRetries() {
+    return retries;
   }
 
   /** Sets the number of retries sent to each server per query */
