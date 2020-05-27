@@ -131,7 +131,7 @@ public class ExtendedResolver implements Resolver {
     }
   }
 
-  private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
+  public static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
   private List<ResolverEntry> resolvers = new CopyOnWriteArrayList<>();
   private boolean loadBalance;
