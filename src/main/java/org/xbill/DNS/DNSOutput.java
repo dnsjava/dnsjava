@@ -181,4 +181,8 @@ public class DNSOutput {
     System.arraycopy(array, 0, out, 0, pos);
     return out;
   }
+
+  static byte[] toU16(int val) {
+    return new byte[] {(byte) ((val >>> 8) & 0xFF), (byte) (val & 0xFF)};
+  }
 }

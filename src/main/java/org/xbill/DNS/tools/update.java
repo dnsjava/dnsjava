@@ -126,7 +126,7 @@ public class update {
             if (res == null) {
               res = new SimpleResolver(server);
             }
-            res.setTSIGKey(new TSIG(keyname, keydata));
+            res.setTSIGKey(new TSIG(TSIG.HMAC_MD5, keyname, keydata));
             break;
           case "edns":
             if (res == null) {
