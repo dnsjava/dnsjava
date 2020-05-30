@@ -39,25 +39,22 @@ public class Message implements Cloneable {
   int tsigState;
   int sig0start;
 
-  /* The message was not signed */
+  /** The message was not signed */
   static final int TSIG_UNSIGNED = 0;
 
-  /* The message was signed and verification succeeded */
+  /** The message was signed and verification succeeded */
   static final int TSIG_VERIFIED = 1;
 
-  /* The message was an unsigned message in multiple-message response */
+  /** The message was an unsigned message in multiple-message response */
   static final int TSIG_INTERMEDIATE = 2;
 
-  /* The message was signed and no verification was attempted.  */
+  /** The message was signed and no verification was attempted. */
   static final int TSIG_SIGNED = 3;
 
-  /*
-   * The message was signed and verification failed, or was not signed
-   * when it should have been.
-   */
+  /** The message was signed and verification failed, or was not signed when it should have been. */
   static final int TSIG_FAILED = 4;
 
-  private static Record[] emptyRecordArray = new Record[0];
+  private static final Record[] emptyRecordArray = new Record[0];
 
   @SuppressWarnings("unchecked")
   private Message(Header header) {

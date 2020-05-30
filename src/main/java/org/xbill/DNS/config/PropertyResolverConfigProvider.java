@@ -24,6 +24,15 @@ public class PropertyResolverConfigProvider extends BaseResolverConfigProvider {
     initialize(DNS_SERVER_PROP, DNS_SEARCH_PROP, DNS_NDOTS_PROP);
   }
 
+  /**
+   * Initializes the servers, search path and ndots setting with from the property names passed as
+   * the arguments.
+   *
+   * @param serverName the property name for the DNS servers
+   * @param searchName the property name for the search path
+   * @param ndotsName the property name for the ndots setting
+   * @since 3.2
+   */
   protected void initialize(String serverName, String searchName, String ndotsName) {
     String servers = System.getProperty(serverName);
     if (servers != null) {

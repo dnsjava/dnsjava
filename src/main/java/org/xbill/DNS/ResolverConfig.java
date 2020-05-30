@@ -78,7 +78,11 @@ public final class ResolverConfig {
     return currentConfig;
   }
 
-  /** Gets the ordered list of resolver config providers. */
+  /**
+   * Gets the ordered list of resolver config providers.
+   *
+   * @since 3.2
+   */
   public static synchronized List<ResolverConfigProvider> getConfigProviders() {
     checkInitialized();
     return Collections.unmodifiableList(configProviders);

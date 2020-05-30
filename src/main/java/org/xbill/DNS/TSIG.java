@@ -80,7 +80,7 @@ public class TSIG {
     throw new IllegalArgumentException("Unknown algorithm");
   }
 
-  /** The default fudge value for outgoing packets. Can be overriden by the tsigfudge option. */
+  /** The default fudge value for outgoing packets. Can be overridden by the tsigfudge option. */
   public static final Duration FUDGE = Duration.ofSeconds(300);
 
   private Name name, alg;

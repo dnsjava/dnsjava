@@ -131,12 +131,16 @@ public class ExtendedResolver implements Resolver {
     }
   }
 
-  /** @since 3.2 */
+  /**
+   * Default timeout until resolving is aborted.
+   *
+   * @since 3.2
+   */
   public static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
 
-  private List<ResolverEntry> resolvers = new CopyOnWriteArrayList<>();
+  private final List<ResolverEntry> resolvers = new CopyOnWriteArrayList<>();
   private boolean loadBalance;
-  private AtomicInteger lbStart = new AtomicInteger();
+  private final AtomicInteger lbStart = new AtomicInteger();
   private int retries = 3;
 
   /**
