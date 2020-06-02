@@ -499,11 +499,9 @@ public class ZoneTransferIn {
       byte[] in = client.recv();
       Message response = parseMessage(in);
       if (response.getHeader().getRcode() == Rcode.NOERROR && verifier != null) {
-        TSIGRecord tsigrec = response.getTSIG();
-
         int error = verifier.verify(response, in);
         if (error != Rcode.NOERROR) {
-          fail("TSIG failure");
+          fail("TSIG failure: " + Rcode.TSIGstring(error));
         }
       }
 

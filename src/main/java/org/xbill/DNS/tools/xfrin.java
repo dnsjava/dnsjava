@@ -43,7 +43,7 @@ public class xfrin {
         if (index < 0) {
           usage("invalid key");
         }
-        key = new TSIG(s.substring(0, index), s.substring(index + 1));
+        key = new TSIG(TSIG.HMAC_MD5, s.substring(0, index), s.substring(index + 1));
       } else if (args[arg].equals("-s")) {
         server = args[++arg];
       } else if (args[arg].equals("-p")) {

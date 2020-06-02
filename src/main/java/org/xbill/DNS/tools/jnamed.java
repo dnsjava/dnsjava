@@ -388,7 +388,7 @@ public class jnamed {
         header.setFlag(Flags.AA);
         addRRset(rrset.getName(), response, rrset, Section.ANSWER, FLAG_DNSSECOK);
         if (tsig != null) {
-          tsig.applyStream(response, qtsig, first);
+          tsig.apply(response, qtsig, first);
           qtsig = response.getTSIG();
         }
         first = false;

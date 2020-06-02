@@ -148,7 +148,18 @@ public class dig {
             } else {
               key = argv[++arg];
             }
-            res.setTSIGKey(TSIG.fromString(key));
+
+            String[] parts = key.split("[:/]", 3);
+            switch (parts.length) {
+              case 2:
+                res.setTSIGKey(new TSIG(TSIG.HMAC_MD5, parts[0], parts[1]));
+                break;
+              case 3:
+                res.setTSIGKey(new TSIG(parts[0], parts[1], parts[2]));
+                break;
+              default:
+                throw new IllegalArgumentException("Invalid TSIG key specification");
+            }
             break;
 
           case 't':
