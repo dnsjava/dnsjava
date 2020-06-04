@@ -16,6 +16,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Win32Exception;
 import com.sun.jna.platform.win32.WinError;
 import com.sun.jna.ptr.IntByReference;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -75,7 +76,7 @@ public class WindowsResolverConfigProvider implements ResolverConfigProvider {
             InetAddress address;
             try {
               address = dns.Address.toAddress();
-              if (!address.isSiteLocalAddress()) {
+              if (address instanceof Inet4Address || !address.isSiteLocalAddress()) {
                 addNameserver(new InetSocketAddress(address, SimpleResolver.DEFAULT_PORT));
               } else {
                 log.debug(
