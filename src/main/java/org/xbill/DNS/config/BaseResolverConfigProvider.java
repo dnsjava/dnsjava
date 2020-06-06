@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS.config;
 
+import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Name;
@@ -18,8 +20,11 @@ import org.xbill.DNS.TextParseException;
  * @since 3.2
  */
 public abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
+  private static final boolean ipv4only = Boolean.getBoolean("java.net.preferIPv4Stack");
+  private static final boolean ipv6first = Boolean.getBoolean("java.net.preferIPv6Addresses");
+
+  private final List<InetSocketAddress> nameservers = new ArrayList<>(3);
   final Logger log = LoggerFactory.getLogger(getClass());
-  List<InetSocketAddress> nameservers = new ArrayList<>(3);
   List<Name> searchlist = new ArrayList<>(1);
 
   protected void parseSearchPathList(String search, String delimiter) {
@@ -77,6 +82,22 @@ public abstract class BaseResolverConfigProvider implements ResolverConfigProvid
 
   @Override
   public final List<InetSocketAddress> servers() {
+    if (ipv6first) {
+      // prefer IPv6: return IPv6 first, then IPv4 (each in the order added)
+      return nameservers.stream()
+          .sorted(
+              (a, b) ->
+                  Integer.compare(
+                      b.getAddress().getAddress().length, a.getAddress().getAddress().length))
+          .collect(Collectors.toList());
+    } else if (ipv4only) {
+      // skip IPv6 addresses
+      return nameservers.stream()
+          .filter(isa -> isa.getAddress() instanceof Inet4Address)
+          .collect(Collectors.toList());
+    }
+
+    // neither is specified, return in the order added
     return Collections.unmodifiableList(nameservers);
   }
 
