@@ -2,7 +2,6 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.xbill.DNS.config.PropertyResolverConfigProvider.DNS_NDOTS_PROP;
 import static org.xbill.DNS.config.PropertyResolverConfigProvider.DNS_SEARCH_PROP;
@@ -158,12 +157,6 @@ class ResolverConfigTest {
     JndiContextResolverConfigProvider rc = new JndiContextResolverConfigProvider();
     assertTrue(rc.isEnabled());
     rc.initialize();
-  }
-
-  @Test
-  void sunJvmThrowsIfNotInitialized() {
-    SunJvmResolverConfigProvider rc = new SunJvmResolverConfigProvider();
-    assertThrows(IllegalStateException.class, rc::servers);
   }
 
   @Test

@@ -49,7 +49,7 @@ public class AndroidResolverConfigProvider extends BaseResolverConfigProvider {
     for (int i = 1; i <= 4; i++) {
       String server = SystemProperties.get("net.dns" + i);
       if (server != null && !server.isEmpty()) {
-        nameservers.add(new InetSocketAddress(server, SimpleResolver.DEFAULT_PORT));
+        addNameserver(new InetSocketAddress(server, SimpleResolver.DEFAULT_PORT));
       }
     }
   }

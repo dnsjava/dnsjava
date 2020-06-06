@@ -49,7 +49,7 @@ public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider
 
         switch (st.nextToken()) {
           case "nameserver":
-            addServer(st.nextToken());
+            addNameserver(new InetSocketAddress(st.nextToken(), SimpleResolver.DEFAULT_PORT));
             break;
 
           case "domain":
@@ -107,12 +107,6 @@ public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider
           ndots = parseNdots(token.substring(6));
         }
       }
-    }
-  }
-
-  private void addServer(String server) {
-    if (nameservers.size() < 3) {
-      addNameserver(new InetSocketAddress(server, SimpleResolver.DEFAULT_PORT));
     }
   }
 
