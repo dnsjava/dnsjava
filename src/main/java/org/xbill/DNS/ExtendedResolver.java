@@ -2,6 +2,7 @@
 
 package org.xbill.DNS;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
@@ -34,9 +35,11 @@ public class ExtendedResolver implements Resolver {
     private final int retriesPerResolver;
     private List<ResolverEntry> resolvers;
     private int currentResolver;
+    private long endTime;
 
     Resolution(ExtendedResolver eres, Message query) {
       resolvers = new ArrayList<>(eres.resolvers);
+      endTime = System.nanoTime() + eres.timeout.toNanos();
       if (eres.loadBalance) {
         int start = eres.lbStart.updateAndGet(i -> i++ % resolvers.size());
         if (start > 0) {
@@ -99,14 +102,26 @@ public class ExtendedResolver implements Resolver {
             ex.getMessage());
 
         failureCounter.incrementAndGet();
-        // go to next resolver, until retries on all resolvers are exhausted
-        currentResolver = (currentResolver + 1) % resolvers.size();
-        if (attempts[currentResolver] < retriesPerResolver) {
-          send().handleAsync((r, t) -> handle(r, t, f));
-          return null;
-        }
 
-        f.completeExceptionally(ex);
+        if (endTime - System.nanoTime() < 0) {
+          f.completeExceptionally(
+              new IOException(
+                  "Timed out while trying to resolve "
+                      + query.getQuestion().getName()
+                      + "/"
+                      + Type.string(query.getQuestion().type)
+                      + ", id="
+                      + query.getHeader().getID()));
+        } else {
+          // go to next resolver, until retries on all resolvers are exhausted
+          currentResolver = (currentResolver + 1) % resolvers.size();
+          if (attempts[currentResolver] < retriesPerResolver) {
+            send().handleAsync((r, t) -> handle(r, t, f));
+            return null;
+          }
+
+          f.completeExceptionally(ex);
+        }
       } else {
         failureCounter.updateAndGet(i -> i > 0 ? (int) Math.log(i) : 0);
         f.complete(result);
@@ -136,16 +151,25 @@ public class ExtendedResolver implements Resolver {
    *
    * @since 3.2
    */
-  public static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(5);
+  public static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
+
+  /**
+   * Default timeout until resolving with one of the used resolvers fails.
+   *
+   * @since 3.2
+   */
+  public static final Duration DEFAULT_RESOLVER_TIMEOUT = Duration.ofSeconds(5);
 
   private final List<ResolverEntry> resolvers = new CopyOnWriteArrayList<>();
-  private boolean loadBalance;
   private final AtomicInteger lbStart = new AtomicInteger();
+  private boolean loadBalance;
   private int retries = 3;
+  private Duration timeout = DEFAULT_TIMEOUT;
 
   /**
    * Creates a new Extended Resolver. The default {@link ResolverConfig} is used to determine the
-   * servers for which {@link SimpleResolver}s are initialized.
+   * servers for which {@link SimpleResolver}s are initialized. The timeout for each server is
+   * initialized with {@link #DEFAULT_RESOLVER_TIMEOUT}.
    */
   public ExtendedResolver() {
     List<InetSocketAddress> servers = ResolverConfig.getCurrentConfig().servers();
@@ -154,14 +178,15 @@ public class ExtendedResolver implements Resolver {
             .map(
                 server -> {
                   Resolver r = new SimpleResolver(server);
-                  r.setTimeout(DEFAULT_TIMEOUT);
+                  r.setTimeout(DEFAULT_RESOLVER_TIMEOUT);
                   return new ResolverEntry(r);
                 })
             .collect(Collectors.toSet()));
   }
 
   /**
-   * Creates a new Extended Resolver
+   * Creates a new instance with {@link SimpleResolver}s. The timeout for each server is initialized
+   * with {@link #DEFAULT_RESOLVER_TIMEOUT}.
    *
    * @param servers An array of server names or IP addresses for which {@link SimpleResolver}s are
    *     initialized.
@@ -175,7 +200,7 @@ public class ExtendedResolver implements Resolver {
                   server -> {
                     try {
                       Resolver r = new SimpleResolver(server);
-                      r.setTimeout(DEFAULT_TIMEOUT);
+                      r.setTimeout(DEFAULT_RESOLVER_TIMEOUT);
                       return new ResolverEntry(r);
                     } catch (UnknownHostException e) {
                       throw new RuntimeException(e);
@@ -200,18 +225,16 @@ public class ExtendedResolver implements Resolver {
   }
 
   /**
-   * Creates a new Extended Resolver
+   * Creates a new {@link ExtendedResolver}. No timeout value is applied to the individual
+   * resolvers, make sure their timeout is smaller than the timeout of this {@link
+   * ExtendedResolver}.
    *
    * @param resolvers An iterable of pre-initialized {@link Resolver}s.
    */
   public ExtendedResolver(Iterable<Resolver> resolvers) {
     this.resolvers.addAll(
         StreamSupport.stream(resolvers.spliterator(), false)
-            .map(
-                resolver -> {
-                  resolver.setTimeout(DEFAULT_TIMEOUT);
-                  return new ResolverEntry(resolver);
-                })
+            .map(ResolverEntry::new)
             .collect(Collectors.toSet()));
   }
 
@@ -251,10 +274,13 @@ public class ExtendedResolver implements Resolver {
   }
 
   @Override
+  public Duration getTimeout() {
+    return timeout;
+  }
+
+  @Override
   public void setTimeout(Duration timeout) {
-    for (ResolverEntry re : resolvers) {
-      re.resolver.setTimeout(timeout);
-    }
+    this.timeout = timeout;
   }
 
   /**
