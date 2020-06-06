@@ -8,7 +8,6 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -52,7 +51,6 @@ public class ExtendedResolver implements Resolver {
           resolvers = shuffle;
         }
       } else {
-        Collections.shuffle(resolvers);
         resolvers =
             resolvers.stream()
                 .sorted(Comparator.comparingInt(re -> re.failures.get()))
@@ -181,7 +179,7 @@ public class ExtendedResolver implements Resolver {
                   r.setTimeout(DEFAULT_RESOLVER_TIMEOUT);
                   return new ResolverEntry(r);
                 })
-            .collect(Collectors.toSet()));
+            .collect(Collectors.toList()));
   }
 
   /**
