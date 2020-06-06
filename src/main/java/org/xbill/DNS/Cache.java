@@ -729,7 +729,11 @@ public class Cache {
       addRRset(rRset, cred);
     }
 
-    log.debug("caching {} for {}", response, in.getQuestion().getName());
+    log.debug(
+        "Caching {} for {}/{}",
+        response,
+        in.getQuestion().getName(),
+        Type.string(in.getQuestion().getType()));
     return response;
   }
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS.config;
 
-
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.List;
