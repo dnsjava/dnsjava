@@ -34,7 +34,13 @@ public class JndiContextResolverConfigProvider implements ResolverConfigProvider
     }
   }
 
-  private static class InnerJndiContextResolverConfigProvider extends BaseResolverConfigProvider {
+  @Slf4j
+  private static final class InnerJndiContextResolverConfigProvider
+      extends BaseResolverConfigProvider {
+    static {
+      log.debug("JNDI class: {}", DirContext.class.getName());
+    }
+
     public void initialize() {
       Hashtable<String, String> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");

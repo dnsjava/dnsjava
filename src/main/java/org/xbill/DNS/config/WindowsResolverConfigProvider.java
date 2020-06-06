@@ -47,7 +47,14 @@ public class WindowsResolverConfigProvider implements ResolverConfigProvider {
   }
 
   @Slf4j
-  private static class InnerWindowsResolverConfigProvider extends BaseResolverConfigProvider {
+  private static final class InnerWindowsResolverConfigProvider extends BaseResolverConfigProvider {
+    static {
+      log.debug(
+          "Checking for JNA classes: {} and {}",
+          Memory.class.getName(),
+          Win32Exception.class.getName());
+    }
+
     public void initialize() throws InitializationException {
       // The recommended method of calling the GetAdaptersAddresses function is to pre-allocate a
       // 15KB working buffer
