@@ -1,4 +1,8 @@
 06/22/2020
+	- 3.2.1 released
+	- Include sources and Javadoc
+
+06/22/2020
 	- 3.2.0 released
 	- Add Javadoc @since tags for APIs introduced since 3.0
 	- Fix requiring JNA in certain classloaders (#112)
