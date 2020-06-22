@@ -1,3 +1,13 @@
+06/22/2020
+	- 3.2.0 released
+	- Add Javadoc @since tags for APIs introduced since 3.0
+	- Fix requiring JNA in certain classloaders (#112)
+	- Add property to skip initializing builtin resolver config (#112)
+	- Make ResolverConfig and Resolver API public (#111)
+	- Add properties for a fallback resolver config provider (#111)
+	- Close UDP socket on failures (#110)
+	- Refactor TSIG code and add trace logging (#109)
+
 05/15/2020
 	- 3.1.0 released
 	- Fix order of OPT and TSIG records in messages (#108)
