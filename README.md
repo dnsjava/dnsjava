@@ -199,7 +199,7 @@ neither source nor binary compatible. The most important changes are:
    serialization formats:
    - `toString()`, `rrToString()` <-> `fromString()`
    - `toWire()` <-> `fromWire()`, `newRecord()`
-- `Message` and `Header` properly supported `clone()`
+- `Message` and `Header` properly support `clone()`
 
 ### Replacing the standard Java DNS functionality
 

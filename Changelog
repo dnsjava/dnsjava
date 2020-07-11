@@ -1,3 +1,8 @@
+07/11/2020
+	- 3.2.1 released
+	- Fix JNA access violation in WindowsResolverConfigProvider
+	  on 32bit JVMs
+
 06/22/2020
 	- 3.2.1 released
 	- Include sources and Javadoc
