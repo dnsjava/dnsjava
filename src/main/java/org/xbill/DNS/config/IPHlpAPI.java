@@ -151,6 +151,12 @@ interface IPHlpAPI extends Library {
     public char[] _String = new char[256];
   }
 
+  @Structure.FieldOrder({"LowPart", "HighPart"})
+  class LUID extends Structure {
+    public int LowPart;
+    public int HighPart;
+  }
+
   @Structure.FieldOrder({
     "Length",
     "IfIndex",
@@ -228,7 +234,7 @@ interface IPHlpAPI extends Library {
     public Pointer FirstGatewayAddress;
     public int Ipv4Metric;
     public int Ipv6Metric;
-    public Pointer Luid;
+    public LUID Luid;
     public SOCKET_ADDRESS Dhcpv4Server;
     public int CompartmentId;
     public Guid.GUID NetworkGuid;
