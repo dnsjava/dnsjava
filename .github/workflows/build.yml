@@ -35,4 +35,4 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Build with Maven
-        run: mvn test jacoco:report -B -"Dgpg.skip"
+        run: mvn verify -B -"Dgpg.skip"

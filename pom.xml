@@ -170,21 +170,24 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.14.0</version>
+                <version>0.14.3</version>
                 <configuration>
                     <parameter>
                         <onlyModified>true</onlyModified>
+                        <accessModifier>public</accessModifier>
                         <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
                         <excludes>
                             <!-- JDK9 removed the Nameservice SPI as per bug 8134577. -->
                             <exclude>org.xbill.DNS.spi</exclude>
+                            <!-- internal API detected as public -->
+                            <exclude>org.xbill.DNS.config.IPHlpAPI</exclude>
                         </excludes>
                     </parameter>
                 </configuration>
                 <executions>
                     <execution>
                         <id>check-compatibility</id>
-                        <phase>package</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>cmp</goal>
                         </goals>
