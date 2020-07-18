@@ -1,11 +1,11 @@
 package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class SVCBRecordTest {
   @Test
@@ -59,7 +59,86 @@ public class SVCBRecordTest {
   @Test
   void serviceFormQuotedEscapedValue() throws IOException {
     String str = "1 . alpn=\"h2\\,h3,h4\"";
+    assertEquals("1 . alpn=h2\\,h3,h4", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormMandatoryAndOutOfOrder() throws IOException {
+    String str = "1 . alpn=h3 no-default-alpn mandatory=alpn";
+    assertEquals("1 . mandatory=alpn alpn=h3 no-default-alpn", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormEscapedDomain() throws IOException {
+    String str = "1 dotty\\.lotty.example.com. no-default-alpn";
     assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormEchConfig() throws IOException {
+    String str = "1 h3pool. echconfig=1234";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormEchConfigMulti() throws IOException {
+    String str = "1 h3pool. alpn=h2,h3 echconfig=1234";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormEchConfigOutOfOrder() throws IOException {
+    String str = "1 h3pool. echconfig=1234 alpn=h2,h3";
+    assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormEchConfigQuoted() throws IOException {
+    String str = "1 h3pool. alpn=h2,h3 echconfig=\"1234\"";
+    assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
+  }
+
+  @Disabled
+  @Test
+  void serviceFormRelativeDomain() throws IOException {
+    String str = "1 h3pool alpn=h2,h3 echconfig=\"1234\"";
+    assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormIpv4Hint() throws IOException {
+    String str = "3 . ipv4hint=4.5.6.7";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormIpv4HintList() throws IOException {
+    String str = "5 . ipv4hint=4.5.6.7,8.9.1.2";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormIpv4HintQuoted() throws IOException {
+    String str = "5 . ipv4hint=\"4.5.6.7,8.9.1.2\"";
+    assertEquals("5 . ipv4hint=4.5.6.7,8.9.1.2", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormIpv4HintMultiKey() throws IOException {
+    String str = "7 . alpn=h2 ipv4hint=4.5.6.7";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormIpv6Hint() throws IOException {
+    String str = "9 . ipv6hint=2001:2002::1";
+    assertEquals("9 . ipv6hint=2001:2002:0:0:0:0:0:1", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormIpv6HintMulti() throws IOException {
+    String str = "2 . alpn=h2 ipv6hint=2001:2002::1,2001:2002::2";
+    assertEquals("2 . alpn=h2 ipv6hint=2001:2002:0:0:0:0:0:1,2001:2002:0:0:0:0:0:2", stringToWireToString(str));
   }
 
   private String stringToWireToString(String str) throws IOException {

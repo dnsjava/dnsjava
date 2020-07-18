@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,7 @@ abstract class SVCBBase extends Record {
   private static final ParameterMnemonic parameters = new ParameterMnemonic();
 
   static {
-    parameters.add(MANDATORY, "mandatory");
+    parameters.add(MANDATORY, "mandatory", SVCBParameterMandatory::new);
     parameters.add(ALPN, "alpn", SVCBParameterAlpn::new);
     parameters.add(NO_DEFAULT_ALPN, "no-default-alpn", SVCBParameterNoDefaultAlpn::new);
     parameters.add(PORT, "port", SVCBParameterPort::new);
@@ -78,6 +78,58 @@ abstract class SVCBBase extends Record {
     public abstract void fromString(String string) throws IOException;
     public abstract byte[] toWire();
     public abstract String toString();
+
+    // Split on string on commas but not if comma is escaped with a '\'
+    public static String[] splitStringWithEscapedCommas(String string) {
+      return string.split("(?<!\\\\),");
+    }
+  }
+
+  static private class SVCBParameterMandatory extends SVCBParameterBase {
+    private List<Integer> values;
+
+    public SVCBParameterMandatory() {
+      super();
+      values = new ArrayList<>();
+    }
+
+    @Override
+    public void fromWire(byte[] bytes) throws IOException {
+      DNSInput in = new DNSInput(bytes);
+      while (in.remaining() > 0) {
+        int key = in.readU16();
+        values.add(key);
+      }
+    }
+
+    @Override
+    public void fromString(String string) throws IOException {
+      for (String str : splitStringWithEscapedCommas(string)) {
+        int key = parameters.getValue(str);
+        values.add(key);
+      }
+    }
+
+    @Override
+    public byte[] toWire() {
+      DNSOutput out = new DNSOutput();
+      for (Integer val : values) {
+        out.writeU16(val);
+      }
+      return out.toByteArray();
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      for (Integer val : values) {
+        if (sb.length() > 0) {
+          sb.append(",");
+        }
+        sb.append(parameters.getText(val));
+      }
+      return sb.toString();
+    }
   }
 
   static private class SVCBParameterAlpn extends SVCBParameterBase {
@@ -99,8 +151,8 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws IOException {
-      for (String str : string.split(",")) {
-        values.add(byteArrayFromString(str));
+      for (String str : splitStringWithEscapedCommas(string)) {
+        values.add(str.getBytes());
       }
     }
 
@@ -193,12 +245,19 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) {
-
+      for (String str : string.split(",")) {
+        byte[] address = Address.toByteArray(str, Address.IPv4);
+        addresses.add(address);
+      }
     }
 
     @Override
     public byte[] toWire() {
-      return new byte[0];
+      DNSOutput out = new DNSOutput();
+      for (byte[] b : addresses) {
+        out.writeByteArray(b);
+      }
+      return out.toByteArray();
     }
 
     @Override
@@ -215,26 +274,28 @@ abstract class SVCBBase extends Record {
   }
 
   static private class SVCBParameterEchConfig extends SVCBParameterBase {
+    private byte[] data;
+
     public SVCBParameterEchConfig() { super(); }
 
     @Override
     public void fromWire(byte[] bytes) {
-
+      data = bytes;
     }
 
     @Override
     public void fromString(String string) {
-
+      data = Base64.getDecoder().decode(string);
     }
 
     @Override
     public byte[] toWire() {
-      return new byte[0];
+      return data;
     }
 
     @Override
     public String toString() {
-      return null;
+      return Base64.getEncoder().encodeToString(data);
     }
   }
 
@@ -256,12 +317,19 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) {
-
+      for (String str : string.split(",")) {
+        byte[] address = Address.toByteArray(str, Address.IPv6);
+        addresses.add(address);
+      }
     }
 
     @Override
     public byte[] toWire() {
-      return new byte[0];
+      DNSOutput out = new DNSOutput();
+      for (byte[] b : addresses) {
+        out.writeByteArray(b);
+      }
+      return out.toByteArray();
     }
 
     @Override
