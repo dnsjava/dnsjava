@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -351,26 +352,32 @@ abstract class SVCBBase extends Record {
   }
 
   static private class SVCBParameterUnknown extends SVCBParameterBase {
-    public SVCBParameterUnknown() { super(); }
+    private int key;
+    private byte[] value;
 
-    @Override
-    public void fromWire(byte[] bytes) {
-
+    public SVCBParameterUnknown(int key) {
+      super();
+      this.key = key;
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromWire(byte[] bytes) {
+      value = bytes;
+    }
 
+    @Override
+    public void fromString(String string) throws IOException {
+      value =  byteArrayFromString(string);
     }
 
     @Override
     public byte[] toWire() {
-      return new byte[0];
+      return value;
     }
 
     @Override
     public String toString() {
-      return null;
+      return byteArrayToString(value, false);
     }
   }
 
@@ -388,7 +395,7 @@ abstract class SVCBBase extends Record {
       if (factory != null) {
         param = factory.get();
       } else {
-        param = new SVCBParameterUnknown();
+        param = new SVCBParameterUnknown(key);
       }
       param.fromWire(value);
       svcFieldValue.put(key, param);
@@ -423,7 +430,6 @@ abstract class SVCBBase extends Record {
       String keyStr = null;
       String valueStr = null;
       Tokenizer.Token t = st.get();
-      System.out.println("AWS token: " + t);
       if (!t.isString()) {
         break;
       }
@@ -456,7 +462,7 @@ abstract class SVCBBase extends Record {
       if (factory != null) {
         param = factory.get();
       } else {
-        param = new SVCBParameterUnknown();
+        param = new SVCBParameterUnknown(key);
       }
       param.fromString(valueStr);
       svcFieldValue.put(key, param);

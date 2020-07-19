@@ -141,8 +141,37 @@ public class SVCBRecordTest {
     assertEquals("2 . alpn=h2 ipv6hint=2001:2002:0:0:0:0:0:1,2001:2002:0:0:0:0:0:2", stringToWireToString(str));
   }
 
+  @Test
+  void serviceFormUnknownKey() throws IOException {
+    String str = "6 . key12345=abcdefg\\012";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormUnknownKeyBytes() throws IOException {
+    String str = "8 . key23456=\\000\\001\\002\\003";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormUnknownKeyEscapedChars() throws IOException {
+    String str = "1 . key29=a\\b\\c";
+    assertEquals("1 . key29=abc", stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormUnknownKeyEscapedSlash() throws IOException {
+    String str = "65535 . key29=a\\\\b\\\\c";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void serviceFormUnknownHighKey() throws IOException {
+    String str = "65535 . key65535=abcdefg";
+    assertEquals(str, stringToWireToString(str));
+  }
+
   private String stringToWireToString(String str) throws IOException {
-    System.out.println("AWS string: " + str);
     Tokenizer t = new Tokenizer(str);
     SVCBRecord record = new SVCBRecord();
     record.rdataFromString(t, null);
