@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
@@ -17,13 +17,13 @@ abstract class SVCBBase extends Record {
   protected Name svcDomainName;
   protected Map<Integer, SVCBParameterBase> svcFieldValue;
 
-  protected static final int MANDATORY = 0;
-  protected static final int ALPN = 1;
-  protected static final int NO_DEFAULT_ALPN = 2;
-  protected static final int PORT = 3;
-  protected static final int IPV4HINT = 4;
-  protected static final int ECHCONFIG = 5;
-  protected static final int IPV6HINT = 6;
+  public static final int MANDATORY = 0;
+  public static final int ALPN = 1;
+  public static final int NO_DEFAULT_ALPN = 2;
+  public static final int PORT = 3;
+  public static final int IPV4HINT = 4;
+  public static final int ECHCONFIG = 5;
+  public static final int IPV6HINT = 6;
 
   protected SVCBBase() {}
 
@@ -31,13 +31,30 @@ abstract class SVCBBase extends Record {
     super(name, type, dclass, ttl);
   }
 
-  protected SVCBBase(Name name, int type, int dclass, long ttl, int priority, Name domain, Map<Integer, SVCBParameterBase> value) {
+  protected SVCBBase(Name name, int type, int dclass, long ttl, int priority, Name domain, List<SVCBParameterBase> values) {
     super(name, type, dclass, ttl);
     svcFieldPriority = priority;
+    svcDomainName = domain;
     this.svcFieldValue = new TreeMap<>();
-    for (Integer i : value.keySet()) {
-      this.svcFieldValue.put(i, value.get(i));
+    for (SVCBParameterBase param :values) {
+      this.svcFieldValue.put(param.getKey(), param);
     }
+  }
+
+  public int getSvcFieldPriority() {
+    return svcFieldPriority;
+  }
+
+  public Name getSvcDomainName() {
+    return svcDomainName;
+  }
+
+  public Set<Integer> getSvcParameterKeys() {
+    return svcFieldValue.keySet();
+  }
+
+  public SVCBParameterBase getSvcParameterValue(int key) {
+    return svcFieldValue.get(key);
   }
 
   private static class ParameterMnemonic extends Mnemonic {
@@ -73,8 +90,9 @@ abstract class SVCBBase extends Record {
     parameters.add(IPV6HINT, "ipv6hint", SVCBParameterIpv6Hint::new);
   }
 
-  static abstract class SVCBParameterBase {
+  static public abstract class SVCBParameterBase {
     public SVCBParameterBase() {}
+    public abstract int getKey();
     public abstract void fromWire(byte[] bytes) throws IOException;
     public abstract void fromString(String string) throws IOException;
     public abstract byte[] toWire();
@@ -84,14 +102,23 @@ abstract class SVCBBase extends Record {
     public static String[] splitStringWithEscapedCommas(String string) {
       return string.split("(?<!\\\\),");
     }
+
+    public String getKeyText() {
+      return parameters.getText(getKey());
+    }
   }
 
-  static private class SVCBParameterMandatory extends SVCBParameterBase {
+  static public class SVCBParameterMandatory extends SVCBParameterBase {
     private List<Integer> values;
 
     public SVCBParameterMandatory() {
       super();
       values = new ArrayList<>();
+    }
+
+    @Override
+    public int getKey() {
+      return MANDATORY;
     }
 
     @Override
@@ -133,12 +160,17 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterAlpn extends SVCBParameterBase {
+  static public class SVCBParameterAlpn extends SVCBParameterBase {
     private List<byte[]> values;
 
     public SVCBParameterAlpn() {
       super();
       values = new ArrayList<>();
+    }
+
+    @Override
+    public int getKey() {
+      return ALPN;
     }
 
     @Override
@@ -179,14 +211,23 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterNoDefaultAlpn extends SVCBParameterBase {
+  static public class SVCBParameterNoDefaultAlpn extends SVCBParameterBase {
     public SVCBParameterNoDefaultAlpn() { super(); }
+
+    @Override
+    public int getKey() {
+      return NO_DEFAULT_ALPN;
+    }
 
     @Override
     public void fromWire(byte[] bytes) { }
 
     @Override
-    public void fromString(String string) { }
+    public void fromString(String string) throws TextParseException {
+      if (string != null && !string.isEmpty()) {
+        throw new TextParseException("No value can be specified for no-default-alpn");
+      }
+    }
 
     @Override
     public byte[] toWire() {
@@ -199,10 +240,15 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterPort extends SVCBParameterBase {
+  static public class SVCBParameterPort extends SVCBParameterBase {
     private int port;
 
     public SVCBParameterPort() { super(); }
+
+    @Override
+    public int getKey() {
+      return PORT;
+    }
 
     @Override
     public void fromWire(byte[] bytes) throws IOException {
@@ -228,12 +274,17 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterIpv4Hint extends SVCBParameterBase {
+  static public class SVCBParameterIpv4Hint extends SVCBParameterBase {
     private List<byte[]> addresses;
 
     public SVCBParameterIpv4Hint() {
       super();
       addresses = new ArrayList<>();
+    }
+
+    @Override
+    public int getKey() {
+      return IPV4HINT;
     }
 
     @Override
@@ -245,9 +296,12 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromString(String string) throws IOException {
       for (String str : string.split(",")) {
         byte[] address = Address.toByteArray(str, Address.IPv4);
+        if (address == null) {
+          throw new TextParseException("Invalid ipv4hint value '" + string + "'");
+        }
         addresses.add(address);
       }
     }
@@ -274,10 +328,15 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterEchConfig extends SVCBParameterBase {
+  static public class SVCBParameterEchConfig extends SVCBParameterBase {
     private byte[] data;
 
     public SVCBParameterEchConfig() { super(); }
+
+    @Override
+    public int getKey() {
+      return ECHCONFIG;
+    }
 
     @Override
     public void fromWire(byte[] bytes) {
@@ -300,12 +359,17 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterIpv6Hint extends SVCBParameterBase {
+  static public class SVCBParameterIpv6Hint extends SVCBParameterBase {
     private List<byte[]> addresses;
 
     public SVCBParameterIpv6Hint() {
       super();
       addresses = new ArrayList<>();
+    }
+
+    @Override
+    public int getKey() {
+      return IPV6HINT;
     }
 
     @Override
@@ -317,9 +381,12 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromString(String string) throws IOException {
       for (String str : string.split(",")) {
         byte[] address = Address.toByteArray(str, Address.IPv6);
+        if (address == null) {
+          throw new TextParseException("Invalid ipv6hint value '" + string + "'");
+        }
         addresses.add(address);
       }
     }
@@ -351,13 +418,18 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static private class SVCBParameterUnknown extends SVCBParameterBase {
+  static public class SVCBParameterUnknown extends SVCBParameterBase {
     private int key;
     private byte[] value;
 
     public SVCBParameterUnknown(int key) {
       super();
       this.key = key;
+    }
+
+    @Override
+    public int getKey() {
+      return key;
     }
 
     @Override
@@ -443,7 +515,7 @@ abstract class SVCBBase extends Record {
         keyStr = t.value.substring(0, indexOfEquals);
         t = st.get();
         if (!t.isString()) {
-          // ERROR
+          throw new TextParseException("Expected value for parameter key '" + keyStr + "'");
         }
         valueStr = t.value;
       }
@@ -452,12 +524,15 @@ abstract class SVCBBase extends Record {
         keyStr = t.value.substring(0, indexOfEquals);
         valueStr = t.value.substring(indexOfEquals + 1);
       }
-      else {
-        // If "=" is the first character it is invalid since key must be specified
-      }
 
       SVCBParameterBase param;
       int key = parameters.getValue(keyStr);
+      if (key == -1) {
+        throw new TextParseException("Expected a valid parameter key for '" + keyStr + "'");
+      }
+      if (svcFieldValue.containsKey(key)) {
+        throw new TextParseException("Duplicate parameter key for '" + keyStr + "'");
+      }
       Supplier<SVCBParameterBase> factory = parameters.getFactory(key);
       if (factory != null) {
         param = factory.get();
@@ -466,6 +541,13 @@ abstract class SVCBBase extends Record {
       }
       param.fromString(valueStr);
       svcFieldValue.put(key, param);
+    }
+
+    if (svcFieldPriority > 0 && svcFieldValue.isEmpty()) {
+      throw new TextParseException("At least one parameter value must be specified for ServiceForm");
+    }
+    if (svcFieldPriority == 0 && !svcFieldValue.isEmpty()) {
+      throw new TextParseException("No parameter values allowed for AliasForm");
     }
   }
 
