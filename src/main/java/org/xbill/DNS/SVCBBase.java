@@ -13,9 +13,9 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 
 abstract class SVCBBase extends Record {
-  protected int svcFieldPriority;
-  protected Name svcDomainName;
-  protected Map<Integer, SVCBParameterBase> svcFieldValue;
+  protected int svcPriority;
+  protected Name targetName;
+  protected Map<Integer, ParameterBase> svcParams;
 
   public static final int MANDATORY = 0;
   public static final int ALPN = 1;
@@ -31,34 +31,34 @@ abstract class SVCBBase extends Record {
     super(name, type, dclass, ttl);
   }
 
-  protected SVCBBase(Name name, int type, int dclass, long ttl, int priority, Name domain, List<SVCBParameterBase> values) {
+  protected SVCBBase(Name name, int type, int dclass, long ttl, int priority, Name domain, List<ParameterBase> params) {
     super(name, type, dclass, ttl);
-    svcFieldPriority = priority;
-    svcDomainName = domain;
-    this.svcFieldValue = new TreeMap<>();
-    for (SVCBParameterBase param :values) {
-      this.svcFieldValue.put(param.getKey(), param);
+    svcPriority = priority;
+    targetName = domain;
+    this.svcParams = new TreeMap<>();
+    for (ParameterBase param : params) {
+      this.svcParams.put(param.getKey(), param);
     }
   }
 
-  public int getSvcFieldPriority() {
-    return svcFieldPriority;
+  public int getSvcPriority() {
+    return svcPriority;
   }
 
-  public Name getSvcDomainName() {
-    return svcDomainName;
+  public Name getTargetName() {
+    return targetName;
   }
 
-  public Set<Integer> getSvcParameterKeys() {
-    return svcFieldValue.keySet();
+  public Set<Integer> getSvcParamKeys() {
+    return svcParams.keySet();
   }
 
-  public SVCBParameterBase getSvcParameterValue(int key) {
-    return svcFieldValue.get(key);
+  public ParameterBase getSvcParamValue(int key) {
+    return svcParams.get(key);
   }
 
   private static class ParameterMnemonic extends Mnemonic {
-    private HashMap<Integer, Supplier<SVCBParameterBase>> factories;
+    private HashMap<Integer, Supplier<ParameterBase>> factories;
 
     public ParameterMnemonic() {
       super("SVCB/HTTPS Parameters", Mnemonic.CASE_LOWER);
@@ -68,12 +68,12 @@ abstract class SVCBBase extends Record {
       factories = new HashMap<>();
     }
 
-    public void add(int val, String str, Supplier<SVCBParameterBase> factory) {
+    public void add(int val, String str, Supplier<ParameterBase> factory) {
       super.add(val, str);
       factories.put(val, factory);
     }
 
-    public Supplier<SVCBParameterBase> getFactory(int val) {
+    public Supplier<ParameterBase> getFactory(int val) {
       return factories.get(val);
     }
   }
@@ -81,17 +81,17 @@ abstract class SVCBBase extends Record {
   private static final ParameterMnemonic parameters = new ParameterMnemonic();
 
   static {
-    parameters.add(MANDATORY, "mandatory", SVCBParameterMandatory::new);
-    parameters.add(ALPN, "alpn", SVCBParameterAlpn::new);
-    parameters.add(NO_DEFAULT_ALPN, "no-default-alpn", SVCBParameterNoDefaultAlpn::new);
-    parameters.add(PORT, "port", SVCBParameterPort::new);
-    parameters.add(IPV4HINT, "ipv4hint", SVCBParameterIpv4Hint::new);
-    parameters.add(ECHCONFIG, "echconfig", SVCBParameterEchConfig::new);
-    parameters.add(IPV6HINT, "ipv6hint", SVCBParameterIpv6Hint::new);
+    parameters.add(MANDATORY, "mandatory", ParameterMandatory::new);
+    parameters.add(ALPN, "alpn", ParameterAlpn::new);
+    parameters.add(NO_DEFAULT_ALPN, "no-default-alpn", ParameterNoDefaultAlpn::new);
+    parameters.add(PORT, "port", ParameterPort::new);
+    parameters.add(IPV4HINT, "ipv4hint", ParameterIpv4Hint::new);
+    parameters.add(ECHCONFIG, "echconfig", ParameterEchConfig::new);
+    parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
   }
 
-  static public abstract class SVCBParameterBase {
-    public SVCBParameterBase() {}
+  static public abstract class ParameterBase {
+    public ParameterBase() {}
     public abstract int getKey();
     public abstract void fromWire(byte[] bytes) throws IOException;
     public abstract void fromString(String string) throws IOException;
@@ -102,16 +102,12 @@ abstract class SVCBBase extends Record {
     public static String[] splitStringWithEscapedCommas(String string) {
       return string.split("(?<!\\\\),");
     }
-
-    public String getKeyText() {
-      return parameters.getText(getKey());
-    }
   }
 
-  static public class SVCBParameterMandatory extends SVCBParameterBase {
+  static public class ParameterMandatory extends ParameterBase {
     private List<Integer> values;
 
-    public SVCBParameterMandatory() {
+    public ParameterMandatory() {
       super();
       values = new ArrayList<>();
     }
@@ -131,7 +127,7 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) throws IOException {
+    public void fromString(String string) {
       for (String str : splitStringWithEscapedCommas(string)) {
         int key = parameters.getValue(str);
         values.add(key);
@@ -160,10 +156,10 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class SVCBParameterAlpn extends SVCBParameterBase {
+  static public class ParameterAlpn extends ParameterBase {
     private List<byte[]> values;
 
-    public SVCBParameterAlpn() {
+    public ParameterAlpn() {
       super();
       values = new ArrayList<>();
     }
@@ -183,7 +179,7 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) throws IOException {
+    public void fromString(String string) {
       for (String str : splitStringWithEscapedCommas(string)) {
         values.add(str.getBytes());
       }
@@ -211,8 +207,8 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class SVCBParameterNoDefaultAlpn extends SVCBParameterBase {
-    public SVCBParameterNoDefaultAlpn() { super(); }
+  static public class ParameterNoDefaultAlpn extends ParameterBase {
+    public ParameterNoDefaultAlpn() { super(); }
 
     @Override
     public int getKey() {
@@ -236,14 +232,14 @@ abstract class SVCBBase extends Record {
 
     @Override
     public String toString() {
-      return new String();
+      return "";
     }
   }
 
-  static public class SVCBParameterPort extends SVCBParameterBase {
+  static public class ParameterPort extends ParameterBase {
     private int port;
 
-    public SVCBParameterPort() { super(); }
+    public ParameterPort() { super(); }
 
     @Override
     public int getKey() {
@@ -274,10 +270,10 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class SVCBParameterIpv4Hint extends SVCBParameterBase {
+  static public class ParameterIpv4Hint extends ParameterBase {
     private List<byte[]> addresses;
 
-    public SVCBParameterIpv4Hint() {
+    public ParameterIpv4Hint() {
       super();
       addresses = new ArrayList<>();
     }
@@ -328,10 +324,10 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class SVCBParameterEchConfig extends SVCBParameterBase {
+  static public class ParameterEchConfig extends ParameterBase {
     private byte[] data;
 
-    public SVCBParameterEchConfig() { super(); }
+    public ParameterEchConfig() { super(); }
 
     @Override
     public int getKey() {
@@ -359,10 +355,10 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class SVCBParameterIpv6Hint extends SVCBParameterBase {
+  static public class ParameterIpv6Hint extends ParameterBase {
     private List<byte[]> addresses;
 
-    public SVCBParameterIpv6Hint() {
+    public ParameterIpv6Hint() {
       super();
       addresses = new ArrayList<>();
     }
@@ -418,11 +414,11 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class SVCBParameterUnknown extends SVCBParameterBase {
+  static public class ParameterUnknown extends ParameterBase {
     private int key;
     private byte[] value;
 
-    public SVCBParameterUnknown(int key) {
+    public ParameterUnknown(int key) {
       super();
       this.key = key;
     }
@@ -455,35 +451,35 @@ abstract class SVCBBase extends Record {
 
   @Override
   protected void rrFromWire(DNSInput in) throws IOException {
-    svcFieldPriority = in.readU16();
-    svcDomainName = new Name(in);
-    svcFieldValue = new TreeMap<>();
+    svcPriority = in.readU16();
+    targetName = new Name(in);
+    svcParams = new TreeMap<>();
     while (in.remaining() > 0) {
       int key = in.readU16();
       int length = in.readU16();
       byte[] value = in.readByteArray(length);
-      SVCBParameterBase param;
-      Supplier<SVCBParameterBase> factory = parameters.getFactory(key);
+      ParameterBase param;
+      Supplier<ParameterBase> factory = parameters.getFactory(key);
       if (factory != null) {
         param = factory.get();
       } else {
-        param = new SVCBParameterUnknown(key);
+        param = new ParameterUnknown(key);
       }
       param.fromWire(value);
-      svcFieldValue.put(key, param);
+      svcParams.put(key, param);
     }
   }
 
   @Override
   protected String rrToString() {
     StringBuilder sb = new StringBuilder();
-    sb.append(svcFieldPriority);
+    sb.append(svcPriority);
     sb.append(" ");
-    sb.append(svcDomainName);
-    for (Integer key : svcFieldValue.keySet()) {
+    sb.append(targetName);
+    for (Integer key : svcParams.keySet()) {
       sb.append(" ");
       sb.append(parameters.getText(key));
-      SVCBParameterBase param = svcFieldValue.get(key);
+      ParameterBase param = svcParams.get(key);
       String value = param.toString();
       if (value != null && !value.isEmpty()) {
         sb.append("=");
@@ -495,9 +491,9 @@ abstract class SVCBBase extends Record {
 
   @Override
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
-    svcFieldPriority = st.getUInt16();
-    svcDomainName = st.getName(origin);
-    svcFieldValue = new TreeMap<>();
+    svcPriority = st.getUInt16();
+    targetName = st.getName(origin);
+    svcParams = new TreeMap<>();
     while (true) {
       String keyStr = null;
       String valueStr = null;
@@ -507,7 +503,7 @@ abstract class SVCBBase extends Record {
       }
       int indexOfEquals = t.value.indexOf('=');
       if (indexOfEquals == -1) {
-        // No "=" is key with no value case, set the value as empty byte sequence
+        // No "=" is key with no value case, leave value string as null
         keyStr = t.value;
       }
       else if (indexOfEquals == t.value.length() - 1) {
@@ -525,39 +521,39 @@ abstract class SVCBBase extends Record {
         valueStr = t.value.substring(indexOfEquals + 1);
       }
 
-      SVCBParameterBase param;
+      ParameterBase param;
       int key = parameters.getValue(keyStr);
       if (key == -1) {
         throw new TextParseException("Expected a valid parameter key for '" + keyStr + "'");
       }
-      if (svcFieldValue.containsKey(key)) {
+      if (svcParams.containsKey(key)) {
         throw new TextParseException("Duplicate parameter key for '" + keyStr + "'");
       }
-      Supplier<SVCBParameterBase> factory = parameters.getFactory(key);
+      Supplier<ParameterBase> factory = parameters.getFactory(key);
       if (factory != null) {
         param = factory.get();
       } else {
-        param = new SVCBParameterUnknown(key);
+        param = new ParameterUnknown(key);
       }
       param.fromString(valueStr);
-      svcFieldValue.put(key, param);
+      svcParams.put(key, param);
     }
 
-    if (svcFieldPriority > 0 && svcFieldValue.isEmpty()) {
-      throw new TextParseException("At least one parameter value must be specified for ServiceForm");
+    if (svcPriority > 0 && svcParams.isEmpty()) {
+      throw new TextParseException("At least one parameter value must be specified for ServiceMode");
     }
-    if (svcFieldPriority == 0 && !svcFieldValue.isEmpty()) {
-      throw new TextParseException("No parameter values allowed for AliasForm");
+    if (svcPriority == 0 && !svcParams.isEmpty()) {
+      throw new TextParseException("No parameter values allowed for AliasMode");
     }
   }
 
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-    out.writeU16(svcFieldPriority);
-    svcDomainName.toWire(out, null, canonical);
-    for (Integer key : svcFieldValue.keySet()) {
+    out.writeU16(svcPriority);
+    targetName.toWire(out, null, canonical);
+    for (Integer key : svcParams.keySet()) {
       out.writeU16(key);
-      SVCBParameterBase param = svcFieldValue.get(key);
+      ParameterBase param = svcParams.get(key);
       byte[] value = param.toWire();
       out.writeU16(value.length);
       out.writeByteArray(value);

@@ -17,29 +17,29 @@ public class SVCBRecordTest {
     Name label = Name.fromString("test.com.");
     int svcPriority = 5;
     Name svcDomain = Name.fromString("svc.test.com.");
-    SVCBRecord.SVCBParameterMandatory mandatory = new SVCBRecord.SVCBParameterMandatory();
+    SVCBRecord.ParameterMandatory mandatory = new SVCBRecord.ParameterMandatory();
     mandatory.fromString("alpn");
-    SVCBRecord.SVCBParameterAlpn alpn = new SVCBRecord.SVCBParameterAlpn();
+    SVCBRecord.ParameterAlpn alpn = new SVCBRecord.ParameterAlpn();
     alpn.fromString("h1,h2");
-    SVCBRecord.SVCBParameterIpv4Hint ipv4 = new SVCBRecord.SVCBParameterIpv4Hint();
+    SVCBRecord.ParameterIpv4Hint ipv4 = new SVCBRecord.ParameterIpv4Hint();
     ipv4.fromString("1.2.3.4,5.6.7.8");
-    List<SVCBRecord.SVCBParameterBase> params = List.of(mandatory, ipv4, alpn);
+    List<SVCBRecord.ParameterBase> params = List.of(mandatory, ipv4, alpn);
     SVCBRecord record = new SVCBRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
 
     assertEquals(Type.SVCB, record.getType());
     assertEquals(label, record.getName());
-    assertEquals(svcPriority, record.getSvcFieldPriority());
-    assertEquals(svcDomain, record.getSvcDomainName());
-    assertEquals(List.of(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString(), record.getSvcParameterKeys().toString());
-    assertEquals("alpn", record.getSvcParameterValue(SVCBRecord.MANDATORY).toString());
-    assertEquals("h1,h2", record.getSvcParameterValue(SVCBRecord.ALPN).toString());
-    assertEquals("h1,h2", record.getSvcParameterValue(SVCBRecord.ALPN).toString());
-    assertNull(record.getSvcParameterValue(1234));
+    assertEquals(svcPriority, record.getSvcPriority());
+    assertEquals(svcDomain, record.getTargetName());
+    assertEquals(List.of(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString(), record.getSvcParamKeys().toString());
+    assertEquals("alpn", record.getSvcParamValue(SVCBRecord.MANDATORY).toString());
+    assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
+    assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
+    assertNull(record.getSvcParamValue(1234));
     assertEquals("test.com.\t\t300\tIN\tSVCB\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8", record.toString());
   }
 
   @Test
-  void aliasForm() throws IOException {
+  void aliasMode() throws IOException {
     String str = "0 a.b.c.";
     byte[] bytes = stringToWire(str);
     byte[] expected = new byte[] { 0, 0, 1, 'a', 1, 'b', 1, 'c', 0 };
@@ -48,7 +48,7 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceFormPort() throws IOException {
+  void serviceModePort() throws IOException {
     String str = "1 . port=8443";
     byte[] bytes = stringToWire(str);
     byte[] expected = new byte[] { 0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
@@ -57,31 +57,31 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceFormAlpn() throws IOException {
+  void serviceModeAlpn() throws IOException {
     String str = "1 . alpn=h3";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormNoDefaultAlpn() throws IOException {
+  void serviceModeNoDefaultAlpn() throws IOException {
     String str = "1 . no-default-alpn";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormMultiKey() throws IOException {
+  void serviceModeMultiKey() throws IOException {
     String str = "1 . alpn=h3 no-default-alpn";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormIntKey() throws IOException {
+  void serviceModeIntKey() throws IOException {
     String str = "1 . 1=h3";
     assertEquals("1 . alpn=h3", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormMultiValue() throws IOException {
+  void serviceModeMultiValue() throws IOException {
     String str = "1 . alpn=h2,h3";
     byte[] bytes = stringToWire(str);
     byte[] expected = new byte[] { 0, 1, 0, 0, 1, 0, 6, 2, 'h', '2', 2, 'h', '3'};
@@ -90,68 +90,68 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceFormQuotedValue() throws IOException {
+  void serviceModeQuotedValue() throws IOException {
     String str = "1 . alpn=\"h2,h3\"";
     assertEquals("1 . alpn=h2,h3", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormQuotedEscapedValue() throws IOException {
+  void serviceModeQuotedEscapedValue() throws IOException {
     String str = "1 . alpn=\"h2\\,h3,h4\"";
     assertEquals("1 . alpn=h2\\,h3,h4", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormMandatoryAndOutOfOrder() throws IOException {
+  void serviceModeMandatoryAndOutOfOrder() throws IOException {
     String str = "1 . alpn=h3 no-default-alpn mandatory=alpn";
     assertEquals("1 . mandatory=alpn alpn=h3 no-default-alpn", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormEscapedDomain() throws IOException {
+  void serviceModeEscapedDomain() throws IOException {
     String str = "1 dotty\\.lotty.example.com. no-default-alpn";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormEchConfig() throws IOException {
+  void serviceModeEchConfig() throws IOException {
     String str = "1 h3pool. echconfig=1234";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormEchConfigMulti() throws IOException {
+  void serviceModeEchConfigMulti() throws IOException {
     String str = "1 h3pool. alpn=h2,h3 echconfig=1234";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormEchConfigOutOfOrder() throws IOException {
+  void serviceModeEchConfigOutOfOrder() throws IOException {
     String str = "1 h3pool. echconfig=1234 alpn=h2,h3";
     assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormEchConfigQuoted() throws IOException {
+  void serviceModeEchConfigQuoted() throws IOException {
     String str = "1 h3pool. alpn=h2,h3 echconfig=\"1234\"";
     assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
   }
 
   @Disabled
   @Test
-  void serviceFormRelativeDomain() throws IOException {
+  void serviceModeRelativeDomain() throws IOException {
     String str = "1 h3pool alpn=h2,h3 echconfig=\"1234\"";
     assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormIpv4Hint() throws IOException {
+  void serviceModeIpv4Hint() throws IOException {
     String str = "3 . ipv4hint=4.5.6.7";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormIpv4HintList() throws IOException {
+  void serviceModeIpv4HintList() throws IOException {
     String str = "5 . ipv4hint=4.5.6.7,8.9.1.2";
     byte[] bytes = stringToWire(str);
     byte[] expected = new byte[] { 0, 5, 0, 0, 4, 0, 8, 4, 5, 6, 7, 8, 9, 1, 2 };
@@ -160,37 +160,37 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceFormIpv4HintQuoted() throws IOException {
+  void serviceModeIpv4HintQuoted() throws IOException {
     String str = "5 . ipv4hint=\"4.5.6.7,8.9.1.2\"";
     assertEquals("5 . ipv4hint=4.5.6.7,8.9.1.2", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormIpv4HintMultiKey() throws IOException {
+  void serviceModeIpv4HintMultiKey() throws IOException {
     String str = "7 . alpn=h2 ipv4hint=4.5.6.7";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormIpv6Hint() throws IOException {
+  void serviceModeIpv6Hint() throws IOException {
     String str = "9 . ipv6hint=2001:2002::1";
     assertEquals("9 . ipv6hint=2001:2002:0:0:0:0:0:1", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormIpv6HintMulti() throws IOException {
+  void serviceModeIpv6HintMulti() throws IOException {
     String str = "2 . alpn=h2 ipv6hint=2001:2002::1,2001:2002::2";
     assertEquals("2 . alpn=h2 ipv6hint=2001:2002:0:0:0:0:0:1,2001:2002:0:0:0:0:0:2", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormUnknownKey() throws IOException {
+  void serviceModeUnknownKey() throws IOException {
     String str = "6 . key12345=abcdefg\\012";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormUnknownKeyBytes() throws IOException {
+  void serviceModeUnknownKeyBytes() throws IOException {
     String str = "8 . key23456=\\000\\001\\002\\003";
     byte[] bytes = stringToWire(str);
     byte[] expected = new byte[] { 0, 8, 0, 0x5B, (byte) 0xA0, 0, 4, 0, 1, 2, 3 };
@@ -199,19 +199,19 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceFormUnknownKeyEscapedChars() throws IOException {
+  void serviceModeUnknownKeyEscapedChars() throws IOException {
     String str = "1 . key29=a\\b\\c";
     assertEquals("1 . key29=abc", stringToWireToString(str));
   }
 
   @Test
-  void serviceFormUnknownKeyEscapedSlash() throws IOException {
+  void serviceModeUnknownKeyEscapedSlash() throws IOException {
     String str = "65535 . key29=a\\\\b\\\\c";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceFormUnknownHighKey() throws IOException {
+  void serviceModeUnknownHighKey() throws IOException {
     String str = "65535 . key65535=abcdefg";
     assertEquals(str, stringToWireToString(str));
   }
@@ -229,13 +229,13 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceFormWithoutParameters() {
-    String str = "1 aliasform.example.com.";
+  void serviceModeWithoutParameters() {
+    String str = "1 aliasmode.example.com.";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
 
   @Test
-  void aliasFormWithParameters() {
+  void aliasModeWithParameters() {
     String str = "0 . alpn=h3";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
