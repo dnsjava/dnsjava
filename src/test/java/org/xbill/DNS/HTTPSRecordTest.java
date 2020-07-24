@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class HTTPSRecordTest {
@@ -22,14 +23,14 @@ public class HTTPSRecordTest {
     alpn.fromString("h1,h2");
     HTTPSRecord.ParameterIpv4Hint ipv4 = new HTTPSRecord.ParameterIpv4Hint();
     ipv4.fromString("1.2.3.4,5.6.7.8");
-    List<HTTPSRecord.ParameterBase> params = List.of(mandatory, ipv4, alpn);
+    List<HTTPSRecord.ParameterBase> params = Arrays.asList(mandatory, ipv4, alpn);
     HTTPSRecord record = new HTTPSRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
 
     assertEquals(Type.HTTPS, record.getType());
     assertEquals(label, record.getName());
     assertEquals(svcPriority, record.getSvcPriority());
     assertEquals(svcDomain, record.getTargetName());
-    assertEquals(List.of(HTTPSRecord.MANDATORY, HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT).toString(), record.getSvcParamKeys().toString());
+    assertEquals(Arrays.asList(HTTPSRecord.MANDATORY, HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT).toString(), record.getSvcParamKeys().toString());
     assertEquals("alpn", record.getSvcParamValue(HTTPSRecord.MANDATORY).toString());
     assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
     assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());

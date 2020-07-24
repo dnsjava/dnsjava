@@ -90,7 +90,7 @@ abstract class SVCBBase extends Record {
     parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
   }
 
-  static public abstract class ParameterBase {
+  public static abstract class ParameterBase {
     public ParameterBase() {}
     public abstract int getKey();
     public abstract void fromWire(byte[] bytes) throws IOException;
@@ -104,7 +104,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterMandatory extends ParameterBase {
+  public static class ParameterMandatory extends ParameterBase {
     private List<Integer> values;
 
     public ParameterMandatory() {
@@ -156,7 +156,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterAlpn extends ParameterBase {
+  public static class ParameterAlpn extends ParameterBase {
     private List<byte[]> values;
 
     public ParameterAlpn() {
@@ -207,7 +207,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterNoDefaultAlpn extends ParameterBase {
+  public static class ParameterNoDefaultAlpn extends ParameterBase {
     public ParameterNoDefaultAlpn() { super(); }
 
     @Override
@@ -236,7 +236,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterPort extends ParameterBase {
+  public static class ParameterPort extends ParameterBase {
     private int port;
 
     public ParameterPort() { super(); }
@@ -270,7 +270,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterIpv4Hint extends ParameterBase {
+  public static class ParameterIpv4Hint extends ParameterBase {
     private List<byte[]> addresses;
 
     public ParameterIpv4Hint() {
@@ -324,7 +324,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterEchConfig extends ParameterBase {
+  public static class ParameterEchConfig extends ParameterBase {
     private byte[] data;
 
     public ParameterEchConfig() { super(); }
@@ -355,7 +355,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterIpv6Hint extends ParameterBase {
+  public static class ParameterIpv6Hint extends ParameterBase {
     private List<byte[]> addresses;
 
     public ParameterIpv6Hint() {
@@ -414,7 +414,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  static public class ParameterUnknown extends ParameterBase {
+  public static class ParameterUnknown extends ParameterBase {
     private int key;
     private byte[] value;
 
@@ -509,16 +509,19 @@ abstract class SVCBBase extends Record {
       else if (indexOfEquals == t.value.length() - 1) {
         // Ends with "=" means the next token is quoted string with the value
         keyStr = t.value.substring(0, indexOfEquals);
-        t = st.get();
-        if (!t.isString()) {
+        Tokenizer.Token valueToken = st.get();
+        if (!valueToken.isString()) {
           throw new TextParseException("Expected value for parameter key '" + keyStr + "'");
         }
-        valueStr = t.value;
+        valueStr = valueToken.value;
       }
       else if (indexOfEquals > 0 ) {
         // If "=" is in the middle then need to split the key and value from this token
         keyStr = t.value.substring(0, indexOfEquals);
         valueStr = t.value.substring(indexOfEquals + 1);
+      }
+      else {
+        throw new TextParseException("Expected valid parameter key=value for '" + t.value + "'");
       }
 
       ParameterBase param;

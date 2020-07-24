@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class SVCBRecordTest {
@@ -23,14 +23,14 @@ public class SVCBRecordTest {
     alpn.fromString("h1,h2");
     SVCBRecord.ParameterIpv4Hint ipv4 = new SVCBRecord.ParameterIpv4Hint();
     ipv4.fromString("1.2.3.4,5.6.7.8");
-    List<SVCBRecord.ParameterBase> params = List.of(mandatory, ipv4, alpn);
+    List<SVCBRecord.ParameterBase> params = Arrays.asList(mandatory, ipv4, alpn);
     SVCBRecord record = new SVCBRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
 
     assertEquals(Type.SVCB, record.getType());
     assertEquals(label, record.getName());
     assertEquals(svcPriority, record.getSvcPriority());
     assertEquals(svcDomain, record.getTargetName());
-    assertEquals(List.of(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString(), record.getSvcParamKeys().toString());
+    assertEquals(Arrays.asList(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString(), record.getSvcParamKeys().toString());
     assertEquals("alpn", record.getSvcParamValue(SVCBRecord.MANDATORY).toString());
     assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
     assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
@@ -137,13 +137,6 @@ public class SVCBRecordTest {
     assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
   }
 
-  @Disabled
-  @Test
-  void serviceModeRelativeDomain() throws IOException {
-    String str = "1 h3pool alpn=h2,h3 echconfig=\"1234\"";
-    assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
-  }
-
   @Test
   void serviceModeIpv4Hint() throws IOException {
     String str = "3 . ipv4hint=4.5.6.7";
@@ -243,6 +236,18 @@ public class SVCBRecordTest {
   @Test
   void zeroLengthAlpnValue() {
     String str = "1 . alpn=";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void emptyKey() {
+    String str = "1 . =1234";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void emptyKeyAndValue() {
+    String str = "1 . =";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
 
