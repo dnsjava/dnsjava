@@ -112,6 +112,15 @@ abstract class SVCBBase extends Record {
       values = new ArrayList<>();
     }
 
+    public ParameterMandatory(List<Integer> values) {
+      super();
+      this.values = values;
+    }
+
+    public List<Integer> getValues() {
+      return values;
+    }
+
     @Override
     public int getKey() {
       return MANDATORY;
@@ -127,9 +136,18 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromString(String string) throws TextParseException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty list must be specified for mandatory");
+      }
       for (String str : splitStringWithEscapedCommas(string)) {
         int key = parameters.getValue(str);
+        if (key == MANDATORY) {
+          throw new TextParseException("Key mandatory must not appear in its own list");
+        }
+        if (values.contains(key)) {
+          throw new TextParseException("Duplicate key " + str + " not allowed in mandatory list");
+        }
         values.add(key);
       }
     }
@@ -164,6 +182,15 @@ abstract class SVCBBase extends Record {
       values = new ArrayList<>();
     }
 
+    public ParameterAlpn(List<byte[]> values) {
+      super();
+      this.values = values;
+    }
+
+    public List<byte[]> getValues() {
+      return values;
+    }
+
     @Override
     public int getKey() {
       return ALPN;
@@ -179,7 +206,10 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromString(String string) throws TextParseException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty list must be specified for alpn");
+      }
       for (String str : splitStringWithEscapedCommas(string)) {
         values.add(str.getBytes());
       }
@@ -241,6 +271,15 @@ abstract class SVCBBase extends Record {
 
     public ParameterPort() { super(); }
 
+    public ParameterPort(int port) {
+      super();
+      this.port = port;
+    }
+
+    public int getPort() {
+      return port;
+    }
+
     @Override
     public int getKey() {
       return PORT;
@@ -253,7 +292,10 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromString(String string) throws TextParseException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Integer value must be specified for port");
+      }
       port = Integer.parseInt(string);
     }
 
@@ -278,6 +320,15 @@ abstract class SVCBBase extends Record {
       addresses = new ArrayList<>();
     }
 
+    public ParameterIpv4Hint(List<byte[]> addresses) {
+      super();
+      this.addresses = addresses;
+    }
+
+    public List<byte[]> getAddresses() {
+      return addresses;
+    }
+
     @Override
     public int getKey() {
       return IPV4HINT;
@@ -293,6 +344,9 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws IOException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty IPv4 list must be specified for ipv4hint");
+      }
       for (String str : string.split(",")) {
         byte[] address = Address.toByteArray(str, Address.IPv4);
         if (address == null) {
@@ -329,6 +383,15 @@ abstract class SVCBBase extends Record {
 
     public ParameterEchConfig() { super(); }
 
+    public ParameterEchConfig(byte[] data) {
+      super();
+      this.data = data;
+    }
+
+    public byte[] getData() {
+      return data;
+    }
+
     @Override
     public int getKey() {
       return ECHCONFIG;
@@ -340,7 +403,10 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromString(String string) {
+    public void fromString(String string) throws TextParseException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty base64 value must be specified for echconfig");
+      }
       data = Base64.getDecoder().decode(string);
     }
 
@@ -363,6 +429,15 @@ abstract class SVCBBase extends Record {
       addresses = new ArrayList<>();
     }
 
+    public ParameterIpv6Hint(List<byte[]> addresses) {
+      super();
+      this.addresses = addresses;
+    }
+
+    public List<byte[]> getAddresses() {
+      return addresses;
+    }
+
     @Override
     public int getKey() {
       return IPV6HINT;
@@ -378,6 +453,9 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws IOException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty IPv6 list must be specified for ipv6hint");
+      }
       for (String str : string.split(",")) {
         byte[] address = Address.toByteArray(str, Address.IPv6);
         if (address == null) {
@@ -421,6 +499,17 @@ abstract class SVCBBase extends Record {
     public ParameterUnknown(int key) {
       super();
       this.key = key;
+      this.value = new byte[0];
+    }
+
+    public ParameterUnknown(int key, byte[] value) {
+      super();
+      this.key = key;
+      this.value = value;
+    }
+
+    public byte[] getValue() {
+      return value;
     }
 
     @Override
@@ -435,7 +524,12 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws IOException {
-      value =  byteArrayFromString(string);
+      if (string == null || string.isEmpty()) {
+        value = new byte[0];
+      }
+      else {
+        value = byteArrayFromString(string);
+      }
     }
 
     @Override
@@ -447,6 +541,18 @@ abstract class SVCBBase extends Record {
     public String toString() {
       return byteArrayToString(value, false);
     }
+  }
+
+  protected boolean checkMandatoryParams() {
+    ParameterMandatory param = (ParameterMandatory) getSvcParamValue(MANDATORY);
+    if (param != null) {
+      for (int key : param.values) {
+        if (getSvcParamValue(key) == null) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   @Override
@@ -467,6 +573,9 @@ abstract class SVCBBase extends Record {
       }
       param.fromWire(value);
       svcParams.put(key, param);
+    }
+    if (!checkMandatoryParams()) {
+      throw new WireParseException("Not all mandatory SvcParams are specified");
     }
   }
 
@@ -547,6 +656,9 @@ abstract class SVCBBase extends Record {
     }
     if (svcPriority == 0 && !svcParams.isEmpty()) {
       throw new TextParseException("No parameter values allowed for AliasMode");
+    }
+    if (!checkMandatoryParams()) {
+      throw new TextParseException("Not all mandatory SvcParams are specified");
     }
   }
 

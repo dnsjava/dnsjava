@@ -8,10 +8,49 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
 public class SVCBRecordTest {
+  @Test
+  void createParams() throws UnknownHostException {
+    List<Integer> mandatoryList = Arrays.asList(SVCBRecord.ALPN, SVCBRecord.IPV4HINT);
+    SVCBRecord.ParameterMandatory mandatory = new SVCBBase.ParameterMandatory(mandatoryList);
+    assertEquals(SVCBRecord.MANDATORY, mandatory.getKey());
+    assertEquals(mandatoryList, mandatory.getValues());
+
+    List<byte[]> alpnList = Arrays.asList("h2".getBytes(), "h3".getBytes());
+    SVCBRecord.ParameterAlpn alpn = new SVCBRecord.ParameterAlpn(alpnList);
+    assertEquals(SVCBRecord.ALPN, alpn.getKey());
+    assertEquals(alpnList, alpn.getValues());
+
+    SVCBRecord.ParameterPort port = new SVCBBase.ParameterPort(8443);
+    assertEquals(SVCBRecord.PORT, port.getKey());
+    assertEquals(8443, port.getPort());
+
+    List<byte[]> ipv4List = Arrays.asList(InetAddress.getByName("1.2.3.4").getAddress());
+    SVCBRecord.ParameterIpv4Hint ipv4hint = new SVCBRecord.ParameterIpv4Hint(ipv4List);
+    assertEquals(SVCBRecord.IPV4HINT, ipv4hint.getKey());
+    assertEquals(ipv4List, ipv4hint.getAddresses());
+
+    byte[] data = { 'a', 'b', 'c' };
+    SVCBRecord.ParameterEchConfig echconfig = new SVCBRecord.ParameterEchConfig(data);
+    assertEquals(SVCBRecord.ECHCONFIG, echconfig.getKey());
+    assertEquals(data, echconfig.getData());
+
+    List<byte[]> ipv6List = Arrays.asList(InetAddress.getByName("2001::1").getAddress());
+    SVCBRecord.ParameterIpv6Hint ipv6hint = new SVCBRecord.ParameterIpv6Hint(ipv6List);
+    assertEquals(SVCBRecord.IPV6HINT, ipv6hint.getKey());
+    assertEquals(ipv6List, ipv6hint.getAddresses());
+
+    byte[] value = { 0, 1, 2, 3 };
+    SVCBRecord.ParameterUnknown unknown = new SVCBRecord.ParameterUnknown(33, value);
+    assertEquals(33, unknown.getKey());
+    assertEquals(value, unknown.getValue());
+  }
+
   @Test
   void createRecord() throws IOException {
     Name label = Name.fromString("test.com.");
@@ -210,6 +249,12 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void serviceModeUnknownKeyNoValue() throws IOException {
+    String str = "65535 . key65535";
+    assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
   void invalidText() {
     String str = "these are all garbage strings that should fail";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
@@ -234,14 +279,50 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void zeroLengthMandatory() {
+    String str = "1 . mandatory";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
   void zeroLengthAlpnValue() {
-    String str = "1 . alpn=";
+    String str = "1 . alpn";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void zeroLengthPortValue() {
+    String str = "1 . port";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void zeroLengthIpv4Hint() {
+    String str = "1 . ipv4hint";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void zeroLengthEchConfig() {
+    String str = "1 . echconfig";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void zeroLengthIpv6Hint() {
+    String str = "1 . ipv6hint";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
 
   @Test
   void emptyKey() {
     String str = "1 . =1234";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void emptyValue() {
+    String str = "1 . alpn=";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
 
@@ -258,15 +339,27 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void portValueTooLarge() {
-    String str = "1 . port=84438";
-    assertThrows(IllegalArgumentException.class, () -> { stringToWire(str); } );
+  void mandatoryListWithSelf() {
+    String str = "1 . mandatory=alpn,mandatory alpn=h1";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
 
   @Test
-  void zeroLengthPortValue() {
-    String str = "1 . port=";
+  void mandatoryListWithDuplicate() {
+    String str = "1 . mandatory=alpn,ipv4hint,alpn alpn=h1 ipv4hint=1.2.3.4";
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void mandatoryListWithMissingParam() {
+    String str = "1 . mandatory=alpn,ipv4hint alpn=h1";
+    assertThrows(TextParseException.class, () -> { stringToWire(str); } );
+  }
+
+  @Test
+  void portValueTooLarge() {
+    String str = "1 . port=84438";
+    assertThrows(IllegalArgumentException.class, () -> { stringToWire(str); } );
   }
 
   @Test

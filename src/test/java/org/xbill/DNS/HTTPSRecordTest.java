@@ -8,10 +8,49 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
 public class HTTPSRecordTest {
+  @Test
+  void createParams() throws UnknownHostException {
+    List<Integer> mandatoryList = Arrays.asList(HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT);
+    HTTPSRecord.ParameterMandatory mandatory = new SVCBBase.ParameterMandatory(mandatoryList);
+    assertEquals(HTTPSRecord.MANDATORY, mandatory.getKey());
+    assertEquals(mandatoryList, mandatory.getValues());
+
+    List<byte[]> alpnList = Arrays.asList("h2".getBytes(), "h3".getBytes());
+    HTTPSRecord.ParameterAlpn alpn = new HTTPSRecord.ParameterAlpn(alpnList);
+    assertEquals(HTTPSRecord.ALPN, alpn.getKey());
+    assertEquals(alpnList, alpn.getValues());
+
+    HTTPSRecord.ParameterPort port = new SVCBBase.ParameterPort(8443);
+    assertEquals(HTTPSRecord.PORT, port.getKey());
+    assertEquals(8443, port.getPort());
+
+    List<byte[]> ipv4List = Arrays.asList(InetAddress.getByName("1.2.3.4").getAddress());
+    HTTPSRecord.ParameterIpv4Hint ipv4hint = new HTTPSRecord.ParameterIpv4Hint(ipv4List);
+    assertEquals(HTTPSRecord.IPV4HINT, ipv4hint.getKey());
+    assertEquals(ipv4List, ipv4hint.getAddresses());
+
+    byte[] data = { 'a', 'b', 'c' };
+    HTTPSRecord.ParameterEchConfig echconfig = new HTTPSRecord.ParameterEchConfig(data);
+    assertEquals(HTTPSRecord.ECHCONFIG, echconfig.getKey());
+    assertEquals(data, echconfig.getData());
+
+    List<byte[]> ipv6List = Arrays.asList(InetAddress.getByName("2001::1").getAddress());
+    HTTPSRecord.ParameterIpv6Hint ipv6hint = new HTTPSRecord.ParameterIpv6Hint(ipv6List);
+    assertEquals(HTTPSRecord.IPV6HINT, ipv6hint.getKey());
+    assertEquals(ipv6List, ipv6hint.getAddresses());
+
+    byte[] value = { 0, 1, 2, 3 };
+    HTTPSRecord.ParameterUnknown unknown = new HTTPSRecord.ParameterUnknown(33, value);
+    assertEquals(33, unknown.getKey());
+    assertEquals(value, unknown.getValue());
+  }
+
   @Test
   void createRecord() throws IOException {
     Name label = Name.fromString("test.com.");
