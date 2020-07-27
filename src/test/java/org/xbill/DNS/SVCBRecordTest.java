@@ -434,6 +434,54 @@ public class SVCBRecordTest {
     assertThrows(TextParseException.class, () -> { stringToWire(str); } );
   }
 
+  @Test
+  void wireFormatTooShort() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 1, 0, 10 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatTooLong() {
+    byte[] wire = new byte[] { 0, 0, 0, 1 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatMandatoryTooLong() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 0, 0, 3, 0, 1, 55 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatAlpnTooShort() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 1, 0, 3, 10, 1, 55 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatNoDefaultAlpnTooLong() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 2, 0, 1, 0 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatPortTooLong() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 3, 0, 4, 0, 0, 0, 0 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatIpv4HintTooLong() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 4, 0, 5, 1, 2, 3, 4, 5 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
+  @Test
+  void wireFormatIpv6HintTooShort() {
+    byte[] wire = new byte[] { 0, 1, 0, 0, 6, 0, 2, 1, 2 };
+    assertThrows(WireParseException.class, () -> { wireToString(wire); } );
+  }
+
   public static byte[] stringToWire(String str) throws IOException {
     Tokenizer t = new Tokenizer(str);
     SVCBRecord record = new SVCBRecord();

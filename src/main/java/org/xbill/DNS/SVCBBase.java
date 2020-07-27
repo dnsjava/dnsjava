@@ -129,9 +129,12 @@ abstract class SVCBBase extends Record {
     @Override
     public void fromWire(byte[] bytes) throws IOException {
       DNSInput in = new DNSInput(bytes);
-      while (in.remaining() > 0) {
+      while (in.remaining() >= 2) {
         int key = in.readU16();
         values.add(key);
+      }
+      if (in.remaining() > 0) {
+        throw new WireParseException("Unexpected number of bytes in mandatory parameter");
       }
     }
 
@@ -246,7 +249,11 @@ abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromWire(byte[] bytes) { }
+    public void fromWire(byte[] bytes) throws WireParseException {
+      if (bytes.length > 0) {
+        throw new WireParseException("No value can be specified for no-default-alpn");
+      }
+    }
 
     @Override
     public void fromString(String string) throws TextParseException {
@@ -289,6 +296,9 @@ abstract class SVCBBase extends Record {
     public void fromWire(byte[] bytes) throws IOException {
       DNSInput in = new DNSInput(bytes);
       port = in.readU16();
+      if (in.remaining() > 0) {
+        throw new WireParseException("Unexpected number of bytes in port parameter");
+      }
     }
 
     @Override
@@ -337,8 +347,11 @@ abstract class SVCBBase extends Record {
     @Override
     public void fromWire(byte[] bytes) throws IOException {
       DNSInput in = new DNSInput(bytes);
-      while (in.remaining() > 0) {
+      while (in.remaining() >= 4) {
         addresses.add(in.readByteArray(4));
+      }
+      if (in.remaining() > 0) {
+        throw new WireParseException("Unexpected number of bytes in ipv4hint parameter");
       }
     }
 
@@ -446,8 +459,11 @@ abstract class SVCBBase extends Record {
     @Override
     public void fromWire(byte[] bytes) throws IOException {
       DNSInput in = new DNSInput(bytes);
-      while (in.remaining() > 0) {
+      while (in.remaining() >= 16) {
         addresses.add(in.readByteArray(16));
+      }
+      if (in.remaining() > 0) {
+        throw new WireParseException("Unexpected number of bytes in ipv6hint parameter");
       }
     }
 
@@ -560,7 +576,7 @@ abstract class SVCBBase extends Record {
     svcPriority = in.readU16();
     targetName = new Name(in);
     svcParams = new TreeMap<>();
-    while (in.remaining() > 0) {
+    while (in.remaining() >= 4) {
       int key = in.readU16();
       int length = in.readU16();
       byte[] value = in.readByteArray(length);
@@ -573,6 +589,9 @@ abstract class SVCBBase extends Record {
       }
       param.fromWire(value);
       svcParams.put(key, param);
+    }
+    if (in.remaining() > 0) {
+      throw new WireParseException("Record had unexpected number of bytes");
     }
     if (!checkMandatoryParams()) {
       throw new WireParseException("Not all mandatory SvcParams are specified");
