@@ -223,13 +223,13 @@ public final class Type {
   public static final int ZONEMD = 63;
 
   /** Service Location and Parameter Binding
-   * @see <a href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-00">draft-ietf-dnsop-svcb-https</a>
+   * @see <a href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-01">draft-ietf-dnsop-svcb-https</a>
    */
   public static final int SVCB = 64;
 
   /**
    * HTTPS Service Location and Parameter Binding
-   * @see <a href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-00">draft-ietf-dnsop-svcb-https</a>
+   * @see <a href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-01">draft-ietf-dnsop-svcb-https</a>
    * */
   public static final int HTTPS = 65;
 

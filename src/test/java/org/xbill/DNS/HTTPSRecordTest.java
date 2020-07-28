@@ -17,7 +17,7 @@ public class HTTPSRecordTest {
   @Test
   void createParams() throws UnknownHostException {
     List<Integer> mandatoryList = Arrays.asList(HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT);
-    HTTPSRecord.ParameterMandatory mandatory = new SVCBBase.ParameterMandatory(mandatoryList);
+    HTTPSRecord.ParameterMandatory mandatory = new HTTPSRecord.ParameterMandatory(mandatoryList);
     assertEquals(HTTPSRecord.MANDATORY, mandatory.getKey());
     assertEquals(mandatoryList, mandatory.getValues());
 
@@ -26,7 +26,7 @@ public class HTTPSRecordTest {
     assertEquals(HTTPSRecord.ALPN, alpn.getKey());
     assertEquals(alpnList, alpn.getValues());
 
-    HTTPSRecord.ParameterPort port = new SVCBBase.ParameterPort(8443);
+    HTTPSRecord.ParameterPort port = new HTTPSRecord.ParameterPort(8443);
     assertEquals(HTTPSRecord.PORT, port.getKey());
     assertEquals(8443, port.getPort());
 
@@ -74,6 +74,8 @@ public class HTTPSRecordTest {
     assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
     assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
     assertNull(record.getSvcParamValue(1234));
+    Options.unset("BINDTTL");
+    Options.unset("noPrintIN");
     assertEquals("test.com.\t\t300\tIN\tHTTPS\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8", record.toString());
   }
 

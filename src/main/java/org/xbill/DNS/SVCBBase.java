@@ -35,9 +35,12 @@ abstract class SVCBBase extends Record {
     super(name, type, dclass, ttl);
     svcPriority = priority;
     targetName = domain;
-    this.svcParams = new TreeMap<>();
+    svcParams = new TreeMap<>();
     for (ParameterBase param : params) {
-      this.svcParams.put(param.getKey(), param);
+      if (svcParams.containsKey(param.getKey())) {
+        throw new IllegalArgumentException("Duplicate SvcParam for key " + param.getKey());
+      }
+      svcParams.put(param.getKey(), param);
     }
   }
 
@@ -98,7 +101,7 @@ abstract class SVCBBase extends Record {
     public abstract byte[] toWire();
     public abstract String toString();
 
-    // Split on string on commas but not if comma is escaped with a '\'
+    // Split string on commas, but not if comma is escaped with a '\'
     public static String[] splitStringWithEscapedCommas(String string) {
       return string.split("(?<!\\\\),");
     }
@@ -363,7 +366,7 @@ abstract class SVCBBase extends Record {
       for (String str : string.split(",")) {
         byte[] address = Address.toByteArray(str, Address.IPv4);
         if (address == null) {
-          throw new TextParseException("Invalid ipv4hint value '" + string + "'");
+          throw new TextParseException("Invalid ipv4hint value '" + str + "'");
         }
         addresses.add(address);
       }
@@ -475,7 +478,7 @@ abstract class SVCBBase extends Record {
       for (String str : string.split(",")) {
         byte[] address = Address.toByteArray(str, Address.IPv6);
         if (address == null) {
-          throw new TextParseException("Invalid ipv6hint value '" + string + "'");
+          throw new TextParseException("Invalid ipv6hint value '" + str + "'");
         }
         addresses.add(address);
       }

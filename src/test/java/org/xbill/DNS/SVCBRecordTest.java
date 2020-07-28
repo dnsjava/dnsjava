@@ -74,7 +74,21 @@ public class SVCBRecordTest {
     assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
     assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
     assertNull(record.getSvcParamValue(1234));
+    Options.unset("BINDTTL");
+    Options.unset("noPrintIN");
     assertEquals("test.com.\t\t300\tIN\tSVCB\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8", record.toString());
+  }
+
+  @Test
+  void createRecordDuplicateParam() throws IOException {
+    Name label = Name.fromString("test.com.");
+    Name svcDomain = Name.fromString("svc.test.com.");
+    SVCBRecord.ParameterAlpn alpn = new SVCBRecord.ParameterAlpn();
+    alpn.fromString("h1,h2");
+    SVCBRecord.ParameterIpv4Hint ipv4 = new SVCBRecord.ParameterIpv4Hint();
+    ipv4.fromString("1.2.3.4,5.6.7.8");
+    List<SVCBRecord.ParameterBase> params = Arrays.asList(alpn, ipv4, alpn);
+    assertThrows(IllegalArgumentException.class, () -> { new SVCBRecord(label, DClass.IN, 300, 5, svcDomain, params); } );
   }
 
   @Test
