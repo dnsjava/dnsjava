@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
 import java.io.IOException;
@@ -12,6 +13,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
+/**
+ * Implements common functionality for SVCB and HTTPS records
+ */
 abstract class SVCBBase extends Record {
   protected int svcPriority;
   protected Name targetName;
