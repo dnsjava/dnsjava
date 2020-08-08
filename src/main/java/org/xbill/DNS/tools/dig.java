@@ -7,56 +7,30 @@ import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedFlags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
-import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.ReverseMap;
-import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.WireParseException;
+import org.xbill.DNS.ZoneTransferException;
+import org.xbill.DNS.ZoneTransferIn;
 
 /** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
 public class dig {
-
   static Name name = null;
   static int type = Type.A, dclass = DClass.IN;
 
   static void usage() {
+    System.out.println("; dnsjava dig");
     System.out.println("Usage: dig [@server] name [<type>] [<class>] [options]");
     System.exit(0);
   }
 
   static void doQuery(Message response, long ms) {
-    System.out.println("; java dig 0.0");
+    System.out.println("; dnsjava dig");
     System.out.println(response);
     System.out.println(";; Query time: " + ms + " ms");
-  }
-
-  static void doAXFR(Message response) {
-    System.out.println("; java dig 0.0 <> " + name + " axfr");
-    if (response.isSigned()) {
-      System.out.print(";; TSIG ");
-      if (response.isVerified()) {
-        System.out.println("ok");
-      } else {
-        System.out.println("failed");
-      }
-    }
-
-    if (response.getRcode() != Rcode.NOERROR) {
-      System.out.println(response);
-      return;
-    }
-
-    for (Record record : response.getSection(Section.ANSWER)) {
-      System.out.println(record);
-    }
-
-    System.out.print(";; done (");
-    System.out.print(response.getHeader().getCount(Section.ANSWER));
-    System.out.print(" records, ");
-    System.out.print(response.getHeader().getCount(Section.ADDITIONAL));
-    System.out.println(" additional)");
   }
 
   public static void main(String[] argv) throws IOException {
@@ -215,13 +189,38 @@ public class dig {
     if (printQuery) {
       System.out.println(query);
     }
-    startTime = System.currentTimeMillis();
-    response = res.send(query);
-    endTime = System.currentTimeMillis();
 
     if (type == Type.AXFR) {
-      doAXFR(response);
+      System.out.println("; dnsjava dig <> " + name + " axfr");
+      ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(name, res.getAddress(), res.getTSIGKey());
+      xfrin.setTimeout(res.getTimeout());
+      try {
+        xfrin.run(
+            new ZoneTransferIn.ZoneTransferHandler() {
+              @Override
+              public void startAXFR() {}
+
+              @Override
+              public void startIXFR() {}
+
+              @Override
+              public void startIXFRDeletes(Record soa) {}
+
+              @Override
+              public void startIXFRAdds(Record soa) {}
+
+              @Override
+              public void handleRecord(Record r) {
+                System.out.println(r);
+              }
+            });
+      } catch (ZoneTransferException e) {
+        throw new WireParseException(e.getMessage());
+      }
     } else {
+      startTime = System.currentTimeMillis();
+      response = res.send(query);
+      endTime = System.currentTimeMillis();
       doQuery(response, endTime - startTime);
     }
   }
