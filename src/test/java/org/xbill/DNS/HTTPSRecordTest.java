@@ -6,13 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class HTTPSRecordTest {
   @Test
@@ -22,7 +23,7 @@ public class HTTPSRecordTest {
     assertEquals(HTTPSRecord.MANDATORY, mandatory.getKey());
     assertEquals(mandatoryList, mandatory.getValues());
 
-    List<byte[]> alpnList = Arrays.asList("h2".getBytes(), "h3".getBytes());
+    List<String> alpnList = Arrays.asList("h2", "h3");
     HTTPSRecord.ParameterAlpn alpn = new HTTPSRecord.ParameterAlpn(alpnList);
     assertEquals(HTTPSRecord.ALPN, alpn.getKey());
     assertEquals(alpnList, alpn.getValues());
@@ -31,22 +32,22 @@ public class HTTPSRecordTest {
     assertEquals(HTTPSRecord.PORT, port.getKey());
     assertEquals(8443, port.getPort());
 
-    List<byte[]> ipv4List = Arrays.asList(InetAddress.getByName("1.2.3.4").getAddress());
+    List<Inet4Address> ipv4List = Arrays.asList((Inet4Address) InetAddress.getByName("1.2.3.4"));
     HTTPSRecord.ParameterIpv4Hint ipv4hint = new HTTPSRecord.ParameterIpv4Hint(ipv4List);
     assertEquals(HTTPSRecord.IPV4HINT, ipv4hint.getKey());
     assertEquals(ipv4List, ipv4hint.getAddresses());
 
-    byte[] data = { 'a', 'b', 'c' };
+    byte[] data = {'a', 'b', 'c'};
     HTTPSRecord.ParameterEchConfig echconfig = new HTTPSRecord.ParameterEchConfig(data);
     assertEquals(HTTPSRecord.ECHCONFIG, echconfig.getKey());
     assertEquals(data, echconfig.getData());
 
-    List<byte[]> ipv6List = Arrays.asList(InetAddress.getByName("2001::1").getAddress());
+    List<Inet6Address> ipv6List = Arrays.asList((Inet6Address) InetAddress.getByName("2001::1"));
     HTTPSRecord.ParameterIpv6Hint ipv6hint = new HTTPSRecord.ParameterIpv6Hint(ipv6List);
     assertEquals(HTTPSRecord.IPV6HINT, ipv6hint.getKey());
     assertEquals(ipv6List, ipv6hint.getAddresses());
 
-    byte[] value = { 0, 1, 2, 3 };
+    byte[] value = {0, 1, 2, 3};
     HTTPSRecord.ParameterUnknown unknown = new HTTPSRecord.ParameterUnknown(33, value);
     assertEquals(33, unknown.getKey());
     assertEquals(value, unknown.getValue());
@@ -70,21 +71,25 @@ public class HTTPSRecordTest {
     assertEquals(label, record.getName());
     assertEquals(svcPriority, record.getSvcPriority());
     assertEquals(svcDomain, record.getTargetName());
-    assertEquals(Arrays.asList(HTTPSRecord.MANDATORY, HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT).toString(), record.getSvcParamKeys().toString());
+    assertEquals(
+        Arrays.asList(HTTPSRecord.MANDATORY, HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT).toString(),
+        record.getSvcParamKeys().toString());
     assertEquals("alpn", record.getSvcParamValue(HTTPSRecord.MANDATORY).toString());
     assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
     assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
     assertNull(record.getSvcParamValue(1234));
     Options.unset("BINDTTL");
     Options.unset("noPrintIN");
-    assertEquals("test.com.\t\t300\tIN\tHTTPS\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8", record.toString());
+    assertEquals(
+        "test.com.\t\t300\tIN\tHTTPS\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8",
+        record.toString());
   }
 
   @Test
   void aliasMode() throws IOException {
     String str = "0 a.b.c.";
     byte[] bytes = SVCBRecordTest.stringToWire(str);
-    byte[] expected = new byte[] { 0, 0, 1, 'a', 1, 'b', 1, 'c', 0 };
+    byte[] expected = new byte[] {0, 0, 1, 'a', 1, 'b', 1, 'c', 0};
     assertArrayEquals(expected, bytes);
     assertEquals(str, SVCBRecordTest.wireToString(bytes));
   }
@@ -93,7 +98,7 @@ public class HTTPSRecordTest {
   void serviceModePort() throws IOException {
     String str = "1 . port=8443";
     byte[] bytes = SVCBRecordTest.stringToWire(str);
-    byte[] expected = new byte[] { 0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
+    byte[] expected = new byte[] {0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
     assertArrayEquals(expected, bytes);
     assertEquals(str, SVCBRecordTest.wireToString(bytes));
   }
@@ -107,6 +112,10 @@ public class HTTPSRecordTest {
   @Test
   void unknownKey() {
     String str = "1 . sport=8443";
-    assertThrows(TextParseException.class, () -> { SVCBRecordTest.stringToWire(str); } );
+    assertThrows(
+        TextParseException.class,
+        () -> {
+          SVCBRecordTest.stringToWire(str);
+        });
   }
 }

@@ -2,24 +2,26 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-/**
- * Implements common functionality for SVCB and HTTPS records
- */
+/** Implements common functionality for SVCB and HTTPS records */
 abstract class SVCBBase extends Record {
   protected int svcPriority;
   protected Name targetName;
-  protected Map<Integer, ParameterBase> svcParams;
+  protected final Map<Integer, ParameterBase> svcParams;
 
   public static final int MANDATORY = 0;
   public static final int ALPN = 1;
@@ -29,13 +31,23 @@ abstract class SVCBBase extends Record {
   public static final int ECHCONFIG = 5;
   public static final int IPV6HINT = 6;
 
-  protected SVCBBase() {}
+  protected SVCBBase() {
+    svcParams = new TreeMap<>();
+  }
 
   protected SVCBBase(Name name, int type, int dclass, long ttl) {
     super(name, type, dclass, ttl);
+    svcParams = new TreeMap<>();
   }
 
-  protected SVCBBase(Name name, int type, int dclass, long ttl, int priority, Name domain, List<ParameterBase> params) {
+  protected SVCBBase(
+      Name name,
+      int type,
+      int dclass,
+      long ttl,
+      int priority,
+      Name domain,
+      List<ParameterBase> params) {
     super(name, type, dclass, ttl);
     svcPriority = priority;
     targetName = domain;
@@ -97,12 +109,17 @@ abstract class SVCBBase extends Record {
     parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
   }
 
-  public static abstract class ParameterBase {
+  public abstract static class ParameterBase {
     public ParameterBase() {}
+
     public abstract int getKey();
+
     public abstract void fromWire(byte[] bytes) throws IOException;
+
     public abstract void fromString(String string) throws IOException;
+
     public abstract byte[] toWire();
+
     public abstract String toString();
 
     // Split string on commas, but not if comma is escaped with a '\'
@@ -112,7 +129,7 @@ abstract class SVCBBase extends Record {
   }
 
   public static class ParameterMandatory extends ParameterBase {
-    private List<Integer> values;
+    private final List<Integer> values;
 
     public ParameterMandatory() {
       super();
@@ -135,6 +152,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromWire(byte[] bytes) throws IOException {
+      values.clear();
       DNSInput in = new DNSInput(bytes);
       while (in.remaining() >= 2) {
         int key = in.readU16();
@@ -147,6 +165,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws TextParseException {
+      values.clear();
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty list must be specified for mandatory");
       }
@@ -185,20 +204,20 @@ abstract class SVCBBase extends Record {
   }
 
   public static class ParameterAlpn extends ParameterBase {
-    private List<byte[]> values;
+    private final List<byte[]> values;
 
     public ParameterAlpn() {
       super();
       values = new ArrayList<>();
     }
 
-    public ParameterAlpn(List<byte[]> values) {
+    public ParameterAlpn(List<String> values) {
       super();
-      this.values = values;
+      this.values = values.stream().map(String::getBytes).collect(Collectors.toList());
     }
 
-    public List<byte[]> getValues() {
-      return values;
+    public List<String> getValues() {
+      return values.stream().map(String::new).collect(Collectors.toList());
     }
 
     @Override
@@ -208,6 +227,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromWire(byte[] bytes) throws IOException {
+      values.clear();
       DNSInput in = new DNSInput(bytes);
       while (in.remaining() > 0) {
         byte[] b = in.readCountedString();
@@ -217,6 +237,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws TextParseException {
+      values.clear();
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty list must be specified for alpn");
       }
@@ -248,7 +269,9 @@ abstract class SVCBBase extends Record {
   }
 
   public static class ParameterNoDefaultAlpn extends ParameterBase {
-    public ParameterNoDefaultAlpn() { super(); }
+    public ParameterNoDefaultAlpn() {
+      super();
+    }
 
     @Override
     public int getKey() {
@@ -283,7 +306,9 @@ abstract class SVCBBase extends Record {
   public static class ParameterPort extends ParameterBase {
     private int port;
 
-    public ParameterPort() { super(); }
+    public ParameterPort() {
+      super();
+    }
 
     public ParameterPort(int port) {
       super();
@@ -330,19 +355,27 @@ abstract class SVCBBase extends Record {
   }
 
   public static class ParameterIpv4Hint extends ParameterBase {
-    private List<byte[]> addresses;
+    private final List<byte[]> addresses;
 
     public ParameterIpv4Hint() {
       super();
       addresses = new ArrayList<>();
     }
 
-    public ParameterIpv4Hint(List<byte[]> addresses) {
+    public ParameterIpv4Hint(List<Inet4Address> addresses) {
       super();
-      this.addresses = addresses;
+      this.addresses =
+          addresses.stream().map(Inet4Address::getAddress).collect(Collectors.toList());
     }
 
-    public List<byte[]> getAddresses() {
+    public List<Inet4Address> getAddresses() throws UnknownHostException {
+      List<Inet4Address> addresses = new LinkedList<>();
+      for (byte[] bytes : this.addresses) {
+        InetAddress address = InetAddress.getByAddress(bytes);
+        if (address instanceof Inet4Address) {
+          addresses.add((Inet4Address) address);
+        }
+      }
       return addresses;
     }
 
@@ -353,6 +386,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromWire(byte[] bytes) throws IOException {
+      addresses.clear();
       DNSInput in = new DNSInput(bytes);
       while (in.remaining() >= 4) {
         addresses.add(in.readByteArray(4));
@@ -364,6 +398,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws IOException {
+      addresses.clear();
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty IPv4 list must be specified for ipv4hint");
       }
@@ -401,7 +436,9 @@ abstract class SVCBBase extends Record {
   public static class ParameterEchConfig extends ParameterBase {
     private byte[] data;
 
-    public ParameterEchConfig() { super(); }
+    public ParameterEchConfig() {
+      super();
+    }
 
     public ParameterEchConfig(byte[] data) {
       super();
@@ -442,19 +479,27 @@ abstract class SVCBBase extends Record {
   }
 
   public static class ParameterIpv6Hint extends ParameterBase {
-    private List<byte[]> addresses;
+    private final List<byte[]> addresses;
 
     public ParameterIpv6Hint() {
       super();
       addresses = new ArrayList<>();
     }
 
-    public ParameterIpv6Hint(List<byte[]> addresses) {
+    public ParameterIpv6Hint(List<Inet6Address> addresses) {
       super();
-      this.addresses = addresses;
+      this.addresses =
+          addresses.stream().map(Inet6Address::getAddress).collect(Collectors.toList());
     }
 
-    public List<byte[]> getAddresses() {
+    public List<Inet6Address> getAddresses() throws UnknownHostException {
+      List<Inet6Address> addresses = new LinkedList<>();
+      for (byte[] bytes : this.addresses) {
+        InetAddress address = InetAddress.getByAddress(bytes);
+        if (address instanceof Inet6Address) {
+          addresses.add((Inet6Address) address);
+        }
+      }
       return addresses;
     }
 
@@ -465,6 +510,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromWire(byte[] bytes) throws IOException {
+      addresses.clear();
       DNSInput in = new DNSInput(bytes);
       while (in.remaining() >= 16) {
         addresses.add(in.readByteArray(16));
@@ -476,6 +522,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public void fromString(String string) throws IOException {
+      addresses.clear();
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty IPv6 list must be specified for ipv6hint");
       }
@@ -549,8 +596,7 @@ abstract class SVCBBase extends Record {
     public void fromString(String string) throws IOException {
       if (string == null || string.isEmpty()) {
         value = new byte[0];
-      }
-      else {
+      } else {
         value = byteArrayFromString(string);
       }
     }
@@ -582,7 +628,7 @@ abstract class SVCBBase extends Record {
   protected void rrFromWire(DNSInput in) throws IOException {
     svcPriority = in.readU16();
     targetName = new Name(in);
-    svcParams = new TreeMap<>();
+    svcParams.clear();
     while (in.remaining() >= 4) {
       int key = in.readU16();
       int length = in.readU16();
@@ -628,7 +674,7 @@ abstract class SVCBBase extends Record {
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     svcPriority = st.getUInt16();
     targetName = st.getName(origin);
-    svcParams = new TreeMap<>();
+    svcParams.clear();
     while (true) {
       String keyStr = null;
       String valueStr = null;
@@ -640,8 +686,7 @@ abstract class SVCBBase extends Record {
       if (indexOfEquals == -1) {
         // No "=" is key with no value case, leave value string as null
         keyStr = t.value;
-      }
-      else if (indexOfEquals == t.value.length() - 1) {
+      } else if (indexOfEquals == t.value.length() - 1) {
         // Ends with "=" means the next token is quoted string with the value
         keyStr = t.value.substring(0, indexOfEquals);
         Tokenizer.Token valueToken = st.get();
@@ -649,13 +694,11 @@ abstract class SVCBBase extends Record {
           throw new TextParseException("Expected value for parameter key '" + keyStr + "'");
         }
         valueStr = valueToken.value;
-      }
-      else if (indexOfEquals > 0 ) {
+      } else if (indexOfEquals > 0) {
         // If "=" is in the middle then need to split the key and value from this token
         keyStr = t.value.substring(0, indexOfEquals);
         valueStr = t.value.substring(indexOfEquals + 1);
-      }
-      else {
+      } else {
         throw new TextParseException("Expected valid parameter key=value for '" + t.value + "'");
       }
 
@@ -678,7 +721,8 @@ abstract class SVCBBase extends Record {
     }
 
     if (svcPriority > 0 && svcParams.isEmpty()) {
-      throw new TextParseException("At least one parameter value must be specified for ServiceMode");
+      throw new TextParseException(
+          "At least one parameter value must be specified for ServiceMode");
     }
     if (svcPriority == 0 && !svcParams.isEmpty()) {
       throw new TextParseException("No parameter values allowed for AliasMode");
