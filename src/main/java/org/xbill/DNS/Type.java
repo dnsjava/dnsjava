@@ -222,6 +222,22 @@ public final class Type {
   /** Message Digest for DNS Zones. */
   public static final int ZONEMD = 63;
 
+  /**
+   * Service Location and Parameter Binding
+   *
+   * @see <a
+   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-01">draft-ietf-dnsop-svcb-https</a>
+   */
+  public static final int SVCB = 64;
+
+  /**
+   * HTTPS Service Location and Parameter Binding
+   *
+   * @see <a
+   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-01">draft-ietf-dnsop-svcb-https</a>
+   */
+  public static final int HTTPS = 65;
+
   /** {@link SPFRecord Sender Policy Framework} */
   public static final int SPF = 99;
 
@@ -403,6 +419,8 @@ public final class Type {
     types.add(OPENPGPKEY, "OPENPGPKEY", OPENPGPKEYRecord::new);
     types.add(CSYNC, "CSYNC");
     types.add(ZONEMD, "ZONEMD");
+    types.add(SVCB, "SVCB", SVCBRecord::new);
+    types.add(HTTPS, "HTTPS", HTTPSRecord::new);
 
     types.add(SPF, "SPF", SPFRecord::new);
     types.add(UINFO, "UINFO");
