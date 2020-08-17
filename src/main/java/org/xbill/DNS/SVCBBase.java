@@ -215,12 +215,14 @@ abstract class SVCBBase extends Record {
     public ParameterAlpn(List<String> values) {
       super();
       this.values =
-          values.stream().map(s -> s.getBytes(StandardCharsets.UTF_8)).collect(Collectors.toList());
+          values.stream()
+              .map(s -> s.getBytes(StandardCharsets.US_ASCII))
+              .collect(Collectors.toList());
     }
 
     public List<String> getValues() {
       return values.stream()
-          .map(b -> new String(b, StandardCharsets.UTF_8))
+          .map(b -> new String(b, StandardCharsets.US_ASCII))
           .collect(Collectors.toList());
     }
 
