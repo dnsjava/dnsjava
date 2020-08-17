@@ -6,6 +6,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -213,11 +214,14 @@ abstract class SVCBBase extends Record {
 
     public ParameterAlpn(List<String> values) {
       super();
-      this.values = values.stream().map(String::getBytes).collect(Collectors.toList());
+      this.values =
+          values.stream().map(s -> s.getBytes(StandardCharsets.UTF_8)).collect(Collectors.toList());
     }
 
     public List<String> getValues() {
-      return values.stream().map(String::new).collect(Collectors.toList());
+      return values.stream()
+          .map(b -> new String(b, StandardCharsets.UTF_8))
+          .collect(Collectors.toList());
     }
 
     @Override
