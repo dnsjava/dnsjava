@@ -475,6 +475,16 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void portValueCharAfterInt() {
+    String str = "1 . port=443a";
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        stringToWire(str);
+      });
+  }
+
+  @Test
   void noDefaultAlpnWithValue() {
     String str = "1 . no-default-alpn=true";
     assertThrows(
@@ -582,6 +592,16 @@ public class SVCBRecordTest {
         () -> {
           stringToWire(str);
         });
+  }
+
+  @Test
+  void svcParamUnknownKeyCharAfterInt() {
+    String str = "65535 . key123a=abcdefg";
+    assertThrows(
+      TextParseException.class,
+      () -> {
+        stringToWire(str);
+      });
   }
 
   @Test
