@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 public class HTTPSRecordTest {
   @Test
-  void createParams() throws UnknownHostException {
+  void createParams() throws UnknownHostException, TextParseException {
     List<Integer> mandatoryList = Arrays.asList(HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT);
     HTTPSRecord.ParameterMandatory mandatory = new HTTPSRecord.ParameterMandatory(mandatoryList);
     assertEquals(HTTPSRecord.MANDATORY, mandatory.getKey());

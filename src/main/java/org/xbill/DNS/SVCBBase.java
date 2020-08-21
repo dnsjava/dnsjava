@@ -212,18 +212,20 @@ abstract class SVCBBase extends Record {
       values = new ArrayList<>();
     }
 
-    public ParameterAlpn(List<String> values) {
+    public ParameterAlpn(List<String> values) throws TextParseException {
       super();
-      this.values =
-          values.stream()
-              .map(s -> s.getBytes(StandardCharsets.US_ASCII))
-              .collect(Collectors.toList());
+      this.values = new ArrayList<>();
+      for (String str : values) {
+        this.values.add(byteArrayFromString(str));
+      }
     }
 
     public List<String> getValues() {
-      return values.stream()
-          .map(b -> new String(b, StandardCharsets.US_ASCII))
-          .collect(Collectors.toList());
+      List<String> values = new ArrayList<>();
+      for (byte[] b : this.values) {
+        values.add(byteArrayToString(b, false));
+      }
+      return values;
     }
 
     @Override
@@ -248,7 +250,7 @@ abstract class SVCBBase extends Record {
         throw new TextParseException("Non-empty list must be specified for alpn");
       }
       for (String str : splitStringWithEscapedCommas(string)) {
-        values.add(str.getBytes());
+        values.add(byteArrayFromString(str));
       }
     }
 
@@ -268,7 +270,9 @@ abstract class SVCBBase extends Record {
         if (sb.length() > 0) {
           sb.append(",");
         }
-        sb.append(new String(b));
+        String str = byteArrayToString(b, false);
+        str = str.replaceAll(",", "\\\\,");
+        sb.append(str);
       }
       return sb.toString();
     }
