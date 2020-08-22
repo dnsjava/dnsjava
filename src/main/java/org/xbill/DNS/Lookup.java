@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -146,15 +147,19 @@ public final class Lookup {
    * Sets the search path to be used as the default by future Lookups.
    *
    * @param domains The default search path.
+   * @throws IllegalArgumentException if a domain in the search path is not absolute and cannot be
+   *     made absolute.
    */
   public static synchronized void setDefaultSearchPath(List<Name> domains) {
-    defaultSearchPath = domains;
+    defaultSearchPath = convertSearchPathDomainList(domains);
   }
 
   /**
    * Sets the search path to be used as the default by future Lookups.
    *
    * @param domains The default search path.
+   * @throws IllegalArgumentException if a domain in the search path is not absolute and cannot be
+   *     made absolute.
    */
   public static synchronized void setDefaultSearchPath(Name... domains) {
     setDefaultSearchPath(Arrays.asList(domains));
@@ -179,6 +184,27 @@ public final class Lookup {
     }
 
     defaultSearchPath = newdomains;
+  }
+
+  private static List<Name> convertSearchPathDomainList(List<Name> domains) {
+    try {
+      return domains.stream()
+          .map(
+              n -> {
+                try {
+                  return Name.concatenate(n, Name.root);
+                } catch (NameTooLongException e) {
+                  throw new RuntimeException(e);
+                }
+              })
+          .collect(Collectors.toList());
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof NameTooLongException) {
+        throw new IllegalArgumentException(e.getCause());
+      } else {
+        throw e;
+      }
+    }
   }
 
   /**
@@ -319,15 +345,19 @@ public final class Lookup {
    * Sets the search path to use when performing this lookup. This overrides the default value.
    *
    * @param domains An array of names containing the search path.
+   * @throws IllegalArgumentException if a domain in the search path is not absolute and cannot be
+   *     made absolute.
    */
   public void setSearchPath(List<Name> domains) {
-    this.searchPath = domains;
+    this.searchPath = convertSearchPathDomainList(domains);
   }
 
   /**
    * Sets the search path to use when performing this lookup. This overrides the default value.
    *
    * @param domains An array of names containing the search path.
+   * @throws IllegalArgumentException if a domain in the search path is not absolute and cannot be
+   *     made absolute.
    */
   public void setSearchPath(Name... domains) {
     setSearchPath(Arrays.asList(domains));
