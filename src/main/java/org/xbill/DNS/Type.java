@@ -286,7 +286,11 @@ public final class Type {
   /** Transfer mailbox records */
   public static final int MAILB = 253;
 
-  /** mail agent RRs (obsolete - {@see MX}) */
+  /**
+   * mail agent RRs (obsolete)
+   *
+   * @see #MX
+   */
   public static final int MAILA = 254;
 
   /** Matches any type */

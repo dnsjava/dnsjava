@@ -58,7 +58,8 @@ public interface Resolver {
    *
    * @param version The EDNS version to use. 0 indicates EDNS0 and -1 indicates no EDNS.
    * @param payloadSize The maximum DNS packet size that this host is capable of receiving over UDP.
-   *     If 0 is specified, the default ({@value SimpleResolver#DEFAULT_EDNS_PAYLOADSIZE}) is used.
+   *     If 0 is specified, the default ({@value
+   *     org.xbill.DNS.SimpleResolver#DEFAULT_EDNS_PAYLOADSIZE}) is used.
    * @param flags EDNS extended flags to be set in the OPT record.
    * @param options EDNS options to be set in the OPT record, specified as a List of
    *     OPTRecord.Option elements.
