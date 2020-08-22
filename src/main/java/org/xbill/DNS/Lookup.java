@@ -156,7 +156,7 @@ public final class Lookup {
    *
    * @param domains The default search path.
    */
-  public static synchronized void setDefaultSearchPath(org.xbill.DNS.Name[] domains) {
+  public static synchronized void setDefaultSearchPath(Name... domains) {
     setDefaultSearchPath(Arrays.asList(domains));
   }
 
@@ -166,7 +166,8 @@ public final class Lookup {
    * @param domains The default search path.
    * @throws TextParseException A name in the array is not a valid DNS name.
    */
-  public static synchronized void setDefaultSearchPath(String[] domains) throws TextParseException {
+  public static synchronized void setDefaultSearchPath(String... domains)
+      throws TextParseException {
     if (domains == null) {
       defaultSearchPath = null;
       return;
@@ -328,7 +329,7 @@ public final class Lookup {
    *
    * @param domains An array of names containing the search path.
    */
-  public void setSearchPath(Name[] domains) {
+  public void setSearchPath(Name... domains) {
     setSearchPath(Arrays.asList(domains));
   }
 
@@ -338,7 +339,7 @@ public final class Lookup {
    * @param domains An array of names containing the search path.
    * @throws TextParseException A name in the array is not a valid DNS name.
    */
-  public void setSearchPath(String[] domains) throws TextParseException {
+  public void setSearchPath(String... domains) throws TextParseException {
     if (domains == null) {
       this.searchPath = null;
       return;
