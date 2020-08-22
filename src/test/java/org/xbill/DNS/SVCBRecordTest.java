@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 public class SVCBRecordTest {
   @Test
-  void createParams() throws UnknownHostException {
+  void createParams() throws UnknownHostException, TextParseException {
     List<Integer> mandatoryList = Arrays.asList(SVCBRecord.ALPN, SVCBRecord.IPV4HINT);
     SVCBRecord.ParameterMandatory mandatory = new SVCBBase.ParameterMandatory(mandatoryList);
     assertEquals(SVCBRecord.MANDATORY, mandatory.getKey());
@@ -160,8 +160,27 @@ public class SVCBRecordTest {
 
   @Test
   void serviceModeQuotedEscapedValue() throws IOException {
-    String str = "1 . alpn=\"h2\\,h3,h4\"";
-    assertEquals("1 . alpn=h2\\,h3,h4", stringToWireToString(str));
+    String str = "1 . alpn=\"h2\\,h3,h\\\\4\"";
+    String expectedStr = "1 . alpn=h2\\,h3,h\\\\4";
+    byte[] bytes = stringToWire(str);
+    byte[] expectedBytes =
+        new byte[] {0, 1, 0, 0, 1, 0, 10, 5, 104, 50, 44, 104, 51, 3, 104, '\\', 52};
+    assertArrayEquals(bytes, expectedBytes);
+    assertEquals(expectedStr, wireToString(bytes));
+  }
+
+  @Test
+  void serviceModeAlpnEscapedBytes() throws IOException {
+    String str = "1 . alpn=http/1.1,\\001aa\\003\\b,h2";
+    String expectedStr = "1 . alpn=http/1.1,\\001aa\\003b,h2";
+    byte[] bytes = stringToWire(str);
+    byte[] expectedBytes =
+        new byte[] {
+          0, 1, 0, 0, 1, 0, 18, 8, 104, 116, 116, 112, 47, 49, 46, 49, 5, 1, 97, 97, 3, 98, 2, 104,
+          50
+        };
+    assertArrayEquals(bytes, expectedBytes);
+    assertEquals(expectedStr, wireToString(bytes));
   }
 
   @Test
@@ -461,6 +480,16 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void portValueCharAfterInt() {
+    String str = "1 . port=443a";
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          stringToWire(str);
+        });
+  }
+
+  @Test
   void noDefaultAlpnWithValue() {
     String str = "1 . no-default-alpn=true";
     assertThrows(
@@ -563,6 +592,16 @@ public class SVCBRecordTest {
   @Test
   void svcParamUnknownKeyTooHigh() {
     String str = "65535 . key65536=abcdefg";
+    assertThrows(
+        TextParseException.class,
+        () -> {
+          stringToWire(str);
+        });
+  }
+
+  @Test
+  void svcParamUnknownKeyCharAfterInt() {
+    String str = "65535 . key123a=abcdefg";
     assertThrows(
         TextParseException.class,
         () -> {
