@@ -26,7 +26,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.m2
-          key: m2
+          key: m2-cache-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
 
       - name: Set up JDK ${{ matrix.java }}
         uses: joschi/setup-jdk@2d2c40de6fb6af3db2a3d2bedd57eb02442521c4
@@ -36,3 +36,39 @@ jobs:
 
       - name: Build with Maven
         run: mvn verify -B -"Dgpg.skip"
+
+  release:
+    if: github.ref == 'refs/heads/master'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: m2-cache-8-x64-ubuntu-latest
+
+      - name: Set up JDK 8
+        uses: joschi/setup-jdk@2d2c40de6fb6af3db2a3d2bedd57eb02442521c4
+        with:
+          java-version: '8'
+          architecture: 'x64'
+          server-id: ossrh
+          server-username: SONATYPE_USER
+          server-password: SONATYPE_PW
+
+      - name: Release to Maven Central
+        env:
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          SONATYPE_PW: ${{ secrets.SONATYPE_PW }}
+        run: |
+          cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+          mvn \
+            --no-transfer-progress \
+            --batch-mode \
+            -Dgpg.passphrase="${{ secrets.GPG_PW }}" \
+            -DperformRelease=true \
+            deploy
