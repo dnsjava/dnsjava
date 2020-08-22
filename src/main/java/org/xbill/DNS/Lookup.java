@@ -610,6 +610,8 @@ public final class Lookup {
           break;
         }
       }
+
+      resolve(name, Name.root);
     }
     if (!done) {
       if (badresponse) {
