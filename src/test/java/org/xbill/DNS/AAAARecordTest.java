@@ -85,14 +85,15 @@ class AAAARecordTest {
 
     // a relative name
     assertThrows(RelativeNameException.class, () -> new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr));
+  }
 
-    // an IPv4 address
+  @Test
+  void ctor_v4() {
     try {
-      new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.0.1"));
-      fail("IllegalArgumentException not thrown");
-    } catch (IllegalArgumentException e) {
-    } catch (UnknownHostException e) {
-      fail(e.getMessage());
+      AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.1.1"));
+      assertEquals("::ffff:192.168.1.1", ar.rrToString());
+    } catch (UnknownHostException ignore){
+
     }
   }
 

@@ -25,8 +25,8 @@ public class AAAARecord extends Record {
    */
   public AAAARecord(Name name, int dclass, long ttl, InetAddress address) {
     super(name, Type.AAAA, dclass, ttl);
-    if (Address.familyOf(address) != Address.IPv6) {
-      throw new IllegalArgumentException("invalid IPv6 address");
+    if (Address.familyOf(address) != Address.IPv4 && Address.familyOf(address) != Address.IPv6) {
+      throw new IllegalArgumentException("invalid IPv4/IPv6 address");
     }
     this.address = address.getAddress();
   }
@@ -52,13 +52,7 @@ public class AAAARecord extends Record {
     }
     if (addr.getAddress().length == 4) {
       // Deal with Java's broken handling of mapped IPv4 addresses.
-      StringBuilder sb = new StringBuilder("0:0:0:0:0:ffff:");
-      int high = ((address[12] & 0xFF) << 8) + (address[13] & 0xFF);
-      int low = ((address[14] & 0xFF) << 8) + (address[15] & 0xFF);
-      sb.append(Integer.toHexString(high));
-      sb.append(':');
-      sb.append(Integer.toHexString(low));
-      return sb.toString();
+      return "::ffff:" + addr.getHostAddress();
     }
     return addr.getHostAddress();
   }
