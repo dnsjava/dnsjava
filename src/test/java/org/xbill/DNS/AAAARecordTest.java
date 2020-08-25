@@ -88,8 +88,8 @@ class AAAARecordTest {
 
   @Test
   void ctor_v4() throws UnknownHostException {
-      AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.1.1"));
-      assertEquals("::ffff:192.168.1.1", ar.rrToString());
+    AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.1.1"));
+    assertEquals("::ffff:192.168.1.1", ar.rrToString());
   }
 
   @Test
