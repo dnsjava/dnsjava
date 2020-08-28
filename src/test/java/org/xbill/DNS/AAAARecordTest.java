@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -85,15 +84,12 @@ class AAAARecordTest {
 
     // a relative name
     assertThrows(RelativeNameException.class, () -> new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr));
+  }
 
-    // an IPv4 address
-    try {
-      new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.0.1"));
-      fail("IllegalArgumentException not thrown");
-    } catch (IllegalArgumentException e) {
-    } catch (UnknownHostException e) {
-      fail(e.getMessage());
-    }
+  @Test
+  void ctor_v4() throws UnknownHostException {
+    AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.1.1"));
+    assertEquals("::ffff:192.168.1.1", ar.rrToString());
   }
 
   @Test
