@@ -78,6 +78,11 @@ class TypeTest {
   }
 
   @Test
+  void value_2arg_outOfRange() {
+    assertEquals(-1, Type.value("TYPE65536", true));
+  }
+
+  @Test
   void isRR() {
     assertTrue(Type.isRR(Type.CNAME));
     assertFalse(Type.isRR(Type.IXFR));

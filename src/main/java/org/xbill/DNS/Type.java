@@ -323,6 +323,7 @@ public final class Type {
     public TypeMnemonic() {
       super("Type", CASE_UPPER);
       setPrefix("TYPE");
+      setMaximum(0xFFFF);
       factories = new HashMap<>();
     }
 
