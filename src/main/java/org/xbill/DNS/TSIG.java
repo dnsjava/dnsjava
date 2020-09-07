@@ -89,7 +89,9 @@ public class TSIG {
   private final Name alg;
   private final Clock clock;
   private final Name name;
-  private final Mac hmac;
+  private final SecretKey macKey;
+  private final String macAlgorithm;
+  private final Mac sharedHmac;
 
   /**
    * Verifies the data (computes the secure hash and compares it to the input)
@@ -107,10 +109,19 @@ public class TSIG {
     return Arrays.equals(signature, expected);
   }
 
-  private Mac initHmac(String macAlgorithm, SecretKey key) {
+  private Mac initHmac() {
+    if (sharedHmac != null) {
+      try {
+        return (Mac) sharedHmac.clone();
+      } catch (CloneNotSupportedException e) {
+        sharedHmac.reset();
+        return sharedHmac;
+      }
+    }
+
     try {
       Mac mac = Mac.getInstance(macAlgorithm);
-      mac.init(key);
+      mac.init(macKey);
       return mac;
     } catch (GeneralSecurityException ex) {
       throw new IllegalArgumentException("Caught security exception setting up HMAC.", ex);
@@ -139,12 +150,7 @@ public class TSIG {
    * @param keyBytes The shared key's data.
    */
   public TSIG(Name algorithm, Name name, byte[] keyBytes) {
-    this.name = name;
-    this.alg = algorithm;
-    this.clock = Clock.systemUTC();
-    String macAlgorithm = nameToAlgorithm(algorithm);
-    SecretKey key = new SecretKeySpec(keyBytes, macAlgorithm);
-    this.hmac = initHmac(macAlgorithm, key);
+    this(algorithm, name, new SecretKeySpec(keyBytes, nameToAlgorithm(algorithm)));
   }
 
   /**
@@ -170,8 +176,9 @@ public class TSIG {
     this.name = name;
     this.alg = algorithm;
     this.clock = clock;
-    String macAlgorithm = nameToAlgorithm(algorithm);
-    this.hmac = initHmac(macAlgorithm, key);
+    this.macAlgorithm = nameToAlgorithm(algorithm);
+    this.macKey = key;
+    this.sharedHmac = null;
   }
 
   /**
@@ -180,10 +187,14 @@ public class TSIG {
    *
    * @param mac The JCE HMAC object
    * @param name The name of the key
+   * @deprecated Use one of the constructors that specifies an algorithm and key.
    */
+  @Deprecated
   public TSIG(Mac mac, Name name) {
     this.name = name;
-    this.hmac = mac;
+    this.sharedHmac = mac;
+    this.macAlgorithm = null;
+    this.macKey = null;
     this.clock = Clock.systemUTC();
     this.alg = algorithmToName(mac.getAlgorithm());
   }
@@ -220,8 +231,9 @@ public class TSIG {
     }
     this.alg = algorithm;
     this.clock = Clock.systemUTC();
-    String macAlgorithm = nameToAlgorithm(this.alg);
-    this.hmac = initHmac(macAlgorithm, new SecretKeySpec(keyBytes, macAlgorithm));
+    this.macAlgorithm = nameToAlgorithm(algorithm);
+    this.sharedHmac = null;
+    this.macKey = new SecretKeySpec(keyBytes, macAlgorithm);
   }
 
   /**
@@ -311,9 +323,10 @@ public class TSIG {
     }
 
     boolean signing = false;
+    Mac hmac = null;
     if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
       signing = true;
-      hmac.reset();
+      hmac = initHmac();
     }
 
     Duration fudge;
@@ -520,7 +533,7 @@ public class TSIG {
       return Rcode.BADKEY;
     }
 
-    hmac.reset();
+    Mac hmac = initHmac();
     if (old != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
       hmacAddSignature(hmac, old);
     }
