@@ -252,7 +252,8 @@ public final class DohResolver implements Resolver {
     if (contentLength > -1) {
       responseBytes = new byte[contentLength];
 
-      // As bytes are read the available space in responseBytes reduces, so the 3rd parameter should reduce accordingly.
+      // As bytes are read the available space in responseBytes reduces, so the 3rd parameter should
+      // reduce accordingly.
       while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
         offset += r;
       }
@@ -261,7 +262,8 @@ public final class DohResolver implements Resolver {
       // The response length is unknown, so read until we get a response of -1
       responseBytes = new byte[MAX_DOH_RESPONSE_SIZE];
 
-      // As bytes are read the available space in responseBytes reduces, so the 3rd parameter should reduce accordingly.
+      // As bytes are read the available space in responseBytes reduces, so the 3rd parameter should
+      // reduce accordingly.
       while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
         offset += r;
       }
