@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -25,6 +26,8 @@ import org.xbill.DNS.utils.base64;
 @Slf4j
 public final class DohResolver implements Resolver {
   private static final boolean useHttpClient;
+
+  private static final int MAX_DOH_RESPONSE_SIZE = 2048;
 
   private static Object defaultHttpRequestBuilder;
   private static Method publisherOfByteArrayMethod;
@@ -240,13 +243,32 @@ public final class DohResolver implements Resolver {
       conn.getOutputStream().write(queryBytes);
     }
     InputStream is = conn.getInputStream();
-    byte[] responseBytes = new byte[conn.getContentLength()];
+    final int contentLength = conn.getContentLength();
     int r;
     int offset = 0;
-    while ((r = is.read(responseBytes, offset, responseBytes.length)) > 0) {
-      offset += r;
+    byte[] responseBytes;
+
+    // getContentLength() can return -1 in some cases if the length is unknown.
+    if (contentLength > -1) {
+      responseBytes = new byte[contentLength];
+
+      // As bytes are read the available space in responseBytes reduces, so the 3rd parameter should reduce accordingly.
+      while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
+        offset += r;
+      }
+      return responseBytes;
+    } else {
+      // The response length is unknown, so read until we get a response of -1
+      responseBytes = new byte[MAX_DOH_RESPONSE_SIZE];
+
+      // As bytes are read the available space in responseBytes reduces, so the 3rd parameter should reduce accordingly.
+      while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
+        offset += r;
+      }
+
+      // Only return the bytes we actually read, not MAX_DOH_RESPONSE_SIZE bytes
+      return Arrays.copyOfRange(responseBytes, 0, offset);
     }
-    return responseBytes;
   }
 
   private CompletionStage<Message> sendAsync11(final Message query) {
