@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -339,13 +341,28 @@ public final class DohResolver implements Resolver {
         conn.getOutputStream().write(queryBytes);
       }
       try (InputStream is = conn.getInputStream()) {
-        byte[] responseBytes = new byte[conn.getContentLength()];
-        int r;
-        int offset = 0;
-        while ((r = is.read(responseBytes, offset, responseBytes.length)) > 0) {
-          offset += r;
+        int length = conn.getContentLength();
+        if (length > -1) {
+          byte[] responseBytes = new byte[conn.getContentLength()];
+          int r;
+          int offset = 0;
+          while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
+            offset += r;
+          }
+          if (offset < responseBytes.length) {
+            throw new EOFException("Could not read expected content length");
+          }
+          return responseBytes;
+        } else {
+          try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int r;
+            while ((r = is.read(buffer, 0, buffer.length)) > 0) {
+              bos.write(buffer, 0, r);
+            }
+            return bos.toByteArray();
+          }
         }
-        return responseBytes;
       }
     } catch (IOException ioe) {
       try (InputStream es = conn.getErrorStream()) {
