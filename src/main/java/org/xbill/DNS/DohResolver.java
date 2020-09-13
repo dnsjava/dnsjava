@@ -8,23 +8,44 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.base64;
 
 /**
- * Implements a very basic DNS over HTTP (DoH) resolver. On Java 8, it uses HTTP/1.1, which is
- * against the recommendation of RFC 8484 to use HTTP/2 and thus horribly slow. On Java 11 or newer,
- * HTTP/2 is always used.
+ * Proof-of-concept <a href="https://tools.ietf.org/html/rfc8484">DNS over HTTP (DoH)</a> resolver.
+ * This class is not suitable for high load scenarios because of the shortcomings of Java's built-in
+ * HTTP clients. For more control, implement your own {@link Resolver} using e.g. <a
+ * href="https://github.com/square/okhttp/">OkHttp</a>.
+ *
+ * <p>On Java 8, it uses HTTP/1.1, which is against the recommendation of RFC 8484 to use HTTP/2 and
+ * thus slower. On Java 11 or newer, HTTP/2 is always used, but the built-in HttpClient has it's own
+ * <a href="https://bugs.openjdk.java.net/browse/JDK-8225647">issues</a> with connection handling.
+ *
+ * <p>As of 2020-09-13, the following limits of public resolvers for HTTP/2 were observed:
+ * <li>https://cloudflare-dns.com/dns-query: max streams=250, idle timeout=400s
+ * <li>https://dns.google/dns-query: max streams=100, idle timeout=240s
+ *
+ * @since 3.0
  */
 @Slf4j
 public final class DohResolver implements Resolver {
   private static final boolean useHttpClient;
+  private final SSLSocketFactory sslSocketFactory;
 
   private static Object defaultHttpRequestBuilder;
   private static Method publisherOfByteArrayMethod;
@@ -36,6 +57,7 @@ public final class DohResolver implements Resolver {
 
   private static Method httpClientNewBuilderMethod;
   private static Method httpClientBuilderTimeoutMethod;
+  private static Method httpClientBuilderExecutorMethod;
   private static Method httpClientBuilderBuildMethod;
   private static Method httpClientSendAsyncMethod;
 
@@ -46,9 +68,21 @@ public final class DohResolver implements Resolver {
   private boolean usePost = false;
   private Duration timeout = Duration.ofSeconds(5);
   private String uriTemplate;
+  private final Duration idleConnectionTimeout;
   private OPTRecord queryOPT = new OPTRecord(0, 0, 0);
   private TSIG tsig;
   private Object httpClient;
+  private Executor executor = ForkJoinPool.commonPool();
+
+  /**
+   * Maximum concurrent HTTP/2 streams or HTTP/1.1 connections.
+   *
+   * <p>rfc7540#section-6.5.2 recommends a minimum of 100 streams for HTTP/2.
+   */
+  private final Semaphore maxConcurrentRequests;
+
+  private final AtomicLong lastRequest = new AtomicLong(0);
+  private final Semaphore initialRequestLock = new Semaphore(1);
 
   static {
     boolean initSuccess = false;
@@ -68,6 +102,8 @@ public final class DohResolver implements Resolver {
         // HttpClient.Builder
         httpClientBuilderTimeoutMethod =
             httpClientBuilderClass.getDeclaredMethod("connectTimeout", Duration.class);
+        httpClientBuilderExecutorMethod =
+            httpClientBuilderClass.getDeclaredMethod("executor", Executor.class);
         httpClientBuilderBuildMethod = httpClientBuilderClass.getDeclaredMethod("build");
 
         // HttpClient
@@ -103,7 +139,7 @@ public final class DohResolver implements Resolver {
         httpResponseStatusCodeMethod = httpResponseClass.getDeclaredMethod("statusCode");
 
         // defaultHttpRequestBuilder = HttpRequest.newBuilder();
-        // defaultHttpRequestBuilder.version(Version.HTTP_2);
+        // defaultHttpRequestBuilder.version(HttpClient.Version.HTTP_2);
         // defaultHttpRequestBuilder.header("Content-Type", "application/dns-message");
         // defaultHttpRequestBuilder.header("Accept", "application/dns-message");
         defaultHttpRequestBuilder = requestBuilderNewBuilderMethod.invoke(null);
@@ -133,15 +169,63 @@ public final class DohResolver implements Resolver {
    * @param uriTemplate the URI to use for resolving, e.g. {@code https://dns.google/dns-query}
    */
   public DohResolver(String uriTemplate) {
+    this(uriTemplate, 100, Duration.ofMinutes(2));
+  }
+
+  /**
+   * Creates a new DoH resolver that performs lookups with HTTP GET and the default timeout (5s).
+   *
+   * @param uriTemplate the URI to use for resolving, e.g. {@code https://dns.google/dns-query}
+   * @param maxConcurrentRequests Maximum concurrent HTTP/2 streams for Java 11+ or HTTP/1.1
+   *     connections for Java 8. On Java 8 this cannot exceed the system property {@code
+   *     http.maxConnections}.
+   * @param idleConnectionTimeout Max. idle time for HTTP/2 connections until a request is
+   *     serialized. Applies to Java 11+ only.
+   * @since 3.3
+   */
+  public DohResolver(
+      String uriTemplate, int maxConcurrentRequests, Duration idleConnectionTimeout) {
     this.uriTemplate = uriTemplate;
+    this.idleConnectionTimeout = idleConnectionTimeout;
+    if (maxConcurrentRequests <= 0) {
+      throw new IllegalArgumentException("maxConcurrentRequests must be > 0");
+    }
+    if (!useHttpClient) {
+      try {
+        int javaMaxConn = Integer.parseInt(System.getProperty("http.maxConnections", "5"));
+        if (maxConcurrentRequests > javaMaxConn) {
+          maxConcurrentRequests = javaMaxConn;
+        }
+      } catch (NumberFormatException nfe) {
+        // well, use what we got
+      }
+    }
+    this.maxConcurrentRequests = new Semaphore(maxConcurrentRequests);
+    try {
+      sslSocketFactory = SSLContext.getDefault().getSocketFactory();
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
     buildHttpClient();
   }
 
   @SneakyThrows
   private void buildHttpClient() {
     if (useHttpClient) {
+      // var builder =
+      //     HttpClient.newBuilder().connectTimeout(timeout).version(HttpClient.Version.HTTP_2);
+      // if (executor != null) {
+      //   builder.executor(executor);
+      // }
+      //
+      // httpClient = builder.build();
+      // defaultHttpRequestBuilder.timeout(timeout);
+
       Object httpClientBuilder = httpClientNewBuilderMethod.invoke(null);
       httpClientBuilderTimeoutMethod.invoke(httpClientBuilder, timeout);
+      if (executor != null) {
+        httpClientBuilderExecutorMethod.invoke(httpClientBuilder, executor);
+      }
       httpClient = httpClientBuilderBuildMethod.invoke(httpClientBuilder);
       requestBuilderTimeoutMethod.invoke(defaultHttpRequestBuilder, timeout);
     }
@@ -217,12 +301,23 @@ public final class DohResolver implements Resolver {
                 byte[] queryBytes = prepareQuery(query).toWire();
                 String url = getUrl(queryBytes);
 
-                byte[] responseBytes = sendAndGetMessageBytes(url, queryBytes);
+                // limit number of concurrent connections
+                if (!maxConcurrentRequests.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+                  failedFuture(new IOException("Query timed out"));
+                  return;
+                }
+
+                byte[] responseBytes;
+                try {
+                  responseBytes = sendAndGetMessageBytes(url, queryBytes);
+                } finally {
+                  maxConcurrentRequests.release();
+                }
                 Message response = new Message(responseBytes);
                 verifyTSIG(query, response, responseBytes, tsig);
                 response.setResolver(this);
                 f.complete(response);
-              } catch (IOException e) {
+              } catch (InterruptedException | IOException e) {
                 f.completeExceptionally(e);
               }
             });
@@ -231,49 +326,128 @@ public final class DohResolver implements Resolver {
 
   private byte[] sendAndGetMessageBytes(String url, byte[] queryBytes) throws IOException {
     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-    conn.setConnectTimeout((int) timeout.toMillis());
-    conn.setRequestMethod(isUsePost() ? "POST" : "GET");
-    conn.setRequestProperty("Content-Type", "application/dns-message");
-    conn.setRequestProperty("Accept", "application/dns-message");
-    if (usePost) {
-      conn.setDoOutput(true);
-      conn.getOutputStream().write(queryBytes);
+    try {
+      if (conn instanceof HttpsURLConnection) {
+        ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
+      }
+      conn.setConnectTimeout((int) timeout.toMillis());
+      conn.setRequestMethod(isUsePost() ? "POST" : "GET");
+      conn.setRequestProperty("Content-Type", "application/dns-message");
+      conn.setRequestProperty("Accept", "application/dns-message");
+      if (usePost) {
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(queryBytes);
+      }
+      try (InputStream is = conn.getInputStream()) {
+        byte[] responseBytes = new byte[conn.getContentLength()];
+        int r;
+        int offset = 0;
+        while ((r = is.read(responseBytes, offset, responseBytes.length)) > 0) {
+          offset += r;
+        }
+        return responseBytes;
+      }
+    } catch (IOException ioe) {
+      try (InputStream es = conn.getErrorStream()) {
+        byte[] buf = new byte[4096];
+        while (es.read(buf) > 0) {
+          // discard
+        }
+      }
+      throw ioe;
     }
-    InputStream is = conn.getInputStream();
-    byte[] responseBytes = new byte[conn.getContentLength()];
-    int r;
-    int offset = 0;
-    while ((r = is.read(responseBytes, offset, responseBytes.length)) > 0) {
-      offset += r;
-    }
-    return responseBytes;
   }
 
   private CompletionStage<Message> sendAsync11(final Message query) {
+    long startTime = System.nanoTime();
     byte[] queryBytes = prepareQuery(query).toWire();
     String url = getUrl(queryBytes);
 
     try {
       // var builder = defaultHttpRequestBuilder.copy();
-      Object builder = requestBuilderCopyMethod.invoke(defaultHttpRequestBuilder);
       // builder.uri(URI.create(url));
+      Object builder = requestBuilderCopyMethod.invoke(defaultHttpRequestBuilder);
       requestBuilderUriMethod.invoke(builder, URI.create(url));
       if (usePost) {
-        // builder.POST(BodyPublishers.ofByteArray(queryBytes));
+        // builder.POST(HttpRequest.BodyPublishers.ofByteArray(queryBytes));
         requestBuilderPostMethod.invoke(
             builder, publisherOfByteArrayMethod.invoke(null, queryBytes));
       }
 
-      // var request = request.build();
-      // var bodyHandler = BodyHandlers.ofByteArray();
+      try {
+        // check if this request needs to be done synchronously because of HttpClient's stupidity to
+        // not use the connection pool for HTTP/2 until one connection is successfully established,
+        // which could lead to hundreds of connections (and threads with the default executor)
+        if (!initialRequestLock.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+          return failedFuture(new IOException("Query timed out"));
+        }
+      } catch (InterruptedException iex) {
+        return failedFuture(iex);
+      }
+
+      long lastRequestTime = lastRequest.get();
+      long now = System.nanoTime();
+      boolean isInitialRequest = (lastRequestTime < now - idleConnectionTimeout.toNanos());
+      if (!isInitialRequest) {
+        initialRequestLock.release();
+      }
+
+      // check if we already exceeded the query timeout while checking the initial connection
+      Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+      if (remainingTimeout.isNegative()) {
+        if (isInitialRequest) {
+          initialRequestLock.release();
+        }
+        return failedFuture(new IOException("Query timed out"));
+      }
+
+      try {
+        // Lock a HTTP/2 stream. Another stupidity of HttpClient to not simply queue the request,
+        // but fail with an IOException which also CLOSES the connection... *facepalm*
+        if (!maxConcurrentRequests.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+          if (isInitialRequest) {
+            initialRequestLock.release();
+          }
+          return failedFuture(new IOException("Query timed out"));
+        }
+      } catch (InterruptedException iex) {
+        if (isInitialRequest) {
+          initialRequestLock.release();
+        }
+        return failedFuture(iex);
+      }
+
+      // check if the stream lock acquisition took too long
+      remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+      if (remainingTimeout.isNegative()) {
+        if (isInitialRequest) {
+          initialRequestLock.release();
+        }
+        return failedFuture(new IOException("Query timed out"));
+      }
+
+      // var httpRequest = builder.build();
+      // var bodyHandler = HttpResponse.BodyHandlers.ofByteArray();
+      // return httpClient
+      //     .sendAsync(httpRequest, bodyHandler)
       Object httpRequest = requestBuilderBuildMethod.invoke(builder);
       Object bodyHandler = byteArrayBodyPublisherMethod.invoke(null);
       return ((CompletionStage<?>)
               httpClientSendAsyncMethod.invoke(httpClient, httpRequest, bodyHandler))
+          .whenComplete(
+              (result, ex) -> {
+                maxConcurrentRequests.release();
+                if (isInitialRequest && ex == null) {
+                  lastRequest.set(now);
+                  initialRequestLock.release();
+                }
+              })
           .thenComposeAsync(
               response -> {
                 try {
                   Message responseMessage;
+                  // if (response.statusCode() == 200) {
+                  // byte[] responseBytes = response.body();
                   if ((int) httpResponseStatusCodeMethod.invoke(response) == 200) {
                     byte[] responseBytes = (byte[]) httpResponseBodyMethod.invoke(response);
                     responseMessage = new Message(responseBytes);
@@ -352,6 +526,28 @@ public final class DohResolver implements Resolver {
   /** Sets the URI to use for resolving, e.g. {@code https://dns.google/dns-query} */
   public void setUriTemplate(String uriTemplate) {
     this.uriTemplate = uriTemplate;
+  }
+
+  /**
+   * Gets the {@link Executor} for HTTP/2 requests. Only applicable on Java 11+ and default to
+   * {@link ForkJoinPool#commonPool()}.
+   *
+   * @since 3.3
+   */
+  public Executor getExecutor() {
+    return executor;
+  }
+
+  /**
+   * Gets the {@link Executor} for HTTP/2 requests. Only applicable on Java 11+
+   *
+   * @param executor The new {@link Executor}, can be null to restore the HttpClient default
+   *     behavior.
+   * @since 3.3
+   */
+  public void setExecutor(Executor executor) {
+    this.executor = executor;
+    buildHttpClient();
   }
 
   @Override
