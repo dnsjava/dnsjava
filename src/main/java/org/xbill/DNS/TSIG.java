@@ -207,6 +207,7 @@ public class TSIG {
    * @param key The shared key's data.
    * @deprecated Use {@link #TSIG(Name, Name, SecretKey)} to explicitly specify an algorithm.
    */
+  @Deprecated
   public TSIG(Name name, byte[] key) {
     this(HMAC_MD5, name, key);
   }
@@ -260,6 +261,7 @@ public class TSIG {
    * @throws IllegalArgumentException The key data is improperly encoded
    * @deprecated Use {@link #TSIG(Name, String, String)} to explicitly specify an algorithm.
    */
+  @Deprecated
   public TSIG(String name, String key) {
     this(HMAC_MD5, name, key);
   }
@@ -274,6 +276,7 @@ public class TSIG {
    * @throws IllegalArgumentException The key data is improperly encoded
    * @deprecated Use an explicit constructor
    */
+  @Deprecated
   public static TSIG fromString(String str) {
     String[] parts = str.split("[:/]", 3);
     switch (parts.length) {
@@ -458,6 +461,7 @@ public class TSIG {
    *     subsequent messages with reduced TSIG variables set (rfc2845, 4.4.).
    * @deprecated use {@link #apply(Message, TSIGRecord, boolean)}
    */
+  @Deprecated
   public void applyStream(Message m, TSIGRecord old, boolean fullSignature) {
     apply(m, Rcode.NOERROR, old, fullSignature);
   }
