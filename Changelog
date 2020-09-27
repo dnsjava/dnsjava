@@ -1,5 +1,17 @@
+09/27/2020
+	 - 3.3.0 released
+	 - Add support for SVCB and HTTPS records
+	   (PR#116, @adam-stoler)
+	 - Fix an issue with ndots in Lookup (#118)
+	 - Support IPv4 mapped IPv6 address in AAAA record
+	   (PR#120, @spwei)
+	 - Validate range in Type
+	 - Improve DOH Resolver (#123, #127)
+	   Note that this resolver is more a proof of concept and not
+	   production ready. See Javadoc and issue #123.
+
 07/11/2020
-	- 3.2.1 released
+	- 3.2.2 released
 	- Fix JNA access violation in WindowsResolverConfigProvider
 	  on 32bit JVMs
 

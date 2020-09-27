@@ -157,7 +157,7 @@ dnsjava comes with several built-in resolvers:
 - `ExtendedResolver`: a resolver that uses multiple `SimpleResolver`s to send
    the queries. Can be configured to query the servers in a round-robin order.
    Blacklists a server if it times out.
-- `DohResolver`: a very basic DNS over HTTP resolver, e.g. to use
+- `DohResolver`: a proof-of-concept DNS over HTTP resolver, e.g. to use
   `https://dns.google/query`.
 
 The project [dnssecjava](https://github.com/ibauersachs/dnssecjava) has a
