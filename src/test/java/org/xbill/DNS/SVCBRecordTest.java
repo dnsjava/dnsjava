@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -297,6 +298,33 @@ public class SVCBRecordTest {
   void serviceModeUnknownKeyNoValue() throws IOException {
     String str = "65535 . key65535";
     assertEquals(str, stringToWireToString(str));
+  }
+
+  @Test
+  void masterFormatParsing() throws IOException {
+    String str =
+        "test.net. 86400 IN SOA test.net. test.net. 2020100900 3600 600 604800 300\n"
+            + "test.net. 86400 IN NS ns1.test.net.\n"
+            + "test.net. 300 IN HTTPS 0 www.test.net.\n"
+            + "test.net. 300 IN SVCB 1 . alpn=h2\n"
+            + "www.test.net. 300 IN A 1.2.3.4\n";
+    Master m = new Master(new ByteArrayInputStream(str.getBytes()));
+
+    Record r = m.nextRecord();
+    assertEquals(Type.SOA, r.getType());
+    r = m.nextRecord();
+    assertEquals(Type.NS, r.getType());
+    r = m.nextRecord();
+    assertEquals(Type.HTTPS, r.getType());
+    assertEquals("0 www.test.net.", r.rdataToString());
+    r = m.nextRecord();
+    assertEquals(Type.SVCB, r.getType());
+    assertEquals("1 . alpn=h2", r.rdataToString());
+    r = m.nextRecord();
+    assertEquals(Type.A, r.getType());
+    assertEquals("1.2.3.4", r.rdataToString());
+    r = m.nextRecord();
+    assertNull(r);
   }
 
   @Test

@@ -728,6 +728,7 @@ abstract class SVCBBase extends Record {
       param.fromString(valueStr);
       svcParams.put(key, param);
     }
+    st.unget();
 
     if (svcPriority > 0 && svcParams.isEmpty()) {
       throw new TextParseException(
