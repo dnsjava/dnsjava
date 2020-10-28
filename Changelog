@@ -1,3 +1,9 @@
+10/28/2020
+	- 3.3.1 released
+	- Fix value of getAlias in C/DNameRecord (#136)
+	- Fix bug with SVCB/HTTPS parsing of master file format
+	  (PR#135, @adam-stoler) 
+
 09/27/2020
 	 - 3.3.0 released
 	 - Add support for SVCB and HTTPS records
