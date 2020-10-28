@@ -26,8 +26,14 @@ public class CNAMERecord extends SingleCompressedNameBase {
     return getSingleName();
   }
 
-  /** Gets the alias specified by the CNAME Record */
+  /**
+   * Gets the name of this record, aka the <i>alias</i> or <i>label</i> to the <i>canonical name</i>
+   * specified in {@link #getTarget()}.
+   *
+   * @deprecated use {@link #getName()}
+   */
+  @Deprecated
   public Name getAlias() {
-    return getSingleName();
+    return getName();
   }
 }
