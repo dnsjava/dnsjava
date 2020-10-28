@@ -111,6 +111,7 @@
                             android.*;resolution:=optional,
                             javax.naming.*;resolution:=optional,
                             com.sun.jna.*;resolution:=optional,*
+                            org.bouncycastle.*;resolution:=optional,*
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>
