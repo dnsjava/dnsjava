@@ -29,7 +29,7 @@ jobs:
           key: m2-cache-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: joschi/setup-jdk@2d2c40de6fb6af3db2a3d2bedd57eb02442521c4
+        uses: joschi/setup-jdk@e87a7cec853d2dd7066adf837fe12bf0f3d45e52
         with:
           java-version: ${{ matrix.java }}
           architecture: ${{ matrix.arch }}
@@ -56,7 +56,7 @@ jobs:
           key: m2-cache-8-x64-ubuntu-latest
 
       - name: Set up JDK 8
-        uses: joschi/setup-jdk@2d2c40de6fb6af3db2a3d2bedd57eb02442521c4
+        uses: joschi/setup-jdk@e87a7cec853d2dd7066adf837fe12bf0f3d45e52
         with:
           java-version: '8'
           architecture: 'x64'
