@@ -40,6 +40,9 @@ jobs:
 
       - name: Build with Maven
         if: matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn verify -B -"Dgpg.skip" org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
   release:
