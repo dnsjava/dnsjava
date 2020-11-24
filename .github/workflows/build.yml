@@ -35,11 +35,11 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Build with Maven
-        if: matrix.arch != 'x64' && matrix.os != 'ubuntu-latest' && matrix.java != '8'
+        if: matrix.arch != 'x64' && matrix.os != 'ubuntu-latest' && matrix.java != '11'
         run: mvn verify -B -"Dgpg.skip"
 
       - name: Build with Maven
-        if: matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '8'
+        if: matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11'
         run: mvn verify -B -"Dgpg.skip" org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
   release:
