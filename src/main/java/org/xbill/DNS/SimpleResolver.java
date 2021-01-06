@@ -482,7 +482,7 @@ public class SimpleResolver implements Resolver {
 
               verifyTSIG(query, response, in, tsig);
               if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
-                log.debug("Got truncated response for id {}, retrying via TCP", qid);
+                log.debug("Got truncated response for id {}, discarding", qid);
                 log.trace("Truncated response: {}", response);
                 continue;
               }
