@@ -354,7 +354,7 @@ public class SimpleResolver implements Resolver {
 
           Verify1Response verify1Response = new Verify1Response(query, qid);
           if (v instanceof byte[]) {
-            byte[] in = (byte[])v;
+            byte[] in = (byte[]) v;
             Message response = verify1Response.parse(in);
             if (response == null) {
               f.completeExceptionally(verify1Response.getExc());
@@ -372,7 +372,7 @@ public class SimpleResolver implements Resolver {
             f.complete(response);
           } else if (v instanceof ArrayList) {
             @SuppressWarnings("unchecked")
-            ArrayList<byte[]> list = (ArrayList<byte[]>)v;
+            ArrayList<byte[]> list = (ArrayList<byte[]>) v;
             Message response = null;
             Throwable exc = null;
             for (byte[] in : list) {
@@ -489,31 +489,31 @@ public class SimpleResolver implements Resolver {
       // validate name, class and type (rfc5452#section-9.1)
       if (!query.getQuestion().getName().equals(r.getQuestion().getName())) {
         exc =
-          new WireParseException(
-            "invalid name in message: expected "
-              + query.getQuestion().getName()
-              + "; got "
-              + r.getQuestion().getName());
+            new WireParseException(
+                "invalid name in message: expected "
+                    + query.getQuestion().getName()
+                    + "; got "
+                    + r.getQuestion().getName());
         return null;
       }
 
       if (query.getQuestion().getDClass() != r.getQuestion().getDClass()) {
         exc =
-          new WireParseException(
-            "invalid class in message: expected "
-              + DClass.string(query.getQuestion().getDClass())
-              + "; got "
-              + DClass.string(r.getQuestion().getDClass()));
+            new WireParseException(
+                "invalid class in message: expected "
+                    + DClass.string(query.getQuestion().getDClass())
+                    + "; got "
+                    + DClass.string(r.getQuestion().getDClass()));
         return null;
       }
 
       if (query.getQuestion().getType() != r.getQuestion().getType()) {
         exc =
-          new WireParseException(
-            "invalid type in message: expected "
-              + Type.string(query.getQuestion().getType())
-              + "; got "
-              + Type.string(r.getQuestion().getType()));
+            new WireParseException(
+                "invalid type in message: expected "
+                    + Type.string(query.getQuestion().getType())
+                    + "; got "
+                    + Type.string(r.getQuestion().getType()));
         return null;
       }
 
