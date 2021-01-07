@@ -352,61 +352,12 @@ public class SimpleResolver implements Resolver {
         v -> {
           CompletableFuture<Message> f = new CompletableFuture<>();
 
-         if (v instanceof byte[]) {
+          Verify1Response verify1Response = new Verify1Response(query, qid);
+          if (v instanceof byte[]) {
             byte[] in = (byte[])v;
-            // Check that the response is long enough.
-            if (in.length < Header.LENGTH) {
-              f.completeExceptionally(new WireParseException("invalid DNS header - too short"));
-              return f;
-            }
-
-            // Check that the response ID matches the query ID. We want
-            // to check this before actually parsing the message, so that
-            // if there's a malformed response that's not ours, it
-            // doesn't confuse us.
-            int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
-            if (id != qid) {
-              f.completeExceptionally(
-                  new WireParseException("invalid message id: expected " + qid + "; got id " + id));
-              return f;
-            }
-
-            Message response;
-            try {
-              response = parseMessage(in);
-            } catch (WireParseException e) {
-              f.completeExceptionally(e);
-              return f;
-            }
-
-            // validate name, class and type (rfc5452#section-9.1)
-            if (!query.getQuestion().getName().equals(response.getQuestion().getName())) {
-              f.completeExceptionally(
-                  new WireParseException(
-                      "invalid name in message: expected "
-                          + query.getQuestion().getName()
-                          + "; got "
-                          + response.getQuestion().getName()));
-              return f;
-            }
-
-            if (query.getQuestion().getDClass() != response.getQuestion().getDClass()) {
-              f.completeExceptionally(
-                  new WireParseException(
-                      "invalid class in message: expected "
-                          + DClass.string(query.getQuestion().getDClass())
-                          + "; got "
-                          + DClass.string(response.getQuestion().getDClass())));
-              return f;
-            }
-
-            if (query.getQuestion().getType() != response.getQuestion().getType()) {
-              f.completeExceptionally(
-                  new WireParseException(
-                      "invalid type in message: expected "
-                          + Type.string(query.getQuestion().getType())
-                          + "; got "
-                          + Type.string(response.getQuestion().getType())));
+            Message response = verify1Response.parse(in);
+            if (response == null) {
+              f.completeExceptionally(verify1Response.getExc());
               return f;
             }
 
@@ -419,71 +370,22 @@ public class SimpleResolver implements Resolver {
 
             response.setResolver(this);
             f.complete(response);
-         } else if (v instanceof ArrayList) {
+          } else if (v instanceof ArrayList) {
             @SuppressWarnings("unchecked")
             ArrayList<byte[]> list = (ArrayList<byte[]>)v;
             Message response = null;
             Throwable exc = null;
             for (byte[] in : list) {
-              // Check that the response is long enough.
-              if (in.length < Header.LENGTH) {
-                exc = new WireParseException("invalid DNS header - too short");
+              Message r = verify1Response.parse(in);
+              if (r == null) {
+                exc = verify1Response.getExc();
                 continue;
               }
 
-              // Check that the response ID matches the query ID. We want
-              // to check this before actually parsing the message, so that
-              // if there's a malformed response that's not ours, it
-              // doesn't confuse us.
-              int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
-              if (id != qid) {
-                exc = new WireParseException("invalid message id: expected " + qid + "; got id " + id);
-                continue;
-              }
-
-              Message r;
-              try {
-                r = parseMessage(in);
-              } catch (WireParseException e) {
-                exc = e;
-                continue;
-              }
-
-              // validate name, class and type (rfc5452#section-9.1)
-              if (!query.getQuestion().getName().equals(response.getQuestion().getName())) {
-                exc =
-                  new WireParseException(
-                      "invalid name in message: expected "
-                          + query.getQuestion().getName()
-                          + "; got "
-                          + response.getQuestion().getName());
-                continue;
-              }
-
-              if (query.getQuestion().getDClass() != response.getQuestion().getDClass()) {
-                exc =
-                    new WireParseException(
-                        "invalid class in message: expected "
-                            + DClass.string(query.getQuestion().getDClass())
-                            + "; got "
-                            + DClass.string(response.getQuestion().getDClass()));
-                continue;
-              }
-
-              if (query.getQuestion().getType() != response.getQuestion().getType()) {
-                exc =
-                    new WireParseException(
-                        "invalid type in message: expected "
-                            + Type.string(query.getQuestion().getType())
-                            + "; got "
-                            + Type.string(response.getQuestion().getType()));
-                continue;
-              }
-
-              verifyTSIG(query, response, in, tsig);
-              if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
-                log.debug("Got truncated response for id {}, discarding", qid);
-                log.trace("Truncated response: {}", response);
+              verifyTSIG(query, r, in, tsig);
+              if (!tcp && !ignoreTruncation && r.getHeader().getFlag(Flags.TC)) {
+                log.debug("Got truncated response for id {}, discarding`", qid);
+                log.trace("Truncated response: {}", r);
                 continue;
               }
 
@@ -541,5 +443,81 @@ public class SimpleResolver implements Resolver {
   @Override
   public String toString() {
     return "SimpleResolver [" + address + "]";
+  }
+
+  private class Verify1Response {
+    private Message query;
+    private int qid;
+    private Throwable exc;
+
+    public Verify1Response(Message query, int qid) {
+      this.query = query;
+      this.qid = qid;
+    }
+
+    public Throwable getExc() {
+      return exc;
+    }
+
+    public Message parse(byte[] in) {
+      exc = null;
+
+      // Check that the response is long enough.
+      if (in.length < Header.LENGTH) {
+        exc = new WireParseException("invalid DNS header - too short");
+        return null;
+      }
+
+      // Check that the response ID matches the query ID. We want
+      // to check this before actually parsing the message, so that
+      // if there's a malformed response that's not ours, it
+      // doesn't confuse us.
+      int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
+      if (id != qid) {
+        exc = new WireParseException("invalid message id: expected " + qid + "; got id " + id);
+        return null;
+      }
+
+      Message r;
+      try {
+        r = parseMessage(in);
+      } catch (WireParseException e) {
+        exc = e;
+        return null;
+      }
+
+      // validate name, class and type (rfc5452#section-9.1)
+      if (!query.getQuestion().getName().equals(r.getQuestion().getName())) {
+        exc =
+          new WireParseException(
+            "invalid name in message: expected "
+              + query.getQuestion().getName()
+              + "; got "
+              + r.getQuestion().getName());
+        return null;
+      }
+
+      if (query.getQuestion().getDClass() != r.getQuestion().getDClass()) {
+        exc =
+          new WireParseException(
+            "invalid class in message: expected "
+              + DClass.string(query.getQuestion().getDClass())
+              + "; got "
+              + DClass.string(r.getQuestion().getDClass()));
+        return null;
+      }
+
+      if (query.getQuestion().getType() != r.getQuestion().getType()) {
+        exc =
+          new WireParseException(
+            "invalid type in message: expected "
+              + Type.string(query.getQuestion().getType())
+              + "; got "
+              + Type.string(r.getQuestion().getType()));
+        return null;
+      }
+
+      return r;
+    }
   }
 }
