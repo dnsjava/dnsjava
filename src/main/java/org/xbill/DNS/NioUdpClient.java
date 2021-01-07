@@ -14,7 +14,9 @@ import java.nio.channels.Selector;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -86,7 +88,7 @@ final class NioUdpClient extends Client {
     private final long endTime;
     private final DatagramChannel channel;
     private final SocketAddress remoteSocketAddress;
-    final CompletableFuture<Object> f;
+    final CompletableFuture<List<byte[]>> f;
 
     void send() throws IOException {
       ByteBuffer buffer = ByteBuffer.wrap(data);
@@ -132,10 +134,10 @@ final class NioUdpClient extends Client {
       verboseLog(
           "UDP read",
           channel.socket().getLocalSocketAddress(),
-          remoteSocketAddress,
+          source,
           data);
       silentCloseChannel();
-      f.complete(data);
+      f.complete(Collections.singletonList(data));
       pendingTransactions.remove(this);
     }
 
@@ -147,7 +149,7 @@ final class NioUdpClient extends Client {
         // ignore, we either already have everything we need or can't do anything
       }
     }
-    
+
     void closeTransaction() {
       silentCloseChannel();
       f.completeExceptionally(new SocketTimeoutException("Query timed out"));
@@ -157,7 +159,7 @@ final class NioUdpClient extends Client {
   private static class MultiAnswerTransaction extends Transaction {
       MultiAnswerTransaction(byte[] query, int max, long endTime, DatagramChannel channel,
                            SocketAddress remoteSocketAddress,
-                           CompletableFuture<Object> f) {
+                           CompletableFuture<List<byte[]>> f) {
         super(query, max, endTime, channel, remoteSocketAddress, f);
       }
 
@@ -211,9 +213,9 @@ final class NioUdpClient extends Client {
     }
   }
 
-  static CompletableFuture<Object> sendrecv(
+  static CompletableFuture<List<byte[]>> sendrecv(
       InetSocketAddress local, InetSocketAddress remote, byte[] data, int max, Duration timeout) {
-    CompletableFuture<Object> f = new CompletableFuture<>();
+    CompletableFuture<List<byte[]>> f = new CompletableFuture<>();
     try {
       final Selector selector = selector();
       DatagramChannel channel = DatagramChannel.open();
@@ -255,10 +257,10 @@ final class NioUdpClient extends Client {
       Transaction t;
       if (!remote.getAddress().isMulticastAddress()) {
         channel.connect(remote);
-        t = new Transaction(data, max, endTime, channel, f);
+        t = new Transaction(data, max, endTime, channel, remote, f);
       } else {
         // stop this a little before the timeout so we can report what answers we did get
-        t = new MultiAnswerTransaction(data, max, endTime - 1000000000L, channel, f);
+        t = new MultiAnswerTransaction(data, max, endTime - 1000000000L, channel, remote, f);
       }
       pendingTransactions.add(t);
       registrationQueue.add(t);
