@@ -92,11 +92,7 @@ final class NioUdpClient extends Client {
 
     void send() throws IOException {
       ByteBuffer buffer = ByteBuffer.wrap(data);
-      verboseLog(
-          "UDP write",
-          channel.socket().getLocalSocketAddress(),
-          remoteSocketAddress,
-          data);
+      verboseLog("UDP write", channel.socket().getLocalSocketAddress(), remoteSocketAddress, data);
       int n = channel.send(buffer, remoteSocketAddress);
       if (n <= 0) {
         throw new EOFException();
@@ -131,11 +127,7 @@ final class NioUdpClient extends Client {
       buffer.flip();
       byte[] data = new byte[read];
       System.arraycopy(buffer.array(), 0, data, 0, read);
-      verboseLog(
-          "UDP read",
-          channel.socket().getLocalSocketAddress(),
-          source,
-          data);
+      verboseLog("UDP read", channel.socket().getLocalSocketAddress(), source, data);
       silentCloseChannel();
       f.complete(Collections.singletonList(data));
       pendingTransactions.remove(this);
@@ -157,13 +149,17 @@ final class NioUdpClient extends Client {
   }
 
   private static class MultiAnswerTransaction extends Transaction {
-      MultiAnswerTransaction(byte[] query, int max, long endTime, DatagramChannel channel,
-                           SocketAddress remoteSocketAddress,
-                           CompletableFuture<List<byte[]>> f) {
-        super(query, max, endTime, channel, remoteSocketAddress, f);
-      }
+    MultiAnswerTransaction(
+        byte[] query,
+        int max,
+        long endTime,
+        DatagramChannel channel,
+        SocketAddress remoteSocketAddress,
+        CompletableFuture<List<byte[]>> f) {
+      super(query, max, endTime, channel, remoteSocketAddress, f);
+    }
 
-      public void processReadyKey(SelectionKey key) {
+    public void processReadyKey(SelectionKey key) {
       if (!key.isReadable()) {
         silentCloseChannel();
         f.completeExceptionally(new EOFException("channel not readable"));
@@ -191,11 +187,7 @@ final class NioUdpClient extends Client {
       buffer.flip();
       byte[] data = new byte[read];
       System.arraycopy(buffer.array(), 0, data, 0, read);
-      verboseLog(
-        "UDP read",
-        channel.socket().getLocalSocketAddress(),
-        source,
-        data);
+      verboseLog("UDP read", channel.socket().getLocalSocketAddress(), source, data);
       answers.add(data);
     }
 
