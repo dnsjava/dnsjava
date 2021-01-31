@@ -60,6 +60,7 @@ public final class Lookup {
   private boolean nametoolong;
   private boolean referral;
   private boolean cycleResults = true;
+  private int maxIterations;
 
   private static final Name[] noAliases = new Name[0];
 
@@ -270,6 +271,8 @@ public final class Lookup {
     this.ndots = defaultNdots;
     this.credibility = Credibility.NORMAL;
     this.result = -1;
+    this.maxIterations =
+        Integer.parseInt(System.getProperty("dnsjava.lookup.max_iterations", "16"));
   }
 
   /**
@@ -454,7 +457,7 @@ public final class Lookup {
     nxdomain = false;
     referral = false;
     iterations++;
-    if (iterations >= 10 || name.equals(oldname)) {
+    if (iterations >= maxIterations || name.equals(oldname)) {
       result = UNRECOVERABLE;
       error = "CNAME loop";
       done = true;

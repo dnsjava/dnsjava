@@ -324,7 +324,7 @@
             </activation>
 
             <properties>
-                <target.jdk>9</target.jdk>
+                <target.jdk>11</target.jdk>
                 <maven.compiler.release>${target.jdk}</maven.compiler.release>
             </properties>
             <build>

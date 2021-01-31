@@ -135,6 +135,15 @@ Some settings of dnsjava can be configured via
         <tr>
             <td colspan="3">Use an OS-assigned ephemeral port for UDP queries. Enabling this option is insecure! Do NOT use it.</td>
         </tr>
+        <tr>
+            <td rowspan="2">dnsjava.lookup.max_iterations</td>
+            <td>Integer</td>
+            <td>16</td>
+            <td>20</td>
+        </tr>
+        <tr>
+            <td colspan="3">Maximum number of CNAMEs to follow in a chain.</td>
+        </tr>
     </tbody>
 </table>
 
