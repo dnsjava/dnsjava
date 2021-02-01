@@ -12,6 +12,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,8 @@ public class HTTPSRecordTest {
     assertEquals(HTTPSRecord.PORT, port.getKey());
     assertEquals(8443, port.getPort());
 
-    List<Inet4Address> ipv4List = Arrays.asList((Inet4Address) InetAddress.getByName("1.2.3.4"));
+    List<Inet4Address> ipv4List =
+        Collections.singletonList((Inet4Address) InetAddress.getByName("1.2.3.4"));
     HTTPSRecord.ParameterIpv4Hint ipv4hint = new HTTPSRecord.ParameterIpv4Hint(ipv4List);
     assertEquals(HTTPSRecord.IPV4HINT, ipv4hint.getKey());
     assertEquals(ipv4List, ipv4hint.getAddresses());
@@ -42,7 +44,8 @@ public class HTTPSRecordTest {
     assertEquals(HTTPSRecord.ECHCONFIG, echconfig.getKey());
     assertEquals(data, echconfig.getData());
 
-    List<Inet6Address> ipv6List = Arrays.asList((Inet6Address) InetAddress.getByName("2001::1"));
+    List<Inet6Address> ipv6List =
+        Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
     HTTPSRecord.ParameterIpv6Hint ipv6hint = new HTTPSRecord.ParameterIpv6Hint(ipv6List);
     assertEquals(HTTPSRecord.IPV6HINT, ipv6hint.getKey());
     assertEquals(ipv6List, ipv6hint.getAddresses());
@@ -112,10 +115,6 @@ public class HTTPSRecordTest {
   @Test
   void unknownKey() {
     String str = "1 . sport=8443";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          SVCBRecordTest.stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> SVCBRecordTest.stringToWire(str));
   }
 }

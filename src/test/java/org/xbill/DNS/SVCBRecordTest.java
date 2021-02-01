@@ -13,6 +13,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,8 @@ public class SVCBRecordTest {
     assertEquals(SVCBRecord.PORT, port.getKey());
     assertEquals(8443, port.getPort());
 
-    List<Inet4Address> ipv4List = Arrays.asList((Inet4Address) InetAddress.getByName("1.2.3.4"));
+    List<Inet4Address> ipv4List =
+        Collections.singletonList((Inet4Address) InetAddress.getByName("1.2.3.4"));
     SVCBRecord.ParameterIpv4Hint ipv4hint = new SVCBRecord.ParameterIpv4Hint(ipv4List);
     assertEquals(SVCBRecord.IPV4HINT, ipv4hint.getKey());
     assertEquals(ipv4List, ipv4hint.getAddresses());
@@ -43,7 +45,8 @@ public class SVCBRecordTest {
     assertEquals(SVCBRecord.ECHCONFIG, echconfig.getKey());
     assertEquals(data, echconfig.getData());
 
-    List<Inet6Address> ipv6List = Arrays.asList((Inet6Address) InetAddress.getByName("2001::1"));
+    List<Inet6Address> ipv6List =
+        Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
     SVCBRecord.ParameterIpv6Hint ipv6hint = new SVCBRecord.ParameterIpv6Hint(ipv6List);
     assertEquals(SVCBRecord.IPV6HINT, ipv6hint.getKey());
     assertEquals(ipv6List, ipv6hint.getAddresses());
@@ -97,9 +100,7 @@ public class SVCBRecordTest {
     List<SVCBRecord.ParameterBase> params = Arrays.asList(alpn, ipv4, alpn);
     assertThrows(
         IllegalArgumentException.class,
-        () -> {
-          new SVCBRecord(label, DClass.IN, 300, 5, svcDomain, params);
-        });
+        () -> new SVCBRecord(label, DClass.IN, 300, 5, svcDomain, params));
   }
 
   @Test
@@ -249,15 +250,15 @@ public class SVCBRecordTest {
 
   @Test
   void serviceModeIpv6Hint() throws IOException {
-    String str = "9 . ipv6hint=2001:2002::1";
-    assertEquals("9 . ipv6hint=2001:2002:0:0:0:0:0:1", stringToWireToString(str));
+    String str = "9 . ipv6hint=2001:db8::1";
+    assertEquals("9 . ipv6hint=2001:db8:0:0:0:0:0:1", stringToWireToString(str));
   }
 
   @Test
   void serviceModeIpv6HintMulti() throws IOException {
-    String str = "2 . alpn=h2 ipv6hint=2001:2002::1,2001:2002::2";
+    String str = "2 . alpn=h2 ipv6hint=2001:db8::1,2001:db8::2";
     assertEquals(
-        "2 . alpn=h2 ipv6hint=2001:2002:0:0:0:0:0:1,2001:2002:0:0:0:0:0:2",
+        "2 . alpn=h2 ipv6hint=2001:db8:0:0:0:0:0:1,2001:db8:0:0:0:0:0:2",
         stringToWireToString(str));
   }
 
@@ -330,401 +331,241 @@ public class SVCBRecordTest {
   @Test
   void invalidText() {
     String str = "these are all garbage strings that should fail";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void extraQuotesInParamValues() {
     String str = "5 . ipv4hint=\"4.5.6.7\",\"8.9.1.2\"";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void serviceModeWithoutParameters() {
     String str = "1 aliasmode.example.com.";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void aliasModeWithParameters() {
     String str = "0 . alpn=h3";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void zeroLengthMandatory() {
     String str = "1 . mandatory";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void zeroLengthAlpnValue() {
     String str = "1 . alpn";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void zeroLengthPortValue() {
     String str = "1 . port";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void zeroLengthIpv4Hint() {
     String str = "1 . ipv4hint";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void zeroLengthEchConfig() {
     String str = "1 . echconfig";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void zeroLengthIpv6Hint() {
     String str = "1 . ipv6hint";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void emptyKey() {
     String str = "1 . =1234";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void emptyValue() {
     String str = "1 . alpn=";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void emptyKeyAndValue() {
     String str = "1 . =";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void unknownKey() {
     String str = "1 . sport=8443";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void mandatoryListWithSelf() {
     String str = "1 . mandatory=alpn,mandatory alpn=h1";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void mandatoryListWithDuplicate() {
     String str = "1 . mandatory=alpn,ipv4hint,alpn alpn=h1 ipv4hint=1.2.3.4";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void mandatoryListWithMissingParam() {
     String str = "1 . mandatory=alpn,ipv4hint alpn=h1";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void portValueTooLarge() {
     String str = "1 . port=84438";
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(IllegalArgumentException.class, () -> stringToWire(str));
   }
 
   @Test
   void portValueCharAfterInt() {
     String str = "1 . port=443a";
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(IllegalArgumentException.class, () -> stringToWire(str));
   }
 
   @Test
   void noDefaultAlpnWithValue() {
     String str = "1 . no-default-alpn=true";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void emptyString() {
     String str = "";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void noParamValues() {
     String str = "1 .";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void svcPriorityTooHigh() {
     String str = "65536 . port=443";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void invalidPortKey() {
     String str = "1 . port<5";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void invalidSvcDomain() {
     String str = "1 fred..harvey port=80";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void duplicateParamKey() {
     String str = "1 . alpn=h2 alpn=h3";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void invalidIpv4Hint() {
-    String str = "1 . ipv4hint=2001::1";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    String str = "1 . ipv4hint=2001:db8::1";
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void invalidIpv6Hint() {
     String str = "1 . ipv6hint=1.2.3.4";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void negativeSvcPriority() {
     String str = "-1 . port=80";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void svcParamUnknownKeyTooHigh() {
     String str = "65535 . key65536=abcdefg";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void svcParamUnknownKeyCharAfterInt() {
     String str = "65535 . key123a=abcdefg";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void invalidSvcParamKey() {
     String str = "65535 . keyBlooie=abcdefg";
-    assertThrows(
-        TextParseException.class,
-        () -> {
-          stringToWire(str);
-        });
+    assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
   @Test
   void wireFormatTooShort() {
     byte[] wire = new byte[] {0, 1, 0, 0, 1, 0, 10};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatTooLong() {
     byte[] wire = new byte[] {0, 0, 0, 1};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatMandatoryTooLong() {
     byte[] wire = new byte[] {0, 1, 0, 0, 0, 0, 3, 0, 1, 55};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatAlpnTooShort() {
     byte[] wire = new byte[] {0, 1, 0, 0, 1, 0, 3, 10, 1, 55};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatNoDefaultAlpnTooLong() {
     byte[] wire = new byte[] {0, 1, 0, 0, 2, 0, 1, 0};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatPortTooLong() {
     byte[] wire = new byte[] {0, 1, 0, 0, 3, 0, 4, 0, 0, 0, 0};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatIpv4HintTooLong() {
     byte[] wire = new byte[] {0, 1, 0, 0, 4, 0, 5, 1, 2, 3, 4, 5};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatIpv6HintTooShort() {
     byte[] wire = new byte[] {0, 1, 0, 0, 6, 0, 2, 1, 2};
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          wireToString(wire);
-        });
+    assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   public static byte[] stringToWire(String str) throws IOException {
