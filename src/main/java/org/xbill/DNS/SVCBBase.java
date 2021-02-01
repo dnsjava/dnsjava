@@ -564,7 +564,8 @@ abstract class SVCBBase extends Record {
           InetAddress addr = InetAddress.getByAddress(null, b);
           sb.append(addr.getHostAddress());
         } catch (UnknownHostException e) {
-          return null;
+          // should not happen, but returning null and throwing is bad
+          return e.getMessage();
         }
       }
       return sb.toString();
