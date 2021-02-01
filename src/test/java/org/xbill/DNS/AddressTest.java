@@ -482,9 +482,8 @@ class AddressTest {
                   return answer;
                 });
     Lookup.setDefaultResolver(mockResolver);
-    assertThrows(
-        UnknownHostException.class,
-        () -> Address.getHostName(InetAddress.getByName("192.168.1.1")));
+    InetAddress address = InetAddress.getByName("192.168.1.1");
+    assertThrows(UnknownHostException.class, () -> Address.getHostName(address));
 
     // reset resolver
     Lookup.refreshDefault();

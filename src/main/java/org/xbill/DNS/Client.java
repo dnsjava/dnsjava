@@ -58,6 +58,7 @@ class Client {
       selectorThread.join();
     } catch (InterruptedException | IOException e) {
       log.warn("Failed to properly shutdown", e);
+      Thread.currentThread().interrupt();
     }
   }
 

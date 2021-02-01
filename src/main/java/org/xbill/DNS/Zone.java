@@ -141,12 +141,13 @@ public class Zone implements Serializable {
     if (zone == null) {
       throw new IllegalArgumentException("no zone name specified");
     }
-    Master m = new Master(file, zone);
-    Record record;
+    try (Master m = new Master(file, zone)) {
+      Record record;
 
-    origin = zone;
-    while ((record = m.nextRecord()) != null) {
-      maybeAddRecord(record);
+      origin = zone;
+      while ((record = m.nextRecord()) != null) {
+        maybeAddRecord(record);
+      }
     }
     validate();
   }

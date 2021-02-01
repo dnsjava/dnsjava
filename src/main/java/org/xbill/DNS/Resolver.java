@@ -146,6 +146,7 @@ public interface Resolver {
       CompletableFuture<Message> result = sendAsync(query).toCompletableFuture();
       return result.get(getTimeout().toMillis(), TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       throw new IOException(e);
     } catch (ExecutionException e) {
       if (e.getCause() instanceof IOException) {

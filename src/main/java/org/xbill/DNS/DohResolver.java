@@ -321,6 +321,7 @@ public final class DohResolver implements Resolver {
                 f.complete(response);
               } catch (InterruptedException | IOException e) {
                 f.completeExceptionally(e);
+                Thread.currentThread().interrupt();
               }
             });
     return f;
@@ -399,6 +400,7 @@ public final class DohResolver implements Resolver {
           return failedFuture(new IOException("Query timed out"));
         }
       } catch (InterruptedException iex) {
+        Thread.currentThread().interrupt();
         return failedFuture(iex);
       }
 
@@ -431,6 +433,7 @@ public final class DohResolver implements Resolver {
         if (isInitialRequest) {
           initialRequestLock.release();
         }
+        Thread.currentThread().interrupt();
         return failedFuture(iex);
       }
 

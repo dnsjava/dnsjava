@@ -229,6 +229,7 @@ public class update {
             try {
               Thread.sleep(interval);
             } catch (InterruptedException e) {
+              Thread.currentThread().interrupt();
               throw new IOException(e);
             }
             break;
