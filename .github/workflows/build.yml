@@ -1,6 +1,12 @@
 name: dnsjava CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   test:
@@ -35,16 +41,15 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Build with Maven
+        if: "${{ !(matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11') }}"
+        run: mvn verify -B -"Dgpg.skip"
+
+      - name: Build with Maven and run Sonar
+        if: "${{ matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: bash
-        run: |
-          if [[ "{{ matrix.arch }}" == "x64" && "{{ matrix.os }}" == "ubuntu-latest" && "{{ matrix.java }}" == "11" ]]; then
-            mvn verify -B -"Dgpg.skip" org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          else
-            mvn verify -B -"Dgpg.skip"
-          fi;
+        run: mvn verify -B -"Dgpg.skip" org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
   release:
     if: github.ref == 'refs/heads/master'
