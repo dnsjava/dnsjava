@@ -43,13 +43,13 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.function.Supplier;
-import junit.framework.Assert;
 import org.junit.jupiter.api.Test;
 
 class RecordTest {
@@ -856,7 +856,7 @@ class RecordTest {
         try {
           assertNotNull(proto.get());
         } catch (Exception e) {
-          Assert.fail(
+          fail(
               "Record type "
                   + Type.string(i)
                   + " ("
