@@ -17,11 +17,11 @@ public interface ResolverConfigProvider {
 
   /**
    * Gets the threshold for the number of dots which must appear in a name before it is considered
-   * absolute. The default is {@code -1}, meaning this provider does not supported reading the ndots
-   * configuration.
+   * absolute. If the interface implementation does not override this, the default implementation
+   * returns 1.
    */
   default int ndots() {
-    return -1;
+    return 1;
   }
 
   /** Determines if this provider is enabled. */
