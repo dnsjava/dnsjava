@@ -268,7 +268,7 @@ public final class Address {
           }
         }
         throw new UnknownHostException(
-            "<" + name + "> could not be resolved; " + lookup.getErrorString());
+            "<" + name + "> could not be resolved: " + lookup.getErrorString());
       }
       if (!all) {
         return a;
@@ -282,7 +282,7 @@ public final class Address {
       System.arraycopy(aaaa, 0, merged, a.length, aaaa.length);
       return merged;
     } catch (TextParseException e) {
-      throw new UnknownHostException("<" + name + "> is invalid; " + e.getMessage());
+      throw new UnknownHostException("<" + name + "> is invalid: " + e.getMessage());
     }
   }
 
