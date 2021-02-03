@@ -26,7 +26,11 @@ jobs:
     name: Java ${{ matrix.java }}/${{ matrix.arch }}/${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # for Sonar
+          fetch-depth: 0
 
       - name: Cache Maven dependencies
         uses: actions/cache@v1
