@@ -40,15 +40,19 @@ public class CookieOption extends EDNSOption {
    */
   public CookieOption(byte[] clientCookie, byte[] serverCookie) {
     this();
-    if (clientCookie == null) throw new IllegalArgumentException("client cookie must not be null");
-    if (clientCookie.length != 8)
+    if (clientCookie == null) {
+      throw new IllegalArgumentException("client cookie must not be null");
+    }
+    if (clientCookie.length != 8) {
       throw new IllegalArgumentException("client cookie must consist of eight bytes");
+    }
     this.clientCookie = clientCookie;
 
     if (serverCookie != null) {
       int length = serverCookie.length;
-      if (length < 8 || length > 32)
+      if (length < 8 || length > 32) {
         throw new IllegalArgumentException("server cookie must consist of 8 to 32 bytes");
+      }
     }
     this.serverCookie = serverCookie;
   }
@@ -80,11 +84,14 @@ public class CookieOption extends EDNSOption {
   @Override
   void optionFromWire(DNSInput in) throws IOException {
     int length = in.remaining();
-    if (length < 8) throw new WireParseException("invalid length of client cookie");
+    if (length < 8) {
+      throw new WireParseException("invalid length of client cookie");
+    }
     clientCookie = in.readByteArray(8);
     if (length > 8) {
-      if (length < 16 || length > 40)
+      if (length < 16 || length > 40) {
         throw new WireParseException("invalid length of server cookie");
+      }
       serverCookie = in.readByteArray();
     }
   }

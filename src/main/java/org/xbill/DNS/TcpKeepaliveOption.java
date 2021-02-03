@@ -32,8 +32,9 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   public TcpKeepaliveOption(int t) {
     super(EDNSOption.Code.TCP_KEEPALIVE);
-    if (t < 0 || t > 65535)
+    if (t < 0 || t > 65535) {
       throw new IllegalArgumentException("timeout must be betwee 0 and 65535");
+    }
     timeout = OptionalInt.of(t);
   }
 
@@ -45,9 +46,10 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   public TcpKeepaliveOption(Duration t) {
     super(EDNSOption.Code.TCP_KEEPALIVE);
-    if (t.isNegative() || t.compareTo(UPPER_LIMIT) >= 0)
+    if (t.isNegative() || t.compareTo(UPPER_LIMIT) >= 0) {
       throw new IllegalArgumentException(
           "timeout must be between 0 and 6553.6 seconds (exclusively)");
+    }
     timeout = OptionalInt.of((int) t.toMillis() / 100);
   }
 
@@ -101,7 +103,9 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   @Override
   void optionToWire(DNSOutput out) {
-    if (timeout.isPresent()) out.writeU16(timeout.getAsInt());
+    if (timeout.isPresent()) {
+      out.writeU16(timeout.getAsInt());
+    }
   }
 
   /**

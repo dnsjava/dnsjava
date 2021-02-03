@@ -115,7 +115,7 @@ final class NioTcpClient extends Client {
     int readState = 0;
 
     public void processReadyKey(SelectionKey key) {
-      if (key.isValid())
+      if (key.isValid()) {
         if (key.isConnectable()) {
           processConnect(key);
         } else {
@@ -126,6 +126,7 @@ final class NioTcpClient extends Client {
             processRead();
           }
         }
+      }
     }
 
     void handleTransactionException(IOException e) {
