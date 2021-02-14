@@ -249,8 +249,8 @@ until one succeeds.
 - On Unix/Solaris, `/etc/resolv.conf` is parsed.
 - On Windows, if [JNA](https://github.com/java-native-access/jna) is available
   on the classpath, the `GetAdaptersAddresses` API is used.
-- On Android, depending on the SDK level, either the properties `net.dns[1234]`
-  or the `ConnectivityManager` is used (requires initialization).
+- On Android the `ConnectivityManager` is used (requires initialization using
+  `org.xbill.DNS.config.AndroidResolverConfigProvider.setContext`).
 - The `sun.net.dns.ResolverConfiguration` class is queried if enabled.
 - If available and no servers have been found yet,
   [JNDI-DNS](https://docs.oracle.com/javase/8/docs/technotes/guides/jndi/jndi-dns.html) is used.
