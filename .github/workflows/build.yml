@@ -16,12 +16,12 @@ jobs:
       matrix:
         os: [ ubuntu-18.04, ubuntu-20.04, windows-latest ]
         java: [ '8', '11' ]
-        arch: [ 'x32', 'x64' ]
+        arch: [ 'x86', 'x64' ]
         exclude:
           - os: ubuntu-18.04
-            arch: x32
+            arch: x86
           - os: ubuntu-20.04
-            arch: x32
+            arch: x86
 
     name: Java ${{ matrix.java }}/${{ matrix.arch }}/${{ matrix.os }}
 
@@ -39,7 +39,7 @@ jobs:
           key: m2-cache-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: joschi/setup-jdk@e87a7cec853d2dd7066adf837fe12bf0f3d45e52
+        uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
           architecture: ${{ matrix.arch }}
