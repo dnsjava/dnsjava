@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,7 +18,6 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +26,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 public class LookupTest {
-  public static final Name DUMMY_NAME = Name.fromConstantString("ignored.");
+  public static final Name DUMMY_NAME = Name.fromConstantString("to.be.replaced.");
+  public static final String LONG_LABEL =
+      IntStream.range(0, 63).mapToObj(i -> "a").collect(joining());
+
   private Resolver mockResolver;
 
   @BeforeEach
@@ -128,6 +133,10 @@ public class LookupTest {
         queries.get(1).getQuestion());
 
     assertEquals(1, results.length);
+    assertEquals(Name.fromConstantString("target.example.com."), results[0].getName());
+    assertEquals(
+        singletonList(Name.fromConstantString("hostX.first.example.com.")),
+        asList(lookup.getAliases()));
   }
 
   Message maybeCnameAnswer(Message query) {
@@ -140,6 +149,45 @@ public class LookupTest {
           }
           return new ARecord(DUMMY_NAME, DClass.IN, 0, InetAddress.getLoopbackAddress());
         });
+  }
+
+  @Test
+  void testRun_firstSearchPathHitsServFail() throws Exception {
+    wireUpMockResolver(mockResolver, this::firstSERVFAILThenA);
+
+    Lookup lookup = makeLookupWithResolver(mockResolver, "host2");
+    lookup.setSearchPath("first.example.com", "second.example.com");
+    Record[] results = lookup.run();
+
+    ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
+    verify(mockResolver, times(2)).send(messageCaptor.capture());
+
+    List<Message> queries = messageCaptor.getAllValues();
+
+    assertEquals(
+        Record.newRecord(
+            Name.fromConstantString("host2.first.example.com."), Type.A, DClass.IN, 0L),
+        queries.get(0).getQuestion());
+    assertEquals(
+        Record.newRecord(
+            Name.fromConstantString("host2.second.example.com."), Type.A, DClass.IN, 0L),
+        queries.get(1).getQuestion());
+
+    assertEquals(1, results.length);
+    assertEquals(Lookup.SUCCESSFUL, lookup.getResult());
+  }
+
+  Message firstSERVFAILThenA(Message query) {
+    Message answer = new Message(query.getHeader().getID());
+    answer.addRecord(query.getQuestion(), Section.QUESTION);
+    Name questionName = query.getQuestion().getName();
+    if (questionName.equals(Name.fromConstantString("host2.first.example.com."))) {
+      answer.getHeader().setRcode(Rcode.SERVFAIL);
+    } else {
+      Record r = new ARecord(questionName, DClass.IN, 0, InetAddress.getLoopbackAddress());
+      answer.addRecord(r, Section.ANSWER);
+    }
+    return answer;
   }
 
   @Test
@@ -243,11 +291,9 @@ public class LookupTest {
   void testRun_concatenatedNameTooLong() throws Exception {
     wireUpMockResolver(mockResolver, this::simpleAnswer);
 
-    String longName = IntStream.range(0, 63).mapToObj(i -> "a").collect(Collectors.joining());
-
-    Lookup lookup = makeLookupWithResolver(mockResolver, longName);
+    Lookup lookup = makeLookupWithResolver(mockResolver, LONG_LABEL);
     // search path has a suffix that will make the combined name too long
-    lookup.setSearchPath(String.format("%s.%s.%s", longName, longName, longName));
+    lookup.setSearchPath(String.format("%s.%s.%s", LONG_LABEL, LONG_LABEL, LONG_LABEL));
     Record[] results = lookup.run();
 
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -257,7 +303,7 @@ public class LookupTest {
     // ignored, and resolution falls back to converting longName to an absolute name and querying
     // that
     assertEquals(
-        Record.newRecord(Name.fromConstantString(longName + "."), Type.A, DClass.IN, 0L),
+        Record.newRecord(Name.fromConstantString(LONG_LABEL + "."), Type.A, DClass.IN, 0L),
         messageCaptor.getValue().getSection(Section.QUESTION).get(0));
 
     assertEquals(1, results.length);
@@ -287,7 +333,7 @@ public class LookupTest {
   }
 
   @Test
-  void testLookup_constructorFailsWithMetaTypes() throws TextParseException {
+  void testLookup_constructorFailsWithMetaTypes() {
     assertThrows(IllegalArgumentException.class, () -> new Lookup("example.com.", Type.OPT));
   }
 
@@ -329,7 +375,7 @@ public class LookupTest {
     }
   }
 
-  private Message fail(Message query, int code) {
+  public static Message fail(Message query, int code) {
     Message answer = new Message(query.getHeader().getID());
     answer.addRecord(query.getQuestion(), Section.QUESTION);
     answer.getHeader().setRcode(code);
@@ -341,7 +387,7 @@ public class LookupTest {
     return answer(query, name -> r);
   }
 
-  private Message answer(Message query, Function<Name, Record> recordMaker) {
+  public static Message answer(Message query, Function<Name, Record> recordMaker) {
     Message answer = new Message(query.getHeader().getID());
     answer.addRecord(query.getQuestion(), Section.QUESTION);
     Name questionName = query.getQuestion().getName();
@@ -349,7 +395,10 @@ public class LookupTest {
     if (response == null) {
       answer.getHeader().setRcode(Rcode.NXDOMAIN);
     } else {
-      answer.addRecord(response.withName(query.getQuestion().getName()), Section.ANSWER);
+      if (DUMMY_NAME.equals(response.getName())) {
+        response = response.withName(query.getQuestion().getName());
+      }
+      answer.addRecord(response, Section.ANSWER);
     }
     return answer;
   }

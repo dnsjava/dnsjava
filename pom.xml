@@ -53,6 +53,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.java.source>8</sonar.java.source>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <delombok.output>${project.build.directory}/generated-sources/delombok</delombok.output>
     </properties>
 
     <build>
@@ -141,6 +142,7 @@
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
                     <doclint>none</doclint>
+                    <sourcepath>${delombok.output}</sourcepath>
                 </configuration>
             </plugin>
 
@@ -302,6 +304,25 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.18.0</version>
+                <configuration>
+                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    <addOutputDirectory>false</addOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -360,6 +381,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>3.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${slf4j.version}</version>
@@ -395,7 +422,8 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <excludePackageNames>*.spi.*</excludePackageNames>
+                            <excludePackageNames>*.spi</excludePackageNames>
+                            <sourcepath>${delombok.output}</sourcepath>
                         </configuration>
                     </plugin>
                 </plugins>
