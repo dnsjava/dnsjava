@@ -34,6 +34,7 @@
 //
 package org.xbill.DNS;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,6 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -286,15 +289,26 @@ class NameTest {
     }
 
     @Test
-    void ctor_max_length_rel() throws TextParseException {
-      // relative name with three 63-char labels and a 62-char label
+    void ctor_length_too_long_rel() {
+      // We want to fail to crate this as there is no way to make a Name that long absolute,
+      // which means that it can not be used for lookups or updates.
+      String label63 = IntStream.range(0, 63).mapToObj(i -> "a").collect(Collectors.joining());
+      String label62 = IntStream.range(0, 62).mapToObj(i -> "a").collect(Collectors.joining());
+      assertThrows(
+          TextParseException.class,
+          () -> new Name(format("%s.%s.%s.%s", label63, label63, label63, label62)));
+    }
+
+    @Test
+    void ctor_longest_allowed_rel() throws TextParseException {
+      // relative name with three 63-char labels and a 61-char label
       Name n =
           new Name(
-              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
       assertFalse(n.isAbsolute());
       assertFalse(n.isWild());
       assertEquals(4, n.labels());
-      assertEquals(255, n.length());
+      assertEquals(254, n.length());
     }
 
     @Test

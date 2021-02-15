@@ -271,6 +271,14 @@ public class Name implements Comparable<Name>, Serializable {
     if (origin != null && !absolute) {
       appendFromString(s, origin.name, origin.offset(0), origin.labels);
     }
+    // A relative name that is MAXNAME octets long is a strange and wonderful thing.
+    // Not technically in violation, but it can not be used for queries as it needs
+    // to be made absolute by appending at the very least the an empty label at the
+    // end, which there is no room for. To make life easier for everyone, let's only
+    // allow Names that are MAXNAME long if they are absolute.
+    if (!absolute && length() == MAXNAME) {
+      throw parseException(s, "Name too long");
+    }
   }
 
   /**
