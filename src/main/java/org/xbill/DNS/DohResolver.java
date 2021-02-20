@@ -366,10 +366,13 @@ public final class DohResolver implements Resolver {
         }
       }
     } catch (IOException ioe) {
-      try (InputStream es = conn.getErrorStream()) {
-        byte[] buf = new byte[4096];
-        while (es.read(buf) > 0) {
-          // discard
+      InputStream es = conn.getErrorStream();
+      if (es != null) {
+        try (InputStream in = es) {
+          byte[] buf = new byte[4096];
+          while (in.read(buf) > 0) {
+            // discard
+          }
         }
       }
       throw ioe;
