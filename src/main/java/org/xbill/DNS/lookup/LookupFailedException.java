@@ -31,4 +31,18 @@ public class LookupFailedException extends RuntimeException {
     this.name = name;
     this.type = type;
   }
+
+  /** Returns the Name being looked up when this failure occurred. */
+  public Name getName() {
+    return name;
+  }
+
+  /**
+   * Returns the Type being looked up when this failure occurred.
+   *
+   * @return
+   */
+  public int getType() {
+    return type;
+  }
 }
