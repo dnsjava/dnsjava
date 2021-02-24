@@ -248,17 +248,10 @@
                     Still too many failure (mostly in Javadoc) to enable it fully:
                     <configLocation>google_checks.xml</configLocation>
                     -->
+                    <configLocation>checkstyle/checkstyle-config.xml</configLocation>
                     <linkXRef>false</linkXRef>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
-                    <checkstyleRules>
-                        <module name="Checker">
-                            <module name="TreeWalker">
-                                <module name="AvoidStarImport"/>
-                                <module name="NeedBraces"/>
-                            </module>
-                        </module>
-                    </checkstyleRules>
                 </configuration>
                 <dependencies>
                     <dependency>
