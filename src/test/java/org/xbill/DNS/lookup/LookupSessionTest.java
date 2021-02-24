@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS.lookup;
 
 import static java.lang.String.format;

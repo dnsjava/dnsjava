@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-2-Clause
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
 
 package org.xbill.DNS;
