@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-2-Clause
 // -*- Java -*-
 //
 // Copyright (c) 2011, org.xbill.DNS
