@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import lombok.EqualsAndHashCode;
 
 /**
  * A set of Records with the same name, type, and class. Also included are all RRSIG records signing
@@ -17,6 +19,7 @@ import java.util.List;
  * @see RRSIGRecord
  * @author Brian Wellington
  */
+@EqualsAndHashCode(of = {"rrs", "sigs"})
 public class RRset implements Serializable {
   private final ArrayList<Record> rrs;
   private final ArrayList<RRSIGRecord> sigs;
@@ -35,6 +38,19 @@ public class RRset implements Serializable {
     addRR(record);
   }
 
+  /**
+   * Creates an RRset and sets its contents to the specified record(s)
+   *
+   * @param records The records to add to the set. See {@link #addRR(Record)} for restrictions.
+   */
+  public RRset(Record... records) {
+    this();
+    Objects.requireNonNull(records);
+    for (Record r : records) {
+      addRR(r);
+    }
+  }
+
   /** Creates an RRset with the contents of an existing RRset */
   public RRset(RRset rrset) {
     rrs = new ArrayList<>(rrset.rrs);
@@ -47,6 +63,9 @@ public class RRset implements Serializable {
    * Adds a signature to this RRset. If the TTL of the added signature is not the same as existing
    * records in the RRset, all records are set to the lowest TTL of either the added record or the
    * existing records.
+   *
+   * @throws IllegalArgumentException if the RRset already contains records and the signature to add
+   *     does not match.
    */
   public void addRR(RRSIGRecord r) {
     addRR(r, sigs);
@@ -56,6 +75,9 @@ public class RRset implements Serializable {
    * Adds a Record to this RRset. If the TTL of the added record is not the same as existing records
    * in the RRset, all records are set to the lowest TTL of either the added record or the existing
    * records.
+   *
+   * @throws IllegalArgumentException if the RRset already contains records and the record to add
+   *     does not match.
    */
   public void addRR(Record r) {
     if (r instanceof RRSIGRecord) {

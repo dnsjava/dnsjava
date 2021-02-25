@@ -44,7 +44,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -216,6 +219,31 @@ class RRsetTest {
     assertEquals(m_s1, sigs.get(0));
     assertEquals(m_s2, sigs.get(1));
     assertEquals(2, sigs.size());
+  }
+
+  @Test
+  void ctor_vararg() {
+    RRset set = new RRset(m_a1, m_a2);
+    assertEquals(Stream.of(m_a1, m_a2).collect(Collectors.toList()), set.rrs());
+    assertEquals(Collections.emptyList(), set.sigs());
+  }
+
+  @Test
+  void ctor_vararg_sig() {
+    RRset set = new RRset(m_a1, m_a2, m_s1);
+    assertEquals(Stream.of(m_a1, m_a2).collect(Collectors.toList()), set.rrs());
+    assertEquals(Collections.singletonList(m_s1), set.sigs());
+  }
+
+  @Test
+  void ctor_vararg_mismatch() {
+    TXTRecord txt = new TXTRecord(m_name, DClass.IN, 3600, "test");
+    assertThrows(IllegalArgumentException.class, () -> new RRset(m_a1, m_a2, txt));
+  }
+
+  @Test
+  void ctor_vararg_null() {
+    assertThrows(NullPointerException.class, () -> new RRset((Record[]) null));
   }
 
   @Test
