@@ -14,6 +14,7 @@ import java.security.Security;
 import java.security.Signature;
 import java.time.Instant;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.Algorithm;
@@ -30,6 +31,11 @@ public class DNSSECWithBCProviderTest {
   @BeforeAll
   static void setUp() {
     Security.addProvider(new BouncyCastleProvider());
+  }
+
+  @AfterAll
+  static void afterAll() {
+    Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
   }
 
   @Test
