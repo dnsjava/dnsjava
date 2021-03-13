@@ -229,6 +229,9 @@ final class NioUdpClient extends Client {
 
               addr = new InetSocketAddress(local.getAddress(), port);
             }
+            if (addr.getPort() == SimpleResolver.RESERVED_MDNS_PORT) {
+              continue; // can't use the mDNS server port, try again
+            }
 
             channel.bind(addr);
             bound = true;

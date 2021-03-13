@@ -30,6 +30,9 @@ public class SimpleResolver implements Resolver {
   /** The default port to send queries to */
   public static final int DEFAULT_PORT = 53;
 
+  /** The port we can't use as a client because it's reserved for mDNS servers. */
+  public static final int RESERVED_MDNS_PORT = 5353;
+
   /** The default EDNS payload size */
   public static final int DEFAULT_EDNS_PAYLOADSIZE = 1280;
 
@@ -341,7 +344,7 @@ public class SimpleResolver implements Resolver {
         address.getPort());
     log.trace("Query:\n{}", query);
 
-    CompletableFuture<?> result;
+    CompletableFuture<List<byte[]>> result;
     if (tcp) {
       result = NioTcpClient.sendrecv(localAddress, address, query, out, timeoutValue);
     } else {
@@ -353,29 +356,10 @@ public class SimpleResolver implements Resolver {
           CompletableFuture<Message> f = new CompletableFuture<>();
 
           Verify1Response verify1Response = new Verify1Response(query, qid);
-          if (v instanceof byte[]) {
-            byte[] in = (byte[]) v;
-            Message response = verify1Response.parse(in);
-            if (response == null) {
-              f.completeExceptionally(verify1Response.getExc());
-              return f;
-            }
-
-            verifyTSIG(query, response, in, tsig);
-            if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
-              log.debug("Got truncated response for id {}, retrying via TCP", qid);
-              log.trace("Truncated response: {}", response);
-              return sendAsync(query, true);
-            }
-
-            response.setResolver(this);
-            f.complete(response);
-          } else if (v instanceof ArrayList) {
             @SuppressWarnings("unchecked")
-            ArrayList<byte[]> list = (ArrayList<byte[]>) v;
             Message response = null;
             Throwable exc = null;
-            for (byte[] in : list) {
+            for (byte[] in : v) {
               Message r = verify1Response.parse(in);
               if (r == null) {
                 exc = verify1Response.getExc();
@@ -414,7 +398,6 @@ public class SimpleResolver implements Resolver {
               }
               f.completeExceptionally(exc);
             }
-          }
           return f;
         });
   }
@@ -455,6 +438,13 @@ public class SimpleResolver implements Resolver {
       this.qid = qid;
     }
 
+    /**
+     * Keep the exception that caused this to fail. We don't throw the exception
+     * immediately because, when using mDNS, we might get both failing and successful
+     * answers, in which case we just want to discard the bad answers and keep the
+     * good ones; the exception only gets thrown if only bad answers are received.
+     * @return the Throwable reporting why this parse failed.
+     */
     public Throwable getExc() {
       return exc;
     }
