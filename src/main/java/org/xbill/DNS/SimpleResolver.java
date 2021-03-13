@@ -8,7 +8,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -355,14 +354,14 @@ public class SimpleResolver implements Resolver {
         v -> {
           CompletableFuture<Message> f = new CompletableFuture<>();
 
-          Verify1Response verify1Response = new Verify1Response(query, qid);
+          VerifyOneResponse verifyOneResponse = new VerifyOneResponse(query, qid);
             @SuppressWarnings("unchecked")
             Message response = null;
-            Throwable exc = null;
+            Throwable responseFailureException = null;
             for (byte[] in : v) {
-              Message r = verify1Response.parse(in);
+              Message r = verifyOneResponse.parse(in);
               if (r == null) {
-                exc = verify1Response.getExc();
+                responseFailureException = verifyOneResponse.getFailureReason();
                 continue;
               }
 
@@ -393,10 +392,10 @@ public class SimpleResolver implements Resolver {
               response.setResolver(this);
               f.complete(response);
             } else {
-              if (exc == null) {
-                exc = new SocketTimeoutException("Query timed out");
+              if (responseFailureException == null) {
+                responseFailureException = new SocketTimeoutException("Query timed out");
               }
-              f.completeExceptionally(exc);
+              f.completeExceptionally(responseFailureException);
             }
           return f;
         });
@@ -428,12 +427,12 @@ public class SimpleResolver implements Resolver {
     return "SimpleResolver [" + address + "]";
   }
 
-  private class Verify1Response {
+  private class VerifyOneResponse {
     private Message query;
     private int qid;
-    private Throwable exc;
+    private Throwable failureReasonException;
 
-    public Verify1Response(Message query, int qid) {
+    public VerifyOneResponse(Message query, int qid) {
       this.query = query;
       this.qid = qid;
     }
@@ -445,16 +444,16 @@ public class SimpleResolver implements Resolver {
      * good ones; the exception only gets thrown if only bad answers are received.
      * @return the Throwable reporting why this parse failed.
      */
-    public Throwable getExc() {
-      return exc;
+    public Throwable getFailureReason() {
+      return failureReasonException;
     }
 
     public Message parse(byte[] in) {
-      exc = null;
+      failureReasonException = null;
 
       // Check that the response is long enough.
       if (in.length < Header.LENGTH) {
-        exc = new WireParseException("invalid DNS header - too short");
+        failureReasonException = new WireParseException("invalid DNS header - too short");
         return null;
       }
 
@@ -464,7 +463,7 @@ public class SimpleResolver implements Resolver {
       // doesn't confuse us.
       int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
       if (id != qid) {
-        exc = new WireParseException("invalid message id: expected " + qid + "; got id " + id);
+        failureReasonException = new WireParseException("invalid message id: expected " + qid + "; got id " + id);
         return null;
       }
 
@@ -472,13 +471,13 @@ public class SimpleResolver implements Resolver {
       try {
         r = parseMessage(in);
       } catch (WireParseException e) {
-        exc = e;
+        failureReasonException = e;
         return null;
       }
 
       // validate name, class and type (rfc5452#section-9.1)
       if (!query.getQuestion().getName().equals(r.getQuestion().getName())) {
-        exc =
+        failureReasonException =
             new WireParseException(
                 "invalid name in message: expected "
                     + query.getQuestion().getName()
@@ -487,8 +486,8 @@ public class SimpleResolver implements Resolver {
         return null;
       }
 
-      if (query.getQuestion().getDClass() != r.getQuestion().getDClass()) {
-        exc =
+      if ((query.getQuestion().getDClass() & ~DClass.UNICAST_RESPONSE) != (r.getQuestion().getDClass() & ~DClass.UNICAST_RESPONSE)) {
+        failureReasonException =
             new WireParseException(
                 "invalid class in message: expected "
                     + DClass.string(query.getQuestion().getDClass())
@@ -498,7 +497,7 @@ public class SimpleResolver implements Resolver {
       }
 
       if (query.getQuestion().getType() != r.getQuestion().getType()) {
-        exc =
+        failureReasonException =
             new WireParseException(
                 "invalid type in message: expected "
                     + Type.string(query.getQuestion().getType())
