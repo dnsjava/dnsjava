@@ -355,48 +355,48 @@ public class SimpleResolver implements Resolver {
           CompletableFuture<Message> f = new CompletableFuture<>();
 
           VerifyOneResponse verifyOneResponse = new VerifyOneResponse(query, qid);
-            @SuppressWarnings("unchecked")
-            Message response = null;
-            Throwable responseFailureException = null;
-            for (byte[] in : v) {
-              Message r = verifyOneResponse.parse(in);
-              if (r == null) {
-                responseFailureException = verifyOneResponse.getFailureReason();
-                continue;
-              }
-
-              verifyTSIG(query, r, in, tsig);
-              if (!tcp && !ignoreTruncation && r.getHeader().getFlag(Flags.TC)) {
-                log.debug("Got truncated response for id {}, discarding`", qid);
-                log.trace("Truncated response: {}", r);
-                continue;
-              }
-
-              if (response == null) {
-                response = r;
-              } else {
-                // not the first answer, append the results to first response
-                for (Record rec : r.getSection(Section.ANSWER)) {
-                  response.addRecord(rec, Section.ANSWER);
-                }
-                for (Record rec : r.getSection(Section.AUTHORITY)) {
-                  response.addRecord(rec, Section.AUTHORITY);
-                }
-                for (Record rec : r.getSection(Section.ADDITIONAL)) {
-                  response.addRecord(rec, Section.ADDITIONAL);
-                }
-              }
+          @SuppressWarnings("unchecked")
+          Message response = null;
+          Throwable responseFailureException = null;
+          for (byte[] in : v) {
+            Message r = verifyOneResponse.parse(in);
+            if (r == null) {
+              responseFailureException = verifyOneResponse.getFailureReason();
+              continue;
             }
 
-            if (response != null) {
-              response.setResolver(this);
-              f.complete(response);
+            verifyTSIG(query, r, in, tsig);
+            if (!tcp && !ignoreTruncation && r.getHeader().getFlag(Flags.TC)) {
+              log.debug("Got truncated response for id {}, discarding`", qid);
+              log.trace("Truncated response: {}", r);
+              continue;
+            }
+
+            if (response == null) {
+              response = r;
             } else {
-              if (responseFailureException == null) {
-                responseFailureException = new SocketTimeoutException("Query timed out");
+              // not the first answer, append the results to first response
+              for (Record rec : r.getSection(Section.ANSWER)) {
+                response.addRecord(rec, Section.ANSWER);
               }
-              f.completeExceptionally(responseFailureException);
+              for (Record rec : r.getSection(Section.AUTHORITY)) {
+                response.addRecord(rec, Section.AUTHORITY);
+              }
+              for (Record rec : r.getSection(Section.ADDITIONAL)) {
+                response.addRecord(rec, Section.ADDITIONAL);
+              }
             }
+          }
+
+          if (response != null) {
+            response.setResolver(this);
+            f.complete(response);
+          } else {
+            if (responseFailureException == null) {
+              responseFailureException = new SocketTimeoutException("Query timed out");
+            }
+            f.completeExceptionally(responseFailureException);
+          }
           return f;
         });
   }
@@ -438,10 +438,11 @@ public class SimpleResolver implements Resolver {
     }
 
     /**
-     * Keep the exception that caused this to fail. We don't throw the exception
-     * immediately because, when using mDNS, we might get both failing and successful
-     * answers, in which case we just want to discard the bad answers and keep the
-     * good ones; the exception only gets thrown if only bad answers are received.
+     * Keep the exception that caused this to fail. We don't throw the exception immediately
+     * because, when using mDNS, we might get both failing and successful answers, in which case we
+     * just want to discard the bad answers and keep the good ones; the exception only gets thrown
+     * if only bad answers are received.
+     *
      * @return the Throwable reporting why this parse failed.
      */
     public Throwable getFailureReason() {
@@ -463,7 +464,8 @@ public class SimpleResolver implements Resolver {
       // doesn't confuse us.
       int id = ((in[0] & 0xFF) << 8) + (in[1] & 0xFF);
       if (id != qid) {
-        failureReasonException = new WireParseException("invalid message id: expected " + qid + "; got id " + id);
+        failureReasonException =
+            new WireParseException("invalid message id: expected " + qid + "; got id " + id);
         return null;
       }
 
@@ -486,7 +488,8 @@ public class SimpleResolver implements Resolver {
         return null;
       }
 
-      if ((query.getQuestion().getDClass() & ~DClass.UNICAST_RESPONSE) != (r.getQuestion().getDClass() & ~DClass.UNICAST_RESPONSE)) {
+      if ((query.getQuestion().getDClass() & ~DClass.UNICAST_RESPONSE)
+          != (r.getQuestion().getDClass() & ~DClass.UNICAST_RESPONSE)) {
         failureReasonException =
             new WireParseException(
                 "invalid class in message: expected "
