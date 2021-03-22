@@ -41,7 +41,7 @@ public class ExtendedResolver implements Resolver {
       resolvers = new ArrayList<>(eres.resolvers);
       endTime = System.nanoTime() + eres.timeout.toNanos();
       if (eres.loadBalance) {
-        int start = eres.lbStart.updateAndGet(i -> i++ % resolvers.size());
+        int start = eres.lbStart.updateAndGet(i -> i+1 % resolvers.size());
         if (start > 0) {
           List<ResolverEntry> shuffle = new ArrayList<>(resolvers.size());
           for (int i = 0; i < resolvers.size(); i++) {
