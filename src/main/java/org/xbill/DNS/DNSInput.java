@@ -92,7 +92,7 @@ public class DNSInput {
     if (pos > byteBuffer.capacity()) {
       throw new IllegalArgumentException("cannot set active region past end of input");
     }
-    byteBuffer.limit(byteBuffer.position());
+    byteBuffer.limit(pos);
   }
 
   /**

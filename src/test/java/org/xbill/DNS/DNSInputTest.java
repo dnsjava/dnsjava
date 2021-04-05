@@ -138,6 +138,23 @@ class DNSInputTest {
   }
 
   @Test
+  void save_set_restore() {
+    m_di.jump(4);
+    assertEquals(4, m_di.current());
+    assertEquals(6, m_di.remaining());
+
+    int save = m_di.saveActive();
+    assertEquals(10, save);
+    assertEquals(6, m_di.remaining());
+
+    m_di.setActive(4);
+    assertEquals(4, m_di.remaining());
+
+    m_di.restoreActive(save);
+    assertEquals(6, m_di.remaining());
+  }
+
+  @Test
   void readU8_basic() throws WireParseException {
     int v1 = m_di.readU8();
     assertEquals(1, m_di.current());
