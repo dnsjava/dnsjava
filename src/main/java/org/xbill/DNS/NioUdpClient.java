@@ -4,6 +4,7 @@ package org.xbill.DNS;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
@@ -12,7 +13,10 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -71,8 +75,7 @@ final class NioUdpClient extends Client {
     for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
       Transaction t = it.next();
       if (t.endTime - System.nanoTime() < 0) {
-        t.silentCloseChannel();
-        t.f.completeExceptionally(new SocketTimeoutException("Query timed out"));
+        t.closeTransaction();
         it.remove();
       }
     }
@@ -81,19 +84,16 @@ final class NioUdpClient extends Client {
   @RequiredArgsConstructor
   private static class Transaction implements KeyProcessor {
     private final byte[] data;
-    private final int max;
+    final int max;
     private final long endTime;
     private final DatagramChannel channel;
-    private final CompletableFuture<byte[]> f;
+    private final SocketAddress remoteSocketAddress;
+    final CompletableFuture<List<byte[]>> f;
 
     void send() throws IOException {
       ByteBuffer buffer = ByteBuffer.wrap(data);
-      verboseLog(
-          "UDP write",
-          channel.socket().getLocalSocketAddress(),
-          channel.socket().getRemoteSocketAddress(),
-          data);
-      int n = channel.send(buffer, channel.socket().getRemoteSocketAddress());
+      verboseLog("UDP write", channel.socket().getLocalSocketAddress(), remoteSocketAddress, data);
+      int n = channel.send(buffer, remoteSocketAddress);
       if (n <= 0) {
         throw new EOFException();
       }
@@ -109,10 +109,12 @@ final class NioUdpClient extends Client {
 
       DatagramChannel channel = (DatagramChannel) key.channel();
       ByteBuffer buffer = ByteBuffer.allocate(max);
+      SocketAddress source;
       int read;
       try {
-        read = channel.read(buffer);
-        if (read <= 0) {
+        source = channel.receive(buffer);
+        read = buffer.position();
+        if (read <= 0 || source == null) {
           throw new EOFException();
         }
       } catch (IOException e) {
@@ -125,17 +127,13 @@ final class NioUdpClient extends Client {
       buffer.flip();
       byte[] data = new byte[read];
       System.arraycopy(buffer.array(), 0, data, 0, read);
-      verboseLog(
-          "UDP read",
-          channel.socket().getLocalSocketAddress(),
-          channel.socket().getRemoteSocketAddress(),
-          data);
+      verboseLog("UDP read", channel.socket().getLocalSocketAddress(), source, data);
       silentCloseChannel();
-      f.complete(data);
+      f.complete(Collections.singletonList(data));
       pendingTransactions.remove(this);
     }
 
-    private void silentCloseChannel() {
+    void silentCloseChannel() {
       try {
         channel.disconnect();
       } catch (IOException e) {
@@ -148,11 +146,73 @@ final class NioUdpClient extends Client {
         }
       }
     }
+
+    void closeTransaction() {
+      silentCloseChannel();
+      f.completeExceptionally(new SocketTimeoutException("Query timed out"));
+    }
   }
 
-  static CompletableFuture<byte[]> sendrecv(
+  private static class MultiAnswerTransaction extends Transaction {
+    MultiAnswerTransaction(
+        byte[] query,
+        int max,
+        long endTime,
+        DatagramChannel channel,
+        SocketAddress remoteSocketAddress,
+        CompletableFuture<List<byte[]>> f) {
+      super(query, max, endTime, channel, remoteSocketAddress, f);
+    }
+
+    public void processReadyKey(SelectionKey key) {
+      if (!key.isReadable()) {
+        silentCloseChannel();
+        f.completeExceptionally(new EOFException("channel not readable"));
+        pendingTransactions.remove(this);
+        return;
+      }
+
+      DatagramChannel channel = (DatagramChannel) key.channel();
+      ByteBuffer buffer = ByteBuffer.allocate(max);
+      SocketAddress source;
+      int read;
+      try {
+        source = channel.receive(buffer);
+        read = buffer.position();
+        if (read <= 0 || source == null) {
+          return; // ignore this datagram
+        }
+      } catch (IOException e) {
+        silentCloseChannel();
+        f.completeExceptionally(e);
+        pendingTransactions.remove(this);
+        return;
+      }
+
+      buffer.flip();
+      byte[] data = new byte[read];
+      System.arraycopy(buffer.array(), 0, data, 0, read);
+      verboseLog("UDP read", channel.socket().getLocalSocketAddress(), source, data);
+      answers.add(data);
+    }
+
+    private ArrayList<byte[]> answers = new ArrayList<>();
+
+    @Override
+    void closeTransaction() {
+      if (answers.size() > 0) {
+        silentCloseChannel();
+        f.complete(answers);
+      } else {
+        // we failed, no answers
+        super.closeTransaction();
+      }
+    }
+  }
+
+  static CompletableFuture<List<byte[]>> sendrecv(
       InetSocketAddress local, InetSocketAddress remote, byte[] data, int max, Duration timeout) {
-    CompletableFuture<byte[]> f = new CompletableFuture<>();
+    CompletableFuture<List<byte[]>> f = new CompletableFuture<>();
     try {
       final Selector selector = selector();
       DatagramChannel channel = DatagramChannel.open();
@@ -174,6 +234,9 @@ final class NioUdpClient extends Client {
 
               addr = new InetSocketAddress(local.getAddress(), port);
             }
+            if (addr.getPort() == SimpleResolver.RESERVED_MDNS_PORT) {
+              continue; // can't use the mDNS server port, try again
+            }
 
             channel.bind(addr);
             bound = true;
@@ -190,9 +253,15 @@ final class NioUdpClient extends Client {
         }
       }
 
-      channel.connect(remote);
       long endTime = System.nanoTime() + timeout.toNanos();
-      Transaction t = new Transaction(data, max, endTime, channel, f);
+      Transaction t;
+      if (!remote.getAddress().isMulticastAddress()) {
+        channel.connect(remote);
+        t = new Transaction(data, max, endTime, channel, remote, f);
+      } else {
+        // stop this a little before the timeout so we can report what answers we did get
+        t = new MultiAnswerTransaction(data, max, endTime - 1000000000L, channel, remote, f);
+      }
       pendingTransactions.add(t);
       registrationQueue.add(t);
       selector.wakeup();

@@ -10,7 +10,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +76,8 @@ final class NioTcpClient extends Client {
     private final byte[] queryData;
     private final long endTime;
     private final SocketChannel channel;
-    private final CompletableFuture<byte[]> f;
+    private final CompletableFuture<List<byte[]>> f;
+
     private boolean sendDone;
 
     void send() throws IOException {
@@ -207,7 +210,7 @@ final class NioTcpClient extends Client {
         int id = ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
         int qid = t.query.getHeader().getID();
         if (id == qid) {
-          t.f.complete(data);
+          t.f.complete(Collections.singletonList(data));
           it.remove();
           return;
         }
@@ -236,13 +239,13 @@ final class NioTcpClient extends Client {
     final InetSocketAddress remote;
   }
 
-  static CompletableFuture<byte[]> sendrecv(
+  static CompletableFuture<List<byte[]>> sendrecv(
       InetSocketAddress local,
       InetSocketAddress remote,
       Message query,
       byte[] data,
       Duration timeout) {
-    CompletableFuture<byte[]> f = new CompletableFuture<>();
+    CompletableFuture<List<byte[]>> f = new CompletableFuture<>();
     try {
       final Selector selector = selector();
       long endTime = System.nanoTime() + timeout.toNanos();

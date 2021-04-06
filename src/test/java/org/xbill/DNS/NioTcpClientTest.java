@@ -67,7 +67,7 @@ public class NioTcpClientTest {
           .thenAccept(
               d -> {
                 try {
-                  clientReceivedAnswers[jj] = new Message(d);
+                  clientReceivedAnswers[jj] = new Message(d.get(0));
                   cdl2.countDown();
                 } catch (IOException e) {
                   fail(e);

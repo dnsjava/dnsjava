@@ -32,6 +32,9 @@ public final class DClass {
   /** Matches any class */
   public static final int ANY = 255;
 
+  /** Indicates on mDNS that querier will accept unicast replies from a multicast request. */
+  public static final int UNICAST_RESPONSE = 0x8000;
+
   private static class DClassMnemonic extends Mnemonic {
     public DClassMnemonic() {
       super("DClass", CASE_UPPER);
