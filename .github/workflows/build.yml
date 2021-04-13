@@ -14,9 +14,9 @@ jobs:
 
     strategy:
       matrix:
-        os: [ ubuntu-18.04, ubuntu-20.04, windows-latest ]
-        java: [ '8', '11' ]
-        arch: [ 'x86', 'x64' ]
+        os: [ ubuntu-20.04 ]
+        java: [ '8' ]
+        arch: [ 'x64' ]
         exclude:
           - os: ubuntu-18.04
             arch: x86
@@ -61,40 +61,3 @@ jobs:
       - name: Run codecovc
         if: "${{ matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
         uses: codecov/codecov-action@v1
-
-  release:
-    if: github.ref == 'refs/heads/master'
-    needs: test
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: m2-cache-8-x64-ubuntu-20.04
-
-      - name: Set up JDK 8
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          architecture: 'x64'
-          distribution: zulu
-          server-id: ossrh
-          server-username: SONATYPE_USER
-          server-password: SONATYPE_PW
-
-      - name: Release to Maven Central
-        env:
-          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
-          SONATYPE_PW: ${{ secrets.SONATYPE_PW }}
-        run: |
-          cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
-          gpg --list-secret-keys --keyid-format LONG
-          mvn \
-            --no-transfer-progress \
-            --batch-mode \
-            -Dgpg.passphrase="${{ secrets.GPG_PW }}" \
-            -DperformRelease=true \
-            deploy

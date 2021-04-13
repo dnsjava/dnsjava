@@ -15,8 +15,10 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 public class NioTcpClientTest {
   @Test
   void testResponseStream() throws InterruptedException, IOException {
@@ -39,6 +41,7 @@ public class NioTcpClientTest {
               try {
                 cdlServerThreadStart.countDown();
                 s[0] = ss.accept();
+                log.warn("socket accepted");
                 while (cdl1.getCount() > 0) {
                   int ii = i.getAndIncrement();
                   try {
@@ -84,7 +87,7 @@ public class NioTcpClientTest {
               });
     }
 
-    if (!cdl1.await(5, TimeUnit.SECONDS)) {
+    if (!cdl1.await(10, TimeUnit.SECONDS)) {
       fail("timed out waiting for messages");
     }
 

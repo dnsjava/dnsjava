@@ -64,6 +64,7 @@ class Client {
   }
 
   private static void runSelector() {
+    log.warn("Entering selector thread");
     while (run) {
       try {
         if (selector.select(1000) == 0) {
