@@ -20,8 +20,12 @@ import org.junit.jupiter.api.Test;
 public class NioTcpClientTest {
   @Test
   void testResponseStream() throws InterruptedException, IOException {
+    // start the selector thread early
+    Client.selector();
+
     Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
     Message[] q = new Message[] {Message.newQuery(qr), Message.newQuery(qr)};
+    CountDownLatch cdlServerThreadStart = new CountDownLatch(1);
     CountDownLatch cdl1 = new CountDownLatch(q.length);
     CountDownLatch cdl2 = new CountDownLatch(q.length);
     Message[] serverReceivedMessages = new Message[q.length];
@@ -33,6 +37,7 @@ public class NioTcpClientTest {
         new Thread(
             () -> {
               try {
+                cdlServerThreadStart.countDown();
                 s[0] = ss.accept();
                 while (cdl1.getCount() > 0) {
                   int ii = i.getAndIncrement();
@@ -55,6 +60,10 @@ public class NioTcpClientTest {
               }
             });
     server.start();
+
+    if (!cdlServerThreadStart.await(5, TimeUnit.SECONDS)) {
+      fail("timed out waiting for server thread to start");
+    }
 
     for (int j = 0; j < q.length; j++) {
       int jj = j;
