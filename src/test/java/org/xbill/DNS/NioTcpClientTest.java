@@ -10,11 +10,11 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -28,36 +28,53 @@ public class NioTcpClientTest {
     Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
     Message[] q = new Message[] {Message.newQuery(qr), Message.newQuery(qr)};
     CountDownLatch cdlServerThreadStart = new CountDownLatch(1);
-    CountDownLatch cdl1 = new CountDownLatch(q.length);
-    CountDownLatch cdl2 = new CountDownLatch(q.length);
-    Message[] serverReceivedMessages = new Message[q.length];
-    Message[] clientReceivedAnswers = new Message[q.length];
-    AtomicInteger i = new AtomicInteger(0);
-    Socket[] s = new Socket[1];
+    CountDownLatch cdlQueryRepliesReceived = new CountDownLatch(q.length);
     ServerSocket ss = new ServerSocket(0);
+    ss.setSoTimeout(5000);
     Thread server =
         new Thread(
             () -> {
               try {
                 cdlServerThreadStart.countDown();
-                s[0] = ss.accept();
+                Socket s = ss.accept();
                 log.warn("socket accepted");
-                while (cdl1.getCount() > 0) {
-                  int ii = i.getAndIncrement();
+                for (int i = 0; i < q.length; i++) {
                   try {
-                    InputStream is = s[0].getInputStream();
+                    InputStream is = s.getInputStream();
                     byte[] lengthData = new byte[2];
                     int readLength = is.read(lengthData);
                     assertEquals(2, readLength);
                     byte[] messageData = new byte[(lengthData[0] << 8) + lengthData[1]];
                     int readMessageLength = is.read(messageData);
                     assertEquals(messageData.length, readMessageLength);
-                    serverReceivedMessages[ii] = new Message(messageData);
-                    cdl1.countDown();
+                    Message serverReceivedMessages = new Message(messageData);
+
+                    for (int j = q.length - 1; j >= 0; j--) {
+                      Message answer = new Message();
+                      answer.getHeader().setRcode(Rcode.NOERROR);
+                      answer.getHeader().setID(serverReceivedMessages.getHeader().getID());
+                      answer.addRecord(serverReceivedMessages.getQuestion(), Section.QUESTION);
+                      answer.addRecord(
+                          new ARecord(
+                              Name.fromConstantString("example.com."),
+                              DClass.IN,
+                              900,
+                              InetAddress.getLoopbackAddress()),
+                          Section.ANSWER);
+                      byte[] queryData = answer.toWire();
+                      ByteBuffer buffer = ByteBuffer.allocate(queryData.length + 2);
+                      buffer.put((byte) (queryData.length >>> 8));
+                      buffer.put((byte) (queryData.length & 0xFF));
+                      buffer.put(queryData);
+                      s.getOutputStream().write(buffer.array());
+                    }
+
                   } catch (IOException e) {
                     fail(e);
                   }
                 }
+              } catch (SocketTimeoutException ste) {
+                fail("Timeout waiting for a client connection", ste);
               } catch (IOException e) {
                 fail(e);
               }
@@ -79,44 +96,16 @@ public class NioTcpClientTest {
           .thenAccept(
               d -> {
                 try {
-                  clientReceivedAnswers[jj] = new Message(d);
-                  cdl2.countDown();
+                  assertEquals(q[jj].getHeader().getID(), new Message(d).getHeader().getID());
+                  cdlQueryRepliesReceived.countDown();
                 } catch (IOException e) {
                   fail(e);
                 }
               });
     }
 
-    if (!cdl1.await(10, TimeUnit.SECONDS)) {
-      fail("timed out waiting for messages");
-    }
-
-    for (int j = q.length - 1; j >= 0; j--) {
-      Message answer = new Message();
-      answer.getHeader().setRcode(Rcode.NOERROR);
-      answer.getHeader().setID(serverReceivedMessages[j].getHeader().getID());
-      answer.addRecord(serverReceivedMessages[j].getQuestion(), Section.QUESTION);
-      answer.addRecord(
-          new ARecord(
-              Name.fromConstantString("example.com."),
-              DClass.IN,
-              900,
-              InetAddress.getLoopbackAddress()),
-          Section.ANSWER);
-      byte[] queryData = answer.toWire();
-      ByteBuffer buffer = ByteBuffer.allocate(queryData.length + 2);
-      buffer.put((byte) (queryData.length >>> 8));
-      buffer.put((byte) (queryData.length & 0xFF));
-      buffer.put(queryData);
-      s[0].getOutputStream().write(buffer.array());
-    }
-
-    if (!cdl2.await(5, TimeUnit.SECONDS)) {
+    if (!cdlQueryRepliesReceived.await(5, TimeUnit.SECONDS)) {
       fail("timed out waiting for answers");
-    }
-
-    for (int j = 0; j < q.length; j++) {
-      assertEquals(q[j].getHeader().getID(), clientReceivedAnswers[j].getHeader().getID());
     }
   }
 }
