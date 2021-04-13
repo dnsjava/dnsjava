@@ -29,7 +29,7 @@ public class NioTcpClientTest {
     Message[] q = new Message[] {Message.newQuery(qr), Message.newQuery(qr)};
     CountDownLatch cdlServerThreadStart = new CountDownLatch(1);
     CountDownLatch cdlQueryRepliesReceived = new CountDownLatch(q.length);
-    ServerSocket ss = new ServerSocket(0);
+    ServerSocket ss = new ServerSocket(0, 0, InetAddress.getLoopbackAddress());
     ss.setSoTimeout(5000);
     Thread server =
         new Thread(
