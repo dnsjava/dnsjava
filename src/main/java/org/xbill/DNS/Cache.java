@@ -91,7 +91,7 @@ public class Cache {
       this.type = type;
       long cttl = 0;
       if (soa != null) {
-        cttl = soa.getMinimum();
+        cttl = Math.min(soa.getMinimum(), soa.getTTL());
       }
       this.credibility = cred;
       this.expire = limitExpire(cttl, maxttl);
