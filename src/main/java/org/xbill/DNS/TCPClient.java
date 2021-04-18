@@ -13,7 +13,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
-final class TCPClient extends Client {
+final class TCPClient {
   private long endTime;
   private SelectionKey key;
 
@@ -63,7 +63,7 @@ final class TCPClient extends Client {
 
   void send(byte[] data) throws IOException {
     SocketChannel channel = (SocketChannel) key.channel();
-    verboseLog(
+    NioClient.verboseLog(
         "TCP write",
         channel.socket().getLocalSocketAddress(),
         channel.socket().getRemoteSocketAddress(),
@@ -150,7 +150,7 @@ final class TCPClient extends Client {
     int length = ((buf[0] & 0xFF) << 8) + (buf[1] & 0xFF);
     byte[] data = _recv(length);
     SocketChannel channel = (SocketChannel) key.channel();
-    verboseLog(
+    NioClient.verboseLog(
         "TCP read",
         channel.socket().getLocalSocketAddress(),
         channel.socket().getRemoteSocketAddress(),

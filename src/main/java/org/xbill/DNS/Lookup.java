@@ -215,7 +215,7 @@ public final class Lookup {
    * @param logger The logger
    */
   public static synchronized void setPacketLogger(PacketLogger logger) {
-    Client.setPacketLogger(logger);
+    NioClient.setPacketLogger(logger);
   }
 
   private void reset() {
