@@ -398,7 +398,7 @@ public class Cache {
   public synchronized void addNegative(Name name, int type, SOARecord soa, int cred) {
     long ttl = 0;
     if (soa != null) {
-      ttl = soa.getTTL();
+      ttl = Math.min(soa.getMinimum(), soa.getTTL());
     }
     Element element = findElement(name, type, 0);
     if (ttl == 0) {
