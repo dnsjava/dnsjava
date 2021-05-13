@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -116,6 +117,7 @@ class HostsFileParserTest {
             hostsFileWindows,
             tempDir.resolve("testFileWatcherClearsCache"),
             StandardCopyOption.REPLACE_EXISTING);
+    Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(0));
     HostsFileParser hostsFileParser = new HostsFileParser(tempHosts);
     assertEquals(0, hostsFileParser.cacheSize());
     assertEquals(
@@ -131,6 +133,7 @@ class HostsFileParserTest {
       w.newLine();
     }
 
+    Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(10_0000));
     assertEquals(
         InetAddress.getByAddress(testName.toString(), localhostBytes),
         hostsFileParser
