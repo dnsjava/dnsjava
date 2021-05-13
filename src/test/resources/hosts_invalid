@@ -1,0 +1,13 @@
+127.0.0.5 example.com
+127.0.0.7 example.com
+127.0.0.2 ..
+ 
+127.0.0.3 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+127.0.0.4 #bla
+	
+::/0 example.net
+:::1 invalid-ipv6
+127.0.0.256	invalid-ipv4
+127.0.0.1	 localhost localalias
+127.0.0.6	example.org #localalias some-junk
+::1 localhost
