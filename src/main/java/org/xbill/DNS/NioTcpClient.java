@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @UtilityClass
-final class NioTcpClient extends Client {
+final class NioTcpClient extends NioClient {
   private static final Queue<ChannelState> registrationQueue = new ConcurrentLinkedQueue<>();
   private static final Map<ChannelKey, ChannelState> channelMap = new ConcurrentHashMap<>();
 
