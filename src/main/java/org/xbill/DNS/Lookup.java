@@ -306,7 +306,9 @@ public final class Lookup {
     this.result = -1;
     this.maxIterations =
         Integer.parseInt(System.getProperty("dnsjava.lookup.max_iterations", "16"));
-    this.hostsFileParser = getDefaultHostsFileParser();
+    if (Boolean.parseBoolean(System.getProperty("dnsjava.lookup.use_hosts_file", "true"))) {
+      this.hostsFileParser = getDefaultHostsFileParser();
+    }
   }
 
   /**

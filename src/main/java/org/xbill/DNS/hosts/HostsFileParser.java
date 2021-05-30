@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Name;
@@ -102,62 +103,89 @@ public final class HostsFileParser {
       return Optional.empty();
     }
 
-    return parseHostsFile(name, type);
+    if (Files.size(path) <= MAX_FULL_CACHE_FILE_SIZE_BYTES) {
+      parseEntireHostsFile();
+    } else {
+      searchHostsFileForEntry(name, type);
+    }
+
+    return Optional.ofNullable(hostsCache.get(key(name, type)));
   }
 
-  private Optional<InetAddress> parseHostsFile(Name name, int type) throws IOException {
-    boolean parseEntireFile = Files.size(path) <= MAX_FULL_CACHE_FILE_SIZE_BYTES;
-    InetAddress result = null;
+  private void parseEntireHostsFile() throws IOException {
     String line;
     int lineNumber = 0;
     try (BufferedReader hostsReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
       while ((line = hostsReader.readLine()) != null) {
-        int finalLineNumber = ++lineNumber;
-
-        String[] lineTokens = getLineTokens(line);
-        if (lineTokens.length < 2) {
-          continue;
-        }
-
-        int lineAddressType = Type.A;
-        byte[] lineAddressBytes = Address.toByteArray(lineTokens[0], Address.IPv4);
-        if (lineAddressBytes == null) {
-          lineAddressBytes = Address.toByteArray(lineTokens[0], Address.IPv6);
-          lineAddressType = Type.AAAA;
-        }
-
-        if (lineAddressBytes == null) {
-          log.warn("Could not decode address {}, {}#L{}", lineTokens[0], path, finalLineNumber);
-          continue;
-        }
-
-        Iterable<? extends Name> lineNames =
-            Arrays.stream(lineTokens)
-                    .skip(1)
-                    .map(lineTokenName -> safeName(lineTokenName, finalLineNumber))
-                    .filter(Objects::nonNull)
-                ::iterator;
-        for (Name lineName : lineNames) {
-          boolean isSearchedEntry = lineName.equals(name);
-          if (parseEntireFile || isSearchedEntry) {
+        LineData lineData = parseLine(++lineNumber, line);
+        if (lineData != null) {
+          for (Name lineName : lineData.names) {
             InetAddress lineAddress =
-                InetAddress.getByAddress(lineName.toString(true), lineAddressBytes);
-            InetAddress previous =
-                hostsCache.putIfAbsent(key(lineName, lineAddressType), lineAddress);
-            if (type == lineAddressType) {
-              if (!parseEntireFile) {
-                return Optional.of(lineAddress);
-              } else if (isSearchedEntry && previous == null) {
-                result = lineAddress;
-              }
-            }
+                InetAddress.getByAddress(lineName.toString(true), lineData.address);
+            hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
           }
         }
       }
     }
 
     isEntireFileParsed = true;
-    return Optional.ofNullable(result);
+  }
+
+  private void searchHostsFileForEntry(Name name, int type) throws IOException {
+    String line;
+    int lineNumber = 0;
+    try (BufferedReader hostsReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+      while ((line = hostsReader.readLine()) != null) {
+        LineData lineData = parseLine(++lineNumber, line);
+        if (lineData != null) {
+          for (Name lineName : lineData.names) {
+            boolean isSearchedEntry = lineName.equals(name);
+            if (isSearchedEntry) {
+              InetAddress lineAddress =
+                  InetAddress.getByAddress(lineName.toString(true), lineData.address);
+              hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
+              if (type == lineData.type) {
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @RequiredArgsConstructor
+  private static final class LineData {
+    final int type;
+    final byte[] address;
+    final Iterable<? extends Name> names;
+  }
+
+  private LineData parseLine(int lineNumber, String line) {
+    String[] lineTokens = getLineTokens(line);
+    if (lineTokens.length < 2) {
+      return null;
+    }
+
+    int lineAddressType = Type.A;
+    byte[] lineAddressBytes = Address.toByteArray(lineTokens[0], Address.IPv4);
+    if (lineAddressBytes == null) {
+      lineAddressBytes = Address.toByteArray(lineTokens[0], Address.IPv6);
+      lineAddressType = Type.AAAA;
+    }
+
+    if (lineAddressBytes == null) {
+      log.warn("Could not decode address {}, {}#L{}", lineTokens[0], path, lineNumber);
+      return null;
+    }
+
+    Iterable<? extends Name> lineNames =
+        Arrays.stream(lineTokens)
+                .skip(1)
+                .map(lineTokenName -> safeName(lineTokenName, lineNumber))
+                .filter(Objects::nonNull)
+            ::iterator;
+    return new LineData(lineAddressType, lineAddressBytes, lineNames);
   }
 
   private Name safeName(String name, int lineNumber) {
@@ -190,9 +218,9 @@ public final class HostsFileParser {
         if (!hostsCache.isEmpty()) {
           log.info("Local hosts database has changed at {}, clearing cache", fileTime);
           hostsCache.clear();
-          isEntireFileParsed = false;
         }
 
+        isEntireFileParsed = false;
         lastFileReadTime = fileTime;
       }
     }
