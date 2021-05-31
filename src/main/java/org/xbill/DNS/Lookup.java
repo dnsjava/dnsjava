@@ -548,23 +548,8 @@ public final class Lookup {
   }
 
   private void lookup(Name current) {
-    if (hostsFileParser != null && (type == Type.A || type == Type.AAAA)) {
-      try {
-        Optional<InetAddress> localLookup = hostsFileParser.getAddressForHost(current, type);
-        if (localLookup.isPresent()) {
-          result = SUCCESSFUL;
-          done = true;
-          if (type == Type.A) {
-            answers = new ARecord[] {new ARecord(current, dclass, 0L, localLookup.get())};
-          } else {
-            answers = new AAAARecord[] {new AAAARecord(current, dclass, 0L, localLookup.get())};
-          }
-
-          return;
-        }
-      } catch (IOException e) {
-        log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
-      }
+    if (lookupFromHostsFile(current)) {
+      return;
     }
 
     SetResponse sr = cache.lookupRecords(current, type, credibility);
@@ -621,6 +606,29 @@ public final class Lookup {
     log.debug(
         "Queried {}/{}, id={}: {}", current, Type.string(type), response.getHeader().getID(), sr);
     processResponse(current, sr);
+  }
+
+  private boolean lookupFromHostsFile(Name current) {
+    if (hostsFileParser != null && (type == Type.A || type == Type.AAAA)) {
+      try {
+        Optional<InetAddress> localLookup = hostsFileParser.getAddressForHost(current, type);
+        if (localLookup.isPresent()) {
+          result = SUCCESSFUL;
+          done = true;
+          if (type == Type.A) {
+            answers = new ARecord[] {new ARecord(current, dclass, 0L, localLookup.get())};
+          } else {
+            answers = new AAAARecord[] {new AAAARecord(current, dclass, 0L, localLookup.get())};
+          }
+
+          return true;
+        }
+      } catch (IOException e) {
+        log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
+      }
+    }
+
+    return false;
   }
 
   private void resolve(Name current, Name suffix) {

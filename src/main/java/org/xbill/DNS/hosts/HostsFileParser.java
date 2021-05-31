@@ -140,13 +140,11 @@ public final class HostsFileParser {
         if (lineData != null) {
           for (Name lineName : lineData.names) {
             boolean isSearchedEntry = lineName.equals(name);
-            if (isSearchedEntry) {
+            if (isSearchedEntry && type == lineData.type) {
               InetAddress lineAddress =
                   InetAddress.getByAddress(lineName.toString(true), lineData.address);
               hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
-              if (type == lineData.type) {
-                return;
-              }
+              return;
             }
           }
         }

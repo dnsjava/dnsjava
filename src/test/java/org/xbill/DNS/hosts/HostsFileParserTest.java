@@ -163,8 +163,26 @@ class HostsFileParserTest {
   }
 
   @Test
-  void testBigFileIsNotCompletelyCached() throws IOException {
-    Path generatedLargeFile = tempDir.resolve("testBigFileIsNotCompletelyCached");
+  void testBigFileIsNotCompletelyCachedA() throws IOException {
+    HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileIsNotCompletelyCachedA");
+    hostsFileParser
+        .getAddressForHost(Name.fromConstantString("localhost-10."), Type.A)
+        .orElseThrow(() -> new IllegalStateException("Host entry not found"));
+    assertEquals(1, hostsFileParser.cacheSize());
+  }
+
+  @Test
+  void testBigFileIsNotCompletelyCachedAAAA() throws IOException {
+    HostsFileParser hostsFileParser =
+        generateLargeHostsFile("testBigFileIsNotCompletelyCachedAAAA");
+    hostsFileParser
+        .getAddressForHost(Name.fromConstantString("localhost-10."), Type.AAAA)
+        .orElseThrow(() -> new IllegalStateException("Host entry not found"));
+    assertEquals(1, hostsFileParser.cacheSize());
+  }
+
+  private HostsFileParser generateLargeHostsFile(String name) throws IOException {
+    Path generatedLargeFile = tempDir.resolve(name);
     try (BufferedWriter w = Files.newBufferedWriter(generatedLargeFile)) {
       for (int i = 0; i < 1024; i++) {
         w.append("127.0.0.")
@@ -172,13 +190,38 @@ class HostsFileParserTest {
             .append(" localhost-")
             .append(String.valueOf(i));
         w.newLine();
+        w.append("::")
+            .append(Integer.toHexString(i))
+            .append(" localhost-")
+            .append(String.valueOf(i));
+        w.newLine();
       }
     }
-    HostsFileParser hostsFileParser = new HostsFileParser(generatedLargeFile);
+    return new HostsFileParser(generatedLargeFile);
+  }
+
+  @Test
+  void testBigFileNotFoundA() throws IOException {
+    HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileNotFoundA");
     hostsFileParser
-        .getAddressForHost(Name.fromConstantString("localhost-10."), Type.A)
-        .orElseThrow(() -> new IllegalStateException("Host entry not found"));
-    assertEquals(1, hostsFileParser.cacheSize());
+        .getAddressForHost(Name.fromConstantString("localhost-1024."), Type.A)
+        .ifPresent(
+            entry -> {
+              throw new IllegalStateException("Host entry not found");
+            });
+    assertEquals(0, hostsFileParser.cacheSize());
+  }
+
+  @Test
+  void testBigFileNotFoundAAAA() throws IOException {
+    HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileNotFoundAAAA");
+    hostsFileParser
+        .getAddressForHost(Name.fromConstantString("localhost-1024."), Type.AAAA)
+        .ifPresent(
+            entry -> {
+              throw new IllegalStateException("Host entry not found");
+            });
+    assertEquals(0, hostsFileParser.cacheSize());
   }
 
   @Test
