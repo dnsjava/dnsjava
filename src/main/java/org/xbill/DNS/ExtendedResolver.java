@@ -16,7 +16,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -192,25 +191,10 @@ public class ExtendedResolver implements Resolver {
    * @exception UnknownHostException A server name could not be resolved
    */
   public ExtendedResolver(String[] servers) throws UnknownHostException {
-    try {
-      resolvers.addAll(
-          Arrays.stream(servers)
-              .map(
-                  server -> {
-                    try {
-                      Resolver r = new SimpleResolver(server);
-                      r.setTimeout(DEFAULT_RESOLVER_TIMEOUT);
-                      return new ResolverEntry(r);
-                    } catch (UnknownHostException e) {
-                      throw new RuntimeException(e);
-                    }
-                  })
-              .collect(Collectors.toSet()));
-    } catch (RuntimeException e) {
-      if (e.getCause() instanceof UnknownHostException) {
-        throw (UnknownHostException) e.getCause();
-      }
-      throw e;
+    for (String server : servers) {
+      Resolver r = new SimpleResolver(server);
+      r.setTimeout(DEFAULT_RESOLVER_TIMEOUT);
+      resolvers.add(new ResolverEntry(r));
     }
   }
 
@@ -231,10 +215,9 @@ public class ExtendedResolver implements Resolver {
    * @param resolvers An iterable of pre-initialized {@link Resolver}s.
    */
   public ExtendedResolver(Iterable<Resolver> resolvers) {
-    this.resolvers.addAll(
-        StreamSupport.stream(resolvers.spliterator(), false)
-            .map(ResolverEntry::new)
-            .collect(Collectors.toSet()));
+    for (Resolver r : resolvers) {
+      this.resolvers.add(new ResolverEntry(r));
+    }
   }
 
   @Override
