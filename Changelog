@@ -1,3 +1,20 @@
+06/09/2021
+	- 3.4.0 released
+	- UnknownHostException provides details in message (#154)
+	- Limit length of relative Name to 254 (#165)
+	- Fix wildcard lookups in Zone (#169)
+	- Properly close UDP channel upon error
+	  (#177, Walter Scott Johnson)
+	- Fix load balancing in ExtendedResolver
+	  (#179, Paulo Costa)
+	- Add method to shutdown NIO threads (#180)
+	- Fix restoring active position on byte buffers
+	  (#184, @ryru)
+	- Add support for extended DNS errors (RFC8914, #187)
+	- Fix TTL for SOA record to minimum of TTL and minimum field
+	  (#191, @amitknx)
+	- Add support for hosts file in lookups (#195)
+
 10/28/2020
 	- 3.3.1 released
 	- Fix value of getAlias in C/DNameRecord (#136)
