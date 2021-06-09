@@ -144,6 +144,15 @@ Some settings of dnsjava can be configured via
         <tr>
             <td colspan="3">Maximum number of CNAMEs to follow in a chain.</td>
         </tr>
+        <tr>
+            <td rowspan="2">dnsjava.lookup.use_hosts_file</td>
+            <td>Boolean</td>
+            <td>true</td>
+            <td>false</td>
+        </tr>
+        <tr>
+            <td colspan="3">Use the system's hosts file for lookups before resorting to a resolver.</td>
+        </tr>
     </tbody>
 </table>
 

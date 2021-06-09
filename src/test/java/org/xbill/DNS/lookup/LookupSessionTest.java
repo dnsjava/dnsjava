@@ -4,7 +4,6 @@ package org.xbill.DNS.lookup;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,25 +19,33 @@ import static org.xbill.DNS.LookupTest.LONG_LABEL;
 import static org.xbill.DNS.LookupTest.answer;
 import static org.xbill.DNS.LookupTest.fail;
 import static org.xbill.DNS.Type.A;
+import static org.xbill.DNS.Type.AAAA;
 import static org.xbill.DNS.Type.CNAME;
+import static org.xbill.DNS.Type.MX;
 
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
+import org.xbill.DNS.Address;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.Credibility;
@@ -53,14 +60,44 @@ import org.xbill.DNS.Resolver;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SetResponse;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.hosts.HostsFileParser;
 
 @ExtendWith(MockitoExtension.class)
 class LookupSessionTest {
-
   @Mock Resolver mockResolver;
 
+  @TempDir Path tempDir;
+
+  private static final ARecord LOOPBACK_A =
+      new ARecord(DUMMY_NAME, IN, 3600, InetAddress.getLoopbackAddress());
+  private static final AAAARecord LOOPBACK_AAAA;
+  private HostsFileParser lookupSessionTestHostsFileParser;
+
+  static {
+    AAAARecord record = null;
+    try {
+      record =
+          new AAAARecord(
+              DUMMY_NAME,
+              IN,
+              3600,
+              InetAddress.getByAddress(Address.toByteArray("::1", Address.IPv6)));
+    } catch (UnknownHostException e) {
+      // cannot happen
+    }
+
+    LOOPBACK_AAAA = record;
+  }
+
+  @BeforeEach
+  void beforeEach() throws URISyntaxException {
+    lookupSessionTestHostsFileParser =
+        new HostsFileParser(
+            Paths.get(LookupSessionTest.class.getResource("/hosts_windows").toURI()));
+  }
+
   @AfterEach
-  void after() {
+  void afterEach() {
     verifyNoMoreInteractions(mockResolver);
   }
 
@@ -75,6 +112,105 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
+    verify(mockResolver).sendAsync(any());
+  }
+
+  @Test
+  void lookupAsync_absoluteQueryWithHosts() throws InterruptedException, ExecutionException {
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .hostsFileParser(lookupSessionTestHostsFileParser)
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(
+        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
+        result.getRecords());
+  }
+
+  @Test
+  void lookupAsync_absoluteQueryWithHostsInvalidType() {
+    wireUpMockResolver(mockResolver, query -> fail(query, Rcode.NXDOMAIN));
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .hostsFileParser(lookupSessionTestHostsFileParser)
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal."), MX, IN);
+
+    assertThrowsCause(NoSuchDomainException.class, () -> resultFuture.toCompletableFuture().get());
+    verify(mockResolver).sendAsync(any());
+  }
+
+  @Test
+  void lookupAsync_absoluteAaaaQueryWithHosts() throws InterruptedException, ExecutionException {
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .hostsFileParser(lookupSessionTestHostsFileParser)
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal."), AAAA, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(
+        singletonList(LOOPBACK_AAAA.withName(name("kubernetes.docker.internal."))),
+        result.getRecords());
+  }
+
+  @Test
+  void lookupAsync_relativeQueryWithHosts() throws InterruptedException, ExecutionException {
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .hostsFileParser(lookupSessionTestHostsFileParser)
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal"), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(
+        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
+        result.getRecords());
+  }
+
+  @Test
+  void lookupAsync_relativeQueryWithHostsNdots3() throws InterruptedException, ExecutionException {
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .ndots(3)
+            .hostsFileParser(lookupSessionTestHostsFileParser)
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal"), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(
+        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
+        result.getRecords());
+  }
+
+  @Test
+  void lookupAsync_relativeQueryWithInvalidHosts() throws InterruptedException, ExecutionException {
+    wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .hostsFileParser(
+                new HostsFileParser(tempDir.resolve("lookupAsync_relativeQueryWithInvalidHosts")))
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal"), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(
+        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
+        result.getRecords());
     verify(mockResolver).sendAsync(any());
   }
 
@@ -474,40 +610,39 @@ class LookupSessionTest {
   @Test
   void expandName_absolute() {
     LookupSession session = LookupSession.builder().resolver(mockResolver).build();
-    Stream<Name> nameStream = session.expandName(name("a."));
-    assertEquals(singletonList(name("a.")), nameStream.collect(toList()));
+    List<Name> nameStream = session.expandName(name("a."));
+    assertEquals(singletonList(name("a.")), nameStream);
   }
 
   @Test
   void expandName_singleSearchPath() {
     LookupSession session =
         LookupSession.builder().resolver(mockResolver).searchPath(name("example.com.")).build();
-    Stream<Name> nameStream = session.expandName(name("host"));
-    assertEquals(asList(name("host.example.com."), name("host.")), nameStream.collect(toList()));
+    List<Name> nameStream = session.expandName(name("host"));
+    assertEquals(asList(name("host.example.com."), name("host.")), nameStream);
   }
 
   @Test
   void expandName_notSetSearchPath() {
     LookupSession session = LookupSession.builder().resolver(mockResolver).build();
-    Stream<Name> nameStream = session.expandName(name("host"));
-    assertEquals(singletonList(name("host.")), nameStream.collect(toList()));
+    List<Name> nameStream = session.expandName(name("host"));
+    assertEquals(singletonList(name("host.")), nameStream);
   }
 
   @Test
   void expandName_searchPathIsMadeAbsolute() {
     LookupSession session =
         LookupSession.builder().resolver(mockResolver).searchPath(name("example.com")).build();
-    Stream<Name> nameStream = session.expandName(name("host"));
-    assertEquals(asList(name("host.example.com."), name("host.")), nameStream.collect(toList()));
+    List<Name> nameStream = session.expandName(name("host"));
+    assertEquals(asList(name("host.example.com."), name("host.")), nameStream);
   }
 
   @Test
   void expandName_defaultNdots() {
     LookupSession session =
         LookupSession.builder().resolver(mockResolver).searchPath(name("example.com")).build();
-    Stream<Name> nameStream = session.expandName(name("a.b"));
-    assertEquals(
-        asList(name("a.b."), name("a.b.example.com."), name("a.b.")), nameStream.collect(toList()));
+    List<Name> nameStream = session.expandName(name("a.b"));
+    assertEquals(asList(name("a.b."), name("a.b.example.com.")), nameStream);
   }
 
   @Test
@@ -518,12 +653,9 @@ class LookupSessionTest {
             .resolver(mockResolver)
             .ndots(2)
             .build();
-    Stream<Name> nameStream = session.expandName(name("a.b"));
-    assertEquals(asList(name("a.b.example.com."), name("a.b.")), nameStream.collect(toList()));
+    List<Name> nameStream = session.expandName(name("a.b"));
+    assertEquals(asList(name("a.b.example.com."), name("a.b.")), nameStream);
   }
-
-  private static final ARecord LOOPBACK_A =
-      new ARecord(DUMMY_NAME, IN, 3600, InetAddress.getLoopbackAddress());
 
   private static CNAMERecord cname(String name, String target) {
     return new CNAMERecord(name(name), IN, 0, name(target));

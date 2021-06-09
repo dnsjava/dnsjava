@@ -5,13 +5,18 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.hosts.HostsFileParser;
 
 /**
  * The Lookup object issues queries to caching DNS servers. The input consists of a name, an
@@ -35,6 +40,7 @@ public final class Lookup {
   private static List<Name> defaultSearchPath;
   private static Map<Integer, Cache> defaultCaches;
   private static int defaultNdots;
+  private static HostsFileParser defaultHostsFileParser;
 
   private Resolver resolver;
   private List<Name> searchPath;
@@ -63,6 +69,13 @@ public final class Lookup {
   private boolean cycleResults = true;
   private int maxIterations;
 
+  /**
+   * Gets or sets the local hosts database parser to use for lookup before using a {@link Resolver}.
+   *
+   * @since 3.4
+   */
+  @Getter @Setter private HostsFileParser hostsFileParser;
+
   private static final Name[] noAliases = new Name[0];
 
   /** The lookup was successful. */
@@ -85,6 +98,7 @@ public final class Lookup {
     defaultSearchPath = ResolverConfig.getCurrentConfig().searchPath();
     defaultCaches = new HashMap<>();
     defaultNdots = ResolverConfig.getCurrentConfig().ndots();
+    defaultHostsFileParser = new HostsFileParser();
   }
 
   static {
@@ -188,6 +202,24 @@ public final class Lookup {
     defaultSearchPath = newdomains;
   }
 
+  /**
+   * Gets the default {@link HostsFileParser} to use for new Lookup instances.
+   *
+   * @since 3.4
+   */
+  public static synchronized HostsFileParser getDefaultHostsFileParser() {
+    return defaultHostsFileParser;
+  }
+
+  /**
+   * Sets the default {@link HostsFileParser} to use for new Lookup instances.
+   *
+   * @since 3.4
+   */
+  public static synchronized void setDefaultHostsFileParser(HostsFileParser hostsFileParser) {
+    defaultHostsFileParser = hostsFileParser;
+  }
+
   private static List<Name> convertSearchPathDomainList(List<Name> domains) {
     try {
       return domains.stream()
@@ -274,6 +306,9 @@ public final class Lookup {
     this.result = -1;
     this.maxIterations =
         Integer.parseInt(System.getProperty("dnsjava.lookup.max_iterations", "16"));
+    if (Boolean.parseBoolean(System.getProperty("dnsjava.lookup.use_hosts_file", "true"))) {
+      this.hostsFileParser = getDefaultHostsFileParser();
+    }
   }
 
   /**
@@ -513,6 +548,10 @@ public final class Lookup {
   }
 
   private void lookup(Name current) {
+    if (lookupFromHostsFile(current)) {
+      return;
+    }
+
     SetResponse sr = cache.lookupRecords(current, type, credibility);
     log.debug("Lookup for {}/{}, cache answer: {}", current, Type.string(type), sr);
 
@@ -567,6 +606,29 @@ public final class Lookup {
     log.debug(
         "Queried {}/{}, id={}: {}", current, Type.string(type), response.getHeader().getID(), sr);
     processResponse(current, sr);
+  }
+
+  private boolean lookupFromHostsFile(Name current) {
+    if (hostsFileParser != null && (type == Type.A || type == Type.AAAA)) {
+      try {
+        Optional<InetAddress> localLookup = hostsFileParser.getAddressForHost(current, type);
+        if (localLookup.isPresent()) {
+          result = SUCCESSFUL;
+          done = true;
+          if (type == Type.A) {
+            answers = new ARecord[] {new ARecord(current, dclass, 0L, localLookup.get())};
+          } else {
+            answers = new AAAARecord[] {new AAAARecord(current, dclass, 0L, localLookup.get())};
+          }
+
+          return true;
+        }
+      } catch (IOException e) {
+        log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
+      }
+    }
+
+    return false;
   }
 
   private void resolve(Name current, Name suffix) {

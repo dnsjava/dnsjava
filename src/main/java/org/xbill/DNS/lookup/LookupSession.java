@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS.lookup;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -11,15 +13,18 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
+import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.AAAARecord;
+import org.xbill.DNS.ARecord;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.Credibility;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
+import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
@@ -29,6 +34,7 @@ import org.xbill.DNS.Resolver;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SetResponse;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.hosts.HostsFileParser;
 
 /**
  * LookupSession provides facilities to make DNS Queries. A LookupSession is intended to be long
@@ -36,6 +42,7 @@ import org.xbill.DNS.Type;
  * instance returned by the builder() method.
  */
 @Builder
+@Slf4j
 public class LookupSession {
   public static final int DEFAULT_MAX_ITERATIONS = 16;
   public static final int DEFAULT_NDOTS = 1;
@@ -70,6 +77,9 @@ public class LookupSession {
   @Singular("cache")
   private final Map<Integer, Cache> caches;
 
+  /** Configures the local hosts database file parser to use within this session. */
+  private final HostsFileParser hostsFileParser;
+
   /**
    * A builder for {@link LookupSession} instances where functionality is mostly generated as
    * described in the <a href="https://projectlombok.org/features/Builder">Lombok Builder</a>
@@ -79,6 +89,16 @@ public class LookupSession {
    * LookupSessionBuilder#build()} on the builder instance.
    */
   public static class LookupSessionBuilder {
+    /**
+     * Enable querying the local hosts database using the system defaults.
+     *
+     * @see HostsFileParser
+     */
+    public LookupSessionBuilder defaultHostsFileParser() {
+      hostsFileParser = new HostsFileParser();
+      return this;
+    }
+
     void preBuild() {
       // note that this transform is idempotent, as concatenating an already absolute Name with root
       // is a noop.
@@ -118,30 +138,39 @@ public class LookupSession {
    * @return A {@link CompletionStage} what will yield the eventual lookup result.
    */
   public CompletionStage<LookupResult> lookupAsync(Name name, int type, int dclass) {
+    List<Name> searchNames = expandName(name);
+    LookupResult localHostsLookupResult = lookupWithHosts(searchNames, type);
+    if (localHostsLookupResult != null) {
+      return CompletableFuture.completedFuture(localHostsLookupResult);
+    }
+
     CompletableFuture<LookupResult> future = new CompletableFuture<>();
-    lookupUntilSuccess(expandName(name).iterator(), type, dclass, future);
+    lookupUntilSuccess(searchNames.iterator(), type, dclass, future);
     return future;
   }
 
   /**
    * Generate a stream of names according to the search path application semantics. The semantics of
-   * this is a bit odd, but they are inherited from Lookup.java. Note that the stream returned is
+   * this is a bit odd, but they are inherited from {@link Lookup}. Note that the stream returned is
    * never empty, as it will at the very least always contain {@code name}.
    */
-  Stream<Name> expandName(Name name) {
+  List<Name> expandName(Name name) {
     if (name.isAbsolute()) {
-      return Stream.of(name);
+      return Collections.singletonList(name);
     }
-    Stream<Name> fromSearchPath =
-        Stream.concat(
-            searchPath.stream()
-                .map(searchSuffix -> safeConcat(name, searchSuffix))
-                .filter(Objects::nonNull),
-            Stream.of(safeConcat(name, Name.root)));
+
+    List<Name> fromSearchPath =
+        searchPath.stream()
+            .map(searchSuffix -> safeConcat(name, searchSuffix))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(ArrayList::new));
 
     if (name.labels() > ndots) {
-      return Stream.concat(Stream.of(safeConcat(name, Name.root)), fromSearchPath);
+      fromSearchPath.add(0, safeConcat(name, Name.root));
+    } else {
+      fromSearchPath.add(safeConcat(name, Name.root));
     }
+
     return fromSearchPath;
   }
 
@@ -151,6 +180,29 @@ public class LookupSession {
     } catch (NameTooLongException e) {
       return null;
     }
+  }
+
+  private LookupResult lookupWithHosts(List<Name> names, int type) {
+    if (hostsFileParser != null && (type == Type.A || type == Type.AAAA)) {
+      try {
+        for (Name name : names) {
+          Optional<InetAddress> result = hostsFileParser.getAddressForHost(name, type);
+          if (result.isPresent()) {
+            Record r;
+            if (type == Type.A) {
+              r = new ARecord(name, DClass.IN, 0, result.get());
+            } else {
+              r = new AAAARecord(name, DClass.IN, 0, result.get());
+            }
+            return new LookupResult(Collections.singletonList(r), Collections.emptyList());
+          }
+        }
+      } catch (IOException e) {
+        log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
+      }
+    }
+
+    return null;
   }
 
   private void lookupUntilSuccess(

@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +17,9 @@ import static org.xbill.DNS.ResolverConfig.CONFIGPROVIDER_SKIP_INIT;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -24,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.xbill.DNS.hosts.HostsFileParser;
 
 public class LookupTest {
   public static final Name DUMMY_NAME = Name.fromConstantString("to.be.replaced.");
@@ -335,6 +340,48 @@ public class LookupTest {
   @Test
   void testLookup_constructorFailsWithMetaTypes() {
     assertThrows(IllegalArgumentException.class, () -> new Lookup("example.com.", Type.OPT));
+  }
+
+  @Test
+  void testLookupFromHosts() throws TextParseException, URISyntaxException, UnknownHostException {
+    Lookup lookup = new Lookup("host.docker.internal", Type.A);
+    wireUpMockResolver(
+        mockResolver,
+        q -> {
+          throw new RuntimeException("The resolver should not be invoked");
+        });
+    lookup.setResolver(mockResolver);
+    lookup.setHostsFileParser(
+        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_windows").toURI())));
+    Record[] run = lookup.run();
+    assertNotNull(run);
+    assertEquals(1, run.length);
+    assertEquals(
+        InetAddress.getByAddress(
+            "host.docker.internal", new byte[] {(byte) 192, (byte) 168, 10, 96}),
+        ((ARecord) run[0]).getAddress());
+  }
+
+  @Test
+  void testLookupFromHostsWithSearchDomain()
+      throws TextParseException, URISyntaxException, UnknownHostException {
+    Lookup lookup = new Lookup("host", Type.A);
+    lookup.setSearchPath("docker.internal");
+    wireUpMockResolver(
+        mockResolver,
+        q -> {
+          throw new RuntimeException("The resolver should not be invoked");
+        });
+    lookup.setResolver(mockResolver);
+    lookup.setHostsFileParser(
+        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_windows").toURI())));
+    Record[] run = lookup.run();
+    assertNotNull(run);
+    assertEquals(1, run.length);
+    assertEquals(
+        InetAddress.getByAddress(
+            "host.docker.internal", new byte[] {(byte) 192, (byte) 168, 10, 96}),
+        ((ARecord) run[0]).getAddress());
   }
 
   private Message goodAnswerWhenThreeLabels(Message query) {
