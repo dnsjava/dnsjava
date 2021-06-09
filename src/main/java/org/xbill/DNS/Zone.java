@@ -443,7 +443,8 @@ public class Zone implements Serializable {
   }
 
   /**
-   * Looks up Records in the Zone. This follows CNAMEs and wildcards.
+   * Looks up Records in the Zone. The answer can be a {@code CNAME} instead of the actual requested
+   * type and wildcards are expanded.
    *
    * @param name The name to look up
    * @param type The type to look up
