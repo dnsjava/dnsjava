@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/dnsjava/dnsjava.svg?branch=master)](https://travis-ci.org/dnsjava/dnsjava)
+[![dnsjava CI](https://github.com/dnsjava/dnsjava/actions/workflows/build.yml/badge.svg)](https://github.com/dnsjava/dnsjava/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/dnsjava/dnsjava/branch/master/graph/badge.svg?token=FKmcwl1Oys)](https://codecov.io/gh/dnsjava/dnsjava)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/dnsjava/dnsjava/badge.svg)](https://search.maven.org/artifact/dnsjava/dnsjava)
 [![Javadocs](http://javadoc.io/badge/dnsjava/dnsjava.svg)](http://javadoc.io/doc/dnsjava/dnsjava)
