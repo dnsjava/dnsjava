@@ -1119,12 +1119,12 @@ public class DNSSEC {
         }
         break;
       case Algorithm.ED25519:
-        if (!"Ed25519".equals(key.getAlgorithm())) {
+        if (!"Ed25519".equals(key.getAlgorithm()) && !"EdDSA".equals(key.getAlgorithm()) {
           throw new IncompatibleKeyException();
         }
         break;
       case Algorithm.ED448:
-        if (!"Ed448".equals(key.getAlgorithm())) {
+        if (!"Ed448".equals(key.getAlgorithm()) && !"EdDSA".equals(key.getAlgorithm()) {
           throw new IncompatibleKeyException();
         }
         break;
