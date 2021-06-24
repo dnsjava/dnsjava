@@ -680,8 +680,9 @@ public class DNSSEC {
       case Algorithm.ECDSAP384SHA384:
         return "SHA384withECDSA";
       case Algorithm.ED25519:
+        return "Ed25519";
       case Algorithm.ED448:
-        return "EdDSA";
+        return "Ed448";
       default:
         throw new UnsupportedAlgorithmException(alg);
     }
@@ -1114,6 +1115,16 @@ public class DNSSEC {
       case Algorithm.ECDSAP256SHA256:
       case Algorithm.ECDSAP384SHA384:
         if (!"EC".equals(key.getAlgorithm())) {
+          throw new IncompatibleKeyException();
+        }
+        break;
+      case Algorithm.ED25519:
+        if (!"Ed25519".equals(key.getAlgorithm()) && !"EdDSA".equals(key.getAlgorithm())) {
+          throw new IncompatibleKeyException();
+        }
+        break;
+      case Algorithm.ED448:
+        if (!"Ed448".equals(key.getAlgorithm()) && !"EdDSA".equals(key.getAlgorithm())) {
           throw new IncompatibleKeyException();
         }
         break;
