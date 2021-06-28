@@ -1249,6 +1249,14 @@ class NameTest {
     assertEquals(exp, n.toString());
   }
 
+  @Test
+  void toString_idn() throws TextParseException {
+    String in = "café.éxemple.org";
+    Name n = Name.fromString(in);
+    assertEquals(in, n.toUnicodeString());
+    assertEquals("xn--caf-dma.xn--xemple-9ua.org", n.toString());
+  }
+
   static class Test_toWire {
     @Test
     void rel() throws TextParseException {
@@ -1454,6 +1462,15 @@ class NameTest {
 
       assertNotEquals(n1, n2);
       assertNotEquals(n2, n1);
+    }
+
+    @Test
+    void idn() throws TextParseException {
+      Name n1 = new Name("xn--caf-dma.xn--xemple-9ua.org.");
+      Name n2 = new Name("café.éxemple.org.");
+
+      assertEquals(n1, n2);
+      assertEquals(n2, n1);
     }
   }
 

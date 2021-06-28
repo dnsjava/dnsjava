@@ -5,6 +5,7 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.IDN;
 import java.text.DecimalFormat;
 import lombok.extern.slf4j.Slf4j;
 
@@ -203,6 +204,12 @@ public class Name implements Comparable<Name>, Serializable {
       case ".":
         copy(root, this);
         return;
+    }
+    // Punycode encoding
+    try {
+      s = IDN.toASCII(s);
+    } catch (IllegalArgumentException e) {
+      throw parseException(s, "cannot be encoded to Punycode");
     }
     int labelstart = -1;
     int pos = 1;
@@ -639,6 +646,15 @@ public class Name implements Comparable<Name>, Serializable {
   @Override
   public String toString() {
     return toString(false);
+  }
+
+  /**
+   * Convert a Name to a String. Replace Punycode encoding to Unicode.
+   *
+   * @return The representation of this name as a Unicode String.
+   */
+  public String toUnicodeString() {
+    return IDN.toUnicode(toString(false));
   }
 
   /**
