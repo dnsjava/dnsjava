@@ -210,7 +210,7 @@ public class Name implements Comparable<Name>, Serializable {
     try {
       s1 = IDN.toASCII(s);
     } catch (IllegalArgumentException e) {
-      throw new TextParseException(s + " cannot be encoded to Punycode.");
+      throw parseException(s, "cannot be encoded to Punycode");
     }
     int labelstart = -1;
     int pos = 1;
