@@ -206,9 +206,8 @@ public class Name implements Comparable<Name>, Serializable {
         return;
     }
     // Punycode encoding
-    String s1;
     try {
-      s1 = IDN.toASCII(s);
+      s = IDN.toASCII(s);
     } catch (IllegalArgumentException e) {
       throw parseException(s, "cannot be encoded to Punycode");
     }
@@ -219,25 +218,25 @@ public class Name implements Comparable<Name>, Serializable {
     int digits = 0;
     int intval = 0;
     boolean absolute = false;
-    for (int i = 0; i < s1.length(); i++) {
-      byte b = (byte) s1.charAt(i);
+    for (int i = 0; i < s.length(); i++) {
+      byte b = (byte) s.charAt(i);
       if (escaped) {
         if (b >= '0' && b <= '9' && digits < 3) {
           digits++;
           intval *= 10;
           intval += b - '0';
           if (intval > 255) {
-            throw parseException(s1, "bad escape");
+            throw parseException(s, "bad escape");
           }
           if (digits < 3) {
             continue;
           }
           b = (byte) intval;
         } else if (digits > 0 && digits < 3) {
-          throw parseException(s1, "bad escape");
+          throw parseException(s, "bad escape");
         }
         if (pos > MAXLABEL) {
-          throw parseException(s1, "label too long");
+          throw parseException(s, "label too long");
         }
         labelstart = pos;
         label[pos++] = b;
@@ -248,10 +247,10 @@ public class Name implements Comparable<Name>, Serializable {
         intval = 0;
       } else if (b == '.') {
         if (labelstart == -1) {
-          throw parseException(s1, "invalid empty label");
+          throw parseException(s, "invalid empty label");
         }
         label[0] = (byte) (pos - 1);
-        appendFromString(s1, label, 0, 1);
+        appendFromString(s, label, 0, 1);
         labelstart = -1;
         pos = 1;
       } else {
@@ -259,34 +258,34 @@ public class Name implements Comparable<Name>, Serializable {
           labelstart = i;
         }
         if (pos > MAXLABEL) {
-          throw parseException(s1, "label too long");
+          throw parseException(s, "label too long");
         }
         label[pos++] = b;
       }
     }
     if (digits > 0 && digits < 3) {
-      throw parseException(s1, "bad escape");
+      throw parseException(s, "bad escape");
     }
     if (escaped) {
-      throw parseException(s1, "bad escape");
+      throw parseException(s, "bad escape");
     }
     if (labelstart == -1) {
-      appendFromString(s1, emptyLabel, 0, 1);
+      appendFromString(s, emptyLabel, 0, 1);
       absolute = true;
     } else {
       label[0] = (byte) (pos - 1);
-      appendFromString(s1, label, 0, 1);
+      appendFromString(s, label, 0, 1);
     }
     if (origin != null && !absolute) {
-      appendFromString(s1, origin.name, origin.offset(0), origin.labels);
+      appendFromString(s, origin.name, origin.offset(0), origin.labels);
     }
     // A relative name that is MAXNAME octets long is a strange and wonderful thing.
     // Not technically in violation, but it can not be used for queries as it needs
     // to be made absolute by appending at the very least the an empty label at the
-    // end, which there is no room for. To make life easier for everyone, let's1 only
+    // end, which there is no room for. To make life easier for everyone, let's only
     // allow Names that are MAXNAME long if they are absolute.
     if (!absolute && length() == MAXNAME) {
-      throw parseException(s1, "Name too long");
+      throw parseException(s, "Name too long");
     }
   }
 

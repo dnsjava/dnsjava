@@ -369,7 +369,7 @@ class NameTest {
       assertThrows(TextParseException.class, () -> new Name("ab\\256"));
     }
 
-//    @Test
+    @Test
     void ctor_max_label_escaped() throws TextParseException {
       // name with a 63 char label containing an escape
       Name n = new Name("aaaa\\100aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b.");
@@ -1251,10 +1251,10 @@ class NameTest {
 
   @Test
   void toString_idn() throws TextParseException {
-    String in = "café.be";
+    String in = "café.éxemple.org";
     Name n = Name.fromString(in);
     assertEquals(in, n.toUnicodeString());
-    assertEquals("xn--caf-dma.be", n.toString());
+    assertEquals("xn--caf-dma.xn--xemple-9ua.org", n.toString());
   }
 
   static class Test_toWire {
@@ -1466,8 +1466,8 @@ class NameTest {
 
     @Test
     void idn() throws TextParseException {
-      Name n1 = new Name("xn--caf-dma.be.");
-      Name n2 = new Name("café.be.");
+      Name n1 = new Name("xn--caf-dma.xn--xemple-9ua.org.");
+      Name n2 = new Name("café.éxemple.org.");
 
       assertEquals(n1, n2);
       assertEquals(n2, n1);
