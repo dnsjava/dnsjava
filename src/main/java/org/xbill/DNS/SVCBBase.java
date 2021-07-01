@@ -28,7 +28,7 @@ abstract class SVCBBase extends Record {
   public static final int NO_DEFAULT_ALPN = 2;
   public static final int PORT = 3;
   public static final int IPV4HINT = 4;
-  public static final int ECHCONFIG = 5;
+  public static final int ECH = 5;
   public static final int IPV6HINT = 6;
 
   protected SVCBBase() {
@@ -105,7 +105,7 @@ abstract class SVCBBase extends Record {
     parameters.add(NO_DEFAULT_ALPN, "no-default-alpn", ParameterNoDefaultAlpn::new);
     parameters.add(PORT, "port", ParameterPort::new);
     parameters.add(IPV4HINT, "ipv4hint", ParameterIpv4Hint::new);
-    parameters.add(ECHCONFIG, "echconfig", ParameterEchConfig::new);
+    parameters.add(ECH, "ech", ParameterEch::new);
     parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
   }
 
@@ -442,14 +442,14 @@ abstract class SVCBBase extends Record {
     }
   }
 
-  public static class ParameterEchConfig extends ParameterBase {
+  public static class ParameterEch extends ParameterBase {
     private byte[] data;
 
-    public ParameterEchConfig() {
+    public ParameterEch() {
       super();
     }
 
-    public ParameterEchConfig(byte[] data) {
+    public ParameterEch(byte[] data) {
       super();
       this.data = data;
     }
@@ -460,7 +460,7 @@ abstract class SVCBBase extends Record {
 
     @Override
     public int getKey() {
-      return ECHCONFIG;
+      return ECH;
     }
 
     @Override
@@ -471,7 +471,7 @@ abstract class SVCBBase extends Record {
     @Override
     public void fromString(String string) throws TextParseException {
       if (string == null || string.isEmpty()) {
-        throw new TextParseException("Non-empty base64 value must be specified for echconfig");
+        throw new TextParseException("Non-empty base64 value must be specified for ech");
       }
       data = Base64.getDecoder().decode(string);
     }

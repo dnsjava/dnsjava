@@ -41,9 +41,9 @@ public class SVCBRecordTest {
     assertEquals(ipv4List, ipv4hint.getAddresses());
 
     byte[] data = {'a', 'b', 'c'};
-    SVCBRecord.ParameterEchConfig echconfig = new SVCBRecord.ParameterEchConfig(data);
-    assertEquals(SVCBRecord.ECHCONFIG, echconfig.getKey());
-    assertEquals(data, echconfig.getData());
+    SVCBBase.ParameterEch ech = new SVCBBase.ParameterEch(data);
+    assertEquals(SVCBRecord.ECH, ech.getKey());
+    assertEquals(data, ech.getData());
 
     List<Inet6Address> ipv6List =
         Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
@@ -198,27 +198,27 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void serviceModeEchConfig() throws IOException {
-    String str = "1 h3pool. echconfig=1234";
+  void serviceModeEch() throws IOException {
+    String str = "1 h3pool. ech=1234";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceModeEchConfigMulti() throws IOException {
-    String str = "1 h3pool. alpn=h2,h3 echconfig=1234";
+  void serviceModeEchMulti() throws IOException {
+    String str = "1 h3pool. alpn=h2,h3 ech=1234";
     assertEquals(str, stringToWireToString(str));
   }
 
   @Test
-  void serviceModeEchConfigOutOfOrder() throws IOException {
-    String str = "1 h3pool. echconfig=1234 alpn=h2,h3";
-    assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
+  void serviceModeEchOutOfOrder() throws IOException {
+    String str = "1 h3pool. ech=1234 alpn=h2,h3";
+    assertEquals("1 h3pool. alpn=h2,h3 ech=1234", stringToWireToString(str));
   }
 
   @Test
-  void serviceModeEchConfigQuoted() throws IOException {
-    String str = "1 h3pool. alpn=h2,h3 echconfig=\"1234\"";
-    assertEquals("1 h3pool. alpn=h2,h3 echconfig=1234", stringToWireToString(str));
+  void serviceModeEchQuoted() throws IOException {
+    String str = "1 h3pool. alpn=h2,h3 ech=\"1234\"";
+    assertEquals("1 h3pool. alpn=h2,h3 ech=1234", stringToWireToString(str));
   }
 
   @Test
@@ -377,8 +377,8 @@ public class SVCBRecordTest {
   }
 
   @Test
-  void zeroLengthEchConfig() {
-    String str = "1 . echconfig";
+  void zeroLengthEch() {
+    String str = "1 . ech";
     assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 

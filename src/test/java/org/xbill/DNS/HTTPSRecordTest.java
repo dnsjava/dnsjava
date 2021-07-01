@@ -40,9 +40,9 @@ public class HTTPSRecordTest {
     assertEquals(ipv4List, ipv4hint.getAddresses());
 
     byte[] data = {'a', 'b', 'c'};
-    HTTPSRecord.ParameterEchConfig echconfig = new HTTPSRecord.ParameterEchConfig(data);
-    assertEquals(HTTPSRecord.ECHCONFIG, echconfig.getKey());
-    assertEquals(data, echconfig.getData());
+    SVCBBase.ParameterEch ech = new SVCBBase.ParameterEch(data);
+    assertEquals(HTTPSRecord.ECH, ech.getKey());
+    assertEquals(data, ech.getData());
 
     List<Inet6Address> ipv6List =
         Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
@@ -107,8 +107,8 @@ public class HTTPSRecordTest {
   }
 
   @Test
-  void serviceModeEchConfigMulti() throws IOException {
-    String str = "1 h3pool. alpn=h2,h3 echconfig=1234";
+  void serviceModeEchMulti() throws IOException {
+    String str = "1 h3pool. alpn=h2,h3 ech=1234";
     assertEquals(str, SVCBRecordTest.stringToWireToString(str));
   }
 
