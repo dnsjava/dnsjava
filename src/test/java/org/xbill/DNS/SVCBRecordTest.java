@@ -497,6 +497,12 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void obsoleteEchConfigName() {
+    String str = "1 . echconfig=1234";
+    assertThrows(TextParseException.class, () -> stringToWire(str));
+  }
+
+  @Test
   void negativeSvcPriority() {
     String str = "-1 . port=80";
     assertThrows(TextParseException.class, () -> stringToWire(str));
