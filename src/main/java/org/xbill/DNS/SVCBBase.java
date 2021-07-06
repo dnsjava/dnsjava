@@ -489,13 +489,48 @@ abstract class SVCBBase extends Record {
   }
 
   @Deprecated
-  public static class ParameterEchConfig extends ParameterEch {
+  public static class ParameterEchConfig extends ParameterBase {
+    private byte[] data;
+
     public ParameterEchConfig() {
       super();
     }
 
     public ParameterEchConfig(byte[] data) {
-      super(data);
+      super();
+      this.data = data;
+    }
+
+    public byte[] getData() {
+      return data;
+    }
+
+    @Override
+    public int getKey() {
+      return ECHCONFIG;
+    }
+
+    @Override
+    public void fromWire(byte[] bytes) {
+      data = bytes;
+    }
+
+    @Override
+    public void fromString(String string) throws TextParseException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty base64 value must be specified for echconfig");
+      }
+      data = Base64.getDecoder().decode(string);
+    }
+
+    @Override
+    public byte[] toWire() {
+      return data;
+    }
+
+    @Override
+    public String toString() {
+      return Base64.getEncoder().encodeToString(data);
     }
   }
 
