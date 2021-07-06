@@ -30,6 +30,7 @@ abstract class SVCBBase extends Record {
   public static final int IPV4HINT = 4;
   public static final int ECH = 5;
   public static final int IPV6HINT = 6;
+  @Deprecated public static final int ECHCONFIG = 5;
 
   protected SVCBBase() {
     svcParams = new TreeMap<>();
@@ -484,6 +485,17 @@ abstract class SVCBBase extends Record {
     @Override
     public String toString() {
       return Base64.getEncoder().encodeToString(data);
+    }
+  }
+
+  @Deprecated
+  public static class ParameterEchConfig extends ParameterEch {
+    public ParameterEchConfig() {
+      super();
+    }
+
+    public ParameterEchConfig(byte[] data) {
+      super(data);
     }
   }
 

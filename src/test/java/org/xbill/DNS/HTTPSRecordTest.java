@@ -44,6 +44,10 @@ public class HTTPSRecordTest {
     assertEquals(HTTPSRecord.ECH, ech.getKey());
     assertEquals(data, ech.getData());
 
+    HTTPSRecord.ParameterEchConfig echconfig = new HTTPSRecord.ParameterEchConfig(data);
+    assertEquals(HTTPSRecord.ECHCONFIG, echconfig.getKey());
+    assertEquals(data, echconfig.getData());
+
     List<Inet6Address> ipv6List =
         Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
     HTTPSRecord.ParameterIpv6Hint ipv6hint = new HTTPSRecord.ParameterIpv6Hint(ipv6List);

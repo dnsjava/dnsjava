@@ -45,6 +45,10 @@ public class SVCBRecordTest {
     assertEquals(SVCBRecord.ECH, ech.getKey());
     assertEquals(data, ech.getData());
 
+    SVCBRecord.ParameterEchConfig echconfig = new SVCBRecord.ParameterEchConfig(data);
+    assertEquals(SVCBRecord.ECHCONFIG, echconfig.getKey());
+    assertEquals(data, echconfig.getData());
+
     List<Inet6Address> ipv6List =
         Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
     SVCBRecord.ParameterIpv6Hint ipv6hint = new SVCBRecord.ParameterIpv6Hint(ipv6List);
