@@ -227,7 +227,7 @@ public final class Type {
    * Service Location and Parameter Binding
    *
    * @see <a
-   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-01">draft-ietf-dnsop-svcb-https</a>
+   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
    */
   public static final int SVCB = 64;
 
@@ -235,7 +235,7 @@ public final class Type {
    * HTTPS Service Location and Parameter Binding
    *
    * @see <a
-   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-01">draft-ietf-dnsop-svcb-https</a>
+   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
    */
   public static final int HTTPS = 65;
 

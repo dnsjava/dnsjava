@@ -17,8 +17,14 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/** Implements common functionality for SVCB and HTTPS records */
-abstract class SVCBBase extends Record {
+/**
+ * Implements common functionality for SVCB and HTTPS records
+ *
+ * @see <a
+ *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
+ * @since 3.3
+ */
+public abstract class SVCBBase extends Record {
   protected int svcPriority;
   protected Name targetName;
   protected final Map<Integer, ParameterBase> svcParams;
@@ -30,6 +36,7 @@ abstract class SVCBBase extends Record {
   public static final int IPV4HINT = 4;
   public static final int ECH = 5;
   public static final int IPV6HINT = 6;
+  /** @deprecated use {@link #ECH} */
   @Deprecated public static final int ECHCONFIG = 5;
 
   protected SVCBBase() {
@@ -488,6 +495,7 @@ abstract class SVCBBase extends Record {
     }
   }
 
+  /** @deprecated use {@link ParameterEch} */
   @Deprecated
   public static class ParameterEchConfig extends ParameterBase {
     private byte[] data;
