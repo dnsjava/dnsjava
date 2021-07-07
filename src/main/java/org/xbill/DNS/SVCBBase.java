@@ -17,8 +17,14 @@ import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/** Implements common functionality for SVCB and HTTPS records */
-abstract class SVCBBase extends Record {
+/**
+ * Implements common functionality for SVCB and HTTPS records
+ *
+ * @see <a
+ *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
+ * @since 3.3
+ */
+public abstract class SVCBBase extends Record {
   protected int svcPriority;
   protected Name targetName;
   protected final Map<Integer, ParameterBase> svcParams;
@@ -28,8 +34,10 @@ abstract class SVCBBase extends Record {
   public static final int NO_DEFAULT_ALPN = 2;
   public static final int PORT = 3;
   public static final int IPV4HINT = 4;
-  public static final int ECHCONFIG = 5;
+  public static final int ECH = 5;
   public static final int IPV6HINT = 6;
+  /** @deprecated use {@link #ECH} */
+  @Deprecated public static final int ECHCONFIG = 5;
 
   protected SVCBBase() {
     svcParams = new TreeMap<>();
@@ -105,8 +113,10 @@ abstract class SVCBBase extends Record {
     parameters.add(NO_DEFAULT_ALPN, "no-default-alpn", ParameterNoDefaultAlpn::new);
     parameters.add(PORT, "port", ParameterPort::new);
     parameters.add(IPV4HINT, "ipv4hint", ParameterIpv4Hint::new);
-    parameters.add(ECHCONFIG, "echconfig", ParameterEchConfig::new);
+    parameters.add(ECH, "ech", ParameterEch::new);
     parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
+    /* Support obsolete echconfig name as an alias for ech */
+    parameters.addAlias(ECH, "echconfig");
   }
 
   public abstract static class ParameterBase {
@@ -442,6 +452,53 @@ abstract class SVCBBase extends Record {
     }
   }
 
+  public static class ParameterEch extends ParameterBase {
+    private byte[] data;
+
+    public ParameterEch() {
+      super();
+    }
+
+    public ParameterEch(byte[] data) {
+      super();
+      this.data = data;
+    }
+
+    public byte[] getData() {
+      return data;
+    }
+
+    @Override
+    public int getKey() {
+      return ECH;
+    }
+
+    @Override
+    public void fromWire(byte[] bytes) {
+      data = bytes;
+    }
+
+    @Override
+    public void fromString(String string) throws TextParseException {
+      if (string == null || string.isEmpty()) {
+        throw new TextParseException("Non-empty base64 value must be specified for ech");
+      }
+      data = Base64.getDecoder().decode(string);
+    }
+
+    @Override
+    public byte[] toWire() {
+      return data;
+    }
+
+    @Override
+    public String toString() {
+      return Base64.getEncoder().encodeToString(data);
+    }
+  }
+
+  /** @deprecated use {@link ParameterEch} */
+  @Deprecated
   public static class ParameterEchConfig extends ParameterBase {
     private byte[] data;
 

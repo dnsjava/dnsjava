@@ -40,6 +40,10 @@ public class HTTPSRecordTest {
     assertEquals(ipv4List, ipv4hint.getAddresses());
 
     byte[] data = {'a', 'b', 'c'};
+    SVCBBase.ParameterEch ech = new SVCBBase.ParameterEch(data);
+    assertEquals(HTTPSRecord.ECH, ech.getKey());
+    assertEquals(data, ech.getData());
+
     HTTPSRecord.ParameterEchConfig echconfig = new HTTPSRecord.ParameterEchConfig(data);
     assertEquals(HTTPSRecord.ECHCONFIG, echconfig.getKey());
     assertEquals(data, echconfig.getData());
@@ -107,8 +111,8 @@ public class HTTPSRecordTest {
   }
 
   @Test
-  void serviceModeEchConfigMulti() throws IOException {
-    String str = "1 h3pool. alpn=h2,h3 echconfig=1234";
+  void serviceModeEchMulti() throws IOException {
+    String str = "1 h3pool. alpn=h2,h3 ech=1234";
     assertEquals(str, SVCBRecordTest.stringToWireToString(str));
   }
 
