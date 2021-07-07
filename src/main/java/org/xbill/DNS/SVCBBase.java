@@ -115,6 +115,8 @@ public abstract class SVCBBase extends Record {
     parameters.add(IPV4HINT, "ipv4hint", ParameterIpv4Hint::new);
     parameters.add(ECH, "ech", ParameterEch::new);
     parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
+    /* Support obsolete echconfig name as an alias for ech */
+    parameters.addAlias(ECH, "echconfig");
   }
 
   public abstract static class ParameterBase {

@@ -226,6 +226,12 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void serviceModeObsoleteEchConfigName() throws IOException {
+    String str = "1 . echconfig=1234";
+    assertEquals("1 . ech=1234", stringToWireToString(str));
+  }
+
+  @Test
   void serviceModeIpv4Hint() throws IOException {
     String str = "3 . ipv4hint=4.5.6.7";
     assertEquals(str, stringToWireToString(str));
@@ -497,12 +503,6 @@ public class SVCBRecordTest {
   @Test
   void invalidIpv6Hint() {
     String str = "1 . ipv6hint=1.2.3.4";
-    assertThrows(TextParseException.class, () -> stringToWire(str));
-  }
-
-  @Test
-  void obsoleteEchConfigName() {
-    String str = "1 . echconfig=1234";
     assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
