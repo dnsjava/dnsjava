@@ -839,7 +839,9 @@ public class Name implements Comparable<Name>, Serializable {
       int length = name[start];
       int alength = arg.name[astart];
       for (int j = 0; j < length && j < alength; j++) {
-        int n = lowercase[name[j + start + 1] & 0xFF] - lowercase[arg.name[j + astart + 1] & 0xFF];
+        int n =
+            (lowercase[name[j + start + 1] & 0xFF] & 0xFF)
+                - (lowercase[arg.name[j + astart + 1] & 0xFF] & 0xFF);
         if (n != 0) {
           return n;
         }
