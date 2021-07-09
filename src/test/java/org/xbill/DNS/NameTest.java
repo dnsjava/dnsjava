@@ -1502,6 +1502,24 @@ class NameTest {
       assertTrue(n1.compareTo(n2) < 0);
       assertTrue(n2.compareTo(n1) > 0);
     }
+
+    @Test
+    void octal_digits_low() throws TextParseException {
+      Name n1 = new Name("\004.b.a.");
+      Name n2 = new Name("c.b.a.");
+
+      assertTrue(n1.compareTo(n2) < 0);
+      assertTrue(n2.compareTo(n1) > 0);
+    }
+
+    @Test
+    void octal_digits_high() throws TextParseException {
+      Name n1 = new Name("c.b.a.");
+      Name n2 = new Name("\237.b.a.");
+
+      assertTrue(n1.compareTo(n2) < 0);
+      assertTrue(n2.compareTo(n1) > 0);
+    }
   }
 
   @Test
