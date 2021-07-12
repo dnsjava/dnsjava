@@ -809,7 +809,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
     int code = 0;
     for (int i = offset(0); i < name.length; i++) {
-      code += (code << 3) + lowercase[name[i] & 0xFF];
+      code += (code << 3) + (lowercase[name[i] & 0xFF] & 0xFF);
     }
     hashcode = code;
     return hashcode;
