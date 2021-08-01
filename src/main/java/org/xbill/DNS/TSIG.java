@@ -36,7 +36,11 @@ public class TSIG {
   /** The domain name representing the HMAC-MD5 algorithm. */
   public static final Name HMAC_MD5 = Name.fromConstantString("HMAC-MD5.SIG-ALG.REG.INT.");
 
-  /** The domain name representing the HMAC-MD5 algorithm (deprecated). */
+  /**
+   * The domain name representing the HMAC-MD5 algorithm.
+   *
+   * @deprecated use {@link #HMAC_MD5}
+   */
   @Deprecated public static final Name HMAC = HMAC_MD5;
 
   /** The domain name representing the HMAC-SHA1 algorithm. */

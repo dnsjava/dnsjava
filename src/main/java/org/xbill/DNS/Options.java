@@ -8,14 +8,22 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 /**
- * Boolean options:<br>
- * BINDTTL - Print TTLs in BIND format<br>
- * multiline - Print records in multiline format<br>
- * noPrintIN - Don't print the class of a record if it's IN<br>
- * <br>
- * Valued options:<br>
- * tsigfudge=n - Sets the default TSIG fudge value (in seconds)<br>
- * sig0validity=n - Sets the default SIG(0) validity period (in seconds)<br>
+ * Configuration options for dnsjava.
+ *
+ * <p>Boolean options:
+ *
+ * <ul>
+ *   <li>BINDTTL - Print TTLs in BIND format
+ *   <li>multiline - Print records in multiline format<br>
+ *   <li>noPrintIN - Don't print the class of a record if it's IN<br>
+ * </ul>
+ *
+ * <p>Valued options:
+ *
+ * <ul>
+ *   <li>tsigfudge=n - Sets the default TSIG fudge value (in seconds)
+ *   <li>sig0validity=n - Sets the default SIG(0) validity period (in seconds)
+ * </ul>
  *
  * @author Brian Wellington
  */

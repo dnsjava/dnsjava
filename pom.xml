@@ -45,13 +45,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <target.jdk>1.8</target.jdk>
+        <target.jdk>8</target.jdk>
+
         <org.junit.version>5.7.2</org.junit.version>
         <slf4j.version>1.7.32</slf4j.version>
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.source>8</sonar.java.source>
+        <sonar.java.source>${target.jdk}</sonar.java.source>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <delombok.output>${project.build.directory}/generated-sources/delombok</delombok.output>
@@ -140,6 +141,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
+                    <source>${target.jdk}</source>
                     <debug>true</debug>
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
@@ -438,7 +440,6 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                             <excludePackageNames>*.spi</excludePackageNames>
-                            <sourcepath>${delombok.output}</sourcepath>
                         </configuration>
                     </plugin>
                 </plugins>

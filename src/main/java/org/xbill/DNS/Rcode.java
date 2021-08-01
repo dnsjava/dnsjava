@@ -26,7 +26,11 @@ public final class Rcode {
   /** The operation requested is not implemented */
   public static final int NOTIMP = 4;
 
-  /** Deprecated synonym for NOTIMP. */
+  /**
+   * Synonym for NOTIMP.
+   *
+   * @deprecated use {{@link #NOTIMP}}
+   */
   @Deprecated public static final int NOTIMPL = 4;
 
   /** The operation was refused by the server */

@@ -32,16 +32,12 @@ public class LookupFailedException extends RuntimeException {
     this.type = type;
   }
 
-  /** Returns the Name being looked up when this failure occurred. */
+  /** Gets the Name being looked up when this failure occurred. */
   public Name getName() {
     return name;
   }
 
-  /**
-   * Returns the Type being looked up when this failure occurred.
-   *
-   * @return
-   */
+  /** Gets the {@link org.xbill.DNS.Type} being looked up when this failure occurred. */
   public int getType() {
     return type;
   }
