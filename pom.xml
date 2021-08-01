@@ -49,6 +49,10 @@
 
         <org.junit.version>5.7.2</org.junit.version>
         <slf4j.version>1.7.32</slf4j.version>
+        <lombok.version>1.18.20</lombok.version>
+        <jna.version>5.8.0</jna.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
+
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -56,7 +60,6 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <delombok.output>${project.build.directory}/generated-sources/delombok</delombok.output>
-        <lombok.version>1.18.20</lombok.version>
     </properties>
 
     <build>
@@ -190,8 +193,13 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.14.4</version>
+                <version>0.15.3</version>
                 <configuration>
+                    <newVersion>
+                        <file>
+                            <path>${project.build.directory}/${project.artifactId}-${project.version}.jar</path>
+                        </file>
+                    </newVersion>
                     <parameter>
                         <onlyModified>true</onlyModified>
                         <accessModifier>public</accessModifier>
@@ -364,19 +372,19 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.6.0</version>
+            <version>${jna.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
-            <version>5.6.0</version>
+            <version>${jna.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.68</version>
+            <version>${bouncycastle.version}</version>
             <optional>true</optional>
         </dependency>
         <dependency>
