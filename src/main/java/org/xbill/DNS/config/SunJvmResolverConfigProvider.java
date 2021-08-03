@@ -9,8 +9,13 @@ import java.util.List;
  * Resolver config provider that queries the traditional class {@code
  * sun.net.dns.ResolverConfiguration} via reflection.
  *
- * <p>As of Java 9, this generates an illegal reflective access exception and on Windows, this may
- * return invalid nameservers of disconnected NICs.
+ * <ul>
+ *   <li>As of Java 9, generates an illegal reflective access exception.
+ *   <li>As of Java 16, adding the JVM flag {@code --add-opens java.base/sun.net.dns=ALL-UNNAMED} is
+ *       required.
+ *   <li>On Windows, may return invalid nameservers of disconnected NICs before Java 15, <a
+ *       href="https://bugs.openjdk.java.net/browse/JDK-7006496">JDK-7006496</a>.
+ * </ul>
  */
 public class SunJvmResolverConfigProvider extends BaseResolverConfigProvider {
   public void initialize() throws InitializationException {

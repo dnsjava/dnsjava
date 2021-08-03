@@ -83,7 +83,7 @@ jobs:
         with:
           java-version: '8'
           architecture: 'x64'
-          distribution: zulu
+          distribution: adopt
           server-id: ossrh
           server-username: SONATYPE_USER
           server-password: SONATYPE_PW

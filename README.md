@@ -260,7 +260,9 @@ until one succeeds.
   on the classpath, the `GetAdaptersAddresses` API is used.
 - On Android the `ConnectivityManager` is used (requires initialization using
   `org.xbill.DNS.config.AndroidResolverConfigProvider.setContext`).
-- The `sun.net.dns.ResolverConfiguration` class is queried if enabled.
+- The `sun.net.dns.ResolverConfiguration` class is queried if enabled. As of
+  Java 16 the JVM flag `--add-opens java.base/sun.net.dns=ALL-UNNAMED` is also
+  required.
 - If available and no servers have been found yet,
   [JNDI-DNS](https://docs.oracle.com/javase/8/docs/technotes/guides/jndi/jndi-dns.html) is used.
 - If still no servers have been found yet, use the fallback properties. This can be used to query
