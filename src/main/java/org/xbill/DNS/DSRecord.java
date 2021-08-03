@@ -18,26 +18,32 @@ import org.xbill.DNS.utils.base16;
  */
 public class DSRecord extends Record {
 
+  /** @deprecated use {@link DNSSEC.Digest} */
+  @Deprecated
   public static class Digest {
     private Digest() {}
 
     /** SHA-1 */
-    public static final int SHA1 = 1;
+    public static final int SHA1 = DNSSEC.Digest.SHA1;
 
     /** SHA-256 */
-    public static final int SHA256 = 2;
+    public static final int SHA256 = DNSSEC.Digest.SHA256;
 
     /** GOST R 34.11-94 */
-    public static final int GOST3411 = 3;
+    public static final int GOST3411 = DNSSEC.Digest.GOST3411;
 
     /** SHA-384 */
-    public static final int SHA384 = 4;
+    public static final int SHA384 = DNSSEC.Digest.SHA384;
   }
 
-  public static final int SHA1_DIGEST_ID = Digest.SHA1;
-  public static final int SHA256_DIGEST_ID = Digest.SHA256;
-  public static final int GOST3411_DIGEST_ID = Digest.GOST3411;
-  public static final int SHA384_DIGEST_ID = Digest.SHA384;
+  /** @deprecated use {@link DNSSEC.Digest#SHA1} */
+  @Deprecated public static final int SHA1_DIGEST_ID = DNSSEC.Digest.SHA1;
+  /** @deprecated use {@link DNSSEC.Digest#SHA256} */
+  @Deprecated public static final int SHA256_DIGEST_ID = DNSSEC.Digest.SHA256;
+  /** @deprecated use {@link DNSSEC.Digest#GOST3411} */
+  @Deprecated public static final int GOST3411_DIGEST_ID = DNSSEC.Digest.GOST3411;
+  /** @deprecated use {@link DNSSEC.Digest#SHA384} */
+  @Deprecated public static final int SHA384_DIGEST_ID = DNSSEC.Digest.SHA384;
 
   private int footprint;
   private int alg;

@@ -36,9 +36,16 @@ import java.util.Date;
  * @author Brian Wellington
  */
 public class DNSSEC {
-
+  /** Domain Name System Security (DNSSEC) Algorithm Numbers. */
   public static class Algorithm {
     private Algorithm() {}
+
+    /**
+     * Delete DS record in parent zone, RFC8078.
+     *
+     * @since 3.5
+     */
+    public static final int DELETE = 0;
 
     /** RSA/MD5 public key (deprecated) */
     public static final int RSAMD5 = 1;
@@ -88,12 +95,13 @@ public class DNSSEC {
     /** Private algorithm, specified by OID */
     public static final int PRIVATEOID = 254;
 
-    private static Mnemonic algs = new Mnemonic("DNSSEC algorithm", Mnemonic.CASE_UPPER);
+    private static final Mnemonic algs = new Mnemonic("DNSSEC algorithm", Mnemonic.CASE_UPPER);
 
     static {
       algs.setMaximum(0xFF);
       algs.setNumericAllowed(true);
 
+      algs.add(DELETE, "DELETE");
       algs.add(RSAMD5, "RSAMD5");
       algs.add(DH, "DH");
       algs.add(DSA, "DSA");
@@ -110,6 +118,56 @@ public class DNSSEC {
       algs.add(INDIRECT, "INDIRECT");
       algs.add(PRIVATEDNS, "PRIVATEDNS");
       algs.add(PRIVATEOID, "PRIVATEOID");
+    }
+
+    /** Converts an algorithm into its textual representation */
+    public static String string(int alg) {
+      return algs.getText(alg);
+    }
+
+    /**
+     * Converts a textual representation of an algorithm into its numeric code. Integers in the
+     * range 0..255 are also accepted.
+     *
+     * @param s The textual representation of the algorithm
+     * @return The algorithm code, or -1 on error.
+     */
+    public static int value(String s) {
+      return algs.getValue(s);
+    }
+  }
+
+  /**
+   * DNSSEC Delegation Signer (DS) Resource Record (RR) Type Digest Algorithms.
+   *
+   * @since 3.5
+   */
+  public static class Digest {
+    private Digest() {}
+
+    /** SHA-1, RFC3658. */
+    public static final int SHA1 = 1;
+
+    /** SHA-256, RFC4509. */
+    public static final int SHA256 = 2;
+
+    /** GOST R 34.11-94, RFC5933. */
+    public static final int GOST3411 = 3;
+
+    /** SHA-384, RFC6605. */
+    public static final int SHA384 = 4;
+
+    private static final Mnemonic algs =
+        new Mnemonic("DNSSEC Digest Algorithm", Mnemonic.CASE_UPPER);
+
+    static {
+      algs.setMaximum(0xFF);
+      algs.setNumericAllowed(true);
+
+      algs.add(SHA1, "SHA-1");
+      algs.add(SHA256, "SHA-256");
+      algs.add(GOST3411, "GOST R 34.11-94");
+      algs.add(SHA384, "SHA-384");
     }
 
     /** Converts an algorithm into its textual representation */
@@ -1328,16 +1386,16 @@ public class DNSSEC {
     MessageDigest digest;
     try {
       switch (digestid) {
-        case DSRecord.Digest.SHA1:
+        case Digest.SHA1:
           digest = MessageDigest.getInstance("sha-1");
           break;
-        case DSRecord.Digest.SHA256:
+        case Digest.SHA256:
           digest = MessageDigest.getInstance("sha-256");
           break;
-        case DSRecord.Digest.GOST3411:
+        case Digest.GOST3411:
           digest = MessageDigest.getInstance("GOST3411");
           break;
-        case DSRecord.Digest.SHA384:
+        case Digest.SHA384:
           digest = MessageDigest.getInstance("sha-384");
           break;
         default:
