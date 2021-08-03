@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 public class SVCBRecordTest {
   @Test
+  @SuppressWarnings("deprecation")
   void createParams() throws UnknownHostException, TextParseException {
     List<Integer> mandatoryList = Arrays.asList(SVCBRecord.ALPN, SVCBRecord.IPV4HINT);
     SVCBRecord.ParameterMandatory mandatory = new SVCBBase.ParameterMandatory(mandatoryList);
