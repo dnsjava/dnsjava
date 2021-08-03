@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.DNSSECException;
 
 class DNSSECTest {
-  private TXTRecord txt = new TXTRecord(Name.root, DClass.IN, 3600, "test");
+  private final TXTRecord txt = new TXTRecord(Name.root, DClass.IN, 3600, "test");
 
   @Test
   void testECDSALeadingZeroUndersize() throws IOException, DNSSECException {

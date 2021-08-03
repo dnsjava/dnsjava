@@ -22,7 +22,9 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.EllipticCurve;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -231,11 +233,11 @@ public class DNSSEC {
     rrset.rrs(false).stream()
         .sorted()
         .forEachOrdered(
-            record -> {
+            r -> {
               out.writeByteArray(header.toByteArray());
               int lengthPosition = out.current();
               out.writeU16(0);
-              out.writeByteArray(record.rdataToWireCanonical());
+              r.rrToWire(out, null, true);
               int rrlength = out.current() - lengthPosition - 2;
               out.save();
               out.jump(lengthPosition);
@@ -321,8 +323,8 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the signature has expired. */
   public static class SignatureExpiredException extends DNSSECException {
-    private Instant when;
-    private Instant now;
+    private final Instant when;
+    private final Instant now;
 
     SignatureExpiredException(Instant when, Instant now) {
       super("signature expired");
@@ -343,8 +345,8 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the signature has not yet become valid. */
   public static class SignatureNotYetValidException extends DNSSECException {
-    private Instant when;
-    private Instant now;
+    private final Instant when;
+    private final Instant now;
 
     SignatureNotYetValidException(Instant when, Instant now) {
       super("signature is not yet valid");
@@ -384,7 +386,7 @@ public class DNSSEC {
     }
   }
 
-  private static int BigIntegerLength(BigInteger i) {
+  private static int bigIntegerLength(BigInteger i) {
     return (i.bitLength() + 7) / 8;
   }
 
@@ -492,27 +494,19 @@ public class DNSSEC {
 
   private static class ECKeyInfo {
     int length;
-    public BigInteger p, a, b, gx, gy, n;
     EllipticCurve curve;
     ECParameterSpec spec;
 
-    ECKeyInfo(
-        int length,
-        String p_str,
-        String a_str,
-        String b_str,
-        String gx_str,
-        String gy_str,
-        String n_str) {
+    ECKeyInfo(int length, String p, String a, String b, String gx, String gy, String n) {
       this.length = length;
-      p = new BigInteger(p_str, 16);
-      a = new BigInteger(a_str, 16);
-      b = new BigInteger(b_str, 16);
-      gx = new BigInteger(gx_str, 16);
-      gy = new BigInteger(gy_str, 16);
-      n = new BigInteger(n_str, 16);
-      curve = new EllipticCurve(new ECFieldFp(p), a, b);
-      spec = new ECParameterSpec(curve, new ECPoint(gx, gy), n, 1);
+      BigInteger pi = new BigInteger(p, 16);
+      BigInteger ai = new BigInteger(a, 16);
+      BigInteger bi = new BigInteger(b, 16);
+      BigInteger gxi = new BigInteger(gx, 16);
+      BigInteger gyi = new BigInteger(gy, 16);
+      BigInteger ni = new BigInteger(n, 16);
+      curve = new EllipticCurve(new ECFieldFp(pi), ai, bi);
+      spec = new ECParameterSpec(curve, new ECPoint(gxi, gyi), ni, 1);
     }
   }
 
@@ -574,6 +568,28 @@ public class DNSSEC {
     return factory.generatePublic(new ECPublicKeySpec(q, keyinfo.spec));
   }
 
+  private static PublicKey toEdDSAPublicKey(byte[] key, byte algId)
+      throws GeneralSecurityException {
+    // Key is encoded as plain octets, rfc8080#section-3
+    // wrap it in ASN.1 format so we can use X509EncodedKeySpec to read it as JCA
+    byte[] encoded = new byte[12 + key.length];
+    encoded[0] = ASN1_SEQ;
+    encoded[1] = (byte) (10 + key.length); // length
+    encoded[2] = ASN1_SEQ;
+    encoded[3] = 5; // length
+    encoded[4] = ASN1_OID; // OID
+    encoded[5] = 3; // length
+    encoded[6] = 0x2b; // iso.org
+    encoded[7] = 0x65; // 101 thawte
+    encoded[8] = algId;
+    encoded[9] = ASN1_BITSTRING; // sequence
+    encoded[10] = (byte) (key.length + 1); // length
+    System.arraycopy(key, 0, encoded, 12, key.length);
+    X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+    KeyFactory keyFactory = KeyFactory.getInstance("EdDSA");
+    return keyFactory.generatePublic(keySpec);
+  }
+
   /** Converts a KEY/DNSKEY record into a PublicKey */
   static PublicKey toPublicKey(KEYBase r) throws DNSSECException {
     return toPublicKey(r.getAlgorithm(), r.getKey(), r);
@@ -599,8 +615,9 @@ public class DNSSEC {
         case Algorithm.ECDSAP384SHA384:
           return toECDSAPublicKey(key, ECDSA_P384);
         case Algorithm.ED25519:
+          return toEdDSAPublicKey(key, (byte) 112);
         case Algorithm.ED448:
-          return DNSSECWithBC.toPublicKey(alg, key);
+          return toEdDSAPublicKey(key, (byte) 113);
         default:
           throw new UnsupportedAlgorithmException(alg);
       }
@@ -615,7 +632,7 @@ public class DNSSEC {
     DNSOutput out = new DNSOutput();
     BigInteger exponent = key.getPublicExponent();
     BigInteger modulus = key.getModulus();
-    int exponentLength = BigIntegerLength(exponent);
+    int exponentLength = bigIntegerLength(exponent);
 
     if (exponentLength < 256) {
       out.writeU8(exponentLength);
@@ -670,6 +687,12 @@ public class DNSSEC {
     return out.toByteArray();
   }
 
+  private static byte[] fromEdDSAPublicKey(PublicKey key) {
+    // The key is a signed DER BitString, starting at index 10. Drop the leading zero if necessary
+    byte[] encoded = key.getEncoded();
+    return Arrays.copyOfRange(encoded, 12, encoded.length);
+  }
+
   /** Builds a DNSKEY record from a PublicKey */
   static byte[] fromPublicKey(PublicKey key, int alg) throws DNSSECException {
     switch (alg) {
@@ -705,7 +728,10 @@ public class DNSSEC {
         return fromECDSAPublicKey((ECPublicKey) key, ECDSA_P384);
       case Algorithm.ED25519:
       case Algorithm.ED448:
-        return DNSSECWithBC.fromPublicKey(key, alg);
+        if (!key.getFormat().equalsIgnoreCase("X.509")) {
+          throw new IncompatibleKeyException();
+        }
+        return fromEdDSAPublicKey(key);
       default:
         throw new UnsupportedAlgorithmException(alg);
     }
@@ -746,248 +772,119 @@ public class DNSSEC {
     }
   }
 
-  private static final int ASN1_SEQ = 0x30;
-  private static final int ASN1_INT = 0x2;
+  static final int ASN1_SEQ = 0x30;
+  static final int ASN1_INT = 0x2;
+  static final int ASN1_BITSTRING = 0x3;
+  static final int ASN1_OID = 0x6;
 
   private static final int DSA_LEN = 20;
 
-  private static byte[] DSASignaturefromDNS(byte[] dns) throws DNSSECException, IOException {
-    if (dns.length != 1 + DSA_LEN * 2) {
-      throw new SignatureVerificationException();
-    }
-
-    DNSInput in = new DNSInput(dns);
-    DNSOutput out = new DNSOutput();
-
-    /*int t =*/ in.readU8();
-
-    byte[] r = in.readByteArray(DSA_LEN);
-    int rlen = DSA_LEN;
-    if (r[0] < 0) {
-      rlen++;
-    } else {
-      for (int i = 0; i < DSA_LEN - 1 && r[i] == 0 && r[i + 1] >= 0; i++) {
-        rlen--;
-      }
-    }
-
-    byte[] s = in.readByteArray(DSA_LEN);
-    int slen = DSA_LEN;
-    if (s[0] < 0) {
-      slen++;
-    } else {
-      for (int i = 0; i < DSA_LEN - 1 && s[i] == 0 && s[i + 1] >= 0; i++) {
-        slen--;
-      }
-    }
-
-    out.writeU8(ASN1_SEQ);
-    out.writeU8(rlen + slen + 4);
-
-    out.writeU8(ASN1_INT);
-    out.writeU8(rlen);
-    if (rlen > DSA_LEN) {
-      out.writeU8(0);
-    }
-    if (rlen >= DSA_LEN) {
-      out.writeByteArray(r);
-    } else {
-      out.writeByteArray(r, DSA_LEN - rlen, rlen);
-    }
-
-    out.writeU8(ASN1_INT);
-    out.writeU8(slen);
-    if (slen > DSA_LEN) {
-      out.writeU8(0);
-    }
-    if (slen >= DSA_LEN) {
-      out.writeByteArray(s);
-    } else {
-      out.writeByteArray(s, DSA_LEN - slen, slen);
-    }
-
-    return out.toByteArray();
+  private static IOException asn1ParseException(Object expected, Object actual) {
+    return new IOException("Invalid ASN.1 data, expected " + expected + " got " + actual);
   }
 
-  private static byte[] DSASignaturetoDNS(byte[] signature, int t) throws IOException {
-    DNSInput in = new DNSInput(signature);
-    DNSOutput out = new DNSOutput();
-
-    out.writeU8(t);
-
-    int tmp = in.readU8();
-    if (tmp != ASN1_SEQ) {
-      throw new IOException("Invalid ASN.1 data, expected " + ASN1_SEQ + " got " + tmp);
-    }
-    /*int seqlen =*/ in.readU8();
-
-    tmp = in.readU8();
-    if (tmp != ASN1_INT) {
-      throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
-    }
-
-    // r must be of DSA_LEN or +1 if it has a leading zero for negative
-    // ASN.1 integers
-    int rlen = in.readU8();
-    if (rlen == DSA_LEN + 1 && in.readU8() == 0) {
-      --rlen;
-    } else if (rlen <= DSA_LEN) {
-      // pad with leading zeros, rfc2536#section-3
-      for (int i = 0; i < DSA_LEN - rlen; i++) {
-        out.writeU8(0);
-      }
-    } else {
-      throw new IOException("Invalid r-value in ASN.1 DER encoded DSA signature: " + rlen);
-    }
-
-    out.writeByteArray(in.readByteArray(rlen));
-
-    tmp = in.readU8();
-    if (tmp != ASN1_INT) {
-      throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
-    }
-
-    // s must be of DSA_LEN or +1 if it has a leading zero for negative
-    // ASN.1 integers
-    int slen = in.readU8();
-    if (slen == DSA_LEN + 1 && in.readU8() == 0) {
-      --slen;
-    } else if (slen <= DSA_LEN) {
-      // pad with leading zeros, rfc2536#section-3
-      for (int i = 0; i < DSA_LEN - slen; i++) {
-        out.writeU8(0);
-      }
-    } else {
-      throw new IOException("Invalid s-value in ASN.1 DER encoded DSA signature: " + slen);
-    }
-
-    out.writeByteArray(in.readByteArray(slen));
-
-    return out.toByteArray();
-  }
-
-  private static byte[] ECGOSTSignaturefromDNS(byte[] signature, ECKeyInfo keyinfo)
-      throws DNSSECException {
-    if (signature.length != keyinfo.length * 2) {
-      throw new SignatureVerificationException();
-    }
-    // Wire format is equal to the engine input
-    return signature;
-  }
-
-  private static byte[] ECDSASignaturefromDNS(byte[] signature, ECKeyInfo keyinfo)
+  private static byte[] dsaSignatureFromDNS(byte[] signature, int keyLength, boolean skipT)
       throws DNSSECException, IOException {
-    if (signature.length != keyinfo.length * 2) {
+    if (signature.length != keyLength * 2 + (skipT ? 1 : 0)) {
       throw new SignatureVerificationException();
     }
 
     DNSInput in = new DNSInput(signature);
     DNSOutput out = new DNSOutput();
 
-    byte[] r = in.readByteArray(keyinfo.length);
-    int rlen = keyinfo.length;
-    if (r[0] < 0) {
-      rlen++;
-    } else {
-      for (int i = 0; i < keyinfo.length - 1 && r[i] == 0 && r[i + 1] >= 0; i++) {
-        rlen--;
-      }
+    if (skipT) {
+      // rfc2536#section-3, this applies to DSA only, not ECDSA
+      in.readU8();
     }
 
-    byte[] s = in.readByteArray(keyinfo.length);
-    int slen = keyinfo.length;
-    if (s[0] < 0) {
-      slen++;
-    } else {
-      for (int i = 0; i < keyinfo.length - 1 && s[i] == 0 && s[i + 1] >= 0; i++) {
-        slen--;
-      }
-    }
+    byte[] r = in.readByteArray(keyLength);
+    int rlen = getDsaIntLen(r, keyLength);
+
+    byte[] s = in.readByteArray(keyLength);
+    int slen = getDsaIntLen(s, keyLength);
 
     out.writeU8(ASN1_SEQ);
     out.writeU8(rlen + slen + 4);
 
-    out.writeU8(ASN1_INT);
-    out.writeU8(rlen);
-    if (rlen > keyinfo.length) {
-      out.writeU8(0);
-    }
-    if (rlen >= keyinfo.length) {
-      out.writeByteArray(r);
-    } else {
-      out.writeByteArray(r, keyinfo.length - rlen, rlen);
-    }
-
-    out.writeU8(ASN1_INT);
-    out.writeU8(slen);
-    if (slen > keyinfo.length) {
-      out.writeU8(0);
-    }
-    if (slen >= keyinfo.length) {
-      out.writeByteArray(s);
-    } else {
-      out.writeByteArray(s, keyinfo.length - slen, slen);
-    }
+    writeAsn1Int(keyLength, out, r, rlen);
+    writeAsn1Int(keyLength, out, s, slen);
 
     return out.toByteArray();
   }
 
-  private static byte[] ECDSASignaturetoDNS(byte[] signature, ECKeyInfo keyinfo)
-      throws IOException {
+  private static int getDsaIntLen(byte[] bigint, int dsaLen) {
+    int len = dsaLen;
+    if (bigint[0] < 0) {
+      len++;
+    } else {
+      for (int i = 0; i < dsaLen - 1 && bigint[i] == 0 && bigint[i + 1] >= 0; i++) {
+        len--;
+      }
+    }
+    return len;
+  }
+
+  private static void writeAsn1Int(int keyLength, DNSOutput out, byte[] bigint, int bigintLen) {
+    out.writeU8(ASN1_INT);
+    out.writeU8(bigintLen);
+    if (bigintLen > keyLength) {
+      out.writeU8(0);
+    }
+    if (bigintLen >= keyLength) {
+      out.writeByteArray(bigint);
+    } else {
+      out.writeByteArray(bigint, keyLength - bigintLen, bigintLen);
+    }
+  }
+
+  private static byte[] dsaSignatureToDNS(byte[] signature, int rsLen, int t) throws IOException {
     DNSInput in = new DNSInput(signature);
     DNSOutput out = new DNSOutput();
 
+    if (t > -1) {
+      out.writeU8(t);
+    }
+
     int tmp = in.readU8();
     if (tmp != ASN1_SEQ) {
-      throw new IOException("Invalid ASN.1 data, expected " + ASN1_SEQ + " got " + tmp);
+      throw asn1ParseException(ASN1_SEQ, tmp);
     }
     /*int seqlen =*/ in.readU8();
 
-    tmp = in.readU8();
-    if (tmp != ASN1_INT) {
-      throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
-    }
-
-    int rlen = in.readU8();
-    if (rlen == keyinfo.length + 1 && in.readU8() == 0) {
-      --rlen;
-    } else if (rlen <= keyinfo.length) {
-      // pad with leading zeros, rfc2536#section-3
-      for (int i = 0; i < keyinfo.length - rlen; i++) {
-        out.writeU8(0);
-      }
-    } else {
-      throw new IOException("Invalid r-value in ASN.1 DER encoded ECDSA signature: " + rlen);
-    }
-
-    out.writeByteArray(in.readByteArray(rlen));
-
-    tmp = in.readU8();
-    if (tmp != ASN1_INT) {
-      throw new IOException("Invalid ASN.1 data, expected " + ASN1_INT + " got " + tmp);
-    }
-    int slen = in.readU8();
-    if (slen == keyinfo.length + 1 && in.readU8() == 0) {
-      --slen;
-    } else if (slen <= keyinfo.length) {
-      // pad with leading zeros, rfc2536#section-3
-      for (int i = 0; i < keyinfo.length - slen; i++) {
-        out.writeU8(0);
-      }
-    } else {
-      throw new IOException("Invalid s-value in ASN.1 DER encoded ECDSA signature: " + slen);
-    }
-
-    out.writeByteArray(in.readByteArray(slen));
-
+    transformAns1IntToDns(rsLen, in, out);
+    transformAns1IntToDns(rsLen, in, out);
     return out.toByteArray();
+  }
+
+  private static void transformAns1IntToDns(int rsLen, DNSInput in, DNSOutput out)
+      throws IOException {
+    int tmp = in.readU8();
+    if (tmp != ASN1_INT) {
+      throw asn1ParseException(ASN1_INT, tmp);
+    }
+
+    // the int must be of rsLen or +1 if it has a leading zero for negative
+    // ASN.1 integers
+    int len = in.readU8();
+    if (len == rsLen + 1 && in.readU8() == 0) {
+      --len;
+    } else if (len <= rsLen) {
+      // pad with leading zeros, rfc2536#section-3
+      for (int i = 0; i < rsLen - len; i++) {
+        out.writeU8(0);
+      }
+    } else {
+      throw new IOException("Invalid r/s-value in ASN.1 DER encoded signature: " + len);
+    }
+
+    out.writeByteArray(in.readByteArray(len));
   }
 
   private static void verify(PublicKey key, int alg, byte[] data, byte[] signature)
       throws DNSSECException {
     if (key instanceof DSAPublicKey) {
       try {
-        signature = DSASignaturefromDNS(signature);
+        signature = dsaSignatureFromDNS(signature, DSA_LEN, true);
       } catch (IOException e) {
         throw new IllegalStateException();
       }
@@ -995,13 +892,16 @@ public class DNSSEC {
       try {
         switch (alg) {
           case Algorithm.ECC_GOST:
-            signature = ECGOSTSignaturefromDNS(signature, GOST);
+            // Wire format is equal to the engine input
+            if (signature.length != GOST.length * 2) {
+              throw new SignatureVerificationException();
+            }
             break;
           case Algorithm.ECDSAP256SHA256:
-            signature = ECDSASignaturefromDNS(signature, ECDSA_P256);
+            signature = dsaSignatureFromDNS(signature, ECDSA_P256.length, false);
             break;
           case Algorithm.ECDSAP384SHA384:
-            signature = ECDSASignaturefromDNS(signature, ECDSA_P384);
+            signature = dsaSignatureFromDNS(signature, ECDSA_P384.length, false);
             break;
           default:
             throw new UnsupportedAlgorithmException(alg);
@@ -1123,9 +1023,9 @@ public class DNSSEC {
     if (pubkey instanceof DSAPublicKey) {
       try {
         DSAPublicKey dsa = (DSAPublicKey) pubkey;
-        BigInteger P = dsa.getParams().getP();
-        int t = (BigIntegerLength(P) - 64) / 8;
-        signature = DSASignaturetoDNS(signature, t);
+        BigInteger p = dsa.getParams().getP();
+        int t = (bigIntegerLength(p) - 64) / 8;
+        signature = dsaSignatureToDNS(signature, DSA_LEN, t);
       } catch (IOException e) {
         throw new IllegalStateException(e);
       }
@@ -1136,10 +1036,10 @@ public class DNSSEC {
             // Wire format is equal to the engine output
             break;
           case Algorithm.ECDSAP256SHA256:
-            signature = ECDSASignaturetoDNS(signature, ECDSA_P256);
+            signature = dsaSignatureToDNS(signature, ECDSA_P256.length, -1);
             break;
           case Algorithm.ECDSAP384SHA384:
-            signature = ECDSASignaturetoDNS(signature, ECDSA_P384);
+            signature = dsaSignatureToDNS(signature, ECDSA_P384.length, -1);
             break;
           default:
             throw new UnsupportedAlgorithmException(alg);
@@ -1172,7 +1072,7 @@ public class DNSSEC {
       case Algorithm.ECC_GOST:
       case Algorithm.ECDSAP256SHA256:
       case Algorithm.ECDSAP384SHA384:
-        if (!"EC".equals(key.getAlgorithm())) {
+        if (!"EC".equals(key.getAlgorithm()) && !"ECDSA".equals(key.getAlgorithm())) {
           throw new IncompatibleKeyException();
         }
         break;

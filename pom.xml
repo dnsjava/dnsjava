@@ -122,8 +122,8 @@
                             !lombok,
                             android.*;resolution:=optional,
                             javax.naming.*;resolution:=optional,
-                            com.sun.jna.*;resolution:=optional,*
-                            org.bouncycastle.*;resolution:=optional,*
+                            com.sun.jna.*;resolution:=optional,
+                            *
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>
@@ -385,7 +385,7 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>${bouncycastle.version}</version>
-            <optional>true</optional>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -396,6 +396,12 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <version>${org.junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
             <version>${org.junit.version}</version>
             <scope>test</scope>
         </dependency>
