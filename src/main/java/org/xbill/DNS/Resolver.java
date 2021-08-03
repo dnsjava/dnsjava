@@ -4,7 +4,6 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -156,7 +155,13 @@ public interface Resolver {
         throw new IOException(e.getCause());
       }
     } catch (TimeoutException e) {
-      throw new SocketTimeoutException(e.getMessage());
+      throw new IOException(
+          "Timed out while trying to resolve "
+              + query.getQuestion().getName()
+              + "/"
+              + Type.string(query.getQuestion().type)
+              + ", id="
+              + query.getHeader().getID());
     }
   }
 

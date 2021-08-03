@@ -167,7 +167,7 @@ abstract class SIGBase extends Record {
     return timeSigned;
   }
 
-  /** Returns The footprint/key id of the signing key. */
+  /** Returns the footprint/key id of the signing key. */
   public int getFootprint() {
     return footprint;
   }

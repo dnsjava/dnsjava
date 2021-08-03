@@ -32,9 +32,9 @@ public class ExtendedResolver implements Resolver {
     private final Message query;
     private final int[] attempts;
     private final int retriesPerResolver;
+    private final long endTime;
     private List<ResolverEntry> resolvers;
     private int currentResolver;
-    private long endTime;
 
     Resolution(ExtendedResolver eres, Message query) {
       resolvers = new ArrayList<>(eres.resolvers);
@@ -260,6 +260,18 @@ public class ExtendedResolver implements Resolver {
     return timeout;
   }
 
+  /**
+   * Sets the timeout for the {@link ExtendedResolver}.
+   *
+   * <p>Note that this <i>only</i> sets the timeout for the {@link ExtendedResolver}, not the
+   * individual {@link Resolver}s. If the timeout expires, the {@link ExtendedResolver} simply stops
+   * retrying, it does not abort running queries. The timeout value must be larger than that for the
+   * individual resolver to have any effect.
+   *
+   * @see #ExtendedResolver()
+   * @see #ExtendedResolver(String[])
+   * @param timeout The amount of time to wait before sending further queries.
+   */
   @Override
   public void setTimeout(Duration timeout) {
     this.timeout = timeout;
