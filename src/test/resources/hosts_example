@@ -1,0 +1,11 @@
+﻿# Examples:
+#      192.168.1.10     dino.example.com        # example animal server
+#       10.10.10.10      cat.example.net        # another furry host
+
+# Added by Docker Desktop
+192.168.10.96 host.docker.internal
+192.168.10.96 gateway.docker.internal
+# To allow the same kube context to work on the host and the container:
+127.0.0.1 kubernetes.docker.internal
+::1 kubernetes.docker.internal
+# End of section

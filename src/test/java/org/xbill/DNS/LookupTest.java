@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
 import static java.util.Arrays.asList;
@@ -352,7 +352,7 @@ public class LookupTest {
         });
     lookup.setResolver(mockResolver);
     lookup.setHostsFileParser(
-        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_windows").toURI())));
+        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_example").toURI())));
     Record[] run = lookup.run();
     assertNotNull(run);
     assertEquals(1, run.length);
@@ -374,7 +374,7 @@ public class LookupTest {
         });
     lookup.setResolver(mockResolver);
     lookup.setHostsFileParser(
-        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_windows").toURI())));
+        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_example").toURI())));
     Record[] run = lookup.run();
     assertNotNull(run);
     assertEquals(1, run.length);

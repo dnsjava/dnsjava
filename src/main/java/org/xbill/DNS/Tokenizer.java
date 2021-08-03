@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2003-2004 Brian Wellington (bwelling@xbill.org)
 //
 // Copyright (C) 2003-2004 Nominum, Inc.

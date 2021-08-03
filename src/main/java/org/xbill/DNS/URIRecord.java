@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 // Implemented by Anthony Kirby (anthony@anthony.org)
 // based on SRVRecord.java Copyright (c) 1999-2004 Brian Wellington
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.lookup;
 
 import static java.lang.String.format;
@@ -93,7 +93,7 @@ class LookupSessionTest {
   void beforeEach() throws URISyntaxException {
     lookupSessionTestHostsFileParser =
         new HostsFileParser(
-            Paths.get(LookupSessionTest.class.getResource("/hosts_windows").toURI()));
+            Paths.get(LookupSessionTest.class.getResource("/hosts_example").toURI()));
   }
 
   @AfterEach

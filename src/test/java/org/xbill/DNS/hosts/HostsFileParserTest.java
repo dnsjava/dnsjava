@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.hosts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +36,7 @@ class HostsFileParserTest {
 
   @BeforeAll
   static void beforeAll() throws URISyntaxException, UnknownHostException {
-    hostsFileWindows = Paths.get(HostsFileParserTest.class.getResource("/hosts_windows").toURI());
+    hostsFileWindows = Paths.get(HostsFileParserTest.class.getResource("/hosts_example").toURI());
     hostsFileInvalid = Paths.get(HostsFileParserTest.class.getResource("/hosts_invalid").toURI());
     kubernetesAddress = InetAddress.getByAddress(kubernetesName.toString(), localhostBytes);
   }

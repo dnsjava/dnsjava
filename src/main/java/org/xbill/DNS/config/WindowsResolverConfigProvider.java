@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.config;
 
 import static org.xbill.DNS.config.IPHlpAPI.AF_UNSPEC;

@@ -280,8 +280,7 @@ at [javadoc.io](http://javadoc.io/doc/dnsjava/dnsjava). See the
 
 ## License
 
-dnsjava is placed under the [BSD license](LICENSE). Several files are also under
-additional licenses; see the individual files for details.
+dnsjava is placed under the [BSD-3-Clause license](LICENSE).
 
 ## Authors
 
