@@ -483,7 +483,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <argLine>
-                                --add-opens java.base/sun.net.dns=ALL-UNNAMED
+                                ${argLine} --add-opens java.base/sun.net.dns=ALL-UNNAMED
                             </argLine>
                         </configuration>
                     </plugin>
