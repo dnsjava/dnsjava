@@ -58,7 +58,7 @@ public class WindowsResolverConfigProvider implements ResolverConfigProvider {
     public void initialize() throws InitializationException {
       // The recommended method of calling the GetAdaptersAddresses function is to pre-allocate a
       // 15KB working buffer
-      Memory buffer = new Memory(15 * 1024);
+      Memory buffer = new Memory(15 * 1024L);
       IntByReference size = new IntByReference(0);
       int flags =
           GAA_FLAG_SKIP_UNICAST

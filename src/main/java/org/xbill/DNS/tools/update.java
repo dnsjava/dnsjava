@@ -103,149 +103,149 @@ public class update {
           line = line.substring(1);
         }
 
-        Tokenizer st = new Tokenizer(line);
-        Tokenizer.Token token = st.get();
+        try (Tokenizer st = new Tokenizer(line)) {
+          Tokenizer.Token token = st.get();
 
-        if (token.isEOL()) {
-          continue;
-        }
-        String operation = token.value;
+          if (token.isEOL()) {
+            continue;
+          }
+          String operation = token.value;
 
-        switch (operation) {
-          case "server":
-            server = st.getString();
-            res = new SimpleResolver(server);
-            token = st.get();
-            if (token.isString()) {
-              String portstr = token.value;
-              res.setPort(Short.parseShort(portstr));
-            }
-            break;
-          case "key":
-            String keyname = st.getString();
-            String keydata = st.getString();
-            if (res == null) {
+          switch (operation) {
+            case "server":
+              server = st.getString();
               res = new SimpleResolver(server);
-            }
-            res.setTSIGKey(new TSIG(TSIG.HMAC_MD5, keyname, keydata));
-            break;
-          case "edns":
-            if (res == null) {
-              res = new SimpleResolver(server);
-            }
-            res.setEDNS(st.getUInt16());
-            break;
-          case "port":
-            if (res == null) {
-              res = new SimpleResolver(server);
-            }
-            res.setPort(st.getUInt16());
-            break;
-          case "tcp":
-            if (res == null) {
-              res = new SimpleResolver(server);
-            }
-            res.setTCP(true);
-            break;
-          case "class":
-            String classStr = st.getString();
-            int newClass = DClass.value(classStr);
-            if (newClass > 0) {
-              defaultClass = newClass;
-            } else {
-              print("Invalid class " + classStr);
-            }
-            break;
-          case "ttl":
-            defaultTTL = st.getTTL();
-            break;
-          case "origin":
-          case "zone":
-            zone = st.getName(Name.root);
-            break;
-          case "require":
-            doRequire(st);
-            break;
-          case "prohibit":
-            doProhibit(st);
-            break;
-          case "add":
-            doAdd(st);
-            break;
-          case "delete":
-            doDelete(st);
-            break;
-          case "glue":
-            doGlue(st);
-            break;
-          case "help":
-          case "?":
-            token = st.get();
-            if (token.isString()) {
-              help(token.value);
-            } else {
-              help(null);
-            }
-            break;
-          case "echo":
-            print(line.substring(4).trim());
-            break;
-          case "send":
-            sendUpdate();
-            query = newMessage();
-            break;
-          case "show":
-            print(query);
-            break;
-          case "clear":
-            query = newMessage();
-            break;
-          case "query":
-            doQuery(st);
-            break;
-          case "quit":
-          case "q":
-            if (log != null) {
-              log.close();
-            }
-            for (Object input : inputs) {
-              BufferedReader tbr;
-              tbr = (BufferedReader) input;
-              tbr.close();
-            }
-            System.exit(0);
-          case "file":
-            doFile(st, inputs, istreams);
-            break;
-          case "log":
-            doLog(st);
-            break;
-          case "assert":
-            if (!doAssert(st)) {
-              return;
-            }
-            break;
-          case "sleep":
-            long interval = st.getUInt32();
-            try {
-              Thread.sleep(interval);
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-              throw new IOException(e);
-            }
-            break;
-          case "date":
-            Instant now = Instant.now();
-            token = st.get();
-            if (token.isString() && token.value.equals("-ms")) {
-              print(Long.toString(now.toEpochMilli()));
-            } else {
-              print(now);
-            }
-            break;
-          default:
-            print("invalid keyword: " + operation);
-            break;
+              token = st.get();
+              if (token.isString()) {
+                String portstr = token.value;
+                res.setPort(Short.parseShort(portstr));
+              }
+              break;
+            case "key":
+              String keyname = st.getString();
+              String keydata = st.getString();
+              if (res == null) {
+                res = new SimpleResolver(server);
+              }
+              res.setTSIGKey(new TSIG(TSIG.HMAC_MD5, keyname, keydata));
+              break;
+            case "edns":
+              if (res == null) {
+                res = new SimpleResolver(server);
+              }
+              res.setEDNS(st.getUInt16());
+              break;
+            case "port":
+              if (res == null) {
+                res = new SimpleResolver(server);
+              }
+              res.setPort(st.getUInt16());
+              break;
+            case "tcp":
+              if (res == null) {
+                res = new SimpleResolver(server);
+              }
+              res.setTCP(true);
+              break;
+            case "class":
+              String classStr = st.getString();
+              int newClass = DClass.value(classStr);
+              if (newClass > 0) {
+                defaultClass = newClass;
+              } else {
+                print("Invalid class " + classStr);
+              }
+              break;
+            case "ttl":
+              defaultTTL = st.getTTL();
+              break;
+            case "origin":
+            case "zone":
+              zone = st.getName(Name.root);
+              break;
+            case "require":
+              doRequire(st);
+              break;
+            case "prohibit":
+              doProhibit(st);
+              break;
+            case "add":
+              doAdd(st);
+              break;
+            case "delete":
+              doDelete(st);
+              break;
+            case "glue":
+              doGlue(st);
+              break;
+            case "help":
+            case "?":
+              token = st.get();
+              if (token.isString()) {
+                help(token.value);
+              } else {
+                help(null);
+              }
+              break;
+            case "echo":
+              print(line.substring(4).trim());
+              break;
+            case "send":
+              sendUpdate();
+              query = newMessage();
+              break;
+            case "show":
+              print(query);
+              break;
+            case "clear":
+              query = newMessage();
+              break;
+            case "query":
+              doQuery(st);
+              break;
+            case "quit":
+            case "q":
+              if (log != null) {
+                log.close();
+              }
+              for (BufferedReader input : inputs) {
+                input.close();
+              }
+              System.exit(0);
+              break;
+            case "file":
+              doFile(st, inputs, istreams);
+              break;
+            case "log":
+              doLog(st);
+              break;
+            case "assert":
+              if (!doAssert(st)) {
+                return;
+              }
+              break;
+            case "sleep":
+              long interval = st.getUInt32();
+              try {
+                Thread.sleep(interval);
+              } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException(e);
+              }
+              break;
+            case "date":
+              Instant now = Instant.now();
+              token = st.get();
+              if (token.isString() && token.value.equals("-ms")) {
+                print(Long.toString(now.toEpochMilli()));
+              } else {
+                print(now);
+              }
+              break;
+            default:
+              print("invalid keyword: " + operation);
+              break;
+          }
         }
       } catch (TextParseException tpe) {
         System.out.println(tpe.getMessage());
@@ -465,8 +465,7 @@ public class update {
 
   void doLog(Tokenizer st) throws IOException {
     String s = st.getString();
-    try {
-      FileOutputStream fos = new FileOutputStream(s);
+    try (FileOutputStream fos = new FileOutputStream(s)) {
       log = new PrintStream(fos);
     } catch (Exception e) {
       print("Error opening " + s);

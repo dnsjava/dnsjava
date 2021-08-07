@@ -173,7 +173,8 @@ public class LOCRecord extends Record {
     vPrecision = parseDouble(st, "vertical precision", false, 0, 9000000000L, 1000);
   }
 
-  private void renderFixedPoint(StringBuffer sb, NumberFormat formatter, long value, long divisor) {
+  private void renderFixedPoint(
+      StringBuilder sb, NumberFormat formatter, long value, long divisor) {
     sb.append(value / divisor);
     value %= divisor;
     if (value != 0) {
@@ -183,7 +184,7 @@ public class LOCRecord extends Record {
   }
 
   private String positionToString(long value, char pos, char neg) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     char direction;
 
     long temp = value - (1L << 31);
@@ -213,7 +214,7 @@ public class LOCRecord extends Record {
   /** Convert to a String */
   @Override
   protected String rrToString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     /* Latitude */
     sb.append(positionToString(latitude, 'N', 'S'));
@@ -301,6 +302,6 @@ public class LOCRecord extends Record {
       exp++;
       l /= 10;
     }
-    return (int) ((l << 4) + exp);
+    return (int) ((l << 4) + (exp & 0xFF));
   }
 }

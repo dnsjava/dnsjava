@@ -35,7 +35,7 @@ public class base16 {
       os.write(Base16.charAt(high));
       os.write(Base16.charAt(low));
     }
-    return new String(os.toByteArray());
+    return os.toString();
   }
 
   /**
@@ -64,7 +64,7 @@ public class base16 {
       byte high = (byte) Base16.indexOf(Character.toUpperCase((char) in[i]));
       byte low = (byte) Base16.indexOf(Character.toUpperCase((char) in[i + 1]));
       try {
-        ds.writeByte((high << 4) + low);
+        ds.writeByte((high << 4) + (low & 0xFF));
       } catch (IOException e) {
       }
     }

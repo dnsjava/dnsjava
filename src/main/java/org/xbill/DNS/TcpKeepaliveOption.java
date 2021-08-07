@@ -15,7 +15,7 @@ import java.util.OptionalInt;
 public class TcpKeepaliveOption extends EDNSOption {
 
   /** the timeout */
-  private OptionalInt timeout;
+  private Integer timeout;
 
   /** upper limit of the duration (exclusive) */
   private static final Duration UPPER_LIMIT = Duration.ofMillis(6553600);
@@ -23,7 +23,7 @@ public class TcpKeepaliveOption extends EDNSOption {
   /** Constructor for an option with no timeout */
   public TcpKeepaliveOption() {
     super(EDNSOption.Code.TCP_KEEPALIVE);
-    timeout = OptionalInt.empty();
+    timeout = null;
   }
 
   /**
@@ -36,7 +36,7 @@ public class TcpKeepaliveOption extends EDNSOption {
     if (t < 0 || t > 65535) {
       throw new IllegalArgumentException("timeout must be betwee 0 and 65535");
     }
-    timeout = OptionalInt.of(t);
+    timeout = t;
   }
 
   /**
@@ -51,7 +51,7 @@ public class TcpKeepaliveOption extends EDNSOption {
       throw new IllegalArgumentException(
           "timeout must be between 0 and 6553.6 seconds (exclusively)");
     }
-    timeout = OptionalInt.of((int) t.toMillis() / 100);
+    timeout = (int) t.toMillis() / 100;
   }
 
   /**
@@ -60,7 +60,7 @@ public class TcpKeepaliveOption extends EDNSOption {
    * @return the timeout in 100ms units
    */
   public OptionalInt getTimeout() {
-    return timeout;
+    return timeout == null ? OptionalInt.empty() : OptionalInt.of(timeout);
   }
 
   /**
@@ -69,9 +69,7 @@ public class TcpKeepaliveOption extends EDNSOption {
    * @return the timeout
    */
   public Optional<Duration> getTimeoutDuration() {
-    return timeout.isPresent()
-        ? Optional.of(Duration.ofMillis(timeout.getAsInt() * 100))
-        : Optional.empty();
+    return timeout != null ? Optional.of(Duration.ofMillis(timeout * 100L)) : Optional.empty();
   }
 
   /**
@@ -86,10 +84,10 @@ public class TcpKeepaliveOption extends EDNSOption {
 
     switch (length) {
       case 0:
-        timeout = OptionalInt.empty();
+        timeout = null;
         break;
       case 2:
-        timeout = OptionalInt.of(in.readU16());
+        timeout = in.readU16();
         break;
       default:
         throw new WireParseException(
@@ -104,8 +102,8 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   @Override
   void optionToWire(DNSOutput out) {
-    if (timeout.isPresent()) {
-      out.writeU16(timeout.getAsInt());
+    if (timeout != null) {
+      out.writeU16(timeout);
     }
   }
 
@@ -116,6 +114,6 @@ public class TcpKeepaliveOption extends EDNSOption {
    */
   @Override
   String optionToString() {
-    return timeout.isPresent() ? String.valueOf(timeout.getAsInt()) : "-";
+    return timeout != null ? String.valueOf(timeout) : "-";
   }
 }

@@ -61,7 +61,7 @@ public class ZoneTransferIn {
   private TCPClient client;
   private TSIG tsig;
   private TSIG.StreamVerifier verifier;
-  private long timeout = 900 * 1000;
+  private long timeout = 900 * 1000L;
 
   private int state;
   private long end_serial;
