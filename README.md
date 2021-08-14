@@ -153,6 +153,15 @@ Some settings of dnsjava can be configured via
         <tr>
             <td colspan="3">Use the system's hosts file for lookups before resorting to a resolver.</td>
         </tr>
+        <tr>
+            <td rowspan="2">dnsjava.disable_idn</td>
+            <td>Boolean</td>
+            <td>false</td>
+            <td>true</td>
+        </tr>
+        <tr>
+            <td colspan="3">Disable parsing of Internationalized Domain Names (IDN).</td>
+        </tr>
     </tbody>
 </table>
 
@@ -164,7 +173,7 @@ through the `Options` class. Please refer to the Javadoc for details.
 | --- | ---- | -------|  ----------- |
 | BINDTTL | Boolean | false | Print TTLs in BIND format |
 | multiline | Boolean | false | Print records in multiline format |
-| noPrintIN | Boolean | false | Don't print the class of a record if it's IN |
+| noPrintIN | Boolean | false | Do not print the class of a record if it is `IN` |
 | tsigfudge | Integer | 300 | Sets the default TSIG fudge value (in seconds) |
 | sig0validity | Integer | 300 | Sets the default SIG(0) validity period (in seconds) |
 
@@ -224,7 +233,8 @@ neither source nor binary compatible. The most important changes are:
 Java versions from 1.4 to 8 can load DNS service providers at runtime. The
 functionality was [removed in JDK 9](https://bugs.openjdk.java.net/browse/JDK-8134577),
 a replacement is [requested](https://bugs.openjdk.java.net/browse/JDK-8192780),
-but so far has not been implemented.
+but so far only a [proposal](https://bugs.openjdk.java.net/browse/JDK-8263693)
+has been defined.
 
 To load the dnsjava service provider, build dnsjava on JDK 8 and set the system property:
 

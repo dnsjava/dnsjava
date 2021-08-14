@@ -142,37 +142,13 @@ class NameTest {
     }
 
     @Test
-    void ctor_7label() throws TextParseException {
-      // 7 is the number of label positions that are cached
-      Name n = new Name("a.b.c.d.e.f.");
+    void ctor_9label() throws TextParseException {
+      // 9 is the number of label positions that are cached
+      Name n = new Name("a.b.c.d.e.f.g.h.");
       assertTrue(n.isAbsolute());
       assertFalse(n.isWild());
-      assertEquals(7, n.labels());
-      assertEquals(13, n.length());
-      assertArrayEquals(new byte[] {1, 'a'}, n.getLabel(0));
-      assertEquals("a", n.getLabelString(0));
-      assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
-      assertEquals("b", n.getLabelString(1));
-      assertArrayEquals(new byte[] {1, 'c'}, n.getLabel(2));
-      assertEquals("c", n.getLabelString(2));
-      assertArrayEquals(new byte[] {1, 'd'}, n.getLabel(3));
-      assertEquals("d", n.getLabelString(3));
-      assertArrayEquals(new byte[] {1, 'e'}, n.getLabel(4));
-      assertEquals("e", n.getLabelString(4));
-      assertArrayEquals(new byte[] {1, 'f'}, n.getLabel(5));
-      assertEquals("f", n.getLabelString(5));
-      assertArrayEquals(new byte[] {0}, n.getLabel(6));
-      assertEquals("", n.getLabelString(6));
-    }
-
-    @Test
-    void ctor_8label() throws TextParseException {
-      // 7 is the number of label positions that are cached
-      Name n = new Name("a.b.c.d.e.f.g.");
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(8, n.labels());
-      assertEquals(15, n.length());
+      assertEquals(9, n.labels());
+      assertEquals(17, n.length());
       assertArrayEquals(new byte[] {1, 'a'}, n.getLabel(0));
       assertEquals("a", n.getLabelString(0));
       assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
@@ -187,8 +163,40 @@ class NameTest {
       assertEquals("f", n.getLabelString(5));
       assertArrayEquals(new byte[] {1, 'g'}, n.getLabel(6));
       assertEquals("g", n.getLabelString(6));
-      assertArrayEquals(new byte[] {0}, n.getLabel(7));
-      assertEquals("", n.getLabelString(7));
+      assertArrayEquals(new byte[] {1, 'h'}, n.getLabel(7));
+      assertEquals("h", n.getLabelString(7));
+      assertArrayEquals(new byte[] {0}, n.getLabel(8));
+      assertEquals("", n.getLabelString(8));
+    }
+
+    @Test
+    void ctor_10label() throws TextParseException {
+      // 9 is the number of label positions that are cached
+      Name n = new Name("a.b.c.d.e.f.g.h.i.");
+      assertTrue(n.isAbsolute());
+      assertFalse(n.isWild());
+      assertEquals(10, n.labels());
+      assertEquals(19, n.length());
+      assertArrayEquals(new byte[] {1, 'a'}, n.getLabel(0));
+      assertEquals("a", n.getLabelString(0));
+      assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
+      assertEquals("b", n.getLabelString(1));
+      assertArrayEquals(new byte[] {1, 'c'}, n.getLabel(2));
+      assertEquals("c", n.getLabelString(2));
+      assertArrayEquals(new byte[] {1, 'd'}, n.getLabel(3));
+      assertEquals("d", n.getLabelString(3));
+      assertArrayEquals(new byte[] {1, 'e'}, n.getLabel(4));
+      assertEquals("e", n.getLabelString(4));
+      assertArrayEquals(new byte[] {1, 'f'}, n.getLabel(5));
+      assertEquals("f", n.getLabelString(5));
+      assertArrayEquals(new byte[] {1, 'g'}, n.getLabel(6));
+      assertEquals("g", n.getLabelString(6));
+      assertArrayEquals(new byte[] {1, 'h'}, n.getLabel(7));
+      assertEquals("h", n.getLabelString(7));
+      assertArrayEquals(new byte[] {1, 'i'}, n.getLabel(8));
+      assertEquals("i", n.getLabelString(8));
+      assertArrayEquals(new byte[] {0}, n.getLabel(9));
+      assertEquals("", n.getLabelString(9));
     }
 
     @Test
@@ -345,7 +353,12 @@ class NameTest {
     }
 
     @Test
-    void ctor_short_escaped() {
+    void ctor_short_escaped_one() {
+      assertThrows(TextParseException.class, () -> new Name("ab\\1cd"));
+    }
+
+    @Test
+    void ctor_short_escaped_two() {
       assertThrows(TextParseException.class, () -> new Name("ab\\12cd"));
     }
 
@@ -500,9 +513,82 @@ class NameTest {
     }
 
     @Test
+    void fromString_at_null() throws TextParseException {
+      Name n = Name.fromString("@", null);
+      assertSame(Name.empty, n);
+    }
+
+    @Test
     void fromString_dot() throws TextParseException {
       Name n = Name.fromString(".");
       assertSame(Name.root, n);
+    }
+
+    @Test
+    void fromString_idn_basic() throws TextParseException {
+      String in = "café.example.org";
+      Name n = Name.fromString(in);
+      assertEquals(in, n.toUnicodeString());
+      assertEquals("xn--caf-dma.example.org", n.toString());
+    }
+
+    @Test
+    void fromString_idn_disabled() throws TextParseException {
+      System.setProperty("dnsjava.disable_idn", "true");
+      try {
+        String in = "café.example.org";
+        Name n = Name.fromString(in);
+        assertEquals("caf\\233.example.org", n.toString());
+        assertThrows(IllegalStateException.class, n::toUnicodeString);
+      } finally {
+        System.clearProperty("dnsjava.disable_idn");
+      }
+    }
+
+    @Test
+    void fromString_idn_trickery() throws TextParseException {
+      String in = "www.\u0430\u0440\u0440\u04cf\u0435.com";
+      Name n = Name.fromString(in);
+      assertEquals(in, n.toUnicodeString());
+      assertEquals("www.xn--80ak6aa92e.com", n.toString());
+    }
+
+    @Test
+    void fromString_idn_mixed1() {
+      String in = "www.\\128café.example.com";
+      Exception tpe = assertThrows(TextParseException.class, () -> Name.fromString(in));
+      assertEquals("unicode and escapes cannot be mixed", tpe.getMessage());
+    }
+
+    @Test
+    void fromString_idn_mixed2() {
+      String in = "www.café\\128.example.com";
+      Exception tpe = assertThrows(TextParseException.class, () -> Name.fromString(in));
+      assertEquals("unicode and escapes cannot be mixed", tpe.getMessage());
+    }
+
+    @Test
+    void fromString_idn_separators1() throws TextParseException {
+      assertEquals(Name.root, Name.fromString("."));
+      assertEquals(Name.root, Name.fromString("\uFF0E"));
+      assertEquals(Name.root, Name.fromString("\u3002"));
+      assertEquals(Name.root, Name.fromString("\uFF61"));
+    }
+
+    @Test
+    void fromString_idn_separators2() throws TextParseException {
+      assertEquals(Name.root, new Name("."));
+      assertEquals(Name.root, new Name("\uFF0E"));
+      assertEquals(Name.root, new Name("\u3002"));
+      assertEquals(Name.root, new Name("\uFF61"));
+    }
+
+    @Test
+    void fromString_idn_separators3() throws TextParseException {
+      String in = "a.b\uFF0Ec\u3002d\uFF61example.com";
+      Name n = Name.fromString(in);
+      assertEquals("a.b.c.d.example.com", n.toString());
+      assertEquals("a.b.c.d.example.com", n.toUnicodeString());
     }
 
     @Test
@@ -981,6 +1067,20 @@ class NameTest {
     }
 
     @Test
+    void bad_label_reserved_type1() {
+      byte[] raw = new byte[] {(byte) 0b0100_0000, 2, 0};
+      Exception e = assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
+      assertEquals("bad label type", e.getMessage());
+    }
+
+    @Test
+    void bad_label_reserved_type2() {
+      byte[] raw = new byte[] {(byte) 0b1000_0000, 2, 0};
+      Exception e = assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
+      assertEquals("bad label type", e.getMessage());
+    }
+
+    @Test
     void basic_compression_state_restore() throws TextParseException, WireParseException {
       byte[] raw = new byte[] {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1, 3, 'd', 'e', 'f', 0};
       Name e = Name.fromString("abc.");
@@ -1038,6 +1138,19 @@ class NameTest {
     assertFalse(n2.isWild());
     assertEquals(0, n2.labels());
     assertEquals(0, n2.length());
+  }
+
+  @Test
+  void init_from_name_labels_exceeded() throws TextParseException {
+    Name n = new Name("a.b.c.d.");
+    assertThrows(IllegalArgumentException.class, () -> new Name(n, 6));
+  }
+
+  @Test
+  void init_from_name_labels_offset() throws TextParseException {
+    // 18 labels + root to exceed the cached offsets
+    Name n = new Name("a.b.c.d.e.f.g.h.1.2.3.4.5.6.7.8.9.0.");
+    assertEquals(Name.fromConstantString("1.2.3.4.5.6.7.8.9.0."), new Name(n, 8));
   }
 
   @Test
@@ -1177,6 +1290,18 @@ class NameTest {
   }
 
   @Test
+  void label_min() throws TextParseException {
+    Name n = new Name("a.b.c.");
+    assertThrows(IllegalArgumentException.class, () -> n.getLabel(-1));
+  }
+
+  @Test
+  void label_max() throws TextParseException {
+    Name n = new Name("a.b.c.");
+    assertThrows(IllegalArgumentException.class, () -> n.getLabel(5));
+  }
+
+  @Test
   void subdomain_abs() throws TextParseException {
     Name dom = new Name("the.domain.");
     Name sub = new Name("sub.of.the.domain.");
@@ -1230,6 +1355,20 @@ class NameTest {
   @Test
   void toString_wild() throws TextParseException {
     String in = "*.A.b.c.e";
+    Name n = new Name(in);
+    assertEquals(in, n.toString());
+  }
+
+  @Test
+  void toString_escaped_one_digit() throws TextParseException {
+    String in = "my.escaped\\001.label.";
+    Name n = new Name(in);
+    assertEquals(in, n.toString());
+  }
+
+  @Test
+  void toString_escaped_two_digits() throws TextParseException {
+    String in = "my.escaped\\010.label.";
     Name n = new Name(in);
     assertEquals(in, n.toString());
   }
@@ -1455,6 +1594,15 @@ class NameTest {
       assertNotEquals(n1, n2);
       assertNotEquals(n2, n1);
     }
+
+    @Test
+    void idn() throws TextParseException {
+      Name n1 = new Name("xn--caf-dma.xn--xemple-9ua.org.");
+      Name n2 = new Name("café.éxemple.org.");
+
+      assertEquals(n1, n2);
+      assertEquals(n2, n1);
+    }
   }
 
   static class Test_compareTo {
@@ -1505,7 +1653,7 @@ class NameTest {
 
     @Test
     void octal_digits_low() throws TextParseException {
-      Name n1 = new Name("\004.b.a.");
+      Name n1 = new Name("\\004.b.a.");
       Name n2 = new Name("c.b.a.");
 
       assertTrue(n1.compareTo(n2) < 0);
@@ -1515,7 +1663,7 @@ class NameTest {
     @Test
     void octal_digits_high() throws TextParseException {
       Name n1 = new Name("c.b.a.");
-      Name n2 = new Name("\237.b.a.");
+      Name n2 = new Name("\\237.b.a.");
 
       assertTrue(n1.compareTo(n2) < 0);
       assertTrue(n2.compareTo(n1) > 0);

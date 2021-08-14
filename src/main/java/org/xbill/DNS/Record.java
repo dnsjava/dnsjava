@@ -518,7 +518,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   }
 
   /**
-   * Converts the type-specific RR to wire format - must be overriden
+   * Converts the type-specific RR to wire format - must be overridden.
    *
    * @since 3.1
    */

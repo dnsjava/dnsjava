@@ -5,7 +5,9 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
+import java.net.IDN;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -16,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Name implements Comparable<Name>, Serializable {
 
-  private static final long serialVersionUID = 5149282554141851880L;
+  private static final long serialVersionUID = -6036624806201621219L;
 
   private static final int LABEL_NORMAL = 0;
   private static final int LABEL_COMPRESSION = 0xC0;
@@ -29,7 +31,7 @@ public class Name implements Comparable<Name>, Serializable {
   private long offsets;
 
   /* Precomputed hashcode. */
-  private int hashcode;
+  private transient int hashcode;
 
   /* The number of labels in this name. */
   private int labels;
@@ -49,14 +51,8 @@ public class Name implements Comparable<Name>, Serializable {
   /** The maximum length of a label a Name */
   private static final int MAXLABEL = 63;
 
-  /** The maximum number of labels in a Name */
-  private static final int MAXLABELS = 128;
-
-  /** The maximum number of cached offsets */
-  private static final int MAXOFFSETS = 8;
-
-  /* Used for printing non-printable characters */
-  private static final DecimalFormat byteFormat = new DecimalFormat();
+  /** The maximum number of cached offsets, the first offset (always zero) is not stored. */
+  private static final int MAXOFFSETS = 9;
 
   /* Used to efficiently convert bytes to lowercase */
   private static final byte[] lowercase = new byte[256];
@@ -64,8 +60,9 @@ public class Name implements Comparable<Name>, Serializable {
   /* Used in wildcard names. */
   private static final Name wild;
 
+  private static final String IDN_DISABLED_OPTION = "dnsjava.disable_idn";
+
   static {
-    byteFormat.setMinimumIntegerDigits(3);
     for (int i = 0; i < lowercase.length; i++) {
       if (i < 'A' || i > 'Z') {
         lowercase[i] = (byte) i;
@@ -74,36 +71,38 @@ public class Name implements Comparable<Name>, Serializable {
       }
     }
     root = new Name();
-    root.appendSafe(emptyLabel, 0, 1);
+    root.name = emptyLabel;
+    root.labels = 1;
     empty = new Name();
     empty.name = new byte[0];
     wild = new Name();
-    wild.appendSafe(wildLabel, 0, 1);
+    wild.name = wildLabel;
+    wild.labels = 1;
   }
 
   private Name() {}
 
   private void setoffset(int n, int offset) {
-    if (n >= MAXOFFSETS) {
+    if (n == 0 || n >= MAXOFFSETS) {
       return;
     }
-    int shift = 8 * n;
+    int shift = 8 * (n - 1);
     offsets &= ~(0xFFL << shift);
     offsets |= (long) offset << shift;
   }
 
   private int offset(int n) {
-    if (n == 0 && labels == 0) {
+    if (n == 0) {
       return 0;
     }
-    if (n < 0 || n >= labels) {
+    if (n < 1 || n >= labels) {
       throw new IllegalArgumentException("label out of range");
     }
     if (n < MAXOFFSETS) {
-      int shift = 8 * n;
+      int shift = 8 * (n - 1);
       return (int) (offsets >>> shift) & 0xFF;
     } else {
-      int pos = offset(MAXOFFSETS - 1);
+      int pos = (int) (offsets >>> (8 * (MAXOFFSETS - 2))) & 0xFF;
       for (int i = MAXOFFSETS - 1; i < n; i++) {
         pos += name[pos] + 1;
       }
@@ -112,72 +111,93 @@ public class Name implements Comparable<Name>, Serializable {
   }
 
   private static void copy(Name src, Name dst) {
-    if (src.offset(0) == 0) {
-      dst.name = src.name;
-      dst.offsets = src.offsets;
-      dst.labels = src.labels;
-    } else {
-      int offset0 = src.offset(0);
-      int namelen = src.name.length - offset0;
-      dst.name = new byte[namelen];
-      System.arraycopy(src.name, offset0, dst.name, 0, namelen);
-      for (int i = 0; i < src.labels && i < MAXOFFSETS; i++) {
-        dst.setoffset(i, src.offset(i) - offset0);
-      }
-      dst.labels = src.labels;
-    }
+    dst.name = src.name;
+    dst.offsets = src.offsets;
+    dst.labels = src.labels;
   }
 
-  private void append(byte[] array, int start, int n) throws NameTooLongException {
-    int length = name == null ? 0 : name.length - offset(0);
-    int alength = 0;
-    for (int i = 0, pos = start; i < n; i++) {
-      int len = array[pos];
-      if (len > MAXLABEL) {
-        throw new IllegalStateException("invalid label");
-      }
-      len++;
+  private void append(byte[] array, int arrayOffset, int numLabels) throws NameTooLongException {
+    int length = name == null ? 0 : name.length;
+    int appendLength = 0;
+    for (int i = 0, pos = arrayOffset; i < numLabels; i++) {
+      // add one byte for the label length
+      int len = array[pos] + 1;
       pos += len;
-      alength += len;
+      appendLength += len;
     }
-    int newlength = length + alength;
+    int newlength = length + appendLength;
     if (newlength > MAXNAME) {
       throw new NameTooLongException();
     }
-    int newlabels = labels + n;
-    if (newlabels > MAXLABELS) {
-      throw new IllegalStateException("too many labels");
+    byte[] newname;
+    if (name != null) {
+      newname = Arrays.copyOf(name, newlength);
+    } else {
+      newname = new byte[newlength];
     }
-    byte[] newname = new byte[newlength];
-    if (length != 0) {
-      System.arraycopy(name, offset(0), newname, 0, length);
-    }
-    System.arraycopy(array, start, newname, length, alength);
+    System.arraycopy(array, arrayOffset, newname, length, appendLength);
     name = newname;
-    for (int i = 0, pos = length; i < n; i++) {
+    for (int i = 0, pos = length; i < numLabels && i < MAXOFFSETS; i++) {
       setoffset(labels + i, pos);
       pos += newname[pos] + 1;
     }
-    labels = newlabels;
+    labels += numLabels;
   }
 
-  private static TextParseException parseException(String str, String message) {
-    return new TextParseException("'" + str + "': " + message);
-  }
-
-  private void appendFromString(String fullName, byte[] array, int start, int n)
-      throws TextParseException {
-    try {
-      append(array, start, n);
-    } catch (NameTooLongException e) {
-      throw parseException(fullName, "Name too long");
+  private void append(char[] label, int len) throws NameTooLongException {
+    int destPos = prepareAppend(len);
+    for (int i = 0; i < len; i++) {
+      name[destPos + i] = (byte) label[i];
     }
   }
 
-  private void appendSafe(byte[] array, int start, int n) {
+  private void append(String label) throws NameTooLongException {
+    int len = label.length();
+    int destPos = prepareAppend(len);
+    System.arraycopy(label.getBytes(StandardCharsets.US_ASCII), 0, name, destPos, len);
+  }
+
+  private int prepareAppend(int len) throws NameTooLongException {
+    int length = name == null ? 0 : name.length;
+    // add one byte for the label length
+    int newlength = length + 1 + len;
+    if (newlength > MAXNAME) {
+      throw new NameTooLongException();
+    }
+    byte[] newname;
+    if (name != null) {
+      newname = Arrays.copyOf(name, newlength);
+    } else {
+      newname = new byte[newlength];
+    }
+    newname[length] = (byte) len;
+    name = newname;
+    setoffset(labels, length);
+    labels++;
+    return length + 1;
+  }
+
+  private void appendFromString(String fullName, char[] label, int length, boolean containsUnicode)
+      throws TextParseException {
     try {
-      append(array, start, n);
+      if (containsUnicode) {
+        // Punycode encoding
+        append(IDN.toASCII(new String(label, 0, length), IDN.ALLOW_UNASSIGNED));
+      } else {
+        append(label, length);
+      }
+    } catch (IllegalArgumentException e) {
+      throw new TextParseException(fullName, "cannot be encoded to Punycode", e);
     } catch (NameTooLongException e) {
+      throw new TextParseException(fullName, "Name too long", e);
+    }
+  }
+
+  private void appendFromString(String fullName, byte[] label, int n) throws TextParseException {
+    try {
+      append(label, 0, n);
+    } catch (NameTooLongException e) {
+      throw new TextParseException(fullName, "Name too long");
     }
   }
 
@@ -192,7 +212,7 @@ public class Name implements Comparable<Name>, Serializable {
   public Name(String s, Name origin) throws TextParseException {
     switch (s) {
       case "":
-        throw parseException(s, "empty name");
+        throw new TextParseException("empty name");
       case "@":
         if (origin == null) {
           copy(empty, this);
@@ -200,85 +220,98 @@ public class Name implements Comparable<Name>, Serializable {
           copy(origin, this);
         }
         return;
-      case ".":
+      case ".": // full stop
+      case "\uFF0E": // full width full stop (Unicode TR#46, 2.3)
+      case "\u3002": // ideographic full stop (Unicode TR#46, 2.3)
+      case "\uFF61": // half width ideographic full stop (Unicode TR#46, 2.3)
         copy(root, this);
         return;
     }
     int labelstart = -1;
-    int pos = 1;
-    byte[] label = new byte[MAXLABEL + 1];
+    int pos = 0;
+    char[] label = new char[MAXLABEL];
     boolean escaped = false;
     int digits = 0;
     int intval = 0;
     boolean absolute = false;
+    boolean containsUnicode = false;
+    boolean containsEscape = false;
+    boolean idnDisabled = Boolean.getBoolean(IDN_DISABLED_OPTION);
     for (int i = 0; i < s.length(); i++) {
-      byte b = (byte) s.charAt(i);
+      char c = s.charAt(i);
+      if (c > 0x7F && !idnDisabled) {
+        containsUnicode = true;
+        if (containsEscape) {
+          throw new TextParseException("unicode and escapes cannot be mixed");
+        }
+      }
       if (escaped) {
-        if (b >= '0' && b <= '9' && digits < 3) {
+        if (c >= '0' && c <= '9' && digits < 3) {
           digits++;
           intval *= 10;
-          intval += b - '0';
+          intval += c - '0';
           if (intval > 255) {
-            throw parseException(s, "bad escape");
+            throw new TextParseException(s, "bad escape");
           }
           if (digits < 3) {
             continue;
           }
-          b = (byte) intval;
+          c = (char) intval;
         } else if (digits > 0 && digits < 3) {
-          throw parseException(s, "bad escape");
+          throw new TextParseException(s, "bad escape");
         }
-        if (pos > MAXLABEL) {
-          throw parseException(s, "label too long");
+        if (pos >= MAXLABEL) {
+          throw new TextParseException(s, "label too long");
         }
         labelstart = pos;
-        label[pos++] = b;
+        label[pos++] = c;
         escaped = false;
-      } else if (b == '\\') {
+      } else if (c == '\\') {
+        if (containsUnicode) {
+          throw new TextParseException("unicode and escapes cannot be mixed");
+        }
         escaped = true;
+        containsEscape = true;
         digits = 0;
         intval = 0;
-      } else if (b == '.') {
+      } else if (c == '.' || c == '\uFF0E' || c == '\u3002' || c == '\uFF61') {
         if (labelstart == -1) {
-          throw parseException(s, "invalid empty label");
+          throw new TextParseException(s, "invalid empty label");
         }
-        label[0] = (byte) (pos - 1);
-        appendFromString(s, label, 0, 1);
+        appendFromString(s, label, pos, containsUnicode);
+        containsUnicode = false;
+        containsEscape = false;
         labelstart = -1;
-        pos = 1;
+        pos = 0;
       } else {
         if (labelstart == -1) {
           labelstart = i;
         }
-        if (pos > MAXLABEL) {
-          throw parseException(s, "label too long");
+        if (pos >= MAXLABEL) {
+          throw new TextParseException(s, "label too long");
         }
-        label[pos++] = b;
+        label[pos++] = c;
       }
     }
-    if (digits > 0 && digits < 3) {
-      throw parseException(s, "bad escape");
-    }
-    if (escaped) {
-      throw parseException(s, "bad escape");
+    if (digits > 0 && digits < 3 || escaped) {
+      throw new TextParseException(s, "bad escape");
     }
     if (labelstart == -1) {
-      appendFromString(s, emptyLabel, 0, 1);
+      appendFromString(s, emptyLabel, 1);
       absolute = true;
     } else {
-      label[0] = (byte) (pos - 1);
-      appendFromString(s, label, 0, 1);
+      appendFromString(s, label, pos, containsUnicode);
     }
     if (origin != null && !absolute) {
-      appendFromString(s, origin.name, origin.offset(0), origin.labels);
+      appendFromString(s, origin.name, origin.labels);
     }
     // A relative name that is MAXNAME octets long is a strange and wonderful thing.
     // Not technically in violation, but it can not be used for queries as it needs
-    // to be made absolute by appending at the very least the an empty label at the
+    // to be made absolute by appending at the very least the empty label at the
     // end, which there is no room for. To make life easier for everyone, let's only
     // allow Names that are MAXNAME long if they are absolute.
     if (!absolute && length() == MAXNAME) {
-      throw parseException(s, "Name too long");
+      throw new TextParseException(s, "Name too long");
     }
   }
 
@@ -303,9 +336,9 @@ public class Name implements Comparable<Name>, Serializable {
    * @throws TextParseException The name is invalid.
    */
   public static Name fromString(String s, Name origin) throws TextParseException {
-    if (s.equals("@") && origin != null) {
-      return origin;
-    } else if (s.equals(".")) {
+    if (s.equals("@")) {
+      return origin != null ? origin : empty;
+    } else if (s.equals(".") || s.equals("\uFF0E") || s.equals("\u3002") || s.equals("\uFF61")) {
       return root;
     }
 
@@ -346,7 +379,8 @@ public class Name implements Comparable<Name>, Serializable {
    *     name to be read.
    */
   public Name(DNSInput in) throws WireParseException {
-    int len, pos;
+    int len;
+    int pos;
     boolean done = false;
     byte[] label = new byte[MAXLABEL + 1];
     boolean savedState = false;
@@ -355,9 +389,6 @@ public class Name implements Comparable<Name>, Serializable {
       len = in.readU8();
       switch (len & LABEL_MASK) {
         case LABEL_NORMAL:
-          if (labels >= MAXLABELS) {
-            throw new WireParseException("too many labels");
-          }
           if (len == 0) {
             append(emptyLabel, 0, 1);
             done = true;
@@ -407,21 +438,26 @@ public class Name implements Comparable<Name>, Serializable {
    * @param n The number of labels to remove from the beginning in the copy
    */
   public Name(Name src, int n) {
-    int slabels = src.labels;
-    if (n > slabels) {
+    if (n > src.labels) {
       throw new IllegalArgumentException("attempted to remove too many labels");
     }
-    name = src.name;
-    labels = slabels - n;
-    for (int i = 0; i < MAXOFFSETS && i < slabels - n; i++) {
+    if (n == src.labels) {
+      copy(empty, this);
+      return;
+    }
+
+    labels = src.labels - n;
+    name = Arrays.copyOfRange(src.name, src.offset(n), src.name.length);
+    for (int i = 1; i < MAXOFFSETS && i < labels; i++) {
       setoffset(i, src.offset(i + n));
     }
   }
 
   /**
-   * Creates a new name by concatenating two existing names.
+   * Creates a new name by concatenating two existing names. If the {@code prefix} name is absolute
+   * {@code prefix} is returned unmodified.
    *
-   * @param prefix The prefix name.
+   * @param prefix The prefix name. Must be relative.
    * @param suffix The suffix name.
    * @return The concatenated name.
    * @throws NameTooLongException The name is too long.
@@ -431,8 +467,8 @@ public class Name implements Comparable<Name>, Serializable {
       return prefix;
     }
     Name newname = new Name();
-    copy(prefix, newname);
-    newname.append(suffix.name, suffix.offset(0), suffix.labels);
+    newname.append(prefix.name, 0, prefix.labels);
+    newname.append(suffix.name, 0, suffix.labels);
     return newname;
   }
 
@@ -448,11 +484,11 @@ public class Name implements Comparable<Name>, Serializable {
       return this;
     }
     Name newname = new Name();
-    copy(this, newname);
     int length = length() - origin.length();
-    newname.labels = newname.labels - origin.labels;
+    newname.labels = labels - origin.labels;
+    newname.offsets = offsets;
     newname.name = new byte[length];
-    System.arraycopy(name, offset(0), newname.name, 0, length);
+    System.arraycopy(name, 0, newname.name, 0, length);
     return newname;
   }
 
@@ -492,9 +528,11 @@ public class Name implements Comparable<Name>, Serializable {
     }
 
     Name newname = new Name();
-    newname.appendSafe(name, offset(0), labels);
+    newname.offsets = offsets;
+    newname.labels = labels;
+    newname.name = new byte[length()];
     for (int i = 0; i < newname.name.length; i++) {
-      newname.name[i] = lowercase[newname.name[i] & 0xFF];
+      newname.name[i] = lowercase[name[i] & 0xFF];
     }
 
     return newname;
@@ -504,7 +542,8 @@ public class Name implements Comparable<Name>, Serializable {
    * Generates a new Name to be used when following a DNAME.
    *
    * @param dname The DNAME record to follow.
-   * @return The constructed name.
+   * @return The constructed name or {@code null} if this Name is not a subdomain of the {@code
+   *     dname} name.
    * @throws NameTooLongException The resulting name is too long.
    */
   public Name fromDNAME(DNAMERecord dname) throws NameTooLongException {
@@ -516,7 +555,6 @@ public class Name implements Comparable<Name>, Serializable {
 
     int plabels = labels - dnameowner.labels;
     int plength = length() - dnameowner.length();
-    int pstart = offset(0);
 
     int dlabels = dnametarget.labels;
     int dlength = dnametarget.length();
@@ -527,8 +565,7 @@ public class Name implements Comparable<Name>, Serializable {
 
     Name newname = new Name();
     newname.labels = plabels + dlabels;
-    newname.name = new byte[plength + dlength];
-    System.arraycopy(name, pstart, newname.name, 0, plength);
+    newname.name = Arrays.copyOf(name, plength + dlength);
     System.arraycopy(dnametarget.name, 0, newname.name, plength, dlength);
 
     for (int i = 0, pos = 0; i < MAXOFFSETS && i < plabels + dlabels; i++) {
@@ -554,12 +591,12 @@ public class Name implements Comparable<Name>, Serializable {
     return name[offset(labels - 1)] == 0;
   }
 
-  /** The length of the name. */
+  /** The length of the name (in bytes). */
   public short length() {
     if (labels == 0) {
       return 0;
     }
-    return (short) (name.length - offset(0));
+    return (short) (name.length);
   }
 
   /** The number of labels in the name. */
@@ -586,7 +623,12 @@ public class Name implements Comparable<Name>, Serializable {
       int b = array[i] & 0xFF;
       if (b <= 0x20 || b >= 0x7f) {
         sb.append('\\');
-        sb.append(byteFormat.format(b));
+        if (b < 10) {
+          sb.append("00");
+        } else if (b < 100) {
+          sb.append('0');
+        }
+        sb.append(b);
       } else if (b == '"' || b == '(' || b == ')' || b == '.' || b == ';' || b == '\\' || b == '@'
           || b == '$') {
         sb.append('\\');
@@ -607,15 +649,12 @@ public class Name implements Comparable<Name>, Serializable {
   public String toString(boolean omitFinalDot) {
     if (labels == 0) {
       return "@";
-    } else if (labels == 1 && name[offset(0)] == 0) {
+    } else if (labels == 1 && name[0] == 0) {
       return ".";
     }
     StringBuilder sb = new StringBuilder();
-    for (int i = 0, pos = offset(0); i < labels; i++) {
+    for (int i = 0, pos = 0; i < labels; i++) {
       int len = name[pos];
-      if (len > MAXLABEL) {
-        throw new IllegalStateException("invalid label");
-      }
       if (len == 0) {
         if (!omitFinalDot) {
           sb.append('.');
@@ -642,17 +681,37 @@ public class Name implements Comparable<Name>, Serializable {
   }
 
   /**
+   * Convert a Name to a String. Replaces Punycode encoding with Unicode.
+   *
+   * @param omitFinalDot If true, and the name is absolute, omit the final dot.
+   * @return The representation of this name as a Unicode String.
+   */
+  public String toUnicodeString(boolean omitFinalDot) {
+    if (Boolean.getBoolean(IDN_DISABLED_OPTION)) {
+      throw new IllegalStateException("Unicode handling is disabled, see " + IDN_DISABLED_OPTION);
+    }
+    return IDN.toUnicode(toString(omitFinalDot), IDN.ALLOW_UNASSIGNED);
+  }
+
+  /**
+   * Convert a Name to a String. Replaces Punycode encoding with Unicode.
+   *
+   * @return The representation of this name as a Unicode String.
+   */
+  public String toUnicodeString() {
+    return toUnicodeString(false);
+  }
+
+  /**
    * Retrieve the nth label of a Name. This makes a copy of the label; changing this does not change
-   * the Name.
+   * the Name. The returned byte array includes the label length as the first byte.
    *
    * @param n The label to be retrieved. The first label is 0.
    */
   public byte[] getLabel(int n) {
     int pos = offset(n);
     byte len = (byte) (name[pos] + 1);
-    byte[] label = new byte[len];
-    System.arraycopy(name, pos, label, 0, len);
-    return label;
+    return Arrays.copyOfRange(name, pos, pos + len);
   }
 
   /**
@@ -733,12 +792,9 @@ public class Name implements Comparable<Name>, Serializable {
     if (labels == 0) {
       return new byte[0];
     }
-    byte[] b = new byte[name.length - offset(0)];
-    for (int i = 0, spos = offset(0), dpos = 0; i < labels; i++) {
+    byte[] b = new byte[name.length];
+    for (int i = 0, spos = 0, dpos = 0; i < labels; i++) {
       int len = name[spos];
-      if (len > MAXLABEL) {
-        throw new IllegalStateException("invalid label");
-      }
       b[dpos++] = name[spos++];
       for (int j = 0; j < len; j++) {
         b[dpos++] = lowercase[name[spos++] & 0xFF];
@@ -764,15 +820,12 @@ public class Name implements Comparable<Name>, Serializable {
   }
 
   private boolean equals(byte[] b, int bpos) {
-    for (int i = 0, pos = offset(0); i < labels; i++) {
+    for (int i = 0, pos = 0; i < labels; i++) {
       if (name[pos] != b[bpos]) {
         return false;
       }
       int len = name[pos++];
       bpos++;
-      if (len > MAXLABEL) {
-        throw new IllegalStateException("invalid label");
-      }
       for (int j = 0; j < len; j++) {
         if (lowercase[name[pos++] & 0xFF] != lowercase[b[bpos++] & 0xFF]) {
           return false;
@@ -792,13 +845,13 @@ public class Name implements Comparable<Name>, Serializable {
       return false;
     }
     Name other = (Name) arg;
-    if (other.hashCode() != hashCode()) {
-      return false;
-    }
     if (other.labels != labels) {
       return false;
     }
-    return equals(other.name, other.offset(0));
+    if (other.hashCode() != hashCode()) {
+      return false;
+    }
+    return equals(other.name, 0);
   }
 
   /** Computes a hashcode based on the value */

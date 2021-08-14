@@ -19,4 +19,14 @@ public class TextParseException extends IOException {
   public TextParseException(String s) {
     super(s);
   }
+
+  /** @since 3.5 */
+  public TextParseException(String name, String message) {
+    super("'" + name + "': " + message);
+  }
+
+  /** @since 3.5 */
+  public TextParseException(String name, String message, Exception inner) {
+    super("'" + name + "': " + message, inner);
+  }
 }
