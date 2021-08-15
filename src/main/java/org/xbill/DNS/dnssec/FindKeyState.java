@@ -2,17 +2,16 @@
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
 
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import org.xbill.DNS.Name;
-import org.xbill.DNS.dnssec.SRRset;
 
 /**
  * State-object for the key-finding phase.
  *
  * @since 3.5
  */
-class FindKeyState {
+final class FindKeyState {
   /** The (initial) DS RRset for the following DNSKEY search and validate phase. */
   SRRset dsRRset;
 

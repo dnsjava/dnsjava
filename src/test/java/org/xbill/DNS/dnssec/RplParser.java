@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.unbound.rpl;
+package org.xbill.DNS.dnssec;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -31,8 +31,6 @@ import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 
 /** Parser for the RPL unit-test files of unbound. */
 class RplParser {

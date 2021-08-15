@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 /**
  * These are response subtypes. They are necessary for determining the validation strategy. They

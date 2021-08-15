@@ -25,7 +25,7 @@ import org.xbill.DNS.Type;
  * @since 3.5
  */
 @Slf4j
-public final class SMessage {
+final class SMessage {
   private static final int NUM_SECTIONS = 3;
   private static final int MAX_FLAGS = 16;
   private static final int EXTENDED_FLAGS_BIT_OFFSET = 4;

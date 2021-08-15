@@ -16,7 +16,6 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.validator.ValidatingResolver;
 
 class ResolveExample {
   static String ROOT =

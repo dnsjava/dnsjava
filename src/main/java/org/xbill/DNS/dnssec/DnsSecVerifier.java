@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,8 +15,6 @@ import org.xbill.DNS.RRSIGRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 
 /**
  * A class for performing basic DNSSEC verification. The DNSJAVA package contains a similar class.
@@ -25,7 +23,7 @@ import org.xbill.DNS.dnssec.SecurityStatus;
  * @since 3.5
  */
 @Slf4j
-class DnsSecVerifier {
+final class DnsSecVerifier {
   /**
    * Find the matching DNSKEY(s) to an RRSIG within a DNSKEY rrset. Normally this will only return
    * one DNSKEY. It can return more than one, since KeyID/Footprints are not guaranteed to be

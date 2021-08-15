@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -19,8 +19,6 @@ import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
-import org.xbill.DNS.dnssec.AlwaysOffline;
-import org.xbill.DNS.dnssec.TestBase;
 
 class TestNsec3ValUtils extends TestBase {
   @Test

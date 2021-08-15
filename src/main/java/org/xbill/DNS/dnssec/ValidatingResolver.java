@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
@@ -41,11 +41,7 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.R;
-import org.xbill.DNS.dnssec.SMessage;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
-import org.xbill.DNS.dnssec.validator.ValUtils.NsecProvesNodataResponse;
+import org.xbill.DNS.dnssec.ValUtils.NsecProvesNodataResponse;
 
 /**
  * This resolver validates responses with DNSSEC.
@@ -121,9 +117,18 @@ public final class ValidatingResolver implements Resolver {
   // ---------------- Module Initialization -------------------
 
   /**
-   * Initialize the module. The only recognized configuration value is
-   * <tt>dnsjava.dnssec.trust_anchor_file</tt>.
+   * Initialize the module. Recognized configuration values:
    *
+   * <dl>
+   *   <dt>dnsjava.dnssec.trust_anchor_file
+   *   <dd>A filename from where to load the trust anchors
+   * </dl>
+   *
+   * See links for other initialized classes and their configuration values (or the readme).
+   *
+   * @see KeyCache#init(Properties)
+   * @see ValUtils#init(Properties)
+   * @see NSEC3ValUtils#init(Properties)
    * @param config The configuration data for this module.
    * @throws IOException When the file specified in the config does not exist or cannot be read.
    */

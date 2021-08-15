@@ -2,16 +2,13 @@
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
 
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.R;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 
 /**
  * DNSKEY cache entry for a given {@link Name}, with or without actual keys.

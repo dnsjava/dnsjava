@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -15,7 +15,6 @@ import org.xbill.DNS.DSRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.dnssec.SRRset;
 
 class TestTrustAnchorStore {
   @Test

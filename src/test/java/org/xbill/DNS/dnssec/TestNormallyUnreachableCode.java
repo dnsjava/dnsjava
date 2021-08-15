@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,9 +17,6 @@ import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.SMessage;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 
 /**
  * These test run checks that are unable to occur during actual validations.

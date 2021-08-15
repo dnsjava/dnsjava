@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.DSAPublicKey;
@@ -24,8 +24,6 @@ import org.xbill.DNS.NameTooLongException;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 import org.xbill.DNS.utils.base32;
 
 /**

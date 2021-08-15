@@ -20,6 +20,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -42,7 +43,6 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.validator.ValidatingResolver;
 
 public abstract class TestBase {
   private static final Logger logger = LoggerFactory.getLogger(TestBase.class);
@@ -84,6 +84,7 @@ public abstract class TestBase {
           .getTestClass()
           .orElseThrow(RuntimeException::new)
           .getName()
+          .toLowerCase(Locale.ROOT)
           .contains("unbound")) {
         unboundTest = true;
         return;

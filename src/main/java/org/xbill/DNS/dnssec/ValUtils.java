@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import java.security.Security;
 import java.time.Instant;
@@ -23,10 +23,6 @@ import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.R;
-import org.xbill.DNS.dnssec.SMessage;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 
 /**
  * This is a collection of routines encompassing the logic of validating different message types.
@@ -34,7 +30,7 @@ import org.xbill.DNS.dnssec.SecurityStatus;
  * @since 3.5
  */
 @Slf4j
-public final class ValUtils {
+final class ValUtils {
   public static final String DIGEST_PREFERENCE = "dnsjava.dnssec.digest_preference";
   public static final String DIGEST_ENABLED = "dnsjava.dnssec.digest";
   public static final String DIGEST_HARDEN_DOWNGRADE = "dnsjava.dnssec.harden_algo_downgrade";

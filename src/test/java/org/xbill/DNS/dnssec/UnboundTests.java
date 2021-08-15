@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.unbound.rpl;
+package org.xbill.DNS.dnssec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -30,9 +30,6 @@ import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.TestBase;
-import org.xbill.DNS.dnssec.validator.ValUtils;
 
 class UnboundTests extends TestBase {
   void runUnboundTest() throws ParseException, IOException {

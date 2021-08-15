@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
 // Copyright (c) 2013-2021 Ingo Bauersachs
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,15 +13,13 @@ import org.xbill.DNS.DSRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.SecurityStatus;
 
 /**
  * Storage for DS or DNSKEY records that are known to be trusted.
  *
  * @since 3.5
  */
-public final class TrustAnchorStore {
+final class TrustAnchorStore {
   private final Map<String, SRRset> map;
 
   /** Creates a new instance of this class. */

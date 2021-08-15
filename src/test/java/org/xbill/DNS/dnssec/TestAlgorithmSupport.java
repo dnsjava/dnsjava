@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.validator;
+package org.xbill.DNS.dnssec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,9 +23,6 @@ import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Rcode;
-import org.xbill.DNS.dnssec.AlwaysOffline;
-import org.xbill.DNS.dnssec.SRRset;
-import org.xbill.DNS.dnssec.TestBase;
 
 class TestAlgorithmSupport extends TestBase {
   @ParameterizedTest(name = "testAlgIsUnknown_{arguments}")

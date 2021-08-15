@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
-package org.xbill.DNS.dnssec.validator;
-
-import org.xbill.DNS.dnssec.SMessage;
-import org.xbill.DNS.dnssec.SecurityStatus;
+package org.xbill.DNS.dnssec;
 
 /**
  * Codes for DNSSEC security statuses along with a reason why the status was determined.
  *
  * @since 3.5
  */
-class JustifiedSecStatus {
+final class JustifiedSecStatus {
   SecurityStatus status;
   String reason;
 

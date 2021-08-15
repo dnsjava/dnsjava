@@ -18,7 +18,7 @@ import org.xbill.DNS.Record;
 @EqualsAndHashCode(
     callSuper = true,
     of = {"securityStatus", "ownerName"})
-public class SRRset extends RRset {
+class SRRset extends RRset {
   private SecurityStatus securityStatus;
   private Name ownerName;
 
