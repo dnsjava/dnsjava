@@ -10,7 +10,7 @@ package org.xbill.DNS;
  */
 public final class ExtendedFlags {
 
-  private static Mnemonic extflags = new Mnemonic("EDNS Flag", Mnemonic.CASE_LOWER);
+  private static final Mnemonic extflags = new Mnemonic("EDNS Flag", Mnemonic.CASE_LOWER);
 
   /** dnssec ok */
   public static final int DO = 0x8000;
@@ -28,6 +28,15 @@ public final class ExtendedFlags {
   /** Converts a numeric extended flag into a String */
   public static String string(int i) {
     return extflags.getText(i);
+  }
+
+  /**
+   * Converts a numeric extended flag into a String
+   *
+   * @param bit the flag as a bit value according to IANA allocation
+   */
+  public static String stringFromBit(int bit) {
+    return extflags.getText((1 << (15 - bit)));
   }
 
   /** Converts a textual representation of an extended flag into its numeric value */

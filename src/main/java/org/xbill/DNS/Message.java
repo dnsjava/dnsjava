@@ -588,17 +588,27 @@ public class Message implements Cloneable {
     }
 
     StringBuilder sb = new StringBuilder();
+    sectionToString(sb, i);
+    return sb.toString();
+  }
+
+  private void sectionToString(StringBuilder sb, int i) {
+    if (i > 3) {
+      return;
+    }
+
     for (Record rec : getSection(i)) {
       if (i == Section.QUESTION) {
         sb.append(";;\t").append(rec.name);
         sb.append(", type = ").append(Type.string(rec.type));
         sb.append(", class = ").append(DClass.string(rec.dclass));
       } else {
-        sb.append(rec);
+        if (!(rec instanceof OPTRecord)) {
+          sb.append(rec);
+        }
       }
       sb.append("\n");
     }
-    return sb.toString();
   }
 
   /** Converts the Message to a String. */
@@ -607,9 +617,11 @@ public class Message implements Cloneable {
     StringBuilder sb = new StringBuilder();
     OPTRecord opt = getOPT();
     if (opt != null) {
-      sb.append(header.toStringWithRcode(getRcode())).append("\n");
+      sb.append(header.toStringWithRcode(getRcode())).append("\n\n");
+      opt.printPseudoSection(sb);
+      sb.append('\n');
     } else {
-      sb.append(header).append("\n");
+      sb.append(header).append('\n');
     }
     if (isSigned()) {
       sb.append(";; TSIG ");
@@ -626,7 +638,8 @@ public class Message implements Cloneable {
       } else {
         sb.append(";; ").append(Section.updString(i)).append(":\n");
       }
-      sb.append(sectionToString(i)).append("\n");
+      sectionToString(sb, i);
+      sb.append("\n");
     }
     sb.append(";; Message size: ").append(numBytes()).append(" bytes");
     return sb.toString();

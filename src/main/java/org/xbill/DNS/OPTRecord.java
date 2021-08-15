@@ -5,6 +5,7 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,17 +36,31 @@ public class OPTRecord extends Record {
    * @param flags Additional message flags.
    * @param version The EDNS version that this DNS implementation supports. This should be 0 for
    *     dnsjava.
-   * @param options The list of options that comprise the data field. There are currently no defined
-   *     options.
+   * @param options The options that comprise the data field.
+   * @see ExtendedFlags
+   */
+  public OPTRecord(int payloadSize, int xrcode, int version, int flags, EDNSOption... options) {
+    this(payloadSize, xrcode, version, flags);
+    if (options != null) {
+      this.options = new ArrayList<>(Arrays.asList(options));
+    }
+  }
+
+  /**
+   * Creates an OPT Record. This is normally called by SimpleResolver, but can also be called by a
+   * server.
+   *
+   * @param payloadSize The size of a packet that can be reassembled on the sending host.
+   * @param xrcode The value of the extended rcode field. This is the upper 16 bits of the full
+   *     rcode.
+   * @param flags Additional message flags.
+   * @param version The EDNS version that this DNS implementation supports. This should be 0 for
+   *     dnsjava.
+   * @param options The list of options that comprise the data field.
    * @see ExtendedFlags
    */
   public OPTRecord(int payloadSize, int xrcode, int version, int flags, List<EDNSOption> options) {
-    super(Name.root, Type.OPT, payloadSize, 0);
-    checkU16("payloadSize", payloadSize);
-    checkU8("xrcode", xrcode);
-    checkU8("version", version);
-    checkU16("flags", flags);
-    ttl = ((long) xrcode << 24) + ((long) version << 16) + flags;
+    this(payloadSize, xrcode, version, flags);
     if (options != null) {
       this.options = new ArrayList<>(options);
     }
@@ -64,7 +79,12 @@ public class OPTRecord extends Record {
    * @see ExtendedFlags
    */
   public OPTRecord(int payloadSize, int xrcode, int version, int flags) {
-    this(payloadSize, xrcode, version, flags, null);
+    super(Name.root, Type.OPT, payloadSize, 0);
+    checkU16("payloadSize", payloadSize);
+    checkU8("xrcode", xrcode);
+    checkU8("version", version);
+    checkU16("flags", flags);
+    ttl = ((long) xrcode << 24) + ((long) version << 16) + flags;
   }
 
   /**
@@ -72,7 +92,7 @@ public class OPTRecord extends Record {
    * called by a server.
    */
   public OPTRecord(int payloadSize, int xrcode, int version) {
-    this(payloadSize, xrcode, version, 0, null);
+    this(payloadSize, xrcode, version, 0);
   }
 
   @Override
@@ -108,6 +128,34 @@ public class OPTRecord extends Record {
     sb.append(", flags ");
     sb.append(getFlags());
     return sb.toString();
+  }
+
+  /** Converts this record to a String representation */
+  @Override
+  public String toString() {
+    return Name.root + "\t\t\t\t" + Type.string(type) + "\t" + rrToString();
+  }
+
+  void printPseudoSection(StringBuilder sb) {
+    sb.append(";; OPT PSEUDOSECTION: \n; EDNS: version: ");
+    sb.append(getVersion());
+    sb.append("; flags: ");
+
+    for (int i = 0; i < 16; i++) {
+      if ((getFlags() & (1 << (15 - i))) != 0) {
+        sb.append(ExtendedFlags.stringFromBit(i));
+        sb.append(" ");
+      }
+    }
+    sb.append("; udp: ").append(getPayloadSize());
+    if (options != null) {
+      for (EDNSOption o : options) {
+        sb.append("\n; ")
+            .append(EDNSOption.Code.string(o.getCode()))
+            .append(": ")
+            .append(o.optionToString());
+      }
+    }
   }
 
   /** Returns the maximum allowed payload size. */

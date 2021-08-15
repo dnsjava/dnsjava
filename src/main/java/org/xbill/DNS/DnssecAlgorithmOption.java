@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.xbill.DNS.DNSSEC.Algorithm;
+import org.xbill.DNS.DNSSEC.Digest;
 
 /**
  * The EDNS0 Option for Signaling Cryptographic Algorithm Understanding in DNS Security Extensions
@@ -61,9 +63,20 @@ public class DnssecAlgorithmOption extends EDNSOption {
 
   @Override
   String optionToString() {
-    return Code.string(getCode())
-        + ": ["
-        + algCodes.stream().map(Algorithm::string).collect(Collectors.joining(", "))
-        + "]";
+    Function<Integer, String> mapper;
+    switch (getCode()) {
+      case Code.DAU:
+        mapper = Algorithm::string;
+        break;
+      case Code.DHU:
+        mapper = Digest::string;
+        break;
+      case Code.N3U:
+        mapper = NSEC3Record.Digest::string;
+        break;
+      default:
+        throw new IllegalStateException("Unknown option code");
+    }
+    return "[" + algCodes.stream().map(mapper).collect(Collectors.joining(", ")) + "]";
   }
 }

@@ -69,6 +69,6 @@ public class DnssecAlgorithmOptionTest {
   void testToString() {
     DnssecAlgorithmOption o =
         new DnssecAlgorithmOption(Code.DAU, Algorithm.RSASHA1, Algorithm.DSA_NSEC3_SHA1);
-    assertEquals("DAU: [RSASHA1, DSA-NSEC3-SHA1]", o.optionToString());
+    assertEquals("[RSASHA1, DSA-NSEC3-SHA1]", o.optionToString());
   }
 }

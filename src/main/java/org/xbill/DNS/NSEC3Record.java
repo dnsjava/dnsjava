@@ -34,6 +34,29 @@ public class NSEC3Record extends Record {
   public static class Digest {
     private Digest() {}
 
+    private static final Mnemonic digests =
+        new Mnemonic("DNSSEC NSEC3 Hash Algorithms", Mnemonic.CASE_SENSITIVE);
+
+    static {
+      digests.add(1, "SHA-1");
+    }
+
+    /** Converts an algorithm into its textual representation */
+    public static String string(int alg) {
+      return digests.getText(alg);
+    }
+
+    /**
+     * Converts a textual representation of an algorithm into its numeric code. Integers in the
+     * range 0..255 are also accepted.
+     *
+     * @param s The textual representation of the algorithm
+     * @return The algorithm code, or -1 on error.
+     */
+    public static int value(String s) {
+      return digests.getValue(s);
+    }
+
     /** SHA-1 */
     public static final int SHA1 = 1;
   }

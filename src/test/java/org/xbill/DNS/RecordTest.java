@@ -436,22 +436,27 @@ class RecordTest {
     assertTrue(out.contains("IN"));
     assertTrue(out.contains(ttl + ""));
 
-    Options.set("BINDTTL");
+    try {
+      Options.set("BINDTTL");
 
-    out = rec.toString();
-    assertTrue(out.contains(n.toString()));
-    assertTrue(out.contains(n2.toString()));
-    assertTrue(out.contains("NS"));
-    assertTrue(out.contains("IN"));
-    assertTrue(out.contains(TTL.format(ttl)));
+      out = rec.toString();
+      assertTrue(out.contains(n.toString()));
+      assertTrue(out.contains(n2.toString()));
+      assertTrue(out.contains("NS"));
+      assertTrue(out.contains("IN"));
+      assertTrue(out.contains(TTL.format(ttl)));
 
-    Options.set("noPrintIN");
-    out = rec.toString();
-    assertTrue(out.contains(n.toString()));
-    assertTrue(out.contains(n2.toString()));
-    assertTrue(out.contains("NS"));
-    assertFalse(out.contains("IN"));
-    assertTrue(out.contains(TTL.format(ttl)));
+      Options.set("noPrintIN");
+      out = rec.toString();
+      assertTrue(out.contains(n.toString()));
+      assertTrue(out.contains(n2.toString()));
+      assertTrue(out.contains("NS"));
+      assertFalse(out.contains("IN"));
+      assertTrue(out.contains(TTL.format(ttl)));
+    } finally {
+      Options.unset("BINDTTL");
+      Options.unset("noPrintIN");
+    }
   }
 
   @Test
