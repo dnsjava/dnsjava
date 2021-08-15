@@ -21,11 +21,11 @@ class TSIGTest {
     Message msg = Message.newQuery(rec);
     msg.setTSIG(key, Rcode.NOERROR, null);
     byte[] bytes = msg.toWire(512);
-    assertEquals(bytes[11], 1);
+    assertEquals(1, bytes[11]);
 
     Message parsed = new Message(bytes);
     int result = key.verify(parsed, bytes, null);
-    assertEquals(result, Rcode.NOERROR);
+    assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
 
@@ -40,14 +40,14 @@ class TSIGTest {
     msg.setTSIG(key, Rcode.NOERROR, null);
     msg.addRecord(opt, Section.ADDITIONAL);
     byte[] bytes = msg.toWire(512);
-    assertEquals(bytes[11], 2); // additional RR count, lower byte
+    assertEquals(2, bytes[11]); // additional RR count, lower byte
 
     Message parsed = new Message(bytes);
     List<Record> additionalSection = parsed.getSection(Section.ADDITIONAL);
     assertEquals(Type.string(Type.OPT), Type.string(additionalSection.get(0).getType()));
     assertEquals(Type.string(Type.TSIG), Type.string(additionalSection.get(1).getType()));
     int result = key.verify(parsed, bytes, null);
-    assertEquals(result, Rcode.NOERROR);
+    assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
 
@@ -95,7 +95,7 @@ class TSIGTest {
     assertEquals(Type.string(Type.OPT), Type.string(additionalSection.get(0).getType()));
     assertEquals(Type.string(Type.TSIG), Type.string(additionalSection.get(1).getType()));
     int result = key.verify(parsed, parsed.toWire(), null);
-    assertEquals(result, Rcode.NOERROR);
+    assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
 
@@ -120,7 +120,7 @@ class TSIGTest {
 
     Message parsed = new Message(bytes);
     int result = key.verify(parsed, bytes, qparsed.getTSIG());
-    assertEquals(result, Rcode.NOERROR);
+    assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
 
@@ -148,7 +148,7 @@ class TSIGTest {
     Message parsed = new Message(bytes);
     assertTrue(parsed.getHeader().getFlag(Flags.TC));
     int result = key.verify(parsed, bytes, qparsed.getTSIG());
-    assertEquals(result, Rcode.NOERROR);
+    assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
 

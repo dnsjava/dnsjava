@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.Algorithm;
 
-public class DNSSECWithBCProviderTest {
+class DNSSECWithBCProviderTest {
 
   private static final String KEY_ALGORITHM = "RSA";
   private final byte[] toSign = "The quick brown fox jumped over the lazy dog.".getBytes();

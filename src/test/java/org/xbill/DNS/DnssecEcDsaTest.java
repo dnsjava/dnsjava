@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class DnssecEcDsaTest {
+class DnssecEcDsaTest {
   private final Name exampleNet = Name.fromConstantString("example.net.");
 
   @BeforeAll

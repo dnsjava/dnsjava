@@ -42,18 +42,18 @@ class TypeBitmapTest {
   @Test
   void empty() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {});
-    assertEquals(typeBitmap.toString(), "");
+    assertEquals("", typeBitmap.toString());
   }
 
   @Test
   void typeA() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {1});
-    assertEquals(typeBitmap.toString(), "A");
+    assertEquals("A", typeBitmap.toString());
   }
 
   @Test
   void typeNSandSOA() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {2, 6});
-    assertEquals(typeBitmap.toString(), "NS SOA");
+    assertEquals("NS SOA", typeBitmap.toString());
   }
 }

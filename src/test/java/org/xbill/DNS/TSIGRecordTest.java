@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
-public class TSIGRecordTest {
+class TSIGRecordTest {
   @Test
   void testTsigToStringFudge() {
     TSIGRecord r =

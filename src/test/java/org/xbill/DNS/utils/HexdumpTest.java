@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-class hexdumpTest {
+class HexdumpTest {
   /*
    * this seems to be basically a debugging routine, so its most
    * important to check that the values are all rendered correctly,

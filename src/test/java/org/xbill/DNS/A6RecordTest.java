@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -117,14 +116,11 @@ class A6RecordTest {
         () -> new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null));
 
     // an IPv4 address
-    try {
-      new A6Record(
-          m_an, DClass.IN, m_ttl, m_prefix_bits, InetAddress.getByName("192.168.0.1"), null);
-      fail("IllegalArgumentException not thrown");
-    } catch (IllegalArgumentException e) {
-    } catch (UnknownHostException e) {
-      fail(e.getMessage());
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new A6Record(
+                m_an, DClass.IN, m_ttl, m_prefix_bits, InetAddress.getByName("192.168.0.1"), null));
   }
 
   @Test

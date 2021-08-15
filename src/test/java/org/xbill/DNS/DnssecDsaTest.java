@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class DnssecDsaTest {
+class DnssecDsaTest {
   private final Name exampleNet = Name.fromConstantString("example.net.");
 
   @Test

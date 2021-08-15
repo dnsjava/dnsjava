@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-public class HTTPSRecordTest {
+class HTTPSRecordTest {
   @Test
   @SuppressWarnings("deprecation")
   void createParams() throws UnknownHostException, TextParseException {

@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-class base64Test {
+class Base64Test {
   @Test
   void toString_empty() {
     byte[] data = new byte[0];

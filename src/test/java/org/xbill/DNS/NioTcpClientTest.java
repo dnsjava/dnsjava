@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-public class NioTcpClientTest {
+class NioTcpClientTest {
   @Test
   void testResponseStream() throws InterruptedException, IOException {
     try {

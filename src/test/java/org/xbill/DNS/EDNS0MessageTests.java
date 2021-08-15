@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-public class EDNS0Messages {
+class EDNS0MessageTests {
 
   /* dig +nocookie foo.dns.addere.ch */
   private static final byte[] EDNS0_EMPTY = {

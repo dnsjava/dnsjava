@@ -50,6 +50,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class RRsetTest {
   private RRset m_rs;
@@ -346,17 +348,9 @@ class RRsetTest {
     assertEquals(m_a2, itr.get(1));
   }
 
-  @Test
-  void cycleBelowShort() throws Exception {
-    runSim(100);
-  }
-
-  @Test
-  void cycleAboveShort() throws Exception {
-    runSim(50_000);
-  }
-
-  private void runSim(int numOfCalls) throws Exception {
+  @ParameterizedTest
+  @ValueSource(ints = {100, 50_000})
+  void cycleSimulationShortValues(int numOfCalls) {
     RRset rrset = new RRset();
     rrset.addRR(m_a1);
     rrset.addRR(m_a2);

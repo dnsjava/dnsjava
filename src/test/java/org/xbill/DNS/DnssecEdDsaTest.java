@@ -27,7 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @Slf4j
-public class DnssecEdDsaTest {
+class DnssecEdDsaTest {
   private final Name exampleCom = Name.fromConstantString("example.com.");
 
   @BeforeAll

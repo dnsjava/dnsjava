@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-class base16Test {
+class Base16Test {
   @Test
   void toString_emptyArray() {
     String out = base16.toString(new byte[0]);

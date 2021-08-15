@@ -70,7 +70,8 @@ public abstract class EDNSOption {
     /** DNS EDNS Tags, draft-bellis-dnsop-edns-tags-01 */
     public static final int EDNS_SERVER_TAG = 17;
 
-    private static final Mnemonic codes = new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
+    private static final Mnemonic codes =
+        new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
 
     static {
       codes.setMaximum(0xFFFF);

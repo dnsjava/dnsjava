@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.Algorithm;
 import org.xbill.DNS.EDNSOption.Code;
 
-public class DnssecAlgorithmOptionTest {
+class DnssecAlgorithmOptionTest {
   @Test
   void ctor() {
     new DnssecAlgorithmOption(Code.DAU);
