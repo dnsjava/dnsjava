@@ -210,6 +210,22 @@ class NameTest {
     }
 
     @Test
+    void ctor_removed_label_multiple() throws TextParseException {
+      Name two = Name.fromString("sub1.sub2.example.com.");
+      Name one = new Name(two, 1);
+      Name domain = new Name(one, 1);
+      Name tld = new Name(domain, 1);
+      Name root = new Name(tld, 1);
+      assertEquals(Name.fromString("sub2.example.com."), one);
+      assertEquals(Name.fromString("example.com."), domain);
+      assertEquals(Name.fromString("example.com."), new Name(two, 2));
+      assertEquals(Name.fromString("com."), tld);
+      assertEquals(Name.fromString("com."), new Name(two, 3));
+      assertEquals(Name.root, root);
+      assertEquals(Name.root, new Name(two, 4));
+    }
+
+    @Test
     void ctor_abs_abs_origin() throws TextParseException {
       Name n = new Name(m_abs, m_abs_origin);
       assertTrue(n.isAbsolute());

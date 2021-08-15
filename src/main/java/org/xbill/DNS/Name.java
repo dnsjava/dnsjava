@@ -448,8 +448,9 @@ public class Name implements Comparable<Name>, Serializable {
 
     labels = src.labels - n;
     name = Arrays.copyOfRange(src.name, src.offset(n), src.name.length);
+    int strippedBytes = src.offset(n);
     for (int i = 1; i < MAXOFFSETS && i < labels; i++) {
-      setoffset(i, src.offset(i + n));
+      setoffset(i, src.offset(i + n) - strippedBytes);
     }
   }
 
@@ -653,7 +654,7 @@ public class Name implements Comparable<Name>, Serializable {
       return ".";
     }
     StringBuilder sb = new StringBuilder();
-    for (int i = 0, pos = 0; i < labels; i++) {
+    for (int label = 0, pos = 0; label < labels; label++) {
       int len = name[pos];
       if (len == 0) {
         if (!omitFinalDot) {
@@ -661,7 +662,7 @@ public class Name implements Comparable<Name>, Serializable {
         }
         break;
       }
-      if (i > 0) {
+      if (label > 0) {
         sb.append('.');
       }
       sb.append(byteString(name, pos));
