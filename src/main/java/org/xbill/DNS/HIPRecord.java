@@ -23,7 +23,7 @@ public class HIPRecord extends Record {
   private byte[] hit;
   private int pkAlgorithm;
   private byte[] publicKey;
-  private List<Name> rvServers = new ArrayList<>();
+  private final List<Name> rvServers = new ArrayList<>();
 
   HIPRecord() {}
 

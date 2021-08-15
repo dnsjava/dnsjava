@@ -15,7 +15,8 @@ import java.text.NumberFormat;
  *     Information in the Domain Name System</a>
  */
 public class LOCRecord extends Record {
-  private static NumberFormat w2, w3;
+  private static final NumberFormat w2;
+  private static final NumberFormat w3;
   private long size, hPrecision, vPrecision;
   private long latitude, longitude, altitude;
 

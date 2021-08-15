@@ -22,10 +22,10 @@ class Mnemonic {
   /* Strings will be stored/searched for in lowercase. */
   static final int CASE_LOWER = 3;
 
-  private HashMap<String, Integer> strings;
-  private HashMap<Integer, String> values;
-  private String description;
-  private int wordcase;
+  private final HashMap<String, Integer> strings;
+  private final HashMap<Integer, String> values;
+  private final String description;
+  private final int wordcase;
   private String prefix;
   private int max;
   private boolean numericok;

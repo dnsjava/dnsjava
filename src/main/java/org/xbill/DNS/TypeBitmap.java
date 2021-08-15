@@ -17,7 +17,7 @@ final class TypeBitmap implements Serializable {
 
   private static final long serialVersionUID = -125354057735389003L;
 
-  private TreeSet<Integer> types;
+  private final TreeSet<Integer> types;
 
   private TypeBitmap() {
     types = new TreeSet<>();

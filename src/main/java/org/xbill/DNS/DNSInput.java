@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  */
 public class DNSInput {
 
-  private ByteBuffer byteBuffer;
+  private final ByteBuffer byteBuffer;
   private int saved_pos;
   private int saved_end;
 

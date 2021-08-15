@@ -24,7 +24,7 @@ public class Master implements AutoCloseable {
   private Record last = null;
   private long defaultTTL;
   private Master included = null;
-  private Tokenizer st;
+  private final Tokenizer st;
   private int currentType;
   private int currentDClass;
   private long currentTTL;

@@ -12,8 +12,8 @@ import java.io.IOException;
  */
 public class Update extends Message {
 
-  private Name origin;
-  private int dclass;
+  private final Name origin;
+  private final int dclass;
 
   /**
    * Creates an update message.

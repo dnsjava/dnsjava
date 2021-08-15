@@ -85,7 +85,7 @@ public abstract class SVCBBase extends Record {
   }
 
   private static class ParameterMnemonic extends Mnemonic {
-    private HashMap<Integer, Supplier<ParameterBase>> factories;
+    private final HashMap<Integer, Supplier<ParameterBase>> factories;
 
     public ParameterMnemonic() {
       super("SVCB/HTTPS Parameters", Mnemonic.CASE_LOWER);
@@ -630,7 +630,7 @@ public abstract class SVCBBase extends Record {
   }
 
   public static class ParameterUnknown extends ParameterBase {
-    private int key;
+    private final int key;
     private byte[] value;
 
     public ParameterUnknown(int key) {

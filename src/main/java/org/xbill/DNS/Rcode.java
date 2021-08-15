@@ -9,7 +9,7 @@ package org.xbill.DNS;
  * @author Brian Wellington
  */
 public final class Rcode {
-  private static Mnemonic rcodes = new Mnemonic("DNS Rcode", Mnemonic.CASE_UPPER);
+  private static final Mnemonic rcodes = new Mnemonic("DNS Rcode", Mnemonic.CASE_UPPER);
 
   /** No error */
   public static final int NOERROR = 0;

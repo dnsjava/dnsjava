@@ -15,7 +15,7 @@ import org.xbill.DNS.DNSSEC.Digest;
  * (DNSSEC), RFC 6975.
  */
 public class DnssecAlgorithmOption extends EDNSOption {
-  private List<Integer> algCodes;
+  private final List<Integer> algCodes;
 
   private DnssecAlgorithmOption(int code) {
     super(code);

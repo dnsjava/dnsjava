@@ -23,7 +23,7 @@ public class Compression {
 
   private static final int TABLE_SIZE = 17;
   private static final int MAX_POINTER = 0x3FFF;
-  private Entry[] table;
+  private final Entry[] table;
 
   /** Creates a new Compression object. */
   public Compression() {

@@ -43,7 +43,7 @@ public class KEYRecord extends KEYBase {
     /** Any protocol */
     public static final int ANY = 255;
 
-    private static Mnemonic protocols = new Mnemonic("KEY protocol", Mnemonic.CASE_UPPER);
+    private static final Mnemonic protocols = new Mnemonic("KEY protocol", Mnemonic.CASE_UPPER);
 
     static {
       protocols.setMaximum(0xFF);
@@ -178,7 +178,7 @@ public class KEYRecord extends KEYBase {
     /** Signatory value 15 */
     public static final int SIG15 = 15;
 
-    private static Mnemonic flags = new Mnemonic("KEY flags", Mnemonic.CASE_UPPER);
+    private static final Mnemonic flags = new Mnemonic("KEY flags", Mnemonic.CASE_UPPER);
 
     static {
       flags.setMaximum(0xFFFF);

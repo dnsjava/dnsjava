@@ -319,7 +319,7 @@ public final class Type {
   public static final int DLV = 32769;
 
   private static class TypeMnemonic extends Mnemonic {
-    private HashMap<Integer, Supplier<Record>> factories;
+    private final HashMap<Integer, Supplier<Record>> factories;
 
     public TypeMnemonic() {
       super("Type", CASE_UPPER);
@@ -359,7 +359,7 @@ public final class Type {
     }
   }
 
-  private static TypeMnemonic types = new TypeMnemonic();
+  private static final TypeMnemonic types = new TypeMnemonic();
 
   static {
     types.add(A, "A", ARecord::new);

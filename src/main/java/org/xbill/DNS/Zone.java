@@ -35,7 +35,7 @@ public class Zone implements Serializable {
   private boolean hasWild;
 
   class ZoneIterator implements Iterator<RRset> {
-    private Iterator<Map.Entry<Name, Object>> zentries;
+    private final Iterator<Map.Entry<Name, Object>> zentries;
     private RRset[] current;
     private int count;
     private boolean wantLastSOA;

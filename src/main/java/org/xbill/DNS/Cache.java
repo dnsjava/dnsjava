@@ -154,7 +154,7 @@ public class Cache {
     }
   }
 
-  private CacheMap data;
+  private final CacheMap data;
   private int maxncache = -1;
   private int maxcache = -1;
   private int dclass;

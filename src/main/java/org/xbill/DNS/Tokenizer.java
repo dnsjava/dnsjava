@@ -40,8 +40,8 @@ import org.xbill.DNS.utils.base64;
  */
 public class Tokenizer implements AutoCloseable {
 
-  private static String delim = " \t\n;()\"";
-  private static String quotes = "\"";
+  private static final String delim = " \t\n;()\"";
+  private static final String quotes = "\"";
 
   /** End of file */
   public static final int EOF = 0;
@@ -61,13 +61,13 @@ public class Tokenizer implements AutoCloseable {
   /** A comment; only returned when wantComment is set */
   public static final int COMMENT = 5;
 
-  private PushbackInputStream is;
+  private final PushbackInputStream is;
   private boolean ungottenToken;
   private int multiline;
   private boolean quoting;
   private String delimiters;
-  private Token current;
-  private StringBuffer sb;
+  private final Token current;
+  private final StringBuffer sb;
   private boolean wantClose;
 
   private String filename;

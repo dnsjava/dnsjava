@@ -44,7 +44,7 @@ public final class DClass {
     }
   }
 
-  private static Mnemonic classes = new DClassMnemonic();
+  private static final Mnemonic classes = new DClassMnemonic();
 
   static {
     classes.add(IN, "IN");

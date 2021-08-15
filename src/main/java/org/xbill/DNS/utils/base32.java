@@ -22,8 +22,9 @@ public class base32 {
     public static final String BASE32HEX = "0123456789ABCDEFGHIJKLMNOPQRSTUV=";
   }
 
-  private String alphabet;
-  private boolean padding, lowercase;
+  private final String alphabet;
+  private final boolean padding;
+  private final boolean lowercase;
 
   /**
    * Creates an object that can be used to do base32 conversions.

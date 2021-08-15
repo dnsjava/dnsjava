@@ -48,9 +48,9 @@ public final class Lookup {
   private Cache cache;
   private boolean temporary_cache;
   private int credibility;
-  private Name name;
-  private int type;
-  private int dclass;
+  private final Name name;
+  private final int type;
+  private final int dclass;
   private int iterations;
   private boolean foundAlias;
   private boolean done;
@@ -67,7 +67,7 @@ public final class Lookup {
   private boolean nametoolong;
   private boolean referral;
   private boolean cycleResults = true;
-  private int maxIterations;
+  private final int maxIterations;
 
   /**
    * Gets or sets the local hosts database parser to use for lookup before using a {@link Resolver}.

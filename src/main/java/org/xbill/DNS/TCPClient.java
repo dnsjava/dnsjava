@@ -14,8 +14,8 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
 final class TCPClient {
-  private long endTime;
-  private SelectionKey key;
+  private final long endTime;
+  private final SelectionKey key;
 
   TCPClient(long timeout) throws IOException {
     endTime = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);

@@ -52,7 +52,7 @@ public class CERTRecord extends Record {
     /** Certificate format defined by OID */
     public static final int OID = 254;
 
-    private static Mnemonic types = new Mnemonic("Certificate type", Mnemonic.CASE_UPPER);
+    private static final Mnemonic types = new Mnemonic("Certificate type", Mnemonic.CASE_UPPER);
 
     static {
       types.setMaximum(0xFFFF);
