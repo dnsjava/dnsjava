@@ -1,0 +1,174 @@
+#Date: 2013-08-21T00:06:16+02:00
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 21525
+;; flags: qr rd ra cd ; qd: 1 an: 2 au: 2 ad: 5 
+;; QUESTIONS:
+;;	unknownalgorithm.nsec3.tjeb.nl., type = A, class = IN
+
+;; ANSWERS:
+unknownalgorithm.nsec3.tjeb.nl.	285	IN	A	178.18.82.80
+unknownalgorithm.nsec3.tjeb.nl.	285	IN	RRSIG	A 200 4 600 20150101000000 20110520094958 39629 unknownalgorithm.nsec3.tjeb.nl. xI243fqO7RkuWgmyiK9OSNUQ45hOGGZmm1N+J6xwi3V8QkQtmWHpOgmtbMS/A3OTOwFb6vd2VV+LrARLZYY/lRou+vkVrL0vLxcageOJmEkedI8S8HP/U/g4VSJj3uMlxqgLOxeCAGXmqFxljMH5tPuicjzUiVnc/c0SKj8O0vs=
+
+;; AUTHORITY RECORDS:
+unknownalgorithm.nsec3.tjeb.nl.	285	IN	NS	ns2.tjeb.nl.
+unknownalgorithm.nsec3.tjeb.nl.	285	IN	RRSIG	NS 200 4 600 20150101000000 20110520094958 39629 unknownalgorithm.nsec3.tjeb.nl. pMcWMv8kW8AyLrvwGDVea3wpxee84EPZn4cmNJISZhWInbxZo8BtOtJHSpwWbY5Nh1Z0qd0tJrhBI7Ek3Lszda/2Tz/PEh9WUXEyPQ67CgZW7l/NH1xZPEfP4Q0883j+t25F7bhXgdW8qHpXPpkKy9TjxiR7alQ4l5WNIDtI2k8=
+
+;; ADDITIONAL RECORDS:
+ns2.tjeb.nl.		554	IN	A	195.169.221.157
+ns2.tjeb.nl.		554	IN	AAAA	2001:470:1f15:17ba:0:0:0:53
+ns2.tjeb.nl.		555	IN	RRSIG	A 8 3 3600 20130917053510 20130818045138 11499 tjeb.nl. pXJsbRFz7VdvCiKPuElW08X+THHEwYrSFmKl1qd4N7xaQQl9rwmnN48mfqz3ZsChbJdPKsJJ2xSIj9+PcJoXm1RX8TMZoHpCOGDAbZPfEMTgCpnRkfNTMEYgpH9y8pqV49w88ertZfbx5S8FMa7JmEr5y9axzNyW/x0ln3FnGyI=
+ns2.tjeb.nl.		555	IN	RRSIG	AAAA 8 3 3600 20130828183606 20130729175112 11499 tjeb.nl. 4ObrppiU3IGWmXezHtz7x3rVnkEZfhAxej2lo2zhg58UYIZqFN3WhvQS/iST1wP5jdqtCmhUMBAc1yQmGMyXFINbBHVlckyI7DrZt4vPOlTBkVqWqJIwi8mwZ3Tp//hFcRXqhvfGOj2K8x+4mnnRvnLNBKf/r/MW6E5R5R8+nZs=
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 851 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 29473
+;; flags: qr rd ra ad cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;	., type = DNSKEY, class = IN
+
+;; ANSWERS:
+.			138547	IN	DNSKEY	256 3 8 AwEAAcFTyWsmpTs49Q0FKVepUqft+7+c3elhdsfh+amh+orgWLcitLM1bBBiWe6eymWW0EakLZAG4tej28tyx4f+j37Q9VX+m5NAhO/Y0riQonVWfzxLGymx3Ti5x/x7VKvF5Y5hf5OWv2J7pvEumYFFCtu4glit9T9J85+i3UgqSHqf
+.			138547	IN	DNSKEY	257 3 8 AwEAAagAIKlVZrpC6Ia7gEzahOR+9W29euxhJhVVLOyQbSEW0O8gcCjFFVQUTf6v58fLjwBd0YI0EzrAcQqBGCzh/RStIoO8g0NfnfL2MTJRkxoXbfDaUeVPQuYEhg37NZWAJQ9VnMVDxP/VHL496M/QZxkjf5/Efucp2gaDX6RS6CXpoY68LsvPVjR0ZSwzz1apAzvN9dlzEheX7ICJBBtuA6G3LQpzW5hOA2hzCTMjJPJ8LbqF6dsV6DoBQzgul0sGIcGOYl7OyQdXfZ57relSQageu+ipAdTTJ25AsRTAoub8ONGcLmqrAmRLKBP1dfwhYB4N7knNnulqQxA+Uk1ihz0=
+.			138547	IN	RRSIG	DNSKEY 8 0 172800 20130903235959 20130820000000 19036 . fGmWbtROfDQ5bFTrhIQDesRvY2viY1/7Qzg7WHHH8g78QONdl33t10P9rSHwjN2JdgZ3Jbnwu/2LOFCKpwV5Ei5w9A3oUW5jcq/wnC/oKSVfvoHJ4zzJ/11KCMi1sGVUwHRf2BeNMvf8Kjpb59oUMx85NjWkIxlZYZDsC/cemeRcm1aaYrzIAS+rxck8Wmx9+1cEz/KF/w2C0sZSiMJL52Jda5XBv/24obY1NLlUHTNIQVxktAS6e5bPtHNve4zbb0YGI0QUbtIO6Bh56CoE5vnHo5bDdBY6Kdo9VOlZd4AGm1Nw9z2HLyftJanqGd495azQ6uLV6x9QN6LZ4WBVwg==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 736 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 36416
+;; flags: qr rd ra cd ; qd: 1 an: 2 au: 0 ad: 1 
+;; QUESTIONS:
+;;	nl., type = DS, class = IN
+
+;; ANSWERS:
+nl.			83354	IN	DS	21362 8 2 881D17ECCD7FD67F1086247611CCB7FB8646E82D0074AA91E980B016FD3EDE98
+nl.			83354	IN	RRSIG	DS 8 1 86400 20130827000000 20130819230000 49656 . LeBOQAStOr5mLRIDTX893FlBFMKap/amWnaHKgKs6ip/B93jAuoPXJggBPnGGvFrVEuTK8JJOi55FHOEOvKjzg6qDswY+DbqGIdmYOD/SaXv0FqF/iuAbrrNaYXj50MexeHKgExNcEd5mrFk9eQh5T5w7QLjeQG9InVTvoXK5G0=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 238 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 4465
+;; flags: qr rd ra cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;	nl., type = DNSKEY, class = IN
+
+;; ANSWERS:
+nl.			4154	IN	DNSKEY	256 3 8 AwEAAaq7dp+Ez3A1naHOO0A1zAIfcRtGzYRSptT7NOxuw9mKNXf3Z0258r+l4ghNYbnf5ZhAUUMrah7ydNBu5gz9z1y+hJFhm7cPl13rtYmhbMcQoF89ERdCD586HFtgE1RCggGRy/cxp+VDG7N3gheAjbSdAChMSPE2sGC11CFPuEx7
+nl.			4154	IN	DNSKEY	257 3 8 AwEAAbgqMqYHpmZrqQd3zFNOzYv2lw8bWBnrtK9TjlwK/ZBYMwKGR6TNbmMuwdjebpIE2vFxTHGLQfb2PmUJpazAGkG0fUaqrjuIU99Qbe5hwLYXqyGe2Mm+ZNRsomBxhluR/ky/XX4V1TjTqeXYH4gkzEs7I6og5IE0tKyhhpU38XHtuFVj7uunIAWGn5g9tZ0ZNnv8CkwLE5hLmRf+AoNTd483ZBX4FUT32KbF6XV3ikctXbsMe2GqGlIf0gMqJQbNvYf1NuNMbxauh9YavEQ0yaavI1hz5eLMJRruq4wDTyRnMJHupxY69oZZ9IbIsEf0FurtaA7fXrAxqcfEfARr4b0=
+nl.			4154	IN	RRSIG	DNSKEY 8 1 7200 20130902072242 20130819161003 21362 nl. MB0vdAiJIq7TAfodDKy5uGVu0idlJ49vIFs7pDBWvcSfv/7aUohEODQ/b9m0QrZacJz/yssm/pgLyQJckdsyfCWxJ71F2XnJmoZwTRtBVWSArbuDqZx2sisGljn46C5PokGNTVz7stMpLgrp2UBtbkKIUcFxVOkP1aMoAEC2te7EG68Cl/uaAJsphxgU4TyccSJes1QxEwAXpra/apnk/I35Cx67NJzVXOitTSmIh6qI6fjlDIxX30PUyyZsW5bcjJc41wCRpzpFy5d5GCrwqfPLM9ycDcL2LTp5JtGAldzMZ72Jyr6bzVAc7/8DkB4m5EgGjQ8EnbqKcs2aI+XpcQ==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 745 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 37669
+;; flags: qr rd ra cd ; qd: 1 an: 2 au: 0 ad: 1 
+;; QUESTIONS:
+;;	tjeb.nl., type = DS, class = IN
+
+;; ANSWERS:
+tjeb.nl.		4154	IN	DS	17992 8 2 764501411DE58E8618945054A3F620B36202E115D015A7773F4B78E0F952CECA
+tjeb.nl.		4154	IN	RRSIG	DS 8 2 7200 20130830191348 20130816101003 11604 nl. EJl0DMR81ffQRZAcB0wLXtNsUwNtcXkri9GHO8GkjZtlrzhk6jODf1xwFmD7vFCGMBcXqqHZYYWs5IjYUrrdrtFq6ePKfKc1pHs51EoTJdJvjLlShDWN2U9FTfXLjMiVpyL4d3o3ZaPPSQiqiaZINneqzDVyXXan9o8PMBbW7Sg=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 246 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 31112
+;; flags: qr rd ra cd ; qd: 1 an: 4 au: 0 ad: 1 
+;; QUESTIONS:
+;;	tjeb.nl., type = DNSKEY, class = IN
+
+;; ANSWERS:
+tjeb.nl.		554	IN	DNSKEY	257 3 8 AwEAAcHR47QfC0dlPEQkAsKRh3VYFvUKlIerSdlT7HBS3/NOQ6ghVs9uYskdbs2pLSRbu4CSu6X0MgKZO0lxoJhi6FqBa33Oc0Mmp/dd6AW4pNdZa4icP6fKT+HcPbLU9dUsrjDo13iXgUy3gls5BLG9KnTaLzWs9KmxTInBUHFLjZa70Fl+ILNfJ/e1D6eX3C104nmGSWpO6OB+nQDz46ra23eGJ7EeNAu1/uhPcqeXg3HWKjqHTzQW5XxVyMhdXx/ILC3SZhsqNqlkKZjmmHbg7V1+iograUg1XEaxaOE25W9jrzvQnMxlZT8I9LTyyi1YArvxMCTcGkNWRi4Ca4/HEDs=
+tjeb.nl.		554	IN	DNSKEY	256 3 8 AwEAAee4BKqSMI/wEKdLXQyn+TzOjEMWG5IXy+WRGw+6MiKrbLit60eJxNXszf/zR55UUtMqP76lAFkFwZgpmUs6ac3pYOTUYRVFjjG1/hnUF1/thd9uZLe1E3gwa5m6dcOHaspG5xYsJ2wEBmYj1z1xTh70892PwxVR9R9GMKh4YyNt
+tjeb.nl.		554	IN	RRSIG	DNSKEY 8 2 3600 20130917040339 20130818034238 11499 tjeb.nl. ocva2TybPLT8eY4pSxeawEpQ0AM7rvqdGwA3msbiwgPWpW/VfgPWBiN5cZg6PDQA2+Z+BWuK1qgCGFcGEwcWdQ9hm0AsT9pFD8xAFCyNNxYxRiMRFiDop33ZpE2N4S5ukfVVbPa1YHVZ2qzW+RZbb7HjYg4xOJiQKhNuaUEK1b8=
+tjeb.nl.		554	IN	RRSIG	DNSKEY 8 2 3600 20130917040339 20130818034238 17992 tjeb.nl. iqa2i2rUfeHGNHYlkbeSBfULinAmRg9qcsCzTdzlv7MhI0EJZn9LXOlpVA8fi1a1plpIub7qFt5Uu1fzatmlZU48RBxFGINQO4Ad0SKqDFg0WdbwMjwvFJxRmqFvsLhm4eZhOxRx5bCpa/UtTawzY2D5IGH7GGdn8pA0Fa1Dvv32Fw4eNjlcq/Y5xEs1j1ar/qDcG9EyG00O0L+DEc4TREXpPe+PoZkMoRL+glC8IqZ3jJc56O8wugzvJomZNFiaLXGmr2H/XMayhLVpm7ncTeaDknK7aJu0Z/jnATjoc9nyP8t2/Rcw53781pDP1sJlSmfVn/Xpz/MAfY6HQSTPOg==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 922 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 62047
+;; flags: qr rd ra cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;	nsec3.tjeb.nl., type = DS, class = IN
+
+;; ANSWERS:
+nsec3.tjeb.nl.		555	IN	DS	21665 7 2 40B5D47EC3AD05AF64CA91478408DE035AA64F7CAF7FC372958C80033B330377
+nsec3.tjeb.nl.		555	IN	DS	33022 7 1 A9BBB2B6B619282B263474B19BDBA7A724A11F9E
+nsec3.tjeb.nl.		555	IN	RRSIG	DS 8 3 3600 20130917053510 20130818045138 11499 tjeb.nl. SXiF+5inBiEVdfFredApgDrdJ/qu6/sjIQ1Ek4M+ldzrgfjtG+HDFTH3A+cs79Mfeq62yUuQpYLGrkZ5Ok9G/4j7lhzdIGX7VZqOqA5TecpjtnATvHaUH1+3nhHYTMCZbDe4wMzsMBnjcNLVbTq+t+UhLKhiq6nsI4xt8TA4fVQ=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 293 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 9653
+;; flags: qr rd ra cd ; qd: 1 an: 2 au: 0 ad: 1 
+;; QUESTIONS:
+;;	nsec3.tjeb.nl., type = DNSKEY, class = IN
+
+;; ANSWERS:
+nsec3.tjeb.nl.		555	IN	DNSKEY	256 3 7 AwEAAdWgR6bilcX8UdjeVDenTLcnR6AsrSYXpYccj8QF103GPzDkoLLkh9KS4/obiRYs8BRGotSZK7QT1Ew/xWml425bR0JzOgajHF0Au01M/TtvLSA/Vf4jFqXfFwSBCMWtZGbspSj3SEiILaHmdsyfS0KpqJwF8f+hnOdwmHYEmMkh
+nsec3.tjeb.nl.		555	IN	RRSIG	DNSKEY 7 3 3600 20160101000000 20120416140921 21665 nsec3.tjeb.nl. B/gmYobsGg2zcwEwkTHrYp3xt3claIM4YFKJiqZk3A9H4thBv+9kjmlF9Mt1PHAHtbxAmtYOyuPLuFGLbNWn/qCgjP6ShKHInY5nJMqTsL1Sf3kGhxcKsHR4wUjFKg0eyaFUel1Dm88W6yeWhMWj6vAz0C+LtT/mZnJabN4WQnY=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 363 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 38423
+;; flags: qr rd ra cd ; qd: 1 an: 2 au: 0 ad: 1 
+;; QUESTIONS:
+;;	unknownalgorithm.nsec3.tjeb.nl., type = DS, class = IN
+
+;; ANSWERS:
+unknownalgorithm.nsec3.tjeb.nl.	557	IN	DS	39629 7 1 7C7A8C7309C1B974A6C00E8418BB3DE40F21CADB
+unknownalgorithm.nsec3.tjeb.nl.	557	IN	RRSIG	DS 200 4 3600 20160101000000 20120416140921 21665 nsec3.tjeb.nl. MCAkQ9lrNsU9jIlMgTk4/qAQLMKKr/nvWm7zd2PIZVyLJGXEJjSydol6Tczvgdz3VyZy0+6UP9JyEGt1TVcLbQr36SpLdxbxlyKf4I4A1d3mpL2QwKKnojGWwbtx8R7i1Ktw8JAsHsGLfFUe+THUL87HBjk1Vuly9+FzKNP1qHI=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 268 bytes
+
+###############################################
+
