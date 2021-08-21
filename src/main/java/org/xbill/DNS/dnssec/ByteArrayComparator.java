@@ -3,7 +3,7 @@
 // Copyright (c) 2013-2021 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
-import java.util.Comparator;
+import lombok.experimental.UtilityClass;
 
 /**
  * This class implements a basic comparator for byte arrays. It is primarily useful for comparing
@@ -11,7 +11,8 @@ import java.util.Comparator;
  *
  * @since 3.5
  */
-final class ByteArrayComparator implements Comparator<Object> {
+@UtilityClass
+final class ByteArrayComparator {
   private static final int MAX_BYTE = 0xFF;
 
   /** {@inheritDoc} */

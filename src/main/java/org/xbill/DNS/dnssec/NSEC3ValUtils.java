@@ -195,15 +195,16 @@ final class NSEC3ValUtils {
     byte[] next = nsec3.getNext();
 
     // This is the "normal case: owner < next and owner < hash < next
-    ByteArrayComparator bac = new ByteArrayComparator();
-    if (bac.compare(owner, hash) < 0 && bac.compare(hash, next) < 0) {
+    if (ByteArrayComparator.compare(owner, hash) < 0
+        && ByteArrayComparator.compare(hash, next) < 0) {
       return true;
     }
 
     // this is the end of zone case: next <= owner AND (hash > owner OR hash < next)
     // Otherwise, the NSEC3 does not cover the hash.
-    return bac.compare(next, owner) <= 0
-        && (bac.compare(hash, owner) > 0 || bac.compare(hash, next) < 0);
+    return ByteArrayComparator.compare(next, owner) <= 0
+        && (ByteArrayComparator.compare(hash, owner) > 0
+            || ByteArrayComparator.compare(hash, next) < 0);
   }
 
   /**
@@ -385,7 +386,6 @@ final class NSEC3ValUtils {
    */
   public boolean allNSEC3sIgnoreable(List<SRRset> nsec3s, KeyCache dnskeyRrset) {
     Map<Name, NSEC3Record> foundNsecs = new HashMap<>();
-    ByteArrayComparator comp = new ByteArrayComparator();
     for (SRRset set : nsec3s) {
       for (Record r : set.rrs()) {
         NSEC3Record current = (NSEC3Record) r;
@@ -405,7 +405,7 @@ final class NSEC3ValUtils {
           }
 
           if (current.getSalt() != null
-              && comp.compare(current.getSalt(), previous.getSalt()) != 0) {
+              && ByteArrayComparator.compare(current.getSalt(), previous.getSalt()) != 0) {
             return true;
           }
         } else {
