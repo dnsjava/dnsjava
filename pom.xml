@@ -59,7 +59,6 @@
         <sonar.java.source>${target.jdk}</sonar.java.source>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <delombok.output>${project.build.directory}/generated-sources/delombok</delombok.output>
     </properties>
 
     <build>
@@ -154,7 +153,6 @@
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
                     <doclint>none</doclint>
-                    <sourcepath>${delombok.output}</sourcepath>
                 </configuration>
             </plugin>
 
@@ -323,24 +321,6 @@
                         <phase>test</phase>
                         <goals>
                             <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-                <version>${lombok.version}.0</version>
-                <configuration>
-                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                    <addOutputDirectory>false</addOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>delombok</goal>
                         </goals>
                     </execution>
                 </executions>

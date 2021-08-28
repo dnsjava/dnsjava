@@ -7,6 +7,10 @@ package org.xbill.DNS.lookup;
  * CNAME records.
  */
 public class InvalidZoneDataException extends LookupFailedException {
+  InvalidZoneDataException(String message, Throwable inner) {
+    super(message, inner);
+  }
+
   public InvalidZoneDataException(String message) {
     super(message);
   }

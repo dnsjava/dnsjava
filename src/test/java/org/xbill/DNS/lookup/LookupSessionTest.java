@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -23,22 +24,29 @@ import static org.xbill.DNS.Type.AAAA;
 import static org.xbill.DNS.Type.CNAME;
 import static org.xbill.DNS.Type.MX;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -106,8 +114,20 @@ class LookupSessionTest {
     wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
 
     LookupSession lookupSession = LookupSession.builder().resolver(mockResolver).build();
-    CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("a.b."), A, IN);
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+
+    verify(mockResolver).sendAsync(any());
+  }
+
+  @Test
+  void lookupAsync_absoluteQuery_defaultClass() throws InterruptedException, ExecutionException {
+    wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
+
+    LookupSession lookupSession = LookupSession.builder().resolver(mockResolver).build();
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
@@ -123,12 +143,25 @@ class LookupSessionTest {
             .hostsFileParser(lookupSessionTestHostsFileParser)
             .build();
     CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal."), A, IN);
+        lookupSession.lookupAsync(name("kubernetes.docker.internal."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(
         singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
         result.getRecords());
+  }
+
+  @Test
+  void lookupAsync_absoluteQueryWithFailedHosts() throws IOException {
+    wireUpMockResolver(mockResolver, q -> fail(q, Rcode.NXDOMAIN));
+    HostsFileParser mockHosts = mock(HostsFileParser.class);
+    when(mockHosts.getAddressForHost(any(), anyInt())).thenThrow(IOException.class);
+    LookupSession lookupSession =
+        LookupSession.builder().resolver(mockResolver).hostsFileParser(mockHosts).build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(name("kubernetes.docker.internal."), A, IN);
+
+    assertThrowsCause(NoSuchDomainException.class, () -> resultFuture.toCompletableFuture().get());
   }
 
   @Test
@@ -140,7 +173,7 @@ class LookupSessionTest {
             .hostsFileParser(lookupSessionTestHostsFileParser)
             .build();
     CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal."), MX, IN);
+        lookupSession.lookupAsync(name("kubernetes.docker.internal."), MX, IN);
 
     assertThrowsCause(NoSuchDomainException.class, () -> resultFuture.toCompletableFuture().get());
     verify(mockResolver).sendAsync(any());
@@ -154,7 +187,7 @@ class LookupSessionTest {
             .hostsFileParser(lookupSessionTestHostsFileParser)
             .build();
     CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal."), AAAA, IN);
+        lookupSession.lookupAsync(name("kubernetes.docker.internal."), AAAA, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(
@@ -170,7 +203,7 @@ class LookupSessionTest {
             .hostsFileParser(lookupSessionTestHostsFileParser)
             .build();
     CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal"), A, IN);
+        lookupSession.lookupAsync(name("kubernetes.docker.internal"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(
@@ -187,7 +220,7 @@ class LookupSessionTest {
             .hostsFileParser(lookupSessionTestHostsFileParser)
             .build();
     CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal"), A, IN);
+        lookupSession.lookupAsync(name("kubernetes.docker.internal"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(
@@ -205,7 +238,7 @@ class LookupSessionTest {
                 new HostsFileParser(tempDir.resolve("lookupAsync_relativeQueryWithInvalidHosts")))
             .build();
     CompletionStage<LookupResult> resultFuture =
-        lookupSession.lookupAsync(Name.fromConstantString("kubernetes.docker.internal"), A, IN);
+        lookupSession.lookupAsync(name("kubernetes.docker.internal"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(
@@ -218,9 +251,10 @@ class LookupSessionTest {
   void lookupAsync_absoluteQueryWithCacheMiss() throws InterruptedException, ExecutionException {
     wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
     Cache mockCache = mock(Cache.class);
+    when(mockCache.getDClass()).thenReturn(IN);
 
     LookupSession lookupSession =
-        LookupSession.builder().resolver(mockResolver).cache(IN, mockCache).build();
+        LookupSession.builder().resolver(mockResolver).cache(mockCache).build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
@@ -240,6 +274,56 @@ class LookupSessionTest {
   }
 
   @Test
+  void lookupAsync_absoluteQueryWithoutCache() throws InterruptedException, ExecutionException {
+    wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
+    Cache mockCache = mock(Cache.class);
+    when(mockCache.getDClass()).thenReturn(IN);
+
+    LookupSession lookupSession =
+        LookupSession.builder().resolver(mockResolver).cache(mockCache).clearCaches().build();
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+
+    verify(mockResolver).sendAsync(any());
+    verifyNoMoreInteractions(mockCache);
+  }
+
+  @Test
+  void lookupAsync_absoluteQueryWithMultipleCaches()
+      throws InterruptedException, ExecutionException {
+    wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
+    Cache mockCache1 = mock(Cache.class);
+    when(mockCache1.getDClass()).thenReturn(IN);
+    Cache mockCache2 = mock(Cache.class);
+    when(mockCache2.getDClass()).thenReturn(IN);
+    List<Cache> caches = new ArrayList<>(2);
+    caches.add(mockCache1);
+    caches.add(mockCache2);
+
+    LookupSession lookupSession =
+        LookupSession.builder().resolver(mockResolver).caches(caches).build();
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+
+    verify(mockResolver).sendAsync(any());
+    verify(mockCache2).lookupRecords(name("a.b."), A, Credibility.NORMAL);
+
+    ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
+    verify(mockCache2).addMessage(messageCaptor.capture());
+    Record question = messageCaptor.getValue().getQuestion();
+    assertEquals(IN, question.getDClass());
+    assertEquals(A, question.getType());
+    assertEquals(name("a.b."), question.getName());
+
+    verifyNoMoreInteractions(mockCache1);
+    verifyNoMoreInteractions(mockCache2);
+  }
+
+  @Test
   void lookupAsync_absoluteQueryWithCacheHit() throws InterruptedException, ExecutionException {
     Name aName = name("a.b.");
 
@@ -247,10 +331,11 @@ class LookupSessionTest {
     SetResponse response = mock(SetResponse.class);
     when(response.isSuccessful()).thenReturn(true);
     when(response.answers()).thenReturn(singletonList(new RRset(LOOPBACK_A.withName(aName))));
-    when(mockCache.lookupRecords(aName, IN, Credibility.NORMAL)).thenReturn(response);
+    when(mockCache.getDClass()).thenReturn(IN);
+    when(mockCache.lookupRecords(aName, A, Credibility.NORMAL)).thenReturn(response);
 
     LookupSession lookupSession =
-        LookupSession.builder().resolver(mockResolver).cache(IN, mockCache).build();
+        LookupSession.builder().resolver(mockResolver).cache(mockCache).build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(aName, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
@@ -266,20 +351,21 @@ class LookupSessionTest {
     wireUpMockResolver(mockResolver, q -> answer(q, n -> cname("host.tld.", "another.tld.")));
 
     Cache mockCache = mock(Cache.class);
+    when(mockCache.getDClass()).thenReturn(IN);
     // interestingly, a non-configured mock behaves the same way as a cache miss return value.
-    when(mockCache.lookupRecords(name("host.tld."), IN, Credibility.NORMAL))
+    when(mockCache.lookupRecords(name("host.tld."), A, Credibility.NORMAL))
         .thenReturn(mock(SetResponse.class));
 
     SetResponse second = mock(SetResponse.class);
     when(second.isSuccessful()).thenReturn(true);
     when(second.answers())
         .thenReturn(singletonList(new RRset(LOOPBACK_A.withName(name("another.tld.")))));
-    when(mockCache.lookupRecords(name("another.tld."), IN, Credibility.NORMAL)).thenReturn(second);
+    when(mockCache.lookupRecords(name("another.tld."), A, Credibility.NORMAL)).thenReturn(second);
 
     LookupSession lookupSession =
         LookupSession.builder()
             .resolver(mockResolver)
-            .cache(IN, mockCache)
+            .cache(mockCache)
             .searchPath(name("tld."))
             .build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("host"), A, IN);
@@ -297,25 +383,26 @@ class LookupSessionTest {
   void lookupAsync_negativeCacheRecords() throws InterruptedException, ExecutionException {
 
     Cache mockCache = mock(Cache.class);
+    when(mockCache.getDClass()).thenReturn(IN);
 
     SetResponse first = mock(SetResponse.class);
     when(first.isNXDOMAIN()).thenReturn(true);
-    when(mockCache.lookupRecords(name("host.tld1."), IN, Credibility.NORMAL)).thenReturn(first);
+    when(mockCache.lookupRecords(name("host.tld1."), A, Credibility.NORMAL)).thenReturn(first);
 
     SetResponse second = mock(SetResponse.class);
     when(second.isNXRRSET()).thenReturn(true);
-    when(mockCache.lookupRecords(name("host.tld2."), IN, Credibility.NORMAL)).thenReturn(second);
+    when(mockCache.lookupRecords(name("host.tld2."), A, Credibility.NORMAL)).thenReturn(second);
 
     SetResponse third = mock(SetResponse.class);
     when(third.isSuccessful()).thenReturn(true);
     when(third.answers())
         .thenReturn(singletonList(new RRset(LOOPBACK_A.withName(name("host.tld3.")))));
-    when(mockCache.lookupRecords(name("host.tld3."), IN, Credibility.NORMAL)).thenReturn(third);
+    when(mockCache.lookupRecords(name("host.tld3."), A, Credibility.NORMAL)).thenReturn(third);
 
     LookupSession lookupSession =
         LookupSession.builder()
             .resolver(mockResolver)
-            .cache(IN, mockCache)
+            .cache(mockCache)
             .searchPath(asList(name("tld1"), name("tld2"), name("tld3")))
             .build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("host"), A, IN);
@@ -328,6 +415,209 @@ class LookupSessionTest {
     inOrder.verify(mockCache).lookupRecords(name("host.tld2."), A, Credibility.NORMAL);
     inOrder.verify(mockCache).lookupRecords(name("host.tld3."), A, Credibility.NORMAL);
     verifyNoMoreInteractions(mockCache);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void lookupAsync_twoCnameRedirectMultipleQueries(boolean useCache) throws Exception {
+    Function<Name, Record> nameToRecord =
+        name -> {
+          switch (name.toString()) {
+            case "cname.a.":
+              return cname("cname.a.", "cname.b.");
+            case "cname.b.":
+              return cname("cname.b.", "a.b.");
+            default:
+              return LOOPBACK_A.withName(name("a.b."));
+          }
+        };
+    wireUpMockResolver(mockResolver, q -> answer(q, nameToRecord));
+
+    LookupSession lookupSession =
+        useCache
+            ? LookupSession.builder().resolver(mockResolver).build()
+            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertEquals(
+        Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
+        result.getAliases());
+    verify(mockResolver, times(3)).sendAsync(any());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "false,false",
+    "true,false",
+    "false,true",
+    "true,true",
+  })
+  void lookupAsync_twoDnameRedirectOneQuery(boolean useCache, boolean includeSyntheticCnames)
+      throws Exception {
+    wireUpMockResolver(
+        mockResolver,
+        query -> {
+          Message answer = new Message(query.getHeader().getID());
+          answer.addRecord(query.getQuestion(), Section.QUESTION);
+          answer.addRecord(dname("example.org.", "example.net."), Section.ANSWER);
+          if (includeSyntheticCnames) {
+            answer.addRecord(cname("www.example.org.", "www.example.net."), Section.ANSWER);
+          }
+          answer.addRecord(dname("example.net.", "example.com."), Section.ANSWER);
+          if (includeSyntheticCnames) {
+            answer.addRecord(cname("www.example.net.", "www.example.com."), Section.ANSWER);
+          }
+          answer.addRecord(cname("www.example.com.", "example.com."), Section.ANSWER);
+          answer.addRecord(LOOPBACK_A.withName(name("example.com.")), Section.ANSWER);
+          return answer;
+        });
+
+    LookupSession lookupSession =
+        useCache
+            ? LookupSession.builder().resolver(mockResolver).build()
+            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(name("www.example.org."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("example.com."))), result.getRecords());
+    assertEquals(
+        Stream.of(name("www.example.org."), name("www.example.net."), name("www.example.com."))
+            .collect(Collectors.toList()),
+        result.getAliases());
+    verify(mockResolver, times(1)).sendAsync(any());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void lookupAsync_twoCnameRedirectOneQuery(boolean useCache) throws Exception {
+    wireUpMockResolver(
+        mockResolver,
+        query -> {
+          Message answer = new Message(query.getHeader().getID());
+          answer.addRecord(query.getQuestion(), Section.QUESTION);
+          answer.addRecord(cname("cname.a.", "cname.b."), Section.ANSWER);
+          answer.addRecord(cname("cname.b.", "a.b."), Section.ANSWER);
+          answer.addRecord(LOOPBACK_A.withName(name("a.b.")), Section.ANSWER);
+          return answer;
+        });
+
+    LookupSession lookupSession =
+        useCache
+            ? LookupSession.builder().resolver(mockResolver).build()
+            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertEquals(
+        Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
+        result.getAliases());
+    verify(mockResolver, times(1)).sendAsync(any());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "true,1", "false,1", "true,2", "false,2",
+  })
+  void lookupAsync_twoCnameRedirectIncompleteResponse(boolean useCache, int firstResponseCnames)
+      throws Exception {
+    wireUpMockResolver(
+        mockResolver,
+        query -> {
+          Message answer = new Message(query.getHeader().getID());
+          answer.addRecord(query.getQuestion(), Section.QUESTION);
+          if (query.getQuestion().getName().equals(name("cname.a."))) {
+            answer.addRecord(cname("cname.a.", "cname.b."), Section.ANSWER);
+            if (firstResponseCnames == 1) {
+              answer.addRecord(cname("cname.b.", "a.b."), Section.ANSWER);
+            }
+          } else {
+            if (firstResponseCnames == 2) {
+              answer.addRecord(cname("cname.b.", "a.b."), Section.ANSWER);
+            }
+            answer.addRecord(LOOPBACK_A.withName(name("a.b.")), Section.ANSWER);
+          }
+          return answer;
+        });
+
+    LookupSession lookupSession =
+        useCache
+            ? LookupSession.builder().resolver(mockResolver).build()
+            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertEquals(
+        Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
+        result.getAliases());
+    verify(mockResolver, times(2)).sendAsync(any());
+  }
+
+  @Test
+  void lookupAsync_simpleCnameRedirect_oneQuery() throws Exception {
+    wireUpMockResolver(
+        mockResolver,
+        query -> {
+          Message answer = new Message(query.getHeader().getID());
+          answer.addRecord(query.getQuestion(), Section.QUESTION);
+          answer.addRecord(cname("cname.r.", DUMMY_NAME.toString()), Section.ANSWER);
+          answer.addRecord(LOOPBACK_A, Section.ANSWER);
+          return answer;
+        });
+
+    LookupSession lookupSession = LookupSession.builder().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.r."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(LOOPBACK_A), result.getRecords());
+    assertEquals(singletonList(name("cname.r.")), result.getAliases());
+    verify(mockResolver, times(1)).sendAsync(any());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "true,NXDOMAIN,A",
+    "false,NXDOMAIN,A",
+    "true,NOERROR,MX",
+    "false,NOERROR,MX",
+  })
+  void lookupAsync_simpleCnameRedirect(boolean useCache, String rcode, String type)
+      throws ExecutionException, InterruptedException {
+    wireUpMockResolver(
+        mockResolver,
+        q -> {
+          if (q.getQuestion().getName().equals(name("cname.r."))) {
+            return answer(q, n -> cname("cname.r.", "a.b."));
+          } else {
+            return fail(q, Rcode.value(rcode));
+          }
+        });
+
+    LookupSession lookupSession =
+        useCache
+            ? LookupSession.builder().resolver(mockResolver).build()
+            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(name("cname.r."), Type.value(type), IN);
+
+    CompletableFuture<LookupResult> future = resultFuture.toCompletableFuture();
+    if (rcode.equals("NXDOMAIN")) {
+      assertThrowsCause(NoSuchDomainException.class, future::get);
+    } else {
+      LookupResult result = future.get();
+      assertEquals(0, result.getRecords().size());
+    }
+    verify(mockResolver, times(2)).sendAsync(any());
   }
 
   @Test
@@ -377,6 +667,43 @@ class LookupSessionTest {
     assertThrowsCause(
         RedirectOverflowException.class, () -> resultFuture.toCompletableFuture().get());
     verify(mockResolver, times(3)).sendAsync(any());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {3, 4})
+  void lookupAsync_redirectLoopOneAnswer(int maxRedirects) {
+    wireUpMockResolver(
+        mockResolver,
+        query -> {
+          Message answer = new Message(query.getHeader().getID());
+          answer.addRecord(query.getQuestion(), Section.QUESTION);
+          answer.addRecord(cname("a.", "b."), Section.ANSWER);
+          answer.addRecord(cname("b.", "c."), Section.ANSWER);
+          answer.addRecord(cname("c.", "d."), Section.ANSWER);
+          answer.addRecord(cname("d.", "a."), Section.ANSWER);
+          return answer;
+        });
+
+    LookupSession lookupSession =
+        LookupSession.builder().resolver(mockResolver).maxRedirects(maxRedirects).build();
+
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a."), A, IN);
+
+    assertThrowsCause(
+        RedirectOverflowException.class, () -> resultFuture.toCompletableFuture().get());
+    verify(mockResolver, times(1)).sendAsync(any());
+  }
+
+  @Test
+  void lookupAsync_NODATA() throws ExecutionException, InterruptedException {
+    wireUpMockResolver(mockResolver, q -> fail(q, Rcode.NOERROR));
+
+    LookupSession lookupSession = LookupSession.builder().resolver(mockResolver).build();
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(0, result.getRecords().size());
+    verify(mockResolver).sendAsync(any());
   }
 
   @Test
@@ -479,7 +806,7 @@ class LookupSessionTest {
     verify(mockResolver).sendAsync(messageCaptor.capture());
 
     assertEquals(
-        Record.newRecord(Name.fromConstantString("host.example.com."), Type.A, DClass.IN, 0L),
+        Record.newRecord(name("host.example.com."), Type.A, DClass.IN, 0L),
         messageCaptor.getValue().getSection(Section.QUESTION).get(0));
 
     assertEquals(
@@ -530,10 +857,10 @@ class LookupSessionTest {
 
     List<Message> allValues = messageCaptor.getAllValues();
     assertEquals(
-        Record.newRecord(Name.fromConstantString("host.a."), Type.A, DClass.IN, 0L),
+        Record.newRecord(name("host.a."), Type.A, DClass.IN, 0L),
         allValues.get(0).getSection(Section.QUESTION).get(0));
     assertEquals(
-        Record.newRecord(Name.fromConstantString("host.b."), Type.A, DClass.IN, 0L),
+        Record.newRecord(name("host.b."), Type.A, DClass.IN, 0L),
         allValues.get(1).getSection(Section.QUESTION).get(0));
 
     assertEquals(singletonList(LOOPBACK_A.withName(name("host.b."))), lookupResult.getRecords());
@@ -547,16 +874,17 @@ class LookupSessionTest {
     ARecord anotherA = new ARecord(aName, IN, 3600, anotherAddress);
 
     Cache mockCache = mock(Cache.class);
+    when(mockCache.getDClass()).thenReturn(IN);
     SetResponse response = mock(SetResponse.class);
     when(response.isSuccessful()).thenReturn(true);
     RRset rrSet = new RRset();
     rrSet.addRR(LOOPBACK_A.withName(aName));
     rrSet.addRR(anotherA);
     when(response.answers()).thenReturn(singletonList(rrSet));
-    when(mockCache.lookupRecords(aName, IN, Credibility.NORMAL)).thenReturn(response);
+    when(mockCache.lookupRecords(aName, A, Credibility.NORMAL)).thenReturn(response);
 
     LookupSession lookupSession =
-        LookupSession.builder().resolver(mockResolver).cache(IN, mockCache).build();
+        LookupSession.builder().resolver(mockResolver).cache(mockCache).build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(aName, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
@@ -579,20 +907,17 @@ class LookupSessionTest {
     ARecord anotherA = new ARecord(aName, IN, 3600, anotherAddress);
 
     Cache mockCache = mock(Cache.class);
+    when(mockCache.getDClass()).thenReturn(IN);
     SetResponse response = mock(SetResponse.class);
     when(response.isSuccessful()).thenReturn(true);
     RRset rrSet = new RRset();
     rrSet.addRR(LOOPBACK_A.withName(aName));
     rrSet.addRR(anotherA);
     when(response.answers()).thenReturn(singletonList(rrSet));
-    when(mockCache.lookupRecords(aName, IN, Credibility.NORMAL)).thenReturn(response);
+    when(mockCache.lookupRecords(aName, A, Credibility.NORMAL)).thenReturn(response);
 
     LookupSession lookupSession =
-        LookupSession.builder()
-            .resolver(mockResolver)
-            .cache(IN, mockCache)
-            .cycleResults(true)
-            .build();
+        LookupSession.builder().resolver(mockResolver).cache(mockCache).cycleResults(true).build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(aName, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
