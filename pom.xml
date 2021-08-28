@@ -209,6 +209,8 @@
                         <onlyModified>true</onlyModified>
                         <accessModifier>public</accessModifier>
                         <breakBuildBasedOnSemanticVersioning>true</breakBuildBasedOnSemanticVersioning>
+                        <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+                        <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
                         <excludes>
                             <!-- JDK9 removed the Nameservice SPI as per bug 8134577. -->
                             <exclude>org.xbill.DNS.spi</exclude>
@@ -219,6 +221,8 @@
                             <overrideCompatibilityChangeParameter>
                                 <compatibilityChange>ANNOTATION_DEPRECATED_ADDED</compatibilityChange>
                                 <semanticVersionLevel>PATCH</semanticVersionLevel>
+                                <sourceCompatible>true</sourceCompatible>
+                                <binaryCompatible>true</binaryCompatible>
                             </overrideCompatibilityChangeParameter>
                         </overrideCompatibilityChangeParameters>
                     </parameter>
