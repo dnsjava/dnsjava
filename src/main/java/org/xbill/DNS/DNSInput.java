@@ -6,15 +6,16 @@ package org.xbill.DNS;
 import java.nio.ByteBuffer;
 
 /**
- * An class for parsing DNS messages.
+ * A class for parsing DNS messages.
  *
  * @author Brian Wellington
  */
 public class DNSInput {
-
-  private ByteBuffer byteBuffer;
-  private int saved_pos;
-  private int saved_end;
+  private final ByteBuffer byteBuffer;
+  private final int offset;
+  private final int limit;
+  private int savedPos;
+  private int savedEnd;
 
   /**
    * Creates a new DNSInput
@@ -22,9 +23,7 @@ public class DNSInput {
    * @param input The byte array to read from
    */
   public DNSInput(byte[] input) {
-    byteBuffer = ByteBuffer.wrap(input);
-    saved_pos = -1;
-    saved_end = -1;
+    this(ByteBuffer.wrap(input));
   }
 
   /**
@@ -34,13 +33,15 @@ public class DNSInput {
    */
   public DNSInput(ByteBuffer byteBuffer) {
     this.byteBuffer = byteBuffer;
-    saved_pos = -1;
-    saved_end = -1;
+    offset = byteBuffer.position();
+    limit = byteBuffer.limit();
+    savedPos = -1;
+    savedEnd = -1;
   }
 
   /** Returns the current position. */
   public int current() {
-    return byteBuffer.position();
+    return byteBuffer.position() - offset;
   }
 
   /** Returns the number of bytes that can be read from this stream before reaching the end. */
@@ -62,7 +63,7 @@ public class DNSInput {
    *     remainder of the input.
    */
   public void setActive(int len) {
-    if (len > byteBuffer.capacity() - byteBuffer.position()) {
+    if (len > limit - byteBuffer.position()) {
       throw new IllegalArgumentException("cannot set active region past end of input");
     }
     byteBuffer.limit(byteBuffer.position() + len);
@@ -73,12 +74,12 @@ public class DNSInput {
    * input.
    */
   public void clearActive() {
-    byteBuffer.limit(byteBuffer.capacity());
+    byteBuffer.limit(limit);
   }
 
   /** Returns the position of the end of the current active region. */
   public int saveActive() {
-    return byteBuffer.limit();
+    return limit - offset;
   }
 
   /**
@@ -89,10 +90,10 @@ public class DNSInput {
    * @param pos The end of the active region.
    */
   public void restoreActive(int pos) {
-    if (pos > byteBuffer.capacity()) {
+    if (pos + offset > limit) {
       throw new IllegalArgumentException("cannot set active region past end of input");
     }
-    byteBuffer.limit(pos);
+    byteBuffer.limit(pos + offset);
   }
 
   /**
@@ -103,11 +104,11 @@ public class DNSInput {
    * @throws IllegalArgumentException The index is not within the input.
    */
   public void jump(int index) {
-    if (index >= byteBuffer.capacity()) {
+    if (index + offset >= limit) {
       throw new IllegalArgumentException("cannot jump past end of input");
     }
-    byteBuffer.position(index);
-    byteBuffer.limit(byteBuffer.capacity());
+    byteBuffer.position(offset + index);
+    byteBuffer.limit(limit);
   }
 
   /**
@@ -117,19 +118,19 @@ public class DNSInput {
    * @throws IllegalArgumentException The index is not within the input.
    */
   public void save() {
-    saved_pos = byteBuffer.position();
-    saved_end = byteBuffer.limit();
+    savedPos = byteBuffer.position();
+    savedEnd = byteBuffer.limit();
   }
 
   /** Restores the input stream to its state before the call to {@link #save}. */
   public void restore() {
-    if (saved_pos < 0) {
+    if (savedPos < 0) {
       throw new IllegalStateException("no previous state");
     }
-    byteBuffer.position(saved_pos);
-    byteBuffer.limit(saved_end);
-    saved_pos = -1;
-    saved_end = -1;
+    byteBuffer.position(savedPos);
+    byteBuffer.limit(savedEnd);
+    savedPos = -1;
+    savedEnd = -1;
   }
 
   /**

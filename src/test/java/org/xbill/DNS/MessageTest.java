@@ -42,8 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.xbill.DNS.utils.base64;
 
 public class MessageTest {
   static class Test_init {
@@ -76,6 +78,24 @@ public class MessageTest {
       assertEquals(0, h.getCount(1));
       assertEquals(0, h.getCount(2));
       assertEquals(0, h.getCount(3));
+    }
+
+    @Test
+    void ctor_byteBuffer() throws IOException {
+      byte[] arr =
+          base64.fromString(
+              "EEuBgAABAAEABAAIA3d3dwZnb29nbGUDY29tAAABAAHADAABAAEAAAAaAASO+rokwBAAAgABAAFHCwAGA25zMcAQwBAAAgABAAFHCwAGA25zNMAQwBAAAgABAAFHCwAGA25zM8AQwBAAAgABAAFHCwAGA25zMsAQwDwAAQABAADObwAE2O8gCsByAAEAAQABrVEABNjvIgrAYAABAAEAAVqZAATY7yQKwE4AAQABAAK9RQAE2O8mCsA8ABwAAQAD4a0AECABSGBIAgAyAAAAAAAAAArAcgAcAAEAAtDgABAgAUhgSAIANAAAAAAAAAAKwGAAHAABAACSagAQIAFIYEgCADYAAAAAAAAACsBOABwAAQAErVoAECABSGBIAgA4AAAAAAAAAAo=");
+
+      ByteBuffer wrap = ByteBuffer.allocate(arr.length + 2);
+
+      // prepend length, like when reading a response from a TCP channel
+      wrap.putShort((short) arr.length);
+      wrap.put(arr);
+      wrap.flip();
+      wrap.getShort(); // read the prepended length
+
+      Message m = new Message(wrap);
+      assertEquals(Name.fromConstantString("www.google.com."), m.getQuestion().getName());
     }
 
     @Test
