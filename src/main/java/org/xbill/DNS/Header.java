@@ -31,15 +31,17 @@ public class Header implements Cloneable {
    * @param id The message id
    */
   public Header(int id) {
-    this();
-    setID(id);
+    if (id < 0 || id > 0xffff) {
+      throw new IllegalArgumentException("DNS message ID " + id + " is out of range");
+    }
+    counts = new int[4];
+    flags = 0;
+    this.id = id;
   }
 
   /** Create a new empty header with a random message id */
   public Header() {
-    counts = new int[4];
-    flags = 0;
-    id = -1;
+    this(random.nextInt(0xffff));
   }
 
   /** Parses a Header from a stream containing DNS wire format. */
@@ -138,12 +140,7 @@ public class Header implements Cloneable {
 
   /** Retrieves the message ID */
   public int getID() {
-    synchronized (random) {
-      if (id < 0) {
-        id = random.nextInt(0xffff);
-      }
-      return id;
-    }
+    return id;
   }
 
   /** Sets the message ID */
