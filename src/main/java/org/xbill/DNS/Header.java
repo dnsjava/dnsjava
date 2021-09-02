@@ -31,9 +31,9 @@ public class Header implements Cloneable {
    * @param id The message id
    */
   public Header(int id) {
-	if (id < 0 || id > 0xffff) {
-	  throw new IllegalArgumentException("DNS message ID " + id + " is out of range");
-	}
+    if (id < 0 || id > 0xffff) {
+      throw new IllegalArgumentException("DNS message ID " + id + " is out of range");
+    }
     counts = new int[4];
     flags = 0;
     this.id = id;
