@@ -24,20 +24,20 @@ import org.xbill.DNS.config.WindowsResolverConfigProvider;
  *
  * <p>The following are attempted, in order, until one succeeds.
  *
- * <UL>
- *   <LI>dnsjava properties, see {@link org.xbill.DNS.config.PropertyResolverConfigProvider}
- *   <LI>On Unix, /etc/resolv.conf is parsed, see {@link
+ * <ul>
+ *   <li>dnsjava properties, see {@link org.xbill.DNS.config.PropertyResolverConfigProvider}
+ *   <li>On Unix, /etc/resolv.conf is parsed, see {@link
  *       org.xbill.DNS.config.ResolvConfResolverConfigProvider}
- *   <LI>On Windows, GetAdaptersAddresses is called, see {@link
+ *   <li>On Windows, GetAdaptersAddresses is called, see {@link
  *       org.xbill.DNS.config.WindowsResolverConfigProvider}
  *   <li>On Android, system properties or the ConnectivityManager are read, see {@link
  *       org.xbill.DNS.config.AndroidResolverConfigProvider}
  *   <li>The JNDI DNS Service Provider is queried, see {@link
  *       org.xbill.DNS.config.JndiContextResolverConfigProvider}
- *   <LI>The sun.net.dns.ResolverConfiguration class is queried, see {@link
+ *   <li>The sun.net.dns.ResolverConfiguration class is queried, see {@link
  *       org.xbill.DNS.config.SunJvmResolverConfigProvider}
- *   <LI>"localhost" is used as the nameserver, and the search path is empty.
- * </UL>
+ *   <li>{@code localhost} is used as the nameserver, and the search path is empty.
+ * </ul>
  *
  * These routines will be called internally when creating Resolvers/Lookups without explicitly
  * specifying server names, and can also be called directly if desired.

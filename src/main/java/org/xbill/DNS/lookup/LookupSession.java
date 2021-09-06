@@ -28,6 +28,7 @@ import org.xbill.DNS.Cache;
 import org.xbill.DNS.Credibility;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
+import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
@@ -36,8 +37,10 @@ import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
+import org.xbill.DNS.ResolverConfig;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SetResponse;
+import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.hosts.HostsFileParser;
 
@@ -93,7 +96,10 @@ public class LookupSession {
     this.ndots = ndots;
     this.searchPath = searchPath;
     this.cycleResults = cycleResults;
-    this.caches = caches.stream().collect(Collectors.toMap(Cache::getDClass, e -> e));
+    this.caches =
+        caches == null
+            ? Collections.emptyMap()
+            : caches.stream().collect(Collectors.toMap(Cache::getDClass, e -> e));
     this.hostsFileParser = hostsFileParser;
     this.executor = executor == null ? ForkJoinPool.commonPool() : executor;
   }
@@ -148,7 +154,9 @@ public class LookupSession {
 
     /** Disables using a cache for lookups. */
     public LookupSessionBuilder clearCaches() {
-      caches.clear();
+      if (caches != null) {
+        caches.clear();
+      }
       return this;
     }
 
@@ -197,7 +205,10 @@ public class LookupSession {
     }
   }
 
-  /** Returns a new {@link LookupSessionBuilder} instance. */
+  /**
+   * Returns an empty {@link LookupSessionBuilder} instance. See {@link #defaultBuilder()} for a
+   * builder initialized with defaults.
+   */
   public static LookupSessionBuilder builder() {
     LookupSessionBuilder builder =
         new LookupSessionBuilder() {
@@ -209,8 +220,30 @@ public class LookupSession {
         };
     builder.maxRedirects = DEFAULT_MAX_ITERATIONS;
     builder.ndots = DEFAULT_NDOTS;
-    builder.cache(new Cache(DClass.IN));
     return builder;
+  }
+
+  /**
+   * Returns a {@link LookupSessionBuilder} instance initialized with defaults.
+   *
+   * <ul>
+   *   <li>Resolver: an {@link org.xbill.DNS.ExtendedResolver} initialized with the system's default
+   *       DNS servers as determined by {@link org.xbill.DNS.ResolverConfig}.
+   *   <li>ndots: as determined by {@link org.xbill.DNS.ResolverConfig}.
+   *   <li>Cache: A cache for the {@code IN} class is installed.
+   *   <li>Hosts: The local host database file is used.
+   * </ul>
+   */
+  public static LookupSessionBuilder defaultBuilder() {
+    return builder()
+        .resolver(
+            new ExtendedResolver(
+                ResolverConfig.getCurrentConfig().servers().stream()
+                    .map(SimpleResolver::new)
+                    .collect(Collectors.toList())))
+        .ndots(ResolverConfig.getCurrentConfig().ndots())
+        .cache(new Cache(DClass.IN))
+        .defaultHostsFileParser();
   }
 
   /**

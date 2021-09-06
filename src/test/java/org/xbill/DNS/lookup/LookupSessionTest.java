@@ -277,18 +277,15 @@ class LookupSessionTest {
   @Test
   void lookupAsync_absoluteQueryWithoutCache() throws InterruptedException, ExecutionException {
     wireUpMockResolver(mockResolver, query -> answer(query, name -> LOOPBACK_A));
-    Cache mockCache = mock(Cache.class);
-    when(mockCache.getDClass()).thenReturn(IN);
 
     LookupSession lookupSession =
-        LookupSession.builder().resolver(mockResolver).cache(mockCache).clearCaches().build();
+        LookupSession.builder().resolver(mockResolver).clearCaches().build();
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
     verify(mockResolver).sendAsync(any(), any(Executor.class));
-    verifyNoMoreInteractions(mockCache);
   }
 
   @Test
@@ -436,8 +433,8 @@ class LookupSessionTest {
 
     LookupSession lookupSession =
         useCache
-            ? LookupSession.builder().resolver(mockResolver).build()
-            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+            ? LookupSession.builder().cache(new Cache()).resolver(mockResolver).build()
+            : LookupSession.builder().resolver(mockResolver).build();
 
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
 
@@ -478,8 +475,8 @@ class LookupSessionTest {
 
     LookupSession lookupSession =
         useCache
-            ? LookupSession.builder().resolver(mockResolver).build()
-            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+            ? LookupSession.builder().cache(new Cache()).resolver(mockResolver).build()
+            : LookupSession.builder().resolver(mockResolver).build();
 
     CompletionStage<LookupResult> resultFuture =
         lookupSession.lookupAsync(name("www.example.org."), A, IN);
@@ -509,8 +506,8 @@ class LookupSessionTest {
 
     LookupSession lookupSession =
         useCache
-            ? LookupSession.builder().resolver(mockResolver).build()
-            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+            ? LookupSession.builder().cache(new Cache()).resolver(mockResolver).build()
+            : LookupSession.builder().resolver(mockResolver).build();
 
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
 
@@ -549,8 +546,8 @@ class LookupSessionTest {
 
     LookupSession lookupSession =
         useCache
-            ? LookupSession.builder().resolver(mockResolver).build()
-            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+            ? LookupSession.builder().cache(new Cache()).resolver(mockResolver).build()
+            : LookupSession.builder().resolver(mockResolver).build();
 
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
 
@@ -605,8 +602,8 @@ class LookupSessionTest {
 
     LookupSession lookupSession =
         useCache
-            ? LookupSession.builder().resolver(mockResolver).build()
-            : LookupSession.builder().clearCaches().resolver(mockResolver).build();
+            ? LookupSession.builder().cache(new Cache()).resolver(mockResolver).build()
+            : LookupSession.builder().resolver(mockResolver).build();
 
     CompletionStage<LookupResult> resultFuture =
         lookupSession.lookupAsync(name("cname.r."), Type.value(type), IN);

@@ -15,8 +15,7 @@ InetAddress addr = Address.getByName("www.dnsjava.org");
 
 ## Get the MX target and preference of a name (modern)
 ```java
-Resolver r = new SimpleResolver("8.8.8.8");
-LookupSession s = LookupSession.builder().resolver(r).build();
+LookupSession s = LookupSession.defaultBuilder().build();
 Name mxLookup = Name.fromString("gmail.com.");
 s.lookupAsync(mxLookup, Type.MX)
     .whenComplete(
