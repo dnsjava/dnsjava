@@ -13,7 +13,33 @@ import org.xbill.DNS.*;
 InetAddress addr = Address.getByName("www.dnsjava.org");
 ```
 
-## Get the MX target and preference of a name
+## Get the MX target and preference of a name (modern)
+```java
+Resolver r = new SimpleResolver("8.8.8.8");
+LookupSession s = LookupSession.builder().resolver(r).build();
+Name mxLookup = Name.fromString("gmail.com.");
+s.lookupAsync(mxLookup, Type.MX)
+    .whenComplete(
+        (answers, ex) -> {
+          if (ex == null) {
+            if (answers.getRecords().isEmpty()) {
+              System.out.println(mxLookup + " has no MX");
+            } else {
+              for (Record rec : answers.getRecords()) {
+                MXRecord mx = ((MXRecord) rec);
+                System.out.println(
+                    "Host " + mx.getTarget() + " has preference " + mx.getPriority());
+              }
+            }
+          } else {
+            ex.printStackTrace();
+          }
+        })
+    .toCompletableFuture()
+    .get();
+```
+
+## Get the MX target and preference of a name (legacy)
 
 ```java
 Record[] records = new Lookup("gmail.com", Type.MX).run();
@@ -21,6 +47,24 @@ for (int i = 0; i < records.length; i++) {
     MXRecord mx = (MXRecord) records[i];
     System.out.println("Host " + mx.getTarget() + " has preference " + mx.getPriority());
 }
+```
+
+## Simple lookup with a Resolver
+```java
+Record queryRecord = Record.newRecord(Name.fromString("dnsjava.org."), Type.A, DClass.IN);
+Message queryMessage = Message.newQuery(queryRecord);
+Resolver r = new SimpleResolver("8.8.8.8");
+r.sendAsync(queryMessage)
+    .whenComplete(
+        (answer, ex) -> {
+          if (ex == null) {
+            System.out.println(answer);
+          } else {
+            ex.printStackTrace();
+          }
+        })
+    .toCompletableFuture()
+    .get();
 ```
 
 ## Query a remote name server for its version
