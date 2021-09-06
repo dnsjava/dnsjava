@@ -13,7 +13,10 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -35,7 +38,7 @@ import org.xbill.DNS.utils.base64;
  * href="https://github.com/square/okhttp/">OkHttp</a>.
  *
  * <p>On Java 8, it uses HTTP/1.1, which is against the recommendation of RFC 8484 to use HTTP/2 and
- * thus slower. On Java 11 or newer, HTTP/2 is always used, but the built-in HttpClient has it's own
+ * thus slower. On Java 11 or newer, HTTP/2 is always used, but the built-in HttpClient has its own
  * <a href="https://bugs.openjdk.java.net/browse/JDK-8225647">issues</a> with connection handling.
  *
  * <p>As of 2020-09-13, the following limits of public resolvers for HTTP/2 were observed:
@@ -47,6 +50,8 @@ import org.xbill.DNS.utils.base64;
 @Slf4j
 public final class DohResolver implements Resolver {
   private static final boolean useHttpClient;
+  private static final Map<Executor, Object> httpClients =
+      Collections.synchronizedMap(new WeakHashMap<>());
   private final SSLSocketFactory sslSocketFactory;
 
   private static Object defaultHttpRequestBuilder;
@@ -73,8 +78,7 @@ public final class DohResolver implements Resolver {
   private final Duration idleConnectionTimeout;
   private OPTRecord queryOPT = new OPTRecord(0, 0, 0);
   private TSIG tsig;
-  private Object httpClient;
-  private Executor executor = ForkJoinPool.commonPool();
+  private Executor defaultExecutor = ForkJoinPool.commonPool();
 
   /**
    * Maximum concurrent HTTP/2 streams or HTTP/1.1 connections.
@@ -208,29 +212,29 @@ public final class DohResolver implements Resolver {
     } catch (NoSuchAlgorithmException e) {
       throw new RuntimeException(e);
     }
-    buildHttpClient();
   }
 
   @SneakyThrows
-  private void buildHttpClient() {
-    if (useHttpClient) {
-      // var builder =
-      //     HttpClient.newBuilder().connectTimeout(timeout).version(HttpClient.Version.HTTP_2);
-      // if (executor != null) {
-      //   builder.executor(executor);
-      // }
-      //
-      // httpClient = builder.build();
-      // defaultHttpRequestBuilder.timeout(timeout);
-
-      Object httpClientBuilder = httpClientNewBuilderMethod.invoke(null);
-      httpClientBuilderTimeoutMethod.invoke(httpClientBuilder, timeout);
-      if (executor != null) {
-        httpClientBuilderExecutorMethod.invoke(httpClientBuilder, executor);
-      }
-      httpClient = httpClientBuilderBuildMethod.invoke(httpClientBuilder);
-      requestBuilderTimeoutMethod.invoke(defaultHttpRequestBuilder, timeout);
-    }
+  private Object getHttpClient(Executor executor) {
+    return httpClients.computeIfAbsent(
+        executor,
+        key -> {
+          try {
+            // defaultHttpRequestBuilder.timeout(timeout);
+            // return HttpClient.newBuilder()
+            //   .connectTimeout(timeout).
+            //   .executor(executor)
+            //   .build();
+            requestBuilderTimeoutMethod.invoke(defaultHttpRequestBuilder, timeout);
+            Object httpClientBuilder = httpClientNewBuilderMethod.invoke(null);
+            httpClientBuilderTimeoutMethod.invoke(httpClientBuilder, timeout);
+            httpClientBuilderExecutorMethod.invoke(httpClientBuilder, key);
+            return httpClientBuilderBuildMethod.invoke(httpClientBuilder);
+          } catch (IllegalAccessException | InvocationTargetException e) {
+            log.warn("Could not create a HttpClient with for Executor {}", key, e);
+            return null;
+          }
+        });
   }
 
   /** Not implemented. Specify the port in {@link #setUriTemplate(String)} if required. */
@@ -277,7 +281,7 @@ public final class DohResolver implements Resolver {
   @Override
   public void setTimeout(Duration timeout) {
     this.timeout = timeout;
-    buildHttpClient();
+    httpClients.clear();
   }
 
   @Override
@@ -287,43 +291,47 @@ public final class DohResolver implements Resolver {
 
   @Override
   public CompletionStage<Message> sendAsync(Message query) {
-    if (useHttpClient) {
-      return sendAsync11(query);
-    }
-
-    return sendAsync8(query);
+    return sendAsync(query, defaultExecutor);
   }
 
-  private CompletionStage<Message> sendAsync8(final Message query) {
+  @Override
+  public CompletionStage<Message> sendAsync(Message query, Executor executor) {
+    if (useHttpClient) {
+      return sendAsync11(query, executor);
+    }
+
+    return sendAsync8(query, executor);
+  }
+
+  private CompletionStage<Message> sendAsync8(final Message query, Executor executor) {
     CompletableFuture<Message> f = new CompletableFuture<>();
-    ForkJoinPool.commonPool()
-        .execute(
-            () -> {
-              try {
-                byte[] queryBytes = prepareQuery(query).toWire();
-                String url = getUrl(queryBytes);
+    executor.execute(
+        () -> {
+          try {
+            byte[] queryBytes = prepareQuery(query).toWire();
+            String url = getUrl(queryBytes);
 
-                // limit number of concurrent connections
-                if (!maxConcurrentRequests.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-                  failedFuture(new IOException("Query timed out"));
-                  return;
-                }
+            // limit number of concurrent connections
+            if (!maxConcurrentRequests.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+              failedFuture(new IOException("Query timed out"));
+              return;
+            }
 
-                byte[] responseBytes;
-                try {
-                  responseBytes = sendAndGetMessageBytes(url, queryBytes);
-                } finally {
-                  maxConcurrentRequests.release();
-                }
-                Message response = new Message(responseBytes);
-                verifyTSIG(query, response, responseBytes, tsig);
-                response.setResolver(this);
-                f.complete(response);
-              } catch (InterruptedException | IOException e) {
-                f.completeExceptionally(e);
-                Thread.currentThread().interrupt();
-              }
-            });
+            byte[] responseBytes;
+            try {
+              responseBytes = sendAndGetMessageBytes(url, queryBytes);
+            } finally {
+              maxConcurrentRequests.release();
+            }
+            Message response = new Message(responseBytes);
+            verifyTSIG(query, response, responseBytes, tsig);
+            response.setResolver(this);
+            f.complete(response);
+          } catch (InterruptedException | IOException e) {
+            f.completeExceptionally(e);
+            Thread.currentThread().interrupt();
+          }
+        });
     return f;
   }
 
@@ -379,7 +387,7 @@ public final class DohResolver implements Resolver {
     }
   }
 
-  private CompletionStage<Message> sendAsync11(final Message query) {
+  private CompletionStage<Message> sendAsync11(final Message query, Executor executor) {
     long startTime = System.nanoTime();
     byte[] queryBytes = prepareQuery(query).toWire();
     String url = getUrl(queryBytes);
@@ -456,7 +464,7 @@ public final class DohResolver implements Resolver {
       Object httpRequest = requestBuilderBuildMethod.invoke(builder);
       Object bodyHandler = byteArrayBodyPublisherMethod.invoke(null);
       return ((CompletionStage<?>)
-              httpClientSendAsyncMethod.invoke(httpClient, httpRequest, bodyHandler))
+              httpClientSendAsyncMethod.invoke(getHttpClient(executor), httpRequest, bodyHandler))
           .whenComplete(
               (result, ex) -> {
                 maxConcurrentRequests.release();
@@ -485,7 +493,8 @@ public final class DohResolver implements Resolver {
                 } catch (IOException | IllegalAccessException | InvocationTargetException e) {
                   return failedFuture(e);
                 }
-              });
+              },
+              executor);
     } catch (IllegalAccessException | InvocationTargetException e) {
       return failedFuture(e);
     }
@@ -552,25 +561,29 @@ public final class DohResolver implements Resolver {
   }
 
   /**
-   * Gets the {@link Executor} for HTTP/2 requests. Only applicable on Java 11+ and default to
-   * {@link ForkJoinPool#commonPool()}.
+   * Gets the default {@link Executor} for request handling, defaults to {@link
+   * ForkJoinPool#commonPool()}.
    *
    * @since 3.3
+   * @deprecated not applicable if {@link #sendAsync(Message, Executor)} is used.
    */
+  @Deprecated
   public Executor getExecutor() {
-    return executor;
+    return defaultExecutor;
   }
 
   /**
-   * Gets the {@link Executor} for HTTP/2 requests. Only applicable on Java 11+
+   * Sets the default {@link Executor} for request handling.
    *
-   * @param executor The new {@link Executor}, can be null to restore the HttpClient default
-   *     behavior.
+   * @param executor The new {@link Executor}, can be {@code null} (which is equivalent to {@link
+   *     ForkJoinPool#commonPool()}).
    * @since 3.3
+   * @deprecated Use {@link #sendAsync(Message, Executor)}.
    */
+  @Deprecated
   public void setExecutor(Executor executor) {
-    this.executor = executor;
-    buildHttpClient();
+    this.defaultExecutor = executor == null ? ForkJoinPool.commonPool() : executor;
+    httpClients.clear();
   }
 
   @Override
