@@ -19,18 +19,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.hosts.HostsFileParser;
 
 /**
- * The Lookup object issues queries to caching DNS servers. The input consists of a name, an
- * optional type, and an optional class. Caching is enabled by default and used when possible to
- * reduce the number of DNS requests. A Resolver, which defaults to an ExtendedResolver initialized
- * with the resolvers located by the ResolverConfig class, performs the queries. A search path of
- * domain suffixes is used to resolve relative names, and is also determined by the ResolverConfig
+ * The Lookup object issues queries to the local hosts database ({@code /etc/hosts}) and to
+ * recursive DNS servers. The input consists of a name, an optional type, and an optional class.
+ * Caching is enabled by default and used when possible to reduce the number of DNS requests. A
+ * {@link Resolver}, which defaults to an {@link ExtendedResolver} initialized with the resolvers
+ * located by the {@link ResolverConfig} class, performs the queries. A search path of domain
+ * suffixes is used to resolve relative names, and is also determined by the {@link ResolverConfig}
  * class.
  *
  * <p>A Lookup object may be reused, but should not be used by multiple threads.
  *
+ * <p>Lookup is considered legacy (but not yet deprecated). Use {@link
+ * org.xbill.DNS.lookup.LookupSession} instead, which is thread safe and fully async.
+ *
+ * @see org.xbill.DNS.lookup.LookupSession
  * @see Cache
  * @see Resolver
  * @see ResolverConfig
+ * @see HostsFileParser
  * @author Brian Wellington
  */
 @Slf4j
