@@ -120,7 +120,6 @@
                         <Export-Package>
                             org.xbill.DNS.*
                         </Export-Package>
-                        <Private-Package>!android.*</Private-Package>
                         <Import-Package>
                             !org.xbill.DNS*,
                             !sun.*,
@@ -358,6 +357,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.robolectric</groupId>
+            <artifactId>android-all</artifactId>
+            <version>10-robolectric-5803371</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
