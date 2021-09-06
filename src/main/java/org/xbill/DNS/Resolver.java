@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -137,6 +139,10 @@ public interface Resolver {
   /**
    * Sends a message and waits for a response.
    *
+   * <p>The waiting is done on the calling thread. Do not call this method from async code, and
+   * especially not from tasks running on {@link ForkJoinPool#commonPool()}, use {@link
+   * #sendAsync(Message)} or {@link #sendAsync(Message, Executor)} instead.
+   *
    * @param query The query to send.
    * @return The response
    * @throws IOException An error occurred while sending or receiving.
@@ -166,7 +172,7 @@ public interface Resolver {
   }
 
   /**
-   * Asynchronously sends a message.
+   * Asynchronously sends a message using the default {@link ForkJoinPool#commonPool()}.
    *
    * <p>The default implementation calls the deprecated {@link #sendAsync(Message,
    * ResolverListener)}. Implementors must override at least one of the {@code sendAsync} methods or
@@ -175,8 +181,23 @@ public interface Resolver {
    * @param query The query to send.
    * @return A future that completes when the query is finished.
    */
-  @SuppressWarnings("deprecation")
   default CompletionStage<Message> sendAsync(Message query) {
+    return sendAsync(query, ForkJoinPool.commonPool());
+  }
+
+  /**
+   * Asynchronously sends a message.
+   *
+   * <p>The default implementation calls the deprecated {@link #sendAsync(Message,
+   * ResolverListener)}. Implementors must override at least one of the {@code sendAsync} methods or
+   * a stack overflow will occur.
+   *
+   * @param query The query to send.
+   * @param executor The service to use for async operations.
+   * @return A future that completes when the query is finished.
+   */
+  @SuppressWarnings("deprecation")
+  default CompletionStage<Message> sendAsync(Message query, Executor executor) {
     CompletableFuture<Message> f = new CompletableFuture<>();
     sendAsync(
         query,

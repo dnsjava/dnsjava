@@ -13,6 +13,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.NonNull;
@@ -55,6 +58,7 @@ public class LookupSession {
   private final boolean cycleResults;
   private final Map<Integer, Cache> caches;
   private final HostsFileParser hostsFileParser;
+  private final Executor executor;
 
   /**
    * @param resolver The {@link Resolver} to use to look up records.
@@ -72,6 +76,7 @@ public class LookupSession {
    * @param caches Enable caching using the supplied caches.
    * @param hostsFileParser Configures the local hosts database file parser to use within this
    *     session.
+   * @param executor The executor to use when running lookups.
    */
   @Builder
   private LookupSession(
@@ -81,7 +86,8 @@ public class LookupSession {
       @Singular("searchPath") List<Name> searchPath,
       boolean cycleResults,
       List<Cache> caches,
-      HostsFileParser hostsFileParser) {
+      HostsFileParser hostsFileParser,
+      Executor executor) {
     this.resolver = resolver;
     this.maxRedirects = maxRedirects;
     this.ndots = ndots;
@@ -89,6 +95,7 @@ public class LookupSession {
     this.cycleResults = cycleResults;
     this.caches = caches.stream().collect(Collectors.toMap(Cache::getDClass, e -> e));
     this.hostsFileParser = hostsFileParser;
+    this.executor = executor == null ? ForkJoinPool.commonPool() : executor;
   }
 
   /**
@@ -312,7 +319,7 @@ public class LookupSession {
                 return CompletableFuture.completedFuture(result);
               }
             })
-        .thenCompose(x -> x);
+        .thenCompose(Function.identity());
   }
 
   private CompletionStage<LookupResult> lookupWithCache(Record queryRecord, List<Name> aliases) {
@@ -324,7 +331,7 @@ public class LookupSession {
 
   private CompletionStage<LookupResult> lookupWithResolver(Record queryRecord, List<Name> aliases) {
     return resolver
-        .sendAsync(Message.newQuery(queryRecord))
+        .sendAsync(Message.newQuery(queryRecord), executor)
         .thenApply(this::maybeAddToCache)
         .thenApply(answer -> buildResult(answer, aliases, queryRecord));
   }

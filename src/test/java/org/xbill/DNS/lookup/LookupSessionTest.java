@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -119,7 +120,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -132,7 +133,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -176,7 +177,7 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("kubernetes.docker.internal."), MX, IN);
 
     assertThrowsCause(NoSuchDomainException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -244,7 +245,7 @@ class LookupSessionTest {
     assertEquals(
         singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
         result.getRecords());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -260,7 +261,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
     verify(mockCache).lookupRecords(name("a.b."), A, Credibility.NORMAL);
 
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -286,7 +287,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
     verifyNoMoreInteractions(mockCache);
   }
 
@@ -309,7 +310,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
 
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
     verify(mockCache2).lookupRecords(name("a.b."), A, Credibility.NORMAL);
 
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -445,7 +446,7 @@ class LookupSessionTest {
     assertEquals(
         Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
         result.getAliases());
-    verify(mockResolver, times(3)).sendAsync(any());
+    verify(mockResolver, times(3)).sendAsync(any(), any(Executor.class));
   }
 
   @ParameterizedTest
@@ -489,7 +490,7 @@ class LookupSessionTest {
         Stream.of(name("www.example.org."), name("www.example.net."), name("www.example.com."))
             .collect(Collectors.toList()),
         result.getAliases());
-    verify(mockResolver, times(1)).sendAsync(any());
+    verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
   @ParameterizedTest
@@ -518,7 +519,7 @@ class LookupSessionTest {
     assertEquals(
         Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
         result.getAliases());
-    verify(mockResolver, times(1)).sendAsync(any());
+    verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
   @ParameterizedTest
@@ -558,7 +559,7 @@ class LookupSessionTest {
     assertEquals(
         Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
         result.getAliases());
-    verify(mockResolver, times(2)).sendAsync(any());
+    verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -580,7 +581,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A), result.getRecords());
     assertEquals(singletonList(name("cname.r.")), result.getAliases());
-    verify(mockResolver, times(1)).sendAsync(any());
+    verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
   @ParameterizedTest
@@ -617,7 +618,7 @@ class LookupSessionTest {
       LookupResult result = future.get();
       assertEquals(0, result.getRecords().size());
     }
-    verify(mockResolver, times(2)).sendAsync(any());
+    verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -633,7 +634,7 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
     assertEquals(singletonList(name("cname.r.")), result.getAliases());
-    verify(mockResolver, times(2)).sendAsync(any());
+    verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -649,7 +650,7 @@ class LookupSessionTest {
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(singletonList(LOOPBACK_A.withName(name("x.y.to.a."))), result.getRecords());
-    verify(mockResolver, times(2)).sendAsync(any());
+    verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -666,7 +667,7 @@ class LookupSessionTest {
 
     assertThrowsCause(
         RedirectOverflowException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver, times(3)).sendAsync(any());
+    verify(mockResolver, times(3)).sendAsync(any(), any(Executor.class));
   }
 
   @ParameterizedTest
@@ -691,7 +692,7 @@ class LookupSessionTest {
 
     assertThrowsCause(
         RedirectOverflowException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver, times(1)).sendAsync(any());
+    verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -703,7 +704,7 @@ class LookupSessionTest {
 
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(0, result.getRecords().size());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -714,7 +715,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     assertThrowsCause(NoSuchDomainException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -725,7 +726,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     assertThrowsCause(ServerFailedException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -736,7 +737,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     assertThrowsCause(LookupFailedException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -747,7 +748,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     assertThrowsCause(NoSuchRRSetException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -761,7 +762,7 @@ class LookupSessionTest {
 
     assertThrowsCause(
         InvalidZoneDataException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   @Test
@@ -775,7 +776,7 @@ class LookupSessionTest {
 
     assertThrowsCause(
         InvalidZoneDataException.class, () -> resultFuture.toCompletableFuture().get());
-    verify(mockResolver).sendAsync(any());
+    verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
   private static Message multipleCNAMEs(Message query) {
@@ -803,7 +804,7 @@ class LookupSessionTest {
     LookupResult lookupResult = resultFuture.toCompletableFuture().get();
 
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-    verify(mockResolver).sendAsync(messageCaptor.capture());
+    verify(mockResolver).sendAsync(messageCaptor.capture(), any(Executor.class));
 
     assertEquals(
         Record.newRecord(name("host.example.com."), Type.A, DClass.IN, 0L),
@@ -827,7 +828,7 @@ class LookupSessionTest {
     LookupResult lookupResult = resultFuture.toCompletableFuture().get();
 
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-    verify(mockResolver).sendAsync(messageCaptor.capture());
+    verify(mockResolver).sendAsync(messageCaptor.capture(), any(Executor.class));
 
     assertEquals(
         Record.newRecord(name(LONG_LABEL + "."), A, IN, 0L),
@@ -853,7 +854,7 @@ class LookupSessionTest {
     LookupResult lookupResult = resultFuture.toCompletableFuture().get();
 
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-    verify(mockResolver, times(2)).sendAsync(messageCaptor.capture());
+    verify(mockResolver, times(2)).sendAsync(messageCaptor.capture(), any(Executor.class));
 
     List<Message> allValues = messageCaptor.getAllValues();
     assertEquals(
@@ -1002,7 +1003,7 @@ class LookupSessionTest {
   }
 
   private void wireUpMockResolver(Resolver mockResolver, Function<Message, Message> handler) {
-    when(mockResolver.sendAsync(any(Message.class)))
+    when(mockResolver.sendAsync(any(Message.class), any(Executor.class)))
         .thenAnswer(
             invocation -> {
               Message query = invocation.getArgument(0);

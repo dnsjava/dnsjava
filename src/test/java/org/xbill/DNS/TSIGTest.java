@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import org.junit.jupiter.api.Test;
 
 class TSIGTest {
@@ -77,7 +78,7 @@ class TSIGTest {
     SimpleResolver res =
         new SimpleResolver("127.0.0.1") {
           @Override
-          CompletableFuture<Message> sendAsync(Message query, boolean forceTcp) {
+          CompletableFuture<Message> sendAsync(Message query, boolean forceTcp, Executor executor) {
             byte[] out = query.toWire(Message.MAXLENGTH);
             try {
               return CompletableFuture.completedFuture(new Message(out));
