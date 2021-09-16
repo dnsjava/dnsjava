@@ -21,14 +21,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.AsyncSemaphore.Permit;
 import org.xbill.DNS.utils.base64;
 
 /**
@@ -85,10 +85,10 @@ public final class DohResolver implements Resolver {
    *
    * <p>rfc7540#section-6.5.2 recommends a minimum of 100 streams for HTTP/2.
    */
-  private final Semaphore maxConcurrentRequests;
+  private final AsyncSemaphore maxConcurrentRequests;
 
   private final AtomicLong lastRequest = new AtomicLong(0);
-  private final Semaphore initialRequestLock = new Semaphore(1);
+  private final AsyncSemaphore initialRequestLock = new AsyncSemaphore(1);
 
   static {
     boolean initSuccess = false;
@@ -206,7 +206,7 @@ public final class DohResolver implements Resolver {
         // well, use what we got
       }
     }
-    this.maxConcurrentRequests = new Semaphore(maxConcurrentRequests);
+    this.maxConcurrentRequests = new AsyncSemaphore(maxConcurrentRequests);
     try {
       sslSocketFactory = SSLContext.getDefault().getSocketFactory();
     } catch (NoSuchAlgorithmException e) {
@@ -239,15 +239,21 @@ public final class DohResolver implements Resolver {
 
   /** Not implemented. Specify the port in {@link #setUriTemplate(String)} if required. */
   @Override
-  public void setPort(int port) {}
+  public void setPort(int port) {
+    // Not implemented, port is part of the URI
+  }
 
   /** Not implemented. */
   @Override
-  public void setTCP(boolean flag) {}
+  public void setTCP(boolean flag) {
+    // Not implemented, HTTP is always TCP
+  }
 
   /** Not implemented. */
   @Override
-  public void setIgnoreTruncation(boolean flag) {}
+  public void setIgnoreTruncation(boolean flag) {
+    // Not implemented, protocol uses TCP and doesn't have truncation
+  }
 
   /**
    * Sets the EDNS information on outgoing messages.
@@ -304,35 +310,31 @@ public final class DohResolver implements Resolver {
   }
 
   private CompletionStage<Message> sendAsync8(final Message query, Executor executor) {
-    CompletableFuture<Message> f = new CompletableFuture<>();
-    executor.execute(
-        () -> {
-          try {
-            byte[] queryBytes = prepareQuery(query).toWire();
-            String url = getUrl(queryBytes);
-
-            // limit number of concurrent connections
-            if (!maxConcurrentRequests.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-              failedFuture(new IOException("Query timed out"));
-              return;
-            }
-
-            byte[] responseBytes;
-            try {
-              responseBytes = sendAndGetMessageBytes(url, queryBytes);
-            } finally {
-              maxConcurrentRequests.release();
-            }
-            Message response = new Message(responseBytes);
-            verifyTSIG(query, response, responseBytes, tsig);
-            response.setResolver(this);
-            f.complete(response);
-          } catch (InterruptedException | IOException e) {
-            f.completeExceptionally(e);
-            Thread.currentThread().interrupt();
-          }
-        });
-    return f;
+    byte[] queryBytes = prepareQuery(query).toWire();
+    String url = getUrl(queryBytes);
+    return maxConcurrentRequests
+        .acquire(timeout)
+        .handleAsync(
+            (permit, ex) -> {
+              if (ex != null) {
+                return this.<Message>timeoutFailedFuture(query);
+              } else {
+                try {
+                  byte[] responseBytes;
+                  responseBytes = sendAndGetMessageBytes(url, queryBytes);
+                  Message response = new Message(responseBytes);
+                  verifyTSIG(query, response, responseBytes, tsig);
+                  response.setResolver(this);
+                  return CompletableFuture.completedFuture(response);
+                } catch (IOException e) {
+                  return this.<Message>failedFuture(e);
+                } finally {
+                  permit.release();
+                }
+              }
+            },
+            executor)
+        .thenCompose(Function.identity());
   }
 
   private byte[] sendAndGetMessageBytes(String url, byte[] queryBytes) throws IOException {
@@ -392,85 +394,120 @@ public final class DohResolver implements Resolver {
     byte[] queryBytes = prepareQuery(query).toWire();
     String url = getUrl(queryBytes);
 
+    // var requestBuilder = defaultHttpRequestBuilder.copy();
+    // requestBuilder.uri(URI.create(url));
+    Object requestBuilder;
     try {
-      // var builder = defaultHttpRequestBuilder.copy();
-      // builder.uri(URI.create(url));
-      Object builder = requestBuilderCopyMethod.invoke(defaultHttpRequestBuilder);
-      requestBuilderUriMethod.invoke(builder, URI.create(url));
+      requestBuilder = requestBuilderCopyMethod.invoke(defaultHttpRequestBuilder);
+      requestBuilderUriMethod.invoke(requestBuilder, URI.create(url));
       if (usePost) {
-        // builder.POST(HttpRequest.BodyPublishers.ofByteArray(queryBytes));
+        // requestBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(queryBytes));
         requestBuilderPostMethod.invoke(
-            builder, publisherOfByteArrayMethod.invoke(null, queryBytes));
+            requestBuilder, publisherOfByteArrayMethod.invoke(null, queryBytes));
       }
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      return failedFuture(e);
+    }
 
-      try {
-        // check if this request needs to be done synchronously because of HttpClient's stupidity to
-        // not use the connection pool for HTTP/2 until one connection is successfully established,
-        // which could lead to hundreds of connections (and threads with the default executor)
-        if (!initialRequestLock.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-          return failedFuture(new IOException("Query timed out"));
-        }
-      } catch (InterruptedException iex) {
-        Thread.currentThread().interrupt();
-        return failedFuture(iex);
+    // check if this request needs to be done synchronously because of HttpClient's stupidity to
+    // not use the connection pool for HTTP/2 until one connection is successfully established,
+    // which could lead to hundreds of connections (and threads with the default executor)
+    return initialRequestLock
+        .acquire(timeout)
+        .handle(
+            (initialRequestPermit, initialRequestEx) -> {
+              if (initialRequestEx != null) {
+                return this.<Message>timeoutFailedFuture(query);
+              } else {
+                return sendAsync11WithInitialRequestPermit(
+                    query, executor, startTime, requestBuilder, initialRequestPermit);
+              }
+            })
+        .thenCompose(Function.identity());
+  }
+
+  private CompletionStage<Message> sendAsync11WithInitialRequestPermit(
+      Message query,
+      Executor executor,
+      long startTime,
+      Object requestBuilder,
+      Permit initialRequestPermit) {
+    long lastRequestTime = lastRequest.get();
+    boolean isInitialRequest =
+        (lastRequestTime < System.nanoTime() - idleConnectionTimeout.toNanos());
+    if (!isInitialRequest) {
+      initialRequestPermit.release();
+    }
+
+    // check if we already exceeded the query timeout while checking the initial connection
+    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    if (remainingTimeout.isNegative()) {
+      if (isInitialRequest) {
+        initialRequestPermit.release();
       }
+      return timeoutFailedFuture(query);
+    }
 
-      long lastRequestTime = lastRequest.get();
-      long now = System.nanoTime();
-      boolean isInitialRequest = (lastRequestTime < now - idleConnectionTimeout.toNanos());
-      if (!isInitialRequest) {
-        initialRequestLock.release();
+    // Lock a HTTP/2 stream. Another stupidity of HttpClient to not simply queue the
+    // request, but fail with an IOException which also CLOSES the connection... *facepalm*
+    return maxConcurrentRequests
+        .acquire(remainingTimeout)
+        .handle(
+            (maxConcurrentRequestPermit, maxConcurrentRequestEx) -> {
+              if (maxConcurrentRequestEx != null) {
+                if (isInitialRequest) {
+                  initialRequestPermit.release();
+                }
+                return this.<Message>timeoutFailedFuture(query);
+              } else {
+                return sendAsync11WithConcurrentRequestPermit(
+                    query,
+                    executor,
+                    startTime,
+                    requestBuilder,
+                    initialRequestPermit,
+                    isInitialRequest,
+                    maxConcurrentRequestPermit);
+              }
+            })
+        .thenCompose(Function.identity());
+  }
+
+  private CompletionStage<Message> sendAsync11WithConcurrentRequestPermit(
+      Message query,
+      Executor executor,
+      long startTime,
+      Object requestBuilder,
+      Permit initialRequestPermit,
+      boolean isInitialRequest,
+      Permit maxConcurrentRequestPermit) {
+    // check if the stream lock acquisition took too long
+    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    if (remainingTimeout.isNegative()) {
+      if (isInitialRequest) {
+        initialRequestPermit.release();
       }
+      maxConcurrentRequestPermit.release();
+      return timeoutFailedFuture(query);
+    }
 
-      // check if we already exceeded the query timeout while checking the initial connection
-      Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
-      if (remainingTimeout.isNegative()) {
-        if (isInitialRequest) {
-          initialRequestLock.release();
-        }
-        return failedFuture(new IOException("Query timed out"));
-      }
-
-      try {
-        // Lock a HTTP/2 stream. Another stupidity of HttpClient to not simply queue the request,
-        // but fail with an IOException which also CLOSES the connection... *facepalm*
-        if (!maxConcurrentRequests.tryAcquire(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
-          if (isInitialRequest) {
-            initialRequestLock.release();
-          }
-          return failedFuture(new IOException("Query timed out"));
-        }
-      } catch (InterruptedException iex) {
-        if (isInitialRequest) {
-          initialRequestLock.release();
-        }
-        Thread.currentThread().interrupt();
-        return failedFuture(iex);
-      }
-
-      // check if the stream lock acquisition took too long
-      remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
-      if (remainingTimeout.isNegative()) {
-        if (isInitialRequest) {
-          initialRequestLock.release();
-        }
-        return failedFuture(new IOException("Query timed out"));
-      }
-
-      // var httpRequest = builder.build();
-      // var bodyHandler = HttpResponse.BodyHandlers.ofByteArray();
-      // return httpClient
-      //     .sendAsync(httpRequest, bodyHandler)
-      Object httpRequest = requestBuilderBuildMethod.invoke(builder);
+    // var httpRequest = requestBuilder.build();
+    // var bodyHandler = HttpResponse.BodyHandlers.ofByteArray();
+    // return getHttpClient(executor).sendAsync(httpRequest, bodyHandler)
+    try {
+      Object httpClient = getHttpClient(executor);
+      Object httpRequest = requestBuilderBuildMethod.invoke(requestBuilder);
       Object bodyHandler = byteArrayBodyPublisherMethod.invoke(null);
       return ((CompletionStage<?>)
-              httpClientSendAsyncMethod.invoke(getHttpClient(executor), httpRequest, bodyHandler))
+              httpClientSendAsyncMethod.invoke(httpClient, httpRequest, bodyHandler))
           .whenComplete(
               (result, ex) -> {
-                maxConcurrentRequests.release();
-                if (isInitialRequest && ex == null) {
-                  lastRequest.set(now);
-                  initialRequestLock.release();
+                maxConcurrentRequestPermit.release();
+                if (isInitialRequest) {
+                  if (ex == null) {
+                    lastRequest.set(startTime);
+                  }
+                  initialRequestPermit.release();
                 }
               })
           .thenComposeAsync(
@@ -500,10 +537,20 @@ public final class DohResolver implements Resolver {
     }
   }
 
-  private <T> CompletionStage<T> failedFuture(Throwable e) {
+  private <T> CompletableFuture<T> failedFuture(Throwable e) {
     CompletableFuture<T> f = new CompletableFuture<>();
     f.completeExceptionally(e);
     return f;
+  }
+
+  private <T> CompletableFuture<T> timeoutFailedFuture(Message query) {
+    return failedFuture(
+        new IOException(
+            "Query for "
+                + query.getQuestion().getName()
+                + "/"
+                + Type.string(query.getQuestion().getType())
+                + " timed out"));
   }
 
   private String getUrl(byte[] queryBytes) {
