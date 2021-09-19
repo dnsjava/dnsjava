@@ -47,11 +47,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <target.jdk>8</target.jdk>
 
-        <org.junit.version>5.7.2</org.junit.version>
+        <org.junit.version>5.8.0</org.junit.version>
+        <mockito.version>3.12.4</mockito.version>
         <slf4j.version>1.7.32</slf4j.version>
         <lombok.version>1.18.20</lombok.version>
-        <jna.version>5.8.0</jna.version>
+        <jna.version>5.9.0</jna.version>
         <bouncycastle.version>1.69</bouncycastle.version>
+        <vertx.version>4.1.4</vertx.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
@@ -131,7 +133,7 @@
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>
-                            BSD-2-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
+                            BSD-2-Clause;link="https://github.com/dnsjava/dnsjava/blob/release/3.4.x/LICENSE"
                         </Bundle-License>
                         <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource</_removeheaders>
                         <Include-Resource>
@@ -146,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.1</version>
                 <configuration>
                     <source>${target.jdk}</source>
                     <debug>true</debug>
@@ -404,13 +406,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.6.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.6.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -422,13 +424,13 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
-            <version>4.1.4</version>
+            <version>${vertx.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-junit5</artifactId>
-            <version>4.1.4</version>
+            <version>${vertx.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
