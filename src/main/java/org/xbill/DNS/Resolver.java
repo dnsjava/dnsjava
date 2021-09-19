@@ -106,7 +106,7 @@ public interface Resolver {
    */
   @Deprecated
   default void setTimeout(int secs, int msecs) {
-    setTimeout(Duration.ofMillis(secs * 1000 + msecs));
+    setTimeout(Duration.ofMillis(secs * 1000L + msecs));
   }
 
   /**

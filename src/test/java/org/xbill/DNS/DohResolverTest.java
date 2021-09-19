@@ -29,7 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 @ExtendWith(VertxExtension.class)
-public class DohResolverTest {
+class DohResolverTest {
   private DohResolver resolver;
   private final Name queryName = Name.fromConstantString("example.com.");
   private final Record qr = Record.newRecord(queryName, Type.A, DClass.IN);
