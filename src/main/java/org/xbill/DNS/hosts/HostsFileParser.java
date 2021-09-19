@@ -22,7 +22,7 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 /**
- * Parses and caches the systems local hosts database, otherwise known as {@code /etc/hosts}. The
+ * Parses and caches the system's local hosts database, otherwise known as {@code /etc/hosts}. The
  * cache is cleared when the file is modified.
  *
  * @since 3.4

@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -259,7 +261,7 @@ public class SimpleResolver implements Resolver {
       return new Message(b);
     } catch (IOException e) {
       if (!(e instanceof WireParseException)) {
-        e = new WireParseException("Error parsing message");
+        throw new WireParseException("Error parsing message", e);
       }
       throw (WireParseException) e;
     }
@@ -290,15 +292,25 @@ public class SimpleResolver implements Resolver {
   }
 
   /**
-   * Asynchronously sends a message to a single server, registering a listener to receive a callback
-   * on success or exception. Multiple asynchronous lookups can be performed in parallel. Since the
-   * callback may be invoked before the function returns, external synchronization is necessary.
+   * Asynchronously sends a message to a single server.
    *
    * @param query The query to send
    * @return A future that completes when the response has arrived.
    */
   @Override
   public CompletionStage<Message> sendAsync(Message query) {
+    return sendAsync(query, ForkJoinPool.commonPool());
+  }
+
+  /**
+   * Asynchronously sends a message to a single server.
+   *
+   * @param query The query to send
+   * @param executor The service to use for async operations.
+   * @return A future that completes when the response has arrived.
+   */
+  @Override
+  public CompletionStage<Message> sendAsync(Message query, Executor executor) {
     if (query.getHeader().getOpcode() == Opcode.QUERY) {
       Record question = query.getQuestion();
       if (question != null && question.getType() == Type.AXFR) {
@@ -310,7 +322,8 @@ public class SimpleResolver implements Resolver {
               } catch (IOException e) {
                 f.completeExceptionally(e);
               }
-            });
+            },
+            executor);
 
         return f;
       }
@@ -322,23 +335,34 @@ public class SimpleResolver implements Resolver {
       ednsTsigQuery.setTSIG(tsig, Rcode.NOERROR, null);
     }
 
-    return sendAsync(ednsTsigQuery, useTCP);
+    return sendAsync(ednsTsigQuery, useTCP, executor);
   }
 
-  CompletableFuture<Message> sendAsync(Message query, boolean forceTcp) {
+  CompletableFuture<Message> sendAsync(Message query, boolean forceTcp, Executor executor) {
     int qid = query.getHeader().getID();
     byte[] out = query.toWire(Message.MAXLENGTH);
     int udpSize = maxUDPSize(query);
     boolean tcp = forceTcp || out.length > udpSize;
-    log.debug(
-        "Sending {}/{}, id={} to {}/{}:{}",
-        query.getQuestion().getName(),
-        Type.string(query.getQuestion().getType()),
-        qid,
-        tcp ? "tcp" : "udp",
-        address.getAddress().getHostAddress(),
-        address.getPort());
-    log.trace("Query:\n{}", query);
+    if (log.isTraceEnabled()) {
+      log.trace(
+          "Sending {}/{}, id={} to {}/{}:{}, query:\n{}",
+          query.getQuestion().getName(),
+          Type.string(query.getQuestion().getType()),
+          qid,
+          tcp ? "tcp" : "udp",
+          address.getAddress().getHostAddress(),
+          address.getPort(),
+          query);
+    } else if (log.isDebugEnabled()) {
+      log.debug(
+          "Sending {}/{}, id={} to {}/{}:{}",
+          query.getQuestion().getName(),
+          Type.string(query.getQuestion().getType()),
+          qid,
+          tcp ? "tcp" : "udp",
+          address.getAddress().getHostAddress(),
+          address.getPort());
+    }
 
     CompletableFuture<byte[]> result;
     if (tcp) {
@@ -409,15 +433,22 @@ public class SimpleResolver implements Resolver {
 
           verifyTSIG(query, response, in, tsig);
           if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
-            log.debug("Got truncated response for id {}, retrying via TCP", qid);
-            log.trace("Truncated response: {}", response);
-            return sendAsync(query, true);
+            if (log.isTraceEnabled()) {
+              log.trace(
+                  "Got truncated response for id {}, retrying via TCP, response:\n{}",
+                  qid,
+                  response);
+            } else {
+              log.debug("Got truncated response for id {}, retrying via TCP", qid);
+            }
+            return sendAsync(query, true, executor);
           }
 
           response.setResolver(this);
           f.complete(response);
           return f;
-        });
+        },
+        executor);
   }
 
   private Message sendAXFR(Message query) throws IOException {

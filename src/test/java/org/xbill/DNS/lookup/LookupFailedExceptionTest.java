@@ -9,8 +9,6 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.Type;
 
 class LookupFailedExceptionTest {
-
-  @SuppressWarnings("ThrowableNotThrown")
   @Test
   void ctor_noNameAndType() {
     LookupFailedException exception = new LookupFailedException();
@@ -18,7 +16,6 @@ class LookupFailedExceptionTest {
     assertEquals(0, exception.getType());
   }
 
-  @SuppressWarnings("ThrowableNotThrown")
   @Test
   void ctor_withMessage() {
     LookupFailedException exception = new LookupFailedException("message");
@@ -27,7 +24,6 @@ class LookupFailedExceptionTest {
     assertEquals(0, exception.getType());
   }
 
-  @SuppressWarnings("ThrowableNotThrown")
   @Test
   void ctor_withNameAndType() {
     Name name = Name.fromConstantString("a.b.");

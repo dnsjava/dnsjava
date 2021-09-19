@@ -39,17 +39,49 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.ByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-class DNSInputTest {
-  private byte[] m_raw;
-  private DNSInput m_di;
+abstract class DNSInputBase {
+  protected byte[] m_raw;
+  protected DNSInput m_di;
 
-  @BeforeEach
-  void setUp() {
-    m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
-    m_di = new DNSInput(m_raw);
+  static class DNSInputArrayTest extends DNSInputBase {
+    @BeforeEach
+    void setUp() {
+      m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
+      m_di = new DNSInput(m_raw);
+    }
+  }
+
+  static class DNSInputByteBufferTest extends DNSInputBase {
+    @BeforeEach
+    void setUp() {
+      m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
+      ByteBuffer buffer = ByteBuffer.allocate(m_raw.length + 2);
+      buffer.putShort((short) 0xFF);
+      buffer.put(m_raw);
+      buffer.flip();
+      buffer.getShort();
+      m_di = new DNSInput(buffer);
+    }
+  }
+
+  static class DNSInputByteBufferLimitTest extends DNSInputBase {
+    @BeforeEach
+    void setUp() {
+      m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
+      ByteBuffer buffer = ByteBuffer.allocate(m_raw.length + 10);
+      buffer.putShort((short) 0xFF);
+      buffer.put(m_raw);
+      buffer.flip();
+      buffer.getShort();
+      buffer.limit(m_raw.length + 2);
+      m_di = new DNSInput(buffer);
+    }
   }
 
   @Test
@@ -77,25 +109,12 @@ class DNSInputTest {
     assertThrows(IllegalArgumentException.class, () -> m_di.jump(10));
   }
 
-  @Test
-  void setActive() {
-    m_di.setActive(5);
+  @ParameterizedTest
+  @ValueSource(ints = {5, 10, 0})
+  void setActive(int active) {
+    m_di.setActive(active);
     assertEquals(0, m_di.current());
-    assertEquals(5, m_di.remaining());
-  }
-
-  @Test
-  void setActive_boundary1() {
-    m_di.setActive(10);
-    assertEquals(0, m_di.current());
-    assertEquals(10, m_di.remaining());
-  }
-
-  @Test
-  void setActive_boundary2() {
-    m_di.setActive(0);
-    assertEquals(0, m_di.current());
-    assertEquals(0, m_di.remaining());
+    assertEquals(active, m_di.remaining());
   }
 
   @Test
@@ -152,6 +171,17 @@ class DNSInputTest {
 
     m_di.restoreActive(save);
     assertEquals(6, m_di.remaining());
+  }
+
+  @Test
+  void save_set_restore_boundary() {
+    m_di.setActive(4);
+    assertEquals(4, m_di.remaining());
+
+    m_di.restoreActive(10);
+    assertEquals(10, m_di.remaining());
+
+    assertThrows(IllegalArgumentException.class, () -> m_di.restoreActive(12));
   }
 
   @Test
@@ -287,6 +317,6 @@ class DNSInputTest {
     byte[] out = m_di.readCountedString();
     assertEquals(1, out.length);
     assertEquals(3, m_di.current());
-    assertEquals(out[0], 2);
+    assertEquals(2, out[0]);
   }
 }

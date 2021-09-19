@@ -47,11 +47,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <target.jdk>8</target.jdk>
 
-        <org.junit.version>5.7.2</org.junit.version>
+        <org.junit.version>5.8.0</org.junit.version>
+        <mockito.version>3.12.4</mockito.version>
         <slf4j.version>1.7.32</slf4j.version>
         <lombok.version>1.18.20</lombok.version>
-        <jna.version>5.8.0</jna.version>
+        <jna.version>5.9.0</jna.version>
         <bouncycastle.version>1.69</bouncycastle.version>
+        <vertx.version>4.1.4</vertx.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
@@ -59,7 +61,6 @@
         <sonar.java.source>${target.jdk}</sonar.java.source>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <delombok.output>${project.build.directory}/generated-sources/delombok</delombok.output>
     </properties>
 
     <build>
@@ -132,7 +133,7 @@
                         </Import-Package>
                         <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>
-                            BSD-2-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
+                            BSD-3-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
                         </Bundle-License>
                         <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource</_removeheaders>
                         <Include-Resource>
@@ -147,14 +148,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.1</version>
                 <configuration>
                     <source>${target.jdk}</source>
                     <debug>true</debug>
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
                     <doclint>none</doclint>
-                    <sourcepath>${delombok.output}</sourcepath>
                 </configuration>
             </plugin>
 
@@ -223,6 +223,13 @@
                                 <semanticVersionLevel>PATCH</semanticVersionLevel>
                                 <sourceCompatible>true</sourceCompatible>
                                 <binaryCompatible>true</binaryCompatible>
+                            </overrideCompatibilityChangeParameter>
+                            <overrideCompatibilityChangeParameter>
+                                <!-- https://github.com/siom79/japicmp/issues/201 -->
+                                <compatibilityChange>METHOD_NEW_DEFAULT</compatibilityChange>
+                                <semanticVersionLevel>PATCH</semanticVersionLevel>
+                                <binaryCompatible>true</binaryCompatible>
+                                <sourceCompatible>true</sourceCompatible>
                             </overrideCompatibilityChangeParameter>
                         </overrideCompatibilityChangeParameters>
                     </parameter>
@@ -329,24 +336,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-                <version>${lombok.version}.0</version>
-                <configuration>
-                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                    <addOutputDirectory>false</addOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>delombok</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.2.0</version>
@@ -417,19 +406,31 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.6.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.6.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>${vertx.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-junit5</artifactId>
+            <version>${vertx.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

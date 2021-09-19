@@ -9,13 +9,15 @@ public class LookupFailedException extends RuntimeException {
   private final int type;
 
   public LookupFailedException() {
-    super();
-    name = null;
-    type = 0;
+    this(null, null);
   }
 
   public LookupFailedException(String message) {
-    super(message);
+    this(message, null);
+  }
+
+  LookupFailedException(String message, Throwable inner) {
+    super(message, inner);
     name = null;
     type = 0;
   }

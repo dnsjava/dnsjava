@@ -4,6 +4,7 @@ package org.xbill.DNS.lookup;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.Builder;
 import lombok.NonNull;
-import lombok.Singular;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
@@ -24,86 +27,275 @@ import org.xbill.DNS.Cache;
 import org.xbill.DNS.Credibility;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
+import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
+import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
+import org.xbill.DNS.ResolverConfig;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SetResponse;
+import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.hosts.HostsFileParser;
 
 /**
  * LookupSession provides facilities to make DNS Queries. A LookupSession is intended to be long
- * lived, and it's behaviour can be configured using the properties of the LookupSessionBuilder
- * instance returned by the builder() method.
+ * lived, and it's behaviour can be configured using the properties of the {@link
+ * LookupSessionBuilder} instance returned by {@link #builder()}.
  */
-@Builder
 @Slf4j
 public class LookupSession {
   public static final int DEFAULT_MAX_ITERATIONS = 16;
   public static final int DEFAULT_NDOTS = 1;
-  /** The {@link Resolver} to use to look up records. */
-  @NonNull private final Resolver resolver;
-  /**
-   * Sets the maximum number of CNAME or DNAME redirects allowed before lookups with fail with
-   * {@link RedirectOverflowException}. Defaults to {@value
-   * org.xbill.DNS.lookup.LookupSession#DEFAULT_MAX_ITERATIONS}.
-   */
-  @Builder.Default private final int maxRedirects = DEFAULT_MAX_ITERATIONS;
-  /**
-   * Sets the threshold for the number of dots which must appear in a name before it is considered
-   * absolute. The default is {@value org.xbill.DNS.lookup.LookupSession#DEFAULT_NDOTS}, meaning
-   * that if there are any dots in a name, the name will be tried first as an absolute name.
-   */
-  @Builder.Default private final int ndots = DEFAULT_NDOTS;
 
-  /** Configures the search path used to look up relative names with less than ndots dots. */
-  @Singular("searchPath")
+  private final Resolver resolver;
+  private final int maxRedirects;
+  private final int ndots;
   private final List<Name> searchPath;
-
-  /**
-   * If set to {@code true}, cached results with multiple records will be returned with the starting
-   * point shifted one step per request.
-   */
-  @Builder.Default private final boolean cycleResults = false;
-
-  /**
-   * Configures the Cache instances to be used for lookups for the different {@link DClass} values.
-   */
-  @Singular("cache")
+  private final boolean cycleResults;
   private final Map<Integer, Cache> caches;
-
-  /** Configures the local hosts database file parser to use within this session. */
   private final HostsFileParser hostsFileParser;
+  private final Executor executor;
+
+  private LookupSession(
+      @NonNull Resolver resolver,
+      int maxRedirects,
+      int ndots,
+      List<Name> searchPath,
+      boolean cycleResults,
+      List<Cache> caches,
+      HostsFileParser hostsFileParser,
+      Executor executor) {
+    this.resolver = resolver;
+    this.maxRedirects = maxRedirects;
+    this.ndots = ndots;
+    this.searchPath = searchPath;
+    this.cycleResults = cycleResults;
+    this.caches =
+        caches == null
+            ? Collections.emptyMap()
+            : caches.stream().collect(Collectors.toMap(Cache::getDClass, e -> e));
+    this.hostsFileParser = hostsFileParser;
+    this.executor = executor == null ? ForkJoinPool.commonPool() : executor;
+  }
 
   /**
-   * A builder for {@link LookupSession} instances where functionality is mostly generated as
-   * described in the <a href="https://projectlombok.org/features/Builder">Lombok Builder</a>
-   * documentation. An instance of this class is obtained by calling {@link LookupSession#builder()}
-   * and configured using the methods with names corresponding to the different properties. Once
-   * fully configured, a {@link LookupSession} instance is obtained by calling {@link
-   * LookupSessionBuilder#build()} on the builder instance.
+   * A builder for {@link LookupSession} instances. An instance of this class is obtained by calling
+   * {@link LookupSession#builder()} and configured using the methods with names corresponding to
+   * the different properties. Once fully configured, a {@link LookupSession} instance is obtained
+   * by calling {@link LookupSessionBuilder#build()} on the builder instance.
    */
+  @ToString
   public static class LookupSessionBuilder {
+    private Resolver resolver;
+    private int maxRedirects;
+    private int ndots;
+    private List<Name> searchPath;
+    private boolean cycleResults;
+    private List<Cache> caches;
+    private HostsFileParser hostsFileParser;
+    private Executor executor;
+
+    private LookupSessionBuilder() {}
+
+    /**
+     * The {@link Resolver} to use to look up records.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder resolver(@NonNull Resolver resolver) {
+      this.resolver = resolver;
+      return this;
+    }
+
+    /**
+     * The maximum number of CNAME or DNAME redirects allowed before lookups will fail with {@link
+     * RedirectOverflowException}. Defaults to {@value
+     * org.xbill.DNS.lookup.LookupSession#DEFAULT_MAX_ITERATIONS}.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder maxRedirects(int maxRedirects) {
+      this.maxRedirects = maxRedirects;
+      return this;
+    }
+
+    /**
+     * The threshold for the number of dots which must appear in a name before it is considered
+     * absolute. The default is {@value org.xbill.DNS.lookup.LookupSession#DEFAULT_NDOTS}, meaning
+     * that if there are any dots in a name, the name will be tried first as an absolute name.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder ndots(int ndots) {
+      this.ndots = ndots;
+      return this;
+    }
+
+    /**
+     * Configures the search path used to look up relative names with less than ndots dots.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder searchPath(Name searchPath) {
+      if (this.searchPath == null) {
+        this.searchPath = new ArrayList<>();
+      }
+      this.searchPath.add(searchPath);
+      return this;
+    }
+
+    /**
+     * Configures the search path used to look up relative names with less than ndots dots.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder searchPath(Collection<? extends Name> searchPath) {
+      if (this.searchPath == null) {
+        this.searchPath = new ArrayList<>();
+      }
+      this.searchPath.addAll(searchPath);
+      return this;
+    }
+
+    /**
+     * Removes all search paths.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder clearSearchPath() {
+      if (this.searchPath != null) {
+        this.searchPath.clear();
+      }
+      return this;
+    }
+
+    /**
+     * If set to {@code true}, cached results with multiple records will be returned with the
+     * starting point shifted one step per request.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder cycleResults(boolean cycleResults) {
+      this.cycleResults = cycleResults;
+      return this;
+    }
+
+    /**
+     * Configures the local hosts database file parser to use within this session.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder hostsFileParser(HostsFileParser hostsFileParser) {
+      this.hostsFileParser = hostsFileParser;
+      return this;
+    }
+
+    /**
+     * The executor to use when running lookups.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder executor(Executor executor) {
+      this.executor = executor;
+      return this;
+    }
+
     /**
      * Enable querying the local hosts database using the system defaults.
      *
      * @see HostsFileParser
+     * @return {@code this}.
      */
     public LookupSessionBuilder defaultHostsFileParser() {
       hostsFileParser = new HostsFileParser();
       return this;
     }
 
-    void preBuild() {
+    /**
+     * Enable caching using the supplied cache. An existing {@link Cache} for the same class will be
+     * replaced.
+     *
+     * @see Cache
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder cache(@NonNull Cache cache) {
+      if (caches == null) {
+        caches = new ArrayList<>(1);
+      }
+      for (Cache c : caches) {
+        if (c.getDClass() == cache.getDClass()) {
+          caches.remove(c);
+          break;
+        }
+      }
+      caches.add(cache);
+      return this;
+    }
+
+    /**
+     * Enable caching using the supplied caches. Existing {@link Cache}s for the same class will be
+     * replaced.
+     *
+     * @see Cache
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder caches(@NonNull Collection<Cache> caches) {
+      caches.forEach(this::cache);
+      return this;
+    }
+
+    /**
+     * Disables using a cache for lookups.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder clearCaches() {
+      if (caches != null) {
+        caches.clear();
+      }
+      return this;
+    }
+
+    /**
+     * Enable caching using the supplied cache for the given class.
+     *
+     * @param dclass unused
+     * @deprecated use {@link #cache(Cache)}, the {@link Cache} already provides the class.
+     * @see Cache
+     * @return {@code this}.
+     */
+    @Deprecated
+    public LookupSessionBuilder cache(@NonNull Integer dclass, @NonNull Cache cache) {
+      cache(cache);
+      return this;
+    }
+
+    /**
+     * Enable caching using the supplied caches.
+     *
+     * @param caches unused
+     * @deprecated use {@link #cache(Cache)} or {@link #caches(Collection)}, the {@link Cache}
+     *     already provides the class.
+     * @see Cache
+     * @return {@code this}.
+     */
+    @Deprecated
+    public LookupSessionBuilder caches(@NonNull Map<Integer, Cache> caches) {
+      return caches(caches.values());
+    }
+
+    /** Create an instance of {@link LookupSession} configured by this builder. */
+    public LookupSession build() {
       // note that this transform is idempotent, as concatenating an already absolute Name with root
       // is a noop.
       if (searchPath != null) {
-        this.searchPath =
+        searchPath =
             searchPath.stream()
                 .map(
                     name -> {
@@ -114,19 +306,65 @@ public class LookupSession {
                       }
                     })
                 .collect(Collectors.toCollection(ArrayList::new));
+      } else {
+        searchPath = Collections.emptyList();
       }
+
+      return new LookupSession(
+          resolver,
+          maxRedirects,
+          ndots,
+          searchPath,
+          cycleResults,
+          caches,
+          hostsFileParser,
+          executor);
     }
   }
 
-  /** Returns a new {@link LookupSessionBuilder} instance. */
+  /**
+   * Returns an empty {@link LookupSessionBuilder} instance. See {@link #defaultBuilder()} for a
+   * builder initialized with defaults.
+   */
   public static LookupSessionBuilder builder() {
-    return new LookupSessionBuilder() {
-      @Override
-      public LookupSession build() {
-        preBuild();
-        return super.build();
-      }
-    };
+    LookupSessionBuilder builder = new LookupSessionBuilder();
+    builder.maxRedirects = DEFAULT_MAX_ITERATIONS;
+    builder.ndots = DEFAULT_NDOTS;
+    return builder;
+  }
+
+  /**
+   * Returns a {@link LookupSessionBuilder} instance initialized with defaults.
+   *
+   * <ul>
+   *   <li>Resolver: an {@link org.xbill.DNS.ExtendedResolver} initialized with the system's default
+   *       DNS servers as determined by {@link org.xbill.DNS.ResolverConfig}.
+   *   <li>ndots: as determined by {@link org.xbill.DNS.ResolverConfig}.
+   *   <li>Cache: A cache for the {@code IN} class is installed.
+   *   <li>Hosts: The local host database file is used.
+   * </ul>
+   */
+  public static LookupSessionBuilder defaultBuilder() {
+    return builder()
+        .resolver(
+            new ExtendedResolver(
+                ResolverConfig.getCurrentConfig().servers().stream()
+                    .map(SimpleResolver::new)
+                    .collect(Collectors.toList())))
+        .ndots(ResolverConfig.getCurrentConfig().ndots())
+        .cache(new Cache(DClass.IN))
+        .defaultHostsFileParser();
+  }
+
+  /**
+   * Make an asynchronous lookup of the provided name using the default {@link DClass#IN}.
+   *
+   * @param name the name to look up.
+   * @param type the type to look up, values should correspond to constants in {@link Type}.
+   * @return A {@link CompletionStage} what will yield the eventual lookup result.
+   */
+  public CompletionStage<LookupResult> lookupAsync(Name name, int type) {
+    return lookupAsync(name, type, DClass.IN);
   }
 
   /**
@@ -144,9 +382,7 @@ public class LookupSession {
       return CompletableFuture.completedFuture(localHostsLookupResult);
     }
 
-    CompletableFuture<LookupResult> future = new CompletableFuture<>();
-    lookupUntilSuccess(searchNames.iterator(), type, dclass, future);
-    return future;
+    return lookupUntilSuccess(searchNames.iterator(), type, dclass);
   }
 
   /**
@@ -205,51 +441,57 @@ public class LookupSession {
     return null;
   }
 
-  private void lookupUntilSuccess(
-      Iterator<Name> names, int type, int dclass, CompletableFuture<LookupResult> future) {
+  private CompletionStage<LookupResult> lookupUntilSuccess(
+      Iterator<Name> names, int type, int dclass) {
 
     Record query = Record.newRecord(names.next(), type, dclass);
-    lookupWithCache(query, null)
+    return lookupWithCache(query, null)
         .thenCompose(answer -> resolveRedirects(answer, query))
-        .whenComplete(
+        .handle(
             (result, ex) -> {
               Throwable cause = ex == null ? null : ex.getCause();
               if (cause instanceof NoSuchDomainException || cause instanceof NoSuchRRSetException) {
                 if (names.hasNext()) {
-                  lookupUntilSuccess(names, type, dclass, future);
+                  return lookupUntilSuccess(names, type, dclass);
                 } else {
-                  future.completeExceptionally(cause);
+                  return completeExceptionally(cause);
                 }
               } else if (cause != null) {
-                future.completeExceptionally(cause);
+                return completeExceptionally(cause);
               } else {
-                future.complete(result);
+                return CompletableFuture.completedFuture(result);
               }
-            });
+            })
+        .thenCompose(Function.identity());
   }
 
   private CompletionStage<LookupResult> lookupWithCache(Record queryRecord, List<Name> aliases) {
     return Optional.ofNullable(caches.get(queryRecord.getDClass()))
         .map(c -> c.lookupRecords(queryRecord.getName(), queryRecord.getType(), Credibility.NORMAL))
-        .map(setResponse -> setResponseToMessageFuture(setResponse, queryRecord))
+        .map(setResponse -> setResponseToMessageFuture(setResponse, queryRecord, aliases))
         .orElseGet(() -> lookupWithResolver(queryRecord, aliases));
   }
 
   private CompletionStage<LookupResult> lookupWithResolver(Record queryRecord, List<Name> aliases) {
     return resolver
-        .sendAsync(Message.newQuery(queryRecord))
+        .sendAsync(Message.newQuery(queryRecord), executor)
         .thenApply(this::maybeAddToCache)
         .thenApply(answer -> buildResult(answer, aliases, queryRecord));
   }
 
   private Message maybeAddToCache(Message message) {
+    for (RRset set : message.getSectionRRsets(Section.ANSWER)) {
+      if ((set.getType() == Type.CNAME || set.getType() == Type.DNAME) && set.size() != 1) {
+        throw new InvalidZoneDataException("Multiple CNAME RRs not allowed, see RFC1034 3.6.2");
+      }
+    }
     Optional.ofNullable(caches.get(message.getQuestion().getDClass()))
         .ifPresent(cache -> cache.addMessage(message));
     return message;
   }
 
   private CompletionStage<LookupResult> setResponseToMessageFuture(
-      SetResponse setResponse, Record queryRecord) {
+      SetResponse setResponse, Record queryRecord, List<Name> aliases) {
     if (setResponse.isNXDOMAIN()) {
       return completeExceptionally(
           new NoSuchDomainException(queryRecord.getName(), queryRecord.getType()));
@@ -263,88 +505,89 @@ public class LookupSession {
           setResponse.answers().stream()
               .flatMap(rrset -> rrset.rrs(cycleResults).stream())
               .collect(Collectors.toList());
-      return CompletableFuture.completedFuture(new LookupResult(records, null));
+      return CompletableFuture.completedFuture(new LookupResult(records, aliases));
     }
     return null;
   }
 
-  private <T extends LookupFailedException> CompletionStage<LookupResult> completeExceptionally(
-      T failure) {
+  private <T extends Throwable> CompletionStage<LookupResult> completeExceptionally(T failure) {
     CompletableFuture<LookupResult> future = new CompletableFuture<>();
     future.completeExceptionally(failure);
     return future;
   }
 
   private CompletionStage<LookupResult> resolveRedirects(LookupResult response, Record query) {
-    CompletableFuture<LookupResult> future = new CompletableFuture<>();
-    maybeFollowRedirect(response, query, 1, future);
-    return future;
+    return maybeFollowRedirect(response, query, 1);
   }
 
-  private void maybeFollowRedirect(
-      LookupResult response,
-      Record query,
-      int redirectCount,
-      CompletableFuture<LookupResult> future) {
-    try {
-      if (redirectCount > maxRedirects) {
-        throw new RedirectOverflowException(
-            String.format("Refusing to follow more than %s redirects", maxRedirects));
-      }
-
-      List<Record> records = response.getRecords();
-      if (records.isEmpty()) {
-        future.complete(response);
-      } else if (records.get(0).getType() == Type.DNAME || records.get(0).getType() == Type.CNAME) {
-        lookupWithCache(
-                buildRedirectQuery(response, query),
-                makeAliases(response.getAliases(), query.getName()))
-            .thenAccept(m -> maybeFollowRedirect(m, query, redirectCount + 1, future));
-      } else {
-        future.complete(response);
-      }
-    } catch (LookupFailedException e) {
-      future.completeExceptionally(e);
+  private CompletionStage<LookupResult> maybeFollowRedirect(
+      LookupResult response, Record query, int redirectCount) {
+    if (redirectCount > maxRedirects) {
+      throw new RedirectOverflowException(maxRedirects);
     }
-  }
 
-  /** Return an unmodifiable list containing the contents of previous, if any, plus name. */
-  private List<Name> makeAliases(List<Name> previous, Name name) {
-    if (previous == null) {
-      return Collections.singletonList(name);
+    List<Record> records = response.getRecords();
+    if (!records.isEmpty()
+        && (records.get(0).getType() == Type.CNAME || records.get(0).getType() == Type.DNAME)) {
+      return maybeFollowRedirectsInAnswer(response, query, redirectCount);
     } else {
-      List<Name> copy = new ArrayList<>(previous);
-      copy.add(name);
-      return Collections.unmodifiableList(copy);
+      return CompletableFuture.completedFuture(response);
     }
   }
 
-  private Record buildRedirectQuery(LookupResult response, Record question) {
-    List<Record> answer = response.getRecords();
-    Record firstAnswer = answer.get(0);
-    if (answer.size() != 1) {
-      throw new InvalidZoneDataException("Multiple CNAME RRs not allowed, see RFC1034 3.6.2");
+  private CompletionStage<LookupResult> maybeFollowRedirectsInAnswer(
+      LookupResult response, Record query, int redirectCount) {
+    List<Name> aliases = new ArrayList<>(response.getAliases());
+    List<Record> results = new ArrayList<>();
+    Name current = query.getName();
+    for (Record r : response.getRecords()) {
+      if (redirectCount > maxRedirects) {
+        throw new RedirectOverflowException(maxRedirects);
+      }
+
+      if (r.getDClass() != query.getDClass()) {
+        continue;
+      }
+
+      if (r.getType() == Type.CNAME && current.equals(r.getName())) {
+        aliases.add(current);
+        redirectCount++;
+        current = ((CNAMERecord) r).getTarget();
+      } else if (r.getType() == Type.DNAME && current.subdomain(r.getName())) {
+        aliases.add(current);
+        redirectCount++;
+        try {
+          current = current.fromDNAME((DNAMERecord) r);
+        } catch (NameTooLongException e) {
+          throw new InvalidZoneDataException(
+              "Cannot derive DNAME from " + r + " for " + current, e);
+        }
+      } else if (r.getType() == query.getType() && current.equals(r.getName())) {
+        results.add(r);
+      }
     }
 
-    if (firstAnswer.getType() == Type.CNAME) {
-      return Record.newRecord(
-          ((CNAMERecord) firstAnswer).getTarget(), question.getType(), question.getDClass());
+    if (!results.isEmpty()) {
+      return CompletableFuture.completedFuture(new LookupResult(results, aliases));
     }
-    // if it is not a CNAME, it's a DNAME
-    try {
-      Name name = question.getName().fromDNAME((DNAMERecord) firstAnswer);
-      return Record.newRecord(name, question.getType(), question.getDClass());
-    } catch (NameTooLongException e) {
-      throw new InvalidZoneDataException(
-          "DNAME redirect would result in a name that would be too long");
+
+    if (redirectCount > maxRedirects) {
+      throw new RedirectOverflowException(maxRedirects);
     }
+
+    int finalRedirectCount = redirectCount + 1;
+    Record redirectQuery = Record.newRecord(current, query.getType(), query.getDClass());
+    return lookupWithCache(redirectQuery, aliases)
+        .thenCompose(
+            responseFromCache ->
+                maybeFollowRedirect(responseFromCache, redirectQuery, finalRedirectCount));
   }
 
   /** Returns a LookupResult if this response was a non-exceptional empty result, else null. */
   private static LookupResult buildResult(Message answer, List<Name> aliases, Record query) {
     int rcode = answer.getRcode();
     List<Record> answerRecords = answer.getSection(Section.ANSWER);
-    if (answerRecords.isEmpty()) {
+    if (answerRecords.isEmpty() && rcode != Rcode.NOERROR) {
       switch (rcode) {
         case Rcode.NXDOMAIN:
           throw new NoSuchDomainException(query.getName(), query.getType());

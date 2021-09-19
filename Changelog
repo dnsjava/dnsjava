@@ -1,3 +1,16 @@
+09/19/2021
+	- 3.4.2 released
+	- Document behavior of ExtendedResolver.setTimeout (#206)
+	- Add overloads to use an Executor when sending queries in
+	  resolvers (#211)
+	- Remove synchronous locks in DoH Resolver (related to #211)
+	- Fix broken CNAME handling in LookupSession (#212)
+	- "WireParseException: bad label type" when parsing Message
+	  from ByteBuffer (#213)
+	- Remove unnecessary synchronization in org.xbill.DNS.Header::getID
+	  (#215, @maltalex)
+	- Add examples for the LookupSession and direct Resolver usage
+
 07/30/2021
 	- 3.4.1 released
 	- Allow signing with ED25519 and ED448 algorithms
