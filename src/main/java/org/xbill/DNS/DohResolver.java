@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -21,12 +22,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.AsyncSemaphore.Permit;
 import org.xbill.DNS.utils.base64;
@@ -49,7 +52,7 @@ import org.xbill.DNS.utils.base64;
  */
 @Slf4j
 public final class DohResolver implements Resolver {
-  private static final boolean useHttpClient;
+  private static final boolean USE_HTTP_CLIENT;
   private static final Map<Executor, Object> httpClients =
       Collections.synchronizedMap(new WeakHashMap<>());
   private final SSLSocketFactory sslSocketFactory;
@@ -89,6 +92,8 @@ public final class DohResolver implements Resolver {
 
   private final AtomicLong lastRequest = new AtomicLong(0);
   private final AsyncSemaphore initialRequestLock = new AsyncSemaphore(1);
+
+  private static final String APPLICATION_DNS_MESSAGE = "application/dns-message";
 
   static {
     boolean initSuccess = false;
@@ -153,9 +158,9 @@ public final class DohResolver implements Resolver {
         Enum<?> http2Version = Enum.valueOf((Class<Enum>) httpVersionEnum, "HTTP_2");
         requestBuilderVersionMethod.invoke(defaultHttpRequestBuilder, http2Version);
         requestBuilderHeaderMethod.invoke(
-            defaultHttpRequestBuilder, "Content-Type", "application/dns-message");
+            defaultHttpRequestBuilder, "Content-Type", APPLICATION_DNS_MESSAGE);
         requestBuilderHeaderMethod.invoke(
-            defaultHttpRequestBuilder, "Accept", "application/dns-message");
+            defaultHttpRequestBuilder, "Accept", APPLICATION_DNS_MESSAGE);
         initSuccess = true;
       } catch (ClassNotFoundException
           | NoSuchMethodException
@@ -166,7 +171,7 @@ public final class DohResolver implements Resolver {
       }
     }
 
-    useHttpClient = initSuccess;
+    USE_HTTP_CLIENT = initSuccess;
   }
 
   /**
@@ -196,7 +201,7 @@ public final class DohResolver implements Resolver {
     if (maxConcurrentRequests <= 0) {
       throw new IllegalArgumentException("maxConcurrentRequests must be > 0");
     }
-    if (!useHttpClient) {
+    if (!USE_HTTP_CLIENT) {
       try {
         int javaMaxConn = Integer.parseInt(System.getProperty("http.maxConnections", "5"));
         if (maxConcurrentRequests > javaMaxConn) {
@@ -220,12 +225,10 @@ public final class DohResolver implements Resolver {
         executor,
         key -> {
           try {
-            // defaultHttpRequestBuilder.timeout(timeout);
             // return HttpClient.newBuilder()
             //   .connectTimeout(timeout).
             //   .executor(executor)
             //   .build();
-            requestBuilderTimeoutMethod.invoke(defaultHttpRequestBuilder, timeout);
             Object httpClientBuilder = httpClientNewBuilderMethod.invoke(null);
             httpClientBuilderTimeoutMethod.invoke(httpClientBuilder, timeout);
             httpClientBuilderExecutorMethod.invoke(httpClientBuilder, key);
@@ -302,7 +305,7 @@ public final class DohResolver implements Resolver {
 
   @Override
   public CompletionStage<Message> sendAsync(Message query, Executor executor) {
-    if (useHttpClient) {
+    if (USE_HTTP_CLIENT) {
       return sendAsync11(query, executor);
     }
 
@@ -312,20 +315,30 @@ public final class DohResolver implements Resolver {
   private CompletionStage<Message> sendAsync8(final Message query, Executor executor) {
     byte[] queryBytes = prepareQuery(query).toWire();
     String url = getUrl(queryBytes);
+    long startTime = System.nanoTime();
     return maxConcurrentRequests
         .acquire(timeout)
         .handleAsync(
             (permit, ex) -> {
               if (ex != null) {
-                return this.<Message>timeoutFailedFuture(query);
+                return this.<Message>timeoutFailedFuture(query, ex);
               } else {
                 try {
-                  byte[] responseBytes;
-                  responseBytes = sendAndGetMessageBytes(url, queryBytes);
-                  Message response = new Message(responseBytes);
-                  verifyTSIG(query, response, responseBytes, tsig);
+                  SendAndGetMessageBytesResponse result =
+                      sendAndGetMessageBytes(url, queryBytes, startTime);
+                  Message response;
+                  if (result.rc == Rcode.NOERROR) {
+                    response = new Message(result.responseBytes);
+                    verifyTSIG(query, response, result.responseBytes, tsig);
+                  } else {
+                    response = new Message(0);
+                    response.getHeader().setRcode(result.rc);
+                  }
+
                   response.setResolver(this);
                   return CompletableFuture.completedFuture(response);
+                } catch (SocketTimeoutException e) {
+                  return this.<Message>timeoutFailedFuture(query, e);
                 } catch (IOException e) {
                   return this.<Message>failedFuture(e);
                 } finally {
@@ -337,55 +350,84 @@ public final class DohResolver implements Resolver {
         .thenCompose(Function.identity());
   }
 
-  private byte[] sendAndGetMessageBytes(String url, byte[] queryBytes) throws IOException {
+  @Value
+  private static class SendAndGetMessageBytesResponse {
+    int rc;
+    byte[] responseBytes;
+  }
+
+  private SendAndGetMessageBytesResponse sendAndGetMessageBytes(
+      String url, byte[] queryBytes, long startTime) throws IOException {
     HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-    try {
-      if (conn instanceof HttpsURLConnection) {
-        ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
-      }
-      conn.setConnectTimeout((int) timeout.toMillis());
-      conn.setRequestMethod(isUsePost() ? "POST" : "GET");
-      conn.setRequestProperty("Content-Type", "application/dns-message");
-      conn.setRequestProperty("Accept", "application/dns-message");
-      if (usePost) {
-        conn.setDoOutput(true);
-        conn.getOutputStream().write(queryBytes);
-      }
-      try (InputStream is = conn.getInputStream()) {
-        int length = conn.getContentLength();
-        if (length > -1) {
-          byte[] responseBytes = new byte[conn.getContentLength()];
+    if (conn instanceof HttpsURLConnection) {
+      ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
+    }
+
+    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    conn.setConnectTimeout((int) remainingTimeout.toMillis());
+    conn.setReadTimeout((int) remainingTimeout.toMillis());
+    conn.setRequestMethod(usePost ? "POST" : "GET");
+    conn.setRequestProperty("Content-Type", APPLICATION_DNS_MESSAGE);
+    conn.setRequestProperty("Accept", APPLICATION_DNS_MESSAGE);
+    if (usePost) {
+      conn.setDoOutput(true);
+      conn.getOutputStream().write(queryBytes);
+    }
+
+    int rc = conn.getResponseCode();
+    if (rc < 200 || rc >= 300) {
+      discardStream(conn.getInputStream());
+      discardStream(conn.getErrorStream());
+      return new SendAndGetMessageBytesResponse(Rcode.SERVFAIL, null);
+    }
+
+    try (InputStream is = conn.getInputStream()) {
+      int length = conn.getContentLength();
+      if (length > -1) {
+        byte[] responseBytes = new byte[conn.getContentLength()];
+        int r;
+        int offset = 0;
+        while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
+          offset += r;
+          remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+          if (remainingTimeout.isNegative()) {
+            throw new SocketTimeoutException();
+          }
+        }
+        if (offset < responseBytes.length) {
+          throw new EOFException("Could not read expected content length");
+        }
+        return new SendAndGetMessageBytesResponse(Rcode.NOERROR, responseBytes);
+      } else {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+          byte[] buffer = new byte[4096];
           int r;
-          int offset = 0;
-          while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
-            offset += r;
-          }
-          if (offset < responseBytes.length) {
-            throw new EOFException("Could not read expected content length");
-          }
-          return responseBytes;
-        } else {
-          try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[4096];
-            int r;
-            while ((r = is.read(buffer, 0, buffer.length)) > 0) {
-              bos.write(buffer, 0, r);
+          while ((r = is.read(buffer, 0, buffer.length)) > 0) {
+            remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+            if (remainingTimeout.isNegative()) {
+              throw new SocketTimeoutException();
             }
-            return bos.toByteArray();
+            bos.write(buffer, 0, r);
           }
+          return new SendAndGetMessageBytesResponse(Rcode.NOERROR, bos.toByteArray());
         }
       }
     } catch (IOException ioe) {
-      InputStream es = conn.getErrorStream();
-      if (es != null) {
-        try (InputStream in = es) {
-          byte[] buf = new byte[4096];
-          while (in.read(buf) > 0) {
-            // discard
-          }
-        }
-      }
+      discardStream(conn.getErrorStream());
       throw ioe;
+    }
+  }
+
+  private void discardStream(InputStream es) throws IOException {
+    if (es != null) {
+      try (InputStream in = es) {
+        byte[] buf = new byte[4096];
+        while (in.read(buf) > 0) {
+          // discard
+        }
+      } catch (IOException ioe) {
+        // ignore
+      }
     }
   }
 
@@ -412,12 +454,13 @@ public final class DohResolver implements Resolver {
     // check if this request needs to be done synchronously because of HttpClient's stupidity to
     // not use the connection pool for HTTP/2 until one connection is successfully established,
     // which could lead to hundreds of connections (and threads with the default executor)
+    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
     return initialRequestLock
-        .acquire(timeout)
+        .acquire(remainingTimeout)
         .handle(
             (initialRequestPermit, initialRequestEx) -> {
               if (initialRequestEx != null) {
-                return this.<Message>timeoutFailedFuture(query);
+                return this.<Message>timeoutFailedFuture(query, initialRequestEx);
               } else {
                 return sendAsync11WithInitialRequestPermit(
                     query, executor, startTime, requestBuilder, initialRequestPermit);
@@ -445,7 +488,7 @@ public final class DohResolver implements Resolver {
       if (isInitialRequest) {
         initialRequestPermit.release();
       }
-      return timeoutFailedFuture(query);
+      return timeoutFailedFuture(query, null);
     }
 
     // Lock a HTTP/2 stream. Another stupidity of HttpClient to not simply queue the
@@ -458,7 +501,7 @@ public final class DohResolver implements Resolver {
                 if (isInitialRequest) {
                   initialRequestPermit.release();
                 }
-                return this.<Message>timeoutFailedFuture(query);
+                return this.<Message>timeoutFailedFuture(query, maxConcurrentRequestEx);
               } else {
                 return sendAsync11WithConcurrentRequestPermit(
                     query,
@@ -488,50 +531,64 @@ public final class DohResolver implements Resolver {
         initialRequestPermit.release();
       }
       maxConcurrentRequestPermit.release();
-      return timeoutFailedFuture(query);
+      return timeoutFailedFuture(query, null);
     }
 
-    // var httpRequest = requestBuilder.build();
+    // var httpRequest = requestBuilder.timeout(remainingTimeout).build();
     // var bodyHandler = HttpResponse.BodyHandlers.ofByteArray();
     // return getHttpClient(executor).sendAsync(httpRequest, bodyHandler)
     try {
       Object httpClient = getHttpClient(executor);
+      requestBuilderTimeoutMethod.invoke(requestBuilder, remainingTimeout);
       Object httpRequest = requestBuilderBuildMethod.invoke(requestBuilder);
       Object bodyHandler = byteArrayBodyPublisherMethod.invoke(null);
-      return ((CompletionStage<?>)
-              httpClientSendAsyncMethod.invoke(httpClient, httpRequest, bodyHandler))
-          .whenComplete(
-              (result, ex) -> {
-                maxConcurrentRequestPermit.release();
-                if (isInitialRequest) {
-                  if (ex == null) {
-                    lastRequest.set(startTime);
-                  }
-                  initialRequestPermit.release();
-                }
-              })
-          .thenComposeAsync(
-              response -> {
-                try {
-                  Message responseMessage;
-                  // if (response.statusCode() == 200) {
-                  // byte[] responseBytes = response.body();
-                  if ((int) httpResponseStatusCodeMethod.invoke(response) == 200) {
-                    byte[] responseBytes = (byte[]) httpResponseBodyMethod.invoke(response);
-                    responseMessage = new Message(responseBytes);
-                    verifyTSIG(query, responseMessage, responseBytes, tsig);
-                  } else {
-                    responseMessage = new Message();
-                    responseMessage.getHeader().setRcode(Rcode.SERVFAIL);
-                  }
+      CompletableFuture<Message> f =
+          ((CompletableFuture<?>)
+                  httpClientSendAsyncMethod.invoke(httpClient, httpRequest, bodyHandler))
+              .whenComplete(
+                  (result, ex) -> {
+                    if (ex == null) {
+                      lastRequest.set(startTime);
+                    }
+                    maxConcurrentRequestPermit.release();
+                    if (isInitialRequest) {
+                      initialRequestPermit.release();
+                    }
+                  })
+              .handleAsync(
+                  (response, ex) -> {
+                    if (ex != null) {
+                      if (ex.getCause().getClass().getSimpleName().equals("HttpTimeoutException")) {
+                        return this.<Message>timeoutFailedFuture(query, ex.getCause());
+                      } else {
+                        return this.<Message>failedFuture(ex);
+                      }
+                    } else {
+                      try {
+                        Message responseMessage;
+                        // int rc = response.statusCode();
+                        int rc = (int) httpResponseStatusCodeMethod.invoke(response);
+                        if (rc >= 200 && rc < 300) {
+                          // byte[] responseBytes = response.body();
+                          byte[] responseBytes = (byte[]) httpResponseBodyMethod.invoke(response);
+                          responseMessage = new Message(responseBytes);
+                          verifyTSIG(query, responseMessage, responseBytes, tsig);
+                        } else {
+                          responseMessage = new Message();
+                          responseMessage.getHeader().setRcode(Rcode.SERVFAIL);
+                        }
 
-                  responseMessage.setResolver(this);
-                  return CompletableFuture.completedFuture(responseMessage);
-                } catch (IOException | IllegalAccessException | InvocationTargetException e) {
-                  return failedFuture(e);
-                }
-              },
-              executor);
+                        responseMessage.setResolver(this);
+                        return CompletableFuture.completedFuture(responseMessage);
+                      } catch (IOException | IllegalAccessException | InvocationTargetException e) {
+                        return this.<Message>failedFuture(e);
+                      }
+                    }
+                  },
+                  executor)
+              .thenCompose(Function.identity());
+      return TimeoutCompletableFuture.compatTimeout(
+          f, remainingTimeout.toMillis(), TimeUnit.MILLISECONDS);
     } catch (IllegalAccessException | InvocationTargetException e) {
       return failedFuture(e);
     }
@@ -543,14 +600,17 @@ public final class DohResolver implements Resolver {
     return f;
   }
 
-  private <T> CompletableFuture<T> timeoutFailedFuture(Message query) {
+  private <T> CompletableFuture<T> timeoutFailedFuture(Message query, Throwable inner) {
     return failedFuture(
         new IOException(
-            "Query for "
+            "Query "
+                + query.getHeader().getID()
+                + " for "
                 + query.getQuestion().getName()
                 + "/"
                 + Type.string(query.getQuestion().getType())
-                + " timed out"));
+                + " timed out",
+            inner));
   }
 
   private String getUrl(byte[] queryBytes) {
@@ -579,8 +639,14 @@ public final class DohResolver implements Resolver {
     if (tsig == null) {
       return;
     }
+
     int error = tsig.verify(response, b, query.getTSIG());
-    log.debug("TSIG verify: {}", Rcode.TSIGstring(error));
+    log.debug(
+        "TSIG verify for query {}, {}/{}: {}",
+        query.getHeader().getID(),
+        query.getQuestion().getName(),
+        Type.string(query.getQuestion().getType()),
+        Rcode.TSIGstring(error));
   }
 
   /** Returns {@code true} if the HTTP method POST to resolve, {@code false} if GET is used. */
