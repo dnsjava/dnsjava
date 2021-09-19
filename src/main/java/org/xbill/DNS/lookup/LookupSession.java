@@ -17,9 +17,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.Builder;
 import lombok.NonNull;
-import lombok.Singular;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
@@ -63,30 +62,11 @@ public class LookupSession {
   private final HostsFileParser hostsFileParser;
   private final Executor executor;
 
-  /**
-   * @param resolver The {@link Resolver} to use to look up records.
-   * @param maxRedirects The maximum number of CNAME or DNAME redirects allowed before lookups will
-   *     fail with {@link RedirectOverflowException}. Defaults to {@value
-   *     org.xbill.DNS.lookup.LookupSession#DEFAULT_MAX_ITERATIONS}.
-   * @param ndots The threshold for the number of dots which must appear in a name before it is
-   *     considered absolute. The default is {@value
-   *     org.xbill.DNS.lookup.LookupSession#DEFAULT_NDOTS}, meaning that if there are any dots in a
-   *     name, the name will be tried first as an absolute name.
-   * @param searchPath Configures the search path used to look up relative names with less than
-   *     ndots dots.
-   * @param cycleResults If set to {@code true}, cached results with multiple records will be
-   *     returned with the starting point shifted one step per request.
-   * @param caches Enable caching using the supplied caches.
-   * @param hostsFileParser Configures the local hosts database file parser to use within this
-   *     session.
-   * @param executor The executor to use when running lookups.
-   */
-  @Builder
   private LookupSession(
       @NonNull Resolver resolver,
       int maxRedirects,
       int ndots,
-      @Singular("searchPath") List<Name> searchPath,
+      List<Name> searchPath,
       boolean cycleResults,
       List<Cache> caches,
       HostsFileParser hostsFileParser,
@@ -110,11 +90,127 @@ public class LookupSession {
    * the different properties. Once fully configured, a {@link LookupSession} instance is obtained
    * by calling {@link LookupSessionBuilder#build()} on the builder instance.
    */
+  @ToString
   public static class LookupSessionBuilder {
+    private Resolver resolver;
+    private int maxRedirects;
+    private int ndots;
+    private List<Name> searchPath;
+    private boolean cycleResults;
+    private List<Cache> caches;
+    private HostsFileParser hostsFileParser;
+    private Executor executor;
+
+    private LookupSessionBuilder() {}
+
+    /**
+     * The {@link Resolver} to use to look up records.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder resolver(@NonNull Resolver resolver) {
+      this.resolver = resolver;
+      return this;
+    }
+
+    /**
+     * The maximum number of CNAME or DNAME redirects allowed before lookups will fail with {@link
+     * RedirectOverflowException}. Defaults to {@value
+     * org.xbill.DNS.lookup.LookupSession#DEFAULT_MAX_ITERATIONS}.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder maxRedirects(int maxRedirects) {
+      this.maxRedirects = maxRedirects;
+      return this;
+    }
+
+    /**
+     * The threshold for the number of dots which must appear in a name before it is considered
+     * absolute. The default is {@value org.xbill.DNS.lookup.LookupSession#DEFAULT_NDOTS}, meaning
+     * that if there are any dots in a name, the name will be tried first as an absolute name.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder ndots(int ndots) {
+      this.ndots = ndots;
+      return this;
+    }
+
+    /**
+     * Configures the search path used to look up relative names with less than ndots dots.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder searchPath(Name searchPath) {
+      if (this.searchPath == null) {
+        this.searchPath = new ArrayList<>();
+      }
+      this.searchPath.add(searchPath);
+      return this;
+    }
+
+    /**
+     * Configures the search path used to look up relative names with less than ndots dots.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder searchPath(Collection<? extends Name> searchPath) {
+      if (this.searchPath == null) {
+        this.searchPath = new ArrayList<>();
+      }
+      this.searchPath.addAll(searchPath);
+      return this;
+    }
+
+    /**
+     * Removes all search paths.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder clearSearchPath() {
+      if (this.searchPath != null) {
+        this.searchPath.clear();
+      }
+      return this;
+    }
+
+    /**
+     * If set to {@code true}, cached results with multiple records will be returned with the
+     * starting point shifted one step per request.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder cycleResults(boolean cycleResults) {
+      this.cycleResults = cycleResults;
+      return this;
+    }
+
+    /**
+     * Configures the local hosts database file parser to use within this session.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder hostsFileParser(HostsFileParser hostsFileParser) {
+      this.hostsFileParser = hostsFileParser;
+      return this;
+    }
+
+    /**
+     * The executor to use when running lookups.
+     *
+     * @return {@code this}.
+     */
+    public LookupSessionBuilder executor(Executor executor) {
+      this.executor = executor;
+      return this;
+    }
+
     /**
      * Enable querying the local hosts database using the system defaults.
      *
      * @see HostsFileParser
+     * @return {@code this}.
      */
     public LookupSessionBuilder defaultHostsFileParser() {
       hostsFileParser = new HostsFileParser();
@@ -126,6 +222,7 @@ public class LookupSession {
      * replaced.
      *
      * @see Cache
+     * @return {@code this}.
      */
     public LookupSessionBuilder cache(@NonNull Cache cache) {
       if (caches == null) {
@@ -146,13 +243,18 @@ public class LookupSession {
      * replaced.
      *
      * @see Cache
+     * @return {@code this}.
      */
     public LookupSessionBuilder caches(@NonNull Collection<Cache> caches) {
       caches.forEach(this::cache);
       return this;
     }
 
-    /** Disables using a cache for lookups. */
+    /**
+     * Disables using a cache for lookups.
+     *
+     * @return {@code this}.
+     */
     public LookupSessionBuilder clearCaches() {
       if (caches != null) {
         caches.clear();
@@ -166,6 +268,7 @@ public class LookupSession {
      * @param dclass unused
      * @deprecated use {@link #cache(Cache)}, the {@link Cache} already provides the class.
      * @see Cache
+     * @return {@code this}.
      */
     @Deprecated
     public LookupSessionBuilder cache(@NonNull Integer dclass, @NonNull Cache cache) {
@@ -180,17 +283,19 @@ public class LookupSession {
      * @deprecated use {@link #cache(Cache)} or {@link #caches(Collection)}, the {@link Cache}
      *     already provides the class.
      * @see Cache
+     * @return {@code this}.
      */
     @Deprecated
     public LookupSessionBuilder caches(@NonNull Map<Integer, Cache> caches) {
       return caches(caches.values());
     }
 
-    void preBuild() {
+    /** Create an instance of {@link LookupSession} configured by this builder. */
+    public LookupSession build() {
       // note that this transform is idempotent, as concatenating an already absolute Name with root
       // is a noop.
       if (searchPath != null) {
-        this.searchPath =
+        searchPath =
             searchPath.stream()
                 .map(
                     name -> {
@@ -201,7 +306,19 @@ public class LookupSession {
                       }
                     })
                 .collect(Collectors.toCollection(ArrayList::new));
+      } else {
+        searchPath = Collections.emptyList();
       }
+
+      return new LookupSession(
+          resolver,
+          maxRedirects,
+          ndots,
+          searchPath,
+          cycleResults,
+          caches,
+          hostsFileParser,
+          executor);
     }
   }
 
@@ -210,14 +327,7 @@ public class LookupSession {
    * builder initialized with defaults.
    */
   public static LookupSessionBuilder builder() {
-    LookupSessionBuilder builder =
-        new LookupSessionBuilder() {
-          @Override
-          public LookupSession build() {
-            preBuild();
-            return super.build();
-          }
-        };
+    LookupSessionBuilder builder = new LookupSessionBuilder();
     builder.maxRedirects = DEFAULT_MAX_ITERATIONS;
     builder.ndots = DEFAULT_NDOTS;
     return builder;
