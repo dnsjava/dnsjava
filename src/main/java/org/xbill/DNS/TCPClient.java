@@ -112,7 +112,7 @@ final class TCPClient {
             throw new EOFException();
           }
           nrecvd += (int) n;
-          if (nrecvd < length && System.currentTimeMillis() > endTime) {
+          if (nrecvd < length && endTime - System.nanoTime() < 0) {
             throw new SocketTimeoutException();
           }
         } else {
