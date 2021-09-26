@@ -113,12 +113,6 @@ Do NOT use it.
 |true
 |false
 
-.2+|dnsjava.disable_idn
-3+|Disable parsing of Internationalized Domain Names (IDN).
-|Boolean
-|false
-|true
-
 4+h|dnssec options
 .2+|dnsjava.dnssec.keycache.max_ttl
 3+|Maximum time-to-live (TTL) of entries in the key cache in seconds.
@@ -195,12 +189,12 @@ Please refer to the Javadoc for details.
 
 [cols="1,1,1,4",options=header]
 |===
-| Key| Type | Default | Explanation
-| BINDTTL | Boolean | false | Print TTLs in BIND format
-| multiline | Boolean | false | Print records in multiline format
-| noPrintIN | Boolean | false | Do not print the class of a record if it is `IN`
-| tsigfudge | Integer | 300 | Sets the default TSIG fudge value (in seconds)
-| sig0validity | Integer | 300 | Sets the default SIG(0) validity period (in seconds)
+| Key | Type | Default | Explanation
+| `BINDTTL` | Boolean | false | Print TTLs in BIND format
+| `multiline` | Boolean | false | Print records in multiline format
+| `noPrintIN` | Boolean | false | Do not print the class of a record if it is `IN`
+| `tsigfudge` | Integer | 300 | Sets the default TSIG fudge value (in seconds)
+| `sig0validity` | Integer | 300 | Sets the default SIG(0) validity period (in seconds)
 |===
 
 === Resolvers
@@ -211,7 +205,7 @@ Basic resolver that uses UDP by default and falls back to TCP if required.
 
 ==== ExtendedResolver
 
-Resolver that uses multiple `SimpleResolver` s to send the queries.
+Resolver that uses multiple ``SimpleResolver``s to send the queries.
 Can be configured to query the servers in a round-robin order.
 Blacklists a server if it times out.
 
@@ -238,39 +232,49 @@ The link:EXAMPLES.md[examples] contain a small demo.
 dnsjava v3 has significant API changes compared to version 2.1.x and is neither source nor binary compatible.
 The most important changes are:
 
-- The minimum supported version is Java 8
-- Uses http://www.slf4j.org/[slf4j] for logging and thus needs `slf4j-api`
+* Requires at least Java 8
+
+* Uses http://www.slf4j.org/[slf4j] for logging and thus needs `slf4j-api`
 on the classpath
-- The link:USAGE.md[command line tools] were moved to the `org.xbill.DNS.tools`
+
+* The link:USAGE.md[command line tools] were moved to the `org.xbill.DNS.tools`
 package
-- On Windows, https://github.com/java-native-access/jna[JNA] should be on the classpath for the search path and proper DNS server finding
-- The `Resolver` API for custom resolvers has changed to use
+
+* On Windows, https://github.com/java-native-access/jna[JNA] should be on the classpath for the search path and proper DNS server finding
+
+* The `Resolver` API for custom resolvers has changed to use
 `CompletionStage<Message>` for asynchronous resolving.
 The built-in resolvers are now fully non-blocking and do not start a thread per query anymore.
-- Many methods return a `List<T>` instead of an array.
+
+* Many methods return a `List<T>` instead of an array.
 Ideally, use a for-each loop.
 If this is not possible, call `size()` instead of using `length`:
-- Cache#findAnyRecords
-- Cache#findRecords
-- Lookup#getDefaultSearchPath
-- Message#getSectionRRsets
-- SetResponse#answers
-- ResolverConfig
-- RRset returns a List<T> instead of an `Iterator`.
+** Cache#findAnyRecords
+** Cache#findRecords
+** Lookup#getDefaultSearchPath
+** Message#getSectionRRsets
+** SetResponse#answers
+** ResolverConfig
+
+* RRset returns a List<T> instead of an `Iterator`.
 Ideally, modify your code to use a for-each loop.
 If this is not possible, create an iterator on the returned list:
-- RRset#rrs
-- RRset#sigs
-- Methods using `java.util.Date` are deprecated.
+** RRset#rrs
+** RRset#sigs
+
+* Methods using `java.util.Date` are deprecated.
 Use the new versions with
 `java.time.Instant` or `java.time.Duration` instead
-- The type hierarchy of `SMIMEARecord` changed, it now inherits from
+
+* The type hierarchy of `SMIMEARecord` changed, it now inherits from
 `TLSARecord` and constants are shared
-- `Record`s are no longer marked as `Serializable`.
+
+* ``Record``s are no longer marked as `Serializable`.
 Use the RFC defined serialization formats:
-- `toString()`, `rrToString()` <-> `fromString()`
-- `toWire()` <-> `fromWire()`, `newRecord()`
-- `Message` and `Header` properly support `clone()`
+** `toString()`, `rrToString()` ↔ `fromString()`
+** `toWire()` ↔ `fromWire()`, `newRecord()`
+
+* `Message` and `Header` properly support `clone()`
 
 === Replacing the standard Java DNS functionality
 
