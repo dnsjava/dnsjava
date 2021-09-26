@@ -153,15 +153,6 @@ Some settings of dnsjava can be configured via
         <tr>
             <td colspan="3">Use the system's hosts file for lookups before resorting to a resolver.</td>
         </tr>
-        <tr>
-            <td rowspan="2">dnsjava.disable_idn</td>
-            <td>Boolean</td>
-            <td>false</td>
-            <td>true</td>
-        </tr>
-        <tr>
-            <td colspan="3">Disable parsing of Internationalized Domain Names (IDN).</td>
-        </tr>
     </tbody>
 </table>
 

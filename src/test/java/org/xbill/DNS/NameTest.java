@@ -50,10 +50,12 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 class NameTest {
-  static class Test_String_init {
+  @Nested
+  class Test_String_init {
     private final String m_abs = "WWW.DnsJava.org.";
     private Name m_abs_origin;
     private final String m_rel = "WWW.DnsJava";
@@ -399,6 +401,11 @@ class NameTest {
     }
 
     @Test
+    void ctor_idn_throws() {
+      assertThrows(TextParseException.class, () -> new Name("\u95e8.example.org."));
+    }
+
+    @Test
     void ctor_max_label_escaped() throws TextParseException {
       // name with a 63 char label containing an escape
       Name n = new Name("aaaa\\100aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b.");
@@ -541,70 +548,11 @@ class NameTest {
     }
 
     @Test
-    void fromString_idn_basic() throws TextParseException {
-      String in = "café.example.org";
-      Name n = Name.fromString(in);
-      assertEquals(in, n.toUnicodeString());
-      assertEquals("xn--caf-dma.example.org", n.toString());
-    }
-
-    @Test
-    void fromString_idn_disabled() throws TextParseException {
-      System.setProperty("dnsjava.disable_idn", "true");
-      try {
-        String in = "café.example.org";
-        Name n = Name.fromString(in);
-        assertEquals("caf\\233.example.org", n.toString());
-        assertThrows(IllegalStateException.class, n::toUnicodeString);
-      } finally {
-        System.clearProperty("dnsjava.disable_idn");
-      }
-    }
-
-    @Test
-    void fromString_idn_trickery() throws TextParseException {
-      String in = "www.\u0430\u0440\u0440\u04cf\u0435.com";
-      Name n = Name.fromString(in);
-      assertEquals(in, n.toUnicodeString());
-      assertEquals("www.xn--80ak6aa92e.com", n.toString());
-    }
-
-    @Test
-    void fromString_idn_mixed1() {
-      String in = "www.\\128café.example.com";
-      Exception tpe = assertThrows(TextParseException.class, () -> Name.fromString(in));
-      assertEquals("unicode and escapes cannot be mixed", tpe.getMessage());
-    }
-
-    @Test
-    void fromString_idn_mixed2() {
-      String in = "www.café\\128.example.com";
-      Exception tpe = assertThrows(TextParseException.class, () -> Name.fromString(in));
-      assertEquals("unicode and escapes cannot be mixed", tpe.getMessage());
-    }
-
-    @Test
-    void fromString_idn_separators1() throws TextParseException {
-      assertEquals(Name.root, Name.fromString("."));
-      assertEquals(Name.root, Name.fromString("\uFF0E"));
-      assertEquals(Name.root, Name.fromString("\u3002"));
-      assertEquals(Name.root, Name.fromString("\uFF61"));
-    }
-
-    @Test
-    void fromString_idn_separators2() throws TextParseException {
+    void fromString_separators() throws TextParseException {
       assertEquals(Name.root, new Name("."));
-      assertEquals(Name.root, new Name("\uFF0E"));
-      assertEquals(Name.root, new Name("\u3002"));
-      assertEquals(Name.root, new Name("\uFF61"));
-    }
-
-    @Test
-    void fromString_idn_separators3() throws TextParseException {
-      String in = "a.b\uFF0Ec\u3002d\uFF61example.com";
-      Name n = Name.fromString(in);
-      assertEquals("a.b.c.d.example.com", n.toString());
-      assertEquals("a.b.c.d.example.com", n.toUnicodeString());
+      assertThrows(TextParseException.class, () -> Name.fromString("\uFF0E"));
+      assertThrows(TextParseException.class, () -> Name.fromString("\u3002"));
+      assertThrows(TextParseException.class, () -> Name.fromString("\uFF61"));
     }
 
     @Test
@@ -620,7 +568,8 @@ class NameTest {
     }
   }
 
-  static class Test_DNSInput_init {
+  @Nested
+  class Test_DNSInput_init {
     @Test
     void basic() throws IOException {
 
@@ -1404,7 +1353,8 @@ class NameTest {
     assertEquals(exp, n.toString());
   }
 
-  static class Test_toWire {
+  @Nested
+  class Test_toWire {
     @Test
     void rel() throws TextParseException {
       Name n = new Name("A.Relative.Name");
@@ -1468,7 +1418,7 @@ class NameTest {
     @Test
     void ctor_0arg_rel() throws TextParseException {
       Name n = new Name("A.Relative.Name");
-      assertThrows(IllegalArgumentException.class, () -> n.toWire());
+      assertThrows(IllegalArgumentException.class, n::toWire);
     }
 
     @Test
@@ -1504,7 +1454,8 @@ class NameTest {
     }
   }
 
-  static class Test_toWireCanonical {
+  @Nested
+  class Test_toWireCanonical {
     @Test
     void basic() throws TextParseException {
       byte[] raw = new byte[] {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
@@ -1556,7 +1507,8 @@ class NameTest {
     }
   }
 
-  static class Test_equals {
+  @Nested
+  class Test_equals {
     @Test
     void same() throws TextParseException {
       Name n = new Name("A.Name.");
@@ -1610,18 +1562,10 @@ class NameTest {
       assertNotEquals(n1, n2);
       assertNotEquals(n2, n1);
     }
-
-    @Test
-    void idn() throws TextParseException {
-      Name n1 = new Name("xn--caf-dma.xn--xemple-9ua.org.");
-      Name n2 = new Name("café.éxemple.org.");
-
-      assertEquals(n1, n2);
-      assertEquals(n2, n1);
-    }
   }
 
-  static class Test_compareTo {
+  @Nested
+  class Test_compareTo {
     @Test
     void equal() throws TextParseException {
       Name n1 = new Name("A.Name.");
@@ -1629,6 +1573,14 @@ class NameTest {
 
       assertEquals(0, n1.compareTo(n2));
       assertEquals(0, n2.compareTo(n1));
+    }
+
+    @Test
+    void same() throws TextParseException {
+      Name n = new Name("A.Name.");
+
+      //noinspection EqualsWithItself
+      assertEquals(0, n.compareTo(n));
     }
 
     @Test

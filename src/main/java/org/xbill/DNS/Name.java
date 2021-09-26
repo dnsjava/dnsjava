@@ -5,8 +5,6 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.IDN;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,8 +57,6 @@ public class Name implements Comparable<Name>, Serializable {
 
   /* Used in wildcard names. */
   private static final Name wild;
-
-  private static final String IDN_DISABLED_OPTION = "dnsjava.disable_idn";
 
   static {
     for (int i = 0; i < lowercase.length; i++) {
@@ -151,12 +147,6 @@ public class Name implements Comparable<Name>, Serializable {
     }
   }
 
-  private void append(String label) throws NameTooLongException {
-    int len = label.length();
-    int destPos = prepareAppend(len);
-    System.arraycopy(label.getBytes(StandardCharsets.US_ASCII), 0, name, destPos, len);
-  }
-
   private int prepareAppend(int len) throws NameTooLongException {
     int length = name == null ? 0 : name.length;
     // add one byte for the label length
@@ -177,17 +167,10 @@ public class Name implements Comparable<Name>, Serializable {
     return length + 1;
   }
 
-  private void appendFromString(String fullName, char[] label, int length, boolean containsUnicode)
+  private void appendFromString(String fullName, char[] label, int length)
       throws TextParseException {
     try {
-      if (containsUnicode) {
-        // Punycode encoding
-        append(IDN.toASCII(new String(label, 0, length), IDN.ALLOW_UNASSIGNED));
-      } else {
-        append(label, length);
-      }
-    } catch (IllegalArgumentException e) {
-      throw new TextParseException(fullName, "cannot be encoded to Punycode", e);
+      append(label, length);
     } catch (NameTooLongException e) {
       throw new TextParseException(fullName, "Name too long", e);
     }
@@ -221,9 +204,6 @@ public class Name implements Comparable<Name>, Serializable {
         }
         return;
       case ".": // full stop
-      case "\uFF0E": // full width full stop (Unicode TR#46, 2.3)
-      case "\u3002": // ideographic full stop (Unicode TR#46, 2.3)
-      case "\uFF61": // half width ideographic full stop (Unicode TR#46, 2.3)
         copy(root, this);
         return;
     }
@@ -234,16 +214,10 @@ public class Name implements Comparable<Name>, Serializable {
     int digits = 0;
     int intval = 0;
     boolean absolute = false;
-    boolean containsUnicode = false;
-    boolean containsEscape = false;
-    boolean idnDisabled = Boolean.getBoolean(IDN_DISABLED_OPTION);
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
-      if (c > 0x7F && !idnDisabled) {
-        containsUnicode = true;
-        if (containsEscape) {
-          throw new TextParseException("unicode and escapes cannot be mixed");
-        }
+      if (c > 0xff) {
+        throw new TextParseException(s, "Illegal character in name");
       }
       if (escaped) {
         if (c >= '0' && c <= '9' && digits < 3) {
@@ -267,20 +241,14 @@ public class Name implements Comparable<Name>, Serializable {
         label[pos++] = c;
         escaped = false;
       } else if (c == '\\') {
-        if (containsUnicode) {
-          throw new TextParseException("unicode and escapes cannot be mixed");
-        }
         escaped = true;
-        containsEscape = true;
         digits = 0;
         intval = 0;
-      } else if (c == '.' || c == '\uFF0E' || c == '\u3002' || c == '\uFF61') {
+      } else if (c == '.') {
         if (labelstart == -1) {
           throw new TextParseException(s, "invalid empty label");
         }
-        appendFromString(s, label, pos, containsUnicode);
-        containsUnicode = false;
-        containsEscape = false;
+        appendFromString(s, label, pos);
         labelstart = -1;
         pos = 0;
       } else {
@@ -300,7 +268,7 @@ public class Name implements Comparable<Name>, Serializable {
       appendFromString(s, emptyLabel, 1);
       absolute = true;
     } else {
-      appendFromString(s, label, pos, containsUnicode);
+      appendFromString(s, label, pos);
     }
     if (origin != null && !absolute) {
       appendFromString(s, origin.name, origin.labels);
@@ -338,7 +306,7 @@ public class Name implements Comparable<Name>, Serializable {
   public static Name fromString(String s, Name origin) throws TextParseException {
     if (s.equals("@")) {
       return origin != null ? origin : empty;
-    } else if (s.equals(".") || s.equals("\uFF0E") || s.equals("\u3002") || s.equals("\uFF61")) {
+    } else if (s.equals(".")) {
       return root;
     }
 
@@ -679,28 +647,6 @@ public class Name implements Comparable<Name>, Serializable {
   @Override
   public String toString() {
     return toString(false);
-  }
-
-  /**
-   * Convert a Name to a String. Replaces Punycode encoding with Unicode.
-   *
-   * @param omitFinalDot If true, and the name is absolute, omit the final dot.
-   * @return The representation of this name as a Unicode String.
-   */
-  public String toUnicodeString(boolean omitFinalDot) {
-    if (Boolean.getBoolean(IDN_DISABLED_OPTION)) {
-      throw new IllegalStateException("Unicode handling is disabled, see " + IDN_DISABLED_OPTION);
-    }
-    return IDN.toUnicode(toString(omitFinalDot), IDN.ALLOW_UNASSIGNED);
-  }
-
-  /**
-   * Convert a Name to a String. Replaces Punycode encoding with Unicode.
-   *
-   * @return The representation of this name as a Unicode String.
-   */
-  public String toUnicodeString() {
-    return toUnicodeString(false);
   }
 
   /**
