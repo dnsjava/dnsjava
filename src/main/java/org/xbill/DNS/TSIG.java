@@ -71,12 +71,42 @@ public class TSIG {
     algMap = Collections.unmodifiableMap(out);
   }
 
+  private static final Map<String, Name> stringToNameAlgMap;
+
+  static {
+    Map<String, Name> outsn = new HashMap<>();
+    outsn.put(HMAC_MD5   .toString()    .toLowerCase(), HMAC_MD5);
+    outsn.put(HMAC_MD5   .toString(true).toLowerCase(), HMAC_MD5);
+    outsn.put("hmac-md5"                .toLowerCase(), HMAC_MD5);
+    outsn.put("hmac-md5."               .toLowerCase(), HMAC_MD5);
+    outsn.put(HMAC_SHA1  .toString()    .toLowerCase(), HMAC_SHA1);
+    outsn.put(HMAC_SHA1  .toString(true).toLowerCase(), HMAC_SHA1);
+    outsn.put("HmacSHA1"                .toLowerCase(), HMAC_SHA1);
+    outsn.put(HMAC_SHA224.toString()    .toLowerCase(), HMAC_SHA224);
+    outsn.put(HMAC_SHA224.toString(true).toLowerCase(), HMAC_SHA224);
+    outsn.put("HmacSHA224"              .toLowerCase(), HMAC_SHA224);
+    outsn.put(HMAC_SHA256.toString()    .toLowerCase(), HMAC_SHA256);
+    outsn.put(HMAC_SHA256.toString(true).toLowerCase(), HMAC_SHA256);
+    outsn.put("HmacSHA256"              .toLowerCase(), HMAC_SHA256);
+    outsn.put(HMAC_SHA384.toString()    .toLowerCase(), HMAC_SHA384);
+    outsn.put(HMAC_SHA384.toString(true).toLowerCase(), HMAC_SHA384);
+    outsn.put("HmacSHA384"              .toLowerCase(), HMAC_SHA384);
+    outsn.put(HMAC_SHA512.toString()    .toLowerCase(), HMAC_SHA512);
+    outsn.put(HMAC_SHA512.toString(true).toLowerCase(), HMAC_SHA512);
+    outsn.put("HmacSHA512"              .toLowerCase(), HMAC_SHA512);
+    stringToNameAlgMap = Collections.unmodifiableMap(outsn);
+  }
+
   public static Name algorithmToName(String alg) {
-    for (Map.Entry<Name, String> entry : algMap.entrySet()) {
-      if (alg.equalsIgnoreCase(entry.getValue())) {
-        return entry.getKey();
-      }
+    if (alg == null) {
+      throw new IllegalArgumentException("Null algorithm");
     }
+
+    Name nalg = stringToNameAlgMap.get(alg.toLowerCase());
+    if (nalg != null) {
+      return nalg;
+    }
+
     throw new IllegalArgumentException("Unknown algorithm: " + alg);
   }
 

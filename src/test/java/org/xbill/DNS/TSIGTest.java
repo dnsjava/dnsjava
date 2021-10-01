@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TSIGTest {
   @Test
@@ -28,6 +30,32 @@ class TSIGTest {
     assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
+
+  /**
+   * Check all of the string algorithm names defined in the javadoc.
+   */
+  @ParameterizedTest
+  @ValueSource(strings = {
+     "hmac-md5", "hmac-sha1",
+     "hmac-sha224", "hmac-sha256",
+     "hmac-sha384", "hmac-sha512"
+  })
+  void TSIG_query_stringalg(String alg) throws IOException {
+    TSIG key = new TSIG(alg, "example.", "12345678");
+
+    Name qname = Name.fromString("www.example.");
+    Record rec = Record.newRecord(qname, Type.A, DClass.IN);
+    Message msg = Message.newQuery(rec);
+    msg.setTSIG(key, Rcode.NOERROR, null);
+    byte[] bytes = msg.toWire(512);
+    assertEquals(1, bytes[11]);
+
+    Message parsed = new Message(bytes);
+    int result = key.verify(parsed, bytes, null);
+    assertEquals(Rcode.NOERROR, result);
+    assertTrue(parsed.isSigned());
+  }
+
 
   @Test
   void TSIG_queryIsLastAddMessageRecord() throws IOException {
