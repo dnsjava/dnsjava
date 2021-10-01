@@ -31,15 +31,14 @@ class TSIGTest {
     assertTrue(parsed.isSigned());
   }
 
-  /**
-   * Check all of the string algorithm names defined in the javadoc.
-   */
+  /** Check all of the string algorithm names defined in the javadoc. */
   @ParameterizedTest
-  @ValueSource(strings = {
-     "hmac-md5", "hmac-sha1",
-     "hmac-sha224", "hmac-sha256",
-     "hmac-sha384", "hmac-sha512"
-  })
+  @ValueSource(
+      strings = {
+        "hmac-md5", "hmac-sha1",
+        "hmac-sha224", "hmac-sha256",
+        "hmac-sha384", "hmac-sha512"
+      })
   void TSIG_query_stringalg(String alg) throws IOException {
     TSIG key = new TSIG(alg, "example.", "12345678");
 
@@ -55,7 +54,6 @@ class TSIGTest {
     assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
   }
-
 
   @Test
   void TSIG_queryIsLastAddMessageRecord() throws IOException {
