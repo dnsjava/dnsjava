@@ -21,11 +21,14 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
 import org.xbill.DNS.EDNSOption;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.ExtendedFlags;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
@@ -34,10 +37,12 @@ import org.xbill.DNS.Message;
 import org.xbill.DNS.NSECRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
+import org.xbill.DNS.OPTRecord;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.Section;
+import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
@@ -79,6 +84,13 @@ public final class ValidatingResolver implements Resolver {
 
   /** The clock used to validate messages. */
   private final Clock clock;
+
+  /**
+   * If {@code true}, an additional record with the validation reason is added to the {@link
+   * Section#ADDITIONAL} section. The record is available at {@code ./TXT/}{@value
+   * #VALIDATION_REASON_QCLASS}.
+   */
+  @Getter @Setter private boolean isAddReasonToAdditional = true;
 
   /**
    * Creates a new instance of this class.
@@ -330,7 +342,8 @@ public final class ValidatingResolver implements Resolver {
                   // using the NSEC3 records.
                   if (!wcNsecOk && !nsec3s.isEmpty()) {
                     if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
-                      response.setStatus(SecurityStatus.INSECURE, R.get("failed.nsec3_ignored"));
+                      response.setStatus(
+                          SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
                       return;
                     }
 
@@ -338,7 +351,7 @@ public final class ValidatingResolver implements Resolver {
                         this.n3valUtils.proveWildcard(
                             nsec3s, wc.getKey(), nsec3s.get(0).getSignerName(), wc.getValue());
                     if (status == SecurityStatus.INSECURE) {
-                      response.setStatus(status);
+                      response.setStatus(status, -1);
                       return;
                     } else if (status == SecurityStatus.SECURE) {
                       wcNsecOk = true;
@@ -354,7 +367,7 @@ public final class ValidatingResolver implements Resolver {
                 }
               }
 
-              response.setStatus(SecurityStatus.SECURE);
+              response.setStatus(SecurityStatus.SECURE, -1);
             });
   }
 
@@ -391,10 +404,10 @@ public final class ValidatingResolver implements Resolver {
                 return completedFuture(false);
               }
 
-              SecurityStatus status = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
               // If anything in the authority section fails to be secure, we
               // have a bad message.
-              if (status != SecurityStatus.SECURE) {
+              if (res.status != SecurityStatus.SECURE) {
                 response.setBogus(R.get("failed.authority.positive", set));
                 return completedFuture(false);
               }
@@ -438,9 +451,9 @@ public final class ValidatingResolver implements Resolver {
                 return completedFuture(false);
               }
 
-              SecurityStatus status = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
               // If the answer rrset failed to validate, then this message is BAD
-              if (status != SecurityStatus.SECURE) {
+              if (res.status != SecurityStatus.SECURE) {
                 response.setBogus(R.get("failed.answer.positive", set));
                 return completedFuture(false);
               }
@@ -596,14 +609,14 @@ public final class ValidatingResolver implements Resolver {
 
                 // try to prove NODATA with our NSEC3 record(s)
                 if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
-                  response.setStatus(SecurityStatus.BOGUS, R.get("failed.nsec3_ignored"));
+                  response.setBogus(R.get("failed.nsec3_ignored"));
                   return null;
                 }
 
                 SecurityStatus status =
                     this.n3valUtils.proveNodata(nsec3s, qname, qtype, nsec3Signer);
                 if (status == SecurityStatus.INSECURE) {
-                  response.setStatus(SecurityStatus.INSECURE);
+                  response.setStatus(SecurityStatus.INSECURE, -1);
                   return null;
                 }
 
@@ -617,7 +630,7 @@ public final class ValidatingResolver implements Resolver {
               }
 
               log.trace("successfully validated NODATA response");
-              response.setStatus(SecurityStatus.SECURE);
+              response.setStatus(SecurityStatus.SECURE, -1);
               return null;
             });
   }
@@ -638,8 +651,8 @@ public final class ValidatingResolver implements Resolver {
                 return this.failedFuture(new Exception(kve.reason));
               }
 
-              SecurityStatus status = this.valUtils.verifySRRset(set, ke, this.clock.instant());
-              if (status != SecurityStatus.SECURE) {
+              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+              if (res.status != SecurityStatus.SECURE) {
                 response.setBogus(R.get("failed.authority.nodata", set));
                 return this.failedFuture(new Exception("failed.authority.nodata"));
               }
@@ -730,16 +743,19 @@ public final class ValidatingResolver implements Resolver {
 
                 // Attempt to prove name error with nsec3 records.
                 if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
-                  response.setStatus(SecurityStatus.INSECURE, R.get("failed.nsec3_ignored"));
+                  response.setStatus(SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
                   return completedFuture(null);
                 }
 
                 SecurityStatus status = this.n3valUtils.proveNameError(nsec3s, qname, nsec3Signer);
                 if (status != SecurityStatus.SECURE) {
                   if (status == SecurityStatus.INSECURE) {
-                    response.setStatus(status, R.get("failed.nxdomain.nsec3_insecure"));
+                    response.setStatus(status, -1, R.get("failed.nxdomain.nsec3_insecure"));
                   } else {
-                    response.setStatus(status, R.get("failed.nxdomain.nsec3_bogus"));
+                    response.setStatus(
+                        status,
+                        ExtendedErrorCodeOption.DNSSEC_BOGUS,
+                        R.get("failed.nxdomain.nsec3_bogus"));
                   }
 
                   return completedFuture(null);
@@ -776,7 +792,7 @@ public final class ValidatingResolver implements Resolver {
 
               // Otherwise, we consider the message secure.
               log.trace("successfully validated NAME ERROR response.");
-              response.setStatus(SecurityStatus.SECURE);
+              response.setStatus(SecurityStatus.SECURE, -1);
               return completedFuture(null);
             })
         .exceptionally(ex -> null);
@@ -798,8 +814,8 @@ public final class ValidatingResolver implements Resolver {
                 return this.failedFuture(new Exception(kve.reason));
               }
 
-              SecurityStatus status = this.valUtils.verifySRRset(set, ke, this.clock.instant());
-              if (status != SecurityStatus.SECURE) {
+              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+              if (res.status != SecurityStatus.SECURE) {
                 response.setBogus(R.get("failed.nxdomain.authority", set));
                 return this.failedFuture(new Exception("failed.nxdomain.authority"));
               }
@@ -940,7 +956,7 @@ public final class ValidatingResolver implements Resolver {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
 
-    SecurityStatus status;
+    JustifiedSecStatus res;
     ResponseClassification subtype = ValUtils.classifyResponse(request, response);
 
     KeyEntry bogusKE = KeyEntry.newBadKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
@@ -949,15 +965,17 @@ public final class ValidatingResolver implements Resolver {
         // Verify only returns BOGUS or SECURE. If the rrset is bogus,
         // then we are done.
         SRRset dsRrset = response.findAnswerRRset(qname, Type.DS, qclass);
-        status = this.valUtils.verifySRRset(dsRrset, keyRrset, this.clock.instant());
-        if (status != SecurityStatus.SECURE) {
-          bogusKE.setBadReason(R.get("failed.ds"));
+        res = this.valUtils.verifySRRset(dsRrset, keyRrset, this.clock.instant());
+        if (res.status != SecurityStatus.SECURE) {
+          bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds"));
           return bogusKE;
         }
 
         if (!valUtils.atLeastOneSupportedAlgorithm(dsRrset)) {
           KeyEntry nullKey = KeyEntry.newNullKeyEntry(qname, qclass, dsRrset.getTTL());
-          nullKey.setBadReason(R.get("insecure.ds.noalgorithms", qname));
+          nullKey.setBadReason(
+              ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
+              R.get("insecure.ds.noalgorithms", qname));
           return nullKey;
         }
 
@@ -969,12 +987,12 @@ public final class ValidatingResolver implements Resolver {
         // Verify only returns BOGUS or SECURE. If the rrset is bogus,
         // then we are done.
         SRRset cnameRrset = response.findAnswerRRset(qname, Type.CNAME, qclass);
-        status = this.valUtils.verifySRRset(cnameRrset, keyRrset, this.clock.instant());
-        if (status == SecurityStatus.SECURE) {
+        res = this.valUtils.verifySRRset(cnameRrset, keyRrset, this.clock.instant());
+        if (res.status == SecurityStatus.SECURE) {
           return null;
         }
 
-        bogusKE.setBadReason(R.get("failed.ds.cname"));
+        bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.cname"));
         return bogusKE;
 
       case NODATA:
@@ -984,7 +1002,8 @@ public final class ValidatingResolver implements Resolver {
       default:
         // We've encountered an unhandled classification for this
         // response.
-        bogusKE.setBadReason(R.get("failed.ds.notype", subtype));
+        bogusKE.setBadReason(
+            ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.notype", subtype));
         return bogusKE;
     }
   }
@@ -1006,7 +1025,8 @@ public final class ValidatingResolver implements Resolver {
     KeyEntry bogusKE = KeyEntry.newBadKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
 
     if (!this.valUtils.hasSignedNsecs(response)) {
-      bogusKE.setBadReason(R.get("failed.ds.nonsec", qname));
+      bogusKE.setBadReason(
+          ExtendedErrorCodeOption.RRSIGS_MISSING, R.get("failed.ds.nonsec", qname));
       return bogusKE;
     }
 
@@ -1016,12 +1036,12 @@ public final class ValidatingResolver implements Resolver {
     switch (status.status) {
       case SECURE:
         KeyEntry nullKey = KeyEntry.newNullKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
-        nullKey.setBadReason(R.get("insecure.ds.nsec"));
+        nullKey.setBadReason(-1, R.get("insecure.ds.nsec"));
         return nullKey;
       case INSECURE:
         return null;
       case BOGUS:
-        bogusKE.setBadReason(status.reason);
+        bogusKE.setBadReason(status.edeReason, status.reason);
         return bogusKE;
       default:
         // NSEC proof did not work, try NSEC3
@@ -1036,9 +1056,9 @@ public final class ValidatingResolver implements Resolver {
     if (!nsec3Rrsets.isEmpty()) {
       // Attempt to prove no DS with NSEC3s.
       for (SRRset nsec3set : nsec3Rrsets) {
-        SecurityStatus sstatus =
+        JustifiedSecStatus res =
             this.valUtils.verifySRRset(nsec3set, keyRrset, this.clock.instant());
-        if (sstatus != SecurityStatus.SECURE) {
+        if (res.status != SecurityStatus.SECURE) {
           // We could just fail here as there is an invalid rrset, but
           // skipping doesn't matter because we might not need it or
           // the proof will fail anyway.
@@ -1060,23 +1080,23 @@ public final class ValidatingResolver implements Resolver {
           // If nsec3-iter-count too high or optout, then treat below as unsigned
         case SECURE:
           KeyEntry nullKey = KeyEntry.newNullKeyEntry(qname, qclass, nsec3TTL);
-          nullKey.setBadReason(R.get("insecure.ds.nsec3"));
+          nullKey.setBadReason(-1, R.get("insecure.ds.nsec3"));
           return nullKey;
         case INDETERMINATE:
           log.debug("nsec3s for the referral proved no delegation.");
           return null;
         case BOGUS:
-          bogusKE.setBadReason(R.get("failed.ds.nsec3"));
+          bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.nsec3"));
           return bogusKE;
         default:
-          bogusKE.setBadReason(R.get("unknown.ds.nsec3"));
+          bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("unknown.ds.nsec3"));
           return bogusKE;
       }
     }
 
-    // Apparently, no available NSEC/NSEC3 proved NODATA, so this is
+    // Apparently no available NSEC/NSEC3 proved NODATA, so this is
     // BOGUS.
-    bogusKE.setBadReason(R.get("failed.ds.unknown"));
+    bogusKE.setBadReason(ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.ds.unknown"));
     return bogusKE;
   }
 
@@ -1125,7 +1145,8 @@ public final class ValidatingResolver implements Resolver {
     if (dnskeyRrset == null) {
       // If the DNSKEY rrset was missing, this is the end of the line.
       state.keyEntry = KeyEntry.newBadKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
-      state.keyEntry.setBadReason(R.get("dnskey.no_rrset", qname));
+      state.keyEntry.setBadReason(
+          ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_rrset", qname));
       return completedFuture(null);
     }
 
@@ -1173,7 +1194,7 @@ public final class ValidatingResolver implements Resolver {
                 .thenCompose(
                     v -> {
                       if (response.getStatus() != SecurityStatus.INSECURE) {
-                        response.setStatus(SecurityStatus.UNCHECKED);
+                        response.setStatus(SecurityStatus.UNCHECKED, -1);
                         return this.validateNodataResponse(request, response);
                       }
 
@@ -1193,7 +1214,7 @@ public final class ValidatingResolver implements Resolver {
                 .thenCompose(
                     v -> {
                       if (response.getStatus() != SecurityStatus.INSECURE) {
-                        response.setStatus(SecurityStatus.UNCHECKED);
+                        response.setStatus(SecurityStatus.UNCHECKED, -1);
                         return this.validateNameErrorResponse(request, response);
                       }
 
@@ -1202,7 +1223,7 @@ public final class ValidatingResolver implements Resolver {
         break;
 
       default:
-        response.setStatus(SecurityStatus.BOGUS, R.get("validate.response.unknown", subtype));
+        response.setBogus(R.get("validate.response.unknown", subtype));
         completionStage = completedFuture(null);
         break;
     }
@@ -1218,6 +1239,7 @@ public final class ValidatingResolver implements Resolver {
     // If the response message validated, set the AD bit.
     SecurityStatus status = response.getStatus();
     String reason = response.getBogusReason();
+    int edeReason = response.getEdeReason();
     switch (status) {
       case BOGUS:
         // For now, in the absence of any other API information, we
@@ -1239,7 +1261,7 @@ public final class ValidatingResolver implements Resolver {
         throw new IllegalArgumentException("unexpected security status");
     }
 
-    response.setStatus(status, reason);
+    response.setStatus(status, edeReason, reason);
     return response;
   }
 
@@ -1349,24 +1371,54 @@ public final class ValidatingResolver implements Resolver {
                         Message m = validated.getMessage();
                         String reason = validated.getBogusReason();
                         if (reason != null) {
-                          final int maxTxtRecordStringLength = 255;
-                          String[] parts =
-                              new String[reason.length() / maxTxtRecordStringLength + 1];
-                          for (int i = 0; i < parts.length; i++) {
-                            int length =
-                                Math.min((i + 1) * maxTxtRecordStringLength, reason.length());
-                            parts[i] = reason.substring(i * maxTxtRecordStringLength, length);
+                          applyEdeToOpt(validated, m);
+                          if (isAddReasonToAdditional) {
+                            addValidationReasonTxtRecord(m, reason);
                           }
-
-                          m.addRecord(
-                              new TXTRecord(
-                                  Name.root, VALIDATION_REASON_QCLASS, 0, Arrays.asList(parts)),
-                              Section.ADDITIONAL);
                         }
 
                         return m;
                       });
             });
+  }
+
+  private void applyEdeToOpt(SMessage validated, Message m) {
+    if (validated.getEdeReason() <= -1) {
+      return;
+    }
+
+    OPTRecord old = m.getOPT();
+    OPTRecord newOpt;
+    List<EDNSOption> options = new ArrayList<>();
+    if (old != null) {
+      options.addAll(old.getOptions());
+      newOpt =
+          new OPTRecord(
+              old.getPayloadSize(),
+              old.getExtendedRcode(),
+              old.getVersion(),
+              old.getFlags(),
+              options);
+      m.removeRecord(m.getOPT(), Section.ADDITIONAL);
+    } else {
+      options.add(
+          new ExtendedErrorCodeOption(validated.getEdeReason(), validated.getBogusReason()));
+      newOpt = new OPTRecord(SimpleResolver.DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0, options);
+    }
+    m.addRecord(newOpt, Section.ADDITIONAL);
+  }
+
+  private void addValidationReasonTxtRecord(Message m, String reason) {
+    final int maxTxtRecordStringLength = 255;
+    String[] parts = new String[reason.length() / maxTxtRecordStringLength + 1];
+    for (int i = 0; i < parts.length; i++) {
+      int length = Math.min((i + 1) * maxTxtRecordStringLength, reason.length());
+      parts[i] = reason.substring(i * maxTxtRecordStringLength, length);
+    }
+
+    m.addRecord(
+        new TXTRecord(Name.root, VALIDATION_REASON_QCLASS, 0, Arrays.asList(parts)),
+        Section.ADDITIONAL);
   }
 
   /**

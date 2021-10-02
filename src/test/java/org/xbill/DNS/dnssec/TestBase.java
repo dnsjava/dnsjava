@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -34,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSSEC.DNSSECException;
+import org.xbill.DNS.EDNSOption.Code;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Master;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
@@ -239,6 +242,17 @@ public abstract class TestBase {
     }
 
     return null;
+  }
+
+  protected int getEdeReason(Message m) {
+    return Optional.ofNullable(m.getOPT())
+        .flatMap(
+            opt ->
+                opt.getOptions(Code.EDNS_EXTENDED_ERROR).stream()
+                    .filter(o -> o instanceof ExtendedErrorCodeOption)
+                    .findFirst()
+                    .map(o -> ((ExtendedErrorCodeOption) o).getErrorCode()))
+        .orElse(-1);
   }
 
   protected String getReason(Message m) {

@@ -38,8 +38,8 @@ class TestNormallyUnreachableCode {
     SRRset set = new SRRset();
     set.addRR(record);
     RRset keys = new RRset();
-    SecurityStatus result = verifier.verify(set, keys, Instant.now());
-    assertEquals(SecurityStatus.BOGUS, result);
+    JustifiedSecStatus res = verifier.verify(set, keys, Instant.now());
+    assertEquals(SecurityStatus.BOGUS, res.status);
   }
 
   @Test

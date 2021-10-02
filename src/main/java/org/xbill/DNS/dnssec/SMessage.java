@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Header;
 import org.xbill.DNS.Message;
@@ -36,6 +37,7 @@ final class SMessage {
   private final List<SRRset>[] sections;
   private SecurityStatus securityStatus;
   private String bogusReason;
+  private int edeReason = -1;
 
   /**
    * Creates a instance of this class.
@@ -181,8 +183,8 @@ final class SMessage {
    *
    * @param status the new security status for this message.
    */
-  public void setStatus(SecurityStatus status) {
-    this.securityStatus = status;
+  public void setStatus(SecurityStatus status, int edeReason) {
+    setStatus(status, edeReason, null);
   }
 
   /**
@@ -191,10 +193,20 @@ final class SMessage {
    * @param status the new security status for this message.
    * @param reason Why this message's status is set as indicated.
    */
-  public void setStatus(SecurityStatus status, String reason) {
+  public void setStatus(SecurityStatus status, int edeReason, String reason) {
     this.securityStatus = status;
+    this.edeReason = edeReason;
     this.bogusReason = reason;
     log.debug(this.bogusReason);
+  }
+
+  /**
+   * Sets the security status of this message to bogus and sets the reason.
+   *
+   * @param reason Why this message's status is bogus.
+   */
+  public void setBogus(String reason) {
+    setStatus(SecurityStatus.BOGUS, ExtendedErrorCodeOption.DNSSEC_BOGUS, reason);
   }
 
   /**
@@ -207,14 +219,11 @@ final class SMessage {
   }
 
   /**
-   * Sets the security status of this message to bogus and sets the reason.
-   *
-   * @param reason Why this message's status is bogus.
+   * Gets the {@link org.xbill.DNS.ExtendedErrorCodeOption} reason why this messages' status is
+   * bogus.
    */
-  public void setBogus(String reason) {
-    this.setStatus(SecurityStatus.BOGUS);
-    this.bogusReason = reason;
-    log.debug(this.bogusReason);
+  public int getEdeReason() {
+    return this.edeReason;
   }
 
   /**

@@ -19,6 +19,7 @@ import org.xbill.DNS.DNSSEC;
 import org.xbill.DNS.DNSSEC.Algorithm;
 import org.xbill.DNS.DNSSEC.Digest;
 import org.xbill.DNS.DSRecord;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
@@ -32,6 +33,7 @@ class TestAlgorithmSupport extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.noalgorithms:" + param + ".ingotronic.ch.", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM, getEdeReason(response));
   }
 
   @ParameterizedTest(name = "testEd_{arguments}")
@@ -44,6 +46,7 @@ class TestAlgorithmSupport extends TestBase {
       assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
       assertEquals(Rcode.NOERROR, response.getRcode());
       assertNull(getReason(response));
+      assertEquals(-1, getEdeReason(response));
     } finally {
       Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
@@ -55,6 +58,7 @@ class TestAlgorithmSupport extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("failed.ds.nodigest:unknown-alg.ingotronic.ch.", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE, getEdeReason(response));
   }
 
   @AlwaysOffline

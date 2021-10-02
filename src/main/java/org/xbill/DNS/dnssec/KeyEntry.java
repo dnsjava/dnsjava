@@ -6,6 +6,7 @@ package org.xbill.DNS.dnssec;
 
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
@@ -20,6 +21,7 @@ import org.xbill.DNS.Type;
     callSuper = true,
     of = {"badReason", "isEmpty"})
 final class KeyEntry extends SRRset {
+  private int edeReason;
   private String badReason;
   private boolean isEmpty;
 
@@ -107,7 +109,8 @@ final class KeyEntry extends SRRset {
    *
    * @param reason The reason why this key entry is bad.
    */
-  public void setBadReason(String reason) {
+  public void setBadReason(int edeReason, String reason) {
+    this.edeReason = edeReason;
     this.badReason = reason;
     log.debug(this.badReason);
   }
@@ -130,19 +133,27 @@ final class KeyEntry extends SRRset {
           reason = R.get("validate.insecure_unsigned");
         }
 
-        return new JustifiedSecStatus(SecurityStatus.INSECURE, reason);
+        return new JustifiedSecStatus(SecurityStatus.INSECURE, edeReason, reason);
       }
 
       if (this.isGood()) {
-        return new JustifiedSecStatus(SecurityStatus.BOGUS, R.get("validate.bogus.missingsig"));
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS,
+            ExtendedErrorCodeOption.RRSIGS_MISSING,
+            R.get("validate.bogus.missingsig"));
       }
 
-      return new JustifiedSecStatus(SecurityStatus.BOGUS, R.get("validate.bogus", this.badReason));
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.DNSSEC_BOGUS,
+          R.get("validate.bogus", this.badReason));
     }
 
     if (this.isBad()) {
       return new JustifiedSecStatus(
-          SecurityStatus.BOGUS, R.get("validate.bogus.badkey", this.getName(), this.badReason));
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.DNSSEC_BOGUS,
+          R.get("validate.bogus.badkey", this.getName(), this.badReason));
     }
 
     if (this.isNull()) {
@@ -151,7 +162,7 @@ final class KeyEntry extends SRRset {
         reason = R.get("validate.insecure");
       }
 
-      return new JustifiedSecStatus(SecurityStatus.INSECURE, reason);
+      return new JustifiedSecStatus(SecurityStatus.INSECURE, edeReason, reason);
     }
 
     return null;

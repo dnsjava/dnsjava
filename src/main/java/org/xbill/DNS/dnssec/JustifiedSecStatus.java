@@ -8,6 +8,7 @@ package org.xbill.DNS.dnssec;
  */
 final class JustifiedSecStatus {
   SecurityStatus status;
+  int edeReason;
   String reason;
 
   /**
@@ -16,8 +17,9 @@ final class JustifiedSecStatus {
    * @param status The security status.
    * @param reason The reason why the status was determined.
    */
-  JustifiedSecStatus(SecurityStatus status, String reason) {
+  JustifiedSecStatus(SecurityStatus status, int edeReason, String reason) {
     this.status = status;
+    this.edeReason = edeReason;
     this.reason = reason;
   }
 
@@ -27,6 +29,6 @@ final class JustifiedSecStatus {
    * @param response The response to which to apply this status.
    */
   void applyToResponse(SMessage response) {
-    response.setStatus(this.status, this.reason);
+    response.setStatus(this.status, edeReason, this.reason);
   }
 }

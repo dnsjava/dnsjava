@@ -13,6 +13,7 @@ import org.xbill.DNS.DNSKEYRecord;
 import org.xbill.DNS.DNSSEC;
 import org.xbill.DNS.DNSSEC.Algorithm;
 import org.xbill.DNS.DSRecord;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.NSECRecord;
 import org.xbill.DNS.Name;
@@ -232,14 +233,18 @@ final class ValUtils {
     if (!atLeastOneDigestSupported(dsRrset)) {
       KeyEntry ke =
           KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
-      ke.setBadReason(R.get("failed.ds.nodigest", dsRrset.getName()));
+      ke.setBadReason(
+          ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE,
+          R.get("failed.ds.nodigest", dsRrset.getName()));
       return ke;
     }
 
     if (!atLeastOneSupportedAlgorithm(dsRrset)) {
       KeyEntry ke =
           KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
-      ke.setBadReason(R.get("failed.ds.noalg", dsRrset.getName()));
+      ke.setBadReason(
+          ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
+          R.get("failed.ds.noalg", dsRrset.getName()));
       return ke;
     }
 
@@ -270,7 +275,7 @@ final class ValUtils {
 
     // If any were understandable, then it is bad.
     KeyEntry badKey = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
-    badKey.setBadReason(R.get("dnskey.no_ds_match"));
+    badKey.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_ds_match"));
     return badKey;
   }
 
@@ -348,7 +353,7 @@ final class ValUtils {
    * @param date The date against which to verify the rrset.
    * @return The status (BOGUS or SECURE).
    */
-  public SecurityStatus verifySRRset(SRRset rrset, SRRset keyRrset, Instant date) {
+  public JustifiedSecStatus verifySRRset(SRRset rrset, SRRset keyRrset, Instant date) {
     String rrsetName =
         rrset.getName()
             + "/"
@@ -358,19 +363,12 @@ final class ValUtils {
 
     if (rrset.getSecurityStatus() == SecurityStatus.SECURE) {
       log.trace("verifySRRset: rrset <{}> previously found to be SECURE", rrsetName);
-      return SecurityStatus.SECURE;
+      return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
     }
 
-    SecurityStatus status = this.verifier.verify(rrset, keyRrset, date);
-    if (status != SecurityStatus.SECURE) {
-      log.debug("verifySRRset: rrset <{}> found to be BAD", rrsetName);
-      status = SecurityStatus.BOGUS;
-    } else {
-      log.trace("verifySRRset: rrset <{}> found to be SECURE", rrsetName);
-    }
-
-    rrset.setSecurityStatus(status);
-    return status;
+    JustifiedSecStatus res = this.verifier.verify(rrset, keyRrset, date);
+    rrset.setSecurityStatus(res.status);
+    return res;
   }
 
   /**
@@ -674,28 +672,27 @@ final class ValUtils {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
 
-    // If we have a NSEC at the same name, it must prove one of two
-    // things
-    // --
+    // If we have a NSEC at the same name, it must prove one of two things:
     // 1) this is a delegation point and there is no DS
     // 2) this is not a delegation point
     SRRset nsecRrset = response.findRRset(qname, Type.NSEC, qclass, Section.AUTHORITY);
     if (nsecRrset != null) {
       // The NSEC must verify, first of all.
-      SecurityStatus status = this.verifySRRset(nsecRrset, keyRrset, date);
-      if (status != SecurityStatus.SECURE) {
-        return new JustifiedSecStatus(SecurityStatus.BOGUS, R.get("failed.ds.nsec"));
+      JustifiedSecStatus res = this.verifySRRset(nsecRrset, keyRrset, date);
+      if (res.status != SecurityStatus.SECURE) {
+        return new JustifiedSecStatus(SecurityStatus.BOGUS, res.edeReason, R.get("failed.ds.nsec"));
       }
 
       NSECRecord nsec = (NSECRecord) nsecRrset.first();
-      status = ValUtils.nsecProvesNoDS(nsec, qname);
+      SecurityStatus status = ValUtils.nsecProvesNoDS(nsec, qname);
       switch (status) {
         case INSECURE: // this wasn't a delegation point.
-          return new JustifiedSecStatus(status, R.get("failed.ds.nodelegation"));
+          return new JustifiedSecStatus(status, -1, R.get("failed.ds.nodelegation"));
         case SECURE: // this proved no DS.
-          return new JustifiedSecStatus(status, R.get("insecure.ds.nsec"));
+          return new JustifiedSecStatus(status, -1, R.get("insecure.ds.nsec"));
         default: // something was wrong.
-          return new JustifiedSecStatus(status, R.get("failed.ds.nsec.hasdata"));
+          return new JustifiedSecStatus(
+              status, ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.nsec.hasdata"));
       }
     }
 
@@ -706,9 +703,9 @@ final class ValUtils {
     boolean hasValidNSEC = false;
     NSECRecord wcNsec = null;
     for (SRRset set : response.getSectionRRsets(Section.AUTHORITY, Type.NSEC)) {
-      SecurityStatus status = this.verifySRRset(set, keyRrset, date);
-      if (status != SecurityStatus.SECURE) {
-        return new JustifiedSecStatus(status, R.get("failed.ds.nsec.ent"));
+      JustifiedSecStatus res = this.verifySRRset(set, keyRrset, date);
+      if (res.status != SecurityStatus.SECURE) {
+        return new JustifiedSecStatus(res.status, res.edeReason, R.get("failed.ds.nsec.ent"));
       }
 
       NSECRecord nsec = (NSECRecord) set.rrs().get(0);
@@ -735,13 +732,17 @@ final class ValUtils {
     if (hasValidNSEC) {
       if (ndp.wc != null) {
         SecurityStatus status = nsecProvesNoDS(wcNsec, qname);
-        return new JustifiedSecStatus(status, R.get("failed.ds.nowildcardproof"));
+        return new JustifiedSecStatus(
+            status, ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.ds.nowildcardproof"));
       }
 
-      return new JustifiedSecStatus(SecurityStatus.INSECURE, R.get("insecure.ds.nsec.ent"));
+      return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, R.get("insecure.ds.nsec.ent"));
     }
 
-    return new JustifiedSecStatus(SecurityStatus.UNCHECKED, R.get("failed.ds.nonconclusive"));
+    return new JustifiedSecStatus(
+        SecurityStatus.UNCHECKED,
+        ExtendedErrorCodeOption.DNSSEC_INDETERMINATE,
+        R.get("failed.ds.nonconclusive"));
   }
 
   /**

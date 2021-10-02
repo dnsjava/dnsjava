@@ -10,6 +10,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Rcode;
@@ -23,6 +24,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(3, response.getSection(Section.ANSWER).size());
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -32,6 +34,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(2, response.getSection(Section.ANSWER).size());
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -41,6 +44,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(4, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -50,6 +54,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(2, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -60,6 +65,7 @@ class TestCNames extends TestBase {
     assertEquals(4, response.getSection(Section.ANSWER).size());
     assertEquals(5, response.getSection(Section.AUTHORITY).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -69,6 +75,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_match", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @Test
@@ -77,6 +84,7 @@ class TestCNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -85,6 +93,7 @@ class TestCNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -94,6 +103,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_match", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @ParameterizedTest(name = "testCNameToVoid_{index}")
@@ -104,6 +114,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertEquals(acount, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -112,6 +123,7 @@ class TestCNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertEquals("insecure.ds.nsec", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -120,6 +132,7 @@ class TestCNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -128,6 +141,7 @@ class TestCNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -137,6 +151,7 @@ class TestCNames extends TestBase {
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertEquals(2, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -145,6 +160,7 @@ class TestCNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -153,5 +169,6 @@ class TestCNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 }

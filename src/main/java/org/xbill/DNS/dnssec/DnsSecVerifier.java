@@ -11,6 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.DNSKEYRecord;
 import org.xbill.DNS.DNSSEC;
 import org.xbill.DNS.DNSSEC.DNSSECException;
+import org.xbill.DNS.DNSSEC.KeyMismatchException;
+import org.xbill.DNS.DNSSEC.SignatureExpiredException;
+import org.xbill.DNS.DNSSEC.SignatureNotYetValidException;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.RRSIGRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
@@ -67,34 +71,52 @@ final class DnsSecVerifier {
    *     if it did not verify (for any reason), and {@link SecurityStatus#UNCHECKED} if verification
    *     could not be completed (usually because the public key was not available).
    */
-  private SecurityStatus verifySignature(
+  private JustifiedSecStatus verifySignature(
       SRRset rrset, RRSIGRecord sigrec, RRset keyRrset, Instant date) {
+    if (!rrset.getName().subdomain(keyRrset.getName())) {
+      log.debug("signer name is off-tree");
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.DNSSEC_BOGUS,
+          R.get("dnskey.key_offtree", keyRrset.getName(), rrset.getName()));
+    }
+
     List<DNSKEYRecord> keys = this.findKey(keyRrset, sigrec);
     if (keys.isEmpty()) {
       log.trace("could not find appropriate key");
-      return SecurityStatus.BOGUS;
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.DNSKEY_MISSING,
+          R.get("dnskey.no_key", sigrec.getSigner()));
     }
 
-    SecurityStatus status = SecurityStatus.UNCHECKED;
     for (DNSKEYRecord key : keys) {
       try {
-        if (!rrset.getName().subdomain(keyRrset.getName())) {
-          log.debug("signer name is off-tree");
-          status = SecurityStatus.BOGUS;
-          continue;
-        }
-
         DNSSEC.verify(rrset, sigrec, key, date);
         ValUtils.setCanonicalNsecOwner(rrset, sigrec);
-        return SecurityStatus.SECURE;
+        return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
+      } catch (KeyMismatchException kme) {
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_match"));
+      } catch (SignatureExpiredException e) {
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS,
+            ExtendedErrorCodeOption.SIGNATURE_EXPIRED,
+            R.get("dnskey.expired"));
+      } catch (SignatureNotYetValidException e) {
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS,
+            ExtendedErrorCodeOption.SIGNATURE_NOT_YET_VALID,
+            R.get("dnskey.not_yet_valid"));
       } catch (DNSSECException e) {
         log.error(
             "Failed to validate RRset {}/{}", rrset.getName(), Type.string(rrset.getType()), e);
-        status = SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
       }
     }
 
-    return status;
+    return new JustifiedSecStatus(SecurityStatus.UNCHECKED, -1, null);
   }
 
   /**
@@ -106,22 +128,30 @@ final class DnsSecVerifier {
    * @param date The date against which to verify the rrset.
    * @return SecurityStatus.SECURE if the rrest verified positively, SecurityStatus.BOGUS otherwise.
    */
-  public SecurityStatus verify(SRRset rrset, RRset keyRrset, Instant date) {
+  public JustifiedSecStatus verify(SRRset rrset, RRset keyRrset, Instant date) {
     List<RRSIGRecord> sigs = rrset.sigs();
     if (sigs.isEmpty()) {
       log.info("RRset failed to verify due to lack of signatures");
-      return SecurityStatus.BOGUS;
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.RRSIGS_MISSING,
+          R.get("validate.bogus.missingsig"));
     }
 
+    JustifiedSecStatus res =
+        new JustifiedSecStatus(
+            SecurityStatus.BOGUS,
+            ExtendedErrorCodeOption.RRSIGS_MISSING,
+            R.get("validate.bogus.missingsig"));
     for (RRSIGRecord sigrec : sigs) {
-      SecurityStatus res = this.verifySignature(rrset, sigrec, keyRrset, date);
-      if (res == SecurityStatus.SECURE) {
+      res = this.verifySignature(rrset, sigrec, keyRrset, date);
+      if (res.status == SecurityStatus.SECURE) {
         return res;
       }
     }
 
     log.info("RRset failed to verify: all signatures were BOGUS");
-    return SecurityStatus.BOGUS;
+    return res;
   }
 
   /**
