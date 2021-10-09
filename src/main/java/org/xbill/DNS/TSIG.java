@@ -71,45 +71,51 @@ public class TSIG {
     algMap = Collections.unmodifiableMap(out);
   }
 
-  private static final Map<String, Name> stringToNameAlgMap;
-
-  static {
-    Map<String, Name> outsn = new HashMap<>();
-    outsn.put(HMAC_MD5.toString().toLowerCase(), HMAC_MD5);
-    outsn.put(HMAC_MD5.toString(true).toLowerCase(), HMAC_MD5);
-    outsn.put("hmac-md5".toLowerCase(), HMAC_MD5);
-    outsn.put("hmac-md5.".toLowerCase(), HMAC_MD5);
-    outsn.put(HMAC_SHA1.toString().toLowerCase(), HMAC_SHA1);
-    outsn.put(HMAC_SHA1.toString(true).toLowerCase(), HMAC_SHA1);
-    outsn.put("HmacSHA1".toLowerCase(), HMAC_SHA1);
-    outsn.put(HMAC_SHA224.toString().toLowerCase(), HMAC_SHA224);
-    outsn.put(HMAC_SHA224.toString(true).toLowerCase(), HMAC_SHA224);
-    outsn.put("HmacSHA224".toLowerCase(), HMAC_SHA224);
-    outsn.put(HMAC_SHA256.toString().toLowerCase(), HMAC_SHA256);
-    outsn.put(HMAC_SHA256.toString(true).toLowerCase(), HMAC_SHA256);
-    outsn.put("HmacSHA256".toLowerCase(), HMAC_SHA256);
-    outsn.put(HMAC_SHA384.toString().toLowerCase(), HMAC_SHA384);
-    outsn.put(HMAC_SHA384.toString(true).toLowerCase(), HMAC_SHA384);
-    outsn.put("HmacSHA384".toLowerCase(), HMAC_SHA384);
-    outsn.put(HMAC_SHA512.toString().toLowerCase(), HMAC_SHA512);
-    outsn.put(HMAC_SHA512.toString(true).toLowerCase(), HMAC_SHA512);
-    outsn.put("HmacSHA512".toLowerCase(), HMAC_SHA512);
-    stringToNameAlgMap = Collections.unmodifiableMap(outsn);
-  }
-
+  /**
+   * Convert an algorithm String to its equivalent Name.
+   *
+   * @param alg String containing name of algorithm.
+   * @return Name object for algorithm
+   * @throws IllegalArgumentException The algorithm is null or invalid.
+   */
   public static Name algorithmToName(String alg) {
     if (alg == null) {
       throw new IllegalArgumentException("Null algorithm");
     }
 
-    Name nalg = stringToNameAlgMap.get(alg.toLowerCase());
-    if (nalg != null) {
-      return nalg;
+    // Special case.  Allow "HMAC-MD5" as an alias
+    // for the RFC name.
+    if (alg.equalsIgnoreCase("HMAC-MD5") || alg.equalsIgnoreCase("HMAC-MD5.")) {
+      return HMAC_MD5;
     }
 
-    throw new IllegalArgumentException("Unknown algorithm: " + alg);
+    // Search through the RFC Names in the map and match
+    // if the algorithm name with or without the trailing dot.
+    // The match is case-insensitive.
+    return algMap.keySet().stream()
+        .filter(n -> n.toString().equalsIgnoreCase(alg) || n.toString(true).equalsIgnoreCase(alg))
+        .findAny()
+        .orElseGet(
+            () ->
+                // Did not find an RFC name, so fall through
+                // and try the java names in the value of each
+                // entry.  If not found after all this, then
+                // throw an exception.
+                algMap.entrySet().stream()
+                    .filter(e -> e.getValue().equalsIgnoreCase(alg))
+                    .map(Map.Entry::getKey)
+                    .findAny()
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown algorithm: " + alg)));
   }
 
+  /**
+   * Convert an algorithm Name to a string.
+   *
+   * @param name Name object
+   * @return String equivalent
+   * @deprecated Returns java algorithm name, will be made private in 4.0
+   */
+  @Deprecated
   public static String nameToAlgorithm(Name name) {
     String alg = algMap.get(name);
     if (alg != null) {
@@ -275,12 +281,22 @@ public class TSIG {
   /**
    * Creates a new TSIG object, which can be used to sign or verify a message.
    *
+   * @param algorithm The RFC8945 algorithm name of the shared key. The legal values are:
+   *     <ul>
+   *       <li>hmac-md5.sig-alg.reg.int.
+   *       <li>hmac-md5. (alias for hmac-md5.sig-alg.reg.int.)
+   *       <li>hmac-sha1.
+   *       <li>hmac-sha224.
+   *       <li>mac-sha256.
+   *       <li>hmac-sha384.
+   *       <li>hmac-sha512.
+   *     </ul>
+   *     The trailing &quot;.&quot; can be omitted.
    * @param name The name of the shared key.
-   * @param algorithm The algorithm of the shared key. The legal values are "hmac-md5", "hmac-sha1",
-   *     "hmac-sha224", "hmac-sha256", "hmac-sha384", and "hmac-sha512".
    * @param key The shared key's data represented as a base64 encoded string.
    * @throws IllegalArgumentException The key name is an invalid name
    * @throws IllegalArgumentException The key data is improperly encoded
+   * @see RFC8945
    */
   public TSIG(String algorithm, String name, String key) {
     this(algorithmToName(algorithm), name, key);
