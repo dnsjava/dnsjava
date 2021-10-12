@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TSIGTest {
   @Test
@@ -28,6 +30,48 @@ class TSIGTest {
     int result = key.verify(parsed, bytes, null);
     assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
+  }
+
+  /**
+   * Check all of the string algorithm names defined in the javadoc. Confirm that java names also
+   * allowed, even though undocumented. THis is to conserve backwards compatibility.
+   */
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "hmac-md5",
+        "hmac-md5.sig-alg.reg.int.",
+        "hmac-sha1",
+        "hmac-sha224",
+        "hmac-sha256",
+        "hmac-sha256.",
+        "hmac-sha384",
+        "hmac-sha512",
+        // Java names
+        "HmacMD5",
+        "HmacSHA256"
+      })
+  void TSIG_query_stringalg(String alg) throws IOException {
+    TSIG key = new TSIG(alg, "example.", "12345678");
+
+    Name qname = Name.fromString("www.example.");
+    Record rec = Record.newRecord(qname, Type.A, DClass.IN);
+    Message msg = Message.newQuery(rec);
+    msg.setTSIG(key, Rcode.NOERROR, null);
+    byte[] bytes = msg.toWire(512);
+    assertEquals(1, bytes[11]);
+
+    Message parsed = new Message(bytes);
+    int result = key.verify(parsed, bytes, null);
+    assertEquals(Rcode.NOERROR, result);
+    assertTrue(parsed.isSigned());
+  }
+
+  /** Confirm error thrown with illegal algorithm name. */
+  @Test
+  void TSIG_query_stringalg_err() throws IOException {
+    assertThrows(
+        IllegalArgumentException.class, () -> new TSIG("randomalg", "example.", "12345678"));
   }
 
   @Test

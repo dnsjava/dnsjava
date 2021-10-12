@@ -71,15 +71,51 @@ public class TSIG {
     algMap = Collections.unmodifiableMap(out);
   }
 
+  /**
+   * Convert an algorithm String to its equivalent Name.
+   *
+   * @param alg String containing name of algorithm.
+   * @return Name object for algorithm
+   * @throws IllegalArgumentException The algorithm is null or invalid.
+   */
   public static Name algorithmToName(String alg) {
-    for (Map.Entry<Name, String> entry : algMap.entrySet()) {
-      if (alg.equalsIgnoreCase(entry.getValue())) {
-        return entry.getKey();
-      }
+    if (alg == null) {
+      throw new IllegalArgumentException("Null algorithm");
     }
-    throw new IllegalArgumentException("Unknown algorithm: " + alg);
+
+    // Special case.  Allow "HMAC-MD5" as an alias
+    // for the RFC name.
+    if (alg.equalsIgnoreCase("HMAC-MD5") || alg.equalsIgnoreCase("HMAC-MD5.")) {
+      return HMAC_MD5;
+    }
+
+    // Search through the RFC Names in the map and match
+    // if the algorithm name with or without the trailing dot.
+    // The match is case-insensitive.
+    return algMap.keySet().stream()
+        .filter(n -> n.toString().equalsIgnoreCase(alg) || n.toString(true).equalsIgnoreCase(alg))
+        .findAny()
+        .orElseGet(
+            () ->
+                // Did not find an RFC name, so fall through
+                // and try the java names in the value of each
+                // entry.  If not found after all this, then
+                // throw an exception.
+                algMap.entrySet().stream()
+                    .filter(e -> e.getValue().equalsIgnoreCase(alg))
+                    .map(Map.Entry::getKey)
+                    .findAny()
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown algorithm: " + alg)));
   }
 
+  /**
+   * Convert an algorithm Name to a string.
+   *
+   * @param name Name object
+   * @return String equivalent
+   * @deprecated Returns java algorithm name, will be made private in 4.0
+   */
+  @Deprecated
   public static String nameToAlgorithm(Name name) {
     String alg = algMap.get(name);
     if (alg != null) {
@@ -245,12 +281,22 @@ public class TSIG {
   /**
    * Creates a new TSIG object, which can be used to sign or verify a message.
    *
+   * @param algorithm The RFC8945 algorithm name of the shared key. The legal values are:
+   *     <ul>
+   *       <li>hmac-md5.sig-alg.reg.int.
+   *       <li>hmac-md5. (alias for hmac-md5.sig-alg.reg.int.)
+   *       <li>hmac-sha1.
+   *       <li>hmac-sha224.
+   *       <li>hmac-sha256.
+   *       <li>hmac-sha384.
+   *       <li>hmac-sha512.
+   *     </ul>
+   *     The trailing &quot;.&quot; can be omitted.
    * @param name The name of the shared key.
-   * @param algorithm The algorithm of the shared key. The legal values are "hmac-md5", "hmac-sha1",
-   *     "hmac-sha224", "hmac-sha256", "hmac-sha384", and "hmac-sha512".
    * @param key The shared key's data represented as a base64 encoded string.
    * @throws IllegalArgumentException The key name is an invalid name
    * @throws IllegalArgumentException The key data is improperly encoded
+   * @see RFC8945
    */
   public TSIG(String algorithm, String name, String key) {
     this(algorithmToName(algorithm), name, key);
