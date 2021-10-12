@@ -287,7 +287,7 @@ public class TSIG {
    *       <li>hmac-md5. (alias for hmac-md5.sig-alg.reg.int.)
    *       <li>hmac-sha1.
    *       <li>hmac-sha224.
-   *       <li>mac-sha256.
+   *       <li>hmac-sha256.
    *       <li>hmac-sha384.
    *       <li>hmac-sha512.
    *     </ul>
