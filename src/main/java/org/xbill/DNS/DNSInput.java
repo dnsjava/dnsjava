@@ -79,7 +79,7 @@ public class DNSInput {
 
   /** Returns the position of the end of the current active region. */
   public int saveActive() {
-    return limit - offset;
+    return byteBuffer.limit() - offset;
   }
 
   /**
