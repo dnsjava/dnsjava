@@ -39,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,6 +83,19 @@ abstract class DNSInputBase {
       buffer.getShort();
       buffer.limit(m_raw.length + 2);
       m_di = new DNSInput(buffer);
+    }
+  }
+
+  static class DNSInputByteBufferLimitOffsetTest extends DNSInputBase {
+    @BeforeEach
+    void setUp() throws IOException {
+      m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
+      // create a new byte array with a prefix and a suffix to be ignored
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      out.write(42);
+      out.write(m_raw);
+      out.write(47);
+      m_di = new DNSInput(ByteBuffer.wrap(out.toByteArray(), 1, 10));
     }
   }
 
@@ -318,5 +333,29 @@ abstract class DNSInputBase {
     assertEquals(1, out.length);
     assertEquals(3, m_di.current());
     assertEquals(2, out[0]);
+  }
+
+  @Test
+  void setActive_recursive() throws WireParseException {
+    int outer = m_di.saveActive();
+    m_di.setActive(3);
+
+    assertEquals(0x00, m_di.readU8());
+    assertEquals(2, m_di.remaining());
+
+    int inner = m_di.saveActive();
+
+    m_di.setActive(1);
+    assertArrayEquals(new byte[] {0x01}, m_di.readByteArray());
+
+    m_di.restoreActive(inner);
+
+    assertArrayEquals(new byte[] {0x02}, m_di.readByteArray());
+    assertEquals(0, m_di.remaining());
+
+    m_di.restoreActive(outer);
+
+    assertEquals(0x03, m_di.readU8());
+    assertEquals(6, m_di.remaining());
   }
 }
