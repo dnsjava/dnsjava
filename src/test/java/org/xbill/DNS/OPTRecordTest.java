@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
+import org.xbill.DNS.utils.base16;
 
 class OPTRecordTest {
 
@@ -45,6 +48,24 @@ class OPTRecordTest {
             TextParseException.class,
             () -> new OPTRecord().rdataFromString(new Tokenizer(" "), null));
     assertTrue(thrown.getMessage().contains("no text format defined for OPT"));
+  }
+
+  @Test
+  void rdataFromWire() throws IOException {
+    byte[] buf = base16.fromString("000029100000000000000C000A00084531D089BA80C6EB");
+    OPTRecord record = (OPTRecord) OPTRecord.fromWire(new DNSInput(buf), Section.ADDITIONAL);
+    assertEquals(
+        Collections.singletonList(new CookieOption(base16.fromString("4531D089BA80C6EB"))),
+        record.getOptions());
+  }
+
+  @Test
+  void rdataFromWire_nullPadded() throws IOException {
+    byte[] buf = base16.fromString("000029100000000000000C000A00084531D089BA80C6EB00");
+    OPTRecord record = (OPTRecord) OPTRecord.fromWire(new DNSInput(buf), Section.ADDITIONAL);
+    assertEquals(
+        Collections.singletonList(new CookieOption(base16.fromString("4531D089BA80C6EB"))),
+        record.getOptions());
   }
 
   private void assertNotEqual(final OPTRecord optRecordOne, final OPTRecord optRecordTwo) {
