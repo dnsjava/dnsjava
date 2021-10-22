@@ -967,7 +967,7 @@ public final class ValidatingResolver implements Resolver {
         SRRset dsRrset = response.findAnswerRRset(qname, Type.DS, qclass);
         res = this.valUtils.verifySRRset(dsRrset, keyRrset, this.clock.instant());
         if (res.status != SecurityStatus.SECURE) {
-          bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds"));
+          bogusKE.setBadReason(res.edeReason, res.reason);
           return bogusKE;
         }
 

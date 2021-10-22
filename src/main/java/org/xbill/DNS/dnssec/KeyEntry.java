@@ -145,14 +145,14 @@ final class KeyEntry extends SRRset {
 
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS,
-          ExtendedErrorCodeOption.DNSSEC_BOGUS,
+          edeReason,
           R.get("validate.bogus", this.badReason));
     }
 
     if (this.isBad()) {
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS,
-          ExtendedErrorCodeOption.DNSSEC_BOGUS,
+          edeReason,
           R.get("validate.bogus.badkey", this.getName(), this.badReason));
     }
 

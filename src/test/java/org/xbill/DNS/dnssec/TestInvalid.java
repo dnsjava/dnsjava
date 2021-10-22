@@ -10,10 +10,12 @@ import java.net.InetAddress;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSSEC.Algorithm;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
@@ -24,22 +26,22 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
 
 class TestInvalid extends TestBase {
-  @ParameterizedTest(name = "testInvalid_{arguments}")
-  @ValueSource(
-      strings = {
-        "unknownalgorithm.dnssec",
-        "sigexpired.dnssec",
-        "bogussig.dnssec",
-        "unknownalgorithm.nsec3",
-        "sigexpired.nsec3",
-        "bogussig.nsec3"
-      })
+  @ParameterizedTest(name = "testInvalid_{0}")
+  @CsvSource({
+    "bogussig.dnssec,dnskey.invalid,DNSSEC_BOGUS",
+    "bogussig.nsec3,dnskey.invalid,DNSSEC_BOGUS",
+    "sigexpired.dnssec,dnskey.expired,SIGNATURE_EXPIRED",
+    "sigexpired.nsec3,dnskey.expired,SIGNATURE_EXPIRED",
+    "unknownalgorithm.dnssec,failed.ds.noalg,UNSUPPORTED_DNSKEY_ALGORITHM",
+    "unknownalgorithm.nsec3,failed.ds.noalg,UNSUPPORTED_DNSKEY_ALGORITHM",
+  })
   @AlwaysOffline
-  void testInvalid(String param) throws IOException {
+  void testInvalid(String param, String dnssecReason, String edeMnemonic) throws IOException {
     Message response = resolver.send(createMessage(param + ".tjeb.nl./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.bogus.badkey:" + param + ".tjeb.nl.:failed.ds", getReason(response));
+    assertEquals("validate.bogus.badkey:" + param + ".tjeb.nl.:" + dnssecReason, getReason(response));
+    assertEquals(ExtendedErrorCodeOption.code(edeMnemonic), getEdeReason(response));
   }
 
   @Test
@@ -50,6 +52,7 @@ class TestInvalid extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertFalse(isEmptyAnswer(response));
     assertEquals("insecure.ds.nsec", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test

@@ -11,6 +11,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
@@ -30,6 +31,7 @@ class TestDNames extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(5, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -39,6 +41,7 @@ class TestDNames extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(3, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -47,6 +50,7 @@ class TestDNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -61,6 +65,7 @@ class TestDNames extends TestBase {
         assertEquals(Name.fromString("ingotronic.ch."), r.getTarget());
       }
     }
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -74,6 +79,7 @@ class TestDNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.synthesize.nomatch:www.isc.org.:www.ingotronic.ch.", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @Test
@@ -92,6 +98,7 @@ class TestDNames extends TestBase {
     Record[] results = l.run();
     assertNotNull(results);
     assertTrue(results.length >= 1);
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -105,6 +112,7 @@ class TestDNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.synthesize.multiple", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @Test
@@ -122,6 +130,7 @@ class TestDNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.synthesize.toolong", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @Test
@@ -154,6 +163,7 @@ class TestDNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:www.alias.ingotronic.ch.", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @Test
@@ -162,6 +172,7 @@ class TestDNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -170,5 +181,6 @@ class TestDNames extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 }

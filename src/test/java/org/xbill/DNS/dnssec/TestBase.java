@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -245,7 +246,7 @@ public abstract class TestBase {
   }
 
   protected int getEdeReason(Message m) {
-    return Optional.ofNullable(m.getOPT())
+    int edeReason = Optional.ofNullable(m.getOPT())
         .flatMap(
             opt ->
                 opt.getOptions(Code.EDNS_EXTENDED_ERROR).stream()
@@ -253,6 +254,21 @@ public abstract class TestBase {
                     .findFirst()
                     .map(o -> ((ExtendedErrorCodeOption) o).getErrorCode()))
         .orElse(-1);
+    if (edeReason != -1) {
+      assertEquals(getReason(m), getEdeText(m));
+    }
+    return edeReason;
+  }
+
+  protected String getEdeText(Message m) {
+    return Optional.ofNullable(m.getOPT())
+        .flatMap(
+            opt ->
+                opt.getOptions(Code.EDNS_EXTENDED_ERROR).stream()
+                    .filter(o -> o instanceof ExtendedErrorCodeOption)
+                    .findFirst()
+                    .map(o -> ((ExtendedErrorCodeOption) o).getText()))
+        .orElse(null);
   }
 
   protected String getReason(Message m) {
