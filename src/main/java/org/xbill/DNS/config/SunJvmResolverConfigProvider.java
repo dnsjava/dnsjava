@@ -20,6 +20,7 @@ import java.util.List;
 public class SunJvmResolverConfigProvider extends BaseResolverConfigProvider {
   @Override
   public void initialize() throws InitializationException {
+    reset();
     try {
       Class<?> resConfClass = Class.forName("sun.net.dns.ResolverConfiguration");
       Method open = resConfClass.getDeclaredMethod("open");
