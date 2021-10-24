@@ -2,7 +2,7 @@
 package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -69,7 +69,7 @@ class OPTRecordTest {
   }
 
   private void assertNotEqual(final OPTRecord optRecordOne, final OPTRecord optRecordTwo) {
-    assertFalse(optRecordOne.equals(optRecordTwo));
-    assertFalse(optRecordTwo.equals(optRecordOne));
+    assertNotEquals(optRecordOne, optRecordTwo);
+    assertNotEquals(optRecordTwo, optRecordOne);
   }
 }

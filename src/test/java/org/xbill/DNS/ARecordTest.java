@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -76,7 +75,7 @@ class ARecordTest {
   }
 
   @Test
-  void ctor_4arg() {
+  void ctor_4arg() throws UnknownHostException {
     ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr);
     assertEquals(m_an, ar.getName());
     assertEquals(Type.A, ar.getType());
@@ -88,14 +87,9 @@ class ARecordTest {
     assertThrows(RelativeNameException.class, () -> new ARecord(m_rn, DClass.IN, m_ttl, m_addr));
 
     // an IPv6 address
-    try {
-      new ARecord(
-          m_an, DClass.IN, m_ttl, InetAddress.getByName("2001:0db8:85a3:08d3:1319:8a2e:0370:7334"));
-      fail("IllegalArgumentException not thrown");
-    } catch (IllegalArgumentException e) {
-    } catch (UnknownHostException e) {
-      fail(e.getMessage());
-    }
+    InetAddress address = InetAddress.getByName("2001:0db8:85a3:08d3:1319:8a2e:0370:7334");
+    assertThrows(
+        IllegalArgumentException.class, () -> new ARecord(m_an, DClass.IN, m_ttl, address));
   }
 
   @Test
