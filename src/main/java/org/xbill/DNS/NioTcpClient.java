@@ -114,6 +114,7 @@ final class NioTcpClient extends NioClient {
     ByteBuffer responseData = ByteBuffer.allocate(Message.MAXLENGTH);
     int readState = 0;
 
+    @Override
     public void processReadyKey(SelectionKey key) {
       if (key.isValid()) {
         if (key.isConnectable()) {

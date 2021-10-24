@@ -15,6 +15,7 @@ import org.xbill.DNS.SimpleResolver;
 public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider {
   private int ndots = 1;
 
+  @Override
   public void initialize() {
     // first try the default unix config path
     if (!tryParseResolveConf("/etc/resolv.conf")) {

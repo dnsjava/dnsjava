@@ -55,6 +55,7 @@ public class WindowsResolverConfigProvider implements ResolverConfigProvider {
           Win32Exception.class.getName());
     }
 
+    @Override
     public void initialize() throws InitializationException {
       // The recommended method of calling the GetAdaptersAddresses function is to pre-allocate a
       // 15KB working buffer

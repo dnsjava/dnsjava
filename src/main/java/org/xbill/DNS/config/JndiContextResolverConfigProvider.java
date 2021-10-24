@@ -41,6 +41,7 @@ public class JndiContextResolverConfigProvider implements ResolverConfigProvider
       log.debug("JNDI class: {}", DirContext.class.getName());
     }
 
+    @Override
     public void initialize() {
       Hashtable<String, String> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");
