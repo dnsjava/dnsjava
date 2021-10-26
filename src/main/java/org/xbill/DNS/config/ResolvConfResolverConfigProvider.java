@@ -17,6 +17,7 @@ public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider
 
   @Override
   public void initialize() {
+    reset();
     // first try the default unix config path
     if (!tryParseResolveConf("/etc/resolv.conf")) {
       // then fallback to netware

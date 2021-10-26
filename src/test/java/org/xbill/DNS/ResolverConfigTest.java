@@ -41,12 +41,13 @@ class ResolverConfigTest {
 
   @Test
   void properties() {
-    String[] dnsServers = {"192.168.1.1", "192.168.1.2", "192.168.1.1"};
+    String[] dnsServers1 = {"192.168.1.1", "192.168.1.2", "192.168.1.1"};
+    String[] dnsServers2 = {"192.168.1.3"};
     // intentionally adding duplicate search entries for testing
     String[] dnsSearch = {"dnsjava.org", "example.com", "dnsjava.org"};
     Name[] searchPath =
         Arrays.stream(dnsSearch).map(s -> Name.fromConstantString(s + ".")).toArray(Name[]::new);
-    System.setProperty(DNS_SERVER_PROP, String.join(",", dnsServers));
+    System.setProperty(DNS_SERVER_PROP, String.join(",", dnsServers1));
     System.setProperty(DNS_SEARCH_PROP, String.join(",", dnsSearch));
     System.setProperty(DNS_NDOTS_PROP, String.valueOf(5));
     try {
@@ -55,7 +56,12 @@ class ResolverConfigTest {
       rc.initialize();
 
       assertEquals(2, rc.servers().size());
-      assertEquals(dnsServers[0], rc.servers().get(0).getAddress().getHostAddress());
+      assertEquals(dnsServers1[0], rc.servers().get(0).getAddress().getHostAddress());
+
+      // must remove no longer present servers
+      System.setProperty(DNS_SERVER_PROP, String.join(",", dnsServers2));
+      rc.initialize();
+      assertEquals(1, rc.servers().size());
 
       // any duplicate suffixes should be excluded
       assertEquals(2, rc.searchPaths().size());

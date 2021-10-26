@@ -43,6 +43,7 @@ public class JndiContextResolverConfigProvider implements ResolverConfigProvider
 
     @Override
     public void initialize() {
+      reset();
       Hashtable<String, String> env = new Hashtable<>();
       env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.dns.DnsContextFactory");
       // http://mail.openjdk.java.net/pipermail/net-dev/2017-March/010695.html

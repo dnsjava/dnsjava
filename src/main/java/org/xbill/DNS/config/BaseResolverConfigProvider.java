@@ -24,8 +24,15 @@ public abstract class BaseResolverConfigProvider implements ResolverConfigProvid
   private static final boolean ipv6first = Boolean.getBoolean("java.net.preferIPv6Addresses");
 
   private final List<InetSocketAddress> nameservers = new ArrayList<>(3);
-  final Logger log = LoggerFactory.getLogger(getClass());
-  List<Name> searchlist = new ArrayList<>(1);
+
+  protected final Logger log = LoggerFactory.getLogger(getClass());
+  protected final List<Name> searchlist = new ArrayList<>(1);
+
+  protected final void reset() {
+    // TODO v4: make a final void initialize() that clears and then calls abstract doInit()
+    nameservers.clear();
+    searchlist.clear();
+  }
 
   protected void parseSearchPathList(String search, String delimiter) {
     if (search != null) {
