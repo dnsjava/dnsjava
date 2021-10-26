@@ -31,6 +31,7 @@ public class AndroidResolverConfigProvider extends BaseResolverConfigProvider {
 
   @Override
   public void initialize() throws InitializationException {
+    reset();
     if (context == null) {
       throw new InitializationException("Context must be initialized by calling setContext");
     }

@@ -35,6 +35,7 @@
 //
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -355,8 +356,11 @@ class RRsetTest {
     rrset.addRR(m_a1);
     rrset.addRR(m_a2);
 
-    for (int i = 0; i < numOfCalls; i++) {
-      rrset.rrs(true);
-    }
+    assertDoesNotThrow(
+        () -> {
+          for (int i = 0; i < numOfCalls; i++) {
+            rrset.rrs(true);
+          }
+        });
   }
 }

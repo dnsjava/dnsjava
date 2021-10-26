@@ -130,6 +130,7 @@ public abstract class SVCBBase extends Record {
 
     public abstract byte[] toWire();
 
+    @Override
     public abstract String toString();
 
     // Split string on commas, but not if comma is escaped with a '\'

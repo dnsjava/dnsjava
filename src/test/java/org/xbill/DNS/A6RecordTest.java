@@ -80,7 +80,7 @@ class A6RecordTest {
   }
 
   @Test
-  void ctor_6arg() {
+  void ctor_6arg() throws UnknownHostException {
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
     assertEquals(m_an, ar.getName());
     assertEquals(Type.A6, ar.getType());
@@ -116,11 +116,10 @@ class A6RecordTest {
         () -> new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null));
 
     // an IPv4 address
+    InetAddress address = InetAddress.getByName("192.168.0.1");
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new A6Record(
-                m_an, DClass.IN, m_ttl, m_prefix_bits, InetAddress.getByName("192.168.0.1"), null));
+        () -> new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, address, null));
   }
 
   @Test

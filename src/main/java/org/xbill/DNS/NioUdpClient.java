@@ -99,6 +99,7 @@ final class NioUdpClient extends NioClient {
       }
     }
 
+    @Override
     public void processReadyKey(SelectionKey key) {
       if (!key.isReadable()) {
         silentCloseChannel();
