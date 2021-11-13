@@ -11,7 +11,6 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSSEC.Algorithm;
@@ -32,15 +31,19 @@ class TestInvalid extends TestBase {
     "bogussig.nsec3,dnskey.invalid,DNSSEC_BOGUS",
     "sigexpired.dnssec,dnskey.expired,SIGNATURE_EXPIRED",
     "sigexpired.nsec3,dnskey.expired,SIGNATURE_EXPIRED",
-    "unknownalgorithm.dnssec,failed.ds.noalg,UNSUPPORTED_DNSKEY_ALGORITHM",
-    "unknownalgorithm.nsec3,failed.ds.noalg,UNSUPPORTED_DNSKEY_ALGORITHM",
+    // unknownalgorithm would make you think this should return UNSUPPORTED_DNSKEY_ALGORITHM or
+    // UNSUPPORTED_DS_DIGEST_TYPE, but the zone has DS/DNSKEYs for alg=5, then a RRSig with alg=200.
+    // This results in a key not found, regardless of whether the alg is supported or not
+    "unknownalgorithm.dnssec,dnskey.no_key:dnssec.tjeb.nl.,DNSKEY_MISSING",
+    "unknownalgorithm.nsec3,dnskey.no_key:nsec3.tjeb.nl.,DNSKEY_MISSING",
   })
   @AlwaysOffline
   void testInvalid(String param, String dnssecReason, String edeMnemonic) throws IOException {
     Message response = resolver.send(createMessage(param + ".tjeb.nl./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.bogus.badkey:" + param + ".tjeb.nl.:" + dnssecReason, getReason(response));
+    assertEquals(
+        "validate.bogus.badkey:" + param + ".tjeb.nl.:" + dnssecReason, getReason(response));
     assertEquals(ExtendedErrorCodeOption.code(edeMnemonic), getEdeReason(response));
   }
 
@@ -63,6 +66,7 @@ class TestInvalid extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertFalse(isEmptyAnswer(response));
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEquals(-1, getEdeReason(response));
   }
 
   @Test
@@ -81,6 +85,7 @@ class TestInvalid extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.missingsig", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, getEdeReason(response));
   }
 
   @Test
@@ -114,6 +119,7 @@ class TestInvalid extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.answer.positive:{ www.ingotronic.ch."));
+    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
   }
 
   @Test
@@ -129,6 +135,7 @@ class TestInvalid extends TestBase {
     // rfc4035#section-5.5
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:ch.:failed.ds.nonsec:ch.", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, getEdeReason(response));
   }
 
   @Test
@@ -145,5 +152,6 @@ class TestInvalid extends TestBase {
     // rfc4035#section-5.5
     assertEquals(Rcode.REFUSED, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEquals(ExtendedErrorCodeOption.NSEC_MISSING, getEdeReason(response));
   }
 }

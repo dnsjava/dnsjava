@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Rcode;
@@ -23,6 +24,7 @@ class TestNoData extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
+    assertEquals(ExtendedErrorCodeOption.NSEC_MISSING, getEdeReason(response));
   }
 
   @Test
@@ -35,5 +37,6 @@ class TestNoData extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
+    assertEquals(ExtendedErrorCodeOption.NSEC_MISSING, getEdeReason(response));
   }
 }

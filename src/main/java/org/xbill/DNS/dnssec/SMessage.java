@@ -210,6 +210,15 @@ final class SMessage {
   }
 
   /**
+   * Sets the security status of this message to bogus and sets the reason.
+   *
+   * @param reason Why this message's status is bogus.
+   */
+  public void setBogus(String reason, int edeReason) {
+    setStatus(SecurityStatus.BOGUS, edeReason, reason);
+  }
+
+  /**
    * Gets the reason why this messages' status is bogus.
    *
    * @return The reason why this messages' status is bogus.

@@ -143,6 +143,7 @@ final class DnsSecVerifier {
             SecurityStatus.BOGUS,
             ExtendedErrorCodeOption.RRSIGS_MISSING,
             R.get("validate.bogus.missingsig"));
+
     for (RRSIGRecord sigrec : sigs) {
       res = this.verifySignature(rrset, sigrec, keyRrset, date);
       if (res.status == SecurityStatus.SECURE) {

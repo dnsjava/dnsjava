@@ -246,14 +246,15 @@ public abstract class TestBase {
   }
 
   protected int getEdeReason(Message m) {
-    int edeReason = Optional.ofNullable(m.getOPT())
-        .flatMap(
-            opt ->
-                opt.getOptions(Code.EDNS_EXTENDED_ERROR).stream()
-                    .filter(o -> o instanceof ExtendedErrorCodeOption)
-                    .findFirst()
-                    .map(o -> ((ExtendedErrorCodeOption) o).getErrorCode()))
-        .orElse(-1);
+    int edeReason =
+        Optional.ofNullable(m.getOPT())
+            .flatMap(
+                opt ->
+                    opt.getOptions(Code.EDNS_EXTENDED_ERROR).stream()
+                        .filter(o -> o instanceof ExtendedErrorCodeOption)
+                        .findFirst()
+                        .map(o -> ((ExtendedErrorCodeOption) o).getErrorCode()))
+            .orElse(-1);
     if (edeReason != -1) {
       assertEquals(getReason(m), getEdeText(m));
     }

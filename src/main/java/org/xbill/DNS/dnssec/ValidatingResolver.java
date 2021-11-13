@@ -624,7 +624,7 @@ public final class ValidatingResolver implements Resolver {
               }
 
               if (!hasValidNSEC) {
-                response.setBogus(R.get("failed.nodata"));
+                response.setBogus(R.get("failed.nodata"), ExtendedErrorCodeOption.NSEC_MISSING);
                 log.trace("Failed NODATA for " + qname);
                 return null;
               }

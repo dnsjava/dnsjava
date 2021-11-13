@@ -89,7 +89,7 @@ class ExtendedErrorCodeOptionTest {
   @Test
   void testToStringCodeOnly() {
     ExtendedErrorCodeOption option = new ExtendedErrorCodeOption(1);
-    assertEquals("Unsupported DNSKEY Algorithm", option.optionToString());
+    assertEquals("UNSUPPORTED_DNSKEY_ALGORITHM", option.optionToString());
   }
 
   @Test
@@ -101,6 +101,6 @@ class ExtendedErrorCodeOptionTest {
   @Test
   void testToStringCodeAndText() {
     ExtendedErrorCodeOption option = new ExtendedErrorCodeOption(1, "ab");
-    assertEquals("Unsupported DNSKEY Algorithm: ab", option.optionToString());
+    assertEquals("UNSUPPORTED_DNSKEY_ALGORITHM: ab", option.optionToString());
   }
 }
