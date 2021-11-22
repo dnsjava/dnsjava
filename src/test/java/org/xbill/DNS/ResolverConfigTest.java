@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -25,17 +27,24 @@ import org.xbill.DNS.config.SunJvmResolverConfigProvider;
 import org.xbill.DNS.config.WindowsResolverConfigProvider;
 
 class ResolverConfigTest {
-  @Test
-  void testSkipInit() throws Exception {
+  @AfterEach
+  void afterEach() throws Exception {
+    // make sure the ResolverConfig providers are not staying initialized after a test
     Field configProvidersField = ResolverConfig.class.getDeclaredField("configProviders");
     configProvidersField.setAccessible(true);
     configProvidersField.set(null, null);
+    Field currentConfigField = ResolverConfig.class.getDeclaredField("currentConfig");
+    currentConfigField.setAccessible(true);
+    currentConfigField.set(null, null);
+  }
+
+  @Test
+  void testSkipInit() {
     try {
       System.setProperty(ResolverConfig.CONFIGPROVIDER_SKIP_INIT, Boolean.TRUE.toString());
       assertTrue(ResolverConfig.getConfigProviders().isEmpty());
     } finally {
       System.setProperty(ResolverConfig.CONFIGPROVIDER_SKIP_INIT, Boolean.FALSE.toString());
-      configProvidersField.set(null, null);
     }
   }
 
@@ -198,5 +207,10 @@ class ResolverConfigTest {
           jndi.servers().contains(winServer),
           winServer + " not found in JNDI, " + win.servers() + "; " + jndi.servers());
     }
+  }
+
+  @Test
+  void refreshAsFirstCall() {
+    assertDoesNotThrow(ResolverConfig::refresh);
   }
 }
