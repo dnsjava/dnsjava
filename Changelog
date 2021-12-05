@@ -1,3 +1,10 @@
+12/05/2021
+	- 3.4.3 released
+	- Fix handling of buffers in DNSInput
+	  (#224, #225 @nresare)
+	- Clear existing nameservers on config refresh (#226)
+	- Fix exception when calling ResolverConfig.refresh (#234)
+
 09/19/2021
 	- 3.4.2 released
 	- Document behavior of ExtendedResolver.setTimeout (#206)
