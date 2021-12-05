@@ -48,6 +48,15 @@ jobs:
         run: mvn verify -B -"Dgpg.skip"
 
       # doesn't work with PRs from forks, see https://jira.sonarsource.com/browse/MMF-1371
+      - name: Cache Sonar plugins
+        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: |
+            ${{ runner.os }}-sonar
+
       - name: Build with Maven and run Sonar
         if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
         env:
