@@ -35,27 +35,28 @@ jobs:
           # for Sonar
           fetch-depth: 0
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
           architecture: ${{ matrix.arch }}
           distribution: temurin
-          check-latest: true
+          cache: maven
 
       - name: Build with Maven
         if: "${{ !(matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11') || github.event.pull_request.head.repo.full_name != 'dnsjava/dnsjava' }}"
         run: mvn verify -B -"Dgpg.skip"
 
       # doesn't work with PRs from forks, see https://jira.sonarsource.com/browse/MMF-1371
+      - name: Cache Sonar plugins
+        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: |
+            ${{ runner.os }}-sonar
+
       - name: Build with Maven and run Sonar
         if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
         env:
@@ -74,18 +75,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: m2-cache-8-x64-ubuntu-20.04
-
       - name: Set up JDK 8
         uses: actions/setup-java@v2
         with:
           java-version: '8'
           architecture: 'x64'
           distribution: temurin
+          cache: maven
           server-id: ossrh
           server-username: SONATYPE_USER
           server-password: SONATYPE_PW

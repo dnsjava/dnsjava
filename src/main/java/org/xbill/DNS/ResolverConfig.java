@@ -55,20 +55,7 @@ public final class ResolverConfig {
   private static List<ResolverConfigProvider> configProviders;
 
   private static void checkInitialized() {
-    if (configProviders == null) {
-      configProviders = new ArrayList<>(8);
-      if (!Boolean.getBoolean(CONFIGPROVIDER_SKIP_INIT)) {
-        configProviders.add(new PropertyResolverConfigProvider());
-        configProviders.add(new ResolvConfResolverConfigProvider());
-        configProviders.add(new WindowsResolverConfigProvider());
-        configProviders.add(new AndroidResolverConfigProvider());
-        configProviders.add(new JndiContextResolverConfigProvider());
-        configProviders.add(new SunJvmResolverConfigProvider());
-        configProviders.add(new FallbackPropertyResolverConfigProvider());
-      }
-    }
-
-    if (currentConfig == null) {
+    if (currentConfig == null || configProviders == null) {
       refresh();
     }
   }
@@ -103,6 +90,21 @@ public final class ResolverConfig {
   }
 
   public ResolverConfig() {
+    synchronized (ResolverConfig.class) {
+      if (configProviders == null) {
+        configProviders = new ArrayList<>(8);
+        if (!Boolean.getBoolean(CONFIGPROVIDER_SKIP_INIT)) {
+          configProviders.add(new PropertyResolverConfigProvider());
+          configProviders.add(new ResolvConfResolverConfigProvider());
+          configProviders.add(new WindowsResolverConfigProvider());
+          configProviders.add(new AndroidResolverConfigProvider());
+          configProviders.add(new JndiContextResolverConfigProvider());
+          configProviders.add(new SunJvmResolverConfigProvider());
+          configProviders.add(new FallbackPropertyResolverConfigProvider());
+        }
+      }
+    }
+
     for (ResolverConfigProvider provider : configProviders) {
       if (provider.isEnabled()) {
         try {

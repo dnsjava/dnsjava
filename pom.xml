@@ -47,13 +47,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <target.jdk>8</target.jdk>
 
-        <org.junit.version>5.8.1</org.junit.version>
-        <mockito.version>4.0.0</mockito.version>
+        <org.junit.version>5.8.2</org.junit.version>
+        <mockito.version>4.1.0</mockito.version>
         <slf4j.version>1.7.32</slf4j.version>
-        <lombok.version>1.18.20</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
         <jna.version>5.9.0</jna.version>
         <bouncycastle.version>1.69</bouncycastle.version>
-        <vertx.version>4.1.5</vertx.version>
+        <vertx.version>4.2.1</vertx.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
@@ -198,7 +198,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.15.3</version>
+                <version>0.15.4</version>
                 <configuration>
                     <newVersion>
                         <file>
@@ -285,7 +285,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>8.44</version>
+                        <version>9.2</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -364,7 +364,7 @@
         <dependency>
             <groupId>org.robolectric</groupId>
             <artifactId>android-all</artifactId>
-            <version>10-robolectric-5803371</version>
+            <version>12-robolectric-7732740</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
