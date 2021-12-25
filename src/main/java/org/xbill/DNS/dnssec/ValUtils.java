@@ -373,15 +373,12 @@ final class ValUtils {
    * @return The status (BOGUS or SECURE).
    */
   public JustifiedSecStatus verifySRRset(SRRset rrset, SRRset keyRrset, Instant date) {
-    String rrsetName =
-        rrset.getName()
-            + "/"
-            + Type.string(rrset.getType())
-            + "/"
-            + DClass.string(rrset.getDClass());
-
     if (rrset.getSecurityStatus() == SecurityStatus.SECURE) {
-      log.trace("verifySRRset: rrset <{}> previously found to be SECURE", rrsetName);
+      log.trace(
+          "RRset <{}/{}/{}> previously found to be SECURE",
+          rrset.getName(),
+          Type.string(rrset.getType()),
+          DClass.string(rrset.getDClass()));
       return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
     }
 

@@ -197,7 +197,9 @@ final class SMessage {
     this.securityStatus = status;
     this.edeReason = edeReason;
     this.bogusReason = reason;
-    log.debug(this.bogusReason);
+    if (reason != null) {
+      log.debug("Setting bad reason for message to {}", reason);
+    }
   }
 
   /**

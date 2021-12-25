@@ -41,7 +41,7 @@ final class DnsSecVerifier {
   private List<DNSKEYRecord> findKey(RRset dnskeyRrset, RRSIGRecord signature) {
     if (!signature.getSigner().equals(dnskeyRrset.getName())) {
       log.trace(
-          "could not find appropriate key because incorrect keyset was supplied. Wanted: {}, got: {}",
+          "Could not find appropriate key because incorrect keyset was supplied. Wanted: {}, got: {}",
           signature.getSigner(),
           dnskeyRrset.getName());
       return Collections.emptyList();
@@ -74,7 +74,7 @@ final class DnsSecVerifier {
   private JustifiedSecStatus verifySignature(
       SRRset rrset, RRSIGRecord sigrec, RRset keyRrset, Instant date) {
     if (!rrset.getName().subdomain(keyRrset.getName())) {
-      log.debug("signer name is off-tree");
+      log.debug("Signer name is off-tree");
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS,
           ExtendedErrorCodeOption.DNSSEC_BOGUS,
@@ -83,7 +83,7 @@ final class DnsSecVerifier {
 
     List<DNSKEYRecord> keys = this.findKey(keyRrset, sigrec);
     if (keys.isEmpty()) {
-      log.trace("could not find appropriate key");
+      log.trace("Could not find appropriate key");
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS,
           ExtendedErrorCodeOption.DNSKEY_MISSING,

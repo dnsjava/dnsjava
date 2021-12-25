@@ -154,7 +154,7 @@ public final class ValidatingResolver implements Resolver {
     // Load trust anchors
     String s = config.getProperty("dnsjava.dnssec.trust_anchor_file");
     if (s != null) {
-      log.debug("reading trust anchor file file: " + s);
+      log.debug("Reading trust anchor file: {}", s);
       this.loadTrustAnchors(new FileInputStream(s));
     }
   }
@@ -611,7 +611,7 @@ public final class ValidatingResolver implements Resolver {
 
               this.n3valUtils.stripUnknownAlgNSEC3s(nsec3s);
               if (!hasValidNSEC && !nsec3s.isEmpty()) {
-                log.debug("Validating nodata: using NSEC3 records");
+                log.debug("Using NSEC3 records");
 
                 // try to prove NODATA with our NSEC3 record(s)
                 if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
@@ -636,7 +636,7 @@ public final class ValidatingResolver implements Resolver {
                 return null;
               }
 
-              log.trace("successfully validated NODATA response");
+              log.trace("Successfully validated NODATA response");
               response.setStatus(SecurityStatus.SECURE, -1);
               return null;
             });
@@ -798,7 +798,7 @@ public final class ValidatingResolver implements Resolver {
               }
 
               // Otherwise, we consider the message secure.
-              log.trace("successfully validated NAME ERROR response.");
+              log.trace("Successfully validated NAME ERROR response");
               response.setStatus(SecurityStatus.SECURE, -1);
               return completedFuture(null);
             })
@@ -834,13 +834,10 @@ public final class ValidatingResolver implements Resolver {
   private CompletionStage<SMessage> sendRequest(Message request) {
     Record q = request.getQuestion();
     log.trace(
-        "sending request: <"
-            + q.getName()
-            + "/"
-            + Type.string(q.getType())
-            + "/"
-            + DClass.string(q.getDClass())
-            + ">");
+        "Sending request: <{}/{}/{}>",
+        q.getName(),
+        Type.string(q.getType()),
+        DClass.string(q.getDClass()));
 
     // Send the request along by using a local copy of the request
     Message localRequest = request.clone();
@@ -925,12 +922,10 @@ public final class ValidatingResolver implements Resolver {
 
     Name nextKeyName = new Name(targetKeyName, l);
     log.trace(
-        "findKey: targetKeyName = "
-            + targetKeyName
-            + ", currentKeyName = "
-            + currentKeyName
-            + ", nextKeyName = "
-            + nextKeyName);
+        "Key search: targetKeyName = {}, currentKeyName = {}, nextKeyName = {}",
+        targetKeyName,
+        currentKeyName,
+        nextKeyName);
 
     // The next step is either to query for the next DS, or to query for the
     // next DNSKEY.
@@ -987,7 +982,7 @@ public final class ValidatingResolver implements Resolver {
         }
 
         // Otherwise, we return the positive response.
-        log.trace("DS rrset was good.");
+        log.trace("DS RRset was good");
         return KeyEntry.newKeyEntry(dsRrset);
 
       case CNAME:
@@ -1069,7 +1064,7 @@ public final class ValidatingResolver implements Resolver {
           // We could just fail here as there is an invalid rrset, but
           // skipping doesn't matter because we might not need it or
           // the proof will fail anyway.
-          log.debug("skipping bad nsec3");
+          log.debug("Skipping bad NSEC3");
           continue;
         }
 
@@ -1090,7 +1085,7 @@ public final class ValidatingResolver implements Resolver {
           nullKey.setBadReason(-1, R.get("insecure.ds.nsec3"));
           return nullKey;
         case INDETERMINATE:
-          log.debug("nsec3s for the referral proved no delegation.");
+          log.debug("NSEC3s for the referral proved no delegation");
           return null;
         case BOGUS:
           bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.nsec3"));

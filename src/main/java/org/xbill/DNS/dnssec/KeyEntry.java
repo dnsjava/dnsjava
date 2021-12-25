@@ -125,7 +125,7 @@ final class KeyEntry extends SRRset {
     // signerName being null is the indicator that this response was
     // unsigned
     if (signerName == null) {
-      log.debug("no signerName");
+      log.debug("No signerName");
       // Unsigned responses must be underneath a "null" key entry.
       if (this.isNull()) {
         String reason = this.badReason;

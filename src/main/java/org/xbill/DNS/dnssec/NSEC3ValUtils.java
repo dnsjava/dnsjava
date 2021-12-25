@@ -171,7 +171,7 @@ final class NSEC3ValUtils {
           return nsec3;
         }
       } catch (NoSuchAlgorithmException | TextParseException e) {
-        log.debug("Unrecognized NSEC3 in set:" + set, e);
+        log.debug("Unrecognized NSEC3 in set: {}", set, e);
       }
     }
 
@@ -228,7 +228,7 @@ final class NSEC3ValUtils {
           return nsec3;
         }
       } catch (NoSuchAlgorithmException e) {
-        log.debug("Unrecognized NSEC3 in set:" + set, e);
+        log.debug("Unrecognized NSEC3 in set: {}", set, e);
       }
     }
 
@@ -273,14 +273,14 @@ final class NSEC3ValUtils {
   private CEResponse proveClosestEncloser(Name qname, Name zonename, List<SRRset> nsec3s) {
     CEResponse candidate = this.findClosestEncloser(qname, zonename, nsec3s);
     if (candidate == null) {
-      log.debug("proveClosestEncloser: could not find a candidate for the closest encloser.");
+      log.debug("Could not find a candidate for the closest encloser");
       candidate = new CEResponse(Name.empty, null);
       candidate.status = SecurityStatus.BOGUS;
       return candidate;
     }
 
     if (candidate.closestEncloser.equals(qname)) {
-      log.debug("proveClosestEncloser: proved that qname existed!");
+      log.debug("Proved that qname existed!");
       candidate.status = SecurityStatus.BOGUS;
       return candidate;
     }
@@ -294,13 +294,13 @@ final class NSEC3ValUtils {
         return candidate;
       }
 
-      log.debug("proveClosestEncloser: closest encloser was a delegation!");
+      log.debug("Closest encloser was a delegation!");
       candidate.status = SecurityStatus.BOGUS;
       return candidate;
     }
 
     if (candidate.ceNsec3.hasType(Type.DNAME)) {
-      log.debug("proveClosestEncloser: closest encloser was a DNAME!");
+      log.debug("Closest encloser was a DNAME!");
       candidate.status = SecurityStatus.BOGUS;
       return candidate;
     }
@@ -450,7 +450,7 @@ final class NSEC3ValUtils {
     CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s);
 
     if (ce.status != SecurityStatus.SECURE) {
-      log.debug("proveNameError: failed to prove a closest encloser.");
+      log.debug("Failed to prove a closest encloser");
       return ce.status;
     }
 
@@ -460,12 +460,12 @@ final class NSEC3ValUtils {
     Name wc = this.ceWildcard(ce.closestEncloser);
     NSEC3Record nsec3 = this.findCoveringNSEC3(wc, zonename, nsec3s);
     if (nsec3 == null) {
-      log.debug("proveNameError: could not prove that the applicable wildcard did not exist.");
+      log.debug("Could not prove that the applicable wildcard did not exist");
       return SecurityStatus.BOGUS;
     }
 
     if ((ce.ncNsec3.getFlags() & Flags.OPT_OUT) == Flags.OPT_OUT) {
-      log.debug("nsec3 nameerror proof: nc has optout");
+      log.debug("NSEC3 nameerror proof: nc has optout");
       return SecurityStatus.INSECURE;
     }
 
@@ -506,28 +506,28 @@ final class NSEC3ValUtils {
     // Cases 1 & 2.
     if (nsec3 != null) {
       if (nsec3.hasType(qtype)) {
-        log.debug("proveNodata: Matching NSEC3 proved that type existed!");
+        log.debug("Matching NSEC3 proved that type existed!");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.type_exists"));
       }
 
       if (nsec3.hasType(Type.CNAME)) {
-        log.debug("proveNodata: Matching NSEC3 proved that a CNAME existed!");
+        log.debug("Matching NSEC3 proved that a CNAME existed!");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.cname_exists"));
       }
 
       if (qtype == Type.DS && nsec3.hasType(Type.SOA) && !Name.root.equals(qname)) {
-        log.debug("proveNodata: apex NSEC3 abused for no DS proof, bogus");
+        log.debug("Apex NSEC3 abused for no DS proof, bogus");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.apex_abuse"));
       } else if (qtype != Type.DS && nsec3.hasType(Type.NS) && !nsec3.hasType(Type.SOA)) {
         if (!nsec3.hasType(Type.DS)) {
-          log.debug("proveNodata: matching NSEC3 is insecure delegation");
+          log.debug("Matching NSEC3 is insecure delegation");
           return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
         }
 
-        log.debug("proveNodata: matching NSEC3 is a delegation, bogus");
+        log.debug("Matching NSEC3 is a delegation, bogus");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.delegation"));
       }
@@ -543,11 +543,11 @@ final class NSEC3ValUtils {
     // At this point, not finding a match or a proven closest encloser is a
     // problem.
     if (ce.status == SecurityStatus.BOGUS) {
-      log.debug("proveNodata: did not match qname, nor found a proven closest encloser");
+      log.debug("Did not match qname, nor found a proven closest encloser");
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.qname_ce"));
     } else if (ce.status == SecurityStatus.INSECURE && qtype != Type.DS) {
-      log.debug("proveNodata: closest nsec3 is insecure delegation");
+      log.debug("Closest NSEC3 is insecure delegation");
       return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
     }
 
@@ -558,27 +558,27 @@ final class NSEC3ValUtils {
     nsec3 = this.findMatchingNSEC3(wc, zonename, nsec3s);
     if (nsec3 != null) {
       if (nsec3.hasType(qtype)) {
-        log.debug("proveNodata: matching wildcard had qtype!");
+        log.debug("Matching wildcard has qtype {}", Type.string(qtype));
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.type_exists_wc"));
       } else if (nsec3.hasType(Type.CNAME)) {
-        log.debug("nsec3 nodata proof: matching wildcard had a CNAME, bogus");
+        log.debug("Matching wildcard has a CNAME, bogus");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.cname_exists_wc"));
       }
 
       if (qtype == Type.DS && qname.labels() != 1 && nsec3.hasType(Type.SOA)) {
-        log.debug("nsec3 nodata proof: matching wildcard for no DS proof has a SOA, bogus");
+        log.debug("Matching wildcard for no DS proof has a SOA, bogus");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.wc_soa"));
       } else if (qtype != Type.DS && nsec3.hasType(Type.NS) && !nsec3.hasType(Type.SOA)) {
-        log.debug("nsec3 nodata proof: matching wilcard is a delegation, bogus");
+        log.debug("Matching wildcard is a delegation, bogus");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.delegation_wc"));
       }
 
       if (ce.ncNsec3 != null && (ce.ncNsec3.getFlags() & Flags.OPT_OUT) == Flags.OPT_OUT) {
-        log.debug("nsec3 nodata proof: matching wildcard is in optout range, insecure");
+        log.debug("Matching wildcard is in opt-out range, insecure");
         return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
       }
 
@@ -590,7 +590,7 @@ final class NSEC3ValUtils {
     // can see the ordinary unsigned data from a zone beneath an
     // insecure delegation under an optout here */
     if (ce.ncNsec3 == null) {
-      log.debug("nsec3 nodata proof: no next closer nsec3");
+      log.debug("No next closer NSEC3");
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS, NSEC_MISSING, R.get("failed.nsec3.no_next"));
     }
@@ -598,13 +598,12 @@ final class NSEC3ValUtils {
     // We need to make sure that the covering NSEC3 is opt-out.
     if ((ce.ncNsec3.getFlags() & Flags.OPT_OUT) == 0) {
       if (qtype != Type.DS) {
-        log.debug(
-            "proveNodata: covering NSEC3 was not opt-out in an opt-out DS NOERROR/NODATA case");
+        log.debug("Covering NSEC3 was not opt-out in an opt-out DS NOERROR/NODATA case");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.not_optout"));
       } else {
         log.debug(
-            "proveNodata: could not find matching NSEC3, nor matching wildcard, and qtype is not DS -- no more options");
+            "Could not find matching NSEC3, nor matching wildcard, and qtype is not DS -- no more options");
         return new JustifiedSecStatus(
             SecurityStatus.BOGUS, NSEC_MISSING, R.get("failed.nsec3.not_found"));
       }
@@ -640,13 +639,10 @@ final class NSEC3ValUtils {
 
     if (candidate.ncNsec3 == null) {
       log.debug(
-          "proveWildcard: did not find a covering NSEC3 that covered the next closer name to "
-              + qname
-              + " from "
-              + candidate.closestEncloser
-              + " (derived from wildcard "
-              + wildcard
-              + ")");
+          "did not find a covering NSEC3 that covered the next closer name to {} from {} (derived from wildcard {})",
+          qname,
+          candidate.closestEncloser,
+          wildcard);
       return SecurityStatus.BOGUS;
     }
 
