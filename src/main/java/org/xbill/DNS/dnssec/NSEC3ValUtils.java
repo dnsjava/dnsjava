@@ -3,6 +3,9 @@
 // Copyright (c) 2013-2021 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
+import static org.xbill.DNS.ExtendedErrorCodeOption.DNSSEC_BOGUS;
+import static org.xbill.DNS.ExtendedErrorCodeOption.NSEC_MISSING;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -17,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.DNSKEYRecord;
 import org.xbill.DNS.DNSSEC.Algorithm;
 import org.xbill.DNS.DNSSEC.DNSSECException;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.NSEC3Record;
 import org.xbill.DNS.NSEC3Record.Flags;
 import org.xbill.DNS.Name;
@@ -492,9 +496,10 @@ final class NSEC3ValUtils {
    * @return {@link SecurityStatus#SECURE} if the NSEC3s prove the proposition, {@link
    *     SecurityStatus#INSECURE} if qname is under opt-out, {@link SecurityStatus#BOGUS} otherwise.
    */
-  public SecurityStatus proveNodata(List<SRRset> nsec3s, Name qname, int qtype, Name zonename) {
+  public JustifiedSecStatus proveNodata(List<SRRset> nsec3s, Name qname, int qtype, Name zonename) {
     if (nsec3s == null || nsec3s.isEmpty()) {
-      return SecurityStatus.BOGUS;
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS, ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.nsec3.none"));
     }
 
     NSEC3Record nsec3 = this.findMatchingNSEC3(qname, zonename, nsec3s);
@@ -502,28 +507,32 @@ final class NSEC3ValUtils {
     if (nsec3 != null) {
       if (nsec3.hasType(qtype)) {
         log.debug("proveNodata: Matching NSEC3 proved that type existed!");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.type_exists"));
       }
 
       if (nsec3.hasType(Type.CNAME)) {
         log.debug("proveNodata: Matching NSEC3 proved that a CNAME existed!");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.cname_exists"));
       }
 
       if (qtype == Type.DS && nsec3.hasType(Type.SOA) && !Name.root.equals(qname)) {
         log.debug("proveNodata: apex NSEC3 abused for no DS proof, bogus");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.apex_abuse"));
       } else if (qtype != Type.DS && nsec3.hasType(Type.NS) && !nsec3.hasType(Type.SOA)) {
         if (!nsec3.hasType(Type.DS)) {
           log.debug("proveNodata: matching NSEC3 is insecure delegation");
-          return SecurityStatus.INSECURE;
+          return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
         }
 
         log.debug("proveNodata: matching NSEC3 is a delegation, bogus");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.delegation"));
       }
 
-      return SecurityStatus.SECURE;
+      return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
     }
 
     // For cases 3 - 5, we need the proven closest encloser, and it can't
@@ -534,11 +543,12 @@ final class NSEC3ValUtils {
     // At this point, not finding a match or a proven closest encloser is a
     // problem.
     if (ce.status == SecurityStatus.BOGUS) {
-      log.debug("proveNodata: did not match qname, nor found a proven closest encloser.");
-      return SecurityStatus.BOGUS;
+      log.debug("proveNodata: did not match qname, nor found a proven closest encloser");
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.qname_ce"));
     } else if (ce.status == SecurityStatus.INSECURE && qtype != Type.DS) {
-      log.debug("proveNodata: closest nsec3 is insecure delegation.");
-      return SecurityStatus.INSECURE;
+      log.debug("proveNodata: closest nsec3 is insecure delegation");
+      return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
     }
 
     // Case 3: REMOVED
@@ -549,26 +559,30 @@ final class NSEC3ValUtils {
     if (nsec3 != null) {
       if (nsec3.hasType(qtype)) {
         log.debug("proveNodata: matching wildcard had qtype!");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.type_exists_wc"));
       } else if (nsec3.hasType(Type.CNAME)) {
         log.debug("nsec3 nodata proof: matching wildcard had a CNAME, bogus");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.cname_exists_wc"));
       }
 
       if (qtype == Type.DS && qname.labels() != 1 && nsec3.hasType(Type.SOA)) {
         log.debug("nsec3 nodata proof: matching wildcard for no DS proof has a SOA, bogus");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.wc_soa"));
       } else if (qtype != Type.DS && nsec3.hasType(Type.NS) && !nsec3.hasType(Type.SOA)) {
         log.debug("nsec3 nodata proof: matching wilcard is a delegation, bogus");
-        return SecurityStatus.BOGUS;
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.delegation_wc"));
       }
 
       if (ce.ncNsec3 != null && (ce.ncNsec3.getFlags() & Flags.OPT_OUT) == Flags.OPT_OUT) {
         log.debug("nsec3 nodata proof: matching wildcard is in optout range, insecure");
-        return SecurityStatus.INSECURE;
+        return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
       }
 
-      return SecurityStatus.SECURE;
+      return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
     }
 
     // Case 5.
@@ -577,24 +591,27 @@ final class NSEC3ValUtils {
     // insecure delegation under an optout here */
     if (ce.ncNsec3 == null) {
       log.debug("nsec3 nodata proof: no next closer nsec3");
-      return SecurityStatus.BOGUS;
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS, NSEC_MISSING, R.get("failed.nsec3.no_next"));
     }
 
     // We need to make sure that the covering NSEC3 is opt-out.
     if ((ce.ncNsec3.getFlags() & Flags.OPT_OUT) == 0) {
       if (qtype != Type.DS) {
         log.debug(
-            "proveNodata: covering NSEC3 was not opt-out in an opt-out DS NOERROR/NODATA case.");
+            "proveNodata: covering NSEC3 was not opt-out in an opt-out DS NOERROR/NODATA case");
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.not_optout"));
       } else {
         log.debug(
-            "proveNodata: could not find matching NSEC3, nor matching wildcard, and qtype is not DS -- no more options.");
+            "proveNodata: could not find matching NSEC3, nor matching wildcard, and qtype is not DS -- no more options");
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, NSEC_MISSING, R.get("failed.nsec3.not_found"));
       }
-
-      return SecurityStatus.BOGUS;
     }
 
     // RFC5155 section 9.2: if nc has optout then no AD flag set
-    return SecurityStatus.INSECURE;
+    return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
   }
 
   /**

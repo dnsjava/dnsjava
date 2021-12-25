@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Rcode;
@@ -22,6 +23,7 @@ class TestPositive extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -30,6 +32,7 @@ class TestPositive extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -47,6 +50,7 @@ class TestPositive extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.response.unknown:UNKNOWN", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -63,5 +67,6 @@ class TestPositive extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 }

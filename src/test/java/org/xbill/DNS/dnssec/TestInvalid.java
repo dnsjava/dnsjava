@@ -44,7 +44,7 @@ class TestInvalid extends TestBase {
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:" + param + ".tjeb.nl.:" + dnssecReason, getReason(response));
-    assertEquals(ExtendedErrorCodeOption.code(edeMnemonic), getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.code(edeMnemonic), response);
   }
 
   @Test
@@ -55,7 +55,7 @@ class TestInvalid extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertFalse(isEmptyAnswer(response));
     assertEquals("insecure.ds.nsec", getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -66,7 +66,7 @@ class TestInvalid extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertFalse(isEmptyAnswer(response));
     assertEquals("insecure.ds.nsec3", getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -85,7 +85,7 @@ class TestInvalid extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.missingsig", getReason(response));
-    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.RRSIGS_MISSING, response);
   }
 
   @Test
@@ -119,7 +119,7 @@ class TestInvalid extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.answer.positive:{ www.ingotronic.ch."));
-    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -134,8 +134,8 @@ class TestInvalid extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     // rfc4035#section-5.5
     assertEquals(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.bogus.badkey:ch.:failed.ds.nonsec:ch.", getReason(response));
-    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, getEdeReason(response));
+    assertEquals("validate.bogus.badkey:ch.:failed.ds.notype:UNKNOWN", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -151,7 +151,7 @@ class TestInvalid extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     // rfc4035#section-5.5
     assertEquals(Rcode.REFUSED, response.getRcode());
-    assertEquals("failed.nodata", getReason(response));
-    assertEquals(ExtendedErrorCodeOption.NSEC_MISSING, getEdeReason(response));
+    assertEquals("validate.response.unknown:UNKNOWN", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 }

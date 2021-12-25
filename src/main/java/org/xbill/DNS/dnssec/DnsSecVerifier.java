@@ -164,13 +164,17 @@ final class DnsSecVerifier {
    * @param date The date against which to verify the rrset.
    * @return SecurityStatus.SECURE if the rrset verified, BOGUS otherwise.
    */
-  public SecurityStatus verify(RRset rrset, DNSKEYRecord dnskey, Instant date) {
+  public JustifiedSecStatus verify(RRset rrset, DNSKEYRecord dnskey, Instant date) {
     List<RRSIGRecord> sigs = rrset.sigs();
     if (sigs.isEmpty()) {
       log.info("RRset failed to verify due to lack of signatures");
-      return SecurityStatus.BOGUS;
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.RRSIGS_MISSING,
+          R.get("dnskey.no_sigs", rrset.getName()));
     }
 
+    DNSSECException lastException = null;
     for (RRSIGRecord sigrec : sigs) {
       // Skip RRSIGs that do not match our given key's footprint.
       if (sigrec.getFootprint() != dnskey.getFootprint()) {
@@ -179,13 +183,22 @@ final class DnsSecVerifier {
 
       try {
         DNSSEC.verify(rrset, sigrec, dnskey, date);
-        return SecurityStatus.SECURE;
+        return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
       } catch (DNSSECException e) {
         log.error("Failed to validate RRset", e);
+        lastException = e;
       }
     }
 
     log.info("RRset failed to verify: all signatures were BOGUS");
-    return SecurityStatus.BOGUS;
+    int edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
+    String reason = "dnskey.invalid";
+    if (lastException instanceof SignatureExpiredException) {
+      edeReason = ExtendedErrorCodeOption.SIGNATURE_EXPIRED;
+    } else if (lastException instanceof SignatureNotYetValidException) {
+      edeReason = ExtendedErrorCodeOption.SIGNATURE_NOT_YET_VALID;
+    }
+
+    return new JustifiedSecStatus(SecurityStatus.BOGUS, edeReason, reason);
   }
 }

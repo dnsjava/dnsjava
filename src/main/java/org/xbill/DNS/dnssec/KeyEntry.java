@@ -19,9 +19,9 @@ import org.xbill.DNS.Type;
 @Slf4j
 @EqualsAndHashCode(
     callSuper = true,
-    of = {"badReason", "isEmpty"})
+    of = {"edeReason", "badReason", "isEmpty"})
 final class KeyEntry extends SRRset {
-  private int edeReason;
+  private int edeReason = -1;
   private String badReason;
   private boolean isEmpty;
 

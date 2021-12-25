@@ -19,7 +19,7 @@ class TestKeyCacheUsage extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
 
     // send the query a second time to ensure the cache doesn't create a wrong behavior
     response = resolver.send(createMessage("www.unsigned.ingotronic.ch./A"));
@@ -27,6 +27,6 @@ class TestKeyCacheUsage extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 }

@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.RRset;
@@ -17,25 +18,25 @@ import org.xbill.DNS.Rcode;
 
 class TestNSEC3NoData extends TestBase {
   @ParameterizedTest(name = "testNodataNsec3_{index}")
-  @ValueSource(
-      strings = {
-        "www.nsec3.ingotronic.ch./MX",
-        // get NSEC3 hashed whose name is sub.nsec3.ingotronic.ch. from the nsec3.ingotronic.ch.
-        // then return NODATA for the following query, "proofed" by the NSEC3 from the parent
-        "sub.nsec3.ingotronic.ch./A",
-        // get NSEC3 hashed whose name is sub.nsec3.ingotronic.ch. from the sub.nsec3.ingotronic.ch.
-        // then return NODATA for the following query, "proofed" by the NSEC3 from the child
-        "sub.nsec3.ingotronic.ch./DS",
-        // rfc5155#section-7.2.4
-        // response does not contain next closer NSEC3, thus bogus
-        "a.unsigned.nsec3.ingotronic.ch./DS",
-      })
+  @CsvSource({
+    "www.nsec3.ingotronic.ch./MX,DNSSEC_BOGUS",
+    // get NSEC3 hashed whose name is sub.nsec3.ingotronic.ch. from the nsec3.ingotronic.ch.
+    // then return NODATA for the following query, "proofed" by the NSEC3 from the parent
+    "sub.nsec3.ingotronic.ch./A,DNSSEC_BOGUS",
+    // get NSEC3 hashed whose name is sub.nsec3.ingotronic.ch. from the sub.nsec3.ingotronic.ch.
+    // then return NODATA for the following query, "proofed" by the NSEC3 from the child
+    "sub.nsec3.ingotronic.ch./DS,DNSSEC_BOGUS",
+    // rfc5155#section-7.2.4
+    // response does not contain next closer NSEC3, thus bogus
+    "a.unsigned.nsec3.ingotronic.ch./DS,NSEC_MISSING",
+  })
   @AlwaysOffline
-  void testNodataNsec3(String query) throws IOException {
+  void testNodataNsec3(String query, String ede) throws IOException {
     Message response = resolver.send(createMessage(query));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
+    assertEde(ExtendedErrorCodeOption.code(ede), response);
   }
 
   @Test
@@ -48,6 +49,7 @@ class TestNSEC3NoData extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -59,6 +61,7 @@ class TestNSEC3NoData extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -77,6 +80,7 @@ class TestNSEC3NoData extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -95,6 +99,7 @@ class TestNSEC3NoData extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -104,5 +109,6 @@ class TestNSEC3NoData extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 }

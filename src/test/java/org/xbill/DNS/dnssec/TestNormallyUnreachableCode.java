@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.OPTRecord;
@@ -40,6 +41,7 @@ class TestNormallyUnreachableCode {
     RRset keys = new RRset();
     JustifiedSecStatus res = verifier.verify(set, keys, Instant.now());
     assertEquals(SecurityStatus.BOGUS, res.status);
+    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, res.edeReason);
   }
 
   @Test

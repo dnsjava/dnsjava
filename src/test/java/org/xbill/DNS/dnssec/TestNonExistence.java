@@ -31,7 +31,7 @@ class TestNonExistence extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -45,7 +45,7 @@ class TestNonExistence extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.nsec3_bogus", getReason(response));
-    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -56,7 +56,7 @@ class TestNonExistence extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 
   @ParameterizedTest(name = "testSignedNodata_{index}")
@@ -75,7 +75,7 @@ class TestNonExistence extends TestBase {
     assertTrue(response.getSectionRRsets(Section.ANSWER).isEmpty());
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -90,7 +90,7 @@ class TestNonExistence extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nxdomain.authority"));
-    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -105,7 +105,7 @@ class TestNonExistence extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.authority.nodata"));
-    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -113,6 +113,6 @@ class TestNonExistence extends TestBase {
     Message response = resolver.send(createMessage("b.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
-    assertEquals(-1, getEdeReason(response));
+    assertEde(-1, response);
   }
 }

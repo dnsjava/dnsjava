@@ -21,6 +21,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
 import org.xbill.DNS.EDNSOption;
+import org.xbill.DNS.EDNSOption.Code;
 import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.ExtendedFlags;
 import org.xbill.DNS.Flags;
@@ -572,6 +574,7 @@ public final class ValidatingResolver implements Resolver {
               // The RRSIG signer field for the NSEC3 RRs.
               Name nsec3Signer = null;
 
+              int edeReason = ExtendedErrorCodeOption.NSEC_MISSING;
               for (SRRset set : response.getSectionRRsets(Section.AUTHORITY)) {
                 // If we encounter an NSEC record, try to use it to prove NODATA.
                 // This needs to handle the empty non-terminal (ENT) NODATA case.
@@ -580,6 +583,8 @@ public final class ValidatingResolver implements Resolver {
                   ndp = ValUtils.nsecProvesNodata(set, nsec, qname, qtype);
                   if (ndp.result) {
                     hasValidNSEC = true;
+                  } else {
+                    edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
                   }
 
                   if (ValUtils.nsecProvesNameError(set, nsec, qname)) {
@@ -596,10 +601,11 @@ public final class ValidatingResolver implements Resolver {
 
               // check to see if we have a wildcard NODATA proof.
 
-              // The wildcard NODATA is 1 NSEC proving that qname does not exists (and
+              // The wildcard NODATA is 1 NSEC proving that qname does not exist (and
               // also proving what the closest encloser is), and 1 NSEC showing the
               // matching wildcard, which must be *.closest_encloser.
               if (ndp.wc != null && (ce == null || (!ce.equals(ndp.wc) && !qname.equals(ce)))) {
+                edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
                 hasValidNSEC = false;
               }
 
@@ -613,19 +619,20 @@ public final class ValidatingResolver implements Resolver {
                   return null;
                 }
 
-                SecurityStatus status =
+                JustifiedSecStatus res =
                     this.n3valUtils.proveNodata(nsec3s, qname, qtype, nsec3Signer);
-                if (status == SecurityStatus.INSECURE) {
+                edeReason = res.edeReason;
+                if (res.status == SecurityStatus.INSECURE) {
                   response.setStatus(SecurityStatus.INSECURE, -1);
                   return null;
                 }
 
-                hasValidNSEC = status == SecurityStatus.SECURE;
+                hasValidNSEC = res.status == SecurityStatus.SECURE;
               }
 
               if (!hasValidNSEC) {
-                response.setBogus(R.get("failed.nodata"), ExtendedErrorCodeOption.NSEC_MISSING);
-                log.trace("Failed NODATA for " + qname);
+                response.setBogus(R.get("failed.nodata"), edeReason);
+                log.trace("Failed NODATA for {}", qname);
                 return null;
               }
 
@@ -1096,7 +1103,7 @@ public final class ValidatingResolver implements Resolver {
 
     // Apparently no available NSEC/NSEC3 proved NODATA, so this is
     // BOGUS.
-    bogusKE.setBadReason(ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.ds.unknown"));
+    bogusKE.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.unknown"));
     return bogusKE;
   }
 
@@ -1390,8 +1397,12 @@ public final class ValidatingResolver implements Resolver {
     OPTRecord old = m.getOPT();
     OPTRecord newOpt;
     List<EDNSOption> options = new ArrayList<>();
+    options.add(new ExtendedErrorCodeOption(validated.getEdeReason(), validated.getBogusReason()));
     if (old != null) {
-      options.addAll(old.getOptions());
+      options.addAll(
+          old.getOptions().stream()
+              .filter(o -> o.getCode() != Code.EDNS_EXTENDED_ERROR)
+              .collect(Collectors.toList()));
       newOpt =
           new OPTRecord(
               old.getPayloadSize(),
@@ -1401,8 +1412,6 @@ public final class ValidatingResolver implements Resolver {
               options);
       m.removeRecord(m.getOPT(), Section.ADDITIONAL);
     } else {
-      options.add(
-          new ExtendedErrorCodeOption(validated.getEdeReason(), validated.getBogusReason()));
       newOpt = new OPTRecord(SimpleResolver.DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0, options);
     }
     m.addRecord(newOpt, Section.ADDITIONAL);

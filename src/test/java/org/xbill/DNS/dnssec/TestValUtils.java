@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.NSECRecord;
@@ -52,6 +53,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -77,6 +79,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:s.sub.ingotronic.ch.", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -110,6 +113,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:y.ingotronic.ch.", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -135,6 +139,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:zingotronic.ch.", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -160,6 +165,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:ingotronic.ch.", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -172,6 +178,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -180,6 +187,7 @@ class TestValUtils extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -233,6 +241,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -258,6 +267,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -283,6 +293,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -308,6 +319,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -333,6 +345,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -358,6 +371,7 @@ class TestValUtils extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -384,6 +398,7 @@ class TestValUtils extends TestBase {
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:sub.ingotronic.ch.:failed.ds.nsec.hasdata", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test

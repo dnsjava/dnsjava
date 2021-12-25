@@ -14,6 +14,7 @@ import org.xbill.DNS.DNSSEC;
 import org.xbill.DNS.DNSSEC.Algorithm;
 import org.xbill.DNS.DSRecord;
 import org.xbill.DNS.ExtendedErrorCodeOption;
+import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.NSECRecord;
 import org.xbill.DNS.Name;
@@ -132,7 +133,9 @@ final class ValUtils {
     }
 
     // check for referral: nonRD query and it looks like a nodata
-    if (m.getCount(Section.ANSWER) == 0 && m.getRcode() != Rcode.NOERROR) {
+    if (!request.getHeader().getFlag(Flags.RD)
+        && m.getCount(Section.ANSWER) == 0
+        && m.getRcode() != Rcode.NOERROR) {
       // SOA record in auth indicates it is NODATA instead.
       // All validation requiring NODATA messages have SOA in
       // authority section.
@@ -173,7 +176,7 @@ final class ValUtils {
     }
 
     // Next is NODATA
-    if (m.getCount(Section.ANSWER) == 0) {
+    if (m.getRcode() == Rcode.NOERROR && m.getCount(Section.ANSWER) == 0) {
       return ResponseClassification.NODATA;
     }
 
@@ -209,7 +212,7 @@ final class ValUtils {
       }
     }
 
-    log.warn("Failed to classify response message:\n" + m);
+    log.warn("Failed to classify response message:\n{}", m);
     return ResponseClassification.UNKNOWN;
   }
 
@@ -249,6 +252,7 @@ final class ValUtils {
     }
 
     int favoriteDigestID = this.favoriteDSDigestID(dsRrset);
+    KeyEntry ke = null;
     for (Record dsr : dsRrset.rrs()) {
       DSRecord ds = (DSRecord) dsr;
       if (this.digestHardenDowngrade && ds.getDigestID() != favoriteDigestID) {
@@ -264,8 +268,8 @@ final class ValUtils {
           continue;
         }
 
-        KeyEntry ke = getKeyEntry(dnskeyRrset, date, ds, dnskey);
-        if (ke != null) {
+        ke = getKeyEntry(dnskeyRrset, date, ds, dnskey);
+        if (ke.isGood()) {
           return ke;
         }
 
@@ -274,9 +278,11 @@ final class ValUtils {
     }
 
     // If any were understandable, then it is bad.
-    KeyEntry badKey = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
-    badKey.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_ds_match"));
-    return badKey;
+    if (ke == null) {
+      ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
+      ke.setBadReason(ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_ds_match"));
+    }
+    return ke;
   }
 
   private KeyEntry getKeyEntry(SRRset dnskeyRrset, Instant date, DSRecord ds, DNSKEYRecord dnskey) {
@@ -287,25 +293,38 @@ final class ValUtils {
     byte[] dsHash = ds.getDigest();
 
     // see if there is a length mismatch (unlikely)
+    KeyEntry ke;
     if (keyHash.length != dsHash.length) {
-      return null;
+      ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
+      ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
+      return ke;
     }
 
     for (int k = 0; k < keyHash.length; k++) {
       if (keyHash[k] != dsHash[k]) {
-        return null;
+        ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
+        ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
+        return ke;
       }
     }
 
     // Otherwise, we have a match! Make sure that the DNSKEY
     // verifies *with this key*.
-    SecurityStatus res = this.verifier.verify(dnskeyRrset, dnskey, date);
-    if (res == SecurityStatus.SECURE) {
-      log.trace("DS matched DNSKEY.");
-      dnskeyRrset.setSecurityStatus(SecurityStatus.SECURE);
-      return KeyEntry.newKeyEntry(dnskeyRrset);
+    JustifiedSecStatus res = this.verifier.verify(dnskeyRrset, dnskey, date);
+    switch (res.status) {
+      case SECURE:
+        dnskeyRrset.setSecurityStatus(SecurityStatus.SECURE);
+        ke = KeyEntry.newKeyEntry(dnskeyRrset);
+        break;
+      case BOGUS:
+        ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
+        ke.setBadReason(res.edeReason, res.reason);
+        break;
+      default:
+        throw new IllegalStateException("Unexpected security status");
     }
-    return null;
+
+    return ke;
   }
 
   /**
@@ -598,6 +617,7 @@ final class ValUtils {
         if (strictSubdomain(qname, ce)) {
           if (nsec.hasType(Type.CNAME)) {
             // should have gotten the wildcard CNAME
+            log.debug("NSEC proofed wildcard CNAME");
             result.result = false;
             return result;
           }
@@ -606,11 +626,13 @@ final class ValUtils {
             // wrong parentside (wildcard) NSEC used, and it really
             // should not exist anyway:
             // http://tools.ietf.org/html/rfc4592#section-4.2
+            log.debug("Wrong parent (wildcard) NSEC used");
             result.result = false;
             return result;
           }
 
           if (nsec.hasType(qtype)) {
+            log.debug("NSEC proofed that {} exists", Type.string(qtype));
             result.result = false;
             return result;
           }
@@ -629,12 +651,14 @@ final class ValUtils {
 
     // If the qtype exists, then we should have gotten it.
     if (nsec.hasType(qtype)) {
+      log.debug("NSEC proofed that {} exists", Type.string(qtype));
       result.result = false;
       return result;
     }
 
     // if the name is a CNAME node, then we should have gotten the CNAME
     if (nsec.hasType(Type.CNAME)) {
+      log.debug("NSEC proofed CNAME");
       result.result = false;
       return result;
     }
@@ -645,10 +669,12 @@ final class ValUtils {
     // The reverse of this check is used when qtype is DS, since that
     // must use the NSEC from above the zone cut.
     if (qtype != Type.DS && nsec.hasType(Type.NS) && !nsec.hasType(Type.SOA)) {
+      log.debug("NSEC proofed missing referral");
       result.result = false;
       return result;
     }
     if (qtype == Type.DS && nsec.hasType(Type.SOA) && !Name.root.equals(qname)) {
+      log.debug("NSEC from wrong zone");
       result.result = false;
       return result;
     }
@@ -680,7 +706,10 @@ final class ValUtils {
       // The NSEC must verify, first of all.
       JustifiedSecStatus res = this.verifySRRset(nsecRrset, keyRrset, date);
       if (res.status != SecurityStatus.SECURE) {
-        return new JustifiedSecStatus(SecurityStatus.BOGUS, res.edeReason, R.get("failed.ds.nsec"));
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS,
+            ExtendedErrorCodeOption.DNSSEC_BOGUS,
+            R.get("failed.ds.nsec", res.reason));
       }
 
       NSECRecord nsec = (NSECRecord) nsecRrset.first();

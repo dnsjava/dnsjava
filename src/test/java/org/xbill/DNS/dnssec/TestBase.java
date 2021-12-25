@@ -261,6 +261,13 @@ public abstract class TestBase {
     return edeReason;
   }
 
+  protected void assertEde(int expected, Message m) {
+    int edeReason = getEdeReason(m);
+    String expectedText = expected == -1 ? null : ExtendedErrorCodeOption.text(expected);
+    String actualText = edeReason == -1 ? null : ExtendedErrorCodeOption.text(edeReason);
+    assertEquals(expectedText, actualText, "EDE does not match");
+  }
+
   protected String getEdeText(Message m) {
     return Optional.ofNullable(m.getOPT())
         .flatMap(

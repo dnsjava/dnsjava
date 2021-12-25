@@ -15,6 +15,7 @@ import java.io.OutputStreamWriter;
 import java.util.Properties;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
@@ -26,7 +27,7 @@ import org.xbill.DNS.Type;
 
 class TestTrustAnchorLoading extends TestBase {
   @Test
-  void testLoadRootTrustAnchors() throws IOException {
+  void testLoadRootTrustAnchors() {
     assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
     assertNull(resolver.getTrustAnchors().find(Name.root, DClass.CH));
   }
@@ -49,7 +50,7 @@ class TestTrustAnchorLoading extends TestBase {
   }
 
   @Test
-  void testInitializingWithNonExistingFileThrows() throws IOException {
+  void testInitializingWithNonExistingFileThrows() {
     resolver.getTrustAnchors().clear();
     Properties config = new Properties();
     config.put("dnsjava.dnssec.trust_anchor_file", "xyz");
@@ -80,6 +81,7 @@ class TestTrustAnchorLoading extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -92,6 +94,7 @@ class TestTrustAnchorLoading extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
 
   @Test
@@ -103,7 +106,8 @@ class TestTrustAnchorLoading extends TestBase {
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
+    assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
@@ -131,5 +135,6 @@ class TestTrustAnchorLoading extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("validate.insecure", getReason(response));
+    assertEde(-1, response);
   }
 }

@@ -24,7 +24,7 @@ class TestNoData extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
-    assertEquals(ExtendedErrorCodeOption.NSEC_MISSING, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
 
   @Test
@@ -37,6 +37,6 @@ class TestNoData extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
-    assertEquals(ExtendedErrorCodeOption.NSEC_MISSING, getEdeReason(response));
+    assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 }

@@ -18,6 +18,7 @@ class TestUnsigned extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -26,6 +27,7 @@ class TestUnsigned extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -34,6 +36,7 @@ class TestUnsigned extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -43,5 +46,6 @@ class TestUnsigned extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
+    assertEde(-1, response);
   }
 }

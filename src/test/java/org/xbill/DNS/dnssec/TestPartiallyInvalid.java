@@ -19,6 +19,7 @@ class TestPartiallyInvalid extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -28,6 +29,7 @@ class TestPartiallyInvalid extends TestBase {
     assertEquals(Rcode.NOERROR, response.getRcode());
     assertTrue(isEmptyAnswer(response));
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 
   @Test
@@ -36,5 +38,6 @@ class TestPartiallyInvalid extends TestBase {
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
     assertEquals(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
+    assertEde(-1, response);
   }
 }
