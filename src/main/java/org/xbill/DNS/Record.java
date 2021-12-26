@@ -5,9 +5,14 @@ package org.xbill.DNS;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.base16;
 
 /**
@@ -16,15 +21,36 @@ import org.xbill.DNS.utils.base16;
  *
  * @author Brian Wellington
  */
-public abstract class Record implements Cloneable, Comparable<Record> {
+@Slf4j
+public abstract class Record implements Cloneable, Comparable<Record>, Serializable {
   protected Name name;
-  protected int type, dclass;
+  protected int type;
+  protected int dclass;
   protected long ttl;
 
   private static final DecimalFormat byteFormat = new DecimalFormat();
 
   static {
     byteFormat.setMinimumIntegerDigits(3);
+  }
+
+  private static class RecordSerializationProxy implements Serializable {
+    private static final long serialVersionUID = 1434159920070152561L;
+    private final byte[] wireData;
+    private final boolean isEmpty;
+
+    RecordSerializationProxy(Record r) {
+      this.isEmpty = r instanceof EmptyRecord;
+      wireData = r.toWire(isEmpty ? Section.QUESTION : Section.ANSWER);
+    }
+
+    protected Object readResolve() throws ObjectStreamException {
+      try {
+        return Record.fromWire(wireData, isEmpty ? Section.QUESTION : Section.ANSWER);
+      } catch (IOException e) {
+        throw new InvalidObjectException(e.getMessage());
+      }
+    }
   }
 
   protected Record() {}
@@ -41,6 +67,15 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     this.type = type;
     this.dclass = dclass;
     this.ttl = ttl;
+  }
+
+  Object writeReplace() {
+    log.trace("Creating proxy object for serialization");
+    return new RecordSerializationProxy(this);
+  }
+
+  private void readObject(ObjectInputStream ois) throws InvalidObjectException {
+    throw new InvalidObjectException("Use RecordSerializationProxy");
   }
 
   private static Record getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
@@ -169,7 +204,8 @@ public abstract class Record implements Cloneable, Comparable<Record> {
   }
 
   static Record fromWire(DNSInput in, int section, boolean isUpdate) throws IOException {
-    int type, dclass;
+    int type;
+    int dclass;
     long ttl;
     int length;
     Name name;
@@ -404,12 +440,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
 
   /** Converts a byte array into the unknown RR format. */
   protected static String unknownToString(byte[] data) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("\\# ");
-    sb.append(data.length);
-    sb.append(" ");
-    sb.append(base16.toString(data));
-    return sb.toString();
+    return "\\# " + data.length + " " + base16.toString(data);
   }
 
   /**
@@ -453,8 +484,7 @@ public abstract class Record implements Cloneable, Comparable<Record> {
     rec.rdataFromString(st, origin);
     t = st.get();
     if (t.type != Tokenizer.EOL && t.type != Tokenizer.EOF) {
-      throw st.exception(
-          "unexpected tokens at end of record (wanted EOL/EOF, got " + t.toString() + ")");
+      throw st.exception("unexpected tokens at end of record (wanted EOL/EOF, got " + t + ")");
     }
     return rec;
   }

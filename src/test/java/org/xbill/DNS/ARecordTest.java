@@ -40,7 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.BeforeEach;
@@ -134,5 +138,20 @@ class ARecordTest {
     dout = new DNSOutput();
     ar.rrToWire(dout, null, false);
     assertArrayEquals(m_addr_bytes, dout.toByteArray());
+  }
+
+  @Test
+  void testSerializable() throws IOException, ClassNotFoundException {
+    try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+      try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+        ARecord expected = new ARecord(Name.root, DClass.IN, 60, m_addr);
+        oos.writeObject(expected);
+        try (ObjectInputStream ois =
+            new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+          Record actual = (Record) ois.readObject();
+          assertEquals(expected, actual);
+        }
+      }
+    }
   }
 }
