@@ -789,10 +789,6 @@ public abstract class SVCBBase extends Record {
     }
     st.unget();
 
-    if (svcPriority > 0 && svcParams.isEmpty()) {
-      throw new TextParseException(
-          "At least one parameter value must be specified for ServiceMode");
-    }
     if (svcPriority == 0 && !svcParams.isEmpty()) {
       throw new TextParseException("No parameter values allowed for AliasMode");
     }
