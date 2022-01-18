@@ -118,6 +118,15 @@ public class SVCBRecordTest {
   }
 
   @Test
+  void serviceModeWithoutParameters() throws IOException {
+    String str = "1 .";
+    byte[] bytes = stringToWire(str);
+    byte[] expected = new byte[] {0, 1, 0};
+    assertArrayEquals(expected, bytes);
+    assertEquals(str, wireToString(bytes));
+  }
+
+  @Test
   void serviceModePort() throws IOException {
     String str = "1 . port=8443";
     byte[] bytes = stringToWire(str);
@@ -319,6 +328,7 @@ public class SVCBRecordTest {
             + "test.net. 86400 IN NS ns1.test.net.\n"
             + "test.net. 300 IN HTTPS 0 www.test.net.\n"
             + "test.net. 300 IN SVCB 1 . alpn=h2\n"
+            + "test.net. 300 IN HTTPS 1 .\n"
             + "www.test.net. 300 IN A 1.2.3.4\n";
     Master m = new Master(new ByteArrayInputStream(str.getBytes()));
 
@@ -332,6 +342,9 @@ public class SVCBRecordTest {
     r = m.nextRecord();
     assertEquals(Type.SVCB, r.getType());
     assertEquals("1 . alpn=h2", r.rdataToString());
+    r = m.nextRecord();
+    assertEquals(Type.HTTPS, r.getType());
+    assertEquals("1 .", r.rdataToString());
     r = m.nextRecord();
     assertEquals(Type.A, r.getType());
     assertEquals("1.2.3.4", r.rdataToString());
@@ -348,12 +361,6 @@ public class SVCBRecordTest {
   @Test
   void extraQuotesInParamValues() {
     String str = "5 . ipv4hint=\"4.5.6.7\",\"8.9.1.2\"";
-    assertThrows(TextParseException.class, () -> stringToWire(str));
-  }
-
-  @Test
-  void serviceModeWithoutParameters() {
-    String str = "1 aliasmode.example.com.";
     assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
@@ -462,12 +469,6 @@ public class SVCBRecordTest {
   @Test
   void emptyString() {
     String str = "";
-    assertThrows(TextParseException.class, () -> stringToWire(str));
-  }
-
-  @Test
-  void noParamValues() {
-    String str = "1 .";
     assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
