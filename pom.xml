@@ -45,15 +45,16 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <build.jdk>17</build.jdk>
         <target.jdk>8</target.jdk>
 
         <org.junit.version>5.8.2</org.junit.version>
-        <mockito.version>4.1.0</mockito.version>
-        <slf4j.version>1.7.32</slf4j.version>
+        <mockito.version>4.2.0</mockito.version>
+        <slf4j.version>1.7.33</slf4j.version>
         <lombok.version>1.18.22</lombok.version>
         <jna.version>5.9.0</jna.version>
         <bouncycastle.version>1.69</bouncycastle.version>
-        <vertx.version>4.2.1</vertx.version>
+        <vertx.version>4.2.2</vertx.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
@@ -89,9 +90,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.9.0</version>
                 <configuration>
-                    <compilerArgument>-Xlint:unchecked</compilerArgument>
+                    <release>${build.jdk}</release>
+                    <compilerArgument>-Xlint:all</compilerArgument>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -100,6 +102,32 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+                <executions>
+                    <!-- Compile Java 9+ stuff -->
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <release>${build.jdk}</release>
+                            <includes>
+                                <include>module-info.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+
+                    <!-- Compile everything else for Java 8 -->
+                    <execution>
+                        <id>base-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>${target.jdk}</release>
+                            <excludes>
+                                <exclude>module-info.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -111,31 +139,38 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>5.1.2</version>
+                <version>5.1.4</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <niceManifest>true</niceManifest>
+                    <excludeDependencies>lombok</excludeDependencies>
                     <instructions>
                         <Bundle-Name>dnsjava is an implementation of DNS in Java</Bundle-Name>
                         <Bundle-SymbolicName>org.xbill.dns</Bundle-SymbolicName>
-                        <Automatic-Module-Name>org.dnsjava</Automatic-Module-Name>
+                        <Bundle-DocURL>https://javadoc.io/doc/dnsjava/dnsjava</Bundle-DocURL>
                         <_noclassforname>true</_noclassforname>
+                        <_donotcopy>android|sun</_donotcopy>
+                        <_nouses>true</_nouses>
                         <Export-Package>
+                            !org.xbill.DNS.spi,
                             org.xbill.DNS.*
                         </Export-Package>
+                        <Private-Package>!android.*,!sun.*,.</Private-Package>
                         <Import-Package>
                             !org.xbill.DNS*,
                             !sun.*,
                             !lombok,
-                            android.*;resolution:=optional,
+                            android.content;resolution:=optional,
+                            android.net;resolution:=optional,
                             javax.naming.*;resolution:=optional,
-                            com.sun.jna.*;resolution:=optional,
+                            com.sun.jna.*;resolution:=optional;version="[5,6)",
                             *
                         </Import-Package>
-                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.8</Bundle-RequiredExecutionEnvironment>
                         <Bundle-License>
                             BSD-3-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
                         </Bundle-License>
-                        <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource</_removeheaders>
+                        <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource, Private-Package</_removeheaders>
+                        <_snapshot>SNAPSHOT</_snapshot>
                         <Include-Resource>
                             {maven-resources},
                             META-INF/LICENSE=LICENSE
@@ -161,7 +196,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.0.0-M5</version>
                 <configuration>
                     <includes>
                         <!-- Override default config to include inner test classes -->
@@ -171,6 +206,10 @@
                         <!-- Override default config to not exclude inner test classes -->
                         <exclude/>
                     </excludes>
+                    <argLine>
+                        ${argLine} --add-opens java.base/sun.net.dns=ALL-UNNAMED
+                    </argLine>
+                    <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
 
@@ -212,6 +251,9 @@
                         <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
                         <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
                         <excludes>
+                            <!-- Ignore classes that we need for compilation only -->
+                            <exclude>android</exclude>
+                            <exclude>sun</exclude>
                             <!-- JDK9 removed the Nameservice SPI as per bug 8134577. -->
                             <exclude>org.xbill.DNS.spi</exclude>
                             <!-- internal API detected as public -->
@@ -255,6 +297,7 @@
             <plugin>
                 <groupId>com.coveo</groupId>
                 <artifactId>fmt-maven-plugin</artifactId>
+                <!-- newer versions are broken on Java 16+, see https://github.com/google/google-java-format/issues/612 -->
                 <version>2.9.1</version>
                 <executions>
                     <execution>
@@ -292,7 +335,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>9.2</version>
+                        <version>9.2.1</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -369,12 +412,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.robolectric</groupId>
-            <artifactId>android-all</artifactId>
-            <version>12-robolectric-7732740</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>${jna.version}</version>
@@ -441,77 +478,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>[,9)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>${target.jdk}</source>
-                            <target>${target.jdk}</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <!-- JDK9 removed the Nameservice SPI as per bug 8134577. There's no replacement. -->
-            <id>no-spi-on-java9</id>
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <release>${target.jdk}</release>
-                            <excludes>
-                                <exclude>org/xbill/DNS/spi/**</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <excludePackageNames>*.spi</excludePackageNames>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <argLine>
-                                ${argLine} --add-opens java.base/sun.net.dns=ALL-UNNAMED
-                            </argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <excludes>
-                            <exclude>META-INF/services/sun.net.spi.nameservice.NameServiceDescriptor</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-    </profiles>
 
     <distributionManagement>
         <snapshotRepository>
