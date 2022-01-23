@@ -46,7 +46,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
@@ -552,7 +556,6 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xABE99;
-    InetAddress addr = InetAddress.getByName("191.234.43.10");
 
     assertThrows(
         RelativeNameException.class,
@@ -863,14 +866,36 @@ class RecordTest {
           assertNotNull(proto.get());
         } catch (Exception e) {
           fail(
-              "Record type "
-                  + Type.string(i)
-                  + " ("
-                  + i
-                  + ", "
-                  + proto.getClass().getSimpleName()
-                  + ")"
-                  + " seems to have no or invalid 0arg ctor");
+              String.format(
+                  "Record type %s, (%d, %s) seems to have no or invalid 0arg ctor",
+                  Type.string(i), i, proto.getClass().getSimpleName()));
+        }
+      }
+    }
+  }
+
+  @Test
+  void testSerializable() throws IOException {
+    for (int i = 1; i < 65535; i++) {
+      try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+          if (Type.getFactory(i) != null) {
+            Record expected = Record.newRecord(Name.root, i, DClass.IN);
+            try {
+              oos.writeObject(expected);
+              try (ObjectInputStream ois =
+                  new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+                Record actual = (Record) ois.readObject();
+                assertEquals(expected, actual);
+              }
+            } catch (Exception e) {
+              fail(
+                  String.format(
+                      "Record type %s (%d, %s) failed to (de)serialize",
+                      Type.string(i), i, expected.getClass().getSimpleName()),
+                  e);
+            }
+          }
         }
       }
     }
