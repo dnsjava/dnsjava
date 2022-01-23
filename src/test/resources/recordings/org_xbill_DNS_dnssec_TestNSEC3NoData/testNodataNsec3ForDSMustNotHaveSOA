@@ -1,0 +1,38 @@
+#Date: 2014-01-28T22:39:20+01:00
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 48189
+;; flags: qr aa rd ra ; qd: 1 an: 0 au: 8 ad: 1 
+;; QUESTIONS:
+;;  bogus., type = DS, class = IN
+
+;; ANSWERS:
+
+;; AUTHORITY RECORDS:
+;hash(bogus.) -> hash(cogus.)
+;key is the same as for nsec3.ingotronic.ch.
+uroghcuh4jsasbi1f0ompeqpo1fgssvn.bogus. 300 IN NSEC3 1 0 10 1234 k0uipho2c78uta6m47n625jfjbl776m3 NS RRSIG
+uroghcuh4jsasbi1f0ompeqpo1fgssvn.bogus. 300 IN  RRSIG   NSEC3 7 2 300 20140215011722 20140116005424 16758 bogus. D0q5h55pyybGzHMyxnHeFnchmmrEi1mZMuirbvZ/FgSZXN8zp0H5KW4FmOXMNMQwXLwXyYceymusBcGymM1DT3WeJWhds5LG1rqxvjk24Vbvaf/te+Q7aGxIXiEn3l5t3uHEM8m1Z0bc0wURzRLRLjhvaMXFUA06HaORYnEXlRmr3sl5d3BeQIoKtIgOWsdPB6Dk66saDFBAGc/EcWwmwHB6d+SKt1dUcYXYRPbIFL5Xx8EM4PKBE2dhiKi/2SYqQSx8pa8jtxBbBdpx6c/PchRA1zZ1w9V6TtIANSq2Hxrcj8Ey5nmeoR6M1p6r0Wtg46e0EJg0EGYB/rcrGlKilw==
+
+;; ADDITIONAL RECORDS:
+.           32768   CLASS4096   OPT  ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 1051 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 60551
+;; flags: qr rd ra ad cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;  bogus., type = DNSKEY, class = IN
+
+;; ANSWERS:
+bogus.    300 IN  DNSKEY  257 3 7 AwEAAaBuJTf9oGyeTH3biUkAFLrsYrkodX1H7Snsui4XsDHFCBvs5XYacHbs0Jg0/O51KPjmNnjwMW8SSyDkKqYQ+9uYAf2EQ/pnD/VGQqnV2cw0Vwk/t0E2V4FUCju4pnAoyzZFZXGs1eWbX9JXu++b0Azp+ACq6485qJLzHhWDiIrPoK/SvdbFVRK4s+nPPJLH3NGBbtdz6kPq7aFWYBMoGeAZdN1wsQpcNWUo5eOmaJY53nMc7+rDpAyYlMe/FKwSZdX2ZDd63Qsa6Im4FVUJq/nWLq7tlQ/mWks15uDTQyJy/OWfA0ICCO4N9Fel9rThJNpJWEzOCblvZyBoy405kZk=
+bogus.          300 IN  RRSIG   DNSKEY 7 1 300 20140215011722 20140116005424 16758 bogus. cN174LuYu9b/3QYN/5gA1ByWEjXPRFjIUVdGG1hidB4rPuqzWsvI0tOZ7vcQTC9Lagm9IpEYdczyAZWOJZyb727xYqqAQKsLKy/rzdqsD/ICzX0bs6GDA356dYECzW9eR4SqpX3xtMmttYC4lZ140IcZ6hacUqsjMqsxAfHlBbbyaJIf7QUyagwzG87GRgI42/bv0dL69t+CwfoQu2hR1GUcpUOxqEVUz2oPXy+/Cii3fiL8uJ/e65x/QDlMqTpHQ8f/IqLcYPxs364fitgnvwo7j8nDDORgvNuyGYf6lkuMnlRO70IhFBdjG4wmd8lU3fERLhHPFlLOy9g/lbnivw==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.           32768   CLASS4096   OPT  ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 736 bytes
+
+###############################################

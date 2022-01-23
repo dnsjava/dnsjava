@@ -1,0 +1,122 @@
+#Date: 2015-01-06T22:34:55+01:00
+;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 61136
+;; flags: qr aa rd ra cd ; qd: 1 an: 2 au: 6 ad: 1 
+;; QUESTIONS:
+;;	cvoid1.ingotronic.ch., type = A, class = IN
+
+;; ANSWERS:
+cvoid1.ingotronic.ch.	300	IN	CNAME	gibtsnicht.ingotronic.ch.
+cvoid1.ingotronic.ch.	300	IN	RRSIG	CNAME 5 3 300 20150125000532 20141225234703 17430 ingotronic.ch. bjZ5dgY+WNUzgkbA9Bvgz9Ux6lQxEVWzrtnkByK7C6itvwG3pS1LcxOCPi79a5PQqbGm1S4axCsEHtZkoZWWU2OEUvfiqJtATnxBGlb43q0eP8wQhmxMSqSC5DNedShLeT5v1hhvCyyJ7lEpMKwI1ROc/MMtFzvlWHKCqb81lxQ=
+
+;; AUTHORITY RECORDS:
+ingotronic.ch.		300	IN	SOA	ns1.ingotronic.ch. admin.ingotronic.ch. 2013032762 300 60 864000 300
+ingotronic.ch.		300	IN	RRSIG	SOA 5 2 300 20150125021244 20141226011244 17430 ingotronic.ch. WDLpp9G0P/rlMBfpFn9sAfpEFoBnQfwyGSXbGCc/LG1FSkJoKLDQYDY696scLNsJgkrzZeJrl0oSSvA8AvRUhYRrmuqWMxTVFgYlRwPwqEMCKUqiVhKGVF4NYemoBiUQC4nJwBZd57xKCiF4AQ4CodBtiZxefJFAlTNE0g2yxtM=
+ingotronic.ch.		300	IN	NSEC	alias.ingotronic.ch. A NS SOA RRSIG NSEC DNSKEY
+ingotronic.ch.		300	IN	RRSIG	NSEC 5 2 300 20150125000532 20141225234703 17430 ingotronic.ch. en5BaZ6zWqEvoUFUDPm5g1pjz7THXBv/1kjKtV2tS+7xh0BtkLEzlA9n/H66ZZAX2EIh7vXj12xVJKOuEuM0o1mJwKsBaLQuTra60/zYAUIddwUOCzI3zzjiRFklPyHSnLkGoBODZcvehnsTzTPyBxkfoouleqpj7gN5jOSBL8M=
+eccgost.ingotronic.ch.	300	IN	NSEC	invalid.ingotronic.ch. NS DS RRSIG NSEC
+eccgost.ingotronic.ch.	300	IN	RRSIG	NSEC 5 3 300 20150125021136 20141226011244 17430 ingotronic.ch. lsX44/1144d1nG80WVhDnZCiywh+KTNqj9oEECk3GifEjOWNTJDTfbBnrGbdc7BIWs1mZmcPKFVfQB39QunMyzNQi4Wzjor3U1FPbXhUTn/g9fMul37g1aR00hUfS2Jo49vfDZEMZWp7th9ZFc+hlr8uWISceul5OJRq4SyMbzs=
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 905 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 16825
+;; flags: qr rd ra ad cd ; qd: 1 an: 4 au: 0 ad: 1 
+;; QUESTIONS:
+;;	., type = DNSKEY, class = IN
+
+;; ANSWERS:
+.			87378	IN	DNSKEY	256 3 8 AwEAAe3fSrbLBy3LOS7pnxEUhvPZTE2H5dIGsI/UfruI/nOEvWWa/PSX2BFedBkEqOlYdjdNF2f+6lmfk2Od/xu0v5bVqxFE+/24v3hZSlWBxvXzPTAGHrbW/IJYEPqlzVOAS4XdUgHg0N7IbLywNHMvB+Yf+Nm6ctyXXFLV4WTNnzs7
+.			87378	IN	DNSKEY	257 3 8 AwEAAagAIKlVZrpC6Ia7gEzahOR+9W29euxhJhVVLOyQbSEW0O8gcCjFFVQUTf6v58fLjwBd0YI0EzrAcQqBGCzh/RStIoO8g0NfnfL2MTJRkxoXbfDaUeVPQuYEhg37NZWAJQ9VnMVDxP/VHL496M/QZxkjf5/Efucp2gaDX6RS6CXpoY68LsvPVjR0ZSwzz1apAzvN9dlzEheX7ICJBBtuA6G3LQpzW5hOA2hzCTMjJPJ8LbqF6dsV6DoBQzgul0sGIcGOYl7OyQdXfZ57relSQageu+ipAdTTJ25AsRTAoub8ONGcLmqrAmRLKBP1dfwhYB4N7knNnulqQxA+Uk1ihz0=
+.			87378	IN	DNSKEY	256 3 8 AwEAAaPD7Y7XIi1MOEREJNTrRhyqsY3gff6JWzg+XCbqut1sbcbvqyssHw8DT1AkRaAC92pO8xuyq5QEgEPL1IHfABLwpwXI5gTj4gdwi86bpkmlWs9fRpnn4DPDCTdrnxIejJXgClHikLJF3u3CdpNCMijq4CKdQbMlRZ3avv+G7rh7
+.			87378	IN	RRSIG	DNSKEY 8 0 172800 20150115235959 20150101000000 19036 . i8cAxD2pvQi1oAyvQxRpDfFlbqPzW+69QQEsDwE1eWOm5AtawO9U7lmsGps7sy/fVNvl1ljKBj4Djp9pb3U2FLogjiIlW0cDAkPmLlG9t+b/pjEfBNlhjANUVN06pvQVAfm+LcF26EaWT6FlISBqb6jSy4BHRa3Bdc4Sx7+pRSYSqVVvYxLkfAWsKPqGkvWhebJDndJJV9syXQXgZ+v/uJ+6XOS43xkAdeL8iBzIs/FlwMTfh3tVe3d0lb65IBBLlCzeQuetX+0Vu1YFcnD0mHc/wS2ZnAV5toAFmyVQBoY/XAZiZeaOkcROJ6Zmqezy7liwK7BqsYyAZntMhk8lbg==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 883 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 29298
+;; flags: qr rd ra ad cd ; qd: 1 an: 2 au: 0 ad: 1 
+;; QUESTIONS:
+;;	ch., type = DS, class = IN
+
+;; ANSWERS:
+ch.			978	IN	DS	46375 8 2 8F96646FC68BB7E4AF4C0750A6096FBC0D4ECDA3D3FA6DA06FDDB42EE50C6CF3
+ch.			978	IN	RRSIG	DS 8 1 86400 20150112170000 20150105160000 16665 . thY7xYWBBxiBjqbQIb9fAG4TmQgnziwM7q6P1T3/ITxmECdvOCQnnZA3uD7qmN8uM0HudsD7+y+zgD3rsH4RSTKdL4kHSI0OnCxToMTvklghEgFDezqIRm8NkWdI2H4Stwrj20nYKSpLQxPI2EE54gs18P3KyO8bAUYv8Qx73xU=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 238 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 33412
+;; flags: qr rd ra ad cd ; qd: 1 an: 4 au: 0 ad: 1 
+;; QUESTIONS:
+;;	ch., type = DNSKEY, class = IN
+
+;; ANSWERS:
+ch.			979	IN	DNSKEY	257 3 8 AwEAAb7GhhZ8IAy/AhwmSms5DeQK5ad09wIIplEpYoiAIYXPtJvT1ReFzyfTp/2YP+g/PWDwHPh4qKAHa9x0VgbIQcGAeNakmfkAdWEmCnca323/SAml3mwfaX62G7/uYWae5zh8QTxZKNd+K1yZ5x0IxnI31chSl5xymRbTEHYZDKwSIRFM3fTxUMt93WFaBVWELReYotJBr++rvAWdnlay5TPBTvheLBkaiqtgM4GP8HK07Y+86lsZnEsj5K3G1KTV5SPpa82rqYAwxG9VKbmSE/6/kBR5jJHjt1rRt5Oe7v18aEtw0YCEN4vxq+KuvMoNVqXUsE9LBwHJD+QNwi6wmB0=
+ch.			979	IN	DNSKEY	256 3 8 AwEAAcSLdT0fEmcFmLpeUkAJoeVaHKiu+nbuc43fWlqaCRVf8t2HA4uWxOk0O5ci9nrFTc8nq8oa5fk5Cj7CHh4yrX9qUCfTdIWTyp8BDEdJpS+Dyb0u9wQuVj+nQMj4fLzdQf4TJs3/qxuiLr3nL1UUwlhhXeqSqGVb7p3mtB5HJ8ad
+ch.			979	IN	DNSKEY	256 3 8 AwEAAcsg0kY6fw1wzYMhSAKTy+Y2JzAst66P/1odp9NECJJHbU8f4nwziI3onoFSBV0ZiSZhY1aH5dhdDZ7BkrqhVXSrZPAz0CvzjIxmB1gSOf9DeZvjQvoy97HqYolxsf+B3QQv2RKBT67elF5+JisKg3/dQISelKn8LhabSoVrMlD1
+ch.			979	IN	RRSIG	DNSKEY 8 1 86400 20150127100909 20141212090909 46375 ch. bT8q0FWyeMH0SulNo6UdIIgZYNATwYsee2bikq2Gh339Bufma8eaqWIPYT3XKmxYPBFOw0bVl+kLZxTwbR1CFoCDXoP+qgQhh4mf9qkNiv2CDSc+0FE3FRREn+DAhYTUEuB58FPiPakFB8s8O7T+k2qhDae7jy4/y7Jl1lnjaBY8s7bzOUPhF0KKCNZmvoKwtL23ZdVeTSV1xM3jkiNnpzBKbcoSWECSGJVp1SE0BnRXdwQP41YTXFZ0310YjaTAUCC5qbMIWdEkHjfdSQtKBImnc85mkapq9w++XQ4zhauPWBtrPV3CcoCahjUaWdjrKVkibomlJZaN8MEO23CfQw==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 893 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 13219
+;; flags: qr rd ra cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;	ingotronic.ch., type = DS, class = IN
+
+;; ANSWERS:
+ingotronic.ch.		3587	IN	DS	6031 5 1 733D0218B571CD617B1A7493564B9FC4F12ADE82
+ingotronic.ch.		3587	IN	DS	6031 5 2 4A948F2FDADA24686E473EDAC00DCF972584C75E3FAA92C2021B6221449FF87E
+ingotronic.ch.		3587	IN	RRSIG	DS 8 2 3600 20150129033614 20150105123019 60789 ch. rVPJP2HhzW7OkroK2axFj5Lb4iVWCH8Fp/Iq1rF952NDo72b8RiKje2RaAKJAGQ+wd0YgE+PAej04GCmkhlDJA/zvPeeTxuhy3HbJzReMlQ7fjyH+wW1hli+FuIYvogXWf7nO/9VyPORt8X/f/pjrOr3Vlj9sGLN8TGYpEuVSw4=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 288 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 54010
+;; flags: qr aa rd ra cd ; qd: 1 an: 4 au: 0 ad: 1 
+;; QUESTIONS:
+;;	ingotronic.ch., type = DNSKEY, class = IN
+
+;; ANSWERS:
+ingotronic.ch.		300	IN	DNSKEY	256 3 5 AwEAAZ2Xh77GFzpEDx7EHYxShqltHgkiG+BOjBGifEmnJhQSdE5/yNSLFNcdhZZ8HUPxYnaedTqJcFFg4AzUsQklF/fECegTJdZjaj2WoL0/I8K7HMfY/hVuRZUWPNglYi8agJRX6gdkFTCpUNI7stpgKqxtzUJhhw15uG/lKMplwqUr
+ingotronic.ch.		300	IN	DNSKEY	257 3 5 AwEAAeA1vzmjaB+eBAcvhzpKEgAEFpvQ1rg4uKDW6MsQtacKoqBpgyep2+LuWotz5p/xYxj3NGsArwN8Ad5cY0FHRr8miTT0elOv6nvlqGIfRuhj/BXAQ1x4ihpSFslHw0lJMYFwxsUZWpUyjWX/nv1xRZMMwF46gui0N4OEbyTYusCk77D+A71k+K0EAitFIbIH4GCUKmH1H7HmXhSVH9bN/n7KEGwW32lmsuuUcJoRKDkcUvbMXY/9Xoa2quERrUg/rBbDUHowRPjYDS5GzY1+f4YY8s40BufGiqyUTKKXL953MVFK8gmezXA0hbmrnZ7CBOw/7238mORAdzExaX8n7CE=
+ingotronic.ch.		300	IN	RRSIG	DNSKEY 5 2 300 20150125003700 20141226001657 6031 ingotronic.ch. rs1QlP2SlSpA2ELbzwg3DgWLzXWL3Lpv6CUJE2Q0qH2Zp7Qdy3cD+ZEtNh9v24Qv1M6JJ3zFt8mmZoCeW2ycuMbJCqBkW9CBuwF+VznZvZY2MxwPipvhvEEGP//0M8YAZJ66yQPDv3PTdAP8FYbIrJyvY44vwyncwbslpfHT9jAsrbfr3vuMuWps86dnP462q+0s1TxBfqi8mzo3gdavjHKWVNwohLahLKT+tWeu6DSzQv0YwMjwtkLgF7QRgx3ctIIkloOrnx9nHH1N6y+hxEB89fOlyVDjHhgL5uVtsD5fEdT0FJ2Gc/2nShEMMqIwr1/J9kUq1mNySff/uEe65Q==
+ingotronic.ch.		300	IN	RRSIG	DNSKEY 5 2 300 20150125003700 20141226001657 17430 ingotronic.ch. mEwZjhQqeWksWD0TCnNBrtce4YkWJL3edqL6PvAUu8Fn+Ih437kEs3+pqdkgRsdYQ9HW+lBm/8pWwJlNAv0bi9NykItXMwAUFtncgq+6Pnh3iAM972GXSa5VV4LcGQ5b8CBdHCHiEKDqyPv5Hr5QfYL/FQaWlcNRh4QZZlZNPFA=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 940 bytes
+
+###############################################
+

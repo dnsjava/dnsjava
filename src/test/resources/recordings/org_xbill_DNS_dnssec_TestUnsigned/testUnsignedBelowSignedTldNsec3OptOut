@@ -1,0 +1,110 @@
+#Date: 2015-01-06T22:35:06+01:00
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 15612
+;; flags: qr rd ra cd ; qd: 1 an: 3 au: 5 ad: 7 
+;; QUESTIONS:
+;;	yahoo.com., type = A, class = IN
+
+;; ANSWERS:
+yahoo.com.		1800	IN	A	98.138.253.109
+yahoo.com.		1800	IN	A	206.190.36.45
+yahoo.com.		1800	IN	A	98.139.183.24
+
+;; AUTHORITY RECORDS:
+yahoo.com.		87436	IN	NS	ns1.yahoo.com.
+yahoo.com.		87436	IN	NS	ns5.yahoo.com.
+yahoo.com.		87436	IN	NS	ns2.yahoo.com.
+yahoo.com.		87436	IN	NS	ns4.yahoo.com.
+yahoo.com.		87436	IN	NS	ns3.yahoo.com.
+
+;; ADDITIONAL RECORDS:
+ns1.yahoo.com.		87436	IN	A	68.180.131.16
+ns2.yahoo.com.		87436	IN	A	68.142.255.16
+ns3.yahoo.com.		87436	IN	A	203.84.221.53
+ns3.yahoo.com.		1800	IN	AAAA	2406:8600:b8:fe03:0:0:0:1003
+ns4.yahoo.com.		87436	IN	A	98.138.11.157
+ns5.yahoo.com.		87436	IN	A	119.160.247.124
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 284 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 38276
+;; flags: qr rd ra ad cd ; qd: 1 an: 4 au: 0 ad: 1 
+;; QUESTIONS:
+;;	., type = DNSKEY, class = IN
+
+;; ANSWERS:
+.			87368	IN	DNSKEY	256 3 8 AwEAAaPD7Y7XIi1MOEREJNTrRhyqsY3gff6JWzg+XCbqut1sbcbvqyssHw8DT1AkRaAC92pO8xuyq5QEgEPL1IHfABLwpwXI5gTj4gdwi86bpkmlWs9fRpnn4DPDCTdrnxIejJXgClHikLJF3u3CdpNCMijq4CKdQbMlRZ3avv+G7rh7
+.			87368	IN	DNSKEY	257 3 8 AwEAAagAIKlVZrpC6Ia7gEzahOR+9W29euxhJhVVLOyQbSEW0O8gcCjFFVQUTf6v58fLjwBd0YI0EzrAcQqBGCzh/RStIoO8g0NfnfL2MTJRkxoXbfDaUeVPQuYEhg37NZWAJQ9VnMVDxP/VHL496M/QZxkjf5/Efucp2gaDX6RS6CXpoY68LsvPVjR0ZSwzz1apAzvN9dlzEheX7ICJBBtuA6G3LQpzW5hOA2hzCTMjJPJ8LbqF6dsV6DoBQzgul0sGIcGOYl7OyQdXfZ57relSQageu+ipAdTTJ25AsRTAoub8ONGcLmqrAmRLKBP1dfwhYB4N7knNnulqQxA+Uk1ihz0=
+.			87368	IN	DNSKEY	256 3 8 AwEAAe3fSrbLBy3LOS7pnxEUhvPZTE2H5dIGsI/UfruI/nOEvWWa/PSX2BFedBkEqOlYdjdNF2f+6lmfk2Od/xu0v5bVqxFE+/24v3hZSlWBxvXzPTAGHrbW/IJYEPqlzVOAS4XdUgHg0N7IbLywNHMvB+Yf+Nm6ctyXXFLV4WTNnzs7
+.			87368	IN	RRSIG	DNSKEY 8 0 172800 20150115235959 20150101000000 19036 . i8cAxD2pvQi1oAyvQxRpDfFlbqPzW+69QQEsDwE1eWOm5AtawO9U7lmsGps7sy/fVNvl1ljKBj4Djp9pb3U2FLogjiIlW0cDAkPmLlG9t+b/pjEfBNlhjANUVN06pvQVAfm+LcF26EaWT6FlISBqb6jSy4BHRa3Bdc4Sx7+pRSYSqVVvYxLkfAWsKPqGkvWhebJDndJJV9syXQXgZ+v/uJ+6XOS43xkAdeL8iBzIs/FlwMTfh3tVe3d0lb65IBBLlCzeQuetX+0Vu1YFcnD0mHc/wS2ZnAV5toAFmyVQBoY/XAZiZeaOkcROJ6Zmqezy7liwK7BqsYyAZntMhk8lbg==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 883 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 50370
+;; flags: qr rd ra cd ; qd: 1 an: 2 au: 0 ad: 1 
+;; QUESTIONS:
+;;	com., type = DS, class = IN
+
+;; ANSWERS:
+com.			1036	IN	DS	30909 8 2 E2D3C916F6DEEAC73294E8268FB5885044A833FC5459588F4A9184CFC41A5766
+com.			1036	IN	RRSIG	DS 8 1 86400 20150112170000 20150105160000 16665 . EdNGsG+8slVhJncXMIfcIv5EWXpnDNbGHFHGO2qo64xZ7i8v3dMN0f2vvzNBMufCttyxWAC44s0fHzP24IuuLzTQRyPb4x7/xOXPNM/GsDSEWRrSxXD9wxswpa7XdD8gxqlrrLIlFkOJ59R88L/haMC7dzG0uo9lvE3r8fcynp4=
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 239 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 40305
+;; flags: qr rd ra cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;	com., type = DNSKEY, class = IN
+
+;; ANSWERS:
+com.			1037	IN	DNSKEY	257 3 8 AQPDzldNmMvZFX4NcNJ0uEnKDg7tmv/F3MyQR0lpBmVcNcsIszxNFxsBfKNW9JYCYqpik8366LE7VbIcNRzfp2h9OO8HRl+H+E08zauK8k7evWEmu/6od+2boggPoiEfGNyvNPaSI7FOIroDsnw/taggzHRX1Z7SOiOiPWPNIwSUyWOZ79VmcQ1GLkC6NlYvG3HwYmynQv6oFwGv/KELSw7ZSdrbTQ0HXvZbqMUI7BaMskmvgm1G7oKZ1YiF7O9ioVNc0+7ASbqmZN7Z98EGU/Qh2K/BgUe8Hs0XVcdPKrtyYnoQHd2ynKPcMMlTEih2/2HDHjRPJ2aywIpKNnv4oPo/
+com.			1037	IN	DNSKEY	256 3 8 AQOzd48WKiAn+RyfIqkS/ZqQTguv/+dbIENccl9CWvJ8Sx7cLc29uZtDkHjmvqhgI6eKwt1sOhDQdyB6saNImQnG5z6ZoILNlW4h1ljy2LEi16WDf93iQnLekcW3Pr8b0YjmJZu6DXKUrcU1uBYtsULaHpa4ERUJFePn3dmX+2brVQ==
+com.			1037	IN	RRSIG	DNSKEY 8 1 86400 20150108192533 20150101192033 30909 com. qZxb8vx3uSMQJMcx9hLn6OyDBcq67tkDsvcE5Tk3y8UOiJghAJW/4zlyji1C8yQzACqcXtE8g21u3BGyGIhLIDG+v6kaOeqKrWGQfvqer8ihd0NpwuOguV4g68ZcE0qFgFYHNKcpqnxAgIYkcoRda+2tPxcCLTPzEPPyEY0pHX9zC2HL88EneK4xP3qn5YIRDbFfHdDXMU61uXh9p4ASRTpy1l+pKnSf2c/LoUBJyPdFjUw2lQPMHZSNo7qjTkJxv1Mn2WSp8rO+xknqQu12zqihIb40KIyZHPgQ5wCCCT70kf3RmKEqmH1F6T7AWT9oBAzuD192ACyRJSXm5KdW1Q==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 743 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 12758
+;; flags: qr rd ra cd ; qd: 1 an: 0 au: 6 ad: 1 
+;; QUESTIONS:
+;;	yahoo.com., type = DS, class = IN
+
+;; ANSWERS:
+
+;; AUTHORITY RECORDS:
+com.			900	IN	SOA	a.gtld-servers.net. nstld.verisign-grs.com. 1420580086 1800 900 604800 86400
+com.			900	IN	RRSIG	SOA 8 1 900 20150113213446 20150106202446 48758 com. qu8Cf1ULvc3Iziz9agwXZMNlbG29SEJLVSkeqoiH7KHk4BOu/VroRuYnSnO3XYfHmUfcb4iOulUFxywVWrKr+3WnDWI9K9W9ColDY1RQHuiZNV+V3wGmdf+LSXPiGgCT5INi3aCgCz7ASWee82D6uHg5DroaYqkd1mRHz4djry0=
+CK0POJMG874LJREF7EFN8430QVIT8BSM.com.	900	IN	RRSIG	NSEC3 8 2 86400 20150112055507 20150105044507 48758 com. jxmK9TYR0jbMXKL6irMe5NSnXv8TA54f3OnR6Z6FsGAYufuJ5GD38pHzAet0qkn+Bj4qH/mMsAH+McuXXpsLjQqOLI3Vi+ezSyiibgMDWMCx4485rFnoyWuv7P85jjDf0RI/Vi3KhJ2Eo7c7YGLwBeNlf7Rf+mOtsE+Pe/rwWO4=
+CK0POJMG874LJREF7EFN8430QVIT8BSM.com.	900	IN	NSEC3	1 1 0 - CK0QFMDQRCSRU0651QLVA1JQB21IF7UR NS SOA RRSIG DNSKEY NSEC3PARAM
+GPIKIEOSOPL79LLAGN0NKTKIIIG03PO1.com.	900	IN	RRSIG	NSEC3 8 2 86400 20150112051957 20150105040957 48758 com. nG70oihFwICnzK+GXlNIWLTNPpD05C6aWAWUC5rdBhGY/JkNWSdIk2+Gokv+BkNChaIixEO32hsmuLd5frh4E3UtJ1fhiIjX8Ty5FUAT5FM8URfy2nOxlgtp+/qhpM0Fl6YebYWBvjS87gT0m3ihpwyUX5Cc9TDfX/WRxEeYF94=
+GPIKIEOSOPL79LLAGN0NKTKIIIG03PO1.com.	900	IN	NSEC3	1 1 0 - GPIPCMMD0H5PRLQHL08EAICA0CBFSUMP NS DS RRSIG
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 759 bytes
+
+###############################################
+

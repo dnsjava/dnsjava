@@ -231,6 +231,13 @@
                                 <binaryCompatible>true</binaryCompatible>
                                 <sourceCompatible>true</sourceCompatible>
                             </overrideCompatibilityChangeParameter>
+                            <overrideCompatibilityChangeParameter>
+                                <!-- https://github.com/siom79/japicmp/issues/281 -->
+                                <compatibilityChange>METHOD_ABSTRACT_ADDED_IN_IMPLEMENTED_INTERFACE</compatibilityChange>
+                                <semanticVersionLevel>PATCH</semanticVersionLevel>
+                                <binaryCompatible>true</binaryCompatible>
+                                <sourceCompatible>true</sourceCompatible>
+                            </overrideCompatibilityChangeParameter>
                         </overrideCompatibilityChangeParameters>
                     </parameter>
                 </configuration>

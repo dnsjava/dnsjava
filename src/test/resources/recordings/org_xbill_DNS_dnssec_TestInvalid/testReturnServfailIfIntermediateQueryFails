@@ -1,0 +1,42 @@
+#Date: 2013-08-21T00:06:15+02:00
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 25326
+;; flags: qr aa rd ra cd ; qd: 1 an: 2 au: 2 ad: 3 
+;; QUESTIONS:
+;;	www.ingotronic.ch., type = A, class = IN
+
+;; ANSWERS:
+www.ingotronic.ch.	300	IN	A	127.0.0.1
+www.ingotronic.ch.	300	IN	RRSIG	A 5 3 300 20130908204313 20130809202226 17430 ingotronic.ch. OMZ2Z5XSFruxd0jBCyT1wYKzlz6aw2Ui2XmbBxp3Bom26n7UiEdjeGlTkoLce5gxsKaAgPuBLGy6MauZz9wLomlsMphsRAP7Y/U1c5UuKKFjF49cRSu/DTS9OstJ3YNIeoABphfPCMn6dOqBIJyjVHJybiBx2ZBROHdaC4cB1KM=
+
+;; AUTHORITY RECORDS:
+ingotronic.ch.		300	IN	NS	ns1.ingotronic.ch.
+ingotronic.ch.		300	IN	RRSIG	NS 5 2 300 20130908202801 20130809202226 17430 ingotronic.ch. nYQXAE0xrUBWGMWP1cq+xhTFdD91xm2yfuP8SyjL9fI/0ixcW/fJs0PPPdLkStz3ZTGk/rO6alU64HCecshJdLLdwmjNH6cEt9LkudHA4/8TT0fMR7E3elzbYZPIK7iYEsjcfRKey02Hmq+Y+k3W4+lc2uFOlbNr02HfOwH7SDc=
+
+;; ADDITIONAL RECORDS:
+ns1.ingotronic.ch.	300	IN	A	62.192.5.131
+ns1.ingotronic.ch.	300	IN	RRSIG	A 5 3 300 20130908205459 20130809202226 17430 ingotronic.ch. cQ+BxomTy6psnCbedHYgSECQGeRaKghNGOpsFX1ra+WC6MZKdQWAiG/fRn/yU6L4bE1pi1FfFIfAWu79KWfQIbVhOSFUjcpqw/D3lwXtGVk9fjiNCSZN9vsoe6iXLoJtvd1hN/PeHUZAWRdJSkGH9EHEzsWfoki6+kryBYDFDyM=
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 615 bytes
+
+###############################################
+
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 47195
+;; flags: qr rd ra ad cd ; qd: 1 an: 3 au: 0 ad: 1 
+;; QUESTIONS:
+;;	., type = DNSKEY, class = IN
+
+;; ANSWERS:
+.			138548	IN	DNSKEY	257 3 8 AwEAAagAIKlVZrpC6Ia7gEzahOR+9W29euxhJhVVLOyQbSEW0O8gcCjFFVQUTf6v58fLjwBd0YI0EzrAcQqBGCzh/RStIoO8g0NfnfL2MTJRkxoXbfDaUeVPQuYEhg37NZWAJQ9VnMVDxP/VHL496M/QZxkjf5/Efucp2gaDX6RS6CXpoY68LsvPVjR0ZSwzz1apAzvN9dlzEheX7ICJBBtuA6G3LQpzW5hOA2hzCTMjJPJ8LbqF6dsV6DoBQzgul0sGIcGOYl7OyQdXfZ57relSQageu+ipAdTTJ25AsRTAoub8ONGcLmqrAmRLKBP1dfwhYB4N7knNnulqQxA+Uk1ihz0=
+.			138548	IN	DNSKEY	256 3 8 AwEAAcFTyWsmpTs49Q0FKVepUqft+7+c3elhdsfh+amh+orgWLcitLM1bBBiWe6eymWW0EakLZAG4tej28tyx4f+j37Q9VX+m5NAhO/Y0riQonVWfzxLGymx3Ti5x/x7VKvF5Y5hf5OWv2J7pvEumYFFCtu4glit9T9J85+i3UgqSHqf
+.			138548	IN	RRSIG	DNSKEY 8 0 172800 20130903235959 20130820000000 19036 . fGmWbtROfDQ5bFTrhIQDesRvY2viY1/7Qzg7WHHH8g78QONdl33t10P9rSHwjN2JdgZ3Jbnwu/2LOFCKpwV5Ei5w9A3oUW5jcq/wnC/oKSVfvoHJ4zzJ/11KCMi1sGVUwHRf2BeNMvf8Kjpb59oUMx85NjWkIxlZYZDsC/cemeRcm1aaYrzIAS+rxck8Wmx9+1cEz/KF/w2C0sZSiMJL52Jda5XBv/24obY1NLlUHTNIQVxktAS6e5bPtHNve4zbb0YGI0QUbtIO6Bh56CoE5vnHo5bDdBY6Kdo9VOlZd4AGm1Nw9z2HLyftJanqGd495azQ6uLV6x9QN6LZ4WBVwg==
+
+;; AUTHORITY RECORDS:
+
+;; ADDITIONAL RECORDS:
+.			32768	CLASS4096	OPT	 ; payload 4096, xrcode 0, version 0, flags 32768
+
+;; Message size: 736 bytes
+
+###############################################
+

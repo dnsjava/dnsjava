@@ -1,0 +1,13 @@
+. IN DS 19036 8 1 B256BD09DC8DD59F0E0F0D8541B8328DD986DF6E
+. IN DS 19036 8 2 49AAC11D7B6F6446702E54A1607371607A1A41855200FD2CE1CDDE32F24E8FB5
+. CH DS 19036 8 1 B256BD09DC8DD59F0E0F0D8541B8328DD986DF6E
+bla. IN DS 19036 8 1 B256BD09DC8DD59F0E0F0D8541B8328DD986DF6E
+bla. IN DNSKEY 256 3 5 ( AQPSKmynfzW4kyBv015MUG2DeIQ3
+                                          Cbl+BBZH4b/0PY1kxkmvHjcZc8no
+                                          kfzj31GajIQKY+5CptLr3buXA10h
+                                          WqTkF7H6RfoRqXQeogmMHfpftf6z
+                                          Mv1LyBUgia7za6ZEzOJBOztyvhjL
+                                          742iU/TpPSEDhm2SNKLijfUppn1U
+                                          aNvv4w==  )
+x. IN A 127.0.0.1
+x. IN MX 10 asdf.bla.
