@@ -5,28 +5,16 @@ image:https://codecov.io/gh/dnsjava/dnsjava/branch/master/graph/badge.svg?token=
 image:https://maven-badges.herokuapp.com/maven-central/dnsjava/dnsjava/badge.svg["Maven Central",link="https://search.maven.org/artifact/dnsjava/dnsjava"]
 image:https://javadoc.io/badge/dnsjava/dnsjava.svg["Javadocs",link="https://javadoc.io/doc/dnsjava/dnsjava"]
 
-
 == Overview
 
 dnsjava is an implementation of DNS in Java.
-It supports almost all defined record types (including the DNSSEC types), and unknown types.
-It can be used for queries, zone transfers, and dynamic updates.
-It includes a cache which can be used by clients, and an authoritative only server.
-It supports TSIG authenticated messages, partial DNSSEC verification, and EDNS0. It is fully thread safe.
+It
 
-dnsjava was started as an excuse to learn Java.
-It was useful for testing new features in BIND without rewriting the C resolver.
-It was then cleaned up and extended in order to be used as a testing framework for DNS interoperability testing.
-The high level API and caching resolver were added to make it useful to a wider audience.
-The authoritative only server was added as proof of concept.
-
-== dnsjava on Github
-
-This repository has been a mirror of the dnsjava project at Sourceforge since 2014 to maintain the Maven build for publishing to https://search.maven.org/artifact/dnsjava/dnsjava[Maven Central].
-As of 2019-05-15, GitHub is https://sourceforge.net/p/dnsjava/mailman/message/36666800/[officially] the new home of dnsjava.
-
-Please use the GitHub https://github.com/dnsjava/dnsjava/issues[issue tracker] and send - well tested - pull requests.
-The mailto:dnsjava-users@lists.sourceforge.net[dnsjava-users] mailing list still exists.
+* supports almost all defined record types (including the DNSSEC types), and unknown types.
+* can be used for queries, zone transfers, and dynamic updates.
+* includes a cache which can be used by clients, and an authoritative only server.
+* supports TSIG authenticated messages, DNSSEC verification, and EDNS0.
+* is fully thread safe.
 
 == Getting started
 
@@ -127,7 +115,7 @@ Do NOT use it.
 |5000
 
 .2+|org.jitsi.dnssec.nsec3.iterations.N
-3+a|Maximum iteration count for the NSEC3 hashing function depending on the key size N. The defaults are from https://tools.ietf.org/html/rfc5155#section-10.3[RFC5155].
+3+a|Maximum iteration count for the NSEC3 hashing function depending on the key size N. The defaults are from https://www.rfc-editor.org/rfc/rfc5155.html#section-10.3[RFC5155].
 |Integer
 2+a|- 1024 bit keys: 150 iterations
 - 2048 bit keys: 500 iterations
@@ -166,7 +154,7 @@ If `false`, allows any algorithm to validate the zone.
 .2+|dnsjava.dnssec.algorithm_enabled.ID
 3+|Enable or disable a DS/DNSKEY algorithm.
 See
-https://tools.ietf.org/html/rfc8624#section-3.1[RFC8624] for recommended values.
+https://www.rfc-editor.org/rfc/rfc8624.html#section-3.1[RFC8624] for recommended values.
 |Boolean
 2+|Disable ED448:
 `dnsjava.dnssec.algorithm_enabled.16=false`
@@ -174,7 +162,7 @@ https://tools.ietf.org/html/rfc8624#section-3.1[RFC8624] for recommended values.
 .2+|dnsjava.dnssec.digest_enabled.ID
 3+|Enable or disable a DS record digest algorithm.
 See
-https://tools.ietf.org/html/rfc8624#section-3.3[RFC8624] for recommended values.
+https://www.rfc-editor.org/rfc/rfc8624.html#section-3.3[RFC8624] for recommended values.
 |Boolean
 2+|Disable SHA.1:
 `dnsjava.dnssec.digest_enabled.1=false`
@@ -224,6 +212,7 @@ To migrate from dnssecjava, replace `org.jitsi` with `org.xbill.DNS` in Java pac
 Validated, secure responses contain the DNS `AD`-flag, while responses that failed validation return the `SERVFAIL`-RCode.
 Insecure responses return the actual return code without the `AD`-flag set.
 The reason why the validation failed or is insecure is provided as a localized string in the additional section under the record ./65280/TXT (a TXT record for the owner name of the root zone in the private query class `ValidatingResolver.VALIDATION_REASON_QCLASS`).
+The Extended DNS Errors (EDE, https://www.rfc-editor.org/rfc/rfc8914.html[RFC8914]) also provides the failure reason, although in less detail.
 
 The link:EXAMPLES.md[examples] contain a small demo.
 
@@ -269,8 +258,8 @@ Use the new versions with
 * The type hierarchy of `SMIMEARecord` changed, it now inherits from
 `TLSARecord` and constants are shared
 
-* ``Record``s are no longer marked as `Serializable`.
-Use the RFC defined serialization formats:
+* ``Record``s are no longer marked as `Serializable` after 3.0.
+While 3.5 reintroduced `Serializable`, it is preferred to use the RFC defined serialization formats directly:
 ** `toString()`, `rrToString()` ↔ `fromString()`
 ** `toWire()` ↔ `fromWire()`, `newRecord()`
 
@@ -278,18 +267,27 @@ Use the RFC defined serialization formats:
 
 === Replacing the standard Java DNS functionality
 
-Java versions from 1.4 to 8 can load DNS service providers at runtime.
-The functionality was https://bugs.openjdk.java.net/browse/JDK-8134577[removed in JDK 9], a replacement is https://bugs.openjdk.java.net/browse/JDK-8192780[requested], but so far only a https://bugs.openjdk.java.net/browse/JDK-8263693[proposal]
-has been defined.
+==== Java 1.4 to 8
 
+Java versions from 1.4 to 8 can load DNS service providers at runtime.
 To load the dnsjava service provider, build dnsjava on JDK 8 and set the system property:
 
 	sun.net.spi.nameservice.provider.1=dns,dnsjava
 
 This instructs the JVM to use the dnsjava service provide for DNS at the highest priority.
 
+==== Java 9 to 17
+
+The functionality to load a DNS SPI was https://bugs.openjdk.java.net/browse/JDK-8134577[removed in JDK 9] and a replacement API was https://bugs.openjdk.java.net/browse/JDK-8192780[requested].
+
+==== Java 18+
+
+https://bugs.openjdk.java.net/browse/JDK-8263693[JEP 418: Internet-Address Resolution SPI] reintroduces a DNS SPI.
+See https://github.com/dnsjava/dnsjava/issues/245[#245] for the support status in dnsjava.
+
 === Build
 
+dnsjava uses https://maven.apache.org/[Maven] as the build system.
 Run `mvn package` from the toplevel directory to build dnsjava.
 JDK 8 or higher is required.
 
@@ -326,6 +324,22 @@ See the link:EXAMPLES.md[examples] for some basic usage information.
 == License
 
 dnsjava is placed under the link:LICENSE[BSD-3-Clause license].
+
+== History
+
+dnsjava was started as an excuse to learn Java.
+It was useful for testing new features in BIND without rewriting the C resolver.
+It was then cleaned up and extended in order to be used as a testing framework for DNS interoperability testing.
+The high level API and caching resolver were added to make it useful to a wider audience.
+The authoritative only server was added as proof of concept.
+
+=== dnsjava on GitHub
+
+This repository has been a mirror of the dnsjava project at Sourceforge since 2014 to maintain the Maven build for publishing to https://search.maven.org/artifact/dnsjava/dnsjava[Maven Central].
+As of 2019-05-15, GitHub is https://sourceforge.net/p/dnsjava/mailman/message/36666800/[officially] the new home of dnsjava.
+The mailto:dnsjava-users@lists.sourceforge.net[dnsjava-users] mailing list (https://sourceforge.net/p/dnsjava/mailman/dnsjava-users/[archive]) still exists but is mostly inactive.
+
+Please use the GitHub https://github.com/dnsjava/dnsjava/issues[issue tracker] and send - well tested - pull requests.
 
 == Authors
 
