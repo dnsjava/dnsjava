@@ -1,3 +1,11 @@
+02/05/2022
+	- Add full built-in support for DNSSEC based on dnssecjava (#209)
+	- Make Record classes serializable again (#242)
+	- Allow SVCB ServiceMode records without params
+	  (#244, @adam-stoler) 
+	- Fix TCPClient receive timeouts
+	  (#218 @nguydavi, #219) 
+
 12/05/2021
 	- 3.4.3 released
 	- Fix handling of buffers in DNSInput

@@ -17,6 +17,7 @@ It
 * is fully thread safe.
 
 == Getting started
+Have a look at the basic link:EXAMPLES.md[examples].
 
 === Config options
 
