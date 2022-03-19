@@ -296,7 +296,7 @@ public class TSIG {
    * @param key The shared key's data represented as a base64 encoded string.
    * @throws IllegalArgumentException The key name is an invalid name
    * @throws IllegalArgumentException The key data is improperly encoded
-   * @see RFC8945
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC8945</a>
    */
   public TSIG(String algorithm, String name, String key) {
     this(algorithmToName(algorithm), name, key);
@@ -543,15 +543,15 @@ public class TSIG {
    * routine, Message.isVerified() may be called on this message.
    *
    * @param m The message to verify
-   * @param b An array containing the message in unparsed form. This is necessary since TSIG signs
-   *     the message in wire format, and we can't recreate the exact wire format (with the same name
-   *     compression).
-   * @param old If this message is a response, the TSIG from the request
+   * @param messageBytes An array containing the message in unparsed form. This is necessary since
+   *     TSIG signs the message in wire format, and we can't recreate the exact wire format (with
+   *     the same name compression).
+   * @param requestTSIG If this message is a response, the TSIG from the request
    * @return The result of the verification (as an Rcode)
    * @see Rcode
    */
-  public int verify(Message m, byte[] b, TSIGRecord old) {
-    return verify(m, b, old, true);
+  public int verify(Message m, byte[] messageBytes, TSIGRecord requestTSIG) {
+    return verify(m, messageBytes, requestTSIG, true);
   }
 
   /**
@@ -560,10 +560,10 @@ public class TSIG {
    * routine, Message.isVerified() may be called on this message.
    *
    * @param m The message to verify
-   * @param b An array containing the message in unparsed form. This is necessary since TSIG signs
-   *     the message in wire format, and we can't recreate the exact wire format (with the same name
-   *     compression).
-   * @param old If this message is a response, the TSIG from the request
+   * @param messageBytes An array containing the message in unparsed form. This is necessary since
+   *     TSIG signs the message in wire format, and we can't recreate the exact wire format (with
+   *     the same name compression).
+   * @param requestTSIG If this message is a response, the TSIG from the request
    * @param fullSignature {@code true} if this message is the first of many in a TCP connection and
    *     all TSIG variables (rfc2845, 3.4.2.) should be included in the signature. {@code false} for
    *     subsequent messages with reduced TSIG variables set (rfc2845, 4.4.).
@@ -571,7 +571,7 @@ public class TSIG {
    * @see Rcode
    * @since 3.2
    */
-  public int verify(Message m, byte[] b, TSIGRecord old, boolean fullSignature) {
+  public int verify(Message m, byte[] messageBytes, TSIGRecord requestTSIG, boolean fullSignature) {
     m.tsigState = Message.TSIG_FAILED;
     TSIGRecord tsig = m.getTSIG();
     if (tsig == null) {
@@ -580,7 +580,8 @@ public class TSIG {
 
     if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
       log.debug(
-          "BADKEY failure, expected: {}/{}, actual: {}/{}",
+          "BADKEY failure on message id {}, expected: {}/{}, actual: {}/{}",
+          m.getHeader().getID(),
           name,
           alg,
           tsig.getName(),
@@ -589,8 +590,8 @@ public class TSIG {
     }
 
     Mac hmac = initHmac();
-    if (old != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
-      hmacAddSignature(hmac, old);
+    if (requestTSIG != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
+      hmacAddSignature(hmac, requestTSIG);
     }
 
     m.getHeader().decCount(Section.ADDITIONAL);
@@ -603,9 +604,9 @@ public class TSIG {
 
     int len = m.tsigstart - header.length;
     if (log.isTraceEnabled()) {
-      log.trace(hexdump.dump("TSIG-HMAC message after header", b, header.length, len));
+      log.trace(hexdump.dump("TSIG-HMAC message after header", messageBytes, header.length, len));
     }
-    hmac.update(b, header.length, len);
+    hmac.update(messageBytes, header.length, len);
 
     DNSOutput out = new DNSOutput();
     if (fullSignature) {

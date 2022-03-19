@@ -640,7 +640,7 @@ public final class DohResolver implements Resolver {
       return;
     }
 
-    int error = tsig.verify(response, b, query.getTSIG());
+    int error = tsig.verify(response, b, query.getGeneratedTSIG());
     log.debug(
         "TSIG verify for query {}, {}/{}: {}",
         query.getHeader().getID(),

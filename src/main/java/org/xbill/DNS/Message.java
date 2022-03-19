@@ -32,6 +32,7 @@ public class Message implements Cloneable {
   private List<Record>[] sections;
   private int size;
   private TSIG tsigkey;
+  private TSIGRecord generatedTsig;
   private TSIGRecord querytsig;
   private int tsigerror;
   private Resolver resolver;
@@ -274,7 +275,7 @@ public class Message implements Cloneable {
    */
   public Record getQuestion() {
     List<Record> l = sections[Section.QUESTION];
-    if (l == null || l.size() == 0) {
+    if (l == null || l.isEmpty()) {
       return null;
     }
     return l.get(0);
@@ -298,6 +299,16 @@ public class Message implements Cloneable {
       return null;
     }
     return (TSIGRecord) rec;
+  }
+
+  /**
+   * Gets the generated {@link TSIGRecord}. Only valid if the messages has been converted to wire
+   * format with {@link #toWire(int)} before.
+   *
+   * @return A generated TSIG record or {@code null}.
+   */
+  TSIGRecord getGeneratedTSIG() {
+    return generatedTsig;
   }
 
   /**
@@ -325,9 +336,9 @@ public class Message implements Cloneable {
    * @see Section
    */
   public OPTRecord getOPT() {
-    for (Record record : getSection(Section.ADDITIONAL)) {
-      if (record instanceof OPTRecord) {
-        return (OPTRecord) record;
+    for (Record r : getSection(Section.ADDITIONAL)) {
+      if (r instanceof OPTRecord) {
+        return (OPTRecord) r;
       }
     }
     return null;
@@ -516,6 +527,7 @@ public class Message implements Cloneable {
       TSIGRecord tsigrec = tsigkey.generate(this, out.toByteArray(), tsigerror, querytsig);
 
       tsigrec.toWire(out, Section.ADDITIONAL, c);
+      generatedTsig = tsigrec;
       out.writeU16At(additionalCount + 1, startpos + 10);
     }
   }
@@ -536,9 +548,9 @@ public class Message implements Cloneable {
   /**
    * Returns an array containing the wire format representation of the Message with the specified
    * maximum length. This will generate a truncated message (with the TC bit) if the message doesn't
-   * fit, and will also sign the message with the TSIG key set by a call to setTSIG(). This method
-   * may return an empty byte array if the message could not be rendered at all; this could happen
-   * if maxLength is smaller than a DNS header, for example.
+   * fit, and will also sign the message with the TSIG key set by a call to {@link #setTSIG(TSIG,
+   * int, TSIGRecord)}. This method may return an empty byte array if the message could not be
+   * rendered at all; this could happen if maxLength is smaller than a DNS header, for example.
    *
    * <p>Do NOT use this method in conjunction with {@link TSIG#apply(Message, TSIGRecord)}, it
    * produces inconsistent results! Use {@link #setTSIG(TSIG, int, TSIGRecord)} instead.
@@ -554,6 +566,16 @@ public class Message implements Cloneable {
     toWire(out, maxLength);
     size = out.current();
     return out.toByteArray();
+  }
+
+  /**
+   * Sets the TSIG key to sign a message.
+   *
+   * @param key The TSIG key.
+   * @since 3.5.1
+   */
+  public void setTSIG(TSIG key) {
+    setTSIG(key, Rcode.NOERROR, null);
   }
 
   /**
@@ -667,6 +689,9 @@ public class Message implements Cloneable {
     m.header = header.clone();
     if (querytsig != null) {
       m.querytsig = (TSIGRecord) querytsig.cloneRecord();
+    }
+    if (generatedTsig != null) {
+      m.generatedTsig = (TSIGRecord) generatedTsig.cloneRecord();
     }
     return m;
   }
