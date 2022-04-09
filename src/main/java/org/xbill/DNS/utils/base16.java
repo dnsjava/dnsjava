@@ -4,8 +4,6 @@
 package org.xbill.DNS.utils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
 /**
  * Routines for converting between Strings of hex-encoded data and arrays of binary data. This is
@@ -15,7 +13,7 @@ import java.io.IOException;
  */
 public class base16 {
 
-  private static final String Base16 = "0123456789ABCDEF";
+  private static final String BASE_16_CHARS = "0123456789ABCDEF";
 
   private base16() {}
 
@@ -26,47 +24,57 @@ public class base16 {
    * @return A String containing the encoded data
    */
   public static String toString(byte[] b) {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-
+    StringBuilder sb = new StringBuilder(b.length * 2);
     for (byte item : b) {
       short value = (short) (item & 0xFF);
       byte high = (byte) (value >> 4);
       byte low = (byte) (value & 0xF);
-      os.write(Base16.charAt(high));
-      os.write(Base16.charAt(low));
+      sb.append(BASE_16_CHARS.charAt(high));
+      sb.append(BASE_16_CHARS.charAt(low));
     }
-    return os.toString();
+    return sb.toString();
   }
 
   /**
-   * Convert a hex-encoded String to binary data
+   * Convert a hex-encoded String to binary data, ignoring non-hex characters.
    *
    * @param str A String containing the encoded data
    * @return An array containing the binary data, or null if the string is invalid
    */
   public static byte[] fromString(String str) {
+    if (str == null) {
+      return null;
+    }
+
+    if (str.length() == 0) {
+      return new byte[0];
+    }
+
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
-    byte[] raw = str.getBytes();
-    for (byte b : raw) {
-      if (!Character.isWhitespace((char) b)) {
-        bs.write(b);
+    for (int i = 0; i < str.length(); i++) {
+      char c = str.charAt(i);
+      if (c >= 48 && c <= 57 || c >= 65 && c <= 70) {
+        // 0-9, A-Z
+        bs.write(c);
+      } else if (c >= 97 && c <= 102) {
+        // convert a-z to A-Z
+        bs.write(c - 32);
+      } else if (!Character.isWhitespace(c)) {
+        return null;
       }
     }
+
     byte[] in = bs.toByteArray();
-    if (in.length % 2 != 0) {
+    if ((in.length & 1) != 0) {
       return null;
     }
 
     bs.reset();
-    DataOutputStream ds = new DataOutputStream(bs);
 
     for (int i = 0; i < in.length; i += 2) {
-      byte high = (byte) Base16.indexOf(Character.toUpperCase((char) in[i]));
-      byte low = (byte) Base16.indexOf(Character.toUpperCase((char) in[i + 1]));
-      try {
-        ds.writeByte((high << 4) + (low & 0xFF));
-      } catch (IOException e) {
-      }
+      byte high = (byte) BASE_16_CHARS.indexOf(in[i]);
+      byte low = (byte) BASE_16_CHARS.indexOf(in[i + 1]);
+      bs.write((high << 4) + (low & 0x0F));
     }
     return bs.toByteArray();
   }

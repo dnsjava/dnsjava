@@ -35,10 +35,14 @@
 //
 package org.xbill.DNS.utils;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class Base16Test {
   @Test
@@ -47,25 +51,15 @@ class Base16Test {
     assertEquals("", out);
   }
 
-  @Test
-  void toString_singleByte1() {
-    byte[] data = {(byte) 1};
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "0,00", "1,01", "16,10", "255,FF",
+      })
+  void toString_singleByte(int b, String hex) {
+    byte[] data = {(byte) b};
     String out = base16.toString(data);
-    assertEquals("01", out);
-  }
-
-  @Test
-  void toString_singleByte2() {
-    byte[] data = {(byte) 16};
-    String out = base16.toString(data);
-    assertEquals("10", out);
-  }
-
-  @Test
-  void toString_singleByte3() {
-    byte[] data = {(byte) 255};
-    String out = base16.toString(data);
-    assertEquals("FF", out);
+    assertEquals(hex, out);
   }
 
   @Test
@@ -77,9 +71,13 @@ class Base16Test {
 
   @Test
   void fromString_emptyString() {
-    String data = "";
-    byte[] out = base16.fromString(data);
+    byte[] out = base16.fromString("");
     assertEquals(0, out.length);
+  }
+
+  @Test
+  void fromString_null() {
+    assertNull(base16.fromString(null));
   }
 
   @Test
@@ -89,24 +87,34 @@ class Base16Test {
     assertNull(out);
   }
 
-  @Test
-  void fromString_nonHexChars() {
-    String data = "GG";
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "0102030405060708090A0B0C0D0E0F",
+        "0102030405060708090a0B0c0D0e0F",
+        "010203040506070809 0a\n0B\t0c0D0e0F",
+      })
+  void fromString_normal(String data) {
     byte[] out = base16.fromString(data);
-    /*
-     * the output is basically encoded as (-1<<4) + -1, not sure
-     * we want an assertion for this.
-     */
+    byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    assertArrayEquals(exp, out);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "01$02@030405060708090a0B0c0D0e0F",
+        "GG#!*^",
+      })
+  void fromString_invalid(String data) {
+    byte[] out = base16.fromString(data);
+    assertNull(out);
   }
 
   @Test
-  void fromString_normal() {
-    String data = "0102030405060708090A0B0C0D0E0F";
+  void fromString_Utf8Bom() {
+    String data = "EFBFBF";
     byte[] out = base16.fromString(data);
-    byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    assertEquals(exp.length, out.length);
-    for (int i = 0; i < exp.length; ++i) {
-      assertEquals(exp[i], out[i]);
-    }
+    assertArrayEquals(new byte[] {(byte) 0xEF, (byte) 0xBF, (byte) 0xBF}, out);
   }
 }
