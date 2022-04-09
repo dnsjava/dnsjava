@@ -43,6 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.xbill.DNS.DNSSEC.Algorithm;
+import org.xbill.DNS.utils.base16;
 
 class DSRecordTest {
   @Test
@@ -172,13 +176,13 @@ class DSRecordTest {
 
   @Test
   void rdataFromString() throws IOException {
-    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + 0x01 + " 23456789AB");
+    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + 0xFF + " 23456789AB");
 
     DSRecord dr = new DSRecord();
     dr.rdataFromString(t, null);
     assertEquals(0xABCD, dr.getFootprint());
     assertEquals(0xEF, dr.getAlgorithm());
-    assertEquals(0x01, dr.getDigestID());
+    assertEquals(0xFF, dr.getDigestID());
     assertArrayEquals(
         new byte[] {(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB},
         dr.getDigest());
@@ -196,9 +200,47 @@ class DSRecordTest {
     assertThrows(TextParseException.class, () -> new DSRecord().rdataFromString(t, null));
   }
 
+  @ParameterizedTest(name = "digest {0}")
+  @CsvSource({
+    "1,01020304050607080900 01020304050607080900",
+    "2,0102030405060708 0102030405060708 0102030405060708 0102030405060708",
+    "3,0102030405060708 0102030405060708 0102030405060708 0102030405060708",
+    "4,0102030405060708 0102030405060708 0102030405060708 0102030405060708 0102030405060708 0102030405060708",
+    "255,0102"
+  })
+  void rdataFromString_validDigestLengths(int digestId, String data) throws IOException {
+    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + digestId + " " + data);
+    DSRecord r = new DSRecord();
+    r.rdataFromString(t, null);
+    assertEquals(base16.fromString(data).length, r.getDigest().length);
+  }
+
+  @ParameterizedTest(name = "digest {0}")
+  @CsvSource({
+    "1,01", "2,01", "3,01", "4,01",
+  })
+  void rdataFromString_invalidDigestLengths(int digestId, String data) {
+    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + digestId + " " + data);
+    assertThrows(TextParseException.class, () -> new DSRecord().rdataFromString(t, null));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            new DSRecord(
+                Name.root,
+                DClass.IN,
+                3600,
+                1,
+                Algorithm.RSASHA1,
+                digestId,
+                base16.fromString(data)));
+    assertThrows(
+        TextParseException.class,
+        () -> Record.fromString(Name.root, Type.DS, DClass.IN, 3600, t, null));
+  }
+
   @Test
   void rrToString() throws TextParseException {
-    String exp = 0xABCD + " " + 0xEF + " " + 0x01 + " 23456789AB";
+    String exp = 0xABCD + " " + 0xEF + " " + 0xFF + " 23456789AB";
 
     DSRecord dr =
         new DSRecord(
@@ -207,7 +249,7 @@ class DSRecordTest {
             0x123,
             0xABCD,
             0xEF,
-            0x01,
+            0xFF,
             new byte[] {(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB});
     assertEquals(exp, dr.rrToString());
   }
@@ -221,7 +263,7 @@ class DSRecordTest {
             0x123,
             0xABCD,
             0xEF,
-            0x01,
+            0xFF,
             new byte[] {(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB});
 
     byte[] exp =
@@ -229,7 +271,7 @@ class DSRecordTest {
           (byte) 0xAB,
           (byte) 0xCD,
           (byte) 0xEF,
-          (byte) 0x01,
+          (byte) 0xFF,
           (byte) 0x23,
           (byte) 0x45,
           (byte) 0x67,

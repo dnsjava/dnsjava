@@ -26,6 +26,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Constants and methods relating to DNSSEC.
@@ -161,15 +163,20 @@ public class DNSSEC {
 
     private static final Mnemonic algs =
         new Mnemonic("DNSSEC Digest Algorithm", Mnemonic.CASE_UPPER);
+    private static final Map<Integer, Integer> algLengths = new HashMap<>(4);
 
     static {
       algs.setMaximum(0xFF);
       algs.setNumericAllowed(true);
 
       algs.add(SHA1, "SHA-1");
+      algLengths.put(SHA1, 20);
       algs.add(SHA256, "SHA-256");
+      algLengths.put(SHA256, 32);
       algs.add(GOST3411, "GOST R 34.11-94");
+      algLengths.put(GOST3411, 32);
       algs.add(SHA384, "SHA-384");
+      algLengths.put(SHA384, 48);
     }
 
     /** Converts an algorithm into its textual representation */
@@ -186,6 +193,17 @@ public class DNSSEC {
      */
     public static int value(String s) {
       return algs.getValue(s);
+    }
+
+    /**
+     * Gets the length, in bytes, of the specified digest id.
+     *
+     * @return The length, in bytes, or -1 for an unknown digest.
+     * @since 3.6
+     */
+    public static int algLength(int alg) {
+      Integer len = algLengths.get(alg);
+      return len == null ? -1 : len;
     }
   }
 

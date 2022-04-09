@@ -79,10 +79,25 @@ class TestAlgorithmSupport extends TestBase {
     SRRset set = new SRRset();
     set.addRR(
         new DSRecord(
-            Name.root, DClass.IN, 120, 1234, Algorithm.DSA, Digest.SHA1, new byte[] {1, 2, 3}));
+            Name.root,
+            DClass.IN,
+            120,
+            1234,
+            Algorithm.DSA,
+            Digest.SHA1,
+            new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
     set.addRR(
         new DSRecord(
-            Name.root, DClass.IN, 120, 1234, Algorithm.DSA, Digest.SHA256, new byte[] {1, 2, 3}));
+            Name.root,
+            DClass.IN,
+            120,
+            1234,
+            Algorithm.DSA,
+            Digest.SHA256,
+            new byte[] {
+              1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5,
+              6, 7, 8
+            }));
     int digestId = v.favoriteDSDigestID(set);
     assertEquals(0, digestId);
   }
@@ -94,7 +109,16 @@ class TestAlgorithmSupport extends TestBase {
     SRRset set = new SRRset();
     set.addRR(
         new DSRecord(
-            Name.root, DClass.IN, 120, 1234, Algorithm.DSA, Digest.GOST3411, new byte[] {1, 2, 3}));
+            Name.root,
+            DClass.IN,
+            120,
+            1234,
+            Algorithm.DSA,
+            Digest.GOST3411,
+            new byte[] {
+              1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5,
+              6, 7, 8
+            }));
     int digestId = v.favoriteDSDigestID(set);
     assertEquals(0, digestId);
   }
@@ -112,7 +136,7 @@ class TestAlgorithmSupport extends TestBase {
             1234,
             0 /*Unknown alg*/,
             DNSSEC.Digest.SHA1,
-            new byte[] {1, 2, 3}));
+            new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
     int digestId = v.favoriteDSDigestID(set);
     assertEquals(0, digestId);
   }

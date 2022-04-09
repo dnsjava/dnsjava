@@ -286,14 +286,21 @@ final class ValUtils {
   }
 
   private KeyEntry getKeyEntry(SRRset dnskeyRrset, Instant date, DSRecord ds, DNSKEYRecord dnskey) {
-    // Convert the candidate DNSKEY into a hash using the same DS
-    // hash algorithm.
-    DSRecord keyDigest = new DSRecord(Name.root, ds.getDClass(), 0, ds.getDigestID(), dnskey);
-    byte[] keyHash = keyDigest.getDigest();
+    KeyEntry ke;
     byte[] dsHash = ds.getDigest();
 
-    // see if there is a length mismatch (unlikely)
-    KeyEntry ke;
+    // Convert the candidate DNSKEY into a hash using the same DS hash algorithm
+    byte[] keyHash;
+    try {
+      DSRecord keyDigest = new DSRecord(Name.root, ds.getDClass(), 0, ds.getDigestID(), dnskey);
+      keyHash = keyDigest.getDigest();
+    } catch (IllegalArgumentException iae) {
+      ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
+      ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
+      return ke;
+    }
+
+    // see if there is a length mismatch (unlikely, impossible for known hash lengths)
     if (keyHash.length != dsHash.length) {
       ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
       ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
