@@ -38,10 +38,14 @@ import org.xbill.DNS.utils.base64;
  * @author Brian Wellington
  * @author Bob Halley
  */
+@SuppressWarnings({
+  "deprecated",
+  "java:S1874", // deprecated usage of type/value
+})
 public class Tokenizer implements AutoCloseable {
 
-  private static final String delim = " \t\n;()\"";
-  private static final String quotes = "\"";
+  private static final String DEFAULT_DELIMITERS = " \t\n;()\"";
+  private static final String QUOTES = "\"";
 
   /** End of file */
   public static final int EOF = 0;
@@ -66,32 +70,52 @@ public class Tokenizer implements AutoCloseable {
   private int multiline;
   private boolean quoting;
   private String delimiters;
-  private final Token current;
-  private final StringBuffer sb;
+  private Token current;
+  private final StringBuilder sb;
   private boolean wantClose;
 
   private String filename;
   private int line;
 
   public static class Token {
-    /** The type of token. */
-    public int type;
+    /**
+     * The type of token.
+     *
+     * @deprecated use {@link #type()}, will be made private and final in 4.0
+     */
+    @Deprecated public int type;
 
-    /** The value of the token, or null for tokens without values. */
-    public String value;
+    /**
+     * The value of the token, or null for tokens without values.
+     *
+     * @deprecated use {@link #value()}, will be made private and final in 4.0
+     */
+    @Deprecated public String value;
 
-    private Token() {
-      type = -1;
-      value = null;
+    /**
+     * The type of token.
+     *
+     * @since 3.5.1
+     */
+    public int type() {
+      return type;
     }
 
-    private Token set(int type, StringBuffer value) {
+    /**
+     * The value of the token, or null for tokens without values.
+     *
+     * @since 3.5.1
+     */
+    public String value() {
+      return value;
+    }
+
+    private Token(int type, StringBuilder value) {
       if (type < 0) {
         throw new IllegalArgumentException();
       }
       this.type = type;
       this.value = value == null ? null : value.toString();
-      return this;
     }
 
     /** Converts the token to a string containing a representation useful for debugging. */
@@ -139,9 +163,8 @@ public class Tokenizer implements AutoCloseable {
     ungottenToken = false;
     multiline = 0;
     quoting = false;
-    delimiters = delim;
-    current = new Token();
-    sb = new StringBuffer();
+    delimiters = DEFAULT_DELIMITERS;
+    sb = new StringBuilder();
     filename = "<none>";
     line = 1;
   }
@@ -195,11 +218,9 @@ public class Tokenizer implements AutoCloseable {
     int skipped = 0;
     while (true) {
       int c = getChar();
-      if (c != ' ' && c != '\t') {
-        if (!(c == '\n' && multiline > 0)) {
-          ungetChar(c);
-          return skipped;
-        }
+      if (c != ' ' && c != '\t' && !(c == '\n' && multiline > 0)) {
+        ungetChar(c);
+        return skipped;
       }
       skipped++;
     }
@@ -243,7 +264,7 @@ public class Tokenizer implements AutoCloseable {
     }
     int skipped = skipWhitespace();
     if (skipped > 0 && wantWhitespace) {
-      return current.set(WHITESPACE, null);
+      return setCurrentToken(WHITESPACE, null);
     }
     type = IDENTIFIER;
     sb.setLength(0);
@@ -254,9 +275,9 @@ public class Tokenizer implements AutoCloseable {
           if (quoting) {
             throw exception("EOF in quoted string");
           } else if (sb.length() == 0) {
-            return current.set(EOF, null);
+            return setCurrentToken(EOF, null);
           } else {
-            return current.set(type, sb);
+            return setCurrentToken(type, sb);
           }
         }
         if (sb.length() == 0 && type != QUOTED_STRING) {
@@ -274,16 +295,16 @@ public class Tokenizer implements AutoCloseable {
           } else if (c == '"') {
             if (!quoting) {
               quoting = true;
-              delimiters = quotes;
+              delimiters = QUOTES;
               type = QUOTED_STRING;
             } else {
               quoting = false;
-              delimiters = delim;
+              delimiters = DEFAULT_DELIMITERS;
               skipWhitespace();
             }
             continue;
           } else if (c == '\n') {
-            return current.set(EOL, null);
+            return setCurrentToken(EOL, null);
           } else if (c == ';') {
             while (true) {
               c = getChar();
@@ -294,16 +315,16 @@ public class Tokenizer implements AutoCloseable {
             }
             if (wantComment) {
               ungetChar(c);
-              return current.set(COMMENT, sb);
+              return setCurrentToken(COMMENT, sb);
             } else if (c == -1 && type != QUOTED_STRING) {
               checkUnbalancedParens();
-              return current.set(EOF, null);
+              return setCurrentToken(EOF, null);
             } else if (multiline > 0) {
               skipWhitespace();
               sb.setLength(0);
               continue;
             } else {
-              return current.set(EOL, null);
+              return setCurrentToken(EOL, null);
             }
           } else {
             throw new IllegalStateException();
@@ -325,9 +346,14 @@ public class Tokenizer implements AutoCloseable {
     }
     if (sb.length() == 0 && type != QUOTED_STRING) {
       checkUnbalancedParens();
-      return current.set(EOF, null);
+      return setCurrentToken(EOF, null);
     }
-    return current.set(type, sb);
+    return setCurrentToken(type, sb);
+  }
+
+  private Token setCurrentToken(int type, StringBuilder value) {
+    current = new Token(type, value);
+    return current;
   }
 
   /**
@@ -371,7 +397,7 @@ public class Tokenizer implements AutoCloseable {
     return next.value;
   }
 
-  private String _getIdentifier(String expected) throws IOException {
+  private String getIdentifier(String expected) throws IOException {
     Token next = get();
     if (next.type != IDENTIFIER) {
       throw exception("expected " + expected);
@@ -388,7 +414,7 @@ public class Tokenizer implements AutoCloseable {
    * @throws IOException An I/O error occurred.
    */
   public String getIdentifier() throws IOException {
-    return _getIdentifier("an identifier");
+    return getIdentifier("an identifier");
   }
 
   /**
@@ -399,7 +425,7 @@ public class Tokenizer implements AutoCloseable {
    * @throws IOException An I/O error occurred.
    */
   public long getLong() throws IOException {
-    String next = _getIdentifier("an integer");
+    String next = getIdentifier("an integer");
     if (!Character.isDigit(next.charAt(0))) {
       throw exception("expected an integer");
     }
@@ -464,7 +490,7 @@ public class Tokenizer implements AutoCloseable {
    * @see TTL
    */
   public long getTTL() throws IOException {
-    String next = _getIdentifier("a TTL value");
+    String next = getIdentifier("a TTL value");
     try {
       return TTL.parseTTL(next);
     } catch (NumberFormatException e) {
@@ -481,7 +507,7 @@ public class Tokenizer implements AutoCloseable {
    * @see TTL
    */
   public long getTTLLike() throws IOException {
-    String next = _getIdentifier("a TTL-like value");
+    String next = getIdentifier("a TTL-like value");
     try {
       return TTL.parse(next, false);
     } catch (NumberFormatException e) {
@@ -500,7 +526,7 @@ public class Tokenizer implements AutoCloseable {
    * @see Name
    */
   public Name getName(Name origin) throws IOException {
-    String next = _getIdentifier("a name");
+    String next = getIdentifier("a name");
     try {
       Name name = Name.fromString(next, origin);
       if (!name.isAbsolute()) {
@@ -522,7 +548,7 @@ public class Tokenizer implements AutoCloseable {
    * @see Address
    */
   public byte[] getAddressBytes(int family) throws IOException {
-    String next = _getIdentifier("an address");
+    String next = getIdentifier("an address");
     byte[] bytes = Address.toByteArray(next, family);
     if (bytes == null) {
       throw exception("Invalid address: " + next);
@@ -540,7 +566,7 @@ public class Tokenizer implements AutoCloseable {
    * @see Address
    */
   public InetAddress getAddress(int family) throws IOException {
-    String next = _getIdentifier("an address");
+    String next = getIdentifier("an address");
     try {
       return Address.getByAddress(next, family);
     } catch (UnknownHostException e) {
@@ -563,14 +589,14 @@ public class Tokenizer implements AutoCloseable {
 
   /** Returns a concatenation of the remaining strings from a Tokenizer. */
   private String remainingStrings() throws IOException {
-    StringBuffer buffer = null;
+    StringBuilder buffer = null;
     while (true) {
       Tokenizer.Token t = get();
       if (!t.isString()) {
         break;
       }
       if (buffer == null) {
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
       }
       buffer.append(t.value);
     }
@@ -669,7 +695,7 @@ public class Tokenizer implements AutoCloseable {
    * @throws IOException An I/O error occurred.
    */
   public byte[] getHexString() throws IOException {
-    String next = _getIdentifier("a hex string");
+    String next = getIdentifier("a hex string");
     byte[] array = base16.fromString(next);
     if (array == null) {
       throw exception("invalid hex encoding");
@@ -686,7 +712,7 @@ public class Tokenizer implements AutoCloseable {
    * @throws IOException An I/O error occurred.
    */
   public byte[] getBase32String(base32 b32) throws IOException {
-    String next = _getIdentifier("a base32 string");
+    String next = getIdentifier("a base32 string");
     byte[] array = b32.fromString(next);
     if (array == null) {
       throw exception("invalid base32 encoding");
@@ -711,6 +737,7 @@ public class Tokenizer implements AutoCloseable {
       try {
         is.close();
       } catch (IOException e) {
+        // ignore
       }
     }
   }

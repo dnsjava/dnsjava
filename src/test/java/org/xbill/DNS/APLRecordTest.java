@@ -366,7 +366,7 @@ public class APLRecordTest {
       assertEquals(exp, ar.getElements());
 
       // make sure extra token is put back
-      assertEquals(Tokenizer.EOL, t.get().type);
+      assertEquals(Tokenizer.EOL, t.get().type());
     }
 
     @Test
@@ -394,7 +394,7 @@ public class APLRecordTest {
       assertEquals(exp, ar.getElements());
 
       // make sure extra token is put back
-      assertEquals(Tokenizer.EOL, t.get().type);
+      assertEquals(Tokenizer.EOL, t.get().type());
     }
 
     @Test

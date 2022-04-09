@@ -46,200 +46,189 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import org.junit.jupiter.api.BeforeEach;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TokenizerTest {
-  private Tokenizer m_t;
-
-  @BeforeEach
-  void setUp() {
-    m_t = null;
-  }
-
   @Test
   void get() throws IOException {
-    m_t =
+    Tokenizer t =
         new Tokenizer(
             new BufferedInputStream(
                 new ByteArrayInputStream(
                     "AnIdentifier \"a quoted \\\" string\"\r\n; this is \"my\"\t(comment)\nanotherIdentifier (\ramultilineIdentifier\n)"
                         .getBytes())));
 
-    Tokenizer.Token tt = m_t.get(true, true);
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
+    Tokenizer.Token tt = t.get(true, true);
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
     assertTrue(tt.isString());
     assertFalse(tt.isEOL());
-    assertEquals("AnIdentifier", tt.value);
+    assertEquals("AnIdentifier", tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.WHITESPACE, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.WHITESPACE, tt.type());
     assertFalse(tt.isString());
     assertFalse(tt.isEOL());
-    assertNull(tt.value);
+    assertNull(tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.QUOTED_STRING, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.QUOTED_STRING, tt.type());
     assertTrue(tt.isString());
     assertFalse(tt.isEOL());
-    assertEquals("a quoted \\\" string", tt.value);
+    assertEquals("a quoted \\\" string", tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOL, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOL, tt.type());
     assertFalse(tt.isString());
     assertTrue(tt.isEOL());
-    assertNull(tt.value);
+    assertNull(tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.COMMENT, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.COMMENT, tt.type());
     assertFalse(tt.isString());
     assertFalse(tt.isEOL());
-    assertEquals(" this is \"my\"\t(comment)", tt.value);
+    assertEquals(" this is \"my\"\t(comment)", tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOL, tt.type);
-    assertFalse(tt.isString());
-    assertTrue(tt.isEOL());
-    assertNull(tt.value);
-
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertTrue(tt.isString());
-    assertFalse(tt.isEOL());
-    assertEquals("anotherIdentifier", tt.value);
-
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.WHITESPACE, tt.type);
-
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertTrue(tt.isString());
-    assertFalse(tt.isEOL());
-    assertEquals("amultilineIdentifier", tt.value);
-
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.WHITESPACE, tt.type);
-
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOF, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOL, tt.type());
     assertFalse(tt.isString());
     assertTrue(tt.isEOL());
-    assertNull(tt.value);
+    assertNull(tt.value());
+
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertTrue(tt.isString());
+    assertFalse(tt.isEOL());
+    assertEquals("anotherIdentifier", tt.value());
+
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.WHITESPACE, tt.type());
+
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertTrue(tt.isString());
+    assertFalse(tt.isEOL());
+    assertEquals("amultilineIdentifier", tt.value());
+
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.WHITESPACE, tt.type());
+
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOF, tt.type());
+    assertFalse(tt.isString());
+    assertTrue(tt.isEOL());
+    assertNull(tt.value());
 
     // should be able to do this repeatedly
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOF, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOF, tt.type());
     assertFalse(tt.isString());
     assertTrue(tt.isEOL());
-    assertNull(tt.value);
+    assertNull(tt.value());
 
-    m_t = new Tokenizer("onlyOneIdentifier");
-    tt = m_t.get();
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertEquals("onlyOneIdentifier", tt.value);
+    t = new Tokenizer("onlyOneIdentifier");
+    tt = t.get();
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertEquals("onlyOneIdentifier", tt.value());
 
-    m_t = new Tokenizer("identifier ;");
-    tt = m_t.get();
-    assertEquals("identifier", tt.value);
-    tt = m_t.get();
-    assertEquals(Tokenizer.EOF, tt.type);
+    t = new Tokenizer("identifier ;");
+    tt = t.get();
+    assertEquals("identifier", tt.value());
+    tt = t.get();
+    assertEquals(Tokenizer.EOF, tt.type());
 
     // some ungets
-    m_t = new Tokenizer("identifier \nidentifier2; junk comment");
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertEquals("identifier", tt.value);
+    t = new Tokenizer("identifier \nidentifier2; junk comment");
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertEquals("identifier", tt.value());
 
-    m_t.unget();
+    t.unget();
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertEquals("identifier", tt.value);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertEquals("identifier", tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.WHITESPACE, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.WHITESPACE, tt.type());
 
-    m_t.unget();
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.WHITESPACE, tt.type);
+    t.unget();
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.WHITESPACE, tt.type());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOL, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOL, tt.type());
 
-    m_t.unget();
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOL, tt.type);
+    t.unget();
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOL, tt.type());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertEquals("identifier2", tt.value);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertEquals("identifier2", tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.COMMENT, tt.type);
-    assertEquals(" junk comment", tt.value);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.COMMENT, tt.type());
+    assertEquals(" junk comment", tt.value());
 
-    m_t.unget();
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.COMMENT, tt.type);
-    assertEquals(" junk comment", tt.value);
+    t.unget();
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.COMMENT, tt.type());
+    assertEquals(" junk comment", tt.value());
 
-    tt = m_t.get(true, true);
-    assertEquals(Tokenizer.EOF, tt.type);
+    tt = t.get(true, true);
+    assertEquals(Tokenizer.EOF, tt.type());
 
-    m_t = new Tokenizer("identifier ( junk ; comment\n )");
-    tt = m_t.get();
-    assertEquals(Tokenizer.IDENTIFIER, tt.type);
-    assertEquals(Tokenizer.IDENTIFIER, m_t.get().type);
-    assertEquals(Tokenizer.EOF, m_t.get().type);
+    t = new Tokenizer("identifier ( junk ; comment\n )");
+    tt = t.get();
+    assertEquals(Tokenizer.IDENTIFIER, tt.type());
+    assertEquals(Tokenizer.IDENTIFIER, t.get().type());
+    assertEquals(Tokenizer.EOF, t.get().type());
   }
 
   @Test
-  void get_invalid() throws IOException {
-    m_t = new Tokenizer("(this ;");
-    m_t.get();
-    assertThrows(TextParseException.class, () -> m_t.get());
+  void get_invalidIncomplete() throws IOException {
+    try (Tokenizer t = new Tokenizer("(this ;")) {
+      t.get();
+      assertThrows(TextParseException.class, t::get);
+    }
+  }
 
-    m_t = new Tokenizer("\"bad");
-    assertThrows(TextParseException.class, () -> m_t.get());
-
-    m_t = new Tokenizer(")");
-    assertThrows(TextParseException.class, () -> m_t.get());
-
-    m_t = new Tokenizer("\\");
-    assertThrows(TextParseException.class, () -> m_t.get());
-
-    m_t = new Tokenizer("\"\n");
-    assertThrows(TextParseException.class, () -> m_t.get());
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "\"bad", ")", "\\", "\"\n",
+      })
+  void get_invalid(String data) {
+    try (Tokenizer t = new Tokenizer(data)) {
+      assertThrows(TextParseException.class, t::get);
+    }
   }
 
   @Test
-  void File_input() throws IOException {
+  void file_input() throws IOException {
     File tmp = File.createTempFile("dnsjava", "tmp");
-    try {
-      FileWriter fw = new FileWriter(tmp);
-      fw.write("file\ninput; test");
-      fw.close();
+    Files.write(tmp.toPath(), "file\ninput; test".getBytes(StandardCharsets.UTF_8));
+    try (Tokenizer t = new Tokenizer(tmp)) {
+      Tokenizer.Token tt = t.get();
+      assertEquals(Tokenizer.IDENTIFIER, tt.type());
+      assertEquals("file", tt.value());
 
-      m_t = new Tokenizer(tmp);
+      tt = t.get();
+      assertEquals(Tokenizer.EOL, tt.type());
 
-      Tokenizer.Token tt = m_t.get();
-      assertEquals(Tokenizer.IDENTIFIER, tt.type);
-      assertEquals("file", tt.value);
+      tt = t.get();
+      assertEquals(Tokenizer.IDENTIFIER, tt.type());
+      assertEquals("input", tt.value());
 
-      tt = m_t.get();
-      assertEquals(Tokenizer.EOL, tt.type);
-
-      tt = m_t.get();
-      assertEquals(Tokenizer.IDENTIFIER, tt.type);
-      assertEquals("input", tt.value);
-
-      tt = m_t.get(false, true);
-      assertEquals(Tokenizer.COMMENT, tt.type);
-      assertEquals(" test", tt.value);
-
-      m_t.close();
+      tt = t.get(false, true);
+      assertEquals(Tokenizer.COMMENT, tt.type());
+      assertEquals(" test", tt.value());
     } finally {
       tmp.delete();
     }
@@ -247,257 +236,274 @@ class TokenizerTest {
 
   @Test
   void unwanted_comment() throws IOException {
-    m_t = new Tokenizer("; this whole thing is a comment\n");
-    Tokenizer.Token tt = m_t.get();
+    Tokenizer t = new Tokenizer("; this whole thing is a comment\n");
+    Tokenizer.Token tt = t.get();
 
-    assertEquals(Tokenizer.EOL, tt.type);
+    assertEquals(Tokenizer.EOL, tt.type());
   }
 
   @Test
   void unwanted_ungotten_whitespace() throws IOException {
-    m_t = new Tokenizer(" ");
-    Tokenizer.Token tt = m_t.get(true, true);
-    m_t.unget();
-    tt = m_t.get();
-    assertEquals(Tokenizer.EOF, tt.type);
+    Tokenizer t = new Tokenizer(" ");
+    t.get(true, true);
+    t.unget();
+    Tokenizer.Token tt = t.get();
+    assertEquals(Tokenizer.EOF, tt.type());
   }
 
   @Test
   void unwanted_ungotten_comment() throws IOException {
-    m_t = new Tokenizer("; this whole thing is a comment");
-    Tokenizer.Token tt = m_t.get(true, true);
-    m_t.unget();
-    tt = m_t.get();
-    assertEquals(Tokenizer.EOF, tt.type);
+    Tokenizer t = new Tokenizer("; this whole thing is a comment");
+    t.get(true, true);
+    t.unget();
+    Tokenizer.Token tt = t.get();
+    assertEquals(Tokenizer.EOF, tt.type());
   }
 
   @Test
   void empty_string() throws IOException {
-    m_t = new Tokenizer("");
-    Tokenizer.Token tt = m_t.get();
-    assertEquals(Tokenizer.EOF, tt.type);
+    Tokenizer t = new Tokenizer("");
+    Tokenizer.Token tt = t.get();
+    assertEquals(Tokenizer.EOF, tt.type());
 
-    m_t = new Tokenizer(" ");
-    tt = m_t.get();
-    assertEquals(Tokenizer.EOF, tt.type);
+    t = new Tokenizer(" ");
+    tt = t.get();
+    assertEquals(Tokenizer.EOF, tt.type());
   }
 
   @Test
   void multiple_ungets() throws IOException {
-    m_t = new Tokenizer("a simple one");
-    Tokenizer.Token tt = m_t.get();
-
-    m_t.unget();
-    assertThrows(IllegalStateException.class, () -> m_t.unget());
+    Tokenizer t = new Tokenizer("a simple one");
+    t.get();
+    t.unget();
+    assertThrows(IllegalStateException.class, t::unget);
   }
 
   @Test
-  void getString() throws IOException {
-    m_t = new Tokenizer("just_an_identifier");
-    final String[] out = {m_t.getString()};
-    assertEquals("just_an_identifier", out[0]);
+  void getStringIdentifier() throws IOException {
+    Tokenizer t = new Tokenizer("just_an_identifier");
+    assertEquals("just_an_identifier", t.getString());
+  }
 
-    m_t = new Tokenizer("\"just a string\"");
-    out[0] = m_t.getString();
-    assertEquals("just a string", out[0]);
+  @Test
+  void getStringQuoted() throws IOException {
+    Tokenizer t = new Tokenizer("\"just a string\"");
+    assertEquals("just a string", t.getString());
+  }
 
-    m_t = new Tokenizer("; just a comment");
-    assertThrows(TextParseException.class, () -> out[0] = m_t.getString());
+  @Test
+  void getStringComment() {
+    Tokenizer t = new Tokenizer("; just a comment");
+    assertThrows(TextParseException.class, t::getString);
   }
 
   @Test
   void getIdentifier() throws IOException {
-    m_t = new Tokenizer("just_an_identifier");
-    String out = m_t.getIdentifier();
+    Tokenizer t = new Tokenizer("just_an_identifier");
+    String out = t.getIdentifier();
     assertEquals("just_an_identifier", out);
 
-    m_t = new Tokenizer("\"just a string\"");
-    assertThrows(TextParseException.class, () -> m_t.getIdentifier());
+    t = new Tokenizer("\"just a string\"");
+    assertThrows(TextParseException.class, t::getIdentifier);
   }
 
   @Test
   void getLong() throws IOException {
-    m_t = new Tokenizer((Integer.MAX_VALUE + 1L) + "");
-    long out = m_t.getLong();
+    Tokenizer t = new Tokenizer((Integer.MAX_VALUE + 1L) + "");
+    long out = t.getLong();
     assertEquals(Integer.MAX_VALUE + 1L, out);
 
-    m_t = new Tokenizer("-10");
-    assertThrows(TextParseException.class, () -> m_t.getLong());
+    t = new Tokenizer("-10");
+    assertThrows(TextParseException.class, t::getLong);
 
-    m_t = new Tokenizer("19_identifier");
-    assertThrows(TextParseException.class, () -> m_t.getLong());
+    t = new Tokenizer("19_identifier");
+    assertThrows(TextParseException.class, t::getLong);
   }
 
   @Test
   void getUInt32() throws IOException {
-    m_t = new Tokenizer(0xABCDEF12L + "");
-    long out = m_t.getUInt32();
+    Tokenizer t = new Tokenizer(0xABCDEF12L + "");
+    long out = t.getUInt32();
     assertEquals(0xABCDEF12L, out);
 
-    m_t = new Tokenizer(0x100000000L + "");
-    assertThrows(TextParseException.class, () -> m_t.getUInt32());
+    t = new Tokenizer(0x100000000L + "");
+    assertThrows(TextParseException.class, t::getUInt32);
 
-    m_t = new Tokenizer("-12345");
-    assertThrows(TextParseException.class, () -> m_t.getUInt32());
+    t = new Tokenizer("-12345");
+    assertThrows(TextParseException.class, t::getUInt32);
   }
 
   @Test
   void getUInt16() throws IOException {
-    m_t = new Tokenizer(0xABCDL + "");
-    int out = m_t.getUInt16();
+    Tokenizer t = new Tokenizer(0xABCDL + "");
+    int out = t.getUInt16();
     assertEquals(0xABCDL, out);
 
-    m_t = new Tokenizer(0x10000 + "");
-    assertThrows(TextParseException.class, () -> m_t.getUInt16());
+    t = new Tokenizer(0x10000 + "");
+    assertThrows(TextParseException.class, t::getUInt16);
 
-    m_t = new Tokenizer("-125");
-    assertThrows(TextParseException.class, () -> m_t.getUInt16());
+    t = new Tokenizer("-125");
+    assertThrows(TextParseException.class, t::getUInt16);
   }
 
   @Test
   void getUInt8() throws IOException {
-    m_t = new Tokenizer(0xCDL + "");
-    int out = m_t.getUInt8();
+    Tokenizer t = new Tokenizer(0xCDL + "");
+    int out = t.getUInt8();
     assertEquals(0xCDL, out);
 
-    m_t = new Tokenizer(0x100 + "");
-    assertThrows(TextParseException.class, () -> m_t.getUInt8());
+    t = new Tokenizer(0x100 + "");
+    assertThrows(TextParseException.class, t::getUInt8);
 
-    m_t = new Tokenizer("-12");
-    assertThrows(TextParseException.class, () -> m_t.getUInt8());
+    t = new Tokenizer("-12");
+    assertThrows(TextParseException.class, t::getUInt8);
   }
 
   @Test
   void getTTL() throws IOException {
-    m_t = new Tokenizer("59S");
-    assertEquals(59, m_t.getTTL());
+    Tokenizer t = new Tokenizer("59S");
+    assertEquals(59, t.getTTL());
 
-    m_t = new Tokenizer(TTL.MAX_VALUE + "");
-    assertEquals(TTL.MAX_VALUE, m_t.getTTL());
+    t = new Tokenizer(TTL.MAX_VALUE + "");
+    assertEquals(TTL.MAX_VALUE, t.getTTL());
 
-    m_t = new Tokenizer((TTL.MAX_VALUE + 1L) + "");
-    assertEquals(TTL.MAX_VALUE, m_t.getTTL());
+    t = new Tokenizer((TTL.MAX_VALUE + 1L) + "");
+    assertEquals(TTL.MAX_VALUE, t.getTTL());
 
-    m_t = new Tokenizer("Junk");
-    assertThrows(TextParseException.class, () -> m_t.getTTL());
+    t = new Tokenizer("Junk");
+    assertThrows(TextParseException.class, t::getTTL);
   }
 
   @Test
   void getTTLLike() throws IOException {
-    m_t = new Tokenizer("59S");
-    assertEquals(59, m_t.getTTLLike());
+    Tokenizer t = new Tokenizer("59S");
+    assertEquals(59, t.getTTLLike());
 
-    m_t = new Tokenizer(TTL.MAX_VALUE + "");
-    assertEquals(TTL.MAX_VALUE, m_t.getTTLLike());
+    t = new Tokenizer(TTL.MAX_VALUE + "");
+    assertEquals(TTL.MAX_VALUE, t.getTTLLike());
 
-    m_t = new Tokenizer((TTL.MAX_VALUE + 1L) + "");
-    assertEquals(TTL.MAX_VALUE + 1L, m_t.getTTLLike());
+    t = new Tokenizer((TTL.MAX_VALUE + 1L) + "");
+    assertEquals(TTL.MAX_VALUE + 1L, t.getTTLLike());
 
-    m_t = new Tokenizer("Junk");
-    assertThrows(TextParseException.class, () -> m_t.getTTLLike());
+    t = new Tokenizer("Junk");
+    assertThrows(TextParseException.class, t::getTTLLike);
   }
 
   @Test
   void getName() throws IOException {
-    Name root = Name.fromString(".");
-    m_t = new Tokenizer("junk");
+    Tokenizer t = new Tokenizer("junk");
     Name exp = Name.fromString("junk.");
-    Name out = m_t.getName(root);
+    Name out = t.getName(Name.root);
     assertEquals(exp, out);
+  }
 
+  @Test
+  void getNameRelative() throws IOException {
     Name rel = Name.fromString("you.dig");
-    m_t = new Tokenizer("junk");
-    assertThrows(RelativeNameException.class, () -> m_t.getName(rel));
+    Tokenizer t = new Tokenizer("junk");
+    assertThrows(RelativeNameException.class, () -> t.getName(rel));
+  }
 
-    m_t = new Tokenizer("");
-    assertThrows(TextParseException.class, () -> m_t.getName(root));
+  @Test
+  void getNameFromEmpty() {
+    Tokenizer t = new Tokenizer("");
+    assertThrows(TextParseException.class, () -> t.getName(Name.root));
   }
 
   @Test
   void getEOL() throws IOException {
-    m_t = new Tokenizer("id");
-    m_t.getIdentifier();
+    Tokenizer t = new Tokenizer("id");
+    t.getIdentifier();
     try {
-      m_t.getEOL();
+      t.getEOL();
     } catch (TextParseException e) {
       fail(e.getMessage());
     }
 
-    m_t = new Tokenizer("\n");
+    t = new Tokenizer("\n");
     try {
-      m_t.getEOL();
-      m_t.getEOL();
+      t.getEOL();
+      t.getEOL();
     } catch (TextParseException e) {
       fail(e.getMessage());
     }
 
-    m_t = new Tokenizer("id");
-    assertThrows(TextParseException.class, () -> m_t.getEOL());
+    t = new Tokenizer("id");
+    assertThrows(TextParseException.class, t::getEOL);
   }
 
-  @Test
-  void getBase64() throws IOException {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        // basic
+        "AQIDBAUGBwgJ",
+        // with some whitespace
+        "AQIDB AUGB   wgJ",
+        // two base64s separated by newline
+        "AQIDBAUGBwgJ\nAB23DK",
+      })
+  void getBase64(String data) throws IOException {
     byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    // basic
-    m_t = new Tokenizer("AQIDBAUGBwgJ");
-    byte[] out = m_t.getBase64();
+    Tokenizer t = new Tokenizer(data);
+    byte[] out = t.getBase64();
     assertArrayEquals(exp, out);
-
-    // with some whitespace
-    m_t = new Tokenizer("AQIDB AUGB   wgJ");
-    out = m_t.getBase64();
-    assertArrayEquals(exp, out);
-
-    // two base64s separated by newline
-    m_t = new Tokenizer("AQIDBAUGBwgJ\nAB23DK");
-    out = m_t.getBase64();
-    assertArrayEquals(exp, out);
-
-    // no remaining strings
-    m_t = new Tokenizer("\n");
-    assertNull(m_t.getBase64());
-
-    m_t = new Tokenizer("\n");
-    assertThrows(TextParseException.class, () -> m_t.getBase64(true));
-
-    // invalid encoding
-    m_t = new Tokenizer("not_base64");
-    assertThrows(TextParseException.class, () -> m_t.getBase64(false));
-
-    m_t = new Tokenizer("not_base64");
-    assertThrows(TextParseException.class, () -> m_t.getBase64(true));
   }
 
   @Test
-  void getHex() throws IOException {
-    byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    // basic
-    m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F");
-    byte[] out = m_t.getHex();
-    assertArrayEquals(exp, out);
-
-    // with some whitespace
-    m_t = new Tokenizer("0102030 405 060708090A0B0C      0D0E0F");
-    out = m_t.getHex();
-    assertArrayEquals(exp, out);
-
-    // two hexs separated by newline
-    m_t = new Tokenizer("0102030405060708090A0B0C0D0E0F\n01AB3FE");
-    out = m_t.getHex();
-    assertArrayEquals(exp, out);
-
+  void getBase64Newline() throws IOException {
     // no remaining strings
-    m_t = new Tokenizer("\n");
-    assertNull(m_t.getHex());
+    Tokenizer t = new Tokenizer("\n");
+    assertNull(t.getBase64());
+  }
 
-    m_t = new Tokenizer("\n");
-    assertThrows(TextParseException.class, () -> m_t.getHex(true));
+  @Test
+  void getBase64NewlineRequired() {
+    Tokenizer t = new Tokenizer("\n");
+    assertThrows(TextParseException.class, () -> t.getBase64(true));
+  }
 
-    // invalid encoding
-    m_t = new Tokenizer("not_hex");
-    assertThrows(TextParseException.class, () -> m_t.getHex(false));
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void getBase64InvalidEncoding(boolean required) {
+    Tokenizer t = new Tokenizer("not_base64");
+    assertThrows(TextParseException.class, () -> t.getBase64(required));
+  }
 
-    m_t = new Tokenizer("not_hex");
-    assertThrows(TextParseException.class, () -> m_t.getHex(true));
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        // basic
+        "0102030405060708090A0B0C0D0E0F",
+        // with some whitespace
+        "0102030 405 060708090A0B0C      0D0E0F",
+        // two hexs separated by newline
+        "0102030405060708090A0B0C0D0E0F\n01AB3FE",
+      },
+      ignoreLeadingAndTrailingWhitespace = false)
+  void getHex(String data) throws IOException {
+    byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    Tokenizer t = new Tokenizer(data);
+    byte[] out = t.getHex();
+    assertArrayEquals(exp, out);
+  }
+
+  @Test
+  void getHexNewline() throws IOException {
+    // no remaining strings
+    Tokenizer t = new Tokenizer("\n");
+    assertNull(t.getHex());
+  }
+
+  @Test
+  void getHexNewlineRequired() {
+    Tokenizer t = new Tokenizer("\n");
+    assertThrows(TextParseException.class, () -> t.getHex(true));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void getHexInvalidEncoding(boolean required) {
+    Tokenizer t = new Tokenizer("not_hex");
+    assertThrows(TextParseException.class, () -> t.getHex(required));
   }
 }

@@ -62,7 +62,7 @@ abstract class TXTBase extends Record {
         break;
       }
       try {
-        strings.add(byteArrayFromString(t.value));
+        strings.add(byteArrayFromString(t.value()));
       } catch (TextParseException e) {
         throw st.exception(e.getMessage());
       }

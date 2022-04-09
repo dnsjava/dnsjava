@@ -57,9 +57,9 @@ public class NXTRecord extends Record {
       if (!t.isString()) {
         break;
       }
-      int typecode = Type.value(t.value, true);
+      int typecode = Type.value(t.value(), true);
       if (typecode <= 0 || typecode > 128) {
-        throw st.exception("Invalid type: " + t.value);
+        throw st.exception("Invalid type: " + t.value());
       }
       bitmap.set(typecode);
     }

@@ -168,7 +168,7 @@ public class APLRecord extends Record {
       int family;
       int prefix;
 
-      String s = t.value;
+      String s = t.value();
       int start = 0;
       if (s.startsWith("!")) {
         negative = true;

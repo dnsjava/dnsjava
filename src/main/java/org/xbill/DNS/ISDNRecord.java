@@ -50,7 +50,7 @@ public class ISDNRecord extends Record {
       address = byteArrayFromString(st.getString());
       Tokenizer.Token t = st.get();
       if (t.isString()) {
-        subAddress = byteArrayFromString(t.value);
+        subAddress = byteArrayFromString(t.value());
       } else {
         st.unget();
       }

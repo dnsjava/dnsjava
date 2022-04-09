@@ -750,24 +750,24 @@ public abstract class SVCBBase extends Record {
       if (!t.isString()) {
         break;
       }
-      int indexOfEquals = t.value.indexOf('=');
+      int indexOfEquals = t.value().indexOf('=');
       if (indexOfEquals == -1) {
         // No "=" is key with no value case, leave value string as null
-        keyStr = t.value;
-      } else if (indexOfEquals == t.value.length() - 1) {
+        keyStr = t.value();
+      } else if (indexOfEquals == t.value().length() - 1) {
         // Ends with "=" means the next token is quoted string with the value
-        keyStr = t.value.substring(0, indexOfEquals);
+        keyStr = t.value().substring(0, indexOfEquals);
         Tokenizer.Token valueToken = st.get();
         if (!valueToken.isString()) {
           throw new TextParseException("Expected value for parameter key '" + keyStr + "'");
         }
-        valueStr = valueToken.value;
+        valueStr = valueToken.value();
       } else if (indexOfEquals > 0) {
         // If "=" is in the middle then need to split the key and value from this token
-        keyStr = t.value.substring(0, indexOfEquals);
-        valueStr = t.value.substring(indexOfEquals + 1);
+        keyStr = t.value().substring(0, indexOfEquals);
+        valueStr = t.value().substring(indexOfEquals + 1);
       } else {
-        throw new TextParseException("Expected valid parameter key=value for '" + t.value + "'");
+        throw new TextParseException("Expected valid parameter key=value for '" + t.value() + "'");
       }
 
       ParameterBase param;
