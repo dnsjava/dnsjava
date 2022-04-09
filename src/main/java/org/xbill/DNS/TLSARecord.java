@@ -122,7 +122,7 @@ public class TLSARecord extends Record {
     certificateUsage = st.getUInt8();
     selector = st.getUInt8();
     matchingType = st.getUInt8();
-    certificateAssociationData = st.getHex();
+    certificateAssociationData = st.getHex(true);
   }
 
   /** Converts rdata to a String */

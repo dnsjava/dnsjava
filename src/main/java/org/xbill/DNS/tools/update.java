@@ -109,7 +109,7 @@ public class update {
           if (token.isEOL()) {
             continue;
           }
-          String operation = token.value;
+          String operation = token.value();
 
           switch (operation) {
             case "server":
@@ -117,7 +117,7 @@ public class update {
               res = new SimpleResolver(server);
               token = st.get();
               if (token.isString()) {
-                String portstr = token.value;
+                String portstr = token.value();
                 res.setPort(Short.parseShort(portstr));
               }
               break;
@@ -182,7 +182,7 @@ public class update {
             case "?":
               token = st.get();
               if (token.isString()) {
-                help(token.value);
+                help(token.value());
               } else {
                 help(null);
               }
@@ -236,7 +236,7 @@ public class update {
             case "date":
               Instant now = Instant.now();
               token = st.get();
-              if (token.isString() && token.value.equals("-ms")) {
+              if (token.isString() && token.value().equals("-ms")) {
                 print(Long.toString(now.toEpochMilli()));
               } else {
                 print(now);
@@ -329,8 +329,8 @@ public class update {
     name = st.getName(zone);
     token = st.get();
     if (token.isString()) {
-      if ((type = Type.value(token.value)) < 0) {
-        throw new IOException("Invalid type: " + token.value);
+      if ((type = Type.value(token.value())) < 0) {
+        throw new IOException("Invalid type: " + token.value());
       }
       token = st.get();
       boolean iseol = token.isEOL();
@@ -357,8 +357,8 @@ public class update {
     name = st.getName(zone);
     token = st.get();
     if (token.isString()) {
-      if ((type = Type.value(token.value)) < 0) {
-        throw new IOException("Invalid type: " + token.value);
+      if ((type = Type.value(token.value())) < 0) {
+        throw new IOException("Invalid type: " + token.value());
       }
     } else {
       type = Type.ANY;
@@ -384,7 +384,7 @@ public class update {
     name = st.getName(zone);
     token = st.get();
     if (token.isString()) {
-      s = token.value;
+      s = token.value();
       if (DClass.value(s) >= 0) {
         s = st.getString();
       }
@@ -424,13 +424,13 @@ public class update {
     name = st.getName(zone);
     token = st.get();
     if (token.isString()) {
-      type = Type.value(token.value);
+      type = Type.value(token.value());
       if (type < 0) {
         throw new IOException("Invalid type");
       }
       token = st.get();
       if (token.isString()) {
-        dclass = DClass.value(token.value);
+        dclass = DClass.value(token.value());
         if (dclass < 0) {
           throw new IOException("Invalid class");
         }
@@ -531,7 +531,7 @@ public class update {
         if (!token.isString()) {
           break;
         }
-        print(token.value);
+        print(token.value());
       }
       st.unget();
     }

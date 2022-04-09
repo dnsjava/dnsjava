@@ -637,9 +637,9 @@ public class WKSRecord extends Record {
       if (!t.isString()) {
         break;
       }
-      int service = Service.value(t.value);
+      int service = Service.value(t.value());
       if (service < 0) {
-        throw st.exception("Invalid TCP/UDP service: " + t.value);
+        throw st.exception("Invalid TCP/UDP service: " + t.value());
       }
       list.add(service);
     }

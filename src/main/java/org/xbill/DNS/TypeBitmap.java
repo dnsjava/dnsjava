@@ -69,9 +69,9 @@ final class TypeBitmap implements Serializable {
       if (!t.isString()) {
         break;
       }
-      int typecode = Type.value(t.value);
+      int typecode = Type.value(t.value());
       if (typecode < 0) {
-        throw st.exception("Invalid type: " + t.value);
+        throw st.exception("Invalid type: " + t.value());
       }
       types.add(typecode);
     }

@@ -61,7 +61,7 @@ public class DLVRecord extends Record {
     footprint = st.getUInt16();
     alg = st.getUInt8();
     digestid = st.getUInt8();
-    digest = st.getHex();
+    digest = st.getHex(true);
   }
 
   /** Converts rdata to a String */

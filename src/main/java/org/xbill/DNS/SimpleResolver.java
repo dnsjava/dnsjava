@@ -36,7 +36,8 @@ public class SimpleResolver implements Resolver {
 
   private InetSocketAddress address;
   private InetSocketAddress localAddress;
-  private boolean useTCP, ignoreTruncation;
+  private boolean useTCP;
+  private boolean ignoreTruncation;
   private OPTRecord queryOPT = new OPTRecord(DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0);
   private TSIG tsig;
   private Duration timeoutValue = Duration.ofSeconds(10);
@@ -267,12 +268,13 @@ public class SimpleResolver implements Resolver {
     }
   }
 
-  private void verifyTSIG(Message query, Message response, byte[] b, TSIG tsig) {
+  private void verifyTSIG(Message query, Message response, byte[] b) {
     if (tsig == null) {
       return;
     }
-    int error = tsig.verify(response, b, query.getTSIG());
-    log.debug("TSIG verify: {}", Rcode.TSIGstring(error));
+    int error = tsig.verify(response, b, query.getGeneratedTSIG());
+    log.debug(
+        "TSIG verify on message id {}: {}", query.getHeader().getID(), Rcode.TSIGstring(error));
   }
 
   private void applyEDNS(Message query) {
@@ -431,7 +433,7 @@ public class SimpleResolver implements Resolver {
             return f;
           }
 
-          verifyTSIG(query, response, in, tsig);
+          verifyTSIG(query, response, in);
           if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
             if (log.isTraceEnabled()) {
               log.trace(
@@ -466,8 +468,8 @@ public class SimpleResolver implements Resolver {
     response.getHeader().setFlag(Flags.AA);
     response.getHeader().setFlag(Flags.QR);
     response.addRecord(query.getQuestion(), Section.QUESTION);
-    for (Record record : records) {
-      response.addRecord(record, Section.ANSWER);
+    for (Record r : records) {
+      response.addRecord(r, Section.ANSWER);
     }
     return response;
   }

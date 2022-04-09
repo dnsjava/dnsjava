@@ -467,7 +467,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
     TTL.check(ttl);
 
     Tokenizer.Token t = st.get();
-    if (t.type == Tokenizer.IDENTIFIER && t.value.equals("\\#")) {
+    if (t.type() == Tokenizer.IDENTIFIER && t.value().equals("\\#")) {
       int length = st.getUInt16();
       byte[] data = st.getHex();
       if (data == null) {
@@ -483,7 +483,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
     rec = getEmptyRecord(name, type, dclass, ttl, true);
     rec.rdataFromString(st, origin);
     t = st.get();
-    if (t.type != Tokenizer.EOL && t.type != Tokenizer.EOF) {
+    if (t.type() != Tokenizer.EOL && t.type() != Tokenizer.EOF) {
       throw st.exception("unexpected tokens at end of record (wanted EOL/EOF, got " + t + ")");
     }
     return rec;

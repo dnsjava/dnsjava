@@ -38,6 +38,7 @@ package org.xbill.DNS;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -56,6 +57,8 @@ import java.net.UnknownHostException;
 import java.time.Instant;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class RecordTest {
   private static class SubRecord extends Record {
@@ -549,27 +552,36 @@ class RecordTest {
   }
 
   @Test
-  void fromString_invalid() throws IOException {
+  void fromString_empty() throws IOException {
     Name n = Name.fromString("My.N.");
+    Record r = Record.fromString(n, 0, DClass.IN, 3600, "\\# 0", Name.root);
+    assertInstanceOf(UNKRecord.class, r);
+    assertEquals(0, ((UNKRecord) r).getData().length);
+  }
+
+  @Test
+  void fromString_relative() throws IOException {
     Name rel = Name.fromString("My.R");
     Name n2 = Name.fromString("My.Second.Name.");
-    int t = Type.A;
-    int d = DClass.IN;
-    int ttl = 0xABE99;
 
     assertThrows(
         RelativeNameException.class,
-        () -> Record.fromString(rel, t, d, ttl, new Tokenizer("191.234.43.10"), n2));
+        () -> Record.fromString(rel, Type.A, DClass.IN, 3600, "191.234.43.10", n2));
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "191.234.43.10 another_token",
+        "\\# 100 ABCDE",
+        "\\# 100",
+      })
+  void fromString_invalid(String data) throws IOException {
+    Name n = Name.fromString("My.N.");
+    Name n2 = Name.fromString("My.Second.Name.");
 
     assertThrows(
-        TextParseException.class,
-        () -> Record.fromString(n, t, d, ttl, new Tokenizer("191.234.43.10 another_token"), n2));
-
-    assertThrows(
-        TextParseException.class,
-        () -> Record.fromString(n, t, d, ttl, new Tokenizer("\\# 100 ABCDE"), n2));
-
-    assertThrows(TextParseException.class, () -> Record.fromString(n, t, d, ttl, "\\# 100", n2));
+        TextParseException.class, () -> Record.fromString(n, Type.A, DClass.IN, 3600, data, n2));
   }
 
   @Test

@@ -149,7 +149,7 @@ public class LOCRecord extends Record {
       st.unget();
       return defaultValue;
     }
-    String s = token.value;
+    String s = token.value();
     if (s.length() > 1 && s.charAt(s.length() - 1) == 'm') {
       s = s.substring(0, s.length() - 1);
     }

@@ -64,8 +64,8 @@ public class jnamed {
     FileInputStream fs;
     InputStreamReader isr;
     BufferedReader br;
-    List<Integer> ports = new ArrayList<Integer>();
-    List<InetAddress> addresses = new ArrayList<InetAddress>();
+    List<Integer> ports = new ArrayList<>();
+    List<InetAddress> addresses = new ArrayList<>();
     try {
       fs = new FileInputStream(conffile);
       isr = new InputStreamReader(fs);
@@ -76,9 +76,9 @@ public class jnamed {
     }
 
     try {
-      caches = new HashMap<Integer, Cache>();
+      caches = new HashMap<>();
       znames = new HashMap<>();
-      TSIGs = new HashMap<Name, TSIG>();
+      TSIGs = new HashMap<>();
 
       String line;
       while ((line = br.readLine()) != null) {
@@ -127,21 +127,20 @@ public class jnamed {
         }
       }
 
-      if (ports.size() == 0) {
+      if (ports.isEmpty()) {
         ports.add(53);
       }
 
-      if (addresses.size() == 0) {
+      if (addresses.isEmpty()) {
         addresses.add(Address.getByAddress("0.0.0.0"));
       }
 
-      for (Object address : addresses) {
-        InetAddress addr = (InetAddress) address;
-        for (Object o : ports) {
-          int port = (Integer) o;
-          addUDP(addr, port);
-          addTCP(addr, port);
-          System.out.println("jnamed: listening on " + addrport(addr, port));
+      for (InetAddress address : addresses) {
+        for (Integer o : ports) {
+          int port = o;
+          addUDP(address, port);
+          addTCP(address, port);
+          System.out.println("jnamed: listening on " + addrport(address, port));
         }
       }
       System.out.println("jnamed: running");
@@ -172,12 +171,7 @@ public class jnamed {
   }
 
   public Cache getCache(int dclass) {
-    Cache c = caches.get(dclass);
-    if (c == null) {
-      c = new Cache(dclass);
-      caches.put(dclass, c);
-    }
-    return c;
+    return caches.computeIfAbsent(dclass, Cache::new);
   }
 
   public Zone findBestZone(Name name) {
@@ -197,7 +191,7 @@ public class jnamed {
     return null;
   }
 
-  public <T extends Record> RRset findExactMatch(Name name, int type, int dclass, boolean glue) {
+  public RRset findExactMatch(Name name, int type, int dclass, boolean glue) {
     Zone zone = findBestZone(name);
     if (zone != null) {
       return zone.findExactMatch(name, type);
@@ -217,8 +211,7 @@ public class jnamed {
     }
   }
 
-  <T extends Record> void addRRset(
-      Name name, Message response, RRset rrset, int section, int flags) {
+  void addRRset(Name name, Message response, RRset rrset, int section, int flags) {
     for (int s = 1; s <= section; s++) {
       if (response.findRRset(name, rrset.getType(), s)) {
         return;
@@ -403,6 +396,7 @@ public class jnamed {
     try {
       s.close();
     } catch (IOException ex) {
+      // ignore
     }
     return null;
   }
@@ -414,7 +408,6 @@ public class jnamed {
    */
   byte[] generateReply(Message query, byte[] in, Socket s) {
     Header header;
-    boolean badversion;
     int maxLength;
     int flags = 0;
 
@@ -515,13 +508,12 @@ public class jnamed {
   }
 
   public void TCPclient(Socket s) {
-    try {
+    try (InputStream is = s.getInputStream()) {
       int inLength;
       DataInputStream dataIn;
       DataOutputStream dataOut;
       byte[] in;
 
-      InputStream is = s.getInputStream();
       dataIn = new DataInputStream(is);
       inLength = dataIn.readUnsignedShort();
       in = new byte[inLength];
@@ -544,11 +536,6 @@ public class jnamed {
     } catch (IOException e) {
       System.out.println(
           "TCPclient(" + addrport(s.getLocalAddress(), s.getLocalPort()) + "): " + e);
-    } finally {
-      try {
-        s.close();
-      } catch (IOException e) {
-      }
     }
   }
 

@@ -292,11 +292,11 @@ public class Master implements AutoCloseable {
       Name name;
 
       token = st.get(true, false);
-      if (token.type == Tokenizer.WHITESPACE) {
+      if (token.type() == Tokenizer.WHITESPACE) {
         Tokenizer.Token next = st.get();
-        if (next.type == Tokenizer.EOL) {
+        if (next.type() == Tokenizer.EOL) {
           continue;
-        } else if (next.type == Tokenizer.EOF) {
+        } else if (next.type() == Tokenizer.EOF) {
           return null;
         } else {
           st.unget();
@@ -305,12 +305,12 @@ public class Master implements AutoCloseable {
           throw st.exception("no owner");
         }
         name = last.getName();
-      } else if (token.type == Tokenizer.EOL) {
+      } else if (token.type() == Tokenizer.EOL) {
         continue;
-      } else if (token.type == Tokenizer.EOF) {
+      } else if (token.type() == Tokenizer.EOF) {
         return null;
-      } else if (token.value.charAt(0) == '$') {
-        s = token.value;
+      } else if (token.value().charAt(0) == '$') {
+        s = token.value();
 
         if (s.equalsIgnoreCase("$ORIGIN")) {
           origin = st.getName(Name.root);
@@ -343,7 +343,7 @@ public class Master implements AutoCloseable {
           Name includeOrigin = origin;
           token = st.get();
           if (token.isString()) {
-            includeOrigin = parseName(token.value, Name.root);
+            includeOrigin = parseName(token.value(), Name.root);
             st.getEOL();
           }
           included = new Master(includeFile, includeOrigin, defaultTTL);
@@ -366,7 +366,7 @@ public class Master implements AutoCloseable {
           throw st.exception("Invalid directive: " + s);
         }
       } else {
-        s = token.value;
+        s = token.value();
         name = parseName(s, origin);
         if (last != null && name.equals(last.getName())) {
           name = last.getName();

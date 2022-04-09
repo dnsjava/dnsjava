@@ -130,7 +130,7 @@ public class HIPRecord extends Record {
     publicKey = base64.fromString(st.getString());
     Token t;
     while ((t = st.get()).isString()) {
-      rvServers.add(new Name(t.value));
+      rvServers.add(new Name(t.value()));
     }
   }
 
