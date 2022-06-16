@@ -73,6 +73,10 @@ abstract class TXTBase extends Record {
   /** converts to a String */
   @Override
   protected String rrToString() {
+    if (strings.isEmpty()) {
+      // always return at least an empty quoted String
+      return "\"\"";
+    }
     StringBuilder sb = new StringBuilder();
     Iterator<byte[]> it = strings.iterator();
     while (it.hasNext()) {

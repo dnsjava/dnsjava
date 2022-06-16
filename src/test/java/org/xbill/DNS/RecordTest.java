@@ -912,4 +912,12 @@ class RecordTest {
       }
     }
   }
+
+  // https://github.com/dnsjava/dnsjava/issues/254
+  @Test
+  void testEmptyTXTSerialization() throws IOException {
+    Name recordName = Name.fromString("name.name.");
+    Record r = Record.fromString(recordName, Type.TXT, DClass.IN, 0, "", recordName);
+    assertEquals("name.name.\t\t0\tIN\tTXT\t\"\"", r.toString());
+  }
 }
