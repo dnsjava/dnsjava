@@ -64,7 +64,6 @@ public class ZoneTransferIn {
   private Duration timeout = Duration.ofMinutes(15);
 
   private int state;
-  private long end_serial;
   private long current_serial;
   private Record initialsoa;
 
@@ -389,7 +388,7 @@ public class ZoneTransferIn {
         initialsoa = rec;
         // Remember the serial number in the initial SOA; we need it
         // to recognize the end of an IXFR.
-        end_serial = getSOASerial(rec);
+        long end_serial = getSOASerial(rec);
         if (qtype == Type.IXFR && Serial.compare(end_serial, ixfr_serial) <= 0) {
           logxfr("up to date");
           state = END;
