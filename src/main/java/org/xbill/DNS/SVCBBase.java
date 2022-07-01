@@ -281,7 +281,7 @@ public abstract class SVCBBase extends Record {
           sb.append(",");
         }
         String str = byteArrayToString(b, false);
-        str = str.replaceAll(",", "\\\\,");
+        str = str.replace(",", "\\,");
         sb.append(str);
       }
       return sb.toString();
