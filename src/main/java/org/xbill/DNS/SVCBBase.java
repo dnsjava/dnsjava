@@ -281,7 +281,7 @@ public abstract class SVCBBase extends Record {
           sb.append(",");
         }
         String str = byteArrayToString(b, false);
-        str = str.replaceAll(",", "\\\\,");
+        str = str.replace(",", "\\,");
         sb.append(str);
       }
       return sb.toString();
@@ -725,10 +725,10 @@ public abstract class SVCBBase extends Record {
     sb.append(svcPriority);
     sb.append(" ");
     sb.append(targetName);
-    for (Integer key : svcParams.keySet()) {
+    for (Map.Entry<Integer, ParameterBase> entry : svcParams.entrySet()) {
       sb.append(" ");
-      sb.append(parameters.getText(key));
-      ParameterBase param = svcParams.get(key);
+      sb.append(parameters.getText(entry.getKey()));
+      ParameterBase param = entry.getValue();
       String value = param.toString();
       if (value != null && !value.isEmpty()) {
         sb.append("=");
@@ -801,9 +801,9 @@ public abstract class SVCBBase extends Record {
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU16(svcPriority);
     targetName.toWire(out, null, canonical);
-    for (Integer key : svcParams.keySet()) {
-      out.writeU16(key);
-      ParameterBase param = svcParams.get(key);
+    for (Map.Entry<Integer, ParameterBase> entry : svcParams.entrySet()) {
+      out.writeU16(entry.getKey());
+      ParameterBase param = entry.getValue();
       byte[] value = param.toWire();
       out.writeU16(value.length);
       out.writeByteArray(value);
