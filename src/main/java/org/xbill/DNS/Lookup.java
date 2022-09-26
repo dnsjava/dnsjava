@@ -63,6 +63,7 @@ public final class Lookup {
   private boolean doneCurrent;
   private List<Name> aliases;
   private Record[] answers;
+  private List<RRset> rrsets;
   private int result;
   private String error;
   private boolean nxdomain;
@@ -262,6 +263,7 @@ public final class Lookup {
     done = false;
     doneCurrent = false;
     aliases = null;
+    rrsets = null;
     answers = null;
     result = -1;
     error = null;
@@ -514,7 +516,7 @@ public final class Lookup {
 
   private void processResponse(Name name, SetResponse response) {
     if (response.isSuccessful()) {
-      List<RRset> rrsets = response.answers();
+      rrsets = response.answers();
       List<Record> l = new ArrayList<>();
 
       for (RRset set : rrsets) {
@@ -533,6 +535,7 @@ public final class Lookup {
       }
     } else if (response.isNXRRSET()) {
       result = TYPE_NOT_FOUND;
+      rrsets = null;
       answers = null;
       done = true;
     } else if (response.isCNAME()) {
@@ -736,6 +739,18 @@ public final class Lookup {
     checkDone();
     return answers;
   }
+
+    /**
+   * Returns the rrsets from the lookup.
+   *
+   * @return The rrsets, or null if none are found.
+   * @throws IllegalStateException The lookup has not completed.
+   */
+
+    public List<RRset> getRrsets() {
+        checkDone();
+        return rrsets;
+    }
 
   /**
    * Returns all known aliases for this name. Whenever a CNAME/DNAME is followed, an alias is added
