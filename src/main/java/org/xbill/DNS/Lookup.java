@@ -747,7 +747,7 @@ public final class Lookup {
    * @throws IllegalStateException The lookup has not completed.
    */
 
-    public List<RRset> getRrsets() {
+    public List<RRset> getRRsets() {
         checkDone();
         return rrsets;
     }
