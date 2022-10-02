@@ -9,8 +9,6 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +35,9 @@ public abstract class NioClient {
   /** Packet logger, if available. */
   private static PacketLogger packetLogger = null;
 
-  private static final List<Runnable> timeoutTasks = new CopyOnWriteArrayList<>();
-  private static final List<Runnable> closeTasks = new CopyOnWriteArrayList<>();
+  private static Runnable timeoutTask;
+  private static Runnable registrationsTask;
+  private static Runnable closeTask;
   private static Thread selectorThread;
   private static Thread closeThread;
   private static volatile Selector selector;
@@ -81,16 +80,14 @@ public abstract class NioClient {
       try {
         Runtime.getRuntime().removeShutdownHook(closeThread);
       } catch (Exception ex) {
-        log.warn("Failed to remove shutdown hoook, ignoring and continuing close");
+        log.warn("Failed to remove shutdown hook, ignoring and continuing close");
       }
     }
 
-    for (Runnable closeTask : closeTasks) {
-      try {
-        closeTask.run();
-      } catch (Exception e) {
-        log.warn("Failed to execute a shutdown task, ignoring and continuing close", e);
-      }
+    try {
+      closeTask.run();
+    } catch (Exception e) {
+      log.warn("Failed to execute shutdown task, ignoring and continuing close", e);
     }
 
     selector.wakeup();
@@ -124,10 +121,11 @@ public abstract class NioClient {
     while (run) {
       try {
         if (selector.select(timeout) == 0) {
-          timeoutTasks.forEach(Runnable::run);
+          timeoutTask.run();
         }
 
         if (run) {
+          registrationsTask.run();
           processReadyKeys();
         }
       } catch (IOException e) {
@@ -139,12 +137,16 @@ public abstract class NioClient {
     log.debug("dnsjava NIO selector thread stopped");
   }
 
-  static void addSelectorTimeoutTask(Runnable r) {
-    timeoutTasks.add(r);
+  static void setTimeoutTask(Runnable r) {
+    timeoutTask = r;
   }
 
-  static void addCloseTask(Runnable r) {
-    closeTasks.add(r);
+  static void setRegistrationsTask(Runnable r) {
+    registrationsTask = r;
+  }
+
+  static void setCloseTask(Runnable r) {
+    closeTask = r;
   }
 
   private static void processReadyKeys() {
