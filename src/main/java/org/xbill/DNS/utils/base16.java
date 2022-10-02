@@ -36,10 +36,17 @@ public class base16 {
   }
 
   /**
-   * Convert a hex-encoded String to binary data, ignoring non-hex characters.
+   * Convert a hex-encoded String to binary data, ignoring {@link Character#isWhitespace(char)
+   * whitespace} characters.
    *
-   * @param str A String containing the encoded data
-   * @return An array containing the binary data, or null if the string is invalid
+   * <p>Returns {@code null}
+   *
+   * <ul>
+   *   <li>when {@code str} is {@code null},
+   *   <li>when non-hex digits or non-whitespace characters are encountered.
+   *
+   * @param str A String containing the encoded data.
+   * @return An array containing the binary data, or null if the string is invalid.
    */
   public static byte[] fromString(String str) {
     if (str == null) {
