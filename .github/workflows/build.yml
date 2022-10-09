@@ -17,13 +17,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-18.04, ubuntu-20.04, windows-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         java: [ '8', '11', '17' ]
         arch: [ 'x86', 'x64' ]
         exclude:
-          - os: ubuntu-18.04
-            arch: x86
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: x86
 
     name: Java ${{ matrix.java }}/${{ matrix.arch }}/${{ matrix.os }}
@@ -44,12 +42,14 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        if: "${{ !(matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11') || github.event.pull_request.head.repo.full_name != 'dnsjava/dnsjava' }}"
+        if: "${{ !(matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11') || github.event.pull_request.head.repo.full_name != 'dnsjava/dnsjava' }}"
         run: mvn verify -B -"Dgpg.skip"
 
-      # doesn't work with PRs from forks, see https://jira.sonarsource.com/browse/MMF-1371
+      # doesn't work with PRs from forks, see
+      # https://portal.productboard.com/sonarsource/1-sonarcloud/c/50-sonarcloud-analyzes-external-pull-request
+      # or https://jira.sonarsource.com/browse/MMF-1371 (not public anymore)
       - name: Cache Sonar plugins
-        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
+        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
@@ -58,20 +58,20 @@ jobs:
             ${{ runner.os }}-sonar
 
       - name: Build with Maven and run Sonar
-        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
+        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B -"Dgpg.skip" verify jacoco:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
       - name: Run codecovc
-        if: "${{ matrix.arch == 'x64' && matrix.os == 'ubuntu-20.04' && matrix.java == '11' }}"
+        if: "${{ matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
         uses: codecov/codecov-action@v3
 
   release:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/')
     needs: test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
