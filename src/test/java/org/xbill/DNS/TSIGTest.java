@@ -222,12 +222,13 @@ class TSIGTest {
                   NioUdpClient.sendrecv(
                       any(),
                       any(InetSocketAddress.class),
+                      any(),
                       any(byte[].class),
                       anyInt(),
                       any(Duration.class)))
           .thenAnswer(
               a -> {
-                Message qparsed = new Message(a.getArgument(2, byte[].class));
+                Message qparsed = new Message(a.getArgument(3, byte[].class));
 
                 Message response = new Message(qparsed.getHeader().getID());
                 response.setTSIG(key, Rcode.NOERROR, qparsed.getTSIG());

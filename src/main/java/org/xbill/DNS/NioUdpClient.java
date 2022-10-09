@@ -59,6 +59,7 @@ final class NioUdpClient extends NioClient {
     while (!registrationQueue.isEmpty()) {
       Transaction t = registrationQueue.remove();
       try {
+        log.trace("Registering OP_READ for transaction with id {}", t.id);
         t.channel.register(selector(), SelectionKey.OP_READ, t);
         t.send();
       } catch (IOException e) {
@@ -79,6 +80,7 @@ final class NioUdpClient extends NioClient {
 
   @RequiredArgsConstructor
   private static class Transaction implements KeyProcessor {
+    private final int id;
     private final byte[] data;
     private final int max;
     private final long endTime;
@@ -88,13 +90,17 @@ final class NioUdpClient extends NioClient {
     void send() throws IOException {
       ByteBuffer buffer = ByteBuffer.wrap(data);
       verboseLog(
-          "UDP write",
+          "UDP write: transaction id=" + id,
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
           data);
       int n = channel.send(buffer, channel.socket().getRemoteSocketAddress());
-      if (n <= 0) {
-        throw new EOFException();
+      if (n == 0) {
+        throw new EOFException(
+            "Insufficient room for the datagram in the underlying output buffer for transaction "
+                + id);
+      } else if (n < data.length) {
+        throw new EOFException("Could not send all data for transaction " + id);
       }
     }
 
@@ -124,7 +130,7 @@ final class NioUdpClient extends NioClient {
       byte[] data = new byte[read];
       System.arraycopy(buffer.array(), 0, data, 0, read);
       verboseLog(
-          "UDP read",
+          "UDP read: transaction id=" + id,
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
           data);
@@ -154,7 +160,12 @@ final class NioUdpClient extends NioClient {
   }
 
   static CompletableFuture<byte[]> sendrecv(
-      InetSocketAddress local, InetSocketAddress remote, byte[] data, int max, Duration timeout) {
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      Message query,
+      byte[] data,
+      int max,
+      Duration timeout) {
     long endTime = System.nanoTime() + timeout.toNanos();
     CompletableFuture<byte[]> f = new CompletableFuture<>();
     DatagramChannel channel = null;
@@ -163,7 +174,7 @@ final class NioUdpClient extends NioClient {
       channel = DatagramChannel.open();
       channel.configureBlocking(false);
 
-      Transaction t = new Transaction(data, max, endTime, channel, f);
+      Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, f);
       if (local == null || local.getPort() == 0) {
         boolean bound = false;
         for (int i = 0; i < 1024; i++) {
