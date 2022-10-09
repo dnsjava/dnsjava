@@ -26,9 +26,9 @@ class TLSARecordTest {
   }
 
   @Test
-  void emptyAssociationDataFromWire() throws IOException {
+  void emptyAssociationDataFromWire() {
     TLSARecord record = new TLSARecord();
-    DNSInput in = new DNSInput(new byte[] {0x000001});
+    DNSInput in = new DNSInput(new byte[] {0, 0, 1});
     assertThrows(WireParseException.class, () -> record.rrFromWire(in));
   }
 
