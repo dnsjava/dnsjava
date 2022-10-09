@@ -118,6 +118,9 @@ public class TLSARecord extends Record {
     selector = in.readU8();
     matchingType = in.readU8();
     certificateAssociationData = in.readByteArray();
+    if (certificateAssociationData.length == 0) {
+      throw new WireParseException("end of input");
+    }
   }
 
   @Override
