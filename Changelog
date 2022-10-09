@@ -1,4 +1,10 @@
+05/15/2022
+	- 3.5.1 released
+	- Fix validation of TSIG signed responses (#249)
+	- DS rdata digest validation hexadecimal digits (#252)
+
 02/05/2022
+	- 3.5.0 released
 	- Add full built-in support for DNSSEC based on dnssecjava (#209)
 	- Make Record classes serializable again (#242)
 	- Allow SVCB ServiceMode records without params
