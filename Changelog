@@ -1,3 +1,8 @@
+11/16/2022
+	- 3.5.2 released
+	- Correctly render empty TXT records (#254)
+	- More validation on TLSA data input (#257)
+
 05/15/2022
 	- 3.5.1 released
 	- Fix validation of TSIG signed responses (#249)
