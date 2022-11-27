@@ -434,7 +434,8 @@ public class Message implements Cloneable {
         continue;
       }
       for (Record rec : sections[i]) {
-        rec.toWire(out, i, c);
+        if(rec != null)
+          rec.toWire(out, i, c);
       }
     }
   }
