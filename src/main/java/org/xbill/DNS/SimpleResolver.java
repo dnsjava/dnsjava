@@ -402,6 +402,12 @@ public class SimpleResolver implements Resolver {
             return f;
           }
 
+          if (response.getQuestion() == null) {
+            f.completeExceptionally(
+                new WireParseException("invalid message: question section missing"));
+            return f;
+          }
+
           // validate name, class and type (rfc5452#section-9.1)
           if (!query.getQuestion().getName().equals(response.getQuestion().getName())) {
             f.completeExceptionally(
