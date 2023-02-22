@@ -108,9 +108,12 @@ public abstract class NioClient {
   }
 
   private static void runSelector() {
+    int selectorTimeout = Options.intValue("selectorTimeout");
+    int timeout = selectorTimeout >= 0 ? selectorTimeout : 1000; // Default 1000.
+
     while (run) {
       try {
-        if (selector.select(1000) == 0) {
+        if (selector.select(timeout) == 0) {
           timeoutTasks.forEach(Runnable::run);
         }
 
