@@ -102,6 +102,12 @@ Do NOT use it.
 |true
 |false
 
+.2+|dnsjava.nio.selector_timeout
+3+|Set selector timeout. Default/Max 1000, Min 1.
+|Integer
+|1000
+|700
+
 4+h|dnssec options
 .2+|dnsjava.dnssec.keycache.max_ttl
 3+|Maximum time-to-live (TTL) of entries in the key cache in seconds.
