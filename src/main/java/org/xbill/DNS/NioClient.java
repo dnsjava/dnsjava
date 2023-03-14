@@ -22,6 +22,13 @@ import org.xbill.DNS.utils.hexdump;
  * {@code dnsjava} is used in an application container like Tomcat. In a normal JVM setup {@link
  * #close()} is called by a shutdown hook.
  *
+ * <p>The following configuration parameter is available:
+ *
+ * <dl>
+ *   <dt>dnsjava.nio.selector_timeout
+ *   <dd>Set selector timeout. Default/Max 1000, Min 1.
+ * </dl>
+ *
  * @since 3.4
  */
 @Slf4j
@@ -108,9 +115,15 @@ public abstract class NioClient {
   }
 
   private static void runSelector() {
+    int timeout = Integer.getInteger("dnsjava.nio.selector_timeout", 1000);
+
+    if (timeout <= 0 || timeout > 1000) {
+      throw new IllegalArgumentException("Invalid selector_timeout, must be between 1 and 1000");
+    }
+
     while (run) {
       try {
-        if (selector.select(1000) == 0) {
+        if (selector.select(timeout) == 0) {
           timeoutTasks.forEach(Runnable::run);
         }
 
