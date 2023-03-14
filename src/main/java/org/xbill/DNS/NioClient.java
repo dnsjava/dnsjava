@@ -23,6 +23,7 @@ import org.xbill.DNS.utils.hexdump;
  * #close()} is called by a shutdown hook.
  *
  * <p>The following configuration parameter is available:
+ *
  * <dl>
  *   <dt>dnsjava.nio.selector_timeout
  *   <dd>Set selector timeout. Default/Max 1000, Min 1.
