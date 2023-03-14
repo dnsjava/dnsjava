@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
@@ -14,23 +16,25 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class NioTcpClientTest {
   @Test
   void testSelectorTimeoutUnder() throws IOException {
     System.setProperty("dnsjava.nio.selector_timeout", "0");
-    assertThrows(IllegalArgumentException.class, () -> {
-      NioClient.runSelector();
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          NioClient.runSelector();
+        });
   }
 
   @Test
   void testSelectorTimeoutOver() throws IOException {
     System.setProperty("dnsjava.nio.selector_timeout", "1001");
-    assertThrows(IllegalArgumentException.class, () -> {
-      NioClient.runSelector();
-    });
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          NioClient.runSelector();
+        });
   }
 
   @Test
