@@ -114,7 +114,7 @@ public abstract class NioClient {
     }
   }
 
-  private static void runSelector() {
+  static void runSelector() {
     int timeout = Integer.getInteger("dnsjava.nio.selector_timeout", 1000);
 
     if (timeout <= 0 || timeout > 1000) {
