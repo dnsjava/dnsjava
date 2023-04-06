@@ -4,18 +4,10 @@ package org.xbill.DNS.tools;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import org.xbill.DNS.DClass;
-import org.xbill.DNS.ExtendedFlags;
-import org.xbill.DNS.Message;
-import org.xbill.DNS.Name;
+import java.net.UnknownHostException;
+
+import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.ReverseMap;
-import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.TSIG;
-import org.xbill.DNS.Type;
-import org.xbill.DNS.WireParseException;
-import org.xbill.DNS.ZoneTransferException;
-import org.xbill.DNS.ZoneTransferIn;
 
 /** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
 public class dig {
@@ -32,6 +24,34 @@ public class dig {
     System.out.println("; dnsjava dig");
     System.out.println(response);
     System.out.println(";; Query time: " + ms + " ms");
+  }
+
+  // Extract method
+  private static int argBasedModification(String nameString, String[] argv, int arg) throws UnknownHostException, TextParseException {
+    int counter = 0;
+
+    if (nameString.equals("-x")) {
+      name = ReverseMap.fromAddress(argv[arg++]);
+      type = Type.PTR;
+      dclass = DClass.IN;
+    } else {
+      name = Name.fromString(nameString, Name.root);
+      type = Type.value(argv[arg]);
+      if (type < 0) {
+        type = Type.A;
+      } else {
+        counter++;
+      }
+
+      dclass = DClass.value(argv[arg]);
+      if (dclass < 0) {
+        dclass = DClass.IN;
+      } else {
+        counter++;
+      }
+    }
+
+    return counter;
   }
 
   public static void main(String[] argv) throws IOException {
@@ -60,26 +80,7 @@ public class dig {
       }
 
       String nameString = argv[arg++];
-      if (nameString.equals("-x")) {
-        name = ReverseMap.fromAddress(argv[arg++]);
-        type = Type.PTR;
-        dclass = DClass.IN;
-      } else {
-        name = Name.fromString(nameString, Name.root);
-        type = Type.value(argv[arg]);
-        if (type < 0) {
-          type = Type.A;
-        } else {
-          arg++;
-        }
-
-        dclass = DClass.value(argv[arg]);
-        if (dclass < 0) {
-          dclass = DClass.IN;
-        } else {
-          arg++;
-        }
-      }
+      arg = arg + argBasedModification(nameString,argv,arg);
 
       while (argv[arg].startsWith("-") && argv[arg].length() > 1) {
         switch (argv[arg].charAt(1)) {
@@ -197,24 +198,24 @@ public class dig {
       xfrin.setTimeout(res.getTimeout());
       try {
         xfrin.run(
-            new ZoneTransferIn.ZoneTransferHandler() {
-              @Override
-              public void startAXFR() {}
+          new ZoneTransferIn.ZoneTransferHandler() {
+            @Override
+            public void startAXFR() {}
 
-              @Override
-              public void startIXFR() {}
+            @Override
+            public void startIXFR() {}
 
-              @Override
-              public void startIXFRDeletes(Record soa) {}
+            @Override
+            public void startIXFRDeletes(Record soa) {}
 
-              @Override
-              public void startIXFRAdds(Record soa) {}
+            @Override
+            public void startIXFRAdds(Record soa) {}
 
-              @Override
-              public void handleRecord(Record r) {
-                System.out.println(r);
-              }
-            });
+            @Override
+            public void handleRecord(Record r) {
+              System.out.println(r);
+            }
+          });
       } catch (ZoneTransferException e) {
         throw new WireParseException(e.getMessage());
       }

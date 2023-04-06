@@ -3,6 +3,8 @@
 
 package org.xbill.DNS;
 
+import java.net.InetAddress;
+
 /**
  * A class for rendering DNS messages.
  *
@@ -181,6 +183,13 @@ public class DNSOutput {
     byte[] out = new byte[pos];
     System.arraycopy(array, 0, out, 0, pos);
     return out;
+  }
+
+  public void writeOptions(int family, int sourcePrefixLength, int scopePrefixLength, InetAddress address) {
+    writeU16(family);
+    writeU8(sourcePrefixLength);
+    writeU8(scopePrefixLength);
+    writeByteArray(address.getAddress(), 0, (sourcePrefixLength + 7) / 8);
   }
 
   static byte[] toU16(int val) {

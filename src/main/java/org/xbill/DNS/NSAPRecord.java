@@ -14,7 +14,6 @@ import org.xbill.DNS.utils.base16;
  * @see <a href="https://tools.ietf.org/html/rfc1706">RFC 1706: DNS NSAP Resource Records</a>
  */
 public class NSAPRecord extends Record {
-  private byte[] address;
 
   NSAPRecord() {}
 
@@ -75,11 +74,6 @@ public class NSAPRecord extends Record {
     if (this.address == null) {
       throw st.exception("invalid NSAP address " + addr);
     }
-  }
-
-  /** Returns the NSAP address. */
-  public String getAddress() {
-    return byteArrayToString(address, false);
   }
 
   @Override

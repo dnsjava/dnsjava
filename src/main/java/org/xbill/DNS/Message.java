@@ -60,7 +60,8 @@ public class Message implements Cloneable {
 
   @SuppressWarnings("unchecked")
   private Message(Header header) {
-    sections = new List[4];
+    int arraySize = 4;
+    sections = new List[arraySize];
     this.header = header;
   }
 
@@ -263,8 +264,8 @@ public class Message implements Cloneable {
    */
   public boolean findRRset(Name name, int type) {
     return findRRset(name, type, Section.ANSWER)
-        || findRRset(name, type, Section.AUTHORITY)
-        || findRRset(name, type, Section.ADDITIONAL);
+      || findRRset(name, type, Section.AUTHORITY)
+      || findRRset(name, type, Section.ADDITIONAL);
   }
 
   /**
@@ -386,8 +387,20 @@ public class Message implements Cloneable {
 
   private static boolean sameSet(Record r1, Record r2) {
     return r1.getRRsetType() == r2.getRRsetType()
-        && r1.getDClass() == r2.getDClass()
-        && r1.getName().equals(r2.getName());
+      && r1.getDClass() == r2.getDClass()
+      && r1.getName().equals(r2.getName());
+  }
+
+  private boolean compareType(RRset set, Record rec) {
+    return set.getType() == rec.getRRsetType();
+  }
+
+  private boolean compareDClass(RRset set, Record rec) {
+    return set.getDClass() == rec.getDClass();
+  }
+
+  private boolean compareName(RRset set, Name name) {
+    return set.getName().equals(name);
   }
 
   /**
@@ -408,9 +421,9 @@ public class Message implements Cloneable {
       if (hash.contains(name)) {
         for (int j = sets.size() - 1; j >= 0; j--) {
           RRset set = sets.get(j);
-          if (set.getType() == rec.getRRsetType()
-              && set.getDClass() == rec.getDClass()
-              && set.getName().equals(name)) {
+          if ( compareType(set,rec)
+            && compareDClass(set,rec)
+            && compareName(set,name)) {
             set.addRR(rec);
             newset = false;
             break;

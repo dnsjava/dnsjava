@@ -13,7 +13,6 @@ import java.io.IOException;
  * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class X25Record extends Record {
-  private byte[] address;
 
   X25Record() {}
 
@@ -58,10 +57,6 @@ public class X25Record extends Record {
     }
   }
 
-  /** Returns the X.25 PSDN address. */
-  public String getAddress() {
-    return byteArrayToString(address, false);
-  }
 
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {

@@ -110,7 +110,7 @@ final class ValUtils {
         this.digestPreference[i] = Integer.parseInt(dpdata[i]);
         if (!isDigestSupported(this.digestPreference[i])) {
           throw new IllegalArgumentException(
-              "Unsupported or disabled digest ID in digest preferences");
+            "Unsupported or disabled digest ID in digest preferences");
         }
       }
     }
@@ -134,8 +134,8 @@ final class ValUtils {
 
     // check for referral: nonRD query and it looks like a nodata
     if (!request.getHeader().getFlag(Flags.RD)
-        && m.getCount(Section.ANSWER) == 0
-        && m.getRcode() != Rcode.NOERROR) {
+      && m.getCount(Section.ANSWER) == 0
+      && m.getRcode() != Rcode.NOERROR) {
       // SOA record in auth indicates it is NODATA instead.
       // All validation requiring NODATA messages have SOA in
       // authority section.
@@ -160,13 +160,13 @@ final class ValUtils {
 
     // root referral where NS set is in the answer section
     if (m.getSectionRRsets(Section.AUTHORITY).isEmpty()
-        && m.getSectionRRsets(Section.ANSWER).size() == 1
-        && m.getRcode() == Rcode.NOERROR
-        && m.getSectionRRsets(Section.ANSWER).get(0).getType() == Type.NS
-        && !m.getSectionRRsets(Section.ANSWER)
-            .get(0)
-            .getName()
-            .equals(request.getQuestion().getName())) {
+      && m.getSectionRRsets(Section.ANSWER).size() == 1
+      && m.getRcode() == Rcode.NOERROR
+      && m.getSectionRRsets(Section.ANSWER).get(0).getType() == Type.NS
+      && !m.getSectionRRsets(Section.ANSWER)
+      .get(0)
+      .getName()
+      .equals(request.getQuestion().getName())) {
       return ResponseClassification.REFERRAL;
     }
 
@@ -232,22 +232,22 @@ final class ValUtils {
    *     normally this sort of thing is checked before fetching the matching DNSKEY rrset.
    */
   public KeyEntry verifyNewDNSKEYs(
-      SRRset dnskeyRrset, SRRset dsRrset, long badKeyTTL, Instant date) {
+    SRRset dnskeyRrset, SRRset dsRrset, long badKeyTTL, Instant date) {
     if (!atLeastOneDigestSupported(dsRrset)) {
       KeyEntry ke =
-          KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
+        KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
       ke.setBadReason(
-          ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE,
-          R.get("failed.ds.nodigest", dsRrset.getName()));
+        ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE,
+        R.get("failed.ds.nodigest", dsRrset.getName()));
       return ke;
     }
 
     if (!atLeastOneSupportedAlgorithm(dsRrset)) {
       KeyEntry ke =
-          KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
+        KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
       ke.setBadReason(
-          ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
-          R.get("failed.ds.noalg", dsRrset.getName()));
+        ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
+        R.get("failed.ds.noalg", dsRrset.getName()));
       return ke;
     }
 
@@ -264,7 +264,7 @@ final class ValUtils {
 
         // Skip DNSKEYs that don't match the basic criteria.
         if (ds.getFootprint() != dnskey.getFootprint()
-            || ds.getAlgorithm() != dnskey.getAlgorithm()) {
+          || ds.getAlgorithm() != dnskey.getAlgorithm()) {
           continue;
         }
 
@@ -349,8 +349,8 @@ final class ValUtils {
       for (Record r : dsset.rrs()) {
         DSRecord ds = (DSRecord) r;
         if (ds.getDigestID() > max
-            && isDigestSupported(ds.getDigestID())
-            && isAlgorithmSupported(ds.getAlgorithm())) {
+          && isDigestSupported(ds.getDigestID())
+          && isAlgorithmSupported(ds.getAlgorithm())) {
           max = ds.getDigestID();
         }
       }
@@ -382,10 +382,10 @@ final class ValUtils {
   public JustifiedSecStatus verifySRRset(SRRset rrset, SRRset keyRrset, Instant date) {
     if (rrset.getSecurityStatus() == SecurityStatus.SECURE) {
       log.trace(
-          "RRset <{}/{}/{}> previously found to be SECURE",
-          rrset.getName(),
-          Type.string(rrset.getType()),
-          DClass.string(rrset.getDClass()));
+        "RRset <{}/{}/{}> previously found to be SECURE",
+        rrset.getName(),
+        Type.string(rrset.getType()),
+        DClass.string(rrset.getDClass()));
       return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
     }
 
@@ -401,34 +401,6 @@ final class ValUtils {
    * @param rrset The rrset to chedck.
    * @return the wildcard name, if the rrset was synthesized from a wildcard. null if not.
    */
-  public static Name rrsetWildcard(RRset rrset) {
-    List<RRSIGRecord> sigs = rrset.sigs();
-    RRSIGRecord firstSig = sigs.get(0);
-
-    // check rest of signatures have identical label count
-    for (int i = 1; i < sigs.size(); i++) {
-      if (sigs.get(i).getLabels() != firstSig.getLabels()) {
-        throw new IllegalArgumentException("failed.wildcard.label_count_mismatch");
-      }
-    }
-
-    // if the RRSIG label count is shorter than the number of actual labels,
-    // then this rrset was synthesized from a wildcard.
-    // Note that the RRSIG label count doesn't count the root label.
-    Name wn = rrset.getName();
-
-    // skip a leading wildcard label in the dname (RFC4035 2.2)
-    if (rrset.getName().isWild()) {
-      wn = new Name(wn, 1);
-    }
-
-    int labelDiff = (wn.labels() - 1) - firstSig.getLabels();
-    if (labelDiff > 0) {
-      return wn.wild(labelDiff);
-    }
-
-    return null;
-  }
 
   /**
    * Finds the longest domain name in common with the given name.
@@ -495,7 +467,7 @@ final class ValUtils {
    *     invalid name.
    */
   public static Name nsecWildcard(Name domain, SRRset set, NSECRecord nsec)
-      throws NameTooLongException {
+    throws NameTooLongException {
     Name origin = closestEncloser(domain, set.getName(), nsec.getNext());
     return Name.concatenate(WILDCARD, origin);
   }
@@ -592,7 +564,7 @@ final class ValUtils {
    * @return true if the NSEC proves the condition.
    */
   public static NsecProvesNodataResponse nsecProvesNodata(
-      SRRset set, NSECRecord nsec, Name qname, int qtype) {
+    SRRset set, NSECRecord nsec, Name qname, int qtype) {
     NsecProvesNodataResponse result = new NsecProvesNodataResponse();
     if (!set.getName().equals(qname)) {
       // empty-non-terminal checking.
@@ -698,7 +670,7 @@ final class ValUtils {
    * @return The NODATA proof along with the reason of the result.
    */
   public JustifiedSecStatus nsecProvesNodataDsReply(
-      Message request, SMessage response, SRRset keyRrset, Instant date) {
+    Message request, SMessage response, SRRset keyRrset, Instant date) {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
 
@@ -711,9 +683,9 @@ final class ValUtils {
       JustifiedSecStatus res = this.verifySRRset(nsecRrset, keyRrset, date);
       if (res.status != SecurityStatus.SECURE) {
         return new JustifiedSecStatus(
-            SecurityStatus.BOGUS,
-            ExtendedErrorCodeOption.DNSSEC_BOGUS,
-            R.get("failed.ds.nsec", res.reason));
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.DNSSEC_BOGUS,
+          R.get("failed.ds.nsec", res.reason));
       }
 
       NSECRecord nsec = (NSECRecord) nsecRrset.first();
@@ -725,7 +697,7 @@ final class ValUtils {
           return new JustifiedSecStatus(status, -1, R.get("insecure.ds.nsec"));
         default: // something was wrong.
           return new JustifiedSecStatus(
-              status, ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.nsec.hasdata"));
+            status, ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.nsec.hasdata"));
       }
     }
 
@@ -766,16 +738,16 @@ final class ValUtils {
       if (ndp.wc != null) {
         SecurityStatus status = nsecProvesNoDS(wcNsec, qname);
         return new JustifiedSecStatus(
-            status, ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.ds.nowildcardproof"));
+          status, ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.ds.nowildcardproof"));
       }
 
       return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, R.get("insecure.ds.nsec.ent"));
     }
 
     return new JustifiedSecStatus(
-        SecurityStatus.UNCHECKED,
-        ExtendedErrorCodeOption.DNSSEC_INDETERMINATE,
-        R.get("failed.ds.nonconclusive"));
+      SecurityStatus.UNCHECKED,
+      ExtendedErrorCodeOption.DNSSEC_INDETERMINATE,
+      R.get("failed.ds.nonconclusive"));
   }
 
   /**

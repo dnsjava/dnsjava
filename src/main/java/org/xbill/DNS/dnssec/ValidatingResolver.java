@@ -25,29 +25,9 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.xbill.DNS.CNAMERecord;
-import org.xbill.DNS.DClass;
-import org.xbill.DNS.DNAMERecord;
-import org.xbill.DNS.EDNSOption;
+import org.xbill.DNS.*;
 import org.xbill.DNS.EDNSOption.Code;
-import org.xbill.DNS.ExtendedErrorCodeOption;
-import org.xbill.DNS.ExtendedFlags;
-import org.xbill.DNS.Flags;
-import org.xbill.DNS.Header;
-import org.xbill.DNS.Master;
-import org.xbill.DNS.Message;
-import org.xbill.DNS.NSECRecord;
-import org.xbill.DNS.Name;
-import org.xbill.DNS.NameTooLongException;
-import org.xbill.DNS.OPTRecord;
-import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.Resolver;
-import org.xbill.DNS.Section;
-import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.TSIG;
-import org.xbill.DNS.TXTRecord;
-import org.xbill.DNS.Type;
 import org.xbill.DNS.dnssec.ValUtils.NsecProvesNodataResponse;
 
 /**
@@ -196,8 +176,8 @@ public final class ValidatingResolver implements Resolver {
 
       // If this record matches our current RRset, we can just add it.
       if (currentRrset.getName().equals(r.getName())
-          && currentRrset.getType() == r.getType()
-          && currentRrset.getDClass() == r.getDClass()) {
+        && currentRrset.getType() == r.getType()
+        && currentRrset.getDClass() == r.getDClass()) {
         currentRrset.addRR(r);
         continue;
       }
@@ -237,7 +217,7 @@ public final class ValidatingResolver implements Resolver {
   private void removeSpuriousAuthority(SMessage response) {
     // if no answer and only 1 auth RRset, do not remove that one
     if (response.getSectionRRsets(Section.ANSWER).isEmpty()
-        && response.getSectionRRsets(Section.AUTHORITY).size() == 1) {
+      && response.getSectionRRsets(Section.AUTHORITY).size() == 1) {
       return;
     }
 
@@ -247,10 +227,10 @@ public final class ValidatingResolver implements Resolver {
       SRRset rrset = authRrsetIterator.next();
       if (rrset.getType() == Type.NS && rrset.sigs().isEmpty()) {
         log.trace(
-            "Removing spurious unsigned NS record (likely inserted by forwarder) {}/{}/{}",
-            rrset.getName(),
-            Type.string(rrset.getType()),
-            DClass.string(rrset.getDClass()));
+          "Removing spurious unsigned NS record (likely inserted by forwarder) {}/{}/{}",
+          rrset.getName(),
+          Type.string(rrset.getType()),
+          DClass.string(rrset.getDClass()));
         authRrsetIterator.remove();
       }
     }
@@ -280,107 +260,107 @@ public final class ValidatingResolver implements Resolver {
     List<SRRset> nsecs = new ArrayList<>(0);
 
     return this.validateAnswerAndGetWildcards(response, request.getQuestion().getType(), wcs)
-        .thenCompose(
-            success -> {
-              if (Boolean.TRUE.equals(success)) {
-                // validate the AUTHORITY section as well - this will generally be the
-                // NS rrset (which could be missing, no problem)
-                int[] sections;
-                if (request.getQuestion().getType() == Type.ANY) {
-                  sections = new int[] {Section.ANSWER, Section.AUTHORITY};
-                } else {
-                  sections = new int[] {Section.AUTHORITY};
-                }
+      .thenCompose(
+        success -> {
+          if (Boolean.TRUE.equals(success)) {
+            // validate the AUTHORITY section as well - this will generally be the
+            // NS rrset (which could be missing, no problem)
+            int[] sections;
+            if (request.getQuestion().getType() == Type.ANY) {
+              sections = new int[] {Section.ANSWER, Section.AUTHORITY};
+            } else {
+              sections = new int[] {Section.AUTHORITY};
+            }
 
-                return this.validatePositiveResponseRecursive(
-                    response,
-                    wcs,
-                    nsec3s,
-                    nsecs,
-                    sections,
-                    new AtomicInteger(0),
-                    new AtomicInteger(0));
+            return this.validatePositiveResponseRecursive(
+              response,
+              wcs,
+              nsec3s,
+              nsecs,
+              sections,
+              new AtomicInteger(0),
+              new AtomicInteger(0));
+          }
+
+          return completedFuture(false);
+        })
+      .thenAccept(
+        success -> {
+          if (!Boolean.TRUE.equals(success)) {
+            return;
+          }
+
+          // If this is a positive wildcard response, and we have NSEC records,
+          // try to use them to
+          // 1) prove that qname doesn't exist and
+          // 2) that the correct wildcard was used.
+          if (wcs.size() > 0) {
+            for (Map.Entry<Name, Name> wc : wcs.entrySet()) {
+              boolean wcNsecOk = false;
+              for (SRRset set : nsecs) {
+                NSECRecord nsec = (NSECRecord) set.first();
+                if (ValUtils.nsecProvesNameError(set, nsec, wc.getKey())) {
+                  try {
+                    Name nsecWc = ValUtils.nsecWildcard(wc.getKey(), set, nsec);
+                    if (wc.getValue().equals(nsecWc)) {
+                      wcNsecOk = true;
+                      break;
+                    }
+                  } catch (NameTooLongException e) {
+                    // COVERAGE:OFF -> a NTLE can only be thrown when
+                    // the qname is equal to the NSEC owner or NSEC next
+                    // name, so that the wildcard is appended to
+                    // CE=qname=owner=next. This would however indicate
+                    // that the qname exists, which is proofed not the
+                    // be the case beforehand.
+                    throw new IllegalStateException(
+                      R.get("failed.positive.wildcardgeneration"));
+                  }
+                }
               }
 
-              return completedFuture(false);
-            })
-        .thenAccept(
-            success -> {
-              if (!Boolean.TRUE.equals(success)) {
+              // If this was a positive wildcard response that we haven't
+              // already proven, and we have NSEC3 records, try to prove it
+              // using the NSEC3 records.
+              if (!wcNsecOk && !nsec3s.isEmpty()) {
+                if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
+                  response.setStatus(
+                    SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
+                  return;
+                }
+
+                SecurityStatus status =
+                  this.n3valUtils.proveWildcard(
+                    nsec3s, wc.getKey(), nsec3s.get(0).getSignerName(), wc.getValue());
+                if (status == SecurityStatus.INSECURE) {
+                  response.setStatus(status, -1);
+                  return;
+                } else if (status == SecurityStatus.SECURE) {
+                  wcNsecOk = true;
+                }
+              }
+
+              // If after all this, we still haven't proven the positive
+              // wildcard response, fail.
+              if (!wcNsecOk) {
+                response.setBogus(R.get("failed.positive.wildcard_too_broad"));
                 return;
               }
+            }
+          }
 
-              // If this is a positive wildcard response, and we have NSEC records,
-              // try to use them to
-              // 1) prove that qname doesn't exist and
-              // 2) that the correct wildcard was used.
-              if (wcs.size() > 0) {
-                for (Map.Entry<Name, Name> wc : wcs.entrySet()) {
-                  boolean wcNsecOk = false;
-                  for (SRRset set : nsecs) {
-                    NSECRecord nsec = (NSECRecord) set.first();
-                    if (ValUtils.nsecProvesNameError(set, nsec, wc.getKey())) {
-                      try {
-                        Name nsecWc = ValUtils.nsecWildcard(wc.getKey(), set, nsec);
-                        if (wc.getValue().equals(nsecWc)) {
-                          wcNsecOk = true;
-                          break;
-                        }
-                      } catch (NameTooLongException e) {
-                        // COVERAGE:OFF -> a NTLE can only be thrown when
-                        // the qname is equal to the NSEC owner or NSEC next
-                        // name, so that the wildcard is appended to
-                        // CE=qname=owner=next. This would however indicate
-                        // that the qname exists, which is proofed not the
-                        // be the case beforehand.
-                        throw new IllegalStateException(
-                            R.get("failed.positive.wildcardgeneration"));
-                      }
-                    }
-                  }
-
-                  // If this was a positive wildcard response that we haven't
-                  // already proven, and we have NSEC3 records, try to prove it
-                  // using the NSEC3 records.
-                  if (!wcNsecOk && !nsec3s.isEmpty()) {
-                    if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
-                      response.setStatus(
-                          SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
-                      return;
-                    }
-
-                    SecurityStatus status =
-                        this.n3valUtils.proveWildcard(
-                            nsec3s, wc.getKey(), nsec3s.get(0).getSignerName(), wc.getValue());
-                    if (status == SecurityStatus.INSECURE) {
-                      response.setStatus(status, -1);
-                      return;
-                    } else if (status == SecurityStatus.SECURE) {
-                      wcNsecOk = true;
-                    }
-                  }
-
-                  // If after all this, we still haven't proven the positive
-                  // wildcard response, fail.
-                  if (!wcNsecOk) {
-                    response.setBogus(R.get("failed.positive.wildcard_too_broad"));
-                    return;
-                  }
-                }
-              }
-
-              response.setStatus(SecurityStatus.SECURE, -1);
-            });
+          response.setStatus(SecurityStatus.SECURE, -1);
+        });
   }
 
   private CompletionStage<Boolean> validatePositiveResponseRecursive(
-      SMessage response,
-      Map<Name, Name> wcs,
-      List<SRRset> nsec3s,
-      List<SRRset> nsecs,
-      int[] sections,
-      AtomicInteger sectionIndex,
-      AtomicInteger setIndex) {
+    SMessage response,
+    Map<Name, Name> wcs,
+    List<SRRset> nsec3s,
+    List<SRRset> nsecs,
+    int[] sections,
+    AtomicInteger sectionIndex,
+    AtomicInteger setIndex) {
     // reached the end of the sections to validate, end recursion, success
     if (sectionIndex.get() >= sections.length) {
       return completedFuture(true);
@@ -393,47 +373,76 @@ public final class ValidatingResolver implements Resolver {
       sectionIndex.getAndIncrement();
       setIndex.set(0);
       return this.validatePositiveResponseRecursive(
-          response, wcs, nsec3s, nsecs, sections, sectionIndex, setIndex);
+        response, wcs, nsec3s, nsecs, sections, sectionIndex, setIndex);
     }
 
     SRRset set = sectionRRsets.get(setIndex.getAndIncrement());
     return this.prepareFindKey(set)
-        .thenCompose(
-            ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
-              if (kve != null) {
-                kve.applyToResponse(response);
-                return completedFuture(false);
-              }
+      .thenCompose(
+        ke -> {
+          JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+          if (kve != null) {
+            kve.applyToResponse(response);
+            return completedFuture(false);
+          }
 
-              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
-              // If anything in the authority section fails to be secure, we
-              // have a bad message.
-              if (res.status != SecurityStatus.SECURE) {
-                response.setBogus(R.get("failed.authority.positive", set));
-                return completedFuture(false);
-              }
+          JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+          // If anything in the authority section fails to be secure, we
+          // have a bad message.
+          if (res.status != SecurityStatus.SECURE) {
+            response.setBogus(R.get("failed.authority.positive", set));
+            return completedFuture(false);
+          }
 
-              if (wcs.size() > 0) {
-                if (set.getType() == Type.NSEC) {
-                  nsecs.add(set);
-                } else if (set.getType() == Type.NSEC3) {
-                  nsec3s.add(set);
-                }
-              }
+          if (wcs.size() > 0) {
+            if (set.getType() == Type.NSEC) {
+              nsecs.add(set);
+            } else if (set.getType() == Type.NSEC3) {
+              nsec3s.add(set);
+            }
+          }
 
-              return this.validatePositiveResponseRecursive(
-                  response, wcs, nsec3s, nsecs, sections, sectionIndex, setIndex);
-            });
+          return this.validatePositiveResponseRecursive(
+            response, wcs, nsec3s, nsecs, sections, sectionIndex, setIndex);
+        });
   }
 
   private CompletionStage<Boolean> validateAnswerAndGetWildcards(
-      SMessage response, int qtype, Map<Name, Name> wcs) {
+    SMessage response, int qtype, Map<Name, Name> wcs) {
     return this.validateAnswerAndGetWildcardsRecursive(response, qtype, wcs, new AtomicInteger(0));
   }
 
+  public static Name rrsetWildcard(RRset rrset) {
+    List<RRSIGRecord> sigs = rrset.sigs();
+    RRSIGRecord firstSig = sigs.get(0);
+
+    // check rest of signatures have identical label count
+    for (int i = 1; i < sigs.size(); i++) {
+      if (sigs.get(i).getLabels() != firstSig.getLabels()) {
+        throw new IllegalArgumentException("failed.wildcard.label_count_mismatch");
+      }
+    }
+
+    // if the RRSIG label count is shorter than the number of actual labels,
+    // then this rrset was synthesized from a wildcard.
+    // Note that the RRSIG label count doesn't count the root label.
+    Name wn = rrset.getName();
+
+    // skip a leading wildcard label in the dname (RFC4035 2.2)
+    if (rrset.getName().isWild()) {
+      wn = new Name(wn, 1);
+    }
+
+    int labelDiff = (wn.labels() - 1) - firstSig.getLabels();
+    if (labelDiff > 0) {
+      return wn.wild(labelDiff);
+    }
+
+    return null;
+  }
+
   private CompletionStage<Boolean> validateAnswerAndGetWildcardsRecursive(
-      SMessage response, int qtype, Map<Name, Name> wcs, AtomicInteger setIndex) {
+    SMessage response, int qtype, Map<Name, Name> wcs, AtomicInteger setIndex) {
     // validate the ANSWER section - this will be the answer itself
     List<SRRset> sectionRRsets = response.getSectionRRsets(Section.ANSWER);
 
@@ -445,78 +454,78 @@ public final class ValidatingResolver implements Resolver {
     SRRset set = sectionRRsets.get(setIndex.get());
     // Verify the answer rrset.
     return this.prepareFindKey(set)
-        .thenCompose(
-            ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
-              if (kve != null) {
-                kve.applyToResponse(response);
-                return completedFuture(false);
-              }
+      .thenCompose(
+        ke -> {
+          JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+          if (kve != null) {
+            kve.applyToResponse(response);
+            return completedFuture(false);
+          }
 
-              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
-              // If the answer rrset failed to validate, then this message is BAD
-              if (res.status != SecurityStatus.SECURE) {
-                response.setBogus(R.get("failed.answer.positive", set));
-                return completedFuture(false);
-              }
+          JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+          // If the answer rrset failed to validate, then this message is BAD
+          if (res.status != SecurityStatus.SECURE) {
+            response.setBogus(R.get("failed.answer.positive", set));
+            return completedFuture(false);
+          }
 
-              // Check to see if the rrset is the result of a wildcard expansion.
-              // If so, an additional check will need to be made in the authority
-              // section.
-              Name wc;
-              try {
-                wc = ValUtils.rrsetWildcard(set);
-              } catch (RuntimeException ex) {
-                response.setBogus(R.get(ex.getMessage(), set.getName()));
-                return completedFuture(false);
-              }
+          // Check to see if the rrset is the result of a wildcard expansion.
+          // If so, an additional check will need to be made in the authority
+          // section.
+          Name wc;
+          try {
+            wc = rrsetWildcard(set);
+          } catch (RuntimeException ex) {
+            response.setBogus(R.get(ex.getMessage(), set.getName()));
+            return completedFuture(false);
+          }
 
-              if (wc != null) {
-                // RFC 4592, Section 4.4 does not allow wildcarded DNAMEs
-                if (set.getType() == Type.DNAME) {
-                  response.setBogus(R.get("failed.dname.wildcard", set.getName()));
+          if (wc != null) {
+            // RFC 4592, Section 4.4 does not allow wildcarded DNAMEs
+            if (set.getType() == Type.DNAME) {
+              response.setBogus(R.get("failed.dname.wildcard", set.getName()));
+              return completedFuture(false);
+            }
+
+            wcs.put(set.getName(), wc);
+          }
+
+          // Notice a DNAME that should be followed by an unsigned CNAME.
+          if (qtype != Type.DNAME && set.getType() == Type.DNAME) {
+            DNAMERecord dname = (DNAMERecord) set.first();
+            if (setIndex.getAndIncrement() < sectionRRsets.size()) {
+              SRRset cnameSet = sectionRRsets.get(setIndex.get());
+              // Validate the CNAME following a (validated) DNAME is correctly
+              // synthesized.
+              if (cnameSet.getType() == Type.CNAME && dname != null) {
+                if (cnameSet.size() > 1) {
+                  response.setBogus(R.get("failed.synthesize.multiple"));
                   return completedFuture(false);
                 }
 
-                wcs.put(set.getName(), wc);
-              }
-
-              // Notice a DNAME that should be followed by an unsigned CNAME.
-              if (qtype != Type.DNAME && set.getType() == Type.DNAME) {
-                DNAMERecord dname = (DNAMERecord) set.first();
-                if (setIndex.getAndIncrement() < sectionRRsets.size()) {
-                  SRRset cnameSet = sectionRRsets.get(setIndex.get());
-                  // Validate the CNAME following a (validated) DNAME is correctly
-                  // synthesized.
-                  if (cnameSet.getType() == Type.CNAME && dname != null) {
-                    if (cnameSet.size() > 1) {
-                      response.setBogus(R.get("failed.synthesize.multiple"));
-                      return completedFuture(false);
-                    }
-
-                    CNAMERecord cname = (CNAMERecord) cnameSet.first();
-                    try {
-                      Name expected =
-                          Name.concatenate(
-                              cname.getName().relativize(dname.getName()), dname.getTarget());
-                      if (!expected.equals(cname.getTarget())) {
-                        response.setBogus(
-                            R.get("failed.synthesize.nomatch", cname.getTarget(), expected));
-                        return completedFuture(false);
-                      }
-                    } catch (NameTooLongException e) {
-                      response.setBogus(R.get("failed.synthesize.toolong"));
-                      return completedFuture(false);
-                    }
-
-                    cnameSet.setSecurityStatus(SecurityStatus.SECURE);
+                CNAMERecord cname = (CNAMERecord) cnameSet.first();
+                try {
+                  Name expected =
+                    Name.concatenate(
+                      cname.getName().relativize(dname.getName()), dname.getTarget());
+                  if (!expected.equals(cname.getTarget())) {
+                    response.setBogus(
+                      R.get("failed.synthesize.nomatch", cname.getTarget(), expected));
+                    return completedFuture(false);
                   }
+                } catch (NameTooLongException e) {
+                  response.setBogus(R.get("failed.synthesize.toolong"));
+                  return completedFuture(false);
                 }
-              }
 
-              setIndex.getAndIncrement();
-              return this.validateAnswerAndGetWildcardsRecursive(response, qtype, wcs, setIndex);
-            });
+                cnameSet.setSecurityStatus(SecurityStatus.SECURE);
+              }
+            }
+          }
+
+          setIndex.getAndIncrement();
+          return this.validateAnswerAndGetWildcardsRecursive(response, qtype, wcs, setIndex);
+        });
   }
 
   /**
@@ -553,119 +562,119 @@ public final class ValidatingResolver implements Resolver {
     // validate the AUTHORITY section
     Name qname = intermediateQname;
     return this.validateNodataResponseRecursive(response, new AtomicInteger(0))
-        .handleAsync(
-            (result, ex) -> {
-              if (ex != null) {
-                return null;
-              }
+      .handleAsync(
+        (result, ex) -> {
+          if (ex != null) {
+            return null;
+          }
 
-              // If true, then the NODATA has been proven.
-              boolean hasValidNSEC = false;
+          // If true, then the NODATA has been proven.
+          boolean hasValidNSEC = false;
 
-              // for wildcard nodata responses. This is the proven closest encloser.
-              Name ce = null;
+          // for wildcard nodata responses. This is the proven closest encloser.
+          Name ce = null;
 
-              // for wildcard nodata responses. This is the wildcard NSEC.
-              NsecProvesNodataResponse ndp = new NsecProvesNodataResponse();
+          // for wildcard nodata responses. This is the wildcard NSEC.
+          NsecProvesNodataResponse ndp = new NsecProvesNodataResponse();
 
-              // A collection of NSEC3 RRs found in the authority section.
-              List<SRRset> nsec3s = new ArrayList<>(0);
+          // A collection of NSEC3 RRs found in the authority section.
+          List<SRRset> nsec3s = new ArrayList<>(0);
 
-              // The RRSIG signer field for the NSEC3 RRs.
-              Name nsec3Signer = null;
+          // The RRSIG signer field for the NSEC3 RRs.
+          Name nsec3Signer = null;
 
-              int edeReason = ExtendedErrorCodeOption.NSEC_MISSING;
-              for (SRRset set : response.getSectionRRsets(Section.AUTHORITY)) {
-                // If we encounter an NSEC record, try to use it to prove NODATA.
-                // This needs to handle the empty non-terminal (ENT) NODATA case.
-                if (set.getType() == Type.NSEC) {
-                  NSECRecord nsec = (NSECRecord) set.first();
-                  ndp = ValUtils.nsecProvesNodata(set, nsec, qname, qtype);
-                  if (ndp.result) {
-                    hasValidNSEC = true;
-                  } else {
-                    edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
-                  }
-
-                  if (ValUtils.nsecProvesNameError(set, nsec, qname)) {
-                    ce = ValUtils.closestEncloser(qname, set.getName(), nsec.getNext());
-                  }
-                }
-
-                // Collect any NSEC3 records present.
-                if (set.getType() == Type.NSEC3) {
-                  nsec3s.add(set);
-                  nsec3Signer = set.getSignerName();
-                }
-              }
-
-              // check to see if we have a wildcard NODATA proof.
-
-              // The wildcard NODATA is 1 NSEC proving that qname does not exist (and
-              // also proving what the closest encloser is), and 1 NSEC showing the
-              // matching wildcard, which must be *.closest_encloser.
-              if (ndp.wc != null && (ce == null || (!ce.equals(ndp.wc) && !qname.equals(ce)))) {
+          int edeReason = ExtendedErrorCodeOption.NSEC_MISSING;
+          for (SRRset set : response.getSectionRRsets(Section.AUTHORITY)) {
+            // If we encounter an NSEC record, try to use it to prove NODATA.
+            // This needs to handle the empty non-terminal (ENT) NODATA case.
+            if (set.getType() == Type.NSEC) {
+              NSECRecord nsec = (NSECRecord) set.first();
+              ndp = ValUtils.nsecProvesNodata(set, nsec, qname, qtype);
+              if (ndp.result) {
+                hasValidNSEC = true;
+              } else {
                 edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
-                hasValidNSEC = false;
               }
 
-              this.n3valUtils.stripUnknownAlgNSEC3s(nsec3s);
-              if (!hasValidNSEC && !nsec3s.isEmpty()) {
-                log.debug("Using NSEC3 records");
-
-                // try to prove NODATA with our NSEC3 record(s)
-                if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
-                  response.setBogus(R.get("failed.nsec3_ignored"));
-                  return null;
-                }
-
-                JustifiedSecStatus res =
-                    this.n3valUtils.proveNodata(nsec3s, qname, qtype, nsec3Signer);
-                edeReason = res.edeReason;
-                if (res.status == SecurityStatus.INSECURE) {
-                  response.setStatus(SecurityStatus.INSECURE, -1);
-                  return null;
-                }
-
-                hasValidNSEC = res.status == SecurityStatus.SECURE;
+              if (ValUtils.nsecProvesNameError(set, nsec, qname)) {
+                ce = ValUtils.closestEncloser(qname, set.getName(), nsec.getNext());
               }
+            }
 
-              if (!hasValidNSEC) {
-                response.setBogus(R.get("failed.nodata"), edeReason);
-                log.trace("Failed NODATA for {}", qname);
-                return null;
-              }
+            // Collect any NSEC3 records present.
+            if (set.getType() == Type.NSEC3) {
+              nsec3s.add(set);
+              nsec3Signer = set.getSignerName();
+            }
+          }
 
-              log.trace("Successfully validated NODATA response");
-              response.setStatus(SecurityStatus.SECURE, -1);
+          // check to see if we have a wildcard NODATA proof.
+
+          // The wildcard NODATA is 1 NSEC proving that qname does not exist (and
+          // also proving what the closest encloser is), and 1 NSEC showing the
+          // matching wildcard, which must be *.closest_encloser.
+          if (ndp.wc != null && (ce == null || (!ce.equals(ndp.wc) && !qname.equals(ce)))) {
+            edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
+            hasValidNSEC = false;
+          }
+
+          this.n3valUtils.stripUnknownAlgNSEC3s(nsec3s);
+          if (!hasValidNSEC && !nsec3s.isEmpty()) {
+            log.debug("Using NSEC3 records");
+
+            // try to prove NODATA with our NSEC3 record(s)
+            if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
+              response.setBogus(R.get("failed.nsec3_ignored"));
               return null;
-            });
+            }
+
+            JustifiedSecStatus res =
+              this.n3valUtils.proveNodata(nsec3s, qname, qtype, nsec3Signer);
+            edeReason = res.edeReason;
+            if (res.status == SecurityStatus.INSECURE) {
+              response.setStatus(SecurityStatus.INSECURE, -1);
+              return null;
+            }
+
+            hasValidNSEC = res.status == SecurityStatus.SECURE;
+          }
+
+          if (!hasValidNSEC) {
+            response.setBogus(R.get("failed.nodata"), edeReason);
+            log.trace("Failed NODATA for {}", qname);
+            return null;
+          }
+
+          log.trace("Successfully validated NODATA response");
+          response.setStatus(SecurityStatus.SECURE, -1);
+          return null;
+        });
   }
 
   private CompletionStage<Void> validateNodataResponseRecursive(
-      SMessage response, AtomicInteger setIndex) {
+    SMessage response, AtomicInteger setIndex) {
     if (setIndex.get() >= response.getSectionRRsets(Section.AUTHORITY).size()) {
       return completedFuture(null);
     }
 
     SRRset set = response.getSectionRRsets(Section.AUTHORITY).get(setIndex.getAndIncrement());
     return this.prepareFindKey(set)
-        .thenComposeAsync(
-            ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
-              if (kve != null) {
-                kve.applyToResponse(response);
-                return this.failedFuture(new Exception(kve.reason));
-              }
+      .thenComposeAsync(
+        ke -> {
+          JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+          if (kve != null) {
+            kve.applyToResponse(response);
+            return this.failedFuture(new Exception(kve.reason));
+          }
 
-              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
-              if (res.status != SecurityStatus.SECURE) {
-                response.setBogus(R.get("failed.authority.nodata", set));
-                return this.failedFuture(new Exception("failed.authority.nodata"));
-              }
+          JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+          if (res.status != SecurityStatus.SECURE) {
+            response.setBogus(R.get("failed.authority.nodata", set));
+            return this.failedFuture(new Exception("failed.authority.nodata"));
+          }
 
-              return this.validateNodataResponseRecursive(response, setIndex);
-            });
+          return this.validateNodataResponseRecursive(response, setIndex);
+        });
   }
 
   private <T> CompletionStage<T> failedFuture(Throwable e) {
@@ -706,138 +715,138 @@ public final class ValidatingResolver implements Resolver {
     // validate the AUTHORITY section
     Name qname = intermediateQname;
     return this.validateNameErrorResponseRecursive(response, new AtomicInteger(0))
-        .thenComposeAsync(
-            v -> {
-              // Validate the authority section -- all RRsets in the authority section
-              // must be signed and valid.
-              // In addition, the NSEC record(s) must prove the NXDOMAIN condition.
-              boolean hasValidNSEC = false;
-              boolean hasValidWCNSEC = false;
-              List<SRRset> nsec3s = new ArrayList<>(0);
-              Name nsec3Signer = null;
-              int previousClosestEncloseLabels = 0;
+      .thenComposeAsync(
+        v -> {
+          // Validate the authority section -- all RRsets in the authority section
+          // must be signed and valid.
+          // In addition, the NSEC record(s) must prove the NXDOMAIN condition.
+          boolean hasValidNSEC = false;
+          boolean hasValidWCNSEC = false;
+          List<SRRset> nsec3s = new ArrayList<>(0);
+          Name nsec3Signer = null;
+          int previousClosestEncloseLabels = 0;
 
-              for (SRRset set : response.getSectionRRsets(Section.AUTHORITY)) {
-                // If we encounter an NSEC record, try to use it to prove NODATA.
-                // This needs to handle the empty non-terminal (ENT) NODATA case.
-                if (set.getType() == Type.NSEC) {
-                  NSECRecord nsec = (NSECRecord) set.first();
-                  if (ValUtils.nsecProvesNameError(set, nsec, qname)) {
-                    hasValidNSEC = true;
-                  }
-
-                  Name next = nsec.getNext();
-                  int closestEncloserLabels =
-                      ValUtils.closestEncloser(qname, set.getName(), next).labels();
-                  if (closestEncloserLabels > previousClosestEncloseLabels
-                      || (closestEncloserLabels == previousClosestEncloseLabels
-                          && !hasValidWCNSEC)) {
-                    hasValidWCNSEC = ValUtils.nsecProvesNoWC(set, nsec, qname);
-                  }
-
-                  previousClosestEncloseLabels = closestEncloserLabels;
-                }
-
-                if (set.getType() == Type.NSEC3) {
-                  nsec3s.add(set);
-                  nsec3Signer = set.getSignerName();
-                }
-              }
-
-              this.n3valUtils.stripUnknownAlgNSEC3s(nsec3s);
-              if ((!hasValidNSEC || !hasValidWCNSEC) && !nsec3s.isEmpty()) {
-                log.debug("Validating nxdomain: using NSEC3 records");
-
-                // Attempt to prove name error with nsec3 records.
-                if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
-                  response.setStatus(SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
-                  return completedFuture(null);
-                }
-
-                SecurityStatus status = this.n3valUtils.proveNameError(nsec3s, qname, nsec3Signer);
-                if (status != SecurityStatus.SECURE) {
-                  if (status == SecurityStatus.INSECURE) {
-                    response.setStatus(status, -1, R.get("failed.nxdomain.nsec3_insecure"));
-                  } else {
-                    response.setStatus(
-                        status,
-                        ExtendedErrorCodeOption.DNSSEC_BOGUS,
-                        R.get("failed.nxdomain.nsec3_bogus"));
-                  }
-
-                  return completedFuture(null);
-                }
-
-                // Note that we assume that the NSEC3ValUtils proofs encompass the
-                // wildcard part of the proof.
+          for (SRRset set : response.getSectionRRsets(Section.AUTHORITY)) {
+            // If we encounter an NSEC record, try to use it to prove NODATA.
+            // This needs to handle the empty non-terminal (ENT) NODATA case.
+            if (set.getType() == Type.NSEC) {
+              NSECRecord nsec = (NSECRecord) set.first();
+              if (ValUtils.nsecProvesNameError(set, nsec, qname)) {
                 hasValidNSEC = true;
-                hasValidWCNSEC = true;
               }
 
-              if (!hasValidNSEC || !hasValidWCNSEC) {
-                boolean hasValidNSEC2 = hasValidNSEC;
-
-                // Be lenient with RCODE in NSEC NameError responses
-                return this.validateNodataResponse(request, response)
-                    .thenRun(
-                        () -> {
-                          if (response.getStatus() == SecurityStatus.SECURE) {
-                            response.getHeader().setRcode(Rcode.NOERROR);
-                          } else {
-                            // If the message fails to prove either condition, it is bogus.
-                            if (!hasValidNSEC2) {
-                              response.setBogus(
-                                  R.get(
-                                      "failed.nxdomain.exists", response.getQuestion().getName()));
-                              return;
-                            }
-
-                            response.setBogus(R.get("failed.nxdomain.haswildcard"));
-                          }
-                        });
+              Name next = nsec.getNext();
+              int closestEncloserLabels =
+                ValUtils.closestEncloser(qname, set.getName(), next).labels();
+              if (closestEncloserLabels > previousClosestEncloseLabels
+                || (closestEncloserLabels == previousClosestEncloseLabels
+                && !hasValidWCNSEC)) {
+                hasValidWCNSEC = ValUtils.nsecProvesNoWC(set, nsec, qname);
               }
 
-              // Otherwise, we consider the message secure.
-              log.trace("Successfully validated NAME ERROR response");
-              response.setStatus(SecurityStatus.SECURE, -1);
+              previousClosestEncloseLabels = closestEncloserLabels;
+            }
+
+            if (set.getType() == Type.NSEC3) {
+              nsec3s.add(set);
+              nsec3Signer = set.getSignerName();
+            }
+          }
+
+          this.n3valUtils.stripUnknownAlgNSEC3s(nsec3s);
+          if ((!hasValidNSEC || !hasValidWCNSEC) && !nsec3s.isEmpty()) {
+            log.debug("Validating nxdomain: using NSEC3 records");
+
+            // Attempt to prove name error with nsec3 records.
+            if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
+              response.setStatus(SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
               return completedFuture(null);
-            })
-        .exceptionally(ex -> null);
+            }
+
+            SecurityStatus status = this.n3valUtils.proveNameError(nsec3s, qname, nsec3Signer);
+            if (status != SecurityStatus.SECURE) {
+              if (status == SecurityStatus.INSECURE) {
+                response.setStatus(status, -1, R.get("failed.nxdomain.nsec3_insecure"));
+              } else {
+                response.setStatus(
+                  status,
+                  ExtendedErrorCodeOption.DNSSEC_BOGUS,
+                  R.get("failed.nxdomain.nsec3_bogus"));
+              }
+
+              return completedFuture(null);
+            }
+
+            // Note that we assume that the NSEC3ValUtils proofs encompass the
+            // wildcard part of the proof.
+            hasValidNSEC = true;
+            hasValidWCNSEC = true;
+          }
+
+          if (!hasValidNSEC || !hasValidWCNSEC) {
+            boolean hasValidNSEC2 = hasValidNSEC;
+
+            // Be lenient with RCODE in NSEC NameError responses
+            return this.validateNodataResponse(request, response)
+              .thenRun(
+                () -> {
+                  if (response.getStatus() == SecurityStatus.SECURE) {
+                    response.getHeader().setRcode(Rcode.NOERROR);
+                  } else {
+                    // If the message fails to prove either condition, it is bogus.
+                    if (!hasValidNSEC2) {
+                      response.setBogus(
+                        R.get(
+                          "failed.nxdomain.exists", response.getQuestion().getName()));
+                      return;
+                    }
+
+                    response.setBogus(R.get("failed.nxdomain.haswildcard"));
+                  }
+                });
+          }
+
+          // Otherwise, we consider the message secure.
+          log.trace("Successfully validated NAME ERROR response");
+          response.setStatus(SecurityStatus.SECURE, -1);
+          return completedFuture(null);
+        })
+      .exceptionally(ex -> null);
   }
 
   private CompletionStage<Void> validateNameErrorResponseRecursive(
-      SMessage response, AtomicInteger setIndex) {
+    SMessage response, AtomicInteger setIndex) {
     if (setIndex.get() >= response.getSectionRRsets(Section.AUTHORITY).size()) {
       return completedFuture(null);
     }
 
     SRRset set = response.getSectionRRsets(Section.AUTHORITY).get(setIndex.getAndIncrement());
     return this.prepareFindKey(set)
-        .thenCompose(
-            ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
-              if (kve != null) {
-                kve.applyToResponse(response);
-                return this.failedFuture(new Exception(kve.reason));
-              }
+      .thenCompose(
+        ke -> {
+          JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+          if (kve != null) {
+            kve.applyToResponse(response);
+            return this.failedFuture(new Exception(kve.reason));
+          }
 
-              JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
-              if (res.status != SecurityStatus.SECURE) {
-                response.setBogus(R.get("failed.nxdomain.authority", set));
-                return this.failedFuture(new Exception("failed.nxdomain.authority"));
-              }
+          JustifiedSecStatus res = this.valUtils.verifySRRset(set, ke, this.clock.instant());
+          if (res.status != SecurityStatus.SECURE) {
+            response.setBogus(R.get("failed.nxdomain.authority", set));
+            return this.failedFuture(new Exception("failed.nxdomain.authority"));
+          }
 
-              return this.validateNameErrorResponseRecursive(response, setIndex);
-            });
+          return this.validateNameErrorResponseRecursive(response, setIndex);
+        });
   }
 
   private CompletionStage<SMessage> sendRequest(Message request) {
     Record q = request.getQuestion();
     log.trace(
-        "Sending request: <{}/{}/{}>",
-        q.getName(),
-        Type.string(q.getType()),
-        DClass.string(q.getDClass()));
+      "Sending request: <{}/{}/{}>",
+      q.getName(),
+      Type.string(q.getType()),
+      DClass.string(q.getDClass()));
 
     // Send the request along by using a local copy of the request
     Message localRequest = request.clone();
@@ -858,13 +867,13 @@ public final class ValidatingResolver implements Resolver {
     if (trustAnchorRRset == null) {
       // response isn't under a trust anchor, so we cannot validate.
       KeyEntry ke =
-          KeyEntry.newNullKeyEntry(state.signerName, rrset.getDClass(), DEFAULT_TA_BAD_KEY_TTL);
+        KeyEntry.newNullKeyEntry(state.signerName, rrset.getDClass(), DEFAULT_TA_BAD_KEY_TTL);
       return completedFuture(ke);
     }
 
     state.keyEntry = this.keyCache.find(state.signerName, rrset.getDClass());
     if (state.keyEntry == null
-        || (!state.keyEntry.getName().equals(state.signerName) && state.keyEntry.isGood())) {
+      || (!state.keyEntry.getName().equals(state.signerName) && state.keyEntry.isGood())) {
       // start the FINDKEY phase with the trust anchor
       state.dsRRset = trustAnchorRRset;
       state.keyEntry = null;
@@ -922,25 +931,25 @@ public final class ValidatingResolver implements Resolver {
 
     Name nextKeyName = new Name(targetKeyName, l);
     log.trace(
-        "Key search: targetKeyName = {}, currentKeyName = {}, nextKeyName = {}",
-        targetKeyName,
-        currentKeyName,
-        nextKeyName);
+      "Key search: targetKeyName = {}, currentKeyName = {}, nextKeyName = {}",
+      targetKeyName,
+      currentKeyName,
+      nextKeyName);
 
     // The next step is either to query for the next DS, or to query for the
     // next DNSKEY.
     if (state.dsRRset == null || !state.dsRRset.getName().equals(nextKeyName)) {
       Message dsRequest = Message.newQuery(Record.newRecord(nextKeyName, Type.DS, qclass));
       return this.sendRequest(dsRequest)
-          .thenComposeAsync(dsResponse -> this.processDSResponse(dsRequest, dsResponse, state));
+        .thenComposeAsync(dsResponse -> this.processDSResponse(dsRequest, dsResponse, state));
     }
 
     // Otherwise, it is time to query for the DNSKEY
     Message dnskeyRequest =
-        Message.newQuery(Record.newRecord(state.dsRRset.getName(), Type.DNSKEY, qclass));
+      Message.newQuery(Record.newRecord(state.dsRRset.getName(), Type.DNSKEY, qclass));
     return this.sendRequest(dnskeyRequest)
-        .thenComposeAsync(
-            dnskeyResponse -> this.processDNSKEYResponse(dnskeyRequest, dnskeyResponse, state));
+      .thenComposeAsync(
+        dnskeyResponse -> this.processDNSKEYResponse(dnskeyRequest, dnskeyResponse, state));
   }
 
   /**
@@ -976,8 +985,8 @@ public final class ValidatingResolver implements Resolver {
         if (!valUtils.atLeastOneSupportedAlgorithm(dsRrset)) {
           KeyEntry nullKey = KeyEntry.newNullKeyEntry(qname, qclass, dsRrset.getTTL());
           nullKey.setBadReason(
-              ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
-              R.get("insecure.ds.noalgorithms", qname));
+            ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
+            R.get("insecure.ds.noalgorithms", qname));
           return nullKey;
         }
 
@@ -1005,7 +1014,7 @@ public final class ValidatingResolver implements Resolver {
         // We've encountered an unhandled classification for this
         // response.
         bogusKE.setBadReason(
-            ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.notype", subtype));
+          ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("failed.ds.notype", subtype));
         return bogusKE;
     }
   }
@@ -1028,13 +1037,13 @@ public final class ValidatingResolver implements Resolver {
 
     if (!this.valUtils.hasSignedNsecs(response)) {
       bogusKE.setBadReason(
-          ExtendedErrorCodeOption.RRSIGS_MISSING, R.get("failed.ds.nonsec", qname));
+        ExtendedErrorCodeOption.RRSIGS_MISSING, R.get("failed.ds.nonsec", qname));
       return bogusKE;
     }
 
     // Try to prove absence of the DS with NSEC
     JustifiedSecStatus status =
-        this.valUtils.nsecProvesNodataDsReply(request, response, keyRrset, this.clock.instant());
+      this.valUtils.nsecProvesNodataDsReply(request, response, keyRrset, this.clock.instant());
     switch (status.status) {
       case SECURE:
         KeyEntry nullKey = KeyEntry.newNullKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
@@ -1059,7 +1068,7 @@ public final class ValidatingResolver implements Resolver {
       // Attempt to prove no DS with NSEC3s.
       for (SRRset nsec3set : nsec3Rrsets) {
         JustifiedSecStatus res =
-            this.valUtils.verifySRRset(nsec3set, keyRrset, this.clock.instant());
+          this.valUtils.verifySRRset(nsec3set, keyRrset, this.clock.instant());
         if (res.status != SecurityStatus.SECURE) {
           // We could just fail here as there is an invalid rrset, but
           // skipping doesn't matter because we might not need it or
@@ -1110,7 +1119,7 @@ public final class ValidatingResolver implements Resolver {
    * @param state The state associated with the current key finding phase.
    */
   private CompletionStage<Void> processDSResponse(
-      Message request, SMessage response, FindKeyState state) {
+    Message request, SMessage response, FindKeyState state) {
     Name qname = request.getQuestion().getName();
 
     state.emptyDSName = null;
@@ -1139,7 +1148,7 @@ public final class ValidatingResolver implements Resolver {
   }
 
   private CompletionStage<Void> processDNSKEYResponse(
-      Message request, SMessage response, FindKeyState state) {
+    Message request, SMessage response, FindKeyState state) {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
 
@@ -1148,13 +1157,13 @@ public final class ValidatingResolver implements Resolver {
       // If the DNSKEY rrset was missing, this is the end of the line.
       state.keyEntry = KeyEntry.newBadKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
       state.keyEntry.setBadReason(
-          ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_rrset", qname));
+        ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_rrset", qname));
       return completedFuture(null);
     }
 
     state.keyEntry =
-        this.valUtils.verifyNewDNSKEYs(
-            dnskeyRrset, state.dsRRset, DEFAULT_TA_BAD_KEY_TTL, this.clock.instant());
+      this.valUtils.verifyNewDNSKEYs(
+        dnskeyRrset, state.dsRRset, DEFAULT_TA_BAD_KEY_TTL, this.clock.instant());
 
     // If the key entry isBad or isNull, then we can move on to the next
     // state.
@@ -1192,16 +1201,16 @@ public final class ValidatingResolver implements Resolver {
       case CNAME_NODATA:
         log.trace("Validating a CNAME_NODATA response");
         completionStage =
-            this.validatePositiveResponse(request, response)
-                .thenCompose(
-                    v -> {
-                      if (response.getStatus() != SecurityStatus.INSECURE) {
-                        response.setStatus(SecurityStatus.UNCHECKED, -1);
-                        return this.validateNodataResponse(request, response);
-                      }
+          this.validatePositiveResponse(request, response)
+            .thenCompose(
+              v -> {
+                if (response.getStatus() != SecurityStatus.INSECURE) {
+                  response.setStatus(SecurityStatus.UNCHECKED, -1);
+                  return this.validateNodataResponse(request, response);
+                }
 
-                      return completedFuture(null);
-                    });
+                return completedFuture(null);
+              });
         break;
 
       case NAMEERROR:
@@ -1212,16 +1221,16 @@ public final class ValidatingResolver implements Resolver {
       case CNAME_NAMEERROR:
         log.trace("Validating a cname_nxdomain response");
         completionStage =
-            this.validatePositiveResponse(request, response)
-                .thenCompose(
-                    v -> {
-                      if (response.getStatus() != SecurityStatus.INSECURE) {
-                        response.setStatus(SecurityStatus.UNCHECKED, -1);
-                        return this.validateNameErrorResponse(request, response);
-                      }
+          this.validatePositiveResponse(request, response)
+            .thenCompose(
+              v -> {
+                if (response.getStatus() != SecurityStatus.INSECURE) {
+                  response.setStatus(SecurityStatus.UNCHECKED, -1);
+                  return this.validateNameErrorResponse(request, response);
+                }
 
-                      return completedFuture(null);
-                    });
+                return completedFuture(null);
+              });
         break;
 
       default:
@@ -1348,40 +1357,40 @@ public final class ValidatingResolver implements Resolver {
   @Override
   public CompletionStage<Message> sendAsync(Message query) {
     return this.sendRequest(query)
-        .thenCompose(
-            response -> {
-              response.getHeader().unsetFlag(Flags.AD);
+      .thenCompose(
+        response -> {
+          response.getHeader().unsetFlag(Flags.AD);
 
-              // If the CD bit is set, do not process the (cached) validation status.
-              if (query.getHeader().getFlag(Flags.CD)) {
-                return completedFuture(response.getMessage());
-              }
+          // If the CD bit is set, do not process the (cached) validation status.
+          if (query.getHeader().getFlag(Flags.CD)) {
+            return completedFuture(response.getMessage());
+          }
 
-              // Positive RRSIG responses cannot be validated as there are no
-              // signatures on signatures. Negative answers CAN be validated.
-              Message rrsigResponse = response.getMessage();
-              if (query.getQuestion().getType() == Type.RRSIG
-                  && rrsigResponse.getHeader().getRcode() == Rcode.NOERROR
-                  && !rrsigResponse.getSectionRRsets(Section.ANSWER).isEmpty()) {
-                rrsigResponse.getHeader().unsetFlag(Flags.AD);
-                return completedFuture(rrsigResponse);
-              }
+          // Positive RRSIG responses cannot be validated as there are no
+          // signatures on signatures. Negative answers CAN be validated.
+          Message rrsigResponse = response.getMessage();
+          if (query.getQuestion().getType() == Type.RRSIG
+            && rrsigResponse.getHeader().getRcode() == Rcode.NOERROR
+            && !rrsigResponse.getSectionRRsets(Section.ANSWER).isEmpty()) {
+            rrsigResponse.getHeader().unsetFlag(Flags.AD);
+            return completedFuture(rrsigResponse);
+          }
 
-              return this.processValidate(query, response)
-                  .thenApply(
-                      validated -> {
-                        Message m = validated.getMessage();
-                        String reason = validated.getBogusReason();
-                        if (reason != null) {
-                          applyEdeToOpt(validated, m);
-                          if (isAddReasonToAdditional) {
-                            addValidationReasonTxtRecord(m, reason);
-                          }
-                        }
+          return this.processValidate(query, response)
+            .thenApply(
+              validated -> {
+                Message m = validated.getMessage();
+                String reason = validated.getBogusReason();
+                if (reason != null) {
+                  applyEdeToOpt(validated, m);
+                  if (isAddReasonToAdditional) {
+                    addValidationReasonTxtRecord(m, reason);
+                  }
+                }
 
-                        return m;
-                      });
-            });
+                return m;
+              });
+        });
   }
 
   private void applyEdeToOpt(SMessage validated, Message m) {
@@ -1395,16 +1404,16 @@ public final class ValidatingResolver implements Resolver {
     options.add(new ExtendedErrorCodeOption(validated.getEdeReason(), validated.getBogusReason()));
     if (old != null) {
       options.addAll(
-          old.getOptions().stream()
-              .filter(o -> o.getCode() != Code.EDNS_EXTENDED_ERROR)
-              .collect(Collectors.toList()));
+        old.getOptions().stream()
+          .filter(o -> o.getCode() != Code.EDNS_EXTENDED_ERROR)
+          .collect(Collectors.toList()));
       newOpt =
-          new OPTRecord(
-              old.getPayloadSize(),
-              old.getExtendedRcode(),
-              old.getVersion(),
-              old.getFlags(),
-              options);
+        new OPTRecord(
+          old.getPayloadSize(),
+          old.getExtendedRcode(),
+          old.getVersion(),
+          old.getFlags(),
+          options);
       m.removeRecord(m.getOPT(), Section.ADDITIONAL);
     } else {
       newOpt = new OPTRecord(SimpleResolver.DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0, options);
@@ -1421,8 +1430,8 @@ public final class ValidatingResolver implements Resolver {
     }
 
     m.addRecord(
-        new TXTRecord(Name.root, VALIDATION_REASON_QCLASS, 0, Arrays.asList(parts)),
-        Section.ADDITIONAL);
+      new TXTRecord(Name.root, VALIDATION_REASON_QCLASS, 0, Arrays.asList(parts)),
+      Section.ADDITIONAL);
   }
 
   /**

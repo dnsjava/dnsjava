@@ -27,11 +27,16 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   protected int type;
   protected int dclass;
   protected long ttl;
+  protected byte[] address;
 
   private static final DecimalFormat byteFormat = new DecimalFormat();
 
   static {
     byteFormat.setMinimumIntegerDigits(3);
+  }
+
+  public <T> T getAddress() {
+    return (T) byteArrayToString(address, false);
   }
 
   private static class RecordSerializationProxy implements Serializable {
@@ -105,7 +110,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   protected abstract void rrFromWire(DNSInput in) throws IOException;
 
   private static Record newRecord(
-      Name name, int type, int dclass, long ttl, int length, DNSInput in) throws IOException {
+    Name name, int type, int dclass, long ttl, int length, DNSInput in) throws IOException {
     Record rec;
     rec = getEmptyRecord(name, type, dclass, ttl, in != null);
     if (in != null) {
@@ -136,7 +141,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
    *     bytes are used.
    */
   public static Record newRecord(
-      Name name, int type, int dclass, long ttl, int length, byte[] data) {
+    Name name, int type, int dclass, long ttl, int length, byte[] data) {
     if (!name.isAbsolute()) {
       throw new RelativeNameException(name);
     }
@@ -456,7 +461,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
    * @throws IOException The text format was invalid.
    */
   public static Record fromString(
-      Name name, int type, int dclass, long ttl, Tokenizer st, Name origin) throws IOException {
+    Name name, int type, int dclass, long ttl, Tokenizer st, Name origin) throws IOException {
     Record rec;
 
     if (!name.isAbsolute()) {
@@ -502,7 +507,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
    * @throws IOException The text format was invalid.
    */
   public static Record fromString(Name name, int type, int dclass, long ttl, String s, Name origin)
-      throws IOException {
+    throws IOException {
     return fromString(name, type, dclass, ttl, new Tokenizer(s), origin);
   }
 
@@ -689,7 +694,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static int checkU8(String field, int val) {
     if (val < 0 || val > 0xFF) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be an unsigned 8 bit value");
+        "\"" + field + "\" " + val + " must be an unsigned 8 bit value");
     }
     return val;
   }
@@ -698,7 +703,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static int checkU16(String field, int val) {
     if (val < 0 || val > 0xFFFF) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be an unsigned 16 bit value");
+        "\"" + field + "\" " + val + " must be an unsigned 16 bit value");
     }
     return val;
   }
@@ -707,7 +712,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static long checkU32(String field, long val) {
     if (val < 0 || val > 0xFFFFFFFFL) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be an unsigned 32 bit value");
+        "\"" + field + "\" " + val + " must be an unsigned 32 bit value");
     }
     return val;
   }
@@ -716,7 +721,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static Name checkName(String field, Name name) {
     if (!name.isAbsolute()) {
       throw new RelativeNameException(
-          "'" + name + "' on field " + field + " is not an absolute name");
+        "'" + name + "' on field " + field + " is not an absolute name");
     }
     return name;
   }
@@ -724,7 +729,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   static byte[] checkByteArrayLength(String field, byte[] array, int maxLength) {
     if (array.length > 0xFFFF) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" array must have no more than " + maxLength + " elements");
+        "\"" + field + "\" array must have no more than " + maxLength + " elements");
     }
     byte[] out = new byte[array.length];
     System.arraycopy(array, 0, out, 0, array.length);

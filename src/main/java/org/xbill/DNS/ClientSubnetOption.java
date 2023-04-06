@@ -39,7 +39,7 @@ public class ClientSubnetOption extends EDNSOption {
     int max = Address.addressLength(family) * 8;
     if (val < 0 || val > max) {
       throw new IllegalArgumentException(
-          "\"" + field + "\" " + val + " must be in the range [0.." + max + "]");
+        "\"" + field + "\" " + val + " must be in the range [0.." + max + "]");
     }
     return val;
   }
@@ -139,10 +139,7 @@ public class ClientSubnetOption extends EDNSOption {
 
   @Override
   void optionToWire(DNSOutput out) {
-    out.writeU16(family);
-    out.writeU8(sourcePrefixLength);
-    out.writeU8(scopePrefixLength);
-    out.writeByteArray(address.getAddress(), 0, (sourcePrefixLength + 7) / 8);
+    out.writeOptions(family, sourcePrefixLength, scopePrefixLength, address);
   }
 
   @Override

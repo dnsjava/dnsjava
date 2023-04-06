@@ -12,7 +12,6 @@ import java.io.IOException;
  * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class ISDNRecord extends Record {
-  private byte[] address;
   private byte[] subAddress;
 
   ISDNRecord() {}
@@ -57,11 +56,6 @@ public class ISDNRecord extends Record {
     } catch (TextParseException e) {
       throw st.exception(e.getMessage());
     }
-  }
-
-  /** Returns the ISDN number associated with the domain. */
-  public String getAddress() {
-    return byteArrayToString(address, false);
   }
 
   /** Returns the ISDN subaddress, or null if there is none. */
