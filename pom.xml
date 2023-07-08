@@ -52,7 +52,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.24</lombok.version>
         <jna.version>5.11.0</jna.version>
-        <bouncycastle.version>1.71</bouncycastle.version>
+        <bouncycastle.version>1.74</bouncycastle.version>
         <vertx.version>4.2.7</vertx.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
