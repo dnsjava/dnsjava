@@ -351,6 +351,55 @@ class NameTest {
     }
 
     @Test
+    void ctor_max_length_rel_with_root_origin() throws TextParseException {
+      // relative name with three 63-char labels and a 61-char label with Name.root as origin
+      Name n =
+          new Name(
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+              Name.root);
+      assertTrue(n.isAbsolute());
+      assertFalse(n.isWild());
+      assertEquals(5, n.labels());
+      assertEquals(255, n.length());
+    }
+
+    @Test
+    void ctor_max_length_rel_with_abs_origin() throws TextParseException {
+      // relative name with three 63-char labels and a 52-char label with 9-char absolute name as
+      // origin
+      Name n =
+          new Name(
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddd",
+              Name.fromString("absolute."));
+      assertTrue(n.isAbsolute());
+      assertFalse(n.isWild());
+      assertEquals(6, n.labels());
+      assertEquals(255, n.length());
+    }
+
+    @Test
+    void ctor_too_long_rel_with_rel_origin() throws TextParseException {
+      // relative name with three 63-char labels and a 53-char label with an 8-char relative origin
+      assertThrows(
+          TextParseException.class,
+          () ->
+              new Name(
+                  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                  new Name("relative")));
+    }
+
+    @Test
+    void ctor_too_long_rel_with_abs_origin() {
+      // relative name with three 63-char labels and a 53-char label with a 9-char absolute origin
+      assertThrows(
+          TextParseException.class,
+          () ->
+              new Name(
+                  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                  new Name("absolute.")));
+    }
+
+    @Test
     void ctor_escaped() throws TextParseException {
       Name n = new Name("ab\\123cd");
       assertFalse(n.isAbsolute());
