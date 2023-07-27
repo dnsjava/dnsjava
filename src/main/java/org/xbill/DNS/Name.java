@@ -271,6 +271,7 @@ public class Name implements Comparable<Name>, Serializable {
       appendFromString(s, label, pos);
     }
     if (origin != null && !absolute) {
+      absolute = origin.isAbsolute();
       appendFromString(s, origin.name, origin.labels);
     }
     // A relative name that is MAXNAME octets long is a strange and wonderful thing.
