@@ -78,7 +78,7 @@ public class Name implements Comparable<Name>, Serializable {
 
   private Name() {}
 
-  private void setoffset(int n, int offset) {
+  private void setOffset(int n, int offset) {
     if (n == 0 || n >= MAXOFFSETS) {
       return;
     }
@@ -134,7 +134,7 @@ public class Name implements Comparable<Name>, Serializable {
     System.arraycopy(array, arrayOffset, newname, length, appendLength);
     name = newname;
     for (int i = 0, pos = length; i < numLabels && i < MAXOFFSETS; i++) {
-      setoffset(labels + i, pos);
+      setOffset(labels + i, pos);
       pos += newname[pos] + 1;
     }
     labels += numLabels;
@@ -162,7 +162,7 @@ public class Name implements Comparable<Name>, Serializable {
     }
     newname[length] = (byte) len;
     name = newname;
-    setoffset(labels, length);
+    setOffset(labels, length);
     labels++;
     return length + 1;
   }
@@ -271,6 +271,7 @@ public class Name implements Comparable<Name>, Serializable {
       appendFromString(s, label, pos);
     }
     if (origin != null && !absolute) {
+      absolute = origin.isAbsolute();
       appendFromString(s, origin.name, origin.labels);
     }
     // A relative name that is MAXNAME octets long is a strange and wonderful thing.
@@ -418,7 +419,7 @@ public class Name implements Comparable<Name>, Serializable {
     name = Arrays.copyOfRange(src.name, src.offset(n), src.name.length);
     int strippedBytes = src.offset(n);
     for (int i = 1; i < MAXOFFSETS && i < labels; i++) {
-      setoffset(i, src.offset(i + n) - strippedBytes);
+      setOffset(i, src.offset(i + n) - strippedBytes);
     }
   }
 
@@ -538,7 +539,7 @@ public class Name implements Comparable<Name>, Serializable {
     System.arraycopy(dnametarget.name, 0, newname.name, plength, dlength);
 
     for (int i = 0, pos = 0; i < MAXOFFSETS && i < plabels + dlabels; i++) {
-      newname.setoffset(i, pos);
+      newname.setOffset(i, pos);
       pos += newname.name[pos] + 1;
     }
     return newname;
