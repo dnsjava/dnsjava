@@ -203,6 +203,11 @@ final class NioTcpClient extends NioClient {
           channel.socket().getRemoteSocketAddress(),
           data);
 
+      // The message was shorter than the minimum length to find the transaction, abort
+      if (data.length < 2) {
+        return;
+      }
+
       for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
         Transaction t = it.next();
         int id = ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
