@@ -31,12 +31,13 @@ class SimpleResolverDeniedTest {
                   NioUdpClient.sendrecv(
                       any(),
                       any(InetSocketAddress.class),
+                      any(Message.class),
                       any(byte[].class),
                       anyInt(),
                       any(Duration.class)))
           .thenAnswer(
               a -> {
-                Message qparsed = new Message(a.getArgument(2, byte[].class));
+                Message qparsed = new Message(a.<byte[]>getArgument(3));
 
                 int id = qparsed.getHeader().getID();
                 Message response = new Message(id);
