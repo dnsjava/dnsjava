@@ -31,8 +31,9 @@ public final class TTL {
    * @return The value as a number of seconds
    * @throws NumberFormatException The string was not in a valid TTL format.
    */
+  @SuppressWarnings("fallthrough")
   public static long parse(String s, boolean clamp) {
-    if (s == null || s.length() == 0 || !Character.isDigit(s.charAt(0))) {
+    if (s == null || s.isEmpty() || !Character.isDigit(s.charAt(0))) {
       throw new NumberFormatException();
     }
     long value = 0;

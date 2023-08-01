@@ -9,4 +9,8 @@
     <property name="headerFile" value="checkstyle/header.template.txt"/>
     <property name="fileExtensions" value="java"/>
   </module>
+  <!-- Excludes all 'module-info.java' files, see https://github.com/checkstyle/checkstyle/issues/8240 -->
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern" value="module\-info\.java$"/>
+  </module>
 </module>

@@ -13,6 +13,8 @@ import java.util.List;
  *   <li>Java 9: generates an illegal reflective access exception.
  *   <li>Java 16 (classpath): requires adding the JVM flag {@code --add-opens
  *       java.base/sun.net.dns=ALL-UNNAMED}.
+ *   <li>Java 16 (module path): requires adding the JVM flag {@code --add-opens
+ *       java.base/sun.net.dns=org.dnsjava}.
  *   <li>On Windows, may return invalid nameservers of disconnected NICs before Java 15, <a
  *       href="https://bugs.openjdk.java.net/browse/JDK-7006496">JDK-7006496</a>.
  * </ul>

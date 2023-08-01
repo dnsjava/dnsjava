@@ -13,7 +13,7 @@ permissions:
   checks: write
 
 env:
-  BUILD_JAVA_VERSION: '20'
+  BUILD_JAVA_VERSION: '21'
 
 jobs:
   analyze:
@@ -48,7 +48,7 @@ jobs:
           number: ${{ steps.pr_number.outputs.pr_number }}
 
       - name: Checkout PR
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_sha }}
@@ -60,7 +60,7 @@ jobs:
         run: rm -rf base
 
       - name: Checkout base
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.event.repository.full_name }}
           ref: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
