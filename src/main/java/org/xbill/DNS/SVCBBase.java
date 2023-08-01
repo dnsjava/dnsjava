@@ -7,7 +7,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.xbill.DNS.utils.base64;
 
 /**
  * Implements common functionality for SVCB and HTTPS records
@@ -484,7 +484,7 @@ public abstract class SVCBBase extends Record {
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty base64 value must be specified for ech");
       }
-      data = Base64.getDecoder().decode(string);
+      data = base64.fromString(string);
     }
 
     @Override
@@ -494,7 +494,7 @@ public abstract class SVCBBase extends Record {
 
     @Override
     public String toString() {
-      return Base64.getEncoder().encodeToString(data);
+      return base64.toString(data);
     }
   }
 
@@ -531,7 +531,7 @@ public abstract class SVCBBase extends Record {
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty base64 value must be specified for echconfig");
       }
-      data = Base64.getDecoder().decode(string);
+      data = base64.fromString(string);
     }
 
     @Override
@@ -541,7 +541,7 @@ public abstract class SVCBBase extends Record {
 
     @Override
     public String toString() {
-      return Base64.getEncoder().encodeToString(data);
+      return base64.toString(data);
     }
   }
 
