@@ -70,7 +70,7 @@ class FormattedTimeTest {
     assertEquals(cal, cal2);
   }
 
-  @Test()
+  @Test
   void parseEpoch() throws DateTimeParseException {
     // have to make sure to clear out the milliseconds since there
     // is occasionally a difference between when cal and cal2 are

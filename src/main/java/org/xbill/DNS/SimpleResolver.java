@@ -370,7 +370,7 @@ public class SimpleResolver implements Resolver {
     if (tcp) {
       result = NioTcpClient.sendrecv(localAddress, address, query, out, timeoutValue);
     } else {
-      result = NioUdpClient.sendrecv(localAddress, address, out, udpSize, timeoutValue);
+      result = NioUdpClient.sendrecv(localAddress, address, query, out, udpSize, timeoutValue);
     }
 
     return result.thenComposeAsync(

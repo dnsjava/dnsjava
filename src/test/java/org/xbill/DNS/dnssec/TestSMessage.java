@@ -35,21 +35,21 @@ class TestSMessage {
     assertThrows(IllegalArgumentException.class, () -> m.getSectionRRsets(section));
   }
 
-  @Test()
+  @Test
   void testGetEmptySection() {
     SMessage m = new SMessage(0, null);
     List<SRRset> sets = m.getSectionRRsets(Section.ANSWER);
     assertEquals(0, sets.size());
   }
 
-  @Test()
+  @Test
   void testGetEmptySectionByType() {
     SMessage m = new SMessage(0, null);
     List<SRRset> sets = m.getSectionRRsets(Section.ANSWER, Type.A);
     assertEquals(0, sets.size());
   }
 
-  @Test()
+  @Test
   void testGetSectionByType() throws UnknownHostException {
     Message m = new Message();
     Record r1 =
@@ -68,21 +68,21 @@ class TestSMessage {
     assertEquals(Type.A, result.get(0).getType());
   }
 
-  @Test()
+  @Test
   void testRecordCountForQuestionIsOne() {
     SMessage m = new SMessage(0, null);
     int count = m.getCount(Section.QUESTION);
     assertEquals(1, count);
   }
 
-  @Test()
+  @Test
   void testRecordCountForEmptySectionIsZero() {
     SMessage m = new SMessage(0, null);
     int count = m.getCount(Section.ADDITIONAL);
     assertEquals(0, count);
   }
 
-  @Test()
+  @Test
   void testRecordCountForIsValid() throws UnknownHostException {
     Message m = new Message();
     m.addRecord(
@@ -93,7 +93,7 @@ class TestSMessage {
     assertEquals(1, count);
   }
 
-  @Test()
+  @Test
   void testAnswerSectionSearchFound() throws UnknownHostException {
     Message m = new Message();
     Record r =
@@ -104,7 +104,7 @@ class TestSMessage {
     assertEquals(r, result.first());
   }
 
-  @Test()
+  @Test
   void testAnswerSectionSearchNotFoundDifferentClass() throws UnknownHostException {
     Message m = new Message();
     Record r =
@@ -115,7 +115,7 @@ class TestSMessage {
     assertNull(result);
   }
 
-  @Test()
+  @Test
   void testAnswerSectionSearchNotFoundDifferentType() throws UnknownHostException {
     Message m = new Message();
     Record r =
@@ -126,7 +126,7 @@ class TestSMessage {
     assertNull(result);
   }
 
-  @Test()
+  @Test
   void testAnswerSectionSearchNotFoundDifferentName()
       throws UnknownHostException, TextParseException {
     Message m = new Message();

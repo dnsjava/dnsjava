@@ -167,7 +167,8 @@ public interface Resolver {
               + "/"
               + Type.string(query.getQuestion().type)
               + ", id="
-              + query.getHeader().getID());
+              + query.getHeader().getID(),
+          e);
     }
   }
 

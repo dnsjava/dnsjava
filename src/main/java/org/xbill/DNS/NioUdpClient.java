@@ -50,19 +50,20 @@ final class NioUdpClient extends NioClient {
     } else {
       prng = new SecureRandom();
     }
-    addSelectorTimeoutTask(NioUdpClient::processPendingRegistrations);
-    addSelectorTimeoutTask(NioUdpClient::checkTransactionTimeouts);
-    addCloseTask(NioUdpClient::closeUdp);
+    setRegistrationsTask(NioUdpClient::processPendingRegistrations);
+    setTimeoutTask(NioUdpClient::checkTransactionTimeouts);
+    setCloseTask(NioUdpClient::closeUdp);
   }
 
   private static void processPendingRegistrations() {
     while (!registrationQueue.isEmpty()) {
       Transaction t = registrationQueue.remove();
       try {
+        log.trace("Registering OP_READ for transaction with id {}", t.id);
         t.channel.register(selector(), SelectionKey.OP_READ, t);
         t.send();
       } catch (IOException e) {
-        t.f.completeExceptionally(e);
+        t.completeExceptionally(e);
       }
     }
   }
@@ -71,8 +72,7 @@ final class NioUdpClient extends NioClient {
     for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
       Transaction t = it.next();
       if (t.endTime - System.nanoTime() < 0) {
-        t.silentCloseChannel();
-        t.f.completeExceptionally(new SocketTimeoutException("Query timed out"));
+        t.completeExceptionally(new SocketTimeoutException("Query timed out"));
         it.remove();
       }
     }
@@ -80,6 +80,7 @@ final class NioUdpClient extends NioClient {
 
   @RequiredArgsConstructor
   private static class Transaction implements KeyProcessor {
+    private final int id;
     private final byte[] data;
     private final int max;
     private final long endTime;
@@ -89,21 +90,24 @@ final class NioUdpClient extends NioClient {
     void send() throws IOException {
       ByteBuffer buffer = ByteBuffer.wrap(data);
       verboseLog(
-          "UDP write",
+          "UDP write: transaction id=" + id,
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
           data);
       int n = channel.send(buffer, channel.socket().getRemoteSocketAddress());
-      if (n <= 0) {
-        throw new EOFException();
+      if (n == 0) {
+        throw new EOFException(
+            "Insufficient room for the datagram in the underlying output buffer for transaction "
+                + id);
+      } else if (n < data.length) {
+        throw new EOFException("Could not send all data for transaction " + id);
       }
     }
 
     @Override
     public void processReadyKey(SelectionKey key) {
       if (!key.isReadable()) {
-        silentCloseChannel();
-        f.completeExceptionally(new EOFException("channel not readable"));
+        completeExceptionally(new EOFException("Key for transaction " + id + " is not readable"));
         pendingTransactions.remove(this);
         return;
       }
@@ -117,8 +121,7 @@ final class NioUdpClient extends NioClient {
           throw new EOFException();
         }
       } catch (IOException e) {
-        silentCloseChannel();
-        f.completeExceptionally(e);
+        completeExceptionally(e);
         pendingTransactions.remove(this);
         return;
       }
@@ -127,13 +130,18 @@ final class NioUdpClient extends NioClient {
       byte[] data = new byte[read];
       System.arraycopy(buffer.array(), 0, data, 0, read);
       verboseLog(
-          "UDP read",
+          "UDP read: transaction id=" + id,
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
           data);
       silentCloseChannel();
       f.complete(data);
       pendingTransactions.remove(this);
+    }
+
+    private void completeExceptionally(Exception e) {
+      silentCloseChannel();
+      f.completeExceptionally(e);
     }
 
     private void silentCloseChannel() {
@@ -152,12 +160,21 @@ final class NioUdpClient extends NioClient {
   }
 
   static CompletableFuture<byte[]> sendrecv(
-      InetSocketAddress local, InetSocketAddress remote, byte[] data, int max, Duration timeout) {
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      Message query,
+      byte[] data,
+      int max,
+      Duration timeout) {
+    long endTime = System.nanoTime() + timeout.toNanos();
     CompletableFuture<byte[]> f = new CompletableFuture<>();
+    DatagramChannel channel = null;
     try {
       final Selector selector = selector();
-      DatagramChannel channel = DatagramChannel.open();
+      channel = DatagramChannel.open();
       channel.configureBlocking(false);
+
+      Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, f);
       if (local == null || local.getPort() == 0) {
         boolean bound = false;
         for (int i = 0; i < 1024; i++) {
@@ -185,19 +202,23 @@ final class NioUdpClient extends NioClient {
         }
 
         if (!bound) {
-          channel.close();
-          f.completeExceptionally(new IOException("No available source port found"));
+          t.completeExceptionally(new IOException("No available source port found"));
           return f;
         }
       }
 
       channel.connect(remote);
-      long endTime = System.nanoTime() + timeout.toNanos();
-      Transaction t = new Transaction(data, max, endTime, channel, f);
       pendingTransactions.add(t);
       registrationQueue.add(t);
       selector.wakeup();
     } catch (IOException e) {
+      if (channel != null) {
+        try {
+          channel.close();
+        } catch (IOException ioe) {
+          // ignore
+        }
+      }
       f.completeExceptionally(e);
     }
 
@@ -207,7 +228,7 @@ final class NioUdpClient extends NioClient {
   private static void closeUdp() {
     registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
-    pendingTransactions.forEach(t -> t.f.completeExceptionally(closing));
+    pendingTransactions.forEach(t -> t.completeExceptionally(closing));
     pendingTransactions.clear();
   }
 }
