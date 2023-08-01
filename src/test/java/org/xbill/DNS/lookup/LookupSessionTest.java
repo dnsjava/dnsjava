@@ -3,6 +3,7 @@ package org.xbill.DNS.lookup;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,23 +53,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.xbill.DNS.AAAARecord;
-import org.xbill.DNS.ARecord;
-import org.xbill.DNS.Address;
-import org.xbill.DNS.CNAMERecord;
-import org.xbill.DNS.Cache;
-import org.xbill.DNS.Credibility;
-import org.xbill.DNS.DClass;
-import org.xbill.DNS.DNAMERecord;
-import org.xbill.DNS.Message;
-import org.xbill.DNS.Name;
-import org.xbill.DNS.RRset;
-import org.xbill.DNS.Rcode;
+import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.Resolver;
-import org.xbill.DNS.Section;
-import org.xbill.DNS.SetResponse;
-import org.xbill.DNS.Type;
 import org.xbill.DNS.hosts.HostsFileParser;
 
 @ExtendWith(MockitoExtension.class)
@@ -635,6 +621,23 @@ class LookupSessionTest {
   }
 
   @Test
+  void lookupAsync_cnameQuery() throws Exception {
+    Name query = name("cname.r.");
+    CNAMERecord response = cname(query, "a.b.");
+    Function<Name, Record> nameToRecord = name -> query.equals(name) ? response : LOOPBACK_A;
+    wireUpMockResolver(mockResolver, q -> answer(q, nameToRecord));
+
+    LookupSession lookupSession = LookupSession.builder().resolver(mockResolver).build();
+
+    CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(query, CNAME, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(singletonList(response), result.getRecords());
+    assertEquals(emptyList(), result.getAliases());
+    verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
+  }
+
+  @Test
   void lookupAsync_simpleDnameRedirect() throws Exception {
     Function<Name, Record> nameToRecord =
         n -> name("x.y.to.dname.").equals(n) ? dname("to.dname.", "to.a.") : LOOPBACK_A;
@@ -981,7 +984,11 @@ class LookupSessionTest {
   }
 
   private static CNAMERecord cname(String name, String target) {
-    return new CNAMERecord(name(name), IN, 0, name(target));
+    return cname(name(name), target);
+  }
+
+  private static CNAMERecord cname(Name name, String target) {
+    return new CNAMERecord(name, IN, 0, name(target));
   }
 
   @SuppressWarnings("SameParameterValue")

@@ -528,6 +528,7 @@ public class LookupSession {
 
     List<Record> records = response.getRecords();
     if (!records.isEmpty()
+        && query.getType() != records.get(0).getType()
         && (records.get(0).getType() == Type.CNAME || records.get(0).getType() == Type.DNAME)) {
       return maybeFollowRedirectsInAnswer(response, query, redirectCount);
     } else {
