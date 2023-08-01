@@ -121,7 +121,7 @@
                         <Bundle-SymbolicName>org.xbill.dns</Bundle-SymbolicName>
                         <Automatic-Module-Name>org.dnsjava</Automatic-Module-Name>
                         <_noclassforname>true</_noclassforname>
-                        <_donotcopy>sun</_donotcopy>
+                        <_donotcopy>android|sun</_donotcopy>
                         <_nouses>true</_nouses>
                         <Export-Package>
                             org.xbill.DNS.*
@@ -218,6 +218,7 @@
                         <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
                         <excludes>
                             <!-- Ignore classes that we need for compilation only -->
+                            <exclude>android</exclude>
                             <exclude>sun</exclude>
                             <!-- internal API detected as public -->
                             <exclude>org.xbill.DNS.config.IPHlpAPI</exclude>
@@ -362,12 +363,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.robolectric</groupId>
-            <artifactId>android-all</artifactId>
-            <version>12-robolectric-7732740</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
