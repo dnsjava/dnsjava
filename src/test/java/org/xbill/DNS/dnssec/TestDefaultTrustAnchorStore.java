@@ -9,18 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
-import org.xbill.DNS.DClass;
-import org.xbill.DNS.DNSKEYRecord;
-import org.xbill.DNS.DSRecord;
-import org.xbill.DNS.Name;
-import org.xbill.DNS.TXTRecord;
-import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.*;
 
-class TestTrustAnchorStore {
+class TestDefaultTrustAnchorStore {
   @Test
   void testNullKeyWhenNameNotUnderAnchor() throws TextParseException {
-    TrustAnchorStore tas = new TrustAnchorStore();
-    SRRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
+    RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
     assertNull(anchor);
   }
 
@@ -28,9 +23,9 @@ class TestTrustAnchorStore {
   void testKeyWhenNameUnderAnchorDS() throws TextParseException {
     SRRset set =
         new SRRset(new DSRecord(Name.fromString("bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
-    TrustAnchorStore tas = new TrustAnchorStore();
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     tas.store(set);
-    SRRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
+    RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
     assertEquals(set, anchor);
   }
 
@@ -39,16 +34,16 @@ class TestTrustAnchorStore {
     SRRset set =
         new SRRset(
             new DNSKEYRecord(Name.fromString("bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
-    TrustAnchorStore tas = new TrustAnchorStore();
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     tas.store(set);
-    SRRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
+    RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
     assertEquals(set.getName(), anchor.getName());
   }
 
   @Test
   void testInvalidAnchorRecord() throws TextParseException {
     SRRset set = new SRRset(new TXTRecord(Name.fromString("bla."), DClass.IN, 0, "root"));
-    TrustAnchorStore tas = new TrustAnchorStore();
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     assertThrows(IllegalArgumentException.class, () -> tas.store(set));
   }
 
@@ -57,9 +52,9 @@ class TestTrustAnchorStore {
     SRRset set =
         new SRRset(
             new DNSKEYRecord(Name.fromString("bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
-    TrustAnchorStore tas = new TrustAnchorStore();
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     tas.store(set);
-    SRRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
+    RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
     assertNotNull(anchor);
     tas.clear();
     assertNull(tas.find(Name.fromString("asdf.bla."), DClass.IN));
@@ -67,26 +62,26 @@ class TestTrustAnchorStore {
 
   @Test
   void testCaseInsensitiveAnchor() throws TextParseException {
-    TrustAnchorStore tas = new TrustAnchorStore();
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     SRRset set1 =
         new SRRset(new DSRecord(Name.fromString("bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
     SRRset set2 =
         new SRRset(new DSRecord(Name.fromString("Bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
     tas.store(set1);
     tas.store(set2);
-    SRRset anchor = tas.find(Name.fromString("bla."), DClass.IN);
+    RRset anchor = tas.find(Name.fromString("bla."), DClass.IN);
     assertEquals(set2, anchor);
     assertIterableEquals(Collections.singleton(set2), tas.items());
   }
 
   @Test
   void testCaseInsensitiveSameSetAnchor() throws TextParseException {
-    TrustAnchorStore tas = new TrustAnchorStore();
+    DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     SRRset set = new SRRset();
     set.addRR(new DSRecord(Name.fromString("Bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
     set.addRR(new DSRecord(Name.fromString("bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
     tas.store(set);
-    SRRset anchor = tas.find(Name.fromString("bla."), DClass.IN);
+    RRset anchor = tas.find(Name.fromString("bla."), DClass.IN);
     assertEquals(set, anchor);
     assertIterableEquals(Collections.singleton(set), tas.items());
   }

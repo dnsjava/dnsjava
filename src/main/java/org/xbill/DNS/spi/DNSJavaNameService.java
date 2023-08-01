@@ -27,20 +27,19 @@ import sun.net.spi.nameservice.NameService;
  *
  * <p>This Name Service Provider uses dnsjava.
  *
- * <p>To use this provider, you must set the following system property:
- * <b>sun.net.spi.nameservice.provider.1=dns,dnsjava</b>
+ * <p>To use this provider, you must set the following system property: {@code
+ * sun.net.spi.nameservice.provider.1=dns,dnsjava}
  *
  * @author Brian Wellington
  * @author Paul Cowan (pwc21@yahoo.com)
  */
 @Slf4j
 public class DNSJavaNameService implements NameService {
+  private static final String NAMESERVERS_PROPERTY = "sun.net.spi.nameservice.nameservers";
+  private static final String DOMAIN_PROPERTY = "sun.net.spi.nameservice.domain";
+  private static final String PREFER_V6_PROPERTY = "java.net.preferIPv6Addresses";
 
-  private static final String nsProperty = "sun.net.spi.nameservice.nameservers";
-  private static final String domainProperty = "sun.net.spi.nameservice.domain";
-  private static final String v6Property = "java.net.preferIPv6Addresses";
-
-  private boolean preferV6 = false;
+  private final boolean preferV6;
 
   private Name localhostName = null;
   private InetAddress[] localhostNamedAddresses = null;
@@ -54,9 +53,9 @@ public class DNSJavaNameService implements NameService {
    * and <b>java.net.preferIPv6Addresses</b> properties for configuration.
    */
   protected DNSJavaNameService() {
-    String nameServers = System.getProperty(nsProperty);
-    String domain = System.getProperty(domainProperty);
-    String v6 = System.getProperty(v6Property);
+    preferV6 = Boolean.getBoolean(PREFER_V6_PROPERTY);
+    String nameServers = System.getProperty(NAMESERVERS_PROPERTY);
+    String domain = System.getProperty(DOMAIN_PROPERTY);
 
     if (nameServers != null) {
       StringTokenizer st = new StringTokenizer(nameServers, ",");
@@ -69,20 +68,16 @@ public class DNSJavaNameService implements NameService {
         Resolver res = new ExtendedResolver(servers);
         Lookup.setDefaultResolver(res);
       } catch (UnknownHostException e) {
-        log.error("DNSJavaNameService: invalid {}", nsProperty);
+        log.error("DNSJavaNameService: invalid {}", NAMESERVERS_PROPERTY);
       }
     }
 
     if (domain != null) {
       try {
-        Lookup.setDefaultSearchPath(new String[] {domain});
+        Lookup.setDefaultSearchPath(domain);
       } catch (TextParseException e) {
-        log.error("DNSJavaNameService: invalid {}", domainProperty);
+        log.error("DNSJavaNameService: invalid {}", DOMAIN_PROPERTY);
       }
-    }
-
-    if (v6 != null && v6.equalsIgnoreCase("true")) {
-      preferV6 = true;
     }
 
     try {

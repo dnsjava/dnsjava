@@ -216,7 +216,12 @@
                             <exclude>org.xbill.DNS.spi</exclude>
                             <!-- internal API detected as public -->
                             <exclude>org.xbill.DNS.config.IPHlpAPI</exclude>
+                            <!-- package-private class converted to public interface, the tool is confused -->
+                            <!-- TODO: remove when 3.6.0 is released -->
+                            <exclude>org.xbill.DNS.dnssec.TrustAnchorStore</exclude>
                         </excludes>
+                        <!-- TODO: remove when 3.6.0 is released -->
+                        <ignoreMissingClasses>true</ignoreMissingClasses>
                         <overrideCompatibilityChangeParameters>
                             <overrideCompatibilityChangeParameter>
                                 <compatibilityChange>ANNOTATION_DEPRECATED_ADDED</compatibilityChange>

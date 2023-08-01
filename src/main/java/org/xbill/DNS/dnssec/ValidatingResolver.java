@@ -40,6 +40,7 @@ import org.xbill.DNS.NSECRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
 import org.xbill.DNS.OPTRecord;
+import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
@@ -120,7 +121,7 @@ public final class ValidatingResolver implements Resolver {
     this.keyCache = new KeyCache();
     this.valUtils = new ValUtils();
     this.n3valUtils = new NSEC3ValUtils();
-    this.trustAnchors = new TrustAnchorStore();
+    this.trustAnchors = new DefaultTrustAnchorStore();
     try {
       init(System.getProperties());
     } catch (IOException e) {
@@ -219,6 +220,7 @@ public final class ValidatingResolver implements Resolver {
    * Gets the store with the loaded trust anchors.
    *
    * @return The store with the loaded trust anchors.
+   * @since 3.6
    */
   public TrustAnchorStore getTrustAnchors() {
     return this.trustAnchors;
@@ -854,7 +856,7 @@ public final class ValidatingResolver implements Resolver {
       state.signerName = rrset.getName();
     }
 
-    SRRset trustAnchorRRset = this.trustAnchors.find(state.signerName, rrset.getDClass());
+    RRset trustAnchorRRset = this.trustAnchors.find(state.signerName, rrset.getDClass());
     if (trustAnchorRRset == null) {
       // response isn't under a trust anchor, so we cannot validate.
       KeyEntry ke =
@@ -862,11 +864,13 @@ public final class ValidatingResolver implements Resolver {
       return completedFuture(ke);
     }
 
+    SRRset trustAnchorSRRset = new SRRset(trustAnchorRRset);
+    trustAnchorSRRset.setSecurityStatus(SecurityStatus.SECURE);
     state.keyEntry = this.keyCache.find(state.signerName, rrset.getDClass());
     if (state.keyEntry == null
         || (!state.keyEntry.getName().equals(state.signerName) && state.keyEntry.isGood())) {
       // start the FINDKEY phase with the trust anchor
-      state.dsRRset = trustAnchorRRset;
+      state.dsRRset = trustAnchorSRRset;
       state.keyEntry = null;
       state.currentDSKeyName = new Name(trustAnchorRRset.getName(), 1);
 
