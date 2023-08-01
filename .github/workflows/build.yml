@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
@@ -55,6 +55,16 @@ jobs:
           cd target
           mv jacoco.exec jacoco-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}.exec
           mv surefire-reports surefire-reports-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
+
+      - name: Verify that the main classes are really compiled for Java 8
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          class_file_version=$(javap -v target/classes/org/xbill/DNS/SimpleResolver.class | grep -oP "major version: \K\d+")
+          echo "::notice file=SimpleResolver.class::Class file version ${class_file_version}"
+          if [ "${class_file_version}" != "52" ]; then
+            echo "::error file=SimpleResolver.class::Class file version is not Java 8"
+            exit 1
+          fi
 
       - name: Upload classes
         uses: ./.github/actions/upload-artifact
@@ -85,7 +95,7 @@ jobs:
     needs: test
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -133,7 +143,7 @@ jobs:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.owner.login == 'dnsjava'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # for Sonar
           fetch-depth: 0
@@ -160,12 +170,12 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 8
+      - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: ${{ env.BUILD_JAVA_VERSION }}
           architecture: 'x64'
           distribution: temurin
           cache: maven
@@ -183,6 +193,23 @@ jobs:
           mvn \
             --no-transfer-progress \
             --batch-mode \
-            -Dgpg.passphrase="${{ secrets.GPG_PW }}" \
-            -DperformRelease=true \
-            deploy
+            compile
+          # Verify that the main classes are really compiled for Java 8
+          class_file_version=$(javap -v target/classes/org/xbill/DNS/SimpleResolver.class | grep -oP "major version: \K\d+")
+          echo "::notice file=SimpleResolver.class::Class file version ${class_file_version}"
+          if [ "${class_file_version}" == "52" ]; then
+            mvn \
+              --no-transfer-progress \
+              --batch-mode \
+              -Dgpg.passphrase="${{ secrets.GPG_PW }}" \
+              -DperformRelease=true \
+              -DskipTests \
+              -Dmaven.test.skip.exec \
+              -Dcheckstyle.skip \
+              -Dspotless.check.skip=true \
+              -Danimal.sniffer.skip=true
+              deploy
+          else
+            echo "::error file=SimpleResolver.class::Class file version is not Java 8"
+            exit 1
+          fi

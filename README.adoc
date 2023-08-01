@@ -317,7 +317,7 @@ The servers can either be IP addresses or hostnames (which are resolved using Ja
 - On Windows, if https://github.com/java-native-access/jna[JNA] is available on the classpath, the `GetAdaptersAddresses` API is used.
 - On Android the `ConnectivityManager` is used (requires initialization using `org.xbill.DNS.config.AndroidResolverConfigProvider.setContext`).
 - The `sun.net.dns.ResolverConfiguration` class is queried if enabled.
-As of Java 16 the JVM flag `--add-opens java.base/sun.net.dns=ALL-UNNAMED` is also required.
+As of Java 16 the JVM flag `--add-opens java.base/sun.net.dns=ALL-UNNAMED` (classpath) or `--add-opens java.base/sun.net.dns=org.dnsjava` (modules) is also required.
 - If available and no servers have been found yet, https://docs.oracle.com/javase/8/docs/technotes/guides/jndi/jndi-dns.html[JNDI-DNS] is used.
 - If still no servers have been found yet, use the fallback properties.
 This can be used to query e.g. a well-known public DNS server instead of localhost.
