@@ -48,7 +48,7 @@
         <target.jdk>8</target.jdk>
 
         <org.junit.version>5.10.0</org.junit.version>
-        <mockito.version>5.4.0</mockito.version>
+        <mockito.version>4.11.0</mockito.version>
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.28</lombok.version>
         <jna.version>5.13.0</jna.version>
@@ -285,7 +285,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>10.12.2</version>
+                        <version>9.3</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -364,7 +364,7 @@
         <dependency>
             <groupId>org.robolectric</groupId>
             <artifactId>android-all</artifactId>
-            <version>13-robolectric-9030017</version>
+            <version>12-robolectric-7732740</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
