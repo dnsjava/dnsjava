@@ -114,14 +114,19 @@
                 <version>5.1.9</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <niceManifest>true</niceManifest>
+                    <excludeDependencies>lombok</excludeDependencies>
                     <instructions>
                         <Bundle-Name>dnsjava is an implementation of DNS in Java</Bundle-Name>
                         <Bundle-SymbolicName>org.xbill.dns</Bundle-SymbolicName>
                         <Automatic-Module-Name>org.dnsjava</Automatic-Module-Name>
                         <_noclassforname>true</_noclassforname>
+                        <_donotcopy>sun</_donotcopy>
+                        <_nouses>true</_nouses>
                         <Export-Package>
                             org.xbill.DNS.*
                         </Export-Package>
+                        <Private-Package>!sun.*,.</Private-Package>
                         <Import-Package>
                             !org.xbill.DNS*,
                             !sun.*,
@@ -212,8 +217,8 @@
                         <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
                         <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
                         <excludes>
-                            <!-- JDK9 removed the Nameservice SPI as per bug 8134577. -->
-                            <exclude>org.xbill.DNS.spi</exclude>
+                            <!-- Ignore classes that we need for compilation only -->
+                            <exclude>sun</exclude>
                             <!-- internal API detected as public -->
                             <exclude>org.xbill.DNS.config.IPHlpAPI</exclude>
                             <!-- package-private class converted to public interface, the tool is confused -->
@@ -454,8 +459,7 @@
         </profile>
 
         <profile>
-            <!-- JDK9 removed the Nameservice SPI as per bug 8134577. There's no replacement. -->
-            <id>no-spi-on-java9</id>
+            <id>java9</id>
             <activation>
                 <jdk>[9,)</jdk>
             </activation>
@@ -467,17 +471,6 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
                             <release>${target.jdk}</release>
-                            <excludes>
-                                <exclude>org/xbill/DNS/spi/**</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                            <excludePackageNames>*.spi</excludePackageNames>
                         </configuration>
                     </plugin>
 
@@ -491,15 +484,6 @@
                         </configuration>
                     </plugin>
                 </plugins>
-
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <excludes>
-                            <exclude>META-INF/services/sun.net.spi.nameservice.NameServiceDescriptor</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
             </build>
         </profile>
     </profiles>

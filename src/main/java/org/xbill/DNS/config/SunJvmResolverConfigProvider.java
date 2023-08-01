@@ -10,9 +10,9 @@ import java.util.List;
  * sun.net.dns.ResolverConfiguration} via reflection.
  *
  * <ul>
- *   <li>As of Java 9, generates an illegal reflective access exception.
- *   <li>As of Java 16, adding the JVM flag {@code --add-opens java.base/sun.net.dns=ALL-UNNAMED} is
- *       required.
+ *   <li>Java 9: generates an illegal reflective access exception.
+ *   <li>Java 16 (classpath): requires adding the JVM flag {@code --add-opens
+ *       java.base/sun.net.dns=ALL-UNNAMED}.
  *   <li>On Windows, may return invalid nameservers of disconnected NICs before Java 15, <a
  *       href="https://bugs.openjdk.java.net/browse/JDK-7006496">JDK-7006496</a>.
  * </ul>
