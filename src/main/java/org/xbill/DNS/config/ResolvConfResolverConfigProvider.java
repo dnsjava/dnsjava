@@ -74,6 +74,7 @@ public class ResolvConfResolverConfigProvider extends BaseResolverConfigProvider
             while (st.hasMoreTokens()) {
               addSearchPath(st.nextToken());
             }
+            break;
 
           case "options":
             while (st.hasMoreTokens()) {
