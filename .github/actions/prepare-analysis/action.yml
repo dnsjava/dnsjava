@@ -1,0 +1,63 @@
+name: Prepare code analysis
+description: Prepare the working directory for SonarQube code analysis
+
+inputs:
+  cache:
+    description: Cache type
+
+runs:
+  using: composite
+  steps:
+    - name: Get reports
+      uses: ./.github/actions/download-artifact
+      with:
+        name: reports
+
+    - name: Get coverage
+      uses: ./.github/actions/download-artifact
+      with:
+        name: merged-coverage
+
+    - name: Get classes
+      uses: ./.github/actions/download-artifact
+      with:
+        name: classes
+
+    - name: Create paths for JUnit reporting
+      id: junit_paths
+      shell: bash
+      run: |
+        report_paths=""
+        check_name=""
+        for file in target/surefire-reports-*
+        do
+          report_paths="${file}/TEST-*.xml"$'\n'"${report_paths}"
+          check_name="JUnit Report ${file##target/surefire-reports-}"$'\n'"${check_name}"
+        done
+        echo "report_paths<<EOF"$'\n'"${report_paths}EOF" >> $GITHUB_OUTPUT
+        echo "check_name<<EOF"$'\n'"${check_name}EOF" >> $GITHUB_OUTPUT
+
+    - name: Publish Test Report
+      uses: mikepenz/action-junit-report@v3
+      with:
+        commit: ${{ github.event.workflow_run.head_sha }}
+        report_paths: ${{ steps.junit_paths.outputs.report_paths }}
+        check_name: ${{ steps.junit_paths.outputs.check_name }}
+        require_tests: true
+        check_retries: true
+        detailed_summary: true
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ env.BUILD_JAVA_VERSION }}
+        distribution: temurin
+        cache: ${{ inputs.cache }}
+
+    - name: Cache SonarCloud packages
+      if: inputs.cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar

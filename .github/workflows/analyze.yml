@@ -1,0 +1,83 @@
+name: Analyze PR
+
+on:
+  workflow_run:
+    workflows:
+      - 'Build'
+    types:
+      - completed
+
+permissions:
+  pull-requests: read
+  contents: read
+  checks: write
+
+env:
+  BUILD_JAVA_VERSION: '20'
+
+jobs:
+  analyze:
+    name: Analyze Code
+    # Only run on forks, in-repo PRs are analyzed directly
+    if: github.event.workflow_run.head_repository.owner.login != 'dnsjava'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download PR number artifact
+        id: get_pr_number
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ github.event.workflow_run.name }}
+          run_id: ${{ github.event.workflow_run.id }}
+          name: pr_number
+
+      - name: Read Pull Request Number
+        id: pr_number
+        run: |
+          PR=$(cat pr_number.txt)
+          echo "pr_number=${PR}" >> "$GITHUB_OUTPUT"
+
+      - name: Request PR data from GitHub API
+        id: get_pr_data
+        if: steps.get_pr_number.outputs.found_artifact
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          route: GET /repos/{full_name}/pulls/{number}
+          full_name: ${{ github.event.repository.full_name }}
+          number: ${{ steps.pr_number.outputs.pr_number }}
+
+      - name: Checkout PR
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.workflow_run.head_repository.full_name }}
+          ref: ${{ github.event.workflow_run.head_sha }}
+          # for Sonar
+          fetch-depth: 0
+
+      - name: Make sure 'base' doesn't exist
+        shell: bash
+        run: rm -rf base
+
+      - name: Checkout base
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.repository.full_name }}
+          ref: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+          path: base
+
+      - name: Get analysis data
+        uses: ./base/.github/actions/prepare-analysis
+
+      - name: Run SonarQube
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cp -f base/pom.xml .
+          mvn -B \
+          -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
+          -Dsonar.pullrequest.key=${{ fromJson(steps.get_pr_data.outputs.data).number }} \
+          -Dsonar.pullrequest.branch=${{ fromJson(steps.get_pr_data.outputs.data).head.ref }} \
+          -Dsonar.pullrequest.base=${{ fromJson(steps.get_pr_data.outputs.data).base.ref }} \
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar

@@ -1,4 +1,4 @@
-name: dnsjava CI
+name: Build
 
 on:
   push:
@@ -10,6 +10,9 @@ on:
       - master
       - 'release/**'
 
+env:
+  BUILD_JAVA_VERSION: '20'
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -18,10 +21,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        java: [ '8', '11', '17' ]
-        arch: [ 'x86', 'x64' ]
-        exclude:
-          - os: ubuntu-latest
+        java: [ '8', '11', '17', '20' ]
+        arch: [ 'x64' ]
+        include:
+          - os: windows-latest
+            java: '17'
             arch: x86
 
     name: Java ${{ matrix.java }}/${{ matrix.arch }}/${{ matrix.os }}
@@ -29,9 +33,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          # for Sonar
-          fetch-depth: 0
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
@@ -42,31 +43,112 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        if: "${{ !(matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11') || github.event.pull_request.head.repo.full_name != 'dnsjava/dnsjava' }}"
-        run: mvn verify -B -"Dgpg.skip"
+        shell: bash
+        run: |
+          mvn verify \
+            -B \
+            -Dsurefire.rerunFailingTestsCount=2 \
+            -"Dgpg.skip" \
+            jacoco:report
+          cd target
+          mv jacoco.exec jacoco-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}.exec
+          mv surefire-reports surefire-reports-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
+
+      - name: Upload classes
+        uses: ./.github/actions/upload-artifact
+        if: always() && matrix.java == env.BUILD_JAVA_VERSION && matrix.arch == 'x64' && matrix.os == 'ubuntu-latest'
+        with:
+          name: classes
+          path: target/*classes
+
+      - name: Upload JUnit Reports
+        uses: ./.github/actions/upload-artifact
+        if: always() # always run even if the previous step fails
+        with:
+          name: reports
+          filename: ${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
+          path: target/surefire-reports-*/TEST-*.xml
+
+      - name: Upload Coverage Reports
+        uses: ./.github/actions/upload-artifact
+        if: always() # always run even if the previous step fails
+        with:
+          name: coverage
+          filename: ${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
+          path: target/jacoco-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}.exec
+
+  report:
+    name: JUnit Reports/JaCoCo Merge
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.BUILD_JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Get coverage artifact
+        uses: ./.github/actions/download-artifact
+        with:
+          name: coverage
+
+      - name: Get classes
+        uses: ./.github/actions/download-artifact
+        with:
+          name: classes
+
+      - name: Merge JaCoCo and output
+        run: mvn -B jacoco:merge jacoco:report
+
+      - name: Upload
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: merged-coverage
+          path: |
+            target/site/jacoco
+            target/jacoco.exec
+
+      - name: Save PR number to file
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'dnsjava'
+        run: echo ${{ github.event.number }} > pr_number.txt
+
+      - name: Archive PR number
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'dnsjava'
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr_number
+          path: pr_number.txt
+
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    needs: report
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.owner.login == 'dnsjava'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          # for Sonar
+          fetch-depth: 0
+
+      - name: Get analysis data
+        uses: ./.github/actions/prepare-analysis
+        with:
+          cache: maven
 
       # doesn't work with PRs from forks, see
       # https://portal.productboard.com/sonarsource/1-sonarcloud/c/50-sonarcloud-analyzes-external-pull-request
       # or https://jira.sonarsource.com/browse/MMF-1371 (not public anymore)
-      - name: Cache Sonar plugins
-        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: |
-            ${{ runner.os }}-sonar
-
-      - name: Build with Maven and run Sonar
-        if: "${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/') || github.event.pull_request.head.repo.full_name == 'dnsjava/dnsjava') && matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
+      - name: Run SonarQube
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B -"Dgpg.skip" verify jacoco:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-
-      - name: Run codecovc
-        if: "${{ matrix.arch == 'x64' && matrix.os == 'ubuntu-latest' && matrix.java == '11' }}"
-        uses: codecov/codecov-action@v3
+        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
   release:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/')
