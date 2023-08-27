@@ -52,6 +52,9 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class NameTest {
   @Nested
@@ -378,14 +381,14 @@ class NameTest {
     }
 
     @Test
-    void ctor_too_long_rel_with_rel_origin() throws TextParseException {
+    void ctor_too_long_rel_with_rel_origin() {
       // relative name with three 63-char labels and a 53-char label with an 8-char relative origin
       assertThrows(
           TextParseException.class,
           () ->
               new Name(
                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-                  new Name("relative")));
+                  Name.fromConstantString("relative")));
     }
 
     @Test
@@ -396,7 +399,7 @@ class NameTest {
           () ->
               new Name(
                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-                  new Name("absolute.")));
+                  Name.fromConstantString("absolute.")));
     }
 
     @Test
@@ -1339,19 +1342,24 @@ class NameTest {
     assertTrue(dom.subdomain(sub));
   }
 
-  @Test
-  void toString_abs() throws TextParseException {
-    String in = "This.Is.My.Absolute.Name.";
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        // absolute
+        "This.Is.My.Absolute.Name.",
+        // relative
+        "This.Is.My.Relative.Name",
+        // wildcard
+        "*.A.b.c.e",
+        // one escaped digit
+        "my.escaped\\001.label.",
+        // two escaped digits
+        "my.escaped\\010.label.",
+        // escaped junk
+        "my.escaped.junk\\128.label.",
+      })
+  void variousToString(String in) throws TextParseException {
     Name n = new Name(in);
-
-    assertEquals(in, n.toString());
-  }
-
-  @Test
-  void toString_rel() throws TextParseException {
-    String in = "This.Is.My.Relative.Name";
-    Name n = new Name(in);
-
     assertEquals(in, n.toString());
   }
 
@@ -1367,34 +1375,6 @@ class NameTest {
   }
 
   @Test
-  void toString_wild() throws TextParseException {
-    String in = "*.A.b.c.e";
-    Name n = new Name(in);
-    assertEquals(in, n.toString());
-  }
-
-  @Test
-  void toString_escaped_one_digit() throws TextParseException {
-    String in = "my.escaped\\001.label.";
-    Name n = new Name(in);
-    assertEquals(in, n.toString());
-  }
-
-  @Test
-  void toString_escaped_two_digits() throws TextParseException {
-    String in = "my.escaped\\010.label.";
-    Name n = new Name(in);
-    assertEquals(in, n.toString());
-  }
-
-  @Test
-  void toString_escaped() throws TextParseException {
-    String in = "my.escaped.junk\\128.label.";
-    Name n = new Name(in);
-    assertEquals(in, n.toString());
-  }
-
-  @Test
   void toString_special_char() throws WireParseException {
     byte[] raw = new byte[] {1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0};
     String exp = "\\\".\\(.\\).\\..\\;.\\\\.\\@.\\$.";
@@ -1407,7 +1387,8 @@ class NameTest {
     @Test
     void rel() throws TextParseException {
       Name n = new Name("A.Relative.Name");
-      assertThrows(IllegalArgumentException.class, () -> n.toWire(new DNSOutput(), null));
+      DNSOutput out = new DNSOutput();
+      assertThrows(IllegalArgumentException.class, () -> n.toWire(out, null));
     }
 
     @Test
@@ -1641,46 +1622,22 @@ class NameTest {
       assertTrue(n2.compareTo(n1) < 0);
     }
 
-    @Test
-    void disjoint() throws TextParseException {
-      Name n1 = new Name("b");
-      Name n2 = new Name("c");
-
-      assertTrue(n1.compareTo(n2) < 0);
-      assertTrue(n2.compareTo(n1) > 0);
-    }
-
-    @Test
-    void label_prefix() throws TextParseException {
-      Name n1 = new Name("thisIs.a.");
-      Name n2 = new Name("thisIsGreater.a.");
-
-      assertTrue(n1.compareTo(n2) < 0);
-      assertTrue(n2.compareTo(n1) > 0);
-    }
-
-    @Test
-    void more_labels() throws TextParseException {
-      Name n1 = new Name("c.b.a.");
-      Name n2 = new Name("d.c.b.a.");
-
-      assertTrue(n1.compareTo(n2) < 0);
-      assertTrue(n2.compareTo(n1) > 0);
-    }
-
-    @Test
-    void octal_digits_low() throws TextParseException {
-      Name n1 = new Name("\\004.b.a.");
-      Name n2 = new Name("c.b.a.");
-
-      assertTrue(n1.compareTo(n2) < 0);
-      assertTrue(n2.compareTo(n1) > 0);
-    }
-
-    @Test
-    void octal_digits_high() throws TextParseException {
-      Name n1 = new Name("c.b.a.");
-      Name n2 = new Name("\\237.b.a.");
+    @ParameterizedTest
+    @CsvSource({
+      // disjoint
+      "b, c",
+      // label_prefix
+      "thisIs.a., thisIsGreater.a.",
+      // more_labels
+      "c.b.a., d.c.b.a.",
+      // octal_digits_low
+      "\\004.b.a., c.b.a.",
+      // octal_digits_high
+      "c.b.a.,\\237.b.a.",
+    })
+    void compare(String name1, String name2) throws TextParseException {
+      Name n1 = new Name(name1);
+      Name n2 = new Name(name2);
 
       assertTrue(n1.compareTo(n2) < 0);
       assertTrue(n2.compareTo(n1) > 0);

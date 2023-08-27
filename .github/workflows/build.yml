@@ -45,6 +45,8 @@ jobs:
       - name: Build with Maven
         shell: bash
         run: |
+          # don't exit immediately
+          set +e
           mvn verify \
             -B \
             -Dsurefire.rerunFailingTestsCount=2 \

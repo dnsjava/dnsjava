@@ -34,6 +34,7 @@
 //
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -47,13 +48,66 @@ class TypeBitmapTest {
 
   @Test
   void typeA() {
-    TypeBitmap typeBitmap = new TypeBitmap(new int[] {1});
+    TypeBitmap typeBitmap = new TypeBitmap(new int[] {Type.A});
     assertEquals("A", typeBitmap.toString());
   }
 
   @Test
   void typeNSandSOA() {
-    TypeBitmap typeBitmap = new TypeBitmap(new int[] {2, 6});
+    TypeBitmap typeBitmap = new TypeBitmap(new int[] {Type.NS, Type.SOA});
     assertEquals("NS SOA", typeBitmap.toString());
+  }
+
+  @Test
+  void typeNSandSOAArray() {
+    int[] typeArray = new int[] {Type.NS, Type.SOA};
+    TypeBitmap typeBitmap = new TypeBitmap(typeArray);
+    assertArrayEquals(typeArray, typeBitmap.toArray());
+  }
+
+  @Test
+  void typeAAndSOAToWire() {
+    int[] typeArray = new int[] {Type.A, Type.SOA};
+    TypeBitmap typeBitmap = new TypeBitmap(typeArray);
+    DNSOutput out = new DNSOutput();
+    typeBitmap.toWire(out);
+    assertArrayEquals(new byte[] {0, 1, 0b0100_0010}, out.toByteArray());
+  }
+
+  @Test
+  void typeAandNSEC3ToWireAndBack() throws WireParseException {
+    int[] typeArray = new int[] {Type.A, Type.NSEC3};
+    byte[] wire =
+        new byte[] {
+          // block
+          0,
+          // size
+          7,
+          // 0-7
+          0b0100_0000,
+          // 8-15,
+          0,
+          // 16-23,
+          0,
+          // 24-31,
+          0,
+          // 32-39
+          0,
+          // 40-47
+          0,
+          // 48-55
+          0b0010_0000
+        };
+
+    // Test serialization
+    TypeBitmap typeBitmapOut = new TypeBitmap(typeArray);
+    DNSOutput out = new DNSOutput();
+    typeBitmapOut.toWire(out);
+    assertArrayEquals(wire, out.toByteArray());
+
+    // Test parsing
+    DNSInput in = new DNSInput(wire);
+    TypeBitmap typeBitmapIn = new TypeBitmap(in);
+    assertArrayEquals(typeArray, typeBitmapIn.toArray());
   }
 }

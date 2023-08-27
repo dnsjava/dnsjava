@@ -33,33 +33,45 @@ final class TypeBitmap implements Serializable {
 
   public TypeBitmap(DNSInput in) throws WireParseException {
     this();
-    int lastbase = -1;
+
+    // Encoding: ( Window Block # | Bitmap Length | Bitmap )+
+    int lastWindowBlockNumber = -1;
     while (in.remaining() > 0) {
+      // Validate block size, which is at least 2 bytes: block number + map length
       if (in.remaining() < 2) {
         throw new WireParseException("invalid bitmap descriptor");
       }
-      int mapbase = in.readU8();
-      if (mapbase < lastbase) {
-        throw new WireParseException("invalid ordering");
-      }
-      int maplength = in.readU8();
-      if (maplength > in.remaining()) {
-        throw new WireParseException("invalid bitmap");
-      }
-      for (int i = 0; i < maplength; i++) {
-        int current = in.readU8();
-        if (current == 0) {
-          continue;
-        }
-        for (int j = 0; j < 8; j++) {
-          if ((current & (1 << (7 - j))) == 0) {
-            continue;
+
+      int windowBlockNumber = getWindowBlockNumber(in, lastWindowBlockNumber);
+      int mapLength = getMapLength(in);
+      for (int i = 0; i < mapLength; i++) {
+        // Test each bit (of the non-zero bytes) in the bitmap for 1. If set, this is an enabled
+        // type.
+        int bitmapByte = in.readU8();
+        for (int j = 0; j < 8 && bitmapByte > 0; j++) {
+          if ((bitmapByte & (1 << (7 - j))) != 0) {
+            types.add(windowBlockNumber * 256 + i * 8 + j);
           }
-          int typecode = mapbase * 256 + +i * 8 + j;
-          types.add(typecode);
         }
       }
     }
+  }
+
+  private static int getWindowBlockNumber(DNSInput in, int lastWindowBlockNumber)
+      throws WireParseException {
+    int windowBlockNumber = in.readU8();
+    if (windowBlockNumber < lastWindowBlockNumber) {
+      throw new WireParseException("invalid ordering");
+    }
+    return windowBlockNumber;
+  }
+
+  private static int getMapLength(DNSInput in) throws WireParseException {
+    int mapLength = in.readU8();
+    if (mapLength > in.remaining()) {
+      throw new WireParseException("invalid bitmap");
+    }
+    return mapLength;
   }
 
   public TypeBitmap(Tokenizer st) throws IOException {
@@ -106,8 +118,7 @@ final class TypeBitmap implements Serializable {
     int[] array = new int[arraylength];
     out.writeU8(mapbase);
     out.writeU8(arraylength);
-    for (Integer integer : map) {
-      int typecode = integer;
+    for (int typecode : map) {
       array[(typecode & 0xFF) / 8] |= 1 << (7 - typecode % 8);
     }
     for (int j = 0; j < arraylength; j++) {
@@ -116,7 +127,7 @@ final class TypeBitmap implements Serializable {
   }
 
   public void toWire(DNSOutput out) {
-    if (types.size() == 0) {
+    if (types.isEmpty()) {
       return;
     }
 
@@ -127,7 +138,7 @@ final class TypeBitmap implements Serializable {
       int t = type;
       int base = t >> 8;
       if (base != mapbase) {
-        if (map.size() > 0) {
+        if (!map.isEmpty()) {
           mapToWire(out, map, mapbase);
           map.clear();
         }

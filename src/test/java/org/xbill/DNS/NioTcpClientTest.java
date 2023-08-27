@@ -117,10 +117,10 @@ class NioTcpClientTest {
                     }
                   });
         }
-      }
 
-      if (!cdlQueryRepliesReceived.await(5, TimeUnit.SECONDS)) {
-        fail("timed out waiting for answers");
+        if (!cdlQueryRepliesReceived.await(5, TimeUnit.SECONDS)) {
+          fail("timed out waiting for answers");
+        }
       }
     } finally {
       NioClient.close();
@@ -189,10 +189,10 @@ class NioTcpClientTest {
                     fail("Got an answer but expected timeout");
                   }
                 });
-      }
 
-      if (!cdlWaitForResult.await(5, TimeUnit.SECONDS)) {
-        fail("Timeout");
+        if (!cdlWaitForResult.await(5, TimeUnit.SECONDS)) {
+          fail("Timeout");
+        }
       }
     } finally {
       NioClient.close();
