@@ -212,7 +212,7 @@ public interface Resolver {
           public void handleException(Object id, Exception e) {
             f.completeExceptionally(e);
           }
-        });
+        }, executor);
     return f;
   }
 
@@ -231,8 +231,13 @@ public interface Resolver {
    */
   @Deprecated
   default Object sendAsync(Message query, ResolverListener listener) {
+    return sendAsync(query, listener, ForkJoinPool.commonPool());
+  }
+
+  @Deprecated
+  default Object sendAsync(Message query, ResolverListener listener, Executor executor) {
     final Object id = new Object();
-    CompletionStage<Message> f = sendAsync(query);
+    CompletionStage<Message> f = sendAsync(query, executor);
     f.handleAsync(
         (result, throwable) -> {
           if (throwable != null) {
@@ -248,7 +253,7 @@ public interface Resolver {
 
           listener.receiveMessage(id, result);
           return null;
-        });
+        }, executor);
     return id;
   }
 }
