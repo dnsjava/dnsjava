@@ -253,7 +253,7 @@ public interface Resolver {
 
           listener.receiveMessage(id, result);
           return null;
-        });
+        }, executor);
     return id;
   }
 }
