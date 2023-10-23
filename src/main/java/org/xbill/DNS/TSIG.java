@@ -132,7 +132,8 @@ public class TSIG {
   private final Name name;
   private final SecretKey macKey;
   private final String macAlgorithm;
-  private final Mac sharedHmac;
+  // TODO: thread safety still broken
+  private Mac sharedHmac;
 
   /**
    * Verifies the data (computes the secure hash and compares it to the input)
@@ -589,9 +590,12 @@ public class TSIG {
       return Rcode.BADKEY;
     }
 
-    Mac hmac = initHmac();
-    if (requestTSIG != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
-      hmacAddSignature(hmac, requestTSIG);
+    if (fullSignature) {
+      sharedHmac = initHmac();
+
+      if (requestTSIG != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
+        hmacAddSignature(sharedHmac, requestTSIG);
+      }
     }
 
     m.getHeader().decCount(Section.ADDITIONAL);
@@ -600,13 +604,13 @@ public class TSIG {
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC header", header));
     }
-    hmac.update(header);
+    sharedHmac.update(header);
 
     int len = m.tsigstart - header.length;
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC message after header", messageBytes, header.length, len));
     }
-    hmac.update(messageBytes, header.length, len);
+    sharedHmac.update(messageBytes, header.length, len);
 
     DNSOutput out = new DNSOutput();
     if (fullSignature) {
@@ -630,10 +634,10 @@ public class TSIG {
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC variables", tsigVariables));
     }
-    hmac.update(tsigVariables);
+    sharedHmac.update(tsigVariables);
 
     byte[] signature = tsig.getSignature();
-    int digestLength = hmac.getMacLength();
+    int digestLength = sharedHmac.getMacLength();
 
     // rfc4635#section-3.1, 4.:
     // "MAC size" field is less than the larger of 10 (octets) and half
@@ -651,7 +655,7 @@ public class TSIG {
           signature.length);
       return Rcode.BADSIG;
     } else {
-      byte[] expectedSignature = hmac.doFinal();
+      byte[] expectedSignature = sharedHmac.doFinal();
       if (!verify(expectedSignature, signature)) {
         if (log.isDebugEnabled()) {
           log.debug(
@@ -750,12 +754,28 @@ public class TSIG {
       nresponses++;
       if (nresponses == 1) {
         int result = key.verify(m, b, lastTSIG);
+
+        byte[] signature = tsig.getSignature();
+        DNSOutput out = new DNSOutput();
+        out.writeU16(signature.length);
+        byte[] z = out.toByteArray();
+        key.sharedHmac.update(z); // need to add hexdump at trace
+        key.sharedHmac.update(signature); // need to add hexdump at trace
+
         lastTSIG = tsig;
         return result;
       }
 
       if (tsig != null) {
         int result = key.verify(m, b, lastTSIG, false);
+
+        key.sharedHmac.reset();
+        DNSOutput out = new DNSOutput();
+        out.writeU16(tsig.getSignature().length);
+        byte[] outBytes = out.toByteArray();
+        key.sharedHmac.update(outBytes); // need to add hexdump at trace
+        key.sharedHmac.update(tsig.getSignature()); // need to add hexdump at trace
+
         lastsigned = nresponses;
         lastTSIG = tsig;
         return result;
@@ -766,6 +786,12 @@ public class TSIG {
           m.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         } else {
+
+          byte[] header = m.getHeader().toWire();
+          key.sharedHmac.update(header); // need to add hexdump at trace
+          int len = b.length - header.length;
+          key.sharedHmac.update(b, header.length, len); // need to add hexdump at trace
+
           log.trace("Intermediate message {} without signature", nresponses);
           m.tsigState = Message.TSIG_INTERMEDIATE;
           return Rcode.NOERROR;
