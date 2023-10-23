@@ -592,7 +592,7 @@ public class TSIG {
     m.tsigState = Message.TSIG_FAILED;
     TSIGRecord tsig = m.getTSIG();
 
-    if( fullSignature ) {
+    if (fullSignature) {
       if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
         log.debug(
           "BADKEY failure on message id {}, expected: {}/{}, actual: {}/{}",
@@ -643,7 +643,7 @@ public class TSIG {
 
     // TODO: style question whether to prefer "return early" or to have a single return at the end.
     // return early for the intermediate messages between tsigs
-    if( tsig == null ) {
+    if (tsig == null) {
       m.tsigState = Message.TSIG_INTERMEDIATE;
       return Rcode.NOERROR;
     }
