@@ -132,7 +132,21 @@ public class TSIG {
   private final Name name;
   private final SecretKey macKey;
   private final String macAlgorithm;
-  private final Mac sharedHmac;
+
+  // TODO: This change of mine is incompatible with 62d1222e3088f106f05032cef7697da324d699d0 and needs to be resolved.
+  // As written, that changeset was based on the assumption that the hmac state did not need to persist across
+  // calls to TSIG.verify().  Unfortunately, this is false.
+  //
+  // a few possibilities offhand:
+  //  1. Give up on the thread safety promise for the TSIG instance.
+  //     That's what I've done here (just because it is simplest), but it could break client assumptions.
+  //  2. Have the StreamVerifier instance manage the hmac lifecycle and pass it as a parameter to TSIG.verify().
+  //     This seems best to me, but its necessary to think through backward compatibility issues for the API.
+  //  3. Use some sort of ThreadLocal cheese.
+  //     That may cause more trouble than its worth given all DnsJava's nice async support.  I don't know.
+  //
+  // I need a bit of guidance here on how to proceed.
+  private Mac sharedHmac;
 
   /**
    * Verifies the data (computes the secure hash and compares it to the input)
@@ -571,42 +585,68 @@ public class TSIG {
    * @see Rcode
    * @since 3.2
    */
+  // TODO: requestTSIG is now a bit misnamed.  It is, indeed, the request TSIG on the first iteration.
+  //     But in later iterations where the response is larger than 100 messages in length,
+  //     it is just the "lastTSIG".
   public int verify(Message m, byte[] messageBytes, TSIGRecord requestTSIG, boolean fullSignature) {
     m.tsigState = Message.TSIG_FAILED;
     TSIGRecord tsig = m.getTSIG();
-    if (tsig == null) {
-      return Rcode.FORMERR;
-    }
 
-    if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
-      log.debug(
+    if (fullSignature) {
+      if (!tsig.getName().equals(name) || !tsig.getAlgorithm().equals(alg)) {
+        log.debug(
           "BADKEY failure on message id {}, expected: {}/{}, actual: {}/{}",
           m.getHeader().getID(),
           name,
           alg,
           tsig.getName(),
           tsig.getAlgorithm());
-      return Rcode.BADKEY;
+        return Rcode.BADKEY;
+      }
+
+      // TODO: note thread local comment on line 136
+      sharedHmac = initHmac();
+
+      // add the query tsig to the HMAC
+      if (requestTSIG != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
+        hmacAddSignature(sharedHmac, requestTSIG);
+      }
     }
 
-    Mac hmac = initHmac();
-    if (requestTSIG != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
-      hmacAddSignature(hmac, requestTSIG);
+    if (tsig != null) {
+      m.getHeader().decCount(Section.ADDITIONAL);
     }
 
-    m.getHeader().decCount(Section.ADDITIONAL);
     byte[] header = m.getHeader().toWire();
-    m.getHeader().incCount(Section.ADDITIONAL);
+
+    if (tsig != null) {
+      m.getHeader().incCount(Section.ADDITIONAL);
+    }
+
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC header", header));
     }
-    hmac.update(header);
+    sharedHmac.update(header);
 
-    int len = m.tsigstart - header.length;
+    int len;
+    if (tsig != null) {
+      len = m.tsigstart - header.length;
+    } else {
+      len = messageBytes.length - header.length;
+    }
+
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC message after header", messageBytes, header.length, len));
     }
-    hmac.update(messageBytes, header.length, len);
+
+    sharedHmac.update(messageBytes, header.length, len);
+
+    // TODO: style question whether to prefer "return early" or to have a single return at the end.
+    // return early for the intermediate messages between tsigs
+    if (tsig == null) {
+      m.tsigState = Message.TSIG_INTERMEDIATE;
+      return Rcode.NOERROR;
+    }
 
     DNSOutput out = new DNSOutput();
     if (fullSignature) {
@@ -630,10 +670,10 @@ public class TSIG {
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC variables", tsigVariables));
     }
-    hmac.update(tsigVariables);
+    sharedHmac.update(tsigVariables);
 
     byte[] signature = tsig.getSignature();
-    int digestLength = hmac.getMacLength();
+    int digestLength = sharedHmac.getMacLength();
 
     // rfc4635#section-3.1, 4.:
     // "MAC size" field is less than the larger of 10 (octets) and half
@@ -651,7 +691,7 @@ public class TSIG {
           signature.length);
       return Rcode.BADSIG;
     } else {
-      byte[] expectedSignature = hmac.doFinal();
+      byte[] expectedSignature = sharedHmac.doFinal(); // note that doFinal also resets the hmac
       if (!verify(expectedSignature, signature)) {
         if (log.isDebugEnabled()) {
           log.debug(
@@ -675,6 +715,12 @@ public class TSIG {
           tsig.getFudge());
       return Rcode.BADTIME;
     }
+
+    // TODO: this leaves the hmac "dirty" at the end of the last message verification.
+    //       But I don't see a way around it without adding more parameters to TSIG.verify().
+    //       FWIW, it was left dirty in the original working implementation.
+    // Add the current TSIG details to the HMAC for a possible next iteration
+    hmacAddSignature(sharedHmac, tsig);
 
     m.tsigState = Message.TSIG_VERIFIED;
     return Rcode.NOERROR;
@@ -767,8 +813,7 @@ public class TSIG {
           return Rcode.FORMERR;
         } else {
           log.trace("Intermediate message {} without signature", nresponses);
-          m.tsigState = Message.TSIG_INTERMEDIATE;
-          return Rcode.NOERROR;
+          return key.verify(m, b, lastTSIG, false);
         }
       }
     }
