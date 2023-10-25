@@ -383,18 +383,48 @@ public class TSIG {
    */
   public TSIGRecord generate(
       Message m, byte[] b, int error, TSIGRecord old, boolean fullSignature) {
+    Mac hmac = null;
+    boolean signing = false;
+
+    if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
+      signing = true;
+      hmac = initHmac();
+    }
+
+    return generate(m, b, error, old, hmac, true, signing, fullSignature);
+  }
+
+  // TODO - We had to introduce this to implement interleaved tsig requests for the test of StreamVerifier.
+  //  A couple possiblities going forward for this:
+  //    1. Make the ability to send multiple messages with a shared hmac a full feature
+  //    2. Keep this test-only refactor of TSIG.generate
+  //    3. Duplicate this method with this feature in the test class as to not to expose/maintain it as part of the public API
+  /**
+   * Generates a TSIG record with a specific error for a message that has been rendered. This version is useful
+   * if you want to send multiple Messages without TSIGs in between.
+   *
+   *
+   * @param m The message
+   * @param b The rendered message
+   * @param error The error
+   * @param old If this message is a response, the TSIG from the request
+   * @param hmac Hmac to use with this generate, will be cleared if signing completes
+   * @param addOldSignatureFirst Makes a call to hmacAddSignature before signing. This should be false and hmacAddSignature
+   *                             should be called manually if you are attemping to send multiple Messages without TSIGs
+   * @param fullSignature {@code true} if this {@link TSIGRecord} is the to be added to the first of
+   *     many messages in a TCP connection and all TSIG variables (rfc2845, 3.4.2.) should be
+   *     included in the signature. {@code false} for subsequent messages with reduced TSIG
+   *     variables set (rfc2845, 4.4.).
+   * @return The TSIG record to be added to the message
+   * @since 3.2
+   */
+  public TSIGRecord generate(
+    Message m, byte[] b, int error, TSIGRecord old, Mac hmac, boolean addOldSignatureFirst, boolean signing, boolean fullSignature) {
     Instant timeSigned;
     if (error == Rcode.BADTIME) {
       timeSigned = old.getTimeSigned();
     } else {
       timeSigned = clock.instant();
-    }
-
-    boolean signing = false;
-    Mac hmac = null;
-    if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
-      signing = true;
-      hmac = initHmac();
     }
 
     Duration fudge;
@@ -405,7 +435,7 @@ public class TSIG {
       fudge = Duration.ofSeconds(fudgeOption);
     }
 
-    if (old != null && signing) {
+    if (old != null && addOldSignatureFirst && signing) {
       hmacAddSignature(hmac, old);
     }
 

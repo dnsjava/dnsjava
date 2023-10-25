@@ -1,29 +1,30 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.xbill.DNS.utils.base64;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 class TSIGTest {
   @Test
@@ -324,5 +325,98 @@ class TSIGTest {
     byte[] cloneBytes = clone.toWire(Message.MAXLENGTH);
     assertNotNull(cloneBytes);
     assertNotEquals(0, cloneBytes.length);
+  }
+
+  @Test
+  void testTSIGStreamVerifier() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+    MockMessageClient client = new MockMessageClient(new TSIG(TSIG.HMAC_SHA256, "example.", "12345678"));
+    MockMessageServer server = new MockMessageServer(new TSIG(TSIG.HMAC_SHA256, "example.", "12345678"));
+
+    byte[] query = client.createQuery();
+    List<byte[]> response = server.handleQuery(query, 100, 6);
+    client.validateResponse(query, response);
+  }
+
+  private static class MockMessageClient {
+    private final TSIG key;
+
+    MockMessageClient(TSIG key) {
+      this.key = key;
+    }
+
+    byte[] createQuery() throws TextParseException {
+      Name qname = Name.fromString("www.example.");
+      Record question = Record.newRecord(qname, Type.A, DClass.IN);
+      Message query = Message.newQuery(question);
+      query.setTSIG(key);
+      return query.toWire(Message.MAXLENGTH);
+    }
+
+    public void validateResponse(byte[] query, List<byte[]> response) throws IOException {
+      Message queryMessage = new Message(query);
+      TSIG.StreamVerifier verifier = new TSIG.StreamVerifier(key, queryMessage.getTSIG());
+
+      for (byte[] resBytes : response) {
+        Message resMessage = new Message(resBytes);
+        assertEquals(Rcode.NOERROR, verifier.verify(resMessage, resBytes));
+      }
+    }
+  }
+
+  private static class MockMessageServer {
+    private final TSIG key;
+
+    MockMessageServer(TSIG key) {
+      this.key = key;
+    }
+
+    List<byte[]> handleQuery(byte[] queryMessageBytes, int responseMessageCount, int signEvery) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+      Message parsedQueryMessage = new Message(queryMessageBytes);
+      assertNotNull(parsedQueryMessage.getTSIG());
+
+      List<byte[]> responseMessageList = new LinkedList<>();
+      TSIGRecord lastTsigRecord = parsedQueryMessage.getTSIG();
+
+      // Create an HMAC that is shared by messages between each TSIGRecord
+      Mac sharedHmac = Mac.getInstance("HmacSHA256");
+      sharedHmac.init(new SecretKeySpec(base64.fromString("12345678"), "HmacSHA256"));
+
+      for (int i = 0; i < responseMessageCount; i++) {
+        Message response = new Message(parsedQueryMessage.getHeader().getID());
+        response.getHeader().setFlag(Flags.QR);
+        response.addRecord(parsedQueryMessage.getQuestion(), Section.QUESTION);
+        Record answer = Record.fromString(parsedQueryMessage.getQuestion().getName(), Type.A, DClass.IN, 300, "1.2.3." + i, null);
+        response.addRecord(answer, Section.ANSWER);
+
+        boolean isNthMessage = i % signEvery == 0;
+        boolean isLastMessage = i == responseMessageCount - 1;
+        boolean isFirstMessage = i == 0;
+        if (isFirstMessage || isNthMessage || isLastMessage) {
+          byte[] unsignedResponseBytes = response.toWire();
+
+          // Create TSIGRecord for the latest message, the trick here is that prior messages without a TSIG have already
+          // been added to the sharedHmac
+          lastTsigRecord = key.generate(response, unsignedResponseBytes, Rcode.NOERROR, lastTsigRecord, sharedHmac, isFirstMessage, true, isFirstMessage);
+          response.addRecord(lastTsigRecord, Section.ADDITIONAL);
+          response.tsigState = Message.TSIG_SIGNED;
+
+          // Store message as a "response"
+          byte[] signedResponseBytes = response.toWire(Message.MAXLENGTH);
+          responseMessageList.add(signedResponseBytes);
+
+          // The call to generate above called doFinal and cleared sharedHmac, starting a new collection of signatures
+          // and the first thing that needs to be put in it is the previous signature.
+          byte[] signatureSize = DNSOutput.toU16(lastTsigRecord.getSignature().length);
+          sharedHmac.update(signatureSize);
+          sharedHmac.update(lastTsigRecord.getSignature());
+        } else {
+          byte[] responseBytes = response.toWire(Message.MAXLENGTH);
+          sharedHmac.update(responseBytes);
+          responseMessageList.add(responseBytes);
+        }
+      }
+
+      return responseMessageList;
+    }
   }
 }
