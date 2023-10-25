@@ -383,18 +383,38 @@ public class TSIG {
    */
   public TSIGRecord generate(
       Message m, byte[] b, int error, TSIGRecord old, boolean fullSignature) {
+    Mac hmac = null;
+    boolean signing = false;
+
+    if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
+      signing = true;
+      hmac = initHmac();
+    }
+
+    return generate(m, b, error, old, hmac, true, signing, fullSignature);
+  }
+
+  /**
+   * Generates a TSIG record with a specific error for a message that has been rendered.
+   *
+   * @param m The message
+   * @param b The rendered message
+   * @param error The error
+   * @param old If this message is a response, the TSIG from the request
+   * @param fullSignature {@code true} if this {@link TSIGRecord} is the to be added to the first of
+   *     many messages in a TCP connection and all TSIG variables (rfc2845, 3.4.2.) should be
+   *     included in the signature. {@code false} for subsequent messages with reduced TSIG
+   *     variables set (rfc2845, 4.4.).
+   * @return The TSIG record to be added to the message
+   * @since 3.2
+   */
+  public TSIGRecord generate(
+    Message m, byte[] b, int error, TSIGRecord old, Mac hmac, boolean addLastSignature, boolean signing, boolean fullSignature) {
     Instant timeSigned;
     if (error == Rcode.BADTIME) {
       timeSigned = old.getTimeSigned();
     } else {
       timeSigned = clock.instant();
-    }
-
-    boolean signing = false;
-    Mac hmac = null;
-    if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
-      signing = true;
-      hmac = initHmac();
     }
 
     Duration fudge;
@@ -405,7 +425,7 @@ public class TSIG {
       fudge = Duration.ofSeconds(fudgeOption);
     }
 
-    if (old != null && signing) {
+    if (old != null && addLastSignature) {
       hmacAddSignature(hmac, old);
     }
 
