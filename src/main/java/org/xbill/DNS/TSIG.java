@@ -369,18 +369,36 @@ public class TSIG {
    */
   public TSIGRecord generate(
       Message m, byte[] b, int error, TSIGRecord old, boolean fullSignature) {
+    Mac hmac = null;
+    if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
+      hmac = initHmac();
+    }
+
+    return generate(m, b, error, old, fullSignature, hmac);
+  }
+
+  /**
+   * Generates a TSIG record with a specific error for a message that has been rendered.
+   *
+   * @param m The message
+   * @param b The rendered message
+   * @param error The error
+   * @param old If this message is a response, the TSIG from the request
+   * @param fullSignature {@code true} if this {@link TSIGRecord} is the to be added to the first of
+   *     many messages in a TCP connection and all TSIG variables (rfc2845, 3.4.2.) should be
+   *     included in the signature. {@code false} for subsequent messages with reduced TSIG
+   *     variables set (rfc2845, 4.4.).
+   * @param hmac A mac instance to reuse for a stream of messages to sign, e.g. when doing a zone
+   *     transfer.
+   * @return The TSIG record to be added to the message
+   */
+  private TSIGRecord generate(
+      Message m, byte[] b, int error, TSIGRecord old, boolean fullSignature, Mac hmac) {
     Instant timeSigned;
     if (error == Rcode.BADTIME) {
       timeSigned = old.getTimeSigned();
     } else {
       timeSigned = clock.instant();
-    }
-
-    boolean signing = false;
-    Mac hmac = null;
-    if (error == Rcode.NOERROR || error == Rcode.BADTIME || error == Rcode.BADTRUNC) {
-      signing = true;
-      hmac = initHmac();
     }
 
     Duration fudge;
@@ -391,6 +409,7 @@ public class TSIG {
       fudge = Duration.ofSeconds(fudgeOption);
     }
 
+    boolean signing = hmac != null;
     if (old != null && signing) {
       hmacAddSignature(hmac, old);
     }
@@ -572,6 +591,27 @@ public class TSIG {
    * @since 3.2
    */
   public int verify(Message m, byte[] messageBytes, TSIGRecord requestTSIG, boolean fullSignature) {
+    return verify(m, messageBytes, requestTSIG, fullSignature, null);
+  }
+
+  /**
+   * Verifies a TSIG record on an incoming message. Since this is only called in the context where a
+   * TSIG is expected to be present, it is an error if one is not present. After calling this
+   * routine, Message.isVerified() may be called on this message.
+   *
+   * @param m The message to verify
+   * @param messageBytes An array containing the message in unparsed form. This is necessary since
+   *     TSIG signs the message in wire format, and we can't recreate the exact wire format (with
+   *     the same name compression).
+   * @param requestTSIG If this message is a response, the TSIG from the request
+   * @param fullSignature {@code true} if this message is the first of many in a TCP connection and
+   *     all TSIG variables (rfc2845, 3.4.2.) should be included in the signature. {@code false} for
+   *     subsequent messages with reduced TSIG variables set (rfc2845, 4.4.).
+   * @return The result of the verification (as an Rcode)
+   * @see Rcode
+   */
+  private int verify(
+      Message m, byte[] messageBytes, TSIGRecord requestTSIG, boolean fullSignature, Mac hmac) {
     m.tsigState = Message.TSIG_FAILED;
     TSIGRecord tsig = m.getTSIG();
     if (tsig == null) {
@@ -589,7 +629,10 @@ public class TSIG {
       return Rcode.BADKEY;
     }
 
-    Mac hmac = initHmac();
+    if (hmac == null) {
+      hmac = initHmac();
+    }
+
     if (requestTSIG != null && tsig.getError() != Rcode.BADKEY && tsig.getError() != Rcode.BADSIG) {
       hmacAddSignature(hmac, requestTSIG);
     }
@@ -664,7 +707,7 @@ public class TSIG {
     }
 
     // validate time after the signature, as per
-    // https://tools.ietf.org/html/draft-ietf-dnsop-rfc2845bis-08#section-5.4.3
+    // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.4
     Instant now = clock.instant();
     Duration delta = Duration.between(now, tsig.getTimeSigned()).abs();
     if (delta.compareTo(tsig.getFudge()) > 0) {
@@ -719,9 +762,67 @@ public class TSIG {
     out.writeU32(timeLow);
   }
 
-  public static class StreamVerifier {
-    /** A helper class for verifying multiple message responses. */
+  /** A helper class for generating signed message responses. */
+  public static class StreamGenerator {
     private final TSIG key;
+
+    private final Mac sharedHmac;
+
+    private final int signEveryNthMessage;
+
+    private int numGenerated;
+    private TSIGRecord lastTsigRecord;
+
+    public StreamGenerator(TSIG key, TSIGRecord lastTsigRecord) {
+      // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.3.1
+      // The TSIG MUST be included on all DNS messages in the response.
+      this(key, lastTsigRecord, 1);
+    }
+
+    /**
+     * This constructor is <b>only</b> for unit-testing {@link StreamVerifier} with responses where
+     * not every message is signed.
+     */
+    StreamGenerator(TSIG key, TSIGRecord lastTsigRecord, int signEveryNthMessage) {
+      if (signEveryNthMessage < 1 || signEveryNthMessage > 100) {
+        throw new IllegalArgumentException("signEveryNthMessage must be between 1 and 100");
+      }
+
+      this.key = key;
+      this.lastTsigRecord = lastTsigRecord;
+      this.signEveryNthMessage = signEveryNthMessage;
+      sharedHmac = this.key.initHmac();
+    }
+
+    public void generate(Message message, boolean isLastMessage) {
+      boolean isNthMessage = numGenerated % signEveryNthMessage == 0;
+      boolean isFirstMessage = numGenerated == 0;
+      if (isFirstMessage || isNthMessage || isLastMessage) {
+        TSIGRecord r =
+            key.generate(
+                message,
+                message.toWire(),
+                Rcode.NOERROR,
+                lastTsigRecord,
+                isFirstMessage,
+                sharedHmac);
+        message.addRecord(r, Section.ADDITIONAL);
+        message.tsigState = Message.TSIG_SIGNED;
+        lastTsigRecord = r;
+      } else {
+        byte[] responseBytes = message.toWire(Message.MAXLENGTH);
+        sharedHmac.update(responseBytes);
+      }
+
+      numGenerated++;
+    }
+  }
+
+  /** A helper class for verifying multiple message responses. */
+  public static class StreamVerifier {
+    private final TSIG key;
+
+    private final Mac sharedHmac;
 
     private int nresponses;
     private int lastsigned;
@@ -730,6 +831,7 @@ public class TSIG {
     /** Creates an object to verify a multiple message response */
     public StreamVerifier(TSIG tsig, TSIGRecord queryTsig) {
       key = tsig;
+      sharedHmac = key.initHmac();
       nresponses = 0;
       lastTSIG = queryTsig;
     }
@@ -749,13 +851,14 @@ public class TSIG {
 
       nresponses++;
       if (nresponses == 1) {
-        int result = key.verify(m, b, lastTSIG);
+        int result = key.verify(m, b, lastTSIG, true, sharedHmac);
         lastTSIG = tsig;
+        lastsigned = nresponses;
         return result;
       }
 
       if (tsig != null) {
-        int result = key.verify(m, b, lastTSIG, false);
+        int result = key.verify(m, b, lastTSIG, false, sharedHmac);
         lastsigned = nresponses;
         lastTSIG = tsig;
         return result;
@@ -767,10 +870,26 @@ public class TSIG {
           return Rcode.FORMERR;
         } else {
           log.trace("Intermediate message {} without signature", nresponses);
-          m.tsigState = Message.TSIG_INTERMEDIATE;
+          addUnsignedMessageToMac(m, b, sharedHmac);
           return Rcode.NOERROR;
         }
       }
+    }
+
+    private void addUnsignedMessageToMac(Message m, byte[] messageBytes, Mac hmac) {
+      byte[] header = m.getHeader().toWire();
+      if (log.isTraceEnabled()) {
+        log.trace(hexdump.dump("TSIG-HMAC header", header));
+      }
+
+      hmac.update(header);
+      int len = messageBytes.length - header.length;
+      if (log.isTraceEnabled()) {
+        log.trace(hexdump.dump("TSIG-HMAC message after header", messageBytes, header.length, len));
+      }
+
+      hmac.update(messageBytes, header.length, len);
+      m.tsigState = Message.TSIG_INTERMEDIATE;
     }
   }
 }
