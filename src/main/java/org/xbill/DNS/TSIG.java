@@ -765,31 +765,29 @@ public class TSIG {
   /** A helper class for generating signed message responses. */
   public static class StreamGenerator {
     private final TSIG key;
-
     private final Mac sharedHmac;
-
     private final int signEveryNthMessage;
 
     private int numGenerated;
     private TSIGRecord lastTsigRecord;
 
-    public StreamGenerator(TSIG key, TSIGRecord lastTsigRecord) {
+    public StreamGenerator(TSIG key, TSIGRecord queryTsig) {
       // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.3.1
       // The TSIG MUST be included on all DNS messages in the response.
-      this(key, lastTsigRecord, 1);
+      this(key, queryTsig, 1);
     }
 
     /**
      * This constructor is <b>only</b> for unit-testing {@link StreamVerifier} with responses where
      * not every message is signed.
      */
-    StreamGenerator(TSIG key, TSIGRecord lastTsigRecord, int signEveryNthMessage) {
+    StreamGenerator(TSIG key, TSIGRecord queryTsig, int signEveryNthMessage) {
       if (signEveryNthMessage < 1 || signEveryNthMessage > 100) {
         throw new IllegalArgumentException("signEveryNthMessage must be between 1 and 100");
       }
 
       this.key = key;
-      this.lastTsigRecord = lastTsigRecord;
+      this.lastTsigRecord = queryTsig;
       this.signEveryNthMessage = signEveryNthMessage;
       sharedHmac = this.key.initHmac();
     }
@@ -803,12 +801,13 @@ public class TSIG {
                 message,
                 message.toWire(),
                 Rcode.NOERROR,
-                lastTsigRecord,
+                isFirstMessage ? lastTsigRecord : null,
                 isFirstMessage,
                 sharedHmac);
         message.addRecord(r, Section.ADDITIONAL);
         message.tsigState = Message.TSIG_SIGNED;
         lastTsigRecord = r;
+        hmacAddSignature(sharedHmac, r);
       } else {
         byte[] responseBytes = message.toWire(Message.MAXLENGTH);
         sharedHmac.update(responseBytes);
@@ -821,19 +820,18 @@ public class TSIG {
   /** A helper class for verifying multiple message responses. */
   public static class StreamVerifier {
     private final TSIG key;
-
     private final Mac sharedHmac;
+    private final TSIGRecord queryTsig;
 
     private int nresponses;
     private int lastsigned;
-    private TSIGRecord lastTSIG;
 
     /** Creates an object to verify a multiple message response */
     public StreamVerifier(TSIG tsig, TSIGRecord queryTsig) {
       key = tsig;
       sharedHmac = key.initHmac();
       nresponses = 0;
-      lastTSIG = queryTsig;
+      this.queryTsig = queryTsig;
     }
 
     /**
@@ -851,16 +849,16 @@ public class TSIG {
 
       nresponses++;
       if (nresponses == 1) {
-        int result = key.verify(m, b, lastTSIG, true, sharedHmac);
-        lastTSIG = tsig;
+        int result = key.verify(m, b, queryTsig, true, sharedHmac);
+        hmacAddSignature(sharedHmac, tsig);
         lastsigned = nresponses;
         return result;
       }
 
       if (tsig != null) {
-        int result = key.verify(m, b, lastTSIG, false, sharedHmac);
+        int result = key.verify(m, b, null, false, sharedHmac);
         lastsigned = nresponses;
-        lastTSIG = tsig;
+        hmacAddSignature(sharedHmac, tsig);
         return result;
       } else {
         boolean required = nresponses - lastsigned >= 100;
