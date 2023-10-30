@@ -17,20 +17,19 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.io.UdpIoClient;
 
 @Slf4j
-@UtilityClass
-final class NioUdpClient extends NioClient {
-  private static final int EPHEMERAL_START;
-  private static final int EPHEMERAL_RANGE;
+final class NioUdpClient extends NioClient implements UdpIoClient {
+  private final int ephemeralStart;
+  private final int ephemeralRange;
 
-  private static final SecureRandom prng;
-  private static final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
-  private static final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
+  private final SecureRandom prng;
+  private final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
+  private final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
 
-  static {
+  NioUdpClient() {
     // https://tools.ietf.org/html/rfc6335#section-6
     int ephemeralStartDefault = 49152;
     int ephemeralEndDefault = 65535;
@@ -41,21 +40,21 @@ final class NioUdpClient extends NioClient {
       ephemeralEndDefault = 60999;
     }
 
-    EPHEMERAL_START = Integer.getInteger("dnsjava.udp.ephemeral.start", ephemeralStartDefault);
+    ephemeralStart = Integer.getInteger("dnsjava.udp.ephemeral.start", ephemeralStartDefault);
     int ephemeralEnd = Integer.getInteger("dnsjava.udp.ephemeral.end", ephemeralEndDefault);
-    EPHEMERAL_RANGE = ephemeralEnd - EPHEMERAL_START;
+    ephemeralRange = ephemeralEnd - ephemeralStart;
 
     if (Boolean.getBoolean("dnsjava.udp.ephemeral.use_ephemeral_port")) {
       prng = null;
     } else {
       prng = new SecureRandom();
     }
-    setRegistrationsTask(NioUdpClient::processPendingRegistrations, false);
-    setTimeoutTask(NioUdpClient::checkTransactionTimeouts, false);
-    setCloseTask(NioUdpClient::closeUdp, false);
+    setRegistrationsTask(this::processPendingRegistrations, false);
+    setTimeoutTask(this::checkTransactionTimeouts, false);
+    setCloseTask(this::closeUdp, false);
   }
 
-  private static void processPendingRegistrations() {
+  private void processPendingRegistrations() {
     while (!registrationQueue.isEmpty()) {
       Transaction t = registrationQueue.remove();
       try {
@@ -68,7 +67,7 @@ final class NioUdpClient extends NioClient {
     }
   }
 
-  private static void checkTransactionTimeouts() {
+  private void checkTransactionTimeouts() {
     for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
       Transaction t = it.next();
       if (t.endTime - System.nanoTime() < 0) {
@@ -79,7 +78,7 @@ final class NioUdpClient extends NioClient {
   }
 
   @RequiredArgsConstructor
-  private static class Transaction implements KeyProcessor {
+  private class Transaction implements KeyProcessor {
     private final int id;
     private final byte[] data;
     private final int max;
@@ -159,7 +158,8 @@ final class NioUdpClient extends NioClient {
     }
   }
 
-  static CompletableFuture<byte[]> sendrecv(
+  @Override
+  public CompletableFuture<byte[]> sendAndReceiveUdp(
       InetSocketAddress local,
       InetSocketAddress remote,
       Message query,
@@ -182,12 +182,12 @@ final class NioUdpClient extends NioClient {
             InetSocketAddress addr = null;
             if (local == null) {
               if (prng != null) {
-                addr = new InetSocketAddress(prng.nextInt(EPHEMERAL_RANGE) + EPHEMERAL_START);
+                addr = new InetSocketAddress(prng.nextInt(ephemeralRange) + ephemeralStart);
               }
             } else {
               int port = local.getPort();
               if (port == 0 && prng != null) {
-                port = prng.nextInt(EPHEMERAL_RANGE) + EPHEMERAL_START;
+                port = prng.nextInt(ephemeralRange) + ephemeralStart;
               }
 
               addr = new InetSocketAddress(local.getAddress(), port);
@@ -225,7 +225,7 @@ final class NioUdpClient extends NioClient {
     return f;
   }
 
-  private static void closeUdp() {
+  private void closeUdp() {
     registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
     pendingTransactions.forEach(t -> t.completeExceptionally(closing));

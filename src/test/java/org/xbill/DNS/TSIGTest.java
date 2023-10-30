@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -36,9 +38,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.xbill.DNS.TSIG.StreamGenerator;
+import org.xbill.DNS.io.IoClientFactory;
+import org.xbill.DNS.io.TcpIoClient;
+import org.xbill.DNS.io.UdpIoClient;
 import org.xbill.DNS.utils.base64;
 
 class TSIGTest {
@@ -221,40 +224,49 @@ class TSIGTest {
     Record question = Record.newRecord(qname, Type.A, DClass.IN);
     Message query = Message.newQuery(question);
 
-    try (MockedStatic<NioUdpClient> udpClient = Mockito.mockStatic(NioUdpClient.class)) {
-      udpClient
-          .when(
-              () ->
-                  NioUdpClient.sendrecv(
-                      any(),
-                      any(InetSocketAddress.class),
-                      any(),
-                      any(byte[].class),
-                      anyInt(),
-                      any(Duration.class)))
-          .thenAnswer(
-              a -> {
-                Message qparsed = new Message(a.getArgument(3, byte[].class));
+    SimpleResolver res = new SimpleResolver("127.0.0.1");
+    res.setIoClientFactory(
+        new IoClientFactory() {
+          @Override
+          public TcpIoClient createOrGetTcpClient() {
+            return null;
+          }
 
-                Message response = new Message(qparsed.getHeader().getID());
-                response.setTSIG(defaultKey, Rcode.NOERROR, qparsed.getTSIG());
-                response.getHeader().setFlag(Flags.QR);
-                response.addRecord(question, Section.QUESTION);
-                Record answer = Record.fromString(qname, Type.A, DClass.IN, 300, "1.2.3.4", null);
-                response.addRecord(answer, Section.ANSWER);
-                byte[] rbytes = response.toWire(Message.MAXLENGTH);
+          @Override
+          public UdpIoClient createOrGetUdpClient() {
+            UdpIoClient udpClient = mock(UdpIoClient.class);
+            when(udpClient.sendAndReceiveUdp(
+                    any(),
+                    any(InetSocketAddress.class),
+                    any(),
+                    any(byte[].class),
+                    anyInt(),
+                    any(Duration.class)))
+                .thenAnswer(
+                    a -> {
+                      Message qparsed = new Message(a.getArgument(3, byte[].class));
 
-                CompletableFuture<byte[]> f = new CompletableFuture<>();
-                f.complete(rbytes);
-                return f;
-              });
-      SimpleResolver res = new SimpleResolver("127.0.0.1");
-      res.setTSIGKey(defaultKey);
+                      Message response = new Message(qparsed.getHeader().getID());
+                      response.setTSIG(defaultKey, Rcode.NOERROR, qparsed.getTSIG());
+                      response.getHeader().setFlag(Flags.QR);
+                      response.addRecord(question, Section.QUESTION);
+                      Record answer =
+                          Record.fromString(qname, Type.A, DClass.IN, 300, "1.2.3.4", null);
+                      response.addRecord(answer, Section.ANSWER);
+                      byte[] rbytes = response.toWire(Message.MAXLENGTH);
 
-      Message responseFromResolver = res.send(query);
-      assertTrue(responseFromResolver.isSigned());
-      assertTrue(responseFromResolver.isVerified());
-    }
+                      CompletableFuture<byte[]> f = new CompletableFuture<>();
+                      f.complete(rbytes);
+                      return f;
+                    });
+            return udpClient;
+          }
+        });
+    res.setTSIGKey(defaultKey);
+
+    Message responseFromResolver = res.send(query);
+    assertTrue(responseFromResolver.isSigned());
+    assertTrue(responseFromResolver.isVerified());
   }
 
   @Test

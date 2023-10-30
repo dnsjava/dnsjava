@@ -46,6 +46,7 @@ class NioTcpClientTest {
     try {
       // start the selector thread early
       NioClient.selector();
+      NioTcpClient nioTcpClient = new NioTcpClient();
 
       Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
       Message[] q = new Message[] {Message.newQuery(qr), Message.newQuery(qr)};
@@ -112,7 +113,8 @@ class NioTcpClientTest {
 
         for (int j = 0; j < q.length; j++) {
           int jj = j;
-          NioTcpClient.sendrecv(
+          nioTcpClient
+              .sendAndReceiveTcp(
                   null,
                   (InetSocketAddress) ss.getLocalSocketAddress(),
                   q[j],
@@ -160,6 +162,7 @@ class NioTcpClientTest {
     try {
       // start the selector thread early
       NioClient.selector();
+      NioTcpClient nioTcpClient = new NioTcpClient();
 
       Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
       Message q = Message.newQuery(qr);
@@ -208,7 +211,8 @@ class NioTcpClientTest {
           fail("timed out waiting for server thread to start");
         }
 
-        NioTcpClient.sendrecv(
+        nioTcpClient
+            .sendAndReceiveTcp(
                 null,
                 (InetSocketAddress) ss.getLocalSocketAddress(),
                 q,

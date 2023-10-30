@@ -14,7 +14,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.io.DefaultIoClientFactory;
+import org.xbill.DNS.io.IoClientFactory;
 
 /**
  * An implementation of Resolver that sends one query to one server. SimpleResolver handles TCP
@@ -43,6 +47,13 @@ public class SimpleResolver implements Resolver {
   private Duration timeoutValue = Duration.ofSeconds(10);
 
   private static final short DEFAULT_UDPSIZE = 512;
+
+  /**
+   * Gets or sets the factory that creates clients for sending messages to the wire.
+   *
+   * @since 3.6
+   */
+  @Getter @Setter private IoClientFactory ioClientFactory = new DefaultIoClientFactory();
 
   private static InetSocketAddress defaultResolver =
       new InetSocketAddress(InetAddress.getLoopbackAddress(), DEFAULT_PORT);
@@ -368,9 +379,15 @@ public class SimpleResolver implements Resolver {
 
     CompletableFuture<byte[]> result;
     if (tcp) {
-      result = NioTcpClient.sendrecv(localAddress, address, query, out, timeoutValue);
+      result =
+          ioClientFactory
+              .createOrGetTcpClient()
+              .sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
     } else {
-      result = NioUdpClient.sendrecv(localAddress, address, query, out, udpSize, timeoutValue);
+      result =
+          ioClientFactory
+              .createOrGetUdpClient()
+              .sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
     }
 
     return result.thenComposeAsync(
