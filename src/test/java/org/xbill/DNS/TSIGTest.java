@@ -335,7 +335,7 @@ class TSIGTest {
 
     byte[] query = client.createQuery();
     int numResponses = 200;
-    List<Message> response = server.handleQuery(query, numResponses, 200);
+    List<Message> response = server.handleQuery(query, numResponses, 200, false);
     Map<Integer, Integer> expectedRcodes = new HashMap<>();
     for (int i = 0; i < numResponses; i++) {
       expectedRcodes.put(i, i < 100 ? Rcode.NOERROR : Rcode.FORMERR);
@@ -356,11 +356,32 @@ class TSIGTest {
     MockMessageServer server = new MockMessageServer(defaultKey);
 
     byte[] query = client.createQuery();
-    List<Message> response = server.handleQuery(query, numResponses, signEvery);
+    List<Message> response = server.handleQuery(query, numResponses, signEvery, false);
     Map<Integer, Integer> expectedRcodes = new HashMap<>();
     for (int i = 0; i < numResponses; i++) {
       expectedRcodes.put(i, Rcode.NOERROR);
     }
+    client.validateResponse(query, response, expectedRcodes);
+  }
+
+  @ParameterizedTest(name = "testTSIGStreamVerifierLastMessage(numResponses: {0}, signEvery: {1})")
+  @CsvSource({
+    "53,6",
+    "105,7",
+    "1000,100",
+  })
+  void testTSIGStreamVerifierLastMessage(int numResponses, int signEvery) throws Exception {
+    MockMessageClient client = new MockMessageClient(defaultKey);
+    MockMessageServer server = new MockMessageServer(defaultKey);
+
+    byte[] query = client.createQuery();
+    List<Message> response = server.handleQuery(query, numResponses, signEvery, true);
+    Map<Integer, Integer> expectedRcodes = new HashMap<>();
+    for (int i = 0; i < numResponses; i++) {
+      expectedRcodes.put(i, Rcode.NOERROR);
+    }
+
+    expectedRcodes.put(numResponses - 1, Rcode.FORMERR);
     client.validateResponse(query, response, expectedRcodes);
   }
 
@@ -387,9 +408,13 @@ class TSIGTest {
 
       Map<Integer, Integer> actualRcodes = new HashMap<>();
       for (int i = 0; i < responses.size(); i++) {
-        Message response = responses.get(i);
-        byte[] renderedMessage = response.toWire(Message.MAXLENGTH);
-        actualRcodes.put(i, verifier.verify(new Message(renderedMessage), renderedMessage));
+        boolean isLastMessage = i == responses.size() - 1;
+        byte[] renderedMessage = responses.get(i).toWire(Message.MAXLENGTH);
+        Message messageFromWire = new Message(renderedMessage);
+        actualRcodes.put(i, verifier.verify(messageFromWire, renderedMessage, isLastMessage));
+        if (isLastMessage) {
+          assertFalse(messageFromWire.isVerified());
+        }
       }
 
       assertEquals(expectedRcodes, actualRcodes);
@@ -403,7 +428,8 @@ class TSIGTest {
       this.key = key;
     }
 
-    List<Message> handleQuery(byte[] queryMessageBytes, int responseMessageCount, int signEvery)
+    List<Message> handleQuery(
+        byte[] queryMessageBytes, int responseMessageCount, int signEvery, boolean skipLast)
         throws Exception {
       Message parsedQueryMessage = new Message(queryMessageBytes);
       assertNotNull(parsedQueryMessage.getTSIG());
@@ -423,7 +449,7 @@ class TSIGTest {
                 InetAddress.getByAddress(ByteBuffer.allocate(4).putInt(i).array()));
         response.addRecord(answer, Section.ANSWER);
 
-        generator.generate(response, i == responseMessageCount - 1);
+        generator.generate(response, !skipLast && i == responseMessageCount - 1);
         responseMessageList.add(response);
       }
 

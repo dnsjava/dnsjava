@@ -839,24 +839,43 @@ public class TSIG {
      * TSIG records must be present on the first and last messages, and at least every 100 records
      * in between. After calling this routine, Message.isVerified() may be called on this message.
      *
-     * @param m The message
-     * @param b The message in unparsed form
+     * <p>This overload assumes that the verified message is not the last one, which is required to
+     * have a {@link TSIGRecord}. Use {@link #verify(Message, byte[], boolean)} to explicitly
+     * specify the last message.
+     *
+     * @param message The message
+     * @param messageBytes The message in unparsed form
      * @return The result of the verification (as an Rcode)
      * @see Rcode
      */
-    public int verify(Message m, byte[] b) {
-      TSIGRecord tsig = m.getTSIG();
+    public int verify(Message message, byte[] messageBytes) {
+      return verify(message, messageBytes, false);
+    }
+
+    /**
+     * Verifies a TSIG record on an incoming message that is part of a multiple message response.
+     * TSIG records must be present on the first and last messages, and at least every 100 records
+     * in between. After calling this routine, Message.isVerified() may be called on this message.
+     *
+     * @param message The message
+     * @param messageBytes The message in unparsed form
+     * @param isLastMessage If true, verifies that the {@link Message} has an {@link TSIGRecord}.
+     * @return The result of the verification (as an Rcode)
+     * @see Rcode
+     */
+    public int verify(Message message, byte[] messageBytes, boolean isLastMessage) {
+      TSIGRecord tsig = message.getTSIG();
 
       nresponses++;
       if (nresponses == 1) {
-        int result = key.verify(m, b, queryTsig, true, sharedHmac);
+        int result = key.verify(message, messageBytes, queryTsig, true, sharedHmac);
         hmacAddSignature(sharedHmac, tsig);
         lastsigned = nresponses;
         return result;
       }
 
       if (tsig != null) {
-        int result = key.verify(m, b, null, false, sharedHmac);
+        int result = key.verify(message, messageBytes, null, false, sharedHmac);
         lastsigned = nresponses;
         hmacAddSignature(sharedHmac, tsig);
         return result;
@@ -864,11 +883,15 @@ public class TSIG {
         boolean required = nresponses - lastsigned >= 100;
         if (required) {
           log.debug("FORMERR: missing required signature on {}th message", nresponses);
-          m.tsigState = Message.TSIG_FAILED;
+          message.tsigState = Message.TSIG_FAILED;
+          return Rcode.FORMERR;
+        } else if (isLastMessage) {
+          log.debug("FORMERR: missing required signature on last message");
+          message.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         } else {
           log.trace("Intermediate message {} without signature", nresponses);
-          addUnsignedMessageToMac(m, b, sharedHmac);
+          addUnsignedMessageToMac(message, messageBytes, sharedHmac);
           return Rcode.NOERROR;
         }
       }
