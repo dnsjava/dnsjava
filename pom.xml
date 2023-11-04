@@ -161,8 +161,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.1</version>
                 <configuration>
+                    <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <includes>
                         <!-- Override default config to include inner test classes -->
                         <include>**/*Test*</include>

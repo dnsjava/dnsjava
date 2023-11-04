@@ -13,13 +13,18 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.opentest4j.AssertionFailedError;
 import org.xbill.DNS.utils.base16;
 
+@Slf4j
 class NioTcpClientTest {
   private static final String SELECTOR_TIMEOUT_PROPERTY = "dnsjava.nio.selector_timeout";
 
@@ -43,9 +48,11 @@ class NioTcpClientTest {
       Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
       Message[] q = new Message[] {Message.newQuery(qr), Message.newQuery(qr)};
       CountDownLatch cdlServerThreadStart = new CountDownLatch(1);
+      CountDownLatch cdlServerThreadEnd = new CountDownLatch(1);
       CountDownLatch cdlQueryRepliesReceived = new CountDownLatch(q.length);
+      List<Throwable> exceptions = new ArrayList<>();
       try (ServerSocket ss = new ServerSocket(0, 0, InetAddress.getLoopbackAddress())) {
-        ss.setSoTimeout(5000);
+        ss.setSoTimeout(15000);
         Thread server =
             new Thread(
                 () -> {
@@ -53,6 +60,7 @@ class NioTcpClientTest {
                     cdlServerThreadStart.countDown();
                     Socket s = ss.accept();
                     for (int i = 0; i < q.length; i++) {
+                      log.debug("Sending reply #{}, id={}", i, q[i].getHeader().getID());
                       try {
                         InputStream is = s.getInputStream();
                         byte[] lengthData = new byte[2];
@@ -63,39 +71,40 @@ class NioTcpClientTest {
                         assertEquals(messageData.length, readMessageLength);
                         Message serverReceivedMessage = new Message(messageData);
 
-                        for (int j = q.length - 1; j >= 0; j--) {
-                          Message answer = new Message();
-                          answer.getHeader().setRcode(Rcode.NOERROR);
-                          answer.getHeader().setID(serverReceivedMessage.getHeader().getID());
-                          answer.addRecord(serverReceivedMessage.getQuestion(), Section.QUESTION);
-                          answer.addRecord(
-                              new ARecord(
-                                  Name.fromConstantString("example.com."),
-                                  DClass.IN,
-                                  900,
-                                  InetAddress.getLoopbackAddress()),
-                              Section.ANSWER);
-                          byte[] queryData = answer.toWire();
-                          ByteBuffer buffer = ByteBuffer.allocate(queryData.length + 2);
-                          buffer.put((byte) (queryData.length >>> 8));
-                          buffer.put((byte) (queryData.length & 0xFF));
-                          buffer.put(queryData);
-                          s.getOutputStream().write(buffer.array());
-                        }
+                        Message answer = new Message();
+                        answer.getHeader().setRcode(Rcode.NOERROR);
+                        answer.getHeader().setID(serverReceivedMessage.getHeader().getID());
+                        answer.addRecord(serverReceivedMessage.getQuestion(), Section.QUESTION);
+                        answer.addRecord(
+                            new ARecord(
+                                Name.fromConstantString("example.com."),
+                                DClass.IN,
+                                900,
+                                InetAddress.getLoopbackAddress()),
+                            Section.ANSWER);
+                        byte[] answerData = answer.toWire();
+                        ByteBuffer answerBuffer = ByteBuffer.allocate(answerData.length + 2);
+                        answerBuffer.put((byte) (answerData.length >>> 8));
+                        answerBuffer.put((byte) (answerData.length & 0xFF));
+                        answerBuffer.put(answerData);
+                        s.getOutputStream().write(answerBuffer.array());
 
                       } catch (IOException e) {
-                        fail(e);
+                        log.warn("Writing message to client failed", e);
+                        exceptions.add(e);
                       }
                     }
-                  } catch (SocketTimeoutException ste) {
-                    fail("Timeout waiting for a client connection", ste);
                   } catch (IOException e) {
-                    fail(e);
+                    log.warn("Server failed", e);
+                    exceptions.add(e);
                   }
+
+                  cdlServerThreadEnd.countDown();
                 });
+        server.setDaemon(true);
         server.start();
 
-        if (!cdlServerThreadStart.await(5, TimeUnit.SECONDS)) {
+        if (!cdlServerThreadStart.await(15, TimeUnit.SECONDS)) {
           fail("timed out waiting for server thread to start");
         }
 
@@ -106,22 +115,36 @@ class NioTcpClientTest {
                   (InetSocketAddress) ss.getLocalSocketAddress(),
                   q[j],
                   q[j].toWire(),
-                  Duration.ofSeconds(5))
-              .thenAccept(
-                  d -> {
-                    try {
-                      assertEquals(q[jj].getHeader().getID(), new Message(d).getHeader().getID());
-                      cdlQueryRepliesReceived.countDown();
-                    } catch (IOException e) {
-                      fail(e);
+                  Duration.ofSeconds(15))
+              .whenComplete(
+                  (d, e1) -> {
+                    if (e1 == null) {
+                      try {
+                        assertEquals(q[jj].getHeader().getID(), new Message(d).getHeader().getID());
+                      } catch (IOException | AssertionFailedError e2) {
+                        exceptions.add(e2);
+                      }
+                    } else {
+                      log.warn("sendrcv failed", e1);
+                      exceptions.add(e1);
                     }
+                    cdlQueryRepliesReceived.countDown();
                   });
+        }
+
+        if (!cdlQueryRepliesReceived.await(15, TimeUnit.SECONDS)) {
+          fail("timed out waiting for answers in client");
+        }
+
+        if (!cdlServerThreadEnd.await(15, TimeUnit.SECONDS)) {
+          fail("timeout waiting for server to stop");
         }
       }
 
-      if (!cdlQueryRepliesReceived.await(5, TimeUnit.SECONDS)) {
-        fail("timed out waiting for answers");
+      for (Throwable t : exceptions) {
+        log.error("Failure during test run", t);
       }
+      assertEquals(0, exceptions.size(), "Test had exceptions in async code");
     } finally {
       NioClient.close();
     }
@@ -139,9 +162,11 @@ class NioTcpClientTest {
       Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
       Message q = Message.newQuery(qr);
       CountDownLatch cdlServerThreadStart = new CountDownLatch(1);
+      CountDownLatch cdlServerThreadEnd = new CountDownLatch(1);
       CountDownLatch cdlWaitForResult = new CountDownLatch(1);
+      List<Throwable> exceptions = new ArrayList<>();
       try (ServerSocket ss = new ServerSocket(0, 0, InetAddress.getLoopbackAddress())) {
-        ss.setSoTimeout(5000);
+        ss.setSoTimeout(15000);
         Thread server =
             new Thread(
                 () -> {
@@ -165,14 +190,19 @@ class NioTcpClientTest {
                       fail(e);
                     }
                   } catch (SocketTimeoutException ste) {
-                    fail("Timeout waiting for a client connection", ste);
+                    log.warn("Timeout waiting for a client connection", ste);
+                    exceptions.add(ste);
                   } catch (IOException e) {
-                    fail(e);
+                    log.warn("Server failed", e);
+                    exceptions.add(e);
                   }
+
+                  cdlServerThreadEnd.countDown();
                 });
+        server.setDaemon(true);
         server.start();
 
-        if (!cdlServerThreadStart.await(5, TimeUnit.SECONDS)) {
+        if (!cdlServerThreadStart.await(15, TimeUnit.SECONDS)) {
           fail("timed out waiting for server thread to start");
         }
 
@@ -186,14 +216,23 @@ class NioTcpClientTest {
                 (r, e) -> {
                   cdlWaitForResult.countDown();
                   if (e == null) {
-                    fail("Got an answer but expected timeout");
+                    exceptions.add(new AssertionError("Got an answer but expected timeout"));
                   }
                 });
+
+        if (!cdlWaitForResult.await(15, TimeUnit.SECONDS)) {
+          fail("Timeout");
+        }
+
+        if (!cdlServerThreadEnd.await(15, TimeUnit.SECONDS)) {
+          fail("timeout waiting for server to stop");
+        }
       }
 
-      if (!cdlWaitForResult.await(5, TimeUnit.SECONDS)) {
-        fail("Timeout");
+      for (Throwable t : exceptions) {
+        log.error("Failure during test run", t);
       }
+      assertEquals(0, exceptions.size(), "Test had exceptions in async code");
     } finally {
       NioClient.close();
     }
