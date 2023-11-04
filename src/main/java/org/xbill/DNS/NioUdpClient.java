@@ -50,9 +50,9 @@ final class NioUdpClient extends NioClient {
     } else {
       prng = new SecureRandom();
     }
-    setRegistrationsTask(NioUdpClient::processPendingRegistrations);
-    setTimeoutTask(NioUdpClient::checkTransactionTimeouts);
-    setCloseTask(NioUdpClient::closeUdp);
+    setRegistrationsTask(NioUdpClient::processPendingRegistrations, false);
+    setTimeoutTask(NioUdpClient::checkTransactionTimeouts, false);
+    setCloseTask(NioUdpClient::closeUdp, false);
   }
 
   private static void processPendingRegistrations() {
