@@ -434,7 +434,7 @@ class TSIGTest {
     for (int i = 0; i < messages.size(); i++) {
       Map.Entry<Message, byte[]> e = messages.get(i);
       assertEquals(
-          verifier.verify(e.getKey(), e.getValue(), i == messages.size() - 1), Rcode.NOERROR);
+          Rcode.NOERROR, verifier.verify(e.getKey(), e.getValue(), i == messages.size() - 1));
     }
   }
 
@@ -481,7 +481,7 @@ class TSIGTest {
     ZoneBuilderAxfrHandler handler = new ZoneBuilderAxfrHandler();
     client.run(handler);
     // soa on first message, + a record on every message, +soa on last message
-    assertEquals(handler.getRecords().size(), 202);
+    assertEquals(202, handler.getRecords().size());
   }
 
   @Getter

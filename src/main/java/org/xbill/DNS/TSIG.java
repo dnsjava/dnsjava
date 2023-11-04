@@ -395,20 +395,8 @@ public class TSIG {
    */
   private TSIGRecord generate(
       Message m, byte[] b, int error, TSIGRecord old, boolean fullSignature, Mac hmac) {
-    Instant timeSigned;
-    if (error == Rcode.BADTIME) {
-      timeSigned = old.getTimeSigned();
-    } else {
-      timeSigned = clock.instant();
-    }
-
-    Duration fudge;
-    int fudgeOption = Options.intValue("tsigfudge");
-    if (fudgeOption < 0 || fudgeOption > 0x7FFF) {
-      fudge = FUDGE;
-    } else {
-      fudge = Duration.ofSeconds(fudgeOption);
-    }
+    Instant timeSigned = getTimeSigned(error, old);
+    Duration fudge = getTsigFudge();
 
     boolean signing = hmac != null;
     if (old != null && signing) {
@@ -433,7 +421,7 @@ public class TSIG {
       alg.toWireCanonical(out);
     }
 
-    writeTsigTimersVariables(timeSigned, fudge, out);
+    writeTsigTimerVariables(timeSigned, fudge, out);
     if (fullSignature) {
       out.writeU16(error);
       out.writeU16(0); /* No other data */
@@ -468,6 +456,15 @@ public class TSIG {
         m.getHeader().getID(),
         error,
         other);
+  }
+
+  private Instant getTimeSigned(int error, TSIGRecord old) {
+    return error == Rcode.BADTIME ? old.getTimeSigned() : clock.instant();
+  }
+
+  private static Duration getTsigFudge() {
+    int fudgeOption = Options.intValue("tsigfudge");
+    return fudgeOption < 0 || fudgeOption > 0x7FFF ? FUDGE : Duration.ofSeconds(fudgeOption);
   }
 
   /**
@@ -658,6 +655,27 @@ public class TSIG {
     }
     hmac.update(messageBytes, header.length, len);
 
+    byte[] tsigVariables = getTsigVariables(fullSignature, tsig);
+    hmac.update(tsigVariables);
+
+    byte[] signature = tsig.getSignature();
+    int badsig = verifySignature(hmac, signature);
+    if (badsig != Rcode.NOERROR) {
+      return badsig;
+    }
+
+    // validate time after the signature, as per
+    // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.4
+    int badtime = verifyTime(tsig);
+    if (badtime != Rcode.NOERROR) {
+      return badtime;
+    }
+
+    m.tsigState = Message.TSIG_VERIFIED;
+    return Rcode.NOERROR;
+  }
+
+  private static byte[] getTsigVariables(boolean fullSignature, TSIGRecord tsig) {
     DNSOutput out = new DNSOutput();
     if (fullSignature) {
       tsig.getName().toWireCanonical(out);
@@ -665,7 +683,7 @@ public class TSIG {
       out.writeU32(tsig.ttl);
       tsig.getAlgorithm().toWireCanonical(out);
     }
-    writeTsigTimersVariables(tsig.getTimeSigned(), tsig.getFudge(), out);
+    writeTsigTimerVariables(tsig.getTimeSigned(), tsig.getFudge(), out);
     if (fullSignature) {
       out.writeU16(tsig.getError());
       if (tsig.getOther() != null) {
@@ -680,9 +698,10 @@ public class TSIG {
     if (log.isTraceEnabled()) {
       log.trace(hexdump.dump("TSIG-HMAC variables", tsigVariables));
     }
-    hmac.update(tsigVariables);
+    return tsigVariables;
+  }
 
-    byte[] signature = tsig.getSignature();
+  private static int verifySignature(Mac hmac, byte[] signature) {
     int digestLength = hmac.getMacLength();
 
     // rfc4635#section-3.1, 4.:
@@ -712,9 +731,10 @@ public class TSIG {
         return Rcode.BADSIG;
       }
     }
+    return Rcode.NOERROR;
+  }
 
-    // validate time after the signature, as per
-    // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.4
+  private int verifyTime(TSIGRecord tsig) {
     Instant now = clock.instant();
     Duration delta = Duration.between(now, tsig.getTimeSigned()).abs();
     if (delta.compareTo(tsig.getFudge()) > 0) {
@@ -725,8 +745,6 @@ public class TSIG {
           tsig.getFudge());
       return Rcode.BADTIME;
     }
-
-    m.tsigState = Message.TSIG_VERIFIED;
     return Rcode.NOERROR;
   }
 
@@ -756,7 +774,7 @@ public class TSIG {
     hmac.update(tsig.getSignature());
   }
 
-  private static void writeTsigTimersVariables(Instant instant, Duration fudge, DNSOutput out) {
+  private static void writeTsigTimerVariables(Instant instant, Duration fudge, DNSOutput out) {
     writeTsigTime(instant, out);
     out.writeU16((int) fudge.getSeconds());
   }
@@ -899,6 +917,7 @@ public class TSIG {
      * @since 3.5.3
      */
     public int verify(Message message, byte[] messageBytes, boolean isLastMessage) {
+      final String warningPrefix = "FORMERR: {}";
       TSIGRecord tsig = message.getTSIG();
 
       // https://datatracker.ietf.org/doc/html/rfc8945#section-5.3.1
@@ -914,7 +933,7 @@ public class TSIG {
           return result;
         } else {
           errorMessage = "missing required signature on first message";
-          log.debug("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
+          log.debug(warningPrefix, errorMessage);
           message.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         }
@@ -929,17 +948,17 @@ public class TSIG {
         boolean required = nresponses - lastsigned >= 100;
         if (required) {
           errorMessage = "Missing required signature on message #" + nresponses;
-          log.debug("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
+          log.debug(warningPrefix, errorMessage);
           message.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         } else if (isLastMessage) {
           errorMessage = "Missing required signature on last message";
-          log.debug("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
+          log.debug(warningPrefix, errorMessage);
           message.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         } else {
           errorMessage = "Intermediate message #" + nresponses + " without signature";
-          log.trace("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
+          log.debug(warningPrefix, errorMessage);
           addUnsignedMessageToMac(message, messageBytes, sharedHmac);
           return Rcode.NOERROR;
         }
