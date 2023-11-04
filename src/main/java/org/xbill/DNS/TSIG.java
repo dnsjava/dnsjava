@@ -542,6 +542,8 @@ public class TSIG {
    * TSIG is expected to be present, it is an error if one is not present. After calling this
    * routine, Message.isVerified() may be called on this message.
    *
+   * <p>Use {@link StreamVerifier} to validate multiple messages in a stream.
+   *
    * @param m The message
    * @param b An array containing the message in unparsed form. This is necessary since TSIG signs
    *     the message in wire format, and we can't recreate the exact wire format (with the same name
@@ -562,6 +564,8 @@ public class TSIG {
    * TSIG is expected to be present, it is an error if one is not present. After calling this
    * routine, Message.isVerified() may be called on this message.
    *
+   * <p>Use {@link StreamVerifier} to validate multiple messages in a stream.
+   *
    * @param m The message to verify
    * @param messageBytes An array containing the message in unparsed form. This is necessary since
    *     TSIG signs the message in wire format, and we can't recreate the exact wire format (with
@@ -578,6 +582,8 @@ public class TSIG {
    * Verifies a TSIG record on an incoming message. Since this is only called in the context where a
    * TSIG is expected to be present, it is an error if one is not present. After calling this
    * routine, Message.isVerified() may be called on this message.
+   *
+   * <p>Use {@link StreamVerifier} to validate multiple messages in a stream.
    *
    * @param m The message to verify
    * @param messageBytes An array containing the message in unparsed form. This is necessary since
@@ -763,7 +769,11 @@ public class TSIG {
     out.writeU32(timeLow);
   }
 
-  /** A helper class for generating signed message responses. */
+  /**
+   * A utility class for generating signed message responses.
+   *
+   * @since 3.5.3
+   */
   public static class StreamGenerator {
     private final TSIG key;
     private final Mac sharedHmac;
@@ -772,8 +782,16 @@ public class TSIG {
     private int numGenerated;
     private TSIGRecord lastTsigRecord;
 
+    /**
+     * Creates an instance to sign multiple message for use in a stream.
+     *
+     * <p>This class creates a {@link TSIGRecord} on every message to conform with <a
+     * href="https://www.rfc-editor.org/rfc/rfc8945.html#section-5.3.1">RFC 8945, 5.3.1</a>.
+     *
+     * @param key The TSIG key used to create the signature records.
+     * @param queryTsig The initial TSIG records, e.g. from a query to a server.
+     */
     public StreamGenerator(TSIG key, TSIGRecord queryTsig) {
-      // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.3.1
       // The TSIG MUST be included on all DNS messages in the response.
       this(key, queryTsig, 1);
     }
@@ -793,7 +811,16 @@ public class TSIG {
       sharedHmac = this.key.initHmac();
     }
 
-    public void generate(Message message, boolean isLastMessage) {
+    /**
+     * Generate TSIG a signature for use of the message in a stream.
+     *
+     * @param message The message to sign.
+     */
+    public void generate(Message message) {
+      generate(message, true);
+    }
+
+    void generate(Message message, boolean isLastMessage) {
       boolean isNthMessage = numGenerated % signEveryNthMessage == 0;
       boolean isFirstMessage = numGenerated == 0;
       if (isFirstMessage || isNthMessage || isLastMessage) {
@@ -818,7 +845,7 @@ public class TSIG {
     }
   }
 
-  /** A helper class for verifying multiple message responses. */
+  /** A utility class for verifying multiple message responses. */
   public static class StreamVerifier {
     private final TSIG key;
     private final Mac sharedHmac;
@@ -826,6 +853,8 @@ public class TSIG {
 
     private int nresponses;
     private int lastsigned;
+
+    /** {@code null} or the detailed error when validation failed due to a {@link Rcode#FORMERR}. */
     @Getter private String errorMessage;
 
     /** Creates an object to verify a multiple message response */
@@ -839,7 +868,8 @@ public class TSIG {
     /**
      * Verifies a TSIG record on an incoming message that is part of a multiple message response.
      * TSIG records must be present on the first and last messages, and at least every 100 records
-     * in between. After calling this routine, Message.isVerified() may be called on this message.
+     * in between. After calling this routine,{@link Message#isVerified()} may be called on this
+     * message.
      *
      * <p>This overload assumes that the verified message is not the last one, which is required to
      * have a {@link TSIGRecord}. Use {@link #verify(Message, byte[], boolean)} to explicitly
@@ -858,13 +888,15 @@ public class TSIG {
     /**
      * Verifies a TSIG record on an incoming message that is part of a multiple message response.
      * TSIG records must be present on the first and last messages, and at least every 100 records
-     * in between. After calling this routine, Message.isVerified() may be called on this message.
+     * in between. After calling this routine, {@link Message#isVerified()} may be called on this
+     * message.
      *
      * @param message The message
      * @param messageBytes The message in unparsed form
      * @param isLastMessage If true, verifies that the {@link Message} has an {@link TSIGRecord}.
      * @return The result of the verification (as an Rcode)
      * @see Rcode
+     * @since 3.5.3
      */
     public int verify(Message message, byte[] messageBytes, boolean isLastMessage) {
       TSIGRecord tsig = message.getTSIG();
