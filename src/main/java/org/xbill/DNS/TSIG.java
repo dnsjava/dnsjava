@@ -15,6 +15,7 @@ import java.util.Objects;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.utils.base64;
 import org.xbill.DNS.utils.hexdump;
@@ -825,6 +826,7 @@ public class TSIG {
 
     private int nresponses;
     private int lastsigned;
+    @Getter private String errorMessage;
 
     /** Creates an object to verify a multiple message response */
     public StreamVerifier(TSIG tsig, TSIGRecord queryTsig) {
@@ -841,7 +843,8 @@ public class TSIG {
      *
      * <p>This overload assumes that the verified message is not the last one, which is required to
      * have a {@link TSIGRecord}. Use {@link #verify(Message, byte[], boolean)} to explicitly
-     * specify the last message.
+     * specify the last message or check that the message is verified with {@link
+     * Message#isVerified()}.
      *
      * @param message The message
      * @param messageBytes The message in unparsed form
@@ -866,12 +869,23 @@ public class TSIG {
     public int verify(Message message, byte[] messageBytes, boolean isLastMessage) {
       TSIGRecord tsig = message.getTSIG();
 
+      // https://datatracker.ietf.org/doc/html/rfc8945#section-5.3.1
+      // [...] a client that receives DNS messages and verifies TSIG MUST accept up to 99
+      // intermediary messages without a TSIG and MUST verify that both the first and last message
+      // contain a TSIG.
       nresponses++;
       if (nresponses == 1) {
-        int result = key.verify(message, messageBytes, queryTsig, true, sharedHmac);
-        hmacAddSignature(sharedHmac, tsig);
-        lastsigned = nresponses;
-        return result;
+        if (tsig != null) {
+          int result = key.verify(message, messageBytes, queryTsig, true, sharedHmac);
+          hmacAddSignature(sharedHmac, tsig);
+          lastsigned = nresponses;
+          return result;
+        } else {
+          errorMessage = "missing required signature on first message";
+          log.debug("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
+          message.tsigState = Message.TSIG_FAILED;
+          return Rcode.FORMERR;
+        }
       }
 
       if (tsig != null) {
@@ -882,15 +896,18 @@ public class TSIG {
       } else {
         boolean required = nresponses - lastsigned >= 100;
         if (required) {
-          log.debug("FORMERR: missing required signature on {}th message", nresponses);
+          errorMessage = "Missing required signature on message #" + nresponses;
+          log.debug("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
           message.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         } else if (isLastMessage) {
-          log.debug("FORMERR: missing required signature on last message");
+          errorMessage = "Missing required signature on last message";
+          log.debug("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
           message.tsigState = Message.TSIG_FAILED;
           return Rcode.FORMERR;
         } else {
-          log.trace("Intermediate message {} without signature", nresponses);
+          errorMessage = "Intermediate message #" + nresponses + " without signature";
+          log.trace("{}: {}", Rcode.TSIGstring(Rcode.FORMERR), errorMessage);
           addUnsignedMessageToMac(message, messageBytes, sharedHmac);
           return Rcode.NOERROR;
         }

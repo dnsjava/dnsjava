@@ -14,15 +14,24 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import javax.crypto.spec.SecretKeySpec;
+import lombok.Getter;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -331,17 +340,19 @@ class TSIGTest {
   @Test
   void testTSIGStreamVerifierMissingMinimumTsig() throws Exception {
     MockMessageClient client = new MockMessageClient(defaultKey);
-    MockMessageServer server = new MockMessageServer(defaultKey);
-
-    byte[] query = client.createQuery();
     int numResponses = 200;
-    List<Message> response = server.handleQuery(query, numResponses, 200, false);
+    byte[] query = client.createQuery();
+    List<Message> response;
+    try (MockMessageServer server = new MockMessageServer(defaultKey, numResponses, 200, false)) {
+      server.send(query);
+      response = server.getMessages();
+    }
     Map<Integer, Integer> expectedRcodes = new HashMap<>();
     for (int i = 0; i < numResponses; i++) {
       expectedRcodes.put(i, i < 100 ? Rcode.NOERROR : Rcode.FORMERR);
     }
     expectedRcodes.put(numResponses - 1, Rcode.BADSIG);
-    client.validateResponse(query, response, expectedRcodes);
+    client.validateResponse(query, response, expectedRcodes, false);
   }
 
   @ParameterizedTest(name = "testTSIGStreamVerifier(numResponses: {0}, signEvery: {1})")
@@ -353,15 +364,19 @@ class TSIGTest {
   })
   void testTSIGStreamVerifier(int numResponses, int signEvery) throws Exception {
     MockMessageClient client = new MockMessageClient(defaultKey);
-    MockMessageServer server = new MockMessageServer(defaultKey);
-
     byte[] query = client.createQuery();
-    List<Message> response = server.handleQuery(query, numResponses, signEvery, false);
+    List<Message> response;
+    try (MockMessageServer server =
+        new MockMessageServer(defaultKey, numResponses, signEvery, false)) {
+
+      server.send(query);
+      response = server.getMessages();
+    }
     Map<Integer, Integer> expectedRcodes = new HashMap<>();
     for (int i = 0; i < numResponses; i++) {
       expectedRcodes.put(i, Rcode.NOERROR);
     }
-    client.validateResponse(query, response, expectedRcodes);
+    client.validateResponse(query, response, expectedRcodes, true);
   }
 
   @ParameterizedTest(name = "testTSIGStreamVerifierLastMessage(numResponses: {0}, signEvery: {1})")
@@ -372,17 +387,123 @@ class TSIGTest {
   })
   void testTSIGStreamVerifierLastMessage(int numResponses, int signEvery) throws Exception {
     MockMessageClient client = new MockMessageClient(defaultKey);
-    MockMessageServer server = new MockMessageServer(defaultKey);
-
     byte[] query = client.createQuery();
-    List<Message> response = server.handleQuery(query, numResponses, signEvery, true);
+    List<Message> response;
+    try (MockMessageServer server =
+        new MockMessageServer(defaultKey, numResponses, signEvery, true)) {
+
+      server.send(query);
+      response = server.getMessages();
+    }
     Map<Integer, Integer> expectedRcodes = new HashMap<>();
     for (int i = 0; i < numResponses; i++) {
       expectedRcodes.put(i, Rcode.NOERROR);
     }
 
     expectedRcodes.put(numResponses - 1, Rcode.FORMERR);
-    client.validateResponse(query, response, expectedRcodes);
+    client.validateResponse(query, response, expectedRcodes, false);
+  }
+
+  @Test
+  void testFromTcpStream() throws IOException {
+    DNSInput request = new DNSInput(IOUtils.resourceToByteArray("/tsig-axfr/request.bin"));
+    byte[] queryBytes = request.readByteArray(request.readU16());
+    Message query = new Message(queryBytes);
+    assertNotNull(query.getTSIG());
+    TSIG key =
+        new TSIG(
+            TSIG.HMAC_SHA256,
+            Name.fromConstantString("dnssecishardtest."),
+            new SecretKeySpec(
+                Objects.requireNonNull(
+                    base64.fromString("q4Gsu0nYoyub20//PATXhABobmrVUQyqq5TFzYHfC7o=")),
+                "HmacSHA256"),
+            Clock.fixed(Instant.parse("2023-11-01T20:52:08Z"), ZoneId.of("UTC")));
+
+    TSIG.StreamVerifier verifier = new TSIG.StreamVerifier(key, query.getTSIG());
+    DNSInput response = new DNSInput(IOUtils.resourceToByteArray("/tsig-axfr/response.bin"));
+
+    // Use a list, not a map, to keep the message order intact
+    List<Map.Entry<Message, byte[]>> messages = new ArrayList<>();
+    while (response.remaining() > 0) {
+      byte[] messageBytes = response.readByteArray(response.readU16());
+      Message message = new Message(messageBytes);
+      messages.add(new AbstractMap.SimpleEntry<>(message, messageBytes));
+    }
+
+    for (int i = 0; i < messages.size(); i++) {
+      Map.Entry<Message, byte[]> e = messages.get(i);
+      assertEquals(
+          verifier.verify(e.getKey(), e.getValue(), i == messages.size() - 1), Rcode.NOERROR);
+    }
+  }
+
+  @Test
+  void testAxfrLastNotSignedError() throws Exception {
+    Name name = Name.fromConstantString("example.com.");
+    ZoneTransferIn client =
+        new ZoneTransferIn(
+            name,
+            Type.AXFR,
+            0,
+            false,
+            new InetSocketAddress(InetAddress.getLocalHost(), 53),
+            defaultKey) {
+          @Override
+          TCPClient createTcpClient(Duration timeout) throws IOException {
+            return new MockMessageServer(defaultKey, 200, 20, true);
+          }
+        };
+
+    ZoneTransferException exception =
+        assertThrows(ZoneTransferException.class, () -> client.run(new ZoneBuilderAxfrHandler()));
+    assertTrue(exception.getMessage().contains(Rcode.TSIGstring(Rcode.FORMERR)));
+    assertTrue(exception.getMessage().contains("last"));
+  }
+
+  @Test
+  void testAxfr() throws Exception {
+    Name name = Name.fromConstantString("example.com.");
+    ZoneTransferIn client =
+        new ZoneTransferIn(
+            name,
+            Type.AXFR,
+            0,
+            false,
+            new InetSocketAddress(InetAddress.getLocalHost(), 53),
+            defaultKey) {
+          @Override
+          TCPClient createTcpClient(Duration timeout) throws IOException {
+            return new MockMessageServer(defaultKey, 200, 20, false);
+          }
+        };
+
+    ZoneBuilderAxfrHandler handler = new ZoneBuilderAxfrHandler();
+    client.run(handler);
+    // soa on first message, + a record on every message, +soa on last message
+    assertEquals(handler.getRecords().size(), 202);
+  }
+
+  @Getter
+  private static class ZoneBuilderAxfrHandler implements ZoneTransferIn.ZoneTransferHandler {
+    private final List<Record> records = new ArrayList<>();
+
+    @Override
+    public void startAXFR() {}
+
+    @Override
+    public void startIXFR() {}
+
+    @Override
+    public void startIXFRDeletes(Record soa) {}
+
+    @Override
+    public void startIXFRAdds(Record soa) {}
+
+    @Override
+    public void handleRecord(Record r) {
+      records.add(r);
+    }
   }
 
   private static class MockMessageClient {
@@ -401,7 +522,10 @@ class TSIGTest {
     }
 
     public void validateResponse(
-        byte[] query, List<Message> responses, Map<Integer, Integer> expectedRcodes)
+        byte[] query,
+        List<Message> responses,
+        Map<Integer, Integer> expectedRcodes,
+        boolean lastResponseSignedState)
         throws IOException {
       Message queryMessage = new Message(query);
       TSIG.StreamVerifier verifier = new TSIG.StreamVerifier(key, queryMessage.getTSIG());
@@ -413,7 +537,7 @@ class TSIGTest {
         Message messageFromWire = new Message(renderedMessage);
         actualRcodes.put(i, verifier.verify(messageFromWire, renderedMessage, isLastMessage));
         if (isLastMessage) {
-          assertFalse(messageFromWire.isVerified());
+          assertEquals(messageFromWire.isVerified(), lastResponseSignedState);
         }
       }
 
@@ -421,26 +545,71 @@ class TSIGTest {
     }
   }
 
-  private static class MockMessageServer {
+  private static class MockMessageServer extends TCPClient {
     private final TSIG key;
+    private final int responseMessageCount;
+    private final int signEvery;
+    private final boolean skipLast;
+    @Getter private List<Message> messages;
+    private int recvCalls;
 
-    MockMessageServer(TSIG key) {
+    MockMessageServer(TSIG key, int responseMessageCount, int signEvery, boolean skipLast)
+        throws IOException {
+      super(Duration.ZERO);
       this.key = key;
+      this.responseMessageCount = responseMessageCount;
+      this.signEvery = signEvery;
+      this.skipLast = skipLast;
     }
 
-    List<Message> handleQuery(
-        byte[] queryMessageBytes, int responseMessageCount, int signEvery, boolean skipLast)
-        throws Exception {
+    @Override
+    void bind(SocketAddress addr) {
+      // do nothing
+    }
+
+    @Override
+    void connect(SocketAddress addr) {
+      // do nothing
+    }
+
+    @Override
+    public void close() {
+      // do nothing
+    }
+
+    @Override
+    void send(byte[] queryMessageBytes) throws IOException {
       Message parsedQueryMessage = new Message(queryMessageBytes);
       assertNotNull(parsedQueryMessage.getTSIG());
 
-      List<Message> responseMessageList = new LinkedList<>();
-      StreamGenerator generator = getStreamGenerator(signEvery, parsedQueryMessage);
+      messages = new LinkedList<>();
+      StreamGenerator generator;
+      try {
+        generator = getStreamGenerator(signEvery, parsedQueryMessage);
+      } catch (NoSuchFieldException | IllegalAccessException e) {
+        throw new IOException(e);
+      }
 
+      Name queryName = parsedQueryMessage.getQuestion().getName();
+      Record soa =
+          new SOARecord(
+              queryName,
+              DClass.IN,
+              300,
+              new Name("ns1", queryName),
+              new Name("admin", queryName),
+              1,
+              3600,
+              1,
+              3600,
+              1800);
       for (int i = 0; i < responseMessageCount; i++) {
         Message response = new Message(parsedQueryMessage.getHeader().getID());
         response.getHeader().setFlag(Flags.QR);
         response.addRecord(parsedQueryMessage.getQuestion(), Section.QUESTION);
+        if (i == 0) {
+          response.addRecord(soa, Section.ANSWER);
+        }
         Record answer =
             new ARecord(
                 parsedQueryMessage.getQuestion().getName(),
@@ -449,11 +618,18 @@ class TSIGTest {
                 InetAddress.getByAddress(ByteBuffer.allocate(4).putInt(i).array()));
         response.addRecord(answer, Section.ANSWER);
 
-        generator.generate(response, !skipLast && i == responseMessageCount - 1);
-        responseMessageList.add(response);
-      }
+        if (i == responseMessageCount - 1) {
+          response.addRecord(soa, Section.ANSWER);
+        }
 
-      return responseMessageList;
+        generator.generate(response, !skipLast && i == responseMessageCount - 1);
+        messages.add(response);
+      }
+    }
+
+    @Override
+    byte[] recv() {
+      return messages.get(recvCalls++).toWire(Message.MAXLENGTH);
     }
 
     private StreamGenerator getStreamGenerator(int signEvery, Message parsedQueryMessage)

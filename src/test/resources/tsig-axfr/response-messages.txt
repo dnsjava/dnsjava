@@ -1,0 +1,1 @@
+dig @dnssec1.stage.arin.net -p 53 AXFR dnssecishard.com. -y 'hmac-sha256:dnssecishardtest:q4Gsu0nYoyub20//PATXhABobmrVUQyqq5TFzYHfC7o='
