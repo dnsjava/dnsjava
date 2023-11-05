@@ -11,7 +11,7 @@ on:
       - 'release/**'
 
 env:
-  BUILD_JAVA_VERSION: '20'
+  BUILD_JAVA_VERSION: '21'
 
 jobs:
   test:
@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest ]
-        java: [ '8', '11', '17', '20' ]
+        java: [ '8', '11', '17', '21' ]
         arch: [ 'x64' ]
         include:
           - os: windows-latest

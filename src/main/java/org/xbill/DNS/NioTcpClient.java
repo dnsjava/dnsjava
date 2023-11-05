@@ -28,9 +28,9 @@ final class NioTcpClient extends NioClient {
   private static final Map<ChannelKey, ChannelState> channelMap = new ConcurrentHashMap<>();
 
   static {
-    setRegistrationsTask(NioTcpClient::processPendingRegistrations);
-    setTimeoutTask(NioTcpClient::checkTransactionTimeouts);
-    setCloseTask(NioTcpClient::closeTcp);
+    setRegistrationsTask(NioTcpClient::processPendingRegistrations, true);
+    setTimeoutTask(NioTcpClient::checkTransactionTimeouts, true);
+    setCloseTask(NioTcpClient::closeTcp, true);
   }
 
   private static void processPendingRegistrations() {

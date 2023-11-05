@@ -47,11 +47,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-abstract class DNSInputBase {
+abstract class DNSInputTest {
   protected byte[] m_raw;
   protected DNSInput m_di;
 
-  static class DNSInputArrayTest extends DNSInputBase {
+  static class DNSInputArrayTest extends DNSInputTest {
     @BeforeEach
     void setUp() {
       m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
@@ -59,7 +59,7 @@ abstract class DNSInputBase {
     }
   }
 
-  static class DNSInputByteBufferTest extends DNSInputBase {
+  static class DNSInputByteBufferTest extends DNSInputTest {
     @BeforeEach
     void setUp() {
       m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
@@ -72,7 +72,7 @@ abstract class DNSInputBase {
     }
   }
 
-  static class DNSInputByteBufferLimitTest extends DNSInputBase {
+  static class DNSInputByteBufferLimitTest extends DNSInputTest {
     @BeforeEach
     void setUp() {
       m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
@@ -86,7 +86,7 @@ abstract class DNSInputBase {
     }
   }
 
-  static class DNSInputByteBufferLimitOffsetTest extends DNSInputBase {
+  static class DNSInputByteBufferLimitOffsetTest extends DNSInputTest {
     @BeforeEach
     void setUp() throws IOException {
       m_raw = new byte[] {0, 1, 2, 3, 4, 5, (byte) 255, (byte) 255, (byte) 255, (byte) 255};
