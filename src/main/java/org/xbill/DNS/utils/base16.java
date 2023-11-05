@@ -36,6 +36,20 @@ public class base16 {
   }
 
   /**
+   * Convert binary data to a hex-encoded string, line-wrapped at {@code lineLength} characters.
+   *
+   * @param b An array containing binary data
+   * @param lineLength The number of characters per line
+   * @param prefix A string prefixing the characters on each line
+   * @param addClose Whether to add a close parenthesis or not
+   * @return A String containing the encoded data
+   * @since 3.6
+   */
+  public static String toString(byte[] b, int lineLength, String prefix, boolean addClose) {
+    return BaseUtils.wrapLines(toString(b), lineLength, prefix, addClose);
+  }
+
+  /**
    * Convert a hex-encoded String to binary data, ignoring {@link Character#isWhitespace(char)
    * whitespace} characters.
    *

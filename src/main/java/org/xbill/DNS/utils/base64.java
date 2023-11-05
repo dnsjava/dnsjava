@@ -87,21 +87,7 @@ public class base64 {
    * @return A String representing the formatted output
    */
   public static String formatString(byte[] b, int lineLength, String prefix, boolean addClose) {
-    String s = toString(b);
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < s.length(); i += lineLength) {
-      sb.append(prefix);
-      if (i + lineLength >= s.length()) {
-        sb.append(s.substring(i));
-        if (addClose) {
-          sb.append(" )");
-        }
-      } else {
-        sb.append(s, i, i + lineLength);
-        sb.append("\n");
-      }
-    }
-    return sb.toString();
+    return BaseUtils.wrapLines(toString(b), lineLength, prefix, addClose);
   }
 
   /**
