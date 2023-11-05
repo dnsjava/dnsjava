@@ -424,7 +424,7 @@ public final class Type {
     types.add(CDNSKEY, "CDNSKEY", CDNSKEYRecord::new);
     types.add(OPENPGPKEY, "OPENPGPKEY", OPENPGPKEYRecord::new);
     types.add(CSYNC, "CSYNC");
-    types.add(ZONEMD, "ZONEMD");
+    types.add(ZONEMD, "ZONEMD", ZoneMDRecord::new);
     types.add(SVCB, "SVCB", SVCBRecord::new);
     types.add(HTTPS, "HTTPS", HTTPSRecord::new);
 
