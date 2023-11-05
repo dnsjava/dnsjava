@@ -16,10 +16,7 @@ final class ByteArrayComparator {
   private static final int MAX_BYTE = 0xFF;
 
   /** {@inheritDoc} */
-  public int compare(Object o1, Object o2) {
-    byte[] b1 = (byte[]) o1;
-    byte[] b2 = (byte[]) o2;
-
+  public int compare(byte[] b1, byte[] b2) {
     if (b1.length != b2.length) {
       return b1.length - b2.length;
     }

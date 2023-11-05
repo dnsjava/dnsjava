@@ -378,14 +378,14 @@ class NameTest {
     }
 
     @Test
-    void ctor_too_long_rel_with_rel_origin() throws TextParseException {
+    void ctor_too_long_rel_with_rel_origin() {
       // relative name with three 63-char labels and a 53-char label with an 8-char relative origin
       assertThrows(
           TextParseException.class,
           () ->
               new Name(
                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-                  new Name("relative")));
+                  Name.fromConstantString("relative")));
     }
 
     @Test
@@ -396,7 +396,7 @@ class NameTest {
           () ->
               new Name(
                   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-                  new Name("absolute.")));
+                  Name.fromConstantString("absolute.")));
     }
 
     @Test
