@@ -3,6 +3,7 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,9 +13,60 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.xbill.DNS.DNSSEC.DNSSECException;
 
 class MasterTest {
+
+  /**
+   * Parse the <a href="https://www.internic.net/domain/root.zone">root zone file</a> to validate
+   * that we understand all record types.
+   */
+  @Test
+  void testRootZoneFile() throws IOException, DNSSECException {
+    List<Record> records = new ArrayList<>(26000);
+    Map<String, RRset> rrSets = new HashMap<>(13000);
+    try (Master master = new Master(MasterTest.class.getResourceAsStream("/root.zone"))) {
+      Record r;
+      while ((r = master.nextRecord()) != null) {
+        records.add(r);
+        String key =
+            r.getName()
+                + "/"
+                + (r.getType() == Type.RRSIG ? ((RRSIGRecord) r).getTypeCovered() : r.getType());
+        RRset set = rrSets.computeIfAbsent(key, n -> new RRset());
+        set.addRR(r);
+        assertFalse(r.getClass().isInstance(EmptyRecord.class), "EmptyRecord type check");
+        assertNotEquals(Integer.toString(r.getType()), Type.string(r.getType()));
+      }
+    }
+
+    assertEquals(25097, records.size());
+
+    // Test the signatures
+    DNSKEYRecord[] keys =
+        records.stream()
+            .filter(r -> r.getName().equals(Name.root) && r.getType() == Type.DNSKEY)
+            .map(r -> (DNSKEYRecord) r)
+            .toArray(DNSKEYRecord[]::new);
+    for (RRset set : rrSets.values()) {
+      for (RRSIGRecord sig : set.sigs()) {
+        int verifyCount = 0;
+        for (DNSKEYRecord key : keys) {
+          if (key.getFootprint() == sig.getFootprint()) {
+            DNSSEC.verify(set, sig, key, Instant.parse("2023-11-05T19:50:00Z"));
+            verifyCount++;
+          }
+        }
+        assertEquals(set.sigs().size(), verifyCount);
+      }
+    }
+  }
 
   @Test
   void nextRecord() throws IOException {
