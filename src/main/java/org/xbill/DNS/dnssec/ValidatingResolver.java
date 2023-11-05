@@ -1279,6 +1279,7 @@ public final class ValidatingResolver implements Resolver {
    * @param port The IP destination port for the queries sent.
    * @see Resolver#setPort(int)
    */
+  @Override
   public void setPort(int port) {
     this.headResolver.setPort(port);
   }
@@ -1289,6 +1290,7 @@ public final class ValidatingResolver implements Resolver {
    * @param flag <code>true</code> to enable TCP, <code>false</code> to disable it.
    * @see Resolver#setTCP(boolean)
    */
+  @Override
   public void setTCP(boolean flag) {
     this.headResolver.setTCP(flag);
   }
@@ -1298,6 +1300,7 @@ public final class ValidatingResolver implements Resolver {
    *
    * @param flag unused
    */
+  @Override
   public void setIgnoreTruncation(boolean flag) {
     // never ignore
   }
@@ -1315,6 +1318,7 @@ public final class ValidatingResolver implements Resolver {
    *     OPTRecord.Option elements.
    * @see Resolver#setEDNS(int, int, int, List)
    */
+  @Override
   public void setEDNS(int version, int payloadSize, int flags, List<EDNSOption> options) {
     if (version == -1) {
       throw new IllegalArgumentException("EDNS cannot be disabled");
@@ -1329,6 +1333,7 @@ public final class ValidatingResolver implements Resolver {
    * @param key The key.
    * @see Resolver#setTSIGKey(TSIG)
    */
+  @Override
   public void setTSIGKey(TSIG key) {
     this.headResolver.setTSIGKey(key);
   }

@@ -144,6 +144,7 @@ class TCPClient implements AutoCloseable {
     }
   }
 
+  @Override
   public void close() throws IOException {
     key.selector().close();
     key.channel().close();
