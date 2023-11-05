@@ -57,6 +57,9 @@
         <jna.version>5.13.0</jna.version>
         <bouncycastle.version>1.76</bouncycastle.version>
         <vertx.version>4.4.6</vertx.version>
+        <!-- Stay on 1.7 for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
+        <google-java-format.version>1.7</google-java-format.version>
+        <spotless.version>2.30.0</spotless.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
@@ -284,13 +287,24 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.40.0</version>
+                <version>${spotless.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <formats>
                         <format>
                             <includes>
                                 <include>*.*</include>
                             </includes>
+                            <excludes>
+                                <exclude>*.iml</exclude>
+                            </excludes>
                             <trimTrailingWhitespace/>
                             <endWithNewline/>
                         </format>
@@ -304,7 +318,7 @@
                             <include>src/test/java/**/*.java</include>
                         </includes>
                         <googleJavaFormat>
-                            <version>1.7</version>
+                            <version>${google-java-format.version}</version>
                         </googleJavaFormat>
                     </java>
                 </configuration>
@@ -536,6 +550,8 @@
 
             <properties>
                 <mockito.version>5.7.0</mockito.version>
+                <google-java-format.version>1.17.0</google-java-format.version>
+                <spotless.version>2.40.0</spotless.version>
             </properties>
 
             <build>

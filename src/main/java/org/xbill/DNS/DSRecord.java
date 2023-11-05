@@ -18,7 +18,11 @@ import org.xbill.DNS.utils.base16;
  */
 public class DSRecord extends Record {
 
-  /** @deprecated use {@link DNSSEC.Digest} */
+  /**
+   * DS digest constants.
+   *
+   * @deprecated use {@link DNSSEC.Digest}
+   */
   @Deprecated
   public static class Digest {
     private Digest() {}
@@ -36,13 +40,32 @@ public class DSRecord extends Record {
     public static final int SHA384 = DNSSEC.Digest.SHA384;
   }
 
-  /** @deprecated use {@link DNSSEC.Digest#SHA1} */
+  /**
+   * SHA1 delegation signer digest ID.
+   *
+   * @deprecated use {@link DNSSEC.Digest#SHA1}
+   */
   @Deprecated public static final int SHA1_DIGEST_ID = DNSSEC.Digest.SHA1;
-  /** @deprecated use {@link DNSSEC.Digest#SHA256} */
+
+  /**
+   * SHA256 delegation signer digest ID.
+   *
+   * @deprecated use {@link DNSSEC.Digest#SHA256}
+   */
   @Deprecated public static final int SHA256_DIGEST_ID = DNSSEC.Digest.SHA256;
-  /** @deprecated use {@link DNSSEC.Digest#GOST3411} */
+
+  /**
+   * GOST4311 delegation signer digest ID.
+   *
+   * @deprecated use {@link DNSSEC.Digest#GOST3411}
+   */
   @Deprecated public static final int GOST3411_DIGEST_ID = DNSSEC.Digest.GOST3411;
-  /** @deprecated use {@link DNSSEC.Digest#SHA384} */
+
+  /**
+   * SHA384 delegation signer digest ID.
+   *
+   * @deprecated use {@link DNSSEC.Digest#SHA384}
+   */
   @Deprecated public static final int SHA384_DIGEST_ID = DNSSEC.Digest.SHA384;
 
   private int footprint;

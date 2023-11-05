@@ -316,6 +316,7 @@ public class Cache {
   public synchronized void clearCache() {
     data.clear();
   }
+
   /**
    * Adds a record to the Cache.
    *

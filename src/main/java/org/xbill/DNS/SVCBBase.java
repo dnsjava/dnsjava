@@ -36,7 +36,12 @@ public abstract class SVCBBase extends Record {
   public static final int IPV4HINT = 4;
   public static final int ECH = 5;
   public static final int IPV6HINT = 6;
-  /** @deprecated use {@link #ECH} */
+
+  /**
+   * Pre-RFC constant for the {@link #ECH} SVC parameter.
+   *
+   * @deprecated use {@link #ECH}
+   */
   @Deprecated public static final int ECHCONFIG = 5;
 
   protected SVCBBase() {
@@ -498,7 +503,11 @@ public abstract class SVCBBase extends Record {
     }
   }
 
-  /** @deprecated use {@link ParameterEch} */
+  /**
+   * Pre-RFC class for {@link ParameterEch}.
+   *
+   * @deprecated use {@link ParameterEch}
+   */
   @Deprecated
   public static class ParameterEchConfig extends ParameterBase {
     private byte[] data;

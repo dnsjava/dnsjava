@@ -44,7 +44,11 @@ import org.xbill.DNS.config.WindowsResolverConfigProvider;
  */
 @Slf4j
 public final class ResolverConfig {
-  /** @since 3.2 */
+  /**
+   * System property name to disable {@link ResolverConfigProvider} initialization.
+   *
+   * @since 3.2
+   */
   public static final String CONFIGPROVIDER_SKIP_INIT = "dnsjava.configprovider.skipinit";
 
   private final List<InetSocketAddress> servers = new ArrayList<>(2);

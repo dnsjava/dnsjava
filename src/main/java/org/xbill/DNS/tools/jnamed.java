@@ -46,7 +46,11 @@ import org.xbill.DNS.Type;
 import org.xbill.DNS.Zone;
 import org.xbill.DNS.ZoneTransferException;
 
-/** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
+/**
+ * A very basic implementation of a DNS server.
+ *
+ * @author Brian Wellington &lt;bwelling@xbill.org&gt;
+ */
 public class jnamed {
 
   static final int FLAG_DNSSECOK = 1;

@@ -20,12 +20,20 @@ public class TextParseException extends IOException {
     super(s);
   }
 
-  /** @since 3.5 */
+  /**
+   * Create an instance with preformatted message.
+   *
+   * @since 3.5
+   */
   public TextParseException(String name, String message) {
     super("'" + name + "': " + message);
   }
 
-  /** @since 3.5 */
+  /**
+   * Create an instance with preformatted message and inner exception.
+   *
+   * @since 3.5
+   */
   public TextParseException(String name, String message, Exception inner) {
     super("'" + name + "': " + message, inner);
   }

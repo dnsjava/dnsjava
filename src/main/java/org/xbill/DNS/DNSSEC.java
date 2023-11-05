@@ -34,10 +34,10 @@ import java.util.Map;
  *
  * <p>DNSSEC provides authentication for DNS information.
  *
+ * @author Brian Wellington
  * @see RRSIGRecord
  * @see DNSKEYRecord
  * @see RRset
- * @author Brian Wellington
  */
 public class DNSSEC {
   /** Domain Name System Security (DNSSEC) Algorithm Numbers. */
@@ -350,12 +350,12 @@ public class DNSSEC {
       this.now = now;
     }
 
-    /** @return When the signature expired */
+    /** When the signature expired. */
     public Instant getExpiration() {
       return when;
     }
 
-    /** @return When the verification was attempted */
+    /** When the verification was attempted. */
     public Instant getVerifyTime() {
       return now;
     }
@@ -372,12 +372,12 @@ public class DNSSEC {
       this.now = now;
     }
 
-    /** @return When the signature will become valid */
+    /** When the signature will become valid. */
     public Instant getExpiration() {
       return when;
     }
 
-    /** @return When the verification was attempted */
+    /** When the verification was attempted. */
     public Instant getVerifyTime() {
       return now;
     }
@@ -1118,10 +1118,10 @@ public class DNSSEC {
    * @param privkey The PrivateKey to use when signing
    * @param inception The time at which the signatures should become valid
    * @param expiration The time at which the signatures should expire
+   * @return The generated signature
    * @throws UnsupportedAlgorithmException The algorithm is unknown
    * @throws MalformedKeyException The key is malformed
    * @throws DNSSECException Some other error occurred.
-   * @return The generated signature
    * @deprecated use {@link #sign(RRset, DNSKEYRecord, PrivateKey, Instant, Instant)}
    */
   @Deprecated
@@ -1140,10 +1140,10 @@ public class DNSSEC {
    * @param privkey The PrivateKey to use when signing
    * @param inception The time at which the signatures should become valid
    * @param expiration The time at which the signatures should expire
+   * @return The generated signature
    * @throws UnsupportedAlgorithmException The algorithm is unknown
    * @throws MalformedKeyException The key is malformed
    * @throws DNSSECException Some other error occurred.
-   * @return The generated signature
    * @deprecated use {@link #sign(RRset, DNSKEYRecord, PrivateKey, Instant, Instant, String)}
    */
   @Deprecated
@@ -1167,10 +1167,10 @@ public class DNSSEC {
    * @param privkey The PrivateKey to use when signing
    * @param inception The time at which the signatures should become valid
    * @param expiration The time at which the signatures should expire
+   * @return The generated signature
    * @throws UnsupportedAlgorithmException The algorithm is unknown
    * @throws MalformedKeyException The key is malformed
    * @throws DNSSECException Some other error occurred.
-   * @return The generated signature
    */
   public static RRSIGRecord sign(
       RRset rrset, DNSKEYRecord key, PrivateKey privkey, Instant inception, Instant expiration)
@@ -1189,10 +1189,10 @@ public class DNSSEC {
    * @param expiration The time at which the signatures should expire
    * @param provider The name of the JCA provider. If non-null, it will be passed to JCA
    *     getInstance() methods.
+   * @return The generated signature
    * @throws UnsupportedAlgorithmException The algorithm is unknown
    * @throws MalformedKeyException The key is malformed
    * @throws DNSSECException Some other error occurred.
-   * @return The generated signature
    */
   public static RRSIGRecord sign(
       RRset rrset,

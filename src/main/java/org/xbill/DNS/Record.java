@@ -55,7 +55,11 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
 
   protected Record() {}
 
-  /** @since 3.1 */
+  /**
+   * Initialize the basic fields of a record.
+   *
+   * @since 3.1
+   */
   protected Record(Name name, int type, int dclass, long ttl) {
     if (!name.isAbsolute()) {
       throw new RelativeNameException(name);

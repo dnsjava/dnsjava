@@ -17,8 +17,13 @@ import org.xbill.DNS.WireParseException;
 import org.xbill.DNS.ZoneTransferException;
 import org.xbill.DNS.ZoneTransferIn;
 
-/** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
+/**
+ * A dnsjava-based copy of the {@code dig} CLI tool.
+ *
+ * @author Brian Wellington &lt;bwelling@xbill.org&gt;
+ */
 public class dig {
+
   static Name name = null;
   static int type = Type.A, dclass = DClass.IN;
 

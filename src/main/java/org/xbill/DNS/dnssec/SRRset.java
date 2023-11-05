@@ -81,7 +81,7 @@ class SRRset extends RRset {
     this.securityStatus = status;
   }
 
-  /** @return The "signer" name for this SRRset, if signed, or null if not. */
+  /** The "signer" name for this {@link SRRset}, if signed, or {@code null} if not. */
   public Name getSignerName() {
     List<RRSIGRecord> sigs = sigs();
     if (!sigs.isEmpty()) {

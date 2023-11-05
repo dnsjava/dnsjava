@@ -207,7 +207,7 @@ jobs:
               -Dmaven.test.skip.exec \
               -Dcheckstyle.skip \
               -Dspotless.check.skip=true \
-              -Danimal.sniffer.skip=true
+              -Danimal.sniffer.skip=true \
               deploy
           else
             echo "::error file=SimpleResolver.class::Class file version is not Java 8"

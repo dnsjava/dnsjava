@@ -10,7 +10,11 @@ import lombok.Getter;
 public class RedirectOverflowException extends LookupFailedException {
   @Getter private final int maxRedirects;
 
-  /** @deprecated Use {@link RedirectOverflowException#RedirectOverflowException(int)}. */
+  /**
+   * Do not use.
+   *
+   * @deprecated Use {@link RedirectOverflowException#RedirectOverflowException(int)}.
+   */
   @Deprecated
   public RedirectOverflowException(String message) {
     super(message);

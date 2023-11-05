@@ -7,7 +7,12 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
 
-/** @author Brian Wellington &lt;bwelling@xbill.org&gt; */
+/**
+ * A very basic implementation to perform an {@link Type#A} record lookup.
+ *
+ * @author Brian Wellington &lt;bwelling@xbill.org&gt;
+ * @see dig
+ */
 public class lookup {
 
   public static void printAnswer(String name, Lookup lookup) {
