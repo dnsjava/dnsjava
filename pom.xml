@@ -320,6 +320,8 @@
                         <googleJavaFormat>
                             <version>${google-java-format.version}</version>
                         </googleJavaFormat>
+                        <removeUnusedImports/>
+                        <importOrder/>
                     </java>
                 </configuration>
             </plugin>
@@ -343,6 +345,7 @@
                     <configLocation>google_checks.xml</configLocation>
                     -->
                     <configLocation>checkstyle/checkstyle-config.xml</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <linkXRef>false</linkXRef>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>

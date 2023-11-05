@@ -249,7 +249,7 @@ public class ExtendedErrorCodeOption extends EDNSOption {
   @Override
   void optionToWire(DNSOutput out) {
     out.writeU16(errorCode);
-    if (text != null && text.length() > 0) {
+    if (text != null && !text.isEmpty()) {
       out.writeByteArray(text.getBytes(StandardCharsets.UTF_8));
     }
   }

@@ -112,11 +112,11 @@ final class NioUdpClient extends NioClient {
         return;
       }
 
-      DatagramChannel channel = (DatagramChannel) key.channel();
+      DatagramChannel keyChannel = (DatagramChannel) key.channel();
       ByteBuffer buffer = ByteBuffer.allocate(max);
       int read;
       try {
-        read = channel.read(buffer);
+        read = keyChannel.read(buffer);
         if (read <= 0) {
           throw new EOFException();
         }
@@ -127,15 +127,15 @@ final class NioUdpClient extends NioClient {
       }
 
       buffer.flip();
-      byte[] data = new byte[read];
-      System.arraycopy(buffer.array(), 0, data, 0, read);
+      byte[] resultingData = new byte[read];
+      System.arraycopy(buffer.array(), 0, resultingData, 0, read);
       verboseLog(
           "UDP read: transaction id=" + id,
-          channel.socket().getLocalSocketAddress(),
-          channel.socket().getRemoteSocketAddress(),
-          data);
+          keyChannel.socket().getLocalSocketAddress(),
+          keyChannel.socket().getRemoteSocketAddress(),
+          resultingData);
       silentCloseChannel();
-      f.complete(data);
+      f.complete(resultingData);
       pendingTransactions.remove(this);
     }
 

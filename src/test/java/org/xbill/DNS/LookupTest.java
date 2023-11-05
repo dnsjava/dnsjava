@@ -316,7 +316,7 @@ public class LookupTest {
 
   @Test
   void testNdots1() throws Exception {
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = Mockito.mock(Resolver.class);
     wireUpMockResolver(mockResolver, this::simpleAnswer);
     Lookup l = makeLookupWithResolver(mockResolver, "example.com");
     l.setSearchPath("namespace.svc.cluster.local", "svc.cluster.local", "cluster.local");
@@ -327,7 +327,7 @@ public class LookupTest {
 
   @Test
   void testNdotsFallbackToAbsolute() throws Exception {
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = Mockito.mock(Resolver.class);
     wireUpMockResolver(mockResolver, this::goodAnswerWhenThreeLabels);
     Lookup l = makeLookupWithResolver(mockResolver, "example.com");
     l.setSearchPath("namespace.svc.cluster.local", "svc.cluster.local", "cluster.local");

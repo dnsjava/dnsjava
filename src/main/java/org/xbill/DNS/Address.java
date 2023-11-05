@@ -86,22 +86,22 @@ public final class Address {
     int first = 0;
     int last = tokens.length - 1;
 
-    if (tokens[0].length() == 0) {
+    if (tokens[0].isEmpty()) {
       // If the first two tokens are empty, it means the string
       // started with ::, which is fine.  If only the first is
       // empty, the string started with :, which is bad.
-      if (last - first > 0 && tokens[1].length() == 0) {
+      if (last - first > 0 && tokens[1].isEmpty()) {
         first++;
       } else {
         return null;
       }
     }
 
-    if (tokens[last].length() == 0) {
+    if (tokens[last].isEmpty()) {
       // If the last two tokens are empty, it means the string
       // ended with ::, which is fine.  If only the last is
       // empty, the string ended with :, which is bad.
-      if (last - first > 0 && tokens[last - 1].length() == 0) {
+      if (last - first > 0 && tokens[last - 1].isEmpty()) {
         last--;
       } else {
         return null;
@@ -114,7 +114,7 @@ public final class Address {
 
     int i, j;
     for (i = first, j = 0; i <= last; i++) {
-      if (tokens[i].length() == 0) {
+      if (tokens[i].isEmpty()) {
         if (range >= 0) {
           return null;
         }

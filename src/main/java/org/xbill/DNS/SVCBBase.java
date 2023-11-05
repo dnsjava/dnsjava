@@ -236,11 +236,11 @@ public abstract class SVCBBase extends Record {
     }
 
     public List<String> getValues() {
-      List<String> values = new ArrayList<>();
-      for (byte[] b : this.values) {
-        values.add(byteArrayToString(b, false));
+      List<String> result = new ArrayList<>();
+      for (byte[] b : values) {
+        result.add(byteArrayToString(b, false));
       }
-      return values;
+      return result;
     }
 
     @Override
@@ -394,14 +394,14 @@ public abstract class SVCBBase extends Record {
     }
 
     public List<Inet4Address> getAddresses() throws UnknownHostException {
-      List<Inet4Address> addresses = new LinkedList<>();
-      for (byte[] bytes : this.addresses) {
+      List<Inet4Address> result = new LinkedList<>();
+      for (byte[] bytes : addresses) {
         InetAddress address = InetAddress.getByAddress(bytes);
         if (address instanceof Inet4Address) {
-          addresses.add((Inet4Address) address);
+          result.add((Inet4Address) address);
         }
       }
-      return addresses;
+      return result;
     }
 
     @Override
@@ -569,14 +569,14 @@ public abstract class SVCBBase extends Record {
     }
 
     public List<Inet6Address> getAddresses() throws UnknownHostException {
-      List<Inet6Address> addresses = new LinkedList<>();
-      for (byte[] bytes : this.addresses) {
+      List<Inet6Address> result = new LinkedList<>();
+      for (byte[] bytes : addresses) {
         InetAddress address = InetAddress.getByAddress(bytes);
         if (address instanceof Inet6Address) {
-          addresses.add((Inet6Address) address);
+          result.add((Inet6Address) address);
         }
       }
-      return addresses;
+      return result;
     }
 
     @Override

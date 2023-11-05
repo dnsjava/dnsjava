@@ -98,7 +98,7 @@ public class update {
           log.println("> " + line);
         }
 
-        if (line.length() == 0 || line.charAt(0) == '#') {
+        if (line.isEmpty() || line.charAt(0) == '#') {
           continue;
         }
 

@@ -53,7 +53,7 @@ public class base16 {
       return null;
     }
 
-    if (str.length() == 0) {
+    if (str.isEmpty()) {
       return new byte[0];
     }
 

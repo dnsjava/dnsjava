@@ -343,7 +343,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
     }
     sb.append(Type.string(type));
     String rdata = rrToString();
-    if (!rdata.equals("")) {
+    if (!rdata.isEmpty()) {
       sb.append("\t");
       sb.append(rdata);
     }

@@ -74,7 +74,7 @@ public class base64 {
         os.write(base.charAt(t[j]));
       }
     }
-    return new String(os.toByteArray());
+    return os.toString();
   }
 
   /**

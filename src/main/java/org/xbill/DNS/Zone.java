@@ -321,7 +321,7 @@ public class Zone implements Serializable {
         RRset set = list.get(i);
         if (set.getType() == type) {
           list.remove(i);
-          if (list.size() == 0) {
+          if (list.isEmpty()) {
             data.remove(name);
           }
           return;

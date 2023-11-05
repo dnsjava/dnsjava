@@ -3,7 +3,12 @@
 <module name="Checker">
   <module name="TreeWalker">
     <module name="AvoidStarImport"/>
+    <module name="HiddenField">
+      <property name="tokens" value="VARIABLE_DEF"/>
+    </module>
+    <module name="MissingOverride"/>
     <module name="NeedBraces"/>
+    <module name="OneTopLevelClass"/>
   </module>
   <module name="RegexpHeader">
     <property name="headerFile" value="checkstyle/header.template.txt"/>

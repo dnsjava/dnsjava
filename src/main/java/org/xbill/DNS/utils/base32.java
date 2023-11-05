@@ -134,7 +134,7 @@ public class base32 {
       }
     }
 
-    return new String(os.toByteArray());
+    return os.toString();
   }
 
   /**

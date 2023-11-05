@@ -9,7 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
-import org.xbill.DNS.*;
+import org.xbill.DNS.DClass;
+import org.xbill.DNS.DNSKEYRecord;
+import org.xbill.DNS.DSRecord;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.RRset;
+import org.xbill.DNS.TXTRecord;
+import org.xbill.DNS.TextParseException;
 
 class TestDefaultTrustAnchorStore {
   @Test

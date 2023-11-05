@@ -64,7 +64,7 @@ class RplParser {
 
     while ((line = r.readLine()) != null) {
       // comment or empty
-      if (line.equals("") || line.startsWith(";")) {
+      if (line.isEmpty() || line.startsWith(";")) {
         continue;
       }
 
@@ -80,14 +80,14 @@ class RplParser {
             state = ParseState.ENTRY_BEGIN;
             m = new Message();
           } else if (line.startsWith("STEP")) {
-            String[] data = line.split("\\s");
-            step = Integer.parseInt(data[1]);
+            String[] lineItems = line.split("\\s");
+            step = Integer.parseInt(lineItems[1]);
             m = new Message();
             r.readLine();
-            if (data[2].equals("QUERY")) {
+            if (lineItems[2].equals("QUERY")) {
               state = ParseState.STEP_QUERY;
               check = new Check();
-            } else if (data[2].equals("CHECK_ANSWER")) {
+            } else if (lineItems[2].equals("CHECK_ANSWER")) {
               state = ParseState.STEP_CHECK_ANSWER;
             }
           }
@@ -109,14 +109,16 @@ class RplParser {
                     .withZone(ZoneId.of("UTC"));
             rpl.date = LocalDateTime.parse(date, formatter).toInstant(ZoneOffset.UTC);
           } else if (line.matches("\\s*val-nsec3-keysize-iterations:.*")) {
-            String[] data = line.substring(line.indexOf("\"") + 1, line.length() - 1).split("\\s");
-            if (data.length % 2 != 0) {
+            String[] lineItems =
+                line.substring(line.indexOf("\"") + 1, line.length() - 1).split("\\s");
+            if (lineItems.length % 2 != 0) {
               throw new ParseException("val-nsec3-keysize-iterations invalid", 0);
             }
 
             rpl.nsec3iterations = new TreeMap<>();
-            for (int i = 0; i < data.length; i += 2) {
-              rpl.nsec3iterations.put(Integer.parseInt(data[i]), Integer.parseInt(data[i + 1]));
+            for (int i = 0; i < lineItems.length; i += 2) {
+              rpl.nsec3iterations.put(
+                  Integer.parseInt(lineItems[i]), Integer.parseInt(lineItems[i + 1]));
             }
           } else if (line.matches("\\s*val-digest-preference:.*")) {
             rpl.digestPreference = line.substring(line.indexOf("\"") + 1, line.length() - 1);
@@ -233,13 +235,13 @@ class RplParser {
       return r;
     } catch (Exception ex) {
       if (ex.getMessage() != null && ex.getMessage().contains("expected an integer")) {
-        String[] data = line.split("\\s");
+        String[] lineItems = line.split("\\s");
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < data.length; i++) {
-          if (this.algoStrings.contains(data[i])) {
-            sb.append(Algorithm.value(data[i]));
+        for (String lineItem : lineItems) {
+          if (this.algoStrings.contains(lineItem)) {
+            sb.append(Algorithm.value(lineItem));
           } else {
-            sb.append(data[i]);
+            sb.append(lineItem);
           }
           sb.append(' ');
         }

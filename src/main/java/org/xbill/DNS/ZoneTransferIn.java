@@ -576,8 +576,8 @@ public class ZoneTransferIn {
    *     itself.
    */
   public void run() throws IOException, ZoneTransferException {
-    BasicHandler handler = new BasicHandler();
-    run(handler);
+    BasicHandler basicHandler = new BasicHandler();
+    run(basicHandler);
   }
 
   private BasicHandler getBasicHandler() throws IllegalArgumentException {
@@ -603,8 +603,8 @@ public class ZoneTransferIn {
    *     not stored.
    */
   public List<Record> getAXFR() {
-    BasicHandler handler = getBasicHandler();
-    return handler.axfr;
+    BasicHandler basicHandler = getBasicHandler();
+    return basicHandler.axfr;
   }
 
   /**
@@ -622,8 +622,8 @@ public class ZoneTransferIn {
    *     not stored.
    */
   public List<Delta> getIXFR() {
-    BasicHandler handler = getBasicHandler();
-    return handler.ixfr;
+    BasicHandler basicHandler = getBasicHandler();
+    return basicHandler.ixfr;
   }
 
   /**
@@ -634,7 +634,7 @@ public class ZoneTransferIn {
    *     not stored.
    */
   public boolean isCurrent() {
-    BasicHandler handler = getBasicHandler();
-    return handler.axfr == null && handler.ixfr == null;
+    BasicHandler basicHandler = getBasicHandler();
+    return basicHandler.axfr == null && basicHandler.ixfr == null;
   }
 }

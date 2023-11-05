@@ -316,7 +316,7 @@ public final class ValidatingResolver implements Resolver {
               // try to use them to
               // 1) prove that qname doesn't exist and
               // 2) that the correct wildcard was used.
-              if (wcs.size() > 0) {
+              if (!wcs.isEmpty()) {
                 for (Map.Entry<Name, Name> wc : wcs.entrySet()) {
                   boolean wcNsecOk = false;
                   for (SRRset set : nsecs) {
@@ -416,7 +416,7 @@ public final class ValidatingResolver implements Resolver {
                 return completedFuture(false);
               }
 
-              if (wcs.size() > 0) {
+              if (!wcs.isEmpty()) {
                 if (set.getType() == Type.NSEC) {
                   nsecs.add(set);
                 } else if (set.getType() == Type.NSEC3) {

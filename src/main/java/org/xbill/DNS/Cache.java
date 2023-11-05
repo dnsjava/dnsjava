@@ -297,7 +297,7 @@ public class Cache {
         Element elt = list.get(i);
         if (elt.getType() == type) {
           list.remove(i);
-          if (list.size() == 0) {
+          if (list.isEmpty()) {
             data.remove(name);
           }
           return;
