@@ -49,7 +49,7 @@
         <maven.compiler.showCompilationChanges>true</maven.compiler.showCompilationChanges>
         <maven.compiler.createMissingPackageInfoClass>false</maven.compiler.createMissingPackageInfoClass>
 
-        <org.junit.version>5.10.0</org.junit.version>
+        <org.junit.version>5.10.1</org.junit.version>
         <!-- Stay on 4.x for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <mockito.version>4.11.0</mockito.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -167,7 +167,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.2</version>
                 <configuration>
                     <source>${target.jdk}</source>
                     <debug>true</debug>
@@ -180,7 +180,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.2</version>
                 <configuration>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <includes>
@@ -235,7 +235,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.18.3</version>
+                <version> 0.18.3</version>
                 <configuration>
                     <newVersion>
                         <file>
@@ -363,6 +363,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.2</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.1</version>
             </plugin>
 
             <plugin>

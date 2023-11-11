@@ -103,7 +103,7 @@ Do NOT use it.
 |false
 
 .2+|dnsjava.nio.selector_timeout
-3+|Set selector timeout. Default/Max 1000, Min 1.
+3+|Set selector timeout in milliseconds. Default/Max 1000, Min 1.
 |Integer
 |1000
 |700

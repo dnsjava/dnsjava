@@ -24,7 +24,7 @@ import org.xbill.DNS.utils.hexdump;
  *
  * <dl>
  *   <dt>dnsjava.nio.selector_timeout
- *   <dd>Set selector timeout. Default/Max 1000, Min 1.
+ *   <dd>Set selector timeout in milliseconds. Default/Max 1000, Min 1.
  * </dl>
  *
  * @since 3.4
