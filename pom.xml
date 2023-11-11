@@ -47,14 +47,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <target.jdk>8</target.jdk>
 
-        <org.junit.version>5.10.0</org.junit.version>
+        <org.junit.version>5.10.1</org.junit.version>
         <!-- Stay on 4.x for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <mockito.version>4.11.0</mockito.version>
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.30</lombok.version>
         <jna.version>5.13.0</jna.version>
         <bouncycastle.version>1.76</bouncycastle.version>
-        <vertx.version>4.4.4</vertx.version>
+        <vertx.version>4.4.6</vertx.version>
 
         <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
         <sonar.organization>dnsjava</sonar.organization>
@@ -149,7 +149,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.2</version>
                 <configuration>
                     <source>${target.jdk}</source>
                     <debug>true</debug>
@@ -162,7 +162,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.2</version>
                 <configuration>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <includes>
@@ -179,7 +179,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.10</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -200,7 +200,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.17.2</version>
+                <version> 0.18.3</version>
                 <configuration>
                     <newVersion>
                         <file>
@@ -263,7 +263,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>check</id>
@@ -296,6 +296,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.2</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.1</version>
             </plugin>
 
             <plugin>
