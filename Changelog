@@ -1,3 +1,18 @@
+11/11/2023
+	- 3.5.3 released
+	- Fix CNAME in LookupSession (#279)
+	- Fix Name constructor failing with max length, relative name
+	  and root origin (#289, @MMauro94)
+	- Add config option for Resolver I/O timeout (#273, @vmarian2)
+	- Extend I/O logging
+	- Prevent exception during TCP I/O with missing or truncated
+	  length prefix
+	- Use internal base64 codec for Android compatibility (#271)
+	- Fix multi-message TSIG stream verification for pre-RFC8945
+	  servers (#295, @frankarinnet and @nguichon)
+	- Add StreamGenerator for generating RFC8945 compliant
+	  multi-message streams (related to #295)
+
 11/16/2022
 	- 3.5.2 released
 	- Correctly render empty TXT records (#254)
