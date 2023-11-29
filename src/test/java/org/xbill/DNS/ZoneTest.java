@@ -3,16 +3,22 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 class ZoneTest {
+  int answers = 0;
+  Zone zone = null;
   private static final ARecord A_TEST;
   private static final AAAARecord AAAA_1_TEST;
   private static final AAAARecord AAAA_2_TEST;
@@ -108,6 +114,105 @@ class ZoneTest {
     assertEquals(
         listOf(new RRset(A_WILD.withName(testName)), new RRset(TXT_WILD.withName(testName))),
         resp.answers());
+  }
+
+  @Test
+  void testReadLocksAreAcquiredAndReleasedCorrectNumberOfTimes() {
+    Name testName = Name.fromConstantString("test.example.");
+    ReentrantReadWriteLock.ReadLock readLock = mock(ReentrantReadWriteLock.ReadLock.class);
+    ZONE.setLock(readLock);
+    SetResponse resp = ZONE.findRecords(testName, Type.ANY);
+    verify(readLock, times(5)).lock();
+    verify(readLock, times(5)).unlock();
+  }
+
+  @Test
+  void testReadsWaitForWrites() throws Exception {
+    final AAAARecord AAAA_1_TEST_RECORD;
+    final AAAARecord AAAA_2_TEST_RECORD;
+    final ARecord A_WILD_RECORD;
+    final TXTRecord TXT_WILD_RECORD;
+
+    Name testNameZone = new Name("example.");
+    InetAddress localhost4 = InetAddress.getByName("127.0.0.1");
+    InetAddress localhost6a = InetAddress.getByName("::1");
+    InetAddress localhost6b = InetAddress.getByName("::2");
+    AAAA_1_TEST_RECORD =
+        new AAAARecord(new Name("test", testNameZone), DClass.IN, 3600, localhost6a);
+    AAAA_2_TEST_RECORD =
+        new AAAARecord(new Name("test", testNameZone), DClass.IN, 3600, localhost6b);
+    A_WILD_RECORD = new ARecord(new Name("*", testNameZone), DClass.IN, 3600, localhost4);
+    TXT_WILD_RECORD = new TXTRecord(new Name("*", testNameZone), DClass.IN, 3600, "sometext");
+
+    Record[] zoneRecordElements = new Record[100];
+    zoneRecordElements[0] =
+        new SOARecord(
+            testNameZone,
+            DClass.IN,
+            3600L,
+            Name.fromConstantString("nameserver."),
+            new Name("hostmaster", testNameZone),
+            1,
+            21600L,
+            7200L,
+            2160000L,
+            3600L);
+
+    zoneRecordElements[1] =
+        new NSRecord(testNameZone, DClass.IN, 300L, Name.fromConstantString("nameserver."));
+    zoneRecordElements[96] = AAAA_1_TEST_RECORD;
+    zoneRecordElements[97] = AAAA_2_TEST_RECORD;
+    zoneRecordElements[98] = A_WILD_RECORD;
+    zoneRecordElements[99] = TXT_WILD_RECORD;
+
+    int start = 1;
+    for (int i = 2; i <= 95; i++) {
+      zoneRecordElements[i] =
+          new ARecord(
+              new Name("test", testNameZone),
+              DClass.IN,
+              3600,
+              InetAddress.getByName("127.0.0." + start));
+      start++;
+    }
+
+    Thread t1 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  zone = new Zone(testNameZone, zoneRecordElements);
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
+              }
+            });
+
+    Thread t2 =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                Name testName = Name.fromConstantString("test.example.");
+                while (zone == null) {
+                  try {
+                    Thread.sleep(1);
+                  } catch (InterruptedException e) {
+                    e.printStackTrace();
+                  }
+                }
+                SetResponse resp = zone.findRecords(testName, Type.ANY);
+                answers = resp.answers().get(0).size();
+              }
+            });
+
+    t1.start();
+    t2.start();
+
+    t1.join();
+    t2.join();
+    assertEquals(94, answers);
   }
 
   private static List<RRset> listOf(RRset... rrsets) {
