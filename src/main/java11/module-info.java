@@ -7,6 +7,7 @@ module org.dnsjava {
   requires static com.sun.jna.platform;
   requires static java.net.http;
   requires org.slf4j;
+  requires com.google.common;
 
   exports org.xbill.DNS;
   exports org.xbill.DNS.config;

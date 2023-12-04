@@ -535,6 +535,11 @@
             <version>2.15.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.0.0-jre</version>
+        </dependency>
     </dependencies>
 
     <profiles>

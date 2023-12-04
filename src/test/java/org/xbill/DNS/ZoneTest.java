@@ -182,6 +182,7 @@ class ZoneTest {
               @Override
               public void run() {
                 try {
+                  Thread.sleep(1000);
                   zone = new Zone(testNameZone, zoneRecordElements);
                 } catch (Exception e) {
                   e.printStackTrace();
@@ -195,19 +196,13 @@ class ZoneTest {
               @Override
               public void run() {
                 Name testName = Name.fromConstantString("test.example.");
-                while (zone == null) {
-                  try {
-                    Thread.sleep(1);
-                  } catch (InterruptedException e) {
-                    e.printStackTrace();
-                  }
-                }
                 SetResponse resp = zone.findRecords(testName, Type.ANY);
                 answers = resp.answers().get(0).size();
               }
             });
 
     t1.start();
+    Thread.sleep(2000);
     t2.start();
 
     t1.join();
