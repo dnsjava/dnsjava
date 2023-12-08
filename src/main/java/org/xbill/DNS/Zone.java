@@ -69,7 +69,7 @@ public class Zone implements Serializable {
     }
 
     @Override
-    public RRset next() {
+    public RRset next() throws IllegalMonitorStateException {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
@@ -108,7 +108,7 @@ public class Zone implements Serializable {
     readLock = lock;
   }
 
-  private void validate() throws IOException {
+  private void validate() throws IOException, IllegalMonitorStateException {
     originNode = exactName(origin);
     if (originNode == null) {
       throw new IOException(origin + ": no data specified");
@@ -150,6 +150,7 @@ public class Zone implements Serializable {
     data = new TreeMap<>();
 
     if (zone == null) {
+      writeLock.unlock();
       throw new IllegalArgumentException("no zone name specified");
     }
     try (Master m = new Master(file, zone)) {
@@ -211,7 +212,8 @@ public class Zone implements Serializable {
    * @param xfrin The incoming zone transfer to execute.
    * @see ZoneTransferIn
    */
-  public Zone(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
+  public Zone(ZoneTransferIn xfrin)
+      throws IOException, ZoneTransferException, IllegalMonitorStateException {
     fromXFR(xfrin);
   }
 
@@ -220,7 +222,8 @@ public class Zone implements Serializable {
    *
    * @see ZoneTransferIn
    */
-  public Zone(Name zone, int dclass, String remote) throws IOException, ZoneTransferException {
+  public Zone(Name zone, int dclass, String remote)
+      throws IOException, ZoneTransferException, IllegalMonitorStateException {
     ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(zone, remote, null);
     xfrin.setDClass(dclass);
     fromXFR(xfrin);
@@ -299,13 +302,15 @@ public class Zone implements Serializable {
     return oneRRset(types, type);
   }
 
-  private void addRRset(Name name, RRset rrset) {
+  private void addRRset(Name name, RRset rrset) throws IllegalMonitorStateException {
+    writeLock.lock();
     if (!hasWild && name.isWild()) {
       hasWild = true;
     }
     Object types = data.get(name);
     if (types == null) {
       data.put(name, rrset);
+      writeLock.unlock();
       return;
     }
     int rtype = rrset.getType();
@@ -316,6 +321,7 @@ public class Zone implements Serializable {
         RRset set = list.get(i);
         if (set.getType() == rtype) {
           list.set(i, rrset);
+          writeLock.unlock();
           return;
         }
       }
@@ -331,6 +337,7 @@ public class Zone implements Serializable {
         data.put(name, list);
       }
     }
+    writeLock.unlock();
   }
 
   private void removeRRset(Name name, int type) throws IllegalMonitorStateException {
@@ -365,7 +372,7 @@ public class Zone implements Serializable {
     writeLock.unlock();
   }
 
-  private SetResponse lookup(Name name, int type) {
+  private SetResponse lookup(Name name, int type) throws IllegalMonitorStateException {
     if (!name.subdomain(origin)) {
       return SetResponse.ofType(SetResponse.NXDOMAIN);
     }
@@ -480,7 +487,7 @@ public class Zone implements Serializable {
    * @return A SetResponse object
    * @see SetResponse
    */
-  public SetResponse findRecords(Name name, int type) {
+  public SetResponse findRecords(Name name, int type) throws IllegalMonitorStateException {
     return lookup(name, type);
   }
 
@@ -492,7 +499,7 @@ public class Zone implements Serializable {
    * @return The matching RRset
    * @see RRset
    */
-  public RRset findExactMatch(Name name, int type) {
+  public RRset findExactMatch(Name name, int type) throws IllegalMonitorStateException {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -556,7 +563,7 @@ public class Zone implements Serializable {
   }
 
   /** Returns an Iterator over the RRsets in the zone. */
-  public Iterator<RRset> iterator() {
+  public Iterator<RRset> iterator() throws IllegalMonitorStateException {
     return new ZoneIterator(false);
   }
 
@@ -565,11 +572,11 @@ public class Zone implements Serializable {
    * This is identical to {@link #iterator} except that the SOA is returned at the end as well as
    * the beginning.
    */
-  public Iterator<RRset> AXFR() {
+  public Iterator<RRset> AXFR() throws IllegalMonitorStateException {
     return new ZoneIterator(true);
   }
 
-  private void nodeToString(StringBuffer sb, Object node) {
+  private void nodeToString(StringBuilder sb, Object node) throws IllegalMonitorStateException {
     RRset[] sets = allRRsets(node);
     for (RRset rrset : sets) {
       rrset.rrs().forEach(r -> sb.append(r).append('\n'));
@@ -580,7 +587,7 @@ public class Zone implements Serializable {
   /** Returns the contents of the Zone in master file format. */
   public String toMasterFile() throws IllegalMonitorStateException {
     readLock.lock();
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     nodeToString(sb, originNode);
     for (Map.Entry<Name, Object> entry : data.entrySet()) {
       if (!origin.equals(entry.getKey())) {
@@ -593,7 +600,7 @@ public class Zone implements Serializable {
 
   /** Returns the contents of the Zone as a string (in master file format). */
   @Override
-  public String toString() {
+  public String toString() throws IllegalMonitorStateException {
     return toMasterFile();
   }
 }
