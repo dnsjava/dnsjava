@@ -17,8 +17,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 class ZoneTest {
-  int answers = 0;
-  Zone zone = null;
   private static final ARecord A_TEST;
   private static final AAAARecord AAAA_1_TEST;
   private static final AAAARecord AAAA_2_TEST;
