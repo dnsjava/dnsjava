@@ -3,7 +3,6 @@
 
 package org.xbill.DNS;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
@@ -44,23 +43,26 @@ public class Zone implements Serializable {
     private int count;
     private boolean wantLastSOA;
 
-    ZoneIterator(boolean axfr) throws IllegalMonitorStateException {
+    ZoneIterator(boolean axfr) {
       readLock.lock();
-      zentries = data.entrySet().iterator();
-      wantLastSOA = axfr;
-      RRset[] sets = allRRsets(originNode);
-      current = new RRset[sets.length];
-      for (int i = 0, j = 2; i < sets.length; i++) {
-        int type = sets[i].getType();
-        if (type == Type.SOA) {
-          current[0] = sets[i];
-        } else if (type == Type.NS) {
-          current[1] = sets[i];
-        } else {
-          current[j++] = sets[i];
+      try {
+        zentries = data.entrySet().iterator();
+        wantLastSOA = axfr;
+        RRset[] sets = allRRsets(originNode);
+        current = new RRset[sets.length];
+        for (int i = 0, j = 2; i < sets.length; i++) {
+          int type = sets[i].getType();
+          if (type == Type.SOA) {
+            current[0] = sets[i];
+          } else if (type == Type.NS) {
+            current[1] = sets[i];
+          } else {
+            current[j++] = sets[i];
+          }
         }
+      } finally {
+        readLock.unlock();
       }
-      readLock.unlock();
     }
 
     @Override
@@ -69,7 +71,7 @@ public class Zone implements Serializable {
     }
 
     @Override
-    public RRset next() throws IllegalMonitorStateException {
+    public RRset next() {
       if (!hasNext()) {
         throw new NoSuchElementException();
       }
@@ -103,12 +105,16 @@ public class Zone implements Serializable {
     }
   }
 
-  @VisibleForTesting
+  /**
+   * Sets the Reader Lock for this Zone instance. Only to be used for testing.
+   *
+   * @param lock The Reader Lock to set for this Zone instance.
+   */
   void setLock(ReentrantReadWriteLock.ReadLock lock) {
     readLock = lock;
   }
 
-  private void validate() throws IOException, IllegalMonitorStateException {
+  private void validate() throws IOException {
     originNode = exactName(origin);
     if (originNode == null) {
       throw new IOException(origin + ": no data specified");
@@ -126,7 +132,7 @@ public class Zone implements Serializable {
     }
   }
 
-  private void maybeAddRecord(Record record) throws IOException, IllegalMonitorStateException {
+  private void maybeAddRecord(Record record) throws IOException {
     int rtype = record.getType();
     Name name = record.getName();
 
@@ -145,24 +151,26 @@ public class Zone implements Serializable {
    * @param file The master file to read from.
    * @see Master
    */
-  public Zone(Name zone, String file) throws IOException, IllegalMonitorStateException {
+  public Zone(Name zone, String file) throws IOException {
     writeLock.lock();
-    data = new TreeMap<>();
+    try {
+      data = new TreeMap<>();
 
-    if (zone == null) {
-      writeLock.unlock();
-      throw new IllegalArgumentException("no zone name specified");
-    }
-    try (Master m = new Master(file, zone)) {
-      Record record;
-
-      origin = zone;
-      while ((record = m.nextRecord()) != null) {
-        maybeAddRecord(record);
+      if (zone == null) {
+        throw new IllegalArgumentException("no zone name specified");
       }
+      try (Master m = new Master(file, zone)) {
+        Record record;
+
+        origin = zone;
+        while ((record = m.nextRecord()) != null) {
+          maybeAddRecord(record);
+        }
+      }
+      validate();
+    } finally {
+      writeLock.unlock();
     }
-    validate();
-    writeLock.unlock();
   }
 
   /**
@@ -172,38 +180,42 @@ public class Zone implements Serializable {
    * @param records The records to add to the zone.
    * @see Master
    */
-  public Zone(Name zone, Record[] records) throws IOException, IllegalMonitorStateException {
+  public Zone(Name zone, Record[] records) throws IOException {
     writeLock.lock();
-    data = new TreeMap<>();
+    try {
+      data = new TreeMap<>();
 
-    if (zone == null) {
-      throw new IllegalArgumentException("no zone name specified");
+      if (zone == null) {
+        throw new IllegalArgumentException("no zone name specified");
+      }
+      origin = zone;
+      for (Record record : records) {
+        maybeAddRecord(record);
+      }
+      validate();
+    } finally {
+      writeLock.unlock();
     }
-    origin = zone;
-    for (Record record : records) {
-      maybeAddRecord(record);
-    }
-    validate();
-    writeLock.unlock();
   }
 
-  private void fromXFR(ZoneTransferIn xfrin)
-      throws IOException, ZoneTransferException, IllegalMonitorStateException {
+  private void fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
     writeLock.lock();
-    data = new TreeMap<>();
+    try {
+      data = new TreeMap<>();
 
-    origin = xfrin.getName();
-    xfrin.run();
-    if (!xfrin.isAXFR()) {
+      origin = xfrin.getName();
+      xfrin.run();
+      if (!xfrin.isAXFR()) {
+        throw new IllegalArgumentException("zones can only be created from AXFRs");
+      }
+
+      for (Record record : xfrin.getAXFR()) {
+        maybeAddRecord(record);
+      }
+      validate();
+    } finally {
       writeLock.unlock();
-      throw new IllegalArgumentException("zones can only be created from AXFRs");
     }
-
-    for (Record record : xfrin.getAXFR()) {
-      maybeAddRecord(record);
-    }
-    validate();
-    writeLock.unlock();
   }
 
   /**
@@ -212,8 +224,7 @@ public class Zone implements Serializable {
    * @param xfrin The incoming zone transfer to execute.
    * @see ZoneTransferIn
    */
-  public Zone(ZoneTransferIn xfrin)
-      throws IOException, ZoneTransferException, IllegalMonitorStateException {
+  public Zone(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
     fromXFR(xfrin);
   }
 
@@ -222,8 +233,7 @@ public class Zone implements Serializable {
    *
    * @see ZoneTransferIn
    */
-  public Zone(Name zone, int dclass, String remote)
-      throws IOException, ZoneTransferException, IllegalMonitorStateException {
+  public Zone(Name zone, int dclass, String remote) throws IOException, ZoneTransferException {
     ZoneTransferIn xfrin = ZoneTransferIn.newAXFR(zone, remote, null);
     xfrin.setDClass(dclass);
     fromXFR(xfrin);
@@ -249,49 +259,56 @@ public class Zone implements Serializable {
     return DClass.IN;
   }
 
-  private Object exactName(Name name) throws IllegalMonitorStateException {
+  private Object exactName(Name name) {
     readLock.lock();
-    Object val = data.get(name);
-    readLock.unlock();
-    return val;
+    try {
+      Object val = data.get(name);
+      return val;
+    } finally {
+      readLock.unlock();
+    }
   }
 
-  private RRset[] allRRsets(Object types) throws IllegalMonitorStateException {
+  private RRset[] allRRsets(Object types) {
     if (types instanceof List) {
       readLock.lock();
-      @SuppressWarnings("unchecked")
-      List<RRset> typelist = (List<RRset>) types;
-      readLock.unlock();
-      return typelist.toArray(new RRset[0]);
+      try {
+        @SuppressWarnings("unchecked")
+        List<RRset> typelist = (List<RRset>) types;
+        return typelist.toArray(new RRset[0]);
+      } finally {
+        readLock.unlock();
+      }
     } else {
       RRset set = (RRset) types;
       return new RRset[] {set};
     }
   }
 
-  private RRset oneRRset(Object types, int type) throws IllegalMonitorStateException {
+  private RRset oneRRset(Object types, int type) {
     if (type == Type.ANY) {
       throw new IllegalArgumentException("oneRRset(ANY)");
     }
     readLock.lock();
-    RRset resultSet = null;
-    if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> list = (List<RRset>) types;
-      for (RRset set : list) {
+    try {
+      if (types instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<RRset> list = (List<RRset>) types;
+        for (RRset set : list) {
+          if (set.getType() == type) {
+            return set;
+          }
+        }
+      } else {
+        RRset set = (RRset) types;
         if (set.getType() == type) {
-          resultSet = set;
-          break;
+          return set;
         }
       }
-    } else {
-      RRset set = (RRset) types;
-      if (set.getType() == type) {
-        resultSet = set;
-      }
+    } finally {
+      readLock.unlock();
     }
-    readLock.unlock();
-    return resultSet;
+    return null;
   }
 
   private RRset findRRset(Name name, int type) {
@@ -302,77 +319,78 @@ public class Zone implements Serializable {
     return oneRRset(types, type);
   }
 
-  private void addRRset(Name name, RRset rrset) throws IllegalMonitorStateException {
+  private void addRRset(Name name, RRset rrset) {
     writeLock.lock();
-    if (!hasWild && name.isWild()) {
-      hasWild = true;
-    }
-    Object types = data.get(name);
-    if (types == null) {
-      data.put(name, rrset);
-      writeLock.unlock();
-      return;
-    }
-    int rtype = rrset.getType();
-    if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> list = (List<RRset>) types;
-      for (int i = 0; i < list.size(); i++) {
-        RRset set = list.get(i);
-        if (set.getType() == rtype) {
-          list.set(i, rrset);
-          writeLock.unlock();
-          return;
-        }
+    try {
+      if (!hasWild && name.isWild()) {
+        hasWild = true;
       }
-      list.add(rrset);
-    } else {
-      RRset set = (RRset) types;
-      if (set.getType() == rtype) {
+      Object types = data.get(name);
+      if (types == null) {
         data.put(name, rrset);
-      } else {
-        LinkedList<RRset> list = new LinkedList<>();
-        list.add(set);
-        list.add(rrset);
-        data.put(name, list);
-      }
-    }
-    writeLock.unlock();
-  }
-
-  private void removeRRset(Name name, int type) throws IllegalMonitorStateException {
-    writeLock.lock();
-    Object types = data.get(name);
-    if (types == null) {
-      writeLock.unlock();
-      return;
-    }
-    if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> list = (List<RRset>) types;
-      for (int i = 0; i < list.size(); i++) {
-        RRset set = list.get(i);
-        if (set.getType() == type) {
-          list.remove(i);
-          if (list.isEmpty()) {
-            data.remove(name);
-          }
-          writeLock.unlock();
-          return;
-        }
-      }
-    } else {
-      RRset set = (RRset) types;
-      if (set.getType() != type) {
-        writeLock.unlock();
         return;
       }
-      data.remove(name);
+      int rtype = rrset.getType();
+      if (types instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<RRset> list = (List<RRset>) types;
+        for (int i = 0; i < list.size(); i++) {
+          RRset set = list.get(i);
+          if (set.getType() == rtype) {
+            list.set(i, rrset);
+            return;
+          }
+        }
+        list.add(rrset);
+      } else {
+        RRset set = (RRset) types;
+        if (set.getType() == rtype) {
+          data.put(name, rrset);
+        } else {
+          LinkedList<RRset> list = new LinkedList<>();
+          list.add(set);
+          list.add(rrset);
+          data.put(name, list);
+        }
+      }
+    } finally {
+      writeLock.unlock();
     }
-    writeLock.unlock();
   }
 
-  private SetResponse lookup(Name name, int type) throws IllegalMonitorStateException {
+  private void removeRRset(Name name, int type) {
+    writeLock.lock();
+    try {
+      Object types = data.get(name);
+      if (types == null) {
+        return;
+      }
+      if (types instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<RRset> list = (List<RRset>) types;
+        for (int i = 0; i < list.size(); i++) {
+          RRset set = list.get(i);
+          if (set.getType() == type) {
+            list.remove(i);
+            if (list.isEmpty()) {
+              data.remove(name);
+            }
+            return;
+          }
+        }
+      } else {
+        RRset set = (RRset) types;
+        if (set.getType() != type) {
+          return;
+        }
+        data.remove(name);
+      }
+    } finally {
+      writeLock.unlock();
+    }
+  }
+
+  private SetResponse lookup(Name name, int type) {
     if (!name.subdomain(origin)) {
       return SetResponse.ofType(SetResponse.NXDOMAIN);
     }
@@ -487,7 +505,7 @@ public class Zone implements Serializable {
    * @return A SetResponse object
    * @see SetResponse
    */
-  public SetResponse findRecords(Name name, int type) throws IllegalMonitorStateException {
+  public SetResponse findRecords(Name name, int type) {
     return lookup(name, type);
   }
 
@@ -499,7 +517,7 @@ public class Zone implements Serializable {
    * @return The matching RRset
    * @see RRset
    */
-  public RRset findExactMatch(Name name, int type) throws IllegalMonitorStateException {
+  public RRset findExactMatch(Name name, int type) {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -513,11 +531,14 @@ public class Zone implements Serializable {
    * @param rrset The RRset to be added
    * @see RRset
    */
-  public void addRRset(RRset rrset) throws IllegalMonitorStateException {
+  public void addRRset(RRset rrset) {
     writeLock.lock();
-    Name name = rrset.getName();
-    addRRset(name, rrset);
-    writeLock.unlock();
+    try {
+      Name name = rrset.getName();
+      addRRset(name, rrset);
+    } finally {
+      writeLock.unlock();
+    }
   }
 
   /**
@@ -526,18 +547,21 @@ public class Zone implements Serializable {
    * @param r The record to be added
    * @see Record
    */
-  public <T extends Record> void addRecord(T r) throws IllegalMonitorStateException {
+  public <T extends Record> void addRecord(T r) {
     writeLock.lock();
-    Name name = r.getName();
-    int rtype = r.getRRsetType();
-    RRset rrset = findRRset(name, rtype);
-    if (rrset == null) {
-      rrset = new RRset(r);
-      addRRset(name, rrset);
-    } else {
-      rrset.addRR(r);
+    try {
+      Name name = r.getName();
+      int rtype = r.getRRsetType();
+      RRset rrset = findRRset(name, rtype);
+      if (rrset == null) {
+        rrset = new RRset(r);
+        addRRset(name, rrset);
+      } else {
+        rrset.addRR(r);
+      }
+    } finally {
+      writeLock.unlock();
     }
-    writeLock.unlock();
   }
 
   /**
@@ -546,24 +570,27 @@ public class Zone implements Serializable {
    * @param r The record to be removed
    * @see Record
    */
-  public void removeRecord(Record r) throws IllegalMonitorStateException {
+  public void removeRecord(Record r) {
     writeLock.lock();
-    Name name = r.getName();
-    int rtype = r.getRRsetType();
-    RRset rrset = findRRset(name, rtype);
-    if (rrset == null) {
-      return;
+    try {
+      Name name = r.getName();
+      int rtype = r.getRRsetType();
+      RRset rrset = findRRset(name, rtype);
+      if (rrset == null) {
+        return;
+      }
+      if (rrset.size() == 1 && rrset.first().equals(r)) {
+        removeRRset(name, rtype);
+      } else {
+        rrset.deleteRR(r);
+      }
+    } finally {
+      writeLock.unlock();
     }
-    if (rrset.size() == 1 && rrset.first().equals(r)) {
-      removeRRset(name, rtype);
-    } else {
-      rrset.deleteRR(r);
-    }
-    writeLock.unlock();
   }
 
   /** Returns an Iterator over the RRsets in the zone. */
-  public Iterator<RRset> iterator() throws IllegalMonitorStateException {
+  public Iterator<RRset> iterator() {
     return new ZoneIterator(false);
   }
 
@@ -572,11 +599,11 @@ public class Zone implements Serializable {
    * This is identical to {@link #iterator} except that the SOA is returned at the end as well as
    * the beginning.
    */
-  public Iterator<RRset> AXFR() throws IllegalMonitorStateException {
+  public Iterator<RRset> AXFR() {
     return new ZoneIterator(true);
   }
 
-  private void nodeToString(StringBuilder sb, Object node) throws IllegalMonitorStateException {
+  private void nodeToString(StringBuilder sb, Object node) {
     RRset[] sets = allRRsets(node);
     for (RRset rrset : sets) {
       rrset.rrs().forEach(r -> sb.append(r).append('\n'));
@@ -585,22 +612,25 @@ public class Zone implements Serializable {
   }
 
   /** Returns the contents of the Zone in master file format. */
-  public String toMasterFile() throws IllegalMonitorStateException {
+  public String toMasterFile() {
     readLock.lock();
-    StringBuilder sb = new StringBuilder();
-    nodeToString(sb, originNode);
-    for (Map.Entry<Name, Object> entry : data.entrySet()) {
-      if (!origin.equals(entry.getKey())) {
-        nodeToString(sb, entry.getValue());
+    try {
+      StringBuilder sb = new StringBuilder();
+      nodeToString(sb, originNode);
+      for (Map.Entry<Name, Object> entry : data.entrySet()) {
+        if (!origin.equals(entry.getKey())) {
+          nodeToString(sb, entry.getValue());
+        }
       }
+      return sb.toString();
+    } finally {
+      readLock.unlock();
     }
-    readLock.unlock();
-    return sb.toString();
   }
 
   /** Returns the contents of the Zone as a string (in master file format). */
   @Override
-  public String toString() throws IllegalMonitorStateException {
+  public String toString() {
     return toMasterFile();
   }
 }
