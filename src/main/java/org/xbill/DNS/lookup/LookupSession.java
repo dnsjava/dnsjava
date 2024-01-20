@@ -599,7 +599,16 @@ public class LookupSession {
         case Rcode.NXRRSET:
           throw new NoSuchRRSetException(query.getName(), query.getType());
         case Rcode.SERVFAIL:
-          throw new ServerFailedException();
+          if (answer.getOPT() != null) {
+            List<EDNSOption> options =
+                answer.getOPT().getOptions(EDNSOption.Code.EDNS_EXTENDED_ERROR);
+            if (!options.isEmpty()) {
+              throw new ServerFailedException(
+                  query.getName(), query.getType(), (ExtendedErrorCodeOption) options.get(0));
+            }
+          }
+
+          throw new ServerFailedException(query.getName(), query.getType());
         default:
           throw new LookupFailedException(
               String.format("Unknown non-success error code %s", Rcode.string(rcode)));

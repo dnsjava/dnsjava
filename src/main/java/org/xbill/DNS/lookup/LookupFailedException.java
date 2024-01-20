@@ -2,6 +2,7 @@
 package org.xbill.DNS.lookup;
 
 import org.xbill.DNS.Name;
+import org.xbill.DNS.Type;
 
 /** A base class for all types of things that might fail when making a DNS lookup. */
 public class LookupFailedException extends RuntimeException {
@@ -30,6 +31,21 @@ public class LookupFailedException extends RuntimeException {
    * @param type the type that caused the failure.
    */
   public LookupFailedException(Name name, int type) {
+    super("Lookup for " + name + "/" + Type.string(type) + " failed");
+    this.name = name;
+    this.type = type;
+  }
+
+  /**
+   * Construct a LookupFailedException that also specifies the name and type of the lookup that
+   * failed.
+   *
+   * @param name the name that caused the failure.
+   * @param type the type that caused the failure.
+   * @since 3.6
+   */
+  public LookupFailedException(String message, Name name, int type) {
+    super(message);
     this.name = name;
     this.type = type;
   }
