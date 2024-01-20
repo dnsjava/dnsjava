@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -161,7 +162,7 @@ public abstract class TestBase {
         new ValidatingResolver(
             new SimpleResolver("8.8.4.4") {
               @Override
-              public CompletionStage<Message> sendAsync(Message query) {
+              public CompletionStage<Message> sendAsync(Message query, Executor executor) {
                 logger.info("---{}", key(query));
                 Message response = queryResponsePairs.get(key(query));
                 if (response != null) {
@@ -172,7 +173,7 @@ public abstract class TestBase {
 
                 Message networkResult;
                 try {
-                  networkResult = super.sendAsync(query).toCompletableFuture().get();
+                  networkResult = super.sendAsync(query, executor).toCompletableFuture().get();
                   if (w != null) {
                     w.write(networkResult.toString());
                     w.write("\n\n###############################################\n\n");
