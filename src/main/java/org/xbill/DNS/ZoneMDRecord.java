@@ -140,7 +140,7 @@ public class ZoneMDRecord extends Record {
 
   /**
    * A byte array containing the output of the hash algorithm. The length is determined by {@link
-   * #getHashAlgorithm()}
+   * #getHashAlgorithm()}.
    *
    * @see Hash
    */

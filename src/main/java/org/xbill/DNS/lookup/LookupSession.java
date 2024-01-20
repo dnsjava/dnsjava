@@ -27,6 +27,8 @@ import org.xbill.DNS.Cache;
 import org.xbill.DNS.Credibility;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
+import org.xbill.DNS.EDNSOption;
+import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
@@ -584,7 +586,9 @@ public class LookupSession {
                 maybeFollowRedirect(responseFromCache, redirectQuery, finalRedirectCount));
   }
 
-  /** Returns a LookupResult if this response was a non-exceptional empty result, else null. */
+  /**
+   * Returns a LookupResult if this response was a non-exceptional empty result, throws otherwise.
+   */
   private static LookupResult buildResult(Message answer, List<Name> aliases, Record query) {
     int rcode = answer.getRcode();
     List<Record> answerRecords = answer.getSection(Section.ANSWER);

@@ -29,7 +29,7 @@ public final class Rcode {
   /**
    * Synonym for NOTIMP.
    *
-   * @deprecated use {{@link #NOTIMP}}
+   * @deprecated Use {@link #NOTIMP}.
    */
   @Deprecated public static final int NOTIMPL = 4;
 

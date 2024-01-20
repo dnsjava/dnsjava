@@ -67,6 +67,7 @@
         <sonar.java.source>${target.jdk}</sonar.java.source>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
+        <delombok.output>${project.build.directory}/delombok</delombok.output>
     </properties>
 
     <build>
@@ -165,15 +166,44 @@
             </plugin>
 
             <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.20.0</version>
+                <configuration>
+                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    <addOutputDirectory>false</addOutputDirectory>
+                    <outputDirectory>${delombok.output}</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>${lombok.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.6.2</version>
                 <configuration>
                     <source>${target.jdk}</source>
+                    <sourcepath>${delombok.output}</sourcepath>
                     <debug>true</debug>
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
                     <doclint>none</doclint>
+                    <excludePackageNames>android,android.*,sun.*</excludePackageNames>
                 </configuration>
             </plugin>
 
