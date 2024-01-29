@@ -1003,7 +1003,7 @@ public final class ValidatingResolver implements Resolver {
 
       case NODATA:
       case NAMEERROR:
-        return this.dsReponseToKeForNodata(response, request, keyRrset);
+        return this.dsResponseToKeForNodata(response, request, keyRrset);
 
       default:
         // We've encountered an unhandled classification for this
@@ -1025,7 +1025,7 @@ public final class ValidatingResolver implements Resolver {
    *     an end to secure space, good if the DS validated. It returns null if the DS response
    *     indicated that the request wasn't a delegation point.
    */
-  private KeyEntry dsReponseToKeForNodata(SMessage response, Message request, SRRset keyRrset) {
+  private KeyEntry dsResponseToKeForNodata(SMessage response, Message request, SRRset keyRrset) {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
     KeyEntry bogusKE = KeyEntry.newBadKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);

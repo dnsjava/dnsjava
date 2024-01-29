@@ -82,13 +82,6 @@ final class DnsSecVerifier {
     }
 
     List<DNSKEYRecord> keys = this.findKey(keyRrset, sigrec);
-    if (keys.isEmpty()) {
-      log.trace("Could not find appropriate key");
-      return new JustifiedSecStatus(
-          SecurityStatus.BOGUS,
-          ExtendedErrorCodeOption.DNSKEY_MISSING,
-          R.get("dnskey.no_key", sigrec.getSigner()));
-    }
 
     for (DNSKEYRecord key : keys) {
       try {
@@ -116,7 +109,8 @@ final class DnsSecVerifier {
       }
     }
 
-    return new JustifiedSecStatus(SecurityStatus.UNCHECKED, -1, null);
+    log.trace("Could not find appropriate key");
+    return new JustifiedSecStatus(SecurityStatus.BOGUS, ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_key", sigrec.getSigner()));
   }
 
   /**
