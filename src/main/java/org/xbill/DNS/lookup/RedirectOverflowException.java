@@ -32,4 +32,9 @@ public class RedirectOverflowException extends LookupFailedException {
     super("Refusing to follow more than " + maxRedirects + " redirects");
     this.maxRedirects = maxRedirects;
   }
+
+  RedirectOverflowException(String message, int maxRedirects) {
+    super(message);
+    this.maxRedirects = maxRedirects;
+  }
 }

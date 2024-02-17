@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.lookup;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Type;
 
@@ -13,18 +15,19 @@ public class LookupFailedException extends RuntimeException {
   private final Name name;
   private final int type;
 
+  @Getter(AccessLevel.PACKAGE)
+  private final boolean isAuthenticated;
+
   public LookupFailedException() {
-    this(null, null);
+    this(null, null, null, 0, false);
   }
 
   public LookupFailedException(String message) {
-    this(message, null);
+    this(message, null, null, 0, false);
   }
 
   LookupFailedException(String message, Throwable inner) {
-    super(message, inner);
-    name = null;
-    type = 0;
+    this(message, inner, null, 0, false);
   }
 
   /**
@@ -35,23 +38,27 @@ public class LookupFailedException extends RuntimeException {
    * @param type the type that caused the failure.
    */
   public LookupFailedException(Name name, int type) {
-    super("Lookup for " + name + "/" + Type.string(type) + " failed");
-    this.name = name;
-    this.type = type;
+    this("Lookup for " + name + "/" + Type.string(type) + " failed", name, type);
   }
 
   /**
-   * Construct a LookupFailedException that also specifies the name and type of the lookup that
-   * failed.
+   * Construct a LookupFailedException with a custom message that also specifies the name and type
+   * of the lookup that failed.
    *
    * @param name the name that caused the failure.
    * @param type the type that caused the failure.
    * @since 3.6
    */
   public LookupFailedException(String message, Name name, int type) {
-    super(message);
+    this(message, null, name, type, false);
+  }
+
+  LookupFailedException(
+      String message, Throwable inner, Name name, int type, boolean isAuthenticated) {
+    super(message, inner);
     this.name = name;
     this.type = type;
+    this.isAuthenticated = isAuthenticated;
   }
 
   /** Gets the Name being looked up when this failure occurred. */
