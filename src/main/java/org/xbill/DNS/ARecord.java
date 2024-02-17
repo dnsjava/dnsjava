@@ -48,6 +48,20 @@ public class ARecord extends Record {
     addr = fromArray(address.getAddress());
   }
 
+  /**
+   * Creates an A Record from the given data
+   *
+   * @param address The address that the name refers to
+   * @since 3.6
+   */
+  public ARecord(Name name, int dclass, long ttl, byte[] address) {
+    super(name, Type.A, dclass, ttl);
+    if (address == null || address.length != 4) {
+      throw new IllegalArgumentException("invalid IPv4 address");
+    }
+    addr = fromArray(address);
+  }
+
   @Override
   protected void rrFromWire(DNSInput in) throws IOException {
     addr = fromArray(in.readByteArray(4));

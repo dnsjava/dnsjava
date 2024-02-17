@@ -49,6 +49,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ARecordTest {
   private Name m_an;
@@ -94,6 +96,26 @@ class ARecordTest {
     InetAddress address = InetAddress.getByName("2001:0db8:85a3:08d3:1319:8a2e:0370:7334");
     assertThrows(
         IllegalArgumentException.class, () -> new ARecord(m_an, DClass.IN, m_ttl, address));
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1, 2, 3, 5, 16})
+  void ctor_4arg_bytes_invalidLength(int len) {
+    assertThrows(
+        IllegalArgumentException.class, () -> new ARecord(m_an, DClass.IN, m_ttl, new byte[len]));
+  }
+
+  @Test
+  void ctor_4arg_bytes() {
+    ARecord ar = new ARecord(m_an, DClass.IN, m_ttl, m_addr_bytes);
+    assertEquals(m_an, ar.getName());
+    assertEquals(Type.A, ar.getType());
+    assertEquals(DClass.IN, ar.getDClass());
+    assertEquals(m_ttl, ar.getTTL());
+    assertEquals(m_addr, ar.getAddress());
+
+    // a relative name
+    assertThrows(RelativeNameException.class, () -> new ARecord(m_rn, DClass.IN, m_ttl, m_addr));
   }
 
   @Test
