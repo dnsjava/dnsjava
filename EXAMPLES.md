@@ -140,7 +140,7 @@ public class ResolveExample {
         SimpleResolver sr = new SimpleResolver("4.2.2.1");
         System.out.println("Standard resolver:");
         sendAndPrint(sr, "www.dnssec-failed.org.");
-        sendAndPrint(sr, "www.isc.org.");
+        sendAndPrint(sr, "nic.ch.");
 
         // Send the same queries using the validating resolver with the
         // trust anchor of the root zone
@@ -149,7 +149,7 @@ public class ResolveExample {
         vr.loadTrustAnchors(new ByteArrayInputStream(ROOT.getBytes(StandardCharsets.US_ASCII)));
         System.out.println("\n\nValidating resolver:");
         sendAndPrint(vr, "www.dnssec-failed.org.");
-        sendAndPrint(vr, "www.isc.org.");
+        sendAndPrint(vr, "nic.ch.");
     }
 
     private static void sendAndPrint(Resolver vr, String name) throws IOException {
@@ -175,7 +175,7 @@ Standard resolver:
 ---www.dnssec-failed.org.
 AD-Flag: false
 RCode:   NOERROR
----www.isc.org.
+---nic.ch.
 AD-Flag: false
 RCode:   NOERROR
 
@@ -184,7 +184,7 @@ Validating resolver:
 AD-Flag: false
 RCode:   SERVFAIL
 Reason:  Could not establish a chain of trust to keys for [dnssec-failed.org.]. Reason: Did not match a DS to a DNSKEY.
----www.isc.org.
+---nic.ch.
 AD-Flag: true
 RCode:   NOERROR
 ```
