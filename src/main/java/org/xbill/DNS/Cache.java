@@ -423,7 +423,6 @@ public class Cache {
     Element element;
     Name tname;
     Object types;
-    SetResponse sr;
 
     labels = name.labels();
 
@@ -450,8 +449,8 @@ public class Cache {
        * Otherwise, look for a DNAME.
        */
       if (isExact && type == Type.ANY) {
-        sr = new SetResponse(SetResponse.SUCCESSFUL);
         Element[] elements = allElements(types);
+        SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
         int added = 0;
         for (Element value : elements) {
           element = value;
@@ -475,40 +474,37 @@ public class Cache {
       } else if (isExact) {
         element = oneElement(tname, types, type, minCred);
         if (element instanceof CacheRRset) {
-          sr = new SetResponse(SetResponse.SUCCESSFUL);
-          sr.addRRset((CacheRRset) element);
-          return sr;
+          return SetResponse.ofType(SetResponseType.SUCCESSFUL, (CacheRRset) element);
         } else if (element != null) {
-          sr = new SetResponse(SetResponse.NXRRSET);
-          return sr;
+          return SetResponse.ofType(SetResponseType.NXRRSET);
         }
 
         element = oneElement(tname, types, Type.CNAME, minCred);
         if (element instanceof CacheRRset) {
-          return new SetResponse(SetResponse.CNAME, (CacheRRset) element);
+          return SetResponse.ofType(SetResponseType.CNAME, (CacheRRset) element);
         }
       } else {
         element = oneElement(tname, types, Type.DNAME, minCred);
         if (element instanceof CacheRRset) {
-          return new SetResponse(SetResponse.DNAME, (CacheRRset) element);
+          return SetResponse.ofType(SetResponseType.DNAME, (CacheRRset) element);
         }
       }
 
       /* Look for an NS */
       element = oneElement(tname, types, Type.NS, minCred);
       if (element instanceof CacheRRset) {
-        return new SetResponse(SetResponse.DELEGATION, (CacheRRset) element);
+        return SetResponse.ofType(SetResponseType.DELEGATION, (CacheRRset) element);
       }
 
       /* Check for the special NXDOMAIN element. */
       if (isExact) {
         element = oneElement(tname, types, 0, minCred);
         if (element != null) {
-          return SetResponse.ofType(SetResponse.NXDOMAIN);
+          return SetResponse.ofType(SetResponseType.NXDOMAIN);
         }
       }
     }
-    return SetResponse.ofType(SetResponse.UNKNOWN);
+    return SetResponse.ofType(SetResponseType.UNKNOWN);
   }
 
   /**
@@ -642,7 +638,7 @@ public class Cache {
         completed = true;
         if (curname == qname) {
           if (response == null) {
-            response = new SetResponse(SetResponse.SUCCESSFUL);
+            response = SetResponse.ofType(SetResponseType.SUCCESSFUL);
           }
           response.addRRset(answer);
         }
@@ -651,7 +647,7 @@ public class Cache {
         CNAMERecord cname;
         addRRset(answer, cred);
         if (curname == qname) {
-          response = new SetResponse(SetResponse.CNAME, answer);
+          response = SetResponse.ofType(SetResponseType.CNAME, answer);
         }
         cname = (CNAMERecord) answer.first();
         curname = cname.getTarget();
@@ -659,7 +655,7 @@ public class Cache {
         DNAMERecord dname;
         addRRset(answer, cred);
         if (curname == qname) {
-          response = new SetResponse(SetResponse.DNAME, answer);
+          response = SetResponse.ofType(SetResponseType.DNAME, answer);
         }
         dname = (DNAMERecord) answer.first();
         try {
@@ -692,11 +688,11 @@ public class Cache {
         }
         addNegative(curname, cachetype, soarec, cred);
         if (response == null) {
-          int responseType;
+          SetResponseType responseType;
           if (rcode == Rcode.NXDOMAIN) {
-            responseType = SetResponse.NXDOMAIN;
+            responseType = SetResponseType.NXDOMAIN;
           } else {
-            responseType = SetResponse.NXRRSET;
+            responseType = SetResponseType.NXRRSET;
           }
           response = SetResponse.ofType(responseType);
         }
@@ -707,7 +703,7 @@ public class Cache {
         addRRset(ns, cred);
         markAdditional(ns, additionalNames);
         if (response == null) {
-          response = new SetResponse(SetResponse.DELEGATION, ns);
+          response = SetResponse.ofType(SetResponseType.DELEGATION, ns);
         }
       }
     } else if (rcode == Rcode.NOERROR && ns != null) {

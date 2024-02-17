@@ -3,8 +3,17 @@
 
 package org.xbill.DNS;
 
+import static org.xbill.DNS.SetResponseType.CNAME;
+import static org.xbill.DNS.SetResponseType.DELEGATION;
+import static org.xbill.DNS.SetResponseType.DNAME;
+import static org.xbill.DNS.SetResponseType.NXDOMAIN;
+import static org.xbill.DNS.SetResponseType.NXRRSET;
+import static org.xbill.DNS.SetResponseType.SUCCESSFUL;
+import static org.xbill.DNS.SetResponseType.UNKNOWN;
+
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 
 /**
  * The Response from a query to {@link Cache#lookupRecords(Name, int, int)} or {@link
@@ -15,93 +24,65 @@ import java.util.List;
  * @author Brian Wellington
  */
 public class SetResponse {
+  private static final SetResponse SR_UNKNOWN = new SetResponse(UNKNOWN, null, false);
+  private static final SetResponse SR_UNKNOWN_AUTH = new SetResponse(UNKNOWN, null, true);
+  private static final SetResponse SR_NXDOMAIN = new SetResponse(NXDOMAIN, null, false);
+  private static final SetResponse SR_NXDOMAIN_AUTH = new SetResponse(NXDOMAIN, null, true);
+  private static final SetResponse SR_NXRRSET = new SetResponse(NXRRSET, null, false);
+  private static final SetResponse SR_NXRRSET_AUTH = new SetResponse(NXRRSET, null, true);
 
-  /** The Cache contains no information about the requested name/type */
-  static final int UNKNOWN = 0;
-
-  /**
-   * The Zone does not contain the requested name, or the Cache has determined that the name does
-   * not exist.
-   */
-  static final int NXDOMAIN = 1;
-
-  /**
-   * The Zone contains the name, but no data of the requested type, or the Cache has determined that
-   * the name exists and has no data of the requested type.
-   */
-  static final int NXRRSET = 2;
-
-  /** A delegation enclosing the requested name was found. */
-  static final int DELEGATION = 3;
+  private final SetResponseType type;
 
   /**
-   * The Cache/Zone found a CNAME when looking for the name.
-   *
-   * @see CNAMERecord
+   * @since 3.6
    */
-  static final int CNAME = 4;
+  @Getter private boolean isAuthenticated;
 
-  /**
-   * The Cache/Zone found a DNAME when looking for the name.
-   *
-   * @see DNAMERecord
-   */
-  static final int DNAME = 5;
-
-  /** The Cache/Zone has successfully answered the question for the requested name/type/class. */
-  static final int SUCCESSFUL = 6;
-
-  private static final SetResponse unknown = new SetResponse(UNKNOWN);
-  private static final SetResponse nxdomain = new SetResponse(NXDOMAIN);
-  private static final SetResponse nxrrset = new SetResponse(NXRRSET);
-
-  private int type;
   private List<RRset> data;
 
-  private SetResponse() {}
-
-  SetResponse(int type, RRset rrset) {
-    if (type < 0 || type > 6) {
-      throw new IllegalArgumentException("invalid type");
-    }
+  private SetResponse(SetResponseType type, RRset rrset, boolean isAuthenticated) {
     this.type = type;
-    this.data = new ArrayList<>();
-    this.data.add(rrset);
+    this.isAuthenticated = isAuthenticated;
+    if (rrset != null) {
+      addRRset(rrset);
+    }
   }
 
-  SetResponse(int type) {
-    if (type < 0 || type > 6) {
-      throw new IllegalArgumentException("invalid type");
-    }
-    this.type = type;
-    this.data = null;
+  static SetResponse ofType(SetResponseType type) {
+    return ofType(type, null, false);
   }
 
-  static SetResponse ofType(int type) {
+  static SetResponse ofType(SetResponseType type, RRset rrset) {
+    return ofType(type, rrset, false);
+  }
+
+  static SetResponse ofType(SetResponseType type, RRset rrset, boolean isAuthenticated) {
     switch (type) {
       case UNKNOWN:
-        return unknown;
+        return isAuthenticated ? SR_UNKNOWN_AUTH : SR_UNKNOWN;
       case NXDOMAIN:
-        return nxdomain;
+        return isAuthenticated ? SR_NXDOMAIN_AUTH : SR_NXDOMAIN;
       case NXRRSET:
-        return nxrrset;
+        return isAuthenticated ? SR_NXRRSET_AUTH : SR_NXRRSET;
       case DELEGATION:
       case CNAME:
       case DNAME:
       case SUCCESSFUL:
-        SetResponse sr = new SetResponse();
-        sr.type = type;
-        sr.data = null;
-        return sr;
+        return new SetResponse(type, rrset, isAuthenticated);
       default:
         throw new IllegalArgumentException("invalid type");
     }
   }
 
   void addRRset(RRset rrset) {
+    if (type.isSealed()) {
+      throw new IllegalStateException("Attempted to add RRset to sealed response of type " + type);
+    }
+
     if (data == null) {
       data = new ArrayList<>();
     }
+
     data.add(rrset);
   }
 
@@ -160,29 +141,12 @@ public class SetResponse {
 
   /** If the query hit a delegation point, return the NS set. */
   public RRset getNS() {
-    return (data != null) ? data.get(0) : null;
+    return data != null ? data.get(0) : null;
   }
 
   /** Prints the value of the SetResponse */
   @Override
   public String toString() {
-    switch (type) {
-      case UNKNOWN:
-        return "unknown";
-      case NXDOMAIN:
-        return "NXDOMAIN";
-      case NXRRSET:
-        return "NXRRSET";
-      case DELEGATION:
-        return "delegation: " + data.get(0);
-      case CNAME:
-        return "CNAME: " + data.get(0);
-      case DNAME:
-        return "DNAME: " + data.get(0);
-      case SUCCESSFUL:
-        return "successful";
-      default:
-        throw new IllegalStateException();
-    }
+    return type + (type.isPrintRecords() ? ": " + data.get(0) : "");
   }
 }

@@ -338,7 +338,7 @@ public class Zone implements Serializable {
 
   private synchronized SetResponse lookup(Name name, int type) {
     if (!name.subdomain(origin)) {
-      return SetResponse.ofType(SetResponse.NXDOMAIN);
+      return SetResponse.ofType(SetResponseType.NXDOMAIN);
     }
 
     int labels = name.labels();
@@ -366,13 +366,13 @@ public class Zone implements Serializable {
       if (!isOrigin) {
         RRset ns = oneRRset(types, Type.NS);
         if (ns != null) {
-          return new SetResponse(SetResponse.DELEGATION, ns);
+          return SetResponse.ofType(SetResponseType.DELEGATION, ns);
         }
       }
 
       /* If this is an ANY lookup, return everything. */
       if (isExact && type == Type.ANY) {
-        SetResponse sr = new SetResponse(SetResponse.SUCCESSFUL);
+        SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
         for (RRset set : allRRsets(types)) {
           sr.addRRset(set);
         }
@@ -386,22 +386,22 @@ public class Zone implements Serializable {
       if (isExact) {
         RRset rrset = oneRRset(types, type);
         if (rrset != null) {
-          return new SetResponse(SetResponse.SUCCESSFUL, rrset);
+          return SetResponse.ofType(SetResponseType.SUCCESSFUL, rrset);
         }
         rrset = oneRRset(types, Type.CNAME);
         if (rrset != null) {
-          return new SetResponse(SetResponse.CNAME, rrset);
+          return SetResponse.ofType(SetResponseType.CNAME, rrset);
         }
       } else {
         RRset rrset = oneRRset(types, Type.DNAME);
         if (rrset != null) {
-          return new SetResponse(SetResponse.DNAME, rrset);
+          return SetResponse.ofType(SetResponseType.DNAME, rrset);
         }
       }
 
       /* We found the name, but not the type. */
       if (isExact) {
-        return SetResponse.ofType(SetResponse.NXRRSET);
+        return SetResponse.ofType(SetResponseType.NXRRSET);
       }
     }
 
@@ -414,7 +414,7 @@ public class Zone implements Serializable {
         }
 
         if (type == Type.ANY) {
-          SetResponse sr = new SetResponse(SetResponse.SUCCESSFUL);
+          SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
           for (RRset set : allRRsets(types)) {
             sr.addRRset(expandSet(set, name));
           }
@@ -422,13 +422,13 @@ public class Zone implements Serializable {
         } else {
           RRset rrset = oneRRset(types, type);
           if (rrset != null) {
-            return new SetResponse(SetResponse.SUCCESSFUL, expandSet(rrset, name));
+            return SetResponse.ofType(SetResponseType.SUCCESSFUL, expandSet(rrset, name));
           }
         }
       }
     }
 
-    return SetResponse.ofType(SetResponse.NXDOMAIN);
+    return SetResponse.ofType(SetResponseType.NXDOMAIN);
   }
 
   private RRset expandSet(RRset set, Name tname) {

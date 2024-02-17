@@ -45,145 +45,85 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 class SetResponseTest {
-  @Test
-  void ctor_1arg() {
-    final int[] types =
-        new int[] {
-          SetResponse.UNKNOWN,
-          SetResponse.NXDOMAIN,
-          SetResponse.NXRRSET,
-          SetResponse.DELEGATION,
-          SetResponse.CNAME,
-          SetResponse.DNAME,
-          SetResponse.SUCCESSFUL
-        };
+  private static final ARecord A_RECORD_1 =
+      new ARecord(
+          Name.fromConstantString("The.Name."),
+          DClass.IN,
+          0xABCD,
+          new byte[] {(byte) 192, (byte) 168, 0, 1});
+  private static final ARecord A_RECORD_2 =
+      new ARecord(
+          Name.fromConstantString("The.Name."),
+          DClass.IN,
+          0xABCD,
+          new byte[] {(byte) 192, (byte) 168, 0, 2});
 
-    for (int type : types) {
-      SetResponse sr = new SetResponse(type);
-      assertNull(sr.getNS());
-      assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
-      assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-      assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
-      assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
-      assertEquals(type == SetResponse.CNAME, sr.isCNAME());
-      assertEquals(type == SetResponse.DNAME, sr.isDNAME());
-      assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
-    }
+  @ParameterizedTest
+  @EnumSource(value = SetResponseType.class)
+  void ctor_1arg(SetResponseType type) {
+    SetResponse sr = SetResponse.ofType(type);
+    assertNull(sr.getNS());
+    assertEquals(type == SetResponseType.UNKNOWN, sr.isUnknown());
+    assertEquals(type == SetResponseType.NXDOMAIN, sr.isNXDOMAIN());
+    assertEquals(type == SetResponseType.NXRRSET, sr.isNXRRSET());
+    assertEquals(type == SetResponseType.DELEGATION, sr.isDelegation());
+    assertEquals(type == SetResponseType.CNAME, sr.isCNAME());
+    assertEquals(type == SetResponseType.DNAME, sr.isDNAME());
+    assertEquals(type == SetResponseType.SUCCESSFUL, sr.isSuccessful());
+  }
+
+  @ParameterizedTest
+  @EnumSource(
+      value = SetResponseType.class,
+      names = {
+        "DELEGATION",
+        "CNAME",
+        "DNAME",
+        "SUCCESSFUL",
+      })
+  void ofType_basic(SetResponseType type) {
+    RRset rs = new RRset();
+    SetResponse sr = SetResponse.ofType(type, rs);
+    assertSame(rs, sr.getNS());
+    assertEquals(type == SetResponseType.DELEGATION, sr.isDelegation());
+    assertEquals(type == SetResponseType.CNAME, sr.isCNAME());
+    assertEquals(type == SetResponseType.DNAME, sr.isDNAME());
+    assertEquals(type == SetResponseType.SUCCESSFUL, sr.isSuccessful());
+
+    SetResponse sr2 = SetResponse.ofType(type, rs);
+    assertNotSame(sr, sr2);
+  }
+
+  @ParameterizedTest
+  @EnumSource(
+      value = SetResponseType.class,
+      names = {
+        "UNKNOWN",
+        "NXDOMAIN",
+        "NXRRSET",
+      })
+  void ofType_singleton(SetResponseType type) {
+    SetResponse sr = SetResponse.ofType(type);
+    assertNull(sr.getNS());
+    assertEquals(type == SetResponseType.UNKNOWN, sr.isUnknown());
+    assertEquals(type == SetResponseType.NXDOMAIN, sr.isNXDOMAIN());
+    assertEquals(type == SetResponseType.NXRRSET, sr.isNXRRSET());
+    assertThrows(IllegalStateException.class, () -> sr.addRRset(new RRset()));
+
+    SetResponse sr2 = SetResponse.ofType(type);
+    assertSame(sr, sr2);
   }
 
   @Test
-  void ctor_1arg_toosmall() {
-    assertThrows(IllegalArgumentException.class, () -> new SetResponse(-1));
-  }
-
-  @Test
-  void ctor_1arg_toobig() {
-    assertThrows(IllegalArgumentException.class, () -> new SetResponse(7));
-  }
-
-  @Test
-  void ctor_2arg() {
-    final int[] types =
-        new int[] {
-          SetResponse.UNKNOWN,
-          SetResponse.NXDOMAIN,
-          SetResponse.NXRRSET,
-          SetResponse.DELEGATION,
-          SetResponse.CNAME,
-          SetResponse.DNAME,
-          SetResponse.SUCCESSFUL
-        };
-
-    for (int type : types) {
-      RRset rs = new RRset();
-      SetResponse sr = new SetResponse(type, rs);
-      assertSame(rs, sr.getNS());
-      assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
-      assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-      assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
-      assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
-      assertEquals(type == SetResponse.CNAME, sr.isCNAME());
-      assertEquals(type == SetResponse.DNAME, sr.isDNAME());
-      assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
-    }
-  }
-
-  @Test
-  void ctor_2arg_toosmall() {
-    assertThrows(IllegalArgumentException.class, () -> new SetResponse(-1, new RRset()));
-  }
-
-  @Test
-  void ctor_2arg_toobig() {
-    assertThrows(IllegalArgumentException.class, () -> new SetResponse(7, new RRset()));
-  }
-
-  @Test
-  void ofType_basic() {
-    final int[] types =
-        new int[] {
-          SetResponse.DELEGATION, SetResponse.CNAME, SetResponse.DNAME, SetResponse.SUCCESSFUL
-        };
-
-    for (int type : types) {
-      SetResponse sr = SetResponse.ofType(type);
-      assertNull(sr.getNS());
-      assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
-      assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-      assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
-      assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
-      assertEquals(type == SetResponse.CNAME, sr.isCNAME());
-      assertEquals(type == SetResponse.DNAME, sr.isDNAME());
-      assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
-
-      SetResponse sr2 = SetResponse.ofType(type);
-      assertNotSame(sr, sr2);
-    }
-  }
-
-  @Test
-  void ofType_singleton() {
-    final int[] types = new int[] {SetResponse.UNKNOWN, SetResponse.NXDOMAIN, SetResponse.NXRRSET};
-
-    for (int type : types) {
-      SetResponse sr = SetResponse.ofType(type);
-      assertNull(sr.getNS());
-      assertEquals(type == SetResponse.UNKNOWN, sr.isUnknown());
-      assertEquals(type == SetResponse.NXDOMAIN, sr.isNXDOMAIN());
-      assertEquals(type == SetResponse.NXRRSET, sr.isNXRRSET());
-      assertEquals(type == SetResponse.DELEGATION, sr.isDelegation());
-      assertEquals(type == SetResponse.CNAME, sr.isCNAME());
-      assertEquals(type == SetResponse.DNAME, sr.isDNAME());
-      assertEquals(type == SetResponse.SUCCESSFUL, sr.isSuccessful());
-
-      SetResponse sr2 = SetResponse.ofType(type);
-      assertSame(sr, sr2);
-    }
-  }
-
-  @Test
-  void ofType_toosmall() {
-    assertThrows(IllegalArgumentException.class, () -> SetResponse.ofType(-1));
-  }
-
-  @Test
-  void ofType_toobig() {
-    assertThrows(IllegalArgumentException.class, () -> SetResponse.ofType(7));
-  }
-
-  @Test
-  void addRRset() throws TextParseException, UnknownHostException {
+  void addRRset() {
     RRset rrs = new RRset();
-    rrs.addRR(
-        new ARecord(
-            Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.1")));
-    rrs.addRR(
-        new ARecord(
-            Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.2")));
-    SetResponse sr = new SetResponse(SetResponse.SUCCESSFUL);
-    sr.addRRset(rrs);
+    rrs.addRR(A_RECORD_1);
+    rrs.addRR(A_RECORD_2);
+    SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL, rrs);
 
     RRset[] exp = new RRset[] {rrs};
     assertArrayEquals(exp, sr.answers().toArray());
@@ -192,12 +132,8 @@ class SetResponseTest {
   @Test
   void addRRset_multiple() throws TextParseException, UnknownHostException {
     RRset rrs = new RRset();
-    rrs.addRR(
-        new ARecord(
-            Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.1")));
-    rrs.addRR(
-        new ARecord(
-            Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.2")));
+    rrs.addRR(A_RECORD_1);
+    rrs.addRR(A_RECORD_2);
 
     RRset rrs2 = new RRset();
     rrs2.addRR(
@@ -213,7 +149,7 @@ class SetResponseTest {
             0xABCE,
             InetAddress.getByName("192.168.1.2")));
 
-    SetResponse sr = new SetResponse(SetResponse.SUCCESSFUL);
+    SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
     sr.addRRset(rrs);
     sr.addRRset(rrs2);
 
@@ -223,63 +159,40 @@ class SetResponseTest {
 
   @Test
   void answers_nonSUCCESSFUL() {
-    SetResponse sr = new SetResponse(SetResponse.UNKNOWN, new RRset());
+    SetResponse sr = SetResponse.ofType(SetResponseType.UNKNOWN, new RRset());
     assertNull(sr.answers());
   }
 
   @Test
   void getCNAME() throws TextParseException {
-    RRset rrs = new RRset();
     CNAMERecord cr =
         new CNAMERecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, Name.fromString("The.Alias."));
-    rrs.addRR(cr);
-    SetResponse sr = new SetResponse(SetResponse.CNAME, rrs);
+    RRset rrs = new RRset(cr);
+    SetResponse sr = SetResponse.ofType(SetResponseType.CNAME, rrs);
     assertEquals(cr, sr.getCNAME());
   }
 
   @Test
   void getDNAME() throws TextParseException {
-    RRset rrs = new RRset();
     DNAMERecord dr =
         new DNAMERecord(
             Name.fromString("The.Name."), DClass.IN, 0xABCD, Name.fromString("The.Alias."));
-    rrs.addRR(dr);
-    SetResponse sr = new SetResponse(SetResponse.DNAME, rrs);
+    RRset rrs = new RRset(dr);
+    SetResponse sr = SetResponse.ofType(SetResponseType.DNAME, rrs);
     assertEquals(dr, sr.getDNAME());
   }
 
-  @Test
-  void test_toString() throws TextParseException, UnknownHostException {
-    final int[] types =
-        new int[] {
-          SetResponse.UNKNOWN,
-          SetResponse.NXDOMAIN,
-          SetResponse.NXRRSET,
-          SetResponse.DELEGATION,
-          SetResponse.CNAME,
-          SetResponse.DNAME,
-          SetResponse.SUCCESSFUL
-        };
-    RRset rrs = new RRset();
-    rrs.addRR(
-        new ARecord(
-            Name.fromString("The.Name."), DClass.IN, 0xABCD, InetAddress.getByName("192.168.0.1")));
+  @ParameterizedTest
+  @EnumSource(SetResponseType.class)
+  void test_toString(SetResponseType type) {
+    RRset rrs = new RRset(A_RECORD_1);
 
-    final String[] labels =
-        new String[] {
-          "unknown",
-          "NXDOMAIN",
-          "NXRRSET",
-          "delegation: " + rrs,
-          "CNAME: " + rrs,
-          "DNAME: " + rrs,
-          "successful"
-        };
-
-    for (int i = 0; i < types.length; ++i) {
-      SetResponse sr = new SetResponse(types[i], rrs);
-      assertEquals(labels[i], sr.toString());
+    SetResponse sr = SetResponse.ofType(type, rrs);
+    if (type.isPrintRecords()) {
+      assertEquals(type + ": " + rrs, sr.toString());
+    } else {
+      assertEquals(type.toString(), sr.toString());
     }
   }
 }
