@@ -6,6 +6,8 @@ import org.xbill.DNS.Name;
 /**
  * Thrown to indicate that records of the name and type queried does not exist, corresponding to the
  * NXRRSET return code as specified in RFC2136 Section 2.2.
+ *
+ * @since 3.4
  */
 public class NoSuchRRSetException extends LookupFailedException {
   public NoSuchRRSetException(Name name, int type) {

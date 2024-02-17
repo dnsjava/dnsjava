@@ -24,16 +24,16 @@ public final class Credibility {
   /** The additional section of a response. */
   public static final int GLUE = 2;
 
-  /** The authority section of a nonauthoritative response. */
+  /** The authority section of a non-authoritative response. */
   public static final int NONAUTH_AUTHORITY = 3;
 
-  /** The answer section of a nonauthoritative response. */
+  /** The answer section of a non-authoritative response. */
   public static final int NONAUTH_ANSWER = 3;
 
   /** The authority section of an authoritative response. */
   public static final int AUTH_AUTHORITY = 4;
 
-  /** The answer section of a authoritative response. */
+  /** The answer section of an authoritative response. */
   public static final int AUTH_ANSWER = 4;
 
   /** A zone. */

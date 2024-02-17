@@ -49,6 +49,8 @@ import org.xbill.DNS.hosts.HostsFileParser;
  * LookupSession provides facilities to make DNS Queries. A LookupSession is intended to be long
  * lived, and it's behaviour can be configured using the properties of the {@link
  * LookupSessionBuilder} instance returned by {@link #builder()}.
+ *
+ * @since 3.4
  */
 @Slf4j
 public class LookupSession {

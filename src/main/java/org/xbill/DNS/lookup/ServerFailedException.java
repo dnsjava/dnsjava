@@ -9,6 +9,8 @@ import org.xbill.DNS.Type;
 /**
  * Represents a server failure. The upstream server responding to the request returned a {@link
  * org.xbill.DNS.Rcode#SERVFAIL} status.
+ *
+ * @since 3.4
  */
 public class ServerFailedException extends LookupFailedException {
   /**

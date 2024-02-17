@@ -8,7 +8,11 @@ import lombok.Data;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 
-/** LookupResult instances holds the result of a successful lookup operation. */
+/**
+ * LookupResult instances holds the result of a successful lookup operation.
+ *
+ * @since 3.4
+ */
 @Data
 public final class LookupResult {
   /** An unmodifiable list of records that this instance wraps, may not be null but can be empty */

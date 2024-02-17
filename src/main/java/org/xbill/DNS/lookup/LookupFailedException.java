@@ -4,7 +4,11 @@ package org.xbill.DNS.lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Type;
 
-/** A base class for all types of things that might fail when making a DNS lookup. */
+/**
+ * A base class for all types of things that might fail when making a DNS lookup.
+ *
+ * @since 3.4
+ */
 public class LookupFailedException extends RuntimeException {
   private final Name name;
   private final int type;
