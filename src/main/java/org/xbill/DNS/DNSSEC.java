@@ -90,6 +90,18 @@ public class DNSSEC {
     /** Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC, RFC8080 */
     public static final int ED448 = 16;
 
+    /**
+     * SM2 signing algorithm with SM3 hashing algorithm. <a
+     * href="https://datatracker.ietf.org/doc/draft-cuiling-dnsop-sm2-alg/15/">draft-cuiling-dnsop-sm2-alg-15</a>
+     */
+    public static final int SM2SM3 = 17;
+
+    /**
+     * GOST R 34.10-2012 <a
+     * href="https://datatracker.ietf.org/doc/draft-makarenko-gost2012-dnssec/05/">draft-makarenko-gost2012-dnssec-05</a>
+     */
+    public static final int ECC_GOST12 = 23;
+
     /** Indirect keys; the actual key is elsewhere. */
     public static final int INDIRECT = 252;
 
@@ -111,7 +123,7 @@ public class DNSSEC {
       algs.add(DSA, "DSA");
       algs.add(RSASHA1, "RSASHA1");
       algs.add(DSA_NSEC3_SHA1, "DSA-NSEC3-SHA1");
-      algs.add(RSA_NSEC3_SHA1, "RSA-NSEC3-SHA1");
+      algs.add(RSA_NSEC3_SHA1, "RSASHA1-NSEC3-SHA1");
       algs.add(RSASHA256, "RSASHA256");
       algs.add(RSASHA512, "RSASHA512");
       algs.add(ECC_GOST, "ECC-GOST");
@@ -119,6 +131,8 @@ public class DNSSEC {
       algs.add(ECDSAP384SHA384, "ECDSAP384SHA384");
       algs.add(ED25519, "ED25519");
       algs.add(ED448, "ED448");
+      algs.add(SM2SM3, "SM2SM3");
+      algs.add(ECC_GOST12, "ECC-GOST12");
       algs.add(INDIRECT, "INDIRECT");
       algs.add(PRIVATEDNS, "PRIVATEDNS");
       algs.add(PRIVATEOID, "PRIVATEOID");
@@ -161,6 +175,18 @@ public class DNSSEC {
     /** SHA-384, RFC6605. */
     public static final int SHA384 = 4;
 
+    /**
+     * SM3 hashing algorithm. <a
+     * href="https://datatracker.ietf.org/doc/draft-cuiling-dnsop-sm2-alg/15/">draft-cuiling-dnsop-sm2-alg-15</a>
+     */
+    public static final int GOST3411_12 = 5;
+
+    /**
+     * GOST R 34.10-2012 <a
+     * href="https://datatracker.ietf.org/doc/draft-makarenko-gost2012-dnssec/05/">draft-makarenko-gost2012-dnssec-05</a>
+     */
+    public static final int SM3 = 6;
+
     private static final Mnemonic algs =
         new Mnemonic("DNSSEC Digest Algorithm", Mnemonic.CASE_UPPER);
     private static final Map<Integer, Integer> algLengths = new HashMap<>(4);
@@ -177,6 +203,10 @@ public class DNSSEC {
       algLengths.put(GOST3411, 32);
       algs.add(SHA384, "SHA-384");
       algLengths.put(SHA384, 48);
+      algs.add(GOST3411_12, "GOST12");
+      algLengths.put(GOST3411_12, 64);
+      algs.add(SM3, "SM3");
+      algLengths.put(SM3, 32);
     }
 
     /** Converts an algorithm into its textual representation */
