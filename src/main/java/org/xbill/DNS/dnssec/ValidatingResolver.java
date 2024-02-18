@@ -60,6 +60,13 @@ import org.xbill.DNS.dnssec.ValUtils.NsecProvesNodataResponse;
 @Slf4j
 public final class ValidatingResolver implements Resolver {
   /**
+   * Property name from where the trust anchors are loaded.
+   *
+   * @since 3.6
+   */
+  public static final String TRUST_ANCHOR_FILE_PROPERTY = "dnsjava.dnssec.trust_anchor_file";
+
+  /**
    * The QCLASS being used for the injection of the reason why the validator came to the returned
    * result.
    */
@@ -136,7 +143,7 @@ public final class ValidatingResolver implements Resolver {
    * Initialize the module. Recognized configuration values:
    *
    * <dl>
-   *   <dt>dnsjava.dnssec.trust_anchor_file
+   *   <dt>{@value #TRUST_ANCHOR_FILE_PROPERTY}
    *   <dd>A filename from where to load the trust anchors
    * </dl>
    *
@@ -145,6 +152,7 @@ public final class ValidatingResolver implements Resolver {
    * @see KeyCache#init(Properties)
    * @see ValUtils#init(Properties)
    * @see NSEC3ValUtils#init(Properties)
+   * @see DnsSecVerifier#init(Properties)
    * @param config The configuration data for this module.
    * @throws IOException When the file specified in the config does not exist or cannot be read.
    */
@@ -154,7 +162,7 @@ public final class ValidatingResolver implements Resolver {
     this.valUtils.init(config);
 
     // Load trust anchors
-    String s = config.getProperty("dnsjava.dnssec.trust_anchor_file");
+    String s = config.getProperty(TRUST_ANCHOR_FILE_PROPERTY);
     if (s != null) {
       log.debug("Reading trust anchor file: {}", s);
       this.loadTrustAnchors(new FileInputStream(s));

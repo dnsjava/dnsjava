@@ -66,9 +66,9 @@ final class KeyCache {
    * Initialize the cache. This implementation recognizes the following configuration parameters:
    *
    * <dl>
-   *   <dt>dnsjava.dnssec.keycache.max_ttl
+   *   <dt>{@value #MAX_TTL_CONFIG}
    *   <dd>The maximum TTL to apply to any cache entry.
-   *   <dt>dnsjava.dnssec.keycache.max_size
+   *   <dt>{@value #MAX_CACHE_SIZE_CONFIG}
    *   <dd>The maximum number of entries that the cache will hold.
    * </dl>
    *

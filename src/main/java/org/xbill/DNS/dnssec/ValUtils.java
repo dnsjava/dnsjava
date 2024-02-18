@@ -89,10 +89,10 @@ final class ValUtils {
    * Initialize the module. The recognized configuration values are:
    *
    * <ul>
-   *   <li>{@link #DIGEST_PREFERENCE}
-   *   <li>{@link #DIGEST_HARDEN_DOWNGRADE}
-   *   <li>{@link #DIGEST_ENABLED}
-   *   <li>{@link #ALGORITHM_ENABLED}
+   *   <li>{@value #DIGEST_PREFERENCE}
+   *   <li>{@value #DIGEST_HARDEN_DOWNGRADE}
+   *   <li>{@value #DIGEST_ENABLED}
+   *   <li>{@value #ALGORITHM_ENABLED}
    * </ul>
    *
    * @param config The configuration data for this module.
@@ -116,6 +116,7 @@ final class ValUtils {
     }
 
     this.digestHardenDowngrade = Boolean.parseBoolean(config.getProperty(DIGEST_HARDEN_DOWNGRADE));
+    this.verifier.init(config);
   }
 
   /**
@@ -395,8 +396,8 @@ final class ValUtils {
   }
 
   /**
-   * Determine by looking at a signed RRset whether or not the RRset name was the result of a
-   * wildcard expansion. If so, return the name of the generating wildcard.
+   * Determine by looking at a signed RRset whether the RRset name was the result of a wildcard
+   * expansion. If so, return the name of the generating wildcard.
    *
    * @param rrset The rrset to chedck.
    * @return the wildcard name, if the rrset was synthesized from a wildcard. null if not.

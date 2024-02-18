@@ -165,6 +165,13 @@ If `false`, allows any algorithm to validate the zone.
 |true
 |false
 
+.2+|dnsjava.dnssec.max_validate_rrsigs
+3+|Maximum number of RRSig records to validate until the response is considered bogus.
+This is limited to avoid the 'KeyTrap' vulnerability (CVE-2023-50387).
+|Integer
+|8
+|4
+
 .2+|dnsjava.dnssec.algorithm_enabled.ID
 3+|Enable or disable a DS/DNSKEY algorithm.
 See

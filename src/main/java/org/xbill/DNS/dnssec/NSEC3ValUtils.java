@@ -37,6 +37,8 @@ import org.xbill.DNS.utils.base32;
  */
 @Slf4j
 final class NSEC3ValUtils {
+  public static final String NSEC3_MAX_ITERATIONS_PROPERTY_PREFIX =
+      "dnsjava.dnssec.nsec3.iterations";
   private static final Name ASTERISK_LABEL = Name.fromConstantString("*");
 
   private static final int MAX_ITERATION_COUNT = 65536;
@@ -56,7 +58,7 @@ final class NSEC3ValUtils {
    * Loads the configuration data. Supported properties are:
    *
    * <ul>
-   *   <li>dnsjava.dnssec.nsec3.iterations.M=N
+   *   <li>{@value #NSEC3_MAX_ITERATIONS_PROPERTY_PREFIX}.M=N
    * </ul>
    *
    * @param config The configuration data.
@@ -65,7 +67,7 @@ final class NSEC3ValUtils {
     boolean first = true;
     for (Map.Entry<?, ?> s : config.entrySet()) {
       String key = s.getKey().toString();
-      if (key.startsWith("dnsjava.dnssec.nsec3.iterations")) {
+      if (key.startsWith(NSEC3_MAX_ITERATIONS_PROPERTY_PREFIX)) {
         int keySize = Integer.parseInt(key.substring(key.lastIndexOf(".") + 1));
         int iters = Integer.parseInt(s.getValue().toString());
         if (iters > MAX_ITERATION_COUNT) {
@@ -620,7 +622,7 @@ final class NSEC3ValUtils {
    * @param qname The qname that was matched to the wildard
    * @param zonename The name of the zone that the NSEC3s come from.
    * @param wildcard The purported wildcard that matched.
-   * @return true if the NSEC3 records prove this case.
+   * @return {@link SecurityStatus#SECURE} if the NSEC3 records prove this case.
    */
   public SecurityStatus proveWildcard(
       List<SRRset> nsec3s, Name qname, Name zonename, Name wildcard) {

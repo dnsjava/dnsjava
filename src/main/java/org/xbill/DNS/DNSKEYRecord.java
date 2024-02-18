@@ -24,6 +24,10 @@ public class DNSKEYRecord extends KEYBase {
     public static final int DNSSEC = 3;
   }
 
+  /**
+   * {@code DNSKEY} flags as defined in the <a
+   * href="https://www.iana.org/assignments/dnskey-flags/dnskey-flags.xhtml">IANA registry</a>.
+   */
   public static class Flags {
     private Flags() {}
 
