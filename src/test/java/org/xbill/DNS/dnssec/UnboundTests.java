@@ -75,9 +75,13 @@ class UnboundTests extends TestBase {
         Security.addProvider(new BouncyCastleProvider());
       }
 
-      for (Message m : rpl.replays) {
-        add(m);
-      }
+      if (rpl.minRsaSize != null) {
+      config.put(ValUtils.ALGORITHM_RSA_MIN_KEY_SIZE, Integer.toString(rpl.minRsaSize));
+    }
+
+    for (Message m : rpl.replays) {
+      add(m);
+    }
 
       // merge xNAME queries into one
       List<Message> copy = new ArrayList<>(rpl.replays.size());

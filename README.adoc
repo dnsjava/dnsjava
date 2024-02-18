@@ -180,6 +180,12 @@ https://www.rfc-editor.org/rfc/rfc8624.html#section-3.1[RFC8624] for recommended
 2+|Disable ED448:
 `dnsjava.dnssec.algorithm_enabled.16=false`
 
+.2+|dnsjava.dnssec.algorithm_rsa_min_key_size
+3+|Set the minimum size, in bits, for RSA keys.
+|Integer
+|1024
+|512
+
 .2+|dnsjava.dnssec.digest_enabled.ID
 3+|Enable or disable a DS record digest algorithm.
 See

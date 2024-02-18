@@ -6,6 +6,7 @@ server:
 	target-fetch-policy: "0 0 0 0 0"
 	qname-minimisation: "no"
 	fake-sha1: yes
+	val-min-rsa-size: 512
 	trust-anchor-signaling: no
 
 stub-zone:
@@ -17,7 +18,7 @@ SCENARIO_BEGIN Test validator with secure delegation
 
 ; K.ROOT-SERVERS.NET.
 RANGE_BEGIN 0 100
-	ADDRESS 193.0.14.129 
+	ADDRESS 193.0.14.129
 ENTRY_BEGIN
 MATCH opcode qtype qname
 ADJUST copy_id

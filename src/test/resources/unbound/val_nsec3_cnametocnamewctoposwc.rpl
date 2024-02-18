@@ -17,7 +17,7 @@ SCENARIO_BEGIN Test validator with a regular cname to wildcard cname to wildcard
 
 ; K.ROOT-SERVERS.NET.
 RANGE_BEGIN 0 100
-	ADDRESS 193.0.14.129 
+	ADDRESS 193.0.14.129
 ENTRY_BEGIN
 MATCH opcode qtype qname
 ADJUST copy_id
@@ -120,10 +120,10 @@ x.y.z.end.example.com.	3600	IN	A	1.2.3.5
 x.y.z.end.example.com.	3600	IN	RRSIG	A 8 3 3600 20121126123249 20121029123249 64050 example.com. MyXXd3MvXtEYVNqWDepM3+Ra/j/b63QehzSHXZe5gL954WxW8KGHPYmeWyhDtruThpZS6s6jeARY2xt0lmEDnMgNyPJGA6UWwTIgvGD0u9Qw5kocCq3ZH4cSG4xu4rmZoi+h8OGrHxUb4jIKzipzAQDxhnAcp/wKF7e+p+OE+Fo=
 SECTION AUTHORITY
 ; H(z.wc.example.com.) = isn85psesctb6afn2q105mv966tqqepi.
-isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	NSEC3	1 0 1 abcd  isoaarjsq14bkqaamivn1t1milkv95lc A RRSIG 
+isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	NSEC3	1 0 1 abcd  isoaarjsq14bkqaamivn1t1milkv95lc A RRSIG
 isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123259 20121029123259 64050 example.com. Cxwzq1DUQvhkTVHEJHlb92c511Y+uJy/C0yL9br6W/5lB/usuSiK2DjW58ibPh2kLH1P3SpGqd1Y7LigptdXoPBDFakcNcimPWCN93R3J80+vrHHPkPyIsBaywwYI3SNGgfnHfPF+wmH+tZ1vfEHbigOxqPFK+T0ntKq7dkSndg=
 ; H(z.end.example.com.) = a62608t4becqb6233m87ar7a3648rj3b.
-a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG 
+a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG
 a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123315 20121029123315 64050 example.com. gfBu4oqo9cVxJbqrw2Ly7mK638kGPOF8l8eh7ovalniwkU3F+PNYJyfSE9yGX8tMGbXrkEW9mAzAh39igr2+Bbzi9WPTRp4RDVM0qw+eyMmQRPWKt7FeanDtP+OcdVp0Hf2aPzsgmgTdS6s0AboUq1rX53H2M6F8xAiwPrBJXDQ=
 example.com.	3600	IN	NS	ns.example.com.
 example.com.	3600	IN	RRSIG	NS 8 2 3600 20121126123249 20121029123249 64050 example.com. cpLjgKPacNxVIGo59tYMZ98GVYpH28WHRWj3AeIHK0StYFcAlflGLdkae1LEgMwfUmzrayrA5GMe3AH8LyuTgA2Dn1oNFxGfuShQvK2MFQ+LxvQfiuoqlAlL5Aa94IWcSoU/wLrr66I1K8oSB2yK1Tyyv73c2N40D1mBbzIE70U=
@@ -142,9 +142,9 @@ x.y.z.wc.example.com.	3600	IN	RRSIG	CNAME 8 3 3600 20121126123316 20121029123316
 x.y.z.end.example.com.	3600	IN	A	1.2.3.5
 x.y.z.end.example.com.	3600	IN	RRSIG	A 8 3 3600 20121126123249 20121029123249 64050 example.com. MyXXd3MvXtEYVNqWDepM3+Ra/j/b63QehzSHXZe5gL954WxW8KGHPYmeWyhDtruThpZS6s6jeARY2xt0lmEDnMgNyPJGA6UWwTIgvGD0u9Qw5kocCq3ZH4cSG4xu4rmZoi+h8OGrHxUb4jIKzipzAQDxhnAcp/wKF7e+p+OE+Fo=
 SECTION AUTHORITY
-isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	NSEC3	1 0 1 abcd  isoaarjsq14bkqaamivn1t1milkv95lc A RRSIG 
+isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	NSEC3	1 0 1 abcd  isoaarjsq14bkqaamivn1t1milkv95lc A RRSIG
 isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123259 20121029123259 64050 example.com. Cxwzq1DUQvhkTVHEJHlb92c511Y+uJy/C0yL9br6W/5lB/usuSiK2DjW58ibPh2kLH1P3SpGqd1Y7LigptdXoPBDFakcNcimPWCN93R3J80+vrHHPkPyIsBaywwYI3SNGgfnHfPF+wmH+tZ1vfEHbigOxqPFK+T0ntKq7dkSndg=
-a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG 
+a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG
 a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123315 20121029123315 64050 example.com. gfBu4oqo9cVxJbqrw2Ly7mK638kGPOF8l8eh7ovalniwkU3F+PNYJyfSE9yGX8tMGbXrkEW9mAzAh39igr2+Bbzi9WPTRp4RDVM0qw+eyMmQRPWKt7FeanDtP+OcdVp0Hf2aPzsgmgTdS6s0AboUq1rX53H2M6F8xAiwPrBJXDQ=
 example.com.	3600	IN	NS	ns.example.com.
 example.com.	3600	IN	RRSIG	NS 8 2 3600 20121126123249 20121029123249 64050 example.com. cpLjgKPacNxVIGo59tYMZ98GVYpH28WHRWj3AeIHK0StYFcAlflGLdkae1LEgMwfUmzrayrA5GMe3AH8LyuTgA2Dn1oNFxGfuShQvK2MFQ+LxvQfiuoqlAlL5Aa94IWcSoU/wLrr66I1K8oSB2yK1Tyyv73c2N40D1mBbzIE70U=
@@ -161,7 +161,7 @@ SECTION ANSWER
 x.y.z.end.example.com.	3600	IN	A	1.2.3.5
 x.y.z.end.example.com.	3600	IN	RRSIG	A 8 3 3600 20121126123249 20121029123249 64050 example.com. MyXXd3MvXtEYVNqWDepM3+Ra/j/b63QehzSHXZe5gL954WxW8KGHPYmeWyhDtruThpZS6s6jeARY2xt0lmEDnMgNyPJGA6UWwTIgvGD0u9Qw5kocCq3ZH4cSG4xu4rmZoi+h8OGrHxUb4jIKzipzAQDxhnAcp/wKF7e+p+OE+Fo=
 SECTION AUTHORITY
-a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG 
+a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG
 a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123315 20121029123315 64050 example.com. gfBu4oqo9cVxJbqrw2Ly7mK638kGPOF8l8eh7ovalniwkU3F+PNYJyfSE9yGX8tMGbXrkEW9mAzAh39igr2+Bbzi9WPTRp4RDVM0qw+eyMmQRPWKt7FeanDtP+OcdVp0Hf2aPzsgmgTdS6s0AboUq1rX53H2M6F8xAiwPrBJXDQ=
 example.com.	3600	IN	NS	ns.example.com.
 example.com.	3600	IN	RRSIG	NS 8 2 3600 20121126123249 20121029123249 64050 example.com. cpLjgKPacNxVIGo59tYMZ98GVYpH28WHRWj3AeIHK0StYFcAlflGLdkae1LEgMwfUmzrayrA5GMe3AH8LyuTgA2Dn1oNFxGfuShQvK2MFQ+LxvQfiuoqlAlL5Aa94IWcSoU/wLrr66I1K8oSB2yK1Tyyv73c2N40D1mBbzIE70U=
@@ -195,9 +195,9 @@ x.y.z.wc.example.com.	3600	IN	RRSIG	CNAME 8 3 3600 20121126123316 20121029123316
 x.y.z.end.example.com.	3600	IN	A	1.2.3.5
 x.y.z.end.example.com.	3600	IN	RRSIG	A 8 3 3600 20121126123249 20121029123249 64050 example.com. MyXXd3MvXtEYVNqWDepM3+Ra/j/b63QehzSHXZe5gL954WxW8KGHPYmeWyhDtruThpZS6s6jeARY2xt0lmEDnMgNyPJGA6UWwTIgvGD0u9Qw5kocCq3ZH4cSG4xu4rmZoi+h8OGrHxUb4jIKzipzAQDxhnAcp/wKF7e+p+OE+Fo=
 SECTION AUTHORITY
-isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	NSEC3	1 0 1 abcd  isoaarjsq14bkqaamivn1t1milkv95lc A RRSIG 
+isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	NSEC3	1 0 1 abcd  isoaarjsq14bkqaamivn1t1milkv95lc A RRSIG
 isjq5aarcp8p5sukc56g961cccjus5u2.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123259 20121029123259 64050 example.com. Cxwzq1DUQvhkTVHEJHlb92c511Y+uJy/C0yL9br6W/5lB/usuSiK2DjW58ibPh2kLH1P3SpGqd1Y7LigptdXoPBDFakcNcimPWCN93R3J80+vrHHPkPyIsBaywwYI3SNGgfnHfPF+wmH+tZ1vfEHbigOxqPFK+T0ntKq7dkSndg=
-a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG 
+a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	NSEC3	1 0 1 abcd  a64lt5ij9a1up15h5cdsn1u2071901hu A RRSIG
 a61sejfu6am5a36p628t4s089s309o44.example.com.	86400	IN	RRSIG	NSEC3 8 3 86400 20121126123315 20121029123315 64050 example.com. gfBu4oqo9cVxJbqrw2Ly7mK638kGPOF8l8eh7ovalniwkU3F+PNYJyfSE9yGX8tMGbXrkEW9mAzAh39igr2+Bbzi9WPTRp4RDVM0qw+eyMmQRPWKt7FeanDtP+OcdVp0Hf2aPzsgmgTdS6s0AboUq1rX53H2M6F8xAiwPrBJXDQ=
 example.com.	3600	IN	NS	ns.example.com.
 example.com.	3600	IN	RRSIG	NS 8 2 3600 20121126123249 20121029123249 64050 example.com. cpLjgKPacNxVIGo59tYMZ98GVYpH28WHRWj3AeIHK0StYFcAlflGLdkae1LEgMwfUmzrayrA5GMe3AH8LyuTgA2Dn1oNFxGfuShQvK2MFQ+LxvQfiuoqlAlL5Aa94IWcSoU/wLrr66I1K8oSB2yK1Tyyv73c2N40D1mBbzIE70U=

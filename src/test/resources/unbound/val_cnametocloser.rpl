@@ -3,6 +3,7 @@ server:
 	trust-anchor: "example.com.	3600	IN	DS	30899 5 1 d4bf9d2e10f6d76840d42ef5913022abcd0bf512"
 	trust-anchor: "a.b.example.com.	3600	IN	DNSKEY	257 3 5 AwEAAas/cAhCFXvBUgTSNZCvQp0pLx1dY+7rXR0hH4/3EUgWmsmbYUpI1qD0xhwKD/oYGEwAm291fyWJ9c0oVxXDEK8="
 	val-override-date: "20091113091234"
+	val-min-rsa-size: 512
 	fake-sha1: yes
 	trust-anchor-signaling: no
 
@@ -98,7 +99,7 @@ l0c0e5lac37ai0lpij31sj699hkktdmb.example.com.   3600    IN      NSEC3   1 1 1 d3
 l0c0e5lac37ai0lpij31sj699hkktdmb.example.com.   3600    IN      RRSIG   NSEC3 5 3 3600 20091213091234 20091111091234 30899 example.com. qjV0zsbDWLuoOQQ3tgCE2zo1z31bK9nv/Wh6xqKhmhyFI87nw2HM0lZGfRQrpWvWfBDczLRxHH9WNZkeIzv28w== ;{id = 30899}
 1lq4sb4omkd2vgj0l8lro2cbie223hco.example.com.   3600    IN      NSEC3   1 1 1 d399eaab  1lq8sb4omkd2vgj0l8lro2cbie223hco NS RRSIG  ; flags: optout
 1lq4sb4omkd2vgj0l8lro2cbie223hco.example.com.   3600    IN      RRSIG   NSEC3 5 3 3600 20091213091234 20091111091234 30899 example.com. ZOJhHYt+YkGHBxHynuXlyZ8PEGg4YyqD/roWiEtBoP2PiGoPNCNqtWd0WjRgsUT0YFp/VqjqAU/RH8D45B8S8A== ;{id = 30899}
-www.a.b.example.com.    3600    IN      NSEC    zzz.a.b.example.com. A MX RRSIG NSEC 
+www.a.b.example.com.    3600    IN      NSEC    zzz.a.b.example.com. A MX RRSIG NSEC
 www.a.b.example.com.    3600    IN      RRSIG   NSEC 5 5 3600 20091213091234 20091111091234 16486 a.b.example.com. pOj+aOIolZ8VXlLpaLD1NsYVbl8FW4wmsJbiVTYAMcyDOlgxOsbhTtlB4jQ7uV9pRVAzkvdm1V5wc/1PcncTuw== ;{id = 16486}
 ENTRY_END
 

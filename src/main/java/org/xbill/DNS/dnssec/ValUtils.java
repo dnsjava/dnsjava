@@ -3,7 +3,9 @@
 // Copyright (c) 2013-2021 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
+import java.security.PublicKey;
 import java.security.Security;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
@@ -37,6 +39,8 @@ final class ValUtils {
   public static final String DIGEST_ENABLED = "dnsjava.dnssec.digest";
   public static final String DIGEST_HARDEN_DOWNGRADE = "dnsjava.dnssec.harden_algo_downgrade";
   public static final String ALGORITHM_ENABLED = "dnsjava.dnssec.algorithm";
+  public static final String ALGORITHM_RSA_MIN_KEY_SIZE =
+      "dnsjava.dnssec.algorithm_rsa_min_key_size";
 
   private static final Name WILDCARD = Name.fromConstantString("*");
 
@@ -46,6 +50,7 @@ final class ValUtils {
   private int[] digestPreference = null;
   private Properties config = null;
   private boolean digestHardenDowngrade = true;
+  private int minRsaKeySize = 1024;
   private boolean hasGost;
   private boolean hasEd25519;
   private boolean hasEd448;
@@ -93,6 +98,7 @@ final class ValUtils {
    *   <li>{@value #DIGEST_HARDEN_DOWNGRADE}
    *   <li>{@value #DIGEST_ENABLED}
    *   <li>{@value #ALGORITHM_ENABLED}
+   *   <li>{@value #ALGORITHM_RSA_MIN_KEY_SIZE}
    * </ul>
    *
    * @param config The configuration data for this module.
@@ -115,7 +121,11 @@ final class ValUtils {
       }
     }
 
-    this.digestHardenDowngrade = Boolean.parseBoolean(config.getProperty(DIGEST_HARDEN_DOWNGRADE));
+    this.digestHardenDowngrade =
+        Boolean.parseBoolean(config.getProperty(DIGEST_HARDEN_DOWNGRADE, Boolean.TRUE.toString()));
+    this.minRsaKeySize =
+        Integer.parseInt(
+            config.getProperty(ALGORITHM_RSA_MIN_KEY_SIZE, Integer.toString(minRsaKeySize)));
     this.verifier.init(config);
   }
 
@@ -262,6 +272,9 @@ final class ValUtils {
 
       for (Record dsnkeyr : dnskeyRrset.rrs()) {
         DNSKEYRecord dnskey = (DNSKEYRecord) dsnkeyr;
+        if (!isKeySizeSupported(dnskey)) {
+          continue;
+        }
 
         // Skip DNSKEYs that don't match the basic criteria.
         if (ds.getFootprint() != dnskey.getFootprint()
@@ -878,6 +891,42 @@ final class ValUtils {
         return propertyOrTrueWithPrecondition(configKey, hasEd448);
       default:
         return false;
+    }
+  }
+
+  /**
+   * Check if the key size for an algorithm is supported.
+   *
+   * @param dnskey the key to validate.
+   * @return {@code true} if supported.
+   */
+  private boolean isKeySizeSupported(DNSKEYRecord dnskey) {
+    try {
+      PublicKey publicKey = dnskey.getPublicKey();
+      switch (dnskey.getAlgorithm()) {
+        case Algorithm.RSAMD5:
+        case Algorithm.RSASHA1:
+        case Algorithm.RSA_NSEC3_SHA1:
+        case Algorithm.RSASHA256:
+        case Algorithm.RSASHA512:
+          int bitLength = ((RSAPublicKey) publicKey).getModulus().bitLength();
+          boolean valid = bitLength >= minRsaKeySize;
+          if (!valid) {
+            log.debug(
+                "Key size {} for DNSKEY <{}/{}>, alg={}, id={} is less than minimum of {}",
+                bitLength,
+                dnskey.getName(),
+                DClass.string(dnskey.getDClass()),
+                DNSSEC.Algorithm.string(dnskey.getAlgorithm()),
+                dnskey.getFootprint(),
+                minRsaKeySize);
+          }
+          return valid;
+        default:
+          return true;
+      }
+    } catch (DNSSEC.DNSSECException e) {
+      return false;
     }
   }
 

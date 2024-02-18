@@ -21,4 +21,5 @@ class Rpl {
   boolean enableSha1;
   boolean enableDsa;
   boolean loadBouncyCastle;
+  Integer minRsaSize;
 }

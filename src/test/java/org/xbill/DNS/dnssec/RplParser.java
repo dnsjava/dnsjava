@@ -100,6 +100,8 @@ class RplParser {
             rrset.setSecurityStatus(SecurityStatus.SECURE);
             rrset.addRR(parseRecord(line.substring(line.indexOf("\"") + 1, line.length() - 1)));
             rpl.trustAnchors.add(rrset);
+          } else if (line.matches("\\s*val-min-rsa-size:.*")) {
+            rpl.minRsaSize = Integer.parseInt(line.split(":")[1].trim());
           } else if (line.matches("\\s*val-override-date:.*")) {
             String date = line.substring(line.indexOf("\"") + 1, line.length() - 1);
             DateTimeFormatter formatter =

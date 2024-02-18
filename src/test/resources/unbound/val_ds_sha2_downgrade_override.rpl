@@ -5,6 +5,7 @@ server:
 	val-override-date: "20070916134226"
 	target-fetch-policy: "0 0 0 0 0"
 	val-digest-preference: "1,2"
+	val-min-rsa-size: 512
 	fake-dsa: yes
 
 stub-zone:
@@ -16,7 +17,7 @@ SCENARIO_BEGIN Test validator with SHA256 DS downgrade to SHA1
 
 ; K.ROOT-SERVERS.NET.
 RANGE_BEGIN 0 100
-	ADDRESS 193.0.14.129 
+	ADDRESS 193.0.14.129
 ENTRY_BEGIN
 MATCH opcode qtype qname
 ADJUST copy_id
