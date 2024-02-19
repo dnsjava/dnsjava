@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A DNS Zone. This encapsulates all data related to a Zone, and provides convenient lookup methods.
@@ -19,7 +20,9 @@ import java.util.TreeMap;
  */
 public class Zone implements Serializable {
 
-  private static final long serialVersionUID = -9220510891189510942L;
+  private transient ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+  private transient ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
+  private transient ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
 
   /** A primary zone */
   public static final int PRIMARY = 1;
@@ -41,21 +44,24 @@ public class Zone implements Serializable {
     private boolean wantLastSOA;
 
     ZoneIterator(boolean axfr) {
-      synchronized (Zone.this) {
+      readLock.lock();
+      try {
         zentries = data.entrySet().iterator();
-      }
-      wantLastSOA = axfr;
-      RRset[] sets = allRRsets(originNode);
-      current = new RRset[sets.length];
-      for (int i = 0, j = 2; i < sets.length; i++) {
-        int type = sets[i].getType();
-        if (type == Type.SOA) {
-          current[0] = sets[i];
-        } else if (type == Type.NS) {
-          current[1] = sets[i];
-        } else {
-          current[j++] = sets[i];
+        wantLastSOA = axfr;
+        RRset[] sets = allRRsets(originNode);
+        current = new RRset[sets.length];
+        for (int i = 0, j = 2; i < sets.length; i++) {
+          int type = sets[i].getType();
+          if (type == Type.SOA) {
+            current[0] = sets[i];
+          } else if (type == Type.NS) {
+            current[1] = sets[i];
+          } else {
+            current[j++] = sets[i];
+          }
         }
+      } finally {
+        readLock.unlock();
       }
     }
 
@@ -99,6 +105,15 @@ public class Zone implements Serializable {
     }
   }
 
+  /**
+   * Sets the Reader Lock for this Zone instance. Only to be used for testing.
+   *
+   * @param lock The Reader Lock to set for this Zone instance.
+   */
+  void setLock(ReentrantReadWriteLock.ReadLock lock) {
+    readLock = lock;
+  }
+
   private void validate() throws IOException {
     originNode = exactName(origin);
     if (originNode == null) {
@@ -137,20 +152,25 @@ public class Zone implements Serializable {
    * @see Master
    */
   public Zone(Name zone, String file) throws IOException {
-    data = new TreeMap<>();
+    writeLock.lock();
+    try {
+      data = new TreeMap<>();
 
-    if (zone == null) {
-      throw new IllegalArgumentException("no zone name specified");
-    }
-    try (Master m = new Master(file, zone)) {
-      Record record;
-
-      origin = zone;
-      while ((record = m.nextRecord()) != null) {
-        maybeAddRecord(record);
+      if (zone == null) {
+        throw new IllegalArgumentException("no zone name specified");
       }
+      try (Master m = new Master(file, zone)) {
+        Record record;
+
+        origin = zone;
+        while ((record = m.nextRecord()) != null) {
+          maybeAddRecord(record);
+        }
+      }
+      validate();
+    } finally {
+      writeLock.unlock();
     }
-    validate();
   }
 
   /**
@@ -161,33 +181,41 @@ public class Zone implements Serializable {
    * @see Master
    */
   public Zone(Name zone, Record[] records) throws IOException {
-    data = new TreeMap<>();
+    writeLock.lock();
+    try {
+      data = new TreeMap<>();
 
-    if (zone == null) {
-      throw new IllegalArgumentException("no zone name specified");
+      if (zone == null) {
+        throw new IllegalArgumentException("no zone name specified");
+      }
+      origin = zone;
+      for (Record record : records) {
+        maybeAddRecord(record);
+      }
+      validate();
+    } finally {
+      writeLock.unlock();
     }
-    origin = zone;
-    for (Record record : records) {
-      maybeAddRecord(record);
-    }
-    validate();
   }
 
   private void fromXFR(ZoneTransferIn xfrin) throws IOException, ZoneTransferException {
-    synchronized (this) {
+    writeLock.lock();
+    try {
       data = new TreeMap<>();
-    }
 
-    origin = xfrin.getName();
-    xfrin.run();
-    if (!xfrin.isAXFR()) {
-      throw new IllegalArgumentException("zones can only be created from AXFRs");
-    }
+      origin = xfrin.getName();
+      xfrin.run();
+      if (!xfrin.isAXFR()) {
+        throw new IllegalArgumentException("zones can only be created from AXFRs");
+      }
 
-    for (Record record : xfrin.getAXFR()) {
-      maybeAddRecord(record);
+      for (Record record : xfrin.getAXFR()) {
+        maybeAddRecord(record);
+      }
+      validate();
+    } finally {
+      writeLock.unlock();
     }
-    validate();
   }
 
   /**
@@ -231,43 +259,59 @@ public class Zone implements Serializable {
     return DClass.IN;
   }
 
-  private synchronized Object exactName(Name name) {
-    return data.get(name);
+  private Object exactName(Name name) {
+    readLock.lock();
+    try {
+      Object val = data.get(name);
+      return val;
+    } finally {
+      readLock.unlock();
+    }
   }
 
-  private synchronized RRset[] allRRsets(Object types) {
+  private RRset[] allRRsets(Object types) {
     if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> typelist = (List<RRset>) types;
-      return typelist.toArray(new RRset[0]);
+      readLock.lock();
+      try {
+        @SuppressWarnings("unchecked")
+        List<RRset> typelist = (List<RRset>) types;
+        return typelist.toArray(new RRset[0]);
+      } finally {
+        readLock.unlock();
+      }
     } else {
       RRset set = (RRset) types;
       return new RRset[] {set};
     }
   }
 
-  private synchronized RRset oneRRset(Object types, int type) {
+  private RRset oneRRset(Object types, int type) {
     if (type == Type.ANY) {
       throw new IllegalArgumentException("oneRRset(ANY)");
     }
-    if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> list = (List<RRset>) types;
-      for (RRset set : list) {
+    readLock.lock();
+    try {
+      if (types instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<RRset> list = (List<RRset>) types;
+        for (RRset set : list) {
+          if (set.getType() == type) {
+            return set;
+          }
+        }
+      } else {
+        RRset set = (RRset) types;
         if (set.getType() == type) {
           return set;
         }
       }
-    } else {
-      RRset set = (RRset) types;
-      if (set.getType() == type) {
-        return set;
-      }
+    } finally {
+      readLock.unlock();
     }
     return null;
   }
 
-  private synchronized RRset findRRset(Name name, int type) {
+  private RRset findRRset(Name name, int type) {
     Object types = exactName(name);
     if (types == null) {
       return null;
@@ -275,68 +319,78 @@ public class Zone implements Serializable {
     return oneRRset(types, type);
   }
 
-  private synchronized void addRRset(Name name, RRset rrset) {
-    if (!hasWild && name.isWild()) {
-      hasWild = true;
-    }
-    Object types = data.get(name);
-    if (types == null) {
-      data.put(name, rrset);
-      return;
-    }
-    int rtype = rrset.getType();
-    if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> list = (List<RRset>) types;
-      for (int i = 0; i < list.size(); i++) {
-        RRset set = list.get(i);
-        if (set.getType() == rtype) {
-          list.set(i, rrset);
-          return;
-        }
+  private void addRRset(Name name, RRset rrset) {
+    writeLock.lock();
+    try {
+      if (!hasWild && name.isWild()) {
+        hasWild = true;
       }
-      list.add(rrset);
-    } else {
-      RRset set = (RRset) types;
-      if (set.getType() == rtype) {
+      Object types = data.get(name);
+      if (types == null) {
         data.put(name, rrset);
-      } else {
-        LinkedList<RRset> list = new LinkedList<>();
-        list.add(set);
-        list.add(rrset);
-        data.put(name, list);
-      }
-    }
-  }
-
-  private synchronized void removeRRset(Name name, int type) {
-    Object types = data.get(name);
-    if (types == null) {
-      return;
-    }
-    if (types instanceof List) {
-      @SuppressWarnings("unchecked")
-      List<RRset> list = (List<RRset>) types;
-      for (int i = 0; i < list.size(); i++) {
-        RRset set = list.get(i);
-        if (set.getType() == type) {
-          list.remove(i);
-          if (list.isEmpty()) {
-            data.remove(name);
-          }
-          return;
-        }
-      }
-    } else {
-      RRset set = (RRset) types;
-      if (set.getType() != type) {
         return;
       }
-      data.remove(name);
+      int rtype = rrset.getType();
+      if (types instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<RRset> list = (List<RRset>) types;
+        for (int i = 0; i < list.size(); i++) {
+          RRset set = list.get(i);
+          if (set.getType() == rtype) {
+            list.set(i, rrset);
+            return;
+          }
+        }
+        list.add(rrset);
+      } else {
+        RRset set = (RRset) types;
+        if (set.getType() == rtype) {
+          data.put(name, rrset);
+        } else {
+          LinkedList<RRset> list = new LinkedList<>();
+          list.add(set);
+          list.add(rrset);
+          data.put(name, list);
+        }
+      }
+    } finally {
+      writeLock.unlock();
     }
   }
 
-  private synchronized SetResponse lookup(Name name, int type) {
+  private void removeRRset(Name name, int type) {
+    writeLock.lock();
+    try {
+      Object types = data.get(name);
+      if (types == null) {
+        return;
+      }
+      if (types instanceof List) {
+        @SuppressWarnings("unchecked")
+        List<RRset> list = (List<RRset>) types;
+        for (int i = 0; i < list.size(); i++) {
+          RRset set = list.get(i);
+          if (set.getType() == type) {
+            list.remove(i);
+            if (list.isEmpty()) {
+              data.remove(name);
+            }
+            return;
+          }
+        }
+      } else {
+        RRset set = (RRset) types;
+        if (set.getType() != type) {
+          return;
+        }
+        data.remove(name);
+      }
+    } finally {
+      writeLock.unlock();
+    }
+  }
+
+  private SetResponse lookup(Name name, int type) {
     if (!name.subdomain(origin)) {
       return SetResponse.ofType(SetResponse.NXDOMAIN);
     }
@@ -478,8 +532,13 @@ public class Zone implements Serializable {
    * @see RRset
    */
   public void addRRset(RRset rrset) {
-    Name name = rrset.getName();
-    addRRset(name, rrset);
+    writeLock.lock();
+    try {
+      Name name = rrset.getName();
+      addRRset(name, rrset);
+    } finally {
+      writeLock.unlock();
+    }
   }
 
   /**
@@ -489,9 +548,10 @@ public class Zone implements Serializable {
    * @see Record
    */
   public <T extends Record> void addRecord(T r) {
-    Name name = r.getName();
-    int rtype = r.getRRsetType();
-    synchronized (this) {
+    writeLock.lock();
+    try {
+      Name name = r.getName();
+      int rtype = r.getRRsetType();
       RRset rrset = findRRset(name, rtype);
       if (rrset == null) {
         rrset = new RRset(r);
@@ -499,6 +559,8 @@ public class Zone implements Serializable {
       } else {
         rrset.addRR(r);
       }
+    } finally {
+      writeLock.unlock();
     }
   }
 
@@ -509,9 +571,10 @@ public class Zone implements Serializable {
    * @see Record
    */
   public void removeRecord(Record r) {
-    Name name = r.getName();
-    int rtype = r.getRRsetType();
-    synchronized (this) {
+    writeLock.lock();
+    try {
+      Name name = r.getName();
+      int rtype = r.getRRsetType();
       RRset rrset = findRRset(name, rtype);
       if (rrset == null) {
         return;
@@ -521,6 +584,8 @@ public class Zone implements Serializable {
       } else {
         rrset.deleteRR(r);
       }
+    } finally {
+      writeLock.unlock();
     }
   }
 
@@ -538,7 +603,7 @@ public class Zone implements Serializable {
     return new ZoneIterator(true);
   }
 
-  private void nodeToString(StringBuffer sb, Object node) {
+  private void nodeToString(StringBuilder sb, Object node) {
     RRset[] sets = allRRsets(node);
     for (RRset rrset : sets) {
       rrset.rrs().forEach(r -> sb.append(r).append('\n'));
@@ -547,15 +612,20 @@ public class Zone implements Serializable {
   }
 
   /** Returns the contents of the Zone in master file format. */
-  public synchronized String toMasterFile() {
-    StringBuffer sb = new StringBuffer();
-    nodeToString(sb, originNode);
-    for (Map.Entry<Name, Object> entry : data.entrySet()) {
-      if (!origin.equals(entry.getKey())) {
-        nodeToString(sb, entry.getValue());
+  public String toMasterFile() {
+    readLock.lock();
+    try {
+      StringBuilder sb = new StringBuilder();
+      nodeToString(sb, originNode);
+      for (Map.Entry<Name, Object> entry : data.entrySet()) {
+        if (!origin.equals(entry.getKey())) {
+          nodeToString(sb, entry.getValue());
+        }
       }
+      return sb.toString();
+    } finally {
+      readLock.unlock();
     }
-    return sb.toString();
   }
 
   /** Returns the contents of the Zone as a string (in master file format). */

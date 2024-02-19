@@ -3,11 +3,15 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -108,6 +112,16 @@ class ZoneTest {
     assertEquals(
         listOf(new RRset(A_WILD.withName(testName)), new RRset(TXT_WILD.withName(testName))),
         resp.answers());
+  }
+
+  @Test
+  void testReadLocksAreAcquiredAndReleasedCorrectNumberOfTimes() {
+    Name testName = Name.fromConstantString("test.example.");
+    ReentrantReadWriteLock.ReadLock readLock = mock(ReentrantReadWriteLock.ReadLock.class);
+    ZONE.setLock(readLock);
+    SetResponse resp = ZONE.findRecords(testName, Type.ANY);
+    verify(readLock, times(5)).lock();
+    verify(readLock, times(5)).unlock();
   }
 
   private static List<RRset> listOf(RRset... rrsets) {
