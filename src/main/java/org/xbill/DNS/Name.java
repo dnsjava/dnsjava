@@ -574,7 +574,7 @@ public class Name implements Comparable<Name>, Serializable {
     return labels;
   }
 
-  /** Is the current Name a subdomain of the specified name? */
+  /** Returns {@code true} if this {@link Name} a subdomain of {@code domain}. */
   public boolean subdomain(Name domain) {
     int dlabels = domain.labels;
     if (dlabels > labels) {
