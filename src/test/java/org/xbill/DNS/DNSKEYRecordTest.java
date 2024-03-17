@@ -61,7 +61,6 @@ class DNSKEYRecordTest {
   @Test
   void ctor_7arg() throws TextParseException {
     Name n = Name.fromString("My.Absolute.Name.");
-    Name r = Name.fromString("My.Relative.Name");
     byte[] key = new byte[] {0, 1, 3, 5, 7, 9};
 
     DNSKEYRecord kr = new DNSKEYRecord(n, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
@@ -73,8 +72,13 @@ class DNSKEYRecordTest {
     assertEquals(0x12, kr.getProtocol());
     assertEquals(0x67, kr.getAlgorithm());
     assertArrayEquals(key, kr.getKey());
+  }
 
-    // a relative name
+  @Test
+  void ctor_7arg_relativeName() throws TextParseException {
+    Name r = Name.fromString("My.Relative.Name");
+    byte[] key = new byte[] {0, 1, 3, 5, 7, 9};
+
     assertThrows(
         RelativeNameException.class,
         () -> new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
@@ -91,12 +95,36 @@ class DNSKEYRecordTest {
     assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
     assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
     assertEquals(17895, kr.getFootprint());
+  }
 
-    // invalid algorithm
+  @Test
+  void rdataFromStringUnknownAlgorithm() {
+    // Algorithm name 'ZONE' is invalid
     assertThrows(
         TextParseException.class,
         () ->
             new DNSKEYRecord()
                 .rdataFromString(new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));
+  }
+
+  @Test
+  void rdataFromStringIntAlg() throws IOException {
+    DNSKEYRecord kr = new DNSKEYRecord();
+    Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " 5 AQIDBAUGBwgJ");
+    kr.rdataFromString(st, null);
+    assertEquals(0xABCD, kr.getFlags());
+    assertEquals(0x81, kr.getProtocol());
+    assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
+    assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
+    assertEquals(17895, kr.getFootprint());
+  }
+
+  @Test
+  void rdataFromStringBadIntAlg() {
+    // Algorithm number 257 is outside the allowed range
+    DNSKEYRecord kr = new DNSKEYRecord();
+    assertThrows(
+        TextParseException.class,
+        () -> kr.rdataFromString(new Tokenizer(0xABCD + " " + 0x81 + " 257 AQIDBAUGBwgJ"), null));
   }
 }
