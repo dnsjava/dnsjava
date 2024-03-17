@@ -37,7 +37,7 @@ public class DnsSecVerifierTests {
             Name.root,
             DClass.IN,
             3600,
-            0,
+            DNSKEYRecord.Flags.ZONE_KEY,
             DNSKEYRecord.Protocol.DNSSEC,
             DNSSEC.Algorithm.RSASHA256,
             rsaKeyPair.getPublic());

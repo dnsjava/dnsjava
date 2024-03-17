@@ -7,6 +7,8 @@ server:
 	qname-minimisation: "no"
 	fake-sha1: yes
 	trust-anchor-signaling: no
+	rrset-roundrobin: no
+	harden-unknown-additional: no
 
 stub-zone:
 	name: "."
@@ -17,7 +19,7 @@ SCENARIO_BEGIN Test validator with response to qtype ANY that includes DNAME
 
 ; K.ROOT-SERVERS.NET.
 RANGE_BEGIN 0 100
-	ADDRESS 193.0.14.129 
+	ADDRESS 193.0.14.129
 ENTRY_BEGIN
 MATCH opcode qtype qname
 ADJUST copy_id
@@ -135,7 +137,7 @@ example.com.    86400   IN      NS      ns7.domain-registry.example.
 example.com.    86400   IN      RRSIG   NS 3 2 86400 20070926134150 20070829134150 2854 example.com. MC0CFQCaRn30X4neKW7KYoTa2kcsoOLgfgIURvKEyDczLypWlx99KpxzMxRYhEc= ;{id = 2854}
 example.com.    86400   IN      A       213.154.224.1
 example.com.    86400   IN      RRSIG   A 3 2 86400 20070926134150 20070829134150 2854 example.com. MCwCFH8kSLxmRTwzlGDxvF1e4y/gM+5dAhQkzyQ2a6Gf+CMaHzVScaUvTt9HhQ== ;{id = 2854}
-example.com.    18000   IN      NSEC    _sip._udp.example.com. A NS SOA MX TXT AAAA NAPTR RRSIG NSEC DNSKEY 
+example.com.    18000   IN      NSEC    _sip._udp.example.com. A NS SOA MX TXT AAAA NAPTR RRSIG NSEC DNSKEY
 example.com.    18000   IN      RRSIG   NSEC 3 2 18000 20070926134150 20070829134150 2854 example.com. MCwCFBzOGtpgq4uJ2jeuLPYl2HowIRzDAhQVXNz1haQ1mI7z9lt5gcvWW+lFhA== ;{id = 2854}
 SECTION AUTHORITY
 SECTION ADDITIONAL
@@ -161,6 +163,9 @@ REPLY RD DO
 SECTION QUESTION
 example.com. IN ANY
 ENTRY_END
+
+; Allow validation resuming for the RRSIGs
+STEP 2 TIME_PASSES ELAPSE 0.05
 
 ; recursion happens here.
 STEP 10 CHECK_ANSWER
@@ -191,7 +196,7 @@ example.com.    86400   IN      NS      ns7.domain-registry.example.
 example.com.    86400   IN      RRSIG   NS 3 2 86400 20070926134150 20070829134150 2854 example.com. MC0CFQCaRn30X4neKW7KYoTa2kcsoOLgfgIURvKEyDczLypWlx99KpxzMxRYhEc= ;{id = 2854}
 example.com.    86400   IN      A       213.154.224.1
 example.com.    86400   IN      RRSIG   A 3 2 86400 20070926134150 20070829134150 2854 example.com. MCwCFH8kSLxmRTwzlGDxvF1e4y/gM+5dAhQkzyQ2a6Gf+CMaHzVScaUvTt9HhQ== ;{id = 2854}
-example.com.    18000   IN      NSEC    _sip._udp.example.com. A NS SOA MX TXT AAAA NAPTR RRSIG NSEC DNSKEY 
+example.com.    18000   IN      NSEC    _sip._udp.example.com. A NS SOA MX TXT AAAA NAPTR RRSIG NSEC DNSKEY
 example.com.    18000   IN      RRSIG   NSEC 3 2 18000 20070926134150 20070829134150 2854 example.com. MCwCFBzOGtpgq4uJ2jeuLPYl2HowIRzDAhQVXNz1haQ1mI7z9lt5gcvWW+lFhA== ;{id = 2854}
 SECTION AUTHORITY
 SECTION ADDITIONAL

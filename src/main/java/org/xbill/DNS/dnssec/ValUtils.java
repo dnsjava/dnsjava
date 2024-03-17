@@ -41,6 +41,8 @@ final class ValUtils {
   public static final String ALGORITHM_ENABLED = "dnsjava.dnssec.algorithm";
   public static final String ALGORITHM_RSA_MIN_KEY_SIZE =
       "dnsjava.dnssec.algorithm_rsa_min_key_size";
+  public static final String MAX_DS_MATCH_FAILURES_PROPERTY =
+      "dnsjava.dnssec.max_ds_match_failures";
 
   private static final Name WILDCARD = Name.fromConstantString("*");
 
@@ -54,6 +56,7 @@ final class ValUtils {
   private boolean hasGost;
   private boolean hasEd25519;
   private boolean hasEd448;
+  private int maxDsMatchFailures = 4;
 
   /** Creates a new instance of this class. */
   public ValUtils() {
@@ -126,6 +129,10 @@ final class ValUtils {
     this.minRsaKeySize =
         Integer.parseInt(
             config.getProperty(ALGORITHM_RSA_MIN_KEY_SIZE, Integer.toString(minRsaKeySize)));
+    this.maxDsMatchFailures =
+        Integer.parseInt(
+            config.getProperty(
+                MAX_DS_MATCH_FAILURES_PROPERTY, Integer.toString(maxDsMatchFailures)));
     this.verifier.init(config);
   }
 
@@ -244,7 +251,7 @@ final class ValUtils {
    */
   public KeyEntry verifyNewDNSKEYs(
       SRRset dnskeyRrset, SRRset dsRrset, long badKeyTTL, Instant date) {
-    if (!atLeastOneDigestSupported(dsRrset)) {
+    if (!atLeastOneSupportedDigest(dsRrset)) {
       KeyEntry ke =
           KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
       ke.setBadReason(
@@ -263,6 +270,9 @@ final class ValUtils {
     }
 
     int favoriteDigestID = this.favoriteDSDigestID(dsRrset);
+    int numDsChecked = 0;
+    int numDsSizeUnsupported = 0;
+    int numDsOk = 0;
     KeyEntry ke = null;
     for (Record dsr : dsRrset.rrs()) {
       DSRecord ds = (DSRecord) dsr;
@@ -272,9 +282,6 @@ final class ValUtils {
 
       for (Record dsnkeyr : dnskeyRrset.rrs()) {
         DNSKEYRecord dnskey = (DNSKEYRecord) dsnkeyr;
-        if (!isKeySizeSupported(dnskey)) {
-          continue;
-        }
 
         // Skip DNSKEYs that don't match the basic criteria.
         if (ds.getFootprint() != dnskey.getFootprint()
@@ -282,8 +289,19 @@ final class ValUtils {
           continue;
         }
 
+        numDsChecked++;
         ke = getKeyEntry(dnskeyRrset, date, ds, dnskey);
         if (ke.isGood()) {
+          if (isKeySizeSupported(dnskey)) {
+            return ke;
+          }
+
+          log.trace("DNSKEY size not supported, skipping");
+          ke = null;
+          numDsSizeUnsupported++;
+        } else if (numDsChecked > numDsOk + maxDsMatchFailures) {
+          ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
+          ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_ds_match"));
           return ke;
         }
 
@@ -291,11 +309,17 @@ final class ValUtils {
       }
     }
 
+    // There is a working DS, but that DNSKEY is not supported -> INSECURE
+    if (numDsSizeUnsupported > 0) {
+      ke = KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
+    }
+
     // If any were understandable, then it is bad.
     if (ke == null) {
       ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
       ke.setBadReason(ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_ds_match"));
     }
+
     return ke;
   }
 
@@ -936,7 +960,7 @@ final class ValUtils {
    * @param dsRRset The RR set to search in.
    * @return True when at least one DS record uses a supported digest algorithm, false otherwise.
    */
-  boolean atLeastOneDigestSupported(RRset dsRRset) {
+  boolean atLeastOneSupportedDigest(RRset dsRRset) {
     for (Record r : dsRRset.rrs()) {
       if (isDigestSupported(((DSRecord) r).getDigestID())) {
         return true;

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 
 /**
  * Constants and methods relating to DNSSEC.
@@ -152,6 +153,11 @@ public class DNSSEC {
      */
     public static int value(String s) {
       return algs.getValue(s);
+    }
+
+    /** Checks that a numeric value is within the range [0..max] */
+    public static void check(int val) {
+      algs.check(val);
     }
   }
 
@@ -338,6 +344,16 @@ public class DNSSEC {
     }
   }
 
+  /** The {@link DNSKEYRecord} used for the validation is not a zone signing key. */
+  public static class InvalidDnskeyException extends DNSSECException {
+    @Getter private final int edeCode;
+
+    InvalidDnskeyException(DNSKEYRecord dnskey, String message, int edeCode) {
+      super("DNSKEY " + dnskey.getName() + " is invalid, " + message);
+      this.edeCode = edeCode;
+    }
+  }
+
   /** The cryptographic data in a DNSSEC key is malformed. */
   public static class MalformedKeyException extends DNSSECException {
     MalformedKeyException(String message) {
@@ -415,8 +431,16 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the cryptographic signature verification failed. */
   public static class SignatureVerificationException extends DNSSECException {
+    SignatureVerificationException(String message) {
+      super(message);
+    }
+
     SignatureVerificationException() {
-      super("Signature verification failed");
+      this((Throwable) null);
+    }
+
+    SignatureVerificationException(Throwable inner) {
+      super("Signature verification failed", inner);
     }
 
     SignatureVerificationException(String message) {
@@ -838,7 +862,7 @@ public class DNSSEC {
   private static byte[] dsaSignatureFromDNS(byte[] signature, int keyLength, boolean skipT)
       throws DNSSECException, IOException {
     if (signature.length != keyLength * 2 + (skipT ? 1 : 0)) {
-      throw new SignatureVerificationException();
+      throw new SignatureVerificationException("input has unexpected length " + signature.length);
     }
 
     DNSInput in = new DNSInput(signature);
@@ -941,7 +965,7 @@ public class DNSSEC {
       try {
         signature = dsaSignatureFromDNS(signature, DSA_LEN, true);
       } catch (IOException e) {
-        throw new IllegalStateException();
+        throw new SignatureVerificationException(e);
       }
     } else if (key instanceof ECPublicKey) {
       try {
@@ -950,7 +974,7 @@ public class DNSSEC {
             // Wire format is equal to the engine input
             if (signature.length != GOST.length * 2) {
               throw new SignatureVerificationException(
-                  "signature length doesn't match expected length");
+                  "input has unexpected length " + signature.length);
             }
             break;
           case Algorithm.ECDSAP256SHA256:
@@ -963,7 +987,7 @@ public class DNSSEC {
             throw new UnsupportedAlgorithmException(alg);
         }
       } catch (IOException e) {
-        throw new IllegalStateException();
+        throw new SignatureVerificationException(e);
       }
     }
 
@@ -1060,18 +1084,34 @@ public class DNSSEC {
    */
   public static void verify(RRset rrset, RRSIGRecord rrsig, DNSKEYRecord key, Instant date)
       throws DNSSECException {
-    if (!matches(rrsig, key)) {
-      throw new KeyMismatchException(key, rrsig);
+    if ((key.getFlags() & DNSKEYRecord.Flags.ZONE_KEY) != DNSKEYRecord.Flags.ZONE_KEY) {
+      throw new InvalidDnskeyException(
+          key, "zone key flag is not set", ExtendedErrorCodeOption.NO_ZONE_KEY_BIT_SET);
     }
 
-    if (date.compareTo(rrsig.getExpire()) > 0) {
-      throw new SignatureExpiredException(rrsig.getExpire(), date);
+    if (key.getProtocol() != DNSKEYRecord.Protocol.DNSSEC) {
+      throw new InvalidDnskeyException(
+          key, "invalid protocol", ExtendedErrorCodeOption.DNSSEC_BOGUS);
     }
-    if (date.compareTo(rrsig.getTimeSigned()) < 0) {
-      throw new SignatureNotYetValidException(rrsig.getTimeSigned(), date);
-    }
+
+    checkKeyAndSigRecord(rrsig, key, date);
 
     verify(key, rrsig, digestRRset(rrsig, rrset), rrset.getType());
+  }
+
+  private static void checkKeyAndSigRecord(SIGBase sig, KEYBase key, Instant date)
+      throws DNSSECException {
+    if (!matches(sig, key)) {
+      throw new KeyMismatchException(key, sig);
+    }
+
+    if (date.compareTo(sig.getExpire()) > 0) {
+      throw new SignatureExpiredException(sig.getExpire(), date);
+    }
+
+    if (date.compareTo(sig.getTimeSigned()) < 0) {
+      throw new SignatureNotYetValidException(sig.getTimeSigned(), date);
+    }
   }
 
   static byte[] sign(PrivateKey privkey, PublicKey pubkey, int alg, byte[] data, String provider)
@@ -1098,7 +1138,7 @@ public class DNSSEC {
         int t = (bigIntegerLength(p) - 64) / 8;
         signature = dsaSignatureToDNS(signature, DSA_LEN, t);
       } catch (IOException e) {
-        throw new IllegalStateException(e);
+        throw new DNSSECException(e);
       }
     } else if (pubkey instanceof ECPublicKey) {
       try {
@@ -1116,7 +1156,7 @@ public class DNSSEC {
             throw new UnsupportedAlgorithmException(alg);
         }
       } catch (IOException e) {
-        throw new IllegalStateException(e);
+        throw new DNSSECException(e);
       }
     }
 
@@ -1318,16 +1358,7 @@ public class DNSSEC {
       throw new NoSignatureException();
     }
 
-    if (!matches(sig, key)) {
-      throw new KeyMismatchException(key, sig);
-    }
-
-    if (now.compareTo(sig.getExpire()) > 0) {
-      throw new SignatureExpiredException(sig.getExpire(), now);
-    }
-    if (now.compareTo(sig.getTimeSigned()) < 0) {
-      throw new SignatureNotYetValidException(sig.getTimeSigned(), now);
-    }
+    checkKeyAndSigRecord(sig, key, now);
 
     DNSOutput out = new DNSOutput();
     digestSIG(out, sig);

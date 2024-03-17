@@ -17,6 +17,7 @@ It
 * is fully thread safe.
 
 == Getting started
+
 Have a look at the basic link:EXAMPLES.md[examples].
 
 === Config options
@@ -115,7 +116,7 @@ If disabled, such records are copied from the upstream and presented to the clie
 |True
 |False
 
-4+h|dnssec options
+4+h|DNSSEC Options
 .2+|dnsjava.dnssec.keycache.max_ttl
 3+|Maximum time-to-live (TTL) of entries in the key cache in seconds.
 |Integer
@@ -172,10 +173,18 @@ This is limited to avoid the 'KeyTrap' vulnerability (CVE-2023-50387).
 |8
 |4
 
+.2+|dnsjava.dnssec.max_ds_match_failures
+3+|Maximum number of DS records to validate until the response is considered bogus.
+This is limited to avoid the 'KeyTrap' vulnerability (CVE-2023-50387).
+|Integer
+|4
+|2
+
 .2+|dnsjava.dnssec.algorithm_enabled.ID
 3+|Enable or disable a DS/DNSKEY algorithm.
 See
 https://www.rfc-editor.org/rfc/rfc8624.html#section-3.1[RFC8624] for recommended values.
+Note that algorithm number 1, `RSAMD5`, is disabled and cannot be enabled with this property.
 |Boolean
 2+|Disable ED448:
 `dnsjava.dnssec.algorithm_enabled.16=false`
@@ -220,7 +229,7 @@ Basic resolver that uses UDP by default and falls back to TCP if required.
 
 ==== ExtendedResolver
 
-Resolver that uses multiple ``SimpleResolver``s to send the queries.
+A `Resolver` that uses multiple ``Resolver``s to send the queries, defaulting to ``SimpleResolver``s.
 Can be configured to query the servers in a round-robin order.
 Blacklists a server if it times out.
 

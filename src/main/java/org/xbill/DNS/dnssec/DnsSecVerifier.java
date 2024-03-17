@@ -13,6 +13,7 @@ import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSKEYRecord;
 import org.xbill.DNS.DNSSEC;
 import org.xbill.DNS.DNSSEC.DNSSECException;
+import org.xbill.DNS.DNSSEC.InvalidDnskeyException;
 import org.xbill.DNS.DNSSEC.KeyMismatchException;
 import org.xbill.DNS.DNSSEC.SignatureExpiredException;
 import org.xbill.DNS.DNSSEC.SignatureNotYetValidException;
@@ -91,19 +92,19 @@ final class DnsSecVerifier {
    */
   private JustifiedSecStatus verifySignature(
       SRRset rrset, RRSIGRecord sigrec, RRset keyRrset, Instant date) {
-    if (!rrset.getName().subdomain(keyRrset.getName())) {
-      log.debug("Signer name is off-tree");
+    if (!rrset.getName().subdomain(sigrec.getSigner())) {
+      log.debug("Signer name {} is off-tree for {}", sigrec.getSigner(), rrset.getName());
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS,
           ExtendedErrorCodeOption.DNSSEC_BOGUS,
-          R.get("dnskey.key_offtree", keyRrset.getName(), rrset.getName()));
+          R.get("dnskey.key_offtree", sigrec.getSigner(), rrset.getName()));
     }
 
     List<DNSKEYRecord> keys = this.findKey(keyRrset, sigrec);
 
-    for (DNSKEYRecord key : keys) {
+    for (DNSKEYRecord dnskey : keys) {
       try {
-        DNSSEC.verify(rrset, sigrec, key, date);
+        DNSSEC.verify(rrset, sigrec, dnskey, date);
         ValUtils.setCanonicalNsecOwner(rrset, sigrec);
         return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
       } catch (KeyMismatchException kme) {
@@ -119,6 +120,9 @@ final class DnsSecVerifier {
             SecurityStatus.BOGUS,
             ExtendedErrorCodeOption.SIGNATURE_NOT_YET_VALID,
             R.get("dnskey.not_yet_valid"));
+      } catch (InvalidDnskeyException e) {
+        return new JustifiedSecStatus(
+            SecurityStatus.BOGUS, e.getEdeCode(), R.get("dnskey.invalid"));
       } catch (DNSSECException e) {
         log.error(
             "Failed to validate RRset <{}/{}/{}>",
@@ -131,9 +135,9 @@ final class DnsSecVerifier {
       }
     }
 
-    log.trace("Could not find appropriate key");
+    log.trace("Could not find appropriate key for {}", sigrec);
     return new JustifiedSecStatus(
-        SecurityStatus.BOGUS,
+        SecurityStatus.UNCHECKED,
         ExtendedErrorCodeOption.DNSKEY_MISSING,
         R.get("dnskey.no_key", sigrec.getSigner()));
   }
@@ -152,7 +156,7 @@ final class DnsSecVerifier {
     List<RRSIGRecord> sigs = rrset.sigs();
     if (sigs.isEmpty()) {
       log.info(
-          "RRset <{}/{}/{}> failed to verify due to lack of signatures",
+          "RRset <{}/{}/{}> failed to verify due to a lack of signatures",
           rrset.getName(),
           DClass.string(rrset.getDClass()),
           Type.string(rrset.getType()));
@@ -162,13 +166,7 @@ final class DnsSecVerifier {
           R.get("validate.bogus.missingsig_named", rrset.getName(), Type.string(rrset.getType())));
     }
 
-    JustifiedSecStatus res =
-        new JustifiedSecStatus(
-            SecurityStatus.BOGUS,
-            ExtendedErrorCodeOption.RRSIGS_MISSING,
-            R.get(
-                "validate.bogus.missingsig_named", rrset.getName(), Type.string(rrset.getType())));
-
+    JustifiedSecStatus res = null;
     int numVerified = 0;
     for (RRSIGRecord sigrec : sigs) {
       res = this.verifySignature(rrset, sigrec, keyRrset, date);
@@ -191,7 +189,7 @@ final class DnsSecVerifier {
     }
 
     log.warn(
-        "RRset <{}/{}/{}> failed to verify: all signatures were BOGUS",
+        "RRset <{}/{}/{}> failed to verify: all signatures are BOGUS",
         rrset.getName(),
         DClass.string(rrset.getDClass()),
         Type.string(rrset.getType()));

@@ -49,7 +49,7 @@ class TestNsec3ValUtilsPublicKeyLoading extends TestBase {
                     (Answer<PublicKey>)
                         a -> {
                           if (((DNSKEYRecord) a.getMock()).getName().equals(fakeName)) {
-                            if (invocationCount.getAndIncrement() == 4) {
+                            if (invocationCount.getAndIncrement() == 3) {
                               throwDnssecException();
                             }
                             return (PublicKey) a.callRealMethod();

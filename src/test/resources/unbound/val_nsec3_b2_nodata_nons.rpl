@@ -4,6 +4,7 @@ server:
 	val-override-date: "20120420235959"
 	target-fetch-policy: "0 0 0 0 0"
 	fake-sha1: yes
+	val-min-rsa-size: 512
 	trust-anchor-signaling: no
 
 stub-zone:
@@ -15,7 +16,7 @@ SCENARIO_BEGIN Test validator NSEC3 B.2 no data, without NSEC3.
 
 ; K.ROOT-SERVERS.NET.
 RANGE_BEGIN 0 100
-	ADDRESS 193.0.14.129 
+	ADDRESS 193.0.14.129
 ENTRY_BEGIN
 MATCH opcode qtype qname
 ADJUST copy_id
