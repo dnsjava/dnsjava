@@ -223,6 +223,11 @@ The Extended DNS Errors (EDE, https://www.rfc-editor.org/rfc/rfc8914.html[RFC891
 
 The link:EXAMPLES.md[examples] contain a small demo.
 
+[IMPORTANT]
+.Do not use the `ValidatingResolver` standalone.
+A response will need CNAME/DNAME post-processing, and DNS messages can still be manipulated with DNSSEC alone.
+Subsequent processing and validation of messages is intricate and best done using the built-in `LookupSession` (or the legacy `Lookup`) class.
+
 === Migrating from version 2.1.x to v3
 
 dnsjava v3 has significant API changes compared to version 2.1.x and is neither source nor binary compatible.
