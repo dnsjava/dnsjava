@@ -56,7 +56,7 @@
         <lombok.version>1.18.30</lombok.version>
         <jna.version>5.13.0</jna.version>
         <bouncycastle.version>1.76</bouncycastle.version>
-        <vertx.version>4.4.6</vertx.version>
+        <vertx.version>4.5.2</vertx.version>
         <!-- Stay on 1.7 for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <google-java-format.version>1.7</google-java-format.version>
         <spotless.version>2.30.0</spotless.version>
