@@ -502,7 +502,7 @@ public class LookupSession {
       return completeExceptionally(
           new NoSuchRRSetException(queryRecord.getName(), queryRecord.getType()));
     }
-    if (setResponse.isSuccessful()) {
+    if (setResponse.isSuccessful() || setResponse.isCNAME() || setResponse.isDNAME()) {
       List<Record> records =
           setResponse.answers().stream()
               .flatMap(rrset -> rrset.rrs(cycleResults).stream())
