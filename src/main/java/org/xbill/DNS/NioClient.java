@@ -90,23 +90,28 @@ public abstract class NioClient {
       log.warn("Failed to execute shutdown task, ignoring and continuing close", e);
     }
 
-    selector.wakeup();
-
-    try {
-      selector.close();
-    } catch (IOException e) {
-      log.warn("Failed to properly close selector, ignoring and continuing close", e);
+    Selector localSelector = selector;
+    Thread localSelectorThread = selectorThread;
+    synchronized (NioClient.class) {
+      selector = null;
+      selectorThread = null;
+      closeThread = null;
     }
 
-    try {
-      selectorThread.join();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    } finally {
-      synchronized (NioClient.class) {
-        selector = null;
-        selectorThread = null;
-        closeThread = null;
+    if (localSelector != null) {
+      localSelector.wakeup();
+      try {
+        localSelector.close();
+      } catch (IOException e) {
+        log.warn("Failed to properly close selector, ignoring and continuing close", e);
+      }
+    }
+
+    if (localSelectorThread != null) {
+      try {
+        localSelectorThread.join();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
       }
     }
   }

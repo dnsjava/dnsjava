@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -29,6 +30,11 @@ import org.xbill.DNS.utils.base16;
 @Slf4j
 class NioTcpClientTest {
   private static final String SELECTOR_TIMEOUT_PROPERTY = "dnsjava.nio.selector_timeout";
+
+  @Test
+  void testCloseWithoutStart() {
+    assertDoesNotThrow(NioClient::close);
+  }
 
   @ParameterizedTest
   @ValueSource(ints = {0, 1001})
