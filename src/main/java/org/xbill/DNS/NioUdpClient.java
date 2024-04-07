@@ -133,27 +133,23 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
           keyChannel.socket().getLocalSocketAddress(),
           keyChannel.socket().getRemoteSocketAddress(),
           resultingData);
-      silentCloseChannel();
+      silentDisconnectAndCloseChannel();
       f.complete(resultingData);
       pendingTransactions.remove(this);
     }
 
     private void completeExceptionally(Exception e) {
-      silentCloseChannel();
+      silentDisconnectAndCloseChannel();
       f.completeExceptionally(e);
     }
 
-    private void silentCloseChannel() {
+    private void silentDisconnectAndCloseChannel() {
       try {
         channel.disconnect();
       } catch (IOException e) {
         // ignore, we either already have everything we need or can't do anything
       } finally {
-        try {
-          channel.close();
-        } catch (IOException e) {
-          // ignore
-        }
+        NioUdpClient.silentCloseChannel(channel);
       }
     }
   }
@@ -212,17 +208,25 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
       registrationQueue.add(t);
       selector.wakeup();
     } catch (IOException e) {
-      if (channel != null) {
-        try {
-          channel.close();
-        } catch (IOException ioe) {
-          // ignore
-        }
-      }
+      silentCloseChannel(channel);
       f.completeExceptionally(e);
+    } catch (Throwable e) {
+      // Make sure to close the channel, no matter what, but only handle the declared IOException
+      silentCloseChannel(channel);
+      throw e;
     }
 
     return f;
+  }
+
+  private static void silentCloseChannel(DatagramChannel channel) {
+    if (channel != null) {
+      try {
+        channel.close();
+      } catch (IOException ioe) {
+        // ignore
+      }
+    }
   }
 
   private void closeUdp() {
