@@ -46,7 +46,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class SetResponseTest {
   private static final ARecord A_RECORD_1 =
@@ -127,6 +129,47 @@ class SetResponseTest {
 
     RRset[] exp = new RRset[] {rrs};
     assertArrayEquals(exp, sr.answers().toArray());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void ofTypeWithCachedRRset(boolean isAuthenticated) {
+    SetResponse sr =
+        SetResponse.ofType(
+            SetResponseType.SUCCESSFUL,
+            new Cache.CacheRRset(new RRset(A_RECORD_1), 0, 0, isAuthenticated));
+    assertEquals(isAuthenticated, sr.isAuthenticated());
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "false,true,true,true,true",
+    "false,false,true,false,false",
+    "true,true,false,true,false",
+    "true,false,false,false,false",
+  })
+  void addRRsetAuthenticated(
+      boolean addInitial,
+      boolean first,
+      boolean second,
+      boolean firstResult,
+      boolean secondResult) {
+    RRset rrs = new RRset(A_RECORD_1);
+    SetResponse sr;
+    if (addInitial) {
+      sr = SetResponse.ofType(SetResponseType.SUCCESSFUL, rrs, first);
+    } else {
+      sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
+      sr.addRRset(new Cache.CacheRRset(rrs, 0, 0, first));
+    }
+
+    RRset[] exp = new RRset[] {rrs};
+    assertArrayEquals(exp, sr.answers().toArray());
+    assertEquals(firstResult, sr.isAuthenticated());
+
+    sr.addRRset(new Cache.CacheRRset(new RRset(A_RECORD_1), 0, 0, second));
+    assertEquals(secondResult, sr.isAuthenticated());
+    assertEquals(2, sr.answers().size());
   }
 
   @Test

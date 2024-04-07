@@ -24,9 +24,9 @@ public class RedirectOverflowException extends LookupFailedException {
   }
 
   /**
-   * @since 3.4.2
    * @param maxRedirects Informational, indicates the after how many redirects following was
    *     aborted.
+   * @since 3.4.2
    */
   public RedirectOverflowException(int maxRedirects) {
     super("Refusing to follow more than " + maxRedirects + " redirects");

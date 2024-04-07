@@ -567,6 +567,18 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   }
 
   /**
+   * Determines if this Record could be part of the passed RRset. This compares the name, type, and
+   * class of the Record and the set.
+   *
+   * @since 3.6
+   */
+  public boolean sameRRset(RRset set) {
+    return getRRsetType() == set.getType()
+        && dclass == set.getDClass()
+        && name.equals(set.getName());
+  }
+
+  /**
    * Determines if two Records are identical. This compares the name, type, class, and rdata (with
    * names canonicalized). The TTLs are not compared.
    *

@@ -108,6 +108,13 @@ Do NOT use it.
 |1000
 |700
 
+.2+|dnsjava.harden_unknown_additional
+3+|Harden against unknown records in the authority section and additional section.
+If disabled, such records are copied from the upstream and presented to the client together with the answer.
+|Boolean
+|True
+|False
+
 4+h|dnssec options
 .2+|dnsjava.dnssec.keycache.max_ttl
 3+|Maximum time-to-live (TTL) of entries in the key cache in seconds.

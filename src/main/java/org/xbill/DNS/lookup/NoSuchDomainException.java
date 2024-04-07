@@ -14,9 +14,6 @@ public class NoSuchDomainException extends LookupFailedException {
     this(name, type, false);
   }
 
-  /**
-   * @since 3.6
-   */
   NoSuchDomainException(Name name, int type, boolean isAuthenticated) {
     super(null, null, name, type, isAuthenticated);
   }

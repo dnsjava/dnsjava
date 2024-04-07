@@ -445,7 +445,27 @@ public class LookupTest {
       if (DUMMY_NAME.equals(response.getName())) {
         response = response.withName(query.getQuestion().getName());
       }
+      response.setTTL(120);
       answer.addRecord(response, Section.ANSWER);
+    }
+    return answer;
+  }
+
+  public static Message multiAnswer(Message query, Function<Name, Record[]> recordMaker) {
+    Message answer = new Message(query.getHeader().getID());
+    answer.addRecord(query.getQuestion(), Section.QUESTION);
+    Name questionName = query.getQuestion().getName();
+    Record[] response = recordMaker.apply(questionName);
+    if (response == null) {
+      answer.getHeader().setRcode(Rcode.NXDOMAIN);
+    } else {
+      for (Record r : response) {
+        if (DUMMY_NAME.equals(r.getName())) {
+          r = r.withName(query.getQuestion().getName());
+        }
+        r.setTTL(120);
+        answer.addRecord(r, Section.ANSWER);
+      }
     }
     return answer;
   }

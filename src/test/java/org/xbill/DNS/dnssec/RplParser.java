@@ -73,7 +73,7 @@ class RplParser {
           if (line.startsWith("server:")) {
             state = ParseState.Server;
           } else if (line.startsWith("SCENARIO_BEGIN")) {
-            rpl.scenario = line.substring(line.indexOf(" "));
+            rpl.scenario = line.substring(line.indexOf(" ")).trim();
             rpl.replays = new LinkedList<>();
             rpl.checks = new TreeMap<>();
           } else if (line.startsWith("ENTRY_BEGIN")) {
@@ -128,6 +128,8 @@ class RplParser {
             rpl.enableSha1 = "yes".equalsIgnoreCase(line.split(":")[1].trim());
           } else if (line.matches("\\s*fake-dsa:.*")) {
             rpl.enableDsa = "yes".equalsIgnoreCase(line.split(":")[1].trim());
+          } else if (line.matches("\\s*harden-unknown-additional:.*")) {
+            rpl.hardenUnknownAdditional = "yes".equalsIgnoreCase(line.split(":")[1].trim());
           } else if (line.matches("\\s*bouncycastle:.*")) {
             rpl.loadBouncyCastle = "yes".equalsIgnoreCase(line.split(":")[1].trim());
           } else if (line.startsWith("CONFIG_END")) {

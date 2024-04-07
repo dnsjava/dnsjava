@@ -53,9 +53,9 @@ class MessageTest {
     Message m = new Message();
     assertTrue(m.getSection(0).isEmpty());
     assertTrue(m.getSection(1).isEmpty());
-    assertTrue(m.getSection(3).isEmpty());
     assertTrue(m.getSection(2).isEmpty());
-    assertThrows(IndexOutOfBoundsException.class, () -> m.getSection(4));
+    assertTrue(m.getSection(3).isEmpty());
+    assertThrows(IllegalArgumentException.class, () -> m.getSection(4));
     Header h = m.getHeader();
     assertEquals(0, h.getCount(0));
     assertEquals(0, h.getCount(1));
@@ -71,7 +71,7 @@ class MessageTest {
     assertTrue(m.getSection(1).isEmpty());
     assertTrue(m.getSection(2).isEmpty());
     assertTrue(m.getSection(3).isEmpty());
-    assertThrows(IndexOutOfBoundsException.class, () -> m.getSection(4));
+    assertThrows(IllegalArgumentException.class, () -> m.getSection(4));
     Header h = m.getHeader();
     assertEquals(0, h.getCount(0));
     assertEquals(0, h.getCount(1));
@@ -166,5 +166,18 @@ class MessageTest {
     Message clone = response.clone();
     assertEquals(clone.getQuestion(), response.getQuestion());
     assertEquals(clone.getSection(Section.ANSWER), response.getSection(Section.ANSWER));
+  }
+
+  @Test
+  void normalize() throws WireParseException {
+    Record queryRecord =
+        Record.newRecord(Name.fromConstantString("example.com."), Type.MX, DClass.IN);
+    Message query = Message.newQuery(queryRecord);
+    Message response = new Message();
+    response.addRecord(queryRecord, Section.QUESTION);
+    response.addRecord(queryRecord, Section.ADDITIONAL);
+    response = response.normalize(query, true);
+    assertTrue(response.getSection(Section.ANSWER).isEmpty());
+    assertTrue(response.getSection(Section.ADDITIONAL).isEmpty());
   }
 }

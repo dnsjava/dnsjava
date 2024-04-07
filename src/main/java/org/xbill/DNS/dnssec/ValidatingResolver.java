@@ -221,7 +221,6 @@ public final class ValidatingResolver implements Resolver {
    * Gets the store with the loaded trust anchors.
    *
    * @return The store with the loaded trust anchors.
-   * @since 3.6
    */
   public TrustAnchorStore getTrustAnchors() {
     return this.trustAnchors;

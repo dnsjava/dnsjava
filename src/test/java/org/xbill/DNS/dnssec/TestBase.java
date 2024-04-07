@@ -28,12 +28,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSSEC.DNSSECException;
@@ -49,9 +48,8 @@ import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
 
+@Slf4j
 public abstract class TestBase {
-  private static final Logger logger = LoggerFactory.getLogger(TestBase.class);
-
   private static final boolean offline = !Boolean.getBoolean("dnsjava.dnssec.online");
   private static final boolean partialOffline =
       "partial".equals(System.getProperty("dnsjava.dnssec.offline"));
@@ -126,6 +124,7 @@ public abstract class TestBase {
 
           Message m;
           while ((m = messageReader.readMessage(r)) != null) {
+            m = m.normalize(Message.newQuery(m.getQuestion()), true);
             queryResponsePairs.put(key(m), m);
           }
 
@@ -163,9 +162,13 @@ public abstract class TestBase {
             new SimpleResolver("8.8.4.4") {
               @Override
               public CompletionStage<Message> sendAsync(Message query, Executor executor) {
-                logger.info("---{}", key(query));
                 Message response = queryResponsePairs.get(key(query));
                 if (response != null) {
+                  if (!log.isTraceEnabled()) {
+                    log.debug("---{}", key(query));
+                  }
+
+                  log.trace("---{}\n{}", key(query), response);
                   return CompletableFuture.completedFuture(response);
                 } else if ((offline && !partialOffline) || unboundTest || alwaysOffline) {
                   fail("Response for " + key(query) + " not found.");

@@ -13,6 +13,7 @@ import static org.xbill.DNS.SetResponseType.UNKNOWN;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Getter;
 
 /**
@@ -33,10 +34,8 @@ public class SetResponse {
 
   private final SetResponseType type;
 
-  /**
-   * @since 3.6
-   */
-  @Getter private boolean isAuthenticated;
+  @Getter(AccessLevel.PACKAGE)
+  private boolean isAuthenticated;
 
   private List<RRset> data;
 
@@ -54,6 +53,10 @@ public class SetResponse {
 
   static SetResponse ofType(SetResponseType type, RRset rrset) {
     return ofType(type, rrset, false);
+  }
+
+  static SetResponse ofType(SetResponseType type, Cache.CacheRRset rrset) {
+    return ofType(type, rrset, rrset.isAuthenticated());
   }
 
   static SetResponse ofType(SetResponseType type, RRset rrset, boolean isAuthenticated) {
@@ -81,6 +84,13 @@ public class SetResponse {
 
     if (data == null) {
       data = new ArrayList<>();
+      if (rrset instanceof Cache.CacheRRset) {
+        isAuthenticated = ((Cache.CacheRRset) rrset).isAuthenticated();
+      }
+    } else {
+      if (rrset instanceof Cache.CacheRRset && isAuthenticated) {
+        isAuthenticated = ((Cache.CacheRRset) rrset).isAuthenticated();
+      }
     }
 
     data.add(rrset);

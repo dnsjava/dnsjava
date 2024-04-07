@@ -43,6 +43,7 @@ import org.xbill.DNS.Section;
 import org.xbill.DNS.SetResponse;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.WireParseException;
 import org.xbill.DNS.hosts.HostsFileParser;
 
 /**
@@ -65,6 +66,7 @@ public class LookupSession {
   private final Map<Integer, Cache> caches;
   private final HostsFileParser hostsFileParser;
   private final Executor executor;
+  private IrrelevantRecordMode irrelevantRecordMode;
 
   private LookupSession(
       @NonNull Resolver resolver,
@@ -74,7 +76,8 @@ public class LookupSession {
       boolean cycleResults,
       List<Cache> caches,
       HostsFileParser hostsFileParser,
-      Executor executor) {
+      Executor executor,
+      IrrelevantRecordMode irrelevantRecordMode) {
     this.resolver = resolver;
     this.maxRedirects = maxRedirects;
     this.ndots = ndots;
@@ -86,6 +89,7 @@ public class LookupSession {
             : caches.stream().collect(Collectors.toMap(Cache::getDClass, e -> e));
     this.hostsFileParser = hostsFileParser;
     this.executor = executor == null ? ForkJoinPool.commonPool() : executor;
+    this.irrelevantRecordMode = irrelevantRecordMode;
   }
 
   /**
@@ -104,6 +108,7 @@ public class LookupSession {
     private List<Cache> caches;
     private HostsFileParser hostsFileParser;
     private Executor executor;
+    private IrrelevantRecordMode irrelevantRecordMode = IrrelevantRecordMode.REMOVE;
 
     private LookupSessionBuilder() {}
 
@@ -207,6 +212,17 @@ public class LookupSession {
      */
     public LookupSessionBuilder executor(Executor executor) {
       this.executor = executor;
+      return this;
+    }
+
+    /**
+     * Sets how irrelevant records in a {@link Message} returned from the {@link
+     * #resolver(Resolver)} is handled. The default is {@link IrrelevantRecordMode#REMOVE}.
+     *
+     * @return {@code this}.
+     */
+    LookupSessionBuilder irrelevantRecordMode(IrrelevantRecordMode irrelevantRecordMode) {
+      this.irrelevantRecordMode = irrelevantRecordMode;
       return this;
     }
 
@@ -322,7 +338,8 @@ public class LookupSession {
           cycleResults,
           caches,
           hostsFileParser,
-          executor);
+          executor,
+          irrelevantRecordMode);
     }
   }
 
@@ -358,6 +375,22 @@ public class LookupSession {
         .ndots(ResolverConfig.getCurrentConfig().ndots())
         .cache(new Cache(DClass.IN))
         .defaultHostsFileParser();
+  }
+
+  // Visible for testing only
+  Cache getCache(int dclass) {
+    return caches.get(dclass);
+  }
+
+  /**
+   * Make an asynchronous lookup with the provided {@link Record}.
+   *
+   * @param question the name, type and DClass to look up.
+   * @return A {@link CompletionStage} what will yield the eventual lookup result.
+   * @since 3.6
+   */
+  public CompletionStage<LookupResult> lookupAsync(Record question) {
+    return lookupAsync(question.getName(), question.getType(), question.getDClass());
   }
 
   /**
@@ -434,7 +467,8 @@ public class LookupSession {
             } else {
               r = new AAAARecord(name, DClass.IN, 0, result.get());
             }
-            return new LookupResult(Collections.singletonList(r), Collections.emptyList());
+
+            return new LookupResult(Record.newRecord(name, type, DClass.IN), true, r);
           }
         }
       } catch (IOException e) {
@@ -458,10 +492,10 @@ public class LookupSession {
                 if (names.hasNext()) {
                   return lookupUntilSuccess(names, type, dclass);
                 } else {
-                  return completeExceptionally(cause);
+                  return this.<Throwable, LookupResult>completeExceptionally(cause);
                 }
               } else if (cause != null) {
-                return completeExceptionally(cause);
+                return this.<Throwable, LookupResult>completeExceptionally(cause);
               } else {
                 return CompletableFuture.completedFuture(result);
               }
@@ -471,14 +505,54 @@ public class LookupSession {
 
   private CompletionStage<LookupResult> lookupWithCache(Record queryRecord, List<Name> aliases) {
     return Optional.ofNullable(caches.get(queryRecord.getDClass()))
-        .map(c -> c.lookupRecords(queryRecord.getName(), queryRecord.getType(), Credibility.NORMAL))
+        .map(
+            c -> {
+              log.debug(
+                  "Looking for <{}/{}/{}> in cache",
+                  queryRecord.getName(),
+                  Type.string(queryRecord.getType()),
+                  DClass.string(queryRecord.getDClass()));
+              return c.lookupRecords(
+                  queryRecord.getName(), queryRecord.getType(), Credibility.NORMAL);
+            })
         .map(setResponse -> setResponseToMessageFuture(setResponse, queryRecord, aliases))
         .orElseGet(() -> lookupWithResolver(queryRecord, aliases));
   }
 
   private CompletionStage<LookupResult> lookupWithResolver(Record queryRecord, List<Name> aliases) {
+    Message query = Message.newQuery(queryRecord);
+    log.debug(
+        "Asking {} for <{}/{}/{}>",
+        resolver,
+        queryRecord.getName(),
+        Type.string(queryRecord.getType()),
+        DClass.string(queryRecord.getDClass()));
     return resolver
-        .sendAsync(Message.newQuery(queryRecord), executor)
+        .sendAsync(query, executor)
+        .thenCompose(
+            m -> {
+              try {
+                Message normalized =
+                    m.normalize(query, irrelevantRecordMode == IrrelevantRecordMode.THROW);
+
+                log.trace(
+                    "Normalized response for <{}/{}/{}> from \n{}\ninto\n{}",
+                    queryRecord.getName(),
+                    Type.string(queryRecord.getType()),
+                    DClass.string(queryRecord.getDClass()),
+                    m,
+                    normalized);
+                if (normalized == null) {
+                  return completeExceptionally(
+                      new InvalidZoneDataException("Failed to normalize message"));
+                }
+                return CompletableFuture.completedFuture(normalized);
+              } catch (WireParseException e) {
+                return completeExceptionally(
+                    new LookupFailedException(
+                        "Message normalization failed, refusing to return it", e));
+              }
+            })
         .thenApply(this::maybeAddToCache)
         .thenApply(answer -> buildResult(answer, aliases, queryRecord));
   }
@@ -494,16 +568,19 @@ public class LookupSession {
     return message;
   }
 
+  @SuppressWarnings("deprecated")
   private CompletionStage<LookupResult> setResponseToMessageFuture(
       SetResponse setResponse, Record queryRecord, List<Name> aliases) {
     if (setResponse.isNXDOMAIN()) {
       return completeExceptionally(
           new NoSuchDomainException(queryRecord.getName(), queryRecord.getType()));
     }
+
     if (setResponse.isNXRRSET()) {
       return completeExceptionally(
           new NoSuchRRSetException(queryRecord.getName(), queryRecord.getType()));
     }
+
     if (setResponse.isSuccessful()) {
       List<Record> records =
           setResponse.answers().stream()
@@ -511,17 +588,18 @@ public class LookupSession {
               .collect(Collectors.toList());
       return CompletableFuture.completedFuture(new LookupResult(records, aliases));
     }
+
     return null;
   }
 
-  private <T extends Throwable> CompletionStage<LookupResult> completeExceptionally(T failure) {
-    CompletableFuture<LookupResult> future = new CompletableFuture<>();
+  private <T extends Throwable, R> CompletionStage<R> completeExceptionally(T failure) {
+    CompletableFuture<R> future = new CompletableFuture<>();
     future.completeExceptionally(failure);
     return future;
   }
 
   private CompletionStage<LookupResult> resolveRedirects(LookupResult response, Record query) {
-    return maybeFollowRedirect(response, query, 1);
+    return maybeFollowRedirect(response, query, 0);
   }
 
   private CompletionStage<LookupResult> maybeFollowRedirect(
@@ -540,13 +618,20 @@ public class LookupSession {
     }
   }
 
+  @SuppressWarnings("deprecated")
   private CompletionStage<LookupResult> maybeFollowRedirectsInAnswer(
       LookupResult response, Record query, int redirectCount) {
     List<Name> aliases = new ArrayList<>(response.getAliases());
     List<Record> results = new ArrayList<>();
     Name current = query.getName();
     for (Record r : response.getRecords()) {
-      if (redirectCount > maxRedirects) {
+      // Abort with a dedicated exception for loops instead of simply trying until reaching the max
+      // redirects
+      if (aliases.contains(current)) {
+        return completeExceptionally(new RedirectLoopException(maxRedirects));
+      }
+
+      if (redirectCount >= maxRedirects) {
         throw new RedirectOverflowException(maxRedirects);
       }
 
@@ -576,11 +661,17 @@ public class LookupSession {
       return CompletableFuture.completedFuture(new LookupResult(results, aliases));
     }
 
-    if (redirectCount > maxRedirects) {
+    // Abort with a dedicated exception for loops instead of simply trying until reaching the max
+    // redirects
+    if (aliases.contains(current)) {
+      return completeExceptionally(new RedirectLoopException(maxRedirects));
+    }
+
+    if (redirectCount >= maxRedirects) {
       throw new RedirectOverflowException(maxRedirects);
     }
 
-    int finalRedirectCount = redirectCount + 1;
+    int finalRedirectCount = redirectCount;
     Record redirectQuery = Record.newRecord(current, query.getType(), query.getDClass());
     return lookupWithCache(redirectQuery, aliases)
         .thenCompose(

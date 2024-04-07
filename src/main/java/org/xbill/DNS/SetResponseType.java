@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
 import lombok.Getter;

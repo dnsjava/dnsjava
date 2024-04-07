@@ -75,7 +75,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -265,7 +265,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version> 0.20.0</version>
+                <version>0.20.0</version>
                 <configuration>
                     <newVersion>
                         <file>
@@ -529,6 +529,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.25.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit-pioneer</groupId>
+            <artifactId>junit-pioneer</artifactId>
+            <version>2.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
@@ -538,6 +550,12 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>1.14.14</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -676,7 +694,9 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <argLine>
-                                ${argLine} --add-opens java.base/sun.net.dns=ALL-UNNAMED
+                                @{argLine}
+                                --add-opens java.base/sun.net.dns=ALL-UNNAMED
+                                --add-opens java.base/sun.net.dns=org.dnsjava
                             </argLine>
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${project.build.outputDirectory}/META-INF/versions/11</additionalClasspathElement>
@@ -786,10 +806,27 @@
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.6.1</version>
+                        <executions>
+                            <execution>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>properties</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <argLine>
-                                ${argLine} --add-opens java.base/sun.net.dns=ALL-UNNAMED
+                                @{argLine}
+                                --add-opens java.base/sun.net.dns=ALL-UNNAMED
+                                --add-opens java.base/sun.net.dns=org.dnsjava
+                                -javaagent:${net.bytebuddy:byte-buddy-agent:jar}
                             </argLine>
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${project.build.outputDirectory}/META-INF/versions/11</additionalClasspathElement>

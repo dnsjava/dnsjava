@@ -79,4 +79,13 @@ public final class Section {
   public static int value(String s) {
     return sections.getValue(s);
   }
+
+  /**
+   * Checks that a numeric section value is valid.
+   *
+   * @since 3.6
+   */
+  public static void check(int section) {
+    sections.check(section);
+  }
 }
