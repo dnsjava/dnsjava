@@ -110,7 +110,10 @@ final class DnsSecVerifier {
     }
 
     log.trace("Could not find appropriate key");
-    return new JustifiedSecStatus(SecurityStatus.BOGUS, ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_key", sigrec.getSigner()));
+    return new JustifiedSecStatus(
+        SecurityStatus.BOGUS,
+        ExtendedErrorCodeOption.DNSKEY_MISSING,
+        R.get("dnskey.no_key", sigrec.getSigner()));
   }
 
   /**
