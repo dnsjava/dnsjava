@@ -142,10 +142,10 @@ public class SetResponse {
 
   /** If the query was successful, return the answers */
   public List<RRset> answers() {
-    if (type != SUCCESSFUL) {
-      return null;
+    if (type == SUCCESSFUL || type == CNAME || type == DNAME) {
+      return data;
     }
-    return data;
+    return null;
   }
 
   /** If the query encountered a CNAME, return it. */
