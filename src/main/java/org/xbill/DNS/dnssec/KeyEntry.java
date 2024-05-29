@@ -6,6 +6,7 @@ package org.xbill.DNS.dnssec;
 
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
@@ -118,14 +119,20 @@ final class KeyEntry extends SRRset {
   /**
    * Validate if this key instance is valid for the specified name.
    *
-   * @param signerName the name against which this key is validated.
+   * @param set the set against which this key is validated.
    * @return A security status indicating if this key is valid, or if not, why.
    */
-  JustifiedSecStatus validateKeyFor(Name signerName) {
+  JustifiedSecStatus validateKeyFor(SRRset set) {
     // signerName being null is the indicator that this response was
     // unsigned
+    Name signerName = set.getSignerName();
     if (signerName == null) {
-      log.debug("No signerName");
+      log.debug(
+          "No signerName for <{}/{}/{}>",
+          set.getName(),
+          DClass.string(set.getDClass()),
+          Type.string(set.getType()));
+
       // Unsigned responses must be underneath a "null" key entry.
       if (this.isNull()) {
         String reason = this.badReason;

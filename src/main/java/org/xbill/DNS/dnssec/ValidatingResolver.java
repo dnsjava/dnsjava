@@ -407,7 +407,7 @@ public final class ValidatingResolver implements Resolver {
     return this.prepareFindKey(set, executor)
         .thenCompose(
             ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+              JustifiedSecStatus kve = ke.validateKeyFor(set);
               if (kve != null) {
                 kve.applyToResponse(response);
                 return completedFuture(false);
@@ -459,7 +459,7 @@ public final class ValidatingResolver implements Resolver {
     return this.prepareFindKey(set, executor)
         .thenCompose(
             ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+              JustifiedSecStatus kve = ke.validateKeyFor(set);
               if (kve != null) {
                 kve.applyToResponse(response);
                 return completedFuture(false);
@@ -667,7 +667,7 @@ public final class ValidatingResolver implements Resolver {
     return this.prepareFindKey(set, executor)
         .thenComposeAsync(
             ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+              JustifiedSecStatus kve = ke.validateKeyFor(set);
               if (kve != null) {
                 kve.applyToResponse(response);
                 return this.failedFuture(new Exception(kve.reason));
@@ -832,7 +832,7 @@ public final class ValidatingResolver implements Resolver {
     return this.prepareFindKey(set, executor)
         .thenCompose(
             ke -> {
-              JustifiedSecStatus kve = ke.validateKeyFor(set.getSignerName());
+              JustifiedSecStatus kve = ke.validateKeyFor(set);
               if (kve != null) {
                 kve.applyToResponse(response);
                 return this.failedFuture(new Exception(kve.reason));

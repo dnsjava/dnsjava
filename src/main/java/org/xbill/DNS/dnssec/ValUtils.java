@@ -335,7 +335,7 @@ final class ValUtils {
   }
 
   /**
-   * Gets the digest ID for the favorite (best) algorithm that is support in a given DS set.
+   * Gets the digest ID for the favorite (best) algorithm that is supported in a given DS set.
    *
    * <p>The order of preference can be configured with the property {@value #DIGEST_PREFERENCE}. If
    * the property is not set, the highest supported number is returned.

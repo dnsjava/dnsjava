@@ -386,7 +386,11 @@ public class DNSSEC {
   /** A DNSSEC verification failed because the cryptographic signature verification failed. */
   public static class SignatureVerificationException extends DNSSECException {
     SignatureVerificationException() {
-      super("signature verification failed");
+      super("Signature verification failed");
+    }
+
+    SignatureVerificationException(String message) {
+      super("Signature verification failed: " + message);
     }
   }
 
@@ -898,8 +902,11 @@ public class DNSSEC {
     out.writeByteArray(in.readByteArray(len));
   }
 
-  private static void verify(PublicKey key, int alg, byte[] data, byte[] signature)
+  private static void verify(KEYBase keyRecord, SIGBase sigRecord, byte[] data, int coveredType)
       throws DNSSECException {
+    PublicKey key = keyRecord.getPublicKey();
+    int alg = sigRecord.getAlgorithm();
+    byte[] signature = sigRecord.getSignature();
     if (key instanceof DSAPublicKey) {
       try {
         signature = dsaSignatureFromDNS(signature, DSA_LEN, true);
@@ -912,7 +919,8 @@ public class DNSSEC {
           case Algorithm.ECC_GOST:
             // Wire format is equal to the engine input
             if (signature.length != GOST.length * 2) {
-              throw new SignatureVerificationException();
+              throw new SignatureVerificationException(
+                  "signature length doesn't match expected length");
             }
             break;
           case Algorithm.ECDSAP256SHA256:
@@ -934,7 +942,24 @@ public class DNSSEC {
       s.initVerify(key);
       s.update(data);
       if (!s.verify(signature)) {
-        throw new SignatureVerificationException();
+        throw new SignatureVerificationException(
+            "KEY "
+                + keyRecord.getName()
+                + " (alg="
+                + keyRecord.getAlgorithm()
+                + ",id="
+                + keyRecord.getFootprint()
+                + ") doesn't validate <"
+                + sigRecord.getName()
+                + "/"
+                + DClass.string(sigRecord.getDClass())
+                + "/"
+                + Type.string(coveredType)
+                + "> (alg="
+                + sigRecord.getAlgorithm()
+                + ",id="
+                + sigRecord.getFootprint()
+                + ")");
       }
     } catch (GeneralSecurityException e) {
       throw new DNSSECException(e);
@@ -1016,9 +1041,7 @@ public class DNSSEC {
       throw new SignatureNotYetValidException(rrsig.getTimeSigned(), date);
     }
 
-    verify(
-        key.getPublicKey(), rrsig.getAlgorithm(),
-        digestRRset(rrsig, rrset), rrsig.getSignature());
+    verify(key, rrsig, digestRRset(rrsig, rrset), rrset.getType());
   }
 
   static byte[] sign(PrivateKey privkey, PublicKey pubkey, int alg, byte[] data, String provider)
@@ -1288,9 +1311,7 @@ public class DNSSEC {
 
     out.writeByteArray(bytes, Header.LENGTH, message.sig0start - Header.LENGTH);
 
-    verify(
-        key.getPublicKey(), sig.getAlgorithm(),
-        out.toByteArray(), sig.getSignature());
+    verify(key, sig, out.toByteArray(), 0);
   }
 
   /**
