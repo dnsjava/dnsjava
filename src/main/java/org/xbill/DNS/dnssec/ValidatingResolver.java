@@ -221,6 +221,7 @@ public final class ValidatingResolver implements Resolver {
    * Gets the store with the loaded trust anchors.
    *
    * @return The store with the loaded trust anchors.
+   * @since 3.6
    */
   public TrustAnchorStore getTrustAnchors() {
     return this.trustAnchors;
@@ -859,7 +860,9 @@ public final class ValidatingResolver implements Resolver {
     // Send the request along by using a local copy of the request
     Message localRequest = request.clone();
     localRequest.getHeader().setFlag(Flags.CD);
-    return this.headResolver.sendAsync(localRequest, executor).thenApply(SMessage::new);
+    return this.headResolver
+        .sendAsync(localRequest, executor)
+        .thenApply(message -> new SMessage(message.normalize(localRequest)));
   }
 
   private CompletionStage<KeyEntry> prepareFindKey(SRRset rrset, Executor executor) {

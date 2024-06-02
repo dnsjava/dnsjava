@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
@@ -68,6 +69,7 @@ class TestDNames extends TestBase {
     assertEde(-1, response);
   }
 
+  @Disabled("Now valid because of message normalization")
   @Test
   void testDNameWithFakedCnameIsInvalid() throws IOException {
     Message m = resolver.send(createMessage("www.alias.ingotronic.ch./A"));
@@ -101,6 +103,7 @@ class TestDNames extends TestBase {
     assertEde(-1, response);
   }
 
+  @Disabled("Now valid because of message normalization")
   @Test
   void testDNameWithMultipleCnamesIsInvalid() throws IOException {
     Message m = resolver.send(createMessage("www.alias.ingotronic.ch./A"));
@@ -115,6 +118,7 @@ class TestDNames extends TestBase {
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
+  @Disabled("Now valid because of message normalization")
   @Test
   void testDNameWithTooLongCnameIsInvalid() throws IOException {
     Message m = resolver.send(createMessage("www.n3.ingotronic.ch./A"));

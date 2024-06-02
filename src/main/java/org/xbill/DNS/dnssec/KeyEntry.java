@@ -127,6 +127,11 @@ final class KeyEntry extends SRRset {
     // unsigned
     Name signerName = set.getSignerName();
     if (signerName == null) {
+      // A synthesized CNAME has no key, but since it was created from a signed DNAME, it's valid
+      if (set.getType() == Type.CNAME && set.getSecurityStatus() == SecurityStatus.SECURE) {
+        return new JustifiedSecStatus(set.getSecurityStatus(), -1, null);
+      }
+
       log.debug(
           "No signerName for <{}/{}/{}>",
           set.getName(),

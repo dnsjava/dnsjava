@@ -1038,18 +1038,19 @@ public class Message implements Cloneable {
               DClass.string(rrset.getDClass()),
               Type.string(rrset.getType()),
               sname,
-              Type.string(query.getQuestion().getType()),
               DClass.string(query.getQuestion().getDClass()),
+              Type.string(query.getQuestion().getType()),
               getHeader().getID()));
     }
+
     log.debug(
         format,
         rrset.getName(),
         DClass.string(rrset.getDClass()),
         Type.string(rrset.getType()),
         sname,
-        Type.string(query.getQuestion().getType()),
         DClass.string(query.getQuestion().getDClass()),
+        Type.string(query.getQuestion().getType()),
         getHeader().getID());
   }
 
