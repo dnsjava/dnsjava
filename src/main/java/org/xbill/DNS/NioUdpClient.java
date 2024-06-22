@@ -56,7 +56,11 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
 
   private void processPendingRegistrations() {
     while (!registrationQueue.isEmpty()) {
-      Transaction t = registrationQueue.remove();
+      Transaction t = registrationQueue.poll();
+      if (t == null) {
+        continue;
+      }
+
       try {
         log.trace("Registering OP_READ for transaction with id {}", t.id);
         t.channel.register(selector(), SelectionKey.OP_READ, t);

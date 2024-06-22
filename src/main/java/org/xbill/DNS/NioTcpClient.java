@@ -34,7 +34,11 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
 
   private void processPendingRegistrations() {
     while (!registrationQueue.isEmpty()) {
-      ChannelState state = registrationQueue.remove();
+      ChannelState state = registrationQueue.poll();
+      if (state == null) {
+        continue;
+      }
+
       try {
         final Selector selector = selector();
         if (!state.channel.isConnected()) {
