@@ -4,7 +4,9 @@
 
 package org.xbill.DNS.dnssec;
 
+import java.util.List;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedErrorCodeOption;
@@ -22,6 +24,9 @@ import org.xbill.DNS.Type;
     callSuper = true,
     of = {"edeReason", "badReason", "isEmpty"})
 final class KeyEntry extends SRRset {
+  /** List of algorithms signalled, may be {@code null}. */
+  @Getter private final List<Integer> algo;
+
   private int edeReason = -1;
   private String badReason;
   private boolean isEmpty;
@@ -32,12 +37,24 @@ final class KeyEntry extends SRRset {
    * @param rrset The set of records to cache.
    */
   private KeyEntry(SRRset rrset) {
+    this(rrset, null);
+  }
+
+  /**
+   * Create a new, positive key entry.
+   *
+   * @param rrset The set of records to cache.
+   * @param sigalg signalled algorithm list, may be {@code null}.
+   */
+  private KeyEntry(SRRset rrset, List<Integer> sigalg) {
     super(rrset);
+    this.algo = sigalg;
   }
 
   private KeyEntry(Name name, int dclass, long ttl, boolean isBad) {
     super(new SRRset(Record.newRecord(name, Type.DNSKEY, dclass, ttl)));
     this.isEmpty = true;
+    this.algo = null;
     if (isBad) {
       setSecurityStatus(SecurityStatus.BOGUS);
     }
@@ -51,6 +68,17 @@ final class KeyEntry extends SRRset {
    */
   public static KeyEntry newKeyEntry(SRRset rrset) {
     return new KeyEntry(rrset);
+  }
+
+  /**
+   * Creates a new key entry from actual DNSKEYs.
+   *
+   * @param rrset The DNSKEYs to cache.
+   * @param sigalg signalled algorithm list, may be {@code null}.
+   * @return The created key entry.
+   */
+  public static KeyEntry newKeyEntry(SRRset rrset, List<Integer> sigalg) {
+    return new KeyEntry(rrset, sigalg);
   }
 
   /**
@@ -113,7 +141,6 @@ final class KeyEntry extends SRRset {
   public void setBadReason(int edeReason, String reason) {
     this.edeReason = edeReason;
     this.badReason = reason;
-    log.debug(this.badReason);
   }
 
   /**

@@ -63,8 +63,8 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
     assertRCode(Rcode.SERVFAIL, response.getRcode());
+    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -74,8 +74,9 @@ class TestPriming extends TestBase {
     try {
       Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
       assertRCode(Rcode.SERVFAIL, response.getRcode());
+      assertEquals(
+          "validate.bogus.badkey:.:dnskey.no_ds_alg_match:.:RSASHA256", getReason(response));
       assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
     } finally {
       Type.register(Type.DNSKEY, Type.string(Type.DNSKEY), () -> spy(DNSKEYRecord.class));
@@ -99,8 +100,9 @@ class TestPriming extends TestBase {
     try {
       Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
       assertRCode(Rcode.SERVFAIL, response.getRcode());
+      assertEquals(
+          "validate.bogus.badkey:.:dnskey.no_ds_alg_match:.:RSASHA256", getReason(response));
       assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
     } finally {
       Type.register(Type.DNSKEY, Type.string(Type.DNSKEY), () -> spy(DNSKEYRecord.class));
@@ -149,8 +151,8 @@ class TestPriming extends TestBase {
       Security.insertProviderAt(p, 1);
       Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
       assertRCode(Rcode.SERVFAIL, response.getRcode());
+      assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
       assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
     } finally {
       Security.removeProvider(p.getName());

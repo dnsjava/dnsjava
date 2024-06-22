@@ -431,14 +431,6 @@ public class DNSSEC {
 
   /** A DNSSEC verification failed because the cryptographic signature verification failed. */
   public static class SignatureVerificationException extends DNSSECException {
-    SignatureVerificationException(String message) {
-      super(message);
-    }
-
-    SignatureVerificationException() {
-      this((Throwable) null);
-    }
-
     SignatureVerificationException(Throwable inner) {
       super("Signature verification failed", inner);
     }
@@ -997,7 +989,7 @@ public class DNSSEC {
       s.update(data);
       if (!s.verify(signature)) {
         throw new SignatureVerificationException(
-            "KEY "
+            "Key "
                 + keyRecord.getName()
                 + " (alg="
                 + keyRecord.getAlgorithm()

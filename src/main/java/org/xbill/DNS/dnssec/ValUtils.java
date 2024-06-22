@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
-// Copyright (c) 2013-2021 Ingo Bauersachs
+// Copyright (c) 2007-2024 NLnet Labs
+// Copyright (c) 2013-2024 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSKEYRecord;
@@ -60,10 +63,10 @@ final class ValUtils {
 
   /** Creates a new instance of this class. */
   public ValUtils() {
-    this.verifier = new DnsSecVerifier();
     hasGost = Security.getProviders("MessageDigest.GOST3411") != null;
     hasEd25519 = Security.getProviders("KeyFactory.Ed25519") != null;
     hasEd448 = Security.getProviders("KeyFactory.Ed448") != null;
+    this.verifier = new DnsSecVerifier(this);
   }
 
   /**
@@ -251,80 +254,218 @@ final class ValUtils {
    */
   public KeyEntry verifyNewDNSKEYs(
       SRRset dnskeyRrset, SRRset dsRrset, long badKeyTTL, Instant date) {
-    if (!atLeastOneSupportedDigest(dsRrset)) {
-      KeyEntry ke =
-          KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
+    if (!dnskeyRrset.getName().equals(dsRrset.getName())) {
+      KeyEntry ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
+      ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_name_match"));
+      return ke;
+    }
+
+    int favoriteDigestID;
+    AlgorithmRequirements needs = null;
+    List<Integer> sigalg = null;
+    if (digestHardenDowngrade) {
+      favoriteDigestID = this.favoriteDSDigestID(dsRrset);
+      needs = new AlgorithmRequirements(this);
+      sigalg = needs.initDs(dsRrset, favoriteDigestID);
+      log.trace(
+          "Favorite DigestID for rrset {}/DNSKEY is {} ({})",
+          dnskeyRrset.getName(),
+          favoriteDigestID,
+          DNSSEC.Digest.string(favoriteDigestID));
+    } else {
+      favoriteDigestID = -1;
+    }
+
+    boolean hasAlgoRefusal = false;
+    boolean hasCheckedDs = false;
+    boolean hasUsefulDs = false;
+    JustifiedSecStatus lastVerificationResult = null;
+    AtomicInteger numDsChecked = new AtomicInteger(0);
+    for (Record dsr : dsRrset.rrs(false)) {
+      DSRecord ds = (DSRecord) dsr;
+      if (!isDigestSupported(ds.getDigestID())) {
+        log.debug(
+            "Digest ID {} ({}) is not supported",
+            ds.getDigestID(),
+            DNSSEC.Digest.string(ds.getDigestID()));
+        continue;
+      }
+
+      if (!isAlgorithmSupported(ds.getAlgorithm())) {
+        log.debug(
+            "Algorithm {} ({}) is not supported",
+            ds.getAlgorithm(),
+            DNSSEC.Algorithm.string(ds.getAlgorithm()));
+        continue;
+      }
+
+      if ((needs != null && ds.getDigestID() != favoriteDigestID)) {
+        log.debug(
+            "Downgrade protection prevents using digest ID {} ({})",
+            ds.getDigestID(),
+            DNSSEC.Digest.string(ds.getDigestID()));
+        continue;
+      }
+
+      lastVerificationResult = verifyDnskeysWithDs(dnskeyRrset, ds, date, numDsChecked);
+      if (lastVerificationResult.status == SecurityStatus.INSECURE) {
+        log.debug(
+            "Algorithm {} ({}) refused",
+            ds.getAlgorithm(),
+            DNSSEC.Algorithm.string(ds.getAlgorithm()));
+        hasAlgoRefusal = true;
+        continue;
+      }
+
+      if (numDsChecked.get() > 0) {
+        log.debug("Checked #{} DS", numDsChecked.get());
+        hasCheckedDs = true;
+      }
+
+      // Once we see a single DS with a known digestID and algorithm, we cannot return INSECURE
+      // (with a "null" KeyEntry).
+      hasUsefulDs = true;
+
+      if (lastVerificationResult.status == SecurityStatus.SECURE) {
+        if (needs == null || needs.setSecure(ds.getAlgorithm())) {
+          if (!isKeySizeSupported(dnskeyRrset)) {
+            log.debug(
+                "DS {} (footprint={}, id={}, alg={}) works, but DNSKEY set contains keys that are unsupported, treat as insecure",
+                ds.getName(),
+                ds.getFootprint(),
+                ds.getDigestID(),
+                ds.getAlgorithm());
+            return KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
+          }
+
+          dnskeyRrset.setSecurityStatus(SecurityStatus.SECURE);
+          return KeyEntry.newKeyEntry(dnskeyRrset, sigalg);
+        }
+      } else if (needs != null && lastVerificationResult.status == SecurityStatus.BOGUS) {
+        needs.setBogus(ds.getAlgorithm());
+      }
+    }
+
+    // None of the DS's worked out.
+
+    // If none of the DSes have been checked, eg. that means no matches
+    // for keytags, and the other dses are all algo_refusal, it is an
+    // insecure delegation point, since the only matched DS records
+    // have an algo refusal, or are unsupported.
+    if (hasAlgoRefusal && !hasCheckedDs) {
+      log.debug("No supported DS records were found -- treating as insecure");
+      KeyEntry ke = KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
       ke.setBadReason(
           ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE,
           R.get("failed.ds.nodigest", dsRrset.getName()));
       return ke;
     }
 
-    if (!atLeastOneSupportedAlgorithm(dsRrset)) {
-      KeyEntry ke =
-          KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), dsRrset.getTTL());
+    // If no DSs were understandable, then this is OK.
+    if (!hasUsefulDs) {
+      log.debug("No usable DS records were found -- treating as insecure");
+      KeyEntry ke = KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
       ke.setBadReason(
-          ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
-          R.get("failed.ds.noalg", dsRrset.getName()));
+          ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE,
+          R.get("failed.ds.no_usable_digest", dsRrset.getName()));
       return ke;
     }
 
-    int favoriteDigestID = this.favoriteDSDigestID(dsRrset);
-    int numDsChecked = 0;
-    int numDsSizeUnsupported = 0;
-    int numDsOk = 0;
-    KeyEntry ke = null;
-    for (Record dsr : dsRrset.rrs()) {
-      DSRecord ds = (DSRecord) dsr;
-      if (this.digestHardenDowngrade && ds.getDigestID() != favoriteDigestID) {
-        continue;
-      }
-
-      for (Record dsnkeyr : dnskeyRrset.rrs()) {
-        DNSKEYRecord dnskey = (DNSKEYRecord) dsnkeyr;
-
-        // Skip DNSKEYs that don't match the basic criteria.
-        if (ds.getFootprint() != dnskey.getFootprint()
-            || ds.getAlgorithm() != dnskey.getAlgorithm()) {
-          continue;
-        }
-
-        numDsChecked++;
-        ke = getKeyEntry(dnskeyRrset, date, ds, dnskey);
-        if (ke.isGood()) {
-          if (isKeySizeSupported(dnskey)) {
-            return ke;
-          }
-
-          log.trace("DNSKEY size not supported, skipping");
-          ke = null;
-          numDsSizeUnsupported++;
-        } else if (numDsChecked > numDsOk + maxDsMatchFailures) {
-          ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
-          ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_ds_match"));
-          return ke;
-        }
-
-        // If it didn't validate with the DNSKEY, try the next one!
-      }
-    }
-
-    // There is a working DS, but that DNSKEY is not supported -> INSECURE
-    if (numDsSizeUnsupported > 0) {
-      ke = KeyEntry.newNullKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
-    }
-
     // If any were understandable, then it is bad.
-    if (ke == null) {
-      ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
-      ke.setBadReason(ExtendedErrorCodeOption.DNSKEY_MISSING, R.get("dnskey.no_ds_match"));
+    log.debug("Failed to match any usable DS to a DNSKEY");
+    if (needs != null) {
+      int alg = needs.missing();
+      if (alg != 0) {
+        log.debug(
+            "Missing verification of DNSKEY signature with algorithm {} ({})",
+            alg,
+            DNSSEC.Algorithm.string(alg));
+      }
     }
 
+    KeyEntry ke = KeyEntry.newBadKeyEntry(dsRrset.getName(), dsRrset.getDClass(), badKeyTTL);
+    ke.setBadReason(lastVerificationResult.edeReason, lastVerificationResult.reason);
     return ke;
   }
 
-  private KeyEntry getKeyEntry(SRRset dnskeyRrset, Instant date, DSRecord ds, DNSKEYRecord dnskey) {
-    KeyEntry ke;
+  private JustifiedSecStatus verifyDnskeysWithDs(
+      SRRset dnskeyRrset, DSRecord ds, Instant date, AtomicInteger numDsChecked) {
+    int numDsOk = 0;
+    int numDsSizeUnsupported = 0;
+    for (Record dsnkeyr : dnskeyRrset.rrs(false)) {
+      DNSKEYRecord dnskey = (DNSKEYRecord) dsnkeyr;
+
+      log.trace(
+          "Validating DNSKEY {} (footprint={}, alg={}) against DS {} (footprint={}, digest={}, alg={})",
+          dnskey.getName(),
+          dnskey.getFootprint(),
+          dnskey.getAlgorithm(),
+          ds.getName(),
+          ds.getFootprint(),
+          ds.getDigestID(),
+          ds.getAlgorithm());
+
+      // Skip DNSKEYs that don't match the basic criteria.
+      if (ds.getFootprint() != dnskey.getFootprint()
+          || ds.getAlgorithm() != dnskey.getAlgorithm()) {
+        log.trace("Footprint or algorithm mismatch, ignoring");
+        continue;
+      }
+
+      numDsChecked.getAndIncrement();
+      if (!dsDigestMatchesDnskey(ds, dnskey)) {
+        log.debug("DS did not match DNSKEY, ignoring");
+        if (numDsChecked.get() > numDsOk + maxDsMatchFailures) {
+          return new JustifiedSecStatus(
+              SecurityStatus.BOGUS,
+              ExtendedErrorCodeOption.DNSSEC_BOGUS,
+              R.get("dnskey.ds_max_match"));
+        }
+
+        continue;
+      }
+
+      numDsOk++;
+      if (!isKeySizeSupported(dnskey)) {
+        log.debug("DS okay but that DNSKEY size is not supported");
+        numDsSizeUnsupported++;
+        continue;
+      }
+
+      // Otherwise, we have a match! Make sure that the DNSKEY
+      // verifies *with this key*.
+      JustifiedSecStatus sec = this.verifier.verify(dnskeyRrset, dnskey, date);
+      if (sec.status == SecurityStatus.SECURE) {
+        return sec;
+      }
+
+      // If it didn't validate with the DNSKEY, try the next one!
+    }
+
+    if (numDsSizeUnsupported > 0) {
+      return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
+    }
+
+    if (numDsChecked.get() == 0) {
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS,
+          ExtendedErrorCodeOption.DNSKEY_MISSING,
+          R.get(
+              "dnskey.no_ds_alg_match",
+              dnskeyRrset.getName(),
+              DNSSEC.Algorithm.string(ds.getAlgorithm())));
+    } else if (numDsOk == 0) {
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS, ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.no_ds_match"));
+    }
+
+    return new JustifiedSecStatus(
+        SecurityStatus.BOGUS,
+        ExtendedErrorCodeOption.DNSSEC_BOGUS,
+        R.get("dnskey.ds_match_mismatch"));
+  }
+
+  private boolean dsDigestMatchesDnskey(DSRecord ds, DNSKEYRecord dnskey) {
     byte[] dsHash = ds.getDigest();
 
     // Convert the candidate DNSKEY into a hash using the same DS hash algorithm
@@ -333,43 +474,16 @@ final class ValUtils {
       DSRecord keyDigest = new DSRecord(Name.root, ds.getDClass(), 0, ds.getDigestID(), dnskey);
       keyHash = keyDigest.getDigest();
     } catch (IllegalArgumentException iae) {
-      ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
-      ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
-      return ke;
+      log.debug("Digest generation failed", iae);
+      return false;
     }
 
-    // see if there is a length mismatch (unlikely, impossible for known hash lengths)
-    if (keyHash.length != dsHash.length) {
-      ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
-      ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
-      return ke;
+    if (!Arrays.equals(keyHash, dsHash)) {
+      log.debug("Hash mismatch: key {} != ds {}", keyHash, dsHash);
+      return false;
     }
 
-    for (int k = 0; k < keyHash.length; k++) {
-      if (keyHash[k] != dsHash[k]) {
-        ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
-        ke.setBadReason(ExtendedErrorCodeOption.DNSSEC_BOGUS, R.get("dnskey.invalid"));
-        return ke;
-      }
-    }
-
-    // Otherwise, we have a match! Make sure that the DNSKEY
-    // verifies *with this key*.
-    JustifiedSecStatus res = this.verifier.verify(dnskeyRrset, dnskey, date);
-    switch (res.status) {
-      case SECURE:
-        dnskeyRrset.setSecurityStatus(SecurityStatus.SECURE);
-        ke = KeyEntry.newKeyEntry(dnskeyRrset);
-        break;
-      case BOGUS:
-        ke = KeyEntry.newBadKeyEntry(ds.getName(), ds.getDClass(), ds.getTTL());
-        ke.setBadReason(res.edeReason, res.reason);
-        break;
-      default:
-        throw new IllegalStateException("Unexpected security status");
-    }
-
-    return ke;
+    return true;
   }
 
   /**
@@ -384,7 +498,7 @@ final class ValUtils {
   int favoriteDSDigestID(SRRset dsset) {
     if (this.digestPreference == null) {
       int max = 0;
-      for (Record r : dsset.rrs()) {
+      for (Record r : dsset.rrs(false)) {
         DSRecord ds = (DSRecord) r;
         if (ds.getDigestID() > max
             && isDigestSupported(ds.getDigestID())
@@ -396,7 +510,7 @@ final class ValUtils {
       return max;
     } else {
       for (int preference : this.digestPreference) {
-        for (Record r : dsset.rrs()) {
+        for (Record r : dsset.rrs(false)) {
           DSRecord ds = (DSRecord) r;
           if (ds.getDigestID() == preference) {
             return ds.getDigestID();
@@ -417,7 +531,7 @@ final class ValUtils {
    * @param date The date against which to verify the rrset.
    * @return The status (BOGUS or SECURE).
    */
-  public JustifiedSecStatus verifySRRset(SRRset rrset, SRRset keyRrset, Instant date) {
+  public JustifiedSecStatus verifySRRset(SRRset rrset, KeyEntry keyRrset, Instant date) {
     if (rrset.getSecurityStatus() == SecurityStatus.SECURE) {
       log.trace(
           "RRset <{}/{}/{}> previously found to be SECURE",
@@ -736,7 +850,7 @@ final class ValUtils {
    * @return The NODATA proof along with the reason of the result.
    */
   public JustifiedSecStatus nsecProvesNodataDsReply(
-      Message request, SMessage response, SRRset keyRrset, Instant date) {
+      Message request, SMessage response, KeyEntry keyRrset, Instant date) {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
 
@@ -779,7 +893,7 @@ final class ValUtils {
         return new JustifiedSecStatus(res.status, res.edeReason, R.get("failed.ds.nsec.ent"));
       }
 
-      NSECRecord nsec = (NSECRecord) set.rrs().get(0);
+      NSECRecord nsec = (NSECRecord) set.rrs(false).get(0);
       ndp = ValUtils.nsecProvesNodata(set, nsec, qname, Type.DS);
       if (ndp.result) {
         hasValidNSEC = true;
@@ -871,7 +985,7 @@ final class ValUtils {
    * @return True when at least one DS record uses a supported algorithm, false otherwise.
    */
   boolean atLeastOneSupportedAlgorithm(RRset dsRRset) {
-    for (Record r : dsRRset.rrs()) {
+    for (Record r : dsRRset.rrs(false)) {
       if (isAlgorithmSupported(((DSRecord) r).getAlgorithm())) {
         return true;
       }
@@ -921,6 +1035,21 @@ final class ValUtils {
   /**
    * Check if the key size for an algorithm is supported.
    *
+   * @param dnskeyRrset the RRset of keys to validate.
+   * @return {@code true} if supported.
+   */
+  private boolean isKeySizeSupported(RRset dnskeyRrset) {
+    for (Record r : dnskeyRrset.rrs(false)) {
+      if (!isKeySizeSupported((DNSKEYRecord) r)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Check if the key size for an algorithm is supported.
+   *
    * @param dnskey the key to validate.
    * @return {@code true} if supported.
    */
@@ -961,7 +1090,7 @@ final class ValUtils {
    * @return True when at least one DS record uses a supported digest algorithm, false otherwise.
    */
   boolean atLeastOneSupportedDigest(RRset dsRRset) {
-    for (Record r : dsRRset.rrs()) {
+    for (Record r : dsRRset.rrs(false)) {
       if (isDigestSupported(((DSRecord) r).getDigestID())) {
         return true;
       }

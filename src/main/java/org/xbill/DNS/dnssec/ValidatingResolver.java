@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
-// Copyright (c) 2013-2021 Ingo Bauersachs
+// Copyright (c) 2007-2024 NLnet Labs
+// Copyright (c) 2013-2024 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
@@ -284,10 +285,11 @@ public final class ValidatingResolver implements Resolver {
    *
    * @param request The request that generated this response.
    * @param response The response to validate.
+   * @param nsec3State State to keep track of NSEC3 hashes and calculation count.
    * @param executor The service to use for async operations.
    */
   private CompletionStage<Void> validatePositiveResponse(
-      Message request, SMessage response, Executor executor) {
+      Message request, SMessage response, Nsec3ValidationState nsec3State, Executor executor) {
     Map<Name, Name> wcs = new HashMap<>(1);
     List<SRRset> nsec3s = new ArrayList<>(0);
     List<SRRset> nsecs = new ArrayList<>(0);
@@ -358,7 +360,7 @@ public final class ValidatingResolver implements Resolver {
                   // already proven, and we have NSEC3 records, try to prove it
                   // using the NSEC3 records.
                   if (!wcNsecOk && !nsec3s.isEmpty()) {
-                    if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
+                    if (this.n3valUtils.allNSEC3sIgnorable(nsec3s, this.keyCache)) {
                       response.setStatus(
                           SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
                       return;
@@ -366,7 +368,11 @@ public final class ValidatingResolver implements Resolver {
 
                     SecurityStatus status =
                         this.n3valUtils.proveWildcard(
-                            nsec3s, wc.getKey(), nsec3s.get(0).getSignerName(), wc.getValue());
+                            nsec3s,
+                            wc.getKey(),
+                            nsec3s.get(0).getSignerName(),
+                            wc.getValue(),
+                            nsec3State);
                     if (status == SecurityStatus.INSECURE) {
                       response.setStatus(status, -1);
                       return;
@@ -551,10 +557,11 @@ public final class ValidatingResolver implements Resolver {
    *
    * @param request The request that generated this response.
    * @param response The response to validate.
+   * @param nsec3State State to keep track of NSEC3 hashes and calculation count.
    * @param executor The service to use for async operations.
    */
   private CompletionStage<Void> validateNodataResponse(
-      Message request, SMessage response, Executor executor) {
+      Message request, SMessage response, Nsec3ValidationState nsec3State, Executor executor) {
     Name intermediateQname = request.getQuestion().getName();
     int qtype = request.getQuestion().getType();
 
@@ -576,7 +583,8 @@ public final class ValidatingResolver implements Resolver {
 
     // validate the AUTHORITY section
     Name qname = intermediateQname;
-    return this.validateNodataResponseRecursive(response, new AtomicInteger(0), executor)
+    return this.validateNodataResponseRecursive(
+            response, new AtomicInteger(0), nsec3State, executor)
         .handleAsync(
             (result, ex) -> {
               if (ex != null) {
@@ -638,13 +646,13 @@ public final class ValidatingResolver implements Resolver {
                 log.debug("Using NSEC3 records");
 
                 // try to prove NODATA with our NSEC3 record(s)
-                if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
+                if (this.n3valUtils.allNSEC3sIgnorable(nsec3s, this.keyCache)) {
                   response.setBogus(R.get("failed.nsec3_ignored"));
                   return null;
                 }
 
                 JustifiedSecStatus res =
-                    this.n3valUtils.proveNodata(nsec3s, qname, qtype, nsec3Signer);
+                    this.n3valUtils.proveNodata(nsec3s, qname, qtype, nsec3Signer, nsec3State);
                 edeReason = res.edeReason;
                 if (res.status == SecurityStatus.INSECURE) {
                   response.setStatus(SecurityStatus.INSECURE, -1);
@@ -667,7 +675,10 @@ public final class ValidatingResolver implements Resolver {
   }
 
   private CompletionStage<Void> validateNodataResponseRecursive(
-      SMessage response, AtomicInteger setIndex, Executor executor) {
+      SMessage response,
+      AtomicInteger setIndex,
+      Nsec3ValidationState nsec3State,
+      Executor executor) {
     if (setIndex.get() >= response.getSectionRRsets(Section.AUTHORITY).size()) {
       return completedFuture(null);
     }
@@ -688,7 +699,7 @@ public final class ValidatingResolver implements Resolver {
                 return this.failedFuture(new Exception("failed.authority.nodata"));
               }
 
-              return this.validateNodataResponseRecursive(response, setIndex, executor);
+              return this.validateNodataResponseRecursive(response, setIndex, nsec3State, executor);
             });
   }
 
@@ -708,10 +719,11 @@ public final class ValidatingResolver implements Resolver {
    *
    * @param request The request to be proved to not exist.
    * @param response The response to validate.
+   * @param nsec3State State to keep track of NSEC3 hashes and calculation count.
    * @param executor The service to use for async operations.
    */
   private CompletionStage<Void> validateNameErrorResponse(
-      Message request, SMessage response, Executor executor) {
+      Message request, SMessage response, Nsec3ValidationState nsec3State, Executor executor) {
     Name intermediateQname = request.getQuestion().getName();
 
     // The ANSWER section is either empty OR it contains an xNAME chain that
@@ -775,12 +787,13 @@ public final class ValidatingResolver implements Resolver {
                 log.debug("Validating nxdomain: using NSEC3 records");
 
                 // Attempt to prove name error with nsec3 records.
-                if (this.n3valUtils.allNSEC3sIgnoreable(nsec3s, this.keyCache)) {
+                if (this.n3valUtils.allNSEC3sIgnorable(nsec3s, this.keyCache)) {
                   response.setStatus(SecurityStatus.INSECURE, -1, R.get("failed.nsec3_ignored"));
                   return completedFuture(null);
                 }
 
-                SecurityStatus status = this.n3valUtils.proveNameError(nsec3s, qname, nsec3Signer);
+                SecurityStatus status =
+                    this.n3valUtils.proveNameError(nsec3s, qname, nsec3Signer, nsec3State);
                 if (status != SecurityStatus.SECURE) {
                   if (status == SecurityStatus.INSECURE) {
                     response.setStatus(status, -1, R.get("failed.nxdomain.nsec3_insecure"));
@@ -804,7 +817,7 @@ public final class ValidatingResolver implements Resolver {
                 boolean hasValidNSEC2 = hasValidNSEC;
 
                 // Be lenient with RCODE in NSEC NameError responses
-                return this.validateNodataResponse(request, response, executor)
+                return this.validateNodataResponse(request, response, nsec3State, executor)
                     .thenRun(
                         () -> {
                           if (response.getStatus() == SecurityStatus.SECURE) {
@@ -896,13 +909,18 @@ public final class ValidatingResolver implements Resolver {
     if (state.keyEntry == null
         || (!state.keyEntry.getName().equals(state.signerName) && state.keyEntry.isGood())) {
       // start the FINDKEY phase with the trust anchor
-      state.dsRRset = trustAnchorSRRset;
-      state.keyEntry = null;
-      state.currentDSKeyName = new Name(trustAnchorRRset.getName(), 1);
-
-      // and otherwise, don't continue processing this event.
-      // (it will be reactivated when the priming query returns).
-      return this.processFindKey(state, executor).thenApply(v -> state.keyEntry);
+      if (trustAnchorSRRset.getType() == Type.DS) {
+        state.dsRRset = trustAnchorSRRset;
+        state.keyEntry = null;
+        state.currentDSKeyName = new Name(trustAnchorRRset.getName(), 1);
+        // and otherwise, don't continue processing this event.
+        // (it will be reactivated when the priming query returns).
+        return this.processFindKey(state, executor).thenApply(v -> state.keyEntry);
+      } else {
+        state.keyEntry = KeyEntry.newKeyEntry(trustAnchorSRRset);
+        state.keyEntry.setSecurityStatus(SecurityStatus.SECURE);
+        this.keyCache.store(state.keyEntry);
+      }
     }
 
     return completedFuture(state.keyEntry);
@@ -986,7 +1004,7 @@ public final class ValidatingResolver implements Resolver {
    *     an end to secure space, good if the DS validated. It returns null if the DS response
    *     indicated that the request wasn't a delegation point.
    */
-  private KeyEntry dsResponseToKE(SMessage response, Message request, SRRset keyRrset) {
+  private KeyEntry dsResponseToKE(SMessage response, Message request, KeyEntry keyRrset) {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
 
@@ -1053,7 +1071,7 @@ public final class ValidatingResolver implements Resolver {
    *     an end to secure space, good if the DS validated. It returns null if the DS response
    *     indicated that the request wasn't a delegation point.
    */
-  private KeyEntry dsResponseToKeForNodata(SMessage response, Message request, SRRset keyRrset) {
+  private KeyEntry dsResponseToKeForNodata(SMessage response, Message request, KeyEntry keyRrset) {
     Name qname = request.getQuestion().getName();
     int qclass = request.getQuestion().getDClass();
     KeyEntry bogusKE = KeyEntry.newBadKeyEntry(qname, qclass, DEFAULT_TA_BAD_KEY_TTL);
@@ -1108,7 +1126,8 @@ public final class ValidatingResolver implements Resolver {
         nsec3s.add(nsec3set);
       }
 
-      switch (this.n3valUtils.proveNoDS(nsec3s, qname, nsec3Signer)) {
+      Nsec3ValidationState nsec3State = new Nsec3ValidationState();
+      switch (this.n3valUtils.proveNoDS(nsec3s, qname, nsec3Signer, nsec3State)) {
         case INSECURE:
           // case insecure also continues to unsigned space.
           // If nsec3-iter-count too high or optout, then treat below as unsigned
@@ -1208,29 +1227,30 @@ public final class ValidatingResolver implements Resolver {
       this.removeSpuriousAuthority(response);
     }
 
+    Nsec3ValidationState nsec3State = new Nsec3ValidationState();
     CompletionStage<Void> completionStage;
     switch (subtype) {
       case POSITIVE:
       case CNAME:
       case ANY:
         log.trace("Validating a positive response");
-        completionStage = this.validatePositiveResponse(request, response, executor);
+        completionStage = this.validatePositiveResponse(request, response, nsec3State, executor);
         break;
 
       case NODATA:
         log.trace("Validating a nodata response");
-        completionStage = this.validateNodataResponse(request, response, executor);
+        completionStage = this.validateNodataResponse(request, response, nsec3State, executor);
         break;
 
       case CNAME_NODATA:
         log.trace("Validating a CNAME_NODATA response");
         completionStage =
-            this.validatePositiveResponse(request, response, executor)
+            this.validatePositiveResponse(request, response, nsec3State, executor)
                 .thenCompose(
                     v -> {
                       if (response.getStatus() != SecurityStatus.INSECURE) {
                         response.setStatus(SecurityStatus.UNCHECKED, -1);
-                        return this.validateNodataResponse(request, response, executor);
+                        return this.validateNodataResponse(request, response, nsec3State, executor);
                       }
 
                       return completedFuture(null);
@@ -1239,18 +1259,19 @@ public final class ValidatingResolver implements Resolver {
 
       case NAMEERROR:
         log.trace("Validating a nxdomain response");
-        completionStage = this.validateNameErrorResponse(request, response, executor);
+        completionStage = this.validateNameErrorResponse(request, response, nsec3State, executor);
         break;
 
       case CNAME_NAMEERROR:
         log.trace("Validating a cname_nxdomain response");
         completionStage =
-            this.validatePositiveResponse(request, response, executor)
+            this.validatePositiveResponse(request, response, nsec3State, executor)
                 .thenCompose(
                     v -> {
                       if (response.getStatus() != SecurityStatus.INSECURE) {
                         response.setStatus(SecurityStatus.UNCHECKED, -1);
-                        return this.validateNameErrorResponse(request, response, executor);
+                        return this.validateNameErrorResponse(
+                            request, response, nsec3State, executor);
                       }
 
                       return completedFuture(null);

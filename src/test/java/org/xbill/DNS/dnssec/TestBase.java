@@ -17,6 +17,7 @@ import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -158,6 +159,8 @@ public abstract class TestBase {
   }
 
   private void setup() throws NumberFormatException, IOException, DNSSECException {
+    // Some old keys are only 1023 bits long
+    System.setProperty("dnsjava.dnssec.algorithm_rsa_min_key_size", "1023");
     resolver =
         new ValidatingResolver(
             new SimpleResolver("8.8.4.4") {
@@ -194,6 +197,7 @@ public abstract class TestBase {
             resolverClock);
 
     resolver.loadTrustAnchors(getClass().getResourceAsStream("/trust_anchors"));
+    resolver.setTimeout(Duration.ofHours(1));
   }
 
   protected void add(Message m) throws IOException {

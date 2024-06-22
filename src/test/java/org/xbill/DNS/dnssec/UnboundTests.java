@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,12 +77,12 @@ class UnboundTests extends TestBase {
       }
 
       if (rpl.minRsaSize != null) {
-      config.put(ValUtils.ALGORITHM_RSA_MIN_KEY_SIZE, Integer.toString(rpl.minRsaSize));
-    }
+        config.put(ValUtils.ALGORITHM_RSA_MIN_KEY_SIZE, Integer.toString(rpl.minRsaSize));
+      }
 
-    for (Message m : rpl.replays) {
-      add(m);
-    }
+      for (Message m : rpl.replays) {
+        add(m);
+      }
 
       // merge xNAME queries into one
       List<Message> copy = new ArrayList<>(rpl.replays.size());
@@ -164,6 +165,7 @@ class UnboundTests extends TestBase {
       }
 
       resolver.init(config);
+      resolver.setTimeout(Duration.ofMinutes(1));
 
       for (Check c : rpl.checks.values()) {
         Message s = resolver.send(c.query).normalize(c.query, true);
@@ -1199,7 +1201,6 @@ class UnboundTests extends TestBase {
     runUnboundTest();
   }
 
-  @Disabled("TODO: passed before accidentally, message normalization now exposes this")
   @Test
   @DisplayName("val_ta_algo_missing.rpl: Test validator with multiple algorithm missing one")
   void val_ta_algo_missing() throws ParseException, IOException {

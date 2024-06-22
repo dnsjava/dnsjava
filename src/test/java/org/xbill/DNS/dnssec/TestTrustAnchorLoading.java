@@ -92,8 +92,8 @@ class TestTrustAnchorLoading extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
     assertRCode(Rcode.SERVFAIL, response.getRcode());
+    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_alg_match:.:RSASHA256", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
 
@@ -105,8 +105,8 @@ class TestTrustAnchorLoading extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
     assertRCode(Rcode.SERVFAIL, response.getRcode());
+    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 

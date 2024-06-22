@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
-// Copyright (c) 2013-2021 Ingo Bauersachs
+// Copyright (c) 2007-2024 NLnet Labs
+// Copyright (c) 2013-2024 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
 import static org.xbill.DNS.ExtendedErrorCodeOption.DNSSEC_BOGUS;
@@ -43,6 +44,18 @@ final class NSEC3ValUtils {
 
   private static final int MAX_ITERATION_COUNT = 65536;
 
+  /**
+   * Max number of NSEC3 calculations at once. 8 is low enough and allows for cases where multiple
+   * proofs are needed.
+   */
+  private static final int MAX_NSEC3_CALCULATIONS = 8;
+
+  /**
+   * When all allowed NSEC3 calculations at once resulted in error treat as bogus. NSEC3 hash errors
+   * are not cached and this helps breaks loops with erroneous data.
+   */
+  private static final int MAX_NSEC3_ERRORS = -1;
+
   private final TreeMap<Integer, Integer> maxIterations;
 
   /** Creates a new instance of this class. */
@@ -69,9 +82,10 @@ final class NSEC3ValUtils {
       String key = s.getKey().toString();
       if (key.startsWith(NSEC3_MAX_ITERATIONS_PROPERTY_PREFIX)) {
         int keySize = Integer.parseInt(key.substring(key.lastIndexOf(".") + 1));
-        int iters = Integer.parseInt(s.getValue().toString());
-        if (iters > MAX_ITERATION_COUNT) {
-          throw new IllegalArgumentException("Iteration count too high.");
+        int iterations = Integer.parseInt(s.getValue().toString());
+        if (iterations > MAX_ITERATION_COUNT) {
+          throw new IllegalArgumentException(
+              iterations + " iterations is too high, maximum is " + MAX_ITERATION_COUNT);
         }
 
         if (first) {
@@ -79,7 +93,7 @@ final class NSEC3ValUtils {
           this.maxIterations.clear();
         }
 
-        this.maxIterations.put(keySize, iters);
+        this.maxIterations.put(keySize, iterations);
       }
     }
   }
@@ -160,19 +174,31 @@ final class NSEC3ValUtils {
    * @param name The name to find.
    * @param zonename The name of the zone that the NSEC3s are from.
    * @param nsec3s A list of NSEC3Records from a given message.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return The matching NSEC3Record if one is present, null otherwise.
    */
-  private NSEC3Record findMatchingNSEC3(Name name, Name zonename, List<SRRset> nsec3s) {
-    base32 b32 = new base32(base32.Alphabet.BASE32HEX, false, false);
+  private NSEC3Record findMatchingNSEC3(
+      Name name, Name zonename, List<SRRset> nsec3s, Nsec3ValidationState state) {
     for (SRRset set : nsec3s) {
+      if (state.numCalc >= MAX_NSEC3_CALCULATIONS) {
+        if (state.numCalc == state.numCalcErrors) {
+          log.debug("NSEC3 reached max. hash calculation errors");
+          state.numCalc = MAX_NSEC3_ERRORS;
+        } else {
+          log.debug("NSEC3 reached max. hash calculations");
+        }
+        break;
+      }
+
       try {
         NSEC3Record nsec3 = (NSEC3Record) set.first();
-        byte[] hash = nsec3.hashName(name);
-        Name complete = new Name(b32.toString(hash), zonename);
+        Nsec3ValidationState.Nsec3CacheEntry hash = state.computeIfAbsent(nsec3, name);
+        Name complete = new Name(hash.getHashAsBase32(), zonename);
         if (complete.equals(nsec3.getName())) {
           return nsec3;
         }
       } catch (NoSuchAlgorithmException | TextParseException e) {
+        state.numCalcErrors++;
         log.debug("Unrecognized NSEC3 in set: {}", set, e);
       }
     }
@@ -219,17 +245,30 @@ final class NSEC3ValUtils {
    * @param name The name to consider.
    * @param zonename The name of the zone.
    * @param nsec3s The list of NSEC3s present in a message.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return A covering NSEC3 if one is present, null otherwise.
    */
-  private NSEC3Record findCoveringNSEC3(Name name, Name zonename, List<SRRset> nsec3s) {
+  private NSEC3Record findCoveringNSEC3(
+      Name name, Name zonename, List<SRRset> nsec3s, Nsec3ValidationState state) {
     for (SRRset set : nsec3s) {
+      // Check if we are allowed more calculations
+      if (state.numCalc >= MAX_NSEC3_CALCULATIONS) {
+        if (state.numCalcErrors == state.numCalc) {
+          state.numCalc = MAX_NSEC3_ERRORS;
+        }
+
+        return null;
+      }
+
       try {
         NSEC3Record nsec3 = (NSEC3Record) set.first();
-        byte[] hash = nsec3.hashName(name);
-        if (this.nsec3Covers(nsec3, zonename, hash)) {
+        Nsec3ValidationState.Nsec3CacheEntry hash = state.computeIfAbsent(nsec3, name);
+        if (this.nsec3Covers(nsec3, zonename, hash.getHash())) {
           return nsec3;
         }
       } catch (NoSuchAlgorithmException e) {
+        // Malformed NSEC3
+        state.numCalcErrors++;
         log.debug("Unrecognized NSEC3 in set: {}", set, e);
       }
     }
@@ -244,15 +283,22 @@ final class NSEC3ValUtils {
    * @param name The name the start with.
    * @param zonename The name of the zone that the NSEC3s came from.
    * @param nsec3s The list of NSEC3s.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return A CEResponse containing the closest encloser name and the NSEC3 RR that matched it, or
    *     null if there wasn't one.
    */
-  private CEResponse findClosestEncloser(Name name, Name zonename, List<SRRset> nsec3s) {
+  private CEResponse findClosestEncloser(
+      Name name, Name zonename, List<SRRset> nsec3s, Nsec3ValidationState state) {
     // This scans from longest name to shortest, so the first match we find
     // is the only viable candidate.
     // FIXME: modify so that the NSEC3 matching the zone apex need not be present
     while (name.labels() >= zonename.labels()) {
-      NSEC3Record nsec3 = this.findMatchingNSEC3(name, zonename, nsec3s);
+      if (state.numCalc >= MAX_NSEC3_CALCULATIONS || state.numCalc == MAX_NSEC3_ERRORS) {
+        log.debug("NSEC3 reached max. hash calculations");
+        break;
+      }
+
+      NSEC3Record nsec3 = this.findMatchingNSEC3(name, zonename, nsec3s, state);
       if (nsec3 != null) {
         return new CEResponse(name, nsec3);
       }
@@ -269,11 +315,13 @@ final class NSEC3ValUtils {
    * @param qname The qname in question.
    * @param zonename The name of the zone that the NSEC3 RRs come from.
    * @param nsec3s The list of NSEC3s found the this response (already verified).
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return A CEResponse object which contains the closest encloser name and the NSEC3 that matches
    *     it.
    */
-  private CEResponse proveClosestEncloser(Name qname, Name zonename, List<SRRset> nsec3s) {
-    CEResponse candidate = this.findClosestEncloser(qname, zonename, nsec3s);
+  private CEResponse proveClosestEncloser(
+      Name qname, Name zonename, List<SRRset> nsec3s, Nsec3ValidationState state) {
+    CEResponse candidate = this.findClosestEncloser(qname, zonename, nsec3s, state);
     if (candidate == null) {
       log.debug("Could not find a candidate for the closest encloser");
       candidate = new CEResponse(Name.empty, null);
@@ -309,7 +357,7 @@ final class NSEC3ValUtils {
 
     // Otherwise, we need to show that the next closer name is covered.
     Name nextClosest = this.nextClosest(qname, candidate.closestEncloser);
-    candidate.ncNsec3 = this.findCoveringNSEC3(nextClosest, zonename, nsec3s);
+    candidate.ncNsec3 = this.findCoveringNSEC3(nextClosest, zonename, nsec3s, state);
     if (candidate.ncNsec3 == null) {
       log.debug("Could not find proof that the closest encloser was the closest encloser");
       candidate.status = SecurityStatus.BOGUS;
@@ -322,11 +370,21 @@ final class NSEC3ValUtils {
 
   private boolean validIterations(SRRset nsec, KeyCache keyCache) {
     SRRset dnskeyRrset = keyCache.find(nsec.getSignerName(), nsec.getDClass());
+    if (dnskeyRrset == null) {
+      return false;
+    }
+
     // for now, we return the maximum iterations based simply on the key
     // algorithms that may have been used to sign the NSEC3 RRsets.
     try {
-      for (Record r : dnskeyRrset.rrs()) {
+      // Compute size of smallest ZSK key in the rrset
+      int smallestKeySize = Integer.MAX_VALUE;
+      for (Record r : dnskeyRrset.rrs(false)) {
         DNSKEYRecord dnskey = (DNSKEYRecord) r;
+        if ((dnskey.getFlags() & DNSKEYRecord.Flags.ZONE_KEY) != DNSKEYRecord.Flags.ZONE_KEY) {
+          continue;
+        }
+
         int keysize;
         switch (dnskey.getAlgorithm()) {
           case Algorithm.RSAMD5:
@@ -363,18 +421,19 @@ final class NSEC3ValUtils {
             return false;
         }
 
-        Integer keyIters = this.maxIterations.floorKey(keysize);
-        if (keyIters == null) {
-          keyIters = this.maxIterations.firstKey();
-        }
-
-        keyIters = this.maxIterations.get(keyIters);
-        if (((NSEC3Record) nsec.first()).getIterations() > keyIters) {
-          return false;
+        if (keysize < smallestKeySize) {
+          smallestKeySize = keysize;
         }
       }
 
-      return true;
+      // Round up to nearest config key size
+      Integer maxIterationsForKeySet = this.maxIterations.floorKey(smallestKeySize);
+      if (maxIterationsForKeySet == null) {
+        maxIterationsForKeySet = this.maxIterations.firstKey();
+      }
+
+      maxIterationsForKeySet = this.maxIterations.get(maxIterationsForKeySet);
+      return ((NSEC3Record) nsec.first()).getIterations() <= maxIterationsForKeySet;
     } catch (DNSSECException e) {
       log.error("Could not get public key from NSEC3 record", e);
       return false;
@@ -388,9 +447,9 @@ final class NSEC3ValUtils {
    * @param nsec3s The list of NSEC3s. If there is more than one set of NSEC3 parameters present,
    *     this test will not be performed.
    * @param dnskeyRrset The set of validating DNSKEYs.
-   * @return true if all of the NSEC3s can be legally ignored, false if not.
+   * @return true if all NSEC3s can be legally ignored, false if not.
    */
-  public boolean allNSEC3sIgnoreable(List<SRRset> nsec3s, KeyCache dnskeyRrset) {
+  public boolean allNSEC3sIgnorable(List<SRRset> nsec3s, KeyCache dnskeyRrset) {
     Map<Name, NSEC3Record> foundNsecs = new HashMap<>();
     for (SRRset set : nsec3s) {
       for (Record r : set.rrs()) {
@@ -438,18 +497,20 @@ final class NSEC3ValUtils {
    * @param qname The query name to check against.
    * @param zonename This is the name of the zone that the NSEC3s belong to. This may be discovered
    *     in any number of ways. A good one is to use the signerName from the NSEC3 record's RRSIG.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return {@link SecurityStatus#SECURE} of the Name Error is proven by the NSEC3 RRs, {@link
    *     SecurityStatus#BOGUS} if not, {@link SecurityStatus#INSECURE} if all of the NSEC3s could be
    *     validly ignored.
    */
-  public SecurityStatus proveNameError(List<SRRset> nsec3s, Name qname, Name zonename) {
+  public SecurityStatus proveNameError(
+      List<SRRset> nsec3s, Name qname, Name zonename, Nsec3ValidationState state) {
     if (nsec3s == null || nsec3s.isEmpty()) {
       return SecurityStatus.BOGUS;
     }
 
     // First locate and prove the closest encloser to qname. We will use the
     // variant that fails if the closest encloser turns out to be qname.
-    CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s);
+    CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s, state);
 
     if (ce.status != SecurityStatus.SECURE) {
       log.debug("Failed to prove a closest encloser");
@@ -457,12 +518,23 @@ final class NSEC3ValUtils {
     }
 
     // At this point, we know that qname does not exist. Now we need to
-    // prove
-    // that the wildcard does not exist.
+    // prove that the wildcard does not exist.
     Name wc = this.ceWildcard(ce.closestEncloser);
-    NSEC3Record nsec3 = this.findCoveringNSEC3(wc, zonename, nsec3s);
+    if (wc == null) {
+      return SecurityStatus.BOGUS;
+    }
+
+    NSEC3Record nsec3 = this.findCoveringNSEC3(wc, zonename, nsec3s, state);
     if (nsec3 == null) {
       log.debug("Could not prove that the applicable wildcard did not exist");
+      if (state.numCalc == MAX_NSEC3_ERRORS) {
+        log.debug("NSEC3 reached max. hash calculation errors");
+        return SecurityStatus.BOGUS;
+      } else if (state.numCalc == MAX_NSEC3_CALCULATIONS) {
+        log.debug("NSEC3 reached max. hash calculations");
+        return SecurityStatus.UNCHECKED;
+      }
+
       return SecurityStatus.BOGUS;
     }
 
@@ -495,16 +567,18 @@ final class NSEC3ValUtils {
    * @param qname The qname in question.
    * @param qtype The qtype in question.
    * @param zonename The name of the zone that the NSEC3s came from.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return {@link SecurityStatus#SECURE} if the NSEC3s prove the proposition, {@link
    *     SecurityStatus#INSECURE} if qname is under opt-out, {@link SecurityStatus#BOGUS} otherwise.
    */
-  public JustifiedSecStatus proveNodata(List<SRRset> nsec3s, Name qname, int qtype, Name zonename) {
+  public JustifiedSecStatus proveNodata(
+      List<SRRset> nsec3s, Name qname, int qtype, Name zonename, Nsec3ValidationState state) {
     if (nsec3s == null || nsec3s.isEmpty()) {
       return new JustifiedSecStatus(
           SecurityStatus.BOGUS, ExtendedErrorCodeOption.NSEC_MISSING, R.get("failed.nsec3.none"));
     }
 
-    NSEC3Record nsec3 = this.findMatchingNSEC3(qname, zonename, nsec3s);
+    NSEC3Record nsec3 = this.findMatchingNSEC3(qname, zonename, nsec3s, state);
     // Cases 1 & 2.
     if (nsec3 != null) {
       if (nsec3.hasType(qtype)) {
@@ -537,10 +611,19 @@ final class NSEC3ValUtils {
       return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
     }
 
+    if (state.numCalc == MAX_NSEC3_ERRORS) {
+      log.debug("NSEC3 reached max. hash calculation errors");
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.hash_errors"));
+    } else if (state.numCalc == MAX_NSEC3_CALCULATIONS) {
+      log.debug("NSEC3 reached max. hash calculations");
+      return new JustifiedSecStatus(SecurityStatus.UNCHECKED, -1, null);
+    }
+
     // For cases 3 - 5, we need the proven closest encloser, and it can't
     // match qname. Although, at this point, we know that it won't since we
     // just checked that.
-    CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s);
+    CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s, state);
 
     // At this point, not finding a match or a proven closest encloser is a
     // problem.
@@ -551,13 +634,15 @@ final class NSEC3ValUtils {
     } else if (ce.status == SecurityStatus.INSECURE && qtype != Type.DS) {
       log.debug("Closest NSEC3 is insecure delegation");
       return new JustifiedSecStatus(SecurityStatus.INSECURE, -1, null);
+    } else if (ce.status == SecurityStatus.UNCHECKED) {
+      return new JustifiedSecStatus(SecurityStatus.UNCHECKED, -1, null);
     }
 
     // Case 3: REMOVED
 
     // Case 4:
     Name wc = this.ceWildcard(ce.closestEncloser);
-    nsec3 = this.findMatchingNSEC3(wc, zonename, nsec3s);
+    nsec3 = this.findMatchingNSEC3(wc, zonename, nsec3s, state);
     if (nsec3 != null) {
       if (nsec3.hasType(qtype)) {
         log.debug("Matching wildcard has qtype {}", Type.string(qtype));
@@ -585,6 +670,15 @@ final class NSEC3ValUtils {
       }
 
       return new JustifiedSecStatus(SecurityStatus.SECURE, -1, null);
+    }
+
+    if (state.numCalc == MAX_NSEC3_ERRORS) {
+      log.debug("NSEC3 reached max. hash calculation errors");
+      return new JustifiedSecStatus(
+          SecurityStatus.BOGUS, DNSSEC_BOGUS, R.get("failed.nsec3.wc.hash_errors"));
+    } else if (state.numCalc == MAX_NSEC3_CALCULATIONS) {
+      log.debug("NSEC3 reached max. hash calculations");
+      return new JustifiedSecStatus(SecurityStatus.UNCHECKED, -1, null);
     }
 
     // Case 5.
@@ -622,10 +716,11 @@ final class NSEC3ValUtils {
    * @param qname The qname that was matched to the wildard
    * @param zonename The name of the zone that the NSEC3s come from.
    * @param wildcard The purported wildcard that matched.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return {@link SecurityStatus#SECURE} if the NSEC3 records prove this case.
    */
   public SecurityStatus proveWildcard(
-      List<SRRset> nsec3s, Name qname, Name zonename, Name wildcard) {
+      List<SRRset> nsec3s, Name qname, Name zonename, Name wildcard, Nsec3ValidationState state) {
     if (nsec3s == null || nsec3s.isEmpty() || qname == null || wildcard == null) {
       return SecurityStatus.BOGUS;
     }
@@ -637,7 +732,7 @@ final class NSEC3ValUtils {
     // Now we still need to prove that the original data did not exist.
     // Otherwise, we need to show that the next closer name is covered.
     Name nextClosest = this.nextClosest(qname, candidate.closestEncloser);
-    candidate.ncNsec3 = this.findCoveringNSEC3(nextClosest, zonename, nsec3s);
+    candidate.ncNsec3 = this.findCoveringNSEC3(nextClosest, zonename, nsec3s, state);
 
     if (candidate.ncNsec3 == null) {
       log.debug(
@@ -663,18 +758,20 @@ final class NSEC3ValUtils {
    * @param nsec3s The NSEC3 RRs to examine.
    * @param qname The name of the DS in question.
    * @param zonename The name of the zone that the NSEC3 RRs come from.
+   * @param state State to keep track of NSEC3 hashes and calculation count.
    * @return SecurityStatus.SECURE if it was proven that there is no DS in a secure (i.e., not
-   *     opt-in) way, SecurityStatus.INSECURE if there was no DS in an insecure (i.e., opt-in) way,
-   *     SecurityStatus.INDETERMINATE if it was clear that this wasn't a delegation point, and
-   *     SecurityStatus.BOGUS if the proofs don't work out.
+   *     opt-in) way, {@link SecurityStatus#INSECURE} if there was no DS in an insecure (i.e.,
+   *     opt-in) way, {@link SecurityStatus#INDETERMINATE} if it was clear that this wasn't a
+   *     delegation point, and {@link SecurityStatus#BOGUS} if the proofs don't work out.
    */
-  public SecurityStatus proveNoDS(List<SRRset> nsec3s, Name qname, Name zonename) {
+  public SecurityStatus proveNoDS(
+      List<SRRset> nsec3s, Name qname, Name zonename, Nsec3ValidationState state) {
     if (nsec3s == null || nsec3s.isEmpty()) {
       return SecurityStatus.BOGUS;
     }
 
     // Look for a matching NSEC3 to qname -- this is the normal NODATA case.
-    NSEC3Record nsec3 = this.findMatchingNSEC3(qname, zonename, nsec3s);
+    NSEC3Record nsec3 = this.findMatchingNSEC3(qname, zonename, nsec3s, state);
 
     if (nsec3 != null) {
       // If the matching NSEC3 has the SOA bit set, it is from the wrong
@@ -695,7 +792,7 @@ final class NSEC3ValUtils {
     }
 
     // Otherwise, we are probably in the opt-out case.
-    CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s);
+    CEResponse ce = this.proveClosestEncloser(qname, zonename, nsec3s, state);
     if (ce.status != SecurityStatus.SECURE) {
       return SecurityStatus.BOGUS;
     }

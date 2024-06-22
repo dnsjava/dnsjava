@@ -14,7 +14,6 @@ import org.xbill.DNS.ExtendedErrorCodeOption;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.OPTRecord;
-import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
@@ -34,11 +33,11 @@ class TestNormallyUnreachableCode {
 
   @Test
   void testVerifyWithoutSignaturesIsBogus() {
-    DnsSecVerifier verifier = new DnsSecVerifier();
+    DnsSecVerifier verifier = new DnsSecVerifier(new ValUtils());
     ARecord record = new ARecord(Name.root, DClass.IN, 120, localhost);
     SRRset set = new SRRset();
     set.addRR(record);
-    RRset keys = new RRset();
+    KeyEntry keys = KeyEntry.newKeyEntry(new SRRset());
     JustifiedSecStatus res = verifier.verify(set, keys, Instant.now());
     assertEquals(SecurityStatus.BOGUS, res.status);
     assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, res.edeReason);

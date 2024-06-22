@@ -56,8 +56,8 @@ class TestAlgorithmSupport extends TestBase {
   void testDigestIdIsUnknown() throws IOException {
     Message response = resolver.send(createMessage("unknown-alg.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals("failed.ds.nodigest:unknown-alg.ingotronic.ch.", getReason(response));
     assertRCode(Rcode.NOERROR, response.getRcode());
+    assertEquals("failed.ds.no_usable_digest:unknown-alg.ingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE, response);
   }
 

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 // Copyright (c) 2005 VeriSign. All rights reserved.
-// Copyright (c) 2013-2021 Ingo Bauersachs
+// Copyright (c) 2007-2024 NLnet Labs
+// Copyright (c) 2013-2024 Ingo Bauersachs
 package org.xbill.DNS.dnssec;
 
 import java.time.Instant;
@@ -32,7 +33,12 @@ import org.xbill.DNS.Type;
 @Slf4j
 final class DnsSecVerifier {
   public static final String MAX_VALIDATE_RRSIGS_PROPERTY = "dnsjava.dnssec.max_validate_rrsigs";
+  private final ValUtils valUtils;
   private int maxValidateRRsigs;
+
+  public DnsSecVerifier(ValUtils valUtils) {
+    this.valUtils = valUtils;
+  }
 
   /**
    * Initialize the module. The recognized configuration values are:
@@ -69,7 +75,7 @@ final class DnsSecVerifier {
     int keyid = signature.getFootprint();
     int alg = signature.getAlgorithm();
     List<DNSKEYRecord> res = new ArrayList<>(dnskeyRrset.size());
-    for (Record r : dnskeyRrset.rrs()) {
+    for (Record r : dnskeyRrset.rrs(false)) {
       DNSKEYRecord dnskey = (DNSKEYRecord) r;
       if (dnskey.getAlgorithm() == alg && dnskey.getFootprint() == keyid) {
         res.add(dnskey);
@@ -91,7 +97,7 @@ final class DnsSecVerifier {
    *     could not be completed (usually because the public key was not available).
    */
   private JustifiedSecStatus verifySignature(
-      SRRset rrset, RRSIGRecord sigrec, RRset keyRrset, Instant date) {
+      SRRset rrset, RRSIGRecord sigrec, KeyEntry keyRrset, Instant date) {
     if (!rrset.getName().subdomain(sigrec.getSigner())) {
       log.debug("Signer name {} is off-tree for {}", sigrec.getSigner(), rrset.getName());
       return new JustifiedSecStatus(
@@ -152,7 +158,7 @@ final class DnsSecVerifier {
    * @return {@link SecurityStatus#SECURE} if the {@link RRset} verified positively, {@link
    *     SecurityStatus#BOGUS} otherwise.
    */
-  public JustifiedSecStatus verify(SRRset rrset, RRset keyRrset, Instant date) {
+  public JustifiedSecStatus verify(SRRset rrset, KeyEntry keyRrset, Instant date) {
     List<RRSIGRecord> sigs = rrset.sigs();
     if (sigs.isEmpty()) {
       log.info(
@@ -166,12 +172,29 @@ final class DnsSecVerifier {
           R.get("validate.bogus.missingsig_named", rrset.getName(), Type.string(rrset.getType())));
     }
 
+    AlgorithmRequirements needs = null;
+    if (keyRrset.getAlgo() != null) {
+      needs = new AlgorithmRequirements(valUtils);
+      needs.initList(keyRrset.getAlgo());
+      if (needs.getNum() == 0) {
+        log.debug("{} has no known algorithms", rrset.getName());
+        return new JustifiedSecStatus(
+            SecurityStatus.INSECURE,
+            ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM,
+            R.get("validate.insecure.noalg", rrset.getName()));
+      }
+    }
+
     JustifiedSecStatus res = null;
     int numVerified = 0;
     for (RRSIGRecord sigrec : sigs) {
       res = this.verifySignature(rrset, sigrec, keyRrset, date);
       if (res.status == SecurityStatus.SECURE) {
-        return res;
+        if (needs == null || needs.setSecure(sigrec.getAlgorithm())) {
+          return res;
+        }
+      } else if (needs != null && res.status == SecurityStatus.BOGUS) {
+        needs.setBogus(sigrec.getAlgorithm());
       }
 
       numVerified++;
@@ -263,7 +286,10 @@ final class DnsSecVerifier {
         Type.string(rrset.getType()));
     int edeReason = ExtendedErrorCodeOption.DNSSEC_BOGUS;
     String reason = "dnskey.invalid";
-    if (lastException instanceof SignatureExpiredException) {
+    if (numVerified == 0) {
+      edeReason = ExtendedErrorCodeOption.DNSKEY_MISSING;
+      reason = "dnskey.no_ds_match";
+    } else if (lastException instanceof SignatureExpiredException) {
       edeReason = ExtendedErrorCodeOption.SIGNATURE_EXPIRED;
       reason = "dnskey.expired";
     } else if (lastException instanceof SignatureNotYetValidException) {

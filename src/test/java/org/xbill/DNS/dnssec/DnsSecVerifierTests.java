@@ -21,8 +21,9 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.RRset;
 
 public class DnsSecVerifierTests {
-  private final DnsSecVerifier verifier = new DnsSecVerifier();
+  private final DnsSecVerifier verifier = new DnsSecVerifier(new ValUtils());
   private final DNSKEYRecord key;
+  private final KeyEntry keyEntry;
   private final RRset unsigned;
   private final RRset signed;
   private final RRset multiSigned;
@@ -41,6 +42,7 @@ public class DnsSecVerifierTests {
             DNSKEYRecord.Protocol.DNSSEC,
             DNSSEC.Algorithm.RSASHA256,
             rsaKeyPair.getPublic());
+    keyEntry = KeyEntry.newKeyEntry(new SRRset(key));
     unsigned = new RRset(new ARecord(Name.root, DClass.IN, 3600, new byte[4]));
     signed = new RRset(new ARecord(Name.root, DClass.IN, 3600, new byte[4]));
     Instant inception = Instant.ofEpochSecond(3600);
@@ -69,7 +71,7 @@ public class DnsSecVerifierTests {
   void validateUnsigned(boolean asSet) {
     JustifiedSecStatus status;
     if (asSet) {
-      status = verifier.verify(new SRRset(unsigned), new RRset(key), Instant.ofEpochSecond(5400));
+      status = verifier.verify(new SRRset(unsigned), keyEntry, Instant.ofEpochSecond(5400));
     } else {
       status = verifier.verify(unsigned, key, Instant.ofEpochSecond(5400));
     }
@@ -84,7 +86,7 @@ public class DnsSecVerifierTests {
   void validateValid(boolean asSet) {
     JustifiedSecStatus status;
     if (asSet) {
-      status = verifier.verify(new SRRset(signed), new RRset(key), Instant.ofEpochSecond(5400));
+      status = verifier.verify(new SRRset(signed), keyEntry, Instant.ofEpochSecond(5400));
     } else {
       status = verifier.verify(signed, key, Instant.ofEpochSecond(5400));
     }
@@ -99,7 +101,7 @@ public class DnsSecVerifierTests {
   void validateNotYetValid(boolean asSet) {
     JustifiedSecStatus status;
     if (asSet) {
-      status = verifier.verify(new SRRset(signed), new RRset(key), Instant.ofEpochSecond(1800));
+      status = verifier.verify(new SRRset(signed), keyEntry, Instant.ofEpochSecond(1800));
     } else {
       status = verifier.verify(signed, key, Instant.ofEpochSecond(1800));
     }
@@ -114,7 +116,7 @@ public class DnsSecVerifierTests {
   void validateExpired(boolean asSet) {
     JustifiedSecStatus status;
     if (asSet) {
-      status = verifier.verify(new SRRset(signed), new RRset(key), Instant.ofEpochSecond(8000));
+      status = verifier.verify(new SRRset(signed), keyEntry, Instant.ofEpochSecond(8000));
     } else {
       status = verifier.verify(signed, key, Instant.ofEpochSecond(8000));
     }
@@ -134,8 +136,7 @@ public class DnsSecVerifierTests {
 
     JustifiedSecStatus status;
     if (asSet) {
-      status =
-          verifier.verify(new SRRset(multiSigned), new RRset(key), Instant.ofEpochSecond(7208));
+      status = verifier.verify(new SRRset(multiSigned), keyEntry, Instant.ofEpochSecond(7208));
     } else {
       status = verifier.verify(multiSigned, key, Instant.ofEpochSecond(7208));
     }

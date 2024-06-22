@@ -9,6 +9,7 @@ server:
 	qname-minimisation: "no"
 	harden-algo-downgrade: no
 	fake-sha1: yes
+	val-min-rsa-size: 512
 	trust-anchor-signaling: no
 	minimal-responses: no
 
@@ -21,7 +22,7 @@ SCENARIO_BEGIN Test validator with multiple algorithm missing one
 
 ; K.ROOT-SERVERS.NET.
 RANGE_BEGIN 0 100
-	ADDRESS 193.0.14.129 
+	ADDRESS 193.0.14.129
 ENTRY_BEGIN
 MATCH opcode qtype qname
 ADJUST copy_id

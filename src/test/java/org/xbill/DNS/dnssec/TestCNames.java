@@ -74,7 +74,8 @@ class TestCNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
-        "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_match", getReason(response));
+        "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_alg_match:dnssec-failed.org.:RSASHA1",
+        getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
 
@@ -102,7 +103,8 @@ class TestCNames extends TestBase {
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
     assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
-        "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_match", getReason(response));
+        "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_alg_match:dnssec-failed.org.:RSASHA1",
+        getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
 
