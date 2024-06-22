@@ -10,8 +10,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junitpioneer.jupiter.cartesian.CartesianTest.Enum;
-import static org.junitpioneer.jupiter.cartesian.CartesianTest.Values;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.inOrder;
@@ -58,7 +56,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
@@ -137,9 +134,15 @@ class LookupSessionTest {
     verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, irrelevantRecordMode={1}")
-  void lookupAsync_absoluteQueryNoExtra(
-      @Values(booleans = {true, false}) boolean useCache, @Enum IrrelevantRecordMode mode)
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,REMOVE",
+        "true,THROW",
+        "false,REMOVE",
+        "false,THROW",
+      })
+  void lookupAsync_absoluteQueryNoExtra(boolean useCache, IrrelevantRecordMode mode)
       throws ExecutionException, InterruptedException {
     wireUpMockResolver(
         mockResolver, query -> multiAnswer(query, name -> new Record[] {LOOPBACK_A, EXAMPLE_A}));
@@ -493,11 +496,20 @@ class LookupSessionTest {
     verify(mockResolver, times(3)).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, includeSyntheticCnames={1}, irrelevantRecordMode={2}")
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,true,REMOVE",
+        "true,true,THROW",
+        "true,false,REMOVE",
+        "true,false,THROW",
+        "false,false,REMOVE",
+        "false,false,THROW",
+        "false,true,REMOVE",
+        "false,true,THROW",
+      })
   void lookupAsync_twoDnameRedirectOneQuery(
-      @Values(booleans = {true, false}) boolean useCache,
-      @Values(booleans = {true, false}) boolean includeSyntheticCnames,
-      @Enum IrrelevantRecordMode mode)
+      boolean useCache, boolean includeSyntheticCnames, IrrelevantRecordMode mode)
       throws Exception {
     wireUpMockResolver(
         mockResolver,
@@ -738,9 +750,15 @@ class LookupSessionTest {
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, irrelevantRecordMode={1}")
-  void lookupAsync_cnameQueryExtra(
-      @Values(booleans = {true, false}) boolean useCache, @Enum IrrelevantRecordMode mode)
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,REMOVE",
+        "true,THROW",
+        "false,REMOVE",
+        "false,THROW",
+      })
+  void lookupAsync_cnameQueryExtra(boolean useCache, IrrelevantRecordMode mode)
       throws ExecutionException, InterruptedException {
     Name query = name("cname.r.");
     Name target = name("a.b.");
@@ -769,9 +787,15 @@ class LookupSessionTest {
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, irrelevantRecordMode={1}")
-  void lookupAsync_dnameQueryExtra(
-      @Values(booleans = {true, false}) boolean useCache, @Enum IrrelevantRecordMode mode)
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,REMOVE",
+        "true,THROW",
+        "false,REMOVE",
+        "false,THROW",
+      })
+  void lookupAsync_dnameQueryExtra(boolean useCache, IrrelevantRecordMode mode)
       throws ExecutionException, InterruptedException {
     Name query = name("cname.r.");
     Name target = name("a.b.");
@@ -889,9 +913,15 @@ class LookupSessionTest {
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, irrelevantRecordMode={1}")
-  void lookupAsync_simpleDnameRedirectNoExtra(
-      @Values(booleans = {true, false}) boolean useCache, @Enum IrrelevantRecordMode mode)
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,REMOVE",
+        "true,THROW",
+        "false,REMOVE",
+        "false,THROW",
+      })
+  void lookupAsync_simpleDnameRedirectNoExtra(boolean useCache, IrrelevantRecordMode mode)
       throws ExecutionException, InterruptedException {
     Name queryName = name("x.y.to.dname.");
     wireUpMockResolver(
@@ -935,9 +965,15 @@ class LookupSessionTest {
     verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, irrelevantRecordMode={1}")
-  void lookupAsync_simpleCnameWrongInitial(
-      @Values(booleans = {true, false}) boolean useCache, @Enum IrrelevantRecordMode mode)
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,REMOVE",
+        "true,THROW",
+        "false,REMOVE",
+        "false,THROW",
+      })
+  void lookupAsync_simpleCnameWrongInitial(boolean useCache, IrrelevantRecordMode mode)
       throws ExecutionException, InterruptedException {
     Name query = name("first.example.com.");
     wireUpMockResolver(mockResolver, q -> answer(q, name -> cname("a.", "b.")));
@@ -961,9 +997,15 @@ class LookupSessionTest {
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
-  @CartesianTest(name = "useCache={0}, irrelevantRecordMode={1}")
-  void lookupAsync_simpleDnameWrongInitial(
-      @Values(booleans = {true, false}) boolean useCache, @Enum IrrelevantRecordMode mode)
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "true,REMOVE",
+        "true,THROW",
+        "false,REMOVE",
+        "false,THROW",
+      })
+  void lookupAsync_simpleDnameWrongInitial(boolean useCache, IrrelevantRecordMode mode)
       throws ExecutionException, InterruptedException {
     Name query = name("first.example.com.");
     wireUpMockResolver(mockResolver, q -> answer(q, name -> dname("a.", "b.")));
@@ -1000,9 +1042,15 @@ class LookupSessionTest {
     }
   }
 
-  @CartesianTest(name = "maxRedirects={0}, irrelevantRecordMode={1}")
-  void lookupAsync_redirectLoop(
-      @Values(ints = {3, 4}) int maxRedirects, @Enum IrrelevantRecordMode mode) {
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "3,REMOVE",
+        "3,THROW",
+        "4,REMOVE",
+        "4,THROW",
+      })
+  void lookupAsync_redirectLoop(int maxRedirects, IrrelevantRecordMode mode) {
     CNAMERecord cnameA = cname("a.", "b.");
     CNAMERecord cnameB = cname("b.", "c.");
     CNAMERecord cnameC = cname("c.", "d.");
