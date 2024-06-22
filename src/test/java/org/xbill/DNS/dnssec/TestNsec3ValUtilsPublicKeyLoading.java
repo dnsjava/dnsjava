@@ -29,7 +29,7 @@ class TestNsec3ValUtilsPublicKeyLoading extends TestBase {
       resolver.setTimeout(Duration.ofDays(1));
       Message response = resolver.send(createMessage("www.wc.nsec3.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals(Rcode.NOERROR, response.getRcode());
+      assertRCode(Rcode.NOERROR, response.getRcode());
       assertEquals("failed.nsec3_ignored", getReason(response));
     } finally {
       Type.register(Type.DNSKEY, Type.string(Type.DNSKEY), () -> spy(DNSKEYRecord.class));

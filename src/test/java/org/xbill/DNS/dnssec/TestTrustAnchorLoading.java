@@ -79,7 +79,7 @@ class TestTrustAnchorLoading extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }
@@ -92,8 +92,8 @@ class TestTrustAnchorLoading extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
 
@@ -105,8 +105,8 @@ class TestTrustAnchorLoading extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -133,7 +133,7 @@ class TestTrustAnchorLoading extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals("validate.insecure", getReason(response));
     assertEde(-1, response);
   }

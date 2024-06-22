@@ -22,7 +22,7 @@ class TestPositive extends TestBase {
   void testValidExising() throws IOException {
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -32,7 +32,7 @@ class TestPositive extends TestBase {
   void testValidNonExising() throws IOException {
     Message response = resolver.send(createMessage("ingotronic.ch./ANY"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }
@@ -55,7 +55,7 @@ class TestPositive extends TestBase {
     add("www.ingotronic.ch./A", m);
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
@@ -72,7 +72,7 @@ class TestPositive extends TestBase {
     query.getHeader().setFlag(Flags.CD);
     Message response = resolver.send(query);
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,7 +21,7 @@ class TestNoData extends TestBase {
 
     Message response = resolver.send(createMessage("www.nsec3.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
     assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
@@ -35,7 +34,7 @@ class TestNoData extends TestBase {
 
     Message response = resolver.send(createMessage("www.nsec3.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertTrue(getReason(response).startsWith("failed.nodata"));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }

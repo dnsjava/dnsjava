@@ -21,7 +21,7 @@ class TestCNames extends TestBase {
   void testCNameToUnsignedA() throws IOException {
     Message response = resolver.send(createMessage("cunsinged.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(3, response.getSection(Section.ANSWER).size());
     assertEquals("insecure.ds.nsec3", getReason(response));
     assertEde(-1, response);
@@ -31,7 +31,7 @@ class TestCNames extends TestBase {
   void testCNameToUnsignedMX() throws IOException {
     Message response = resolver.send(createMessage("cunsinged.ingotronic.ch./MX"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(2, response.getSection(Section.ANSWER).size());
     assertEquals("insecure.ds.nsec3", getReason(response));
     assertEde(-1, response);
@@ -41,7 +41,7 @@ class TestCNames extends TestBase {
   void testCNameToSignedA() throws IOException {
     Message response = resolver.send(createMessage("csigned.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(4, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -51,7 +51,7 @@ class TestCNames extends TestBase {
   void testCNameToSignedMX() throws IOException {
     Message response = resolver.send(createMessage("csigned.ingotronic.ch./MX"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(2, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -61,7 +61,7 @@ class TestCNames extends TestBase {
   void testCNameToSignedAExternal() throws IOException {
     Message response = resolver.send(createMessage("csext.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(4, response.getSection(Section.ANSWER).size());
     assertEquals(5, response.getSection(Section.AUTHORITY).size());
     assertNull(getReason(response));
@@ -72,7 +72,7 @@ class TestCNames extends TestBase {
   void testCNameToInvalidSigned() throws IOException {
     Message response = resolver.send(createMessage("cfailed.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_match", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
@@ -82,7 +82,7 @@ class TestCNames extends TestBase {
   void testCNameToUnsignedNsec3() throws IOException {
     Message response = resolver.send(createMessage("cunsinged.nsec3.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
     assertEde(-1, response);
   }
@@ -91,7 +91,7 @@ class TestCNames extends TestBase {
   void testCNameToSignedNsec3() throws IOException {
     Message response = resolver.send(createMessage("csigned.nsec3.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }
@@ -100,7 +100,7 @@ class TestCNames extends TestBase {
   void testCNameToInvalidSignedNsec3() throws IOException {
     Message response = resolver.send(createMessage("cfailed.nsec3.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:dnssec-failed.org.:dnskey.no_ds_match", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
@@ -111,7 +111,7 @@ class TestCNames extends TestBase {
   void testCNameToVoid(String subdomain, int acount) throws IOException {
     Message response = resolver.send(createMessage(subdomain + ".ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertEquals(acount, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -121,7 +121,7 @@ class TestCNames extends TestBase {
   void testCNameToUnsignedVoid() throws IOException {
     Message response = resolver.send(createMessage("cvoid4.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertEquals("insecure.ds.nsec", getReason(response));
     assertEde(-1, response);
   }
@@ -130,7 +130,7 @@ class TestCNames extends TestBase {
   void testCNameToExternalUnsignedVoid() throws IOException {
     Message response = resolver.send(createMessage("cvoid.dnssectest.jitsi.net./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
     assertEde(-1, response);
   }
@@ -139,7 +139,7 @@ class TestCNames extends TestBase {
   void testCNameToSubSigned() throws IOException {
     Message response = resolver.send(createMessage("cssub.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }
@@ -148,7 +148,7 @@ class TestCNames extends TestBase {
   void testCNameToVoidExternalInvalidTld() throws IOException {
     Message response = resolver.send(createMessage("cvoidext1.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertEquals(2, response.getSection(Section.ANSWER).size());
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -158,7 +158,7 @@ class TestCNames extends TestBase {
   void testCNameToVoidExternalValidTld() throws IOException {
     Message response = resolver.send(createMessage("cvoidext2.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }
@@ -167,7 +167,7 @@ class TestCNames extends TestBase {
   void testCNameToVoidNsec3() throws IOException {
     Message response = resolver.send(createMessage("cvoid.nsec3.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }

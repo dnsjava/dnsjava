@@ -32,7 +32,7 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:.:dnskey.no_rrset:.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
@@ -46,7 +46,7 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:.:dnskey.no_rrset:.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
@@ -63,8 +63,8 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -74,8 +74,8 @@ class TestPriming extends TestBase {
     try {
       Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals(Rcode.SERVFAIL, response.getRcode());
       assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
+      assertRCode(Rcode.SERVFAIL, response.getRcode());
       assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
     } finally {
       Type.register(Type.DNSKEY, Type.string(Type.DNSKEY), () -> spy(DNSKEYRecord.class));
@@ -99,8 +99,8 @@ class TestPriming extends TestBase {
     try {
       Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals(Rcode.SERVFAIL, response.getRcode());
       assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
+      assertRCode(Rcode.SERVFAIL, response.getRcode());
       assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
     } finally {
       Type.register(Type.DNSKEY, Type.string(Type.DNSKEY), () -> spy(DNSKEYRecord.class));
@@ -149,8 +149,8 @@ class TestPriming extends TestBase {
       Security.insertProviderAt(p, 1);
       Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
       assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-      assertEquals(Rcode.SERVFAIL, response.getRcode());
       assertEquals("validate.bogus.badkey:.:dnskey.invalid", getReason(response));
+      assertRCode(Rcode.SERVFAIL, response.getRcode());
       assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
     } finally {
       Security.removeProvider(p.getName());
@@ -166,7 +166,7 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:ch.:failed.ds.nonsec:ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.RRSIGS_MISSING, response);
   }
@@ -181,7 +181,7 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus.badkey:ch.:failed.ds.nonsec:ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.RRSIGS_MISSING, response);
   }
@@ -208,7 +208,7 @@ class TestPriming extends TestBase {
     R.setUseNeutralMessages(false);
     Message response = resolver.send(createMessage("sub.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:sub.ingotronic.ch.:failed.ds.nsec:dnskey.no_key:sub.ingotronic.ch.",
         getReason(response));
@@ -225,7 +225,7 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("a.e.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus:failed.ds.nsec.ent", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -252,7 +252,7 @@ class TestPriming extends TestBase {
 
     Message response = resolver.send(createMessage("www.unsigned.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.bogus:failed.ds.unknown", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }

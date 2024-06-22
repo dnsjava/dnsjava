@@ -51,7 +51,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("sub.ingotronic.ch./MX"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -77,7 +77,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("s.sub.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:s.sub.ingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -86,7 +86,7 @@ class TestValUtils extends TestBase {
   void testNameErrorWhenNsecIsNotFromApex() throws IOException {
     Message response = resolver.send(createMessage("1.www.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
   }
 
@@ -111,7 +111,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("y.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:y.ingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -137,7 +137,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("zingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:zingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -163,7 +163,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nxdomain.exists:ingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -176,7 +176,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("samekey.ingotronic.ch./DS"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -185,7 +185,7 @@ class TestValUtils extends TestBase {
   void testNoDataOfDSForRoot() throws IOException {
     Message response = resolver.send(createMessage("./DS"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }
@@ -239,7 +239,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -265,7 +265,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./AAAA"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -291,7 +291,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("csigned.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -317,7 +317,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("a.c.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -343,7 +343,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("a.cwv.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -369,7 +369,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("b.d.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -395,7 +395,7 @@ class TestValUtils extends TestBase {
 
     Message response = resolver.send(createMessage("sub.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "validate.bogus.badkey:sub.ingotronic.ch.:failed.ds.nsec.hasdata", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);

@@ -16,7 +16,7 @@ class TestKeyCacheUsage extends TestBase {
   void testUnsigned() throws IOException {
     Message response = resolver.send(createMessage("www.unsigned.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
     assertEde(-1, response);
@@ -24,7 +24,7 @@ class TestKeyCacheUsage extends TestBase {
     // send the query a second time to ensure the cache doesn't create a wrong behavior
     response = resolver.send(createMessage("www.unsigned.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
     assertEde(-1, response);

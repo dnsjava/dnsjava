@@ -31,7 +31,7 @@ class TestAlgorithmSupport extends TestBase {
   void testAlgIsUnknown(String param) throws IOException {
     Message response = resolver.send(createMessage(param + ".ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.noalgorithms:" + param + ".ingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM, response);
   }
@@ -44,7 +44,7 @@ class TestAlgorithmSupport extends TestBase {
       resolver.init(new Properties());
       Message response = resolver.send(createMessage(param + ".nl./A"));
       assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-      assertEquals(Rcode.NOERROR, response.getRcode());
+      assertRCode(Rcode.NOERROR, response.getRcode());
       assertNull(getReason(response));
       assertEde(-1, response);
     } finally {
@@ -56,8 +56,8 @@ class TestAlgorithmSupport extends TestBase {
   void testDigestIdIsUnknown() throws IOException {
     Message response = resolver.send(createMessage("unknown-alg.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
     assertEquals("failed.ds.nodigest:unknown-alg.ingotronic.ch.", getReason(response));
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEde(ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE, response);
   }
 

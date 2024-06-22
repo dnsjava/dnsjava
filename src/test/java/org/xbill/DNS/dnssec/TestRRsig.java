@@ -20,7 +20,7 @@ class TestRRsig extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./RRSIG"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.nodata", getReason(response));
     assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
@@ -34,7 +34,7 @@ class TestRRsig extends TestBase {
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./RRSIG"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.SERVFAIL, response.getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("validate.response.unknown:UNKNOWN", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }

@@ -42,6 +42,7 @@ import org.xbill.DNS.Master;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.RRset;
+import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
@@ -270,6 +271,10 @@ public abstract class TestBase {
     String expectedText = expected == -1 ? null : ExtendedErrorCodeOption.text(expected);
     String actualText = edeReason == -1 ? null : ExtendedErrorCodeOption.text(edeReason);
     assertEquals(expectedText, actualText, "EDE does not match");
+  }
+
+  protected void assertRCode(int expected, int actual) {
+    assertEquals(Rcode.string(expected), Rcode.string(actual));
   }
 
   protected String getEdeText(Message m) {

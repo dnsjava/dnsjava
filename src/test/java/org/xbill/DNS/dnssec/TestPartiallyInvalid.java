@@ -16,7 +16,7 @@ class TestPartiallyInvalid extends TestBase {
   void testValidExising() throws IOException {
     Message response = resolver.send(createMessage("www.partial.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -26,7 +26,7 @@ class TestPartiallyInvalid extends TestBase {
   void testValidExisingNoType() throws IOException {
     Message response = resolver.send(createMessage("www.partial.ingotronic.ch./MX"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertTrue(isEmptyAnswer(response));
     assertNull(getReason(response));
     assertEde(-1, response);
@@ -36,7 +36,7 @@ class TestPartiallyInvalid extends TestBase {
   void testValidNonExising() throws IOException {
     Message response = resolver.send(createMessage("www.gibtsnicht.partial.ingotronic.ch./A"));
     assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertEquals(Rcode.NXDOMAIN, response.getRcode());
+    assertRCode(Rcode.NXDOMAIN, response.getRcode());
     assertNull(getReason(response));
     assertEde(-1, response);
   }

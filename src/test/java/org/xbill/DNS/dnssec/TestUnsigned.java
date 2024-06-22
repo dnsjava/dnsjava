@@ -15,7 +15,7 @@ class TestUnsigned extends TestBase {
   void testUnsignedBelowSignedZoneBind() throws IOException {
     Message response = resolver.send(createMessage("www.unsigned.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
     assertEde(-1, response);
@@ -25,7 +25,7 @@ class TestUnsigned extends TestBase {
   void testUnsignedBelowSignedTldNsec3NoOptOut() throws IOException {
     Message response = resolver.send(createMessage("20min.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
     assertEde(-1, response);
   }
@@ -34,7 +34,7 @@ class TestUnsigned extends TestBase {
   void testUnsignedBelowSignedTldNsec3OptOut() throws IOException {
     Message response = resolver.send(createMessage("yahoo.com./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals("insecure.ds.nsec3", getReason(response));
     assertEde(-1, response);
   }
@@ -43,7 +43,7 @@ class TestUnsigned extends TestBase {
   void testUnsignedBelowUnsignedZone() throws IOException {
     Message response = resolver.send(createMessage("www.sub.unsigned.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
-    assertEquals(Rcode.NOERROR, response.getRcode());
+    assertRCode(Rcode.NOERROR, response.getRcode());
     assertEquals(localhost, firstA(response));
     assertEquals("insecure.ds.nsec", getReason(response));
     assertEde(-1, response);
