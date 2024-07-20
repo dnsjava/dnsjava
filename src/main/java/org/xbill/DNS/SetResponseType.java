@@ -26,20 +26,23 @@ enum SetResponseType {
   DELEGATION(true, false),
 
   /**
-   * The Cache/Zone found a CNAME when looking for the name.
+   * The {@link Cache} or {@link Zone} found a CNAME when looking for the name.
    *
    * @see CNAMERecord
    */
   CNAME(true, false),
 
   /**
-   * The Cache/Zone found a DNAME when looking for the name.
+   * The {@link Cache} or {@link Zone} found a DNAME when looking for the name.
    *
    * @see DNAMERecord
    */
   DNAME(true, false),
 
-  /** The Cache/Zone has successfully answered the question for the requested name/type/class. */
+  /**
+   * The {@link Cache} or {@link Zone} has successfully answered the question for the requested
+   * name/type/class.
+   */
   SUCCESSFUL(false, false);
 
   private final boolean printRecords;

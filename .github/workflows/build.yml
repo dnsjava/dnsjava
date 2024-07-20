@@ -45,12 +45,14 @@ jobs:
       - name: Build with Maven
         shell: bash
         run: |
+          TEST_EXCLUSIONS=$([ '${{ matrix.java }}' == '21' ] && echo "" || echo "concurrency" )
           # don't exit immediately
           set +e
           mvn verify \
             -B \
             -Dsurefire.rerunFailingTestsCount=2 \
             -"Dgpg.skip" \
+            -DexcludedGroups="${TEST_EXCLUSIONS}" \
             jacoco:report
           cd target
           mv jacoco.exec jacoco-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}.exec

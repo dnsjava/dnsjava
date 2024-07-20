@@ -20,7 +20,7 @@ import lombok.EqualsAndHashCode;
  * @author Brian Wellington
  */
 @EqualsAndHashCode(of = {"rrs", "sigs"})
-public class RRset implements Serializable {
+public class RRset implements Serializable, Iterable<Record> {
   private final ArrayList<Record> rrs;
   private final ArrayList<RRSIGRecord> sigs;
   private short position;
@@ -44,6 +44,20 @@ public class RRset implements Serializable {
    * @param records The records to add to the set. See {@link #addRR(Record)} for restrictions.
    */
   public RRset(Record... records) {
+    this();
+    Objects.requireNonNull(records);
+    for (Record r : records) {
+      addRR(r);
+    }
+  }
+
+  /**
+   * Creates an RRset and sets its contents to the specified record(s)
+   *
+   * @param records The records to add to the set. See {@link #addRR(Record)} for restrictions.
+   * @since 3.6
+   */
+  public RRset(Iterable<Record> records) {
     this();
     Objects.requireNonNull(records);
     for (Record r : records) {
@@ -191,9 +205,28 @@ public class RRset implements Serializable {
     return Collections.unmodifiableList(sigs);
   }
 
-  /** Returns the number of (data) records */
+  /** Returns the number of data records. */
   public int size() {
     return rrs.size();
+  }
+
+  /**
+   * Returns the number of signature records.
+   *
+   * @since 3.6
+   */
+  public int sigSize() {
+    return sigs.size();
+  }
+
+  /**
+   * Returns {@code true} if this RRset is empty, i.e. if there are neither data nor signature
+   * records.
+   *
+   * @since 3.6
+   */
+  public boolean isEmpty() {
+    return rrs.isEmpty() && sigs.isEmpty();
   }
 
   /**
@@ -288,5 +321,16 @@ public class RRset implements Serializable {
 
     sb.append(" }");
     return sb.toString();
+  }
+
+  /**
+   * Returns an {@link Iterator} over the resource records. This is a convenience method / interface
+   * implementation and equivalent to calling {@code rrs().iterator()}.
+   *
+   * @since 3.6
+   */
+  @Override
+  public Iterator<Record> iterator() {
+    return rrs().iterator();
   }
 }
