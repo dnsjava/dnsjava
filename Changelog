@@ -1,3 +1,32 @@
+07/21/2024
+	- 3.6.0 released
+	- Fix CVE-2024-25638 (GHSA-cfxw-4h78-h7fw)
+	  Lookup and LookupSession do not sanitize input properly,
+	  allowing to smuggle additional responses, even with DNSSEC.
+	  I would like to thank Thomas Bellebaum from Fraunhofer AISEC
+	  (@bellebaum) and Martin Schanzenbach (@schanzen) for reporting
+	  and assisting me with this issue.
+	- Fix CVE-2023-50387 (GHSA-crjg-w57m-rqqf)
+	  Denial-of-Service Algorithmic Complexity Attacks (KeyTrap)
+	- Fix CVE-2023-50868 (GHSA-mmwx-rj87-vfgr)
+	  NSEC3 closest encloser proof can exhaust CPU resources (KeyTrap)
+	- Fix running all DNSSEC on the specified executor
+	- Add new DNSSEC algorithm constants for SM2SM3 and ECC-GOST12
+	- Add A/AAAA record constructor with IP address byte array
+	- Validate DS record digest lengths (#250)
+	- Fix NPE in SimpleResolver on invalid responses (#277)
+	- Add support for JEP 418: Internet-Address Resolution SPI (#290)
+	- Full JPMS support (#246)
+	- Pluggable I/O for SimpleResolver
+	  (@chrisruffalo, #253)
+	- UDP port leak in SimpleResolver (#318)
+	- Fix clean shutdown in app containers when never used (#319)
+	- Fix concurrency issue in I/O clients (#315, #323)
+	- LookupSession doesn't cache CNAMEs (#316)
+	- SimpleResolver can fail with UPDATE response (#322)
+	- Replace synchronization in Zone with locks
+	  (#305, based on work from @srijeet0406 in #306)
+
 11/11/2023
 	- 3.5.3 released
 	- Fix CNAME in LookupSession (#279)
@@ -28,9 +57,9 @@
 	- Add full built-in support for DNSSEC based on dnssecjava (#209)
 	- Make Record classes serializable again (#242)
 	- Allow SVCB ServiceMode records without params
-	  (#244, @adam-stoler) 
+	  (#244, @adam-stoler)
 	- Fix TCPClient receive timeouts
-	  (#218 @nguydavi, #219) 
+	  (#218 @nguydavi, #219)
 
 12/05/2021
 	- 3.4.3 released
@@ -82,7 +111,7 @@
 	- 3.3.1 released
 	- Fix value of getAlias in C/DNameRecord (#136)
 	- Fix bug with SVCB/HTTPS parsing of master file format
-	  (PR#135, @adam-stoler) 
+	  (PR#135, @adam-stoler)
 
 09/27/2020
 	 - 3.3.0 released
@@ -145,7 +174,7 @@
 	- 3.0.0-next.1 released
 	- Requires Java 8 and slf4j-api
 	- Adds support for Java 9+ and Android O+ via a new server config
-	  lookup system (#6, #9, 
+	  lookup system (#6, #9)
 	- Resolving is now fully asynchronous, no new thread per query anymore
 	- Message provides information about the resolver that produced it (#41)
 	- Add support for Host Identity Protocol (HIP) records (RFC 8005, #47)
@@ -460,7 +489,7 @@
 	- The TSIG verification routines (TSIG.verify,
 	  TSIG.StreamVerifier.verify() now update the Message object with the
 	  status of the verification in addition to returning the status.
-	
+
 6/03/2009
 	- The lists of servers and searchlist entries in ResolverConfig should
 	  not be static.
@@ -695,7 +724,7 @@
 
 5/7/2005
 	- Fix several problems with empty names.
-	  (Matt Rutherford <rutherfo@cs.colorado.edu>)  
+	  (Matt Rutherford <rutherfo@cs.colorado.edu>)
 
 4/23/2005
 	- As per RFC 2181, the maximum allowed TTL value is 0x7FFFFFFF.
@@ -1119,7 +1148,7 @@
 	- Converting some types of records (TXT, for example) to wire format
 	  could throw an IndexOutOfBoundsException.
 	- TSIG signed UDP queries weren't properly verified by jnamed.
-	- Add a method to render a Message with a specified maximum size - 
+	- Add a method to render a Message with a specified maximum size -
 	  this method will properly truncate large responses and apply
 	  TSIG signatures.
 
@@ -1185,7 +1214,7 @@
 
 10/6/2002
 	- Fix minor bugs in Name code (Bob Halley <bob.halley@nominum.com>)
-	  
+
 10/1/2002
 	- Memory usage and speed improvements to the TypeMap class.
 
@@ -1418,7 +1447,7 @@
 	  (Christopher Fitch <cfitch@sbti.com>)
 	- Added a routine to build a SIG record based on the results of
 	  a DSA signature (Pasi Eronen <pe@iki.fi>)
-	
+
 8/13/2000
 	- Added 'clear' command to update client
 	- Removed some deprecated code
@@ -1688,21 +1717,21 @@
 5/13/1999
 	- split WorkerThread into WorkerThread and ResolveThread
 
-4/25/1999	
+4/25/1999
 	- moved files to org.xbill.DNS
 	- Cache round-robins RRsets before handing them out
 	- changed the way ExtendedResolver decides when to send queries
 	- various reflection changes
 
-4/21/1999	
+4/21/1999
 	- minor WorkerThread fixes
 
-4/19/1999	
+4/19/1999
 	- 0.9.1 released
 	- WorkerThreads should die after 15 minutes of idle time
 	- Address.getByName/getAllByName handle dotted quad IP addresses
 
-4/18/1999	
+4/18/1999
 	- 0.9 released
 	- Finished javadoc-ing classes in DNS.*
 	- Server should work now
