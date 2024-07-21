@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java }}
           architecture: ${{ matrix.arch }}
@@ -100,7 +100,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ env.BUILD_JAVA_VERSION }}
           distribution: temurin
@@ -133,7 +133,7 @@ jobs:
 
       - name: Archive PR number
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'dnsjava'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pr_number
           path: pr_number.txt
@@ -156,7 +156,9 @@ jobs:
           cache: maven
 
       - name: Run codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       # doesn't work with PRs from forks, see
       # https://portal.productboard.com/sonarsource/1-sonarcloud/c/50-sonarcloud-analyzes-external-pull-request
@@ -175,7 +177,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up JDK ${{ env.BUILD_JAVA_VERSION }}
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ env.BUILD_JAVA_VERSION }}
           architecture: 'x64'

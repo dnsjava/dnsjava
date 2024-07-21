@@ -23,7 +23,7 @@ runs:
 
     - name: Download artifacts
       if: github.event_name == 'workflow_run'
-      uses: dawidd6/action-download-artifact@v2
+      uses: dawidd6/action-download-artifact@v6
       with:
         workflow: ${{ github.event.workflow_run.name }}
         run_id: ${{ github.event.workflow_run.id }}
