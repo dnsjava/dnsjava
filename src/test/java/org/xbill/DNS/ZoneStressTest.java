@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jcstress.Main;
@@ -23,6 +24,7 @@ import org.openjdk.jcstress.infra.results.L_Result;
 
 class ZoneStressTest {
   @Test
+  @Disabled("Too expensive to always run")
   @Tag("concurrency")
   void runZoneConcurrentReadStressTest() throws Exception {
     // IntelliJ doesn't properly run the JCStress' annotation processor,

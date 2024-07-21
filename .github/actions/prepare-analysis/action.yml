@@ -11,7 +11,7 @@ runs:
     - name: Get reports
       uses: ./.github/actions/download-artifact
       with:
-        name: reports
+        name: reports-*
 
     - name: Get coverage
       uses: ./.github/actions/download-artifact

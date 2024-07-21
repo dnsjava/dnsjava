@@ -79,7 +79,7 @@ jobs:
         uses: ./.github/actions/upload-artifact
         if: always() # always run even if the previous step fails
         with:
-          name: reports
+          name: reports-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
           filename: ${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
           path: target/surefire-reports-*/TEST-*.xml
 
@@ -87,7 +87,7 @@ jobs:
         uses: ./.github/actions/upload-artifact
         if: always() # always run even if the previous step fails
         with:
-          name: coverage
+          name: coverage-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
           filename: ${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}
           path: target/jacoco-${{ matrix.java }}-${{ matrix.arch }}-${{ matrix.os }}.exec
 
@@ -109,7 +109,7 @@ jobs:
       - name: Get coverage artifact
         uses: ./.github/actions/download-artifact
         with:
-          name: coverage
+          name: coverage-*
 
       - name: Get classes
         uses: ./.github/actions/download-artifact
