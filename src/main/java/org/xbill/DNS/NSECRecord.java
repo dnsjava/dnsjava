@@ -14,8 +14,8 @@ import java.io.IOException;
  *
  * @author Brian Wellington
  * @author David Blacka
- * @see <a href="https://tools.ietf.org/html/rfc4034">RFC 4034: Resource Records for the DNS
- *     Security Extensions</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc4034">RFC 4034: Resource Records for the
+ *     DNS Security Extensions</a>
  */
 public class NSECRecord extends Record {
   private Name next;

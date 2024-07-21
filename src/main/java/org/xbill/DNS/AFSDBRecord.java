@@ -7,7 +7,7 @@ package org.xbill.DNS;
  * AFS Data Base Record - maps a domain name to the name of an AFS cell database server.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class AFSDBRecord extends U16NameBase {
   AFSDBRecord() {}

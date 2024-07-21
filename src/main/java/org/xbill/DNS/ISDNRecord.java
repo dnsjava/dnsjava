@@ -9,7 +9,7 @@ import java.io.IOException;
  * ISDN - identifies the ISDN number and subaddress associated with a name.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class ISDNRecord extends Record {
   private byte[] address;

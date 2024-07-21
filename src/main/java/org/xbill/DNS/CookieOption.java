@@ -6,9 +6,10 @@ import java.util.Optional;
 import org.xbill.DNS.utils.base16;
 
 /**
- * Cookie EDNS0 Option, as defined in https://tools.ietf.org/html/rfc7873
+ * Cookie EDNS0 Option.
  *
  * @see OPTRecord
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7873">RFC 7873</a>
  * @author Klaus Malorny
  */
 public class CookieOption extends EDNSOption {

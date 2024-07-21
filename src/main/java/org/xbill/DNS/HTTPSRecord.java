@@ -4,11 +4,10 @@ package org.xbill.DNS;
 import java.util.List;
 
 /**
- * HTTPS Service Location and Parameter Binding Record
+ * HTTPS Service Location and Parameter Binding Record.
  *
- * @see <a
- *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
  * @since 3.3
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc9460">RFC 9460</a>
  */
 public class HTTPSRecord extends SVCBBase {
   HTTPSRecord() {}

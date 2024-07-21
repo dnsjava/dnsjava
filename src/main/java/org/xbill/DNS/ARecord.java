@@ -11,8 +11,8 @@ import java.net.UnknownHostException;
  * Address Record - maps a domain name to an Internet address
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC 1035: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class ARecord extends Record {
   private int addr;

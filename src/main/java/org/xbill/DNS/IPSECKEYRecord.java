@@ -12,8 +12,8 @@ import org.xbill.DNS.utils.base64;
  * IPsec Keying Material (RFC 4025)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc4025">RFC 4025: A Method for Storing IPsec Keying
- *     Material in DNS</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc4025">RFC 4025: A Method for Storing IPsec
+ *     Keying Material in DNS</a>
  */
 public class IPSECKEYRecord extends Record {
   /**
@@ -24,13 +24,25 @@ public class IPSECKEYRecord extends Record {
   public static class Algorithm {
     private Algorithm() {}
 
-    /** A DSA key is present, in the format defined in [RFC2536] */
+    /**
+     * A DSA key is present.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc2536">RFC 2536</a>
+     */
     public static final int DSA = 1;
 
-    /** A RSA key is present, in the format defined in [RFC3110] */
+    /**
+     * A RSA key is present.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc3110">RFC 3110</a>
+     */
     public static final int RSA = 2;
 
-    /** An ECDSA key is present, in the format defined in [RFC6605] */
+    /**
+     * An ECDSA key is present.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6605">RFC 6605</a>
+     */
     public static final int ECDSA = 3;
   }
 

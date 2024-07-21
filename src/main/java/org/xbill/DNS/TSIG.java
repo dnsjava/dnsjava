@@ -665,7 +665,7 @@ public class TSIG {
     }
 
     // validate time after the signature, as per
-    // https://www.rfc-editor.org/rfc/rfc8945.html#section-5.4
+    // https://datatracker.ietf.org/doc/html/rfc8945#section-5.4
     int badtime = verifyTime(tsig);
     if (badtime != Rcode.NOERROR) {
       return badtime;
@@ -804,7 +804,7 @@ public class TSIG {
      * Creates an instance to sign multiple message for use in a stream.
      *
      * <p>This class creates a {@link TSIGRecord} on every message to conform with <a
-     * href="https://www.rfc-editor.org/rfc/rfc8945.html#section-5.3.1">RFC 8945, 5.3.1</a>.
+     * href="https://datatracker.ietf.org/doc/html/rfc8945#section-5.3.1">RFC 8945, 5.3.1</a>.
      *
      * @param key The TSIG key used to create the signature records.
      * @param queryTsig The initial TSIG records, e.g. from a query to a server.

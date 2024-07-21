@@ -6,8 +6,8 @@ package org.xbill.DNS;
 /**
  * S/MIME cert association
  *
- * @see <a href="https://tools.ietf.org/html/rfc8162">RFC 8162: Using Secure DNS to Associate
- *     Certificates with Domain Names for S/MIME</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc8162">RFC 8162: Using Secure DNS to
+ *     Associate Certificates with Domain Names for S/MIME</a>
  * @author Brian Wellington
  */
 public class SMIMEARecord extends TLSARecord {

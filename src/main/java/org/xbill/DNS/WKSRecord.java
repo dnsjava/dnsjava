@@ -14,14 +14,14 @@ import java.util.List;
  * Well Known Services - Lists services offered by this host.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC 1035: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class WKSRecord extends Record {
   /**
    * IP protocol identifiers. This is basically copied out of RFC 1010.
    *
-   * @see <a href="https://tools.ietf.org/html/rfc1010">RFC 1010: Assigned Numbers</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc1010">RFC 1010: Assigned Numbers</a>
    */
   public static class Protocol {
 

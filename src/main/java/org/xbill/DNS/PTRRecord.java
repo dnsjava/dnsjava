@@ -7,8 +7,8 @@ package org.xbill.DNS;
  * Pointer Record - maps a domain name representing an Internet Address to a hostname.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC 1035: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class PTRRecord extends SingleCompressedNameBase {
   PTRRecord() {}

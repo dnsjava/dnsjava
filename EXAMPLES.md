@@ -144,7 +144,7 @@ public class ResolveExample {
 
         // Send the same queries using the validating resolver with the
         // trust anchor of the root zone
-        // http://data.iana.org/root-anchors/root-anchors.xml
+        // https://data.iana.org/root-anchors/root-anchors.xml
         ValidatingResolver vr = new ValidatingResolver(sr);
         vr.loadTrustAnchors(new ByteArrayInputStream(ROOT.getBytes(StandardCharsets.US_ASCII)));
         System.out.println("\n\nValidating resolver:");

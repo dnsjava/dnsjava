@@ -12,7 +12,7 @@ import org.xbill.DNS.utils.base16;
  * ZONEMD Resource record.
  *
  * @since 3.6
- * @see <a href="https://www.rfc-editor.org/rfc/rfc8976.html">RFC8976</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc8976">RFC 8976</a>
  */
 public class ZoneMDRecord extends Record {
   /**
@@ -117,8 +117,8 @@ public class ZoneMDRecord extends Record {
 
   /**
    * A 32-bit unsigned integer in network byte order. It is the serial number from the zone's SOA
-   * record (<a href="https://www.rfc-editor.org/rfc/rfc1035.html">RFC1035, Section 3.3.13]</a>) for
-   * which the zone digest was generated.
+   * record (<a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC 1035, Section 3.3.13]</a>)
+   * for which the zone digest was generated.
    */
   @Getter private long serial;
 

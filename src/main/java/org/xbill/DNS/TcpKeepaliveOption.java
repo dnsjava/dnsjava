@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
- * TCP Keepalive EDNS0 Option, as defined in https://tools.ietf.org/html/rfc7828
+ * TCP Keepalive EDNS0 Option, as defined in https://datatracker.ietf.org/doc/html/rfc7828
  *
  * @see OPTRecord
  * @author Klaus Malorny

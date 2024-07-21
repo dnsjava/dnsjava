@@ -92,7 +92,7 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
           queryData);
 
       // combine length+message to avoid multiple TCP packets
-      // https://tools.ietf.org/html/rfc7766#section-8
+      // https://datatracker.ietf.org/doc/html/rfc7766#section-8
       ByteBuffer buffer = ByteBuffer.allocate(queryData.length + 2);
       buffer.put((byte) (queryData.length >>> 8));
       buffer.put((byte) (queryData.length & 0xFF));

@@ -11,8 +11,8 @@ import java.net.UnknownHostException;
  * IPv6 Address Record - maps a domain name to an IPv6 address
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc3596">RFC 3596: DNS Extensions to Support IP Version
- *     6</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc3596">RFC 3596: DNS Extensions to Support
+ *     IP Version 6</a>
  */
 public class AAAARecord extends Record {
   private byte[] address;

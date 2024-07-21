@@ -8,8 +8,8 @@ package org.xbill.DNS;
  *
  * @see OPTRecord
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc5001">RFC 5001: DNS Name Server Identifier (NSID)
- *     Option</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc5001">RFC 5001: DNS Name Server Identifier
+ *     (NSID) Option</a>
  */
 public class NSIDOption extends GenericEDNSOption {
   NSIDOption() {

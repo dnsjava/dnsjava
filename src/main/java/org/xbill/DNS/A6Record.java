@@ -11,7 +11,8 @@ import java.net.UnknownHostException;
  * A6 Record - maps a domain name to an IPv6 address (historic)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc6563">RFC 6563: Moving A6 to Historic Status</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6563">RFC 6563: Moving A6 to Historic
+ *     Status</a>
  */
 public class A6Record extends Record {
   private int prefixBits;

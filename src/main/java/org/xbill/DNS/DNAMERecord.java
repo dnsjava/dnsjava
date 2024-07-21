@@ -7,7 +7,8 @@ package org.xbill.DNS;
  * DNAME Record - maps a nonterminal alias (subtree) to a different domain
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc6672">RFC 6672: DNAME Redirection in the DNS</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6672">RFC 6672: DNAME Redirection in the
+ *     DNS</a>
  */
 public class DNAMERecord extends SingleNameBase {
   DNAMERecord() {}

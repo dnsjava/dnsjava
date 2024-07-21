@@ -7,8 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * The Client Subnet EDNS Option, defined in <a href="https://tools.ietf.org/html/rfc7871">Client
- * subnet in DNS requests</a>.
+ * The Client Subnet EDNS Option.
  *
  * <p>The option is used to convey information about the IP address of the originating client, so
  * that an authoritative server can make decisions based on this address, rather than the address of
@@ -22,6 +21,7 @@ import java.net.UnknownHostException;
  * length (where the final octet is padded with bits set to 0)
  *
  * @see OPTRecord
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7871">RFC 7871</a>
  * @author Brian Wellington
  * @author Ming Zhou &lt;mizhou@bnivideo.com&gt;, Beaumaris Networks
  */

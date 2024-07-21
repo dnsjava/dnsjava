@@ -7,7 +7,7 @@ package org.xbill.DNS;
  * Mail Forwarder Record - specifies a mail agent which forwards mail for a domain (obsolete)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc973">RFC 973: Domain System Changes and
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc973">RFC 973: Domain System Changes and
  *     Observations</a>
  */
 public class MFRecord extends SingleNameBase {

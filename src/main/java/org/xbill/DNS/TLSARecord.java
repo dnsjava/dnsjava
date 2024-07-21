@@ -10,8 +10,8 @@ import org.xbill.DNS.utils.base16;
  * Transport Layer Security Authentication
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc6698">RFC 6698: The DNS-Based Authentication of
- *     Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6698">RFC 6698: The DNS-Based
+ *     Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA</a>
  */
 public class TLSARecord extends Record {
   public static class CertificateUsage {
@@ -26,10 +26,18 @@ public class TLSARecord extends Record {
   public static class Selector {
     private Selector() {}
 
-    /** Full certificate; the Certificate binary structure defined in [RFC5280] */
+    /**
+     * Full certificate; the Certificate binary structure.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc5280">RFC 5280</a>
+     */
     public static final int FULL_CERTIFICATE = 0;
 
-    /** SubjectPublicKeyInfo; DER-encoded binary structure defined in [RFC5280] */
+    /**
+     * SubjectPublicKeyInfo; DER-encoded binary structure.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc5280">RFC 5280</a>
+     */
     public static final int SUBJECT_PUBLIC_KEY_INFO = 1;
   }
 
@@ -39,10 +47,18 @@ public class TLSARecord extends Record {
     /** Exact match on selected content */
     public static final int EXACT = 0;
 
-    /** SHA-256 hash of selected content [RFC6234] */
+    /**
+     * SHA-256 hash of selected content.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6234">RFC 6234</a>
+     */
     public static final int SHA256 = 1;
 
-    /** SHA-512 hash of selected content [RFC6234] */
+    /**
+     * SHA-512 hash of selected content.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6234">RFC 6234</a>
+     */
     public static final int SHA512 = 2;
   }
 

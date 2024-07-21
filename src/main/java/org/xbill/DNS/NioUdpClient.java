@@ -30,7 +30,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
   private final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
 
   NioUdpClient() {
-    // https://tools.ietf.org/html/rfc6335#section-6
+    // https://datatracker.ietf.org/doc/html/rfc6335#section-6
     int ephemeralStartDefault = 49152;
     int ephemeralEndDefault = 65535;
 

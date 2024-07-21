@@ -22,53 +22,128 @@ public abstract class EDNSOption {
   public static class Code {
     private Code() {}
 
-    /** Apple's DNS Long-Lived Queries protocol, draft-sekar-dns-llq-06 */
+    /**
+     * Apple's DNS Long-Lived Queries protocol.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8764/">RFC 8764</a>
+     */
     public static final int LLQ = 1;
 
-    /** Dynamic DNS Update Leases, draft-sekar-dns-ul-02 */
+    /**
+     * Dynamic DNS Update Leases.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-sekar-dns-ul-03">draft-sekar-dns-ul-03</a>
+     */
     public static final int UL = 2;
 
-    /** Name Server Identifier, RFC 5001 */
+    /**
+     * Name Server Identifier.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc5001/">RFC 5001</a>
+     */
     public static final int NSID = 3;
 
-    /** DNSSEC Algorithm Understood (DAU), RFC 6975 */
+    /**
+     * DNSSEC Algorithm Understood (DAU).
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6975/">RFC 6975</a>
+     */
     public static final int DAU = 5;
 
-    /** DNSSEC DS Hash Understood (DHU), RFC 6975 */
+    /**
+     * DNSSEC DS Hash Understood (DHU).
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8764/">RFC 8764</a>
+     */
     public static final int DHU = 6;
 
-    /** DNSSEC NSEC3 Hash Understood (N3U), RFC 6975 */
+    /**
+     * DNSSEC NSEC3 Hash Understood (N3U).
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6975/">RFC 6975</a>
+     */
     public static final int N3U = 7;
 
-    /** Client Subnet, RFC 7871 */
+    /**
+     * Client Subnet.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7871/">RFC 7871</a>
+     */
     public static final int CLIENT_SUBNET = 8;
 
-    /** (EDNS) EXPIRE Option, RFC 7314 */
+    /**
+     * (EDNS) EXPIRE Option.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7314/">RFC 7314</a>
+     */
     public static final int EDNS_EXPIRE = 9;
 
-    /** Cookie, RFC 7873 */
+    /**
+     * Cookie.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7873/">RFC 7873</a>
+     */
     public static final int COOKIE = 10;
 
-    /** TCP Keepalive, RFC 7828 */
+    /**
+     * TCP Keepalive.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7828/">RFC 7828</a>
+     */
     public static final int TCP_KEEPALIVE = 11;
 
-    /** EDNS(0) Padding Option, RFC 7830 */
+    /**
+     * EDNS(0) Padding Option.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7830/">RFC 7830</a>
+     */
     public static final int PADDING = 12;
 
-    /** CHAIN Query Requests in DNS, RFC 7901 */
+    /**
+     * CHAIN Query Requests in DNS.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7901/">RFC 7901</a>
+     */
     public static final int CHAIN = 13;
 
-    /** Signaling Trust Anchor Knowledge in DNS Security Extensions (DNSSEC), RFC 8145 */
+    /**
+     * Signaling Trust Anchor Knowledge in DNS Security Extensions (DNSSEC).
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8145/">RFC 8145</a>
+     */
     public static final int EDNS_KEY_TAG = 14;
 
-    /** Extended DNS Errors, RFC 8914. */
+    /**
+     * Extended DNS Errors.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8914/">RFC 8914</a>
+     */
     public static final int EDNS_EXTENDED_ERROR = 15;
 
-    /** DNS EDNS Tags, draft-bellis-dnsop-edns-tags-01 */
+    /**
+     * DNS EDNS Tags.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-bellis-dnsop-edns-tags-01">draft-bellis-dnsop-edns-tags-01</a>
+     */
     public static final int EDNS_CLIENT_TAG = 16;
 
-    /** DNS EDNS Tags, draft-bellis-dnsop-edns-tags-01 */
+    /**
+     * DNS EDNS Tags.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-bellis-dnsop-edns-tags-01">draft-bellis-dnsop-edns-tags-01</a>
+     */
     public static final int EDNS_SERVER_TAG = 17;
+
+    /**
+     * Report Channel.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc9567/">RFC 9567</a>
+     * @since 3.6
+     */
+    public static final int REPORT_CHANNEL = 18;
 
     private static final Mnemonic codes =
         new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
@@ -95,6 +170,7 @@ public abstract class EDNSOption {
       codes.add(EDNS_EXTENDED_ERROR, "Extended_DNS_Error");
       codes.add(EDNS_CLIENT_TAG, "EDNS-Client-Tag");
       codes.add(EDNS_SERVER_TAG, "EDNS-Server-Tag");
+      codes.add(REPORT_CHANNEL, "Report-Channel");
     }
 
     /** Converts an EDNS Option Code into its textual representation */

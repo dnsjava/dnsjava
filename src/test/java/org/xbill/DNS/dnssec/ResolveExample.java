@@ -21,7 +21,7 @@ class ResolveExample {
   static String ROOT =
       ". IN DS 20326 8 2 E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D";
 
-  static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     // Send two sample queries using a standard DNSJAVA resolver
     SimpleResolver sr = new SimpleResolver("8.8.8.8");
     System.out.println("Standard resolver:");
@@ -30,7 +30,7 @@ class ResolveExample {
 
     // Send the same queries using the validating resolver with the
     // trust anchor of the root zone
-    // http://data.iana.org/root-anchors/root-anchors.xml
+    // https://data.iana.org/root-anchors/root-anchors.xml
     ValidatingResolver vr = new ValidatingResolver(sr);
     vr.loadTrustAnchors(new ByteArrayInputStream(ROOT.getBytes("ASCII")));
     vr.loadTrustAnchors(new ByteArrayInputStream(ROOT.getBytes(StandardCharsets.US_ASCII)));

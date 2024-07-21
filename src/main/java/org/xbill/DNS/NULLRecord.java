@@ -9,8 +9,8 @@ import java.io.IOException;
  * The NULL Record. This has no defined purpose, but can be used to hold arbitrary data.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC 1035: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class NULLRecord extends Record {
   private byte[] data;

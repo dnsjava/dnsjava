@@ -35,9 +35,9 @@ import org.xbill.DNS.AsyncSemaphore.Permit;
 import org.xbill.DNS.utils.base64;
 
 /**
- * Proof-of-concept <a href="https://tools.ietf.org/html/rfc8484">DNS over HTTP (DoH)</a> resolver.
- * This class is not suitable for high load scenarios because of the shortcomings of Java's built-in
- * HTTP clients. For more control, implement your own {@link Resolver} using e.g. <a
+ * Proof-of-concept <a href="https://datatracker.ietf.org/doc/html/rfc8484">DNS over HTTP (DoH)</a>
+ * resolver. This class is not suitable for high load scenarios because of the shortcomings of
+ * Java's built-in HTTP clients. For more control, implement your own {@link Resolver} using e.g. <a
  * href="https://github.com/square/okhttp/">OkHttp</a>.
  *
  * <p>On Java 8, it uses HTTP/1.1, which is against the recommendation of RFC 8484 to use HTTP/2 and

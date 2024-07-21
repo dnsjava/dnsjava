@@ -46,8 +46,9 @@ public class DNSSEC {
     private Algorithm() {}
 
     /**
-     * Delete DS record in parent zone, RFC8078.
+     * Delete DS record in parent zone.
      *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8078/">RFC 8078</a>
      * @since 3.5
      */
     public static final int DELETE = 0;
@@ -79,27 +80,40 @@ public class DNSSEC {
     /** GOST R 34.10-2001. This requires an external cryptography provider, such as BouncyCastle. */
     public static final int ECC_GOST = 12;
 
-    /** ECDSA Curve P-256 with SHA-256 public key * */
+    /** ECDSA Curve P-256 with SHA-256 public key. */
     public static final int ECDSAP256SHA256 = 13;
 
-    /** ECDSA Curve P-384 with SHA-384 public key * */
+    /** ECDSA Curve P-384 with SHA-384 public key. */
     public static final int ECDSAP384SHA384 = 14;
 
-    /** Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC, RFC8080 */
+    /**
+     * Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8080/">RFC 8080</a>
+     */
     public static final int ED25519 = 15;
 
-    /** Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC, RFC8080 */
+    /**
+     * Edwards-Curve Digital Security Algorithm (EdDSA) for DNSSEC.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8080/">RFC 8080</a>
+     */
     public static final int ED448 = 16;
 
     /**
-     * SM2 signing algorithm with SM3 hashing algorithm. <a
-     * href="https://datatracker.ietf.org/doc/draft-cuiling-dnsop-sm2-alg/15/">draft-cuiling-dnsop-sm2-alg-15</a>
+     * SM2 signing algorithm with SM3 hashing algorithm.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/draft-cuiling-dnsop-sm2-alg/15/">draft-cuiling-dnsop-sm2-alg-15</a>
+     * @since 3.6
      */
     public static final int SM2SM3 = 17;
 
     /**
-     * GOST R 34.10-2012 <a
-     * href="https://datatracker.ietf.org/doc/draft-makarenko-gost2012-dnssec/05/">draft-makarenko-gost2012-dnssec-05</a>
+     * GOST R 34.10-2012.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc9558/">RFC 9558</a>
+     * @since 3.6
      */
     public static final int ECC_GOST12 = 23;
 
@@ -169,27 +183,48 @@ public class DNSSEC {
   public static class Digest {
     private Digest() {}
 
-    /** SHA-1, RFC3658. */
+    /**
+     * SHA-1.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc3658/">RFC 3658</a>
+     */
     public static final int SHA1 = 1;
 
-    /** SHA-256, RFC4509. */
+    /**
+     * SHA-256.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc4509/">RFC 4509</a>
+     */
     public static final int SHA256 = 2;
 
-    /** GOST R 34.11-94, RFC5933. */
+    /**
+     * GOST R 34.11-94.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc5933/">RFC 5933</a>
+     */
     public static final int GOST3411 = 3;
 
-    /** SHA-384, RFC6605. */
+    /**
+     * SHA-384.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6605/">RFC 6605</a>
+     */
     public static final int SHA384 = 4;
 
     /**
-     * SM3 hashing algorithm. <a
-     * href="https://datatracker.ietf.org/doc/draft-cuiling-dnsop-sm2-alg/15/">draft-cuiling-dnsop-sm2-alg-15</a>
+     * GOST R 34.11-2012.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc9558/">RFC 9558</a>
+     * @since 3.6
      */
     public static final int GOST3411_12 = 5;
 
     /**
-     * GOST R 34.10-2012 <a
-     * href="https://datatracker.ietf.org/doc/draft-makarenko-gost2012-dnssec/05/">draft-makarenko-gost2012-dnssec-05</a>
+     * SM3 hashing algorithm.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/draft-cuiling-dnsop-sm2-alg/15/">draft-cuiling-dnsop-sm2-alg-15</a>
+     * @since 3.6
      */
     public static final int SM3 = 6;
 

@@ -15,7 +15,7 @@ import org.xbill.DNS.utils.base64;
  *
  * @see Resolver
  * @see TSIG
- * @see <a href="https://tools.ietf.org/html/rfc2845">RFC 2845: Secret Key Transaction
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc2845">RFC 2845: Secret Key Transaction
  *     Authentication for DNS (TSIG)</a>
  * @author Brian Wellington
  */

@@ -6,9 +6,8 @@ import java.util.List;
 /**
  * Service Location and Parameter Binding Record
  *
- * @see <a
- *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
  * @since 3.3
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc9460">RFC 9460</a>
  */
 public class SVCBRecord extends SVCBBase {
   SVCBRecord() {}

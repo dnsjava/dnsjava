@@ -130,7 +130,7 @@ If disabled, such records are copied from the upstream and presented to the clie
 |5000
 
 .2+|org.jitsi.dnssec.nsec3.iterations.N
-3+a|Maximum iteration count for the NSEC3 hashing function depending on the key size N. The defaults are from https://www.rfc-editor.org/rfc/rfc5155.html#section-10.3[RFC5155].
+3+a|Maximum iteration count for the NSEC3 hashing function depending on the key size N. The defaults are from https://datatracker.ietf.org/doc/html/rfc5155#section-10.3[RFC5155].
 |Integer
 2+a|- 1024 bit keys: 150 iterations
 - 2048 bit keys: 500 iterations
@@ -183,7 +183,7 @@ This is limited to avoid the 'KeyTrap' vulnerability (CVE-2023-50387).
 .2+|dnsjava.dnssec.algorithm_enabled.ID
 3+|Enable or disable a DS/DNSKEY algorithm.
 See
-https://www.rfc-editor.org/rfc/rfc8624.html#section-3.1[RFC8624] for recommended values.
+https://datatracker.ietf.org/doc/html/rfc8624#section-3.1[RFC8624] for recommended values.
 Note that algorithm number 1, `RSAMD5`, is disabled and cannot be enabled with this property.
 |Boolean
 2+|Disable ED448:
@@ -198,7 +198,7 @@ Note that algorithm number 1, `RSAMD5`, is disabled and cannot be enabled with t
 .2+|dnsjava.dnssec.digest_enabled.ID
 3+|Enable or disable a DS record digest algorithm.
 See
-https://www.rfc-editor.org/rfc/rfc8624.html#section-3.3[RFC8624] for recommended values.
+https://datatracker.ietf.org/doc/html/rfc8624#section-3.3[RFC8624] for recommended values.
 |Boolean
 2+|Disable SHA.1:
 `dnsjava.dnssec.digest_enabled.1=false`
@@ -248,7 +248,7 @@ To migrate from dnssecjava, replace `org.jitsi` with `org.xbill.DNS` in Java pac
 Validated, secure responses contain the DNS `AD`-flag, while responses that failed validation return the `SERVFAIL`-RCode.
 Insecure responses return the actual return code without the `AD`-flag set.
 The reason why the validation failed or is insecure is provided as a localized string in the additional section under the record ./65280/TXT (a TXT record for the owner name of the root zone in the private query class `ValidatingResolver.VALIDATION_REASON_QCLASS`).
-The Extended DNS Errors (EDE, https://www.rfc-editor.org/rfc/rfc8914.html[RFC8914]) also provides the failure reason, although in less detail.
+The Extended DNS Errors (EDE, https://datatracker.ietf.org/doc/html/rfc8914[RFC8914]) also provides the failure reason, although in less detail.
 
 The link:EXAMPLES.md[examples] contain a small demo.
 
@@ -264,7 +264,7 @@ The most important changes are:
 
 * Requires at least Java 8
 
-* Uses http://www.slf4j.org/[slf4j] for logging and thus needs `slf4j-api`
+* Uses https://www.slf4j.org/[slf4j] for logging and thus needs `slf4j-api`
 on the classpath
 
 * The link:USAGE.md[command line tools] were moved to the `org.xbill.DNS.tools`

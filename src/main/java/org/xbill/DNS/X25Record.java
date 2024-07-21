@@ -10,7 +10,7 @@ import java.io.IOException;
  * associated with a name.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1183">RFC 1183: New DNS RR Definitions</a>
  */
 public class X25Record extends Record {
   private byte[] address;

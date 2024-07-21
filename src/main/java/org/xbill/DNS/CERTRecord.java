@@ -12,8 +12,8 @@ import org.xbill.DNS.utils.base64;
  *
  * @see KEYRecord
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc4398">RFC 4398: Storing Certificates in the Domain
- *     Name System (DNS)</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc4398">RFC 4398: Storing Certificates in
+ *     the Domain Name System (DNS)</a>
  */
 public class CERTRecord extends Record {
 

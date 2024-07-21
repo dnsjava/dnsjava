@@ -25,7 +25,11 @@ public final class Opcode {
   /** A dynamic update message */
   public static final int UPDATE = 5;
 
-  /** DNS Stateful Operations (DSO, RFC8490) */
+  /**
+   * DNS Stateful Operations (DSO).
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8490">RFC 8490</a>
+   */
   public static final int DSO = 6;
 
   private static final Mnemonic opcodes = new Mnemonic("DNS Opcode", Mnemonic.CASE_UPPER);

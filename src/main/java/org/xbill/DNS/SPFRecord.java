@@ -9,8 +9,8 @@ import java.util.List;
  * Sender Policy Framework (discontinued in RFC 7208)
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc7208">RFC 7208: Sender Policy Framework (SPF) for
- *     Authorizing Use of Domains in Email, Version 1</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7208">RFC 7208: Sender Policy Framework
+ *     (SPF) for Authorizing Use of Domains in Email, Version 1</a>
  */
 public class SPFRecord extends TXTBase {
   SPFRecord() {}

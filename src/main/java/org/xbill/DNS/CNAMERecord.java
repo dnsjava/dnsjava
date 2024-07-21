@@ -7,8 +7,8 @@ package org.xbill.DNS;
  * CNAME Record - maps an alias to its real name
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1035">RFC 1035: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC 1035: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class CNAMERecord extends SingleCompressedNameBase {
   CNAMERecord() {}

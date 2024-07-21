@@ -104,18 +104,18 @@ public final class Type {
   public static final int NXT = 30;
 
   /**
-   * Endpoint identifier
+   * DNS Resource Records for Nimrod Routing Architecture, Endpoint identifier.
    *
-   * @see <a href="https://tools.ietf.org/html/draft-ietf-nimrod-dns-00">DNS Resource Records for
-   *     Nimrod Routing Architecture</a>
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/draft-ietf-nimrod-dns/">draft-ietf-nimrod-dns</a>
    */
   public static final int EID = 31;
 
   /**
-   * Nimrod locator
+   * DNS Resource Records for Nimrod Routing Architecture, Nimrod locator.
    *
-   * @see <a href="https://tools.ietf.org/html/draft-ietf-nimrod-dns-00">DNS Resource Records for
-   *     Nimrod Routing Architecture</a>
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/draft-ietf-nimrod-dns/">draft-ietf-nimrod-dns</a>
    */
   public static final int NIMLOC = 32;
 
@@ -188,7 +188,8 @@ public final class Type {
   /**
    * Zone Status (ZS).
    *
-   * @see <a href="https://tools.ietf.org/html/draft-reid-dnsext-zs-01">draft-reid-dnsext-zs-01</a>
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-reid-dnsext-zs-01">draft-reid-dnsext-zs-01</a>
    */
   public static final int NINFO = 56;
 
@@ -196,7 +197,7 @@ public final class Type {
    * RKEY DNS Resource Record, used for encryption of NAPTR records.
    *
    * @see <a
-   *     href="https://tools.ietf.org/html/draft-reid-dnsext-rkey-00">draft-reid-dnsext-rkey-00</a>
+   *     href="https://datatracker.ietf.org/doc/html/draft-reid-dnsext-zs-01">draft-reid-dnsext-rkey-01</a>
    */
   public static final int RKEY = 57;
 
@@ -204,7 +205,7 @@ public final class Type {
    * DNSSEC Trust Anchor History Service.
    *
    * @see <a
-   *     href="https://tools.ietf.org/html/draft-wijngaards-dnsop-trust-history-02">draft-wijngaards-dnsop-trust-history-02</a>
+   *     href="https://datatracker.ietf.org/doc/html/draft-wijngaards-dnsop-trust-history-02">draft-wijngaards-dnsop-trust-history-02</a>
    */
   public static final int TALINK = 58;
 
@@ -226,16 +227,14 @@ public final class Type {
   /**
    * Service Location and Parameter Binding
    *
-   * @see <a
-   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc9460">RFC 9460</a>
    */
   public static final int SVCB = 64;
 
   /**
    * HTTPS Service Location and Parameter Binding
    *
-   * @see <a
-   *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc9460">RFC 9460</a>
    */
   public static final int HTTPS = 65;
 

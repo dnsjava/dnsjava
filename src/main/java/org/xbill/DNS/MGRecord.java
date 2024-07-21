@@ -7,8 +7,8 @@ package org.xbill.DNS;
  * Mail Group Record - specifies a mailbox which is a member of a mail group.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc883">RFC 883: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class MGRecord extends SingleNameBase {
   MGRecord() {}

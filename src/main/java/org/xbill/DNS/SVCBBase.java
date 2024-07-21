@@ -20,9 +20,8 @@ import org.xbill.DNS.utils.base64;
 /**
  * Implements common functionality for SVCB and HTTPS records
  *
- * @see <a
- *     href="https://tools.ietf.org/html/draft-ietf-dnsop-svcb-https-06">draft-ietf-dnsop-svcb-https</a>
  * @since 3.3
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc9460">RFC 9460</a>
  */
 public abstract class SVCBBase extends Record {
   protected int svcPriority;

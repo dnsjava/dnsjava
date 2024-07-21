@@ -10,8 +10,8 @@ import java.io.IOException;
  * address to receive error messages relating to the mailing list/mailbox.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc883">RFC 883: Domain Names - Implementation and
- *     Specification</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc883">RFC 883: Domain Names -
+ *     Implementation and Specification</a>
  */
 public class MINFORecord extends Record {
   private Name responsibleAddress;

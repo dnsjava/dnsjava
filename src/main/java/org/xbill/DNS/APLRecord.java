@@ -19,8 +19,8 @@ import org.xbill.DNS.utils.base16;
  * APL - Address Prefix List.
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc3123">RFC 3123: A DNS RR Type for Lists of Address
- *     Prefixes (APL RR)</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc3123">RFC 3123: A DNS RR Type for Lists of
+ *     Address Prefixes (APL RR)</a>
  */
 public class APLRecord extends Record {
 

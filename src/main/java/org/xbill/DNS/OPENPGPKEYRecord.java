@@ -9,8 +9,8 @@ import org.xbill.DNS.utils.base64;
  *
  * @author Brian Wellington
  * @author Valentin Hauner
- * @see <a href="https://tools.ietf.org/html/rfc7929">RFC 7929: DNS-Based Authentication of Named
- *     Entities (DANE) Bindings for OpenPGP</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc7929">RFC 7929: DNS-Based Authentication
+ *     of Named Entities (DANE) Bindings for OpenPGP</a>
  */
 public class OPENPGPKEYRecord extends Record {
   private byte[] cert;

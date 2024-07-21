@@ -18,7 +18,8 @@ import java.util.List;
  *
  * @see Message
  * @see Resolver
- * @see <a href="https://tools.ietf.org/html/rfc6891">RFC 6891: Extension Mechanisms for DNS</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6891">RFC 6891: Extension Mechanisms for
+ *     DNS</a>
  * @author Brian Wellington
  */
 public class OPTRecord extends Record {

@@ -10,8 +10,8 @@ import java.io.IOException;
  * limited early version of {@link LOCRecord})
  *
  * @author Brian Wellington
- * @see <a href="https://tools.ietf.org/html/rfc1712">RFC 1712: DNS Encoding of Geographical
- *     Location</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1712">RFC 1712: DNS Encoding of
+ *     Geographical Location</a>
  */
 public class GPOSRecord extends Record {
   private byte[] latitude, longitude, altitude;
