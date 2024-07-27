@@ -55,6 +55,7 @@ import org.xbill.DNS.hosts.HostsFileParser;
  */
 @Slf4j
 public class LookupSession {
+
   public static final int DEFAULT_MAX_ITERATIONS = 16;
   public static final int DEFAULT_NDOTS = 1;
 
@@ -100,6 +101,7 @@ public class LookupSession {
    */
   @ToString
   public static class LookupSessionBuilder {
+
     private Resolver resolver;
     private int maxRedirects;
     private int ndots;
@@ -229,8 +231,8 @@ public class LookupSession {
     /**
      * Enable querying the local hosts database using the system defaults.
      *
-     * @see HostsFileParser
      * @return {@code this}.
+     * @see HostsFileParser
      */
     public LookupSessionBuilder defaultHostsFileParser() {
       hostsFileParser = new HostsFileParser();
@@ -241,8 +243,8 @@ public class LookupSession {
      * Enable caching using the supplied cache. An existing {@link Cache} for the same class will be
      * replaced.
      *
-     * @see Cache
      * @return {@code this}.
+     * @see Cache
      */
     public LookupSessionBuilder cache(@NonNull Cache cache) {
       if (caches == null) {
@@ -262,8 +264,8 @@ public class LookupSession {
      * Enable caching using the supplied caches. Existing {@link Cache}s for the same class will be
      * replaced.
      *
-     * @see Cache
      * @return {@code this}.
+     * @see Cache
      */
     public LookupSessionBuilder caches(@NonNull Collection<Cache> caches) {
       caches.forEach(this::cache);
@@ -286,9 +288,9 @@ public class LookupSession {
      * Enable caching using the supplied cache for the given class.
      *
      * @param dclass unused
-     * @deprecated use {@link #cache(Cache)}, the {@link Cache} already provides the class.
-     * @see Cache
      * @return {@code this}.
+     * @see Cache
+     * @deprecated use {@link #cache(Cache)}, the {@link Cache} already provides the class.
      */
     @Deprecated
     public LookupSessionBuilder cache(@NonNull Integer dclass, @NonNull Cache cache) {
@@ -300,10 +302,10 @@ public class LookupSession {
      * Enable caching using the supplied caches.
      *
      * @param caches unused
+     * @return {@code this}.
+     * @see Cache
      * @deprecated use {@link #cache(Cache)} or {@link #caches(Collection)}, the {@link Cache}
      *     already provides the class.
-     * @see Cache
-     * @return {@code this}.
      */
     @Deprecated
     public LookupSessionBuilder caches(@NonNull Map<Integer, Cache> caches) {
@@ -581,7 +583,13 @@ public class LookupSession {
           new NoSuchRRSetException(queryRecord.getName(), queryRecord.getType()));
     }
 
-    if (setResponse.isSuccessful()) {
+    if (setResponse.isCNAME()) {
+      return CompletableFuture.completedFuture(
+          new LookupResult(Collections.singletonList(setResponse.getCNAME()), aliases));
+    } else if (setResponse.isDNAME()) {
+      return CompletableFuture.completedFuture(
+          new LookupResult(Collections.singletonList(setResponse.getDNAME()), aliases));
+    } else if (setResponse.isSuccessful()) {
       List<Record> records =
           setResponse.answers().stream()
               .flatMap(rrset -> rrset.rrs(cycleResults).stream())
