@@ -7,7 +7,7 @@
     <groupId>dnsjava</groupId>
     <artifactId>dnsjava</artifactId>
     <packaging>bundle</packaging>
-    <version>3.7.0-SNAPSHOT</version>
+    <version>3.6.1-SNAPSHOT</version>
     <name>dnsjava</name>
     <description>dnsjava is an implementation of DNS in Java. It supports all defined record types (including the DNSSEC
         types), and unknown types. It can be used for queries, zone transfers, and dynamic updates. It includes a cache
@@ -352,7 +352,7 @@
                         <includes>
                             <include>src/main/java/**/*.java</include>
                             <include>src/main/java11/**/*.java</include>
-                            <include>src/main/java21/**/*.java</include>
+                            <include>src/main/java18/**/*.java</include>
                             <include>src/test/java/**/*.java</include>
                         </includes>
                         <googleJavaFormat>
@@ -761,11 +761,11 @@
         </profile>
 
         <profile>
-            <!-- Include java11 in IDEA before Java 21 as it still doesn't understand Multi-Release jars -->
+            <!-- Include java11 in IDEA before Java 18 as it still doesn't understand Multi-Release jars -->
             <id>java11-idea</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
-                <jdk>[11,21)</jdk>
+                <jdk>[11,18)</jdk>
                 <property>
                     <name>idea.version</name>
                 </property>
@@ -795,9 +795,9 @@
         </profile>
 
         <profile>
-            <id>java21</id>
+            <id>java18</id>
             <activation>
-                <jdk>[21,)</jdk>
+                <jdk>[18,)</jdk>
             </activation>
 
             <build>
@@ -806,17 +806,17 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <executions>
-                            <!-- Compile Java 21+ stuff (DNS SPI) -->
+                            <!-- Compile Java 18+ stuff (DNS SPI) -->
                             <execution>
-                                <id>compile-java21</id>
+                                <id>compile-java18</id>
                                 <goals>
                                     <goal>compile</goal>
                                 </goals>
                                 <configuration>
-                                    <release>21</release>
+                                    <release>18</release>
                                     <multiReleaseOutput>true</multiReleaseOutput>
                                     <compileSourceRoots>
-                                        <compileSourceRoot>${project.basedir}/src/main/java21</compileSourceRoot>
+                                        <compileSourceRoot>${project.basedir}/src/main/java18</compileSourceRoot>
                                     </compileSourceRoots>
                                 </configuration>
                             </execution>
@@ -848,7 +848,7 @@
                             </argLine>
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${project.build.outputDirectory}/META-INF/versions/11</additionalClasspathElement>
-                                <additionalClasspathElement>${project.build.outputDirectory}/META-INF/versions/21</additionalClasspathElement>
+                                <additionalClasspathElement>${project.build.outputDirectory}/META-INF/versions/18</additionalClasspathElement>
                             </additionalClasspathElements>
                         </configuration>
                     </plugin>
@@ -858,14 +858,14 @@
                         <artifactId>build-helper-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>add-java21-source</id>
+                                <id>add-java18-source</id>
                                 <phase>generate-sources</phase>
                                 <goals>
                                     <goal>add-source</goal>
                                 </goals>
                                 <configuration>
                                     <sources>
-                                        <source>src/main/java21</source>
+                                        <source>src/main/java18</source>
                                     </sources>
                                 </configuration>
                             </execution>
