@@ -1,3 +1,8 @@
+07/28/2024
+	- 3.6.1 released
+	- Properly fix LookupSession doesn't cache CNAMEs (#316)
+	- Move JEP-418 SPI to Java 18 to support EOL workflows (#329)
+
 07/21/2024
 	- 3.6.0 released
 	- Fix CVE-2024-25638 (GHSA-cfxw-4h78-h7fw)
