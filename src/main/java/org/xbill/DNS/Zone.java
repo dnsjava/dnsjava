@@ -234,6 +234,7 @@ public class Zone implements Serializable, Iterable<RRset> {
 
     Name name = r.getName();
     int rtype = r.getRRsetType();
+    int actualType = r.getType();
 
     if (rtype == Type.SOA && !name.equals(origin)) {
       throw new IllegalArgumentException(
@@ -254,7 +255,7 @@ public class Zone implements Serializable, Iterable<RRset> {
           } else {
             // Adding a SOA must replace any existing record. We validated before that the zone name
             // didn't change
-            if (rtype == Type.SOA) {
+            if (actualType == Type.SOA) {
               rrset.deleteRR(SOA);
               SOA = (SOARecord) r;
             }
