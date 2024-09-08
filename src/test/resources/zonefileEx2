@@ -1,0 +1,139 @@
+;; SPDX-License-Identifier: ISC
+;; Copyright (c) 2014-2016 Internet Systems Consortium, Inc. ("ISC")
+;;
+;; Permission to use, copy, modify, and/or distribute this software for
+;; any purpose with or without fee is hereby granted, provided that the
+;; above copyright notice and this permission notice appear in all
+;; copies.
+;;
+;; THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
+;; WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
+;; WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL
+;; THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+;; CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+;; LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+;; NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+;; CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+example.com.		600 IN SOA ns1.example.com. admin.example.com. (
+				2014102104 ; serial
+				1800       ; refresh (30 minutes)
+				900        ; retry (15 minutes)
+				2419200    ; expire (4 weeks)
+				300        ; minimum (5 minutes)
+				)
+example.com.		300 IN RRSIG NSEC 8 2 300 (
+				20141126120153 20141027112239 60798 example.com.
+				U1je2BEXY7S/u4An8sKEp2Cb8b90+9mNBoFb9nXgkTvC
+				cJkT/4OIUIaO7EbsIASmlzjDwJEKSO/nPDFg3y6tsR0m
+				GT7H7AYAouwBhUlIrDrGQpxqRLJXA1kPkxboX4M2JGx4
+				rBcBsN/7lG5CGbjtLW3PMnJRELE5fBJBLZM1KLo= )
+example.com.		300 IN NSEC ftp.example.com. NS SOA RRSIG NSEC DNSKEY TYPE65534
+example.com.		600 IN RRSIG NS 8 2 600 (
+				20141126115318 20141027112239 60798 example.com.
+				TGC1gAksxHHDoltjJ8ETJ9qdr5MzFjA05vEllSNWBFe7
+				O71Payf8o4MISHNeUoZpu7Ys4zBiTRLqUaLeI0oSEnzM
+				r2QJkrfUHl1k8D/wCWApEUhMa1GxLIKMsEfgd3D5nK52
+				6LAVNihx5BKC1YxuYZXhhBMYQm7bIlUXFvxl3uE= )
+example.com.		600 IN RRSIG SOA 8 2 600 (
+				20141126122239 20141027112239 60798 example.com.
+				0ntLprFpg9bKWs5ArGvpZq8uFa9QPEfl6bOmfIwbNnEp
+				9PgBS97icRs27JDgIXGM4dWxXiPVX6sZ8jFulSp2mi2v
+				4dhtqMfb4S/rfxSmCphIz5PA+bngKSr5fhRI6tTM8fW1
+				l5V3zfKCPFracE0CgdcWIt0xViEs56Axj942f5w= )
+example.com.		0 IN RRSIG TYPE65534 8 2 0 (
+				20141126120153 20141027112239 60798 example.com.
+				Sv+7vfHXz4zlLSEuWs5Bt5boqSDVCK2GcOgAzVXnW9/0
+				zgk3v8VwSXRTRnwdsvl3SK6YsM9S/HNXk32AQs2PjXf4
+				2/cmv6VCOGSVGin/L5k4KWjpy0ESV2iY0hIIyeXWqUdB
+				ZUCu1+2GhHiA5+gKODn/8sg6x04g+lZe6wuhU44= )
+example.com.		600 IN RRSIG DNSKEY 8 2 600 (
+				20141126122239 20141027112239 45319 example.com.
+				F2vrBJqvloP5yNE6X1+b1XJ4gY6DlH1oyJz6pSULmGgQ
+				FFztyrCJoV4MI6TeFRXJKLTePewjcTzKlaRKJHZRElcM
+				QaClWr6RdZ2Uc1fFOBgYocrDZtGWdTVg7XCiLJ/ubrDH
+				7et9rSexmKEwI44T4Vf7w3e+kUQSzMBGfA9Z5Q8WnnBW
+				IDn4QFqRx0B02bVLV4giJbVp649ukIApVoHSpJvhrWq8
+				eSSdP2ojymzr4gAuQZzmZUJnxp7Q3ktuQgIokhLG4FDH
+				/O9qnhnOkUZFsxbBaDYVn5TIl1Kkmn3LH98JQE0z8a7D
+				WfqAPAFy0rKHkvyOA8FlimDW09OYeJS00A== )
+example.com.		600 IN RRSIG DNSKEY 8 2 600 (
+				20141126122239 20141027112239 60798 example.com.
+				PoUdallJO0ZF3iFmRoGoKh/iLAJVn52ABVEVku9LK34C
+				oh4Y29rgK4jd3DwxU7zDLadVs0Fo3JFHp2jdYCEm03BS
+				XE6d0cijZP5aFt8rO/grO/qbkdv+ScEi1kOhCKcvt3Kg
+				1mXhiZt4Jx3LeisUpD9mGa+m9ehcPYlAHPKoZMg= )
+example.com.		0 IN TYPE65534 \# 5 ( 08B1070001 )
+example.com.		0 IN TYPE65534 \# 5 ( 08ED7E0001 )
+example.com.		600 IN DNSKEY 256 3 8 (
+				AwEAAfbc/0ESumm1mPVkm025PfHKHNYW62yx0wyLN5LE
+				4DifN6FzIVSKSGdMOdq+z6vFGxzzjPDz7QZdeC6ttIUA
+				Bo4tG7dDrsWK+tG5cm4vuylsEVbnnW5i+gFG/02+RYmZ
+				ZT9AobXB5bVjfXl9SDBgpBluB35WUCAnK9WkRRUS08lf
+				) ; ZSK; alg = RSASHA256; key id = 60798
+example.com.		600 IN DNSKEY 257 3 8 (
+				AwEAAb4N53kPbdRTAwvJT8OYVeVhQIldwppMy7KBJ+8k
+				Uggx2PU3yP/qlq4Zjl0MMmqRiJhD/S+z9cJLNTZ9tHz1
+				7aZQjFyGAyuU3DGW16xfMolcIn+c8TpPCzBOFhxk6jvO
+				VLlz+Wgyi1ES+t29FjYYv5cVNRPmxXLRjlHFdO1DzX3N
+				dmcUoZ+VVJCvaML9+6UpL/6jitNsoU8JHnxT9B2CGKcw
+				N7VaK4l9Ida2BqY3/4UVqWzhj03/M5LK6cn1pEQbQMtY
+				R0TNJURBKdK8bH663h98i23tVX0/85IsCVBL4Dd2boa3
+				/7HPp7uZN1AjDvcRsOh1mqixwUGmVm1EskDIMy8=
+				) ; KSK; alg = RSASHA256; key id = 45319
+example.com.		600 IN NS ns1.example.com.
+ftp.example.com.	600 IN RRSIG A 8 3 600 (
+				20141126115318 20141027112239 60798 example.com.
+				PNATas8HPjc6tm7Ldfk7P61IlRVSQW085P9lDw8qwITc
+				TghDdAXHJBkCTXaDRWPyQZbGI5fNcxWLkf/HRbKREzQs
+				eyztZj2OBnBnnK0t8SWLyM4+OMsGH17z4ZvBmPO/Wgju
+				iSm98reH7J87yRlUMQHdPSwAP6q5tZeJbwpSkao= )
+ftp.example.com.	300 IN RRSIG NSEC 8 3 300 (
+				20141126115318 20141027112239 60798 example.com.
+				ohuvpkqlNR+TYOG79JizEV+SFjVbUKSB3hEfHOJszCIr
+				bcdPKTS0GgQS62N4ISwfvb735oQzc8pI5R+f+8MMn5c9
+				/yRnArTpPJOKDnyIiMaMLBU5sEp5wI+OLsLFMkLef4iK
+				gn+j608Qnoo7dXtWWQPv85FyaT9j3C+EV6rglCk= )
+ftp.example.com.	300 IN NSEC ns1.example.com. A RRSIG NSEC
+ftp.example.com.	600 IN A 192.168.1.200
+ns1.example.com.	600 IN RRSIG A 8 3 600 (
+				20141126115318 20141027112239 60798 example.com.
+				z1rnlU9oVnIhwxQey3Zo6ENYmWXtf97RiZng3u6VkE0n
+				yUC5S3sseZgD8Vc+uJsKVAvafM/k7NgS+P3pe5gN01Ln
+				+geKEMZ3pCHpzHG4UgJj4Xw/iuWOVAFURD26GNnPppDK
+				RNYPWIhA/9FF18vI3V9evNcHGxN+7rOOXF8Qbss= )
+ns1.example.com.	300 IN RRSIG NSEC 8 3 300 (
+				20141126115318 20141027112239 60798 example.com.
+				chH7c6aW6Qk14d4LB866jva9OcH52pJkeHpdslVmUbJ2
+				OkJQNhbpOekSjsroxDU4av3/Y49Dtg0lqoISvMMqwE5X
+				5sKmn+CMKFfMmi22ui+RsPXyDqjkx+JOsi/7kCx7DFJz
+				jF0a6KcsTWNV2QfZjQ50RyrSBBOkw6aqdUC3oF8= )
+ns1.example.com.	300 IN NSEC web.example.com. A RRSIG NSEC
+ns1.example.com.	600 IN A 192.168.1.1
+web.example.com.	600 IN RRSIG CNAME 8 3 600 (
+				20141126115318 20141027112239 60798 example.com.
+				VgHPC0WllAlHY56xMF3j8FI7MsxDhLJJBDBMSVSQpQkA
+				z81kfInYQL4YpAt25WrH7xt4pCmjVl3kUcDGAWWuSiQy
+				nh2O4CoY/tSqQ7Sr9UnE5SIvpW5yws8iROOHvJYuKAmu
+				8B3gYw1gp9xCMS4iBOIXTTq1KV2OHwo0cPXVyfI= )
+web.example.com.	300 IN RRSIG NSEC 8 3 300 (
+				20141126115318 20141027112239 60798 example.com.
+				zh+9fnIQlfpvc0oFRnNIPJoL/S5RQF4HuGwmLxoCxRVp
+				FCQoZbzNB0IVvaA+0XEslcHq3v4+0j9EeKKQw7xORaGu
+				TrzcoRGbjuKZlpvnVlxYkjCiEKVbkXd5yEMnbgolFkhH
+				NjFlozSyzypY0TY0UVRPXWhZ2shASae/ImqFiug= )
+web.example.com.	300 IN NSEC www.example.com. CNAME RRSIG NSEC
+web.example.com.	600 IN CNAME www.example.com.
+www.example.com.	600 IN RRSIG A 8 3 600 (
+				20141126120153 20141027112239 60798 example.com.
+				TLkMRs7I3QW8HRS3trNG307Y0/drO4k8uG8Bv8856qPo
+				33rbEajV49XBBQ+w8jynfKwxMNDfJhpSG0gxo7+0m75Y
+				HRBZ9Xe3EAMNt2/iu0CL6NHyN99qF9TPNbYnD2Zw077L
+				GSDOua1KFMxDqFU7rU0+YlKRGbSk1rqAJBqKEH4= )
+www.example.com.	300 IN RRSIG NSEC 8 3 300 (
+				20141126120153 20141027112239 60798 example.com.
+				GSyFVBgMROqDuoSJoDegX3EkdqA90skBTvi9tkPxoQPo
+				i8LlaD+wRmcXpYKE3vf/y0WpOOVQXbasyfFk8wGzFsde
+				fqpFsscbz3OYgnkwYcTvGXZF9802ytiC5txli9uxUqjc
+				lGL+SDl0woYhecwJD63fTDIMszlVR/eptIL9dLc= )
+www.example.com.	300 IN NSEC example.com. A RRSIG NSEC
+www.example.com.	600 IN A 192.168.1.100

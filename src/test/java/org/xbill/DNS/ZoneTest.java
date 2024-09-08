@@ -106,7 +106,8 @@ class ZoneTest {
 
   @Test
   void exactNameAnyThrow() {
-    assertThatThrownBy(() -> ZONE.findExactMatch(A_TEST.getName(), Type.ANY))
+    Name name = A_TEST.getName();
+    assertThatThrownBy(() -> ZONE.findExactMatch(name, Type.ANY))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("type ANY");
   }
@@ -218,6 +219,21 @@ class ZoneTest {
   }
 
   @Test
+  void ctorInputStream() {
+    Zone zone =
+        assertDoesNotThrow(
+            () ->
+                new Zone(
+                    Name.fromConstantString("example.com."),
+                    ZoneTest.class.getResourceAsStream("/zonefileEx2")));
+    assertThat(zone.iterator().hasNext()).isTrue();
+    RRset set = zone.iterator().next();
+    assertThat(set.getType()).isEqualTo(Type.SOA);
+    assertThat(set.rrs(false)).hasSize(1);
+    assertThat(set.sigs()).hasSize(1);
+  }
+
+  @Test
   void addRecord() throws TextParseException {
     Name n = new Name("something", ZONE_NAME);
     assertNull(ZONE.findExactMatch(n, Type.A));
@@ -319,14 +335,16 @@ class ZoneTest {
 
   @Test
   void addRecordOutOfZone() {
-    assertThatThrownBy(() -> ZONE.addRecord(A_TEST.withName(Name.root)))
+    Record arecord = A_TEST.withName(Name.root);
+    assertThatThrownBy(() -> ZONE.addRecord(arecord))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("subdomain");
   }
 
   @Test
   void addRRsetOutOfZone() {
-    assertThatThrownBy(() -> ZONE.addRRset(new RRset(A_TEST.withName(Name.root))))
+    RRset aset = new RRset(A_TEST.withName(Name.root));
+    assertThatThrownBy(() -> ZONE.addRRset(aset))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("subdomain");
   }
@@ -342,7 +360,8 @@ class ZoneTest {
   @Test
   void addSOARRsetNewName() {
     SOARecord newSoa = (SOARecord) SOA2.withName(Name.root);
-    assertThatThrownBy(() -> ZONE.addRRset(new RRset(newSoa)))
+    RRset soaSet = new RRset(newSoa);
+    assertThatThrownBy(() -> ZONE.addRRset(soaSet))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("SOA owner");
   }
@@ -366,7 +385,8 @@ class ZoneTest {
 
   @Test
   void addSOARRsetCheckSize() {
-    assertThatThrownBy(() -> ZONE.addRRset(new RRset(SOA1, SOA2)))
+    RRset soaSet = new RRset(SOA1, SOA2);
+    assertThatThrownBy(() -> ZONE.addRRset(soaSet))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("exactly 1 SOA");
     assertThat(ZONE.getSOA()).isNotNull().isEqualTo(SOA1);
@@ -374,11 +394,12 @@ class ZoneTest {
 
   @Test
   void removeSOARecord() {
-    assertThatThrownBy(() -> ZONE.removeRecord(ZONE.getSOA()))
+    SOARecord soa = ZONE.getSOA();
+    assertThatThrownBy(() -> ZONE.removeRecord(soa))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("remove SOA");
-    RRset soa = ZONE.findExactMatch(ZONE_NAME, Type.SOA);
-    assertThat(soa).isNotNull().containsExactly(ZONE.getSOA());
+    RRset soaSet = ZONE.findExactMatch(ZONE_NAME, Type.SOA);
+    assertThat(soaSet).isNotNull().containsExactly(ZONE.getSOA());
   }
 
   @Test

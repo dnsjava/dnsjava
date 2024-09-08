@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 
-public class ZoneWithSoaSigTest {
+class ZoneWithSoaSigTest {
   @Test
   void canParseZoneWithSigs() throws IOException {
     Name an = Name.fromString("10.in-addr.arpa.");
@@ -86,7 +86,7 @@ public class ZoneWithSoaSigTest {
         rrSets.stream().filter(r -> r.getType() == Type.DNSKEY).collect(Collectors.toList());
     RRset onlyKeySet = allKeySets.get(0);
     assertThat(onlyKeySet.rrs()).hasSize(1);
-    assertThat(onlyKeySet.sigs()).hasSize(0);
+    assertThat(onlyKeySet.sigs()).isEmpty();
   }
 
   @Test
@@ -123,8 +123,8 @@ public class ZoneWithSoaSigTest {
     // for otherSoa, admin is different than the original
     Record otherSoa =
         new SOARecord(an, DClass.IN, ttl, host, admin2, serial, refresh, retry, expire, minimum);
-    // for oatherSoaRrsig sig is different from the original
-    Record oatherSoaRrsig =
+    // for anotherSoaRrsig sig is different from the original
+    Record anotherSoaRrsig =
         new RRSIGRecord(
             an,
             DClass.IN,
@@ -169,7 +169,7 @@ public class ZoneWithSoaSigTest {
     z.addRecord(otherSoa);
     // replace RRSig covering Soa
     z.removeRecord(soaRrsig);
-    z.addRecord(oatherSoaRrsig);
+    z.addRecord(anotherSoaRrsig);
 
     List<RRset> rrSets = StreamSupport.stream(z.spliterator(), false).collect(Collectors.toList());
 
@@ -201,6 +201,6 @@ public class ZoneWithSoaSigTest {
         rrSets.stream().filter(r -> r.getType() == Type.DNSKEY).collect(Collectors.toList());
     RRset onlyKeySet = allKeySets.get(0);
     assertThat(onlyKeySet.rrs()).hasSize(1);
-    assertThat(onlyKeySet.sigs()).hasSize(0);
+    assertThat(onlyKeySet.sigs()).isEmpty();
   }
 }
