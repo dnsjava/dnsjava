@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -170,9 +171,9 @@ public class Cache {
   }
 
   private final CacheMap data;
+  private final int dclass;
   private int maxncache = -1;
   private int maxcache = -1;
-  private int dclass;
 
   private static final int defaultMaxEntries = 50000;
 
@@ -198,11 +199,24 @@ public class Cache {
 
   /** Creates a Cache which initially contains all records in the specified file. */
   public Cache(String file) throws IOException {
-    data = new CacheMap(defaultMaxEntries);
-    try (Master m = new Master(file)) {
-      Record record;
-      while ((record = m.nextRecord()) != null) {
-        addRecord(record, Credibility.HINT);
+    this(new Master(file));
+  }
+
+  /**
+   * Creates a Cache which initially contains all records in the specified stream.
+   *
+   * @since 3.6.2
+   */
+  public Cache(InputStream input) throws IOException {
+    this(new Master(input));
+  }
+
+  private <T> Cache(Master m) throws IOException {
+    this();
+    try (m) {
+      Record r;
+      while ((r = m.nextRecord()) != null) {
+        addRecord(r, Credibility.HINT);
       }
     }
   }
