@@ -177,11 +177,13 @@ public class Zone implements Serializable, Iterable<RRset> {
 
   private void fromMasterFile(Name origin, Master m) throws IOException {
     this.origin = origin;
-    try (m) {
+    try {
       Record r;
       while ((r = m.nextRecord()) != null) {
         maybeAddRecord(r);
       }
+    } finally {
+      m.close();
     }
     validate();
   }

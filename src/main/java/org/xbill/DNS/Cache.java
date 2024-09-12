@@ -213,11 +213,13 @@ public class Cache {
 
   private <T> Cache(Master m) throws IOException {
     this();
-    try (m) {
+    try {
       Record r;
       while ((r = m.nextRecord()) != null) {
         addRecord(r, Credibility.HINT);
       }
+    } finally {
+      m.close();
     }
   }
 
