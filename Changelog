@@ -1,6 +1,7 @@
 09/21/2024
 	- 3.6.2 released
 	- Add new IANA Trust Anchor (@technolord, #337)
+	- Fix Zone handling with signed SOA (@frankarinnet, #335)
 
 07/28/2024
 	- 3.6.1 released
