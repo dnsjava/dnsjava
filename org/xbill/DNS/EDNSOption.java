@@ -22,6 +22,9 @@ public static class Code {
 	/** Client Subnet, defined in draft-vandergaast-edns-client-subnet-02 */
 	public final static int CLIENT_SUBNET = 8;
 
+	/** Extended DNS Errors, RFC 8914. */
+	public static final int EDNS_EXTENDED_ERROR = 15;
+
 	private static Mnemonic codes = new Mnemonic("EDNS Option Codes",
 						     Mnemonic.CASE_UPPER);
 
@@ -32,6 +35,7 @@ public static class Code {
 
 		codes.add(NSID, "NSID");
 		codes.add(CLIENT_SUBNET, "CLIENT_SUBNET");
+		codes.add(EDNS_EXTENDED_ERROR, "Extended_DNS_Error");
 	}
 
 	/**
@@ -130,6 +134,9 @@ fromWire(DNSInput in) throws IOException {
 		break;
 	case Code.CLIENT_SUBNET:
 		option = new ClientSubnetOption();
+		break;
+	case Code.EDNS_EXTENDED_ERROR:
+		option = new ExtendedErrorCodeOption();
 		break;
 	default:
 		option = new GenericEDNSOption(code);

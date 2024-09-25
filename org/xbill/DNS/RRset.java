@@ -2,6 +2,8 @@
 
 package org.xbill.DNS;
 
+import org.apache.commons.collections4.IteratorUtils;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -156,6 +158,10 @@ rrs(boolean cycle) {
 	return iterator(true, cycle);
 }
 
+public List<Record> rrsNew(boolean cycle){
+	return IteratorUtils.toList(rrs(cycle));
+}
+
 /**
  * Returns an Iterator listing all (data) records.  This cycles through
  * the records, so each Iterator will start with a different record.
@@ -169,6 +175,10 @@ rrs() {
 public synchronized Iterator
 sigs() {
 	return iterator(false, false);
+}
+
+public List<Record> sigsNew(){
+	return IteratorUtils.toList(sigs());
 }
 
 /** Returns the number of (data) records */
@@ -187,12 +197,22 @@ getName() {
 }
 
 /**
- * Returns the type of the records
+ * Returns the type of the records. If this set contains only signatures, it returns the covered
+ * type.
  * @see Type
  */
 public int
 getType() {
 	return first().getRRsetType();
+}
+/**
+ * Returns the actual type of the records, i.e. for signatures not the type covered but {@link
+ * Type#RRSIG}.
+ *
+ * @see Type
+ */
+int getActualType() {
+	return first().getType();
 }
 
 /**

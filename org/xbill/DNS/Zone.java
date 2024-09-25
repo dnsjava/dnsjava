@@ -338,7 +338,7 @@ lookup(Name name, int type) {
 	SetResponse sr;
 
 	if (!name.subdomain(origin))
-		return SetResponse.ofType(SetResponse.NXDOMAIN);
+		return SetResponse.ofType(SetResponseType.NXDOMAIN);
 
 	labels = name.labels();
 	olabels = origin.labels();
@@ -362,13 +362,13 @@ lookup(Name name, int type) {
 		if (!isOrigin) {
 			RRset ns = oneRRset(types, Type.NS);
 			if (ns != null)
-				return new SetResponse(SetResponse.DELEGATION,
-						       ns);
+				return SetResponse.ofType(SetResponseType.DELEGATION,
+						       ns,true);
 		}
 
 		/* If this is an ANY lookup, return everything. */
 		if (isExact && type == Type.ANY) {
-			sr = new SetResponse(SetResponse.SUCCESSFUL);
+			sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
 			RRset [] sets = allRRsets(types);
 			for (int i = 0; i < sets.length; i++)
 				sr.addRRset(sets[i]);
@@ -382,24 +382,24 @@ lookup(Name name, int type) {
 		if (isExact) {
 			rrset = oneRRset(types, type);
 			if (rrset != null) {
-				sr = new SetResponse(SetResponse.SUCCESSFUL);
+				sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
 				sr.addRRset(rrset);
 				return sr;
 			}
 			rrset = oneRRset(types, Type.CNAME);
 			if (rrset != null)
-				return new SetResponse(SetResponse.CNAME,
-						       rrset);
+				return SetResponse.ofType(SetResponseType.CNAME,
+						       rrset,true);
 		} else {
 			rrset = oneRRset(types, Type.DNAME);
 			if (rrset != null)
-				return new SetResponse(SetResponse.DNAME,
-						       rrset);
+				return SetResponse.ofType(SetResponseType.DNAME,
+						       rrset,true);
 		}
 
 		/* We found the name, but not the type. */
 		if (isExact)
-			return SetResponse.ofType(SetResponse.NXRRSET);
+			return SetResponse.ofType(SetResponseType.NXRRSET);
 	}
 
 	if (hasWild) {
@@ -412,14 +412,14 @@ lookup(Name name, int type) {
 
 			rrset = oneRRset(types, type);
 			if (rrset != null) {
-				sr = new SetResponse(SetResponse.SUCCESSFUL);
+				sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
 				sr.addRRset(rrset);
 				return sr;
 			}
 		}
 	}
 
-	return SetResponse.ofType(SetResponse.NXDOMAIN);
+	return SetResponse.ofType(SetResponseType.NXDOMAIN);
 }
 
 /**     

@@ -23,6 +23,7 @@ private interface Element {
 	public boolean expired();
 	public int compareCredibility(int cred);
 	public int getType();
+	boolean isAuthenticated();
 }
 
 private static int
@@ -35,25 +36,23 @@ limitExpire(long ttl, long maxttl) {
 	return (int)expire;
 }
 
-private static class CacheRRset extends RRset implements Element {
-	private static final long serialVersionUID = 5971755205903597024L;
+static class CacheRRset extends RRset implements Element {
 	
 	int credibility;
 	int expire;
+	boolean isAuthenticated;
 
-	public
-	CacheRRset(Record rec, int cred, long maxttl) {
-		super();
+	public CacheRRset(Record rec, int cred, long maxttl, boolean isAuthenticated) {
 		this.credibility = cred;
 		this.expire = limitExpire(rec.getTTL(), maxttl);
+		this.isAuthenticated = isAuthenticated;
 		addRR(rec);
 	}
 
-	public
-	CacheRRset(RRset rrset, int cred, long maxttl) {
-		super(rrset);
+	public CacheRRset(RRset rrset, int cred, long maxttl, boolean isAuthenticated) {
 		this.credibility = cred;
 		this.expire = limitExpire(rrset.getTTL(), maxttl);
+		this.isAuthenticated = isAuthenticated;
 	}
 
 	public final boolean
@@ -65,6 +64,11 @@ private static class CacheRRset extends RRset implements Element {
 	public final int
 	compareCredibility(int cred) {
 		return credibility - cred;
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		return isAuthenticated;
 	}
 
 	public String
@@ -82,10 +86,10 @@ private static class NegativeElement implements Element {
 	Name name;
 	int credibility;
 	int expire;
+	boolean isAuthenticated;
 
 	public
-	NegativeElement(Name name, int type, SOARecord soa, int cred,
-			long maxttl)
+	NegativeElement(Name name, int type, SOARecord soa, int cred, long maxttl, boolean isAuthenticated)
 	{
 		this.name = name;
 		this.type = type;
@@ -94,12 +98,19 @@ private static class NegativeElement implements Element {
 			cttl = soa.getMinimum();
 		this.credibility = cred;
 		this.expire = limitExpire(cttl, maxttl);
+		this.isAuthenticated = isAuthenticated;
 	}
 
 	public int
 	getType() {
 		return type;
 	}
+
+	@Override
+	public boolean isAuthenticated() {
+		return isAuthenticated;
+	}
+
 
 	public final boolean
 	expired() {
@@ -325,14 +336,30 @@ clearCache() {
  */
 public synchronized void
 addRecord(Record r, int cred, Object o) {
+	addRecord(r, cred, false);
+}
+
+
+/**
+ * Adds a record to the Cache.
+ *
+ * @param r The record to be added
+ * @param cred The credibility of the record
+ * @see Record
+ */
+public synchronized void addRecord(Record r, int cred) {
+	addRecord(r, cred, false);
+}
+private synchronized void addRecord(Record r, int cred, boolean isAuthenticated) {
 	Name name = r.getName();
 	int type = r.getRRsetType();
-	if (!Type.isRR(type))
+	if (!Type.isRR(type)) {
 		return;
+	}
 	Element element = findElement(name, type, cred);
 	if (element == null) {
-		CacheRRset crrset = new CacheRRset(r, cred, maxcache);
-		addRRset(crrset, cred);
+		CacheRRset crrset = new CacheRRset(r, cred, maxcache, isAuthenticated);
+		addRRset(crrset, cred, isAuthenticated);
 	} else if (element.compareCredibility(cred) == 0) {
 		if (element instanceof CacheRRset) {
 			CacheRRset crrset = (CacheRRset) element;
@@ -340,36 +367,41 @@ addRecord(Record r, int cred, Object o) {
 		}
 	}
 }
-
 /**
  * Adds an RRset to the Cache.
+ *
  * @param rrset The RRset to be added
  * @param cred The credibility of these records
  * @see RRset
  */
-public synchronized void
-addRRset(RRset rrset, int cred) {
+public synchronized <T extends Record> void addRRset(RRset rrset, int cred) {
+	addRRset(rrset, cred, false);
+}
+private synchronized <T extends Record> void addRRset(
+		RRset rrset, int cred, boolean isAuthenticated) {
 	long ttl = rrset.getTTL();
 	Name name = rrset.getName();
 	int type = rrset.getType();
 	Element element = findElement(name, type, 0);
 	if (ttl == 0) {
-		if (element != null && element.compareCredibility(cred) <= 0)
+		if (element != null && element.compareCredibility(cred) <= 0) {
 			removeElement(name, type);
+		}
 	} else {
-		if (element != null && element.compareCredibility(cred) <= 0)
+		if (element != null && element.compareCredibility(cred) <= 0) {
 			element = null;
+		}
 		if (element == null) {
 			CacheRRset crrset;
-			if (rrset instanceof CacheRRset)
+			if (rrset instanceof CacheRRset) {
 				crrset = (CacheRRset) rrset;
-			else
-				crrset = new CacheRRset(rrset, cred, maxcache);
+			} else {
+				crrset = new CacheRRset(rrset, cred, maxcache, isAuthenticated);
+			}
 			addElement(name, crrset);
 		}
 	}
 }
-
 /**
  * Adds a negative entry to the Cache.
  * @param name The name of the negative entry
@@ -380,6 +412,10 @@ addRRset(RRset rrset, int cred) {
  */
 public synchronized void
 addNegative(Name name, int type, SOARecord soa, int cred) {
+	addNegative(name, type, soa, cred, false);
+}
+private synchronized void addNegative(
+		Name name, int type, SOARecord soa, int cred, boolean isAuthenticated) {
 	long ttl = 0;
 	if (soa != null)
 		ttl = soa.getTTL();
@@ -391,9 +427,7 @@ addNegative(Name name, int type, SOARecord soa, int cred) {
 		if (element != null && element.compareCredibility(cred) <= 0)
 			element = null;
 		if (element == null)
-			addElement(name, new NegativeElement(name, type,
-							     soa, cred,
-							     maxncache));
+			addElement(name, new NegativeElement(name, type, soa, cred, maxncache, isAuthenticated));
 	}
 }
 
@@ -432,7 +466,7 @@ lookup(Name name, int type, int minCred) {
 		 * Otherwise, look for a DNAME.
 		 */
 		if (isExact && type == Type.ANY) {
-			sr = new SetResponse(SetResponse.SUCCESSFUL);
+			sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
 			Element [] elements = allElements(types);
 			int added = 0;
 			for (int i = 0; i < elements.length; i++) {
@@ -456,11 +490,11 @@ lookup(Name name, int type, int minCred) {
 			if (element != null &&
 			    element instanceof CacheRRset)
 			{
-				sr = new SetResponse(SetResponse.SUCCESSFUL);
+				sr =  SetResponse.ofType(SetResponseType.SUCCESSFUL);
 				sr.addRRset((CacheRRset) element);
 				return sr;
 			} else if (element != null) {
-				sr = new SetResponse(SetResponse.NXRRSET);
+				sr = SetResponse.ofType(SetResponseType.NXRRSET);
 				return sr;
 			}
 
@@ -468,7 +502,7 @@ lookup(Name name, int type, int minCred) {
 			if (element != null &&
 			    element instanceof CacheRRset)
 			{
-				return new SetResponse(SetResponse.CNAME,
+				return SetResponse.ofType(SetResponseType.CNAME,
 						       (CacheRRset) element);
 			}
 		} else {
@@ -476,7 +510,7 @@ lookup(Name name, int type, int minCred) {
 			if (element != null &&
 			    element instanceof CacheRRset)
 			{
-				return new SetResponse(SetResponse.DNAME,
+				return SetResponse.ofType(SetResponseType.DNAME,
 						       (CacheRRset) element);
 			}
 		}
@@ -484,18 +518,18 @@ lookup(Name name, int type, int minCred) {
 		/* Look for an NS */
 		element = oneElement(tname, types, Type.NS, minCred);
 		if (element != null && element instanceof CacheRRset)
-			return new SetResponse(SetResponse.DELEGATION,
+			return SetResponse.ofType(SetResponseType.DELEGATION,
 					       (CacheRRset) element);
 
 		/* Check for the special NXDOMAIN element. */
 		if (isExact) {
 			element = oneElement(tname, types, 0, minCred);
 			if (element != null)
-				return SetResponse.ofType(SetResponse.NXDOMAIN);
+				return SetResponse.ofType(SetResponseType.NXDOMAIN);
 		}
 
 	}
-	return SetResponse.ofType(SetResponse.UNKNOWN);
+	return SetResponse.ofType(SetResponseType.UNKNOWN);
 }
 
 /**
@@ -591,7 +625,8 @@ markAdditional(RRset rrset, Set names) {
  */
 public SetResponse
 addMessage(Message in) {
-	boolean isAuth = in.getHeader().getFlag(Flags.AA);
+	boolean isAuthoritative = in.getHeader().getFlag(Flags.AA);
+	boolean isAuthenticated = in.getHeader().getFlag(Flags.AD);
 	Record question = in.getQuestion();
 	Name qname;
 	Name curname;
@@ -619,37 +654,38 @@ addMessage(Message in) {
 
 	answers = in.getSectionRRsets(Section.ANSWER);
 	for (int i = 0; i < answers.length; i++) {
+		RRset answer = answers[i];
 		if (answers[i].getDClass() != qclass)
 			continue;
 		int type = answers[i].getType();
 		Name name = answers[i].getName();
-		cred = getCred(Section.ANSWER, isAuth);
+		cred = getCred(Section.ANSWER, isAuthoritative);
 		if ((type == qtype || qtype == Type.ANY) &&
 		    name.equals(curname))
 		{
-			addRRset(answers[i], cred);
+			addRRset(answer, cred, isAuthenticated);
 			completed = true;
 			if (curname == qname) {
 				if (response == null)
-					response = new SetResponse(
-							SetResponse.SUCCESSFUL);
+					response = SetResponse.ofType(
+							SetResponseType.SUCCESSFUL);
 				response.addRRset(answers[i]);
 			}
 			markAdditional(answers[i], additionalNames);
-		} else if (type == Type.CNAME && name.equals(curname)) {
-			CNAMERecord cname;
-			addRRset(answers[i], cred);
-			if (curname == qname)
-				response = new SetResponse(SetResponse.CNAME,
-							   answers[i]);
-			cname = (CNAMERecord) answers[i].first();
-			curname = cname.getTarget();
 		} else if (type == Type.DNAME && curname.subdomain(name)) {
 			DNAMERecord dname;
-			addRRset(answers[i], cred);
-			if (curname == qname)
-				response = new SetResponse(SetResponse.DNAME,
-							   answers[i]);
+			addRRset(answer, cred, isAuthenticated);
+			if (curname == qname){
+				response = SetResponse.ofType(SetResponseType.DNAME, answer, isAuthenticated);
+			}
+			if (i + 1 < answers.length) {
+				RRset next = answers[i + 1];
+				if (next.getType() == Type.CNAME && next.getName().equals(curname)) {
+					// Skip generating the next name from the current DNAME, the synthesized CNAME did that
+					// for us
+					continue;
+				}
+			}
 			dname = (DNAMERecord) answers[i].first();
 			try {
 				curname = curname.fromDNAME(dname);
@@ -657,6 +693,14 @@ addMessage(Message in) {
 			catch (NameTooLongException e) {
 				break;
 			}
+		} else if (type == Type.CNAME && name.equals(curname)) {
+			CNAMERecord cname;
+			addRRset(answer, cred, isAuthenticated);
+			if (curname == qname) {
+				response = SetResponse.ofType(SetResponseType.CNAME, answer, isAuthenticated);
+			}
+			cname = (CNAMERecord) answer.first();
+			curname = cname.getTarget();
 		}
 	}
 
@@ -675,34 +719,32 @@ addMessage(Message in) {
 		int cachetype = (rcode == Rcode.NXDOMAIN) ? 0 : qtype;
 		if (rcode == Rcode.NXDOMAIN || soa != null || ns == null) {
 			/* Negative response */
-			cred = getCred(Section.AUTHORITY, isAuth);
+			cred = getCred(Section.AUTHORITY, isAuthoritative);
 			SOARecord soarec = null;
 			if (soa != null)
 				soarec = (SOARecord) soa.first();
-			addNegative(curname, cachetype, soarec, cred);
+			addNegative(curname, cachetype, soarec, cred, isAuthenticated);
 			if (response == null) {
-				int responseType;
+				SetResponseType responseType;
 				if (rcode == Rcode.NXDOMAIN)
-					responseType = SetResponse.NXDOMAIN;
+					responseType = SetResponseType.NXDOMAIN;
 				else
-					responseType = SetResponse.NXRRSET;
+					responseType = SetResponseType.NXRRSET;
 				response = SetResponse.ofType(responseType);
 			}
 			/* DNSSEC records are not cached. */
 		} else {
 			/* Referral response */
-			cred = getCred(Section.AUTHORITY, isAuth);
-			addRRset(ns, cred);
+			cred = getCred(Section.AUTHORITY, isAuthoritative);
+			addRRset(ns, cred, isAuthenticated);
 			markAdditional(ns, additionalNames);
 			if (response == null)
-				response = new SetResponse(
-							SetResponse.DELEGATION,
-							ns);
+				response = SetResponse.ofType(SetResponseType.DELEGATION, ns, isAuthenticated);
 		}
 	} else if (rcode == Rcode.NOERROR && ns != null) {
 		/* Cache the NS set from a positive response. */
-		cred = getCred(Section.AUTHORITY, isAuth);
-		addRRset(ns, cred);
+		cred = getCred(Section.AUTHORITY, isAuthoritative);
+		addRRset(ns, cred, isAuthenticated);
 		markAdditional(ns, additionalNames);
 	}
 
@@ -714,8 +756,8 @@ addMessage(Message in) {
 		Name name = addl[i].getName();
 		if (!additionalNames.contains(name))
 			continue;
-		cred = getCred(Section.ADDITIONAL, isAuth);
-		addRRset(addl[i], cred);
+		cred = getCred(Section.ADDITIONAL, isAuthoritative);
+		addRRset(addl[i], cred, isAuthenticated);
 	}
 	if (verbose)
 		System.out.println("addMessage: " + response);

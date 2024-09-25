@@ -352,6 +352,7 @@ setSearchPath(String [] domains) throws TextParseException {
  * default value.  If the results of this lookup should not be permanently
  * cached, null can be provided here.
  * @param cache The cache to use.
+ * @throws IllegalArgumentException If the DClass of the cache doesn't match this Lookup's DClass.
  */
 public void
 setCache(Cache cache) {
@@ -359,6 +360,10 @@ setCache(Cache cache) {
 		this.cache = new Cache(dclass);
 		this.temporary_cache = true;
 	} else {
+		if (cache.getDClass() != dclass) {
+			throw new IllegalArgumentException(
+					"DClass of cache doesn't match DClass of this Lookup instance");
+		}
 		this.cache = cache;
 		this.temporary_cache = false;
 	}
@@ -473,7 +478,7 @@ lookup(Name current) {
 	Message query = Message.newQuery(question);
 	Message response = null;
 	try {
-		response = resolver.send(query);
+		response = resolver.send(query).normalize(query);
 	}
 	catch (IOException e) {
 		// A network error occurred.  Press on.

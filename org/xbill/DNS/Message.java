@@ -1,11 +1,14 @@
 // Copyright (c) 1999-2004 Brian Wellington (bwelling@xbill.org)
-
+// Copyright (c) 2007-2023 NLnet Labs
 package org.xbill.DNS;
 
 import java.util.*;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.stream.Collectors;
 
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 /**
  * A DNS Message.  A message is the basic unit of communication between
  * the client and server of a DNS operation.  A message consists of a Header
@@ -16,14 +19,14 @@ import java.nio.ByteBuffer;
  *
  * @author Brian Wellington
  */
-
+@Slf4j
 public class Message implements Cloneable {
 
 /** The maximum length of a message in wire format. */
 public static final int MAXLENGTH = 65535;
 
 private Header header;
-private List [] sections;
+private List<Record> [] sections;
 private int size;
 private TSIG tsigkey;
 private TSIGRecord querytsig;
@@ -183,6 +186,7 @@ addRecord(Record r, int section) {
  */
 public boolean
 removeRecord(Record r, int section) {
+	Section.check(section);
 	if (sections[section] != null && sections[section].remove(r)) {
 		header.decCount(section);
 		return true;
@@ -198,6 +202,7 @@ removeRecord(Record r, int section) {
  */
 public void
 removeAllRecords(int section) {
+	Section.check(section);
 	sections[section] = null;
 	header.setCount(section, 0);
 }
@@ -209,6 +214,7 @@ removeAllRecords(int section) {
  */
 public boolean
 findRecord(Record r, int section) {
+	Section.check(section);
 	return (sections[section] != null && sections[section].contains(r));
 }
 
@@ -233,6 +239,8 @@ findRecord(Record r) {
  */
 public boolean
 findRRset(Name name, int type, int section) {
+	Type.check(type);
+	Section.check(section);
 	if (sections[section] == null)
 		return false;
 	for (int i = 0; i < sections[section].size(); i++) {
@@ -342,53 +350,50 @@ getRcode() {
  */
 public Record []
 getSectionArray(int section) {
+	Section.check(section);
 	if (sections[section] == null)
 		return emptyRecordArray;
 	List l = sections[section];
 	return (Record []) l.toArray(new Record[l.size()]);
 }
-
-private static boolean
-sameSet(Record r1, Record r2) {
-	return (r1.getRRsetType() == r2.getRRsetType() &&
-		r1.getDClass() == r2.getDClass() &&
-		r1.getName().equals(r2.getName()));
+/**
+ * Returns all records in the given section, or an empty list if the section is empty.
+ *
+ * @see Record
+ * @see Section
+ */
+public List<Record> getSection(int section) {
+	Section.check(section);
+	if (sections[section] == null) {
+		return Collections.emptyList();
+	}
+	return Collections.unmodifiableList(sections[section]);
 }
-
 /**
  * Returns an array containing all records in the given section grouped into
  * RRsets.
  * @see RRset
  * @see Section
  */
-public RRset []
-getSectionRRsets(int section) {
+@SuppressWarnings("java:S1119") // label
+public RRset [] getSectionRRsets(int section) {
+	Section.check(section);
 	if (sections[section] == null)
 		return emptyRRsetArray;
-	List sets = new LinkedList();
+	List<RRset> sets = new LinkedList();
 	Record [] recs = getSectionArray(section);
-	Set hash = new HashSet();
-	for (int i = 0; i < recs.length; i++) {
-		Name name = recs[i].getName();
-		boolean newset = true;
-		if (hash.contains(name)) {
-			for (int j = sets.size() - 1; j >= 0; j--) {
-				RRset set = (RRset) sets.get(j);
-				if (set.getType() == recs[i].getRRsetType() &&
-				    set.getDClass() == recs[i].getDClass() &&
-				    set.getName().equals(name))
-				{
-					set.addRR(recs[i]);
-					newset = false;
-					break;
-				}
+	record_iteration:
+	for (Record rec : sections[section]) {
+		for (int j = sets.size() - 1; j >= 0; j--) {
+			RRset set = sets.get(j);
+			if (rec.sameRRset(set)) {
+				set.addRR(rec);
+				// Existing set found, continue with the next record
+				continue record_iteration;
 			}
 		}
-		if (newset) {
-			RRset set = new RRset(recs[i]);
-			sets.add(set);
-			hash.add(name);
-		}
+		// No existing set found, create a new one
+		sets.add(new RRset(rec));
 	}
 	return (RRset []) sets.toArray(new RRset[sets.size()]);
 }
@@ -424,7 +429,7 @@ sectionToWire(DNSOutput out, int section, Compression c,
 			continue;
 		}
 
-		if (lastrec != null && !sameSet(rec, lastrec)) {
+		if (lastrec != null && !rec.sameRRset(lastrec)) {
 			pos = out.current();
 			rendered = count;
 		}
@@ -560,28 +565,30 @@ numBytes() {
  * Converts the given section of the Message to a String.
  * @see Section
  */
-public String
-sectionToString(int i) {
-	if (i > 3)
-		return null;
-
-	StringBuffer sb = new StringBuffer();
-
-	Record [] records = getSectionArray(i);
-	for (int j = 0; j < records.length; j++) {
-		Record rec = records[j];
-		if (i == Section.QUESTION) {
-			sb.append(";;\t" + rec.name);
-			sb.append(", type = " + Type.string(rec.type));
-			sb.append(", class = " + DClass.string(rec.dclass));
-		}
-		else
-			sb.append(rec);
-		sb.append("\n");
-	}
+public String sectionToString(int section) {
+	Section.check(section);
+	StringBuilder sb = new StringBuilder();
+	sectionToString(sb, section);
 	return sb.toString();
 }
+private void sectionToString(StringBuilder sb, int i) {
+	if (i > 3) {
+		return;
+	}
 
+	for (Record rec : getSection(i)) {
+		if (i == Section.QUESTION) {
+			sb.append(";;\t").append(rec.name);
+			sb.append(", type = ").append(Type.string(rec.type));
+			sb.append(", class = ").append(DClass.string(rec.dclass));
+		} else {
+			if (!(rec instanceof OPTRecord)) {
+				sb.append(rec);
+			}
+		}
+		sb.append("\n");
+	}
+}
 /**
  * Converts the Message to a String.
  */
@@ -619,16 +626,383 @@ toString() {
  * @see TSIGRecord
  * @see OPTRecord
  */
+@Override
+@SneakyThrows(CloneNotSupportedException.class)
+@SuppressWarnings({"unchecked", "java:S2975"})
 public Object
 clone() {
-	Message m = new Message();
+	Message m = (Message) super.clone();
+	m.sections = new List[sections.length];
 	for (int i = 0; i < sections.length; i++) {
-		if (sections[i] != null)
-			m.sections[i] = new LinkedList(sections[i]);
+		if (sections[i] != null) {
+			m.sections[i] = new LinkedList<>(sections[i]);
+		}
 	}
 	m.header = (Header) header.clone();
-	m.size = size;
+	if (querytsig != null) {
+		m.querytsig = (TSIGRecord) querytsig.cloneRecord();
+	}
 	return m;
 }
-
+/**
+ * Checks if a record {@link Type} is allowed within a {@link Section}.
+ *
+ * @return {@code true} if the type is allowed, {@code false} otherwise.
+ */
+boolean isTypeAllowedInSection(int type, int section) {
+	Type.check(type);
+	Section.check(section);
+	switch (section) {
+		case Section.AUTHORITY:
+			if (type == Type.SOA
+					|| type == Type.NS
+					|| type == Type.DS
+					|| type == Type.NSEC
+					|| type == Type.NSEC3) {
+				return true;
+			}
+			break;
+		case Section.ADDITIONAL:
+			if (type == Type.A || type == Type.AAAA) {
+				return true;
+			}
+			break;
+	}
+	return !Boolean.parseBoolean(System.getProperty("dnsjava.harden_unknown_additional", "true"));
+}
+/**
+ * Creates a normalized copy of this message by following xNAME chains, synthesizing CNAMEs from
+ * DNAMEs if necessary, and removing illegal RRsets from {@link Section#AUTHORITY} and {@link
+ * Section#ADDITIONAL}.
+ *
+ * <p>Normalization is only applied to {@link Rcode#NOERROR} and {@link Rcode#NXDOMAIN} responses.
+ *
+ * <p>This method is equivalent to calling {@link #normalize(Message, boolean)} with {@code
+ * false}.
+ *
+ * @param query The query that produced this message.
+ * @return {@code null} if the message could not be normalized or is otherwise invalid.
+ * @since 3.6
+ */
+public Message normalize(Message query) {
+	try {
+		return normalize(query, false);
+	} catch (WireParseException e) {
+		// Cannot happen with 'false'
+	}
+	return null;
+}
+/**
+ * Creates a normalized copy of this message by following xNAME chains, synthesizing CNAMEs from
+ * DNAMEs if necessary, and removing illegal RRsets from {@link Section#AUTHORITY} and {@link
+ * Section#ADDITIONAL}.
+ *
+ * <p>Normalization is only applied to {@link Rcode#NOERROR} and {@link Rcode#NXDOMAIN} responses.
+ *
+ * @param query The query that produced this message.
+ * @param throwOnIrrelevantRecord If {@code true}, throw an exception instead of silently ignoring
+ *     irrelevant records.
+ * @return {@code null} if the message could not be normalized or is otherwise invalid.
+ * @throws WireParseException when {@code throwOnIrrelevantRecord} is {@code true} and an invalid
+ *     or irrelevant record was found.
+ * @since 3.6
+ */
+public Message normalize(Message query, boolean throwOnIrrelevantRecord)
+		throws WireParseException {
+	if (getRcode() != Rcode.NOERROR && getRcode() != Rcode.NXDOMAIN) {
+		return this;
+	}
+	Name sname = query.getQuestion().getName();
+	List<RRset> answerSectionSets = Arrays.stream(getSectionRRsets(Section.ANSWER)).collect(Collectors.toList());
+	List<RRset> additionalSectionSets = Arrays.stream(getSectionRRsets(Section.ADDITIONAL)).collect(Collectors.toList());
+	List<RRset> authoritySectionSets = Arrays.stream(getSectionRRsets(Section.AUTHORITY)).collect(Collectors.toList());
+	List<RRset> cleanedAnswerSection = new ArrayList<>();
+	List<RRset> cleanedAuthoritySection = new ArrayList<>();
+	List<RRset> cleanedAdditionalSection = new ArrayList<>();
+	boolean hadNsInAuthority = false;
+	// For the ANSWER section, remove all "irrelevant" records and add synthesized CNAMEs from
+	// DNAMEs. This will strip out-of-order CNAMEs as well.
+	for (int i = 0; i < answerSectionSets.size(); i++) {
+		RRset rrset = answerSectionSets.get(i);
+		Name oldSname = sname;
+		if (rrset.getType() == Type.DNAME && sname.subdomain(rrset.getName())) {
+			if (rrset.size() > 1) {
+				String template =
+						"Normalization failed in response to <{}/{}/{}> (id {}), found {} entries (instead of just one) in DNAME RRSet <{}/{}>";
+				if (throwOnIrrelevantRecord) {
+					throw new WireParseException(template.replace("{}", "%s"));
+				}
+				log.warn(
+						template,
+						sname,
+						Type.string(query.getQuestion().getType()),
+						DClass.string(query.getQuestion().getDClass()),
+						getHeader().getID(),
+						rrset.size(),
+						rrset.getName(),
+						DClass.string(rrset.getDClass()));
+				return null;
+			}
+			// If DNAME was queried, don't attempt to synthesize CNAME
+			if (query.getQuestion().getType() != Type.DNAME) {
+				// The DNAME is valid, accept it
+				cleanedAnswerSection.add(rrset);
+				// Check if the next rrset is correct CNAME, otherwise synthesize a CNAME
+				RRset nextRRSet = answerSectionSets.size() >= i + 2 ? answerSectionSets.get(i + 1) : null;
+				DNAMERecord dname = ((DNAMERecord) rrset.first());
+				try {
+					// Validate that an existing CNAME matches what we would synthesize
+					if (nextRRSet != null
+							&& nextRRSet.getType() == Type.CNAME
+							&& nextRRSet.getName().equals(sname)) {
+						Name expected =
+								Name.concatenate(
+										nextRRSet.getName().relativize(dname.getName()), dname.getTarget());
+						if (expected.equals(((CNAMERecord) nextRRSet.first()).getTarget())) {
+							continue;
+						}
+					}
+					// Add a synthesized CNAME; TTL=0 to avoid caching
+					Name dnameTarget = sname.fromDNAME(dname);
+					cleanedAnswerSection.add(
+							new RRset(new CNAMERecord(sname, dname.getDClass(), 0, dnameTarget)));
+					sname = dnameTarget;
+					// In DNAME ANY response, can have data after DNAME
+					if (query.getQuestion().getType() == Type.ANY) {
+						for (i++; i < answerSectionSets.size(); i++) {
+							rrset = answerSectionSets.get(i);
+							if (rrset.getName().equals(oldSname)) {
+								cleanedAnswerSection.add(rrset);
+							} else {
+								break;
+							}
+						}
+					}
+					continue;
+				} catch (NameTooLongException e) {
+					String template =
+							"Normalization failed in response to <{}/{}/{}> (id {}), could not synthesize CNAME for DNAME <{}/{}>";
+					if (throwOnIrrelevantRecord) {
+						throw new WireParseException(template.replace("{}", "%s"), e);
+					}
+					log.warn(
+							template,
+							sname,
+							Type.string(query.getQuestion().getType()),
+							DClass.string(query.getQuestion().getDClass()),
+							getHeader().getID(),
+							rrset.getName(),
+							DClass.string(rrset.getDClass()));
+					return null;
+				}
+			}
+		}
+		// Ignore irrelevant records
+		if (!sname.equals(rrset.getName())) {
+			logOrThrow(
+					throwOnIrrelevantRecord,
+					"Ignoring irrelevant RRset <{}/{}/{}> in response to <{}/{}/{}> (id {})",
+					rrset,
+					sname,
+					query);
+			continue;
+		}
+		// Follow CNAMEs
+		if (rrset.getType() == Type.CNAME && query.getQuestion().getType() != Type.CNAME) {
+			if (rrset.size() > 1) {
+				String template =
+						"Found {} CNAMEs in <{}/{}> response to <{}/{}/{}> (id {}), removing all but the first";
+				if (throwOnIrrelevantRecord) {
+					throw new WireParseException(
+							String.format(
+									template.replace("{}", "%s"),
+									rrset.rrsNew(false).size(),
+									rrset.getName(),
+									DClass.string(rrset.getDClass()),
+									sname,
+									Type.string(query.getQuestion().getType()),
+									DClass.string(query.getQuestion().getDClass()),
+									getHeader().getID()));
+				}
+				log.warn(
+						template,
+						rrset.rrsNew(false).size(),
+						rrset.getName(),
+						DClass.string(rrset.getDClass()),
+						sname,
+						Type.string(query.getQuestion().getType()),
+						DClass.string(query.getQuestion().getDClass()),
+						getHeader().getID());
+				List<Record> cnameRRset = rrset.rrsNew(false);
+				for (int cnameIndex = 1; cnameIndex < cnameRRset.size(); cnameIndex++) {
+					rrset.deleteRR(cnameRRset.get(i));
+				}
+			}
+			sname = ((CNAMERecord) rrset.first()).getTarget();
+			cleanedAnswerSection.add(rrset);
+			// In CNAME ANY response, can have data after CNAME
+			if (query.getQuestion().getType() == Type.ANY) {
+				for (i++; i < answerSectionSets.size(); i++) {
+					rrset = answerSectionSets.get(i);
+					if (rrset.getName().equals(oldSname)) {
+						cleanedAnswerSection.add(rrset);
+					} else {
+						break;
+					}
+				}
+			}
+			continue;
+		}
+		// Remove records that don't match the queried type
+		int qtype = getQuestion().getType();
+		if (qtype != Type.ANY && rrset.getActualType() != qtype) {
+			logOrThrow(
+					throwOnIrrelevantRecord,
+					"Ignoring irrelevant RRset <{}/{}/{}> in ANSWER section response to <{}/{}/{}> (id {})",
+					rrset,
+					sname,
+					query);
+			continue;
+		}
+		// Mark the additional names from relevant RRset as OK
+		cleanedAnswerSection.add(rrset);
+		if (sname.equals(rrset.getName())) {
+			addAdditionalRRset(rrset, additionalSectionSets, cleanedAdditionalSection);
+		}
+	}
+	for (RRset rrset : authoritySectionSets) {
+		switch (rrset.getType()) {
+			case Type.DNAME:
+			case Type.CNAME:
+			case Type.A:
+			case Type.AAAA:
+				logOrThrow(
+						throwOnIrrelevantRecord,
+						"Ignoring forbidden RRset <{}/{}/{}> in AUTHORITY section response to <{}/{}/{}> (id {})",
+						rrset,
+						sname,
+						query);
+				continue;
+		}
+		if (!isTypeAllowedInSection(rrset.getType(), Section.AUTHORITY)) {
+			logOrThrow(
+					throwOnIrrelevantRecord,
+					"Ignoring disallowed RRset <{}/{}/{}> in AUTHORITY section response to <{}/{}/{}> (id {})",
+					rrset,
+					sname,
+					query);
+			continue;
+		}
+		if (rrset.getType() == Type.NS) {
+			// NS set must be pertinent to the query
+			if (!sname.subdomain(rrset.getName())) {
+				logOrThrow(
+						throwOnIrrelevantRecord,
+						"Ignoring disallowed RRset <{}/{}/{}> in AUTHORITY section response to <{}/{}/{}> (id {}), not a subdomain of the query",
+						rrset,
+						sname,
+						query);
+				continue;
+			}
+			// We don't want NS sets for NODATA or NXDOMAIN answers, because they could contain
+			// poisonous contents, from e.g. fragmentation attacks, inserted after long RRSIGs in the
+			// packet get to the packet border and such
+			if (getRcode() == Rcode.NXDOMAIN
+					|| (getRcode() == Rcode.NOERROR
+					&& authoritySectionSets.stream().anyMatch(set -> set.getType() == Type.SOA)
+					&& sections[Section.ANSWER] == null)) {
+				logOrThrow(
+						throwOnIrrelevantRecord,
+						"Ignoring disallowed RRset <{}/{}/{}> in AUTHORITY section response to <{}/{}/{}> (id {}), NXDOMAIN or NODATA",
+						rrset,
+						sname,
+						query);
+				continue;
+			}
+			if (!hadNsInAuthority) {
+				hadNsInAuthority = true;
+			} else {
+				logOrThrow(
+						throwOnIrrelevantRecord,
+						"Ignoring disallowed RRset <{}/{}/{}> in AUTHORITY section response to <{}/{}/{}> (id {}), already seen another NS",
+						rrset,
+						sname,
+						query);
+				continue;
+			}
+		}
+		cleanedAuthoritySection.add(rrset);
+		addAdditionalRRset(rrset, additionalSectionSets, cleanedAdditionalSection);
+	}
+	Message cleanedMessage = new Message(this.getHeader());
+	cleanedMessage.sections[Section.QUESTION] = this.sections[Section.QUESTION];
+	cleanedMessage.sections[Section.ANSWER] = rrsetListToRecords(cleanedAnswerSection);
+	cleanedMessage.sections[Section.AUTHORITY] = rrsetListToRecords(cleanedAuthoritySection);
+	cleanedMessage.sections[Section.ADDITIONAL] = rrsetListToRecords(cleanedAdditionalSection);
+	return cleanedMessage;
+}
+private void logOrThrow(
+		boolean throwOnIrrelevantRecord, String format, RRset rrset, Name sname, Message query)
+		throws WireParseException {
+	if (throwOnIrrelevantRecord) {
+		throw new WireParseException(
+				String.format(
+						format.replace("{}", "%s") + this,
+						rrset.getName(),
+						DClass.string(rrset.getDClass()),
+						Type.string(rrset.getType()),
+						sname,
+						Type.string(query.getQuestion().getType()),
+						DClass.string(query.getQuestion().getDClass()),
+						getHeader().getID()));
+	}
+	log.debug(
+			format,
+			rrset.getName(),
+			DClass.string(rrset.getDClass()),
+			Type.string(rrset.getType()),
+			sname,
+			Type.string(query.getQuestion().getType()),
+			DClass.string(query.getQuestion().getDClass()),
+			getHeader().getID());
+}
+private List<Record> rrsetListToRecords(List<RRset> rrsets) {
+	if (rrsets.isEmpty()) {
+		return null;
+	}
+	List<Record> result = new ArrayList<>(rrsets.size());
+	for (RRset set : rrsets) {
+		result.addAll(set.rrsNew(false));
+		result.addAll(set.sigsNew());
+	}
+	return result;
+}
+private void addAdditionalRRset(
+		RRset rrset, List<RRset> additionalSectionSets, List<RRset> cleanedAdditionalSection) {
+	if (!doesTypeHaveAdditionalRecords(rrset.getType())) {
+		return;
+	}
+	for (Record r : rrset.rrsNew(false)) {
+		for (RRset set : additionalSectionSets) {
+			if (set.getName().equals(r.getAdditionalName())
+					&& isTypeAllowedInSection(set.getType(), Section.ADDITIONAL)) {
+				cleanedAdditionalSection.add(set);
+			}
+		}
+	}
+}
+private boolean doesTypeHaveAdditionalRecords(int type) {
+	switch (type) {
+		case Type.MB:
+		case Type.MD:
+		case Type.MF:
+		case Type.NS:
+		case Type.MX:
+		case Type.KX:
+		case Type.SRV:
+		case Type.NAPTR:
+			return true;
+	}
+	return false;
+}
 }

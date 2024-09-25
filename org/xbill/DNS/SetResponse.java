@@ -3,6 +3,16 @@
 package org.xbill.DNS;
 
 import java.util.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+
+import static org.xbill.DNS.SetResponseType.CNAME;
+import static org.xbill.DNS.SetResponseType.DELEGATION;
+import static org.xbill.DNS.SetResponseType.DNAME;
+import static org.xbill.DNS.SetResponseType.NXDOMAIN;
+import static org.xbill.DNS.SetResponseType.NXRRSET;
+import static org.xbill.DNS.SetResponseType.SUCCESSFUL;
+import static org.xbill.DNS.SetResponseType.UNKNOWN;
 
 /**
  * The Response from a query to Cache.lookupRecords() or Zone.findRecords()
@@ -14,88 +24,63 @@ import java.util.*;
 
 public class SetResponse {
 
-/**
- * The Cache contains no information about the requested name/type
- */
-static final int UNKNOWN	= 0;
+private static final SetResponse SR_UNKNOWN = new SetResponse(UNKNOWN, null, false);
+private static final SetResponse SR_UNKNOWN_AUTH = new SetResponse(UNKNOWN, null, true);
+private static final SetResponse SR_NXDOMAIN = new SetResponse(NXDOMAIN, null, false);
+private static final SetResponse SR_NXDOMAIN_AUTH = new SetResponse(NXDOMAIN, null, true);
+private static final SetResponse SR_NXRRSET = new SetResponse(NXRRSET, null, false);
+private static final SetResponse SR_NXRRSET_AUTH = new SetResponse(NXRRSET, null, true);
 
-/**
- * The Zone does not contain the requested name, or the Cache has
- * determined that the name does not exist.
- */
-static final int NXDOMAIN	= 1;
-
-/**
- * The Zone contains the name, but no data of the requested type,
- * or the Cache has determined that the name exists and has no data
- * of the requested type.
- */
-static final int NXRRSET	= 2;
-
-/**
- * A delegation enclosing the requested name was found.
- */
-static final int DELEGATION	= 3;
-
-/**
- * The Cache/Zone found a CNAME when looking for the name.
- * @see CNAMERecord
- */
-static final int CNAME		= 4;
-
-/**
- * The Cache/Zone found a DNAME when looking for the name.
- * @see DNAMERecord
- */
-static final int DNAME		= 5;
-
-/**
- * The Cache/Zone has successfully answered the question for the
- * requested name/type/class.
- */
-static final int SUCCESSFUL	= 6;
-
-private static final SetResponse unknown = new SetResponse(UNKNOWN);
-private static final SetResponse nxdomain = new SetResponse(NXDOMAIN);
-private static final SetResponse nxrrset = new SetResponse(NXRRSET);
-
-private int type;
+private SetResponseType type;
+@Getter(AccessLevel.PACKAGE)
+private boolean isAuthenticated;
 private Object data;
 
-private
-SetResponse() {}
-
-SetResponse(int type, RRset rrset) {
-	if (type < 0 || type > 6)
-		throw new IllegalArgumentException("invalid type");
+//private
+//SetResponse() {}
+//
+//SetResponse(int type, RRset rrset) {
+//	if (type < 0 || type > 6)
+//		throw new IllegalArgumentException("invalid type");
+//	this.type = type;
+//	this.data = rrset;
+//}
+//
+//SetResponse(int type) {
+//	if (type < 0 || type > 6)
+//		throw new IllegalArgumentException("invalid type");
+//	this.type = type;
+//	this.data = null;
+//}
+private SetResponse(SetResponseType type, RRset rrset, boolean isAuthenticated) {
 	this.type = type;
-	this.data = rrset;
+	this.isAuthenticated = isAuthenticated;
+	if (rrset != null) {
+		addRRset(rrset);
+	}
 }
 
-SetResponse(int type) {
-	if (type < 0 || type > 6)
-		throw new IllegalArgumentException("invalid type");
-	this.type = type;
-	this.data = null;
+static SetResponse ofType(SetResponseType type) {
+	return ofType(type, null, false);
 }
 
-static SetResponse
-ofType(int type) {
+static SetResponse ofType(SetResponseType type, Cache.CacheRRset rrset) {
+	return ofType(type, rrset, rrset.isAuthenticated());
+}
+
+static SetResponse ofType(SetResponseType type, RRset rrset, boolean isAuthenticated) {
 	switch (type) {
 		case UNKNOWN:
-			return unknown;
+			return isAuthenticated ? SR_UNKNOWN_AUTH : SR_UNKNOWN;
 		case NXDOMAIN:
-			return nxdomain;
+			return isAuthenticated ? SR_NXDOMAIN_AUTH : SR_NXDOMAIN;
 		case NXRRSET:
-			return nxrrset;
+			return isAuthenticated ? SR_NXRRSET_AUTH : SR_NXRRSET;
 		case DELEGATION:
 		case CNAME:
 		case DNAME:
 		case SUCCESSFUL:
-			SetResponse sr = new SetResponse();
-			sr.type = type;
-			sr.data = null;
-			return sr;
+			return new SetResponse(type, rrset, isAuthenticated);
 		default:
 			throw new IllegalArgumentException("invalid type");
 	}
@@ -103,8 +88,16 @@ ofType(int type) {
 
 void
 addRRset(RRset rrset) {
-	if (data == null)
+	if (data == null){
 		data = new ArrayList();
+		if (rrset instanceof Cache.CacheRRset) {
+			isAuthenticated = ((Cache.CacheRRset) rrset).isAuthenticated();
+		}
+	} else {
+		if (rrset instanceof Cache.CacheRRset && isAuthenticated) {
+			isAuthenticated = ((Cache.CacheRRset) rrset).isAuthenticated();
+		}
+	}
 	List l = (List) data;
 	l.add(rrset);
 }

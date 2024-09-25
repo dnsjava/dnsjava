@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>dnsjava</groupId>
@@ -37,7 +37,11 @@
 
     <properties>
         <project.build.sourceEncoding>iso8859-1</project.build.sourceEncoding>
-        <target.jdk>1.4</target.jdk>
+        <target.jdk>1.8</target.jdk>
+        <lombok.version>1.18.34</lombok.version>
+        <slf4j.version>1.7.36</slf4j.version>
+        <delombok.output>${project.build.directory}/delombok</delombok.output>
+        <commons-collections4.version>4.4</commons-collections4.version>
     </properties>
 
     <build>
@@ -84,7 +88,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.3.1</version>
                 <configuration>
                     <includes>
                         <include>*.java</include>
@@ -99,36 +103,88 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>4.2.0</version>
+                <version>5.1.9</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <niceManifest>true</niceManifest>
+                    <excludeDependencies>lombok</excludeDependencies>
                     <instructions>
-                        <Bundle-Name>dnsjava is an implementation of DNS in Java</Bundle-Name>
+                        <Bundle-Name>dnsjava</Bundle-Name>
+                        <Bundle-Description>dnsjava is an implementation of DNS in Java</Bundle-Description>
                         <Bundle-SymbolicName>org.xbill.dns</Bundle-SymbolicName>
-                        <Automatic-Module-Name>org.dnsjava</Automatic-Module-Name>
+                        <Bundle-DocURL>https://javadoc.io/doc/dnsjava/dnsjava</Bundle-DocURL>
+                        <_noclassforname>true</_noclassforname>
+                        <_donotcopy>android|sun</_donotcopy>
+                        <_nouses>true</_nouses>
+                        <_noee>true</_noee>
                         <Export-Package>
                             org.xbill.DNS.*
                         </Export-Package>
+                        <Private-Package>!android.*,!sun.*,.</Private-Package>
                         <Import-Package>
-                            !org.xbill.DNS*,!sun.*,*
+                            !org.xbill.DNS*,
+                            !sun.*,
+                            !lombok,
+                            !android.*,
+                            javax.naming.*;resolution:=optional,
+                            org.slf4j;version="[1.7,3)",
+                            com.sun.jna.*;resolution:=optional;version="[5,6)",
+                            *
                         </Import-Package>
-                        <Bundle-RequiredExecutionEnvironment>J2SE-1.4</Bundle-RequiredExecutionEnvironment>
-                        <_removeheaders>Bnd-*, Tool, Require-Capability</_removeheaders>
+                        <Bundle-License>
+                            BSD-3-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
+                        </Bundle-License>
+                        <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource, Private-Package</_removeheaders>
+                        <_snapshot>SNAPSHOT</_snapshot>
+                        <Include-Resource>
+                            {maven-resources},
+                            META-INF/LICENSE=LICENSE
+                        </Include-Resource>
+                        <Main-Class>org.xbill.DNS.tools.Tools</Main-Class>
+                        <_fixupmessages>"Classes found in the wrong directory";is:=ignore</_fixupmessages>
+                        <Multi-Release>true</Multi-Release>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.18.20.0</version>
+                <configuration>
+                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    <addOutputDirectory>false</addOutputDirectory>
+                    <outputDirectory>${delombok.output}</outputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>${lombok.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <excludePackageNames>*.tests.*</excludePackageNames>
-                    <sourcepath>./org</sourcepath>
+                    <source>${target.jdk}</source>
+                    <sourcepath>${delombok.output}</sourcepath>
                     <debug>true</debug>
                     <windowtitle>dnsjava documentation</windowtitle>
                     <footer/>
                     <doclint>none</doclint>
+                    <excludePackageNames>android,android.*,sun.*</excludePackageNames>
                 </configuration>
             </plugin>
 
@@ -190,6 +246,28 @@
             <artifactId>junit</artifactId>
             <version>3.8.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
