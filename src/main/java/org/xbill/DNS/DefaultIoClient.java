@@ -34,6 +34,17 @@ public class DefaultIoClient implements TcpIoClient, UdpIoClient {
   }
 
   @Override
+  public CompletableFuture<byte[]> sendAndReceiveTcp(
+    InetSocketAddress local,
+    InetSocketAddress remote,
+    Socks5Proxy proxy,
+    Message query,
+    byte[] data,
+    Duration timeout) {
+    return tcpIoClient.sendAndReceiveTcp(local, remote, proxy, query, data, timeout);
+  }
+
+  @Override
   public CompletableFuture<byte[]> sendAndReceiveUdp(
       InetSocketAddress local,
       InetSocketAddress remote,

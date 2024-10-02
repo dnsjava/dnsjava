@@ -44,6 +44,9 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
         if (!state.channel.isConnected()) {
           state.channel.register(selector, SelectionKey.OP_CONNECT, state);
         } else {
+          if (state.channel.keyFor(selector) == null) {
+            state.channel.register(selector, SelectionKey.OP_CONNECT, state);
+          }
           state.channel.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
         }
       } catch (IOException e) {
@@ -264,8 +267,19 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
 
   @Override
   public CompletableFuture<byte[]> sendAndReceiveTcp(
+    InetSocketAddress local,
+    InetSocketAddress remote,
+    Message query,
+    byte[] data,
+    Duration timeout) {
+    return this.sendAndReceiveTcp(local, remote, null, query, data, timeout);
+  }
+
+  @Override
+  public CompletableFuture<byte[]> sendAndReceiveTcp(
       InetSocketAddress local,
       InetSocketAddress remote,
+      Socks5Proxy proxy,
       Message query,
       byte[] data,
       Duration timeout) {
@@ -286,7 +300,14 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
                     c.bind(local);
                   }
 
-                  c.connect(remote);
+                  if (proxy != null) {
+                    c.configureBlocking(true);
+                    c.connect(proxy.getProxyAddress());
+                    proxy.socks5TcpHandshake(c, remote);
+                  } else {
+                    c.connect(remote);
+                  }
+                  c.configureBlocking(false);
                   return new ChannelState(c);
                 } catch (IOException e) {
                   if (c != null) {
