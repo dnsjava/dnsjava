@@ -54,4 +54,16 @@ public class DefaultIoClient implements TcpIoClient, UdpIoClient {
       Duration timeout) {
     return udpIoClient.sendAndReceiveUdp(local, remote, query, data, max, timeout);
   }
+
+  @Override
+  public CompletableFuture<byte[]> sendAndReceiveUdp(
+    InetSocketAddress local,
+    InetSocketAddress remote,
+    Socks5Proxy proxy,
+    Message query,
+    byte[] data,
+    int max,
+    Duration timeout) {
+    return udpIoClient.sendAndReceiveUdp(local, remote, proxy, query, data, max, timeout);
+  }
 }

@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Iterator;
@@ -63,7 +64,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
 
       try {
         log.trace("Registering OP_READ for transaction with id {}", t.id);
-        t.channel.register(selector(), SelectionKey.OP_READ, t);
+        t.udpChannel.register(selector(), SelectionKey.OP_READ, t);
         t.send();
       } catch (IOException e) {
         t.completeExceptionally(e);
@@ -87,17 +88,19 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
     private final byte[] data;
     private final int max;
     private final long endTime;
-    private final DatagramChannel channel;
+    private final DatagramChannel udpChannel;
+    private final SocketChannel tcpChannel;
+    private final Socks5Proxy proxy;
     private final CompletableFuture<byte[]> f;
 
     void send() throws IOException {
       ByteBuffer buffer = ByteBuffer.wrap(data);
       verboseLog(
           "UDP write: transaction id=" + id,
-          channel.socket().getLocalSocketAddress(),
-          channel.socket().getRemoteSocketAddress(),
+          udpChannel.socket().getLocalSocketAddress(),
+          udpChannel.socket().getRemoteSocketAddress(),
           data);
-      int n = channel.send(buffer, channel.socket().getRemoteSocketAddress());
+      int n = udpChannel.send(buffer, udpChannel.socket().getRemoteSocketAddress());
       if (n == 0) {
         throw new EOFException(
             "Insufficient room for the datagram in the underlying output buffer for transaction "
@@ -138,6 +141,14 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
           keyChannel.socket().getRemoteSocketAddress(),
           resultingData);
       silentDisconnectAndCloseChannel();
+      if (proxy != null && tcpChannel != null) {
+        resultingData = proxy.removeUdpHeader(resultingData);
+        try {
+          tcpChannel.close();
+        } catch (IOException e) {
+          // ignore, we either already have everything we need or can't do anything
+        }
+      }
       f.complete(resultingData);
       pendingTransactions.remove(this);
     }
@@ -149,32 +160,64 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
 
     private void silentDisconnectAndCloseChannel() {
       try {
-        channel.disconnect();
+        udpChannel.disconnect();
       } catch (IOException e) {
         // ignore, we either already have everything we need or can't do anything
       } finally {
-        NioUdpClient.silentCloseChannel(channel);
+        NioUdpClient.silentCloseChannel(udpChannel);
       }
     }
   }
 
   @Override
   public CompletableFuture<byte[]> sendAndReceiveUdp(
+    InetSocketAddress local,
+    InetSocketAddress remote,
+    Message query,
+    byte[] data,
+    int max,
+    Duration timeout) {
+    return sendAndReceiveUdp(local, remote, null, query, data, max, timeout);
+  }
+
+  @Override
+  public CompletableFuture<byte[]> sendAndReceiveUdp(
       InetSocketAddress local,
       InetSocketAddress remote,
+      Socks5Proxy proxy,
       Message query,
       byte[] data,
       int max,
       Duration timeout) {
     long endTime = System.nanoTime() + timeout.toNanos();
     CompletableFuture<byte[]> f = new CompletableFuture<>();
-    DatagramChannel channel = null;
+    DatagramChannel udpChannel = null;
+    SocketChannel tcpChannel = null;
     try {
       final Selector selector = selector();
-      channel = DatagramChannel.open();
-      channel.configureBlocking(false);
 
-      Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, f);
+      // SOCKS5 handshake to set up the UDP association
+      if (proxy != null) {
+        data = proxy.addUdpHeader(data, remote);
+        try {
+          tcpChannel = SocketChannel.open();
+          if (local != null) {
+            tcpChannel.bind(local);
+          }
+          tcpChannel.connect(proxy.getProxyAddress());
+          remote = proxy.socks5UdpAssociateHandshake(tcpChannel);
+        } catch (IOException e) {
+          return new CompletableFuture<>().thenComposeAsync(in -> {
+            f.completeExceptionally(new WireParseException("Error in Udp Associate SOCKS5 handshake", e));
+            return f;
+          });
+        }
+      }
+
+      udpChannel = DatagramChannel.open();
+      udpChannel.configureBlocking(false);
+
+      Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, udpChannel, tcpChannel, proxy, f);
       if (local == null || local.getPort() == 0) {
         boolean bound = false;
         for (int i = 0; i < 1024; i++) {
@@ -193,7 +236,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
               addr = new InetSocketAddress(local.getAddress(), port);
             }
 
-            channel.bind(addr);
+            udpChannel.bind(addr);
             bound = true;
             break;
           } catch (SocketException e) {
@@ -207,16 +250,16 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
         }
       }
 
-      channel.connect(remote);
+      udpChannel.connect(remote);
       pendingTransactions.add(t);
       registrationQueue.add(t);
       selector.wakeup();
     } catch (IOException e) {
-      silentCloseChannel(channel);
+      silentCloseChannel(udpChannel);
       f.completeExceptionally(e);
     } catch (Throwable e) {
       // Make sure to close the channel, no matter what, but only handle the declared IOException
-      silentCloseChannel(channel);
+      silentCloseChannel(udpChannel);
       throw e;
     }
 

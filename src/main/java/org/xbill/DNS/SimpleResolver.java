@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.io.DefaultIoClientFactory;
 import org.xbill.DNS.io.IoClientFactory;
 import org.xbill.DNS.io.TcpIoClient;
+import org.xbill.DNS.io.UdpIoClient;
 
 /**
  * An implementation of Resolver that sends one query to one server. SimpleResolver handles TCP
@@ -406,56 +407,19 @@ public class SimpleResolver implements Resolver {
         result = tcpClient.sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
       }
     } else {
+      UdpIoClient udpClient = ioClientFactory.createOrGetUdpClient();
       if (proxy != null) {
-        try {
-          c = SocketChannel.open();
-          if (localAddress != null) {
-            c.bind(localAddress);
-          }
-          if (proxy != null) {
-            c.connect(proxy.getProxyAddress());
-            address = proxy.socks5UdpAssociateHandshake(c);
-          }
-        } catch (IOException e) {
-          if (c != null) {
-            try {
-              c.close();
-            } catch (IOException ee) {
-              // ignore
-            }
-          }
-          return new CompletableFuture<>().thenComposeAsync(in -> {
-            CompletableFuture<Message> f = new CompletableFuture<>();
-            f.completeExceptionally(new WireParseException("Error in Udp Associate SOCKS5 handshake", e));
-            return f;
-          }, executor);
-        }
-        out = proxy.addUdpHeader(out, proxy.getRemoteAddress());
         localAddress = proxy.getLocalAddress();
+        address = proxy.getRemoteAddress();
+        result = udpClient.sendAndReceiveUdp(localAddress, address, proxy, query, out, udpSize, timeoutValue);
+      } else {
+        result = udpClient.sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
       }
-      result =
-          ioClientFactory
-              .createOrGetUdpClient()
-              .sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
     }
 
-    SocketChannel finalC = c;
     return result.thenComposeAsync(
         in -> {
           CompletableFuture<Message> f = new CompletableFuture<>();
-
-          // finally close the tcp connection
-          // and remove SOCKS5 udp header from the response
-          if (proxy != null && !tcp) {
-            if (finalC != null) {
-              try {
-                finalC.close();
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            }
-            in = proxy.removeUdpHeader(in);
-          }
 
           // Check that the response is long enough.
           if (in.length < Header.LENGTH) {
