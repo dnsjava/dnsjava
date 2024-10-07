@@ -23,6 +23,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import javax.net.ssl.HttpsURLConnection;
@@ -91,6 +92,8 @@ public final class DohResolver implements Resolver {
   private final AsyncSemaphore maxConcurrentRequests;
 
   private final AtomicLong lastRequest = new AtomicLong(0);
+
+  private final AtomicBoolean initialRequestSentMark = new AtomicBoolean(false);
   private final AsyncSemaphore initialRequestLock = new AsyncSemaphore(1);
 
   private static final String APPLICATION_DNS_MESSAGE = "application/dns-message";
@@ -469,15 +472,28 @@ public final class DohResolver implements Resolver {
         .thenCompose(Function.identity());
   }
 
+  /**
+   * Check whether current initiating DoH request is initial request of this {@link DohResolver}.
+   */
+  private boolean checkInitialRequest() {
+    // If initial request haven't been completed successfully yet, just return true.
+    if (!initialRequestSentMark.get()) {
+      return true;
+    }
+
+    // Otherwise, check whether such request is happened
+    // after last successful request plus idle connection timeout.
+    long lastRequestTime = lastRequest.get();
+    return (lastRequestTime + idleConnectionTimeout.toNanos() < System.nanoTime());
+  }
+
   private CompletionStage<Message> sendAsync11WithInitialRequestPermit(
       Message query,
       Executor executor,
       long startTime,
       Object requestBuilder,
       Permit initialRequestPermit) {
-    long lastRequestTime = lastRequest.get();
-    boolean isInitialRequest =
-        (lastRequestTime < System.nanoTime() - idleConnectionTimeout.toNanos());
+    boolean isInitialRequest = checkInitialRequest();
     if (!isInitialRequest) {
       initialRequestPermit.release();
     }
@@ -516,6 +532,25 @@ public final class DohResolver implements Resolver {
         .thenCompose(Function.identity());
   }
 
+  /**
+   * Set last request time to {@link DohResolver#lastRequest}, which ensures only the largest timestamp could be accepted.
+   *
+   * @param startTime start time in nanos of a Doh request.
+   */
+  private void setLastRequestTime(long startTime) {
+    long current = lastRequest.get();
+    // Only update value of 'lastRequest' if timestamp in 'lastRequest' is smaller than incoming 'startTime' value.
+    if (current < startTime) {
+      while (!lastRequest.compareAndSet(current, startTime)) {
+        // CAS failed, re-verify the eligibility of timestamp in 'lastRequest' to be updated to the incoming 'startTime' value.
+        current = lastRequest.get();
+        if (current > startTime) {
+          return;
+        }
+      }
+    }
+  }
+
   private CompletionStage<Message> sendAsync11WithConcurrentRequestPermit(
       Message query,
       Executor executor,
@@ -548,7 +583,12 @@ public final class DohResolver implements Resolver {
               .whenComplete(
                   (result, ex) -> {
                     if (ex == null) {
-                      lastRequest.set(startTime);
+                      setLastRequestTime(startTime);
+                      if (isInitialRequest) {
+                        // initial request was completed successfully, so toggle initialRequestSentMark to true.
+                        // it's very safe to toggle initialRequestSentMark here, since this code had been guarded by initialRequestLock and its permit outside.
+                        initialRequestSentMark.compareAndSet(false, true);
+                      }
                     }
                     maxConcurrentRequestPermit.release();
                     if (isInitialRequest) {
