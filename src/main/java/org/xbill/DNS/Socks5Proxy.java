@@ -1,16 +1,16 @@
 package org.xbill.DNS;
 
 import lombok.Getter;
-
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Objects;
 
 @Getter
 public class Socks5Proxy {
   private static final byte SOCKS5_VERSION = 0x05;
-
+  private static final byte SOCKS5_USER_PWD_AUTH_VERSION = 0x01;
   private static final byte SOCKS5_AUTH_NONE = 0x00;
   private static final byte SOCKS5_AUTH_GSSAPI = 0x01;
   private static final byte SOCKS5_AUTH_USER_PASS = 0x02;
@@ -39,42 +39,87 @@ public class Socks5Proxy {
   private final InetSocketAddress remoteAddress;
   private final InetSocketAddress localAddress;
   private final InetSocketAddress proxyAddress;
+  private final String socks5User;
+  private final String socks5Password;
 
-
-  public Socks5Proxy(InetSocketAddress proxyAddress, InetSocketAddress remoteAddress, InetSocketAddress localAddress) {
-    this.remoteAddress = remoteAddress;
-    this.localAddress = localAddress;
-    this.proxyAddress = proxyAddress;
+  public Socks5Proxy(InetSocketAddress proxyAddress, InetSocketAddress remoteAddress, InetSocketAddress localAddress, String socks5User, String socks5Password) {
+    this.remoteAddress = Objects.requireNonNull(remoteAddress, "remoteAddress must not be null");
+    this.localAddress = Objects.requireNonNull(localAddress, "localAddress must not be null");
+    this.proxyAddress = Objects.requireNonNull(proxyAddress, "proxyAddress must not be null");
+    this.socks5User = socks5User;
+    this.socks5Password = socks5Password;
   }
 
-  public void socks5MethodSelection(SocketChannel c) {
-    ByteBuffer buffer = ByteBuffer.allocate(3);
-    buffer.put(SOCKS5_VERSION);
-    buffer.put((byte) 1);
-    buffer.put(SOCKS5_AUTH_NONE);
-    buffer.flip();
+  public Socks5Proxy(InetSocketAddress proxyAddress, InetSocketAddress remoteAddress, InetSocketAddress localAddress) {
+    this(proxyAddress, remoteAddress, localAddress, null, null);
+  }
 
+  private void writeToChannel(SocketChannel c, ByteBuffer buffer) {
     try {
       c.write(buffer);
     } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to write to TCP channel", e);
+      throw new IllegalStateException("Failed to write to TCP channel", e);
     }
+  }
 
-    buffer.clear();
-
+  private void readFromChannel(SocketChannel c, ByteBuffer buffer) {
     try {
       c.read(buffer);
     } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to read from TCP channel", e);
+      throw new IllegalStateException("Failed to read from TCP channel", e);
     }
+  }
 
+  public byte socks5MethodSelection(SocketChannel c) {
+    ByteBuffer buffer = ByteBuffer.allocate(3);
+    buffer.put(SOCKS5_VERSION);
+    buffer.put((byte) 1);
+    buffer.put((this.socks5User != null && this.socks5Password != null) ? SOCKS5_AUTH_USER_PASS : SOCKS5_AUTH_NONE);
     buffer.flip();
+
+    writeToChannel(c, buffer);
+    buffer.clear();
+
+    readFromChannel(c, buffer);
+    buffer.flip();
+
     if (buffer.get() != SOCKS5_VERSION) {
-      throw new IllegalArgumentException("Invalid version");
+      throw new IllegalStateException("Invalid SOCKS5 version");
     }
 
-    if (buffer.get() == SOCKS5_AUTH_NO_ACCEPTABLE_METHODS) {
-      throw new IllegalArgumentException("No acceptable methods");
+    byte method = buffer.get();
+    if (method == SOCKS5_AUTH_NO_ACCEPTABLE_METHODS) {
+      throw new IllegalStateException("No acceptable authentication methods");
+    }
+    return method;
+  }
+
+  public void socks5UserPwdAuthExchange(SocketChannel c) {
+    ByteBuffer buffer = ByteBuffer.allocate(520);
+    buffer.put(SOCKS5_USER_PWD_AUTH_VERSION);
+    buffer.put((byte) this.socks5User.length());
+    buffer.put(this.socks5User.getBytes());
+    buffer.put((byte) this.socks5Password.length());
+    buffer.put(this.socks5Password.getBytes());
+    buffer.flip();
+
+    writeToChannel(c, buffer);
+    buffer.clear();
+
+    readFromChannel(c, buffer);
+    buffer.flip();
+
+    if (!buffer.hasRemaining()) {
+      throw new IllegalStateException("Authentication failed. No data received from server");
+    }
+
+    if (buffer.get() != SOCKS5_USER_PWD_AUTH_VERSION) {
+      throw new IllegalStateException("Invalid user/pwd auth subnegotiation version");
+    }
+
+    byte reply = buffer.get();
+    if (reply != SOCKS5_REP_SUCCEEDED) {
+      throw new IllegalStateException("Authentication failed with status " + reply);
     }
   }
 
@@ -88,27 +133,23 @@ public class Socks5Proxy {
     buffer.putShort((short) remote.getPort());
     buffer.flip();
 
-    try {
-      c.write(buffer);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to write to TCP channel", e);
-    }
+    writeToChannel(c, buffer);
     buffer.clear();
 
-    try {
-      c.read(buffer);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to read from TCP channel", e);
-    }
+    readFromChannel(c, buffer);
     buffer.flip();
 
+    if (!buffer.hasRemaining()) {
+      throw new IllegalStateException("SOCKS5 handshake failed. No data received from server");
+    }
+
     if (buffer.get() != SOCKS5_VERSION) {
-      throw new IllegalArgumentException("Invalid version");
+      throw new IllegalStateException("Invalid SOCKS5 version");
     }
 
     byte reply = buffer.get();
     if (reply != SOCKS5_REP_SUCCEEDED) {
-      throw new IllegalArgumentException("Failed to connect to remote server: " + reply);
+      throw new IllegalStateException("Connection to remote server failed: " + reply);
     }
   }
 
@@ -122,34 +163,30 @@ public class Socks5Proxy {
     buffer.putShort((short) 0x00);
     buffer.flip();
 
-    try {
-      c.write(buffer);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to write to TCP channel", e);
-    }
+    writeToChannel(c, buffer);
     buffer.clear();
 
-    try {
-      c.read(buffer);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to read from TCP channel", e);
-    }
+    readFromChannel(c, buffer);
     buffer.flip();
 
+    if (!buffer.hasRemaining()) {
+      throw new IllegalStateException("SOCKS5 udp associate exchange failed. No data received from server");
+    }
+
     if (buffer.get() != SOCKS5_VERSION) {
-      throw new IllegalArgumentException("Invalid version");
+      throw new IllegalStateException("Invalid SOCKS5 version");
     }
 
     byte reply = buffer.get();
     if (reply != SOCKS5_REP_SUCCEEDED) {
-      throw new IllegalArgumentException("Failed to connect to remote server: " + reply);
+      throw new IllegalStateException("UDP association failed: " + reply);
     }
 
     buffer.get(); // skip RSV byte
 
     byte atyp = buffer.get();
     if (atyp != SOCKS5_ATYP_IPV4) {
-      throw new IllegalArgumentException("Invalid address type");
+      throw new IllegalStateException("Invalid address type");
     }
 
     byte[] addr = new byte[4];
@@ -177,16 +214,22 @@ public class Socks5Proxy {
     return out;
   }
 
-  public void socks5TcpHandshake(
-    SocketChannel c, InetSocketAddress remote) {
-    this.socks5MethodSelection(c);
+  public void socks5TcpHandshake(SocketChannel c, InetSocketAddress remote) {
+    byte method = this.socks5MethodSelection(c);
+    if (method == SOCKS5_AUTH_USER_PASS) {
+      this.socks5UserPwdAuthExchange(c);
+    }
     this.socks5HeaderExchange(c, remote);
   }
 
-  public InetSocketAddress socks5UdpAssociateHandshake(
-    SocketChannel c
-    ) throws UnknownHostException {
-    this.socks5MethodSelection(c);
+  public InetSocketAddress socks5UdpAssociateHandshake(SocketChannel c) throws UnknownHostException {
+    byte method = this.socks5MethodSelection(c);
+    if (method == SOCKS5_AUTH_USER_PASS) {
+      if (this.socks5User == null || this.socks5Password == null) {
+        throw new IllegalStateException("No user or password provided");
+      }
+      this.socks5UserPwdAuthExchange(c);
+    }
     return this.socks5UdpAssociateExchange(c);
   }
 }
