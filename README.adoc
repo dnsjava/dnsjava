@@ -103,6 +103,12 @@ Do NOT use it.
 |true
 |false
 
+.2+|dnsjava.hostsfile.max_size_bytes
+3+|Set the size of the hosts file to be loaded at a time, in bytes.
+|Integer
+|16384
+|1000000
+
 .2+|dnsjava.nio.selector_timeout
 3+|Set selector timeout in milliseconds. Default/Max 1000, Min 1.
 |Integer
