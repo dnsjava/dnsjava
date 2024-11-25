@@ -104,7 +104,7 @@ Do NOT use it.
 |false
 
 .2+|dnsjava.hostsfile.max_size
-3+|Set the size of the hosts file to be loaded at a time，in bytes.
+3+|Set the size of the hosts file to be loaded at a time,in bytes.
 |Integer
 |16384
 |1000000
