@@ -89,7 +89,8 @@ public class Zone implements Serializable, Iterable<RRset> {
       throw new IllegalArgumentException("no input stream specified");
     }
 
-    fromMasterFile(zone, new Master(input));
+    this.origin = zone;
+    fromMasterFile(new Master(input, origin));
   }
 
   /**
@@ -110,7 +111,9 @@ public class Zone implements Serializable, Iterable<RRset> {
     if (file == null) {
       throw new IllegalArgumentException("no file name specified");
     }
-    fromMasterFile(zone, new Master(file));
+
+    this.origin = zone;
+    fromMasterFile(new Master(file, origin));
   }
 
   /**
@@ -126,13 +129,16 @@ public class Zone implements Serializable, Iterable<RRset> {
     if (zone == null) {
       throw new IllegalArgumentException("no zone name specified");
     }
+
     if (records == null) {
       throw new IllegalArgumentException("no records are specified");
     }
+
     origin = zone;
     for (Record r : records) {
       maybeAddRecord(r);
     }
+
     validate();
   }
 
@@ -175,8 +181,7 @@ public class Zone implements Serializable, Iterable<RRset> {
     fromXFR(xfrin);
   }
 
-  private void fromMasterFile(Name origin, Master m) throws IOException {
-    this.origin = origin;
+  private void fromMasterFile(Master m) throws IOException {
     try {
       Record r;
       while ((r = m.nextRecord()) != null) {

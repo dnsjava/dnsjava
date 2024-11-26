@@ -1,0 +1,7 @@
+$TTL 600
+example.com. IN SOA ns1.foo.com. john.doe.foo.com. 2023110717 28800 7200 604800 7200
+
+@ 86400 IN NS ns1.foo.com.
+@ 86400 IN NS ns2.foo.com.
+@ 86400 IN NS ns3.foo.com.
+@ IN A 1.2.3.4

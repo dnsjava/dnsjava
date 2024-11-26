@@ -234,6 +234,20 @@ class ZoneTest {
   }
 
   @Test
+  void ctorWithoutOrigin() {
+    Zone zone =
+        assertDoesNotThrow(
+            () ->
+                new Zone(
+                    Name.fromConstantString("example.com."),
+                    ZoneTest.class.getResourceAsStream("/zonefileEx3")));
+    assertThat(zone.iterator().hasNext()).isTrue();
+    RRset set = zone.iterator().next();
+    assertThat(set.getType()).isEqualTo(Type.SOA);
+    assertThat(set.rrs(false)).hasSize(1);
+  }
+
+  @Test
   void addRecord() throws TextParseException {
     Name n = new Name("something", ZONE_NAME);
     assertNull(ZONE.findExactMatch(n, Type.A));
