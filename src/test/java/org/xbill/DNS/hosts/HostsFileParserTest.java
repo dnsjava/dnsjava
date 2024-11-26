@@ -176,8 +176,9 @@ class HostsFileParserTest {
     try {
       System.setProperty("dnsjava.hostsfile.max_size_bytes", 1024 * 1024 * 1024 + "");
       HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileCompletelyCachedA");
-      hostsFileParser.getAddressForHost(Name.fromConstantString("localhost-10."), Type.A)
-        .orElseThrow(() -> new IllegalStateException("Host entry not found"));
+      hostsFileParser
+          .getAddressForHost(Name.fromConstantString("localhost-10."), Type.A)
+          .orElseThrow(() -> new IllegalStateException("Host entry not found"));
       assertEquals(1280, hostsFileParser.cacheSize());
     } finally {
       System.clearProperty("dnsjava.hostsfile.max_size_bytes");
