@@ -16,10 +16,10 @@ public class CNAMERecord extends SingleCompressedNameBase {
   /**
    * Creates a new CNAMERecord with the given data
    *
-   * @param alias The name to which the CNAME alias points
+   * @param target The name to which the CNAME alias points
    */
-  public CNAMERecord(Name name, int dclass, long ttl, Name alias) {
-    super(name, Type.CNAME, dclass, ttl, alias, "alias");
+  public CNAMERecord(Name name, int dclass, long ttl, Name target) {
+    super(name, Type.CNAME, dclass, ttl, target, "target");
   }
 
   /** Gets the target of the CNAME Record */
