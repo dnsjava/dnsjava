@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +20,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.io.DefaultIoClientFactory;
 import org.xbill.DNS.io.IoClientFactory;
+import org.xbill.DNS.io.TcpIoClient;
+import org.xbill.DNS.io.UdpIoClient;
 
 /**
  * An implementation of Resolver that sends one query to one server. SimpleResolver handles TCP
@@ -40,6 +43,7 @@ public class SimpleResolver implements Resolver {
 
   private InetSocketAddress address;
   private InetSocketAddress localAddress;
+  private Socks5Proxy proxy;
   private boolean useTCP;
   private boolean ignoreTruncation;
   private OPTRecord queryOPT = new OPTRecord(DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0);
@@ -97,6 +101,11 @@ public class SimpleResolver implements Resolver {
   /** Creates a SimpleResolver that will query the specified host */
   public SimpleResolver(InetSocketAddress host) {
     address = Objects.requireNonNull(host, "host must not be null");
+  }
+
+  /** Creates a SimpleResolver that will query the specified host via the specified SOCKS5 proxy */
+  public SimpleResolver(Socks5Proxy socks5Proxy) {
+    proxy = Objects.requireNonNull(socks5Proxy, "proxy must not be null");
   }
 
   /** Creates a SimpleResolver that will query the specified host */
@@ -378,16 +387,25 @@ public class SimpleResolver implements Resolver {
     }
 
     CompletableFuture<byte[]> result;
+    SocketChannel c = null;
     if (tcp) {
-      result =
-          ioClientFactory
-              .createOrGetTcpClient()
-              .sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
+      TcpIoClient tcpClient = ioClientFactory.createOrGetTcpClient();
+      if (proxy != null) {
+        localAddress = proxy.getLocalAddress();
+        address = proxy.getRemoteAddress();
+        result = tcpClient.sendAndReceiveTcp(localAddress, address, proxy, query, out, timeoutValue);
+      } else {
+        result = tcpClient.sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
+      }
     } else {
-      result =
-          ioClientFactory
-              .createOrGetUdpClient()
-              .sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
+      UdpIoClient udpClient = ioClientFactory.createOrGetUdpClient();
+      if (proxy != null) {
+        localAddress = proxy.getLocalAddress();
+        address = proxy.getRemoteAddress();
+        result = udpClient.sendAndReceiveUdp(localAddress, address, proxy, query, out, udpSize, timeoutValue);
+      } else {
+        result = udpClient.sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
+      }
     }
 
     return result.thenComposeAsync(
