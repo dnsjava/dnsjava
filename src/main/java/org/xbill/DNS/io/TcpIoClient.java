@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Resolver;
-import org.xbill.DNS.Socks5Proxy;
 
 /**
  * Serves as an interface from a {@link Resolver} to the underlying mechanism for sending bytes over
@@ -33,12 +32,4 @@ public interface TcpIoClient {
       Message query,
       byte[] data,
       Duration timeout);
-
-  CompletableFuture<byte[]> sendAndReceiveTcp(
-    InetSocketAddress local,
-    InetSocketAddress remote,
-    Socks5Proxy proxy,
-    Message query,
-    byte[] data,
-    Duration timeout);
 }

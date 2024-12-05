@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Resolver;
-import org.xbill.DNS.Socks5Proxy;
 
 /**
  * Serves as an interface from a {@link Resolver} to the underlying mechanism for sending bytes over
@@ -35,13 +34,4 @@ public interface UdpIoClient {
       byte[] data,
       int max,
       Duration timeout);
-
-  CompletableFuture<byte[]> sendAndReceiveUdp(
-    InetSocketAddress local,
-    InetSocketAddress remote,
-    Socks5Proxy proxy,
-    Message query,
-    byte[] data,
-    int max,
-    Duration timeout);
 }
