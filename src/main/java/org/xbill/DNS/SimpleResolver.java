@@ -389,14 +389,14 @@ public class SimpleResolver implements Resolver {
     CompletableFuture<byte[]> result;
     if (tcp) {
       result =
-        ioClientFactory
-          .createOrGetTcpClient()
-          .sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
+          ioClientFactory
+              .createOrGetTcpClient()
+              .sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
     } else {
       result =
-        ioClientFactory
-          .createOrGetUdpClient()
-          .sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
+          ioClientFactory
+              .createOrGetUdpClient()
+              .sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
     }
 
     return result.thenComposeAsync(
