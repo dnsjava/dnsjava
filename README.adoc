@@ -115,6 +115,13 @@ Do NOT use it.
 |1000
 |700
 
+.2+|dnsjava.nio.register_shutdown_hook
+3+|Register Shutdown Hook for automatic termination of NIO.
+If disabled, the nio selector thread will not automatically clean up on JVM termination.
+|Boolean
+|True
+|False
+
 .2+|dnsjava.harden_unknown_additional
 3+|Harden against unknown records in the authority section and additional section.
 If disabled, such records are copied from the upstream and presented to the client together with the answer.
