@@ -458,6 +458,23 @@ class TSIGTest {
   }
 
   @Test
+  void testLargeMessageIsNotLargerThanMax() {
+    Update update = new Update(Name.fromConstantString("zone.example.com."));
+    for (int i = 0; i < 3000; i++) {
+      TXTRecord record =
+          new TXTRecord(
+              Name.fromConstantString("name-" + i + ".zone.example.com."), DClass.IN, 900, "a");
+      update.absent(record.name, record.type);
+      update.add(record);
+    }
+
+    TSIG tsigKey = new TSIG(TSIG.HMAC_SHA384, "zone.example.com.", "c2VjcmU=");
+    update.setTSIG(tsigKey);
+    byte[] wireData = update.toWire(Message.MAXLENGTH);
+    assertThat(wireData.length).isLessThan(Message.MAXLENGTH);
+  }
+
+  @Test
   void testAxfrLastNotSignedError() throws Exception {
     Name name = Name.fromConstantString("example.com.");
     ZoneTransferIn client =

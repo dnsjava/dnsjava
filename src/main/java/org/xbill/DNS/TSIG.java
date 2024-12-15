@@ -859,7 +859,8 @@ public class TSIG {
         + 10
         + alg.length()
         + 8 // time signed, fudge
-        + 18 // 2 byte MAC length, 16 byte MAC
+        + 2 // 2 byte MAC length
+        + algLengthMap.get(alg)
         + 4 // original id, error
         + 8; // 2 byte error length, 6 byte max error field.
   }
