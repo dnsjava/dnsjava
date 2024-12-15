@@ -10,6 +10,7 @@ on:
 permissions:
   pull-requests: read
   contents: read
+  checks: write
 
 env:
   BUILD_JAVA_VERSION: '21'
@@ -78,8 +79,6 @@ jobs:
           WF_PRKEY: ${{ fromJson(steps.get_pr_data.outputs.data).number }}
           WF_BRANCH: ${{ fromJson(steps.get_pr_data.outputs.data).head.ref }}
           WF_BASE: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
-        permissions:
-          checks: write
         run: |
           cp -f base/pom.xml .
           mvn -B \
