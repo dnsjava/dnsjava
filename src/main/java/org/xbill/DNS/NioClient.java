@@ -62,7 +62,8 @@ public abstract class NioClient {
           selectorThread.start();
           closeThread = new Thread(() -> close(true));
           closeThread.setName("dnsjava NIO shutdown hook");
-          if (Boolean.parseBoolean(System.getProperty("dnsjava.nio.register_shutdown_hook", "true"))) {
+          if (Boolean.parseBoolean(
+              System.getProperty("dnsjava.nio.register_shutdown_hook", "true"))) {
             Runtime.getRuntime().addShutdownHook(closeThread);
           }
         }

@@ -30,6 +30,7 @@ runs:
         run_id: ${{ github.event.workflow_run.id }}
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
+        name_is_regexp: true
 
     - name: Extract artifacts
       run: |

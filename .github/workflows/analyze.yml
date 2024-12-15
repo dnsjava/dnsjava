@@ -10,7 +10,6 @@ on:
 permissions:
   pull-requests: read
   contents: read
-  checks: write
 
 env:
   BUILD_JAVA_VERSION: '21'
@@ -52,6 +51,7 @@ jobs:
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
           # for Sonar
           fetch-depth: 0
 
@@ -64,6 +64,7 @@ jobs:
         with:
           repository: ${{ github.event.repository.full_name }}
           ref: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+          persist-credentials: false
           path: base
 
       - name: Get analysis data
@@ -73,11 +74,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          WF_REVISION: ${{ github.event.workflow_run.head_sha }}
+          WF_PRKEY: ${{ fromJson(steps.get_pr_data.outputs.data).number }}
+          WF_BRANCH: ${{ fromJson(steps.get_pr_data.outputs.data).head.ref }}
+          WF_BASE: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+        permissions:
+          checks: write
         run: |
           cp -f base/pom.xml .
           mvn -B \
-          -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }} \
-          -Dsonar.pullrequest.key=${{ fromJson(steps.get_pr_data.outputs.data).number }} \
-          -Dsonar.pullrequest.branch=${{ fromJson(steps.get_pr_data.outputs.data).head.ref }} \
-          -Dsonar.pullrequest.base=${{ fromJson(steps.get_pr_data.outputs.data).base.ref }} \
+          -Dsonar.scm.revision='${WF_REVISION}' \
+          -Dsonar.pullrequest.key='${WF_PRKEY}' \
+          -Dsonar.pullrequest.branch='${WF_BRANCH}' \
+          -Dsonar.pullrequest.base='${WF_BASE}' \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
