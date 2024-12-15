@@ -12,6 +12,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -31,45 +34,121 @@ import org.xbill.DNS.utils.hexdump;
 public class TSIG {
   // https://www.iana.org/assignments/tsig-algorithm-names/tsig-algorithm-names.xml
 
-  /** The domain name representing the gss-tsig algorithm. */
+  /**
+   * The domain name representing the gss-tsig algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc3645">RFC 3645</a>
+   */
   public static final Name GSS_TSIG = Name.fromConstantString("gss-tsig.");
 
-  /** The domain name representing the HMAC-MD5 algorithm. */
+  /**
+   * The domain name representing the HMAC-MD5 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   */
   public static final Name HMAC_MD5 = Name.fromConstantString("HMAC-MD5.SIG-ALG.REG.INT.");
 
   /**
    * The domain name representing the HMAC-MD5 algorithm.
    *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
    * @deprecated use {@link #HMAC_MD5}
    */
   @Deprecated public static final Name HMAC = HMAC_MD5;
 
-  /** The domain name representing the HMAC-SHA1 algorithm. */
+  /**
+   * The domain name representing the HMAC-SHA1 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   */
   public static final Name HMAC_SHA1 = Name.fromConstantString("hmac-sha1.");
 
-  /** The domain name representing the HMAC-SHA224 algorithm. */
+  /**
+   * The domain name representing the HMAC-SHA224 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   */
   public static final Name HMAC_SHA224 = Name.fromConstantString("hmac-sha224.");
 
-  /** The domain name representing the HMAC-SHA256 algorithm. */
+  /**
+   * The domain name representing the HMAC-SHA256 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   */
   public static final Name HMAC_SHA256 = Name.fromConstantString("hmac-sha256.");
 
-  /** The domain name representing the HMAC-SHA384 algorithm. */
+  /**
+   * The domain name representing the HMAC-SHA384 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   */
   public static final Name HMAC_SHA384 = Name.fromConstantString("hmac-sha384.");
 
-  /** The domain name representing the HMAC-SHA512 algorithm. */
+  /**
+   * The domain name representing the HMAC-SHA512 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   */
   public static final Name HMAC_SHA512 = Name.fromConstantString("hmac-sha512.");
 
+  /**
+   * The domain name representing the HMAC-SHA256-128 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc4868">RFC 4868</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   * @since 3.6.3
+   */
+  public static final Name HMAC_SHA256_128 = Name.fromConstantString("hmac-sha256-128.");
+
+  /**
+   * The domain name representing the HMAC-SHA384-192 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc4868">RFC 4868</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   * @since 3.6.3
+   */
+  public static final Name HMAC_SHA384_192 = Name.fromConstantString("hmac-sha384-192.");
+
+  /**
+   * The domain name representing the HMAC-SHA512-256 algorithm.
+   *
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc4868">RFC 4868</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   * @since 3.6.3
+   */
+  public static final Name HMAC_SHA512_256 = Name.fromConstantString("hmac-sha512-256.");
+
   private static final Map<Name, String> algMap;
+  private static final Map<Name, Integer> algLengthMap;
+  private static final Pattern javaAlgNamePattern =
+      Pattern.compile(
+          "^Hmac(?<alg>(SHA(1|\\d{3})|MD5))(/(?<length>\\d{3}))?$", Pattern.CASE_INSENSITIVE);
 
   static {
-    Map<Name, String> out = new HashMap<>();
-    out.put(HMAC_MD5, "HmacMD5");
-    out.put(HMAC_SHA1, "HmacSHA1");
-    out.put(HMAC_SHA224, "HmacSHA224");
-    out.put(HMAC_SHA256, "HmacSHA256");
-    out.put(HMAC_SHA384, "HmacSHA384");
-    out.put(HMAC_SHA512, "HmacSHA512");
-    algMap = Collections.unmodifiableMap(out);
+    Map<Name, String> names = new TreeMap<>();
+    names.put(HMAC_MD5, "HmacMD5");
+    names.put(HMAC_SHA1, "HmacSHA1");
+    names.put(HMAC_SHA224, "HmacSHA224");
+    names.put(HMAC_SHA256, "HmacSHA256");
+    names.put(HMAC_SHA384, "HmacSHA384");
+    names.put(HMAC_SHA512, "HmacSHA512");
+    // These must always be after the non-truncated versions
+    names.put(HMAC_SHA256_128, "HmacSHA256");
+    names.put(HMAC_SHA384_192, "HmacSHA384");
+    names.put(HMAC_SHA512_256, "HmacSHA512");
+    algMap = Collections.unmodifiableMap(names);
+
+    Map<Name, Integer> lengths = new HashMap<>();
+    lengths.put(HMAC_MD5, 16);
+    lengths.put(HMAC_SHA1, 20);
+    lengths.put(HMAC_SHA224, 28);
+    lengths.put(HMAC_SHA256, 32);
+    lengths.put(HMAC_SHA384, 48);
+    lengths.put(HMAC_SHA512, 64);
+    lengths.put(HMAC_SHA256_128, 16);
+    lengths.put(HMAC_SHA384_192, 24);
+    lengths.put(HMAC_SHA512_256, 32);
+    algLengthMap = Collections.unmodifiableMap(lengths);
   }
 
   /**
@@ -84,29 +163,40 @@ public class TSIG {
       throw new IllegalArgumentException("Null algorithm");
     }
 
-    // Special case.  Allow "HMAC-MD5" as an alias
-    // for the RFC name.
-    if (alg.equalsIgnoreCase("HMAC-MD5") || alg.equalsIgnoreCase("HMAC-MD5.")) {
+    // Handle Java algorithm names
+    if (!alg.contains("-")) {
+      Matcher m = javaAlgNamePattern.matcher(alg);
+      if (m.matches()) {
+        alg = "hmac-" + m.group("alg");
+        String truncatedLength = m.group("length");
+        if (truncatedLength != null) {
+          alg += "-" + truncatedLength;
+        }
+      }
+    }
+
+    if (!alg.endsWith(".")) {
+      alg += ".";
+    }
+
+    Name nameAlg;
+    try {
+      nameAlg = Name.fromString(alg);
+    } catch (TextParseException e) {
+      throw new RuntimeException(e);
+    }
+
+    // Special case, allow "hmac-md5" as an alias for the RFC name.
+    if (nameAlg.equals(Name.fromConstantString("hmac-md5."))) {
       return HMAC_MD5;
     }
 
-    // Search through the RFC Names in the map and match
-    // if the algorithm name with or without the trailing dot.
-    // The match is case-insensitive.
-    return algMap.keySet().stream()
-        .filter(n -> n.toString().equalsIgnoreCase(alg) || n.toString(true).equalsIgnoreCase(alg))
-        .findAny()
-        .orElseGet(
-            () ->
-                // Did not find an RFC name, so fall through
-                // and try the java names in the value of each
-                // entry.  If not found after all this, then
-                // throw an exception.
-                algMap.entrySet().stream()
-                    .filter(e -> e.getValue().equalsIgnoreCase(alg))
-                    .map(Map.Entry::getKey)
-                    .findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("Unknown algorithm: " + alg)));
+    // Make sure we understand this name
+    if (algMap.get(nameAlg) == null) {
+      throw new IllegalArgumentException("Unknown algorithm: " + nameAlg);
+    }
+
+    return nameAlg;
   }
 
   /**
@@ -289,15 +379,19 @@ public class TSIG {
    *       <li>hmac-sha1.
    *       <li>hmac-sha224.
    *       <li>hmac-sha256.
+   *       <li>hmac-sha256-128.
    *       <li>hmac-sha384.
+   *       <li>hmac-sha384-192.
    *       <li>hmac-sha512.
+   *       <li>hmac-sha512-256.
    *     </ul>
    *     The trailing &quot;.&quot; can be omitted.
    * @param name The name of the shared key.
    * @param key The shared key's data represented as a base64 encoded string.
    * @throws IllegalArgumentException The key name is an invalid name
    * @throws IllegalArgumentException The key data is improperly encoded
-   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC8945</a>
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc8945">RFC 8945</a>
+   * @apiNote Do NOT use the MD5 algorithms anymore.
    */
   public TSIG(String algorithm, String name, String key) {
     this(algorithmToName(algorithm), name, key);
@@ -434,6 +528,9 @@ public class TSIG {
         log.trace(hexdump.dump("TSIG-HMAC variables", tsigVariables));
       }
       signature = hmac.doFinal(tsigVariables);
+      if (signature.length > algLengthMap.get(alg)) {
+        signature = Arrays.copyOfRange(signature, 0, algLengthMap.get(alg));
+      }
     } else {
       signature = new byte[0];
     }
@@ -701,7 +798,7 @@ public class TSIG {
     return tsigVariables;
   }
 
-  private static int verifySignature(Mac hmac, byte[] signature) {
+  private int verifySignature(Mac hmac, byte[] signature) {
     int digestLength = hmac.getMacLength();
 
     // rfc4635#section-3.1, 4.:
@@ -721,6 +818,10 @@ public class TSIG {
       return Rcode.BADSIG;
     } else {
       byte[] expectedSignature = hmac.doFinal();
+      if (expectedSignature.length > algLengthMap.get(alg)) {
+        expectedSignature = Arrays.copyOfRange(expectedSignature, 0, algLengthMap.get(alg));
+      }
+
       if (!verify(expectedSignature, signature)) {
         if (log.isDebugEnabled()) {
           log.debug(
