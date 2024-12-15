@@ -299,6 +299,9 @@
                             <exclude>org.xbill.DNS.spi.DnsjavaInetAddressResolver</exclude>
                             <exclude>org.xbill.DNS.spi.DNSJavaNameService</exclude>
                             <exclude>org.xbill.DNS.spi.DNSJavaNameServiceDescriptor</exclude>
+                            <!-- Not available before Java 18 -->
+                            <exclude>org.xbill.DNS.spi.DnsjavaInetAddressResolver</exclude>
+                            <exclude>org.xbill.DNS.spi.DnsjavaInetAddressResolverProvider</exclude>
                         </excludes>
                         <overrideCompatibilityChangeParameters>
                             <overrideCompatibilityChangeParameter>
@@ -789,29 +792,6 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>beforeJava18</id>
-            <activation>
-                <jdk>[,18)</jdk>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.siom79.japicmp</groupId>
-                        <artifactId>japicmp-maven-plugin</artifactId>
-                        <version>0.21.2</version>
-                        <configuration>
-                            <parameter>
-                                <!-- Required for working on Java before 21 -->
-                                <ignoreMissingClasses>true</ignoreMissingClasses>
-                            </parameter>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
