@@ -5,6 +5,7 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -185,6 +186,17 @@ public abstract class NioClient {
       it.remove();
       KeyProcessor t = (KeyProcessor) key.attachment();
       t.processReadyKey(key);
+    }
+  }
+
+  static void verboseLog(
+      String prefix, SocketAddress local, SocketAddress remote, ByteBuffer data) {
+    if (log.isTraceEnabled() || packetLogger != null) {
+      byte[] dst = new byte[data.remaining()];
+      int pos = data.position();
+      data.get(dst, 0, data.remaining());
+      data.position(pos);
+      verboseLog(prefix, local, remote, dst);
     }
   }
 

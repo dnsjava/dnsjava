@@ -82,39 +82,53 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
     private final long endTime;
     private final SocketChannel channel;
     private final CompletableFuture<byte[]> f;
-    private boolean sendDone;
+    private ByteBuffer queryDataBuffer;
+    long bytesWrittenTotal = 0;
 
-    void send() throws IOException {
-      if (sendDone) {
-        return;
+    boolean send() throws IOException {
+      // send can be invoked multiple times if the entire buffer couldn't be written at once
+      if (bytesWrittenTotal == queryData.length + 2) {
+        return true;
+      }
+
+      if (queryDataBuffer == null) {
+        // combine length+message to avoid multiple TCP packets
+        // https://datatracker.ietf.org/doc/html/rfc7766#section-8
+        queryDataBuffer = ByteBuffer.allocate(queryData.length + 2);
+        queryDataBuffer.put((byte) (queryData.length >>> 8));
+        queryDataBuffer.put((byte) (queryData.length & 0xFF));
+        queryDataBuffer.put(queryData);
+        queryDataBuffer.flip();
       }
 
       verboseLog(
           "TCP write: transaction id=" + query.getHeader().getID(),
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
-          queryData);
+          queryDataBuffer);
 
-      // combine length+message to avoid multiple TCP packets
-      // https://datatracker.ietf.org/doc/html/rfc7766#section-8
-      ByteBuffer buffer = ByteBuffer.allocate(queryData.length + 2);
-      buffer.put((byte) (queryData.length >>> 8));
-      buffer.put((byte) (queryData.length & 0xFF));
-      buffer.put(queryData);
-      buffer.flip();
-      while (buffer.hasRemaining()) {
-        long n = channel.write(buffer);
-        if (n == 0) {
-          throw new EOFException(
-              "Insufficient room for the data in the underlying output buffer for transaction "
-                  + query.getHeader().getID());
-        } else if (n < queryData.length) {
-          throw new EOFException(
-              "Could not write all data for transaction " + query.getHeader().getID());
+      while (queryDataBuffer.hasRemaining()) {
+        long bytesWritten = channel.write(queryDataBuffer);
+        bytesWrittenTotal += bytesWritten;
+        if (bytesWritten == 0) {
+          log.debug(
+              "Insufficient room for the data in the underlying output buffer for transaction {}, retrying",
+              query.getHeader().getID());
+          return false;
+        } else if (bytesWrittenTotal < queryData.length) {
+          log.debug(
+              "Wrote {} of {} bytes data for transaction {}",
+              bytesWrittenTotal,
+              queryData.length,
+              query.getHeader().getID());
         }
       }
 
-      sendDone = true;
+      log.debug(
+          "Send for transaction {} is complete, wrote {} bytes",
+          query.getHeader().getID(),
+          bytesWrittenTotal);
+      return true;
     }
   }
 
@@ -248,7 +262,12 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
       for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
         Transaction t = it.next();
         try {
-          t.send();
+          if (!t.send()) {
+            // Write was incomplete because the output buffer was full. Wait until the selector
+            // tells us that we can write again
+            key.interestOps(SelectionKey.OP_WRITE);
+            return;
+          }
         } catch (IOException e) {
           t.f.completeExceptionally(e);
           it.remove();
