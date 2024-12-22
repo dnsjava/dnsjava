@@ -49,14 +49,14 @@
         <maven.compiler.showCompilationChanges>true</maven.compiler.showCompilationChanges>
         <maven.compiler.createMissingPackageInfoClass>false</maven.compiler.createMissingPackageInfoClass>
 
-        <org.junit.version>5.10.3</org.junit.version>
+        <org.junit.version>5.11.4</org.junit.version>
         <!-- Stay on 4.x for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <mockito.version>4.11.0</mockito.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.34</lombok.version>
-        <jna.version>5.14.0</jna.version>
-        <bouncycastle.version>1.78.1</bouncycastle.version>
-        <vertx.version>4.5.9</vertx.version>
+        <lombok.version>1.18.36</lombok.version>
+        <jna.version>5.16.0</jna.version>
+        <bouncycastle.version>1.79</bouncycastle.version>
+        <vertx.version>4.5.11</vertx.version>
         <!-- Stay on 1.7 for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <google-java-format.version>1.7</google-java-format.version>
         <spotless.version>2.30.0</spotless.version>
@@ -75,7 +75,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.2.7</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -133,6 +133,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <!-- Stay before v6 for Java 8 compatibility -->
                 <version>5.1.9</version>
                 <extensions>true</extensions>
                 <configuration>
@@ -207,7 +208,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.11.2</version>
                 <configuration>
                     <source>${target.jdk}</source>
                     <sourcepath>${delombok.output}</sourcepath>
@@ -222,7 +223,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.5.2</version>
                 <configuration>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <includes>
@@ -277,7 +278,7 @@
             <plugin>
                 <groupId>com.github.siom79.japicmp</groupId>
                 <artifactId>japicmp-maven-plugin</artifactId>
-                <version>0.21.2</version>
+                <version>0.23.0</version>
                 <configuration>
                     <newVersion>
                         <file>
@@ -370,7 +371,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>check</id>
@@ -404,7 +405,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.1.3</version>
             </plugin>
 
             <plugin>
@@ -427,7 +428,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.12.1</version>
+                <version>3.21.0</version>
             </plugin>
 
             <plugin>
@@ -463,7 +464,7 @@
                     <dependency>
                         <groupId>org.ow2.asm</groupId>
                         <artifactId>asm</artifactId>
-                        <version>9.6</version>
+                        <version>9.7.1</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -486,13 +487,65 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.1.3</version>
             </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>3.6.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.3</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.18.0</version>
+                <configuration>
+                    <ignoredVersions>
+                        <!-- Ignore Alpha's, Beta's, release candidates and milestones -->
+                        <ignoreVersion type="regex">(?i).*Alpha(?:-?\d+)?</ignoreVersion>
+                        <ignoreVersion type="regex">(?i).*a(?:-?\d+)?</ignoreVersion>
+                        <ignoreVersion type="regex">(?i).*Beta(?:-?\d+)?</ignoreVersion>
+                        <ignoreVersion type="regex">(?i).*-B(?:-?\d+)?</ignoreVersion>
+                        <ignoreVersion type="regex">(?i).*RC(?:-?\d+)?</ignoreVersion>
+                        <ignoreVersion type="regex">(?i).*CR(?:-?\d+)?</ignoreVersion>
+                        <ignoreVersion type="regex">(?i).*M(?:-?\d+)?</ignoreVersion>
+                    </ignoredVersions>
+                    <ruleSet>
+                        <rules>
+                            <rule>
+                                <!-- stay on slf4j 1.x -->
+                                <groupId>org.slf4j</groupId>
+                                <ignoreVersions><ignoreVersion>
+                                    <type>range</type>
+                                    <version>[2.0,)</version>
+                                </ignoreVersion>
+                                </ignoreVersions>
+                            </rule>
+                        </rules>
+                    </ruleSet>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -554,7 +607,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.26.3</version>
+            <version>3.27.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -572,7 +625,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
-            <version>1.14.18</version>
+            <version>1.15.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -603,7 +656,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.16.1</version>
+            <version>2.18.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -641,8 +694,14 @@
             </activation>
 
             <properties>
-                <mockito.version>5.12.0</mockito.version>
-                <google-java-format.version>1.17.0</google-java-format.version>
+                <mockito.version>5.14.2</mockito.version>
+                <!--
+                 Stay on 1.22:
+                 - 1.23 introduces a change that is inconsistent with 1.7 used for Java 8
+                   https://github.com/google/google-java-format/issues/876
+                 - 1.25 requires JDK 17
+                -->
+                <google-java-format.version>1.22.0</google-java-format.version>
                 <spotless.version>2.43.0</spotless.version>
             </properties>
 
@@ -829,7 +888,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
-                        <version>3.7.1</version>
+                        <version>3.8.1</version>
                         <executions>
                             <execution>
                                 <phase>initialize</phase>
