@@ -15,7 +15,9 @@ import java.io.IOException;
  *     the location of services (DNS SRV)</a>
  */
 public class SRVRecord extends Record {
-  private int priority, weight, port;
+  private int priority;
+  private int weight;
+  private int port;
   private Name target;
 
   SRVRecord() {}

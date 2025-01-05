@@ -14,8 +14,11 @@ import java.io.IOException;
  *     Discovery System (DDDS) Part Three: The Domain Name System (DNS) Database</a>
  */
 public class NAPTRRecord extends Record {
-  private int order, preference;
-  private byte[] flags, service, regexp;
+  private int order;
+  private int preference;
+  private byte[] flags;
+  private byte[] service;
+  private byte[] regexp;
   private Name replacement;
 
   NAPTRRecord() {}

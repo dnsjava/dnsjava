@@ -13,10 +13,10 @@ class SSHFPRecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("2 1 CAFEBABE");
-    SSHFPRecord record = new SSHFPRecord();
-    record.rdataFromString(t, null);
-    assertEquals(SSHFPRecord.Algorithm.DSS, record.getAlgorithm());
-    assertEquals(SSHFPRecord.Digest.SHA1, record.getDigestType());
-    assertArrayEquals(base16.fromString("CAFEBABE"), record.getFingerPrint());
+    SSHFPRecord sshfpRecord = new SSHFPRecord();
+    sshfpRecord.rdataFromString(t, null);
+    assertEquals(SSHFPRecord.Algorithm.DSS, sshfpRecord.getAlgorithm());
+    assertEquals(SSHFPRecord.Digest.SHA1, sshfpRecord.getDigestType());
+    assertArrayEquals(base16.fromString("CAFEBABE"), sshfpRecord.getFingerPrint());
   }
 }

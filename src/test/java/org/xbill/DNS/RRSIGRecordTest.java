@@ -17,15 +17,15 @@ class RRSIGRecordTest {
     Tokenizer t =
         new Tokenizer(
             "NSEC3 10 3 180 20161207204758 20161107195347 31055 example.com. GLqlvFaWiemLree+4WQeR+0ANSEYeuLW/KEWZw9mZPUJ1bcb1OQCxp43 7DNdPCSmS/RqJGiVGtSW8xsGoRgUwOdczL8s4j/z3pVi8wDlhw2jXE0k fGBiOshH+3VjZV4eLlDmDixZ3WmA9gzf0G+qAwRP9tjps2+vqRfXOpoj /UffmcMgZODEDGonHAOX/k35sBL+zIP4k6i6Kq/lpPZd8oxsxCwyxAYl E1oMxeE14TnRZoqCZdAEgvrViF91z/tnMbYAY/JNWYK4iREOuuWTLOox C0hKBsymi3fyLjwZ1NV1Bh3lqYN0rr1uo8ZSZmGrfLdg4l+hO4Xl6kG6 JTn27Q==");
-    RRSIGRecord record = new RRSIGRecord();
-    record.rdataFromString(t, null);
-    assertEquals(10, record.getAlgorithm());
-    assertEquals(31055, record.getFootprint());
-    assertEquals(Name.fromConstantString("example.com."), record.getSigner());
-    assertEquals(50, record.getTypeCovered());
+    RRSIGRecord rrsigRecord = new RRSIGRecord();
+    rrsigRecord.rdataFromString(t, null);
+    assertEquals(10, rrsigRecord.getAlgorithm());
+    assertEquals(31055, rrsigRecord.getFootprint());
+    assertEquals(Name.fromConstantString("example.com."), rrsigRecord.getSigner());
+    assertEquals(50, rrsigRecord.getTypeCovered());
     SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddhhmmss", Locale.US);
     formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-    assertEquals(formatter.parse("20161207204758").toInstant(), record.getExpire());
-    assertEquals(formatter.parse("20161107195347").toInstant(), record.getTimeSigned());
+    assertEquals(formatter.parse("20161207204758").toInstant(), rrsigRecord.getExpire());
+    assertEquals(formatter.parse("20161107195347").toInstant(), rrsigRecord.getTimeSigned());
   }
 }

@@ -73,9 +73,9 @@ class MessageReader {
         default:
           if (line != null && !line.isEmpty()) {
             Master ma = new Master(new ByteArrayInputStream(line.getBytes()));
-            Record record = ma.nextRecord();
-            if (record != null) {
-              m.addRecord(record, section);
+            Record nextRecord = ma.nextRecord();
+            if (nextRecord != null) {
+              m.addRecord(nextRecord, section);
             }
           }
       }

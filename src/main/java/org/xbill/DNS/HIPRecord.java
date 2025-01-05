@@ -100,11 +100,11 @@ public class HIPRecord extends Record {
   @Override
   protected String rrToString() {
     StringBuilder sb = new StringBuilder();
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("( ");
     }
 
-    String separator = Options.check("multiline") ? "\n\t" : " ";
+    String separator = Options.multiline() ? "\n\t" : " ";
     sb.append(pkAlgorithm);
     sb.append(" ");
     sb.append(base16.toString(hit));
@@ -116,7 +116,7 @@ public class HIPRecord extends Record {
     }
 
     sb.append(rvServers.stream().map(Name::toString).collect(Collectors.joining(separator)));
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append(" )");
     }
 

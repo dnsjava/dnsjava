@@ -13,8 +13,13 @@ import java.io.IOException;
  *     Implementation and Specification</a>
  */
 public class SOARecord extends Record {
-  private Name host, admin;
-  private long serial, refresh, retry, expire, minimum;
+  private Name host;
+  private Name admin;
+  private long serial;
+  private long refresh;
+  private long retry;
+  private long expire;
+  private long minimum;
 
   SOARecord() {}
 
@@ -79,7 +84,7 @@ public class SOARecord extends Record {
     sb.append(host);
     sb.append(" ");
     sb.append(admin);
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append(" (\n\t\t\t\t\t");
       sb.append(serial);
       sb.append("\t; serial\n\t\t\t\t\t");

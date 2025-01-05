@@ -95,16 +95,15 @@ public final class TTL {
   public static String format(long ttl) {
     TTL.check(ttl);
     StringBuilder sb = new StringBuilder();
-    long secs, mins, hours, days, weeks;
-    secs = ttl % 60;
+    long secs = ttl % 60;
     ttl /= 60;
-    mins = ttl % 60;
+    long mins = ttl % 60;
     ttl /= 60;
-    hours = ttl % 24;
+    long hours = ttl % 24;
     ttl /= 24;
-    days = ttl % 7;
+    long days = ttl % 7;
     ttl /= 7;
-    weeks = ttl;
+    long weeks = ttl;
     if (weeks > 0) {
       sb.append(weeks).append("W");
     }

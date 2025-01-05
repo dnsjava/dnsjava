@@ -12,7 +12,7 @@ public class DNSOutput {
 
   private byte[] array;
   private int pos;
-  private int saved_pos;
+  private int savedPos;
 
   /**
    * Create a new DNSOutput with a specified size.
@@ -22,7 +22,7 @@ public class DNSOutput {
   public DNSOutput(int size) {
     array = new byte[size];
     pos = 0;
-    saved_pos = -1;
+    savedPos = -1;
   }
 
   /** Create a new DNSOutput */
@@ -75,16 +75,16 @@ public class DNSOutput {
    * @throws IllegalArgumentException The index is not within the output.
    */
   public void save() {
-    saved_pos = pos;
+    savedPos = pos;
   }
 
   /** Restores the input stream to its state before the call to {@link #save}. */
   public void restore() {
-    if (saved_pos < 0) {
+    if (savedPos < 0) {
       throw new IllegalStateException("no previous state");
     }
-    pos = saved_pos;
-    saved_pos = -1;
+    pos = savedPos;
+    savedPos = -1;
   }
 
   /**
@@ -122,7 +122,7 @@ public class DNSOutput {
       throw new IllegalArgumentException("cannot write past end of data");
     }
     array[where++] = (byte) ((val >>> 8) & 0xFF);
-    array[where++] = (byte) (val & 0xFF);
+    array[where] = (byte) (val & 0xFF);
   }
 
   /**

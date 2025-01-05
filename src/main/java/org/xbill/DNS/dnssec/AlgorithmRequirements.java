@@ -114,8 +114,8 @@ class AlgorithmRequirements {
    */
   int missing() {
     int miss = -1;
-    // check if a needed algo was bogus - report that;
-    // check the first missing algo - report that;
+    // check if a needed algo was bogus - report that,
+    // check the first missing algo - report that,
     // or return 0
     for (int i = 0; i < needs.length; i++) {
       if (needs[i] == 2) {

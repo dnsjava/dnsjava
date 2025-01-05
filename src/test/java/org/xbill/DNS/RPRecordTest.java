@@ -11,9 +11,9 @@ class RPRecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("louie.trantor.umd.edu.  LAM1.people.umd.edu.");
-    RPRecord record = new RPRecord();
-    record.rdataFromString(t, null);
-    assertEquals(Name.fromConstantString("louie.trantor.umd.edu."), record.getMailbox());
-    assertEquals(Name.fromConstantString("LAM1.people.umd.edu."), record.getTextDomain());
+    RPRecord rpRecord = new RPRecord();
+    rpRecord.rdataFromString(t, null);
+    assertEquals(Name.fromConstantString("louie.trantor.umd.edu."), rpRecord.getMailbox());
+    assertEquals(Name.fromConstantString("LAM1.people.umd.edu."), rpRecord.getTextDomain());
   }
 }

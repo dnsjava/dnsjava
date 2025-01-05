@@ -33,9 +33,9 @@ public class RRset implements Serializable, Iterable<Record> {
   }
 
   /** Creates an RRset and sets its contents to the specified record */
-  public RRset(Record record) {
+  public RRset(Record r) {
     this();
-    addRR(record);
+    addRR(r);
   }
 
   /**

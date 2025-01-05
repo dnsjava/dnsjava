@@ -75,8 +75,8 @@ public class Update extends Message {
    *
    * @throws IOException The record could not be parsed.
    */
-  public void present(Name name, int type, String record) throws IOException {
-    newPrereq(Record.fromString(name, type, dclass, 0, record, origin));
+  public void present(Name name, int type, String recordToCheck) throws IOException {
+    newPrereq(Record.fromString(name, type, dclass, 0, recordToCheck, origin));
   }
 
   /**
@@ -97,8 +97,8 @@ public class Update extends Message {
    * and type in the update message must be identical to the set of all records with that name and
    * type on the server.
    */
-  public void present(Record record) {
-    newPrereq(record);
+  public void present(Record recordToCheck) {
+    newPrereq(recordToCheck);
   }
 
   /**
@@ -123,8 +123,8 @@ public class Update extends Message {
    *
    * @throws IOException The record could not be parsed.
    */
-  public void add(Name name, int type, long ttl, String record) throws IOException {
-    newUpdate(Record.fromString(name, type, dclass, ttl, record, origin));
+  public void add(Name name, int type, long ttl, String recordToAdd) throws IOException {
+    newUpdate(Record.fromString(name, type, dclass, ttl, recordToAdd, origin));
   }
 
   /**
@@ -138,18 +138,18 @@ public class Update extends Message {
   }
 
   /** Indicates that the record should be inserted into the zone. */
-  public void add(Record record) {
-    newUpdate(record);
+  public void add(Record recordToAdd) {
+    newUpdate(recordToAdd);
   }
 
   /** Indicates that the records should be inserted into the zone. */
   public void add(Record[] records) {
-    for (Record record : records) {
-      add(record);
+    for (Record r : records) {
+      add(r);
     }
   }
 
-  /** Indicates that all of the records in the rrset should be inserted into the zone. */
+  /** Indicates that all the records in the rrset should be inserted into the zone. */
   public <T extends Record> void add(RRset rrset) {
     rrset.rrs().forEach(this::add);
   }
@@ -169,8 +169,8 @@ public class Update extends Message {
    *
    * @throws IOException The record could not be parsed.
    */
-  public void delete(Name name, int type, String record) throws IOException {
-    newUpdate(Record.fromString(name, type, DClass.NONE, 0, record, origin));
+  public void delete(Name name, int type, String recordToDelete) throws IOException {
+    newUpdate(Record.fromString(name, type, DClass.NONE, 0, recordToDelete, origin));
   }
 
   /**
@@ -184,14 +184,14 @@ public class Update extends Message {
   }
 
   /** Indicates that the specified record should be deleted from the zone. */
-  public void delete(Record record) {
-    newUpdate(record.withDClass(DClass.NONE, 0));
+  public void delete(Record recordToDelete) {
+    newUpdate(recordToDelete.withDClass(DClass.NONE, 0));
   }
 
   /** Indicates that the records should be deleted from the zone. */
   public void delete(Record[] records) {
-    for (Record record : records) {
-      delete(record);
+    for (Record r : records) {
+      delete(r);
     }
   }
 
@@ -206,9 +206,9 @@ public class Update extends Message {
    *
    * @throws IOException The record could not be parsed.
    */
-  public void replace(Name name, int type, long ttl, String record) throws IOException {
+  public void replace(Name name, int type, long ttl, String recordToReplace) throws IOException {
     delete(name, type);
-    add(name, type, ttl, record);
+    add(name, type, ttl, recordToReplace);
   }
 
   /**
@@ -226,9 +226,9 @@ public class Update extends Message {
    * Indicates that the record should be inserted into the zone replacing any other records with the
    * same name and type.
    */
-  public void replace(Record record) {
-    delete(record.getName(), record.getType());
-    add(record);
+  public void replace(Record recordToReplace) {
+    delete(recordToReplace.getName(), recordToReplace.getType());
+    add(recordToReplace);
   }
 
   /**
@@ -236,13 +236,13 @@ public class Update extends Message {
    * the same name and type as each one.
    */
   public void replace(Record[] records) {
-    for (Record record : records) {
-      replace(record);
+    for (Record r : records) {
+      replace(r);
     }
   }
 
   /**
-   * Indicates that all of the records in the rrset should be inserted into the zone replacing any
+   * Indicates that all the records in the rrset should be inserted into the zone replacing any
    * other records with the same name and type.
    */
   public <T extends Record> void replace(RRset rrset) {

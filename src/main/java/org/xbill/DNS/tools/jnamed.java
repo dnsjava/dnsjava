@@ -58,7 +58,7 @@ public class jnamed {
 
   Map<Integer, Cache> caches;
   Map<Name, Zone> znames;
-  Map<Name, TSIG> TSIGs;
+  Map<Name, TSIG> tsigs;
 
   private static String addrport(InetAddress addr, int port) {
     return addr.getHostAddress() + "#" + port;
@@ -82,7 +82,7 @@ public class jnamed {
     try {
       caches = new HashMap<>();
       znames = new HashMap<>();
-      TSIGs = new HashMap<>();
+      tsigs = new HashMap<>();
 
       String line;
       while ((line = br.readLine()) != null) {
@@ -171,7 +171,7 @@ public class jnamed {
 
   public void addTSIG(String algstr, String namestr, String key) throws IOException {
     Name name = Name.fromString(namestr, Name.root);
-    TSIGs.put(name, new TSIG(algstr, namestr, key));
+    tsigs.put(name, new TSIG(algstr, namestr, key));
   }
 
   public Cache getCache(int dclass) {
@@ -431,7 +431,7 @@ public class jnamed {
     TSIGRecord queryTSIG = query.getTSIG();
     TSIG tsig = null;
     if (queryTSIG != null) {
-      tsig = TSIGs.get(queryTSIG.getName());
+      tsig = tsigs.get(queryTSIG.getName());
       if (tsig == null || tsig.verify(query, in, null) != Rcode.NOERROR) {
         return formerrMessage(in);
       }

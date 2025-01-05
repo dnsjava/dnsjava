@@ -14,9 +14,9 @@ import java.io.IOException;
  */
 public class base64 {
 
-  private static final String Base64 =
+  private static final String BASE_64 =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-  private static final String Base64Url =
+  private static final String BASE_64_URL =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
   private base64() {}
@@ -39,7 +39,7 @@ public class base64 {
    * @return A String containing the encoded data
    */
   public static String toString(byte[] b, boolean useUrl) {
-    String base = useUrl ? Base64Url : Base64;
+    String base = useUrl ? BASE_64_URL : BASE_64;
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     for (int i = 0; i < (b.length + 2) / 3; i++) {
       short[] s = new short[3];
@@ -117,7 +117,7 @@ public class base64 {
       short[] t = new short[3];
 
       for (int j = 0; j < 4; j++) {
-        s[j] = (short) Base64.indexOf(in[i * 4 + j]);
+        s[j] = (short) BASE_64.indexOf(in[i * 4 + j]);
       }
 
       t[0] = (short) ((s[0] << 2) + (s[1] >> 4));
@@ -144,6 +144,7 @@ public class base64 {
           }
         }
       } catch (IOException e) {
+        // Ignore
       }
     }
     return bs.toByteArray();

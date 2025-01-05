@@ -98,14 +98,14 @@ public class SIG0 {
       Message message, byte[] b, KEYRecord key, SIGRecord previous, Instant now)
       throws DNSSEC.DNSSECException {
     SIGRecord sig = null;
-    for (Record record : message.getSection(Section.ADDITIONAL)) {
-      if (record.getType() != Type.SIG) {
+    for (Record r : message.getSection(Section.ADDITIONAL)) {
+      if (r.getType() != Type.SIG) {
         continue;
       }
-      if (((SIGRecord) record).getTypeCovered() != 0) {
+      if (((SIGRecord) r).getTypeCovered() != 0) {
         continue;
       }
-      sig = (SIGRecord) record;
+      sig = (SIGRecord) r;
       break;
     }
     DNSSEC.verifyMessage(message, b, sig, previous, key, now);

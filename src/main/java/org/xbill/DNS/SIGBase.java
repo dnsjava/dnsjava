@@ -14,7 +14,8 @@ import org.xbill.DNS.utils.base64;
  */
 abstract class SIGBase extends Record {
   protected int covered;
-  protected int alg, labels;
+  protected int alg;
+  protected int labels;
   protected long origttl;
   protected Instant expire;
   protected Instant timeSigned;
@@ -24,7 +25,7 @@ abstract class SIGBase extends Record {
 
   protected SIGBase() {}
 
-  public SIGBase(
+  protected SIGBase(
       Name name,
       int type,
       int dclass,
@@ -100,7 +101,7 @@ abstract class SIGBase extends Record {
     sb.append(" ");
     sb.append(origttl);
     sb.append(" ");
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("(\n\t");
     }
     sb.append(FormattedTime.format(expire));
@@ -110,7 +111,7 @@ abstract class SIGBase extends Record {
     sb.append(footprint);
     sb.append(" ");
     sb.append(signer);
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("\n");
       sb.append(base64.formatString(signature, 64, "\t", true));
     } else {

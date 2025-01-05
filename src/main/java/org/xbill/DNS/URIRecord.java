@@ -14,7 +14,8 @@ import java.io.IOException;
  *     Identifier (URI) DNS Resource Record</a>
  */
 public class URIRecord extends Record {
-  private int priority, weight;
+  private int priority;
+  private int weight;
   private byte[] target;
 
   URIRecord() {

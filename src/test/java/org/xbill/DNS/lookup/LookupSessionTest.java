@@ -94,9 +94,9 @@ class LookupSessionTest {
   private HostsFileParser lookupSessionTestHostsFileParser;
 
   static {
-    AAAARecord record = null;
+    AAAARecord aaaaRecord = null;
     try {
-      record =
+      aaaaRecord =
           new AAAARecord(
               DUMMY_NAME,
               IN,
@@ -106,7 +106,7 @@ class LookupSessionTest {
       // cannot happen
     }
 
-    LOOPBACK_AAAA = record;
+    LOOPBACK_AAAA = aaaaRecord;
   }
 
   @BeforeEach

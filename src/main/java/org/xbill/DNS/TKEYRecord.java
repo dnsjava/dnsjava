@@ -164,7 +164,7 @@ public class TKEYRecord extends Record {
     StringBuilder sb = new StringBuilder();
     sb.append(alg);
     sb.append(" ");
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("(\n\t");
     }
     sb.append(FormattedTime.format(timeInception));
@@ -174,7 +174,7 @@ public class TKEYRecord extends Record {
     sb.append(modeString());
     sb.append(" ");
     sb.append(Rcode.TSIGstring(error));
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("\n");
       if (key != null) {
         sb.append(base64.formatString(key, 64, "\t", false));

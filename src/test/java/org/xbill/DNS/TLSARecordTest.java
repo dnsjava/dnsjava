@@ -16,20 +16,20 @@ class TLSARecordTest {
   @ValueSource(strings = {"CAFE", "CAFE CAFFEE"})
   void rdataFromString(String rdata) throws IOException {
     try (Tokenizer t = new Tokenizer("0 0 1 " + rdata)) {
-      TLSARecord record = new TLSARecord();
-      record.rdataFromString(t, null);
-      assertEquals(TLSARecord.CertificateUsage.CA_CONSTRAINT, record.getCertificateUsage());
-      assertEquals(TLSARecord.MatchingType.SHA256, record.getMatchingType());
-      assertEquals(TLSARecord.Selector.FULL_CERTIFICATE, record.getSelector());
-      assertArrayEquals(base16.fromString(rdata), record.getCertificateAssociationData());
+      TLSARecord tlsaRecord = new TLSARecord();
+      tlsaRecord.rdataFromString(t, null);
+      assertEquals(TLSARecord.CertificateUsage.CA_CONSTRAINT, tlsaRecord.getCertificateUsage());
+      assertEquals(TLSARecord.MatchingType.SHA256, tlsaRecord.getMatchingType());
+      assertEquals(TLSARecord.Selector.FULL_CERTIFICATE, tlsaRecord.getSelector());
+      assertArrayEquals(base16.fromString(rdata), tlsaRecord.getCertificateAssociationData());
     }
   }
 
   @Test
   void emptyAssociationDataFromWire() {
-    TLSARecord record = new TLSARecord();
+    TLSARecord tlsaRecord = new TLSARecord();
     DNSInput in = new DNSInput(new byte[] {0, 0, 1});
-    assertThrows(WireParseException.class, () -> record.rrFromWire(in));
+    assertThrows(WireParseException.class, () -> tlsaRecord.rrFromWire(in));
   }
 
   @ParameterizedTest
@@ -44,8 +44,8 @@ class TLSARecordTest {
       })
   void invalidRdataFromString(String rdata) {
     try (Tokenizer t = new Tokenizer(rdata)) {
-      TLSARecord record = new TLSARecord();
-      assertThrows(TextParseException.class, () -> record.rdataFromString(t, null));
+      TLSARecord tlsaRecord = new TLSARecord();
+      assertThrows(TextParseException.class, () -> tlsaRecord.rdataFromString(t, null));
     }
   }
 

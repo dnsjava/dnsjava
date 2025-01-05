@@ -164,9 +164,7 @@ jobs:
           cache: maven
 
       - name: Run codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        uses: codecov/codecov-action@v5
 
       # doesn't work with PRs from forks, see
       # https://portal.productboard.com/sonarsource/1-sonarcloud/c/50-sonarcloud-analyzes-external-pull-request
@@ -175,7 +173,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        run: mvn -B properties:read-project-properties org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
   release:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/')

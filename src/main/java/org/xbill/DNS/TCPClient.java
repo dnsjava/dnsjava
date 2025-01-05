@@ -14,6 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+@SuppressWarnings("resource")
 class TCPClient implements AutoCloseable {
   private final long startTime;
   private final Duration timeout;
@@ -101,7 +102,7 @@ class TCPClient implements AutoCloseable {
     }
   }
 
-  private byte[] _recv(int length) throws IOException {
+  private byte[] recv(int length) throws IOException {
     SocketChannel channel = (SocketChannel) key.channel();
     int nrecvd = 0;
     byte[] data = new byte[length];
@@ -151,9 +152,9 @@ class TCPClient implements AutoCloseable {
   }
 
   byte[] recv() throws IOException {
-    byte[] buf = _recv(2);
+    byte[] buf = recv(2);
     int length = ((buf[0] & 0xFF) << 8) + (buf[1] & 0xFF);
-    byte[] data = _recv(length);
+    byte[] data = recv(length);
     SocketChannel channel = (SocketChannel) key.channel();
     NioClient.verboseLog(
         "TCP read",

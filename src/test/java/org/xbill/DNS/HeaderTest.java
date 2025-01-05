@@ -35,6 +35,7 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -232,7 +233,7 @@ class HeaderTest {
 
     int id = m_h.getID();
     assertEquals(id, m_h.getID());
-    assertTrue(id >= 0 && id < 0xffff);
+    assertThat(id).isNotNegative().isLessThanOrEqualTo(0xffff);
 
     m_h.setID(0xDCBA);
     assertEquals(0xDCBA, m_h.getID());

@@ -13,10 +13,10 @@ class CAARecordTest {
 
   @Test
   void ctor_6arg() {
-    CAARecord record = new CAARecord(n, DClass.IN, 0, CAARecord.Flags.IssuerCritical, "", "");
-    assertEquals(CAARecord.Flags.IssuerCritical, record.getFlags());
-    assertEquals("", record.getTag());
-    assertEquals("", record.getValue());
+    CAARecord caa = new CAARecord(n, DClass.IN, 0, CAARecord.Flags.IssuerCritical, "", "");
+    assertEquals(CAARecord.Flags.IssuerCritical, caa.getFlags());
+    assertEquals("", caa.getTag());
+    assertEquals("", caa.getValue());
 
     String data = new String(new char[256]);
     IllegalArgumentException thrown =
@@ -29,9 +29,9 @@ class CAARecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer(CAARecord.Flags.IssuerCritical + " issue entrust.net");
-    CAARecord record = new CAARecord();
-    record.rdataFromString(t, null);
-    assertEquals("issue", record.getTag());
-    assertEquals("entrust.net", record.getValue());
+    CAARecord caa = new CAARecord();
+    caa.rdataFromString(t, null);
+    assertEquals("issue", caa.getTag());
+    assertEquals("entrust.net", caa.getValue());
   }
 }

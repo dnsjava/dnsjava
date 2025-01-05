@@ -73,24 +73,24 @@ class HTTPSRecordTest {
     HTTPSRecord.ParameterIpv4Hint ipv4 = new HTTPSRecord.ParameterIpv4Hint();
     ipv4.fromString("1.2.3.4,5.6.7.8");
     List<HTTPSRecord.ParameterBase> params = Arrays.asList(mandatory, ipv4, alpn);
-    HTTPSRecord record = new HTTPSRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
+    HTTPSRecord https = new HTTPSRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
 
-    assertEquals(Type.HTTPS, record.getType());
-    assertEquals(label, record.getName());
-    assertEquals(svcPriority, record.getSvcPriority());
-    assertEquals(svcDomain, record.getTargetName());
+    assertEquals(Type.HTTPS, https.getType());
+    assertEquals(label, https.getName());
+    assertEquals(svcPriority, https.getSvcPriority());
+    assertEquals(svcDomain, https.getTargetName());
     assertEquals(
         Arrays.asList(HTTPSRecord.MANDATORY, HTTPSRecord.ALPN, HTTPSRecord.IPV4HINT).toString(),
-        record.getSvcParamKeys().toString());
-    assertEquals("alpn", record.getSvcParamValue(HTTPSRecord.MANDATORY).toString());
-    assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
-    assertEquals("h1,h2", record.getSvcParamValue(HTTPSRecord.ALPN).toString());
-    assertNull(record.getSvcParamValue(1234));
+        https.getSvcParamKeys().toString());
+    assertEquals("alpn", https.getSvcParamValue(HTTPSRecord.MANDATORY).toString());
+    assertEquals("h1,h2", https.getSvcParamValue(HTTPSRecord.ALPN).toString());
+    assertEquals("h1,h2", https.getSvcParamValue(HTTPSRecord.ALPN).toString());
+    assertNull(https.getSvcParamValue(1234));
     Options.unset("BINDTTL");
     Options.unset("noPrintIN");
     assertEquals(
         "test.com.\t\t300\tIN\tHTTPS\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8",
-        record.toString());
+        https.toString());
   }
 
   @Test

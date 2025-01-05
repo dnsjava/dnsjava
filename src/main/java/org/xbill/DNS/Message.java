@@ -1063,7 +1063,7 @@ public class Message implements Cloneable {
     if (throwOnIrrelevantRecord) {
       throw new WireParseException(
           String.format(
-              format.replace("{}", "%s") + this,
+              format.replace("{}", "%s"),
               rrset.getName(),
               DClass.string(rrset.getDClass()),
               Type.string(rrset.getType()),

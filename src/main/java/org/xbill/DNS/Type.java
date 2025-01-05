@@ -464,7 +464,7 @@ public final class Type {
    * @throws InvalidTypeException The type is out of range.
    */
   public static void check(int val) {
-    if (val < 0 || val > 0xFFFF) {
+    if (!Utils.isUInt16(val)) {
       throw new InvalidTypeException(val);
     }
   }

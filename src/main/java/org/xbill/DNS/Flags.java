@@ -10,7 +10,7 @@ package org.xbill.DNS;
  */
 public final class Flags {
 
-  private static final Mnemonic flags = new Mnemonic("DNS Header Flag", Mnemonic.CASE_LOWER);
+  private static final Mnemonic HEADER_FLAGS = new Mnemonic("DNS Header Flag", Mnemonic.CASE_LOWER);
 
   /** query/response */
   public static final byte QR = 0;
@@ -37,29 +37,29 @@ public final class Flags {
   public static final int DO = ExtendedFlags.DO;
 
   static {
-    flags.setMaximum(0xF);
-    flags.setPrefix("FLAG");
-    flags.setNumericAllowed(true);
+    HEADER_FLAGS.setMaximum(0xF);
+    HEADER_FLAGS.setPrefix("FLAG");
+    HEADER_FLAGS.setNumericAllowed(true);
 
-    flags.add(QR, "qr");
-    flags.add(AA, "aa");
-    flags.add(TC, "tc");
-    flags.add(RD, "rd");
-    flags.add(RA, "ra");
-    flags.add(AD, "ad");
-    flags.add(CD, "cd");
+    HEADER_FLAGS.add(QR, "qr");
+    HEADER_FLAGS.add(AA, "aa");
+    HEADER_FLAGS.add(TC, "tc");
+    HEADER_FLAGS.add(RD, "rd");
+    HEADER_FLAGS.add(RA, "ra");
+    HEADER_FLAGS.add(AD, "ad");
+    HEADER_FLAGS.add(CD, "cd");
   }
 
   private Flags() {}
 
   /** Converts a numeric Flag into a String */
   public static String string(int i) {
-    return flags.getText(i);
+    return HEADER_FLAGS.getText(i);
   }
 
   /** Converts a String representation of an Flag into its numeric value */
   public static int value(String s) {
-    return flags.getValue(s);
+    return HEADER_FLAGS.getValue(s);
   }
 
   /**
@@ -67,7 +67,7 @@ public final class Flags {
    * it's not.
    */
   public static boolean isFlag(int index) {
-    flags.check(index);
+    HEADER_FLAGS.check(index);
     return (index < 1 || index > 4) && (index < 12);
   }
 }

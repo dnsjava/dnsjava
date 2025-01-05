@@ -93,6 +93,6 @@ public class ARecord extends Record {
 
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-    out.writeU32((long) addr & 0xFFFFFFFFL);
+    out.writeU32(addr & 0xFFFFFFFFL);
   }
 }

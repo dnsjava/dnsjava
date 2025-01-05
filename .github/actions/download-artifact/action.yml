@@ -24,7 +24,7 @@ runs:
 
     - name: Download artifacts
       if: github.event_name == 'workflow_run'
-      uses: dawidd6/action-download-artifact@v6
+      uses: dawidd6/action-download-artifact@v7
       with:
         workflow: ${{ github.event.workflow_run.name }}
         run_id: ${{ github.event.workflow_run.id }}
@@ -33,6 +33,7 @@ runs:
         name_is_regexp: true
 
     - name: Extract artifacts
+      if: github.event_name != 'workflow_run'
       run: |
         for t in ${{ inputs.name }}*.tar
         do
@@ -41,7 +42,20 @@ runs:
       shell: bash
       working-directory: ${{ inputs.path }}
 
+    - name: Extract artifacts
+      if: github.event_name == 'workflow_run'
+      run: |
+        for t in ${{ inputs.name }}/${{ inputs.name }}*.tar
+        do
+          mv "${t}" .
+          tar -xvf "${t}"
+        done
+      shell: bash
+      working-directory: ${{ inputs.path }}
+
     - name: Remove archive
-      run: rm -f ${{ inputs.name }}*.tar
+      run: |
+        rm -f ${{ inputs.name }}.tar
+        rm -f ${{ inputs.name }}.zip
       shell: bash
       working-directory: ${{ inputs.path }}

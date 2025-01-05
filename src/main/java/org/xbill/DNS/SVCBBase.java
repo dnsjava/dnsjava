@@ -2,6 +2,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -123,7 +124,7 @@ public abstract class SVCBBase extends Record {
     parameters.addAlias(ECH, "echconfig");
   }
 
-  public abstract static class ParameterBase {
+  public abstract static class ParameterBase implements Serializable {
     public ParameterBase() {}
 
     public abstract int getKey();

@@ -20,6 +20,7 @@ public final class Opcode {
   public static final int STATUS = 2;
 
   /** A message from a primary to a secondary server to initiate a zone transfer */
+  @SuppressWarnings("java:S1845")
   public static final int NOTIFY = 4;
 
   /** A dynamic update message */

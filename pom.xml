@@ -61,17 +61,31 @@
         <google-java-format.version>1.7</google-java-format.version>
         <spotless.version>2.30.0</spotless.version>
 
-        <sonar.projectKey>dnsjava_dnsjava</sonar.projectKey>
-        <sonar.organization>dnsjava</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.source>${target.jdk}</sonar.java.source>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <delombok.output>${project.build.directory}/delombok</delombok.output>
     </properties>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <files>
+                        <file>sonar-project.properties</file>
+                    </files>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>

@@ -86,4 +86,5 @@ jobs:
           -Dsonar.pullrequest.key='${WF_PRKEY}' \
           -Dsonar.pullrequest.branch='${WF_BRANCH}' \
           -Dsonar.pullrequest.base='${WF_BASE}' \
+          properties:read-project-properties \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar

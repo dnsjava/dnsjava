@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.StringTokenizer;
-import org.xbill.DNS.SimpleResolver;
 
 /**
  * The properties {@link #DNS_SERVER_PROP}, {@link #DNS_SEARCH_PROP} (comma delimited lists) are
@@ -44,11 +43,11 @@ public class PropertyResolverConfigProvider extends BaseResolverConfigProvider {
           URI uri = new URI("dns://" + server);
           // assume this is an IPv6 address without brackets
           if (uri.getHost() == null) {
-            addNameserver(new InetSocketAddress(server, SimpleResolver.DEFAULT_PORT));
+            addNameserver(new InetSocketAddress(server, DEFAULT_PORT));
           } else {
             int port = uri.getPort();
             if (port == -1) {
-              port = SimpleResolver.DEFAULT_PORT;
+              port = DEFAULT_PORT;
             }
 
             addNameserver(new InetSocketAddress(uri.getHost(), port));

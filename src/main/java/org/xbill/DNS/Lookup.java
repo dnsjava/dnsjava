@@ -52,7 +52,7 @@ public final class Lookup {
   private List<Name> searchPath;
   private int ndots;
   private Cache cache;
-  private boolean temporary_cache;
+  private boolean temporaryCache;
   private int credibility;
   private final Name name;
   private final int type;
@@ -67,7 +67,7 @@ public final class Lookup {
   private String error;
   private boolean nxdomain;
   private boolean badresponse;
-  private String badresponse_error;
+  private String badresponseError;
   private boolean networkerror;
   private boolean timedout;
   private boolean nametoolong;
@@ -268,12 +268,12 @@ public final class Lookup {
     error = null;
     nxdomain = false;
     badresponse = false;
-    badresponse_error = null;
+    badresponseError = null;
     networkerror = false;
     timedout = false;
     nametoolong = false;
     referral = false;
-    if (temporary_cache) {
+    if (temporaryCache) {
       cache.clearCache();
     }
   }
@@ -438,7 +438,7 @@ public final class Lookup {
   public void setCache(Cache cache) {
     if (cache == null) {
       this.cache = new Cache(dclass);
-      this.temporary_cache = true;
+      this.temporaryCache = true;
     } else {
       if (cache.getDClass() != dclass) {
         throw new IllegalArgumentException(
@@ -446,7 +446,7 @@ public final class Lookup {
       }
 
       this.cache = cache;
-      this.temporary_cache = false;
+      this.temporaryCache = false;
     }
   }
 
@@ -600,14 +600,14 @@ public final class Lookup {
       // The server we contacted is broken or otherwise unhelpful.
       // Press on.
       badresponse = true;
-      badresponse_error = Rcode.string(rcode);
+      badresponseError = Rcode.string(rcode);
       return;
     }
 
     if (!query.getQuestion().equals(response.getQuestion())) {
       // The answer doesn't match the question.  That's not good.
       badresponse = true;
-      badresponse_error = "response does not match query";
+      badresponseError = "response does not match query";
       return;
     }
 
@@ -695,7 +695,7 @@ public final class Lookup {
     if (!done) {
       if (badresponse) {
         result = TRY_AGAIN;
-        error = badresponse_error;
+        error = badresponseError;
         done = true;
       } else if (timedout) {
         result = TRY_AGAIN;

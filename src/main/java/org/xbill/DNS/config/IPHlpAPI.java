@@ -13,6 +13,15 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+@SuppressWarnings({
+  "java:S101",
+  "java:S131",
+  "java:S116",
+  "java:S1104",
+  "java:S2160",
+  "java:S100",
+  "unused",
+})
 interface IPHlpAPI extends Library {
   IPHlpAPI INSTANCE = Native.load("IPHlpAPI", IPHlpAPI.class, W32APIOptions.ASCII_OPTIONS);
 

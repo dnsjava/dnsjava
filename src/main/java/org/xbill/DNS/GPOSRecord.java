@@ -14,7 +14,9 @@ import java.io.IOException;
  *     Geographical Location</a>
  */
 public class GPOSRecord extends Record {
-  private byte[] latitude, longitude, altitude;
+  private byte[] latitude;
+  private byte[] longitude;
+  private byte[] altitude;
 
   GPOSRecord() {}
 

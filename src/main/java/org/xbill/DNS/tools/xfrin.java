@@ -25,7 +25,7 @@ public class xfrin {
   public static void main(String[] args) throws Exception {
     ZoneTransferIn xfrin;
     TSIG key = null;
-    int ixfr_serial = -1;
+    int ixfrSerial = -1;
     String server = null;
     int port = SimpleResolver.DEFAULT_PORT;
     boolean fallback = false;
@@ -34,8 +34,8 @@ public class xfrin {
     int arg = 0;
     while (arg < args.length) {
       if (args[arg].equals("-i")) {
-        ixfr_serial = Integer.parseInt(args[++arg]);
-        if (ixfr_serial < 0) {
+        ixfrSerial = Integer.parseInt(args[++arg]);
+        if (ixfrSerial < 0) {
           usage("invalid serial number");
         }
       } else if (args[arg].equals("-k")) {
@@ -77,21 +77,21 @@ public class xfrin {
       System.out.println("sending to server '" + server + "'");
     }
 
-    if (ixfr_serial >= 0) {
-      xfrin = ZoneTransferIn.newIXFR(zname, ixfr_serial, fallback, server, port, key);
+    if (ixfrSerial >= 0) {
+      xfrin = ZoneTransferIn.newIXFR(zname, ixfrSerial, fallback, server, port, key);
     } else {
       xfrin = ZoneTransferIn.newAXFR(zname, server, port, key);
     }
 
     xfrin.run();
     if (xfrin.isAXFR()) {
-      if (ixfr_serial >= 0) {
+      if (ixfrSerial >= 0) {
         System.out.println("AXFR-like IXFR response");
       } else {
         System.out.println("AXFR response");
       }
-      for (Record record : xfrin.getAXFR()) {
-        System.out.println(record);
+      for (Record r : xfrin.getAXFR()) {
+        System.out.println(r);
       }
     } else if (xfrin.isIXFR()) {
       System.out.println("IXFR response");
