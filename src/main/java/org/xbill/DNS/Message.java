@@ -59,9 +59,9 @@ public class Message implements Cloneable {
 
   private static final Record[] emptyRecordArray = new Record[0];
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked"})
   private Message(Header header) {
-    sections = new List[4];
+    sections = (List<Record>[]) new List<?>[4];
     this.header = header;
   }
 
@@ -706,7 +706,7 @@ public class Message implements Cloneable {
   @SuppressWarnings({"unchecked", "java:S2975"})
   public Message clone() {
     Message m = (Message) super.clone();
-    m.sections = new List[sections.length];
+    m.sections = (List<Record>[]) new List<?>[sections.length];
     for (int i = 0; i < sections.length; i++) {
       if (sections[i] != null) {
         m.sections[i] = new LinkedList<>(sections[i]);
