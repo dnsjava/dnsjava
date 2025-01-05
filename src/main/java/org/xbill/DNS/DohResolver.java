@@ -23,7 +23,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import javax.net.ssl.HttpsURLConnection;
@@ -92,8 +91,6 @@ public final class DohResolver implements Resolver {
   private final AsyncSemaphore maxConcurrentRequests;
 
   private final AtomicLong lastRequest = new AtomicLong(0);
-
-  private final AtomicBoolean initialRequestSentMark = new AtomicBoolean(false);
   private final AsyncSemaphore initialRequestLock = new AsyncSemaphore(1);
 
   private static final String APPLICATION_DNS_MESSAGE = "application/dns-message";
@@ -175,6 +172,11 @@ public final class DohResolver implements Resolver {
     }
 
     USE_HTTP_CLIENT = initSuccess;
+  }
+
+  // package-visible for testing
+  long getNanoTime() {
+    return System.nanoTime();
   }
 
   /**
@@ -318,7 +320,7 @@ public final class DohResolver implements Resolver {
   private CompletionStage<Message> sendAsync8(final Message query, Executor executor) {
     byte[] queryBytes = prepareQuery(query).toWire();
     String url = getUrl(queryBytes);
-    long startTime = System.nanoTime();
+    long startTime = getNanoTime();
     return maxConcurrentRequests
         .acquire(timeout)
         .handleAsync(
@@ -366,7 +368,7 @@ public final class DohResolver implements Resolver {
       ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
     }
 
-    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    Duration remainingTimeout = timeout.minus(getNanoTime() - startTime, ChronoUnit.NANOS);
     conn.setConnectTimeout((int) remainingTimeout.toMillis());
     conn.setReadTimeout((int) remainingTimeout.toMillis());
     conn.setRequestMethod(usePost ? "POST" : "GET");
@@ -392,7 +394,7 @@ public final class DohResolver implements Resolver {
         int offset = 0;
         while ((r = is.read(responseBytes, offset, responseBytes.length - offset)) > 0) {
           offset += r;
-          remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+          remainingTimeout = timeout.minus(getNanoTime() - startTime, ChronoUnit.NANOS);
           if (remainingTimeout.isNegative()) {
             throw new SocketTimeoutException();
           }
@@ -406,7 +408,7 @@ public final class DohResolver implements Resolver {
           byte[] buffer = new byte[4096];
           int r;
           while ((r = is.read(buffer, 0, buffer.length)) > 0) {
-            remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+            remainingTimeout = timeout.minus(getNanoTime() - startTime, ChronoUnit.NANOS);
             if (remainingTimeout.isNegative()) {
               throw new SocketTimeoutException();
             }
@@ -435,7 +437,7 @@ public final class DohResolver implements Resolver {
   }
 
   private CompletionStage<Message> sendAsync11(final Message query, Executor executor) {
-    long startTime = System.nanoTime();
+    long startTime = getNanoTime();
     byte[] queryBytes = prepareQuery(query).toWire();
     String url = getUrl(queryBytes);
 
@@ -457,7 +459,7 @@ public final class DohResolver implements Resolver {
     // check if this request needs to be done synchronously because of HttpClient's stupidity to
     // not use the connection pool for HTTP/2 until one connection is successfully established,
     // which could lead to hundreds of connections (and threads with the default executor)
-    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    Duration remainingTimeout = timeout.minus(getNanoTime() - startTime, ChronoUnit.NANOS);
     return initialRequestLock
         .acquire(remainingTimeout)
         .handle(
@@ -472,34 +474,20 @@ public final class DohResolver implements Resolver {
         .thenCompose(Function.identity());
   }
 
-  /**
-   * Check whether current initiating DoH request is initial request of this {@link DohResolver}.
-   */
-  private boolean checkInitialRequest() {
-    // If initial request haven't been completed successfully yet, just return true.
-    if (!initialRequestSentMark.get()) {
-      return true;
-    }
-
-    // Otherwise, check whether such request is happened
-    // after last successful request plus idle connection timeout.
-    long lastRequestTime = lastRequest.get();
-    return (lastRequestTime + idleConnectionTimeout.toNanos() < System.nanoTime());
-  }
-
   private CompletionStage<Message> sendAsync11WithInitialRequestPermit(
       Message query,
       Executor executor,
       long startTime,
       Object requestBuilder,
       Permit initialRequestPermit) {
-    boolean isInitialRequest = checkInitialRequest();
+    long lastRequestTime = lastRequest.get();
+    boolean isInitialRequest = idleConnectionTimeout.toNanos() > getNanoTime() - lastRequestTime;
     if (!isInitialRequest) {
       initialRequestPermit.release();
     }
 
     // check if we already exceeded the query timeout while checking the initial connection
-    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    Duration remainingTimeout = timeout.minus(getNanoTime() - startTime, ChronoUnit.NANOS);
     if (remainingTimeout.isNegative()) {
       if (isInitialRequest) {
         initialRequestPermit.release();
@@ -532,25 +520,6 @@ public final class DohResolver implements Resolver {
         .thenCompose(Function.identity());
   }
 
-  /**
-   * Set last request time to {@link DohResolver#lastRequest}, which ensures only the largest timestamp could be accepted.
-   *
-   * @param startTime start time in nanos of a Doh request.
-   */
-  private void setLastRequestTime(long startTime) {
-    long current = lastRequest.get();
-    // Only update value of 'lastRequest' if timestamp in 'lastRequest' is smaller than incoming 'startTime' value.
-    if (current < startTime) {
-      while (!lastRequest.compareAndSet(current, startTime)) {
-        // CAS failed, re-verify the eligibility of timestamp in 'lastRequest' to be updated to the incoming 'startTime' value.
-        current = lastRequest.get();
-        if (current > startTime) {
-          return;
-        }
-      }
-    }
-  }
-
   private CompletionStage<Message> sendAsync11WithConcurrentRequestPermit(
       Message query,
       Executor executor,
@@ -560,7 +529,7 @@ public final class DohResolver implements Resolver {
       boolean isInitialRequest,
       Permit maxConcurrentRequestPermit) {
     // check if the stream lock acquisition took too long
-    Duration remainingTimeout = timeout.minus(System.nanoTime() - startTime, ChronoUnit.NANOS);
+    Duration remainingTimeout = timeout.minus(getNanoTime() - startTime, ChronoUnit.NANOS);
     if (remainingTimeout.isNegative()) {
       if (isInitialRequest) {
         initialRequestPermit.release();
@@ -583,12 +552,7 @@ public final class DohResolver implements Resolver {
               .whenComplete(
                   (result, ex) -> {
                     if (ex == null) {
-                      setLastRequestTime(startTime);
-                      if (isInitialRequest) {
-                        // initial request was completed successfully, so toggle initialRequestSentMark to true.
-                        // it's very safe to toggle initialRequestSentMark here, since this code had been guarded by initialRequestLock and its permit outside.
-                        initialRequestSentMark.compareAndSet(false, true);
-                      }
+                      lastRequest.set(startTime);
                     }
                     maxConcurrentRequestPermit.release();
                     if (isInitialRequest) {
