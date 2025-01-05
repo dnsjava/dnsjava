@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -344,7 +344,7 @@ public final class DohResolver implements Resolver {
                   return CompletableFuture.completedFuture(response);
                 } catch (SocketTimeoutException e) {
                   return this.<Message>timeoutFailedFuture(query, e);
-                } catch (IOException e) {
+                } catch (IOException | URISyntaxException e) {
                   return this.<Message>failedFuture(e);
                 } finally {
                   permit.release();
@@ -362,8 +362,8 @@ public final class DohResolver implements Resolver {
   }
 
   private SendAndGetMessageBytesResponse sendAndGetMessageBytes(
-      String url, byte[] queryBytes, long startTime) throws IOException {
-    HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+      String url, byte[] queryBytes, long startTime) throws IOException, URISyntaxException {
+    HttpURLConnection conn = (HttpURLConnection) new URI(url).toURL().openConnection();
     if (conn instanceof HttpsURLConnection) {
       ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
     }
