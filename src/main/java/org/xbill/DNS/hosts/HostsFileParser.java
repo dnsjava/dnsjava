@@ -29,7 +29,7 @@ import org.xbill.DNS.Type;
  */
 @Slf4j
 public final class HostsFileParser {
-  private final int MAX_FULL_CACHE_FILE_SIZE_BYTES =
+  private final int maxFullCacheFileSizeBytes =
       Integer.parseInt(System.getProperty("dnsjava.hostsfile.max_size_bytes", "16384"));
 
   private final Map<String, InetAddress> hostsCache = new HashMap<>();
@@ -104,7 +104,7 @@ public final class HostsFileParser {
       return Optional.empty();
     }
 
-    if (Files.size(path) <= MAX_FULL_CACHE_FILE_SIZE_BYTES) {
+    if (Files.size(path) <= maxFullCacheFileSizeBytes) {
       parseEntireHostsFile();
     } else {
       searchHostsFileForEntry(name, type);

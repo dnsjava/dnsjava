@@ -12,8 +12,8 @@ class OPENPGPKEYRecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("CAFEBABE");
-    OPENPGPKEYRecord record = new OPENPGPKEYRecord();
-    record.rdataFromString(t, null);
-    assertArrayEquals(base64.fromString("CAFEBABE"), record.getCert());
+    OPENPGPKEYRecord openpgpkeyRecord = new OPENPGPKEYRecord();
+    openpgpkeyRecord.rdataFromString(t, null);
+    assertArrayEquals(base64.fromString("CAFEBABE"), openpgpkeyRecord.getCert());
   }
 }

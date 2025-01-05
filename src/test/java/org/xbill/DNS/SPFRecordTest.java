@@ -11,9 +11,9 @@ class SPFRecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("v=spf1 a mx ip4:69.64.153.131 include:_spf.google.com ~all");
-    SPFRecord record = new SPFRecord();
-    record.rdataFromString(t, null);
-    assertEquals(6, record.getStrings().size());
-    assertEquals(6, record.getStringsAsByteArrays().size());
+    SPFRecord spfRecord = new SPFRecord();
+    spfRecord.rdataFromString(t, null);
+    assertEquals(6, spfRecord.getStrings().size());
+    assertEquals(6, spfRecord.getStringsAsByteArrays().size());
   }
 }

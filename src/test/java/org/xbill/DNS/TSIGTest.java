@@ -101,7 +101,7 @@ class TSIGTest {
     assertEquals(Rcode.NOERROR, result);
     assertTrue(parsed.isSigned());
     assertTrue(parsed.isVerified());
-    assertThat(parsed.getTSIG().getSignature().length).isEqualTo(signatureLengthBytes);
+    assertThat(parsed.getTSIG().getSignature()).hasSize(signatureLengthBytes);
   }
 
   /** Confirm error thrown with illegal algorithm name. */
@@ -461,17 +461,17 @@ class TSIGTest {
   void testLargeMessageIsNotLargerThanMax() {
     Update update = new Update(Name.fromConstantString("zone.example.com."));
     for (int i = 0; i < 3000; i++) {
-      TXTRecord record =
+      TXTRecord r =
           new TXTRecord(
               Name.fromConstantString("name-" + i + ".zone.example.com."), DClass.IN, 900, "a");
-      update.absent(record.name, record.type);
-      update.add(record);
+      update.absent(r.name, r.type);
+      update.add(r);
     }
 
     TSIG tsigKey = new TSIG(TSIG.HMAC_SHA384, "zone.example.com.", "c2VjcmU=");
     update.setTSIG(tsigKey);
     byte[] wireData = update.toWire(Message.MAXLENGTH);
-    assertThat(wireData.length).isLessThan(Message.MAXLENGTH);
+    assertThat(wireData).hasSizeLessThan(Message.MAXLENGTH);
   }
 
   @Test

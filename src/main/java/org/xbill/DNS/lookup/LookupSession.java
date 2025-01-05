@@ -67,7 +67,7 @@ public class LookupSession {
   private final Map<Integer, Cache> caches;
   private final HostsFileParser hostsFileParser;
   private final Executor executor;
-  private IrrelevantRecordMode irrelevantRecordMode;
+  private final IrrelevantRecordMode irrelevantRecordMode;
 
   private LookupSession(
       @NonNull Resolver resolver,
@@ -570,7 +570,7 @@ public class LookupSession {
     return message;
   }
 
-  @SuppressWarnings("deprecated")
+  @SuppressWarnings("deprecation")
   private CompletionStage<LookupResult> setResponseToMessageFuture(
       SetResponse setResponse, Record queryRecord, List<Name> aliases) {
     if (setResponse.isNXDOMAIN()) {
@@ -626,7 +626,7 @@ public class LookupSession {
     }
   }
 
-  @SuppressWarnings("deprecated")
+  @SuppressWarnings("deprecation")
   private CompletionStage<LookupResult> maybeFollowRedirectsInAnswer(
       LookupResult response, Record query, int redirectCount) {
     List<Name> aliases = new ArrayList<>(response.getAliases());
@@ -690,6 +690,7 @@ public class LookupSession {
   /**
    * Returns a LookupResult if this response was a non-exceptional empty result, throws otherwise.
    */
+  @SuppressWarnings("deprecation")
   private static LookupResult buildResult(Message answer, List<Name> aliases, Record query) {
     int rcode = answer.getRcode();
     List<Record> answerRecords = answer.getSection(Section.ANSWER);

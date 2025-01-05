@@ -46,7 +46,7 @@ final class SMessage {
    */
   @SuppressWarnings("unchecked")
   public SMessage(Header h) {
-    this.sections = new List[NUM_SECTIONS];
+    this.sections = (List<SRRset>[]) new List<?>[NUM_SECTIONS];
     this.header = h;
     this.securityStatus = SecurityStatus.UNCHECKED;
   }

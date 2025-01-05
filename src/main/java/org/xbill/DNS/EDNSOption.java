@@ -3,6 +3,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Arrays;
  * @author Brian Wellington
  * @author Ming Zhou &lt;mizhou@bnivideo.com&gt;, Beaumaris Networks
  */
-public abstract class EDNSOption {
+public abstract class EDNSOption implements Serializable {
 
   /**
    * @see <a
@@ -236,7 +237,8 @@ public abstract class EDNSOption {
    * @param in The input stream.
    */
   static EDNSOption fromWire(DNSInput in) throws IOException {
-    int code, length;
+    int code;
+    int length;
 
     code = in.readU16();
     length = in.readU16();

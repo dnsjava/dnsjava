@@ -74,24 +74,24 @@ public class SVCBRecordTest {
     SVCBRecord.ParameterIpv4Hint ipv4 = new SVCBRecord.ParameterIpv4Hint();
     ipv4.fromString("1.2.3.4,5.6.7.8");
     List<SVCBRecord.ParameterBase> params = Arrays.asList(mandatory, ipv4, alpn);
-    SVCBRecord record = new SVCBRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
+    SVCBRecord svcbRecord = new SVCBRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
 
-    assertEquals(Type.SVCB, record.getType());
-    assertEquals(label, record.getName());
-    assertEquals(svcPriority, record.getSvcPriority());
-    assertEquals(svcDomain, record.getTargetName());
+    assertEquals(Type.SVCB, svcbRecord.getType());
+    assertEquals(label, svcbRecord.getName());
+    assertEquals(svcPriority, svcbRecord.getSvcPriority());
+    assertEquals(svcDomain, svcbRecord.getTargetName());
     assertEquals(
         Arrays.asList(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString(),
-        record.getSvcParamKeys().toString());
-    assertEquals("alpn", record.getSvcParamValue(SVCBRecord.MANDATORY).toString());
-    assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
-    assertEquals("h1,h2", record.getSvcParamValue(SVCBRecord.ALPN).toString());
-    assertNull(record.getSvcParamValue(1234));
+        svcbRecord.getSvcParamKeys().toString());
+    assertEquals("alpn", svcbRecord.getSvcParamValue(SVCBRecord.MANDATORY).toString());
+    assertEquals("h1,h2", svcbRecord.getSvcParamValue(SVCBRecord.ALPN).toString());
+    assertEquals("h1,h2", svcbRecord.getSvcParamValue(SVCBRecord.ALPN).toString());
+    assertNull(svcbRecord.getSvcParamValue(1234));
     Options.unset("BINDTTL");
     Options.unset("noPrintIN");
     assertEquals(
         "test.com.\t\t300\tIN\tSVCB\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8",
-        record.toString());
+        svcbRecord.toString());
   }
 
   @Test
@@ -582,18 +582,18 @@ public class SVCBRecordTest {
 
   public static byte[] stringToWire(String str) throws IOException {
     Tokenizer t = new Tokenizer(str);
-    SVCBRecord record = new SVCBRecord();
-    record.rdataFromString(t, null);
+    SVCBRecord svcbRecord = new SVCBRecord();
+    svcbRecord.rdataFromString(t, null);
     DNSOutput out = new DNSOutput();
-    record.rrToWire(out, null, true);
+    svcbRecord.rrToWire(out, null, true);
     return out.toByteArray();
   }
 
   public static String wireToString(byte[] bytes) throws IOException {
     DNSInput in = new DNSInput(bytes);
-    SVCBRecord record = new SVCBRecord();
-    record.rrFromWire(in);
-    return record.rdataToString();
+    SVCBRecord svcbRecord = new SVCBRecord();
+    svcbRecord.rrFromWire(in);
+    return svcbRecord.rdataToString();
   }
 
   public static String stringToWireToString(String str) throws IOException {

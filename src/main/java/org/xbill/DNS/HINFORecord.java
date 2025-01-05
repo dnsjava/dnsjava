@@ -13,7 +13,8 @@ import java.io.IOException;
  *     Implementation and Specification</a>
  */
 public class HINFORecord extends Record {
-  private byte[] cpu, os;
+  private byte[] cpu;
+  private byte[] os;
 
   HINFORecord() {}
 

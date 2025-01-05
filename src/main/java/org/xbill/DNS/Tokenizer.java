@@ -445,7 +445,7 @@ public class Tokenizer implements AutoCloseable {
    */
   public long getUInt32() throws IOException {
     long l = getLong();
-    if (l < 0 || l > 0xFFFFFFFFL) {
+    if (!Utils.isUInt32(l)) {
       throw exception("expected an 32 bit unsigned integer");
     }
     return l;
@@ -460,7 +460,7 @@ public class Tokenizer implements AutoCloseable {
    */
   public int getUInt16() throws IOException {
     long l = getLong();
-    if (l < 0 || l > 0xFFFFL) {
+    if (!Utils.isUInt16(l)) {
       throw exception("expected an 16 bit unsigned integer");
     }
     return (int) l;
@@ -475,7 +475,7 @@ public class Tokenizer implements AutoCloseable {
    */
   public int getUInt8() throws IOException {
     long l = getLong();
-    if (l < 0 || l > 0xFFL) {
+    if (!Utils.isUInt8(l)) {
       throw exception("expected an 8 bit unsigned integer");
     }
     return (int) l;
@@ -549,11 +549,18 @@ public class Tokenizer implements AutoCloseable {
    */
   public byte[] getAddressBytes(int family) throws IOException {
     String next = getIdentifier("an address");
-    byte[] bytes = Address.toByteArray(next, family);
-    if (bytes == null) {
-      throw exception("Invalid address: " + next);
+    byte[] bytes = null;
+    if (family == IPAddressUtils.IPv4) {
+      bytes = IPAddressUtils.parseV4(next);
+    } else if (family == IPAddressUtils.IPv6) {
+      bytes = IPAddressUtils.parseV6(next);
     }
-    return bytes;
+
+    if (bytes != null) {
+      return bytes;
+    }
+
+    throw exception("Invalid address: " + next);
   }
 
   /**

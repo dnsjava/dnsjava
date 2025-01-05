@@ -13,14 +13,16 @@ import org.xbill.DNS.utils.base64;
  * @author Brian Wellington
  */
 abstract class KEYBase extends Record {
-  protected int flags, proto, alg;
+  protected int flags;
+  protected int proto;
+  protected int alg;
   protected byte[] key;
   protected int footprint = -1;
   protected PublicKey publicKey = null;
 
   protected KEYBase() {}
 
-  public KEYBase(
+  protected KEYBase(
       Name name, int type, int dclass, long ttl, int flags, int proto, int alg, byte[] key) {
     super(name, type, dclass, ttl);
     this.flags = checkU16("flags", flags);
@@ -49,7 +51,7 @@ abstract class KEYBase extends Record {
     sb.append(" ");
     sb.append(alg);
     if (key != null) {
-      if (Options.check("multiline")) {
+      if (Options.multiline()) {
         sb.append(" (\n");
         sb.append(base64.formatString(key, 64, "\t", true));
         sb.append(" ; key_tag = ");

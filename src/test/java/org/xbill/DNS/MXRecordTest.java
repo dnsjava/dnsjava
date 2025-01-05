@@ -82,10 +82,10 @@ class MXRecordTest {
   @Test
   void rdataFromString_nullMXRecord() throws IOException {
     Tokenizer t = new Tokenizer("0 .");
-    MXRecord record = new MXRecord();
-    record.rdataFromString(t, null);
-    assertEquals(Name.fromConstantString("."), record.getTarget());
-    assertEquals(record.getTarget(), record.getAdditionalName());
-    assertEquals(0, record.getPriority());
+    MXRecord mx = new MXRecord();
+    mx.rdataFromString(t, null);
+    assertEquals(Name.fromConstantString("."), mx.getTarget());
+    assertEquals(mx.getTarget(), mx.getAdditionalName());
+    assertEquals(0, mx.getPriority());
   }
 }

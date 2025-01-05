@@ -38,7 +38,8 @@ import org.xbill.DNS.Type;
  */
 public class update {
 
-  Message query, response;
+  Message query;
+  Message response;
   Resolver res;
   String server = null;
   Name zone = Name.root;
@@ -327,7 +328,7 @@ public class update {
   void doRequire(Tokenizer st) throws IOException {
     Tokenizer.Token token;
     Name name;
-    Record record;
+    Record r;
     int type;
 
     name = st.getName(zone);
@@ -340,22 +341,22 @@ public class update {
       boolean iseol = token.isEOL();
       st.unget();
       if (!iseol) {
-        record = Record.fromString(name, type, defaultClass, 0, st, zone);
+        r = Record.fromString(name, type, defaultClass, 0, st, zone);
       } else {
-        record = Record.newRecord(name, type, DClass.ANY, 0);
+        r = Record.newRecord(name, type, DClass.ANY, 0);
       }
     } else {
-      record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
+      r = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
     }
 
-    query.addRecord(record, Section.PREREQ);
-    print(record);
+    query.addRecord(r, Section.PREREQ);
+    print(r);
   }
 
   void doProhibit(Tokenizer st) throws IOException {
     Tokenizer.Token token;
     Name name;
-    Record record;
+    Record r;
     int type;
 
     name = st.getName(zone);
@@ -367,22 +368,22 @@ public class update {
     } else {
       type = Type.ANY;
     }
-    record = Record.newRecord(name, type, DClass.NONE, 0);
-    query.addRecord(record, Section.PREREQ);
-    print(record);
+    r = Record.newRecord(name, type, DClass.NONE, 0);
+    query.addRecord(r, Section.PREREQ);
+    print(r);
   }
 
   void doAdd(Tokenizer st) throws IOException {
-    Record record = parseRR(st, defaultClass, defaultTTL);
-    query.addRecord(record, Section.UPDATE);
-    print(record);
+    Record r = parseRR(st, defaultClass, defaultTTL);
+    query.addRecord(r, Section.UPDATE);
+    print(r);
   }
 
   void doDelete(Tokenizer st) throws IOException {
     Tokenizer.Token token;
     String s;
     Name name;
-    Record record;
+    Record r;
     int type;
 
     name = st.getName(zone);
@@ -399,22 +400,22 @@ public class update {
       boolean iseol = token.isEOL();
       st.unget();
       if (!iseol) {
-        record = Record.fromString(name, type, DClass.NONE, 0, st, zone);
+        r = Record.fromString(name, type, DClass.NONE, 0, st, zone);
       } else {
-        record = Record.newRecord(name, type, DClass.ANY, 0);
+        r = Record.newRecord(name, type, DClass.ANY, 0);
       }
     } else {
-      record = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
+      r = Record.newRecord(name, Type.ANY, DClass.ANY, 0);
     }
 
-    query.addRecord(record, Section.UPDATE);
-    print(record);
+    query.addRecord(r, Section.UPDATE);
+    print(r);
   }
 
   void doGlue(Tokenizer st) throws IOException {
-    Record record = parseRR(st, defaultClass, defaultTTL);
-    query.addRecord(record, Section.ADDITIONAL);
-    print(record);
+    Record r = parseRR(st, defaultClass, defaultTTL);
+    query.addRecord(r, Section.ADDITIONAL);
+    print(r);
   }
 
   void doQuery(Tokenizer st) throws IOException {

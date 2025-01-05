@@ -125,22 +125,22 @@ class TypeTest {
     MYTXTRecord testRecord = new MYTXTRecord(testOwner, DClass.IN, 3600, "hello world");
 
     byte[] wireData = testRecord.toWire(Section.ANSWER);
-    Record record = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
-    assertEquals(MYTXTRecord.class, record.getClass());
-    assertEquals(MYTXT, record.getType());
+    Record customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+    assertEquals(MYTXTRecord.class, customRecord.getClass());
+    assertEquals(MYTXT, customRecord.getType());
 
     byte[] textData = testRecord.toString().getBytes(StandardCharsets.US_ASCII);
     Master m = new Master(new ByteArrayInputStream(textData));
-    record = m.nextRecord();
-    assertNotNull(record);
-    assertEquals(MYTXTRecord.class, record.getClass());
-    assertEquals(MYTXT, record.getType());
+    customRecord = m.nextRecord();
+    assertNotNull(customRecord);
+    assertEquals(MYTXTRecord.class, customRecord.getClass());
+    assertEquals(MYTXT, customRecord.getType());
     m.close();
 
     Type.register(MYTXT, MYTXTName, null);
-    record = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
-    assertEquals(UNKRecord.class, record.getClass());
-    assertEquals(MYTXT, record.getType());
+    customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+    assertEquals(UNKRecord.class, customRecord.getClass());
+    assertEquals(MYTXT, customRecord.getType());
 
     // test implementation replacement
 
@@ -152,16 +152,16 @@ class TypeTest {
       Type.register(Type.TXT, "TXT", TXTRecordReplacement::new);
       TXTRecord testRecord2 = new TXTRecord(testOwner, DClass.IN, 3600, "howdy");
       wireData = testRecord2.toWire(Section.ANSWER);
-      record = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
-      assertEquals(TXTRecordReplacement.class, record.getClass());
-      assertEquals(Type.TXT, record.getType());
+      customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+      assertEquals(TXTRecordReplacement.class, customRecord.getClass());
+      assertEquals(Type.TXT, customRecord.getType());
 
       byte[] textData2 = testRecord2.toString().getBytes(StandardCharsets.US_ASCII);
       m = new Master(new ByteArrayInputStream(textData2));
-      record = m.nextRecord();
-      assertNotNull(record);
-      assertEquals(TXTRecordReplacement.class, record.getClass());
-      assertEquals(Type.TXT, record.getType());
+      customRecord = m.nextRecord();
+      assertNotNull(customRecord);
+      assertEquals(TXTRecordReplacement.class, customRecord.getClass());
+      assertEquals(Type.TXT, customRecord.getType());
       m.close();
 
     } finally {

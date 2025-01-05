@@ -140,7 +140,7 @@ public class TSIGRecord extends Record {
     StringBuilder sb = new StringBuilder();
     sb.append(alg);
     sb.append(" ");
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("(\n\t");
     }
 
@@ -149,7 +149,7 @@ public class TSIGRecord extends Record {
     sb.append((int) fudge.getSeconds());
     sb.append(" ");
     sb.append(signature.length);
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append("\n");
       sb.append(base64.formatString(signature, 64, "\t", false));
     } else {
@@ -163,7 +163,7 @@ public class TSIGRecord extends Record {
       sb.append(0);
     } else {
       sb.append(other.length);
-      if (Options.check("multiline")) {
+      if (Options.multiline()) {
         sb.append("\n\n\n\t");
       } else {
         sb.append(" ");
@@ -175,7 +175,7 @@ public class TSIGRecord extends Record {
           long time =
               ((long) (other[0] & 0xFF) << 40)
                   + ((long) (other[1] & 0xFF) << 32)
-                  + ((other[2] & 0xFF) << 24)
+                  + ((long) (other[2] & 0xFF) << 24)
                   + ((other[3] & 0xFF) << 16)
                   + ((other[4] & 0xFF) << 8)
                   + (other[5] & 0xFF);
@@ -189,7 +189,7 @@ public class TSIGRecord extends Record {
         sb.append(">");
       }
     }
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       sb.append(" )");
     }
     return sb.toString();

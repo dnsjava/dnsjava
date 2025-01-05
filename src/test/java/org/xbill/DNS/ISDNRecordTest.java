@@ -12,17 +12,17 @@ class ISDNRecordTest {
 
   @Test
   void ctor_5arg() {
-    ISDNRecord record = new ISDNRecord(n, DClass.IN, 0, "foo", "bar");
-    assertEquals("foo", record.getAddress());
-    assertEquals("bar", record.getSubAddress());
+    ISDNRecord isdn = new ISDNRecord(n, DClass.IN, 0, "foo", "bar");
+    assertEquals("foo", isdn.getAddress());
+    assertEquals("bar", isdn.getSubAddress());
   }
 
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("150862028003217 004");
-    ISDNRecord record = new ISDNRecord();
-    record.rdataFromString(t, null);
-    assertEquals("150862028003217", record.getAddress());
-    assertEquals("004", record.getSubAddress());
+    ISDNRecord isdn = new ISDNRecord();
+    isdn.rdataFromString(t, null);
+    assertEquals("150862028003217", isdn.getAddress());
+    assertEquals("004", isdn.getSubAddress());
   }
 }

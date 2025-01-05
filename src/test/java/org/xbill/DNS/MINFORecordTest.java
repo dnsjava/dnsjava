@@ -14,17 +14,17 @@ class MINFORecordTest {
   void ctor_5arg() {
     Name respAddress = Name.fromConstantString("example.com.");
     Name errorAddress = Name.fromConstantString("error.com.");
-    MINFORecord record = new MINFORecord(n, DClass.IN, 0, respAddress, errorAddress);
-    assertEquals(respAddress, record.getResponsibleAddress());
-    assertEquals(errorAddress, record.getErrorAddress());
+    MINFORecord minfo = new MINFORecord(n, DClass.IN, 0, respAddress, errorAddress);
+    assertEquals(respAddress, minfo.getResponsibleAddress());
+    assertEquals(errorAddress, minfo.getErrorAddress());
   }
 
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("foo.com. bar.com.");
-    MINFORecord record = new MINFORecord();
-    record.rdataFromString(t, null);
-    assertEquals(Name.fromConstantString("foo.com."), record.getResponsibleAddress());
-    assertEquals(Name.fromConstantString("bar.com."), record.getErrorAddress());
+    MINFORecord minfo = new MINFORecord();
+    minfo.rdataFromString(t, null);
+    assertEquals(Name.fromConstantString("foo.com."), minfo.getResponsibleAddress());
+    assertEquals(Name.fromConstantString("bar.com."), minfo.getErrorAddress());
   }
 }

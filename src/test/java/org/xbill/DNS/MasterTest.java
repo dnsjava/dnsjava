@@ -254,10 +254,10 @@ class MasterTest {
   }
 
   private Record skipTo(Master master, int type) throws IOException {
-    Record record;
+    Record r;
     do {
-      record = master.nextRecord();
-    } while (record != null && record.getType() != type);
-    return record;
+      r = master.nextRecord();
+    } while (r != null && r.getType() != type);
+    return r;
   }
 }

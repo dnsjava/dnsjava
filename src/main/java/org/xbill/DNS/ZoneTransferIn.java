@@ -52,8 +52,8 @@ public class ZoneTransferIn {
   private final Name zname;
   private int qtype;
   private int dclass;
-  private final long ixfr_serial;
-  private final boolean want_fallback;
+  private final long ixfrSerial;
+  private final boolean wantFallback;
   private ZoneTransferHandler handler;
 
   private SocketAddress localAddress;
@@ -64,9 +64,9 @@ public class ZoneTransferIn {
   private Duration timeout = Duration.ofMinutes(15);
 
   private int state;
-  private long end_serial;
-  private long current_serial;
-  private Record initialsoa;
+  private long endSerial;
+  private long currentSerial;
+  private Record initialSoaRecord;
 
   private int rtype;
 
@@ -181,8 +181,8 @@ public class ZoneTransferIn {
     }
     qtype = xfrtype;
     dclass = DClass.IN;
-    ixfr_serial = serial;
-    want_fallback = fallback;
+    ixfrSerial = serial;
+    wantFallback = fallback;
     state = INITIALSOA;
   }
 
@@ -346,7 +346,7 @@ public class ZoneTransferIn {
     query.getHeader().setOpcode(Opcode.QUERY);
     query.addRecord(question, Section.QUESTION);
     if (qtype == Type.IXFR) {
-      Record soa = new SOARecord(zname, dclass, 0, Name.root, Name.root, ixfr_serial, 0, 0, 0, 0);
+      Record soa = new SOARecord(zname, dclass, 0, Name.root, Name.root, ixfrSerial, 0, 0, 0, 0);
       query.addRecord(soa, Section.AUTHORITY);
     }
     if (tsig != null) {
@@ -371,7 +371,7 @@ public class ZoneTransferIn {
   }
 
   private void fallback() throws ZoneTransferException {
-    if (!want_fallback) {
+    if (!wantFallback) {
       fail("server doesn't support IXFR");
     }
 
@@ -388,11 +388,11 @@ public class ZoneTransferIn {
         if (type != Type.SOA) {
           fail("missing initial SOA");
         }
-        initialsoa = rec;
+        initialSoaRecord = rec;
         // Remember the serial number in the initial SOA; we need it
         // to recognize the end of an IXFR.
-        end_serial = getSOASerial(rec);
-        if (qtype == Type.IXFR && Serial.compare(end_serial, ixfr_serial) <= 0) {
+        endSerial = getSOASerial(rec);
+        if (qtype == Type.IXFR && Serial.compare(endSerial, ixfrSerial) <= 0) {
           logxfr("up to date");
           state = END;
           break;
@@ -403,7 +403,7 @@ public class ZoneTransferIn {
       case FIRSTDATA:
         // If the transfer begins with 1 SOA, it's an AXFR.
         // If it begins with 2 SOAs, it's an IXFR.
-        if (qtype == Type.IXFR && type == Type.SOA && getSOASerial(rec) == ixfr_serial) {
+        if (qtype == Type.IXFR && type == Type.SOA && getSOASerial(rec) == ixfrSerial) {
           rtype = Type.IXFR;
           handler.startIXFR();
           logxfr("got incremental response");
@@ -411,7 +411,7 @@ public class ZoneTransferIn {
         } else {
           rtype = Type.AXFR;
           handler.startAXFR();
-          handler.handleRecord(initialsoa);
+          handler.handleRecord(initialSoaRecord);
           logxfr("got nonincremental response");
           state = AXFR;
         }
@@ -425,7 +425,7 @@ public class ZoneTransferIn {
 
       case IXFR_DEL:
         if (type == Type.SOA) {
-          current_serial = getSOASerial(rec);
+          currentSerial = getSOASerial(rec);
           state = IXFR_ADDSOA;
           parseRR(rec); // Restart...
           return;
@@ -441,11 +441,11 @@ public class ZoneTransferIn {
       case IXFR_ADD:
         if (type == Type.SOA) {
           long soa_serial = getSOASerial(rec);
-          if (soa_serial == end_serial) {
+          if (soa_serial == endSerial) {
             state = END;
             break;
-          } else if (soa_serial != current_serial) {
-            fail("IXFR out of sync: expected serial " + current_serial + " , got " + soa_serial);
+          } else if (soa_serial != currentSerial) {
+            fail("IXFR out of sync: expected serial " + currentSerial + " , got " + soa_serial);
           } else {
             state = IXFR_DELSOA;
             parseRR(rec); // Restart...

@@ -24,9 +24,9 @@ class SimpleResolverDeniedTest {
 
     Name zone = Name.fromString("example.");
     Message query = Message.newUpdate(zone);
-    Record record =
+    Record cnameRecord =
         new CNAMERecord(Name.fromString("www", zone), DClass.IN, 300, Name.fromString("example."));
-    query.addRecord(record, Section.UPDATE);
+    query.addRecord(cnameRecord, Section.UPDATE);
 
     SimpleResolver simpleResolver = new SimpleResolver("127.0.0.1");
     simpleResolver.setIoClientFactory(

@@ -84,6 +84,7 @@ class Mnemonic {
         return val;
       }
     } catch (NumberFormatException e) {
+      // Ignore
     }
     return -1;
   }
@@ -181,12 +182,10 @@ class Mnemonic {
     if (value != null) {
       return value;
     }
-    if (prefix != null) {
-      if (str.startsWith(prefix)) {
-        int val = parseNumeric(str.substring(prefix.length()));
-        if (val >= 0) {
-          return val;
-        }
+    if (prefix != null && str.startsWith(prefix)) {
+      int val = parseNumeric(str.substring(prefix.length()));
+      if (val >= 0) {
+        return val;
       }
     }
     if (numericok) {

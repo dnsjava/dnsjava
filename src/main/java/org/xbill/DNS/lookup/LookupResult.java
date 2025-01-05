@@ -79,10 +79,10 @@ public final class LookupResult {
     aliases = Collections.emptyList();
   }
 
-  LookupResult(Record query, boolean isAuthenticated, Record record) {
+  LookupResult(Record query, boolean isAuthenticated, Record result) {
     this.queryResponsePairs = Collections.singletonMap(query, null);
     this.isAuthenticated = isAuthenticated;
-    this.records = Collections.singletonList(record);
+    this.records = Collections.singletonList(result);
     this.aliases = Collections.emptyList();
   }
 

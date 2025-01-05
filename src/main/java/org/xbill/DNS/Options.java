@@ -35,6 +35,7 @@ public final class Options {
     try {
       refresh();
     } catch (SecurityException e) {
+      // Ignore
     }
   }
 
@@ -63,7 +64,7 @@ public final class Options {
     table = null;
   }
 
-  /** Sets an option to "true" */
+  /** Sets an option to {@code true}. */
   public static void set(String option) {
     if (table == null) {
       table = new HashMap<>();
@@ -71,7 +72,7 @@ public final class Options {
     table.put(option.toLowerCase(), "true");
   }
 
-  /** Sets an option to the the supplied value */
+  /** Sets an option to the supplied value */
   public static void set(String option, String value) {
     if (table == null) {
       table = new HashMap<>();
@@ -113,8 +114,17 @@ public final class Options {
           return val;
         }
       } catch (NumberFormatException e) {
+        // Ignore
       }
     }
     return -1;
+  }
+
+  static boolean multiline() {
+    if (table == null) {
+      return false;
+    }
+
+    return table.get("multiline") != null;
   }
 }

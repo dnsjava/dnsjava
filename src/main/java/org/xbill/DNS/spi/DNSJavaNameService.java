@@ -52,6 +52,7 @@ public class DNSJavaNameService implements NameService {
    * <p>Uses the <b>sun.net.spi.nameservice.nameservers</b>, <b>sun.net.spi.nameservice.domain</b>,
    * and <b>java.net.preferIPv6Addresses</b> properties for configuration.
    */
+  @SuppressWarnings("java:S3011")
   protected DNSJavaNameService() {
     preferV6 = Boolean.getBoolean(PREFER_V6_PROPERTY);
     String nameServers = System.getProperty(NAMESERVERS_PROPERTY);

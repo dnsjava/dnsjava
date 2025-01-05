@@ -42,7 +42,7 @@ public class OPENPGPKEYRecord extends Record {
   protected String rrToString() {
     StringBuilder sb = new StringBuilder();
     if (cert != null) {
-      if (Options.check("multiline")) {
+      if (Options.multiline()) {
         sb.append("(\n");
         sb.append(base64.formatString(cert, 64, "\t", true));
       } else {

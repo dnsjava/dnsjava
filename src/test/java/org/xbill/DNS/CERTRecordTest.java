@@ -13,10 +13,10 @@ class CERTRecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("PGP 0 0 CAFEBABE");
-    CERTRecord record = new CERTRecord();
-    record.rdataFromString(t, null);
-    assertEquals(0, record.getAlgorithm());
-    assertEquals(0, record.getKeyTag());
-    assertArrayEquals(base64.fromString("CAFEBABE"), record.getCert());
+    CERTRecord cert = new CERTRecord();
+    cert.rdataFromString(t, null);
+    assertEquals(0, cert.getAlgorithm());
+    assertEquals(0, cert.getKeyTag());
+    assertArrayEquals(base64.fromString("CAFEBABE"), cert.getCert());
   }
 }

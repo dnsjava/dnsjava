@@ -13,10 +13,14 @@ class EmptyRecord extends Record {
   EmptyRecord() {}
 
   @Override
-  protected void rrFromWire(DNSInput in) {}
+  protected void rrFromWire(DNSInput in) {
+    // The empty record doesn't have any data to parse
+  }
 
   @Override
-  protected void rdataFromString(Tokenizer st, Name origin) {}
+  protected void rdataFromString(Tokenizer st, Name origin) {
+    // The empty record doesn't have any data to parse
+  }
 
   @Override
   protected String rrToString() {
@@ -24,5 +28,7 @@ class EmptyRecord extends Record {
   }
 
   @Override
-  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {}
+  protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+    // The empty record doesn't have any data to write
+  }
 }

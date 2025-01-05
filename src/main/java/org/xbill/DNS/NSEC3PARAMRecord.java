@@ -61,9 +61,9 @@ public class NSEC3PARAMRecord extends Record {
     flags = in.readU8();
     iterations = in.readU16();
 
-    int salt_length = in.readU8();
-    if (salt_length > 0) {
-      salt = in.readByteArray(salt_length);
+    int saltLength = in.readU8();
+    if (saltLength > 0) {
+      salt = in.readByteArray(saltLength);
     } else {
       salt = null;
     }

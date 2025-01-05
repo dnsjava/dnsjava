@@ -88,19 +88,19 @@ class OPTRecordTest {
   @Test
   void rdataFromWire() throws IOException {
     byte[] buf = base16.fromString("000029100000000000000C000A00084531D089BA80C6EB");
-    OPTRecord record = (OPTRecord) OPTRecord.fromWire(new DNSInput(buf), Section.ADDITIONAL);
+    OPTRecord optRecord = (OPTRecord) OPTRecord.fromWire(new DNSInput(buf), Section.ADDITIONAL);
     assertEquals(
         Collections.singletonList(new CookieOption(base16.fromString("4531D089BA80C6EB"))),
-        record.getOptions());
+        optRecord.getOptions());
   }
 
   @Test
   void rdataFromWire_nullPadded() throws IOException {
     byte[] buf = base16.fromString("000029100000000000000C000A00084531D089BA80C6EB00");
-    OPTRecord record = (OPTRecord) OPTRecord.fromWire(new DNSInput(buf), Section.ADDITIONAL);
+    OPTRecord optRecord = (OPTRecord) OPTRecord.fromWire(new DNSInput(buf), Section.ADDITIONAL);
     assertEquals(
         Collections.singletonList(new CookieOption(base16.fromString("4531D089BA80C6EB"))),
-        record.getOptions());
+        optRecord.getOptions());
   }
 
   private void assertNotEqual(final OPTRecord optRecordOne, final OPTRecord optRecordTwo) {

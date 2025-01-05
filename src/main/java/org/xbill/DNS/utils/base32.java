@@ -112,9 +112,9 @@ public class base32 {
       t[4] = (byte) (((s[2] & 0x0F) << 1) | ((s[3] >> 7) & 0x01));
       // bits 6-2 from 4th
       t[5] = (byte) ((s[3] >> 2) & 0x1F);
-      // lower 2 from 4th, upper 3 from 5th;
+      // lower 2 from 4th, upper 3 from 5th
       t[6] = (byte) (((s[3] & 0x03) << 3) | ((s[4] >> 5) & 0x07));
-      // lower 5 from 5th;
+      // lower 5 from 5th
       t[7] = (byte) (s[4] & 0x1F);
 
       // write out the actual characters.

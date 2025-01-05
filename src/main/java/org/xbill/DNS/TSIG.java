@@ -183,7 +183,7 @@ public class TSIG {
     try {
       nameAlg = Name.fromString(alg);
     } catch (TextParseException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException(e);
     }
 
     // Special case, allow "hmac-md5" as an alias for the RFC name.

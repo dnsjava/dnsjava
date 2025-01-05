@@ -178,43 +178,43 @@ public class KEYRecord extends KEYBase {
     /** Signatory value 15 */
     public static final int SIG15 = 15;
 
-    private static final Mnemonic flags = new Mnemonic("KEY flags", Mnemonic.CASE_UPPER);
+    private static final Mnemonic KEY_FLAGS = new Mnemonic("KEY flags", Mnemonic.CASE_UPPER);
 
     static {
-      flags.setMaximum(0xFFFF);
-      flags.setNumericAllowed(false);
+      KEY_FLAGS.setMaximum(0xFFFF);
+      KEY_FLAGS.setNumericAllowed(false);
 
-      flags.add(NOCONF, "NOCONF");
-      flags.add(NOAUTH, "NOAUTH");
-      flags.add(NOKEY, "NOKEY");
-      flags.add(FLAG2, "FLAG2");
-      flags.add(EXTEND, "EXTEND");
-      flags.add(FLAG4, "FLAG4");
-      flags.add(FLAG5, "FLAG5");
-      flags.add(USER, "USER");
-      flags.add(ZONE, "ZONE");
-      flags.add(HOST, "HOST");
-      flags.add(NTYP3, "NTYP3");
-      flags.add(FLAG8, "FLAG8");
-      flags.add(FLAG9, "FLAG9");
-      flags.add(FLAG10, "FLAG10");
-      flags.add(FLAG11, "FLAG11");
-      flags.add(SIG0, "SIG0");
-      flags.add(SIG1, "SIG1");
-      flags.add(SIG2, "SIG2");
-      flags.add(SIG3, "SIG3");
-      flags.add(SIG4, "SIG4");
-      flags.add(SIG5, "SIG5");
-      flags.add(SIG6, "SIG6");
-      flags.add(SIG7, "SIG7");
-      flags.add(SIG8, "SIG8");
-      flags.add(SIG9, "SIG9");
-      flags.add(SIG10, "SIG10");
-      flags.add(SIG11, "SIG11");
-      flags.add(SIG12, "SIG12");
-      flags.add(SIG13, "SIG13");
-      flags.add(SIG14, "SIG14");
-      flags.add(SIG15, "SIG15");
+      KEY_FLAGS.add(NOCONF, "NOCONF");
+      KEY_FLAGS.add(NOAUTH, "NOAUTH");
+      KEY_FLAGS.add(NOKEY, "NOKEY");
+      KEY_FLAGS.add(FLAG2, "FLAG2");
+      KEY_FLAGS.add(EXTEND, "EXTEND");
+      KEY_FLAGS.add(FLAG4, "FLAG4");
+      KEY_FLAGS.add(FLAG5, "FLAG5");
+      KEY_FLAGS.add(USER, "USER");
+      KEY_FLAGS.add(ZONE, "ZONE");
+      KEY_FLAGS.add(HOST, "HOST");
+      KEY_FLAGS.add(NTYP3, "NTYP3");
+      KEY_FLAGS.add(FLAG8, "FLAG8");
+      KEY_FLAGS.add(FLAG9, "FLAG9");
+      KEY_FLAGS.add(FLAG10, "FLAG10");
+      KEY_FLAGS.add(FLAG11, "FLAG11");
+      KEY_FLAGS.add(SIG0, "SIG0");
+      KEY_FLAGS.add(SIG1, "SIG1");
+      KEY_FLAGS.add(SIG2, "SIG2");
+      KEY_FLAGS.add(SIG3, "SIG3");
+      KEY_FLAGS.add(SIG4, "SIG4");
+      KEY_FLAGS.add(SIG5, "SIG5");
+      KEY_FLAGS.add(SIG6, "SIG6");
+      KEY_FLAGS.add(SIG7, "SIG7");
+      KEY_FLAGS.add(SIG8, "SIG8");
+      KEY_FLAGS.add(SIG9, "SIG9");
+      KEY_FLAGS.add(SIG10, "SIG10");
+      KEY_FLAGS.add(SIG11, "SIG11");
+      KEY_FLAGS.add(SIG12, "SIG12");
+      KEY_FLAGS.add(SIG13, "SIG13");
+      KEY_FLAGS.add(SIG14, "SIG14");
+      KEY_FLAGS.add(SIG15, "SIG15");
     }
 
     /**
@@ -228,16 +228,17 @@ public class KEYRecord extends KEYBase {
       int value;
       try {
         value = Integer.parseInt(s);
-        if (value >= 0 && value <= 0xFFFF) {
+        if (Utils.isUInt16(value)) {
           return value;
         }
         return -1;
       } catch (NumberFormatException e) {
+        // Ignore
       }
       StringTokenizer st = new StringTokenizer(s, "|");
       value = 0;
       while (st.hasMoreTokens()) {
-        int val = flags.getValue(st.nextToken());
+        int val = KEY_FLAGS.getValue(st.nextToken());
         if (val < 0) {
           return -1;
         }

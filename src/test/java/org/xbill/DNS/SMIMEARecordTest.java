@@ -13,12 +13,13 @@ class SMIMEARecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("(3 0 2 CAFEBABE)");
-    SMIMEARecord record = new SMIMEARecord();
-    record.rdataFromString(t, null);
+    SMIMEARecord smimeaRecord = new SMIMEARecord();
+    smimeaRecord.rdataFromString(t, null);
     assertEquals(
-        SMIMEARecord.CertificateUsage.DOMAIN_ISSUED_CERTIFICATE, record.getCertificateUsage());
-    assertEquals(SMIMEARecord.MatchingType.SHA512, record.getMatchingType());
-    assertEquals(SMIMEARecord.Selector.FULL_CERTIFICATE, record.getSelector());
-    assertArrayEquals(base16.fromString("CAFEBABE"), record.getCertificateAssociationData());
+        SMIMEARecord.CertificateUsage.DOMAIN_ISSUED_CERTIFICATE,
+        smimeaRecord.getCertificateUsage());
+    assertEquals(SMIMEARecord.MatchingType.SHA512, smimeaRecord.getMatchingType());
+    assertEquals(SMIMEARecord.Selector.FULL_CERTIFICATE, smimeaRecord.getSelector());
+    assertArrayEquals(base16.fromString("CAFEBABE"), smimeaRecord.getCertificateAssociationData());
   }
 }

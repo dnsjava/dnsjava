@@ -124,7 +124,7 @@ public class Master implements AutoCloseable {
 
   private void parseTTLClassAndType() throws IOException {
     String s;
-    boolean seen_class;
+    boolean seenClass;
 
     // This is a bit messy, since any of the following are legal:
     //   class ttl type
@@ -132,11 +132,11 @@ public class Master implements AutoCloseable {
     //   class type
     //   ttl type
     //   type
-    seen_class = false;
+    seenClass = false;
     s = st.getString();
     if ((currentDClass = DClass.value(s)) >= 0) {
       s = st.getString();
-      seen_class = true;
+      seenClass = true;
     }
 
     currentTTL = -1;
@@ -151,7 +151,7 @@ public class Master implements AutoCloseable {
       }
     }
 
-    if (!seen_class) {
+    if (!seenClass) {
       if ((currentDClass = DClass.value(s)) >= 0) {
         s = st.getString();
       } else {
@@ -181,7 +181,7 @@ public class Master implements AutoCloseable {
     }
     try {
       long l = Long.parseLong(s);
-      if (l < 0 || l > 0xFFFFFFFFL) {
+      if (!Utils.isUInt32(l)) {
         return -1;
       }
       return l;
@@ -270,7 +270,7 @@ public class Master implements AutoCloseable {
    * @return The next record.
    * @throws IOException The master file could not be read, or was syntactically invalid.
    */
-  private Record _nextRecord() throws IOException {
+  private Record nextRecordInternal() throws IOException {
     Tokenizer.Token token;
     String s;
 
@@ -395,7 +395,7 @@ public class Master implements AutoCloseable {
   public Record nextRecord() throws IOException {
     Record rec = null;
     try {
-      rec = _nextRecord();
+      rec = nextRecordInternal();
     } finally {
       if (rec == null) {
         st.close();

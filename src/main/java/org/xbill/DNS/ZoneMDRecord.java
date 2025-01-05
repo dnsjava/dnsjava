@@ -185,7 +185,7 @@ public class ZoneMDRecord extends Record {
   protected String rrToString() {
     String rr = serial + " " + scheme + " " + hashAlgorithm + " ";
 
-    if (Options.check("multiline")) {
+    if (Options.multiline()) {
       rr += "(" + base16.toString(digest, 48, "\t", true);
     } else {
       rr += base16.toString(digest);

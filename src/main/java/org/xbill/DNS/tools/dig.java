@@ -25,7 +25,8 @@ import org.xbill.DNS.ZoneTransferIn;
 public class dig {
 
   static Name name = null;
-  static int type = Type.A, dclass = DClass.IN;
+  static int type = Type.A;
+  static int dclass = DClass.IN;
 
   static void usage() {
     System.out.println("; dnsjava dig");
@@ -40,20 +41,17 @@ public class dig {
   }
 
   public static void main(String[] argv) throws IOException {
-    String server = null;
     int arg;
-    Message query, response;
-    Record rec;
-    SimpleResolver res = null;
-    boolean printQuery = false;
-    long startTime, endTime;
 
     if (argv.length < 1) {
       usage();
     }
 
+    SimpleResolver res = null;
+    boolean printQuery = false;
     try {
       arg = 0;
+      String server = null;
       if (argv[arg].startsWith("@")) {
         server = argv[arg++].substring(1);
       }
@@ -190,8 +188,8 @@ public class dig {
       res = new SimpleResolver();
     }
 
-    rec = Record.newRecord(name, type, dclass);
-    query = Message.newQuery(rec);
+    Record rec = Record.newRecord(name, type, dclass);
+    Message query = Message.newQuery(rec);
     if (printQuery) {
       System.out.println(query);
     }
@@ -224,9 +222,9 @@ public class dig {
         throw new WireParseException(e.getMessage());
       }
     } else {
-      startTime = System.currentTimeMillis();
-      response = res.send(query);
-      endTime = System.currentTimeMillis();
+      long startTime = System.currentTimeMillis();
+      Message response = res.send(query);
+      long endTime = System.currentTimeMillis();
       doQuery(response, endTime - startTime);
     }
   }

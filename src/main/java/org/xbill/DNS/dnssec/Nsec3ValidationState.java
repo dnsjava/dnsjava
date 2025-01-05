@@ -20,8 +20,8 @@ class Nsec3ValidationState {
 
   private final Map<String, Nsec3CacheEntry> cache = new HashMap<>();
 
-  public int numCalc;
-  public int numCalcErrors;
+  int numCalc;
+  int numCalcErrors;
 
   public Nsec3CacheEntry computeIfAbsent(NSEC3Record nsec3, Name name)
       throws NoSuchAlgorithmException {

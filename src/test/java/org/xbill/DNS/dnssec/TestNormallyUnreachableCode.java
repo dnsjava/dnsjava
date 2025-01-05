@@ -34,9 +34,9 @@ class TestNormallyUnreachableCode {
   @Test
   void testVerifyWithoutSignaturesIsBogus() {
     DnsSecVerifier verifier = new DnsSecVerifier(new ValUtils());
-    ARecord record = new ARecord(Name.root, DClass.IN, 120, localhost);
+    ARecord aRecord = new ARecord(Name.root, DClass.IN, 120, localhost);
     SRRset set = new SRRset();
-    set.addRR(record);
+    set.addRR(aRecord);
     KeyEntry keys = KeyEntry.newKeyEntry(new SRRset());
     JustifiedSecStatus res = verifier.verify(set, keys, Instant.now());
     assertEquals(SecurityStatus.BOGUS, res.status);

@@ -31,7 +31,7 @@ public class Header implements Cloneable {
    * @param id The message id
    */
   public Header(int id) {
-    if (id < 0 || id > 0xffff) {
+    if (!Utils.isUInt16(id)) {
       throw new IllegalArgumentException("DNS message ID " + id + " is out of range");
     }
     counts = new int[4];
@@ -150,7 +150,7 @@ public class Header implements Cloneable {
 
   /** Sets the message ID */
   public void setID(int id) {
-    if (id < 0 || id > 0xffff) {
+    if (!Utils.isUInt16(id)) {
       throw new IllegalArgumentException("DNS message ID " + id + " is out of range");
     }
     this.id = id;
@@ -201,7 +201,7 @@ public class Header implements Cloneable {
   }
 
   void setCount(int field, int value) {
-    if (value < 0 || value > 0xFFFF) {
+    if (!Utils.isUInt16(value)) {
       throw new IllegalArgumentException("DNS section count " + value + " is out of range");
     }
     counts[field] = value;

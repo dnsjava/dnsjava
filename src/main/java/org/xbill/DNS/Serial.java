@@ -8,10 +8,14 @@ package org.xbill.DNS;
  * serial numbers. SOA serial number arithmetic is defined in RFC 1982 and also referenced in RFC
  * 2136.
  *
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc1982">RFC 1982: Serial Number
+ *     Arithmetic</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc2136">RFC 2136: DDynamic Updates in the
+ *     Domain Name System (DNS UPDATE)</a>
  * @author Brian Wellington
  */
 public final class Serial {
-
+  private static final String ERROR_MESSAGE_SUFFIX = " out of range";
   private static final long MAX32 = 0xFFFFFFFFL;
 
   private Serial() {}
@@ -28,16 +32,14 @@ public final class Serial {
    */
   public static int compare(long serial1, long serial2) {
     if (serial1 < 0 || serial1 > MAX32) {
-      throw new IllegalArgumentException(serial1 + " out of range");
+      throw new IllegalArgumentException(serial1 + ERROR_MESSAGE_SUFFIX);
     }
     if (serial2 < 0 || serial2 > MAX32) {
-      throw new IllegalArgumentException(serial2 + " out of range");
+      throw new IllegalArgumentException(serial2 + ERROR_MESSAGE_SUFFIX);
     }
     long diff = serial1 - serial2;
     if (diff >= MAX32) {
       diff -= MAX32 + 1;
-    } else if (diff < -MAX32) {
-      diff += MAX32 + 1;
     }
     return (int) diff;
   }
@@ -53,7 +55,7 @@ public final class Serial {
    */
   public static long increment(long serial) {
     if (serial < 0 || serial > MAX32) {
-      throw new IllegalArgumentException(serial + " out of range");
+      throw new IllegalArgumentException(serial + ERROR_MESSAGE_SUFFIX);
     }
     if (serial == MAX32) {
       return 1;

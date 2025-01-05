@@ -703,7 +703,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
 
   /* Checks that an int contains an unsigned 8 bit value */
   static int checkU8(String field, int val) {
-    if (val < 0 || val > 0xFF) {
+    if (!Utils.isUInt8(val)) {
       throw new IllegalArgumentException(
           "\"" + field + "\" " + val + " must be an unsigned 8 bit value");
     }
@@ -712,7 +712,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
 
   /* Checks that an int contains an unsigned 16 bit value */
   static int checkU16(String field, int val) {
-    if (val < 0 || val > 0xFFFF) {
+    if (!Utils.isUInt16(val)) {
       throw new IllegalArgumentException(
           "\"" + field + "\" " + val + " must be an unsigned 16 bit value");
     }
@@ -721,7 +721,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
 
   /* Checks that a long contains an unsigned 32 bit value */
   static long checkU32(String field, long val) {
-    if (val < 0 || val > 0xFFFFFFFFL) {
+    if (!Utils.isUInt32(val)) {
       throw new IllegalArgumentException(
           "\"" + field + "\" " + val + " must be an unsigned 32 bit value");
     }

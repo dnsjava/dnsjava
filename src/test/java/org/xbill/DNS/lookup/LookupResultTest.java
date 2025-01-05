@@ -68,9 +68,9 @@ class LookupResultTest {
   @Test
   void getAliases() {
     Name name = Name.fromConstantString("b.");
-    Record record = new ARecord(name, DClass.IN, 0, InetAddress.getLoopbackAddress());
+    Record aRecord = new ARecord(name, DClass.IN, 0, InetAddress.getLoopbackAddress());
     LookupResult lookupResult =
-        new LookupResult(PREVIOUS, null, null, false, singletonList(record), singletonList(name));
+        new LookupResult(PREVIOUS, null, null, false, singletonList(aRecord), singletonList(name));
     assertEquals(singletonList(name), lookupResult.getAliases());
   }
 

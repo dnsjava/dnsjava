@@ -65,8 +65,8 @@ class NSAP_PTRRecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("foo.bar.com.");
-    NSAP_PTRRecord record = new NSAP_PTRRecord();
-    record.rdataFromString(t, null);
-    assertEquals(Name.fromConstantString("foo.bar.com."), record.getTarget());
+    NSAP_PTRRecord nsapPtr = new NSAP_PTRRecord();
+    nsapPtr.rdataFromString(t, null);
+    assertEquals(Name.fromConstantString("foo.bar.com."), nsapPtr.getTarget());
   }
 }

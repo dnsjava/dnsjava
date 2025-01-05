@@ -11,8 +11,8 @@ class X25RecordTest {
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("311061700956");
-    X25Record record = new X25Record();
-    record.rdataFromString(t, null);
-    assertEquals("311061700956", record.getAddress());
+    X25Record x25Record = new X25Record();
+    x25Record.rdataFromString(t, null);
+    assertEquals("311061700956", x25Record.getAddress());
   }
 }

@@ -20,8 +20,10 @@ import org.xbill.DNS.TextParseException;
  * @since 3.2
  */
 public abstract class BaseResolverConfigProvider implements ResolverConfigProvider {
-  private static final boolean ipv4only = Boolean.getBoolean("java.net.preferIPv4Stack");
-  private static final boolean ipv6first = Boolean.getBoolean("java.net.preferIPv6Addresses");
+  private static final boolean IPV4_ONLY = Boolean.getBoolean("java.net.preferIPv4Stack");
+  private static final boolean IPV6_FIRST = Boolean.getBoolean("java.net.preferIPv6Addresses");
+
+  protected static final int DEFAULT_PORT = 53;
 
   private final List<InetSocketAddress> nameservers = new ArrayList<>(3);
 
@@ -89,7 +91,7 @@ public abstract class BaseResolverConfigProvider implements ResolverConfigProvid
 
   @Override
   public final List<InetSocketAddress> servers() {
-    if (ipv6first) {
+    if (IPV6_FIRST) {
       // prefer IPv6: return IPv6 first, then IPv4 (each in the order added)
       return nameservers.stream()
           .sorted(
@@ -97,7 +99,7 @@ public abstract class BaseResolverConfigProvider implements ResolverConfigProvid
                   Integer.compare(
                       b.getAddress().getAddress().length, a.getAddress().getAddress().length))
           .collect(Collectors.toList());
-    } else if (ipv4only) {
+    } else if (IPV4_ONLY) {
       // skip IPv6 addresses
       return nameservers.stream()
           .filter(isa -> isa.getAddress() instanceof Inet4Address)
