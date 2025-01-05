@@ -306,6 +306,12 @@
                         </excludes>
                         <overrideCompatibilityChangeParameters>
                             <overrideCompatibilityChangeParameter>
+                                <compatibilityChange>INTERFACE_ADDED</compatibilityChange>
+                                <binaryCompatible>true</binaryCompatible>
+                                <sourceCompatible>true</sourceCompatible>
+                                <semanticVersionLevel>PATCH</semanticVersionLevel>
+                            </overrideCompatibilityChangeParameter>
+                            <overrideCompatibilityChangeParameter>
                                 <compatibilityChange>ANNOTATION_DEPRECATED_ADDED</compatibilityChange>
                                 <semanticVersionLevel>PATCH</semanticVersionLevel>
                                 <sourceCompatible>true</sourceCompatible>

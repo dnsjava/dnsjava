@@ -97,6 +97,13 @@ public class Header implements Cloneable {
     }
   }
 
+  static boolean getFlag(int flags, int bit) {
+    checkFlag(bit);
+
+    // bits are indexed from left to right
+    return (flags & (1 << (15 - bit))) != 0;
+  }
+
   /**
    * Sets a flag to the supplied value
    *
@@ -123,9 +130,7 @@ public class Header implements Cloneable {
    * @see Flags
    */
   public boolean getFlag(int bit) {
-    checkFlag(bit);
-    // bits are indexed from left to right
-    return (flags & (1 << (15 - bit))) != 0;
+    return getFlag(flags, bit);
   }
 
   boolean[] getFlags() {

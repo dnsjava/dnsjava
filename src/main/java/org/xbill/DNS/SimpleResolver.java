@@ -353,7 +353,16 @@ public class SimpleResolver implements Resolver {
 
   CompletableFuture<Message> sendAsync(Message query, boolean forceTcp, Executor executor) {
     int qid = query.getHeader().getID();
-    byte[] out = query.toWire(Message.MAXLENGTH);
+    boolean truncate = query.getHeader().getOpcode() != Opcode.UPDATE;
+    byte[] out;
+    try {
+      out = query.toWire(Message.MAXLENGTH, truncate);
+    } catch (MessageSizeExceededException e) {
+      CompletableFuture<Message> f = new CompletableFuture<>();
+      f.completeExceptionally(e);
+      return f;
+    }
+
     int udpSize = maxUDPSize(query);
     boolean tcp = forceTcp || out.length > udpSize;
     if (log.isTraceEnabled()) {
