@@ -59,8 +59,9 @@ public class Socks5Proxy {
   }
 
   private final Socks5ProxyConfig config;
-  private final InetSocketAddress local;
-  private final InetSocketAddress remote;
+  private final InetSocketAddress localAddress;
+  private final InetSocketAddress proxyAddress;
+  private final InetSocketAddress remoteAddress;
   private SelectionKey tcpSelectionKey;
   private DatagramChannel udpChannel;
   private final Command command;
@@ -70,12 +71,14 @@ public class Socks5Proxy {
     SelectionKey tcpSelectionKey,
     Socks5ProxyConfig config,
     InetSocketAddress local,
+    InetSocketAddress proxyAddress,
     InetSocketAddress remote,
     Command command) {
     this.tcpSelectionKey = tcpSelectionKey;
     this.config = config;
-    this.local = local;
-    this.remote = remote;
+    this.localAddress = local;
+    this.proxyAddress = proxyAddress;
+    this.remoteAddress = remote;
     this.command = command;
   }
 
@@ -89,17 +92,17 @@ public class Socks5Proxy {
     ByteBuffer buffer;
     byte addressType;
     byte[] addressBytes;
-    if (remote.getAddress() instanceof Inet4Address) {
+    if (remoteAddress.getAddress() instanceof Inet4Address) {
       addressType = SOCKS5_ATYP_IPV4;
-      addressBytes = remote.getAddress().getAddress();
+      addressBytes = remoteAddress.getAddress().getAddress();
       buffer = ByteBuffer.allocate(4 + addressBytes.length + 2 + data.length);
-    } else if (remote.getAddress() instanceof Inet6Address) {
+    } else if (remoteAddress.getAddress() instanceof Inet6Address) {
       addressType = SOCKS5_ATYP_IPV6;
-      addressBytes = remote.getAddress().getAddress();
+      addressBytes = remoteAddress.getAddress().getAddress();
       buffer = ByteBuffer.allocate(4 + addressBytes.length + 2 + data.length);
     } else {
       addressType = SOCKS5_ATYP_DOMAINNAME;
-      addressBytes = remote.getHostName().getBytes(StandardCharsets.UTF_8);
+      addressBytes = remoteAddress.getHostName().getBytes(StandardCharsets.UTF_8);
       buffer = ByteBuffer.allocate(4 + 1 + addressBytes.length + 2 + data.length);
     }
 
@@ -111,7 +114,7 @@ public class Socks5Proxy {
       buffer.put((byte) addressBytes.length);
     }
     buffer.put(addressBytes); // DST.ADDR
-    buffer.putShort((short) remote.getPort()); // DST.PORT
+    buffer.putShort((short) remoteAddress.getPort()); // DST.PORT
     buffer.put(data); // DATA
 
     return buffer;
@@ -297,17 +300,17 @@ public class Socks5Proxy {
         byte addressType;
         byte[] addressBytes;
 
-        if (remote.getAddress() instanceof Inet4Address) {
+        if (remoteAddress.getAddress() instanceof Inet4Address) {
           addressType = SOCKS5_ATYP_IPV4;
-          addressBytes = remote.getAddress().getAddress();
+          addressBytes = remoteAddress.getAddress().getAddress();
           buffer = ByteBuffer.allocate(10);
-        } else if (remote.getAddress() instanceof Inet6Address) {
+        } else if (remoteAddress.getAddress() instanceof Inet6Address) {
           addressType = SOCKS5_ATYP_IPV6;
-          addressBytes = remote.getAddress().getAddress();
+          addressBytes = remoteAddress.getAddress().getAddress();
           buffer = ByteBuffer.allocate(22);
         } else {
           addressType = SOCKS5_ATYP_DOMAINNAME;
-          addressBytes = remote.getHostName().getBytes(StandardCharsets.UTF_8);
+          addressBytes = remoteAddress.getHostName().getBytes(StandardCharsets.UTF_8);
           buffer = ByteBuffer.allocate(7 + addressBytes.length);
         }
 
@@ -319,7 +322,7 @@ public class Socks5Proxy {
           buffer.put((byte) addressBytes.length);
         }
         buffer.put(addressBytes);
-        buffer.putShort((short) remote.getPort());
+        buffer.putShort((short) remoteAddress.getPort());
         buffer.flip();
         channel.write(buffer);
 
@@ -416,7 +419,7 @@ public class Socks5Proxy {
           int udpAssociatePort = Short.toUnsignedInt(buffer.getShort());
           udpChannel = DatagramChannel.open();
           udpChannel.configureBlocking(false);
-          udpChannel.bind(new InetSocketAddress(local.getAddress(), 0));
+          udpChannel.bind(new InetSocketAddress(localAddress.getAddress(), 0));
           udpChannel.connect(new InetSocketAddress(config.getProxyAddress().getAddress(), udpAssociatePort));
         }
 
