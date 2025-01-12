@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 final class NioSocksUdpClient extends NioClient implements UdpIoClient {
+  private final NioTcpHandler tcpHandler = new NioTcpHandler();
+  private final NioUdpHandler udpHandler = new NioUdpHandler();
+  private final NioSocksUdpAssociateChannelPool udpPool = new NioSocksUdpAssociateChannelPool(tcpHandler, udpHandler);
   private final Socks5ProxyConfig socksConfig;
 
   NioSocksUdpClient(Socks5ProxyConfig config) {
@@ -32,39 +35,33 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
     CompletableFuture<byte[]> future = new CompletableFuture<>();
     long endTime = System.nanoTime() + timeout.toNanos();
     NioSocksHandler proxy = new NioSocksHandler(socksConfig.getProxyAddress(), remote, local);
-    NioTcpHandler.ChannelState tcpChannel = tcpHandler.createOrGetChannelState(local, remote, proxy, future);
+    NioSocksUdpAssociateChannelPool.SocksUdpAssociateChannelState channel = udpPool.createOrGetChannelState(local, remote, proxy, future);
 
-    synchronized (tcpChannel) {
-      if (tcpChannel.socks5HandshakeF == null) {
-        tcpChannel.setSocks5(true);
-        tcpChannel.socks5HandshakeF = proxy.doSocks5Handshake(tcpChannel, NioSocksHandler.SOCKS5_CMD_UDP_ASSOCIATE, query, endTime);
+    synchronized (channel.getTcpChannel()) {
+      if (channel.getTcpChannel().socks5HandshakeF == null
+          || channel.getTcpChannel().socks5HandshakeF.isCompletedExceptionally()
+          || !channel.isSocks5Initialized()) {
+        channel.getTcpChannel().setSocks5(true);
+        channel.getTcpChannel().socks5HandshakeF = proxy.doSocks5Handshake(
+          channel.getTcpChannel(), NioSocksHandler.SOCKS5_CMD_UDP_ASSOCIATE, query, endTime);
       }
     }
 
-    tcpChannel.socks5HandshakeF.thenApplyAsync(cmdBytes -> {
+    channel.getTcpChannel().socks5HandshakeF.thenApplyAsync(cmdBytes -> {
+      channel.setSocks5Initialized(true);
       NioSocksHandler.CmdResponse cmd = new NioSocksHandler.CmdResponse(cmdBytes);
       InetSocketAddress newRemote = new InetSocketAddress(socksConfig.getProxyAddress().getAddress(), cmd.getPort());
       byte[] wrappedData = proxy.addUdpHeader(data, newRemote);
 
-      DatagramChannel udpChannel;
-      udpChannel = channelMap.computeIfAbsent(newRemote.toString(), k -> {
-        try {
-          return udpHandler.createChannel(local, newRemote, future);
-        } catch (Exception e) {
-          future.completeExceptionally(e);
-          return null;
-        }
-      });
-
-      udpHandler.sendAndReceiveUdp(local, newRemote, udpChannel, query, wrappedData, max, timeout)
+      udpHandler.sendAndReceiveUdp(local, newRemote, channel.getUdpChannel(), query, wrappedData, max, timeout)
         .thenApplyAsync(response -> {
+          channel.setOccupied(false);
           if (response.length < 10) {
-            channelMap.remove(newRemote.toString());
             future.completeExceptionally(new IllegalStateException("SOCKS5 UDP response too short"));
           } else {
             future.complete(proxy.removeUdpHeader(response));
           }
-          return proxy.removeUdpHeader(response);
+          return null;
         }).exceptionally(ex -> {
           future.completeExceptionally(ex);
           return null;

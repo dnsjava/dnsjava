@@ -229,8 +229,25 @@ public class NioSocksHandler {
   }
 
   public byte[] removeUdpHeader(byte[] in) {
-    byte[] out = new byte[in.length - 10];
-    System.arraycopy(in, 10, out, 0, in.length - 10);
+    int addressType = in[3] & 0xFF;
+    int headerLength;
+
+    switch (addressType) {
+      case SOCKS5_ATYP_IPV4:
+        headerLength = 10;
+        break;
+      case SOCKS5_ATYP_DOMAINNAME:
+        headerLength = 7 + (in[4] & 0xFF);
+        break;
+      case SOCKS5_ATYP_IPV6:
+        headerLength = 22;
+        break;
+      default:
+        throw new IllegalArgumentException("Unsupported address type: " + addressType);
+    }
+
+    byte[] out = new byte[in.length - headerLength];
+    System.arraycopy(in, headerLength, out, 0, in.length - headerLength);
     return out;
   }
 

@@ -312,37 +312,40 @@ public class NioTcpHandler extends NioClient {
     channel.queueTransaction(t);
   }
 
+  public ChannelState createChannelState(InetSocketAddress local, InetSocketAddress remote, NioSocksHandler proxy, CompletableFuture<byte[]> f) {
+    log.debug("Opening async channel for l={}/r={}", local, remote);
+    SocketChannel c = null;
+    try {
+      c = SocketChannel.open();
+      c.configureBlocking(false);
+      if (local != null) {
+        c.bind(local);
+      }
+
+      if (proxy != null) {
+        c.connect(proxy.getProxyAddress());
+      } else {
+        c.connect(remote);
+      }
+      return new ChannelState(c);
+    } catch (IOException e) {
+      if (c != null) {
+        try {
+          c.close();
+        } catch (IOException ee) {
+          // ignore
+        }
+      }
+      f.completeExceptionally(e);
+      return null;
+    }
+  }
+
   public ChannelState createOrGetChannelState(InetSocketAddress local, InetSocketAddress remote, NioSocksHandler proxy, CompletableFuture<byte[]> f) {
     return channelMap.computeIfAbsent(
       new ChannelKey(local, remote),
-      key -> {
-        log.debug("Opening async channel for l={}/r={}", local, remote);
-        SocketChannel c = null;
-        try {
-          c = SocketChannel.open();
-          c.configureBlocking(false);
-          if (local != null) {
-            c.bind(local);
-          }
-
-          if (proxy != null) {
-            c.connect(proxy.getProxyAddress());
-          } else {
-            c.connect(remote);
-          }
-          return new ChannelState(c);
-        } catch (IOException e) {
-          if (c != null) {
-            try {
-              c.close();
-            } catch (IOException ee) {
-              // ignore
-            }
-          }
-          f.completeExceptionally(e);
-          return null;
-        }
-      });
+      key -> createChannelState(local, remote, proxy, f)
+    );
   }
 
   public CompletableFuture<byte[]> sendAndReceiveTcp(
