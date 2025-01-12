@@ -13,28 +13,26 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.Iterator;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
 final class NioUdpHandler extends NioClient {
   private final int ephemeralStart;
   private final int ephemeralRange;
-
   private final SecureRandom prng;
-  private final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
-  private final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
+  private static final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
+  private static final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
 
   NioUdpHandler() {
-    // https://datatracker.ietf.org/doc/html/rfc6335#section-6
     int ephemeralStartDefault = 49152;
     int ephemeralEndDefault = 65535;
 
-    // Linux usually uses 32768-60999
     if (System.getProperty("os.name").toLowerCase().contains("linux")) {
       ephemeralStartDefault = 32768;
       ephemeralEndDefault = 60999;
@@ -79,6 +77,23 @@ final class NioUdpHandler extends NioClient {
         it.remove();
       }
     }
+  }
+
+  private static void silentCloseChannel(DatagramChannel channel) {
+    if (channel != null) {
+      try {
+        channel.close();
+      } catch (IOException ioe) {
+        // ignore
+      }
+    }
+  }
+
+  private void closeUdp() {
+    registrationQueue.clear();
+    EOFException closing = new EOFException("Client is closing");
+    pendingTransactions.forEach(t -> t.completeExceptionally(closing));
+    pendingTransactions.clear();
   }
 
   @RequiredArgsConstructor
@@ -166,6 +181,77 @@ final class NioUdpHandler extends NioClient {
     }
   }
 
+
+  public class SocksUdpAssociateChannelPool {
+    private final NioTcpHandler tcpHandler = new NioTcpHandler();
+    private final NioUdpHandler udpHandler = new NioUdpHandler();
+    private final Map<String, SocksUdpAssociateChannelGroup> channelMap = new ConcurrentHashMap<>();
+
+    public DatagramChannel createOrGetDatagramChannel(
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      NioSocksHandler proxy,
+      CompletableFuture<byte[]> future) {
+      String key = local + " " + remote;
+      SocksUdpAssociateChannelGroup group = channelMap.computeIfAbsent(key,
+        k -> new SocksUdpAssociateChannelGroup(tcpHandler, udpHandler));
+      return group.createOrGetDatagramChannel(local, remote, proxy, future);
+    }
+  }
+
+  private class SocksUdpAssociateChannelGroup {
+    private final List<SocksUdpAssociateChannelState> channels;
+    private final NioTcpHandler tcpHandler;
+    private final NioUdpHandler udpHandler;
+    private final int defaultChannelIdleTimeout = 60000;
+
+    public SocksUdpAssociateChannelGroup(NioTcpHandler tcpHandler, NioUdpHandler udpHandler) {
+      channels = new ArrayList<>();
+      this.tcpHandler = tcpHandler;
+      this.udpHandler = udpHandler;
+    }
+
+    public synchronized DatagramChannel createOrGetDatagramChannel(
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      NioSocksHandler proxy,
+      CompletableFuture<byte[]> future) {
+      SocksUdpAssociateChannelState channelState = channels.stream()
+        .filter(c -> !c.isOccupied)
+        .findFirst()
+        .orElseGet(() -> {
+          try {
+            SocksUdpAssociateChannelState newChannel = new SocksUdpAssociateChannelState();
+            newChannel.tcpChannel = tcpHandler.createOrGetChannelState(local, remote, proxy, future);
+            newChannel.udpChannel = udpHandler.createChannel(local, remote, future);
+            newChannel.poolChannelIdleTimeout = System.currentTimeMillis() + defaultChannelIdleTimeout;
+            channels.add(newChannel);
+            return newChannel;
+          } catch (IOException e) {
+            future.completeExceptionally(e);
+            return null;
+          }
+        });
+
+      if (channelState != null) {
+        channelState.isOccupied = true;
+        return channelState.udpChannel;
+      } else {
+        return null;
+      }
+    }
+  }
+
+  @RequiredArgsConstructor
+  private class SocksUdpAssociateChannelState {
+    private NioTcpHandler.ChannelState tcpChannel;
+    private DatagramChannel udpChannel;
+    private boolean isOccupied = false;
+    private boolean isSocks5Initialized = false;
+    private long poolChannelIdleTimeout;
+  }
+
+
   public DatagramChannel createChannel(InetSocketAddress local, InetSocketAddress remote, CompletableFuture<byte[]> f) throws IOException {
     DatagramChannel channel = DatagramChannel.open();
     channel.configureBlocking(false);
@@ -216,13 +302,9 @@ final class NioUdpHandler extends NioClient {
     CompletableFuture<byte[]> f = new CompletableFuture<>();
 
     try {
-      boolean isProxyChannel = false;
+      boolean isProxyChannel = (channel != null);
       if (channel == null) {
         channel = createChannel(local, remote, f);
-      } else {
-        // Do not close the channel in case of SOCKS5 UDP associate.
-        // close it only on Exception and complete the future exceptionally.
-        isProxyChannel = true;
       }
 
       Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, isProxyChannel, f);
@@ -235,28 +317,10 @@ final class NioUdpHandler extends NioClient {
       silentCloseChannel(channel);
       f.completeExceptionally(e);
     } catch (Throwable e) {
-      // Make sure to close the channel, no matter what, but only handle the declared IOException
       silentCloseChannel(channel);
       throw e;
     }
 
     return f;
-  }
-
-  private static void silentCloseChannel(DatagramChannel channel) {
-    if (channel != null) {
-      try {
-        channel.close();
-      } catch (IOException ioe) {
-        // ignore
-      }
-    }
-  }
-
-  private void closeUdp() {
-    registrationQueue.clear();
-    EOFException closing = new EOFException("Client is closing");
-    pendingTransactions.forEach(t -> t.completeExceptionally(closing));
-    pendingTransactions.clear();
   }
 }
