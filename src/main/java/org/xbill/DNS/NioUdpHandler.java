@@ -182,77 +182,7 @@ final class NioUdpHandler extends NioClient {
   }
 
 
-  public class SocksUdpAssociateChannelPool {
-    private final NioTcpHandler tcpHandler = new NioTcpHandler();
-    private final NioUdpHandler udpHandler = new NioUdpHandler();
-    private final Map<String, SocksUdpAssociateChannelGroup> channelMap = new ConcurrentHashMap<>();
-
-    public DatagramChannel createOrGetDatagramChannel(
-      InetSocketAddress local,
-      InetSocketAddress remote,
-      NioSocksHandler proxy,
-      CompletableFuture<byte[]> future) {
-      String key = local + " " + remote;
-      SocksUdpAssociateChannelGroup group = channelMap.computeIfAbsent(key,
-        k -> new SocksUdpAssociateChannelGroup(tcpHandler, udpHandler));
-      return group.createOrGetDatagramChannel(local, remote, proxy, future);
-    }
-  }
-
-  private class SocksUdpAssociateChannelGroup {
-    private final List<SocksUdpAssociateChannelState> channels;
-    private final NioTcpHandler tcpHandler;
-    private final NioUdpHandler udpHandler;
-    private final int defaultChannelIdleTimeout = 60000;
-
-    public SocksUdpAssociateChannelGroup(NioTcpHandler tcpHandler, NioUdpHandler udpHandler) {
-      channels = new ArrayList<>();
-      this.tcpHandler = tcpHandler;
-      this.udpHandler = udpHandler;
-    }
-
-    public synchronized DatagramChannel createOrGetDatagramChannel(
-      InetSocketAddress local,
-      InetSocketAddress remote,
-      NioSocksHandler proxy,
-      CompletableFuture<byte[]> future) {
-      SocksUdpAssociateChannelState channelState = channels.stream()
-        .filter(c -> !c.isOccupied)
-        .findFirst()
-        .orElseGet(() -> {
-          try {
-            SocksUdpAssociateChannelState newChannel = new SocksUdpAssociateChannelState();
-            newChannel.tcpChannel = tcpHandler.createOrGetChannelState(local, remote, proxy, future);
-            newChannel.udpChannel = udpHandler.createChannel(local, remote, future);
-            newChannel.poolChannelIdleTimeout = System.currentTimeMillis() + defaultChannelIdleTimeout;
-            channels.add(newChannel);
-            return newChannel;
-          } catch (IOException e) {
-            future.completeExceptionally(e);
-            return null;
-          }
-        });
-
-      if (channelState != null) {
-        channelState.isOccupied = true;
-        return channelState.udpChannel;
-      } else {
-        return null;
-      }
-    }
-  }
-
-  @RequiredArgsConstructor
-  private class SocksUdpAssociateChannelState {
-    private NioTcpHandler.ChannelState tcpChannel;
-    private DatagramChannel udpChannel;
-    private boolean isOccupied = false;
-    private boolean isSocks5Initialized = false;
-    private long poolChannelIdleTimeout;
-  }
-
-
-  public DatagramChannel createChannel(InetSocketAddress local, InetSocketAddress remote, CompletableFuture<byte[]> f) throws IOException {
+  public DatagramChannel createChannel(InetSocketAddress local, CompletableFuture<byte[]> f) throws IOException {
     DatagramChannel channel = DatagramChannel.open();
     channel.configureBlocking(false);
     if (local == null || local.getPort() == 0) {
@@ -287,7 +217,7 @@ final class NioUdpHandler extends NioClient {
     } else {
       channel.bind(local);
     }
-    return channel.connect(remote);
+    return channel;
   }
 
   public CompletableFuture<byte[]> sendAndReceiveUdp(
@@ -304,7 +234,15 @@ final class NioUdpHandler extends NioClient {
     try {
       boolean isProxyChannel = (channel != null);
       if (channel == null) {
-        channel = createChannel(local, remote, f);
+        channel = createChannel(local, f);
+      }
+      if (channel != null) {
+        if (!channel.isConnected()) {
+          channel.connect(remote);
+        }
+      } else {
+        f.completeExceptionally(new IOException("Could not create channel"));
+        return f;
       }
 
       Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, isProxyChannel, f);
