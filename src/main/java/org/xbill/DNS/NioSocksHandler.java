@@ -228,7 +228,11 @@ public class NioSocksHandler {
     return buffer.array();
   }
 
-  public byte[] removeUdpHeader(byte[] in) {
+  public byte[] removeUdpHeader(byte[] in) throws IllegalArgumentException {
+    if (in.length < 10) {
+      throw new IllegalArgumentException("SOCKS5 UDP response too short");
+    }
+
     int addressType = in[3] & 0xFF;
     int headerLength;
 
@@ -306,7 +310,7 @@ public class NioSocksHandler {
       } else {
         addressType = SOCKS5_ATYP_DOMAINNAME;
         addressBytes = address.getHostName().getBytes(StandardCharsets.UTF_8);
-        bufferSize = 7 + addressBytes.length;
+        bufferSize = 6 + 1 + addressBytes.length;
       }
       port = (short) address.getPort();
     }
@@ -317,6 +321,9 @@ public class NioSocksHandler {
       buffer.put(this.command);
       buffer.put(this.reserved);
       buffer.put(this.addressType);
+      if (addressType == SOCKS5_ATYP_DOMAINNAME) {
+        buffer.put((byte) addressBytes.length);
+      }
       buffer.put(this.addressBytes);
       buffer.putShort(this.port);
       return buffer.array();

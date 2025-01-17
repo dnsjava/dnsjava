@@ -4,20 +4,13 @@ package org.xbill.DNS;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.io.UdpIoClient;
 
-import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.nio.channels.DatagramChannel;
 import java.time.Duration;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 final class NioSocksUdpClient extends NioClient implements UdpIoClient {
-  private final NioTcpHandler tcpHandler = new NioTcpHandler();
   private final NioUdpHandler udpHandler = new NioUdpHandler();
-  private final NioSocksUdpAssociateChannelPool udpPool = new NioSocksUdpAssociateChannelPool(tcpHandler, udpHandler);
   private final Socks5ProxyConfig socksConfig;
 
   NioSocksUdpClient(Socks5ProxyConfig config) {
@@ -32,10 +25,10 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
     byte[] data,
     int max,
     Duration timeout) {
-    CompletableFuture<byte[]> future = new CompletableFuture<>();
+    CompletableFuture<byte[]> f = new CompletableFuture<>();
     long endTime = System.nanoTime() + timeout.toNanos();
     NioSocksHandler proxy = new NioSocksHandler(socksConfig.getProxyAddress(), remote, local);
-    NioSocksUdpAssociateChannelPool.SocksUdpAssociateChannelState channel = udpPool.createOrGetChannelState(local, remote, proxy, future);
+    NioSocksUdpAssociateChannelPool.SocksUdpAssociateChannelState channel = udpHandler.getUdpPool().createOrGetSocketChannelState(local, remote, proxy, f);
 
     synchronized (channel.getTcpChannel()) {
       if (channel.getTcpChannel().socks5HandshakeF == null
@@ -56,22 +49,22 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
       udpHandler.sendAndReceiveUdp(local, newRemote, channel.getUdpChannel(), query, wrappedData, max, timeout)
         .thenApplyAsync(response -> {
           channel.setOccupied(false);
-          if (response.length < 10) {
-            future.completeExceptionally(new IllegalStateException("SOCKS5 UDP response too short"));
-          } else {
-            future.complete(proxy.removeUdpHeader(response));
+          try {
+            f.complete(proxy.removeUdpHeader(response));
+          } catch (IllegalArgumentException e) {
+            f.completeExceptionally(e);
           }
           return null;
         }).exceptionally(ex -> {
-          future.completeExceptionally(ex);
+          f.completeExceptionally(ex);
           return null;
         });
       return null;
     }).exceptionally(ex -> {
-      future.completeExceptionally(ex);
+      f.completeExceptionally(ex);
       return null;
     });
 
-    return future;
+    return f;
   }
 }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,12 +23,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
+@Getter
 final class NioUdpHandler extends NioClient {
   private final int ephemeralStart;
   private final int ephemeralRange;
   private final SecureRandom prng;
   private static final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
   private static final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
+
+  private final NioSocksUdpAssociateChannelPool udpPool;
 
   NioUdpHandler() {
     int ephemeralStartDefault = 49152;
@@ -47,6 +51,10 @@ final class NioUdpHandler extends NioClient {
     } else {
       prng = new SecureRandom();
     }
+
+    // NioTcpHandler for SOCKS5 UDP associate
+    udpPool = new NioSocksUdpAssociateChannelPool(new NioTcpHandler(), this);
+
     setRegistrationsTask(this::processPendingRegistrations, false);
     setTimeoutTask(this::checkTransactionTimeouts, false);
     setCloseTask(this::closeUdp, false);
@@ -77,6 +85,9 @@ final class NioUdpHandler extends NioClient {
         it.remove();
       }
     }
+
+    // check for idle channels and remove them
+    udpPool.removeIdleChannels();
   }
 
   private static void silentCloseChannel(DatagramChannel channel) {

@@ -3,16 +3,17 @@ package org.xbill.DNS;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+@Slf4j
 public class NioSocksUdpAssociateChannelPool {
   private final NioTcpHandler tcpHandler;
   private final NioUdpHandler udpHandler;
@@ -23,7 +24,7 @@ public class NioSocksUdpAssociateChannelPool {
     this.udpHandler = udpHandler;
   }
 
-  public SocksUdpAssociateChannelState createOrGetChannelState(
+  public SocksUdpAssociateChannelState createOrGetSocketChannelState(
     InetSocketAddress local,
     InetSocketAddress remote,
     NioSocksHandler proxy,
@@ -34,14 +35,29 @@ public class NioSocksUdpAssociateChannelPool {
     return group.createOrGetDatagramChannel(local, remote, proxy, future);
   }
 
+  public void removeIdleChannels() {
+    long currentTime = System.currentTimeMillis();
+    channelMap.values().forEach(group -> {
+      for (SocksUdpAssociateChannelState channel : group.channels) {
+        if (channel.poolChannelIdleTimeout < currentTime) {
+          try {
+            group.removeChannelState(channel);
+          } catch (IOException e) {
+            log.warn("Error closing idle channel", e);
+          }
+          }
+        }
+    });
+  }
+
   private static class SocksUdpAssociateChannelGroup {
-    private final List<SocksUdpAssociateChannelState> channels;
+    private final Queue<SocksUdpAssociateChannelState> channels;
     private final NioTcpHandler tcpHandler;
     private final NioUdpHandler udpHandler;
     private final int defaultChannelIdleTimeout = 60000;
 
     public SocksUdpAssociateChannelGroup(NioTcpHandler tcpHandler, NioUdpHandler udpHandler) {
-      channels = new ArrayList<>();
+      channels = new ConcurrentLinkedQueue<>();
       this.tcpHandler = tcpHandler;
       this.udpHandler = udpHandler;
     }
@@ -51,28 +67,40 @@ public class NioSocksUdpAssociateChannelPool {
       InetSocketAddress remote,
       NioSocksHandler proxy,
       CompletableFuture<byte[]> future) {
-      SocksUdpAssociateChannelState channelState = channels.stream()
-        .filter(c -> !c.isOccupied)
-        .findFirst()
-        .orElseGet(() -> {
-          try {
-            SocksUdpAssociateChannelState newChannel = new SocksUdpAssociateChannelState();
-            newChannel.tcpChannel = tcpHandler.createChannelState(local, remote, proxy, future);
-            newChannel.udpChannel = udpHandler.createChannel(local, future);
-            newChannel.poolChannelIdleTimeout = System.currentTimeMillis() + defaultChannelIdleTimeout;
-            channels.add(newChannel);
-            return newChannel;
-          } catch (IOException e) {
-            future.completeExceptionally(e);
-            return null;
+      SocksUdpAssociateChannelState channelState = null;
+      for (Iterator<SocksUdpAssociateChannelState> it = channels.iterator(); it.hasNext(); ) {
+        SocksUdpAssociateChannelState c = it.next();
+        synchronized (c) {
+          if (!c.isOccupied) {
+            channelState = c;
+            c.occupy();
+            break;
           }
-        });
+        }
+      }
 
-      if (channelState != null) {
-        channelState.isOccupied = true;
-        return channelState;
-      } else {
-        return null;
+      if (channelState == null) {
+        try {
+          SocksUdpAssociateChannelState newChannel = new SocksUdpAssociateChannelState();
+          newChannel.tcpChannel = tcpHandler.createChannelState(local, remote, proxy, future);
+          newChannel.udpChannel = udpHandler.createChannel(local, future);
+          newChannel.poolChannelIdleTimeout = System.currentTimeMillis() + defaultChannelIdleTimeout;
+          newChannel.isOccupied = true;
+          channels.add(newChannel);
+          channelState = newChannel;
+        } catch (IOException e) {
+          future.completeExceptionally(e);
+        }
+      }
+
+      return channelState;
+    }
+
+    public void removeChannelState(SocksUdpAssociateChannelState channel) throws IOException {
+      if (channel.occupy()) {
+        channels.remove(channel);
+        channel.tcpChannel.close();
+        channel.udpChannel.close();
       }
     }
   }
@@ -86,5 +114,14 @@ public class NioSocksUdpAssociateChannelPool {
     private boolean isOccupied = false;
     private boolean isSocks5Initialized = false;
     private long poolChannelIdleTimeout;
+
+    public synchronized boolean occupy() {
+      if (!isOccupied) {
+        isOccupied = true;
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 }

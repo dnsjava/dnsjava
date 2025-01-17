@@ -153,6 +153,10 @@ public class NioTcpHandler extends NioClient {
 
     private void handleChannelException(IOException e) {
       handleTransactionException(e);
+      close();
+    }
+
+    public void close() {
       for (Map.Entry<ChannelKey, ChannelState> entry : channelMap.entrySet()) {
         if (entry.getValue() == this) {
           channelMap.remove(entry.getKey());
@@ -160,10 +164,10 @@ public class NioTcpHandler extends NioClient {
             channel.close();
           } catch (IOException ex) {
             log.warn(
-                "Failed to close channel l={}/r={}",
-                entry.getKey().local,
-                entry.getKey().remote,
-                ex);
+              "Failed to close channel l={}/r={}",
+              entry.getKey().local,
+              entry.getKey().remote,
+              ex);
           }
           return;
         }
