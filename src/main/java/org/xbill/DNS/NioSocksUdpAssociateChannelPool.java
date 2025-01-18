@@ -112,7 +112,6 @@ public class NioSocksUdpAssociateChannelPool {
     private NioTcpHandler.ChannelState tcpChannel;
     private DatagramChannel udpChannel;
     private boolean isOccupied = false;
-    private boolean isSocks5Initialized = false;
     private long poolChannelIdleTimeout;
 
     public synchronized boolean occupy() {

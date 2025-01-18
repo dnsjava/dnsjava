@@ -32,8 +32,7 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
 
     synchronized (channel.getTcpChannel()) {
       if (channel.getTcpChannel().socks5HandshakeF == null
-          || channel.getTcpChannel().socks5HandshakeF.isCompletedExceptionally()
-          || !channel.isSocks5Initialized()) {
+          || channel.getTcpChannel().socks5HandshakeF.isCompletedExceptionally()) {
         channel.getTcpChannel().setSocks5(true);
         channel.getTcpChannel().socks5HandshakeF = proxy.doSocks5Handshake(
           channel.getTcpChannel(), NioSocksHandler.SOCKS5_CMD_UDP_ASSOCIATE, query, endTime);
@@ -41,7 +40,6 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
     }
 
     channel.getTcpChannel().socks5HandshakeF.thenApplyAsync(cmdBytes -> {
-      channel.setSocks5Initialized(true);
       NioSocksHandler.CmdResponse cmd = new NioSocksHandler.CmdResponse(cmdBytes);
       InetSocketAddress newRemote = new InetSocketAddress(socksConfig.getProxyAddress().getAddress(), cmd.getPort());
       byte[] wrappedData = proxy.addUdpHeader(data, newRemote);

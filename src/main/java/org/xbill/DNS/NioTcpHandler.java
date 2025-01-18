@@ -372,7 +372,7 @@ public class NioTcpHandler extends NioClient {
       long endTime = System.nanoTime() + timeout.toNanos();
       if (proxy != null) {
         synchronized (channel) {
-          if (channel.socks5HandshakeF == null) {
+          if (channel.socks5HandshakeF == null || channel.socks5HandshakeF.isCompletedExceptionally()) {
             channel.setSocks5(true);
             channel.socks5HandshakeF = proxy.doSocks5Handshake(channel, NioSocksHandler.SOCKS5_CMD_CONNECT, query, endTime);
           }
