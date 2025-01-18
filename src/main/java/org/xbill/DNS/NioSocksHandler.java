@@ -177,7 +177,8 @@ public class NioSocksHandler {
       if (socks5Cmd == SOCKS5_CMD_CONNECT || socks5Cmd == SOCKS5_CMD_UDP_ASSOCIATE) {
         cmdHandshakeF = doSocks5Request(channel, socks5Cmd, query, endTime);
       } else {
-        cmdHandshakeF = CompletableFuture.failedFuture(new UnsupportedOperationException("Unsupported SOCKS5 command: " + socks5Cmd));
+        socks5HandshakeF.completeExceptionally(new UnsupportedOperationException("Unsupported SOCKS5 command: " + socks5Cmd));
+        return;
       }
       cmdHandshakeF.thenComposeAsync(in -> {
         socks5HandshakeF.complete(in);
