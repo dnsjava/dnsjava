@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.Address;
@@ -37,6 +38,7 @@ public final class HostsFileParser {
   private final boolean clearCacheOnChange;
   private Instant lastFileReadTime = Instant.MIN;
   private boolean isEntireFileParsed;
+  private boolean hostsFileWarningLogged = false;
 
   /**
    * Creates a new instance based on the current OS's default. Unix and alike (or rather everything
@@ -116,9 +118,11 @@ public final class HostsFileParser {
   private void parseEntireHostsFile() throws IOException {
     String line;
     int lineNumber = 0;
+    AtomicInteger addressFailures = new AtomicInteger(0);
+    AtomicInteger nameFailures = new AtomicInteger(0);
     try (BufferedReader hostsReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
       while ((line = hostsReader.readLine()) != null) {
-        LineData lineData = parseLine(++lineNumber, line);
+        LineData lineData = parseLine(++lineNumber, line, addressFailures, nameFailures);
         if (lineData != null) {
           for (Name lineName : lineData.names) {
             InetAddress lineAddress =
@@ -129,15 +133,26 @@ public final class HostsFileParser {
       }
     }
 
+    if (!hostsFileWarningLogged && (addressFailures.get() > 0 || nameFailures.get() > 0)) {
+      log.warn(
+          "Failed to parse entire hosts file {}, address failures={}, name failures={}",
+          path,
+          addressFailures.get(),
+          nameFailures);
+      hostsFileWarningLogged = true;
+    }
+
     isEntireFileParsed = true;
   }
 
   private void searchHostsFileForEntry(Name name, int type) throws IOException {
     String line;
     int lineNumber = 0;
+    AtomicInteger addressFailures = new AtomicInteger(0);
+    AtomicInteger nameFailures = new AtomicInteger(0);
     try (BufferedReader hostsReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
       while ((line = hostsReader.readLine()) != null) {
-        LineData lineData = parseLine(++lineNumber, line);
+        LineData lineData = parseLine(++lineNumber, line, addressFailures, nameFailures);
         if (lineData != null) {
           for (Name lineName : lineData.names) {
             boolean isSearchedEntry = lineName.equals(name);
@@ -151,6 +166,16 @@ public final class HostsFileParser {
         }
       }
     }
+
+    if (!hostsFileWarningLogged && (addressFailures.get() > 0 || nameFailures.get() > 0)) {
+      log.warn(
+          "Failed to find {} in hosts file {}, address failures={}, name failures={}",
+          name,
+          path,
+          addressFailures.get(),
+          nameFailures);
+      hostsFileWarningLogged = true;
+    }
   }
 
   @RequiredArgsConstructor
@@ -160,7 +185,8 @@ public final class HostsFileParser {
     final Iterable<? extends Name> names;
   }
 
-  private LineData parseLine(int lineNumber, String line) {
+  private LineData parseLine(
+      int lineNumber, String line, AtomicInteger addressFailures, AtomicInteger nameFailures) {
     String[] lineTokens = getLineTokens(line);
     if (lineTokens.length < 2) {
       return null;
@@ -174,24 +200,26 @@ public final class HostsFileParser {
     }
 
     if (lineAddressBytes == null) {
-      log.warn("Could not decode address {}, {}#L{}", lineTokens[0], path, lineNumber);
+      log.debug("Could not decode address {}, {}#L{}", lineTokens[0], path, lineNumber);
+      addressFailures.incrementAndGet();
       return null;
     }
 
     Iterable<? extends Name> lineNames =
         Arrays.stream(lineTokens)
                 .skip(1)
-                .map(lineTokenName -> safeName(lineTokenName, lineNumber))
+                .map(lineTokenName -> safeName(lineTokenName, lineNumber, nameFailures))
                 .filter(Objects::nonNull)
             ::iterator;
     return new LineData(lineAddressType, lineAddressBytes, lineNames);
   }
 
-  private Name safeName(String name, int lineNumber) {
+  private Name safeName(String name, int lineNumber, AtomicInteger nameFailures) {
     try {
       return Name.fromString(name, Name.root);
     } catch (TextParseException e) {
-      log.warn("Could not decode name {}, {}#L{}, skipping", name, path, lineNumber);
+      log.debug("Could not decode name {}, {}#L{}, skipping", name, path, lineNumber);
+      nameFailures.incrementAndGet();
       return null;
     }
   }
