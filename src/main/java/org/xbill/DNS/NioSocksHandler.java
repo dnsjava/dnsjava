@@ -127,8 +127,37 @@ public class NioSocksHandler {
 
     commandF.thenComposeAsync(in -> {
       CmdResponse cmdResponse = new CmdResponse(in);
-      if (cmdResponse.getReply() != SOCKS5_REP_SUCCEEDED) {
-        cmdHandshakeF.completeExceptionally(new UnsupportedOperationException("SOCKS5 command failed with status: " + cmdResponse.getReply()));
+     if (cmdResponse.getReply() != SOCKS5_REP_SUCCEEDED) {
+        String errorMessage;
+        switch (cmdResponse.getReply()) {
+          case SOCKS5_REP_GENERAL_FAILURE:
+            errorMessage = "General SOCKS server failure";
+            break;
+          case SOCKS5_REP_CONNECTION_NOT_ALLOWED:
+            errorMessage = "Connection not allowed by ruleset";
+            break;
+          case SOCKS5_REP_NETWORK_UNREACHABLE:
+            errorMessage = "Network unreachable";
+            break;
+          case SOCKS5_REP_HOST_UNREACHABLE:
+            errorMessage = "Host unreachable";
+            break;
+          case SOCKS5_REP_CONNECTION_REFUSED:
+            errorMessage = "Connection refused by destination host";
+            break;
+          case SOCKS5_REP_TTL_EXPIRED:
+            errorMessage = "TTL expired";
+            break;
+          case SOCKS5_REP_COMMAND_NOT_SUPPORTED:
+            errorMessage = "Command not supported";
+            break;
+          case SOCKS5_REP_ADDRESS_TYPE_NOT_SUPPORTED:
+            errorMessage = "Address type not supported";
+            break;
+          default:
+            errorMessage = "Unknown SOCKS5 error with status: " + cmdResponse.getReply();
+        }
+        cmdHandshakeF.completeExceptionally(new UnsupportedOperationException("SOCKS5 command failed: " + errorMessage));
       } else {
         cmdHandshakeF.complete(in);
       }
