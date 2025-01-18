@@ -376,19 +376,18 @@ public class NioTcpHandler extends NioClient {
             channel.setSocks5(true);
             channel.socks5HandshakeF = proxy.doSocks5Handshake(channel, NioSocksHandler.SOCKS5_CMD_CONNECT, query, endTime);
           }
-          // Chain the SOCKS5 transactions with the main data transaction
-          channel.socks5HandshakeF.thenRunAsync(
-            () -> {
-              dnsTransaction(channel, query, data, endTime, f);
-            }
-          ).exceptionally(ex -> {
-            channel.socks5HandshakeF = null;
-            f.completeExceptionally(ex);
-            return null;
-          });
         }
+        // Chain the SOCKS5 transactions with the TCP data transaction
+        channel.socks5HandshakeF.thenRunAsync(
+          () -> {
+            dnsTransaction(channel, query, data, endTime, f);
+          }
+        ).exceptionally(ex -> {
+          f.completeExceptionally(ex);
+          return null;
+        });
       } else {
-        // main DNS data transaction
+        // transaction for DNS data
         dnsTransaction(channel, query, data, endTime, f);
       }
     }
