@@ -31,7 +31,7 @@ final class NioSocksTcpClient extends NioTcpHandler implements TcpIoClient {
       Message query,
       byte[] data,
       Duration timeout) {
-    NioSocksHandler proxy = new NioSocksHandler(socksConfig.getProxyAddress(), remote, local);
+    NioSocksHandler proxy = new NioSocksHandler(socksConfig.getProxyAddress(), remote, local, socksConfig.getSocks5User(), socksConfig.getSocks5Password());
     return tcpHandler.sendAndReceiveTcp(local, remote, proxy, query, data, timeout);
   }
 }

@@ -1,6 +1,7 @@
 package org.xbill.DNS;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -11,6 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Getter
+@Slf4j
 public class NioSocksHandler {
   private static final byte SOCKS5_VERSION = 0x05;
   private static final byte SOCKS5_USER_PWD_AUTH_VERSION = 0x01;
@@ -47,7 +49,7 @@ public class NioSocksHandler {
 
   public NioSocksHandler(InetSocketAddress proxyAddress, InetSocketAddress remoteAddress, InetSocketAddress localAddress, String socks5User, String socks5Password) {
     this.remoteAddress = Objects.requireNonNull(remoteAddress, "remoteAddress must not be null");
-    this.localAddress = localAddress;  //Objects.requireNonNull(localAddress, "localAddress must not be null");
+    this.localAddress = localAddress;
     this.proxyAddress = Objects.requireNonNull(proxyAddress, "proxyAddress must not be null");
     this.socks5User = socks5User;
     this.socks5Password = socks5Password;
@@ -63,98 +65,75 @@ public class NioSocksHandler {
 
   public CompletableFuture<Void> doAuthHandshake(NioTcpHandler.ChannelState channel, Message query, long endTime) {
     CompletableFuture<Void> authHandshakeF = new CompletableFuture<>();
-
-    // SOCKS5 method selection transaction
     CompletableFuture<byte[]> methodSelectionF = new CompletableFuture<>();
-    NioSocksHandler.MethodSelectionRequest methodSelectionRequest = getMethodSelectionRequest();
-    NioTcpHandler.Transaction methodSelectionTransaction = new NioTcpHandler.Transaction(
-      query, methodSelectionRequest.toBytes(), endTime, channel.getChannel(), methodSelectionF);
+    MethodSelectionRequest methodSelectionRequest = getMethodSelectionRequest();
+    NioTcpHandler.Transaction methodSelectionTransaction = new NioTcpHandler.Transaction(query, methodSelectionRequest.toBytes(), endTime, channel.getChannel(), methodSelectionF);
     channel.queueTransaction(methodSelectionTransaction);
-    methodSelectionF.thenComposeAsync(
-      methodSelectionBytes -> {
-        if (methodSelectionBytes.length != 2) {
-          authHandshakeF.completeExceptionally(new UnsupportedOperationException("Invalid SOCKS5 method selection response"));
-        }
-        NioSocksHandler.MethodSelectionResponse methodSelectionResponse = new NioSocksHandler.MethodSelectionResponse(methodSelectionBytes);
-        if (methodSelectionResponse.getMethod() == NioSocksHandler.SOCKS5_AUTH_NO_ACCEPTABLE_METHODS) {
-          authHandshakeF.completeExceptionally(new UnsupportedOperationException("Unsupported SOCKS5 method: " + methodSelectionResponse.getMethod()));
-        } else {
-          if (methodSelectionResponse.getMethod() == NioSocksHandler.SOCKS5_AUTH_NONE) {
-            authHandshakeF.complete(null);
-          }
-//          else if (methodSelectionResponse.getMethod() == NioSocksHandler.SOCKS5_AUTH_USER_PASS) {
-//            // SOCKS5 authentication transaction (if required)
-//            CompletableFuture<byte[]> userPassAuthF = new CompletableFuture<>();
-//            UserPassAuthRequest userPassAuthRequest = getUserPassAuthRequest();
-//            NioTcpHandler.Transaction userPwdAuthTransaction = NioTcpHandler.Transaction(query, userPassAuthRequest.toBytes(), endTime, channel.getChannel(), userPassF);
-//            channel.queueTransaction(userPwdAuthTransaction);
-//            userPassAuthF.thenComposeAsync(
-//              authIn -> {
-//                CompletableFuture<byte[]> authF = new CompletableFuture<>();
-//                UserPwdAuthResponse userPwdAuthResponse = UserPwdAuthResponse.fromBytes(authIn);
-//                if (userPwdAuthResponse.getStatus() != NioSocksHandler.SOCKS5_REP_SUCCEEDED) {
-//                  authHandshakeF.completeExceptionally(
-//                    new UnsupportedOperationException("SOCKS5 user/pwd authentication failed with status: " + userPwdAuthResponse.getStatus()));
-//                } else {
-//                  authF.complete(authIn);
-//                }
-//                return authF;
-//              }
-//            );
-//          }
-        }
+
+    methodSelectionF.thenComposeAsync(methodSelectionBytes -> {
+      if (methodSelectionBytes.length != 2) {
+        authHandshakeF.completeExceptionally(new UnsupportedOperationException("Invalid SOCKS5 method selection response"));
         return null;
       }
-    );
+      MethodSelectionResponse methodSelectionResponse = new MethodSelectionResponse(methodSelectionBytes);
+      if (methodSelectionResponse.getMethod() == SOCKS5_AUTH_NO_ACCEPTABLE_METHODS) {
+        authHandshakeF.completeExceptionally(new UnsupportedOperationException("Unsupported SOCKS5 method: " + methodSelectionResponse.getMethod()));
+        return null;
+      }
+      if (methodSelectionResponse.getMethod() == SOCKS5_AUTH_NONE) {
+        authHandshakeF.complete(null);
+      } else if (methodSelectionResponse.getMethod() == SOCKS5_AUTH_USER_PASS) {
+        return handleUserPassAuth(channel, query, endTime, authHandshakeF);
+      } else if (methodSelectionResponse.getMethod() == SOCKS5_AUTH_GSSAPI) {
+        // TODO: Implement GSSAPI
+        authHandshakeF.completeExceptionally(new UnsupportedOperationException("Unsupported SOCKS5 method: " + methodSelectionResponse.getMethod()));
+      }
+      return null;
+    });
 
     return authHandshakeF;
   }
 
-  public CompletableFuture<byte[]> doConnectHandshake(NioTcpHandler.ChannelState channel, Message query, long endTime) {
-    CompletableFuture<byte[]> cmdHandshakeF = new CompletableFuture<>();
+  private CompletableFuture<Void> handleUserPassAuth(NioTcpHandler.ChannelState channel, Message query, long endTime, CompletableFuture<Void> authHandshakeF) {
+    CompletableFuture<byte[]> userPassAuthF = new CompletableFuture<>();
+    UserPassAuthRequest userPassAuthRequest = new UserPassAuthRequest(socks5User, socks5Password);
+    NioTcpHandler.Transaction userPwdAuthTransaction = new NioTcpHandler.Transaction(query, userPassAuthRequest.toBytes(), endTime, channel.getChannel(), userPassAuthF);
+    channel.queueTransaction(userPwdAuthTransaction);
 
-    // SOCKS5 cmd transaction
-    CompletableFuture<byte[]> commandF = new CompletableFuture<>();
-    CmdRequest cmdRequest = new CmdRequest(SOCKS5_CMD_CONNECT, remoteAddress);
-    NioTcpHandler.Transaction commandTransaction = new NioTcpHandler.Transaction(
-      query, cmdRequest.toBytes(), endTime, channel.getChannel(), commandF);
-    channel.queueTransaction(commandTransaction);
-    commandF.thenComposeAsync(
-      in -> {
-        CmdResponse cmdResponse = new CmdResponse(in);
-        if (cmdResponse.getReply() != NioSocksHandler.SOCKS5_REP_SUCCEEDED) {
-          cmdHandshakeF.completeExceptionally(
-            new UnsupportedOperationException("SOCKS5 command failed with status: " + cmdResponse.getReply()));
-        } else {
-          cmdHandshakeF.complete(in);
-        }
-        return null;
+    userPassAuthF.thenComposeAsync(authIn -> {
+      UserPwdAuthResponse userPwdAuthResponse = new UserPwdAuthResponse(authIn);
+      if (userPwdAuthResponse.getStatus() != SOCKS5_REP_SUCCEEDED) {
+        authHandshakeF.completeExceptionally(new UnsupportedOperationException("SOCKS5 user/pwd authentication failed with status: " + userPwdAuthResponse.getStatus()));
+      } else {
+        authHandshakeF.complete(null);
       }
-    );
+      return null;
+    });
 
-    return cmdHandshakeF;
+    return authHandshakeF;
   }
-  public CompletableFuture<byte[]> doUdpAssociateHandshake(NioTcpHandler.ChannelState channel, Message query, long endTime) {
-    CompletableFuture<byte[]> cmdHandshakeF = new CompletableFuture<>();
 
-    // SOCKS5 cmd transaction
+  public CompletableFuture<byte[]> doSocks5Request(NioTcpHandler.ChannelState channel, byte socks5Cmd, Message query, long endTime) {
+    CompletableFuture<byte[]> cmdHandshakeF = new CompletableFuture<>();
     CompletableFuture<byte[]> commandF = new CompletableFuture<>();
-    CmdRequest cmdRequest = new CmdRequest(SOCKS5_CMD_UDP_ASSOCIATE, new InetSocketAddress("0.0.0.0", 0));
-    NioTcpHandler.Transaction commandTransaction = new NioTcpHandler.Transaction(
-      query, cmdRequest.toBytes(), endTime, channel.getChannel(), commandF);
+    // For CONNECT, DST.ADDR and DST.PORT are the address and port of the destination server.
+    // For UDP ASSOCIATE, DST.ADDR and DST.PORT are the address and port of the UDP client.
+    // If DST.ADDR and DST.PORT are set to 0.0.0.0:0, the proxy will accept UDP connections from any source address and port.
+    // After the first packet, the source address and port must not change. If they change, the proxy drops the connection and the UDP association.
+    InetSocketAddress address = (socks5Cmd == SOCKS5_CMD_CONNECT) ? remoteAddress : new InetSocketAddress("0.0.0.0", 0);
+    CmdRequest cmdRequest = new CmdRequest(socks5Cmd, address);
+    NioTcpHandler.Transaction commandTransaction = new NioTcpHandler.Transaction(query, cmdRequest.toBytes(), endTime, channel.getChannel(), commandF);
     channel.queueTransaction(commandTransaction);
-    commandF.thenComposeAsync(
-      in -> {
-        CmdResponse cmdResponse = new CmdResponse(in);
-        if (cmdResponse.getReply() != NioSocksHandler.SOCKS5_REP_SUCCEEDED) {
-          cmdHandshakeF.completeExceptionally(
-            new UnsupportedOperationException("SOCKS5 command failed with status: " + cmdResponse.getReply()));
-        } else {
-          cmdHandshakeF.complete(in);
-        }
-        return null;
+
+    commandF.thenComposeAsync(in -> {
+      CmdResponse cmdResponse = new CmdResponse(in);
+      if (cmdResponse.getReply() != SOCKS5_REP_SUCCEEDED) {
+        cmdHandshakeF.completeExceptionally(new UnsupportedOperationException("SOCKS5 command failed with status: " + cmdResponse.getReply()));
+      } else {
+        cmdHandshakeF.complete(in);
       }
-    );
+      return null;
+    });
 
     return cmdHandshakeF;
   }
@@ -164,34 +143,24 @@ public class NioSocksHandler {
     channel.setSocks5(true);
 
     CompletableFuture<Void> authHandshakeF = doAuthHandshake(channel, query, endTime);
-    authHandshakeF.thenRunAsync(
-      () -> {
-        CompletableFuture<byte[]> cmdHandshakeF;
-        if (socks5Cmd == SOCKS5_CMD_CONNECT) {
-          cmdHandshakeF = doConnectHandshake(channel, query, endTime);
-        } else if (socks5Cmd == SOCKS5_CMD_UDP_ASSOCIATE) {
-          cmdHandshakeF = doUdpAssociateHandshake(channel, query, endTime);
-        } else {
-          cmdHandshakeF = CompletableFuture.failedFuture(new UnsupportedOperationException("Unsupported SOCKS5 command: " + socks5Cmd));
-        }
-        cmdHandshakeF.thenComposeAsync(
-          in -> {
-            socks5HandshakeF.complete(in);
-            return null;
-          }
-        ).exceptionally(
-          e -> {
-            socks5HandshakeF.completeExceptionally(e);
-            return null;
-          }
-        );
+    authHandshakeF.thenRunAsync(() -> {
+      CompletableFuture<byte[]> cmdHandshakeF;
+      if (socks5Cmd == SOCKS5_CMD_CONNECT || socks5Cmd == SOCKS5_CMD_UDP_ASSOCIATE) {
+        cmdHandshakeF = doSocks5Request(channel, socks5Cmd, query, endTime);
+      } else {
+        cmdHandshakeF = CompletableFuture.failedFuture(new UnsupportedOperationException("Unsupported SOCKS5 command: " + socks5Cmd));
       }
-    ).exceptionally(
-      e -> {
+      cmdHandshakeF.thenComposeAsync(in -> {
+        socks5HandshakeF.complete(in);
+        return null;
+      }).exceptionally(e -> {
         socks5HandshakeF.completeExceptionally(e);
         return null;
-      }
-    );
+      });
+    }).exceptionally(e -> {
+      socks5HandshakeF.completeExceptionally(e);
+      return null;
+    });
 
     return socks5HandshakeF;
   }
@@ -217,7 +186,7 @@ public class NioSocksHandler {
     buffer.put((byte) 0x00); // RSV
     buffer.put((byte) 0x00); // RSV
     buffer.put((byte) 0x00); // FRAG
-    buffer.put(addressType); // ATYP (IPv4)
+    buffer.put(addressType); // ATYP
     if (addressType == SOCKS5_ATYP_DOMAINNAME) {
       buffer.put((byte) addressBytes.length);
     }
@@ -235,7 +204,6 @@ public class NioSocksHandler {
 
     int addressType = in[3] & 0xFF;
     int headerLength;
-
     switch (addressType) {
       case SOCKS5_ATYP_IPV4:
         headerLength = 10;
@@ -255,7 +223,6 @@ public class NioSocksHandler {
     return out;
   }
 
-
   static class MethodSelectionRequest {
     private final byte version;
     private final byte method;
@@ -264,6 +231,7 @@ public class NioSocksHandler {
       this.version = SOCKS5_VERSION;
       this.method = method;
     }
+
     public byte[] toBytes() {
       ByteBuffer buffer = ByteBuffer.allocate(3);
       buffer.put(this.version);
@@ -280,8 +248,46 @@ public class NioSocksHandler {
 
     public MethodSelectionResponse(byte[] methodSelectionBytes) {
       ByteBuffer buffer = ByteBuffer.wrap(methodSelectionBytes);
-      version = buffer.get();;
-      method = buffer.get();;
+      version = buffer.get();
+      method = buffer.get();
+    }
+  }
+
+  static class UserPassAuthRequest {
+    private final byte version;
+    private final byte usernameLength;
+    private final byte[] username;
+    private final byte passwordLength;
+    private final byte[] password;
+
+    public UserPassAuthRequest(String username, String password) {
+      this.version = SOCKS5_USER_PWD_AUTH_VERSION;
+      this.username = username.getBytes(StandardCharsets.UTF_8);
+      this.usernameLength = (byte) this.username.length;
+      this.password = password.getBytes(StandardCharsets.UTF_8);
+      this.passwordLength = (byte) this.password.length;
+    }
+
+    public byte[] toBytes() {
+      ByteBuffer buffer = ByteBuffer.allocate(3 + username.length + password.length);
+      buffer.put(this.version);
+      buffer.put(this.usernameLength);
+      buffer.put(this.username);
+      buffer.put(this.passwordLength);
+      buffer.put(this.password);
+      return buffer.array();
+    }
+  }
+
+  @Getter
+  static class UserPwdAuthResponse {
+    private final byte version;
+    private final byte status;
+
+    public UserPwdAuthResponse(byte[] userPwdAuthResponseBytes) {
+      ByteBuffer buffer = ByteBuffer.wrap(userPwdAuthResponseBytes);
+      version = buffer.get();
+      status = buffer.get();
     }
   }
 
@@ -292,27 +298,26 @@ public class NioSocksHandler {
     private final byte addressType;
     private final byte[] addressBytes;
     private final short port;
-
     private final int bufferSize;
 
     public CmdRequest(byte command, InetSocketAddress address) {
-      version = SOCKS5_VERSION;
+      this.version = SOCKS5_VERSION;
       this.command = command;
-      reserved = SOCKS5_RESERVED;
+      this.reserved = SOCKS5_RESERVED;
       if (address.getAddress() instanceof Inet4Address) {
-        addressType = SOCKS5_ATYP_IPV4;
-        addressBytes = address.getAddress().getAddress();
-        bufferSize = 10;
+        this.addressType = SOCKS5_ATYP_IPV4;
+        this.addressBytes = address.getAddress().getAddress();
+        this.bufferSize = 10;
       } else if (address.getAddress() instanceof Inet6Address) {
-        addressType = SOCKS5_ATYP_IPV6;
-        addressBytes = address.getAddress().getAddress();
-        bufferSize = 22;
+        this.addressType = SOCKS5_ATYP_IPV6;
+        this.addressBytes = address.getAddress().getAddress();
+        this.bufferSize = 22;
       } else {
-        addressType = SOCKS5_ATYP_DOMAINNAME;
-        addressBytes = address.getHostName().getBytes(StandardCharsets.UTF_8);
-        bufferSize = 6 + 1 + addressBytes.length;
+        this.addressType = SOCKS5_ATYP_DOMAINNAME;
+        this.addressBytes = address.getHostName().getBytes(StandardCharsets.UTF_8);
+        this.bufferSize = 6 + 1 + addressBytes.length;
       }
-      port = (short) address.getPort();
+      this.port = (short) address.getPort();
     }
 
     public byte[] toBytes() {
@@ -341,14 +346,24 @@ public class NioSocksHandler {
 
     public CmdResponse(byte[] commandResponseBytes) {
       ByteBuffer buffer = ByteBuffer.wrap(commandResponseBytes);
-      version = buffer.get();
-      reply = buffer.get();
-      reserved = buffer.get();
-      addressType = buffer.get();
-      address = new byte[addressType == SOCKS5_ATYP_IPV4 ? 4 : 16];
-      buffer.get(address);
-      // Short.toUnsignedInt makes a difference for port numbers higher than 32767
-      port = Short.toUnsignedInt(buffer.getShort());
+      this.version = buffer.get();
+      this.reply = buffer.get();
+      this.reserved = buffer.get();
+      this.addressType = buffer.get();
+
+      if (addressType == SOCKS5_ATYP_IPV4) {
+        this.address = new byte[4];
+      } else if (addressType == SOCKS5_ATYP_IPV6) {
+        this.address = new byte[16];
+      } else if (addressType == SOCKS5_ATYP_DOMAINNAME) {
+        int domainLength = buffer.get() & 0xFF;
+        this.address = new byte[domainLength];
+      } else {
+        throw new IllegalArgumentException("Unsupported address type: " + addressType);
+      }
+
+      buffer.get(this.address);
+      this.port = Short.toUnsignedInt(buffer.getShort());
     }
   }
 }

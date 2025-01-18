@@ -27,7 +27,7 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
     Duration timeout) {
     CompletableFuture<byte[]> f = new CompletableFuture<>();
     long endTime = System.nanoTime() + timeout.toNanos();
-    NioSocksHandler proxy = new NioSocksHandler(socksConfig.getProxyAddress(), remote, local);
+    NioSocksHandler proxy = new NioSocksHandler(socksConfig.getProxyAddress(), remote, local, socksConfig.getSocks5User(), socksConfig.getSocks5Password());
     NioSocksUdpAssociateChannelPool.SocksUdpAssociateChannelState channel = udpHandler.getUdpPool().createOrGetSocketChannelState(local, remote, proxy, f);
 
     synchronized (channel.getTcpChannel()) {
