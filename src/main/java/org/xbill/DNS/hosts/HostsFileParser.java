@@ -8,12 +8,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,13 +34,23 @@ import org.xbill.DNS.Type;
 public final class HostsFileParser {
   private final int maxFullCacheFileSizeBytes =
       Integer.parseInt(System.getProperty("dnsjava.hostsfile.max_size_bytes", "16384"));
+  private final Duration fileChangeCheckInterval =
+      Duration.ofMillis(
+          Integer.parseInt(
+              System.getProperty("dnsjava.hostsfile.change_check_interval_ms", "300000")));
 
-  private final Map<String, InetAddress> hostsCache = new HashMap<>();
   private final Path path;
   private final boolean clearCacheOnChange;
+  private Clock clock = Clock.systemUTC();
+
+  @SuppressWarnings("java:S3077")
+  private volatile Map<String, InetAddress> hostsCache;
+
+  private Instant lastFileModificationCheckTime = Instant.MIN;
   private Instant lastFileReadTime = Instant.MIN;
   private boolean isEntireFileParsed;
   private boolean hostsFileWarningLogged = false;
+  private long hostsFileSizeBytes;
 
   /**
    * Creates a new instance based on the current OS's default. Unix and alike (or rather everything
@@ -88,8 +100,7 @@ public final class HostsFileParser {
    * @throws IllegalArgumentException when {@code type} is not {@link org.xbill.DNS.Type#A} or{@link
    *     org.xbill.DNS.Type#AAAA}.
    */
-  public synchronized Optional<InetAddress> getAddressForHost(Name name, int type)
-      throws IOException {
+  public Optional<InetAddress> getAddressForHost(Name name, int type) throws IOException {
     Objects.requireNonNull(name, "name is required");
     if (type != Type.A && type != Type.AAAA) {
       throw new IllegalArgumentException("type can only be A or AAAA");
@@ -102,13 +113,11 @@ public final class HostsFileParser {
       return Optional.of(cachedAddress);
     }
 
-    if (isEntireFileParsed || !Files.exists(path)) {
+    if (isEntireFileParsed) {
       return Optional.empty();
     }
 
-    if (Files.size(path) <= maxFullCacheFileSizeBytes) {
-      parseEntireHostsFile();
-    } else {
+    if (hostsFileSizeBytes > maxFullCacheFileSizeBytes) {
       searchHostsFileForEntry(name, type);
     }
 
@@ -141,8 +150,6 @@ public final class HostsFileParser {
           nameFailures);
       hostsFileWarningLogged = true;
     }
-
-    isEntireFileParsed = true;
   }
 
   private void searchHostsFileForEntry(Name name, int type) throws IOException {
@@ -235,21 +242,61 @@ public final class HostsFileParser {
   }
 
   private void validateCache() throws IOException {
-    if (clearCacheOnChange) {
+    if (!clearCacheOnChange) {
+      if (hostsCache == null) {
+        synchronized (this) {
+          if (hostsCache == null) {
+            readHostsFile();
+          }
+        }
+      }
+
+      return;
+    }
+
+    if (lastFileModificationCheckTime.plus(fileChangeCheckInterval).isBefore(clock.instant())) {
+      log.debug("Checked for changes more than 5minutes ago, checking");
       // A filewatcher / inotify etc. would be nicer, but doesn't work. c.f. the write up at
       // https://blog.arkey.fr/2019/09/13/watchservice-and-bind-mount/
-      Instant fileTime =
-          Files.exists(path) ? Files.getLastModifiedTime(path).toInstant() : Instant.MAX;
-      if (fileTime.isAfter(lastFileReadTime)) {
-        // skip logging noise when the cache is empty anyway
-        if (!hostsCache.isEmpty()) {
-          log.info("Local hosts database has changed at {}, clearing cache", fileTime);
-          hostsCache.clear();
+
+      synchronized (this) {
+        if (!lastFileModificationCheckTime
+            .plus(fileChangeCheckInterval)
+            .isBefore(clock.instant())) {
+          log.debug("Never mind, check fulfilled in another thread");
+          return;
         }
 
-        isEntireFileParsed = false;
+        lastFileModificationCheckTime = clock.instant();
+        readHostsFile();
+      }
+    }
+  }
+
+  private void readHostsFile() throws IOException {
+    if (Files.exists(path)) {
+      Instant fileTime = Files.getLastModifiedTime(path).toInstant();
+      if (!lastFileReadTime.equals(fileTime)) {
+        createOrClearCache();
+
+        hostsFileSizeBytes = Files.size(path);
+        if (hostsFileSizeBytes <= maxFullCacheFileSizeBytes) {
+          parseEntireHostsFile();
+          isEntireFileParsed = true;
+        }
+
         lastFileReadTime = fileTime;
       }
+    } else {
+      createOrClearCache();
+    }
+  }
+
+  private void createOrClearCache() {
+    if (hostsCache == null) {
+      hostsCache = new ConcurrentHashMap<>();
+    } else {
+      hostsCache.clear();
     }
   }
 
@@ -259,6 +306,10 @@ public final class HostsFileParser {
 
   // for unit testing only
   int cacheSize() {
-    return hostsCache.size();
+    return hostsCache == null ? 0 : hostsCache.size();
+  }
+
+  void setClock(Clock clock) {
+    this.clock = clock;
   }
 }

@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -18,6 +20,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -72,7 +77,7 @@ class HostsFileParserTest {
   }
 
   @Test
-  void testCacheLookup() throws IOException {
+  void testCacheLookupAfterFileDeleteWithoutChangeChecking() throws IOException {
     Path tempHosts = Files.copy(hostsFileWindows, tempDir, StandardCopyOption.REPLACE_EXISTING);
     HostsFileParser hostsFileParser = new HostsFileParser(tempHosts, false);
     assertEquals(0, hostsFileParser.cacheSize());
@@ -98,6 +103,10 @@ class HostsFileParserTest {
             tempDir.resolve("testFileWatcherClearsCache"),
             StandardCopyOption.REPLACE_EXISTING);
     HostsFileParser hostsFileParser = new HostsFileParser(tempHosts);
+    Clock clock = mock(Clock.class);
+    hostsFileParser.setClock(clock);
+    Instant now = Clock.systemUTC().instant();
+    when(clock.instant()).thenReturn(now);
     assertEquals(0, hostsFileParser.cacheSize());
     assertEquals(
         kubernetesAddress,
@@ -106,6 +115,7 @@ class HostsFileParserTest {
             .orElseThrow(() -> new IllegalStateException("Host entry not found")));
     assertTrue(hostsFileParser.cacheSize() > 1, "Cache must not be empty");
     Files.delete(tempHosts);
+    when(clock.instant()).thenReturn(now.plus(Duration.ofMinutes(6)));
     assertEquals(Optional.empty(), hostsFileParser.getAddressForHost(kubernetesName, Type.A));
     assertEquals(0, hostsFileParser.cacheSize());
   }
@@ -119,6 +129,10 @@ class HostsFileParserTest {
             StandardCopyOption.REPLACE_EXISTING);
     Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(0));
     HostsFileParser hostsFileParser = new HostsFileParser(tempHosts);
+    Clock clock = mock(Clock.class);
+    hostsFileParser.setClock(clock);
+    Instant now = Clock.systemUTC().instant();
+    when(clock.instant()).thenReturn(now);
     assertEquals(0, hostsFileParser.cacheSize());
     assertEquals(
         kubernetesAddress,
@@ -134,6 +148,7 @@ class HostsFileParserTest {
     }
 
     Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(10_0000));
+    when(clock.instant()).thenReturn(now.plus(Duration.ofMinutes(6)));
     assertEquals(
         InetAddress.getByAddress(testName.toString(), localhostBytes),
         hostsFileParser
