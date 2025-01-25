@@ -23,8 +23,10 @@ public class SimpleSocksTest {
     .waitingFor("dante-socks5", Wait.forHealthcheck());
 
   @BeforeAll
-  public static void setUp() throws IOException {
+  public static void setUp() throws IOException, InterruptedException {
     environment.start();
+    // sleep 1 second to make sure the container is ready
+    Thread.sleep(1000);
   }
 
   @AfterAll
