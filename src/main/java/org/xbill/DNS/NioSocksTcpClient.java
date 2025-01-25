@@ -10,9 +10,7 @@ import org.xbill.DNS.io.TcpIoClient;
 
 @Slf4j
 final class NioSocksTcpClient extends NioTcpHandler implements TcpIoClient {
-  // TCP handler
   private final NioTcpHandler tcpHandler;
-  // SOCKS5 proxy configuration
   private final NioSocks5ProxyConfig socksConfig;
 
   NioSocksTcpClient(NioSocks5ProxyConfig config) {

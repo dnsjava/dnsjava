@@ -3,16 +3,24 @@ package org.xbill.DNS.io;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.ComposeContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SimpleSocksTest extends AbstractSocksTest {
+public class SimpleSocksTest {
+  static final ComposeContainer environment = new ComposeContainer(
+    new File("src/test/resources/compose/compose.yml")
+  )
+    .withBuild(true)
+    .waitingFor("dante-socks5", Wait.forHealthcheck());
 
   @BeforeAll
   public static void setUp() throws IOException {
@@ -20,7 +28,7 @@ public class SimpleSocksTest extends AbstractSocksTest {
   }
 
   @AfterAll
-  public static void tearDown() throws IOException {
+  public static void tearDown() {
     environment.stop();
   }
 
@@ -35,7 +43,7 @@ public class SimpleSocksTest extends AbstractSocksTest {
 
   @Test
   public void testUDP() throws IOException {
-    SimpleResolver res = createResolver(null, false, null, null);
+    SimpleResolver res = createResolver("10.5.0.2", false, null, null);
     Record rec = Record.newRecord(Name.fromString("simple.test", Name.root), Type.A, DClass.IN);
     Message query = Message.newQuery(rec);
     Message response = res.send(query);
@@ -53,7 +61,7 @@ public class SimpleSocksTest extends AbstractSocksTest {
 
   @Test
   public void testAuth() throws IOException {
-    SimpleResolver res = createResolver(null, false, "me", "42");
+    SimpleResolver res = createResolver("10.5.0.2", false, "me", "42");
     Record rec = Record.newRecord(Name.fromString("simple.test", Name.root), Type.A, DClass.IN);
     Message query = Message.newQuery(rec);
     Message response = res.send(query);

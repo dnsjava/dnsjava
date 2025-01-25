@@ -27,7 +27,7 @@ services:
         ipv4_address: 10.5.0.3
         ipv6_address: 2001:db8::3
     healthcheck:
-      test: "curl -x socks5h://localhost:1080 http://coredns:8080/health"
+      test: "curl -x socks5://127.0.0.1:1080 http://10.5.0.2:8080/health"
     volumes:
       - ./sockd.conf:/etc/sockd.conf
 
