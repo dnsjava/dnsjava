@@ -1,14 +1,24 @@
 package org.xbill.DNS.io;
 
-import org.testcontainers.containers.GenericContainer;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.DockerComposeContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+
+import java.io.File;
+import java.time.Duration;
+
 
 public class AbstractSocksTest {
+  static final DockerComposeContainer environment = new DockerComposeContainer(
+    new File("src/test/resources/compose/compose.yml")
+  ).withBuild(true).withStartupTimeout(Duration.ofSeconds(3000))
+    .waitingFor("dante-socks5", Wait.forHealthcheck());
 
-  public static final GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:6-alpine"))
-    .withExposedPorts(6379);
-
-  static {
-    redis.start();
+  @Test
+  public void setup() {
+    environment.start();
+    System.out.println("Container started");
+    System.out.println("Container ready");
+    environment.stop();
   }
-
 }
