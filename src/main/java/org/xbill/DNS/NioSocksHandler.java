@@ -249,7 +249,7 @@ public class NioSocksHandler {
     return socks5HandshakeF;
   }
 
-  public byte[] addUdpHeader(byte[] data, InetSocketAddress to) {
+  public byte[] addUdpHeader(byte[] data) {
     ByteBuffer buffer;
     byte addressType;
     byte[] addressBytes;

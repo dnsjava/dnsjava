@@ -336,7 +336,6 @@ public class NioTcpHandler extends NioClient {
 
   public void dnsTransaction(
       ChannelState channel, Message query, byte[] data, long endTime, CompletableFuture<byte[]> f) {
-    // Transaction for the main data
     channel.setSocks5(false);
     Transaction t = new Transaction(query, data, endTime, channel.channel, f, false);
     channel.queueTransaction(t);
@@ -412,7 +411,7 @@ public class NioTcpHandler extends NioClient {
                     channel, NioSocksHandler.SOCKS5_CMD_CONNECT, query, endTime);
           }
         }
-        // Chain the SOCKS5 transactions with the TCP data transaction
+        // Chain the SOCKS5 transactions with the DNS data transaction
         channel
             .socks5HandshakeF
             .thenRunAsync(
@@ -425,7 +424,6 @@ public class NioTcpHandler extends NioClient {
                   return null;
                 });
       } else {
-        // transaction for DNS data
         dnsTransaction(channel, query, data, endTime, f);
       }
     }

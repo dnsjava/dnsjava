@@ -28,7 +28,6 @@ final class NioUdpHandler extends NioClient {
   private final SecureRandom prng;
   private static final Queue<Transaction> registrationQueue = new ConcurrentLinkedQueue<>();
   private static final Queue<Transaction> pendingTransactions = new ConcurrentLinkedQueue<>();
-
   private final NioSocksUdpAssociateChannelPool udpPool;
 
   NioUdpHandler() {
@@ -84,7 +83,6 @@ final class NioUdpHandler extends NioClient {
       }
     }
 
-    // check for idle channels and remove them
     udpPool.removeIdleChannels();
   }
 
@@ -165,10 +163,6 @@ final class NioUdpHandler extends NioClient {
       // do not close the channel in case of SOCKS5 UDP associate.
       // the channel port needs to be claimed for further queries to the same remote host.
       // you can not use the same UDP associate port with another local port after the first query.
-      // you can also close this channel and open a new one with the same local port for further
-      // queries,
-      // but I would like to avoid, that the local port will be taken by another process between
-      // queries.
       if (!isProxyChannel) {
         silentDisconnectAndCloseChannel();
       }

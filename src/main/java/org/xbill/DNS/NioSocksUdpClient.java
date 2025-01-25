@@ -51,11 +51,10 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
         .socks5HandshakeF
         .thenApplyAsync(
             cmdBytes -> {
+              byte[] wrappedData = proxy.addUdpHeader(data);
               NioSocksHandler.CmdResponse cmd = new NioSocksHandler.CmdResponse(cmdBytes);
               InetSocketAddress newRemote =
                   new InetSocketAddress(socksConfig.getProxyAddress().getAddress(), cmd.getPort());
-              byte[] wrappedData = proxy.addUdpHeader(data, newRemote);
-
               udpHandler
                   .sendAndReceiveUdp(
                       local, newRemote, channel.getUdpChannel(), query, wrappedData, max, timeout)
