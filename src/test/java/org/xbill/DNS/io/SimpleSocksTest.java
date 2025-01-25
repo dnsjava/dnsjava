@@ -25,8 +25,8 @@ public class SimpleSocksTest {
   @BeforeAll
   public static void setUp() throws IOException, InterruptedException {
     environment.start();
-    // sleep 1 second to make sure the container is ready
-    Thread.sleep(1000);
+    // wait to make sure the container is ready
+    Thread.sleep(100);
   }
 
   @AfterAll
