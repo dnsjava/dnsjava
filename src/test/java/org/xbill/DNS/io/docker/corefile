@@ -1,0 +1,9 @@
+# RFC 2606: Reserved Top Level DNS Names (https://www.rfc-editor.org/rfc/rfc2606.html)
+test.:53 {
+    debug
+    log
+    errors
+    health
+    file /etc/coredns/test.db
+}
+
