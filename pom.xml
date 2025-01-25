@@ -685,6 +685,11 @@
             <version>0.16</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>docker-compose</artifactId>
+            <version>0.9.9</version>
+        </dependency>
     </dependencies>
 
     <profiles>
