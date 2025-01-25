@@ -7,7 +7,7 @@ services:
         ipv4_address: 10.5.0.2
         ipv6_address: 2001:db8::2
     volumes:
-      - "./corefile:/etc/coredns/corefile"
+      - "./coredns:/etc/coredns"
     command: "-conf /etc/coredns/corefile"
     ports:
       - "53/udp"
