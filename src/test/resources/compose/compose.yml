@@ -16,7 +16,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    privileged: true
     env_file:
         - .env
     ports:
