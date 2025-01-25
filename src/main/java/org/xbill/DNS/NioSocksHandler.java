@@ -85,7 +85,8 @@ public class NioSocksHandler {
             methodSelectionRequest.toBytes(),
             endTime,
             channel.getChannel(),
-            methodSelectionF);
+            methodSelectionF,
+          true);
     channel.queueTransaction(methodSelectionTransaction);
 
     methodSelectionF.thenComposeAsync(
@@ -128,7 +129,7 @@ public class NioSocksHandler {
     UserPassAuthRequest userPassAuthRequest = new UserPassAuthRequest(socks5User, socks5Password);
     NioTcpHandler.Transaction userPwdAuthTransaction =
         new NioTcpHandler.Transaction(
-            query, userPassAuthRequest.toBytes(), endTime, channel.getChannel(), userPassAuthF);
+            query, userPassAuthRequest.toBytes(), endTime, channel.getChannel(), userPassAuthF, true);
     channel.queueTransaction(userPwdAuthTransaction);
 
     userPassAuthF.thenComposeAsync(
@@ -163,7 +164,7 @@ public class NioSocksHandler {
     CmdRequest cmdRequest = new CmdRequest(socks5Cmd, address);
     NioTcpHandler.Transaction commandTransaction =
         new NioTcpHandler.Transaction(
-            query, cmdRequest.toBytes(), endTime, channel.getChannel(), commandF);
+            query, cmdRequest.toBytes(), endTime, channel.getChannel(), commandF, true);
     channel.queueTransaction(commandTransaction);
 
     commandF.thenComposeAsync(

@@ -83,6 +83,7 @@ public class NioTcpHandler extends NioClient {
     private final long endTime;
     private final SocketChannel channel;
     private final CompletableFuture<byte[]> f;
+    private final boolean isSocks5;
     private ByteBuffer queryDataBuffer;
     long bytesWrittenTotal = 0;
 
@@ -92,13 +93,17 @@ public class NioTcpHandler extends NioClient {
         return true;
       }
       if (queryDataBuffer == null) {
-        // combine length+message to avoid multiple TCP packets
-        // https://datatracker.ietf.org/doc/html/rfc7766#section-8
-        queryDataBuffer = ByteBuffer.allocate(queryData.length + 2);
-        queryDataBuffer.put((byte) (queryData.length >>> 8));
-        queryDataBuffer.put((byte) (queryData.length & 0xFF));
-        queryDataBuffer.put(queryData);
-        queryDataBuffer.flip();
+        if (isSocks5) {
+          queryDataBuffer = ByteBuffer.wrap(queryData);
+        } else {
+          // combine length+message to avoid multiple TCP packets
+          // https://datatracker.ietf.org/doc/html/rfc7766#section-8
+          queryDataBuffer = ByteBuffer.allocate(queryData.length + 2);
+          queryDataBuffer.put((byte) (queryData.length >>> 8));
+          queryDataBuffer.put((byte) (queryData.length & 0xFF));
+          queryDataBuffer.put(queryData);
+          queryDataBuffer.flip();
+        }
       }
 
       verboseLog(
@@ -140,7 +145,7 @@ public class NioTcpHandler extends NioClient {
     ByteBuffer responseLengthData = ByteBuffer.allocate(2);
     ByteBuffer responseData = ByteBuffer.allocate(Message.MAXLENGTH);
     int readState = 0;
-    boolean isSocks5 = false;
+    boolean isSocks5;
     CompletableFuture<byte[]> socks5HandshakeF;
 
     @Override
@@ -329,13 +334,7 @@ public class NioTcpHandler extends NioClient {
       ChannelState channel, Message query, byte[] data, long endTime, CompletableFuture<byte[]> f) {
     // Transaction for the main data
     channel.setSocks5(false);
-    // combine length+message to avoid multiple TCP packets
-    // https://datatracker.ietf.org/doc/html/rfc7766#section-8
-    ByteBuffer buffer = ByteBuffer.allocate(2 + data.length);
-    buffer.put((byte) (data.length >>> 8));
-    buffer.put((byte) (data.length & 0xFF));
-    buffer.put(data);
-    Transaction t = new Transaction(query, buffer.array(), endTime, channel.channel, f);
+    Transaction t = new Transaction(query, data, endTime, channel.channel, f, false);
     channel.queueTransaction(t);
   }
 
