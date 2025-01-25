@@ -27,6 +27,7 @@ RUN     apk add --no-cache --virtual .build-deps \
         cd / && rm -r /src && \
         apk del .build-deps && \
         apk add --no-cache \
+            curl \
             linux-pam
 
 COPY    sockd.conf /etc/

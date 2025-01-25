@@ -20,13 +20,15 @@ services:
     env_file:
         - .env
     ports:
-        - "${SOCKD_PORT}:1080"
+        - "1080:1080"
         - "10000:10000/udp"
         - "10001:10001/udp"
     networks:
       default:
         ipv4_address: 10.5.0.3
         ipv6_address: 2001:db8::3
+    healthcheck:
+      test: "curl -x socks5h://localhost:1080 http://coredns:8080/health"
     volumes:
       - ./sockd.conf:/etc/sockd.conf
 
