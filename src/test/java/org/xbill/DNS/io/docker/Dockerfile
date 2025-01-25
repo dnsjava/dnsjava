@@ -14,6 +14,7 @@ ENV     DANTE_SHA 4c97cff23e5c9b00ca1ec8a95ab22972813921d7fbf60fc453e3e06382fc38
 RUN     apk add --no-cache --virtual .build-deps \
             build-base \
             curl \
+            bind-tools \
             linux-pam-dev && \
         install -v -d /src && \
         curl -sSL $DANTE_URL -o /src/dante.tar.gz && \
