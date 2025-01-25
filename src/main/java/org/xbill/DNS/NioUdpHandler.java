@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,13 +10,15 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.security.SecureRandom;
 import java.time.Duration;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
@@ -167,8 +165,10 @@ final class NioUdpHandler extends NioClient {
       // do not close the channel in case of SOCKS5 UDP associate.
       // the channel port needs to be claimed for further queries to the same remote host.
       // you can not use the same UDP associate port with another local port after the first query.
-      // you can also close this channel and open a new one with the same local port for further queries,
-      // but I would like to avoid, that the local port will be taken by another process between queries.
+      // you can also close this channel and open a new one with the same local port for further
+      // queries,
+      // but I would like to avoid, that the local port will be taken by another process between
+      // queries.
       if (!isProxyChannel) {
         silentDisconnectAndCloseChannel();
       }
@@ -192,35 +192,35 @@ final class NioUdpHandler extends NioClient {
     }
   }
 
-
-  public DatagramChannel createChannel(InetSocketAddress local, CompletableFuture<byte[]> f) throws IOException {
+  public DatagramChannel createChannel(InetSocketAddress local, CompletableFuture<byte[]> f)
+      throws IOException {
     DatagramChannel channel = DatagramChannel.open();
     channel.configureBlocking(false);
     if (local == null || local.getPort() == 0) {
       boolean bound = false;
-        for (int i = 0; i < 1024; i++) {
-          try {
-            InetSocketAddress addr = null;
-            if (local == null) {
-              if (prng != null) {
-                addr = new InetSocketAddress(prng.nextInt(ephemeralRange) + ephemeralStart);
-              }
-            } else {
-              int port = local.getPort();
-              if (port == 0 && prng != null) {
-                port = prng.nextInt(ephemeralRange) + ephemeralStart;
-              }
-
-              addr = new InetSocketAddress(local.getAddress(), port);
+      for (int i = 0; i < 1024; i++) {
+        try {
+          InetSocketAddress addr = null;
+          if (local == null) {
+            if (prng != null) {
+              addr = new InetSocketAddress(prng.nextInt(ephemeralRange) + ephemeralStart);
+            }
+          } else {
+            int port = local.getPort();
+            if (port == 0 && prng != null) {
+              port = prng.nextInt(ephemeralRange) + ephemeralStart;
             }
 
-            channel.bind(addr);
-            bound = true;
-            break;
-          } catch (SocketException e) {
-            // ignore, we'll try another random port
+            addr = new InetSocketAddress(local.getAddress(), port);
           }
+
+          channel.bind(addr);
+          bound = true;
+          break;
+        } catch (SocketException e) {
+          // ignore, we'll try another random port
         }
+      }
       if (!bound) {
         f.completeExceptionally(new IOException("No available source port found"));
         return null;
@@ -256,7 +256,9 @@ final class NioUdpHandler extends NioClient {
         return f;
       }
 
-      Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, isProxyChannel, f);
+      Transaction t =
+          new Transaction(
+              query.getHeader().getID(), data, max, endTime, channel, isProxyChannel, f);
 
       final Selector selector = selector();
       pendingTransactions.add(t);

@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,12 +16,18 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
 public class NioTcpHandler extends NioClient {
   // registrationQueue and channelMap must be static to be shared between instances
-  // otherwise, a second instance would overwrite the registration, timeout and close tasks of the first instance
+  // otherwise, a second instance would overwrite the registration, timeout and close tasks of the
+  // first instance
   private static final Queue<ChannelState> registrationQueue = new ConcurrentLinkedQueue<>();
   private static final Map<ChannelKey, ChannelState> channelMap = new ConcurrentHashMap<>();
 
@@ -164,10 +164,10 @@ public class NioTcpHandler extends NioClient {
             channel.close();
           } catch (IOException ex) {
             log.warn(
-              "Failed to close channel l={}/r={}",
-              entry.getKey().local,
-              entry.getKey().remote,
-              ex);
+                "Failed to close channel l={}/r={}",
+                entry.getKey().local,
+                entry.getKey().remote,
+                ex);
           }
           return;
         }
@@ -194,7 +194,8 @@ public class NioTcpHandler extends NioClient {
           }
           responseData.flip();
           byte[] data = new byte[responseData.limit()];
-          System.arraycopy(responseData.array(), responseData.arrayOffset(), data, 0, responseData.limit());
+          System.arraycopy(
+              responseData.array(), responseData.arrayOffset(), data, 0, responseData.limit());
           // the transactions for the socks5 handshake are synchronized
           // you can assume that the responses are in order of the transactions in the queue
           for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
@@ -303,7 +304,8 @@ public class NioTcpHandler extends NioClient {
     final InetSocketAddress remote;
   }
 
-  public void dnsTransaction(ChannelState channel, Message query, byte[] data, long endTime, CompletableFuture<byte[]> f) {
+  public void dnsTransaction(
+      ChannelState channel, Message query, byte[] data, long endTime, CompletableFuture<byte[]> f) {
     // Transaction for the main data
     channel.setSocks5(false);
     // combine length+message to avoid multiple TCP packets
@@ -316,7 +318,11 @@ public class NioTcpHandler extends NioClient {
     channel.queueTransaction(t);
   }
 
-  public ChannelState createChannelState(InetSocketAddress local, InetSocketAddress remote, NioSocksHandler proxy, CompletableFuture<byte[]> f) {
+  public ChannelState createChannelState(
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      NioSocksHandler proxy,
+      CompletableFuture<byte[]> f) {
     log.debug("Opening async channel for l={}/r={}", local, remote);
     SocketChannel c = null;
     try {
@@ -345,47 +351,55 @@ public class NioTcpHandler extends NioClient {
     }
   }
 
-  public ChannelState createOrGetChannelState(InetSocketAddress local, InetSocketAddress remote, NioSocksHandler proxy, CompletableFuture<byte[]> f) {
+  public ChannelState createOrGetChannelState(
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      NioSocksHandler proxy,
+      CompletableFuture<byte[]> f) {
     return channelMap.computeIfAbsent(
-      new ChannelKey(local, remote),
-      key -> createChannelState(local, remote, proxy, f)
-    );
+        new ChannelKey(local, remote), key -> createChannelState(local, remote, proxy, f));
   }
 
   public CompletableFuture<byte[]> sendAndReceiveTcp(
-    InetSocketAddress local,
-    InetSocketAddress remote,
-    NioSocksHandler proxy,
-    Message query,
-    byte[] data,
-    Duration timeout) {
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      NioSocksHandler proxy,
+      Message query,
+      byte[] data,
+      Duration timeout) {
     CompletableFuture<byte[]> f = new CompletableFuture<>();
 
     ChannelState channel = createOrGetChannelState(local, remote, proxy, f);
     if (channel != null) {
       log.trace(
-        "Creating transaction for id {} ({}/{})",
-        query.getHeader().getID(),
-        query.getQuestion().getName(),
-        Type.string(query.getQuestion().getType()));
+          "Creating transaction for id {} ({}/{})",
+          query.getHeader().getID(),
+          query.getQuestion().getName(),
+          Type.string(query.getQuestion().getType()));
 
       long endTime = System.nanoTime() + timeout.toNanos();
       if (proxy != null) {
         synchronized (channel) {
-          if (channel.socks5HandshakeF == null || channel.socks5HandshakeF.isCompletedExceptionally()) {
+          if (channel.socks5HandshakeF == null
+              || channel.socks5HandshakeF.isCompletedExceptionally()) {
             channel.setSocks5(true);
-            channel.socks5HandshakeF = proxy.doSocks5Handshake(channel, NioSocksHandler.SOCKS5_CMD_CONNECT, query, endTime);
+            channel.socks5HandshakeF =
+                proxy.doSocks5Handshake(
+                    channel, NioSocksHandler.SOCKS5_CMD_CONNECT, query, endTime);
           }
         }
         // Chain the SOCKS5 transactions with the TCP data transaction
-        channel.socks5HandshakeF.thenRunAsync(
-          () -> {
-            dnsTransaction(channel, query, data, endTime, f);
-          }
-        ).exceptionally(ex -> {
-          f.completeExceptionally(ex);
-          return null;
-        });
+        channel
+            .socks5HandshakeF
+            .thenRunAsync(
+                () -> {
+                  dnsTransaction(channel, query, data, endTime, f);
+                })
+            .exceptionally(
+                ex -> {
+                  f.completeExceptionally(ex);
+                  return null;
+                });
       } else {
         // transaction for DNS data
         dnsTransaction(channel, query, data, endTime, f);
@@ -394,5 +408,4 @@ public class NioTcpHandler extends NioClient {
 
     return f;
   }
-
 }
