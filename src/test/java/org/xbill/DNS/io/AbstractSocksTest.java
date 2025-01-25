@@ -13,8 +13,7 @@ public class AbstractSocksTest {
     new File("src/test/resources/compose/compose.yml")
   )
   .withBuild(true)
-  .waitingFor("dante-socks5", Wait.forHealthcheck())
-  .withLocalCompose(true);
+  .waitingFor("dante-socks5", Wait.forHealthcheck());
 
   @Test
   public void setup() {
