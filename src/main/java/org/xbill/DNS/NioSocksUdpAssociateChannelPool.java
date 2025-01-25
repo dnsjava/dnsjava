@@ -1,17 +1,19 @@
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NioSocksUdpAssociateChannelPool {
@@ -25,36 +27,40 @@ public class NioSocksUdpAssociateChannelPool {
   }
 
   public SocksUdpAssociateChannelState createOrGetSocketChannelState(
-    InetSocketAddress local,
-    InetSocketAddress remote,
-    NioSocksHandler proxy,
-    CompletableFuture<byte[]> future) {
+      InetSocketAddress local,
+      InetSocketAddress remote,
+      NioSocksHandler proxy,
+      CompletableFuture<byte[]> future) {
     String key = local + " " + remote;
-    SocksUdpAssociateChannelGroup group = channelMap.computeIfAbsent(key,
-      k -> new SocksUdpAssociateChannelGroup(tcpHandler, udpHandler));
+    SocksUdpAssociateChannelGroup group =
+        channelMap.computeIfAbsent(
+            key, k -> new SocksUdpAssociateChannelGroup(tcpHandler, udpHandler));
     return group.createOrGetDatagramChannel(local, remote, proxy, future);
   }
 
   public void removeIdleChannels() {
     long currentTime = System.currentTimeMillis();
-    channelMap.values().forEach(group -> {
-      for (SocksUdpAssociateChannelState channel : group.channels) {
-        if (channel.poolChannelIdleTimeout < currentTime) {
-          try {
-            group.removeChannelState(channel);
-          } catch (IOException e) {
-            log.warn("Error closing idle channel", e);
-          }
-          }
-        }
-    });
+    channelMap
+        .values()
+        .forEach(
+            group -> {
+              for (SocksUdpAssociateChannelState channel : group.channels) {
+                if (channel.poolChannelIdleTimeout < currentTime) {
+                  try {
+                    group.removeChannelState(channel);
+                  } catch (IOException e) {
+                    log.warn("Error closing idle channel", e);
+                  }
+                }
+              }
+            });
   }
 
   private static class SocksUdpAssociateChannelGroup {
     private final Queue<SocksUdpAssociateChannelState> channels;
     private final NioTcpHandler tcpHandler;
     private final NioUdpHandler udpHandler;
-    private final int defaultChannelIdleTimeout = 60000;
+    private final int defaultChannelIdleTimeout = 1000;
 
     public SocksUdpAssociateChannelGroup(NioTcpHandler tcpHandler, NioUdpHandler udpHandler) {
       channels = new ConcurrentLinkedQueue<>();
@@ -62,11 +68,11 @@ public class NioSocksUdpAssociateChannelPool {
       this.udpHandler = udpHandler;
     }
 
-    public synchronized SocksUdpAssociateChannelState createOrGetDatagramChannel(
-      InetSocketAddress local,
-      InetSocketAddress remote,
-      NioSocksHandler proxy,
-      CompletableFuture<byte[]> future) {
+    public SocksUdpAssociateChannelState createOrGetDatagramChannel(
+        InetSocketAddress local,
+        InetSocketAddress remote,
+        NioSocksHandler proxy,
+        CompletableFuture<byte[]> future) {
       SocksUdpAssociateChannelState channelState = null;
       for (Iterator<SocksUdpAssociateChannelState> it = channels.iterator(); it.hasNext(); ) {
         SocksUdpAssociateChannelState c = it.next();
@@ -84,7 +90,8 @@ public class NioSocksUdpAssociateChannelPool {
           SocksUdpAssociateChannelState newChannel = new SocksUdpAssociateChannelState();
           newChannel.tcpChannel = tcpHandler.createChannelState(local, remote, proxy, future);
           newChannel.udpChannel = udpHandler.createChannel(local, future);
-          newChannel.poolChannelIdleTimeout = System.currentTimeMillis() + defaultChannelIdleTimeout;
+          newChannel.poolChannelIdleTimeout =
+              System.currentTimeMillis() + defaultChannelIdleTimeout;
           newChannel.isOccupied = true;
           channels.add(newChannel);
           channelState = newChannel;

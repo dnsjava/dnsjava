@@ -1,13 +1,13 @@
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import java.net.InetSocketAddress;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.net.InetSocketAddress;
-
 @Getter
 @Setter
-public class Socks5ProxyConfig {
+public class NioSocks5ProxyConfig {
   private InetSocketAddress proxyAddress;
   private AuthMethod authMethod;
   private String socks5User;
@@ -19,19 +19,20 @@ public class Socks5ProxyConfig {
     USER_PASS
   }
 
-  public Socks5ProxyConfig(InetSocketAddress proxyAddress) {
+  public NioSocks5ProxyConfig(InetSocketAddress proxyAddress) {
     this(proxyAddress, null, null);
     authMethod = AuthMethod.NONE;
   }
 
-  public Socks5ProxyConfig(InetSocketAddress proxyAddress, String socks5User, String socks5Password) {
+  public NioSocks5ProxyConfig(
+      InetSocketAddress proxyAddress, String socks5User, String socks5Password) {
     this.proxyAddress = proxyAddress;
     this.socks5User = socks5User;
     this.socks5Password = socks5Password;
     authMethod = AuthMethod.USER_PASS;
   }
 
-//  public Socks5ProxyConfig(InetSocketAddress proxyAddress, GSSCredential gssCredential) {
-//    this(proxyAddress, null, null, gssCredential);
-//  }
+  //  public Socks5ProxyConfig(InetSocketAddress proxyAddress, GSSCredential gssCredential) {
+  //    this(proxyAddress, null, null, gssCredential);
+  //  }
 }
