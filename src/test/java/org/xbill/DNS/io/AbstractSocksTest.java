@@ -11,8 +11,10 @@ import java.time.Duration;
 public class AbstractSocksTest {
   static final ComposeContainer environment = new ComposeContainer(
     new File("src/test/resources/compose/compose.yml")
-  ).withBuild(true).withStartupTimeout(Duration.ofSeconds(3000))
-    .waitingFor("dante-socks5", Wait.forHealthcheck());
+  )
+  .withBuild(true)
+  .waitingFor("dante-socks5", Wait.forHealthcheck())
+  .withLocalCompose(true);
 
   @Test
   public void setup() {
