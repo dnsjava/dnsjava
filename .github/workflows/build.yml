@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          setx DOCKER_HOST="tcp://localhost:2375"
+          setx DOCKER_HOST "tcp://localhost:2375"
           fi
           TEST_EXCLUSIONS=$([ '${{ matrix.java }}' == '21' ] && echo "" || echo "concurrency" )
           mvn verify \
