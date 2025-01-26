@@ -1,3 +1,16 @@
+01/26/2025
+	- 3.6.3 released
+	- Support custom hosts file size (@flaming-archer, #349)
+	- Fix origin handling in zone loaded from file or stream (#346)
+	- Prevent TCP port leak when closing IO (#351)
+	- Fix confusing parameter name in CNAMERecord (@chkal, #354)
+	- Optionally disable ShutdownHook in NioClient (@SvenssonWeb, #359)
+	- TSIG algorithm names from RFC 8945
+	- Message.toWire can exceed MAXLENGTH (#355)
+	- TCP query might fail if the shared buffer is full (#357)
+	- Dynamic updates silently truncates records (#356)
+	- Fix DoH initial request using recommended nanoTime calculation (@LinZong, #345)
+
 09/21/2024
 	- 3.6.2 released
 	- Add new IANA Trust Anchor (@technolord, #337)
