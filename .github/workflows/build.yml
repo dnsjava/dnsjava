@@ -46,6 +46,8 @@ jobs:
 
       - name: Set up Docker
         uses: docker/setup-docker-action@v4
+        with:
+          set-host: true
 
       - name: Build with Maven
         shell: bash
