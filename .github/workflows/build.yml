@@ -55,6 +55,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
           setx DOCKER_HOST "tcp://localhost:2375"
+          setx TESTCONTAINERS_RYUK_DISABLED "true"
           fi
           TEST_EXCLUSIONS=$([ '${{ matrix.java }}' == '21' ] && echo "" || echo "concurrency" )
           mvn verify \
