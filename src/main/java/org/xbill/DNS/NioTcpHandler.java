@@ -25,9 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 public class NioTcpHandler extends NioClient {
-  // registrationQueue and channelMap must be static to be shared between instances
-  // otherwise, a second instance would overwrite the registration, timeout and close tasks of the
-  // first instance
+  // `registrationQueue` and `channelMap` must be static to be shared between instances.
+  // This is necessary because a second instance overwrites the registration, timeout, and close tasks,
+  // leaving no thread to process the pending registrations for the first instance.
   private static final Queue<ChannelState> registrationQueue = new ConcurrentLinkedQueue<>();
   private static final Map<ChannelKey, ChannelState> channelMap = new ConcurrentHashMap<>();
 
