@@ -153,12 +153,12 @@ public class NioSocksHandler {
       NioTcpHandler.ChannelState channel, byte socks5Cmd, Message query, long endTime) {
     CompletableFuture<byte[]> cmdHandshakeF = new CompletableFuture<>();
     CompletableFuture<byte[]> commandF = new CompletableFuture<>();
-    // For CONNECT, DST.ADDR and DST.PORT are the address and port of the destination server.
-    // For UDP ASSOCIATE, DST.ADDR and DST.PORT are the address and port of the UDP client.
-    // If DST.ADDR and DST.PORT are set to 0.0.0.0:0, the proxy will accept UDP connections from any
-    // source address and port.
-    // After the first packet, the source address and port must not change. If they change, the
-    // proxy drops the connection and the UDP association.
+    // For CONNECT, DST.ADDR and DST.PORT represent the host and port of the remote address.
+    // For UDP ASSOCIATE, DST.ADDR and DST.PORT represent the destination of the returning UDP packets.
+    // If DST.ADDR and DST.PORT are set to 0.0.0.0:0, the proxy will send the packets back the same way.
+    // This allows it to work in a NAT-ed network.
+    // After the first packet, the source address and port must not change. If they do, the
+    // proxy will drop the connection and the UDP association.
     InetSocketAddress address =
         (socks5Cmd == SOCKS5_CMD_CONNECT) ? remoteAddress : new InetSocketAddress("0.0.0.0", 0);
     CmdRequest cmdRequest = new CmdRequest(socks5Cmd, address);
