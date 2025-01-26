@@ -53,10 +53,6 @@ jobs:
       - name: Build with Maven
         shell: bash
         run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          setx DOCKER_HOST "tcp://localhost:2375"
-          setx TESTCONTAINERS_RYUK_DISABLED "true"
-          fi
           TEST_EXCLUSIONS=$([ '${{ matrix.java }}' == '21' ] && echo "" || echo "concurrency" )
           mvn verify \
             -B \
@@ -64,6 +60,8 @@ jobs:
             -"Dgpg.skip" \
             -DexcludedGroups="${TEST_EXCLUSIONS}" \
             jacoco:report
+        env:
+          DOCKER_HOST: tcp://localhost:2375
 
       - name: Copy build reports
         shell: bash
