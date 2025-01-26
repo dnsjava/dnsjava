@@ -222,7 +222,7 @@ public class NioTcpHandler extends NioClient {
           System.arraycopy(
               responseData.array(), responseData.arrayOffset(), data, 0, responseData.limit());
           // the transactions for the socks5 handshake are synchronized
-          // you can assume that the responses are in order of the transactions in the queue
+          // you can assume that the responses are one after another
           for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
             Transaction t = it.next();
             t.f.complete(data);
