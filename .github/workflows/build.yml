@@ -48,7 +48,6 @@ jobs:
         uses: docker/setup-docker-action@v4
         with:
           set-host: true
-          tcp-port: 2375
 
       - name: Build with Maven
         shell: bash
@@ -60,8 +59,6 @@ jobs:
             -"Dgpg.skip" \
             -DexcludedGroups="${TEST_EXCLUSIONS}" \
             jacoco:report
-        env:
-          DOCKER_HOST: tcp://localhost:2375
 
       - name: Copy build reports
         shell: bash
