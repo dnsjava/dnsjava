@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.io;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,8 +12,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.xbill.DNS.*;
+import org.xbill.DNS.DClass;
+import org.xbill.DNS.Message;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.NioSocks5ProxyConfig;
+import org.xbill.DNS.NioSocks5ProxyFactory;
 import org.xbill.DNS.Record;
+import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.Type;
 
 public class SimpleSocksTest {
   static final ComposeContainer environment =
