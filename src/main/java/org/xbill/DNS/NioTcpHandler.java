@@ -26,7 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class NioTcpHandler extends NioClient {
   // `registrationQueue` and `channelMap` must be static to be shared between instances.
-  // This is necessary because a second instance overwrites the registration, timeout, and close tasks,
+  // This is necessary because a second instance overwrites the registration, timeout, and close
+  // tasks,
   // leaving no thread to process the pending registrations for the first instance.
   private static final Queue<ChannelState> registrationQueue = new ConcurrentLinkedQueue<>();
   private static final Map<ChannelKey, ChannelState> channelMap = new ConcurrentHashMap<>();
@@ -73,10 +74,10 @@ public class NioTcpHandler extends NioClient {
     registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
     channelMap.forEach(
-      (key, state) -> {
-        state.handleTransactionException(closing);
-        state.handleChannelException(closing);
-      });
+        (key, state) -> {
+          state.handleTransactionException(closing);
+          state.handleChannelException(closing);
+        });
     channelMap.clear();
   }
 
@@ -114,28 +115,28 @@ public class NioTcpHandler extends NioClient {
           "TCP write: transaction id=" + query.getHeader().getID(),
           channel.socket().getLocalSocketAddress(),
           channel.socket().getRemoteSocketAddress(),
-        queryDataBuffer);
+          queryDataBuffer);
       while (queryDataBuffer.hasRemaining()) {
         long bytesWritten = channel.write(queryDataBuffer);
         bytesWrittenTotal += bytesWritten;
         if (bytesWritten == 0) {
           log.debug(
-            "Insufficient room for the data in the underlying output buffer for transaction {}, retrying",
-            query.getHeader().getID());
+              "Insufficient room for the data in the underlying output buffer for transaction {}, retrying",
+              query.getHeader().getID());
           return false;
         } else if (bytesWrittenTotal < queryData.length) {
           log.debug(
-            "Wrote {} of {} bytes data for transaction {}",
-            bytesWrittenTotal,
-            queryData.length,
-            query.getHeader().getID());
+              "Wrote {} of {} bytes data for transaction {}",
+              bytesWrittenTotal,
+              queryData.length,
+              query.getHeader().getID());
         }
       }
 
       log.debug(
-        "Send for transaction {} is complete, wrote {} bytes",
-        query.getHeader().getID(),
-        bytesWrittenTotal);
+          "Send for transaction {} is complete, wrote {} bytes",
+          query.getHeader().getID(),
+          bytesWrittenTotal);
       return true;
     }
   }

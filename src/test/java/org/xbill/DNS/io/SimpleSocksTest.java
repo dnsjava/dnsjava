@@ -1,5 +1,11 @@
 package org.xbill.DNS.io;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -8,19 +14,11 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 public class SimpleSocksTest {
-  static final ComposeContainer environment = new ComposeContainer(
-    new File("src/test/resources/compose/compose.yml")
-  )
-    .withBuild(true)
-    .waitingFor("dante-socks5", Wait.forHealthcheck());
+  static final ComposeContainer environment =
+      new ComposeContainer(new File("src/test/resources/compose/compose.yml"))
+          .withBuild(true)
+          .waitingFor("dante-socks5", Wait.forHealthcheck());
 
   @BeforeAll
   public static void setUp() throws IOException, InterruptedException {
@@ -34,10 +32,15 @@ public class SimpleSocksTest {
     environment.stop();
   }
 
-  private SimpleResolver createResolver(String address, boolean useTCP, String user, String password) throws IOException {
+  private SimpleResolver createResolver(
+      String address, boolean useTCP, String user, String password) throws IOException {
     SimpleResolver res = address == null ? new SimpleResolver() : new SimpleResolver(address);
-    InetSocketAddress proxyAddress = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 1080);
-    NioSocks5ProxyConfig config = user == null ? new NioSocks5ProxyConfig(proxyAddress) : new NioSocks5ProxyConfig(proxyAddress, user, password);
+    InetSocketAddress proxyAddress =
+        new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 1080);
+    NioSocks5ProxyConfig config =
+        user == null
+            ? new NioSocks5ProxyConfig(proxyAddress)
+            : new NioSocks5ProxyConfig(proxyAddress, user, password);
     res.setIoClientFactory(new NioSocks5ProxyFactory(config));
     res.setTCP(useTCP);
     return res;

@@ -86,7 +86,7 @@ public class NioSocksHandler {
             endTime,
             channel.getChannel(),
             methodSelectionF,
-          true);
+            true);
     channel.queueTransaction(methodSelectionTransaction);
 
     methodSelectionF.thenComposeAsync(
@@ -129,7 +129,12 @@ public class NioSocksHandler {
     UserPassAuthRequest userPassAuthRequest = new UserPassAuthRequest(socks5User, socks5Password);
     NioTcpHandler.Transaction userPwdAuthTransaction =
         new NioTcpHandler.Transaction(
-            query, userPassAuthRequest.toBytes(), endTime, channel.getChannel(), userPassAuthF, true);
+            query,
+            userPassAuthRequest.toBytes(),
+            endTime,
+            channel.getChannel(),
+            userPassAuthF,
+            true);
     channel.queueTransaction(userPwdAuthTransaction);
 
     userPassAuthF.thenComposeAsync(
@@ -154,8 +159,10 @@ public class NioSocksHandler {
     CompletableFuture<byte[]> cmdHandshakeF = new CompletableFuture<>();
     CompletableFuture<byte[]> commandF = new CompletableFuture<>();
     // For CONNECT, DST.ADDR and DST.PORT represent the host and port of the remote address.
-    // For UDP ASSOCIATE, DST.ADDR and DST.PORT represent the destination of the returning UDP packets.
-    // If DST.ADDR and DST.PORT are set to 0.0.0.0:0, the proxy will send the packets back the same way.
+    // For UDP ASSOCIATE, DST.ADDR and DST.PORT represent the destination of the returning UDP
+    // packets.
+    // If DST.ADDR and DST.PORT are set to 0.0.0.0:0, the proxy will send the packets back the same
+    // way.
     // This allows it to work in a NAT-ed network.
     // After the first packet, the source address and port must not change. If they do, the
     // proxy will drop the connection and the UDP association.
