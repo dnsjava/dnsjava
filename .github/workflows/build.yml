@@ -44,6 +44,9 @@ jobs:
           distribution: temurin
           cache: maven
 
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+
       - name: Build with Maven
         shell: bash
         run: |
