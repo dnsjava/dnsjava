@@ -48,6 +48,7 @@ jobs:
         uses: docker/setup-docker-action@v4
         with:
           set-host: true
+          tcp-port: 2375
 
       - name: Build with Maven
         shell: bash
