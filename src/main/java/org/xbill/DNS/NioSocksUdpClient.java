@@ -34,7 +34,7 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
             socksConfig.getSocks5User(),
             socksConfig.getSocks5Password());
     NioSocksUdpAssociateChannelPool.SocksUdpAssociateChannelState channel =
-        udpHandler.getUdpPool().createOrGetSocketChannelState(local, remote, proxy, f);
+        udpHandler.getUdpPool().createOrGetSocketChannelState(local, proxy.getProxyAddress(), f);
 
     synchronized (channel) {
       if (channel.getTcpChannel().socks5HandshakeF == null
@@ -70,6 +70,7 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
                       })
                   .exceptionally(
                       ex -> {
+                        channel.setFailed(true);
                         f.completeExceptionally(ex);
                         return null;
                       });
@@ -77,6 +78,7 @@ final class NioSocksUdpClient extends NioClient implements UdpIoClient {
             })
         .exceptionally(
             ex -> {
+              channel.setFailed(true);
               f.completeExceptionally(ex);
               return null;
             });
