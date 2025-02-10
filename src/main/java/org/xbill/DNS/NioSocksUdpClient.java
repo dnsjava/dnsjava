@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import lombok.extern.slf4j.Slf4j;
+import org.xbill.DNS.io.UdpIoClient;
+
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
-import lombok.extern.slf4j.Slf4j;
-import org.xbill.DNS.io.UdpIoClient;
 
 @Slf4j
 final class NioSocksUdpClient extends NioClient implements UdpIoClient {

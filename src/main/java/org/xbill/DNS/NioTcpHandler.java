@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -16,11 +22,6 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Getter
@@ -343,9 +344,7 @@ public class NioTcpHandler extends NioClient {
   }
 
   public ChannelState createChannelState(
-      InetSocketAddress local,
-      InetSocketAddress remote,
-      CompletableFuture<byte[]> f) {
+      InetSocketAddress local, InetSocketAddress remote, CompletableFuture<byte[]> f) {
     log.debug("Opening async channel for l={}/r={}", local, remote);
     SocketChannel c = null;
     try {
@@ -370,9 +369,7 @@ public class NioTcpHandler extends NioClient {
   }
 
   public ChannelState createOrGetChannelState(
-      InetSocketAddress local,
-      InetSocketAddress remote,
-      CompletableFuture<byte[]> f) {
+      InetSocketAddress local, InetSocketAddress remote, CompletableFuture<byte[]> f) {
     return channelMap.computeIfAbsent(
         new ChannelKey(local, remote), key -> createChannelState(local, remote, f));
   }

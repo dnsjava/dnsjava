@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
@@ -10,16 +15,13 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NioSocksUdpAssociateChannelPool {
   private final NioTcpHandler tcpHandler;
   private final NioUdpHandler udpHandler;
-  private final static Map<String, SocksUdpAssociateChannelGroup> channelMap = new ConcurrentHashMap<>();
+  private static final Map<String, SocksUdpAssociateChannelGroup> channelMap =
+      new ConcurrentHashMap<>();
 
   public NioSocksUdpAssociateChannelPool(NioTcpHandler tcpHandler, NioUdpHandler udpHandler) {
     this.tcpHandler = tcpHandler;
@@ -27,9 +29,7 @@ public class NioSocksUdpAssociateChannelPool {
   }
 
   public SocksUdpAssociateChannelState createOrGetSocketChannelState(
-      InetSocketAddress local,
-      InetSocketAddress remote,
-      CompletableFuture<byte[]> future) {
+      InetSocketAddress local, InetSocketAddress remote, CompletableFuture<byte[]> future) {
     String key = local + " " + remote;
     SocksUdpAssociateChannelGroup group =
         channelMap.computeIfAbsent(
@@ -68,9 +68,7 @@ public class NioSocksUdpAssociateChannelPool {
     }
 
     public SocksUdpAssociateChannelState createOrGetDatagramChannel(
-        InetSocketAddress local,
-        InetSocketAddress remote,
-        CompletableFuture<byte[]> future) {
+        InetSocketAddress local, InetSocketAddress remote, CompletableFuture<byte[]> future) {
       SocksUdpAssociateChannelState channelState = null;
       for (Iterator<SocksUdpAssociateChannelState> it = channels.iterator(); it.hasNext(); ) {
         SocksUdpAssociateChannelState c = it.next();
