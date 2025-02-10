@@ -1,0 +1,3 @@
+test.                             IN  SOA    test. admin.test. 1675303881 7200 3600 1209600 3600
+
+simple.test.                      IN  A      1.2.3.4
