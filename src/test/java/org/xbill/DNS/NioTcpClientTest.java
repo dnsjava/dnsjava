@@ -17,6 +17,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
 import org.xbill.DNS.utils.base16;
+
+import java.nio.channels.Selector;
+import java.nio.channels.Pipe;
+import java.nio.channels.SelectionKey;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.xbill.DNS.NioClient.KeyProcessor;
+import java.lang.reflect.Field;
+
 
 @Slf4j
 class NioTcpClientTest {
@@ -44,6 +53,82 @@ class NioTcpClientTest {
       assertThrows(IllegalArgumentException.class, NioClient::runSelector);
     } finally {
       System.clearProperty(SELECTOR_TIMEOUT_PROPERTY);
+    }
+  }
+
+  /**
+   * Verifies that NioClient.processReadyKeys() does not throw a ConcurrentModificationException
+   * when channels are registered with the selector while processReadyKeys() is iterating over
+   * selector.selectedKeys(). This simulates concurrent modifications that can occur under high load.
+   *
+   * The test starts the selector thread, registers an initial key, and then rapidly registers new
+   * channels from another thread while making them ready. It fails if a ConcurrentModificationException
+   * is observed during the process.
+   * 
+   * Since this involves concurrency timing, the test may be flaky and not fail consistently,
+   * even if the underlying issue exists.
+   */
+  @Test
+  void testProcessReadyKeysShouldNotThrowConcurrentModificationException() throws Exception {
+    // Speed up selector loop
+    System.setProperty("dnsjava.nio.selector_timeout", "10");
+
+    // Start selector thread
+    NioClient.selector();
+
+    // Access the selector
+    Field selectorField = NioClient.class.getDeclaredField("selector");
+    selectorField.setAccessible(true);
+    Selector selector = (Selector) selectorField.get(null);
+
+    // Add initial key to ensure selectedKeys isn't empty
+    Pipe initialPipe = Pipe.open();
+    initialPipe.source().configureBlocking(false);
+    SelectionKey key = initialPipe.source().register(selector, SelectionKey.OP_READ);
+    key.attach((KeyProcessor) (readyKey) -> {
+        try {
+            Thread.sleep(10); // Slow down processing
+        } catch (InterruptedException ignored) {}
+    });
+
+    // Watch for unexpected exceptions
+    AtomicBoolean sawCME = new AtomicBoolean(false);
+    Thread.UncaughtExceptionHandler originalHandler = Thread.getDefaultUncaughtExceptionHandler();
+    Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+        if (e instanceof ConcurrentModificationException) {
+            sawCME.set(true); // Violation of expected behavior
+        }
+    });
+
+    // Thread that registers new channels and makes them ready
+    Thread writerThread = new Thread(() -> {
+        try {
+            for (int i = 0; i < 100; i++) {
+                Pipe pipe = Pipe.open();
+                pipe.source().configureBlocking(false);
+                SelectionKey sk = pipe.source().register(selector, SelectionKey.OP_READ);
+                sk.attach((KeyProcessor) (readyKey) -> {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ignored) {}
+                });
+
+                // Make the channel ready to trigger selectedKeys modification
+                pipe.sink().write(ByteBuffer.wrap("x".getBytes()));
+                Thread.sleep(2); // Help trigger overlap
+            }
+        } catch (Exception ignored) {}
+    });
+
+    writerThread.start();
+    writerThread.join(5000);
+    Thread.sleep(2000); // Let selector process mutations
+    NioClient.close();
+    Thread.setDefaultUncaughtExceptionHandler(originalHandler); // restore
+
+    // ✅ Assume correctness: fail if any exception was observed
+    if (sawCME.get()) {
+        fail("processReadyKeys() is not thread-safe: Unexpected ConcurrentModificationException was thrown during concurrent channel activation.");
     }
   }
 
