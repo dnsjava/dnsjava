@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
 import java.util.Iterator;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -180,10 +181,10 @@ public abstract class NioClient {
   }
 
   private static void processReadyKeys() {
-    Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-    while (it.hasNext()) {
-      SelectionKey key = it.next();
-      it.remove();
+    // Copy selected keys to avoid ConcurrentModificationException
+    ArrayList<SelectionKey> readyKeys = new ArrayList<>(selector.selectedKeys());
+    for (SelectionKey key : readyKeys) {
+      selector.selectedKeys().remove(key);
       KeyProcessor t = (KeyProcessor) key.attachment();
       t.processReadyKey(key);
     }
