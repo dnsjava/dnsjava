@@ -106,12 +106,14 @@ public abstract class NioClient {
     }
 
     if (localSelector != null) {
-      localSelector.wakeup();
-      try {
-        localSelector.close();
-      } catch (IOException e) {
-        log.warn("Failed to properly close selector, ignoring and continuing close", e);
-      }
+      REGISTRATIONS_TASKS[0] = () -> {
+        try {
+          localSelector.close(); // ✅ runs safely inside the selector thread
+        } catch (IOException e) {
+          log.warn("Failed to properly close selector", e);
+        }
+      };
+      localSelector.wakeup(); // wake up selector thread to execute shutdown
     }
 
     if (localSelectorThread != null) {
