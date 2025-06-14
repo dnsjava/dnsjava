@@ -8,6 +8,7 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ import org.xbill.DNS.hosts.HostsFileParser;
 public final class Lookup {
 
   private static Resolver defaultResolver;
-  private static List<Name> defaultSearchPath;
+  private static List<Name> defaultSearchPath = Collections.emptyList();
   private static Map<Integer, Cache> defaultCaches;
   private static int defaultNdots;
   private static HostsFileParser defaultHostsFileParser;
@@ -173,6 +174,11 @@ public final class Lookup {
    *     made absolute.
    */
   public static synchronized void setDefaultSearchPath(List<Name> domains) {
+    if (domains == null) {
+      defaultSearchPath = Collections.emptyList();
+      return;
+    }
+
     defaultSearchPath = convertSearchPathDomainList(domains);
   }
 
@@ -184,6 +190,11 @@ public final class Lookup {
    *     made absolute.
    */
   public static synchronized void setDefaultSearchPath(Name... domains) {
+    if (domains == null) {
+      defaultSearchPath = Collections.emptyList();
+      return;
+    }
+
     setDefaultSearchPath(Arrays.asList(domains));
   }
 
@@ -196,16 +207,16 @@ public final class Lookup {
   public static synchronized void setDefaultSearchPath(String... domains)
       throws TextParseException {
     if (domains == null) {
-      defaultSearchPath = null;
+      defaultSearchPath = Collections.emptyList();
       return;
     }
 
-    List<Name> newdomains = new ArrayList<>(domains.length);
+    List<Name> newDomains = new ArrayList<>(domains.length);
     for (String domain : domains) {
-      newdomains.add(Name.fromString(domain, Name.root));
+      newDomains.add(Name.fromString(domain, Name.root));
     }
 
-    defaultSearchPath = newdomains;
+    defaultSearchPath = newDomains;
   }
 
   /**
@@ -395,6 +406,11 @@ public final class Lookup {
    *     made absolute.
    */
   public void setSearchPath(List<Name> domains) {
+    if (domains == null) {
+      this.searchPath = Collections.emptyList();
+      return;
+    }
+
     this.searchPath = convertSearchPathDomainList(domains);
   }
 
@@ -406,6 +422,11 @@ public final class Lookup {
    *     made absolute.
    */
   public void setSearchPath(Name... domains) {
+    if (domains == null) {
+      this.searchPath = Collections.emptyList();
+      return;
+    }
+
     setSearchPath(Arrays.asList(domains));
   }
 
@@ -417,15 +438,16 @@ public final class Lookup {
    */
   public void setSearchPath(String... domains) throws TextParseException {
     if (domains == null) {
-      this.searchPath = null;
+      this.searchPath = Collections.emptyList();
       return;
     }
 
-    List<Name> newdomains = new ArrayList<>(domains.length);
+    List<Name> newDomains = new ArrayList<>(domains.length);
     for (String domain : domains) {
-      newdomains.add(Name.fromString(domain, Name.root));
+      newDomains.add(Name.fromString(domain, Name.root));
     }
-    this.searchPath = newdomains;
+
+    this.searchPath = newDomains;
   }
 
   /**
@@ -671,8 +693,6 @@ public final class Lookup {
     }
     if (name.isAbsolute()) {
       resolve(name, null);
-    } else if (searchPath == null) {
-      resolve(name, Name.root);
     } else {
       if (name.labels() > ndots) {
         resolve(name, Name.root);
