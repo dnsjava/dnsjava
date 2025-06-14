@@ -1,0 +1,43 @@
+
+services:
+  coredns:
+    image: coredns/coredns:1.12.0
+    networks:
+      default:
+        ipv4_address: 10.5.0.2
+        ipv6_address: 2001:db8::2
+    volumes:
+      - "./coredns:/etc/coredns"
+    command: "-conf /etc/coredns/corefile"
+    ports:
+      - "53/udp"
+
+  dante-socks5:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+        - .env
+    ports:
+        - "1080:1080"
+        - "10000:10000/udp"
+        - "10001:10001/udp"
+    networks:
+      default:
+        ipv4_address: 10.5.0.3
+        ipv6_address: 2001:db8::3
+    healthcheck:
+      test: "curl -x socks5://127.0.0.1:1080 http://10.5.0.2:8080/health"
+    volumes:
+      - ./sockd.conf:/etc/sockd.conf
+
+networks:
+  default:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+        - subnet: 2001:db8::/64
+          gateway: 2001:db8::1
