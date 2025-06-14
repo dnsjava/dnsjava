@@ -54,7 +54,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
     setCloseTask(this::closeUdp, false);
   }
 
-  private void processPendingRegistrations() {
+  private void processPendingRegistrations(Selector selector) {
     while (!registrationQueue.isEmpty()) {
       Transaction t = registrationQueue.poll();
       if (t == null) {
@@ -63,7 +63,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
 
       try {
         log.trace("Registering OP_READ for transaction with id {}", t.id);
-        t.channel.register(selector(), SelectionKey.OP_READ, t);
+        t.channel.register(selector, SelectionKey.OP_READ, t);
         t.send();
       } catch (IOException e) {
         t.completeExceptionally(e);

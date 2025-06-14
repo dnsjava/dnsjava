@@ -10,6 +10,7 @@ import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
+import java.util.function.Consumer;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +25,9 @@ import org.xbill.DNS.utils.hexdump;
  * <p>The following configuration parameter is available:
  *
  * <dl>
- *   <dt>dnsjava.nio.selector_timeout
+ *   <dt>{@value SELECTOR_TIMEOUT_PROPERTY}
  *   <dd>Set selector timeout in milliseconds. Default/Max 1000, Min 1.
- *   <dt>dnsjava.nio.register_shutdown_hook
+ *   <dt>{@value REGISTER_SHUTDOWN_HOOK_PROPERTY}
  *   <dd>Register Shutdown Hook termination of NIO. Default True.
  * </dl>
  *
@@ -35,16 +36,24 @@ import org.xbill.DNS.utils.hexdump;
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.NONE)
 public abstract class NioClient {
+  static final String SELECTOR_TIMEOUT_PROPERTY = "dnsjava.nio.selector_timeout";
+  static final String REGISTER_SHUTDOWN_HOOK_PROPERTY = "dnsjava.nio.register_shutdown_hook";
+  private static final Object NIO_CLIENT_LOCK = new Object();
+
   /** Packet logger, if available. */
   private static PacketLogger packetLogger = null;
 
   private static final Runnable[] TIMEOUT_TASKS = new Runnable[2];
-  private static final Runnable[] REGISTRATIONS_TASKS = new Runnable[2];
+
+  @SuppressWarnings("unchecked")
+  private static final Consumer<Selector>[] REGISTRATIONS_TASKS = new Consumer[2];
+
   private static final Runnable[] CLOSE_TASKS = new Runnable[2];
   private static Thread selectorThread;
   private static Thread closeThread;
   private static volatile Selector selector;
   private static volatile boolean run;
+  private static volatile boolean closeDone;
 
   interface KeyProcessor {
     void processReadyKey(SelectionKey key);
@@ -52,7 +61,7 @@ public abstract class NioClient {
 
   static Selector selector() throws IOException {
     if (selector == null) {
-      synchronized (NioClient.class) {
+      synchronized (NIO_CLIENT_LOCK) {
         if (selector == null) {
           selector = Selector.open();
           log.debug("Starting dnsjava NIO selector thread");
@@ -63,8 +72,7 @@ public abstract class NioClient {
           selectorThread.start();
           closeThread = new Thread(() -> close(true));
           closeThread.setName("dnsjava NIO shutdown hook");
-          if (Boolean.parseBoolean(
-              System.getProperty("dnsjava.nio.register_shutdown_hook", "true"))) {
+          if (Boolean.parseBoolean(System.getProperty(REGISTER_SHUTDOWN_HOOK_PROPERTY, "true"))) {
             Runtime.getRuntime().addShutdownHook(closeThread);
           }
         }
@@ -74,13 +82,23 @@ public abstract class NioClient {
     return selector;
   }
 
-  /** Shutdown the network I/O used by the {@link SimpleResolver}. */
+  /**
+   * Shutdown the network I/O used by the {@link SimpleResolver}.
+   *
+   * @implNote Does not wait until the selector thread has stopped. But users may immediately start
+   *     using the {@link NioClient} again.
+   * @since 3.4.0
+   */
   public static void close() {
     close(false);
   }
 
   private static void close(boolean fromHook) {
     run = false;
+    Selector localSelector = selector;
+    if (localSelector != null) {
+      selector.wakeup();
+    }
 
     if (!fromHook) {
       try {
@@ -90,6 +108,53 @@ public abstract class NioClient {
       }
     }
 
+    if (localSelector == null) {
+      // Prevent hanging when close() was called without starting
+      return;
+    }
+
+    synchronized (NIO_CLIENT_LOCK) {
+      try {
+        while (!closeDone) {
+          NIO_CLIENT_LOCK.wait();
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      } finally {
+        closeDone = false;
+      }
+    }
+  }
+
+  static void runSelector() {
+    int timeout = Integer.getInteger(SELECTOR_TIMEOUT_PROPERTY, 1000);
+
+    if (timeout <= 0 || timeout > 1000) {
+      throw new IllegalArgumentException("Invalid selector_timeout, must be between 1 and 1000");
+    }
+
+    while (run) {
+      try {
+        if (selector.select(timeout) == 0) {
+          runTasks(TIMEOUT_TASKS);
+        }
+
+        if (run) {
+          runRegistrationTasks();
+          processReadyKeys();
+        }
+      } catch (IOException e) {
+        log.error("A selection operation failed", e);
+      } catch (ClosedSelectorException e) {
+        // ignore
+      }
+    }
+
+    runClose();
+    log.debug("dnsjava NIO selector thread stopped");
+  }
+
+  private static void runClose() {
     try {
       runTasks(CLOSE_TASKS);
     } catch (Exception e) {
@@ -98,14 +163,15 @@ public abstract class NioClient {
 
     Selector localSelector = selector;
     Thread localSelectorThread = selectorThread;
-    synchronized (NioClient.class) {
+    synchronized (NIO_CLIENT_LOCK) {
       selector = null;
       selectorThread = null;
       closeThread = null;
+      closeDone = true;
+      NIO_CLIENT_LOCK.notifyAll();
     }
 
     if (localSelector != null) {
-      localSelector.wakeup();
       try {
         localSelector.close();
       } catch (IOException e) {
@@ -122,53 +188,35 @@ public abstract class NioClient {
     }
   }
 
-  static void runSelector() {
-    int timeout = Integer.getInteger("dnsjava.nio.selector_timeout", 1000);
-
-    if (timeout <= 0 || timeout > 1000) {
-      throw new IllegalArgumentException("Invalid selector_timeout, must be between 1 and 1000");
-    }
-
-    while (run) {
-      try {
-        if (selector.select(timeout) == 0) {
-          runTasks(TIMEOUT_TASKS);
-        }
-
-        if (run) {
-          runTasks(REGISTRATIONS_TASKS);
-          processReadyKeys();
-        }
-      } catch (IOException e) {
-        log.error("A selection operation failed", e);
-      } catch (ClosedSelectorException e) {
-        // ignore
-      }
-    }
-    log.debug("dnsjava NIO selector thread stopped");
-  }
-
-  static synchronized void setTimeoutTask(Runnable r, boolean isTcpClient) {
+  static void setTimeoutTask(Runnable r, boolean isTcpClient) {
     addTask(TIMEOUT_TASKS, r, isTcpClient);
   }
 
-  static synchronized void setRegistrationsTask(Runnable r, boolean isTcpClient) {
-    addTask(REGISTRATIONS_TASKS, r, isTcpClient);
+  static void setRegistrationsTask(Consumer<Selector> r, boolean isTcpClient) {
+    addRegistrationTask(r, isTcpClient);
   }
 
-  static synchronized void setCloseTask(Runnable r, boolean isTcpClient) {
+  static void setCloseTask(Runnable r, boolean isTcpClient) {
     addTask(CLOSE_TASKS, r, isTcpClient);
   }
 
-  private static void addTask(Runnable[] closeTasks, Runnable r, boolean isTcpClient) {
+  private static void addTask(Runnable[] tasks, Runnable r, boolean isTcpClient) {
     if (isTcpClient) {
-      closeTasks[0] = r;
+      tasks[0] = r;
     } else {
-      closeTasks[1] = r;
+      tasks[1] = r;
     }
   }
 
-  private static synchronized void runTasks(Runnable[] runnables) {
+  private static void addRegistrationTask(Consumer<Selector> r, boolean isTcpClient) {
+    if (isTcpClient) {
+      REGISTRATIONS_TASKS[0] = r;
+    } else {
+      REGISTRATIONS_TASKS[1] = r;
+    }
+  }
+
+  private static void runTasks(Runnable[] runnables) {
     Runnable r0 = runnables[0];
     if (r0 != null) {
       r0.run();
@@ -176,6 +224,17 @@ public abstract class NioClient {
     Runnable r1 = runnables[1];
     if (r1 != null) {
       r1.run();
+    }
+  }
+
+  private static void runRegistrationTasks() {
+    Consumer<Selector> r0 = REGISTRATIONS_TASKS[0];
+    if (r0 != null) {
+      r0.accept(selector);
+    }
+    Consumer<Selector> r1 = REGISTRATIONS_TASKS[1];
+    if (r1 != null) {
+      r1.accept(selector);
     }
   }
 
