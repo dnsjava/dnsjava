@@ -32,7 +32,7 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
     setCloseTask(this::closeTcp, true);
   }
 
-  private void processPendingRegistrations() {
+  private void processPendingRegistrations(Selector selector) {
     while (!registrationQueue.isEmpty()) {
       ChannelState state = registrationQueue.poll();
       if (state == null) {
@@ -40,7 +40,6 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
       }
 
       try {
-        final Selector selector = selector();
         if (!state.channel.isConnected()) {
           state.channel.register(selector, SelectionKey.OP_CONNECT, state);
         } else {
