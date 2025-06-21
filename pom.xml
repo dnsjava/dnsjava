@@ -49,14 +49,14 @@
         <maven.compiler.showCompilationChanges>true</maven.compiler.showCompilationChanges>
         <maven.compiler.createMissingPackageInfoClass>false</maven.compiler.createMissingPackageInfoClass>
 
-        <org.junit.version>5.11.4</org.junit.version>
+        <org.junit.version>5.13.1</org.junit.version>
         <!-- Stay on 4.x for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <mockito.version>4.11.0</mockito.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.36</lombok.version>
-        <jna.version>5.16.0</jna.version>
-        <bouncycastle.version>1.79</bouncycastle.version>
-        <vertx.version>4.5.11</vertx.version>
+        <lombok.version>1.18.38</lombok.version>
+        <jna.version>5.17.0</jna.version>
+        <bouncycastle.version>1.81</bouncycastle.version>
+        <vertx.version>4.5.16</vertx.version>
         <!-- Stay on 1.7 for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <google-java-format.version>1.7</google-java-format.version>
         <spotless.version>2.30.0</spotless.version>
@@ -111,7 +111,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.14.0</version>
                 <configuration>
                     <compilerArgs>
                         <arg>-Xlint:all,-serial,-processing</arg>
@@ -237,7 +237,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
                 <configuration>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <includes>
@@ -254,7 +254,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.13</version>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -425,13 +425,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.3</version>
+                <version>3.1.4</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.1</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -507,7 +507,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>3.1.3</version>
+                <version>3.1.4</version>
             </plugin>
 
             <plugin>
