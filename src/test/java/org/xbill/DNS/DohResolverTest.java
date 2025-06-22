@@ -28,8 +28,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +38,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.stubbing.Answer;
 
 @ExtendWith(VertxExtension.class)
+@Slf4j
 class DohResolverTest {
-  private DohResolver resolver;
   private final Name queryName = Name.fromConstantString("example.com.");
   private final Record qr = Record.newRecord(queryName, Type.A, DClass.IN);
   private final Message qm = Message.newQuery(qr);
@@ -48,7 +48,6 @@ class DohResolverTest {
 
   @BeforeEach
   void beforeEach() throws UnknownHostException {
-    resolver = new DohResolver("http://localhost");
     Record ar =
         new ARecord(
             Name.fromConstantString("example.com."),
@@ -59,11 +58,16 @@ class DohResolverTest {
     a.addRecord(ar, Section.ANSWER);
   }
 
+  private DohResolver getResolver() {
+    return new DohResolver("http://localhost");
+  }
+
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
   void simpleResolve(boolean usePost, Vertx vertx, VertxTestContext context) {
+    DohResolver resolver = getResolver();
     resolver.setUsePost(usePost);
-    setupResolverWithServer(Duration.ZERO, 200, 1, vertx, context)
+    setupResolverWithServer(resolver, Duration.ZERO, 200, 1, vertx, context)
         .onSuccess(
             server ->
                 Future.fromCompletionStage(resolver.sendAsync(qm))
@@ -79,10 +83,13 @@ class DohResolverTest {
                                     }))));
   }
 
-  @Test
-  void timeoutResolve(Vertx vertx, VertxTestContext context) {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void timeoutResolve(boolean usePost, Vertx vertx, VertxTestContext context) {
+    DohResolver resolver = getResolver();
     resolver.setTimeout(Duration.ofSeconds(1));
-    setupResolverWithServer(Duration.ofSeconds(5), 200, 1, vertx, context)
+    resolver.setUsePost(usePost);
+    setupResolverWithServer(resolver, Duration.ofSeconds(5), 200, 1, vertx, context)
         .onSuccess(
             server ->
                 Future.fromCompletionStage(resolver.sendAsync(qm))
@@ -98,9 +105,12 @@ class DohResolverTest {
                                     }))));
   }
 
-  @Test
-  void servfailResolve(Vertx vertx, VertxTestContext context) {
-    setupResolverWithServer(Duration.ZERO, 301, 1, vertx, context)
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void servfailResolve(boolean usePost, Vertx vertx, VertxTestContext context) {
+    DohResolver resolver = getResolver();
+    resolver.setUsePost(usePost);
+    setupResolverWithServer(resolver, Duration.ZERO, 301, 1, vertx, context)
         .onSuccess(
             server ->
                 Future.fromCompletionStage(resolver.sendAsync(qm))
@@ -114,12 +124,14 @@ class DohResolverTest {
                                     }))));
   }
 
-  @Test
-  void limitRequestsResolve(Vertx vertx, VertxTestContext context) {
-    resolver = new DohResolver("http://localhost", 5, Duration.ofMinutes(2));
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void limitRequestsResolve(boolean usePost, Vertx vertx, VertxTestContext context) {
+    DohResolver resolver = new DohResolver("http://localhost", 5, Duration.ofMinutes(2));
+    resolver.setUsePost(usePost);
     int requests = 100;
     Checkpoint cpPass = context.checkpoint(requests);
-    setupResolverWithServer(Duration.ofMillis(100), 200, 5, vertx, context)
+    setupResolverWithServer(resolver, Duration.ofMillis(100), 200, 5, vertx, context)
         .onSuccess(
             server -> {
               for (int i = 0; i < requests; i++) {
@@ -137,13 +149,15 @@ class DohResolverTest {
             });
   }
 
-  @Test
-  void initialRequestSlowResolve(Vertx vertx, VertxTestContext context) {
-    resolver = new DohResolver("http://localhost", 2, Duration.ofMinutes(2));
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void initialRequestSlowResolve(boolean usePost, Vertx vertx, VertxTestContext context) {
+    DohResolver resolver = new DohResolver("http://localhost", 2, Duration.ofMinutes(2));
+    resolver.setUsePost(usePost);
     int requests = 20;
     allRequestsUseTimeout = false;
     Checkpoint cpPass = context.checkpoint(requests);
-    setupResolverWithServer(Duration.ofSeconds(1), 200, 2, vertx, context)
+    setupResolverWithServer(resolver, Duration.ofSeconds(1), 200, 2, vertx, context)
         .onSuccess(
             server -> {
               for (int i = 0; i < requests; i++) {
@@ -161,19 +175,23 @@ class DohResolverTest {
             });
   }
 
-  @Test
-  void initialRequestTimeoutResolve(Vertx vertx, VertxTestContext context) {
-    resolver = new DohResolver("http://localhost", 2, Duration.ofMinutes(2));
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void initialRequestTimeoutResolve(boolean usePost, Vertx vertx, VertxTestContext context) {
+    DohResolver resolver = new DohResolver("http://localhost", 2, Duration.ofMinutes(2));
+    resolver.setUsePost(usePost);
     resolver.setTimeout(Duration.ofSeconds(1));
     int requests = 20;
     allRequestsUseTimeout = false;
     Checkpoint cpPass = context.checkpoint(requests - 1);
     Checkpoint cpFail = context.checkpoint();
-    setupResolverWithServer(Duration.ofSeconds(2), 200, 2, vertx, context)
+    setupResolverWithServer(resolver, Duration.ofSeconds(2), 200, 2, vertx, context)
         .onSuccess(
             server -> {
+              Message q = qm.clone();
+              q.getHeader().setID(0);
               resolver
-                  .sendAsync(qm)
+                  .sendAsync(q)
                   .whenComplete(
                       (result, ex) -> {
                         if (ex == null) {
@@ -185,9 +203,11 @@ class DohResolverTest {
               vertx.setTimer(
                   1000,
                   timer -> {
-                    for (int i = 0; i < requests - 1; i++) {
+                    for (int i = 1; i < requests; i++) {
+                      Message qq = qm.clone();
+                      qq.getHeader().setID(i);
                       resolver
-                          .sendAsync(qm)
+                          .sendAsync(qq)
                           .whenComplete(
                               (result, ex) -> {
                                 if (ex == null) {
@@ -202,6 +222,7 @@ class DohResolverTest {
   }
 
   private Future<HttpServer> setupResolverWithServer(
+      DohResolver resolver,
       Duration responseDelay,
       int statusCode,
       int maxConcurrentRequests,
@@ -214,12 +235,14 @@ class DohResolverTest {
   @EnabledForJreRange(
       min = JRE.JAVA_9,
       disabledReason = "Java 8 implementation doesn't have the initial request guard")
-  @Test
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
   void initialRequestGuardIfIdleConnectionTimeIsLargerThanSystemNanoTime(
-      Vertx vertx, VertxTestContext context) {
+      boolean usePost, Vertx vertx, VertxTestContext context) {
     AtomicLong startNanos = new AtomicLong(System.nanoTime());
-    resolver = spy(new DohResolver("http://localhost", 2, Duration.ofMinutes(2)));
+    DohResolver resolver = spy(new DohResolver("http://localhost", 2, Duration.ofMinutes(2)));
     resolver.setTimeout(Duration.ofSeconds(1));
+    resolver.setUsePost(usePost);
     // Simulate a nanoTime value that is lower than the idle timeout
     doAnswer((Answer<Long>) invocationOnMock -> System.nanoTime() - startNanos.get())
         .when(resolver)
@@ -243,11 +266,13 @@ class DohResolverTest {
 
     AtomicBoolean firstCallCompleted = new AtomicBoolean(false);
 
-    setupResolverWithServer(Duration.ofMillis(100L), 200, 2, vertx, context)
+    setupResolverWithServer(resolver, Duration.ofMillis(100L), 200, 2, vertx, context)
         .onSuccess(
             server -> {
               // First call
-              CompletionStage<Message> firstCall = resolver.sendAsync(qm);
+              CompletionStage<Message> firstCall =
+                  resolver.sendAsync(qm).whenComplete((msg, ex) -> firstCallCompleted.set(true));
+
               // Ensure second call was made after first call and uses a different query
               startNanos.addAndGet(TimeUnit.MILLISECONDS.toNanos(20));
               CompletionStage<Message> secondCall = resolver.sendAsync(Message.newQuery(qr));
@@ -261,7 +286,6 @@ class DohResolverTest {
                                     assertEquals(Rcode.NOERROR, result.getHeader().getRcode());
                                     assertEquals(0, result.getHeader().getID());
                                     assertEquals(queryName, result.getQuestion().getName());
-                                    firstCallCompleted.set(true);
                                   })));
 
               Future.fromCompletionStage(secondCall)
@@ -302,10 +326,12 @@ class DohResolverTest {
               int thisRequestNum = requestCount.incrementAndGet();
               int count = concurrentRequests.incrementAndGet();
               if (count > maxConcurrentRequests) {
-                context.failNow("Concurrent requests exceeded");
+                context.failNow(
+                    "Concurrent requests exceeded: " + count + " > " + maxConcurrentRequests);
                 return;
               }
 
+              httpRequest.endHandler(v -> concurrentRequests.decrementAndGet());
               httpRequest.bodyHandler(
                   body -> {
                     context.verify(
@@ -332,15 +358,12 @@ class DohResolverTest {
                         && (thisRequestNum == 1 || allRequestsUseTimeout)) {
                       vertx.setTimer(
                           serverProcessingTime.toMillis(),
-                          timer -> {
-                            concurrentRequests.decrementAndGet();
-                            httpRequest
-                                .response()
-                                .setStatusCode(statusCode)
-                                .end(Buffer.buffer(dnsResponseCopy.toWire()));
-                          });
+                          timer ->
+                              httpRequest
+                                  .response()
+                                  .setStatusCode(statusCode)
+                                  .end(Buffer.buffer(dnsResponseCopy.toWire())));
                     } else {
-                      concurrentRequests.decrementAndGet();
                       httpRequest
                           .response()
                           .setStatusCode(statusCode)
