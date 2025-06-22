@@ -26,7 +26,7 @@ final class AsyncSemaphore {
           log.trace("{} permit released id={}, available={}", name, id, permits);
         } else {
           log.trace("{} permit released id={}, available={}, immediate next", name, id, permits);
-          executor.execute(() -> next.complete(this));
+          next.completeAsync(() -> this, executor);
         }
       }
     }
@@ -35,7 +35,7 @@ final class AsyncSemaphore {
   AsyncSemaphore(int permits, String name) {
     this.permits = permits;
     this.name = name;
-    log.debug("Using Java 8 implementation for {}", name);
+    log.debug("Using Java 11+ implementation for {}", name);
   }
 
   CompletionStage<Permit> acquire(Duration timeout, int id, Executor executor) {
@@ -45,8 +45,8 @@ final class AsyncSemaphore {
         log.trace("{} permit acquired id={}, available={}", name, id, permits);
         return CompletableFuture.completedFuture(singletonPermit);
       } else {
-        TimeoutCompletableFuture<Permit> f = new TimeoutCompletableFuture<>();
-        f.compatTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS)
+        CompletableFuture<Permit> f = new CompletableFuture<>();
+        f.orTimeout(timeout.toNanos(), TimeUnit.NANOSECONDS)
             .whenCompleteAsync(
                 (result, ex) -> {
                   synchronized (queue) {
