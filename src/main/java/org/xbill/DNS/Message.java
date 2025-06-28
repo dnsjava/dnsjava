@@ -810,9 +810,11 @@ public class Message implements Cloneable {
     List<RRset> additionalSectionSets = getSectionRRsets(Section.ADDITIONAL);
     List<RRset> authoritySectionSets = getSectionRRsets(Section.AUTHORITY);
 
-    List<RRset> cleanedAnswerSection = new ArrayList<>();
-    List<RRset> cleanedAuthoritySection = new ArrayList<>();
-    List<RRset> cleanedAdditionalSection = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    List<RRset>[] cleanedSection = new ArrayList[4];
+    cleanedSection[Section.ANSWER] = new ArrayList<>();
+    cleanedSection[Section.AUTHORITY] = new ArrayList<>();
+    cleanedSection[Section.ADDITIONAL] = new ArrayList<>();
     boolean hadNsInAuthority = false;
 
     // For the ANSWER section, remove all "irrelevant" records and add synthesized CNAMEs from
@@ -843,7 +845,7 @@ public class Message implements Cloneable {
         // If DNAME was queried, don't attempt to synthesize CNAME
         if (query.getQuestion().getType() != Type.DNAME) {
           // The DNAME is valid, accept it
-          cleanedAnswerSection.add(rrset);
+          cleanedSection[Section.ANSWER].add(rrset);
 
           // Check if the next rrset is correct CNAME, otherwise synthesize a CNAME
           RRset nextRRSet = answerSectionSets.size() >= i + 2 ? answerSectionSets.get(i + 1) : null;
@@ -863,7 +865,7 @@ public class Message implements Cloneable {
 
             // Add a synthesized CNAME; TTL=0 to avoid caching
             Name dnameTarget = sname.fromDNAME(dname);
-            cleanedAnswerSection.add(
+            cleanedSection[Section.ANSWER].add(
                 new RRset(new CNAMERecord(sname, dname.getDClass(), 0, dnameTarget)));
             sname = dnameTarget;
 
@@ -872,7 +874,7 @@ public class Message implements Cloneable {
               for (i++; i < answerSectionSets.size(); i++) {
                 rrset = answerSectionSets.get(i);
                 if (rrset.getName().equals(oldSname)) {
-                  cleanedAnswerSection.add(rrset);
+                  cleanedSection[Section.ANSWER].add(rrset);
                 } else {
                   break;
                 }
@@ -943,14 +945,14 @@ public class Message implements Cloneable {
         }
 
         sname = ((CNAMERecord) rrset.first()).getTarget();
-        cleanedAnswerSection.add(rrset);
+        cleanedSection[Section.ANSWER].add(rrset);
 
         // In CNAME ANY response, can have data after CNAME
         if (query.getQuestion().getType() == Type.ANY) {
           for (i++; i < answerSectionSets.size(); i++) {
             rrset = answerSectionSets.get(i);
             if (rrset.getName().equals(oldSname)) {
-              cleanedAnswerSection.add(rrset);
+              cleanedSection[Section.ANSWER].add(rrset);
             } else {
               break;
             }
@@ -973,9 +975,9 @@ public class Message implements Cloneable {
       }
 
       // Mark the additional names from relevant RRset as OK
-      cleanedAnswerSection.add(rrset);
+      cleanedSection[Section.ANSWER].add(rrset);
       if (sname.equals(rrset.getName())) {
-        addAdditionalRRset(rrset, additionalSectionSets, cleanedAdditionalSection);
+        addAdditionalRRset(rrset, additionalSectionSets, cleanedSection[Section.ADDITIONAL]);
       }
     }
 
@@ -1045,15 +1047,25 @@ public class Message implements Cloneable {
         }
       }
 
-      cleanedAuthoritySection.add(rrset);
-      addAdditionalRRset(rrset, additionalSectionSets, cleanedAdditionalSection);
+      cleanedSection[Section.AUTHORITY].add(rrset);
+      addAdditionalRRset(rrset, additionalSectionSets, cleanedSection[Section.ADDITIONAL]);
     }
 
     Message cleanedMessage = new Message(this.getHeader());
     cleanedMessage.sections[Section.QUESTION] = this.sections[Section.QUESTION];
-    cleanedMessage.sections[Section.ANSWER] = rrsetListToRecords(cleanedAnswerSection);
-    cleanedMessage.sections[Section.AUTHORITY] = rrsetListToRecords(cleanedAuthoritySection);
-    cleanedMessage.sections[Section.ADDITIONAL] = rrsetListToRecords(cleanedAdditionalSection);
+    for (int section : new int[] {Section.ANSWER, Section.AUTHORITY, Section.ADDITIONAL}) {
+      cleanedMessage.sections[section] = rrsetListToRecords(cleanedSection[section]);
+
+      // Fixup counts in the header
+      cleanedMessage
+          .getHeader()
+          .setCount(
+              section,
+              cleanedMessage.sections[section] == null
+                  ? 0
+                  : cleanedMessage.sections[section].size());
+    }
+
     return cleanedMessage;
   }
 
