@@ -35,6 +35,7 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -177,7 +178,9 @@ class MessageTest {
     response.addRecord(queryRecord, Section.QUESTION);
     response.addRecord(queryRecord, Section.ADDITIONAL);
     response = response.normalize(query, true);
-    assertTrue(response.getSection(Section.ANSWER).isEmpty());
-    assertTrue(response.getSection(Section.ADDITIONAL).isEmpty());
+    assertThat(response.getSection(Section.ANSWER)).isEmpty();
+    assertThat(response.getHeader().getCount(Section.ANSWER)).isZero();
+    assertThat(response.getSection(Section.ADDITIONAL)).isEmpty();
+    assertThat(response.getHeader().getCount(Section.ADDITIONAL)).isZero();
   }
 }

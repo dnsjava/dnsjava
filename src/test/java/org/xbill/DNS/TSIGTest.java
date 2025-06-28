@@ -2,6 +2,7 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -518,6 +519,19 @@ class TSIGTest {
     client.run(handler);
     // soa on first message, + a record on every message, +soa on last message
     assertEquals(202, handler.getRecords().size());
+  }
+
+  @Test
+  void invalidAdditionalCount() {
+    Message q = Message.newQuery(Record.newRecord(Name.root, Type.A, DClass.IN));
+    Message m = new Message();
+    m.addRecord(Record.newRecord(Name.root, Type.A, DClass.IN), Section.QUESTION);
+    m.addRecord(Record.newRecord(Name.root, Type.A, DClass.IN), Section.ANSWER);
+    m.addRecord(
+        Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN),
+        Section.ADDITIONAL);
+    assertDoesNotThrow(m::getTSIG);
+    assertDoesNotThrow(() -> m.normalize(q).getTSIG());
   }
 
   @Getter

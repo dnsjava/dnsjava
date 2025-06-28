@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -126,7 +127,18 @@ public abstract class TestBase {
 
           Message m;
           while ((m = messageReader.readMessage(r)) != null) {
+            for (int i = 0; i < 4; i++) {
+              assertThat(m.getHeader().getCount(i))
+                  .withFailMessage("Before normalization")
+                  .isEqualTo(m.getSection(i).size());
+            }
+
             m = m.normalize(Message.newQuery(m.getQuestion()), true);
+            for (int i = 0; i < 4; i++) {
+              assertThat(m.getHeader().getCount(i))
+                  .withFailMessage("After normalization")
+                  .isEqualTo(m.getSection(i).size());
+            }
             queryResponsePairs.put(key(m), m);
           }
 
@@ -286,7 +298,7 @@ public abstract class TestBase {
         .flatMap(
             opt ->
                 opt.getOptions(Code.EDNS_EXTENDED_ERROR).stream()
-                    .filter(o -> o instanceof ExtendedErrorCodeOption)
+                    .filter(ExtendedErrorCodeOption.class::isInstance)
                     .findFirst()
                     .map(o -> ((ExtendedErrorCodeOption) o).getText()))
         .orElse(null);
