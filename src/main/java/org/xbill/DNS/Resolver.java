@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -239,11 +240,16 @@ public interface Resolver {
         (result, throwable) -> {
           if (throwable != null) {
             Exception exception;
+            if (throwable instanceof CompletionException && throwable.getCause() != null) {
+              throwable = throwable.getCause();
+            }
+
             if (throwable instanceof Exception) {
               exception = (Exception) throwable;
             } else {
               exception = new Exception(throwable);
             }
+
             listener.handleException(id, exception);
             return null;
           }
