@@ -45,8 +45,8 @@ public abstract class NioClient {
 
   private static final Runnable[] TIMEOUT_TASKS = new Runnable[2];
 
-  @SuppressWarnings("unchecked")
-  private static final Consumer<Selector>[] REGISTRATIONS_TASKS = new Consumer[2];
+  private static Consumer<Selector> TCP_REGISTRATIONS_TASK;
+  private static Consumer<Selector> UDP_REGISTRATIONS_TASK;
 
   private static final Runnable[] CLOSE_TASKS = new Runnable[2];
   private static Thread selectorThread;
@@ -193,7 +193,11 @@ public abstract class NioClient {
   }
 
   static void setRegistrationsTask(Consumer<Selector> r, boolean isTcpClient) {
-    addRegistrationTask(r, isTcpClient);
+    if (isTcpClient) {
+      TCP_REGISTRATIONS_TASK = r;
+    } else {
+      UDP_REGISTRATIONS_TASK = r;
+    }
   }
 
   static void setCloseTask(Runnable r, boolean isTcpClient) {
@@ -205,14 +209,6 @@ public abstract class NioClient {
       tasks[0] = r;
     } else {
       tasks[1] = r;
-    }
-  }
-
-  private static void addRegistrationTask(Consumer<Selector> r, boolean isTcpClient) {
-    if (isTcpClient) {
-      REGISTRATIONS_TASKS[0] = r;
-    } else {
-      REGISTRATIONS_TASKS[1] = r;
     }
   }
 
@@ -228,13 +224,13 @@ public abstract class NioClient {
   }
 
   private static void runRegistrationTasks() {
-    Consumer<Selector> r0 = REGISTRATIONS_TASKS[0];
-    if (r0 != null) {
-      r0.accept(selector);
+    Consumer<Selector> tcpTask = TCP_REGISTRATIONS_TASK;
+    if (tcpTask != null) {
+      tcpTask.accept(selector);
     }
-    Consumer<Selector> r1 = REGISTRATIONS_TASKS[1];
-    if (r1 != null) {
-      r1.accept(selector);
+    Consumer<Selector> udpTask = UDP_REGISTRATIONS_TASK;
+    if (udpTask != null) {
+      udpTask.accept(selector);
     }
   }
 

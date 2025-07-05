@@ -810,7 +810,7 @@ public class Message implements Cloneable {
     List<RRset> additionalSectionSets = getSectionRRsets(Section.ADDITIONAL);
     List<RRset> authoritySectionSets = getSectionRRsets(Section.AUTHORITY);
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     List<RRset>[] cleanedSection = new ArrayList[4];
     cleanedSection[Section.ANSWER] = new ArrayList<>();
     cleanedSection[Section.AUTHORITY] = new ArrayList<>();
