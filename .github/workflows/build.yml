@@ -200,6 +200,7 @@ jobs:
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_PW: ${{ secrets.SONATYPE_PW }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PW }}
         run: |
           cat <(echo -e "${{ secrets.GPG_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
@@ -214,10 +215,8 @@ jobs:
             mvn \
               --no-transfer-progress \
               --batch-mode \
-              -Dgpg.passphrase="${{ secrets.GPG_PW }}" \
               -DperformRelease=true \
               -DskipTests \
-              -Dmaven.test.skip.exec \
               -Dcheckstyle.skip \
               -Dspotless.check.skip=true \
               -Danimal.sniffer.skip=true \

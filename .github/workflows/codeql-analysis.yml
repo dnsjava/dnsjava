@@ -48,7 +48,6 @@ jobs:
         run: |
           mvn clean package -B -V \
             -DskipTests \
-            -Dmaven.test.skip.exec \
             -Dgpg.skip \
             -Dcheckstyle.skip \
             -Denforcer.skip \
