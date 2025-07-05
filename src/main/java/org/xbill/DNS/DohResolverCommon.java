@@ -59,7 +59,8 @@ abstract class DohResolverCommon implements Resolver {
       // well, use what we got
     }
 
-    this.maxConcurrentRequests = new AsyncSemaphore(maxConcurrentRequests, "concurrent");
+    this.maxConcurrentRequests =
+        new AsyncSemaphore(maxConcurrentRequests, "concurrent request limit");
   }
 
   /** Not implemented. Specify the port in {@link #setUriTemplate(String)} if required. */
