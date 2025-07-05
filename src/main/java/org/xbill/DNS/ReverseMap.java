@@ -149,14 +149,14 @@ public final class ReverseMap {
    */
   public static InetAddress fromName(Name name) throws UnknownHostException {
     if (name.labels() <= 3) {
-      throw new UnknownHostException("Not an arpa address: " + name.toString());
+      throw new UnknownHostException("Not an arpa address: " + name);
     }
 
     byte[] ipBytes;
     if (name.subdomain(inaddr4)) {
       Name ip = name.relativize(inaddr4);
       if (ip.labels() > 4) {
-        throw new UnknownHostException("Invalid IPv4 arpa address: " + name.toString());
+        throw new UnknownHostException("Invalid IPv4 arpa address: " + name);
       }
 
       ipBytes = new byte[4];
@@ -165,26 +165,28 @@ public final class ReverseMap {
           ipBytes[ip.labels() - i - 1] = (byte) Integer.parseInt(ip.getLabelString(i));
         }
       } catch (NumberFormatException e) {
-        throw new UnknownHostException("Invalid IPv4 arpa address: " + name.toString());
+        throw new UnknownHostException("Invalid IPv4 arpa address: " + name);
       }
       return InetAddress.getByAddress(ipBytes);
     } else if (name.subdomain(inaddr6)) {
       Name ip = name.relativize(inaddr6);
       if (ip.labels() > 32) {
-        throw new UnknownHostException("Invalid IPv6 arpa address: " + name.toString());
+        throw new UnknownHostException("Invalid IPv6 arpa address: " + name);
       }
 
       ipBytes = new byte[16];
       try {
         for (int i = 0; i < ip.labels(); i++) {
           ipBytes[(ip.labels() - i - 1) / 2] |=
-              Byte.parseByte(ip.getLabelString(i), 16) << ((ip.labels() - i) % 2 == 0 ? 0 : 4);
+              (byte)
+                  (Byte.parseByte(ip.getLabelString(i), 16)
+                      << ((ip.labels() - i) % 2 == 0 ? 0 : 4));
         }
       } catch (NumberFormatException e) {
-        throw new UnknownHostException("Invalid IPv6 arpa address: " + name.toString());
+        throw new UnknownHostException("Invalid IPv6 arpa address: " + name);
       }
     } else {
-      throw new UnknownHostException("Not an arpa address: " + name.toString());
+      throw new UnknownHostException("Not an arpa address: " + name);
     }
 
     return InetAddress.getByAddress(ipBytes);
