@@ -192,7 +192,7 @@ jobs:
           architecture: 'x64'
           distribution: temurin
           cache: maven
-          server-id: ossrh
+          server-id: central
           server-username: SONATYPE_USER
           server-password: SONATYPE_PW
 
