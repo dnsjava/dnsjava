@@ -4,6 +4,7 @@ package org.xbill.DNS;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -321,20 +322,34 @@ public class LookupTest {
     Lookup l = makeLookupWithResolver(mockResolver, "example.com");
     l.setSearchPath("namespace.svc.cluster.local", "svc.cluster.local", "cluster.local");
     Record[] results = l.run();
-    verify(mockResolver).send(any(Message.class));
+    verify(mockResolver, times(1)).send(any(Message.class));
     assertEquals(1, results.length);
   }
 
   @Test
   void testNdotsFallbackToAbsolute() throws Exception {
     mockResolver = Mockito.mock(Resolver.class);
-    wireUpMockResolver(mockResolver, this::goodAnswerWhenThreeLabels);
+    wireUpMockResolver(mockResolver, name -> goodAnswerWhenNLabels(name, 3));
     Lookup l = makeLookupWithResolver(mockResolver, "example.com");
     l.setSearchPath("namespace.svc.cluster.local", "svc.cluster.local", "cluster.local");
     l.setNdots(5);
     Record[] results = l.run();
     verify(mockResolver, times(4)).send(any(Message.class));
     assertEquals(1, results.length);
+  }
+
+  @Test
+  void testNdotsFallbackToAbsoluteButNotTwice() throws Exception {
+    mockResolver = Mockito.mock(Resolver.class);
+    // Never answer with a positive response
+    wireUpMockResolver(mockResolver, name -> goodAnswerWhenNLabels(name, -1));
+    // Two dots with ndots=2, so implicitly absolute
+    Lookup l = makeLookupWithResolver(mockResolver, "service.example.com");
+    l.setNdots(2);
+    Record[] results = l.run();
+    verify(mockResolver, times(1)).send(any(Message.class));
+    assertThat(results).isNull();
+    assertThat(l.getResult()).isEqualTo(Lookup.HOST_NOT_FOUND);
   }
 
   @Test
@@ -384,11 +399,11 @@ public class LookupTest {
         ((ARecord) run[0]).getAddress());
   }
 
-  private Message goodAnswerWhenThreeLabels(Message query) {
+  private Message goodAnswerWhenNLabels(Message query, int numLabels) {
     return answer(
         query,
         name -> {
-          if (name.labels() == 3) {
+          if (name.labels() == numLabels) {
             return new ARecord(DUMMY_NAME, DClass.IN, 60, InetAddress.getLoopbackAddress());
           } else {
             return null;

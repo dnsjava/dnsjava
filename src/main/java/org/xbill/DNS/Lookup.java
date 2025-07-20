@@ -668,18 +668,15 @@ public final class Lookup {
 
   private void resolve(Name current, Name suffix) {
     doneCurrent = false;
-    Name tname;
     if (suffix == null) {
-      tname = current;
+      lookup(current);
     } else {
       try {
-        tname = Name.concatenate(current, suffix);
+        lookup(Name.concatenate(current, suffix));
       } catch (NameTooLongException e) {
         nametoolong = true;
-        return;
       }
     }
-    lookup(tname);
   }
 
   /**
@@ -694,11 +691,13 @@ public final class Lookup {
     if (name.isAbsolute()) {
       resolve(name, null);
     } else {
-      if (name.labels() > ndots) {
+      // Save absolute query attempt state to prevent a double absolute lookup
+      boolean absoluteNameAttempted = name.labels() > ndots;
+      if (absoluteNameAttempted) {
         resolve(name, Name.root);
-      }
-      if (done) {
-        return answers;
+        if (done) {
+          return answers;
+        }
       }
 
       for (Name value : searchPath) {
@@ -710,8 +709,11 @@ public final class Lookup {
         }
       }
 
-      resolve(name, Name.root);
+      if (!absoluteNameAttempted) {
+        resolve(name, Name.root);
+      }
     }
+
     if (!done) {
       if (badresponse) {
         result = TRY_AGAIN;
