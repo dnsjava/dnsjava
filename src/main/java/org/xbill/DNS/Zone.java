@@ -35,9 +35,9 @@ public class Zone implements Serializable, Iterable<RRset> {
   /** A secondary zone. */
   public static final int SECONDARY = 2;
 
-  private final transient ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-  private final transient ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
-  private final transient ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
+  private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+  private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
+  private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
 
   private final Map<Name, Object> data = new ConcurrentSkipListMap<>();
 

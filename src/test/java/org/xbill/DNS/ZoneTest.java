@@ -10,7 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Iterator;
@@ -682,6 +686,21 @@ class ZoneTest {
     assertThatThrownBy(iterator::next)
         .isInstanceOf(NoSuchElementException.class)
         .hasMessageContaining("No more elements");
+  }
+
+  @Test
+  void isSerializable() throws IOException, ClassNotFoundException {
+    ByteArrayOutputStream oms = new ByteArrayOutputStream();
+    ObjectOutputStream oos = new ObjectOutputStream(oms);
+    oos.writeObject(ZONE);
+    byte[] zoneData = oms.toByteArray();
+    ByteArrayInputStream ims = new ByteArrayInputStream(zoneData);
+    ObjectInputStream ois = new ObjectInputStream(ims);
+    Zone z = (Zone) ois.readObject();
+    assertThat(z.getSOA()).isEqualTo(SOA1);
+    assertThat(z.findExactMatch(ZONE.getOrigin(), Type.SOA)).first().isEqualTo(SOA1);
+    assertDoesNotThrow(
+        () -> z.addRecord(A_TEST.withName(new Name("some-other-name", ZONE.getOrigin()))));
   }
 
   private static List<RRset> listOf(RRset... rrsets) {
