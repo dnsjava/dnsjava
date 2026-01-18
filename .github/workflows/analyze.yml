@@ -13,7 +13,7 @@ permissions:
   checks: write
 
 env:
-  BUILD_JAVA_VERSION: '21'
+  BUILD_JAVA_VERSION: '25'
 
 jobs:
   analyze:
@@ -24,7 +24,8 @@ jobs:
     steps:
       - name: Download PR number artifact
         id: get_pr_number
-        uses: dawidd6/action-download-artifact@v6
+        #v12
+        uses: dawidd6/action-download-artifact@0bd50d53a6d7fb5cb921e607957e9cc12b4ce392
         with:
           workflow: ${{ github.event.workflow_run.name }}
           run_id: ${{ github.event.workflow_run.id }}
@@ -39,7 +40,8 @@ jobs:
       - name: Request PR data from GitHub API
         id: get_pr_data
         if: steps.get_pr_number.outputs.found_artifact
-        uses: octokit/request-action@v2.x
+        #v2.4.0
+        uses: octokit/request-action@dad4362715b7fb2ddedf9772c8670824af564f0d
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -48,20 +50,17 @@ jobs:
           number: ${{ steps.pr_number.outputs.pr_number }}
 
       - name: Checkout PR
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
+          path: pr
           # for Sonar
           fetch-depth: 0
 
-      - name: Make sure 'base' doesn't exist
-        shell: bash
-        run: rm -rf base
-
       - name: Checkout base
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.event.repository.full_name }}
           ref: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
@@ -80,8 +79,10 @@ jobs:
           WF_BRANCH: ${{ fromJson(steps.get_pr_data.outputs.data).head.ref }}
           WF_BASE: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
         run: |
-          cp -f base/pom.xml .
+          cp -f base/pom.xml pr/
+          cd pr
           mvn -B \
+          -f pom.xml \
           -Dsonar.scm.revision='${WF_REVISION}' \
           -Dsonar.pullrequest.key='${WF_PRKEY}' \
           -Dsonar.pullrequest.branch='${WF_BRANCH}' \

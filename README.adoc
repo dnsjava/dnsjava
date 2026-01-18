@@ -283,7 +283,8 @@ on the classpath
 * The link:USAGE.md[command line tools] were moved to the `org.xbill.DNS.tools`
 package
 
-* On Windows, https://github.com/java-native-access/jna[JNA] should be on the classpath for the search path and proper DNS server finding
+* On Windows, https://github.com/java-native-access/jna[JNA] should be on the classpath for the search path and proper DNS server finding.
+As of Java 24, note that additional JVM config is required, see https://javadoc.io/doc/net.java.dev.jna/jna/latest/index.html#special-considerations-for-jdk24--heading[Special considerations for JDK24+].
 
 * The `Resolver` API for custom resolvers has changed to use
 `CompletionStage<Message>` for asynchronous resolving.
