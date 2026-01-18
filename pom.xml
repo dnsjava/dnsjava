@@ -771,13 +771,13 @@
             <properties>
                 <mockito.version>5.21.0</mockito.version>
                 <!--
-                 Stay on 1.22:
-                 - 1.23 introduces a change that is inconsistent with 1.7 used for Java 8
-                   https://github.com/google/google-java-format/issues/876
-                 - 1.25 requires JDK 17
+                 Stay on 1.24 as 1.25 requires JDK 17
                 -->
-                <google-java-format.version>1.22.0</google-java-format.version>
-                <spotless.version>3.1.0</spotless.version>
+                <google-java-format.version>1.24.0</google-java-format.version>
+                <!--
+                 Stay on 2x as 3.x requires JDK 17
+                -->
+                <spotless.version>2.46.1</spotless.version>
             </properties>
 
             <build>
@@ -924,8 +924,23 @@
                 <jdk>[18,)</jdk>
             </activation>
 
+            <properties>
+                <google-java-format.version>1.27.0</google-java-format.version>
+                <spotless.version>3.1.0</spotless.version>
+            </properties>
+
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <configuration>
+                            <java>
+                                <forbidWildcardImports/>
+                            </java>
+                        </configuration>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>

@@ -1129,9 +1129,9 @@ public final class ValidatingResolver implements Resolver {
       Nsec3ValidationState nsec3State = new Nsec3ValidationState();
       switch (this.n3valUtils.proveNoDS(nsec3s, qname, nsec3Signer, nsec3State)) {
         case INSECURE:
+        case SECURE:
           // case insecure also continues to unsigned space.
           // If nsec3-iter-count too high or optout, then treat below as unsigned
-        case SECURE:
           KeyEntry nullKey = KeyEntry.newNullKeyEntry(qname, qclass, nsec3TTL);
           nullKey.setBadReason(-1, R.get("insecure.ds.nsec3"));
           return nullKey;
