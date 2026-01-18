@@ -101,10 +101,14 @@ public abstract class NioClient {
     }
 
     if (!fromHook) {
-      try {
-        Runtime.getRuntime().removeShutdownHook(closeThread);
-      } catch (Exception ex) {
-        log.warn("Failed to remove shutdown hook, ignoring and continuing close");
+      synchronized (NIO_CLIENT_LOCK) {
+        if (closeThread != null) {
+          try {
+            Runtime.getRuntime().removeShutdownHook(closeThread);
+          } catch (Exception ex) {
+            log.warn("Failed to remove shutdown hook, ignoring and continuing close", ex);
+          }
+        }
       }
     }
 
