@@ -1,3 +1,19 @@
+01/18/2026
+	- 3.6.4 released
+	- Fix Zone-class serialization (#391)
+	- Avoid Double DNS Lookup for Names with Labels >= ndots (#388)
+	- Prevent NPE when calling Message#getTSIG() on DNS request with
+	  bad header (#384)
+	- Unwrap an exception in the legacy callback-based async interface (#383)
+	- Prevent ConcurrentModificationException in NIO clients
+	  (#379, @bhaveshthakker)
+	- Handle `null` in all setSearchPath overloads equally (#157)
+	- Reduce warning level of invalid `hosts` file entries (#371)
+	- Remove a lock on the hot-path in the `hosts` file parser (#371)
+	- DoH Resolver makes use of the Multi-Release jar and tests are executed
+	  for Java 8 and 11+ implementations (#385)
+	- Fix DoH Resolver initial request delay (#385)
+
 01/26/2025
 	- 3.6.3 released
 	- Support custom hosts file size (@flaming-archer, #349)
@@ -9,7 +25,8 @@
 	- Message.toWire can exceed MAXLENGTH (#355)
 	- TCP query might fail if the shared buffer is full (#357)
 	- Dynamic updates silently truncates records (#356)
-	- Fix DoH initial request using recommended nanoTime calculation (@LinZong, #345)
+	- Fix DoH initial request using recommended nanoTime calculation
+	 (@LinZong, #345)
 
 09/21/2024
 	- 3.6.2 released
