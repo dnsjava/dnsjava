@@ -66,11 +66,10 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
   private void closeTcp() {
     registrationQueue.clear();
     EOFException closing = new EOFException("Client is closing");
-    channelMap.forEach(
-        (key, state) -> {
-          state.handleTransactionException(closing);
-          state.handleChannelException(closing);
-        });
+    for (ChannelState state : channelMap.values()) {
+      state.handleTransactionException(closing);
+      state.handleChannelException(closing);
+    }
     channelMap.clear();
   }
 
