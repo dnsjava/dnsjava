@@ -94,6 +94,7 @@ public abstract class NioClient {
   }
 
   private static void close(boolean fromHook) {
+    log.debug("Closing dnsjava NIO selector, fromHook={}", fromHook);
     run = false;
     Selector localSelector = selector;
     if (localSelector != null) {
@@ -139,7 +140,14 @@ public abstract class NioClient {
 
     while (run) {
       try {
-        if (selector.select(timeout) == 0) {
+        int numSelects = selector.select(timeout);
+        if (Thread.currentThread().isInterrupted()) {
+          log.debug("Sector thread was interrupted, stopping");
+          close();
+          break;
+        }
+
+        if (numSelects == 0) {
           runTasks(TIMEOUT_TASKS);
         }
 
