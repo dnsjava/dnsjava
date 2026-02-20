@@ -142,7 +142,7 @@ If disabled, such records are copied from the upstream and presented to the clie
 |1000
 |5000
 
-.2+|org.jitsi.dnssec.nsec3.iterations.N
+.2+|dnsjava.dnssec.nsec3.iterations.N
 3+a|Maximum iteration count for the NSEC3 hashing function depending on the key size N. The defaults are from https://datatracker.ietf.org/doc/html/rfc5155#section-10.3[RFC5155].
 |Integer
 2+a|- 1024 bit keys: 150 iterations
@@ -193,14 +193,14 @@ This is limited to avoid the 'KeyTrap' vulnerability (CVE-2023-50387).
 |4
 |2
 
-.2+|dnsjava.dnssec.algorithm_enabled.ID
+.2+|dnsjava.dnssec.algorithm.ID
 3+|Enable or disable a DS/DNSKEY algorithm.
 See
 https://datatracker.ietf.org/doc/html/rfc8624#section-3.1[RFC8624] for recommended values.
 Note that algorithm number 1, `RSAMD5`, is disabled and cannot be enabled with this property.
 |Boolean
 2+|Disable ED448:
-`dnsjava.dnssec.algorithm_enabled.16=false`
+`dnsjava.dnssec.algorithm.16=false`
 
 .2+|dnsjava.dnssec.algorithm_rsa_min_key_size
 3+|Set the minimum size, in bits, for RSA keys.
@@ -208,13 +208,13 @@ Note that algorithm number 1, `RSAMD5`, is disabled and cannot be enabled with t
 |1024
 |512
 
-.2+|dnsjava.dnssec.digest_enabled.ID
+.2+|dnsjava.dnssec.digest.ID
 3+|Enable or disable a DS record digest algorithm.
 See
 https://datatracker.ietf.org/doc/html/rfc8624#section-3.3[RFC8624] for recommended values.
 |Boolean
 2+|Disable SHA.1:
-`dnsjava.dnssec.digest_enabled.1=false`
+`dnsjava.dnssec.digest.1=false`
 
 |===
 
