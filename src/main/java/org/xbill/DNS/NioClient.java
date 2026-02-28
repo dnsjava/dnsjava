@@ -44,11 +44,11 @@ public abstract class NioClient {
   private static PacketLogger packetLogger = null;
 
   private static final Runnable[] TIMEOUT_TASKS = new Runnable[2];
-
-  private static Consumer<Selector> TCP_REGISTRATIONS_TASK;
-  private static Consumer<Selector> UDP_REGISTRATIONS_TASK;
-
   private static final Runnable[] CLOSE_TASKS = new Runnable[2];
+
+  private static Consumer<Selector> tcpRegistrationsTask;
+  private static Consumer<Selector> udpRegistrationsTask;
+
   private static Thread selectorThread;
   private static Thread closeThread;
   private static volatile Selector selector;
@@ -206,9 +206,9 @@ public abstract class NioClient {
 
   static void setRegistrationsTask(Consumer<Selector> r, boolean isTcpClient) {
     if (isTcpClient) {
-      TCP_REGISTRATIONS_TASK = r;
+      tcpRegistrationsTask = r;
     } else {
-      UDP_REGISTRATIONS_TASK = r;
+      udpRegistrationsTask = r;
     }
   }
 
@@ -236,11 +236,11 @@ public abstract class NioClient {
   }
 
   private static void runRegistrationTasks() {
-    Consumer<Selector> tcpTask = TCP_REGISTRATIONS_TASK;
+    Consumer<Selector> tcpTask = tcpRegistrationsTask;
     if (tcpTask != null) {
       tcpTask.accept(selector);
     }
-    Consumer<Selector> udpTask = UDP_REGISTRATIONS_TASK;
+    Consumer<Selector> udpTask = udpRegistrationsTask;
     if (udpTask != null) {
       udpTask.accept(selector);
     }

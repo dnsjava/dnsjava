@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.security.SecureRandom;
@@ -82,7 +83,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
   }
 
   @RequiredArgsConstructor
-  private class Transaction implements KeyProcessor {
+  private final class Transaction implements KeyProcessor {
     private final int id;
     private final byte[] data;
     private final int max;
@@ -109,9 +110,16 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
 
     @Override
     public void processReadyKey(SelectionKey key) {
+      if (!key.isValid()) {
+        completeExceptionally(new EOFException("Key for transaction " + id + " is invalid"));
+        pendingTransactions.remove(this);
+        return;
+      }
+
       if (!key.isReadable()) {
         completeExceptionally(new EOFException("Key for transaction " + id + " is not readable"));
         pendingTransactions.remove(this);
+        key.cancel();
         return;
       }
 
@@ -121,11 +129,12 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
       try {
         read = keyChannel.read(buffer);
         if (read <= 0) {
-          throw new EOFException();
+          throw new EOFException("Could not read expected data for transaction " + id);
         }
-      } catch (IOException e) {
+      } catch (IOException | NotYetConnectedException e) {
         completeExceptionally(e);
         pendingTransactions.remove(this);
+        key.cancel();
         return;
       }
 
@@ -137,6 +146,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
           keyChannel.socket().getLocalSocketAddress(),
           keyChannel.socket().getRemoteSocketAddress(),
           resultingData);
+      key.cancel();
       silentDisconnectAndCloseChannel();
       f.complete(resultingData);
       pendingTransactions.remove(this);
@@ -177,28 +187,8 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
       Transaction t = new Transaction(query.getHeader().getID(), data, max, endTime, channel, f);
       if (local == null || local.getPort() == 0) {
         boolean bound = false;
-        for (int i = 0; i < 1024; i++) {
-          try {
-            InetSocketAddress addr = null;
-            if (local == null) {
-              if (prng != null) {
-                addr = new InetSocketAddress(prng.nextInt(ephemeralRange) + ephemeralStart);
-              }
-            } else {
-              int port = local.getPort();
-              if (port == 0 && prng != null) {
-                port = prng.nextInt(ephemeralRange) + ephemeralStart;
-              }
-
-              addr = new InetSocketAddress(local.getAddress(), port);
-            }
-
-            channel.bind(addr);
-            bound = true;
-            break;
-          } catch (SocketException e) {
-            // ignore, we'll try another random port
-          }
+        for (int i = 0; i < 1024 && !bound; i++) {
+          bound = tryBindToSocket(local, channel);
         }
 
         if (!bound) {
@@ -221,6 +211,32 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
     }
 
     return f;
+  }
+
+  private boolean tryBindToSocket(InetSocketAddress local, DatagramChannel channel)
+      throws IOException {
+    try {
+      InetSocketAddress address = null;
+      if (local == null) {
+        if (prng != null) {
+          address = new InetSocketAddress(prng.nextInt(ephemeralRange) + ephemeralStart);
+        }
+      } else {
+        int port = local.getPort();
+        if (port == 0 && prng != null) {
+          port = prng.nextInt(ephemeralRange) + ephemeralStart;
+        }
+
+        address = new InetSocketAddress(local.getAddress(), port);
+      }
+
+      channel.bind(address);
+      return true;
+    } catch (SocketException e) {
+      // ignore, we'll try another random port
+    }
+
+    return false;
   }
 
   private static void silentCloseChannel(DatagramChannel channel) {

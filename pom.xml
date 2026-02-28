@@ -299,6 +299,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
                 <configuration>
+                    <argLine>
+                        @{argLine}
+                        -Djava.util.logging.config.file=${project.build.testOutputDirectory}/logging.properties
+                    </argLine>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <includes>
@@ -656,6 +660,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>${vertx.version}</version>
@@ -852,6 +862,7 @@
                         <configuration>
                             <argLine>
                                 @{argLine}
+                                -Djava.util.logging.config.file=${project.build.testOutputDirectory}/logging.properties
                                 --add-opens java.base/sun.net.dns=ALL-UNNAMED
                             </argLine>
 
@@ -981,6 +992,7 @@
                         <configuration>
                             <argLine>
                                 @{argLine}
+                                -Djava.util.logging.config.file=${project.build.testOutputDirectory}/logging.properties
                                 --enable-native-access=ALL-UNNAMED
                                 --add-opens java.base/sun.net.dns=ALL-UNNAMED
                                 -javaagent:${net.bytebuddy:byte-buddy-agent:jar}

@@ -74,7 +74,7 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
   }
 
   @RequiredArgsConstructor
-  private static class Transaction {
+  private static final class Transaction {
     private final Message query;
     private final byte[] queryData;
     private final long endTime;
@@ -148,9 +148,11 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
             processWrite(key);
           }
           if (key.isReadable()) {
-            processRead();
+            processRead(key);
           }
         }
+      } else {
+        handleTransactionException(new EOFException("Invalid key"));
       }
     }
 
@@ -187,15 +189,17 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
         key.interestOps(SelectionKey.OP_WRITE);
       } catch (IOException e) {
         handleChannelException(e);
+        key.cancel();
       }
     }
 
-    private void processRead() {
+    private void processRead(SelectionKey key) {
       try {
         if (readState == 0) {
           int read = channel.read(responseLengthData);
           if (read < 0) {
             handleChannelException(new EOFException());
+            key.cancel();
             return;
           }
 
@@ -211,12 +215,14 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
         int read = channel.read(responseData);
         if (read < 0) {
           handleChannelException(new EOFException());
+          key.cancel();
           return;
         } else if (responseData.hasRemaining()) {
           return;
         }
       } catch (IOException e) {
         handleChannelException(e);
+        key.cancel();
         return;
       }
 
@@ -269,6 +275,7 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
         } catch (IOException e) {
           t.f.completeExceptionally(e);
           it.remove();
+          key.cancel();
         }
       }
 
