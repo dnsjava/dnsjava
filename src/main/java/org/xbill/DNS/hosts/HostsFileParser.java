@@ -46,8 +46,8 @@ public final class HostsFileParser {
   @SuppressWarnings("java:S3077")
   private volatile Map<String, InetAddress> hostsCache;
 
-  private Instant lastFileModificationCheckTime = Instant.MIN;
-  private Instant lastFileReadTime = Instant.MIN;
+  private Instant lastFileModificationCheckTime = null;
+  private Instant lastFileReadTime = null;
   private boolean isEntireFileParsed;
   private boolean hostsFileWarningLogged = false;
   private long hostsFileSizeBytes;
@@ -254,15 +254,19 @@ public final class HostsFileParser {
       return;
     }
 
-    if (lastFileModificationCheckTime.plus(fileChangeCheckInterval).isBefore(clock.instant())) {
+    if (hostsCache == null
+        || lastFileModificationCheckTime == null
+        || lastFileModificationCheckTime.plus(fileChangeCheckInterval).isBefore(clock.instant())) {
       log.debug("Checked for changes more than 5minutes ago, checking");
       // A filewatcher / inotify etc. would be nicer, but doesn't work. c.f. the write up at
       // https://blog.arkey.fr/2019/09/13/watchservice-and-bind-mount/
 
       synchronized (this) {
-        if (!lastFileModificationCheckTime
-            .plus(fileChangeCheckInterval)
-            .isBefore(clock.instant())) {
+        if (hostsCache != null
+            && lastFileModificationCheckTime != null
+            && !lastFileModificationCheckTime
+                .plus(fileChangeCheckInterval)
+                .isBefore(clock.instant())) {
           log.debug("Never mind, check fulfilled in another thread");
           return;
         }
@@ -276,7 +280,7 @@ public final class HostsFileParser {
   private void readHostsFile() throws IOException {
     if (Files.exists(path)) {
       Instant fileTime = Files.getLastModifiedTime(path).toInstant();
-      if (!lastFileReadTime.equals(fileTime)) {
+      if (lastFileReadTime == null || !lastFileReadTime.equals(fileTime)) {
         createOrClearCache();
 
         hostsFileSizeBytes = Files.size(path);

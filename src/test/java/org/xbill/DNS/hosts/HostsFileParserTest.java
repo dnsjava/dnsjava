@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.hosts;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.BufferedWriter;
@@ -14,16 +20,21 @@ import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.spi.FileSystemProvider;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
+import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -50,6 +61,36 @@ class HostsFileParserTest {
   void testArguments() {
     assertThrows(NullPointerException.class, () -> new HostsFileParser(null));
     assertThrows(IllegalArgumentException.class, () -> new HostsFileParser(tempDir));
+  }
+
+  @Test
+  void handleNoValidClock() {
+    HostsFileParser p = new HostsFileParser(hostsFileWindows);
+    p.setClock(Clock.fixed(Instant.MIN, ZoneId.systemDefault()));
+    assertDoesNotThrow(() -> p.getAddressForHost(Name.root, Type.A));
+  }
+
+  @Test
+  void handleNoModificationTime() throws IOException {
+    FileSystemProvider spiedFsp = spy(FileSystemProviders.getFileSystemProvider(hostsFileWindows));
+    doAnswer(
+            a -> {
+              BasicFileAttributes attributes = spy((BasicFileAttributes) a.callRealMethod());
+              when(attributes.lastModifiedTime()).thenReturn(FileTime.from(Instant.MIN));
+              return attributes;
+            })
+        .when(spiedFsp)
+        .readAttributes(any(), eq(BasicFileAttributes.class));
+    Path spiedPath = spy(spiedFsp.getPath(hostsFileWindows.toUri()));
+    when(spiedPath.getFileSystem())
+        .thenAnswer(
+            a -> {
+              FileSystem spiedFs = spy((FileSystem) a.callRealMethod());
+              doReturn(spiedFsp).when(spiedFs).provider();
+              return spiedFs;
+            });
+    HostsFileParser p = new HostsFileParser(spiedPath);
+    assertDoesNotThrow(() -> p.getAddressForHost(Name.root, Type.A));
   }
 
   @Test
