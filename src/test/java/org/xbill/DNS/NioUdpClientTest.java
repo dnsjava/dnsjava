@@ -26,14 +26,23 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("unchecked")
+@EnabledIf("notWindowsOrJre17Plus")
 class NioUdpClientTest {
   private static SocketAddress localAddress;
+
+  @SuppressWarnings("java:S1144")
+  private static boolean notWindowsOrJre17Plus() {
+    String javaVersion = System.getProperty("java.version", "0");
+    return !System.getProperty("os.name").contains("Windows")
+        || Integer.parseInt(javaVersion.substring(0, javaVersion.indexOf('.'))) >= 17;
+  }
 
   @BeforeAll
   static void beforeAll(Vertx vertx, VertxTestContext context) {
