@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 final class AsyncSemaphore {
+
   private final Queue<CompletableFuture<Permit>> queue = new ArrayDeque<>();
   private final Permit singletonPermit = new Permit();
   private final String name;
