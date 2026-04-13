@@ -5,6 +5,9 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Uniform Resource Identifier (URI) DNS Resource Record
@@ -78,9 +81,25 @@ public class URIRecord extends Record {
     return weight;
   }
 
-  /** Returns the target URI */
+  /**
+   * Returns the target URI as a string, escaped for RR textual representation.
+   *
+   * <p>Obsolete, use {@link URIRecord#getTargetAsURI()} instead.
+   *
+   * @deprecated
+   */
+  @Deprecated
   public String getTarget() {
     return byteArrayToString(target, false);
+  }
+
+  /**
+   * Returns the target URI as a {@link URI}
+   *
+   * @since 3.6.5
+   */
+  public URI getTargetAsURI() throws URISyntaxException {
+    return new URI(new String(target, StandardCharsets.UTF_8));
   }
 
   @Override

@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.junit.jupiter.api.Test;
 
 class URIRecordTest {
   @Test
-  void ctor_0arg() {
+  void ctor_0arg() throws URISyntaxException {
     URIRecord r = new URIRecord();
     assertNull(r.getName());
     assertEquals(0, r.getType());
@@ -20,12 +22,13 @@ class URIRecordTest {
     assertEquals(0, r.getPriority());
     assertEquals(0, r.getWeight());
     assertEquals("", r.getTarget());
+    assertEquals(new URI(""), r.getTargetAsURI());
   }
 
   @Test
-  void ctor_6arg() throws TextParseException {
+  void ctor_6arg() throws TextParseException, URISyntaxException {
     Name n = Name.fromString("my.name.");
-    String target = "http://foo";
+    String target = "http://foo/bar";
 
     URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 42, 69, target);
     assertEquals(n, r.getName());
@@ -34,18 +37,19 @@ class URIRecordTest {
     assertEquals(0xABCDEL, r.getTTL());
     assertEquals(42, r.getPriority());
     assertEquals(69, r.getWeight());
-    assertEquals(target, r.getTarget());
+    assertEquals("http://foo/bar", r.getTarget());
+    assertEquals(new URI("http://foo/bar"), r.getTargetAsURI());
   }
 
   @Test
-  void rdataFromString() throws IOException {
+  void rdataFromString() throws IOException, URISyntaxException {
     Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF01 + " \"http://foo:1234/bar?baz=bum\"");
 
     URIRecord r = new URIRecord();
     r.rdataFromString(t, null);
     assertEquals(0xABCD, r.getPriority());
     assertEquals(0xEF01, r.getWeight());
-    assertEquals("http://foo:1234/bar?baz=bum", r.getTarget());
+    assertEquals(new URI("http://foo:1234/bar?baz=bum"), r.getTargetAsURI());
   }
 
   @Test
@@ -77,7 +81,7 @@ class URIRecordTest {
   }
 
   @Test
-  void rrFromWire() throws IOException {
+  void rrFromWire() throws IOException, URISyntaxException {
     byte[] raw =
         new byte[] {
           (byte) 0xbe,
@@ -101,7 +105,7 @@ class URIRecordTest {
     r.rrFromWire(in);
     assertEquals(0xBEEF, r.getPriority());
     assertEquals(0xDEAD, r.getWeight());
-    assertEquals("http://foo", r.getTarget());
+    assertEquals(new URI("http://foo"), r.getTargetAsURI());
   }
 
   @Test

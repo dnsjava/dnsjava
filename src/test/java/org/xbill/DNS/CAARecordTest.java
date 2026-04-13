@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class CAARecordTest {
@@ -17,6 +19,7 @@ class CAARecordTest {
     assertEquals(CAARecord.Flags.IssuerCritical, caa.getFlags());
     assertEquals("", caa.getTag());
     assertEquals("", caa.getValue());
+    assertEquals(0, caa.getValueAsByteArray().length);
 
     String data = new String(new char[256]);
     IllegalArgumentException thrown =
@@ -33,5 +36,7 @@ class CAARecordTest {
     caa.rdataFromString(t, null);
     assertEquals("issue", caa.getTag());
     assertEquals("entrust.net", caa.getValue());
+    assertEquals("entrust.net", caa.getValue(false));
+    assertArrayEquals("entrust.net".getBytes(StandardCharsets.UTF_8), caa.getValueAsByteArray());
   }
 }

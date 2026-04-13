@@ -41,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class HINFORecordTest {
@@ -120,7 +121,9 @@ class HINFORecordTest {
     HINFORecord dr = new HINFORecord();
     dr.rdataFromString(t, null);
     assertEquals(cpu, dr.getCPU());
+    assertArrayEquals(cpu.getBytes(StandardCharsets.UTF_8), dr.getCPUAsByteArray());
     assertEquals(os, dr.getOS());
+    assertArrayEquals(os.getBytes(StandardCharsets.UTF_8), dr.getOSAsByteArray());
   }
 
   @Test

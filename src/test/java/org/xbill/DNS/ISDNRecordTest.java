@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class ISDNRecordTest {
@@ -12,9 +14,13 @@ class ISDNRecordTest {
 
   @Test
   void ctor_5arg() {
-    ISDNRecord isdn = new ISDNRecord(n, DClass.IN, 0, "foo", "bar");
-    assertEquals("foo", isdn.getAddress());
+    ISDNRecord isdn = new ISDNRecord(n, DClass.IN, 0, "foo\\\"", "bar");
+    assertEquals("foo\\\"", isdn.getAddress());
+    assertEquals("foo\"", isdn.getAddress(false));
+    assertArrayEquals("foo\"".getBytes(StandardCharsets.UTF_8), isdn.getAddressAsByteArray());
     assertEquals("bar", isdn.getSubAddress());
+    assertEquals("bar", isdn.getSubAddress(false));
+    assertArrayEquals("bar".getBytes(StandardCharsets.UTF_8), isdn.getSubAddressAsByteArray());
   }
 
   @Test

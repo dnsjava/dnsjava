@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Host Information - describes the CPU and OS of a host
@@ -51,14 +52,54 @@ public class HINFORecord extends Record {
     }
   }
 
-  /** Returns the host's CPU */
-  public String getCPU() {
-    return byteArrayToString(cpu, false);
+  /**
+   * Returns the host's CPU as a string.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getCPU(boolean escape) {
+    return escape ? byteArrayToString(cpu, false) : new String(cpu, StandardCharsets.UTF_8);
   }
 
-  /** Returns the host's OS */
+  /** Returns the host's CPU as a string, escaped for RR textual representation */
+  public String getCPU() {
+    return getCPU(true);
+  }
+
+  /**
+   * Returns the host's CPU as a raw byte-array
+   *
+   * @since 3.6.5
+   */
+  public byte[] getCPUAsByteArray() {
+    return cpu;
+  }
+
+  /**
+   * Returns the host's OS as a string.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getOS(boolean escape) {
+    return escape ? byteArrayToString(os, false) : new String(os, StandardCharsets.UTF_8);
+  }
+
+  /** Returns the host's OS as a string, escaped for RR textual representation */
   public String getOS() {
-    return byteArrayToString(os, false);
+    return getOS(true);
+  }
+
+  /**
+   * Returns the host's OS as a raw byte-array
+   *
+   * @since 3.6.5
+   */
+  public byte[] getOSAsByteArray() {
+    return os;
   }
 
   @Override

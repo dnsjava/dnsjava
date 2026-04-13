@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Name Authority Pointer Record - specifies rewrite rule, that when applied to an existing string
@@ -112,17 +113,57 @@ public class NAPTRRecord extends Record {
 
   /** Returns flags */
   public String getFlags() {
-    return byteArrayToString(flags, false);
+    return new String(flags, StandardCharsets.US_ASCII);
   }
 
-  /** Returns service */
+  /**
+   * Returns the service as a string.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getService(boolean escape) {
+    return escape ? byteArrayToString(service, false) : new String(service, StandardCharsets.UTF_8);
+  }
+
+  /** Returns the service as a string, escaped for RR textual representation */
   public String getService() {
-    return byteArrayToString(service, false);
+    return getService(true);
   }
 
-  /** Returns regexp */
+  /**
+   * Returns the service as a raw byte-array
+   *
+   * @since 3.6.5
+   */
+  public byte[] getServiceAsByteArray() {
+    return service;
+  }
+
+  /**
+   * Returns regexp as a string.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getRegexp(boolean escape) {
+    return escape ? byteArrayToString(regexp, false) : new String(regexp, StandardCharsets.UTF_8);
+  }
+
+  /** Returns regexp as a string, escaped for RR textual representation */
   public String getRegexp() {
-    return byteArrayToString(regexp, false);
+    return getRegexp(true);
+  }
+
+  /**
+   * Returns regexp as a raw byte-array
+   *
+   * @since 3.6.5
+   */
+  public byte[] getRegexpAsByteArray() {
+    return regexp;
   }
 
   /** Returns the replacement domain-name */

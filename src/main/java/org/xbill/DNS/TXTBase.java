@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -90,22 +91,31 @@ abstract class TXTBase extends Record {
   }
 
   /**
-   * Returns the text strings
+   * Returns the text strings as a list of strings.
    *
-   * @return A list of Strings corresponding to the text strings.
+   * @param escape if true, returns the RR textual representation of the underlying bytes for each
+   *     string. If false, returns just the simple strings using the UTF-8 charset with no
+   *     additional escaping.
+   * @since 3.6.5
    */
-  public List<String> getStrings() {
+  public List<String> getStrings(boolean escape) {
     List<String> list = new ArrayList<>(strings.size());
     for (byte[] string : strings) {
-      list.add(byteArrayToString(string, false));
+      list.add(
+          escape ? byteArrayToString(string, false) : new String(string, StandardCharsets.UTF_8));
     }
     return list;
   }
 
+  /** Returns the text strings as a list of strings, escaped for RR textual representation */
+  public List<String> getStrings() {
+    return getStrings(true);
+  }
+
   /**
-   * Returns the text strings
+   * Returns the text strings as a list of raw byte-arrays
    *
-   * @return A list of byte arrays corresponding to the text strings.
+   * @since 3.6.5
    */
   public List<byte[]> getStringsAsByteArrays() {
     return strings;

@@ -78,9 +78,25 @@ public class NSAPRecord extends Record {
     }
   }
 
-  /** Returns the NSAP address. */
+  /**
+   * Returns the NSAP address as a string, escaped for RR textual representation.
+   *
+   * <p>Obsolete, use {@link NSAPRecord#getAddressAsByteArray} instead.
+   *
+   * @deprecated
+   */
+  @Deprecated
   public String getAddress() {
     return byteArrayToString(address, false);
+  }
+
+  /**
+   * Returns the NSAP address.
+   *
+   * @since 3.6.5
+   */
+  public byte[] getAddressAsByteArray() {
+    return address;
   }
 
   @Override
