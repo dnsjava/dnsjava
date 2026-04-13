@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -16,5 +17,29 @@ class NSAPRecordTest {
     assertEquals(
         "G\\000\\005\\128\\000Z\\000\\000\\000\\000\\001\\2253\\255\\255\\255\\000\\001a\\000",
         nsap.getAddress());
+    assertArrayEquals(
+        new byte[] {
+          71,
+          0,
+          5,
+          (byte) 128,
+          0,
+          90,
+          0,
+          0,
+          0,
+          0,
+          1,
+          (byte) 225,
+          51,
+          (byte) 255,
+          (byte) 255,
+          (byte) 255,
+          0,
+          1,
+          97,
+          0
+        },
+        nsap.getAddressAsByteArray());
   }
 }

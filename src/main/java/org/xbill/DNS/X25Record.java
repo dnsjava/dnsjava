@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * X25 - identifies the PSDN (Public Switched Data Network) address in the X.121 numbering plan
@@ -60,7 +61,7 @@ public class X25Record extends Record {
 
   /** Returns the X.25 PSDN address. */
   public String getAddress() {
-    return byteArrayToString(address, false);
+    return new String(address, StandardCharsets.US_ASCII);
   }
 
   @Override

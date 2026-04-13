@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Certification Authority Authorization
@@ -79,12 +80,32 @@ public class CAARecord extends Record {
 
   /** Returns the tag. */
   public String getTag() {
-    return byteArrayToString(tag, false);
+    return new String(tag, StandardCharsets.US_ASCII);
   }
 
-  /** Returns the value */
+  /**
+   * Returns the value as a string.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getValue(boolean escape) {
+    return escape ? byteArrayToString(value, false) : new String(value, StandardCharsets.UTF_8);
+  }
+
+  /** Returns the value as a string, escaped for RR textual representation */
   public String getValue() {
-    return byteArrayToString(value, false);
+    return getValue(true);
+  }
+
+  /**
+   * Returns the value as a raw byte-array
+   *
+   * @since 3.6.5
+   */
+  public byte[] getValueAsByteArray() {
+    return value;
   }
 
   @Override

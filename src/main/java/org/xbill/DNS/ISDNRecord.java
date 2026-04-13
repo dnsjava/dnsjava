@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * ISDN - identifies the ISDN number and subaddress associated with a name.
@@ -59,17 +60,65 @@ public class ISDNRecord extends Record {
     }
   }
 
-  /** Returns the ISDN number associated with the domain. */
-  public String getAddress() {
-    return byteArrayToString(address, false);
+  /**
+   * Returns the ISDN number associated with the domain as a string.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getAddress(boolean escape) {
+    return escape ? byteArrayToString(address, false) : new String(address, StandardCharsets.UTF_8);
   }
 
-  /** Returns the ISDN subaddress, or null if there is none. */
-  public String getSubAddress() {
+  /**
+   * Returns the ISDN number associated with the domain as a string, escaped for RR textual
+   * representation
+   */
+  public String getAddress() {
+    return getAddress(true);
+  }
+
+  /**
+   * Returns the ISDN number associated with the domain as a raw byte-array
+   *
+   * @since 3.6.5
+   */
+  public byte[] getAddressAsByteArray() {
+    return address;
+  }
+
+  /**
+   * Returns the ISDN subaddress as a string, or null if there is none.
+   *
+   * @param escape if true, returns the RR textual representation of the underlying bytes. If false,
+   *     returns just the simple string using the UTF-8 charset with no additional escaping.
+   * @since 3.6.5
+   */
+  public String getSubAddress(boolean escape) {
     if (subAddress == null) {
       return null;
     }
-    return byteArrayToString(subAddress, false);
+    return escape
+        ? byteArrayToString(subAddress, false)
+        : new String(subAddress, StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Returns the ISDN subaddress as a string, escaped for RR textual representation, or null if
+   * there is none.
+   */
+  public String getSubAddress() {
+    return getSubAddress(true);
+  }
+
+  /**
+   * Returns the ISDN subaddress as a raw byte-array, or null if there is none.
+   *
+   * @since 3.6.5
+   */
+  public byte[] getSubAddressAsByteArray() {
+    return subAddress;
   }
 
   @Override
