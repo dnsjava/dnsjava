@@ -22,10 +22,24 @@ jobs:
     if: github.event.workflow_run.head_repository.owner.login != 'dnsjava'
     runs-on: ubuntu-latest
     steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.BUILD_JAVA_VERSION }}
+          distribution: temurin
+
+      - name: Checkout actions
+        uses: actions/checkout@v6
+        with:
+          repository: 'dnsjava/dnsjava'
+          ref: 'master'
+          persist-credentials: false
+          sparse-checkout: .github
+
       - name: Download PR number artifact
         id: get_pr_number
-        #v12
-        uses: dawidd6/action-download-artifact@0bd50d53a6d7fb5cb921e607957e9cc12b4ce392
+        #v21
+        uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151
         with:
           workflow: ${{ github.event.workflow_run.name }}
           run_id: ${{ github.event.workflow_run.id }}
@@ -39,9 +53,8 @@ jobs:
 
       - name: Request PR data from GitHub API
         id: get_pr_data
-        if: steps.get_pr_number.outputs.found_artifact
-        #v2.4.0
-        uses: octokit/request-action@dad4362715b7fb2ddedf9772c8670824af564f0d
+        #v3.0.0
+        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -49,7 +62,7 @@ jobs:
           full_name: ${{ github.event.repository.full_name }}
           number: ${{ steps.pr_number.outputs.pr_number }}
 
-      - name: Checkout PR
+      - name: Checkout PR Source
         uses: actions/checkout@v6
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
@@ -58,17 +71,31 @@ jobs:
           path: pr
           # for Sonar
           fetch-depth: 0
+          sparse-checkout: |
+            src
 
-      - name: Checkout base
+      - name: Get coverage
+        uses: ./.github/actions/download-artifact
+        with:
+          path: pr
+          name: merged-coverage
+
+      - name: Get classes
+        uses: ./.github/actions/download-artifact
+        with:
+          path: pr
+          name: classes
+
+      - name: Checkout Maven/Sonar config
         uses: actions/checkout@v6
         with:
-          repository: ${{ github.event.repository.full_name }}
-          ref: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+          repository: 'dnsjava/dnsjava'
+          ref: 'master'
           persist-credentials: false
-          path: base
-
-      - name: Get analysis data
-        uses: ./base/.github/actions/prepare-analysis
+          path: pr
+          sparse-checkout: |
+            pom.xml
+            sonar-project.properties
 
       - name: Run SonarQube
         env:
@@ -78,14 +105,13 @@ jobs:
           WF_PRKEY: ${{ fromJson(steps.get_pr_data.outputs.data).number }}
           WF_BRANCH: ${{ fromJson(steps.get_pr_data.outputs.data).head.ref }}
           WF_BASE: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+        working-directory: pr
         run: |
-          cp -f base/pom.xml pr/
-          cd pr
           mvn -B \
           -f pom.xml \
-          -Dsonar.scm.revision='${WF_REVISION}' \
-          -Dsonar.pullrequest.key='${WF_PRKEY}' \
-          -Dsonar.pullrequest.branch='${WF_BRANCH}' \
-          -Dsonar.pullrequest.base='${WF_BASE}' \
+          -Dsonar.scm.revision="${WF_REVISION}" \
+          -Dsonar.pullrequest.key="${WF_PRKEY}" \
+          -Dsonar.pullrequest.branch="${WF_BRANCH}" \
+          -Dsonar.pullrequest.base="${WF_BASE}" \
           properties:read-project-properties \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar

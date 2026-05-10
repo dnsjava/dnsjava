@@ -134,13 +134,42 @@ jobs:
             target/site/jacoco
             target/jacoco.exec
 
+      - name: Get reports
+        uses: ./.github/actions/download-artifact
+        with:
+          name: reports-*
+
+      - name: Create paths for JUnit reporting
+        id: junit_paths
+        shell: bash
+        run: |
+          report_paths=""
+          check_name=""
+          for file in target/surefire-reports-*
+          do
+            report_paths="${file}/TEST-*.xml"$'\n'"${report_paths}"
+            check_name="JUnit Report ${file##target/surefire-reports-}"$'\n'"${check_name}"
+          done
+          echo "report_paths<<EOF"$'\n'"${report_paths}EOF" >> $GITHUB_OUTPUT
+          echo "check_name<<EOF"$'\n'"${check_name}EOF" >> $GITHUB_OUTPUT
+
+      - name: Publish Test Report
+        #v6.4.0
+        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386
+        with:
+          report_paths: ${{ steps.junit_paths.outputs.report_paths }}
+          check_name: ${{ steps.junit_paths.outputs.check_name }}
+          require_tests: true
+          check_retries: true
+          detailed_summary: true
+
       - name: Save PR number to file
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'dnsjava'
         run: echo ${{ github.event.number }} > pr_number.txt
 
       - name: Archive PR number
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.owner.login != 'dnsjava'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: pr_number
           path: pr_number.txt
@@ -149,7 +178,6 @@ jobs:
     name: Analyze Code
     runs-on: ubuntu-latest
     needs: report
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.owner.login == 'dnsjava'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -158,19 +186,41 @@ jobs:
           # for Sonar
           fetch-depth: 0
 
-      - name: Get analysis data
-        uses: ./.github/actions/prepare-analysis
+      - name: Get coverage
+        uses: ./.github/actions/download-artifact
         with:
-          cache: maven
+          path: ${{ inputs.path }}
+          name: merged-coverage
+
+      - name: Get classes
+        uses: ./.github/actions/download-artifact
+        with:
+          path: ${{ inputs.path }}
+          name: classes
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.BUILD_JAVA_VERSION }}
+          distribution: temurin
+          cache: ${{ inputs.cache }}
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Run codecov
-        #v5.5.2
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        #v6.0.0
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
 
       # doesn't work with PRs from forks, see
       # https://portal.productboard.com/sonarsource/1-sonarcloud/c/50-sonarcloud-analyzes-external-pull-request
       # or https://jira.sonarsource.com/browse/MMF-1371 (not public anymore)
       - name: Run SonarQube
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.owner.login == 'dnsjava'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
