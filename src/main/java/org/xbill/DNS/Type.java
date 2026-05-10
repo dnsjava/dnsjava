@@ -271,6 +271,14 @@ public final class Type {
   /** EUI-64 Address. */
   public static final int EUI64 = 109;
 
+  /**
+   * NXDOMAIN indicator for Compact Denial of Existence.
+   *
+   * @since 3.6.5
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc9824">RFC 9824</a>
+   */
+  public static final int NXNAME = 128;
+
   /** {@link TKEYRecord Transaction key} */
   public static final int TKEY = 249;
 

@@ -33,8 +33,16 @@ public final class Flags {
   /** (security) checking disabled */
   public static final byte CD = 11;
 
-  /** dnssec ok (extended) */
+  /** DNSSEC answer OK (extended). */
   public static final int DO = ExtendedFlags.DO;
+
+  /**
+   * Compact Answers OK (extended).
+   *
+   * @since 3.6.5
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc9824">RFC 9824</a>
+   */
+  public static final int CO = ExtendedFlags.CO;
 
   static {
     HEADER_FLAGS.setMaximum(0xF);

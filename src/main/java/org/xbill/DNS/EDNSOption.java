@@ -146,6 +146,14 @@ public abstract class EDNSOption implements Serializable {
      */
     public static final int REPORT_CHANNEL = 18;
 
+    /**
+     * Report Channel.
+     *
+     * @since 3.6.5
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc9660/">RFC 9660</a>
+     */
+    public static final int ZONEVERSION = 19;
+
     private static final Mnemonic codes =
         new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
 
@@ -172,6 +180,7 @@ public abstract class EDNSOption implements Serializable {
       codes.add(EDNS_CLIENT_TAG, "EDNS-Client-Tag");
       codes.add(EDNS_SERVER_TAG, "EDNS-Server-Tag");
       codes.add(REPORT_CHANNEL, "Report-Channel");
+      codes.add(ZONEVERSION, "ZONEVERSION");
     }
 
     /** Converts an EDNS Option Code into its textual representation */

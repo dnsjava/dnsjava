@@ -195,6 +195,14 @@ public class ExtendedErrorCodeOption extends EDNSOption {
    */
   public static final int SYNTHESIZED = 29;
 
+  /**
+   * Invalid Query Type.
+   *
+   * @since 3.6.5
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc9824">RFC 9824</a>
+   */
+  public static final int INVALID_QUERY_TYPE = 30;
+
   @Getter private int errorCode;
   @Getter private String text;
 
@@ -234,6 +242,7 @@ public class ExtendedErrorCodeOption extends EDNSOption {
     codes.add(UNSUPPORTED_NSEC3_ITERATIONS_VALUE, "UNSUPPORTED_NSEC3_ITERATIONS_VALUE");
     codes.add(UNABLE_TO_CONFORM_TO_POLICY, "UNABLE_TO_CONFORM_TO_POLICY");
     codes.add(SYNTHESIZED, "SYNTHESIZED");
+    codes.add(INVALID_QUERY_TYPE, "INVALID_QUERY_TYPE");
   }
 
   /**

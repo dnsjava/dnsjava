@@ -12,8 +12,16 @@ public final class ExtendedFlags {
 
   private static final Mnemonic extflags = new Mnemonic("EDNS Flag", Mnemonic.CASE_LOWER);
 
-  /** dnssec ok */
+  /** DNSSEC answer OK. */
   public static final int DO = 0x8000;
+
+  /**
+   * Compact Answers OK.
+   *
+   * @since 3.6.5
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc9824">RFC 9824</a>
+   */
+  public static final int CO = 0x8001;
 
   static {
     extflags.setMaximum(0xFFFF);
@@ -21,6 +29,7 @@ public final class ExtendedFlags {
     extflags.setNumericAllowed(true);
 
     extflags.add(DO, "do");
+    extflags.add(CO, "co");
   }
 
   private ExtendedFlags() {}
