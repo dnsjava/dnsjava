@@ -58,7 +58,7 @@
         <jna.version>5.18.1</jna.version>
         <bouncycastle.version>1.84</bouncycastle.version>
         <!-- Stay on 5.x for Java 8 compatibility. -->
-        <vertx.version>4.5.24</vertx.version>
+        <vertx.version>4.5.27</vertx.version>
         <!-- Stay on 1.7 for Java 8 compatibility. Newer versions are used for Java 11+ builds -->
         <google-java-format.version>1.7</google-java-format.version>
         <spotless.version>2.30.0</spotless.version>
