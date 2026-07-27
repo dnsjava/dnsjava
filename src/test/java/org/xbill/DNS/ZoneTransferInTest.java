@@ -2,7 +2,6 @@ package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -94,7 +93,13 @@ class ZoneTransferInTest {
     private List<byte[]> responses;
     private MockTCPClient mockClient;
 
-    TestZoneTransferIn(Name zone, int type, long serial, boolean fallback, SocketAddress address, List<byte[]> responses) {
+    TestZoneTransferIn(
+        Name zone,
+        int type,
+        long serial,
+        boolean fallback,
+        SocketAddress address,
+        List<byte[]> responses) {
       super(zone, type, serial, fallback, address, null);
       this.responses = responses;
     }
@@ -109,7 +114,8 @@ class ZoneTransferInTest {
   @Test
   void testAXFRSuccess() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
+    SOARecord soa =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
     ARecord a = new ARecord(name, DClass.IN, 3600, InetAddress.getByName("127.0.0.1"));
 
     Message m = new Message();
@@ -133,16 +139,18 @@ class ZoneTransferInTest {
   @Test
   void testIXFRSuccess() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa1 = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
-    SOARecord soa2 = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
+    SOARecord soa1 =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
+    SOARecord soa2 =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
     ARecord a = new ARecord(name, DClass.IN, 3600, InetAddress.getByName("127.0.0.1"));
 
     Message m = new Message();
     m.addRecord(soa2, Section.ANSWER); // Current SOA
     m.addRecord(soa1, Section.ANSWER); // Deleted SOA
-    m.addRecord(a, Section.ANSWER);    // Deleted record
+    m.addRecord(a, Section.ANSWER); // Deleted record
     m.addRecord(soa2, Section.ANSWER); // Added SOA
-    m.addRecord(a, Section.ANSWER);    // Added record
+    m.addRecord(a, Section.ANSWER); // Added record
     m.addRecord(soa2, Section.ANSWER); // End of IXFR
 
     List<byte[]> responses = Collections.singletonList(m.toWire());
@@ -166,7 +174,8 @@ class ZoneTransferInTest {
   @Test
   void testIXFRUpToDate() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa1 = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
+    SOARecord soa1 =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
 
     Message m = new Message();
     m.addRecord(soa1, Section.ANSWER);
@@ -181,7 +190,8 @@ class ZoneTransferInTest {
   @Test
   void testIXFRFallbackToAXFR() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
+    SOARecord soa =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
 
     Message mNotImp = new Message();
     mNotImp.getHeader().setRcode(Rcode.NOTIMP);
@@ -217,7 +227,8 @@ class ZoneTransferInTest {
   @Test
   void testExtraData() throws IOException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
+    SOARecord soa =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
 
     Message m = new Message();
     m.addRecord(soa, Section.ANSWER);
@@ -245,7 +256,8 @@ class ZoneTransferInTest {
   void testIXFRAsAXFR() throws IOException, ZoneTransferException {
     // Server returns AXFR response (single SOA) to IXFR query
     Name name = Name.fromString("example.com.");
-    SOARecord soa = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
+    SOARecord soa =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
 
     Message m = new Message();
     m.addRecord(soa, Section.ANSWER);
@@ -262,7 +274,8 @@ class ZoneTransferInTest {
   @Test
   void testMultipleMessages() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
+    SOARecord soa =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
     ARecord a1 = new ARecord(name, DClass.IN, 3600, InetAddress.getByName("127.0.0.1"));
     ARecord a2 = new ARecord(name, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
 
@@ -293,7 +306,8 @@ class ZoneTransferInTest {
   @Test
   void testIXFREmptyResponseFallback() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
+    SOARecord soa =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 2, 3600, 600, 86400, 3600);
 
     Message mEmpty = new Message();
     // No records in ANSWER section
@@ -316,7 +330,8 @@ class ZoneTransferInTest {
   @Test
   void testTimeout() throws IOException {
     Name name = Name.fromString("example.com.");
-    List<byte[]> responses = new ArrayList<>(); // Empty list will cause MockTCPClient to throw IOException
+    List<byte[]> responses =
+        new ArrayList<>(); // Empty list will cause MockTCPClient to throw IOException
 
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
     assertThrows(IOException.class, xfr::run);
@@ -325,7 +340,8 @@ class ZoneTransferInTest {
   @Test
   void testIsCurrent() throws IOException, ZoneTransferException {
     Name name = Name.fromString("example.com.");
-    SOARecord soa1 = new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
+    SOARecord soa1 =
+        new SOARecord(name, DClass.IN, 3600, Name.root, Name.root, 1, 3600, 600, 86400, 3600);
 
     Message m = new Message();
     m.addRecord(soa1, Section.ANSWER);

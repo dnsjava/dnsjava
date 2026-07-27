@@ -57,7 +57,8 @@ class CacheTest {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
 
     Name otherName = Name.fromString("other.com.");
-    ARecord otherRecord = new ARecord(otherName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
+    ARecord otherRecord =
+        new ARecord(otherName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
     cache.addRecord(otherRecord, Credibility.AUTH_ANSWER);
 
     assertEquals(1, cache.getSize());
@@ -72,14 +73,18 @@ class CacheTest {
   void testNegativeCaching() throws TextParseException {
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isNXRRSET() || response.isUnknown(), "Expected NXRRSET or UNKNOWN for " + exampleName + " but got " + response);
+    assertTrue(
+        response.isNXRRSET() || response.isUnknown(),
+        "Expected NXRRSET or UNKNOWN for " + exampleName + " but got " + response);
   }
 
   @Test
   void testNXDOMAIN() throws TextParseException {
     cache.addNegative(exampleName, Type.ANY, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isNXDOMAIN() || response.isUnknown(), "Expected NXDOMAIN or UNKNOWN for " + exampleName + " but got " + response);
+    assertTrue(
+        response.isNXDOMAIN() || response.isUnknown(),
+        "Expected NXDOMAIN or UNKNOWN for " + exampleName + " but got " + response);
   }
 
   @Test
@@ -218,7 +223,8 @@ class CacheTest {
     Message m = new Message();
     m.getHeader().setRcode(Rcode.NXDOMAIN);
     m.addRecord(Record.newRecord(exampleName, Type.A, DClass.IN), Section.QUESTION);
-    SOARecord soa = new SOARecord(exampleName, DClass.IN, 3600, Name.root, Name.root, 1, 2, 3, 4, 5);
+    SOARecord soa =
+        new SOARecord(exampleName, DClass.IN, 3600, Name.root, Name.root, 1, 2, 3, 4, 5);
     m.addRecord(soa, Section.AUTHORITY);
 
     cache.addMessage(m);
@@ -291,7 +297,8 @@ class CacheTest {
     assertEquals(1, cache.getSize());
 
     Name otherName = Name.fromString("other.com.");
-    ARecord otherRecord = new ARecord(otherName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
+    ARecord otherRecord =
+        new ARecord(otherName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
     cache.addRecord(otherRecord, Credibility.AUTH_ANSWER);
     assertEquals(2, cache.getSize());
 
@@ -381,8 +388,7 @@ class CacheTest {
   void testAddMultipleTypes() throws TextParseException, UnknownHostException {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     AAAARecord aaaaRecord =
-        new AAAARecord(
-            exampleName, DClass.IN, 3600, InetAddress.getByName("2001:db8::1"));
+        new AAAARecord(exampleName, DClass.IN, 3600, InetAddress.getByName("2001:db8::1"));
     cache.addRecord(aaaaRecord, Credibility.AUTH_ANSWER);
 
     assertEquals(1, cache.getSize()); // Same name, different types
@@ -399,7 +405,9 @@ class CacheTest {
     cache.setMaxNCache(1);
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isNXRRSET() || response.isUnknown(), "Expected NXRRSET or UNKNOWN but got " + response);
+    assertTrue(
+        response.isNXRRSET() || response.isUnknown(),
+        "Expected NXRRSET or UNKNOWN but got " + response);
 
     try {
       Thread.sleep(1100);

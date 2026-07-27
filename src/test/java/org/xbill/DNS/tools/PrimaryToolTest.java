@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +15,7 @@ class PrimaryToolTest {
   private final PrintStream originalOut = System.out;
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-  @TempDir
-  File tempDir;
+  @TempDir File tempDir;
 
   @BeforeEach
   void setUp() {
@@ -33,7 +31,8 @@ class PrimaryToolTest {
   void testPrimary() throws Exception {
     File zoneFile = new File(tempDir, "example.com.zone");
     try (FileWriter writer = new FileWriter(zoneFile)) {
-      writer.write("example.com. 3600 IN SOA ns1.example.com. hostmaster.example.com. 1 3600 600 86400 3600\n");
+      writer.write(
+          "example.com. 3600 IN SOA ns1.example.com. hostmaster.example.com. 1 3600 600 86400 3600\n");
       writer.write("example.com. 3600 IN NS ns1.example.com.\n");
       writer.write("ns1.example.com. 3600 IN A 127.0.0.1\n");
     }
@@ -50,7 +49,8 @@ class PrimaryToolTest {
   void testPrimaryAxfr() throws Exception {
     File zoneFile = new File(tempDir, "example.com.zone");
     try (FileWriter writer = new FileWriter(zoneFile)) {
-      writer.write("example.com. 3600 IN SOA ns1.example.com. hostmaster.example.com. 1 3600 600 86400 3600\n");
+      writer.write(
+          "example.com. 3600 IN SOA ns1.example.com. hostmaster.example.com. 1 3600 600 86400 3600\n");
       writer.write("example.com. 3600 IN NS ns1.example.com.\n");
     }
 

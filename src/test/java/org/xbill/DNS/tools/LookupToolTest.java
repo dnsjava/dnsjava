@@ -60,7 +60,8 @@ class LookupToolTest {
     Lookup l = new Lookup(name, Type.A);
     l.setCache(new Cache());
     // Don't set resolver to null, let it use default or a mock if we had one.
-    // Since we don't have a network, it should eventually fail with "network error" or "host not found"
+    // Since we don't have a network, it should eventually fail with "network error" or "host not
+    // found"
     // but without a resolver it throws NPE.
     l.run();
 
@@ -72,7 +73,9 @@ class LookupToolTest {
 
   @Test
   void testMainInvalidType() {
-    assertThrows(IllegalArgumentException.class, () -> lookup.main(new String[] {"-t", "INVALID", "example.com"}));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> lookup.main(new String[] {"-t", "INVALID", "example.com"}));
   }
 
   @Test

@@ -5,14 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.DNSSECException;
 import org.xbill.DNS.DNSSEC.KeyMismatchException;
@@ -297,7 +295,8 @@ class DNSSECTest {
     rrset.addRR(rrsig);
 
     assertThrows(
-        KeyMismatchException.class, () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60)));
+        KeyMismatchException.class,
+        () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60)));
   }
 
   @Test
@@ -356,7 +355,8 @@ class DNSSECTest {
     Instant inception = now.minus(1, ChronoUnit.HOURS);
     Instant expiration = now.plus(1, ChronoUnit.HOURS);
 
-    SIGRecord sig = DNSSEC.signMessage(msg, null, keyRecord, kp.getPrivate(), inception, expiration);
+    SIGRecord sig =
+        DNSSEC.signMessage(msg, null, keyRecord, kp.getPrivate(), inception, expiration);
     assertNotNull(sig);
 
     msg.addRecord(sig, Section.ADDITIONAL);

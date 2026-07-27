@@ -1,7 +1,6 @@
 package org.xbill.DNS.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -27,7 +26,8 @@ class JnamedToolTest {
 
   @Test
   void testAddrport() throws Exception {
-    Method addrportMethod = jnamed.class.getDeclaredMethod("addrport", InetAddress.class, int.class);
+    Method addrportMethod =
+        jnamed.class.getDeclaredMethod("addrport", InetAddress.class, int.class);
     addrportMethod.setAccessible(true);
 
     InetAddress addr = InetAddress.getByName("127.0.0.1");
