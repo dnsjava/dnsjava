@@ -2,11 +2,22 @@
 package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DNSSEC.DNSSECException;
+import org.xbill.DNS.DNSSEC.KeyMismatchException;
+import org.xbill.DNS.DNSSEC.SignatureExpiredException;
+import org.xbill.DNS.DNSSEC.SignatureNotYetValidException;
 
 class DNSSECTest {
   private final TXTRecord txt = new TXTRecord(Name.root, DClass.IN, 3600, "test");
@@ -157,5 +168,201 @@ class DNSSECTest {
     rrset.addRR(s1);
     rrset.addRR(s2);
     assertArrayEquals(DNSSEC.digestRRset(s1, rrset), DNSSEC.digestRRset(s1, rrset));
+  }
+
+  @Test
+  void testAlgorithmMnemonic() {
+    assertEquals("RSASHA256", DNSSEC.Algorithm.string(DNSSEC.Algorithm.RSASHA256));
+    assertEquals(DNSSEC.Algorithm.RSASHA256, DNSSEC.Algorithm.value("RSASHA256"));
+    assertEquals(-1, DNSSEC.Algorithm.value("UNKNOWN_ALG"));
+  }
+
+  @Test
+  void testDigestMnemonic() {
+    assertEquals("SHA-256", DNSSEC.Digest.string(DNSSEC.Digest.SHA256));
+    assertEquals(DNSSEC.Digest.SHA256, DNSSEC.Digest.value("SHA-256"));
+  }
+
+  @Test
+  void testDigestLength() {
+    assertEquals(32, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA256));
+    assertEquals(20, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA1));
+    assertEquals(48, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA384));
+    assertEquals(64, DNSSEC.Digest.algLength(DNSSEC.Digest.GOST3411_12));
+    assertEquals(-1, DNSSEC.Digest.algLength(255));
+  }
+
+  @Test
+  void testGenerateDSDigest() throws TextParseException {
+    DNSKEYRecord dnskey =
+        new DNSKEYRecord(
+            Name.fromString("example.com."),
+            DClass.IN,
+            3600,
+            DNSKEYRecord.Flags.ZONE_KEY,
+            DNSKEYRecord.Protocol.DNSSEC,
+            DNSSEC.Algorithm.RSASHA256,
+            new byte[] {1, 2, 3, 4});
+    byte[] digest = DNSSEC.generateDSDigest(dnskey, DNSSEC.Digest.SHA256);
+    assertNotNull(digest);
+    assertEquals(32, digest.length);
+  }
+
+  @Test
+  void testSignatureExpired() throws IOException, DNSSECException {
+    DNSKEYRecord dnskey =
+        (DNSKEYRecord)
+            Record.fromString(
+                Name.root,
+                Type.DNSKEY,
+                DClass.IN,
+                3600,
+                "256 3 13 HgcQzDrxDm641ASGyEF0MXrjDji4XDnWzjrY9VoIn5GfAvHpuqI2W8yihplAz6C/56Zxq1XbAHjLZATfhZFmaA==",
+                Name.root);
+    RRSIGRecord rrsig =
+        (RRSIGRecord)
+            Record.fromString(
+                Name.root,
+                Type.RRSIG,
+                DClass.IN,
+                3600,
+                "TXT 13 0 3600 19700101000003 19700101000000 46271 . dRwMEthIeGiucMcEcDmwixM8/LZcZ+W6lMM0KDSY5rwAGrm1j7tS/VU6xs+rpD5dSRmBYosinkWD6Jk3zRmyBQ==",
+                Name.root);
+
+    RRset rrset = new RRset();
+    rrset.addRR(txt);
+    rrset.addRR(rrsig);
+
+    // Expired: now (10s) > expiration (3s)
+    assertThrows(
+        SignatureExpiredException.class,
+        () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochSecond(10)));
+  }
+
+  @Test
+  void testSignatureNotYetValid() throws IOException, DNSSECException {
+    DNSKEYRecord dnskey =
+        (DNSKEYRecord)
+            Record.fromString(
+                Name.root,
+                Type.DNSKEY,
+                DClass.IN,
+                3600,
+                "256 3 13 HgcQzDrxDm641ASGyEF0MXrjDji4XDnWzjrY9VoIn5GfAvHpuqI2W8yihplAz6C/56Zxq1XbAHjLZATfhZFmaA==",
+                Name.root);
+    RRSIGRecord rrsig =
+        (RRSIGRecord)
+            Record.fromString(
+                Name.root,
+                Type.RRSIG,
+                DClass.IN,
+                3600,
+                "TXT 13 0 3600 19700101000003 19700101000001 46271 . dRwMEthIeGiucMcEcDmwixM8/LZcZ+W6lMM0KDSY5rwAGrm1j7tS/VU6xs+rpD5dSRmBYosinkWD6Jk3zRmyBQ==",
+                Name.root);
+
+    RRset rrset = new RRset();
+    rrset.addRR(txt);
+    rrset.addRR(rrsig);
+
+    // Not yet valid: now (0s) < inception (1s)
+    assertThrows(
+        SignatureNotYetValidException.class,
+        () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochSecond(0)));
+  }
+
+  @Test
+  void testKeyMismatch() throws IOException, DNSSECException {
+    DNSKEYRecord dnskey =
+        (DNSKEYRecord)
+            Record.fromString(
+                Name.root,
+                Type.DNSKEY,
+                DClass.IN,
+                3600,
+                "256 3 13 HgcQzDrxDm641ASGyEF0MXrjDji4XDnWzjrY9VoIn5GfAvHpuqI2W8yihplAz6C/56Zxq1XbAHjLZATfhZFmaA==",
+                Name.root);
+    // RRSIG with different key tag (46272 instead of 46271)
+    RRSIGRecord rrsig =
+        (RRSIGRecord)
+            Record.fromString(
+                Name.root,
+                Type.RRSIG,
+                DClass.IN,
+                3600,
+                "TXT 13 0 3600 19700101000003 19700101000000 46272 . dRwMEthIeGiucMcEcDmwixM8/LZcZ+W6lMM0KDSY5rwAGrm1j7tS/VU6xs+rpD5dSRmBYosinkWD6Jk3zRmyBQ==",
+                Name.root);
+
+    RRset rrset = new RRset();
+    rrset.addRR(txt);
+    rrset.addRR(rrsig);
+
+    assertThrows(
+        KeyMismatchException.class, () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60)));
+  }
+
+  @Test
+  void testSignAndVerify() throws Exception {
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+    kpg.initialize(2048);
+    KeyPair kp = kpg.generateKeyPair();
+
+    Name name = Name.fromString("example.com.");
+    DNSKEYRecord dnskey =
+        new DNSKEYRecord(
+            name,
+            DClass.IN,
+            3600,
+            DNSKEYRecord.Flags.ZONE_KEY,
+            DNSKEYRecord.Protocol.DNSSEC,
+            DNSSEC.Algorithm.RSASHA256,
+            kp.getPublic());
+
+    RRset rrset = new RRset();
+    rrset.addRR(new TXTRecord(name, DClass.IN, 3600, "hello"));
+
+    Instant now = Instant.now();
+    Instant inception = now.minus(1, ChronoUnit.HOURS);
+    Instant expiration = now.plus(1, ChronoUnit.HOURS);
+
+    RRSIGRecord rrsig = DNSSEC.sign(rrset, dnskey, kp.getPrivate(), inception, expiration);
+    assertNotNull(rrsig);
+    assertEquals(dnskey.getFootprint(), rrsig.getFootprint());
+
+    rrset.addRR(rrsig);
+    DNSSEC.verify(rrset, rrsig, dnskey, now);
+  }
+
+  @Test
+  void testSignAndVerifyMessage() throws Exception {
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+    kpg.initialize(2048);
+    KeyPair kp = kpg.generateKeyPair();
+
+    Name name = Name.fromString("example.com.");
+    KEYRecord keyRecord =
+        new KEYRecord(
+            name,
+            DClass.IN,
+            3600,
+            KEYRecord.Flags.ZONE,
+            KEYRecord.Protocol.DNSSEC,
+            DNSSEC.Algorithm.RSASHA256,
+            kp.getPublic());
+
+    Message msg = new Message();
+    msg.addRecord(new TXTRecord(name, DClass.IN, 3600, "message test"), Section.ANSWER);
+
+    Instant now = Instant.now();
+    Instant inception = now.minus(1, ChronoUnit.HOURS);
+    Instant expiration = now.plus(1, ChronoUnit.HOURS);
+
+    SIGRecord sig = DNSSEC.signMessage(msg, null, keyRecord, kp.getPrivate(), inception, expiration);
+    assertNotNull(sig);
+
+    msg.addRecord(sig, Section.ADDITIONAL);
+    byte[] wire = msg.toWire();
+    Message msg2 = new Message(wire);
+
+    DNSSEC.verifyMessage(msg2, wire, sig, null, keyRecord, now);
   }
 }
