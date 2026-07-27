@@ -1,14 +1,11 @@
 package org.xbill.DNS.tools;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
-import org.xbill.DNS.Name;
 import org.xbill.DNS.Tokenizer;
 
 class UpdateToolTest {

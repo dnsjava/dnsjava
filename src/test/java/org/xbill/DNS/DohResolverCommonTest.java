@@ -35,7 +35,9 @@ class DohResolverCommonTest {
   void testConstructor() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     assertEquals("https://dns.google/dns-query", resolver.getUriTemplate());
-    assertThrows(IllegalArgumentException.class, () -> new TestDohResolver("https://dns.google/dns-query", 0));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new TestDohResolver("https://dns.google/dns-query", 0));
   }
 
   @Test
@@ -78,7 +80,8 @@ class DohResolverCommonTest {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     Message query = new Message();
     query.getHeader().setID(1234);
-    query.addRecord(Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
+    query.addRecord(
+        Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
 
     Message prepared = resolver.prepareQuery(query);
     assertEquals(0, prepared.getHeader().getID());
@@ -99,7 +102,8 @@ class DohResolverCommonTest {
     assertEquals(0, prepared.getOPT().getVersion());
     assertTrue((prepared.getOPT().getFlags() & Flags.DO) != 0);
 
-    assertThrows(IllegalArgumentException.class, () -> resolver.setEDNS(1, 0, 0, Collections.emptyList()));
+    assertThrows(
+        IllegalArgumentException.class, () -> resolver.setEDNS(1, 0, 0, Collections.emptyList()));
   }
 
   @Test
@@ -108,7 +112,8 @@ class DohResolverCommonTest {
     TSIG key = new TSIG(TSIG.HMAC_SHA256, "keyname.", "YmFzZTY0ZGF0YQ==");
     resolver.setTSIGKey(key);
     Message query = new Message();
-    query.addRecord(Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
+    query.addRecord(
+        Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
     Message prepared = resolver.prepareQuery(query);
     assertNotNull(prepared.getTSIG());
   }
@@ -136,7 +141,8 @@ class DohResolverCommonTest {
     TSIG key = new TSIG(TSIG.HMAC_SHA256, "keyname.", "YmFzZTY0ZGF0YQ==");
 
     Message query = new Message();
-    query.addRecord(Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
+    query.addRecord(
+        Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
     query.setTSIG(key, Rcode.NOERROR, null);
 
     Message response = new Message();
@@ -160,9 +166,11 @@ class DohResolverCommonTest {
   void testTimeoutFailedFuture() throws TextParseException {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     Message query = new Message();
-    query.addRecord(Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
+    query.addRecord(
+        Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
 
-    java.util.concurrent.CompletableFuture<Object> f = resolver.timeoutFailedFuture(query, new Exception("inner"));
+    java.util.concurrent.CompletableFuture<Object> f =
+        resolver.timeoutFailedFuture(query, new Exception("inner"));
     assertTrue(f.isCompletedExceptionally());
 
     f = resolver.timeoutFailedFuture(query, "extra message", new Exception("inner"));

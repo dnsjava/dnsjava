@@ -219,7 +219,9 @@ class MessageTest {
   @Test
   void testToString() {
     Message m = new Message();
-    m.addRecord(Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN), Section.QUESTION);
+    m.addRecord(
+        Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN),
+        Section.QUESTION);
     String s = m.toString();
     assertTrue(s.contains("example.com."));
     assertTrue(s.contains("QUESTION"));
