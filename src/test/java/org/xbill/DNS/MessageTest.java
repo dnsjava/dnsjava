@@ -37,6 +37,8 @@ package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -182,5 +184,94 @@ class MessageTest {
     assertThat(response.getHeader().getCount(Section.ANSWER)).isZero();
     assertThat(response.getSection(Section.ADDITIONAL)).isEmpty();
     assertThat(response.getHeader().getCount(Section.ADDITIONAL)).isZero();
+  }
+
+  @Test
+  void testAddRecord() {
+    Message m = new Message();
+    Name n = Name.fromConstantString("example.com.");
+    ARecord r = new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress());
+    m.addRecord(r, Section.ANSWER);
+    assertTrue(m.findRecord(r, Section.ANSWER));
+    m.removeRecord(r, Section.ANSWER);
+    assertFalse(m.findRecord(r, Section.ANSWER));
+  }
+
+  @Test
+  void testRemoveAllRecords() {
+    Message m = new Message();
+    Name n = Name.fromConstantString("example.com.");
+    ARecord r1 = new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress());
+    ARecord r2 = new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress());
+    m.addRecord(r1, Section.ANSWER);
+    m.addRecord(r2, Section.ANSWER);
+    m.removeAllRecords(Section.ANSWER);
+    assertTrue(m.getSection(Section.ANSWER).isEmpty());
+  }
+
+  @Test
+  void testGetOPT() {
+    Message m = new Message();
+    m.addRecord(new OPTRecord(512, 0, 0, 0), Section.ADDITIONAL);
+    assertNotNull(m.getOPT());
+  }
+
+  @Test
+  void testToString() {
+    Message m = new Message();
+    m.addRecord(Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN), Section.QUESTION);
+    String s = m.toString();
+    assertTrue(s.contains("example.com."));
+    assertTrue(s.contains("QUESTION"));
+  }
+
+  @Test
+  void testNewUpdate() {
+    Name n = Name.fromConstantString("example.com.");
+    Message m = Message.newUpdate(n);
+    assertEquals(Opcode.UPDATE, m.getHeader().getOpcode());
+    assertEquals(n, m.getSection(Section.ZONE).get(0).getName());
+  }
+
+  @Test
+  void testGetSectionRRsets() {
+    Message m = new Message();
+    Name n = Name.fromConstantString("example.com.");
+    m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
+    m.addRecord(new ARecord(n, DClass.IN, 3601, InetAddress.getLoopbackAddress()), Section.ANSWER);
+    List<RRset> rrsets = m.getSectionRRsets(Section.ANSWER);
+    // Even with different TTLs, they should be grouped if name, type, dclass match
+    assertEquals(1, rrsets.size());
+  }
+
+  @Test
+  void testFindRRset() {
+    Message m = new Message();
+    Name n = Name.fromConstantString("example.com.");
+    m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
+    assertTrue(m.findRRset(n, Type.A, Section.ANSWER));
+    assertTrue(m.findRRset(n, Type.A));
+    assertFalse(m.findRRset(n, Type.AAAA));
+  }
+
+  @Test
+  void testGetSectionArray() {
+    Message m = new Message();
+    Name n = Name.fromConstantString("example.com.");
+    m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
+    Record[] records = m.getSectionArray(Section.ANSWER);
+    assertEquals(1, records.length);
+    assertTrue(records[0] instanceof ARecord);
+  }
+
+  @Test
+  void testClone() {
+    Message m = new Message();
+    m.getHeader().setID(1234);
+    Name n = Name.fromConstantString("example.com.");
+    m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
+    Message m2 = m.clone();
+    assertEquals(1234, m2.getHeader().getID());
+    assertEquals(1, m2.getSection(Section.ANSWER).size());
   }
 }
