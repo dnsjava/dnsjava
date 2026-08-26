@@ -34,6 +34,7 @@ import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NameTooLongException;
+import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
@@ -458,8 +459,12 @@ public class LookupSession {
   }
 
   private LookupResult lookupWithHosts(List<Name> names, int type) {
-    if (hostsFileParser != null && (type == Type.A || type == Type.AAAA)) {
-      try {
+    if (hostsFileParser == null) {
+      return null;
+    }
+
+    try {
+      if (type == Type.A || type == Type.AAAA) {
         for (Name name : names) {
           Optional<InetAddress> result = hostsFileParser.getAddressForHost(name, type);
           if (result.isPresent()) {
@@ -473,9 +478,17 @@ public class LookupSession {
             return new LookupResult(Record.newRecord(name, type, DClass.IN), true, r);
           }
         }
-      } catch (IOException e) {
-        log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
+      } else if (type == Type.PTR) {
+        for (Name name : names) {
+          Optional<Name> result = hostsFileParser.getNameForReverseLookup(name);
+          if (result.isPresent()) {
+            Record r = new PTRRecord(name, DClass.IN, 0, result.get());
+            return new LookupResult(Record.newRecord(name, type, DClass.IN), true, r);
+          }
+        }
       }
+    } catch (IOException e) {
+      log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
     }
 
     return null;

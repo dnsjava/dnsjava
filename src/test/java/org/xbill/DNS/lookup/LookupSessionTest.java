@@ -31,6 +31,7 @@ import static org.xbill.DNS.Type.AAAA;
 import static org.xbill.DNS.Type.CNAME;
 import static org.xbill.DNS.Type.DNAME;
 import static org.xbill.DNS.Type.MX;
+import static org.xbill.DNS.Type.PTR;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -70,6 +71,7 @@ import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNAMERecord;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
@@ -191,6 +193,24 @@ class LookupSessionTest {
     LookupResult result = resultFuture.toCompletableFuture().get();
     assertEquals(
         singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
+        result.getRecords());
+  }
+
+  @Test
+  void lookupAsync_reverseQueryWithHosts() throws InterruptedException, ExecutionException {
+    LookupSession lookupSession =
+        LookupSession.builder()
+            .resolver(mockResolver)
+            .hostsFileParser(lookupSessionTestHostsFileParser)
+            .build();
+    CompletionStage<LookupResult> resultFuture =
+        lookupSession.lookupAsync(name("96.10.168.192.in-addr.arpa."), PTR, IN);
+
+    LookupResult result = resultFuture.toCompletableFuture().get();
+    assertEquals(
+        singletonList(
+            new PTRRecord(
+                name("96.10.168.192.in-addr.arpa."), IN, 0, name("host.docker.internal."))),
         result.getRecords());
   }
 

@@ -378,6 +378,25 @@ public class LookupTest {
   }
 
   @Test
+  void testReverseLookupFromHosts() throws URISyntaxException {
+    Lookup lookup =
+        new Lookup(ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, 10, 96}), Type.PTR);
+    wireUpMockResolver(
+        mockResolver,
+        q -> {
+          throw new RuntimeException("The resolver should not be invoked");
+        });
+    lookup.setResolver(mockResolver);
+    lookup.setHostsFileParser(
+        new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_example").toURI())));
+    Record[] run = lookup.run();
+    assertNotNull(run);
+    assertEquals(1, run.length);
+    assertEquals(
+        Name.fromConstantString("host.docker.internal."), ((PTRRecord) run[0]).getTarget());
+  }
+
+  @Test
   void testLookupFromHostsWithSearchDomain()
       throws TextParseException, URISyntaxException, UnknownHostException {
     Lookup lookup = new Lookup("host", Type.A);
