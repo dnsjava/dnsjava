@@ -941,7 +941,7 @@ public class Message implements Cloneable {
               getHeader().getID());
           List<Record> cnameRRset = rrset.rrs(false);
           for (int cnameIndex = 1; cnameIndex < cnameRRset.size(); cnameIndex++) {
-            rrset.deleteRR(cnameRRset.get(i));
+            rrset.deleteRR(cnameRRset.get(cnameIndex));
           }
         }
 

@@ -187,6 +187,60 @@ class MessageTest {
   }
 
   @Test
+  void normalizeCnames() throws WireParseException {
+    Name exampleCom = Name.fromConstantString("example.com.");
+    Record queryRecord = Record.newRecord(exampleCom, Type.MX, DClass.IN);
+    Message query = Message.newQuery(queryRecord);
+    Message response = new Message();
+    response.addRecord(queryRecord, Section.QUESTION);
+    response.addRecord(
+        new CNAMERecord(
+            Name.fromConstantString("example.com."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("1.example.com.")),
+        Section.ANSWER);
+    response.addRecord(
+        new CNAMERecord(
+            Name.fromConstantString("1.example.com."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("2.example.com.")),
+        Section.ANSWER);
+    response.addRecord(
+        new CNAMERecord(
+            Name.fromConstantString("2.example.com."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("3.example.com.")),
+        Section.ANSWER);
+    response.addRecord(
+        new CNAMERecord(
+            Name.fromConstantString("3.example.com."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("4.example.com.")),
+        Section.ANSWER);
+    response.addRecord(
+        new CNAMERecord(
+            Name.fromConstantString("4.example.com."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("5.example.com.")),
+        Section.ANSWER);
+    response.addRecord(
+        new CNAMERecord(
+            Name.fromConstantString("4.example.com."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("6.example.com.")),
+        Section.ANSWER);
+    List<Record> expectedRecords = response.getSection(Section.ANSWER).subList(0, 5);
+    response = response.normalize(query, false);
+    assertThat(response.getSection(Section.ANSWER)).containsExactlyElementsOf(expectedRecords);
+  }
+
+  @Test
   void testAddRecord() {
     Message m = new Message();
     Name n = Name.fromConstantString("example.com.");
