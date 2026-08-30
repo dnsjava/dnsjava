@@ -167,18 +167,14 @@ public final class HostsFileParser {
       while ((line = hostsReader.readLine()) != null) {
         LineData lineData = parseLine(++lineNumber, line, addressFailures, nameFailures);
         if (lineData != null) {
-          Name firstName = null;
           for (Name lineName : lineData.names) {
-            if (firstName == null) {
-              firstName = lineName;
-            }
             InetAddress lineAddress =
                 InetAddress.getByAddress(lineName.toString(true), lineData.address);
             hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
           }
-          if (firstName != null) {
-            reverseHostsCache.putIfAbsent(ReverseMap.fromAddress(lineData.address), firstName);
-          }
+
+          reverseHostsCache.putIfAbsent(
+              ReverseMap.fromAddress(lineData.address), lineData.names[0]);
         }
       }
     }
@@ -235,10 +231,7 @@ public final class HostsFileParser {
       while ((line = hostsReader.readLine()) != null) {
         LineData lineData = parseLine(++lineNumber, line, addressFailures, nameFailures);
         if (lineData != null && ReverseMap.fromAddress(lineData.address).equals(reverseName)) {
-          for (Name lineName : lineData.names) {
-            reverseHostsCache.putIfAbsent(reverseName, lineName);
-            return;
-          }
+          reverseHostsCache.putIfAbsent(reverseName, lineData.names[0]);
         }
       }
     }
@@ -258,7 +251,7 @@ public final class HostsFileParser {
   private static final class LineData {
     final int type;
     final byte[] address;
-    final Iterable<? extends Name> names;
+    final Name[] names;
   }
 
   private LineData parseLine(
@@ -281,12 +274,17 @@ public final class HostsFileParser {
       return null;
     }
 
-    Iterable<? extends Name> lineNames =
+    Name[] lineNames =
         Arrays.stream(lineTokens)
-                .skip(1)
-                .map(lineTokenName -> safeName(lineTokenName, lineNumber, nameFailures))
-                .filter(Objects::nonNull)
-            ::iterator;
+            .skip(1)
+            .map(lineTokenName -> safeName(lineTokenName, lineNumber, nameFailures))
+            .filter(Objects::nonNull)
+            .toArray(Name[]::new);
+    if (lineNames.length == 0) {
+      // Skip lines that have no valid names
+      return null;
+    }
+
     return new LineData(lineAddressType, lineAddressBytes, lineNames);
   }
 
