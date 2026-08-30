@@ -106,7 +106,8 @@ public class Message implements Cloneable {
       for (int i = 0; i < 4; i++) {
         int count = header.getCount(i);
         if (count > 0) {
-          sections[i] = new ArrayList<>(count);
+          // Don't pre-allocate unlimited, count may be under attacker control
+          sections[i] = new ArrayList<>(Math.min(count, 4));
         }
         for (int j = 0; j < count; j++) {
           int pos = in.current();
