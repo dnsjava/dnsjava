@@ -644,8 +644,12 @@ public final class Lookup {
   }
 
   private boolean lookupFromHostsFile(Name current) {
-    if (hostsFileParser != null && (type == Type.A || type == Type.AAAA)) {
-      try {
+    if (hostsFileParser == null) {
+      return false;
+    }
+
+    try {
+      if (type == Type.A || type == Type.AAAA) {
         Optional<InetAddress> localLookup = hostsFileParser.getAddressForHost(current, type);
         if (localLookup.isPresent()) {
           result = SUCCESSFUL;
@@ -658,9 +662,17 @@ public final class Lookup {
 
           return true;
         }
-      } catch (IOException e) {
-        log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
+      } else if (type == Type.PTR) {
+        Optional<Name> localLookup = hostsFileParser.getNameForReverseLookup(current);
+        if (localLookup.isPresent()) {
+          result = SUCCESSFUL;
+          done = true;
+          answers = new PTRRecord[] {new PTRRecord(current, dclass, 0L, localLookup.get())};
+          return true;
+        }
       }
+    } catch (IOException e) {
+      log.debug("Local hosts database parsing failed, ignoring and using resolver", e);
     }
 
     return false;

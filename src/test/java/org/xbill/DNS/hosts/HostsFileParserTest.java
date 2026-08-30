@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.ReverseMap;
 import org.xbill.DNS.Type;
 
 class HostsFileParserTest {
@@ -343,5 +344,59 @@ class HostsFileParserTest {
         hostsFileParser
             .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
             .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+  }
+
+  @Test
+  void testReverseLookupNullArgument() {
+    HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
+    assertThrows(NullPointerException.class, () -> hostsFileParser.getNameForReverseLookup(null));
+  }
+
+  @Test
+  void testReverseLookup() throws IOException {
+    HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
+    assertEquals(
+        kubernetesName,
+        hostsFileParser
+            .getNameForReverseLookup(ReverseMap.fromAddress(localhostBytes))
+            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+  }
+
+  @Test
+  void testReverseLookupNotFound() throws IOException {
+    HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
+    assertEquals(
+        Optional.empty(),
+        hostsFileParser.getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {8, 8, 8, 8})));
+  }
+
+  @Test
+  void testReverseLookupReturnsFirstName() throws IOException {
+    // hosts_example maps 192.168.10.96 to host.docker.internal and gateway.docker.internal
+    HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
+    assertEquals(
+        Name.fromConstantString("host.docker.internal."),
+        hostsFileParser
+            .getNameForReverseLookup(
+                ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, 10, 96}))
+            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+  }
+
+  @Test
+  void testBigFileReverseLookup() throws IOException {
+    HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileReverseLookup");
+    assertEquals(
+        Name.fromConstantString("localhost-10."),
+        hostsFileParser
+            .getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {127, 0, 0, 10}))
+            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+  }
+
+  @Test
+  void testBigFileReverseNotFound() throws IOException {
+    HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileReverseNotFound");
+    assertEquals(
+        Optional.empty(),
+        hostsFileParser.getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {127, 1, 1, 1})));
   }
 }

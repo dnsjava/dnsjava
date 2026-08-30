@@ -332,6 +332,111 @@ class NioTcpClientTest {
     }
   }
 
+  /**
+   * Verifies that a failed write does not kill the shared selector thread. The server never reads
+   * and resets the connection while the client still has partially written transactions queued: the
+   * resulting write failure in ChannelState#processWrite must fail the pending transactions and
+   * must not escape with a CancelledKeyException, neither from setting interestOps on the canceled
+   * key in processWrite nor from the isReadable check on it in processReadyKey.
+   */
+  @Test
+  void testWriteFailureDoesNotKillSelectorThread() throws Exception {
+    try {
+      // start the selector thread early
+      NioClient.selector();
+      NioTcpClient nioTcpClient = new NioTcpClient();
+
+      // Watch the selector thread for escaping exceptions, without this they are only
+      // visible as a silently died thread
+      AtomicReference<Throwable> uncaughtException = new AtomicReference<>(null);
+      Field selectorThreadField = NioClient.class.getDeclaredField("selectorThread");
+      selectorThreadField.setAccessible(true);
+      Thread selectorThread = (Thread) selectorThreadField.get(null);
+      selectorThread.setUncaughtExceptionHandler((t, e) -> uncaughtException.set(e));
+
+      // Large queries so that the client's socket send buffer fills up and transactions stay
+      // queued in processWrite, waiting for OP_WRITE (same trick as in testResponseStream)
+      Record qr = Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN);
+      Message[] q = new Message[10];
+      for (int i = 0; i < q.length; i++) {
+        q[i] = Message.newQuery(qr);
+        for (int j = 0; j < 2048; j++) {
+          q[i].addRecord(
+              new AAAARecord(
+                  Name.fromConstantString("example.com."), DClass.IN, 3600, new byte[16]),
+              Section.AUTHORITY);
+        }
+      }
+
+      CountDownLatch cdlQueriesSubmitted = new CountDownLatch(1);
+      CountDownLatch cdlQueriesFailed = new CountDownLatch(q.length);
+      List<Throwable> exceptions = new ArrayList<>();
+      try (ServerSocket ss = new ServerSocket(0, 0, InetAddress.getLoopbackAddress())) {
+        ss.setReceiveBufferSize(16);
+        ss.setSoTimeout(15000);
+        Thread server =
+            new Thread(
+                () -> {
+                  try {
+                    Socket s = ss.accept();
+                    // Never read; wait until the client has queued all transactions and
+                    // filled its send buffer, then reset the connection so that the next
+                    // write fails
+                    if (!cdlQueriesSubmitted.await(15, TimeUnit.SECONDS)) {
+                      exceptions.add(
+                          new AssertionError("timed out waiting for queries to be submitted"));
+                    }
+                    Thread.sleep(500);
+                    s.setSoLinger(true, 0);
+                    s.close();
+                  } catch (IOException | InterruptedException e) {
+                    exceptions.add(e);
+                  }
+                });
+        server.setDaemon(true);
+        server.start();
+
+        for (Message query : q) {
+          nioTcpClient
+              .sendAndReceiveTcp(
+                  null,
+                  (InetSocketAddress) ss.getLocalSocketAddress(),
+                  query,
+                  query.toWire(),
+                  Duration.ofSeconds(15))
+              .whenComplete(
+                  (d, e) -> {
+                    if (e == null) {
+                      exceptions.add(new AssertionError("Got an answer but expected a failure"));
+                    }
+                    cdlQueriesFailed.countDown();
+                  });
+        }
+        cdlQueriesSubmitted.countDown();
+
+        // With the write failure unhandled, the selector thread dies: the pending
+        // transactions then never complete (their timeouts run on that thread) and this
+        // times out
+        if (!cdlQueriesFailed.await(15, TimeUnit.SECONDS)) {
+          fail("timed out waiting for the transactions to fail");
+        }
+      }
+
+      // The transactions fail (from handleChannelException) just before the selector thread
+      // would die from an escaping exception, so give the thread a grace period to prove it
+      // survived rather than immediately checking a possibly-still-unset uncaughtException
+      selectorThread.join(500);
+      assertThat(selectorThread.isAlive()).isTrue();
+      assertThat(uncaughtException.get()).isNull();
+      for (Throwable t : exceptions) {
+        log.error("Failure during test run", t);
+      }
+      assertEquals(0, exceptions.size(), "Test had exceptions in async code");
+    } finally {
+      NioClient.close();
+    }
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"000101", "0000", "0002", "000201"})
   void testTooShortResponseStream(String base16ResponseBytes)

@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.ReverseMap;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
@@ -45,6 +46,9 @@ public final class HostsFileParser {
 
   @SuppressWarnings("java:S3077")
   private volatile Map<String, InetAddress> hostsCache;
+
+  @SuppressWarnings("java:S3077")
+  private volatile Map<Name, Name> reverseHostsCache;
 
   private Instant lastFileModificationCheckTime = null;
   private Instant lastFileReadTime = null;
@@ -124,6 +128,36 @@ public final class HostsFileParser {
     return Optional.ofNullable(hostsCache.get(key(name, type)));
   }
 
+  /**
+   * Performs on-demand parsing and caching of the local hosts database for a reverse (PTR) lookup.
+   *
+   * @param reverseName the reverse map name to search for, as returned by {@link
+   *     ReverseMap#fromAddress(InetAddress)}.
+   * @return The first host name found for the requested address.
+   * @throws IOException When the parsing fails.
+   * @since 3.6.6
+   */
+  public Optional<Name> getNameForReverseLookup(Name reverseName) throws IOException {
+    Objects.requireNonNull(reverseName, "reverseName is required");
+
+    validateCache();
+
+    Name cachedName = reverseHostsCache.get(reverseName);
+    if (cachedName != null) {
+      return Optional.of(cachedName);
+    }
+
+    if (isEntireFileParsed) {
+      return Optional.empty();
+    }
+
+    if (hostsFileSizeBytes > maxFullCacheFileSizeBytes) {
+      searchHostsFileForReverseEntry(reverseName);
+    }
+
+    return Optional.ofNullable(reverseHostsCache.get(reverseName));
+  }
+
   private void parseEntireHostsFile() throws IOException {
     String line;
     int lineNumber = 0;
@@ -138,6 +172,9 @@ public final class HostsFileParser {
                 InetAddress.getByAddress(lineName.toString(true), lineData.address);
             hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
           }
+
+          reverseHostsCache.putIfAbsent(
+              ReverseMap.fromAddress(lineData.address), lineData.names[0]);
         }
       }
     }
@@ -185,11 +222,36 @@ public final class HostsFileParser {
     }
   }
 
+  private void searchHostsFileForReverseEntry(Name reverseName) throws IOException {
+    String line;
+    int lineNumber = 0;
+    AtomicInteger addressFailures = new AtomicInteger(0);
+    AtomicInteger nameFailures = new AtomicInteger(0);
+    try (BufferedReader hostsReader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+      while ((line = hostsReader.readLine()) != null) {
+        LineData lineData = parseLine(++lineNumber, line, addressFailures, nameFailures);
+        if (lineData != null && ReverseMap.fromAddress(lineData.address).equals(reverseName)) {
+          reverseHostsCache.putIfAbsent(reverseName, lineData.names[0]);
+        }
+      }
+    }
+
+    if (!hostsFileWarningLogged && (addressFailures.get() > 0 || nameFailures.get() > 0)) {
+      log.warn(
+          "Failed to find {} in hosts file {}, address failures={}, name failures={}",
+          reverseName,
+          path,
+          addressFailures.get(),
+          nameFailures);
+      hostsFileWarningLogged = true;
+    }
+  }
+
   @RequiredArgsConstructor
   private static final class LineData {
     final int type;
     final byte[] address;
-    final Iterable<? extends Name> names;
+    final Name[] names;
   }
 
   private LineData parseLine(
@@ -212,12 +274,17 @@ public final class HostsFileParser {
       return null;
     }
 
-    Iterable<? extends Name> lineNames =
+    Name[] lineNames =
         Arrays.stream(lineTokens)
-                .skip(1)
-                .map(lineTokenName -> safeName(lineTokenName, lineNumber, nameFailures))
-                .filter(Objects::nonNull)
-            ::iterator;
+            .skip(1)
+            .map(lineTokenName -> safeName(lineTokenName, lineNumber, nameFailures))
+            .filter(Objects::nonNull)
+            .toArray(Name[]::new);
+    if (lineNames.length == 0) {
+      // Skip lines that have no valid names
+      return null;
+    }
+
     return new LineData(lineAddressType, lineAddressBytes, lineNames);
   }
 
@@ -299,8 +366,10 @@ public final class HostsFileParser {
   private void createOrClearCache() {
     if (hostsCache == null) {
       hostsCache = new ConcurrentHashMap<>();
+      reverseHostsCache = new ConcurrentHashMap<>();
     } else {
       hostsCache.clear();
+      reverseHostsCache.clear();
     }
   }
 

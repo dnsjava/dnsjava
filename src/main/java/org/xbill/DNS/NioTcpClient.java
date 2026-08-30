@@ -147,7 +147,9 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
           if (key.isWritable()) {
             processWrite(key);
           }
-          if (key.isReadable()) {
+          // processWrite may have canceled the key on a write failure; isReadable would
+          // then throw a CancelledKeyException and kill the selector thread
+          if (key.isValid() && key.isReadable()) {
             processRead(key);
           }
         }
@@ -263,8 +265,7 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
     }
 
     private void processWrite(SelectionKey key) {
-      for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
-        Transaction t = it.next();
+      for (Transaction t : pendingTransactions) {
         try {
           if (!t.send()) {
             // Write was incomplete because the output buffer was full. Wait until the selector
@@ -273,9 +274,13 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
             return;
           }
         } catch (IOException e) {
-          t.f.completeExceptionally(e);
-          it.remove();
+          // A failed write leaves the TCP stream in an undefined state for all transactions
+          // multiplexed on this channel, fail them and close the channel. Return without
+          // touching interestOps, on the now canceled key it would throw
+          // CancelledKeyException and kill the selector thread.
+          handleChannelException(e);
           key.cancel();
+          return;
         }
       }
 
