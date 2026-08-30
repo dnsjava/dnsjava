@@ -33,17 +33,22 @@ public final class TTL {
    */
   @SuppressWarnings("fallthrough")
   public static long parse(String s, boolean clamp) {
-    if (s == null || s.isEmpty() || !Character.isDigit(s.charAt(0))) {
+    if (s == null || s.isEmpty()) {
       throw new NumberFormatException();
     }
+    char c = s.charAt(0);
+    if (c < '0' || c > '9') {
+      throw new NumberFormatException();
+    }
+
     long value = 0;
     long ttl = 0;
     for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      long oldvalue = value;
-      if (Character.isDigit(c)) {
+      c = s.charAt(i);
+      long oldValue = value;
+      if (c >= '0' && c <= '9') {
         value = (value * 10) + Character.getNumericValue(c);
-        if (value < oldvalue) {
+        if (value < oldValue) {
           throw new NumberFormatException();
         }
       } else {

@@ -176,9 +176,11 @@ public class Master implements AutoCloseable {
   }
 
   private long parseUInt32(String s) {
-    if (!Character.isDigit(s.charAt(0))) {
+    char c = s.charAt(0);
+    if (c < '0' || c > '9') {
       return -1;
     }
+
     try {
       long l = Long.parseLong(s);
       if (!Utils.isUInt32(l)) {

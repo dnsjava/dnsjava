@@ -20,10 +20,14 @@ public class X25Record extends Record {
 
   private static byte[] checkAndConvertAddress(String address) {
     int length = address.length();
+    if (length == 0 || length > 15) {
+      return null;
+    }
+
     byte[] out = new byte[length];
     for (int i = 0; i < length; i++) {
       char c = address.charAt(i);
-      if (!Character.isDigit(c)) {
+      if (c < '0' || c > '9') {
         return null;
       }
       out[i] = (byte) c;

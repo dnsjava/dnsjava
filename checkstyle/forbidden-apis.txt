@@ -1,0 +1,3 @@
+@defaultMessage isDigit can return true for Unicode characters
+java.lang.Character#isDigit(char)
+java.lang.Character#isDigit(int)

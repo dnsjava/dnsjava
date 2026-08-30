@@ -426,7 +426,8 @@ public class Tokenizer implements AutoCloseable {
    */
   public long getLong() throws IOException {
     String next = getIdentifier("an integer");
-    if (!Character.isDigit(next.charAt(0))) {
+    char c = next.charAt(0);
+    if (c < '0' || c > '9') {
       throw exception("expected an integer");
     }
     try {
