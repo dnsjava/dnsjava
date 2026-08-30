@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -140,6 +141,62 @@ abstract class DohResolverCommon implements Resolver {
     }
 
     return preparedQuery;
+  }
+
+  protected CompletableFuture<Message> processResponseIntoMessage(
+      Message query, int httpResponseStatusCode, byte[] responseBytes) {
+    Message response;
+    if (httpResponseStatusCode >= 200 && httpResponseStatusCode < 300) {
+      try {
+        response = new Message(responseBytes);
+      } catch (IOException e) {
+        return failedFuture(e);
+      }
+
+      WireParseException validationResult = validateResponseMatchesQuery(query, response);
+      if (validationResult != null) {
+        return failedFuture(validationResult);
+      }
+      verifyTSIG(query, response, responseBytes, tsig);
+    } else {
+      response = new Message(0);
+      response.getHeader().setRcode(Rcode.SERVFAIL);
+    }
+
+    response.setResolver(this);
+    return CompletableFuture.completedFuture(response);
+  }
+
+  private WireParseException validateResponseMatchesQuery(Message query, Message response) {
+    if (response.getQuestion() == null) {
+      return new WireParseException("invalid message: question section missing");
+    }
+
+    // validate name, class and type (rfc5452#section-9.1)
+    if (!query.getQuestion().getName().equals(response.getQuestion().getName())) {
+      return new WireParseException(
+          "invalid name in message: expected "
+              + query.getQuestion().getName()
+              + "; got "
+              + response.getQuestion().getName());
+    }
+
+    if (query.getQuestion().getDClass() != response.getQuestion().getDClass()) {
+      return new WireParseException(
+          "invalid class in message: expected "
+              + DClass.string(query.getQuestion().getDClass())
+              + "; got "
+              + DClass.string(response.getQuestion().getDClass()));
+    }
+
+    if (query.getQuestion().getType() != response.getQuestion().getType()) {
+      return new WireParseException(
+          "invalid type in message: expected "
+              + Type.string(query.getQuestion().getType())
+              + "; got "
+              + Type.string(response.getQuestion().getType()));
+    }
+    return null;
   }
 
   protected void verifyTSIG(Message query, Message response, byte[] b, TSIG tsig) {

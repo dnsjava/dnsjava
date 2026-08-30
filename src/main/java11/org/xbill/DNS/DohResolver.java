@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -260,23 +259,7 @@ public final class DohResolver extends DohResolverCommon {
                   return CompletableFuture.<Message>failedFuture(ex);
                 }
               } else {
-                try {
-                  Message responseMessage;
-                  int rc = response.statusCode();
-                  if (rc >= 200 && rc < 300) {
-                    byte[] responseBytes = response.body();
-                    responseMessage = new Message(responseBytes);
-                    verifyTSIG(query, responseMessage, responseBytes, tsig);
-                  } else {
-                    responseMessage = new Message();
-                    responseMessage.getHeader().setRcode(Rcode.SERVFAIL);
-                  }
-
-                  responseMessage.setResolver(this);
-                  return CompletableFuture.completedFuture(responseMessage);
-                } catch (IOException e) {
-                  return CompletableFuture.<Message>failedFuture(e);
-                }
+                return processResponseIntoMessage(query, response.statusCode(), response.body());
               }
             },
             executor)

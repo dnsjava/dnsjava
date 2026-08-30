@@ -122,17 +122,8 @@ public final class DohResolver extends DohResolverCommon {
                     try {
                       SendAndGetMessageBytesResponse result =
                           sendAndGetMessageBytes(url, queryBytes, startTime);
-                      Message response;
-                      if (result.rc == Rcode.NOERROR) {
-                        response = new Message(result.responseBytes);
-                        verifyTSIG(query, response, result.responseBytes, tsig);
-                      } else {
-                        response = new Message(0);
-                        response.getHeader().setRcode(result.rc);
-                      }
-
-                      response.setResolver(this);
-                      return CompletableFuture.completedFuture(response);
+                      return processResponseIntoMessage(
+                          query, result.httpResponseStatusCode, result.responseBytes);
                     } catch (SocketTimeoutException e) {
                       return this.<Message>timeoutFailedFuture(query, e);
                     } catch (IOException | URISyntaxException e) {
@@ -173,7 +164,7 @@ public final class DohResolver extends DohResolverCommon {
 
   @Value
   private static class SendAndGetMessageBytesResponse {
-    int rc;
+    int httpResponseStatusCode;
     byte[] responseBytes;
   }
 
@@ -212,7 +203,7 @@ public final class DohResolver extends DohResolverCommon {
     if (rc < 200 || rc >= 300) {
       discardStream(conn.getInputStream());
       discardStream(conn.getErrorStream());
-      return new SendAndGetMessageBytesResponse(Rcode.SERVFAIL, null);
+      return new SendAndGetMessageBytesResponse(rc, null);
     }
 
     try (InputStream is = conn.getInputStream()) {
@@ -241,7 +232,7 @@ public final class DohResolver extends DohResolverCommon {
           throw new EOFException("Could not read expected content length");
         }
 
-        return new SendAndGetMessageBytesResponse(Rcode.NOERROR, responseBytes);
+        return new SendAndGetMessageBytesResponse(rc, responseBytes);
       } else {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
           byte[] buffer = new byte[4096];
@@ -254,7 +245,7 @@ public final class DohResolver extends DohResolverCommon {
             }
             bos.write(buffer, 0, r);
           }
-          return new SendAndGetMessageBytesResponse(Rcode.NOERROR, bos.toByteArray());
+          return new SendAndGetMessageBytesResponse(rc, bos.toByteArray());
         }
       }
     } catch (IOException ioe) {

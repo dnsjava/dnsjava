@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -28,12 +31,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.stubbing.Answer;
 
@@ -71,16 +76,85 @@ class DohResolverTest {
         .onSuccess(
             server ->
                 Future.fromCompletionStage(resolver.sendAsync(qm))
-                    .onComplete(
-                        context.succeeding(
-                            result ->
-                                context.verify(
-                                    () -> {
-                                      assertEquals(Rcode.NOERROR, result.getHeader().getRcode());
-                                      assertEquals(0, result.getHeader().getID());
-                                      assertEquals(queryName, result.getQuestion().getName());
-                                      context.completeNow();
-                                    }))));
+                    .onComplete(assertOnValidReply(context)));
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "false,,,,true",
+    "true,,,,true",
+    "false,a.,,,false",
+    "true,a.,,,false",
+    "false,,3,,false",
+    "true,,3,,false",
+    "false,a.,3,,false",
+    "true,a.,3,,false",
+    "false,,,28,false",
+    "true,,,28,false",
+    "false,a.,,28,false",
+    "true,a.,,28,false",
+    "false,a.,3,28,false",
+    "true,a.,3,28,false",
+    "false,,3,28,false",
+    "true,,3,28,false",
+  })
+  void simpleResolveInvalidReply(
+      boolean usePost,
+      String name,
+      Integer dclass,
+      Integer type,
+      boolean isValid,
+      Vertx vertx,
+      VertxTestContext context) {
+    DohResolver resolver = getResolver();
+    resolver.setUsePost(usePost);
+    setupServer(
+            qm,
+            a,
+            Duration.ZERO,
+            200,
+            1,
+            context,
+            vertx,
+            m -> {
+              Record question = m.getQuestion();
+              m.removeAllRecords(Section.QUESTION);
+              m.addRecord(
+                  Record.newRecord(
+                      name == null ? question.getName() : Name.fromConstantString(name),
+                      type == null ? question.getType() : type,
+                      dclass == null ? question.getDClass() : dclass),
+                  Section.QUESTION);
+            })
+        .onSuccess(
+            server -> {
+              resolver.setUriTemplate("http://localhost:" + server.actualPort());
+              Future.fromCompletionStage(resolver.sendAsync(qm))
+                  .onComplete(
+                      isValid ? assertOnValidReply(context) : assertOnInvalidReply(context));
+            });
+  }
+
+  private Handler<AsyncResult<Message>> assertOnInvalidReply(VertxTestContext context) {
+    return context.failing(
+        result ->
+            context.verify(
+                () -> {
+                  assertThat(result).hasRootCauseInstanceOf(WireParseException.class);
+                  context.completeNow();
+                }));
+  }
+
+  private Handler<AsyncResult<Message>> assertOnValidReply(VertxTestContext context) {
+    return context.succeeding(
+        result ->
+            context.verify(
+                () -> {
+                  assertEquals(Rcode.NOERROR, result.getHeader().getRcode());
+                  assertEquals(0, result.getHeader().getID());
+                  assertEquals(queryName, result.getQuestion().getName());
+                  context.completeNow();
+                }));
   }
 
   @ParameterizedTest
@@ -228,7 +302,8 @@ class DohResolverTest {
       int maxConcurrentRequests,
       Vertx vertx,
       VertxTestContext context) {
-    return setupServer(qm, a, responseDelay, statusCode, maxConcurrentRequests, context, vertx)
+    return setupServer(
+            qm, a, responseDelay, statusCode, maxConcurrentRequests, context, vertx, null)
         .onSuccess(server -> resolver.setUriTemplate("http://localhost:" + server.actualPort()));
   }
 
@@ -311,7 +386,8 @@ class DohResolverTest {
       int statusCode,
       int maxConcurrentRequests,
       VertxTestContext context,
-      Vertx vertx) {
+      Vertx vertx,
+      Consumer<Message> responseInterceptor) {
     HttpVersion version =
         System.getProperty("java.version").startsWith("1.")
             ? HttpVersion.HTTP_1_1
@@ -354,6 +430,9 @@ class DohResolverTest {
                         });
                     Message dnsResponseCopy = dnsResponse.clone();
                     dnsResponseCopy.getHeader().setID(0);
+                    if (responseInterceptor != null) {
+                      responseInterceptor.accept(dnsResponseCopy);
+                    }
                     if (!serverProcessingTime.isZero()
                         && (thisRequestNum == 1 || allRequestsUseTimeout)) {
                       vertx.setTimer(
