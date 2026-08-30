@@ -265,8 +265,7 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
     }
 
     private void processWrite(SelectionKey key) {
-      for (Iterator<Transaction> it = pendingTransactions.iterator(); it.hasNext(); ) {
-        Transaction t = it.next();
+      for (Transaction t : pendingTransactions) {
         try {
           if (!t.send()) {
             // Write was incomplete because the output buffer was full. Wait until the selector
