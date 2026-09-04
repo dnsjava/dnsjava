@@ -48,7 +48,8 @@ class ZoneTransferInTest {
     ZoneTransferIn xfr = ZoneTransferIn.newAXFR(zoneName, address, null);
     assertThatCode(() -> xfr.setTimeout(Duration.ofSeconds(10))).doesNotThrowAnyException();
     assertThatCode(() -> xfr.setDClass(DClass.CH)).doesNotThrowAnyException();
-    assertThatCode(() -> xfr.setLocalAddress(new InetSocketAddress("127.0.0.2", 0))).doesNotThrowAnyException();
+    assertThatCode(() -> xfr.setLocalAddress(new InetSocketAddress("127.0.0.2", 0)))
+        .doesNotThrowAnyException();
   }
 
   @Test
@@ -73,8 +74,7 @@ class ZoneTransferInTest {
     public void bind(SocketAddress addr) {}
 
     @Override
-    public void send(byte[] data) {
-    }
+    public void send(byte[] data) {}
 
     @Override
     byte[] recv() throws IOException {
@@ -351,7 +351,6 @@ class ZoneTransferInTest {
     assertFalse(xfr.isAXFR());
     assertFalse(xfr.isIXFR());
   }
-
 
   @Test
   void testIXFRNoFallback() throws IOException {
