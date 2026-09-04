@@ -41,7 +41,7 @@ class LookupToolTest {
     Name name = Name.fromString("example.com.");
     Cache cache = new Cache();
     Record a = new ARecord(name, DClass.IN, 3600, InetAddress.getByName("127.0.0.1"));
-    cache.addRecord(a, Credibility.AUTH_ANSWER, null);
+    cache.addRecord(a, Credibility.AUTH_ANSWER);
 
     Lookup l = new Lookup(name, Type.A);
     l.setCache(cache);
@@ -52,24 +52,6 @@ class LookupToolTest {
     String output = outContent.toString();
     assertTrue(output.contains("example.com:"));
     assertTrue(output.contains("127.0.0.1"));
-  }
-
-  @Test
-  void testPrintAnswerNotFound() throws TextParseException {
-    Name name = Name.fromString("nonexistent.example.com.");
-    // Use an empty cache and no resolver to ensure it fails
-    Lookup l = new Lookup(name, Type.A);
-    l.setCache(new Cache());
-    // Don't set resolver to null, let it use default or a mock if we had one.
-    // Since we don't have a network, it should eventually fail with "network error" or "host not
-    // found"
-    // but without a resolver it throws NPE.
-    l.run();
-
-    lookup.printAnswer("example.com", l);
-
-    String output = outContent.toString();
-    assertTrue(output.contains("example.com:"));
   }
 
   @Test

@@ -170,21 +170,69 @@ class DNSSECTest {
 
   @Test
   void testAlgorithmMnemonic() {
+    assertEquals("DELETE", DNSSEC.Algorithm.string(DNSSEC.Algorithm.DELETE));
+    assertEquals("DH", DNSSEC.Algorithm.string(DNSSEC.Algorithm.DH));
+    assertEquals("DSA", DNSSEC.Algorithm.string(DNSSEC.Algorithm.DSA));
+    assertEquals("RSASHA1", DNSSEC.Algorithm.string(DNSSEC.Algorithm.RSASHA1));
+    assertEquals("DSA-NSEC3-SHA1", DNSSEC.Algorithm.string(DNSSEC.Algorithm.DSA_NSEC3_SHA1));
+    assertEquals("RSASHA1-NSEC3-SHA1", DNSSEC.Algorithm.string(DNSSEC.Algorithm.RSA_NSEC3_SHA1));
     assertEquals("RSASHA256", DNSSEC.Algorithm.string(DNSSEC.Algorithm.RSASHA256));
+    assertEquals("RSASHA512", DNSSEC.Algorithm.string(DNSSEC.Algorithm.RSASHA512));
+    assertEquals("ECC-GOST", DNSSEC.Algorithm.string(DNSSEC.Algorithm.ECC_GOST));
+    assertEquals("ECDSAP256SHA256", DNSSEC.Algorithm.string(DNSSEC.Algorithm.ECDSAP256SHA256));
+    assertEquals("ECDSAP384SHA384", DNSSEC.Algorithm.string(DNSSEC.Algorithm.ECDSAP384SHA384));
+    assertEquals("ED25519", DNSSEC.Algorithm.string(DNSSEC.Algorithm.ED25519));
+    assertEquals("ED448", DNSSEC.Algorithm.string(DNSSEC.Algorithm.ED448));
+    assertEquals("SM2SM3", DNSSEC.Algorithm.string(DNSSEC.Algorithm.SM2SM3));
+    assertEquals("ECC-GOST12", DNSSEC.Algorithm.string(DNSSEC.Algorithm.ECC_GOST12));
+    assertEquals("INDIRECT", DNSSEC.Algorithm.string(DNSSEC.Algorithm.INDIRECT));
+    assertEquals("PRIVATEDNS", DNSSEC.Algorithm.string(DNSSEC.Algorithm.PRIVATEDNS));
+    assertEquals("PRIVATEOID", DNSSEC.Algorithm.string(DNSSEC.Algorithm.PRIVATEOID));
+
+    assertEquals(DNSSEC.Algorithm.DELETE, DNSSEC.Algorithm.value("DELETE"));
+    assertEquals(DNSSEC.Algorithm.DH, DNSSEC.Algorithm.value("DH"));
+    assertEquals(DNSSEC.Algorithm.DSA, DNSSEC.Algorithm.value("DSA"));
+    assertEquals(DNSSEC.Algorithm.RSASHA1, DNSSEC.Algorithm.value("RSASHA1"));
+    assertEquals(DNSSEC.Algorithm.DSA_NSEC3_SHA1, DNSSEC.Algorithm.value("DSA-NSEC3-SHA1"));
+    assertEquals(DNSSEC.Algorithm.RSA_NSEC3_SHA1, DNSSEC.Algorithm.value("RSASHA1-NSEC3-SHA1"));
     assertEquals(DNSSEC.Algorithm.RSASHA256, DNSSEC.Algorithm.value("RSASHA256"));
+    assertEquals(DNSSEC.Algorithm.RSASHA512, DNSSEC.Algorithm.value("RSASHA512"));
+    assertEquals(DNSSEC.Algorithm.ECC_GOST, DNSSEC.Algorithm.value("ECC-GOST"));
+    assertEquals(DNSSEC.Algorithm.ECDSAP256SHA256, DNSSEC.Algorithm.value("ECDSAP256SHA256"));
+    assertEquals(DNSSEC.Algorithm.ECDSAP384SHA384, DNSSEC.Algorithm.value("ECDSAP384SHA384"));
+    assertEquals(DNSSEC.Algorithm.ED25519, DNSSEC.Algorithm.value("ED25519"));
+    assertEquals(DNSSEC.Algorithm.ED448, DNSSEC.Algorithm.value("ED448"));
+    assertEquals(DNSSEC.Algorithm.SM2SM3, DNSSEC.Algorithm.value("SM2SM3"));
+    assertEquals(DNSSEC.Algorithm.ECC_GOST12, DNSSEC.Algorithm.value("ECC-GOST12"));
+    assertEquals(DNSSEC.Algorithm.INDIRECT, DNSSEC.Algorithm.value("INDIRECT"));
+    assertEquals(DNSSEC.Algorithm.PRIVATEDNS, DNSSEC.Algorithm.value("PRIVATEDNS"));
+    assertEquals(DNSSEC.Algorithm.PRIVATEOID, DNSSEC.Algorithm.value("PRIVATEOID"));
     assertEquals(-1, DNSSEC.Algorithm.value("UNKNOWN_ALG"));
   }
 
   @Test
   void testDigestMnemonic() {
+    assertEquals("SHA-1", DNSSEC.Digest.string(DNSSEC.Digest.SHA1));
     assertEquals("SHA-256", DNSSEC.Digest.string(DNSSEC.Digest.SHA256));
+    assertEquals("GOST R 34.11-94", DNSSEC.Digest.string(DNSSEC.Digest.GOST3411));
+    assertEquals("SHA-384", DNSSEC.Digest.string(DNSSEC.Digest.SHA384));
+    assertEquals("GOST R 34.11-94", DNSSEC.Digest.string(DNSSEC.Digest.GOST3411));
+    assertEquals("GOST12", DNSSEC.Digest.string(DNSSEC.Digest.GOST3411_12));
+    assertEquals("SM3", DNSSEC.Digest.string(DNSSEC.Digest.SM3));
+    assertEquals(DNSSEC.Digest.SHA1, DNSSEC.Digest.value("SHA-1"));
     assertEquals(DNSSEC.Digest.SHA256, DNSSEC.Digest.value("SHA-256"));
+    assertEquals(DNSSEC.Digest.GOST3411, DNSSEC.Digest.value("GOST R 34.11-94"));
+    assertEquals(DNSSEC.Digest.SHA384, DNSSEC.Digest.value("SHA-384"));
+    assertEquals(DNSSEC.Digest.GOST3411_12, DNSSEC.Digest.value("GOST12"));
+    assertEquals(DNSSEC.Digest.SM3, DNSSEC.Digest.value("SM3"));
   }
 
   @Test
   void testDigestLength() {
-    assertEquals(32, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA256));
     assertEquals(20, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA1));
+    assertEquals(32, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA256));
+    assertEquals(32, DNSSEC.Digest.algLength(DNSSEC.Digest.GOST3411));
+    assertEquals(32, DNSSEC.Digest.algLength(DNSSEC.Digest.SM3));
     assertEquals(48, DNSSEC.Digest.algLength(DNSSEC.Digest.SHA384));
     assertEquals(64, DNSSEC.Digest.algLength(DNSSEC.Digest.GOST3411_12));
     assertEquals(-1, DNSSEC.Digest.algLength(255));
@@ -199,15 +247,15 @@ class DNSSECTest {
             3600,
             DNSKEYRecord.Flags.ZONE_KEY,
             DNSKEYRecord.Protocol.DNSSEC,
-            DNSSEC.Algorithm.RSASHA256,
+            DNSSEC.Algorithm.DSA,
             new byte[] {1, 2, 3, 4});
     byte[] digest = DNSSEC.generateDSDigest(dnskey, DNSSEC.Digest.SHA256);
     assertNotNull(digest);
-    assertEquals(32, digest.length);
+    assertEquals(DNSSEC.Digest.algLength(DNSSEC.Algorithm.DSA), digest.length);
   }
 
   @Test
-  void testSignatureExpired() throws IOException, DNSSECException {
+  void testSignatureExpired() throws IOException {
     DNSKEYRecord dnskey =
         (DNSKEYRecord)
             Record.fromString(
@@ -238,7 +286,7 @@ class DNSSECTest {
   }
 
   @Test
-  void testSignatureNotYetValid() throws IOException, DNSSECException {
+  void testSignatureNotYetValid() throws IOException {
     DNSKEYRecord dnskey =
         (DNSKEYRecord)
             Record.fromString(
@@ -269,7 +317,7 @@ class DNSSECTest {
   }
 
   @Test
-  void testKeyMismatch() throws IOException, DNSSECException {
+  void testKeyMismatch() throws IOException {
     DNSKEYRecord dnskey =
         (DNSKEYRecord)
             Record.fromString(

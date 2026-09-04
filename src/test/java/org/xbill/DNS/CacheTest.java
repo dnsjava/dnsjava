@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -71,7 +72,7 @@ class CacheTest {
   }
 
   @Test
-  void testNegativeCaching() throws TextParseException {
+  void testNegativeCaching() {
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(
@@ -80,7 +81,7 @@ class CacheTest {
   }
 
   @Test
-  void testNXDOMAIN() throws TextParseException {
+  void testNXDOMAIN() {
     cache.addNegative(exampleName, Type.ANY, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(
@@ -155,7 +156,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddMessageCNAME() throws TextParseException, UnknownHostException {
+  void testAddMessageCNAME() throws TextParseException {
     Name cnameName = Name.fromString("cname.example.com.");
     CNAMERecord cnameRecord = new CNAMERecord(cnameName, DClass.IN, 3600, exampleName);
 
@@ -220,7 +221,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddMessageNegative() throws TextParseException {
+  void testAddMessageNegative() {
     Message m = new Message();
     m.getHeader().setRcode(Rcode.NXDOMAIN);
     m.addRecord(Record.newRecord(exampleName, Type.A, DClass.IN), Section.QUESTION);
@@ -269,8 +270,7 @@ class CacheTest {
   void testCacheFromInputStream() throws IOException {
     String masterFile =
         "example.com. 3600 IN A 127.0.0.1\n" + "www.example.com. 3600 IN CNAME example.com.";
-    try (java.io.ByteArrayInputStream bis =
-        new java.io.ByteArrayInputStream(masterFile.getBytes())) {
+    try (ByteArrayInputStream bis = new ByteArrayInputStream(masterFile.getBytes())) {
       Cache masterCache = new Cache(bis);
       SetResponse response = masterCache.lookupRecords(exampleName, Type.A, Credibility.HINT);
       assertTrue(response.isSuccessful());
@@ -345,7 +345,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddMessageAuthenticated() throws TextParseException, UnknownHostException {
+  void testAddMessageAuthenticated() {
     Message m = new Message();
     m.getHeader().setFlag(Flags.AA);
     m.getHeader().setFlag(Flags.AD);
@@ -359,10 +359,10 @@ class CacheTest {
   }
 
   @Test
-  void testAddMessageNotAuthenticated() throws TextParseException, UnknownHostException {
+  void testAddMessageNotAuthenticated() {
     Message m = new Message();
     m.getHeader().setFlag(Flags.AA);
-    // AD flag not set
+    // AD flag is not set
     m.addRecord(Record.newRecord(exampleName, Type.A, DClass.IN), Section.QUESTION);
     m.addRecord(aRecord, Section.ANSWER);
 
@@ -373,7 +373,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddMultipleRecords() throws TextParseException, UnknownHostException {
+  void testAddMultipleRecords() throws UnknownHostException {
     ARecord a1 = new ARecord(exampleName, DClass.IN, 3600, InetAddress.getByName("127.0.0.1"));
     ARecord a2 = new ARecord(exampleName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
     cache.addRecord(a1, Credibility.AUTH_ANSWER);
@@ -386,7 +386,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddMultipleTypes() throws TextParseException, UnknownHostException {
+  void testAddMultipleTypes() throws UnknownHostException {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     AAAARecord aaaaRecord =
         new AAAARecord(exampleName, DClass.IN, 3600, InetAddress.getByName("2001:db8::1"));
@@ -402,7 +402,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddNegativeExpiration() throws TextParseException {
+  void testAddNegativeExpiration() throws InterruptedException {
     cache.setMaxNCache(1);
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
@@ -410,11 +410,7 @@ class CacheTest {
         response.isNXRRSET() || response.isUnknown(),
         "Expected NXRRSET or UNKNOWN but got " + response);
 
-    try {
-      Thread.sleep(1100);
-    } catch (InterruptedException e) {
-      // ignore
-    }
+    Thread.sleep(1100);
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(response.isUnknown(), "Expected UNKNOWN after expiration but got " + response);
