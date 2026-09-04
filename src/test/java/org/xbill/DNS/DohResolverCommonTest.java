@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-
 import org.junit.jupiter.api.Test;
 
 class DohResolverCommonTest {
@@ -186,7 +185,8 @@ class DohResolverCommonTest {
     response.addRecord(query.getQuestion(), Section.QUESTION);
     response.setTSIG(key, Rcode.NOERROR, query.getTSIG());
 
-    assertThatCode(() -> resolver.verifyTSIG(query, response, response.toWire(), key)).doesNotThrowAnyException();
+    assertThatCode(() -> resolver.verifyTSIG(query, response, response.toWire(), key))
+        .doesNotThrowAnyException();
   }
 
   @Test
@@ -204,8 +204,7 @@ class DohResolverCommonTest {
     query.addRecord(
         Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
 
-    CompletableFuture<Object> f =
-        resolver.timeoutFailedFuture(query, new Exception("inner"));
+    CompletableFuture<Object> f = resolver.timeoutFailedFuture(query, new Exception("inner"));
     assertTrue(f.isCompletedExceptionally());
 
     f = resolver.timeoutFailedFuture(query, "extra message", new Exception("inner"));
