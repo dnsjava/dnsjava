@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,6 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+
 import org.junit.jupiter.api.Test;
 
 class DohResolverCommonTest {
@@ -20,13 +25,13 @@ class DohResolverCommonTest {
     }
 
     @Override
-    public java.util.concurrent.CompletionStage<Message> sendAsync(Message query) {
+    public CompletionStage<Message> sendAsync(Message query) {
       return null;
     }
 
     @Override
-    protected <T> java.util.concurrent.CompletableFuture<T> failedFuture(Throwable e) {
-      java.util.concurrent.CompletableFuture<T> f = new java.util.concurrent.CompletableFuture<>();
+    protected <T> CompletableFuture<T> failedFuture(Throwable e) {
+      CompletableFuture<T> f = new CompletableFuture<>();
       f.completeExceptionally(e);
       return f;
     }
@@ -39,6 +44,37 @@ class DohResolverCommonTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> new TestDohResolver("https://dns.google/dns-query", 0));
+  }
+
+  @Test
+  void testMaxConcurrentRequestsConfig() {
+    String previousMaxConnections = System.getProperty("http.maxConnections");
+    Executor executor = Runnable::run;
+    try {
+      System.setProperty("http.maxConnections", "2");
+      TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
+
+      CompletionStage<AsyncSemaphore.Permit> first =
+          resolver.maxConcurrentRequests.acquire(Duration.ofSeconds(1), 1, executor);
+      CompletionStage<AsyncSemaphore.Permit> second =
+          resolver.maxConcurrentRequests.acquire(Duration.ofSeconds(1), 2, executor);
+      CompletionStage<AsyncSemaphore.Permit> third =
+          resolver.maxConcurrentRequests.acquire(Duration.ofSeconds(1), 3, executor);
+
+      assertTrue(first.toCompletableFuture().isDone());
+      assertTrue(second.toCompletableFuture().isDone());
+      assertFalse(third.toCompletableFuture().isDone());
+
+      first.toCompletableFuture().join().release(1, executor);
+      assertTrue(third.toCompletableFuture().isDone());
+      second.toCompletableFuture().join().release(2, executor);
+    } finally {
+      if (previousMaxConnections == null) {
+        System.clearProperty("http.maxConnections");
+      } else {
+        System.setProperty("http.maxConnections", previousMaxConnections);
+      }
+    }
   }
 
   @Test
@@ -101,8 +137,8 @@ class DohResolverCommonTest {
     Message prepared = resolver.prepareQuery(query);
     assertNotNull(prepared.getOPT());
     assertEquals(0, prepared.getOPT().getVersion());
-    assertTrue((prepared.getOPT().getFlags() & Flags.DO) != 0);
-
+    assertEquals(Flags.DO, prepared.getOPT().getFlags() & Flags.DO);
+    assertEquals(Flags.DO, prepared.getOPT().getFlags());
     assertThrows(
         IllegalArgumentException.class, () -> resolver.setEDNS(1, 0, 0, Collections.emptyList()));
   }
@@ -122,10 +158,9 @@ class DohResolverCommonTest {
   @Test
   void testNoOps() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
-    resolver.setPort(853);
-    resolver.setTCP(true);
-    resolver.setIgnoreTruncation(true);
-    // Should not throw or change anything visible
+    assertThatCode(() -> resolver.setPort(853)).doesNotThrowAnyException();
+    assertThatCode(() -> resolver.setTCP(true)).doesNotThrowAnyException();
+    assertThatCode(() -> resolver.setIgnoreTruncation(true)).doesNotThrowAnyException();
   }
 
   @Test
@@ -151,15 +186,14 @@ class DohResolverCommonTest {
     response.addRecord(query.getQuestion(), Section.QUESTION);
     response.setTSIG(key, Rcode.NOERROR, query.getTSIG());
 
-    // Should not throw
-    resolver.verifyTSIG(query, response, response.toWire(), key);
+    assertThatCode(() -> resolver.verifyTSIG(query, response, response.toWire(), key)).doesNotThrowAnyException();
   }
 
   @Test
   void testFailedFuture() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     Exception ex = new Exception("test");
-    java.util.concurrent.CompletableFuture<Object> f = resolver.failedFuture(ex);
+    CompletableFuture<Object> f = resolver.failedFuture(ex);
     assertTrue(f.isCompletedExceptionally());
   }
 
@@ -170,7 +204,7 @@ class DohResolverCommonTest {
     query.addRecord(
         Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
 
-    java.util.concurrent.CompletableFuture<Object> f =
+    CompletableFuture<Object> f =
         resolver.timeoutFailedFuture(query, new Exception("inner"));
     assertTrue(f.isCompletedExceptionally());
 

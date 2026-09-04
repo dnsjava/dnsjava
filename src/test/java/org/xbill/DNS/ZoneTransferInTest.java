@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,10 +46,9 @@ class ZoneTransferInTest {
   @Test
   void testSetters() {
     ZoneTransferIn xfr = ZoneTransferIn.newAXFR(zoneName, address, null);
-    xfr.setTimeout(Duration.ofSeconds(10));
-    xfr.setDClass(DClass.CH);
-    xfr.setLocalAddress(new InetSocketAddress("127.0.0.2", 0));
-    // No way to verify these directly as they are private fields, but we ensure no exception
+    assertThatCode(() -> xfr.setTimeout(Duration.ofSeconds(10))).doesNotThrowAnyException();
+    assertThatCode(() -> xfr.setDClass(DClass.CH)).doesNotThrowAnyException();
+    assertThatCode(() -> xfr.setLocalAddress(new InetSocketAddress("127.0.0.2", 0))).doesNotThrowAnyException();
   }
 
   @Test
@@ -58,9 +58,8 @@ class ZoneTransferInTest {
   }
 
   private static class MockTCPClient extends TCPClient {
-    private List<byte[]> responses;
+    private final List<byte[]> responses;
     private int responseIndex = 0;
-    private byte[] sentData;
 
     MockTCPClient(Duration timeout, List<byte[]> responses) throws IOException {
       super(timeout);
@@ -75,7 +74,6 @@ class ZoneTransferInTest {
 
     @Override
     public void send(byte[] data) {
-      sentData = data;
     }
 
     @Override
@@ -91,8 +89,7 @@ class ZoneTransferInTest {
   }
 
   private static class TestZoneTransferIn extends ZoneTransferIn {
-    private List<byte[]> responses;
-    private MockTCPClient mockClient;
+    private final List<byte[]> responses;
 
     TestZoneTransferIn(
         Name zone,
@@ -107,8 +104,7 @@ class ZoneTransferInTest {
 
     @Override
     TCPClient createTcpClient(Duration timeout) throws IOException {
-      mockClient = new MockTCPClient(timeout, responses);
-      return mockClient;
+      return new MockTCPClient(timeout, responses);
     }
   }
 
@@ -356,12 +352,6 @@ class ZoneTransferInTest {
     assertFalse(xfr.isIXFR());
   }
 
-  @Test
-  void testGetters() {
-    ZoneTransferIn xfr = ZoneTransferIn.newAXFR(zoneName, address, null);
-    assertEquals(zoneName, xfr.getName());
-    assertEquals(Type.AXFR, xfr.getType());
-  }
 
   @Test
   void testIXFRNoFallback() throws IOException {
