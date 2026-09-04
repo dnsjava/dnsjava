@@ -345,7 +345,7 @@ public final class Type {
       if (oldVal != -1) {
         if (oldVal != val) {
           throw new IllegalArgumentException(
-              "mnemnonic \"" + str + "\" already used by type " + oldVal);
+              "mnemonic \"" + str + "\" already used by type " + oldVal);
         } else {
           remove(val);
           factories.remove(val);
