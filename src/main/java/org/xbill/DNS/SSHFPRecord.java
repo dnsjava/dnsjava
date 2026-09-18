@@ -44,6 +44,11 @@ public class SSHFPRecord extends Record {
     super(name, Type.SSHFP, dclass, ttl);
     this.alg = checkU8("alg", alg);
     this.digestType = checkU8("digestType", digestType);
+    int expectedLength = fingerprintLength(digestType);
+    if (expectedLength >= 0 && fingerprint.length != expectedLength) {
+      throw new IllegalArgumentException(
+          "Expected " + expectedLength + " fingerprint bytes, got " + fingerprint.length);
+    }
     this.fingerprint = fingerprint;
   }
 
@@ -59,6 +64,22 @@ public class SSHFPRecord extends Record {
     alg = st.getUInt8();
     digestType = st.getUInt8();
     fingerprint = st.getHex(true);
+    int expectedLength = fingerprintLength(digestType);
+    if (expectedLength >= 0 && fingerprint.length != expectedLength) {
+      throw st.exception(
+          "Expected " + expectedLength + " fingerprint bytes, got " + fingerprint.length);
+    }
+  }
+
+  private static int fingerprintLength(int digestType) {
+    switch (digestType) {
+      case Digest.SHA1:
+        return 20;
+      case 2:
+        return 32;
+      default:
+        return -1;
+    }
   }
 
   @Override
