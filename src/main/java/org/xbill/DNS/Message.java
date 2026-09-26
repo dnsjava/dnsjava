@@ -467,6 +467,14 @@ public class Message implements Cloneable {
       lastrec = rec;
       rec.toWire(out, section, c);
       if (out.current() > maxLength) {
+        // If we just added a new name to the compression lookup table, we need to remove that again
+        if (c != null) {
+          int cPos = c.get(rec.name);
+          if (cPos >= pos) {
+            c.remove(rec.name);
+          }
+        }
+
         out.jump(pos);
         return n - rendered;
       }
@@ -477,6 +485,11 @@ public class Message implements Cloneable {
 
   /* Returns true if the message could be completely rendered (i.e. not truncated). */
   private boolean toWire(DNSOutput out, int maxLength) {
+    return toWire(out, new Compression(), maxLength);
+  }
+
+  /* Returns true if the message could be completely rendered (i.e. not truncated). */
+  boolean toWire(DNSOutput out, Compression c, int maxLength) {
     if (maxLength < Header.LENGTH) {
       return false;
     }
@@ -495,7 +508,6 @@ public class Message implements Cloneable {
 
     int startpos = out.current();
     header.toWire(out);
-    Compression c = new Compression();
     int flags = header.getFlagsByte();
     int additionalCount = 0;
     for (int i = 0; i < 4; i++) {

@@ -36,6 +36,7 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -238,6 +239,45 @@ class MessageTest {
     List<Record> expectedRecords = response.getSection(Section.ANSWER).subList(0, 5);
     response = response.normalize(query, false);
     assertThat(response.getSection(Section.ANSWER)).containsExactlyElementsOf(expectedRecords);
+  }
+
+  @Test
+  void truncationSkipsCompressedName1() throws IOException {
+    Name exampleCom = Name.fromConstantString("example.com.");
+    Name testExampleCom = Name.fromConstantString("test.example.com.");
+    Message m = new Message();
+    m.addRecord(new ARecord(exampleCom, DClass.IN, 3600, new byte[4]), Section.ANSWER);
+    int maxLength = m.toWire().length + 1;
+    m.addRecord(new ARecord(testExampleCom, DClass.IN, 3600, new byte[4]), Section.ANSWER);
+    Compression c = new Compression();
+    DNSOutput out = new DNSOutput();
+    assertThat(m.toWire(out, c, maxLength)).isFalse();
+    Message mParsedFromBytes = new Message(out.toByteArray());
+    assertThat(mParsedFromBytes.getHeader().getFlag(Flags.TC)).isTrue();
+    assertThat(c.get(testExampleCom)).isEqualTo(-1);
+  }
+
+  @Test
+  void truncationSkipsCompressedName2() throws IOException {
+    Name exampleCom = Name.fromConstantString("example.com.");
+    Name testExampleCom = Name.fromConstantString("test.example.com.");
+    TSIG tsig = new TSIG(TSIG.HMAC_SHA256, testExampleCom, new byte[16]);
+    Message m = new Message();
+    ARecord aExampleCom = new ARecord(exampleCom, DClass.IN, 3600, new byte[4]);
+    m.addRecord(aExampleCom, Section.ANSWER);
+    int maxLength = m.toWire().length;
+
+    m.addRecord(new ARecord(testExampleCom, DClass.IN, 3600, new byte[4]), Section.ANSWER);
+    m.setTSIG(tsig, Rcode.NOERROR, null);
+
+    Compression c = new Compression();
+    DNSOutput out = new DNSOutput();
+    assertThat(m.toWire(out, c, maxLength + tsig.recordLength())).isFalse();
+    Message mParsedFromBytes = new Message(out.toByteArray());
+    assertThat(mParsedFromBytes.getHeader().getFlag(Flags.TC)).isTrue();
+    assertThat(mParsedFromBytes.getSection(Section.ANSWER)).containsExactly(aExampleCom);
+    assertThat(c.get(testExampleCom)).isPositive();
+    assertDoesNotThrow(m::getTSIG);
   }
 
   @Test

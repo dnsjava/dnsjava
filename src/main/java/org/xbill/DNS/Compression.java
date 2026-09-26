@@ -50,6 +50,27 @@ public class Compression {
   }
 
   /**
+   * Removes a compression entry mapping of a name in a message.
+   *
+   * @param name The name to remove.
+   * @since 3.6.6
+   */
+  public void remove(Name name) {
+    int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;
+    for (Entry entry = table[row], prev = null; entry != null; prev = entry, entry = entry.next) {
+      if (entry.name.equals(name)) {
+        if (prev == null) {
+          table[row] = entry.next;
+        } else {
+          prev.next = entry.next;
+        }
+        log.trace("Removed {}", name);
+        return;
+      }
+    }
+  }
+
+  /**
    * Retrieves the position of the given name, if it has been previously included in the message.
    *
    * @param name The name to find in the compression table.
