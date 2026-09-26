@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -16,6 +17,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class SVCBRecordTest {
   @Test
@@ -60,6 +63,15 @@ public class SVCBRecordTest {
     SVCBRecord.ParameterUnknown unknown = new SVCBRecord.ParameterUnknown(33, value);
     assertEquals(33, unknown.getKey());
     assertEquals(value, unknown.getValue());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 65536})
+  void svcbPortRange(int portNumber) {
+    SVCBRecord.ParameterPort port = new SVCBBase.ParameterPort();
+    assertThatThrownBy(() -> port.fromString(Integer.toString(portNumber)))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertEquals(SVCBRecord.PORT, port.getKey());
   }
 
   @Test
@@ -448,10 +460,11 @@ public class SVCBRecordTest {
     assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
-  @Test
-  void portValueTooLarge() {
-    String str = "1 . port=84438";
-    assertThrows(IllegalArgumentException.class, () -> stringToWire(str));
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 65536, 84438})
+  void portValueOutOfRange(int port) {
+    String str = "1 . port=" + port;
+    assertThatThrownBy(() -> stringToWire(str)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -472,10 +485,11 @@ public class SVCBRecordTest {
     assertThrows(TextParseException.class, () -> stringToWire(str));
   }
 
-  @Test
-  void svcPriorityTooHigh() {
-    String str = "65536 . port=443";
-    assertThrows(TextParseException.class, () -> stringToWire(str));
+  @ParameterizedTest
+  @ValueSource(ints = {-1, 65536})
+  void svcPriorityInvalid(int port) {
+    String str = port + " . port=443";
+    assertThatThrownBy(() -> stringToWire(str)).isInstanceOf(TextParseException.class);
   }
 
   @Test

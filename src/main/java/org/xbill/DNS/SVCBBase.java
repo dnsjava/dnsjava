@@ -363,7 +363,13 @@ public abstract class SVCBBase extends Record {
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Integer value must be specified for port");
       }
-      port = Integer.parseInt(string);
+
+      int parsedPort = Integer.parseInt(string);
+      if (parsedPort >= 0 && parsedPort <= 65535) {
+        port = parsedPort;
+      } else {
+        throw new IllegalArgumentException("Invalid port number: " + string);
+      }
     }
 
     @Override
