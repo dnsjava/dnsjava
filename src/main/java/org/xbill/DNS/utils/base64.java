@@ -6,6 +6,7 @@ package org.xbill.DNS.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Routines for converting between Strings of base64-encoded data and arrays of binary data.
@@ -91,33 +92,49 @@ public class base64 {
   }
 
   /**
-   * Convert a base64-encoded String to binary data
+   * Convert a base64-encoded String to binary data. Assumes standard Base64 encoding, use {@link
+   * #fromString(String, boolean)} for Base64 URL decoding.
    *
    * @param str A String containing the encoded data
    * @return An array containing the binary data, or null if the string is invalid
    */
   public static byte[] fromString(String str) {
+    return fromString(str, false);
+  }
+
+  /**
+   * Convert a base64-encoded String to binary data
+   *
+   * @param str A String containing the encoded data
+   * @param useUrl True to use Base64URL encoding (i.e. no trailing =, -_ instead of +/)
+   * @return An array containing the binary data, or null if the string is invalid
+   */
+  public static byte[] fromString(String str, boolean useUrl) {
+    String base = useUrl ? BASE_64_URL : BASE_64;
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
     byte[] raw = str.getBytes();
     for (byte b : raw) {
-      if (!Character.isWhitespace((char) b)) {
+      if (base.indexOf((char) b) > -1) {
         bs.write(b);
       }
     }
-    byte[] in = bs.toByteArray();
-    if (in.length % 4 != 0) {
+
+    if (bs.size() % 4 != 0) {
       return null;
     }
 
+    byte[] in = bs.toByteArray();
     bs.reset();
     DataOutputStream ds = new DataOutputStream(bs);
 
+    short[] s = new short[4];
+    short[] t = new short[3];
     for (int i = 0; i < (in.length + 3) / 4; i++) {
-      short[] s = new short[4];
-      short[] t = new short[3];
+      Arrays.fill(s, (short) 0);
+      Arrays.fill(t, (short) 0);
 
       for (int j = 0; j < 4; j++) {
-        s[j] = (short) BASE_64.indexOf(in[i * 4 + j]);
+        s[j] = (short) base.indexOf(in[i * 4 + j]);
       }
 
       t[0] = (short) ((s[0] << 2) + (s[1] >> 4));

@@ -40,6 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class Base64Test {
   @Test
@@ -202,10 +205,10 @@ class Base64Test {
     assertEquals("!_AQID\n!_BAUG\n!_BwgJ )", out);
   }
 
-  @Test
-  void fromString_empty1() {
-    byte[] data = new byte[0];
-    byte[] out = base64.fromString("");
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void fromString_empty1(boolean useUrl) {
+    byte[] out = base64.fromString("", useUrl);
     assertArrayEquals(new byte[0], out);
   }
 
@@ -217,6 +220,12 @@ class Base64Test {
   }
 
   @Test
+  void fromString_basic1_url() {
+    byte[] out = base64.fromString("AA==", true);
+    assertNull(out);
+  }
+
+  @Test
   void fromString_basic2() {
     byte[] exp = {0, 0};
     byte[] out = base64.fromString("AAA=");
@@ -224,9 +233,16 @@ class Base64Test {
   }
 
   @Test
-  void fromString_basic3() {
+  void fromString_basic2_url() {
+    byte[] out = base64.fromString("AAA=", true);
+    assertNull(out);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void fromString_basic3(boolean useUrl) {
     byte[] exp = {0, 0, 1};
-    byte[] out = base64.fromString("AAAB");
+    byte[] out = base64.fromString("AAAB", useUrl);
     assertArrayEquals(exp, out);
   }
 
@@ -238,6 +254,12 @@ class Base64Test {
   }
 
   @Test
+  void fromString_basic4_url() {
+    byte[] out = base64.fromString("/AAA", true);
+    assertNull(out);
+  }
+
+  @Test
   void fromString_basic5() {
     byte[] exp = {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
     byte[] out = base64.fromString("////");
@@ -245,39 +267,34 @@ class Base64Test {
   }
 
   @Test
-  void fromString_basic6() {
+  void fromString_basic5_url() {
+    byte[] out = base64.fromString("////", true);
+    assertArrayEquals(new byte[0], out);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void fromString_basic6(boolean useUrl) {
     byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    byte[] out = base64.fromString("AQIDBAUGBwgJ");
+    byte[] out = base64.fromString("AQIDBAUGBwgJ", useUrl);
     assertArrayEquals(exp, out);
   }
 
-  @Test
-  void fromString_invalid1() {
-    byte[] out = base64.fromString("AAA");
+  @ParameterizedTest
+  @CsvSource({
+    "AAA,true", "AA,true", "A,true", "BB==,true", "BBB=,true",
+    "AAA,false", "AA,false", "A,false", "BB==,false", "BBB=,false",
+  })
+  void fromString_invalid1(String input, boolean useUrl) {
+    byte[] out = base64.fromString(input, useUrl);
     assertNull(out);
   }
 
-  @Test
-  void fromString_invalid2() {
-    byte[] out = base64.fromString("AA");
-    assertNull(out);
-  }
-
-  @Test
-  void fromString_invalid3() {
-    byte[] out = base64.fromString("A");
-    assertNull(out);
-  }
-
-  @Test
-  void fromString_invalid4() {
-    byte[] out = base64.fromString("BB==");
-    assertNull(out);
-  }
-
-  @Test
-  void fromString_invalid5() {
-    byte[] out = base64.fromString("BBB=");
-    assertNull(out);
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void fromString_invalid2(boolean useUrl) {
+    byte[] exp = {0, 0, 1};
+    byte[] out = base64.fromString("A.A.A.B.", useUrl);
+    assertArrayEquals(exp, out);
   }
 }
