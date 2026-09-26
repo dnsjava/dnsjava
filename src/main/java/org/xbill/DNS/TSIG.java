@@ -145,12 +145,12 @@ public class TSIG {
     algMap = Collections.unmodifiableMap(names);
 
     Map<Name, Integer> lengths = new HashMap<>();
-    lengths.put(HMAC_MD5, 16);
-    lengths.put(HMAC_SHA1, 20);
-    lengths.put(HMAC_SHA224, 28);
-    lengths.put(HMAC_SHA256, 32);
-    lengths.put(HMAC_SHA384, 48);
-    lengths.put(HMAC_SHA512, 64);
+    lengths.put(HMAC_MD5, DigestLengths.MD5);
+    lengths.put(HMAC_SHA1, DigestLengths.SHA1);
+    lengths.put(HMAC_SHA224, DigestLengths.SHA224);
+    lengths.put(HMAC_SHA256, DigestLengths.SHA256);
+    lengths.put(HMAC_SHA384, DigestLengths.SHA384);
+    lengths.put(HMAC_SHA512, DigestLengths.SHA512);
     lengths.put(HMAC_SHA256_128, 16);
     lengths.put(HMAC_SHA384_192, 24);
     lengths.put(HMAC_SHA512_256, 32);

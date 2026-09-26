@@ -18,7 +18,8 @@ import org.xbill.DNS.utils.base16;
 public class ZoneMDRecordTest {
   @ParameterizedTest
   @CsvSource({
-    "1,48", "2,64",
+    "1," + DigestLengths.SHA384,
+    "2," + DigestLengths.SHA512,
   })
   void testKnownHashLengths(int alg, int len) {
     assertEquals(len, Hash.hashLength(alg));
@@ -34,7 +35,10 @@ public class ZoneMDRecordTest {
 
   @ParameterizedTest
   @CsvSource({
-    "0,0,12", "1,0,12", "0,1,48", "0,2,64",
+    "0,0,12",
+    "1,0,12",
+    "0,1," + DigestLengths.SHA384,
+    "0,2," + DigestLengths.SHA512,
   })
   void testConstructorSuccess(int scheme, int hash, int digestSize) {
     ZoneMDRecord md =
@@ -102,11 +106,10 @@ public class ZoneMDRecordTest {
     "2147483648,0,257,FEBE3D4CFEBEFEBE3D4CFEBE",
   })
   void testFromWireFails(long serial, int scheme, int hash, String digest) {
+    byte[] base16digest = base16.fromString(digest);
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new ZoneMDRecord(
-                Name.root, DClass.IN, 3600, serial, scheme, hash, base16.fromString(digest)));
+        () -> new ZoneMDRecord(Name.root, DClass.IN, 3600, serial, scheme, hash, base16digest));
   }
 
   @ParameterizedTest
@@ -145,7 +148,7 @@ public class ZoneMDRecordTest {
     "00_003F_0001_00000E10_0047_80000000_00_02_FEBE3D4CE2EC2FFA4BA99D46CD69D6D29711E55217057BEEFEBE3D4CFEBE3D4CFEBE3D4CE2EC2FFA4BA99D46CD69D6D29711E55217057BEEFEBE3D4CFEBE3D4C5D",
   })
   void testFromWireFails(String hex) {
-    byte[] data = base16.fromString(hex.replaceAll("_", ""));
+    byte[] data = base16.fromString(hex.replace("_", ""));
     assertThrows(WireParseException.class, () -> Record.fromWire(data, Section.ANSWER));
   }
 

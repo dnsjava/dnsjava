@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.util.function.Function;
 import org.xbill.DNS.utils.base16;
 
 /**
@@ -18,13 +19,25 @@ public class SSHFPRecord extends Record {
     private Algorithm() {}
 
     public static final int RSA = 1;
-    public static final int DSS = 2;
+
+    /**
+     * Use {@link #DSA}; DSS was a typo in RFC 4255.
+     *
+     * @see <a href="https://errata.rfc-editor.org/eid6266/">Errata-ID: 6266</a>
+     */
+    @Deprecated public static final int DSS = 2;
+
+    public static final int DSA = 2;
+    public static final int ECDSA = 3;
+    public static final int ED25519 = 4;
+    public static final int ED448 = 6;
   }
 
   public static class Digest {
     private Digest() {}
 
     public static final int SHA1 = 1;
+    public static final int SHA256 = 2;
   }
 
   private int alg;
@@ -45,6 +58,7 @@ public class SSHFPRecord extends Record {
     this.alg = checkU8("alg", alg);
     this.digestType = checkU8("digestType", digestType);
     this.fingerprint = fingerprint;
+    validateFingerprintLength(IllegalArgumentException::new);
   }
 
   @Override
@@ -52,6 +66,7 @@ public class SSHFPRecord extends Record {
     alg = in.readU8();
     digestType = in.readU8();
     fingerprint = in.readByteArray();
+    validateFingerprintLength(WireParseException::new);
   }
 
   @Override
@@ -59,6 +74,27 @@ public class SSHFPRecord extends Record {
     alg = st.getUInt8();
     digestType = st.getUInt8();
     fingerprint = st.getHex(true);
+    validateFingerprintLength(st::exception);
+  }
+
+  private <T extends Throwable> void validateFingerprintLength(Function<String, T> exceptionCreator)
+      throws T {
+    int expectedLength = fingerprintLength(digestType);
+    if (expectedLength >= 0 && fingerprint.length != expectedLength) {
+      throw exceptionCreator.apply(
+          "Expected " + expectedLength + " fingerprint bytes, got " + fingerprint.length);
+    }
+  }
+
+  private static int fingerprintLength(int digestType) {
+    switch (digestType) {
+      case Digest.SHA1:
+        return DigestLengths.SHA1;
+      case Digest.SHA256:
+        return DigestLengths.SHA256;
+      default:
+        return -1;
+    }
   }
 
   @Override
