@@ -237,17 +237,17 @@ public class DNSSEC {
       algs.setNumericAllowed(true);
 
       algs.add(SHA1, "SHA-1");
-      algLengths.put(SHA1, 20);
+      algLengths.put(SHA1, DigestLengths.SHA1);
       algs.add(SHA256, "SHA-256");
-      algLengths.put(SHA256, 32);
+      algLengths.put(SHA256, DigestLengths.SHA256);
       algs.add(GOST3411, "GOST R 34.11-94");
-      algLengths.put(GOST3411, 32);
+      algLengths.put(GOST3411, DigestLengths.GOST3411);
       algs.add(SHA384, "SHA-384");
-      algLengths.put(SHA384, 48);
+      algLengths.put(SHA384, DigestLengths.SHA384);
       algs.add(GOST3411_12, "GOST12");
-      algLengths.put(GOST3411_12, 64);
+      algLengths.put(GOST3411_12, DigestLengths.GOST3411_12);
       algs.add(SM3, "SM3");
-      algLengths.put(SM3, 32);
+      algLengths.put(SM3, DigestLengths.SM3);
     }
 
     /** Converts an algorithm into its textual representation */

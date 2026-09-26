@@ -19,13 +19,25 @@ public class SSHFPRecord extends Record {
     private Algorithm() {}
 
     public static final int RSA = 1;
-    public static final int DSS = 2;
+
+    /**
+     * Use {@link #DSA}; DSS was a typo in RFC 4255.
+     *
+     * @see <a href="https://errata.rfc-editor.org/eid6266/">Errata-ID: 6266</a>
+     */
+    @Deprecated public static final int DSS = 2;
+
+    public static final int DSA = 2;
+    public static final int ECDSA = 3;
+    public static final int ED25519 = 4;
+    public static final int ED448 = 6;
   }
 
   public static class Digest {
     private Digest() {}
 
     public static final int SHA1 = 1;
+    public static final int SHA256 = 2;
   }
 
   private int alg;
@@ -77,9 +89,9 @@ public class SSHFPRecord extends Record {
   private static int fingerprintLength(int digestType) {
     switch (digestType) {
       case Digest.SHA1:
-        return 20;
-      case 2:
-        return 32;
+        return DigestLengths.SHA1;
+      case Digest.SHA256:
+        return DigestLengths.SHA256;
       default:
         return -1;
     }
