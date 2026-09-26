@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Download artifacts
       if: github.event_name != 'workflow_run'
-      uses: actions/download-artifact@v7
+      uses: actions/download-artifact@v8
       with:
         pattern: ${{ inputs.name }}
         path: ${{ inputs.path }}
@@ -24,8 +24,8 @@ runs:
 
     - name: Download artifacts
       if: github.event_name == 'workflow_run'
-      #v21
-      uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151
+      #v25
+      uses: dawidd6/action-download-artifact@634d83b91986fcec9be314054943fa5c976aeb0e
       with:
         workflow: ${{ github.event.workflow_run.name }}
         run_id: ${{ github.event.workflow_run.id }}
