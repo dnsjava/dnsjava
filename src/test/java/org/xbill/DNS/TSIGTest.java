@@ -632,6 +632,23 @@ class TSIGTest {
     assertDoesNotThrow(() -> m.normalize(q).getTSIG());
   }
 
+  @Test
+  void invalidAdditionalCountViaHeader() throws IOException {
+    Message q = Message.newQuery(Record.newRecord(Name.root, Type.A, DClass.IN));
+    Message m = new Message();
+    m.getHeader().setFlag(Flags.TC);
+    m.addRecord(Record.newRecord(Name.root, Type.A, DClass.IN), Section.QUESTION);
+    m.addRecord(Record.newRecord(Name.root, Type.A, DClass.IN), Section.ANSWER);
+    byte[] mOnWire = m.toWire();
+    // bytes 0-1 id, 2-3 flags, 4-11 counts; each u16
+    mOnWire[11] = 3; // pretend there are 3 additional records
+    Message m2 = new Message(mOnWire);
+    assertThat(m2.getHeader().getCount(Section.ADDITIONAL)).isZero();
+    assertThat(m2.normalize(q).getHeader().getCount(Section.ADDITIONAL)).isZero();
+    assertDoesNotThrow(m2::getTSIG);
+    assertDoesNotThrow(() -> m2.normalize(q).getTSIG());
+  }
+
   @Getter
   private static class ZoneBuilderAxfrHandler implements ZoneTransferIn.ZoneTransferHandler {
     private final List<Record> records = new ArrayList<>();

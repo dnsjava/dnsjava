@@ -590,7 +590,7 @@ public class jnamed {
         }
         sock.send(outdp);
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       System.out.println("serveUDP(" + addrport(addr, port) + "): " + e);
     }
   }

@@ -134,6 +134,13 @@ public class Message implements Cloneable {
         throw e;
       }
     }
+
+    // Reconcile the header with what was actually parsed so readers that index a section by its
+    // declared count cannot run past the end.
+    for (int i = 0; i < 4; i++) {
+      header.setCount(i, sections[i] == null ? 0 : sections[i].size());
+    }
+
     size = in.current();
   }
 
