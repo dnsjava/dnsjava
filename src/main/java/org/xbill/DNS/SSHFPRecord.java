@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.util.function.Function;
 import org.xbill.DNS.utils.base16;
 
 /**
@@ -44,12 +45,8 @@ public class SSHFPRecord extends Record {
     super(name, Type.SSHFP, dclass, ttl);
     this.alg = checkU8("alg", alg);
     this.digestType = checkU8("digestType", digestType);
-    int expectedLength = fingerprintLength(digestType);
-    if (expectedLength >= 0 && fingerprint.length != expectedLength) {
-      throw new IllegalArgumentException(
-          "Expected " + expectedLength + " fingerprint bytes, got " + fingerprint.length);
-    }
     this.fingerprint = fingerprint;
+    validateFingerprintLength(IllegalArgumentException::new);
   }
 
   @Override
@@ -57,6 +54,7 @@ public class SSHFPRecord extends Record {
     alg = in.readU8();
     digestType = in.readU8();
     fingerprint = in.readByteArray();
+    validateFingerprintLength(WireParseException::new);
   }
 
   @Override
@@ -64,9 +62,14 @@ public class SSHFPRecord extends Record {
     alg = st.getUInt8();
     digestType = st.getUInt8();
     fingerprint = st.getHex(true);
+    validateFingerprintLength(st::exception);
+  }
+
+  private <T extends Throwable> void validateFingerprintLength(Function<String, T> exceptionCreator)
+      throws T {
     int expectedLength = fingerprintLength(digestType);
     if (expectedLength >= 0 && fingerprint.length != expectedLength) {
-      throw st.exception(
+      throw exceptionCreator.apply(
           "Expected " + expectedLength + " fingerprint bytes, got " + fingerprint.length);
     }
   }
