@@ -333,9 +333,8 @@ public class Zone implements Serializable, Iterable<RRset> {
             throw new IllegalArgumentException("Cannot remove all NS");
           }
 
-          if (rrset.size() + rrset.sigSize() > 1) {
-            rrset.deleteRR(r);
-          } else {
+          rrset.deleteRR(r);
+          if (rrset.isEmpty()) {
             // Remove the set (and maybe the entire name) if the set is now empty
             removeRRsetWithoutLock(name, rtype);
           }
@@ -588,7 +587,7 @@ public class Zone implements Serializable, Iterable<RRset> {
       List<RRset> list = (List<RRset>) types;
       for (int i = 0; i < list.size(); i++) {
         RRset set = list.get(i);
-        if (set.getType() == type) {
+        if (set.isEmpty() || set.getType() == type) {
           // The type of this RRset matched, remove the set
           list.remove(i);
           break;
@@ -602,7 +601,7 @@ public class Zone implements Serializable, Iterable<RRset> {
     } else {
       // One type for this name
       RRset set = (RRset) types;
-      if (set.getType() != type) {
+      if (!set.isEmpty() && set.getType() != type) {
         // Type doesn't match, nothing to remove
         return;
       }

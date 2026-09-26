@@ -32,7 +32,8 @@ class ZoneTest {
   private NSRecord NS1;
   private NSRecord NS2;
   private ARecord A_UNIQUE;
-  private ARecord A_TEST;
+  private ARecord A_1_TEST;
+  private ARecord A_2_TEST;
   private AAAARecord AAAA_1_TEST;
   private AAAARecord AAAA_2_TEST;
   private ARecord A_WILD;
@@ -75,7 +76,8 @@ class ZoneTest {
     A_UNIQUE =
         new ARecord(
             new Name("unique", ZONE_NAME), DClass.IN, 3600, InetAddress.getByName("127.0.0.3"));
-    A_TEST = new ARecord(new Name("test", ZONE_NAME), DClass.IN, 3600, localhost4);
+    A_1_TEST = new ARecord(new Name("test", ZONE_NAME), DClass.IN, 3600, localhost4);
+    A_2_TEST = new ARecord(new Name("test", ZONE_NAME), DClass.IN, 3600, new byte[] {127, 0, 0, 2});
     AAAA_1_TEST = new AAAARecord(new Name("test", ZONE_NAME), DClass.IN, 3600, localhost6a);
     AAAA_2_TEST = new AAAARecord(new Name("test", ZONE_NAME), DClass.IN, 3600, localhost6b);
     A_WILD =
@@ -85,7 +87,7 @@ class ZoneTest {
 
     Record[] zoneRecords =
         new Record[] {
-          SOA1, NS1, NS2, A_UNIQUE, A_TEST, AAAA_1_TEST, AAAA_2_TEST, A_WILD, TXT_WILD,
+          SOA1, NS1, NS2, A_UNIQUE, A_1_TEST, AAAA_1_TEST, AAAA_2_TEST, A_WILD, TXT_WILD,
         };
     ZONE = new Zone(ZONE_NAME, zoneRecords);
   }
@@ -105,12 +107,14 @@ class ZoneTest {
 
   @Test
   void exactNameExistingALookup() {
-    assertThat(ZONE.findExactMatch(A_TEST.getName(), Type.A)).isNotNull().containsExactly(A_TEST);
+    assertThat(ZONE.findExactMatch(A_1_TEST.getName(), Type.A))
+        .isNotNull()
+        .containsExactly(A_1_TEST);
   }
 
   @Test
   void exactNameAnyThrow() {
-    Name name = A_TEST.getName();
+    Name name = A_1_TEST.getName();
     assertThatThrownBy(() -> ZONE.findExactMatch(name, Type.ANY))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("type ANY");
@@ -118,13 +122,13 @@ class ZoneTest {
 
   @Test
   void findNameExistingALookup() {
-    SetResponse resp = ZONE.findRecords(A_TEST.getName(), Type.A);
-    assertEquals(oneRRset(A_TEST), resp.answers());
+    SetResponse resp = ZONE.findRecords(A_1_TEST.getName(), Type.A);
+    assertEquals(oneRRset(A_1_TEST), resp.answers());
   }
 
   @Test
   void findNameNXRRsetLookup() {
-    SetResponse resp = ZONE.findRecords(A_TEST.getName(), Type.TXT);
+    SetResponse resp = ZONE.findRecords(A_1_TEST.getName(), Type.TXT);
     assertEquals(SetResponse.ofType(SetResponseType.NXRRSET), resp);
   }
 
@@ -136,9 +140,9 @@ class ZoneTest {
 
   @Test
   void findNameAnyLookup() {
-    SetResponse resp = ZONE.findRecords(A_TEST.getName(), Type.ANY);
+    SetResponse resp = ZONE.findRecords(A_1_TEST.getName(), Type.ANY);
     assertTrue(resp.isSuccessful());
-    assertEquals(listOf(new RRset(A_TEST), new RRset(AAAA_1_TEST, AAAA_2_TEST)), resp.answers());
+    assertEquals(listOf(new RRset(A_1_TEST), new RRset(AAAA_1_TEST, AAAA_2_TEST)), resp.answers());
   }
 
   @Test
@@ -210,7 +214,7 @@ class ZoneTest {
   @Test
   void ctorMissingRecords() {
     assertThrows(IOException.class, () -> new Zone(Name.root, new Record[0]));
-    assertThrows(IOException.class, () -> new Zone(Name.root, new Record[] {A_TEST}));
+    assertThrows(IOException.class, () -> new Zone(Name.root, new Record[] {A_1_TEST}));
     assertThatThrownBy(() -> new Zone(Name.root, new Record[] {SOA1}))
         .isInstanceOf(IOException.class)
         .hasMessageContaining("SOA owner");
@@ -255,13 +259,13 @@ class ZoneTest {
   void addRecord() throws TextParseException {
     Name n = new Name("something", ZONE_NAME);
     assertNull(ZONE.findExactMatch(n, Type.A));
-    ZONE.addRecord(A_TEST.withName(n));
+    ZONE.addRecord(A_1_TEST.withName(n));
     assertNotNull(ZONE.findExactMatch(n, Type.A));
   }
 
   @Test
   void addRecordExistingName() {
-    Name n = A_TEST.getName();
+    Name n = A_1_TEST.getName();
     assertNotNull(ZONE.findExactMatch(n, Type.A));
     assertNull(ZONE.findExactMatch(n, Type.MX));
     MXRecord mx = new MXRecord(n, DClass.IN, 3600, 1, Name.root);
@@ -271,11 +275,11 @@ class ZoneTest {
 
   @Test
   void addRecordExistingSet() {
-    Name n = A_TEST.getName();
-    assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(A_TEST);
+    Name n = A_1_TEST.getName();
+    assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(A_1_TEST);
     ARecord a2 = new ARecord(n, DClass.IN, 3600, new byte[4]);
     ZONE.addRecord(a2);
-    assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(A_TEST, a2);
+    assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(A_1_TEST, a2);
   }
 
   @Test
@@ -293,22 +297,31 @@ class ZoneTest {
 
   @Test
   void removeRecord() {
-    assertNotNull(ZONE.findExactMatch(A_TEST.getName(), Type.A));
-    ZONE.removeRecord(A_TEST);
-    assertNull(ZONE.findExactMatch(A_TEST.getName(), Type.A));
+    assertNotNull(ZONE.findExactMatch(A_1_TEST.getName(), Type.A));
+    ZONE.removeRecord(A_1_TEST);
+    assertNull(ZONE.findExactMatch(A_1_TEST.getName(), Type.A));
+  }
+
+  @Test
+  void removeRecordNotInZone() {
+    assertThat(ZONE.findExactMatch(A_1_TEST.getName(), Type.A)).isNotNull();
+    String zoneBefore = ZONE.toMasterFile();
+    ZONE.removeRecord(A_2_TEST);
+    assertThat(ZONE.findExactMatch(A_1_TEST.getName(), Type.A)).isNotNull();
+    assertThat(ZONE.toMasterFile()).isEqualTo(zoneBefore);
   }
 
   @Test
   void addRRset() throws TextParseException {
     Name n = new Name("something", ZONE_NAME);
     assertNull(ZONE.findExactMatch(n, Type.A));
-    ZONE.addRRset(new RRset(A_TEST.withName(n)));
+    ZONE.addRRset(new RRset(A_1_TEST.withName(n)));
     assertNotNull(ZONE.findExactMatch(n, Type.A));
   }
 
   @Test
   void addRRsetExistingName() {
-    Name n = A_TEST.getName();
+    Name n = A_1_TEST.getName();
     assertNotNull(ZONE.findExactMatch(n, Type.A));
     assertNull(ZONE.findExactMatch(n, Type.MX));
     MXRecord mx = new MXRecord(n, DClass.IN, 3600, 1, Name.root);
@@ -318,8 +331,8 @@ class ZoneTest {
 
   @Test
   void addRRsetExistingSet() {
-    Name n = A_TEST.getName();
-    assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(A_TEST);
+    Name n = A_1_TEST.getName();
+    assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(A_1_TEST);
     ARecord a2 = new ARecord(n, DClass.IN, 3600, new byte[4]);
     ZONE.addRRset(new RRset(a2));
     assertThat(ZONE.findExactMatch(n, Type.A)).isNotNull().containsExactly(a2);
@@ -353,7 +366,7 @@ class ZoneTest {
 
   @Test
   void addRecordOutOfZone() {
-    Record arecord = A_TEST.withName(Name.root);
+    Record arecord = A_1_TEST.withName(Name.root);
     assertThatThrownBy(() -> ZONE.addRecord(arecord))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("subdomain");
@@ -361,7 +374,7 @@ class ZoneTest {
 
   @Test
   void addRRsetOutOfZone() {
-    RRset aset = new RRset(A_TEST.withName(Name.root));
+    RRset aset = new RRset(A_1_TEST.withName(Name.root));
     assertThatThrownBy(() -> ZONE.addRRset(aset))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("subdomain");
@@ -530,7 +543,7 @@ class ZoneTest {
 
   @Test
   void removeAllTypes() {
-    Name n = A_TEST.getName();
+    Name n = A_1_TEST.getName();
     assertThat(n).isEqualTo(AAAA_1_TEST.getName());
     assertDoesNotThrow(() -> ZONE.removeRRset(n, Type.A));
     assertThat(ZONE.findExactMatch(n, Type.A)).isNull();
@@ -548,7 +561,7 @@ class ZoneTest {
         .containsExactly(
             new RRset(SOA1),
             new RRset(NS1, NS2),
-            new RRset(A_TEST),
+            new RRset(A_1_TEST),
             new RRset(AAAA_1_TEST, AAAA_2_TEST),
             new RRset(A_UNIQUE),
             new RRset(A_WILD),
@@ -557,7 +570,7 @@ class ZoneTest {
 
   @Test
   void iteratorHasAllInOrderWithNamesAtOrigin() {
-    MXRecord mx = new MXRecord(ZONE_NAME, DClass.IN, 3600, 1, A_TEST.getName());
+    MXRecord mx = new MXRecord(ZONE_NAME, DClass.IN, 3600, 1, A_1_TEST.getName());
     ZONE.addRecord(mx);
     assertThat(ZONE)
         .hasSize(8)
@@ -565,7 +578,7 @@ class ZoneTest {
             new RRset(SOA1),
             new RRset(NS1, NS2),
             new RRset(mx),
-            new RRset(A_TEST),
+            new RRset(A_1_TEST),
             new RRset(AAAA_1_TEST, AAAA_2_TEST),
             new RRset(A_UNIQUE),
             new RRset(A_WILD),
@@ -574,7 +587,7 @@ class ZoneTest {
 
   @Test
   void iteratorHasAllInOrderWithNamesAtOriginForAXFR() {
-    MXRecord mx = new MXRecord(ZONE_NAME, DClass.IN, 3600, 1, A_TEST.getName());
+    MXRecord mx = new MXRecord(ZONE_NAME, DClass.IN, 3600, 1, A_1_TEST.getName());
     ZONE.addRecord(mx);
     assertThat(ZONE.AXFR())
         .toIterable()
@@ -583,7 +596,7 @@ class ZoneTest {
             new RRset(SOA1),
             new RRset(NS1, NS2),
             new RRset(mx),
-            new RRset(A_TEST),
+            new RRset(A_1_TEST),
             new RRset(AAAA_1_TEST, AAAA_2_TEST),
             new RRset(A_UNIQUE),
             new RRset(A_WILD),
@@ -623,10 +636,10 @@ class ZoneTest {
     it.next(); // Skip SOA
     it.next(); // Skip NS
     RRset aSet = it.next();
-    assertThat(aSet).containsExactly(A_TEST);
+    assertThat(aSet).containsExactly(A_1_TEST);
     aSet.deleteRR(aSet.first());
     assertThat(aSet).isEmpty();
-    assertThat(ZONE.findExactMatch(A_TEST.getName(), Type.A)).hasSize(1);
+    assertThat(ZONE.findExactMatch(A_1_TEST.getName(), Type.A)).hasSize(1);
   }
 
   @Test
@@ -673,7 +686,7 @@ class ZoneTest {
     it.next(); // NS
     it.next(); // A
     it.remove();
-    assertThat(ZONE.findExactMatch(A_TEST.getName(), Type.A)).isNull();
+    assertThat(ZONE.findExactMatch(A_1_TEST.getName(), Type.A)).isNull();
   }
 
   @Test
@@ -700,7 +713,7 @@ class ZoneTest {
     assertThat(z.getSOA()).isEqualTo(SOA1);
     assertThat(z.findExactMatch(ZONE.getOrigin(), Type.SOA)).first().isEqualTo(SOA1);
     assertDoesNotThrow(
-        () -> z.addRecord(A_TEST.withName(new Name("some-other-name", ZONE.getOrigin()))));
+        () -> z.addRecord(A_1_TEST.withName(new Name("some-other-name", ZONE.getOrigin()))));
   }
 
   private static List<RRset> listOf(RRset... rrsets) {
