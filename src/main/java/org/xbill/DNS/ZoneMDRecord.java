@@ -83,9 +83,9 @@ public class ZoneMDRecord extends Record {
       schemes.setNumericAllowed(true);
       schemes.add(RESERVED, "RESERVED");
       schemes.add(SHA384, "SHA384");
-      hashLengths.put(SHA384, 48);
+      hashLengths.put(SHA384, DigestLengths.SHA384);
       schemes.add(SHA512, "SHA512");
-      hashLengths.put(SHA512, 64);
+      hashLengths.put(SHA512, DigestLengths.SHA512);
     }
 
     /** Converts an algorithm into its textual representation */
