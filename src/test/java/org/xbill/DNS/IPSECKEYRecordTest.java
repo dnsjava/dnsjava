@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.io.IOException;
 import java.net.InetAddress;
 import org.junit.jupiter.api.Test;
+import org.xbill.DNS.utils.base64;
 
 class IPSECKEYRecordTest {
 
@@ -67,5 +69,44 @@ class IPSECKEYRecordTest {
     ipseckey.rdataFromString(t, null);
     assertEquals(3, ipseckey.getGatewayType());
     assertEquals(Name.fromConstantString("mygateway.example.com."), ipseckey.getGateway());
+  }
+
+  @Test
+  void roundtripIPv6MappedIPv4() throws IOException {
+    String addressString = "0:0:0:0:0:ffff:192.0.2.1";
+    InetAddress address = Address.getByAddress(addressString);
+    String rdata = "10 2 2 " + addressString + " AQID";
+    IPSECKEYRecord r = new IPSECKEYRecord();
+    r.rdataFromString(new Tokenizer(rdata), Name.root);
+    assertThat(r.rdataToString()).isEqualTo(rdata);
+    assertThat(r.getGatewayType()).isEqualTo(IPSECKEYRecord.Gateway.IPv6);
+    assertThat(r.getGateway()).isInstanceOf(InetAddress.class).isEqualTo(address);
+
+    DNSOutput out = new DNSOutput();
+    r.rrToWire(out, null, false);
+    r = new IPSECKEYRecord();
+    r.rrFromWire(new DNSInput(out.toByteArray()));
+    assertThat(r.rdataToString()).isEqualTo(rdata);
+    assertThat(r.getGatewayType()).isEqualTo(IPSECKEYRecord.Gateway.IPv6);
+    assertThat(r.getGateway()).isInstanceOf(InetAddress.class).isEqualTo(address);
+  }
+
+  @Test
+  void ctorAllowsIPv6MappedIPv4() throws IOException {
+    String addressString = "0:0:0:0:0:ffff:192.0.2.1";
+    InetAddress address = Address.getByAddress(addressString);
+    IPSECKEYRecord r =
+        new IPSECKEYRecord(
+            n,
+            DClass.IN,
+            0,
+            10,
+            IPSECKEYRecord.Gateway.IPv6,
+            IPSECKEYRecord.Algorithm.RSA,
+            address,
+            base64.fromString("AQID"));
+    assertThat(r.getGatewayType()).isEqualTo(IPSECKEYRecord.Gateway.IPv6);
+    assertThat(r.getGateway()).isInstanceOf(InetAddress.class).isEqualTo(address);
+    assertThat(r.rdataToString()).isEqualTo("10 2 2 " + addressString + " AQID");
   }
 }

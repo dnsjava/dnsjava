@@ -3,7 +3,10 @@
 
 package org.xbill.DNS;
 
+import static org.xbill.DNS.IPAddressUtils.IPV4_MAPPED_IPV6_PREFIX;
+
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -32,9 +35,6 @@ public class A6Record extends Record {
       Name name, int dclass, long ttl, int prefixBits, InetAddress suffix, Name prefix) {
     super(name, Type.A6, dclass, ttl);
     this.prefixBits = checkU8("prefixBits", prefixBits);
-    if (suffix != null && Address.familyOf(suffix) != Address.IPv6) {
-      throw new IllegalArgumentException("invalid IPv6 address");
-    }
     this.suffix = suffix;
     if (prefix != null) {
       this.prefix = checkName("prefix", prefix);
@@ -81,8 +81,14 @@ public class A6Record extends Record {
     sb.append(prefixBits);
     if (suffix != null) {
       sb.append(" ");
+      if (suffix instanceof Inet4Address) {
+        // Deal with Java's broken handling of mapped IPv4 addresses.
+        sb.append("0:0:0:0:0:ffff:");
+      }
+
       sb.append(suffix.getHostAddress());
     }
+
     if (prefix != null) {
       sb.append(" ");
       sb.append(prefix);
@@ -111,7 +117,16 @@ public class A6Record extends Record {
     if (suffix != null) {
       int suffixbits = 128 - prefixBits;
       int suffixbytes = (suffixbits + 7) / 8;
-      byte[] data = suffix.getAddress();
+      byte[] data;
+      if (suffix instanceof Inet4Address) {
+        // Deal with Java's broken handling of mapped IPv4 addresses.
+        data = new byte[16];
+        System.arraycopy(IPV4_MAPPED_IPV6_PREFIX, 0, data, 0, IPV4_MAPPED_IPV6_PREFIX.length);
+        System.arraycopy(suffix.getAddress(), 0, data, IPV4_MAPPED_IPV6_PREFIX.length, 4);
+      } else {
+        data = suffix.getAddress();
+      }
+
       out.writeByteArray(data, 16 - suffixbytes, suffixbytes);
     }
     if (prefix != null) {

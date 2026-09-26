@@ -35,7 +35,9 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -115,11 +117,9 @@ class A6RecordTest {
         RelativeNameException.class,
         () -> new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null));
 
-    // an IPv4 address
+    // an IPv4 address - allowed, as these can be written as mapped addresses
     InetAddress address = InetAddress.getByName("192.168.0.1");
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, address, null));
+    assertDoesNotThrow(() -> new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, address, null));
   }
 
   @Test
@@ -147,9 +147,9 @@ class A6RecordTest {
     ar.rrFromWire(din);
     assertEquals(9, ar.getPrefixBits());
 
-    byte[] addr_bytes = m_addr_bytes.clone();
-    addr_bytes[0] = 0;
-    InetAddress exp = InetAddress.getByAddress(addr_bytes);
+    byte[] leadingZeroByteAddress = m_addr_bytes.clone();
+    leadingZeroByteAddress[0] = 0;
+    InetAddress exp = InetAddress.getByAddress(leadingZeroByteAddress);
     assertEquals(exp, ar.getSuffix());
     assertEquals(m_an2, ar.getPrefix());
   }
@@ -188,9 +188,30 @@ class A6RecordTest {
   @Test
   void rrToString() {
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
-    String exp = "" + m_prefix_bits + " " + m_addr_string_canonical + " " + m_an2;
+    String exp = m_prefix_bits + " " + m_addr_string_canonical + " " + m_an2;
     String out = ar.rrToString();
     assertEquals(exp, out);
+  }
+
+  @Test
+  void roundtripIPv6MappedIPv4() throws IOException {
+    InetAddress mappedAddress = Address.getByAddress("0:0:0:0:0:ffff:192.0.2.1");
+    A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, mappedAddress, m_an2);
+    String expectedRdata = "9 0:0:0:0:0:ffff:192.0.2.1 My.Second.Absolute.Name.";
+    assertThat(ar.rdataToString()).isEqualTo(expectedRdata);
+
+    DNSOutput out = new DNSOutput();
+    ar.rrToWire(out, null, false);
+
+    ar = new A6Record();
+    ar.rdataFromString(new Tokenizer(expectedRdata), Name.root);
+    assertThat(ar.getPrefixBits()).isEqualTo(m_prefix_bits);
+    assertThat(ar.getSuffix()).isEqualTo(mappedAddress);
+
+    ar = new A6Record();
+    ar.rrFromWire(new DNSInput(out.toByteArray()));
+    assertThat(ar.getPrefixBits()).isEqualTo(m_prefix_bits);
+    assertThat(ar.getSuffix()).isEqualTo(mappedAddress);
   }
 
   @Test

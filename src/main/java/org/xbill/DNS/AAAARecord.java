@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -15,6 +16,8 @@ import java.net.UnknownHostException;
  *     IP Version 6</a>
  */
 public class AAAARecord extends Record {
+  private static final byte[] IPV4_MAPPED_IPV6_PREFIX =
+      new byte[] {0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
   private byte[] address;
 
   AAAARecord() {}
@@ -40,9 +43,10 @@ public class AAAARecord extends Record {
    */
   public AAAARecord(Name name, int dclass, long ttl, byte[] address) {
     super(name, Type.AAAA, dclass, ttl);
-    if (address == null || address.length != 16) {
-      throw new IllegalArgumentException("invalid IPv6 address");
+    if (address == null || address.length != 4 && address.length != 16) {
+      throw new IllegalArgumentException("invalid IPv4/IPv6 address");
     }
+
     this.address = address;
   }
 
@@ -65,9 +69,9 @@ public class AAAARecord extends Record {
     } catch (UnknownHostException e) {
       return null;
     }
-    if (addr.getAddress().length == 4) {
+    if (addr instanceof Inet4Address) {
       // Deal with Java's broken handling of mapped IPv4 addresses.
-      return "::ffff:" + addr.getHostAddress();
+      return "0:0:0:0:0:ffff:" + addr.getHostAddress();
     }
     return addr.getHostAddress();
   }
@@ -87,6 +91,11 @@ public class AAAARecord extends Record {
 
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+    if (address.length == 4) {
+      // Deal with Java's broken handling of mapped IPv4 addresses.
+      out.writeByteArray(IPAddressUtils.IPV4_MAPPED_IPV6_PREFIX);
+    }
+
     out.writeByteArray(address);
   }
 }

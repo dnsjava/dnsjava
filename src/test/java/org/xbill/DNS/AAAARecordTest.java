@@ -35,6 +35,7 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -90,7 +91,7 @@ class AAAARecordTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {0, 1, 2, 3, 4, 5, 17})
+  @ValueSource(ints = {0, 1, 2, 3, 5, 15, 17})
   void ctor_4arg_bytes_invalidLength(int len) {
     assertThrows(
         IllegalArgumentException.class,
@@ -98,9 +99,30 @@ class AAAARecordTest {
   }
 
   @Test
-  void ctor_v4() throws UnknownHostException {
+  void ctor_v4_address() throws UnknownHostException {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.1.1"));
-    assertEquals("::ffff:192.168.1.1", ar.rrToString());
+    assertEquals("0:0:0:0:0:ffff:192.168.1.1", ar.rrToString());
+    DNSOutput out = new DNSOutput();
+    ar.rrToWire(out, null, false);
+    assertThat(out.toByteArray())
+        .isEqualTo(
+            new byte[] {
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xff, (byte) 0xff, (byte) 192, (byte) 168, 1, 1
+            });
+  }
+
+  @Test
+  void ctor_v4_bytes() {
+    AAAARecord ar =
+        new AAAARecord(m_an, DClass.IN, m_ttl, new byte[] {(byte) 192, (byte) 168, 1, 1});
+    assertEquals("0:0:0:0:0:ffff:192.168.1.1", ar.rrToString());
+    DNSOutput out = new DNSOutput();
+    ar.rrToWire(out, null, false);
+    assertThat(out.toByteArray())
+        .isEqualTo(
+            new byte[] {
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xff, (byte) 0xff, (byte) 192, (byte) 168, 1, 1
+            });
   }
 
   @Test

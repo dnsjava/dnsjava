@@ -3,8 +3,10 @@
 
 package org.xbill.DNS;
 
+import static org.xbill.DNS.IPAddressUtils.IPV4_MAPPED_IPV6_PREFIX;
+
 import java.io.IOException;
-import java.net.Inet6Address;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import org.xbill.DNS.utils.base64;
 
@@ -102,14 +104,9 @@ public class IPSECKEYRecord extends Record {
         this.gateway = null;
         break;
       case Gateway.IPv4:
-        if (!(gateway instanceof InetAddress)) {
-          throw new IllegalArgumentException("\"gateway\" must be an IPv4 address");
-        }
-        this.gateway = gateway;
-        break;
       case Gateway.IPv6:
-        if (!(gateway instanceof Inet6Address)) {
-          throw new IllegalArgumentException("\"gateway\" must be an IPv6 address");
+        if (!(gateway instanceof InetAddress)) {
+          throw new IllegalArgumentException("\"gateway\" must be an InetAddress");
         }
         this.gateway = gateway;
         break;
@@ -194,11 +191,18 @@ public class IPSECKEYRecord extends Record {
         sb.append(".");
         break;
       case Gateway.IPv4:
+        sb.append(((InetAddress) gateway).getHostAddress());
+        break;
       case Gateway.IPv6:
         InetAddress gatewayAddr = (InetAddress) gateway;
+        if (gatewayAddr instanceof Inet4Address) {
+          // Deal with Java's broken handling of mapped IPv4 addresses.
+          sb.append("0:0:0:0:0:ffff:");
+        }
         sb.append(gatewayAddr.getHostAddress());
         break;
       case Gateway.Name:
+      default:
         sb.append(gateway);
         break;
     }
@@ -243,14 +247,22 @@ public class IPSECKEYRecord extends Record {
       case Gateway.None:
         break;
       case Gateway.IPv4:
+        out.writeByteArray(((InetAddress) gateway).getAddress());
+        break;
       case Gateway.IPv6:
         InetAddress gatewayAddr = (InetAddress) gateway;
+        if (gatewayAddr instanceof Inet4Address) {
+          // Deal with Java's broken handling of mapped IPv4 addresses.
+          out.writeByteArray(IPV4_MAPPED_IPV6_PREFIX);
+        }
         out.writeByteArray(gatewayAddr.getAddress());
         break;
       case Gateway.Name:
         Name gatewayName = (Name) gateway;
         gatewayName.toWire(out, null, canonical);
         break;
+      default:
+        throw new IllegalStateException("Unknown gateway format");
     }
     if (key != null) {
       out.writeByteArray(key);

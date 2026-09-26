@@ -44,14 +44,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 class AddressTest {
@@ -75,43 +77,39 @@ class AddressTest {
     assertArrayEquals(exp, ret);
   }
 
-  @Test
-  void toByteArray_IPv4_invalid() {
-    assertNull(Address.toByteArray("A.B.C.D", Address.IPv4));
-
-    assertNull(Address.toByteArray("128...", Address.IPv4));
-    assertNull(Address.toByteArray("128.121", Address.IPv4));
-    assertNull(Address.toByteArray("128.111.8", Address.IPv4));
-    assertNull(Address.toByteArray("128.198.10.", Address.IPv4));
-
-    assertNull(Address.toByteArray("128.121.90..10", Address.IPv4));
-    assertNull(Address.toByteArray("128.121..90.10", Address.IPv4));
-    assertNull(Address.toByteArray("128..121.90.10", Address.IPv4));
-    assertNull(Address.toByteArray(".128.121.90.10", Address.IPv4));
-
-    assertNull(Address.toByteArray("128.121.90.256", Address.IPv4));
-    assertNull(Address.toByteArray("128.121.256.10", Address.IPv4));
-    assertNull(Address.toByteArray("128.256.90.10", Address.IPv4));
-    assertNull(Address.toByteArray("256.121.90.10", Address.IPv4));
-
-    assertNull(Address.toByteArray("128.121.90.-1", Address.IPv4));
-    assertNull(Address.toByteArray("128.121.-1.10", Address.IPv4));
-    assertNull(Address.toByteArray("128.-1.90.10", Address.IPv4));
-    assertNull(Address.toByteArray("-1.121.90.10", Address.IPv4));
-
-    assertNull(Address.toByteArray("120.121.90.10.10", Address.IPv4));
-
-    assertNull(Address.toByteArray("120.121.90.010", Address.IPv4));
-    assertNull(Address.toByteArray("120.121.090.10", Address.IPv4));
-    assertNull(Address.toByteArray("120.021.90.10", Address.IPv4));
-    assertNull(Address.toByteArray("020.121.90.10", Address.IPv4));
-
-    assertNull(Address.toByteArray("1120.121.90.10", Address.IPv4));
-    assertNull(Address.toByteArray("120.2121.90.10", Address.IPv4));
-    assertNull(Address.toByteArray("120.121.4190.10", Address.IPv4));
-    assertNull(Address.toByteArray("120.121.190.1000", Address.IPv4));
-
-    assertNull(Address.toByteArray("", Address.IPv4));
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "A.B.C.D",
+        "128...",
+        "128.121",
+        "128.111.8",
+        "128.198.10.",
+        "128.121.90..10",
+        "128.121..90.10",
+        "128..121.90.10",
+        ".128.121.90.10",
+        "128.121.90.256",
+        "128.121.256.10",
+        "128.256.90.10",
+        "256.121.90.10",
+        "128.121.90.-1",
+        "128.121.-1.10",
+        "128.-1.90.10",
+        "-1.121.90.10",
+        "120.121.90.10.10",
+        "120.121.90.010",
+        "120.121.090.10",
+        "120.021.90.10",
+        "020.121.90.10",
+        "1120.121.90.10",
+        "120.2121.90.10",
+        "120.121.4190.10",
+        "120.121.190.1000",
+        "",
+      })
+  void toByteArray_IPv4_invalid(String address) {
+    assertNull(Address.toByteArray(address, Address.IPv4));
   }
 
   @Test
@@ -245,24 +243,28 @@ class AddressTest {
     assertArrayEquals(exp, ret);
   }
 
-  @Test
-  void toByteArray_IPv6_invalid() {
-    // not enough groups
-    assertNull(Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:0370", Address.IPv6));
-    // too many groups
-    assertNull(Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:0370:193A:BCdE", Address.IPv6));
-    // invalid letter
-    assertNull(Address.toByteArray("2001:0gb8:85a3:08d3:1319:8a2e:0370:9819", Address.IPv6));
-    assertNull(Address.toByteArray("lmno:0bb8:85a3:08d3:1319:8a2e:0370:9819", Address.IPv6));
-    assertNull(Address.toByteArray("11ab:0ab8:85a3:08d3:1319:8a2e:0370:qrst", Address.IPv6));
-    // three consecutive colons
-    assertNull(Address.toByteArray("11ab:0ab8:85a3:08d3:::", Address.IPv6));
-    // IPv4 in the middle
-    assertNull(Address.toByteArray("2001:0ab8:192.168.0.1:1319:8a2e:0370:9819", Address.IPv6));
-    // invalid IPv4
-    assertNull(Address.toByteArray("2001:0ab8:1212:AbAb:8a2e:345.12.22.1", Address.IPv6));
-    // group with too many digits
-    assertNull(Address.toByteArray("2001:0ab8:85a3:128d3:1319:8a2e:0370:9819", Address.IPv6));
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        // not enough groups
+        "2001:0db8:85a3:08d3:1319:8a2e:0370",
+        // too many groups
+        "2001:0db8:85a3:08d3:1319:8a2e:0370:193A:BCdE",
+        // invalid letter
+        "2001:0gb8:85a3:08d3:1319:8a2e:0370:9819",
+        "lmno:0bb8:85a3:08d3:1319:8a2e:0370:9819",
+        "11ab:0ab8:85a3:08d3:1319:8a2e:0370:qrst",
+        // three consecutive colons
+        "11ab:0ab8:85a3:08d3:::",
+        // IPv4 in the middle
+        "2001:0ab8:192.168.0.1:1319:8a2e:0370:9819",
+        // invalid IPv4
+        "2001:0ab8:1212:AbAb:8a2e:345.12.22.1",
+        // group with too many digits
+        "2001:0ab8:85a3:128d3:1319:8a2e:0370:9819",
+      })
+  void toByteArray_IPv6_invalid(String address) {
+    assertNull(Address.toByteArray(address, Address.IPv6));
   }
 
   @Test
@@ -280,11 +282,14 @@ class AddressTest {
     assertArrayEquals(exp, ret);
   }
 
-  @Test
-  void toArray_invalid() {
-    assertNull(Address.toArray("128.121.1", Address.IPv4));
-
-    assertNull(Address.toArray(""));
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "128.121.1",
+        "",
+      })
+  void toArray_invalid(String address) {
+    assertNull(Address.toArray(address, Address.IPv4));
   }
 
   @Test
@@ -327,7 +332,7 @@ class AddressTest {
             InetAddress.getByAddress(new byte[] {(byte) 198, 41, 0, 4})),
         Section.ANSWER);
 
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    Resolver mockResolver = mock(Resolver.class);
     when(mockResolver.send(ArgumentMatchers.any(Message.class)))
         .thenAnswer(
             (Answer<Message>)
@@ -350,7 +355,7 @@ class AddressTest {
   void getByName_invalid() throws IOException {
     Message m = new Message();
     m.getHeader().setRcode(Rcode.NXDOMAIN);
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    Resolver mockResolver = mock(Resolver.class);
     when(mockResolver.send(ArgumentMatchers.any(Message.class)))
         .thenAnswer(
             (Answer<Message>)
@@ -396,7 +401,7 @@ class AddressTest {
             InetAddress.getByAddress(
                 new byte[] {0x20, 1, 5, 3, (byte) 0xba, 0x3e, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0x30})),
         Section.ANSWER);
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    Resolver mockResolver = mock(Resolver.class);
     doReturn(aMessage)
         .when(mockResolver)
         .send(argThat(message -> message.getQuestion().getType() == Type.A));
@@ -418,7 +423,7 @@ class AddressTest {
   void getAllByName_invalid() throws IOException {
     Message m = new Message();
     m.getHeader().setRcode(Rcode.NXDOMAIN);
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    Resolver mockResolver = mock(Resolver.class);
     when(mockResolver.send(ArgumentMatchers.any(Message.class)))
         .thenAnswer(
             (Answer<Message>)
@@ -452,7 +457,7 @@ class AddressTest {
     ptrMessage.getHeader().setRcode(Rcode.NOERROR);
     ptrMessage.addRecord(Record.newRecord(aRootServerPtr, Type.PTR, DClass.IN), Section.QUESTION);
     ptrMessage.addRecord(new PTRRecord(aRootServerPtr, DClass.IN, 60, aRootServer), Section.ANSWER);
-    Resolver mockResolver = Mockito.mock(Resolver.class);
+    Resolver mockResolver = mock(Resolver.class);
     when(mockResolver.send(any(Message.class)))
         .thenAnswer(
             (Answer<Message>)
@@ -472,7 +477,7 @@ class AddressTest {
     ptrMessage.addRecord(
         Record.newRecord(Name.fromString("1.1.168.192.in-addr.arpa."), Type.PTR, DClass.IN),
         Section.QUESTION);
-    mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = mock(Resolver.class);
     when(mockResolver.send(any()))
         .thenAnswer(
             (Answer<Message>)
