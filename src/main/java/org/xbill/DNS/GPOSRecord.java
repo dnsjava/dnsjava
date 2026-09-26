@@ -9,6 +9,10 @@ import java.io.IOException;
  * Geographical Location - describes the physical location of a host. (withdrawn -- this was a
  * limited early version of {@link LOCRecord})
  *
+ * <p>Latitude/Longitude are implemented as per RFC, without considering <a
+ * href="https://errata.rfc-editor.org/eid541/">Errata-ID 541</a>. So Longitude comes first, and is
+ * validated against -90 / +90, and the Latitude comes second, validated as -180 / +180 degrees.
+ *
  * @author Brian Wellington
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc1712">RFC 1712: DNS Encoding of
  *     Geographical Location</a>

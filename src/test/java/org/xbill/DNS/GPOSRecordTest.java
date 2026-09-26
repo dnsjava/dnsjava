@@ -35,6 +35,7 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -362,5 +363,14 @@ class GPOSRecordTest {
     for (int i = 0; i < exp.length; ++i) {
       assertEquals(exp[i], bar[i], "i=" + i);
     }
+  }
+
+  @Test
+  void gposRange() {
+    assertThatCode(
+            () ->
+                Record.fromString(
+                    Name.root, Type.GPOS, DClass.IN, 3600, "-32.6882 116.8652 10.0", Name.root))
+        .doesNotThrowAnyException();
   }
 }
