@@ -48,7 +48,7 @@ final class NioUdpClient extends NioClient implements UdpIoClient {
     if (Boolean.getBoolean("dnsjava.udp.ephemeral.use_ephemeral_port")) {
       prng = null;
     } else {
-      prng = new SecureRandom();
+      prng = Utils.secureRandom();
     }
     setRegistrationsTask(this::processPendingRegistrations, false);
     setTimeoutTask(this::checkTransactionTimeouts, false);

@@ -91,6 +91,13 @@ Do NOT use it.
 |false
 |true
 
+.2+|dnsjava.secure_random_algorithm
+3+|Name of the `SecureRandom` algorithm used to generate UDP source ports and message IDs.
+If unset or not available, the platform default `SecureRandom` is used.
+|String
+|-
+|SHA1PRNG
+
 .2+|dnsjava.lookup.max_iterations
 3+|Maximum number of CNAMEs to follow in a chain.
 |Integer
