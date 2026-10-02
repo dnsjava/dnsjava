@@ -4,7 +4,6 @@
 package org.xbill.DNS;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.Random;
 import lombok.SneakyThrows;
 
@@ -20,7 +19,7 @@ public class Header implements Cloneable {
   private int flags;
   private int[] counts;
 
-  private static final Random random = new SecureRandom();
+  private static final Random random = Utils.secureRandom();
 
   /** The length of a DNS Header in wire format. */
   public static final int LENGTH = 12;
