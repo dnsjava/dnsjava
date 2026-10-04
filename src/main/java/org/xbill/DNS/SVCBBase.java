@@ -29,20 +29,117 @@ public abstract class SVCBBase extends Record {
   protected Name targetName;
   protected final Map<Integer, ParameterBase> svcParams;
 
+  /**
+   * Mandatory keys in this RR.
+   *
+   * @see <a href="https://www.rfc-editor.org/info/rfc9460/#section-8">RFC 9460, Section 8</a>
+   */
   public static final int MANDATORY = 0;
+
+  /**
+   * Additional supported protocols.
+   *
+   * @see <a href="https://www.rfc-editor.org/info/rfc9460/#section-7.1">RFC 9460, Section 7.1</a>
+   */
   public static final int ALPN = 1;
+
+  /**
+   * No support for default protocol.
+   *
+   * @see <a href="https://www.rfc-editor.org/info/rfc9460/#section-7.1">RFC 9460, Section 7.1</a>
+   */
   public static final int NO_DEFAULT_ALPN = 2;
+
+  /**
+   * Port for alternative endpoint.
+   *
+   * @see <a href="https://www.rfc-editor.org/info/rfc9460/#section-7.2">RFC 9460, Section 7.2</a>
+   */
   public static final int PORT = 3;
+
+  /**
+   * IPv4 address hints.
+   *
+   * @see <a href="https://www.rfc-editor.org/info/rfc9460/#section-7.3">RFC 9460, Section 7.3</a>
+   */
   public static final int IPV4HINT = 4;
+
+  /**
+   * TLS Encrypted ClientHello Config.
+   *
+   * @since 3.4.1
+   * @see <a href="https://www.iana.org/go/rfc9848">RFC 9848</a>
+   */
   public static final int ECH = 5;
+
+  /**
+   * IPv6 address hints.
+   *
+   * @see <a href="https://www.rfc-editor.org/info/rfc9460/#section-7.3">RFC 9460, Section 7.3</a>
+   */
   public static final int IPV6HINT = 6;
+
+  /**
+   * DNS over HTTPS path template.
+   *
+   * @since 3.6.6
+   * @see <a href="https://www.iana.org/go/rfc9461">RFC 9461</a>
+   */
+  public static final int DOHPATH = 7;
+
+  /**
+   * Denotes that a service operates an Oblivious HTTP target.
+   *
+   * @since 3.6.6
+   * @see <a href="https://www.rfc-editor.org/info/rfc9540/#section-4.2">RFC 9540, Section 4.2</a>
+   */
+  public static final int OHTTP = 8;
+
+  /**
+   * Supported groups in TLS.
+   *
+   * @since 3.6.6
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-key-share-prediction-04#name-format">draft-ietf-tls-key-share-prediction-04,
+   *     Section 3.1</a>
+   */
+  public static final int TLS_SUPPORTED_GROUPS = 9;
+
+  /**
+   * DNS over CoAP resource path.
+   *
+   * @since 3.6.6
+   * @see <a href="https://www.rfc-editor.org/info/rfc9953/#section-3">RFC 9953, Section 3.1</a>
+   */
+  public static final int DOCPATH = 10;
+
+  /**
+   * PvD configuration is available at the well-known path.
+   *
+   * @since 3.6.6
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-ietf-intarea-proxy-config-14#section-2.1">RFC-ietf-intarea-proxy-config-14,
+   *     Section 2.1</a>
+   */
+  public static final int PVD = 11;
+
+  /**
+   * Per-transport operator confidence in serving the nameserver's query load over that transport,
+   * as a percentage.
+   *
+   * @since 3.6.6
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-johani-dnsop-svcb-oots-00/#section-5">draft-johani-dnsop-svcb-oots-00,
+   *     Section 5</a>
+   */
+  public static final int OOTS = 11;
 
   /**
    * Pre-RFC constant for the {@link #ECH} SVC parameter.
    *
    * @deprecated use {@link #ECH}
    */
-  @Deprecated public static final int ECHCONFIG = 5;
+  @Deprecated public static final int ECHCONFIG = ECH;
 
   protected SVCBBase() {
     svcParams = new TreeMap<>();
@@ -120,7 +217,17 @@ public abstract class SVCBBase extends Record {
     parameters.add(IPV4HINT, "ipv4hint", ParameterIpv4Hint::new);
     parameters.add(ECH, "ech", ParameterEch::new);
     parameters.add(IPV6HINT, "ipv6hint", ParameterIpv6Hint::new);
-    /* Support obsolete echconfig name as an alias for ech */
+    parameters.add(DOHPATH, "dohpath", () -> new ParameterUnknown(DOHPATH));
+    parameters.add(OHTTP, "ohttp", () -> new ParameterUnknown(OHTTP));
+    parameters.add(
+        TLS_SUPPORTED_GROUPS,
+        "tls-supported-groups",
+        () -> new ParameterUnknown(TLS_SUPPORTED_GROUPS));
+    parameters.add(DOCPATH, "docpath", () -> new ParameterUnknown(DOCPATH));
+    parameters.add(PVD, "pvd", () -> new ParameterUnknown(PVD));
+    parameters.add(OOTS, "oots", () -> new ParameterUnknown(OOTS));
+
+    // Support obsolete echconfig name as an alias for ech
     parameters.addAlias(ECH, "echconfig");
   }
 
