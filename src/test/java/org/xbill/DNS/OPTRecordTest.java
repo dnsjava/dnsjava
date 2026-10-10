@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,7 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.xbill.DNS.DNSSEC.Algorithm;
 import org.xbill.DNS.DNSSEC.Digest;
 import org.xbill.DNS.EDNSOption.Code;
@@ -101,6 +106,36 @@ class OPTRecordTest {
     assertEquals(
         Collections.singletonList(new CookieOption(base16.fromString("4531D089BA80C6EB"))),
         optRecord.getOptions());
+  }
+
+  @Test
+  void modifiedDClassAndTTL0() {
+    OPTRecord opt = new OPTRecord(512, 0, 0, 0);
+    // DClass is used to encapsulate the payload size
+    assertThat(opt.getDClass()).isEqualTo(512);
+    // TTL is used to encapsulate RCode, version and flags (Z)
+    assertThat(opt.getTTL()).isZero();
+    assertThat(opt.getVersion()).isZero();
+  }
+
+  @ParameterizedTest
+  @MethodSource("generateRcodeVersionFlagsAsTTL")
+  void rcodeVersionFlagsAsTTL(int flags, long ttl) {
+    OPTRecord opt = new OPTRecord(512, 0, 0, flags);
+    // DClass is used to encapsulate the payload size
+    assertThat(opt.getDClass()).isEqualTo(512);
+    // TTL is used to encapsulate RCode, version and flags (Z)
+    assertThat(opt.getTTL()).isEqualTo(ttl);
+    assertThat(opt.getVersion()).isZero();
+  }
+
+  private static Stream<Arguments> generateRcodeVersionFlagsAsTTL() {
+    return Stream.of(
+        Arguments.of(0, 0b00000000_00000000_00000000_00000000_00000000),
+        Arguments.of(ExtendedFlags.DO, 0b00000000_00000000_00000000_10000000_00000000),
+        Arguments.of(ExtendedFlags.CO, 0b00000000_00000000_00000000_01000000_00000000),
+        Arguments.of(
+            ExtendedFlags.DO | ExtendedFlags.CO, 0b00000000_00000000_00000000_11000000_00000000));
   }
 
   private void assertNotEqual(final OPTRecord optRecordOne, final OPTRecord optRecordTwo) {

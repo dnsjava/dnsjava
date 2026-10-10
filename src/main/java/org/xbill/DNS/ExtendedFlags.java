@@ -21,7 +21,7 @@ public final class ExtendedFlags {
    * @since 3.6.5
    * @see <a href="https://datatracker.ietf.org/doc/html/rfc9824">RFC 9824</a>
    */
-  public static final int CO = 0x8001;
+  public static final int CO = 0x4000;
 
   static {
     extflags.setMaximum(0xFFFF);
