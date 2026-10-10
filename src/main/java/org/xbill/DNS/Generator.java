@@ -61,8 +61,8 @@ public class Generator {
   /**
    * Creates a specification for generating records, as a $GENERATE statement in a master file.
    *
-   * @param start The start of the range.
-   * @param end The end of the range.
+   * @param start The start of the range (inclusive).
+   * @param end The end of the range (inclusive).
    * @param step The step value of the range.
    * @param namePattern The pattern to use for generating record names.
    * @param type The type of the generated records. The supported types are PTR, CNAME, DNAME, A,
@@ -245,10 +245,10 @@ public class Generator {
    */
   public Record[] expand() throws IOException {
     List<Record> list = new ArrayList<>();
-    for (long i = start; i < end; i += step) {
-      String namestr = substitute(namePattern, current);
+    for (long i = start; i <= end; i += step) {
+      String namestr = substitute(namePattern, i);
       Name name = Name.fromString(namestr, origin);
-      String rdata = substitute(rdataPattern, current);
+      String rdata = substitute(rdataPattern, i);
       list.add(Record.fromString(name, type, dclass, ttl, rdata, origin));
     }
     return list.toArray(new Record[0]);

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,9 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class GeneratorTest {
+public class GeneratorTest {
 
   @Test
   void testSupportedType() {
@@ -193,5 +196,53 @@ class GeneratorTest {
     Generator g = new Generator(1, 10, 2, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin);
     String s = g.toString();
     assertEquals("$GENERATE 1-10/2 host$ 3600 IN A 1.2.3.$ ", s);
+  }
+
+  @Test
+  void expand() throws IOException {
+    int start = 1;
+    int end = 3;
+    int step = 1;
+    Generator g =
+        new Generator(start, end, step, "host$", Type.A, DClass.IN, 3600, "10.0.0.$", Name.root);
+
+    List<ARecord> l = new ArrayList<>();
+    for (int i = start; i <= end; i += step) {
+      l.add(
+          new ARecord(
+              Name.fromConstantString("host" + i + "."),
+              DClass.IN,
+              3600,
+              new byte[] {10, 0, 0, (byte) i}));
+    }
+
+    assertThat(g.expand()).containsExactlyElementsOf(l);
+  }
+
+  @Test
+  void nextRecord() throws IOException {
+    int start = 1;
+    int end = 3;
+    int step = 1;
+    Generator g =
+        new Generator(start, end, step, "host$", Type.A, DClass.IN, 3600, "10.0.0.$", Name.root);
+
+    List<ARecord> l = new ArrayList<>();
+    for (int i = start; i <= end; i += step) {
+      l.add(
+          new ARecord(
+              Name.fromConstantString("host" + i + "."),
+              DClass.IN,
+              3600,
+              new byte[] {10, 0, 0, (byte) i}));
+    }
+
+    List<Record> l2 = new ArrayList<>();
+    Record r;
+    while ((r = g.nextRecord()) != null) {
+      l2.add(r);
+    }
+
+    assertThat(l2).containsExactlyElementsOf(l);
   }
 }
