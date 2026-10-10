@@ -223,7 +223,14 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
       return newRecord(name, type, dclass);
     }
 
+    // rfc2181/#section-8
+    // Implementations should treat TTL values received with the most
+    // significant bit set as if the entire value received was zero.
     ttl = in.readU32();
+    if (ttl > TTL.MAX_VALUE) {
+      ttl = 0;
+    }
+
     length = in.readU16();
     if (length == 0 && isUpdate && (section == Section.PREREQ || section == Section.UPDATE)) {
       return newRecord(name, type, dclass, ttl);
