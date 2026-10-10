@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,9 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class URIRecordTest {
+  private static final Name n = Name.fromConstantString("my.name.");
+
   @Test
   void ctor_0arg() throws URISyntaxException {
     URIRecord r = new URIRecord();
@@ -27,7 +34,6 @@ class URIRecordTest {
 
   @Test
   void ctor_6arg() throws TextParseException, URISyntaxException {
-    Name n = Name.fromString("my.name.");
     String target = "http://foo/bar";
 
     URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 42, 69, target);
@@ -53,8 +59,7 @@ class URIRecordTest {
   }
 
   @Test
-  void rdataToWire() throws TextParseException {
-    Name n = Name.fromString("my.name.");
+  void rdataToWire() {
     String target = "http://foo";
     byte[] exp =
         new byte[] {
@@ -112,31 +117,79 @@ class URIRecordTest {
   void toobig_priority() {
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new URIRecord(
-                Name.fromString("the.name"), DClass.IN, 0x1234, 0x10000, 42, "http://foo"));
+        () -> new URIRecord(n, DClass.IN, 0x1234, 0x10000, 42, "http://foo"));
   }
 
   @Test
   void toosmall_priority() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234, -1, 42, "http://foo"));
+        () -> new URIRecord(n, DClass.IN, 0x1234, -1, 42, "http://foo"));
   }
 
   @Test
   void toobig_weight() {
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new URIRecord(
-                Name.fromString("the.name"), DClass.IN, 0x1234, 42, 0x10000, "http://foo"));
+        () -> new URIRecord(n, DClass.IN, 0x1234, 42, 0x10000, "http://foo"));
   }
 
   @Test
   void toosmall_weight() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new URIRecord(Name.fromString("the.name"), DClass.IN, 0x1234, 42, -1, "http://foo"));
+        () -> new URIRecord(n, DClass.IN, 0x1234, 42, -1, "http://foo"));
+  }
+
+  @Test
+  void validateEmptyUriThrows() {
+    assertThatThrownBy(() -> new URIRecord(n, DClass.IN, 3600, 1, 1, ""))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new URIRecord(n, DClass.IN, 3600, 1, 1, null))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {1, 256, 300})
+  void validateUriLengths(int uriLength) {
+    String value = new String(new char[uriLength]);
+    URIRecord uri = new URIRecord(n, DClass.IN, 3600, 1, 1, value);
+    assertThatThrownBy(uri::getTargetAsURI).isInstanceOf(URISyntaxException.class);
+  }
+
+  @Test
+  void validateLongUriCanRoundtrip() throws IOException, URISyntaxException {
+    String value =
+        IntStream.range(0, 360)
+            .boxed()
+            .map(
+                i -> {
+                  if (i < 120) {
+                    return "a";
+                  } else if (i == 120) {
+                    return ".";
+                  } else if (i < 240) {
+                    return "b";
+                  } else if (i == 240) {
+                    return ".";
+                  } else if (i < 360) {
+                    return "c";
+                  } else if (i == 360) {
+                    return ".";
+                  }
+                  return "d";
+                })
+            .reduce("http://", (a, b) -> a + b);
+    URIRecord uri = new URIRecord(n, DClass.IN, 3600, 1, 1, value);
+
+    URIRecord uri2 = new URIRecord();
+    DNSOutput out = new DNSOutput();
+    uri.rrToWire(out, null, false);
+    uri2.rrFromWire(new DNSInput(out.toByteArray()));
+    assertThat(uri2.getTargetAsURI()).hasToString(value);
+
+    URIRecord uri3 = new URIRecord();
+    uri3.rdataFromString(new Tokenizer(uri.rrToString()), Name.root);
+    assertThat(uri3.getTargetAsURI()).hasToString(value);
   }
 }

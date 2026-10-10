@@ -36,8 +36,12 @@ public class URIRecord extends Record {
     super(name, Type.URI, dclass, ttl);
     this.priority = checkU16("priority", priority);
     this.weight = checkU16("weight", weight);
+    if (target == null || target.isEmpty()) {
+      throw new IllegalArgumentException("target must not be empty");
+    }
+
     try {
-      this.target = byteArrayFromString(target);
+      this.target = byteArrayFromString(target, -1);
     } catch (TextParseException e) {
       throw new IllegalArgumentException(e.getMessage());
     }
@@ -55,7 +59,7 @@ public class URIRecord extends Record {
     priority = st.getUInt16();
     weight = st.getUInt16();
     try {
-      target = byteArrayFromString(st.getString());
+      target = byteArrayFromString(st.getString(), -1);
     } catch (TextParseException e) {
       throw st.exception(e.getMessage());
     }

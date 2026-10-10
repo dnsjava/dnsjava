@@ -36,11 +36,15 @@ public class CAARecord extends Record {
   public CAARecord(Name name, int dclass, long ttl, int flags, String tag, String value) {
     super(name, Type.CAA, dclass, ttl);
     this.flags = checkU8("flags", flags);
+    if (tag == null || tag.isEmpty() || tag.length() > 255) {
+      throw new IllegalArgumentException("invalid tag");
+    }
+
     try {
       this.tag = byteArrayFromString(tag);
-      this.value = byteArrayFromString(value);
+      this.value = byteArrayFromString(value, -1);
     } catch (TextParseException e) {
-      throw new IllegalArgumentException(e.getMessage());
+      throw new IllegalArgumentException(e.getMessage(), e);
     }
   }
 
@@ -56,7 +60,7 @@ public class CAARecord extends Record {
     flags = st.getUInt8();
     try {
       tag = byteArrayFromString(st.getString());
-      value = byteArrayFromString(st.getString());
+      value = byteArrayFromString(st.getString(), -1);
     } catch (TextParseException e) {
       throw st.exception(e.getMessage());
     }

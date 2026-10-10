@@ -357,8 +357,24 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
    */
   protected abstract void rdataFromString(Tokenizer st, Name origin) throws IOException;
 
-  /** Converts a String into a byte array. */
+  /**
+   * Converts a String into a byte array.
+   *
+   * <p>Enforces a max-length of 255 bytes. Use {@link #byteArrayFromString(String, int)} to specify
+   * a different (or no) limit.
+   */
   protected static byte[] byteArrayFromString(String s) throws TextParseException {
+    return byteArrayFromString(s, 255);
+  }
+
+  /**
+   * Converts a String into a byte array.
+   *
+   * @since 3.6.6
+   * @param sizeLimit Throw a {@link TextParseException} if the string is longer than this limit,
+   *     {@code -1} means no limit.
+   */
+  protected static byte[] byteArrayFromString(String s, int sizeLimit) throws TextParseException {
     byte[] array = s.getBytes();
     boolean escaped = false;
     boolean hasEscapes = false;
@@ -370,7 +386,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
       }
     }
     if (!hasEscapes) {
-      if (array.length > 255) {
+      if (sizeLimit != -1 && array.length > sizeLimit) {
         throw new TextParseException("text string too long");
       }
       return array;
@@ -411,7 +427,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
       throw new TextParseException("bad escape");
     }
     array = os.toByteArray();
-    if (array.length > 255) {
+    if (sizeLimit != -1 && array.length > sizeLimit) {
       throw new TextParseException("text string too long");
     }
 
