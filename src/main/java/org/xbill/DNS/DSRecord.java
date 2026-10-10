@@ -176,9 +176,11 @@ public class DSRecord extends Record {
     sb.append(alg);
     sb.append(" ");
     sb.append(digestid);
-    if (digest != null) {
-      sb.append(" ");
+    sb.append(" ");
+    if (digest != null && digest.length > 0) {
       sb.append(base16.toString(digest));
+    } else {
+      sb.append("\"\"");
     }
 
     return sb.toString();

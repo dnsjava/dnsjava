@@ -104,7 +104,12 @@ public class SSHFPRecord extends Record {
     sb.append(" ");
     sb.append(digestType);
     sb.append(" ");
-    sb.append(base16.toString(fingerprint));
+    if (fingerprint.length == 0) {
+      sb.append("\"\"");
+    } else {
+      sb.append(base16.toString(fingerprint));
+    }
+
     return sb.toString();
   }
 

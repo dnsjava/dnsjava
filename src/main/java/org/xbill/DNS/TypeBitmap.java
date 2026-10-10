@@ -17,23 +17,18 @@ final class TypeBitmap implements Serializable {
 
   private static final long serialVersionUID = -125354057735389003L;
 
-  private final TreeSet<Integer> types;
-
-  private TypeBitmap() {
-    types = new TreeSet<>();
-  }
+  private final TreeSet<Integer> types = new TreeSet<>();
 
   public TypeBitmap(int[] array) {
-    this();
-    for (int value : array) {
-      Type.check(value);
-      types.add(value);
+    if (array != null) {
+      for (int value : array) {
+        Type.check(value);
+        types.add(value);
+      }
     }
   }
 
   public TypeBitmap(DNSInput in) throws WireParseException {
-    this();
-
     // Encoding: ( Window Block # | Bitmap Length | Bitmap )+
     int lastWindowBlockNumber = -1;
     while (in.remaining() > 0) {
@@ -75,7 +70,6 @@ final class TypeBitmap implements Serializable {
   }
 
   public TypeBitmap(Tokenizer st) throws IOException {
-    this();
     while (true) {
       Tokenizer.Token t = st.get();
       if (!t.isString()) {

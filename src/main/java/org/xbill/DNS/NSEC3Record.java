@@ -6,6 +6,7 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import org.xbill.DNS.utils.base16;
 import org.xbill.DNS.utils.base32;
 
@@ -112,8 +113,9 @@ public class NSEC3Record extends Record {
       }
     }
 
-    if (next.length > 255) {
-      throw new IllegalArgumentException("Invalid next hash");
+    Objects.requireNonNull(next);
+    if (next.length == 0 || next.length > 255) {
+      throw new IllegalArgumentException("Invalid next hash length");
     }
     this.next = new byte[next.length];
     System.arraycopy(next, 0, this.next, 0, next.length);
@@ -134,12 +136,20 @@ public class NSEC3Record extends Record {
     }
 
     int nextLength = in.readU8();
+    if (nextLength == 0) {
+      throw new WireParseException("Invalid next hash length");
+    }
+
     next = in.readByteArray(nextLength);
     types = new TypeBitmap(in);
   }
 
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+    if (next == null || next.length == 0) {
+      throw new IllegalStateException("Record is not initialized");
+    }
+
     out.writeU8(hashAlg);
     out.writeU8(flags);
     out.writeU16(iterations);
@@ -174,12 +184,20 @@ public class NSEC3Record extends Record {
     }
 
     next = st.getBase32String(b32);
+    if (next.length == 0) {
+      throw new TextParseException("Invalid next hash");
+    }
+
     types = new TypeBitmap(st);
   }
 
   /** Converts rdata to a String */
   @Override
   protected String rrToString() {
+    if (next == null || next.length == 0) {
+      throw new IllegalStateException("Record is not initialized");
+    }
+
     StringBuilder sb = new StringBuilder();
     sb.append(hashAlg);
     sb.append(' ');
@@ -187,7 +205,7 @@ public class NSEC3Record extends Record {
     sb.append(' ');
     sb.append(iterations);
     sb.append(' ');
-    if (salt == null) {
+    if (salt == null || salt.length == 0) {
       sb.append('-');
     } else {
       sb.append(base16.toString(salt));
@@ -197,7 +215,7 @@ public class NSEC3Record extends Record {
 
     if (!types.empty()) {
       sb.append(' ');
-      sb.append(types.toString());
+      sb.append(types);
     }
 
     return sb.toString();

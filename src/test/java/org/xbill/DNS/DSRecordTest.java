@@ -35,7 +35,9 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -207,13 +209,25 @@ class DSRecordTest {
     "3,0102030405060708 0102030405060708 0102030405060708 0102030405060708",
     "4,0102030405060708 0102030405060708 0102030405060708 0102030405060708 0102030405060708 0102030405060708",
     "5,6033725b0ccfc05d 1e9d844d49c6cf89 0b13d5eac9439189 947d5db6c8d1c1ec",
-    "255,0102"
+    "255,0102",
   })
   void rdataFromString_validDigestLengths(int digestId, String data) throws IOException {
     Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + digestId + " " + data);
     DSRecord r = new DSRecord();
     r.rdataFromString(t, null);
     assertEquals(base16.fromString(data).length, r.getDigest().length);
+  }
+
+  @Test
+  void rdataFromString_emptyDigest() {
+    String rr = 0xABCD + " " + 0xEF + " 0 \"\"";
+    DSRecord r = new DSRecord();
+    try (Tokenizer t = new Tokenizer(rr)) {
+      assertDoesNotThrow(() -> r.rdataFromString(t, null));
+      assertThat(r.getDigest()).isEmpty();
+    }
+
+    assertThat(r.rrToString()).isEqualTo(rr);
   }
 
   @ParameterizedTest(name = "digest {0}")

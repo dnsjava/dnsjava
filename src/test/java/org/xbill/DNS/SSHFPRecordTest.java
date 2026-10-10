@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,5 +113,18 @@ class SSHFPRecordTest {
             () -> new SSHFPRecord(Name.root, DClass.IN, 3600, 1, digestType, new byte[length]))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("Expected.+fingerprint bytes, got.+");
+  }
+
+  @Test
+  void emptyFingerprintRoundtrip() throws IOException {
+    SSHFPRecord sshfpRecord = new SSHFPRecord(Name.root, DClass.IN, 0, 123, 255, new byte[0]);
+    assertThat(sshfpRecord.getFingerPrint()).isEmpty();
+    String rr = sshfpRecord.rrToString();
+    assertThat(rr).isEqualTo("123 255 \"\"");
+    sshfpRecord = new SSHFPRecord();
+    sshfpRecord.rdataFromString(new Tokenizer(rr), Name.root);
+    assertThat(sshfpRecord.getAlgorithm()).isEqualTo(123);
+    assertThat(sshfpRecord.getDigestType()).isEqualTo(255);
+    assertThat(sshfpRecord.getFingerPrint()).isEmpty();
   }
 }
