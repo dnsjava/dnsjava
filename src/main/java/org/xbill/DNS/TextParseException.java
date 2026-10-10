@@ -21,6 +21,15 @@ public class TextParseException extends IOException {
   }
 
   /**
+   * Constructs a {@link TextParseException} with the specified detail message and cause.
+   *
+   * @since 3.6.6
+   */
+  public TextParseException(String message, Throwable inner) {
+    super(message, inner);
+  }
+
+  /**
    * Create an instance with preformatted message.
    *
    * @since 3.5

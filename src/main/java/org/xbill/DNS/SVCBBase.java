@@ -7,6 +7,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -245,7 +246,12 @@ public abstract class SVCBBase extends Record {
     @Override
     public abstract String toString();
 
-    // Split string on commas, but not if comma is escaped with a '\'
+    /**
+     * Split string on commas, but not if the comma is escaped with a {@code \} (backslash).
+     *
+     * @deprecated This uses a regex and doesn't work as intended. Use a proper parser instead.
+     */
+    @Deprecated
     public static String[] splitStringWithEscapedCommas(String string) {
       return string.split("(?<!\\\\),");
     }
@@ -255,13 +261,12 @@ public abstract class SVCBBase extends Record {
     private final List<Integer> values;
 
     public ParameterMandatory() {
-      super();
       values = new ArrayList<>();
     }
 
     public ParameterMandatory(List<Integer> values) {
-      super();
-      this.values = values;
+      this.values = new ArrayList<>(values);
+      this.values.sort(Integer::compareTo);
     }
 
     public List<Integer> getValues() {
@@ -277,10 +282,18 @@ public abstract class SVCBBase extends Record {
     public void fromWire(byte[] bytes) throws IOException {
       values.clear();
       DNSInput in = new DNSInput(bytes);
+      int maxKey = 0;
       while (in.remaining() >= 2) {
         int key = in.readU16();
+        if (key < maxKey) {
+          // In wire format, the keys are represented by their numeric values in network byte order,
+          // concatenated in strictly increasing numeric order.
+          throw new WireParseException("Illegal mandatory value, " + key + " is out of order");
+        }
+        maxKey = key;
         values.add(key);
       }
+
       if (in.remaining() > 0) {
         throw new WireParseException("Unexpected number of bytes in mandatory parameter");
       }
@@ -292,16 +305,24 @@ public abstract class SVCBBase extends Record {
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty list must be specified for mandatory");
       }
-      for (String str : splitStringWithEscapedCommas(string)) {
+
+      // section-8: To enable simpler parsing, this SvcParamValue MUST NOT contain escape sequences
+      for (String str : string.split(",")) {
         int key = parameters.getValue(str);
         if (key == MANDATORY) {
           throw new TextParseException("Key mandatory must not appear in its own list");
         }
+
         if (values.contains(key)) {
           throw new TextParseException("Duplicate key " + str + " not allowed in mandatory list");
         }
+
         values.add(key);
       }
+
+      // In wire format, the keys are represented by their numeric values in network byte order,
+      // concatenated in strictly increasing numeric order.
+      values.sort(Integer::compareTo);
     }
 
     @Override
@@ -327,15 +348,22 @@ public abstract class SVCBBase extends Record {
   }
 
   public static class ParameterAlpn extends ParameterBase {
+    private static final byte[] H2 = new byte[] {'h', '2'};
+    private static final byte[] H3 = new byte[] {'h', '3'};
+
+    private static final DecimalFormat byteFormat = new DecimalFormat();
+
+    static {
+      byteFormat.setMinimumIntegerDigits(3);
+    }
+
     private final List<byte[]> values;
 
     public ParameterAlpn() {
-      super();
       values = new ArrayList<>();
     }
 
     public ParameterAlpn(List<String> values) throws TextParseException {
-      super();
       this.values = new ArrayList<>();
       for (String str : values) {
         this.values.add(byteArrayFromString(str));
@@ -344,10 +372,25 @@ public abstract class SVCBBase extends Record {
 
     public List<String> getValues() {
       List<String> result = new ArrayList<>();
-      for (byte[] b : values) {
-        result.add(byteArrayToString(b, false));
+      for (byte[] str : values) {
+        StringBuilder sb = new StringBuilder();
+        for (byte c : str) {
+          if (c >= ' ' && c <= '~') {
+            sb.append((char) c);
+          } else {
+            sb.append('\\');
+            sb.append(byteFormat.format(c & 0xFF));
+          }
+        }
+
+        result.add(sb.toString());
       }
+
       return result;
+    }
+
+    public List<byte[]> getRawValues() {
+      return new ArrayList<>(values);
     }
 
     @Override
@@ -356,8 +399,63 @@ public abstract class SVCBBase extends Record {
     }
 
     @Override
+    @SuppressWarnings("java:S131")
     public void fromWire(byte[] bytes) throws IOException {
       values.clear();
+      // Optimize for the common case: h2 / h3 / h2,h3 / h3,h2
+      // Out of the 50'000 most-commonly visited domains, about 1/5th have an HTTPS record.
+      // From those, only 17 contain other values than the common ones. 40 include http/1.1, with
+      // gentoo.com being the only outlier announcing pre-RFC http/3 (alpn=h2,h3,h3-29,h3-27)
+      switch (bytes.length) {
+        case 0:
+        case 1:
+          throw new WireParseException("invalid alpn value (empty)");
+
+        case 2:
+          if (bytes[0] == 1) {
+            values.add(new byte[] {bytes[1]});
+            return;
+          } else {
+            throw new WireParseException("invalid alpn value, end of input");
+          }
+
+        case 3:
+          // string length, string h*
+          if (bytes[0] == 2 && bytes[1] == 'h') {
+            // h2 or h3
+            if (bytes[2] == '2') {
+              values.add(H2);
+              return;
+            } else if (bytes[2] == '3') {
+              values.add(H3);
+              return;
+            }
+          }
+          break;
+
+        case 6:
+          // string length, h*
+          if (bytes[0] == 2
+              && bytes[1] == 'h'
+              // string length, h*
+              && bytes[3] == 2
+              && bytes[4] == 'h') {
+
+            // h2,h3 or h3,h2
+            if (bytes[2] == '2' && bytes[5] == '3') {
+              values.add(H2);
+              values.add(H3);
+              return;
+            } else if (bytes[2] == '3' && bytes[5] == '2') {
+              values.add(H3);
+              values.add(H2);
+              return;
+            }
+          }
+          break;
+      }
+
+      // Parse all non-well-known alpn values generically
       DNSInput in = new DNSInput(bytes);
       while (in.remaining() > 0) {
         byte[] b = in.readCountedString();
@@ -371,9 +469,63 @@ public abstract class SVCBBase extends Record {
       if (string == null || string.isEmpty()) {
         throw new TextParseException("Non-empty list must be specified for alpn");
       }
-      for (String str : splitStringWithEscapedCommas(string)) {
-        values.add(byteArrayFromString(str));
+
+      // Appendix A.1:
+      // Decode the value as a char-string first, then apply comma-separated list decoding
+      DNSOutput out = new DNSOutput();
+      int pos = 0;
+      int digits = 0;
+      int val = 0;
+      boolean charStringEscape = false;
+      boolean commaEscape = false;
+      while (pos < string.length()) {
+        char c = string.charAt(pos++);
+        byte b;
+        if (c == '\\' && !charStringEscape) {
+          charStringEscape = true;
+          digits = 0;
+          val = 0;
+          continue;
+        } else if (charStringEscape && c >= '0' && c <= '9' && digits < 3) {
+          val *= 10;
+          val += (c - '0');
+          if (++digits == 3) {
+            b = (byte) val;
+            charStringEscape = false;
+          } else {
+            continue;
+          }
+        } else {
+          b = (byte) c;
+          charStringEscape = false;
+        }
+
+        if (b == '\\' && !commaEscape) {
+          commaEscape = true;
+        } else if (commaEscape) {
+          if ((b == ',' || b == '\\')) {
+            out.writeU8(b);
+            commaEscape = false;
+          } else {
+            throw new TextParseException("bad escape");
+          }
+        } else if (b == ',') {
+          if (out.current() == 0) {
+            throw new TextParseException("empty identifier");
+          }
+
+          values.add(out.toByteArray());
+          out = new DNSOutput();
+        } else {
+          out.writeU8(b & 0xFF);
+        }
       }
+
+      if (out.current() == 0) {
+        throw new TextParseException("empty identifier");
+      }
+
+      values.add(out.toByteArray());
     }
 
     @Override
@@ -387,15 +539,46 @@ public abstract class SVCBBase extends Record {
 
     @Override
     public String toString() {
+      boolean needsQuote = false;
       StringBuilder sb = new StringBuilder();
-      for (byte[] b : values) {
+      for (byte[] str : values) {
         if (sb.length() > 0) {
-          sb.append(",");
+          sb.append(',');
         }
-        String str = byteArrayToString(b, false);
-        str = str.replace(",", "\\,");
-        sb.append(str);
+
+        for (byte c : str) {
+          if (c == ' ' || c == '"' || c == ';' || c == '(' || c == ')') {
+            // Appendix-A: quoted
+            if (!needsQuote) {
+              sb.insert(0, '"');
+              needsQuote = true;
+            }
+            sb.append('\\');
+            sb.append((char) c);
+          } else if (c >= 0x21 && c <= 0x7e) {
+            // VCHAR
+            if (c == ',') {
+              // Appendix-A.1: comma needs escaping
+              sb.append("\\092,");
+            } else if (c == '\\') {
+              // Appendix-A.1: backslash needs escaping
+              sb.append("\\\\\\092");
+            } else {
+              // Appendix-A: non-special
+              sb.append((char) c);
+            }
+          } else {
+            // Appendix-A: escaped dec-octet
+            sb.append('\\');
+            sb.append(byteFormat.format(c & 0xFF));
+          }
+        }
       }
+
+      if (needsQuote) {
+        sb.append('"');
+      }
+
       return sb.toString();
     }
   }
@@ -471,11 +654,17 @@ public abstract class SVCBBase extends Record {
         throw new TextParseException("Integer value must be specified for port");
       }
 
-      int parsedPort = Integer.parseInt(string);
+      int parsedPort;
+      try {
+        parsedPort = Integer.parseInt(string);
+      } catch (NumberFormatException nfe) {
+        throw new TextParseException("Invalid port number: " + string, nfe);
+      }
+
       if (parsedPort >= 0 && parsedPort <= 65535) {
         port = parsedPort;
       } else {
-        throw new IllegalArgumentException("Invalid port number: " + string);
+        throw new TextParseException("Invalid port number: " + string);
       }
     }
 
@@ -574,13 +763,13 @@ public abstract class SVCBBase extends Record {
   public static class ParameterEch extends ParameterBase {
     private byte[] data;
 
-    public ParameterEch() {
-      super();
-    }
+    public ParameterEch() {}
 
     public ParameterEch(byte[] data) {
-      super();
       this.data = data;
+      if (data == null || data.length == 0) {
+        throw new IllegalArgumentException("data is required and must be non-empty");
+      }
     }
 
     public byte[] getData() {
@@ -593,8 +782,11 @@ public abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromWire(byte[] bytes) {
+    public void fromWire(byte[] bytes) throws WireParseException {
       data = bytes;
+      if (data == null || data.length == 0) {
+        throw new WireParseException("data is required and must be non-empty");
+      }
     }
 
     @Override
@@ -625,13 +817,13 @@ public abstract class SVCBBase extends Record {
   public static class ParameterEchConfig extends ParameterBase {
     private byte[] data;
 
-    public ParameterEchConfig() {
-      super();
-    }
+    public ParameterEchConfig() {}
 
     public ParameterEchConfig(byte[] data) {
-      super();
       this.data = data;
+      if (data == null || data.length == 0) {
+        throw new IllegalArgumentException("data is required and must be non-empty");
+      }
     }
 
     public byte[] getData() {
@@ -644,8 +836,11 @@ public abstract class SVCBBase extends Record {
     }
 
     @Override
-    public void fromWire(byte[] bytes) {
+    public void fromWire(byte[] bytes) throws WireParseException {
       data = bytes;
+      if (data == null || data.length == 0) {
+        throw new WireParseException("data is required and must be non-empty");
+      }
     }
 
     @Override
@@ -798,7 +993,7 @@ public abstract class SVCBBase extends Record {
 
     @Override
     public String toString() {
-      return byteArrayToString(value, false);
+      return byteArrayToStringAutoQuote(value);
     }
   }
 

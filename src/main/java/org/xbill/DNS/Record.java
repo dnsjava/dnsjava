@@ -419,6 +419,34 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   }
 
   /** Converts a byte array into a String. */
+  static String byteArrayToStringAutoQuote(byte[] array) {
+    boolean needsQuote = false;
+    StringBuilder sb = new StringBuilder();
+    for (byte value : array) {
+      int b = value & 0xFF;
+      if (b == 0x20) {
+        sb.append((char) b);
+        needsQuote = true;
+      } else if (b < 0x21 || b >= 0x7f) {
+        sb.append('\\');
+        sb.append(byteFormat.format(b));
+      } else if (b == '"' || b == '\\') {
+        sb.append('\\');
+        sb.append((char) b);
+      } else {
+        sb.append((char) b);
+      }
+    }
+
+    if (needsQuote) {
+      sb.insert(0, '"');
+      sb.append('"');
+    }
+
+    return sb.toString();
+  }
+
+  /** Converts a byte array into a String. */
   protected static String byteArrayToString(byte[] array, boolean quote) {
     StringBuilder sb = new StringBuilder();
     if (quote) {
