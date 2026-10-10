@@ -125,5 +125,6 @@ class ReverseMapTest {
     assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("in-addr.arpa."));
     assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("caffee.in-addr.arpa."));
     assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("1.2.3.4.5.in-addr.arpa."));
+    assertThrows(UnknownHostException.class, () -> ReverseMap.fromName("256.3.4.5.in-addr.arpa."));
   }
 }

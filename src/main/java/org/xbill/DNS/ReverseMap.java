@@ -162,7 +162,11 @@ public final class ReverseMap {
       ipBytes = new byte[4];
       try {
         for (int i = 0; i < ip.labels(); i++) {
-          ipBytes[ip.labels() - i - 1] = (byte) Integer.parseInt(ip.getLabelString(i));
+          int labelValue = Integer.parseInt(ip.getLabelString(i));
+          if (labelValue < 0 || labelValue > 255) {
+            throw new UnknownHostException("Invalid IPv4 arpa address: " + name);
+          }
+          ipBytes[ip.labels() - i - 1] = (byte) labelValue;
         }
       } catch (NumberFormatException e) {
         throw new UnknownHostException("Invalid IPv4 arpa address: " + name);
