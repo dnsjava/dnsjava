@@ -40,7 +40,8 @@ public class Header implements Cloneable {
 
   /** Create a new empty header with a random message id */
   public Header() {
-    this(random.nextInt(0xffff));
+    // The bound of nextInt is exclusive, thus +1 to include 0xffff as possible IDs
+    this(random.nextInt(0xffff + 1));
   }
 
   /** Parses a Header from a stream containing DNS wire format. */
