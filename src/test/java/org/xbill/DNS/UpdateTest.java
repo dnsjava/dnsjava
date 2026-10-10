@@ -27,6 +27,17 @@ class UpdateTest {
   }
 
   @Test
+  void constructorForwardsClassToSoa() {
+    Update u = new Update(exampleCom, DClass.CHAOS);
+    assertThat(u.getSection(Section.QUESTION)).hasSize(1);
+    assertThat(u.getQuestion().getDClass()).isEqualTo(DClass.CHAOS);
+    assertThat(u.getSection(Section.QUESTION))
+        .first()
+        .extracting(Record::getDClass)
+        .isEqualTo(DClass.CHAOS);
+  }
+
+  @Test
   void toWireThrowsOnDisallowedTruncation() throws IOException {
     Update u = getLargeUpdateMessage();
     assertThatThrownBy(() -> u.toWire(Message.MAXLENGTH, false))

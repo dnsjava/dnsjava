@@ -28,7 +28,7 @@ public class Update extends Message {
     }
     DClass.check(dclass);
     getHeader().setOpcode(Opcode.UPDATE);
-    Record soa = Record.newRecord(zone, Type.SOA, DClass.IN);
+    Record soa = Record.newRecord(zone, Type.SOA, dclass);
     addRecord(soa, Section.QUESTION);
     this.origin = zone;
     this.dclass = dclass;
