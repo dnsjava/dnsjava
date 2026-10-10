@@ -187,6 +187,7 @@ public class Message implements Cloneable {
    * @see Section
    */
   public void addRecord(Record r, int section) {
+    Section.check(section);
     if (sections[section] == null) {
       sections[section] = new LinkedList<>();
     }
