@@ -43,10 +43,13 @@ public final class TTL {
 
     long value = 0;
     long ttl = 0;
+    boolean hasUnit = false;
+    boolean hadAnyUnit = false;
     for (int i = 0; i < s.length(); i++) {
       c = s.charAt(i);
       long oldValue = value;
       if (c >= '0' && c <= '9') {
+        hasUnit = false;
         value = (value * 10) + Character.getNumericValue(c);
         if (value < oldValue) {
           throw new NumberFormatException();
@@ -62,6 +65,8 @@ public final class TTL {
           case 'M':
             value *= 60;
           case 'S':
+            hasUnit = true;
+            hadAnyUnit = true;
             break;
           default:
             throw new NumberFormatException();
@@ -73,6 +78,11 @@ public final class TTL {
         }
       }
     }
+
+    if (hadAnyUnit && !hasUnit) {
+      throw new NumberFormatException("Missing unit");
+    }
+
     if (ttl == 0) {
       ttl = value;
     }

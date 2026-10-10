@@ -35,10 +35,13 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class TTLTest {
   private final long S = 1;
@@ -72,19 +75,23 @@ class TTLTest {
     assertEquals(98 * S + 11 * M + 1234 * H + 2 * D + W, TTL.parseTTL("98S11M1234H2D01W"));
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "",
+        "S",
+        "1h30",
+        "10S4B",
+        "1S4294967295S",
+        "4294967296",
+      })
+  void parseTTL_invalid(String ttl) {
+    assertThatThrownBy(() -> TTL.parseTTL(ttl)).isInstanceOf(NumberFormatException.class);
+  }
+
   @Test
-  void parseTTL_invalid() {
-    assertThrows(NumberFormatException.class, () -> TTL.parseTTL(null));
-
-    assertThrows(NumberFormatException.class, () -> TTL.parseTTL(""));
-
-    assertThrows(NumberFormatException.class, () -> TTL.parseTTL("S"));
-
-    assertThrows(NumberFormatException.class, () -> TTL.parseTTL("10S4B"));
-
-    assertThrows(NumberFormatException.class, () -> TTL.parseTTL("1S" + 0xFFFFFFFFL + "S"));
-
-    assertThrows(NumberFormatException.class, () -> TTL.parseTTL("" + 0x100000000L));
+  void parseNullTtlIsInvalid() {
+    assertThatThrownBy(() -> TTL.parseTTL(null)).isInstanceOf(NumberFormatException.class);
   }
 
   @Test
