@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -19,7 +20,8 @@ import org.xbill.DNS.DNSSEC.DNSSECException;
 import org.xbill.DNS.IPSECKEYRecord.Algorithm;
 
 class HIPRecordTest {
-  private final Name exampleCom = Name.fromConstantString("www.example.com.");
+  private final Name exampleCom = Name.fromConstantString("example.com.");
+  private final Name wwwExampleCom = Name.fromConstantString("www.example.com.");
   private final Name rvs = Name.fromConstantString("rvs.example.com.");
   private final Name rvs1 = Name.fromConstantString("rvs1.example.com.");
   private final Name rvs2 = Name.fromConstantString("rvs2.example.com.");
@@ -36,9 +38,9 @@ class HIPRecordTest {
     String example =
         "www.example.com.      IN  HIP ( 2 200100107B1A74DF365639CC39F1D578\n"
             + "                          AwEAAbdxyhNuSutc5EMzxTs9LBPCIkOFH8cIvM4p9+LrV4e19WzK00+CI6zBCQTdtWsuxKbWIy87UOoJTwkUs7lBu+Upr1gsNrut79ryra+bSRGQb1slImA8YVJyuIDsj7kwzG7jnERNqnWxZ48AWkskmdHaVDP4BcelrTI3rMXdXF5D )";
-    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), Name.root, 900)) {
+    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(exampleCom, hip.getName());
+      assertEquals(wwwExampleCom, hip.getName());
       assertEquals(2, hip.getAlgorithm());
       PublicKey pk = hip.getPublicKey();
       assertInstanceOf(RSAPublicKey.class, pk);
@@ -57,9 +59,9 @@ class HIPRecordTest {
         "www.example.com.      IN  HIP ( 2 200100107B1A74DF365639CC39F1D578\n"
             + "                          AwEAAbdxyhNuSutc5EMzxTs9LBPCIkOFH8cIvM4p9+LrV4e19WzK00+CI6zBCQTdtWsuxKbWIy87UOoJTwkUs7lBu+Upr1gsNrut79ryra+bSRGQb1slImA8YVJyuIDsj7kwzG7jnERNqnWxZ48AWkskmdHaVDP4BcelrTI3rMXdXF5D\n"
             + "                          rvs.example.com. )";
-    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), Name.root, 900)) {
+    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(exampleCom, hip.getName());
+      assertEquals(wwwExampleCom, hip.getName());
       assertEquals(2, hip.getAlgorithm());
       PublicKey pk = hip.getPublicKey();
       assertInstanceOf(RSAPublicKey.class, pk);
@@ -80,9 +82,9 @@ class HIPRecordTest {
             + "                          AwEAAbdxyhNuSutc5EMzxTs9LBPCIkOFH8cIvM4p9+LrV4e19WzK00+CI6zBCQTdtWsuxKbWIy87UOoJTwkUs7lBu+Upr1gsNrut79ryra+bSRGQb1slImA8YVJyuIDsj7kwzG7jnERNqnWxZ48AWkskmdHaVDP4BcelrTI3rMXdXF5D\n"
             + "                          rvs1.example.com.\n"
             + "                          rvs2.example.com. )";
-    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), Name.root, 900)) {
+    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(exampleCom, hip.getName());
+      assertEquals(wwwExampleCom, hip.getName());
       assertEquals(2, hip.getAlgorithm());
       PublicKey pk = hip.getPublicKey();
       assertInstanceOf(RSAPublicKey.class, pk);
@@ -98,11 +100,42 @@ class HIPRecordTest {
   }
 
   @Test
+  void testRelativeRv() throws IOException, DNSSECException {
+    String example =
+        "www.example.com.      IN  HIP ( 2 200100107B1A74DF365639CC39F1D578\n"
+            + "                          AwEAAbdxyhNuSutc5EMzxTs9LBPCIkOFH8cIvM4p9+LrV4e19WzK00+CI6zBCQTdtWsuxKbWIy87UOoJTwkUs7lBu+Upr1gsNrut79ryra+bSRGQb1slImA8YVJyuIDsj7kwzG7jnERNqnWxZ48AWkskmdHaVDP4BcelrTI3rMXdXF5D\n"
+            + "                          rvs1\n"
+            + "                          rvs2 )";
+    try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
+      HIPRecord hip = (HIPRecord) m.nextRecord();
+      assertEquals(wwwExampleCom, hip.getName());
+      assertEquals(2, hip.getAlgorithm());
+      PublicKey pk = hip.getPublicKey();
+      assertInstanceOf(RSAPublicKey.class, pk);
+      assertEquals(2, hip.getRvServers().size());
+      assertThat(hip.getRvServers().get(0)).isEqualTo(rvs1);
+      assertThat(hip.getRvServers().get(1)).isEqualTo(rvs2);
+      assertThat(hip.getRvServers().get(0).isAbsolute()).isTrue();
+      assertThat(hip.getRvServers().get(1).isAbsolute()).isTrue();
+
+      DNSOutput out = new DNSOutput();
+      hip.toWire(out, Section.ANSWER, null);
+      HIPRecord hip2 = (HIPRecord) Record.fromWire(out.toByteArray(), Section.ANSWER);
+      assertEquals(hip, hip2);
+    }
+  }
+
+  @Test
   void testHipToString() {
     Options.unset("multiline");
     HIPRecord hip =
         new HIPRecord(
-            exampleCom, DClass.IN, 900, new byte[] {1, 2, 3}, Algorithm.RSA, new byte[] {1, 2, 3});
+            wwwExampleCom,
+            DClass.IN,
+            900,
+            new byte[] {1, 2, 3},
+            Algorithm.RSA,
+            new byte[] {1, 2, 3});
     assertEquals("2 010203 AQID", hip.rrToString());
   }
 
@@ -111,7 +144,7 @@ class HIPRecordTest {
     Options.unset("multiline");
     HIPRecord hip =
         new HIPRecord(
-            exampleCom,
+            wwwExampleCom,
             DClass.IN,
             900,
             new byte[] {1, 2, 3},
@@ -126,7 +159,12 @@ class HIPRecordTest {
     Options.set("multiline");
     HIPRecord hip =
         new HIPRecord(
-            exampleCom, DClass.IN, 900, new byte[] {1, 2, 3}, Algorithm.RSA, new byte[] {1, 2, 3});
+            wwwExampleCom,
+            DClass.IN,
+            900,
+            new byte[] {1, 2, 3},
+            Algorithm.RSA,
+            new byte[] {1, 2, 3});
     assertEquals("( 2 010203\n\tAQID )", hip.rrToString());
   }
 
@@ -135,7 +173,7 @@ class HIPRecordTest {
     Options.set("multiline");
     HIPRecord hip =
         new HIPRecord(
-            exampleCom,
+            wwwExampleCom,
             DClass.IN,
             900,
             new byte[] {1, 2, 3},

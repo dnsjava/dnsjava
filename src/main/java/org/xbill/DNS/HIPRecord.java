@@ -148,7 +148,7 @@ public class HIPRecord extends Record {
     publicKey = base64.fromString(base64publicKey);
     Token t;
     while ((t = st.get()).isString()) {
-      rvServers.add(new Name(t.value()));
+      rvServers.add(Name.fromString(t.value(), origin));
     }
   }
 
@@ -159,7 +159,9 @@ public class HIPRecord extends Record {
     out.writeU16(publicKey.length);
     out.writeByteArray(hit);
     out.writeByteArray(publicKey);
-    rvServers.forEach(n -> n.toWire(out, null, canonical));
+    for (Name n : rvServers) {
+      n.toWire(out, null, canonical);
+    }
   }
 
   @Override
