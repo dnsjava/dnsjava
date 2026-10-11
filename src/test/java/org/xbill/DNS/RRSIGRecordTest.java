@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class RRSIGRecordTest {
@@ -83,6 +84,65 @@ class RRSIGRecordTest {
     assertThatThrownBy(emptySig::rdataToString)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageStartingWith("Signature is not set");
+  }
+
+  @Test
+  void expireBeforeEpochThrows() {
+    Instant expire = Instant.EPOCH.plusSeconds(-1);
+    assertThatThrownBy(
+            () ->
+                new RRSIGRecord(
+                    Name.root,
+                    DClass.IN,
+                    0,
+                    0,
+                    0,
+                    0,
+                    expire,
+                    Instant.EPOCH,
+                    0,
+                    Name.root,
+                    new byte[1]))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("must be after Unix Epoch");
+  }
+
+  @Test
+  void timeSignedBeforeEpochThrows() {
+    Instant timeSigned = Instant.EPOCH.plusSeconds(-1);
+    assertThatThrownBy(
+            () ->
+                new RRSIGRecord(
+                    Name.root,
+                    DClass.IN,
+                    0,
+                    0,
+                    0,
+                    0,
+                    Instant.EPOCH,
+                    timeSigned,
+                    0,
+                    Name.root,
+                    new byte[1]))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("must be after Unix Epoch");
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "19690101000000,19700101000000",
+        "19700101000000,19690101000000",
+        "19690101000000,19690101000000",
+      })
+  void invalidDateInPresentationThrows(String expire, String timeSigned) {
+    try (Tokenizer t =
+        new Tokenizer("NSEC3 10 3 180 " + expire + " " + timeSigned + " 31055 example.com. AQID")) {
+      RRSIGRecord r = new RRSIGRecord();
+      assertThatThrownBy(() -> r.rdataFromString(t, null))
+          .isInstanceOf(TextParseException.class)
+          .hasMessageContaining("must be after Unix Epoch");
+    }
   }
 
   @ParameterizedTest

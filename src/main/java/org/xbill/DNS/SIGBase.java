@@ -48,8 +48,17 @@ abstract class SIGBase extends Record {
       this.labels--;
     }
     this.origttl = origttl;
+
     this.expire = expire;
+    if (expire.isBefore(Instant.EPOCH)) {
+      throw new IllegalArgumentException("expire must be after Unix Epoch (1970-01-01 00:00Z)");
+    }
+
     this.timeSigned = timeSigned;
+    if (timeSigned.isBefore(Instant.EPOCH)) {
+      throw new IllegalArgumentException("timeSigned must be after Unix Epoch (1970-01-01 00:00Z)");
+    }
+
     this.footprint = checkU16("footprint", footprint);
     this.signer = checkName("signer", signer);
     this.signature = signature;
@@ -85,8 +94,17 @@ abstract class SIGBase extends Record {
     }
     labels = st.getUInt8();
     origttl = st.getTTL();
+
     expire = FormattedTime.parse(st.getString());
+    if (expire.isBefore(Instant.EPOCH)) {
+      throw st.exception("expire must be after Unix Epoch (1970-01-01 00:00Z)");
+    }
+
     timeSigned = FormattedTime.parse(st.getString());
+    if (timeSigned.isBefore(Instant.EPOCH)) {
+      throw st.exception("timeSigned must be after Unix Epoch (1970-01-01 00:00Z)");
+    }
+
     footprint = st.getUInt16();
     signer = st.getName(origin);
     signature = st.getBase64();
