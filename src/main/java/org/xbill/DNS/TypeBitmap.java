@@ -30,14 +30,14 @@ final class TypeBitmap implements Serializable {
 
   public TypeBitmap(DNSInput in) throws WireParseException {
     // Encoding: ( Window Block # | Bitmap Length | Bitmap )+
-    int lastWindowBlockNumber = -1;
+    int windowBlockNumber = -1;
     while (in.remaining() > 0) {
       // Validate block size, which is at least 2 bytes: block number + map length
       if (in.remaining() < 2) {
         throw new WireParseException("invalid bitmap descriptor");
       }
 
-      int windowBlockNumber = getWindowBlockNumber(in, lastWindowBlockNumber);
+      windowBlockNumber = getWindowBlockNumber(in, windowBlockNumber);
       int mapLength = getMapLength(in);
       for (int i = 0; i < mapLength; i++) {
         // Test each bit (of the non-zero bytes) in the bitmap for 1. If set, this is an enabled

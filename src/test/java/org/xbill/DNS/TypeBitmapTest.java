@@ -34,6 +34,7 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -109,5 +110,42 @@ class TypeBitmapTest {
     DNSInput in = new DNSInput(wire);
     TypeBitmap typeBitmapIn = new TypeBitmap(in);
     assertArrayEquals(typeArray, typeBitmapIn.toArray());
+  }
+
+  @Test
+  void validateWindowBlockNumberAscendingOrder() {
+    byte[] wire =
+        new byte[] {
+          // block
+          1,
+          // size
+          7,
+          // 0-7
+          0b0100_0000,
+          // 8-15,
+          0,
+          // 16-23,
+          0,
+          // 24-31,
+          0,
+          // 32-39
+          0,
+          // 40-47
+          0,
+          // 48-55
+          0b0010_0000,
+          // block
+          0,
+          // size
+          1,
+          // 0-7
+          0b0100_0000,
+        };
+
+    // Test parsing fails
+    DNSInput in = new DNSInput(wire);
+    assertThatThrownBy(() -> new TypeBitmap(in))
+        .isInstanceOf(WireParseException.class)
+        .hasMessage("invalid ordering");
   }
 }
