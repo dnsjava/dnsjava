@@ -43,7 +43,7 @@ public class DHCIDRecord extends Record {
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     data = st.getBase64();
     if (data == null || data.length == 0) {
-      throw new TextParseException("data is required and must be non-empty");
+      throw st.exception("data is required and must be non-empty");
     }
   }
 

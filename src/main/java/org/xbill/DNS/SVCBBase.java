@@ -621,13 +621,10 @@ public abstract class SVCBBase extends Record {
   public static class ParameterPort extends ParameterBase {
     private int port;
 
-    public ParameterPort() {
-      super();
-    }
+    public ParameterPort() {}
 
     public ParameterPort(int port) {
-      super();
-      this.port = port;
+      this.port = checkU16("port", port);
     }
 
     public int getPort() {
@@ -1076,7 +1073,7 @@ public abstract class SVCBBase extends Record {
         keyStr = t.value().substring(0, indexOfEquals);
         Tokenizer.Token valueToken = st.get();
         if (!valueToken.isString()) {
-          throw new TextParseException("Expected value for parameter key '" + keyStr + "'");
+          throw st.exception("Expected value for parameter key '" + keyStr + "'");
         }
         valueStr = valueToken.value();
       } else if (indexOfEquals > 0) {
@@ -1084,16 +1081,16 @@ public abstract class SVCBBase extends Record {
         keyStr = t.value().substring(0, indexOfEquals);
         valueStr = t.value().substring(indexOfEquals + 1);
       } else {
-        throw new TextParseException("Expected valid parameter key=value for '" + t.value() + "'");
+        throw st.exception("Expected valid parameter key=value for '" + t.value() + "'");
       }
 
       ParameterBase param;
       int key = parameters.getValue(keyStr);
       if (key == -1) {
-        throw new TextParseException("Expected a valid parameter key for '" + keyStr + "'");
+        throw st.exception("Expected a valid parameter key for '" + keyStr + "'");
       }
       if (svcParams.containsKey(key)) {
-        throw new TextParseException("Duplicate parameter key for '" + keyStr + "'");
+        throw st.exception("Duplicate parameter key for '" + keyStr + "'");
       }
       Supplier<ParameterBase> factory = parameters.getFactory(key);
       if (factory != null) {
@@ -1107,10 +1104,10 @@ public abstract class SVCBBase extends Record {
     st.unget();
 
     if (svcPriority == 0 && !svcParams.isEmpty()) {
-      throw new TextParseException("No parameter values allowed for AliasMode");
+      throw st.exception("No parameter values allowed for AliasMode");
     }
     if (!checkMandatoryParams()) {
-      throw new TextParseException("Not all mandatory SvcParams are specified");
+      throw st.exception("Not all mandatory SvcParams are specified");
     }
   }
 

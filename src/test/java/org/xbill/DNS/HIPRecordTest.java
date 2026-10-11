@@ -230,7 +230,7 @@ class HIPRecordTest {
       assertThatThrownBy(() -> r.rdataFromString(t, null))
           .isInstanceOf(TextParseException.class)
           .hasMessageMatching(
-              "(public key is required and must be non-empty)|(.*expected a string)");
+              "(.*public key is required and must be non-empty)|(.*expected a string)");
     }
   }
 

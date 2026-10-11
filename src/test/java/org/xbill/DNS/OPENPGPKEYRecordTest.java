@@ -33,7 +33,7 @@ class OPENPGPKEYRecordTest {
       OPENPGPKEYRecord r = new OPENPGPKEYRecord();
       assertThatThrownBy(() -> r.rdataFromString(t, null))
           .isInstanceOf(TextParseException.class)
-          .hasMessage("cert is required and must be non-empty");
+          .hasMessageEndingWith("cert is required and must be non-empty");
     }
   }
 

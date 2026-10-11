@@ -156,7 +156,7 @@ class RRSIGRecordTest {
       RRSIGRecord r = new RRSIGRecord();
       assertThatThrownBy(() -> r.rdataFromString(t, null))
           .isInstanceOf(TextParseException.class)
-          .hasMessage("signature is required and must be non-empty");
+          .hasMessageEndingWith("signature is required and must be non-empty");
     }
   }
 

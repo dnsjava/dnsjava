@@ -137,12 +137,12 @@ public class HIPRecord extends Record {
     pkAlgorithm = st.getUInt8();
     hit = st.getHexString();
     if (hit == null || hit.length == 0) {
-      throw new TextParseException("hit is required and must be non-empty");
+      throw st.exception("hit is required and must be non-empty");
     }
 
     String base64publicKey = st.getString();
     if (base64publicKey == null || base64publicKey.isEmpty()) {
-      throw new TextParseException("public key is required and must be non-empty");
+      throw st.exception("public key is required and must be non-empty");
     }
 
     publicKey = base64.fromString(base64publicKey);

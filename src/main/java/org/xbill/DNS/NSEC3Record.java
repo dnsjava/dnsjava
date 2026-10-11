@@ -185,7 +185,7 @@ public class NSEC3Record extends Record {
 
     next = st.getBase32String(b32);
     if (next.length == 0) {
-      throw new TextParseException("Invalid next hash");
+      throw st.exception("Invalid next hash");
     }
 
     types = new TypeBitmap(st);

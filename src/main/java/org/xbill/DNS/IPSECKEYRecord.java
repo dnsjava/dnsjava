@@ -158,7 +158,7 @@ public class IPSECKEYRecord extends Record {
       case Gateway.None:
         String s = st.getString();
         if (!s.equals(".")) {
-          throw new TextParseException("invalid gateway format");
+          throw st.exception("invalid gateway format");
         }
         gateway = null;
         break;

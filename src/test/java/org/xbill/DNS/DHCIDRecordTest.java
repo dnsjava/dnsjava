@@ -4,6 +4,8 @@ package org.xbill.DNS;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class DHCIDRecordTest {
   @Test
@@ -16,13 +18,14 @@ public class DHCIDRecordTest {
         .hasMessage("data is required and must be non-empty");
   }
 
-  @Test
-  void emptyCertInPresentationThrows() {
-    try (Tokenizer t = new Tokenizer("")) {
+  @ParameterizedTest
+  @ValueSource(strings = {"", " ", "\"\""})
+  void emptyCertInPresentationThrows(String input) {
+    try (Tokenizer t = new Tokenizer(input)) {
       DHCIDRecord r = new DHCIDRecord();
       assertThatThrownBy(() -> r.rdataFromString(t, null))
           .isInstanceOf(TextParseException.class)
-          .hasMessage("data is required and must be non-empty");
+          .hasMessageEndingWith("data is required and must be non-empty");
     }
   }
 

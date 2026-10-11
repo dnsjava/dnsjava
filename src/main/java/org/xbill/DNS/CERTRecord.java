@@ -155,7 +155,7 @@ public class CERTRecord extends Record {
     }
     cert = st.getBase64();
     if (cert == null || cert.length == 0) {
-      throw new TextParseException("cert is required and must be non-empty");
+      throw st.exception("cert is required and must be non-empty");
     }
   }
 

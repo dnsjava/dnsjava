@@ -109,7 +109,7 @@ abstract class SIGBase extends Record {
     signer = st.getName(origin);
     signature = st.getBase64();
     if (signature == null || signature.length == 0) {
-      throw new TextParseException("signature is required and must be non-empty");
+      throw st.exception("signature is required and must be non-empty");
     }
   }
 

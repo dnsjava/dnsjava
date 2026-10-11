@@ -43,7 +43,7 @@ public class OPENPGPKEYRecord extends Record {
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     cert = st.getBase64();
     if (cert == null || cert.length == 0) {
-      throw new TextParseException("cert is required and must be non-empty");
+      throw st.exception("cert is required and must be non-empty");
     }
   }
 
