@@ -990,6 +990,10 @@ public abstract class SVCBBase extends Record {
 
     @Override
     public String toString() {
+      if (value == null || value.length == 0) {
+        return "";
+      }
+
       return byteArrayToStringAutoQuote(value);
     }
   }

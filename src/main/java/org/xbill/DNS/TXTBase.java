@@ -65,7 +65,7 @@ abstract class TXTBase extends Record {
       try {
         strings.add(byteArrayFromString(t.value()));
       } catch (TextParseException e) {
-        throw st.exception(e.getMessage());
+        throw st.exception("invalid string", e);
       }
     }
     st.unget();
@@ -82,7 +82,7 @@ abstract class TXTBase extends Record {
     Iterator<byte[]> it = strings.iterator();
     while (it.hasNext()) {
       byte[] array = it.next();
-      sb.append(byteArrayToString(array, true));
+      sb.append(byteArrayToStringAutoQuote(array));
       if (it.hasNext()) {
         sb.append(" ");
       }

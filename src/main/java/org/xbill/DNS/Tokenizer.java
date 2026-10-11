@@ -172,7 +172,11 @@ public class Tokenizer implements AutoCloseable {
   /**
    * Creates a Tokenizer from a string.
    *
+   * <p><b>Important</b>: {@code s} must be in presentation format, i.e. it <b>MUST NOT</b> contain
+   * characters outside the {@code VCHAR} set (ASCII between ' ' / 0x20 and '~' / 0x7E, inclusive).
+   *
    * @param s The String to tokenize.
+   * @see <a href="https://www.rfc-editor.org/info/rfc5234/#appendix-B.1">RFC 5234, Appendix B.1</a>
    */
   public Tokenizer(String s) {
     this(new ByteArrayInputStream(s.getBytes()));

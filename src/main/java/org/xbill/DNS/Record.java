@@ -445,6 +445,10 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   /** Converts a byte array into a String. */
   static String byteArrayToStringAutoQuote(byte[] array) {
     boolean needsQuote = false;
+    if (array.length == 0) {
+      return "\"\"";
+    }
+
     StringBuilder sb = new StringBuilder();
     for (byte value : array) {
       int b = value & 0xFF;
@@ -548,6 +552,9 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   /**
    * Builds a new Record from its textual representation
    *
+   * <p><b>Important</b>: {@code s} must be in presentation format, i.e. it <b>MUST NOT</b> contain
+   * characters outside the {@code VCHAR} set (ASCII between ' ' / 0x20 and '~' / 0x7E, inclusive).
+   *
    * @param name The owner name of the record.
    * @param type The record's type.
    * @param dclass The record's class.
@@ -556,6 +563,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
    * @param origin The default origin to be appended to relative domain names.
    * @return The new record
    * @throws IOException The text format was invalid.
+   * @see <a href="https://www.rfc-editor.org/info/rfc5234/#appendix-B.1">RFC 5234, Appendix B.1</a>
    */
   public static Record fromString(Name name, int type, int dclass, long ttl, String s, Name origin)
       throws IOException {

@@ -18,6 +18,9 @@ public class SPFRecord extends TXTBase {
   /**
    * Creates a SPF Record from the given data
    *
+   * <p><b>Important</b>: {@code strings} is interpreted as a Java string, in standard platform
+   * encoding. Characters outside the ASCII-range will be encoded.
+   *
    * @param strings The text strings
    * @throws IllegalArgumentException One of the strings has invalid escapes
    */
@@ -26,7 +29,10 @@ public class SPFRecord extends TXTBase {
   }
 
   /**
-   * Creates a SPF Record from the given data
+   * Creates an SPF Record from the given data.
+   *
+   * <p><b>Important</b>: {@code string} is interpreted as a Java string, in standard platform
+   * encoding. Characters outside the ASCII-range will be encoded.
    *
    * @param string One text string
    * @throws IllegalArgumentException The string has invalid escapes
