@@ -35,12 +35,15 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class DNSOutputTest {
   private DNSOutput m_do;
@@ -94,9 +97,13 @@ class DNSOutputTest {
     assertEquals((byte) 0xFF, curr[0]);
   }
 
-  @Test
-  void writeU8_toobig() {
-    assertThrows(IllegalArgumentException.class, () -> m_do.writeU8(0x1FF));
+  @ParameterizedTest
+  @ValueSource(
+      ints = {
+        -1, 256, 0x1FF,
+      })
+  void writeU8_toobig(int val) {
+    assertThatThrownBy(() -> m_do.writeU8(val)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -118,9 +125,15 @@ class DNSOutputTest {
     assertEquals((byte) 0XFF, curr[1]);
   }
 
-  @Test
-  void writeU16_toobig() {
-    assertThrows(IllegalArgumentException.class, () -> m_do.writeU16(0x1FFFF));
+  @ParameterizedTest
+  @ValueSource(
+      ints = {
+        -1,
+        0xFFFF + 1,
+        0x1FFFF,
+      })
+  void writeU16_toobig(int val) {
+    assertThatThrownBy(() -> m_do.writeU16(val)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -146,9 +159,15 @@ class DNSOutputTest {
     assertEquals((byte) 0XFF, curr[3]);
   }
 
-  @Test
-  void writeU32_toobig() {
-    assertThrows(IllegalArgumentException.class, () -> m_do.writeU32(0x1FFFFFFFFL));
+  @ParameterizedTest
+  @ValueSource(
+      longs = {
+        -1L,
+        0xffff_ffffL + 1L,
+        0x1_ffff_ffffL,
+      })
+  void writeU32_toobig(long val) {
+    assertThatThrownBy(() -> m_do.writeU32(val)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

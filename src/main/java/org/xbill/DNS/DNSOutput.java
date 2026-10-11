@@ -38,7 +38,7 @@ public class DNSOutput {
   private void check(long val, int bits) {
     long max = 1;
     max <<= bits;
-    if (val < 0 || val > max) {
+    if (val < 0 || val >= max) {
       throw new IllegalArgumentException(val + " out of range for " + bits + " bit value");
     }
   }
