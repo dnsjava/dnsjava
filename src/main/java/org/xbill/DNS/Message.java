@@ -495,7 +495,7 @@ public class Message implements Cloneable {
       return false;
     }
 
-    int tempMaxLength = maxLength;
+    int tempMaxLength = maxLength - Header.LENGTH;
     if (tsigkey != null) {
       tempMaxLength -= tsigkey.recordLength();
     }
@@ -505,6 +505,15 @@ public class Message implements Cloneable {
     if (opt != null) {
       optBytes = opt.toWire(Section.ADDITIONAL);
       tempMaxLength -= optBytes.length;
+    }
+
+    if (tempMaxLength < 0 || (maxLength - tempMaxLength) < 0) {
+      throw new IllegalArgumentException(
+          "Message needs at least "
+              + (maxLength - tempMaxLength)
+              + " bytes, only allowed to render "
+              + maxLength,
+          new MessageSizeExceededException(maxLength));
     }
 
     int startpos = out.current();

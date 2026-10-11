@@ -36,6 +36,7 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -242,6 +243,15 @@ class MessageTest {
   }
 
   @Test
+  void truncate() {
+    Message m = new Message();
+    m.addRecord(new OPTRecord(768, 0, 0), Section.ADDITIONAL);
+    assertThatThrownBy(() -> m.toWire(12))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageStartingWith("Message needs at least");
+  }
+
+  @Test
   void truncationSkipsCompressedName1() throws IOException {
     Name exampleCom = Name.fromConstantString("example.com.");
     Name testExampleCom = Name.fromConstantString("test.example.com.");
@@ -272,7 +282,7 @@ class MessageTest {
 
     Compression c = new Compression();
     DNSOutput out = new DNSOutput();
-    assertThat(m.toWire(out, c, maxLength + tsig.recordLength())).isFalse();
+    assertThat(m.toWire(out, c, maxLength + tsig.recordLength() + Header.LENGTH)).isFalse();
     Message mParsedFromBytes = new Message(out.toByteArray());
     assertThat(mParsedFromBytes.getHeader().getFlag(Flags.TC)).isTrue();
     assertThat(mParsedFromBytes.getSection(Section.ANSWER)).containsExactly(aExampleCom);
