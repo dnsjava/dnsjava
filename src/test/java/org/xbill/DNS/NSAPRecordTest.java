@@ -1,14 +1,17 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class NSAPRecordTest {
-
+  @SuppressWarnings("deprecation")
   @Test
   void rdataFromString() throws IOException {
     Tokenizer t = new Tokenizer("0x47.0005.80.005a00.0000.0001.e133.ffffff000161.00");
@@ -41,5 +44,18 @@ class NSAPRecordTest {
           0
         },
         nsap.getAddressAsByteArray());
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "", " ", "\"\"", "0", " 0",
+      })
+  void rdataFromStringShortAddress(String value) {
+    try (Tokenizer t = new Tokenizer(value)) {
+      NSAPRecord nsap = new NSAPRecord();
+      assertThatThrownBy(() -> nsap.rdataFromString(t, null))
+          .isInstanceOf(TextParseException.class);
+    }
   }
 }

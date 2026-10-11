@@ -20,9 +20,12 @@ public class NSAPRecord extends Record {
   NSAPRecord() {}
 
   private static byte[] checkAndConvertAddress(String address) {
-    if (!address.substring(0, 2).equalsIgnoreCase("0x")) {
+    if (address == null
+        || address.length() < 2
+        || !address.substring(0, 2).equalsIgnoreCase("0x")) {
       return null;
     }
+
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     boolean partial = false;
     int current = 0;
