@@ -66,6 +66,9 @@ abstract class SIGBase extends Record {
     footprint = in.readU16();
     signer = new Name(in);
     signature = in.readByteArray();
+    if (signature == null || signature.length == 0) {
+      throw new WireParseException("signature is required and must be non-empty");
+    }
   }
 
   @Override
@@ -87,11 +90,19 @@ abstract class SIGBase extends Record {
     footprint = st.getUInt16();
     signer = st.getName(origin);
     signature = st.getBase64();
+    if (signature == null || signature.length == 0) {
+      throw new TextParseException("signature is required and must be non-empty");
+    }
   }
 
   /** Converts the RRSIG/SIG Record to a String */
   @Override
   protected String rrToString() {
+    if (signature == null || signature.length == 0) {
+      throw new IllegalStateException(
+          "Signature is not set. This is only valid to compute the signature, but not as the presentation format");
+    }
+
     StringBuilder sb = new StringBuilder();
     sb.append(Type.string(covered));
     sb.append(" ");
@@ -189,6 +200,11 @@ abstract class SIGBase extends Record {
 
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
+    if (signature == null || signature.length == 0) {
+      throw new IllegalStateException(
+          "Signature is not set. This is only valid to compute the signature, but not as the wire format");
+    }
+
     out.writeU16(covered);
     out.writeU8(alg);
     out.writeU8(labels);

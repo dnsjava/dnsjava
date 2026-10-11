@@ -17,6 +17,8 @@ import org.xbill.DNS.utils.base64;
 /**
  * Host Identity Protocol (HIP) Record as defined in RFC 8005.
  *
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc8005">RFC 8005: Host Identity Protocol
+ *     (HIP) Domain Name System (DNS) Extension</a>
  * @see IPSECKEYRecord.Algorithm for PK algorithm numbers
  */
 public class HIPRecord extends Record {
@@ -30,6 +32,13 @@ public class HIPRecord extends Record {
   public HIPRecord(
       Name name, int dclass, long ttl, byte[] hit, int alg, byte[] key, List<Name> servers) {
     super(name, Type.HIP, dclass, ttl);
+    if (hit == null || hit.length == 0) {
+      throw new IllegalArgumentException("hit is required and must be non-empty");
+    }
+    if (key == null || key.length == 0) {
+      throw new IllegalArgumentException("key is required and must be non-empty");
+    }
+
     this.hit = hit;
     this.pkAlgorithm = alg;
     this.publicKey = key;
@@ -127,7 +136,16 @@ public class HIPRecord extends Record {
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     pkAlgorithm = st.getUInt8();
     hit = st.getHexString();
-    publicKey = base64.fromString(st.getString());
+    if (hit == null || hit.length == 0) {
+      throw new TextParseException("hit is required and must be non-empty");
+    }
+
+    String base64publicKey = st.getString();
+    if (base64publicKey == null || base64publicKey.isEmpty()) {
+      throw new TextParseException("public key is required and must be non-empty");
+    }
+
+    publicKey = base64.fromString(base64publicKey);
     Token t;
     while ((t = st.get()).isString()) {
       rvServers.add(new Name(t.value()));
@@ -150,7 +168,13 @@ public class HIPRecord extends Record {
     pkAlgorithm = in.readU8();
     int pkLength = in.readU16();
     hit = in.readByteArray(hitLength);
+    if (hit == null || hit.length == 0) {
+      throw new WireParseException("hit is required and must be non-empty");
+    }
     publicKey = in.readByteArray(pkLength);
+    if (publicKey == null || publicKey.length == 0) {
+      throw new WireParseException("public key is required and must be non-empty");
+    }
     while (in.remaining() > 0) {
       rvServers.add(new Name(in));
     }

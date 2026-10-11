@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.TimeZone;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class RRSIGRecordTest {
-
   @Test
   void rdataFromString() throws IOException, ParseException {
     Tokenizer t =
@@ -27,5 +30,96 @@ class RRSIGRecordTest {
     formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     assertEquals(formatter.parse("20161207204758").toInstant(), rrsigRecord.getExpire());
     assertEquals(formatter.parse("20161107195347").toInstant(), rrsigRecord.getTimeSigned());
+  }
+
+  @Test
+  void emptySignatureInToWireThrows() {
+    DNSOutput out = new DNSOutput();
+    RRSIGRecord nullSig =
+        new RRSIGRecord(
+            Name.root, DClass.IN, 0, 0, 0, 0, Instant.EPOCH, Instant.EPOCH, 0, Name.root, null);
+    RRSIGRecord emptySig =
+        new RRSIGRecord(
+            Name.root,
+            DClass.IN,
+            0,
+            0,
+            0,
+            0,
+            Instant.EPOCH,
+            Instant.EPOCH,
+            0,
+            Name.root,
+            new byte[0]);
+    assertThatThrownBy(() -> nullSig.rrToWire(out, null, false))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageStartingWith("Signature is not set");
+    assertThatThrownBy(() -> emptySig.rrToWire(out, null, false))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageStartingWith("Signature is not set");
+  }
+
+  @Test
+  void emptySignatureInToPresentationThrows() {
+    RRSIGRecord nullSig =
+        new RRSIGRecord(
+            Name.root, DClass.IN, 0, 0, 0, 0, Instant.EPOCH, Instant.EPOCH, 0, Name.root, null);
+    RRSIGRecord emptySig =
+        new RRSIGRecord(
+            Name.root,
+            DClass.IN,
+            0,
+            0,
+            0,
+            0,
+            Instant.EPOCH,
+            Instant.EPOCH,
+            0,
+            Name.root,
+            new byte[0]);
+    assertThatThrownBy(nullSig::rdataToString)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageStartingWith("Signature is not set");
+    assertThatThrownBy(emptySig::rdataToString)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageStartingWith("Signature is not set");
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "", " ", " \"\"",
+      })
+  void emptySignatureInPresentationThrows(String suffix) {
+    try (Tokenizer t =
+        new Tokenizer("NSEC3 10 3 180 20161207204758 20161107195347 31055 example.com." + suffix)) {
+      RRSIGRecord r = new RRSIGRecord();
+      assertThatThrownBy(() -> r.rdataFromString(t, null))
+          .isInstanceOf(TextParseException.class)
+          .hasMessage("signature is required and must be non-empty");
+    }
+  }
+
+  @Test
+  void emptyCertFromWireThrows() {
+    RRSIGRecord r = new RRSIGRecord();
+    assertThatThrownBy(
+            () ->
+                r.rrFromWire(
+                    new DNSInput(
+                        new byte[] {
+                          0, // covered
+                          0, // alg
+                          0, // labels,
+                          0, 0, 0, 0, // orig ttl
+                          0, 0, 0, 0, // expire
+                          0, 0, 0, 0, // time signed
+                          0, 0, // footprint
+                          1, // signer name length
+                          0, // signer name (root - .)
+                          // missing signature
+                        })))
+        .isInstanceOf(WireParseException.class)
+        .hasMessage("signature is required and must be non-empty");
   }
 }

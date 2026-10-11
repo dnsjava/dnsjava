@@ -26,16 +26,25 @@ public class DHCIDRecord extends Record {
   public DHCIDRecord(Name name, int dclass, long ttl, byte[] data) {
     super(name, Type.DHCID, dclass, ttl);
     this.data = data;
+    if (data == null || data.length == 0) {
+      throw new IllegalArgumentException("data is required and must be non-empty");
+    }
   }
 
   @Override
-  protected void rrFromWire(DNSInput in) {
+  protected void rrFromWire(DNSInput in) throws WireParseException {
     data = in.readByteArray();
+    if (data == null || data.length == 0) {
+      throw new WireParseException("data is required and must be non-empty");
+    }
   }
 
   @Override
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     data = st.getBase64();
+    if (data == null || data.length == 0) {
+      throw new TextParseException("data is required and must be non-empty");
+    }
   }
 
   @Override

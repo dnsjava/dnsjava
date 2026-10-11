@@ -124,6 +124,9 @@ public class CERTRecord extends Record {
     this.keyTag = checkU16("keyTag", keyTag);
     this.alg = checkU8("alg", alg);
     this.cert = cert;
+    if (cert == null || cert.length == 0) {
+      throw new IllegalArgumentException("cert is required and must be non-empty");
+    }
   }
 
   @Override
@@ -132,6 +135,9 @@ public class CERTRecord extends Record {
     keyTag = in.readU16();
     alg = in.readU8();
     cert = in.readByteArray();
+    if (cert == null || cert.length == 0) {
+      throw new WireParseException("cert is required and must be non-empty");
+    }
   }
 
   @Override
@@ -148,6 +154,9 @@ public class CERTRecord extends Record {
       throw st.exception("Invalid algorithm: " + algString);
     }
     cert = st.getBase64();
+    if (cert == null || cert.length == 0) {
+      throw new TextParseException("cert is required and must be non-empty");
+    }
   }
 
   /** Converts rdata to a String */

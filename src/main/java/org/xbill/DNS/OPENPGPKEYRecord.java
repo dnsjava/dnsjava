@@ -24,17 +24,27 @@ public class OPENPGPKEYRecord extends Record {
    */
   public OPENPGPKEYRecord(Name name, int dclass, long ttl, byte[] cert) {
     super(name, Type.OPENPGPKEY, dclass, ttl);
+    if (cert == null || cert.length == 0) {
+      throw new IllegalArgumentException("cert is required and must be non-empty");
+    }
+
     this.cert = cert;
   }
 
   @Override
-  protected void rrFromWire(DNSInput in) {
+  protected void rrFromWire(DNSInput in) throws WireParseException {
     cert = in.readByteArray();
+    if (cert == null || cert.length == 0) {
+      throw new WireParseException("cert is required and must be non-empty");
+    }
   }
 
   @Override
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     cert = st.getBase64();
+    if (cert == null || cert.length == 0) {
+      throw new TextParseException("cert is required and must be non-empty");
+    }
   }
 
   /** Converts rdata to a String */

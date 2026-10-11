@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.xbill.DNS.DNSSEC.DNSSECException;
 import org.xbill.DNS.IPSECKEYRecord.Algorithm;
 
@@ -38,7 +41,7 @@ class HIPRecordTest {
       assertEquals(exampleCom, hip.getName());
       assertEquals(2, hip.getAlgorithm());
       PublicKey pk = hip.getPublicKey();
-      assertTrue(pk instanceof RSAPublicKey);
+      assertInstanceOf(RSAPublicKey.class, pk);
       assertEquals(0, hip.getRvServers().size());
 
       DNSOutput out = new DNSOutput();
@@ -59,7 +62,7 @@ class HIPRecordTest {
       assertEquals(exampleCom, hip.getName());
       assertEquals(2, hip.getAlgorithm());
       PublicKey pk = hip.getPublicKey();
-      assertTrue(pk instanceof RSAPublicKey);
+      assertInstanceOf(RSAPublicKey.class, pk);
       assertEquals(1, hip.getRvServers().size());
       assertEquals(rvs, hip.getRvServers().get(0));
 
@@ -82,7 +85,7 @@ class HIPRecordTest {
       assertEquals(exampleCom, hip.getName());
       assertEquals(2, hip.getAlgorithm());
       PublicKey pk = hip.getPublicKey();
-      assertTrue(pk instanceof RSAPublicKey);
+      assertInstanceOf(RSAPublicKey.class, pk);
       assertEquals(2, hip.getRvServers().size());
       assertEquals(rvs1, hip.getRvServers().get(0));
       assertEquals(rvs2, hip.getRvServers().get(1));
@@ -142,5 +145,109 @@ class HIPRecordTest {
     assertEquals(
         "( 2 010203\n\t" + "AQID\n\t" + rvs1.toString() + "\n\t" + rvs2.toString() + " )",
         hip.rrToString());
+  }
+
+  @Test
+  void emptyHitInCtorThrows() {
+    assertThatThrownBy(() -> new HIPRecord(Name.root, DClass.IN, 0, new byte[0], 0, new byte[1]))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("hit is required and must be non-empty");
+    assertThatThrownBy(() -> new HIPRecord(Name.root, DClass.IN, 0, null, 0, new byte[1]))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("hit is required and must be non-empty");
+  }
+
+  @Test
+  void emptyCertInCtorThrows() {
+    assertThatThrownBy(() -> new HIPRecord(Name.root, DClass.IN, 0, new byte[1], 0, new byte[0]))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("key is required and must be non-empty");
+    assertThatThrownBy(() -> new HIPRecord(Name.root, DClass.IN, 0, new byte[1], 0, (byte[]) null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("key is required and must be non-empty");
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "", " ", " \"\"",
+      })
+  void emptyHitInPresentationThrows(String suffix) {
+    try (Tokenizer t = new Tokenizer("2" + suffix)) {
+      HIPRecord r = new HIPRecord();
+      assertThatThrownBy(() -> r.rdataFromString(t, null))
+          .isInstanceOf(TextParseException.class)
+          .hasMessageEndingWith("expected a hex string");
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "", " ", " \"\"",
+      })
+  void emptyCertInPresentationThrows(String suffix) {
+    try (Tokenizer t = new Tokenizer("2 AB" + suffix)) {
+      HIPRecord r = new HIPRecord();
+      assertThatThrownBy(() -> r.rdataFromString(t, null))
+          .isInstanceOf(TextParseException.class)
+          .hasMessageMatching(
+              "(public key is required and must be non-empty)|(.*expected a string)");
+    }
+  }
+
+  @Test
+  void tooShortInputFromWireThrows() {
+    HIPRecord r = new HIPRecord();
+    assertThatThrownBy(
+            () ->
+                r.rrFromWire(
+                    new DNSInput(
+                        new byte[] {
+                          0, // hit length
+                          0, // alg
+                          // missing hit
+                          // missing length
+                          // missing cert
+                        })))
+        .isInstanceOf(WireParseException.class)
+        .hasMessage("end of input");
+  }
+
+  @Test
+  void emptyHitFromWireThrows() {
+    HIPRecord r = new HIPRecord();
+    assertThatThrownBy(
+            () ->
+                r.rrFromWire(
+                    new DNSInput(
+                        new byte[] {
+                          0, // hit length
+                          0, // alg
+                          0, // cert length
+                          1,
+                          // missing hit
+                          1, // cert
+                        })))
+        .isInstanceOf(WireParseException.class)
+        .hasMessage("hit is required and must be non-empty");
+  }
+
+  @Test
+  void emptyCertFromWireThrows() {
+    HIPRecord r = new HIPRecord();
+    assertThatThrownBy(
+            () ->
+                r.rrFromWire(
+                    new DNSInput(
+                        new byte[] {
+                          1, // hit length
+                          0, // alg
+                          0, // cert length
+                          0, 0xa, // hit
+                          // missing cert
+                        })))
+        .isInstanceOf(WireParseException.class)
+        .hasMessage("public key is required and must be non-empty");
   }
 }

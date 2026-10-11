@@ -85,7 +85,7 @@ class RRsetTest {
             Instant.now(),
             0xA,
             m_name,
-            new byte[0]);
+            new byte[] {1});
     m_s2 =
         new RRSIGRecord(
             m_name,
@@ -98,7 +98,7 @@ class RRsetTest {
             Instant.now(),
             0xA,
             m_name2,
-            new byte[0]);
+            new byte[] {1});
   }
 
   @Test
