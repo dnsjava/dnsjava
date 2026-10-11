@@ -55,6 +55,15 @@ public class LOCRecord extends Record {
       double hPrecision,
       double vPrecision) {
     super(name, Type.LOC, dclass, ttl);
+    if (size < 0 || size > 9e9) {
+      throw new IllegalArgumentException("size must be > 0");
+    }
+    if (hPrecision < 0 || hPrecision > 9e9) {
+      throw new IllegalArgumentException("size must be > 0");
+    }
+    if (vPrecision < 0 || vPrecision > 9e9) {
+      throw new IllegalArgumentException("size must be > 0");
+    }
     this.latitude = (long) (latitude * 3600 * 1000 + (1L << 31));
     this.longitude = (long) (longitude * 3600 * 1000 + (1L << 31));
     this.altitude = (long) ((altitude + 100000) * 100);
@@ -80,7 +89,7 @@ public class LOCRecord extends Record {
     altitude = in.readU32();
   }
 
-  private double parseFixedPoint(String s) {
+  private double parseFixedPoint(String s) throws NumberFormatException {
     if (s.matches("^-?\\d+$")) {
       return Integer.parseInt(s);
     } else if (s.matches("^-?\\d+\\.\\d*$")) {
@@ -100,8 +109,8 @@ public class LOCRecord extends Record {
   private long parsePosition(Tokenizer st, String type) throws IOException {
     boolean isLatitude = type.equals("latitude");
     int deg;
-    int min = 0;
-    double sec = 0;
+    int min;
+    double sec;
     long value;
     String s;
 
@@ -110,26 +119,30 @@ public class LOCRecord extends Record {
       throw st.exception("Invalid LOC " + type + " degrees");
     }
 
-    s = st.getString();
     try {
-      min = Integer.parseInt(s);
+      min = Integer.parseInt(st.getString());
       if (min < 0 || min > 59) {
         throw st.exception("Invalid LOC " + type + " minutes");
       }
-      s = st.getString();
-      sec = parseFixedPoint(s);
+    } catch (NumberFormatException e) {
+      throw st.exception("Invalid LOC " + type + " minutes", e);
+    }
+
+    try {
+      sec = parseFixedPoint(st.getString());
       if (sec < 0 || sec >= 60) {
         throw st.exception("Invalid LOC " + type + " seconds");
       }
-      s = st.getString();
     } catch (NumberFormatException e) {
+      throw st.exception("Invalid LOC " + type + " seconds", e);
     }
 
+    value = Math.round(1000 * (sec + 60L * (min + 60L * deg)));
+
+    s = st.getString();
     if (s.length() != 1) {
       throw st.exception("Invalid LOC " + type);
     }
-
-    value = (long) (1000 * (sec + 60L * (min + 60L * deg)));
 
     char c = Character.toUpperCase(s.charAt(0));
     if ((isLatitude && c == 'S') || (!isLatitude && c == 'W')) {
@@ -185,12 +198,11 @@ public class LOCRecord extends Record {
     value %= divisor;
     if (value != 0) {
       sb.append(".");
-      sb.append(formatter.format(value));
+      sb.append(formatter.format(Math.abs(value)));
     }
   }
 
-  private String positionToString(long value, char pos, char neg) {
-    StringBuilder sb = new StringBuilder();
+  private void positionToString(StringBuilder sb, long value, char pos, char neg) {
     char direction;
 
     long temp = value - (1L << 31);
@@ -201,20 +213,18 @@ public class LOCRecord extends Record {
       direction = pos;
     }
 
-    sb.append(temp / (3600 * 1000)); /* degrees */
+    sb.append(w2.format(temp / (3600 * 1000))); /* degrees */
+    sb.append(' ');
+
     temp = temp % (3600 * 1000);
-    sb.append(" ");
+    sb.append(w2.format(temp / (60 * 1000))); /* minutes */
+    sb.append(' ');
 
-    sb.append(temp / (60 * 1000)); /* minutes */
     temp = temp % (60 * 1000);
-    sb.append(" ");
-
     renderFixedPoint(sb, w3, temp, 1000); /* seconds */
-    sb.append(" ");
+    sb.append(' ');
 
     sb.append(direction);
-
-    return sb.toString();
   }
 
   /** Convert to a String */
@@ -223,12 +233,12 @@ public class LOCRecord extends Record {
     StringBuilder sb = new StringBuilder();
 
     /* Latitude */
-    sb.append(positionToString(latitude, 'N', 'S'));
-    sb.append(" ");
+    positionToString(sb, latitude, 'N', 'S');
+    sb.append(' ');
 
     /* Latitude */
-    sb.append(positionToString(longitude, 'E', 'W'));
-    sb.append(" ");
+    positionToString(sb, longitude, 'E', 'W');
+    sb.append(' ');
 
     /* Altitude */
     renderFixedPoint(sb, w2, altitude - 10000000, 100);

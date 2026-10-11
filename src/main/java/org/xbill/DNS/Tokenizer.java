@@ -729,13 +729,24 @@ public class Tokenizer implements AutoCloseable {
   }
 
   /**
-   * Creates an exception which includes the current state in the error message
+   * Creates an exception which includes the current state in the error message.
    *
    * @param s The error message to include.
    * @return The exception to be thrown
    */
   public TextParseException exception(String s) {
     return new TextParseException(filename + ":" + line + ": " + s);
+  }
+
+  /**
+   * Creates an exception which includes the current state in the error message.
+   *
+   * @since 3.6.6
+   * @param s The error message to include.
+   * @return The exception to be thrown
+   */
+  public TextParseException exception(String s, Throwable inner) {
+    return new TextParseException(filename + ":" + line + ": " + s, inner);
   }
 
   /** Closes any files opened by this tokenizer. */
