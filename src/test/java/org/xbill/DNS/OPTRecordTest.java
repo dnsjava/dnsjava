@@ -142,4 +142,13 @@ class OPTRecordTest {
     assertNotEquals(optRecordOne, optRecordTwo);
     assertNotEquals(optRecordTwo, optRecordOne);
   }
+
+  @Test
+  void equals() {
+    OPTRecord opt = new OPTRecord(4096, 0, 0);
+    Record r = Record.newRecord(Name.root, Type.OPT, 4096);
+    assertThat(opt).isEqualTo(r);
+    assertThat(opt.equals(r)).isTrue();
+    assertThat(r.equals(opt)).isTrue();
+  }
 }

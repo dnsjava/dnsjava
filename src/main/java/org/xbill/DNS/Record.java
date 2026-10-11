@@ -84,7 +84,8 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
 
   private static Record getEmptyRecord(Name name, int type, int dclass, long ttl, boolean hasData) {
     Record rec;
-    if (hasData) {
+    // OPT is valid if it's empty and has special meaning
+    if (hasData || type == Type.OPT) {
       Supplier<Record> factory = Type.getFactory(type);
       if (factory != null) {
         rec = factory.get();

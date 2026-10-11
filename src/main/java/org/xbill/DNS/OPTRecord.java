@@ -80,8 +80,7 @@ public class OPTRecord extends Record {
    * @see ExtendedFlags
    */
   public OPTRecord(int payloadSize, int xrcode, int version, int flags) {
-    super(Name.root, Type.OPT, payloadSize, 0);
-    checkU16("payloadSize", payloadSize);
+    super(Name.root, Type.OPT, checkU16("payloadSize", payloadSize), 0);
     checkU8("xrcode", xrcode);
     checkU8("version", version);
     checkU16("flags", flags);
@@ -225,7 +224,7 @@ public class OPTRecord extends Record {
    */
   @Override
   public boolean equals(final Object arg) {
-    return super.equals(arg) && ttl == ((OPTRecord) arg).ttl;
+    return super.equals(arg) && arg instanceof OPTRecord && ttl == ((OPTRecord) arg).ttl;
   }
 
   @Override
