@@ -615,6 +615,7 @@ public class WKSRecord extends Record {
     for (int i = 0; i < list.size(); i++) {
       services[i] = list.get(i);
     }
+    Arrays.sort(services);
   }
 
   @Override
@@ -648,6 +649,7 @@ public class WKSRecord extends Record {
     for (int i = 0; i < list.size(); i++) {
       services[i] = list.get(i);
     }
+    Arrays.sort(services);
   }
 
   /** Converts rdata to a String */
@@ -679,7 +681,7 @@ public class WKSRecord extends Record {
 
   /** Returns the services provided by the host on the specified address. */
   public int[] getServices() {
-    return services;
+    return services.clone();
   }
 
   @Override
