@@ -99,9 +99,13 @@ public class Message implements Cloneable {
   }
 
   Message(DNSInput in) throws IOException {
+    this(in, false);
+  }
+
+  Message(DNSInput in, boolean truncated) throws IOException {
     this(new Header(in));
     boolean isUpdate = header.getOpcode() == Opcode.UPDATE;
-    boolean truncated = header.getFlag(Flags.TC);
+    truncated |= header.getFlag(Flags.TC);
     try {
       for (int i = 0; i < 4; i++) {
         int count = header.getCount(i);
