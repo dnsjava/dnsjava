@@ -13,6 +13,6 @@ class DigestLengths {
   static final int SHA384 = 48;
   static final int SHA512 = 64;
   static final int GOST3411 = 32;
-  static final int GOST3411_12 = 64;
+  static final int GOST3411_12 = 32;
   static final int SM3 = 32;
 }
