@@ -1425,6 +1425,9 @@ public class DNSSEC {
         case Digest.SHA384:
           digest = MessageDigest.getInstance("sha-384");
           break;
+        case Digest.GOST3411_12:
+          digest = MessageDigest.getInstance("GOST3411-2012-256");
+          break;
         default:
           throw new IllegalArgumentException("unknown DS digest type " + digestid);
       }
