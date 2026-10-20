@@ -244,8 +244,9 @@ jobs:
           distribution: temurin
           cache: maven
           server-id: central
-          server-username: SONATYPE_USER
-          server-password: SONATYPE_PW
+          server-username-env-var: SONATYPE_USER
+          server-password-env-var: SONATYPE_PW
+          mvn-server-repository-origins: "central:https://central.sonatype.com"
 
       - name: Release to Maven Central
         env:
