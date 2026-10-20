@@ -5,6 +5,7 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -27,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Cache {
 
   private interface Element {
-    boolean expired();
+    boolean expired(Clock clock);
 
     int compareCredibility(int cred);
 
@@ -36,39 +37,39 @@ public class Cache {
     boolean isAuthenticated();
   }
 
-  private static int limitExpire(long ttl, long maxttl) {
+  private long limitExpire(long ttl, long maxttl) {
     if (maxttl >= 0 && maxttl < ttl) {
       ttl = maxttl;
     }
-    long expire = (System.currentTimeMillis() / 1000) + ttl;
+    long expire = (clock.millis() / 1000) + ttl;
     if (expire < 0 || expire > Integer.MAX_VALUE) {
       return Integer.MAX_VALUE;
     }
-    return (int) expire;
+    return expire;
   }
 
   static class CacheRRset extends RRset implements Element {
     int credibility;
-    int expire;
+    long expire;
     boolean isAuthenticated;
 
-    public CacheRRset(Record rec, int cred, long maxttl, boolean isAuthenticated) {
+    public CacheRRset(Record rec, int cred, long expire, boolean isAuthenticated) {
       this.credibility = cred;
-      this.expire = limitExpire(rec.getTTL(), maxttl);
+      this.expire = expire;
       this.isAuthenticated = isAuthenticated;
       addRR(rec);
     }
 
-    public CacheRRset(RRset rrset, int cred, long maxttl, boolean isAuthenticated) {
+    public CacheRRset(RRset rrset, int cred, long expire, boolean isAuthenticated) {
       super(rrset);
       this.credibility = cred;
-      this.expire = limitExpire(rrset.getTTL(), maxttl);
+      this.expire = expire;
       this.isAuthenticated = isAuthenticated;
     }
 
     @Override
-    public final boolean expired() {
-      int now = (int) (System.currentTimeMillis() / 1000);
+    public final boolean expired(Clock clock) {
+      int now = (int) (clock.millis() / 1000);
       return now >= expire;
     }
 
@@ -92,19 +93,14 @@ public class Cache {
     int type;
     Name name;
     int credibility;
-    int expire;
+    long expire;
     boolean isAuthenticated;
 
-    public NegativeElement(
-        Name name, int type, SOARecord soa, int cred, long maxttl, boolean isAuthenticated) {
+    public NegativeElement(Name name, int type, int cred, long expire, boolean isAuthenticated) {
       this.name = name;
       this.type = type;
-      long cttl = 0;
-      if (soa != null) {
-        cttl = Math.min(soa.getMinimum(), soa.getTTL());
-      }
       this.credibility = cred;
-      this.expire = limitExpire(cttl, maxttl);
+      this.expire = expire;
       this.isAuthenticated = isAuthenticated;
     }
 
@@ -114,8 +110,8 @@ public class Cache {
     }
 
     @Override
-    public final boolean expired() {
-      int now = (int) (System.currentTimeMillis() / 1000);
+    public final boolean expired(Clock clock) {
+      int now = (int) (clock.millis() / 1000);
       return now >= expire;
     }
 
@@ -172,6 +168,7 @@ public class Cache {
 
   private final CacheMap data;
   private final int dclass;
+  private final Clock clock;
   private int maxncache = -1;
   private int maxcache = -1;
 
@@ -184,6 +181,11 @@ public class Cache {
    * @see DClass
    */
   public Cache(int dclass) {
+    this(Clock.systemUTC(), dclass);
+  }
+
+  Cache(Clock clock, int dclass) {
+    this.clock = clock;
     this.dclass = dclass;
     data = new CacheMap(DEFAULT_MAX_ENTRIES);
   }
@@ -197,9 +199,13 @@ public class Cache {
     this(DClass.IN);
   }
 
+  Cache(Clock clock) {
+    this(clock, DClass.IN);
+  }
+
   /** Creates a Cache which initially contains all records in the specified file. */
   public Cache(String file) throws IOException {
-    this(new Master(file));
+    this(Clock.systemUTC(), new Master(file));
   }
 
   /**
@@ -208,11 +214,15 @@ public class Cache {
    * @since 3.6.2
    */
   public Cache(InputStream input) throws IOException {
-    this(new Master(input));
+    this(Clock.systemUTC(), new Master(input));
   }
 
-  private <T> Cache(Master m) throws IOException {
-    this();
+  Cache(Clock clock, InputStream input) throws IOException {
+    this(clock, new Master(input));
+  }
+
+  private <T> Cache(Clock clock, Master m) throws IOException {
+    this(clock);
     try {
       Record r;
       while ((r = m.nextRecord()) != null) {
@@ -267,7 +277,7 @@ public class Cache {
     if (found == null) {
       return null;
     }
-    if (found.expired()) {
+    if (found.expired(clock)) {
       removeElement(name, type);
       return null;
     }
@@ -380,7 +390,8 @@ public class Cache {
     }
     Element element = findElement(name, type, cred);
     if (element == null) {
-      CacheRRset crrset = new CacheRRset(r, cred, maxcache, isAuthenticated);
+      CacheRRset crrset =
+          new CacheRRset(r, cred, limitExpire(r.getTTL(), maxcache), isAuthenticated);
       addRRset(crrset, cred, isAuthenticated);
     } else if (element.compareCredibility(cred) == 0 && element instanceof CacheRRset) {
       CacheRRset crrset = (CacheRRset) element;
@@ -418,7 +429,8 @@ public class Cache {
         if (rrset instanceof CacheRRset) {
           crrset = (CacheRRset) rrset;
         } else {
-          crrset = new CacheRRset(rrset, cred, maxcache, isAuthenticated);
+          crrset =
+              new CacheRRset(rrset, cred, limitExpire(rrset.getTTL(), maxcache), isAuthenticated);
         }
         addElement(name, crrset);
       }
@@ -454,7 +466,8 @@ public class Cache {
         element = null;
       }
       if (element == null) {
-        addElement(name, new NegativeElement(name, type, soa, cred, maxncache, isAuthenticated));
+        long expire = limitExpire(Math.min(soa.getMinimum(), soa.getTTL()), maxncache);
+        addElement(name, new NegativeElement(name, type, cred, expire, isAuthenticated));
       }
     }
   }
@@ -497,7 +510,7 @@ public class Cache {
         int added = 0;
         for (Element value : elements) {
           element = value;
-          if (element.expired()) {
+          if (element.expired(clock)) {
             removeElement(tname, element.getType());
             continue;
           }

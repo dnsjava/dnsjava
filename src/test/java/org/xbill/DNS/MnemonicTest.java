@@ -270,4 +270,36 @@ class MnemonicTest {
     value = m_mn.getValue("THIRTY");
     assertEquals(30, value);
   }
+
+  @Test
+  void remove() {
+    m_mn.add(10, "Ten");
+    m_mn.addAlias(10, "Diez");
+    assertEquals(10, m_mn.getValue("TEN"));
+    assertEquals(10, m_mn.getValue("DIEZ"));
+    assertEquals("TEN", m_mn.getText(10));
+
+    m_mn.remove(10);
+    assertEquals(-1, m_mn.getValue("TEN"));
+    assertEquals(-1, m_mn.getValue("DIEZ"));
+    assertEquals("10", m_mn.getText(10));
+  }
+
+  @Test
+  void removeAlias() {
+    m_mn.add(10, "Ten");
+    m_mn.addAlias(10, "Diez");
+    assertEquals(10, m_mn.getValue("TEN"));
+    assertEquals(10, m_mn.getValue("DIEZ"));
+
+    m_mn.removeAlias("Diez");
+    assertEquals(10, m_mn.getValue("TEN"));
+    assertEquals(-1, m_mn.getValue("DIEZ"));
+  }
+
+  @Test
+  void addAll_invalid() {
+    Mnemonic mn2 = new Mnemonic("second test Mnemonic", Mnemonic.CASE_LOWER);
+    assertThrows(IllegalArgumentException.class, () -> m_mn.addAll(mn2));
+  }
 }
