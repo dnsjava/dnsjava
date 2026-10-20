@@ -2,6 +2,7 @@
 package org.xbill.DNS;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,8 +22,8 @@ class GeneratorTest {
     assertTrue(Generator.supportedType(Type.AAAA));
     assertTrue(Generator.supportedType(Type.NS));
 
-    assertTrue(!Generator.supportedType(Type.MX));
-    assertTrue(!Generator.supportedType(Type.SOA));
+    assertFalse(Generator.supportedType(Type.MX));
+    assertFalse(Generator.supportedType(Type.SOA));
 
     assertThrows(InvalidTypeException.class, () -> Generator.supportedType(-1));
   }
@@ -183,7 +184,7 @@ class GeneratorTest {
     // Test underflow
     Generator g2 =
         new Generator(5, 5, 1, "host${-10,1,d}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
-    assertThrows(TextParseException.class, () -> g2.nextRecord());
+    assertThrows(TextParseException.class, g2::nextRecord);
   }
 
   @Test

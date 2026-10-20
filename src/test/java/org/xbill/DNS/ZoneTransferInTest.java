@@ -68,13 +68,19 @@ class ZoneTransferInTest {
     }
 
     @Override
-    public void connect(SocketAddress addr) {}
+    public void connect(SocketAddress addr) {
+      // Mock - do nothing
+    }
 
     @Override
-    public void bind(SocketAddress addr) {}
+    public void bind(SocketAddress addr) {
+      // Mock - do nothing
+    }
 
     @Override
-    public void send(byte[] data) {}
+    public void send(byte[] data) {
+      // Mock - do nothing
+    }
 
     @Override
     byte[] recv() throws IOException {
@@ -85,7 +91,9 @@ class ZoneTransferInTest {
     }
 
     @Override
-    public void close() {}
+    public void close() {
+      // Mock - do nothing
+    }
   }
 
   private static class TestZoneTransferIn extends ZoneTransferIn {
