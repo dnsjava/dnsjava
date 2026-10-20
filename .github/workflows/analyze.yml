@@ -93,6 +93,7 @@ jobs:
           repository: 'dnsjava/dnsjava'
           ref: 'master'
           persist-credentials: false
+          clean: 'false'
           path: pr
           sparse-checkout: |
             pom.xml
