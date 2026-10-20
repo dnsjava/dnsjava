@@ -11,19 +11,24 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CacheTest {
 
+  private MockClock clock;
   private Cache cache;
   private Name exampleName;
   private ARecord aRecord;
 
   @BeforeEach
   void setUp() throws TextParseException, UnknownHostException {
-    cache = new Cache(DClass.IN);
+    clock = new MockClock(Clock.fixed(Instant.now(), Clock.systemDefaultZone().getZone()));
+    cache = new Cache(clock, DClass.IN);
     exampleName = Name.fromString("example.com.");
     aRecord = new ARecord(exampleName, DClass.IN, 3600, InetAddress.getByName("127.0.0.1"));
   }
@@ -123,7 +128,7 @@ class CacheTest {
   }
 
   @Test
-  void testTTL() throws InterruptedException {
+  void testTTL() {
     ARecord shortTtlRecord =
         new ARecord(exampleName, DClass.IN, 1, InetAddress.getLoopbackAddress());
     cache.addRecord(shortTtlRecord, Credibility.AUTH_ANSWER);
@@ -131,15 +136,15 @@ class CacheTest {
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(response.isSuccessful());
 
-    // Wait for TTL to expire. Using a slightly longer wait to be safe.
-    Thread.sleep(1100);
+    // Wait for TTL to expire
+    clock.advance(Duration.ofMillis(1100));
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(response.isUnknown());
   }
 
   @Test
-  void testAddMessage() throws TextParseException, UnknownHostException {
+  void testAddMessage() {
     Message m = new Message();
     m.getHeader().setFlag(Flags.AA);
     m.getHeader().setFlag(Flags.AD);
@@ -402,7 +407,7 @@ class CacheTest {
   }
 
   @Test
-  void testAddNegativeExpiration() throws InterruptedException {
+  void testAddNegativeExpiration() {
     cache.setMaxNCache(1);
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
@@ -410,7 +415,7 @@ class CacheTest {
         response.isNXRRSET() || response.isUnknown(),
         "Expected NXRRSET or UNKNOWN but got " + response);
 
-    Thread.sleep(1100);
+    Clock.tick(clock, Duration.ofMillis(1100));
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(response.isUnknown(), "Expected UNKNOWN after expiration but got " + response);
