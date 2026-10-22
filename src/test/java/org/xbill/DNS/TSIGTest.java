@@ -51,6 +51,67 @@ import org.xbill.DNS.utils.base64;
 class TSIGTest {
   private final TSIG defaultKey = new TSIG(TSIG.HMAC_SHA256, "example.", "12345678");
 
+  @ParameterizedTest
+  @ValueSource(ints = {-3600, 3600})
+  void badTimeResponseCanBeVerified(int clockOffsetSeconds) throws IOException {
+    Instant serverTime = Instant.parse("2026-01-01T00:00:00Z");
+    Clock serverClock = Clock.fixed(serverTime, ZoneId.of("UTC"));
+    Clock clientClock = Clock.offset(serverClock, Duration.ofSeconds(clockOffsetSeconds));
+    Name keyName = Name.fromString("example.");
+    SecretKeySpec secret = new SecretKeySpec(new byte[32], "HmacSHA256");
+    TSIG client = new TSIG(TSIG.HMAC_SHA256, keyName, secret, clientClock);
+    TSIG server = new TSIG(TSIG.HMAC_SHA256, keyName, secret, serverClock);
+
+    Message query = Message.newQuery(Record.newRecord(keyName, Type.SOA, DClass.IN));
+    query.setTSIG(client);
+    byte[] queryWire = query.toWire(Message.MAXLENGTH);
+    Message received = new Message(queryWire);
+    assertEquals(Rcode.BADTIME, server.verify(received, queryWire, null));
+
+    Message response = new Message(received.getHeader().getID());
+    response.getHeader().setFlag(Flags.QR);
+    response.getHeader().setRcode(Rcode.NOTAUTH);
+    response.addRecord(received.getQuestion(), Section.QUESTION);
+    response.setTSIG(server, Rcode.BADTIME, received.getTSIG());
+    byte[] responseWire = response.toWire(Message.MAXLENGTH);
+    Message parsed = new Message(responseWire);
+
+    assertEquals(Rcode.BADTIME, parsed.getTSIG().getError());
+    assertEquals(received.getTSIG().getTimeSigned(), parsed.getTSIG().getTimeSigned());
+    assertEquals(received.getTSIG().getFudge(), parsed.getTSIG().getFudge());
+    assertThat(parsed.getTSIG().getOther()).hasSize(6);
+    DNSInput other = new DNSInput(parsed.getTSIG().getOther());
+    long serverSeconds = ((long) other.readU16() << 32) | other.readU32();
+    assertEquals(serverTime.getEpochSecond(), serverSeconds);
+    assertEquals(Rcode.NOERROR, client.verify(parsed, responseWire, received.getTSIG()));
+    assertTrue(parsed.isVerified());
+
+    responseWire[responseWire.length - 1] ^= 1;
+    assertEquals(
+        Rcode.BADSIG, client.verify(new Message(responseWire), responseWire, received.getTSIG()));
+  }
+
+  @Test
+  void badTimeResponseUsesRequestFudge() throws IOException {
+    TSIGRecord request =
+        new TSIGRecord(
+            Name.fromString("example."),
+            DClass.ANY,
+            0,
+            TSIG.HMAC_SHA256,
+            Instant.parse("2026-01-01T00:00:00Z"),
+            Duration.ofSeconds(42),
+            new byte[32],
+            123,
+            Rcode.NOERROR,
+            null);
+    Message response = new Message(123);
+
+    TSIGRecord tsig = defaultKey.generate(response, response.toWire(), Rcode.BADTIME, request);
+
+    assertEquals(request.getFudge(), tsig.getFudge());
+  }
+
   @Test
   void signedQuery() throws IOException {
     Record question = Record.newRecord(Name.fromString("www.example."), Type.A, DClass.IN);
