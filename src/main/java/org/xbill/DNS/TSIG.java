@@ -499,7 +499,13 @@ public class TSIG {
   private TSIGRecord generate(
       Message m, byte[] b, int error, TSIGRecord old, boolean fullSignature, Mac hmac) {
     Instant timeSigned = getTimeSigned(error, old);
-    Duration fudge = getTsigFudge();
+    Duration fudge = error == Rcode.BADTIME ? old.getFudge() : getTsigFudge();
+    byte[] other = null;
+    if (error == Rcode.BADTIME) {
+      DNSOutput otherData = new DNSOutput(6);
+      writeTsigTime(clock.instant(), otherData);
+      other = otherData.toByteArray();
+    }
 
     boolean signing = hmac != null;
     int messageID = m.getHeader().getID();
@@ -533,7 +539,12 @@ public class TSIG {
     writeTsigTimerVariables(timeSigned, fudge, out);
     if (fullSignature) {
       out.writeU16(error);
-      out.writeU16(0); /* No other data */
+      if (other != null) {
+        out.writeU16(other.length);
+        out.writeByteArray(other);
+      } else {
+        out.writeU16(0);
+      }
     }
 
     byte[] signature;
@@ -548,13 +559,6 @@ public class TSIG {
       }
     } else {
       signature = new byte[0];
-    }
-
-    byte[] other = null;
-    if (error == Rcode.BADTIME) {
-      out = new DNSOutput(6);
-      writeTsigTime(clock.instant(), out);
-      other = out.toByteArray();
     }
 
     return new TSIGRecord(
