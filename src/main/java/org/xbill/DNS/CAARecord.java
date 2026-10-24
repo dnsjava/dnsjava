@@ -5,12 +5,13 @@ package org.xbill.DNS;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Function;
 
 /**
  * Certification Authority Authorization
  *
  * @author Brian Wellington
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc6844">RFC 6844: DNS Certification
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659">RFC 8659: DNS Certification
  *     Authority Authorization (CAA) Resource Record</a>
  */
 public class CAARecord extends Record {
@@ -20,8 +21,108 @@ public class CAARecord extends Record {
     public static final int IssuerCritical = 128;
   }
 
+  /**
+   * Know tag values in IANA registry Public Key Infrastructure using X.509 (PKIX) Parameters,
+   * Certification Authority Restriction Properties.
+   *
+   * @see <a href="https://www.iana.org/assignments/pkix-parameters">Public Key Infrastructure using
+   *     X.509 (PKIX) Parameters</a>
+   */
+  public static class Tags {
+    /**
+     * Authorization Entry by Domain.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659#section-7.2">RFC 8659, Section
+     *     7.2</a>
+     */
+    public static final String ISSUE = "issue";
+
+    /**
+     * Authorization Entry by Wildcard Domain.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659#section-7.2">RFC 8659, Section
+     *     7.2</a>
+     */
+    public static final String ISSUEWILD = "issuewild";
+
+    /**
+     * Report incident by IODEF report.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659#section-7.2">RFC 8659, Section
+     *     7.2</a>
+     */
+    public static final String IODEF = "iodef";
+
+    /**
+     * Reserved in RFC 8659.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659#section-7.2">RFC 8659, Section
+     *     7.2</a>
+     */
+    public static final String AUTH = "auth";
+
+    /**
+     * Reserved in RFC 8659; Authorization Entry by Signature Path in
+     * draft-hallambaker-donotissue-04.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-hallambaker-donotissue-04#rfc.section.5.2">draft-hallambaker-donotissue-04,
+     *     Section 5.2</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659#section-7.2">RFC 8659, Section
+     *     7.2</a>
+     */
+    public static final String PATH = "path";
+
+    /**
+     * Reserved in RFC 8659; Authorization Entry by Certificate Policy in
+     * draft-hallambaker-donotissue-04.
+     *
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-hallambaker-donotissue-04#rfc.section.5.2">draft-hallambaker-donotissue-04,
+     *     Section 5.2</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8659#section-7.2">RFC 8659, Section
+     *     7.2</a>
+     */
+    public static final String POLICY = "policy";
+
+    /**
+     * Authorized e-mail contact for domain validation.
+     *
+     * @see <a
+     *     href="https://cabforum.org/wp-content/uploads/CA-Browser-Forum-BR-1.6.3.pdf">CA/Browser
+     *     Forum 1.6.3</a>
+     * @see <a href="https://cabforum.org/">CA/Browser Forum</a>
+     */
+    public static final String CONTACTEMAIL = "contactemail";
+
+    /**
+     * Authorized phone contact for DNS validation.
+     *
+     * @see <a href="https://cabforum.org/pipermail/public/2019-January/014498.html">CA/Browser
+     *     Forum Ballot SC14</a>
+     * @see <a href="https://cabforum.org/">CA/Browser Forum</a>
+     */
+    public static final String CONTACTPHONE = "contactphone";
+
+    /**
+     * Authorization Entry by Domain for Verified Mark Certificates.
+     *
+     * @see <a href="https://bimigroup.org/resources/VMC_Guidelines_latest.pdf">VMC Requirements
+     *     v1.0</a>
+     * @see <a href="mailto:corey.bonnell@digicert.com">Corey Bonnell</a>
+     */
+    public static final String ISSUEVMC = "issuevmc";
+
+    /**
+     * Authorization Entry by Email Address.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc9495">RFC 9495</a>
+     */
+    public static final String ISSUEMAIL = "issuemail";
+  }
+
   private int flags;
-  private byte[] tag;
+  private String tag;
   private byte[] value;
 
   CAARecord() {}
@@ -36,32 +137,45 @@ public class CAARecord extends Record {
   public CAARecord(Name name, int dclass, long ttl, int flags, String tag, String value) {
     super(name, Type.CAA, dclass, ttl);
     this.flags = checkU8("flags", flags);
-    if (tag == null || tag.isEmpty() || tag.length() > 255) {
-      throw new IllegalArgumentException("invalid tag");
-    }
+    this.tag = validateTag(IllegalArgumentException::new, tag);
 
     try {
-      this.tag = byteArrayFromString(tag);
       this.value = byteArrayFromString(value, -1);
     } catch (TextParseException e) {
       throw new IllegalArgumentException(e.getMessage(), e);
     }
   }
 
+  private static <T extends Throwable> String validateTag(
+      Function<String, T> getException, String tag) throws T {
+    if (tag == null || tag.isEmpty() || tag.length() > 255) {
+      throw getException.apply("invalid tag");
+    }
+    for (int i = 0; i < tag.length(); i++) {
+      char c = tag.charAt(i);
+      if ((c < '0' || c > '9') && (c < 'a' || c > 'z')) {
+        throw getException.apply("invalid tag; must be ASCII letters and numbers in lowercase");
+      }
+    }
+
+    return tag;
+  }
+
   @Override
   protected void rrFromWire(DNSInput in) throws IOException {
     flags = in.readU8();
-    tag = in.readCountedString();
+    tag = validateTag(WireParseException::new, byteArrayToString(in.readCountedString(), false));
     value = in.readByteArray();
   }
 
   @Override
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
     flags = st.getUInt8();
+
     try {
-      tag = byteArrayFromString(st.getString());
+      tag = validateTag(TextParseException::new, st.getString());
       value = byteArrayFromString(st.getString(), -1);
-    } catch (TextParseException e) {
+    } catch (TextParseException | IllegalArgumentException e) {
       throw st.exception(e.getMessage());
     }
   }
@@ -71,7 +185,7 @@ public class CAARecord extends Record {
     StringBuilder sb = new StringBuilder();
     sb.append(flags);
     sb.append(" ");
-    sb.append(byteArrayToString(tag, false));
+    sb.append(tag);
     sb.append(" ");
     sb.append(byteArrayToString(value, true));
     return sb.toString();
@@ -84,7 +198,7 @@ public class CAARecord extends Record {
 
   /** Returns the tag. */
   public String getTag() {
-    return new String(tag, StandardCharsets.US_ASCII);
+    return tag;
   }
 
   /**
@@ -115,7 +229,7 @@ public class CAARecord extends Record {
   @Override
   protected void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     out.writeU8(flags);
-    out.writeCountedString(tag);
+    out.writeCountedString(tag.getBytes(StandardCharsets.US_ASCII));
     out.writeByteArray(value);
   }
 }

@@ -39,6 +39,62 @@ class CAARecordTest {
   }
 
   @ParameterizedTest
+  @ValueSource(
+      strings = {
+        ",", " ", "AZ", "1aZ", "~",
+      })
+  void validateTagCharacters(String tag) {
+    assertThatThrownBy(
+            () -> new CAARecord(n, DClass.IN, 3600, CAARecord.Flags.IssuerCritical, tag, ""))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageStartingWith("invalid tag; must be");
+  }
+
+  @Test
+  void validateTagCharactersFromWireFormat() {
+    CAARecord caa = new CAARecord();
+    DNSOutput out = new DNSOutput();
+    out.writeU8(0); // flags
+    out.writeCountedString(new byte[] {'a', 'b', '~'});
+    DNSInput in = new DNSInput(out.toByteArray());
+    assertThatThrownBy(() -> caa.rrFromWire(in))
+        .isInstanceOf(WireParseException.class)
+        .hasMessageStartingWith("invalid tag; must be");
+  }
+
+  @Test
+  void validateTagCharactersFromRdata() {
+    CAARecord caa = new CAARecord();
+    try (Tokenizer st = new Tokenizer("0 ab~")) {
+      assertThatThrownBy(() -> caa.rdataFromString(st, Name.root))
+          .isInstanceOf(TextParseException.class)
+          .hasMessageContaining("invalid tag; must be");
+    }
+  }
+
+  @Test
+  void validateEmptyTagFromWireFormat() {
+    CAARecord caa = new CAARecord();
+    DNSOutput out = new DNSOutput();
+    out.writeU8(0); // flags
+    out.writeCountedString(new byte[0]);
+    DNSInput in = new DNSInput(out.toByteArray());
+    assertThatThrownBy(() -> caa.rrFromWire(in))
+        .isInstanceOf(WireParseException.class)
+        .hasMessage("invalid tag");
+  }
+
+  @Test
+  void validateEmptyTagFromRdata() {
+    CAARecord caa = new CAARecord();
+    try (Tokenizer st = new Tokenizer("0 \"\"")) {
+      assertThatThrownBy(() -> caa.rdataFromString(st, Name.root))
+          .isInstanceOf(TextParseException.class)
+          .hasMessageEndingWith("invalid tag");
+    }
+  }
+
+  @ParameterizedTest
   @ValueSource(ints = {0, 256, 300})
   void validateValueLengths(int valueLength) {
     String value = new String(new char[valueLength]);
