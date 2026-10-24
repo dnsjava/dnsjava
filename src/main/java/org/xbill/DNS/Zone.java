@@ -675,24 +675,22 @@ public class Zone implements Serializable, Iterable<RRset> {
     }
 
     if (hasWild) {
-      for (int i = 0; i < labels - olabels; i++) {
-        Name tname = name.wild(i + 1);
-        Object types = exactName(tname);
-        if (types == null) {
-          continue;
-        }
+      Name tname = name.wild(1);
+      Object types = exactName(tname);
+      if (types == null) {
+        return SetResponse.ofType(SetResponseType.NXDOMAIN);
+      }
 
-        if (type == Type.ANY) {
-          SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
-          for (RRset set : allRRsetsWithoutLock(types)) {
-            sr.addRRset(expandSet(set, name));
-          }
-          return sr;
-        } else {
-          RRset rrset = oneRRsetWithoutLock(types, type);
-          if (rrset != null) {
-            return SetResponse.ofType(SetResponseType.SUCCESSFUL, expandSet(rrset, name));
-          }
+      if (type == Type.ANY) {
+        SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
+        for (RRset set : allRRsetsWithoutLock(types)) {
+          sr.addRRset(expandSet(set, name));
+        }
+        return sr;
+      } else {
+        RRset rrset = oneRRsetWithoutLock(types, type);
+        if (rrset != null) {
+          return SetResponse.ofType(SetResponseType.SUCCESSFUL, expandSet(rrset, name));
         }
       }
     }

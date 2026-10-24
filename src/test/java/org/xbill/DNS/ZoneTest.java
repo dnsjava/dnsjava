@@ -716,6 +716,50 @@ class ZoneTest {
         () -> z.addRecord(A_1_TEST.withName(new Name("some-other-name", ZONE.getOrigin()))));
   }
 
+  /** A wildcard must not synthesize below an existing (empty non-terminal) closer encloser. */
+  @Test
+  void wildcardClosestEncloser() throws Exception {
+    SOARecord soa =
+        new SOARecord(
+            Name.fromConstantString("example."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("ns.example."),
+            Name.fromConstantString("hostmaster.example."),
+            1,
+            7200,
+            3600,
+            1209600,
+            300);
+    NSRecord ns =
+        new NSRecord(
+            Name.fromConstantString("example."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("ns.example."));
+    Zone zone =
+        new Zone(
+            Name.fromConstantString("example."),
+            soa,
+            ns,
+            Record.fromString(
+                Name.fromConstantString("*.example."),
+                Type.A,
+                DClass.IN,
+                3600,
+                "192.0.2.1",
+                Name.root),
+            Record.fromString(
+                Name.fromConstantString("x.sub.example."),
+                Type.A,
+                DClass.IN,
+                3600,
+                "192.0.2.1",
+                Name.root));
+    SetResponse sr = zone.findRecords(Name.fromConstantString("y.sub.example."), Type.A);
+    assertThat(sr.isNXDOMAIN()).as(sr.toString()).isTrue();
+  }
+
   private static List<RRset> listOf(RRset... rrsets) {
     return Stream.of(rrsets).collect(Collectors.toList());
   }
