@@ -93,11 +93,16 @@ jobs:
           repository: 'dnsjava/dnsjava'
           ref: 'master'
           persist-credentials: false
-          clean: 'false'
-          path: pr
+          # clean: false is broken, see https://github.com/actions/checkout/issues/2348
+          path: pr-config
           sparse-checkout: |
             pom.xml
             sonar-project.properties
+
+      - name: Copy config files
+        run: |
+          cp -f pr-config/pom.xml pr/
+          cp -f pr-config/sonar-project.properties pr/
 
       - name: Run SonarQube
         env:
