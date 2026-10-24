@@ -268,9 +268,9 @@ public class SimpleResolver implements Resolver {
     return timeoutValue;
   }
 
-  private Message parseMessage(byte[] b) throws WireParseException {
+  private Message parseMessage(byte[] b, boolean truncated) throws WireParseException {
     try {
-      return new Message(b);
+      return new Message(new DNSInput(b), truncated);
     } catch (IOException e) {
       if (!(e instanceof WireParseException)) {
         throw new WireParseException("Error parsing message", e);
@@ -393,10 +393,12 @@ public class SimpleResolver implements Resolver {
               .createOrGetTcpClient()
               .sendAndReceiveTcp(localAddress, address, query, out, timeoutValue);
     } else {
+      // Read one extra byte to distinguish an oversized datagram from an exactly full buffer.
+      int receiveSize = ignoreTruncation ? udpSize : Math.min(udpSize + 1, Message.MAXLENGTH);
       result =
           ioClientFactory
               .createOrGetUdpClient()
-              .sendAndReceiveUdp(localAddress, address, query, out, udpSize, timeoutValue);
+              .sendAndReceiveUdp(localAddress, address, query, out, receiveSize, timeoutValue);
     }
 
     return result.thenComposeAsync(
@@ -420,9 +422,10 @@ public class SimpleResolver implements Resolver {
             return f;
           }
 
+          boolean oversized = !tcp && !ignoreTruncation && in.length > udpSize;
           Message response;
           try {
-            response = parseMessage(in);
+            response = parseMessage(in, oversized);
           } catch (WireParseException e) {
             f.completeExceptionally(e);
             return f;
@@ -477,7 +480,7 @@ public class SimpleResolver implements Resolver {
           }
 
           verifyTSIG(query, response, in);
-          if (!tcp && !ignoreTruncation && response.getHeader().getFlag(Flags.TC)) {
+          if (!tcp && !ignoreTruncation && (oversized || response.getHeader().getFlag(Flags.TC))) {
             if (log.isTraceEnabled()) {
               log.trace(
                   "Got truncated response for id {}, retrying via TCP, response:\n{}",
