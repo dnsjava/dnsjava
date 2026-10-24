@@ -4,6 +4,7 @@
 package org.xbill.DNS;
 
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -247,7 +248,7 @@ public class TSIG {
       System.arraycopy(expected, 0, truncated, 0, truncated.length);
       expected = truncated;
     }
-    return Arrays.equals(signature, expected);
+    return MessageDigest.isEqual(signature, expected);
   }
 
   private Mac initHmac() {
