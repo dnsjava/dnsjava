@@ -1300,7 +1300,7 @@ public final class ValidatingResolver implements Resolver {
       case BOGUS:
         // For now, in the absence of any other API information, we
         // return SERVFAIL.
-        int code = response.getHeader().getRcode();
+        int code = response.getRcode();
         if (code == Rcode.NOERROR || code == Rcode.NXDOMAIN) {
           code = Rcode.SERVFAIL;
         }
@@ -1421,7 +1421,7 @@ public final class ValidatingResolver implements Resolver {
               // signatures on signatures. Negative answers CAN be validated.
               Message rrsigResponse = response.getMessage();
               if (query.getQuestion().getType() == Type.RRSIG
-                  && rrsigResponse.getHeader().getRcode() == Rcode.NOERROR
+                  && rrsigResponse.getRcode() == Rcode.NOERROR
                   && !rrsigResponse.getSectionRRsets(Section.ANSWER).isEmpty()) {
                 rrsigResponse.getHeader().unsetFlag(Flags.AD);
                 return completedFuture(rrsigResponse);

@@ -489,7 +489,7 @@ public class update {
       return true;
     }
     if (field.equalsIgnoreCase("rcode")) {
-      int rcode = response.getHeader().getRcode();
+      int rcode = response.getRcode();
       if (rcode != Rcode.value(expected)) {
         value = Rcode.string(rcode);
         flag = false;

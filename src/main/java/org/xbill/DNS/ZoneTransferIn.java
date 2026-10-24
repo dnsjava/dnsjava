@@ -503,7 +503,7 @@ public class ZoneTransferIn {
       byte[] in = client.recv();
       Message response = parseMessage(in);
       List<Record> answers = response.getSection(Section.ANSWER);
-      if (response.getHeader().getRcode() == Rcode.NOERROR && verifier != null) {
+      if (response.getRcode() == Rcode.NOERROR && verifier != null) {
         int error =
             verifier.verify(response, in, answers.get(answers.size() - 1).getType() == Type.SOA);
         if (error != Rcode.NOERROR) {

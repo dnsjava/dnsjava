@@ -664,7 +664,7 @@ public class Cache {
     int qtype;
     int qclass;
     int cred;
-    int rcode = in.getHeader().getRcode();
+    int rcode = in.getRcode();
     boolean completed = false;
     SetResponse response = null;
     HashSet<Name> additionalNames;

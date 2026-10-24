@@ -419,7 +419,7 @@ public class jnamed {
     if (header.getFlag(Flags.QR)) {
       return null;
     }
-    if (header.getRcode() != Rcode.NOERROR) {
+    if (query.getRcode() != Rcode.NOERROR) {
       return errorMessage(query, Rcode.FORMERR);
     }
     if (header.getOpcode() != Opcode.QUERY) {

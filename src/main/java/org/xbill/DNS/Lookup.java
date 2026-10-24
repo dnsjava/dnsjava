@@ -617,7 +617,7 @@ public final class Lookup {
       }
       return;
     }
-    int rcode = response.getHeader().getRcode();
+    int rcode = response.getRcode();
     if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
       // The server we contacted is broken or otherwise unhelpful.
       // Press on.

@@ -150,7 +150,7 @@ class DohResolverTest {
         result ->
             context.verify(
                 () -> {
-                  assertEquals(Rcode.NOERROR, result.getHeader().getRcode());
+                  assertEquals(Rcode.NOERROR, result.getRcode());
                   assertEquals(0, result.getHeader().getID());
                   assertEquals(queryName, result.getQuestion().getName());
                   context.completeNow();
@@ -193,7 +193,7 @@ class DohResolverTest {
                             result ->
                                 context.verify(
                                     () -> {
-                                      assertEquals(Rcode.SERVFAIL, result.getHeader().getRcode());
+                                      assertEquals(Rcode.SERVFAIL, result.getRcode());
                                       context.completeNow();
                                     }))));
   }
@@ -358,7 +358,7 @@ class DohResolverTest {
                           result ->
                               context.verify(
                                   () -> {
-                                    assertEquals(Rcode.NOERROR, result.getHeader().getRcode());
+                                    assertEquals(Rcode.NOERROR, result.getRcode());
                                     assertEquals(0, result.getHeader().getID());
                                     assertEquals(queryName, result.getQuestion().getName());
                                   })));
@@ -370,7 +370,7 @@ class DohResolverTest {
                               context.verify(
                                   () -> {
                                     assertTrue(firstCallCompleted.get());
-                                    assertEquals(Rcode.NOERROR, result.getHeader().getRcode());
+                                    assertEquals(Rcode.NOERROR, result.getRcode());
                                     assertEquals(0, result.getHeader().getID());
                                     assertEquals(queryName, result.getQuestion().getName());
                                     // Complete context after the 2nd call was completed.

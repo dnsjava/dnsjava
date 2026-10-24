@@ -420,4 +420,32 @@ class CacheTest {
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
     assertTrue(response.isUnknown(), "Expected UNKNOWN after expiration but got " + response);
   }
+
+  @Test
+  void cacheShouldUseExtendedRcode() {
+    Name q = Name.fromConstantString("x.example.");
+    Message m = new Message(1);
+    m.getHeader().setFlag(Flags.QR);
+    m.addRecord(Record.newRecord(q, Type.A, DClass.IN), Section.QUESTION);
+    SOARecord soa =
+        new SOARecord(
+            Name.fromConstantString("example."),
+            DClass.IN,
+            3600,
+            Name.fromConstantString("ns.example."),
+            Name.fromConstantString("hostmaster.example."),
+            1,
+            7200,
+            3600,
+            1209600,
+            300);
+    m.addRecord(soa, Section.AUTHORITY);
+    m.addRecord(new OPTRecord(4096, 1, 0), Section.ADDITIONAL); // extended rcode 1 -> BADVERS (16)
+    assertEquals(16, m.getRcode());
+    Cache c = new Cache();
+    c.addMessage(m);
+    SetResponse sr = c.lookupRecords(q, Type.A, Credibility.NORMAL);
+    assertFalse(sr.isNXRRSET(), sr.toString());
+    assertTrue(sr.isUnknown(), sr.toString());
+  }
 }

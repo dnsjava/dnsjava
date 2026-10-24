@@ -33,7 +33,7 @@ class TestWildcard extends TestBase {
     // detected by the NSEC proof
     Message response = resolver.send(createMessage("a.d.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD));
-    assertRCode(Rcode.SERVFAIL, response.getHeader().getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.positive.wildcard_too_broad", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -52,7 +52,7 @@ class TestWildcard extends TestBase {
     // *.d.nsec3.ingotronic.ch. which must be detected by the NSEC proof
     Message response = resolver.send(createMessage("a.d.nsec3.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD));
-    assertRCode(Rcode.SERVFAIL, response.getHeader().getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals("failed.positive.wildcard_too_broad", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
@@ -62,7 +62,7 @@ class TestWildcard extends TestBase {
   void testLabelCountInSignaturesNotAllSame() throws IOException {
     Message response = resolver.send(createMessage("b.d.nsec3.ingotronic.ch./A"));
     assertFalse(response.getHeader().getFlag(Flags.AD));
-    assertRCode(Rcode.SERVFAIL, response.getHeader().getRcode());
+    assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEquals(
         "failed.wildcard.label_count_mismatch:b.d.nsec3.ingotronic.ch.", getReason(response));
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
