@@ -16,8 +16,6 @@ import java.net.UnknownHostException;
  *     IP Version 6</a>
  */
 public class AAAARecord extends Record {
-  private static final byte[] IPV4_MAPPED_IPV6_PREFIX =
-      new byte[] {0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
   private byte[] address;
 
   AAAARecord() {}
