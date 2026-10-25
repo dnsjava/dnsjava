@@ -134,8 +134,14 @@ class OPTRecordTest {
         Arguments.of(0, 0b00000000_00000000_00000000_00000000_00000000),
         Arguments.of(ExtendedFlags.DO, 0b00000000_00000000_00000000_10000000_00000000),
         Arguments.of(ExtendedFlags.CO, 0b00000000_00000000_00000000_01000000_00000000),
+        Arguments.of(ExtendedFlags.DE, 0b00000000_00000000_00000000_00100000_00000000),
         Arguments.of(
-            ExtendedFlags.DO | ExtendedFlags.CO, 0b00000000_00000000_00000000_11000000_00000000));
+            ExtendedFlags.DO | ExtendedFlags.CO, 0b00000000_00000000_00000000_11000000_00000000),
+        Arguments.of(
+            ExtendedFlags.DO | ExtendedFlags.CO | ExtendedFlags.DE,
+            0b00000000_00000000_00000000_11100000_00000000),
+        Arguments.of(
+            ExtendedFlags.DO | ExtendedFlags.DE, 0b00000000_00000000_00000000_10100000_00000000));
   }
 
   private void assertNotEqual(final OPTRecord optRecordOne, final OPTRecord optRecordTwo) {

@@ -23,6 +23,15 @@ public final class ExtendedFlags {
    */
   public static final int CO = 0x4000;
 
+  /**
+   * Delegation Extensions.
+   *
+   * @since 3.7.0
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-delext-12">draft-ietf-dnsop-delext-12</a>
+   */
+  public static final int DE = 0x2000;
+
   static {
     extflags.setMaximum(0xFFFF);
     extflags.setPrefix("FLAG");
@@ -30,6 +39,7 @@ public final class ExtendedFlags {
 
     extflags.add(DO, "do");
     extflags.add(CO, "co");
+    extflags.add(DE, "de");
   }
 
   private ExtendedFlags() {}

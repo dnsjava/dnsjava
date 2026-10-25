@@ -31,14 +31,37 @@ public class DNSKEYRecord extends KEYBase {
   public static class Flags {
     private Flags() {}
 
-    /** Key is a zone key */
-    public static final int ZONE_KEY = 0x100;
+    /**
+     * Key is a zone key. Flags bit 7.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc3757">RFC 3757</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc4034">RFC 4034</a>
+     */
+    public static final int ZONE_KEY = 0b0000_0001_0000_0000;
 
-    /** Key is a secure entry point key */
-    public static final int SEP_KEY = 0x1;
+    /**
+     * Key has been revoked. Flags bit 8.
+     *
+     * @see <a href="<a href="https://datatracker.ietf.org/doc/html/rfc5011">RFC 5011</a>
+     */
+    public static final int REVOKE = 0b0000_0000_1000_0000;
 
-    /** Key has been revoked */
-    public static final int REVOKE = 0x80;
+    /**
+     * Authoritative Delegation Types. Flags bit 14.
+     *
+     * @since 3.7.0
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-delext-12">draft-ietf-dnsop-delext-12</a>
+     */
+    public static final int AUTHORITATIVE_DELEGATION_TYPES = 0b0000_0000_0000_0010;
+
+    /**
+     * Key is a secure entry point key. Flags bit 15.
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc3757">RFC 3757</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc4034">RFC 4034</a>
+     */
+    public static final int SEP_KEY = 0b0000_0000_0000_0001;
   }
 
   DNSKEYRecord() {}

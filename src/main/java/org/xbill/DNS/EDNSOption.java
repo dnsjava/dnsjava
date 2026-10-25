@@ -154,6 +154,87 @@ public abstract class EDNSOption implements Serializable {
      */
     public static final int ZONEVERSION = 19;
 
+    /**
+     * DNS Multiple QTYPEs (query).
+     *
+     * @since 3.7.0
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc10029/">RFC 10029</a>
+     */
+    public static final int MQTYPE_QUERY = 20;
+
+    /**
+     * DNS Multiple QTYPEs (response).
+     *
+     * @since 3.7.0
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc10029/">RFC 10029</a>
+     */
+    public static final int MQTYPE_RESPONSE = 21;
+
+    /**
+     * Specifies the language that is used in the EXTRA-TEXT field of EDNS Extended DNS Error
+     * options in the same DNS message.
+     *
+     * @since 3.7.0
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-muks-dns-filtering-05/">draft-muks-dns-filtering-05</a>
+     */
+    public static final int EDE_EXTRA_TEXT_LANGUAGE = 22;
+
+    /**
+     * Contact information of the party that performed the filtering.
+     *
+     * @since 3.7.0
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-muks-dns-filtering-05/">draft-muks-dns-filtering-05</a>
+     */
+    public static final int FILTERING_CONTACT = 23;
+
+    /**
+     * Name of the organization that performed the filtering.
+     *
+     * @since 3.7.0
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-muks-dns-filtering-05/">draft-muks-dns-filtering-05</a>
+     */
+    public static final int FILTERING_ORGANIZATION = 24;
+
+    /**
+     * Identifier, name, or description of the filtering database against which a matched query
+     * caused the filtering to occur.
+     *
+     * @since 3.7.0
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-muks-dns-filtering-05/">draft-muks-dns-filtering-05</a>
+     */
+    public static final int FILTERING_DB = 25;
+
+    /**
+     * Structured DNS Error.
+     *
+     * @since 3.7.0
+     * @see <a
+     *     href="https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-structured-dns-error-27/">draft-ietf-dnsop-structured-dns-error-27</a>
+     */
+    public static final int STRUCTURED_DNS_ERROR = 26;
+
+    /**
+     * @since 3.7.0
+     * @see <a
+     *     href="https://developer.cisco.com/docs/cloud-security/network-devices-with-cisco-umbrella-dns/#identify-dns-traffic">Cisco
+     *     Umbrella</a>
+     * @see <a href="mailto:cie-eng.dns-team@cisco.com">Cisco CIE DNS team</a>
+     */
+    public static final int UMBRELLA_IDENT = 20292;
+
+    /**
+     * @since 3.7.0
+     * @see <a
+     *     href="https://www.cisco.com/c/en/us/td/docs/wireless/upc/21-28/cups-cp-admin/21-28-upc-cups-cp-admin-guide/m_edns-support.html">Cisco
+     *     Ultra Packet Core CUPS Control Plane Administration Guide</a>
+     * @see <a href="mailto:cie-eng.dns-team@cisco.com">Cisco CIE DNS team</a>
+     */
+    public static final int DEVICEID = 26946;
+
     private static final Mnemonic codes =
         new Mnemonic("EDNS Option Codes", Mnemonic.CASE_SENSITIVE);
 
@@ -176,11 +257,20 @@ public abstract class EDNSOption implements Serializable {
       codes.add(PADDING, "Padding");
       codes.add(CHAIN, "CHAIN");
       codes.add(EDNS_KEY_TAG, "edns-key-tag");
-      codes.add(EDNS_EXTENDED_ERROR, "Extended_DNS_Error");
+      codes.add(EDNS_EXTENDED_ERROR, "Extended DNS Error");
       codes.add(EDNS_CLIENT_TAG, "EDNS-Client-Tag");
       codes.add(EDNS_SERVER_TAG, "EDNS-Server-Tag");
       codes.add(REPORT_CHANNEL, "Report-Channel");
       codes.add(ZONEVERSION, "ZONEVERSION");
+      codes.add(MQTYPE_QUERY, "MQTYPE-Query");
+      codes.add(MQTYPE_RESPONSE, "MQTYPE-Response");
+      codes.add(EDE_EXTRA_TEXT_LANGUAGE, "EDE-EXTRA-TEXT-LANGUAGE");
+      codes.add(FILTERING_CONTACT, "FILTERING-CONTACT");
+      codes.add(FILTERING_ORGANIZATION, "FILTERING-ORGANIZATION");
+      codes.add(FILTERING_DB, "FILTERING-DB");
+      codes.add(STRUCTURED_DNS_ERROR, "Structured DNS Error");
+      codes.add(UMBRELLA_IDENT, "Umbrella Ident");
+      codes.add(DEVICEID, "DeviceID");
     }
 
     /** Converts an EDNS Option Code into its textual representation */

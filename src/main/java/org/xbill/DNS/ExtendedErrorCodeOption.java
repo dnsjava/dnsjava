@@ -203,6 +203,51 @@ public class ExtendedErrorCodeOption extends EDNSOption {
    */
   public static final int INVALID_QUERY_TYPE = 30;
 
+  /**
+   * Rate Limited.
+   *
+   * @since 3.7.0
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-muks-dns-ede-rate-limited-02">draft-muks-dns-ede-rate-limited-02</a>
+   */
+  public static final int RATE_LIMITED = 31;
+
+  /**
+   * Over Quota.
+   *
+   * @since 3.7.0
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-muks-dns-ede-rate-limited-02">draft-muks-dns-ede-rate-limited-02</a>
+   */
+  public static final int OVER_QUOTA = 32;
+
+  /**
+   * Negative Trust Anchor.
+   *
+   * @since 3.7.0
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-farrokhi-dnsop-ede-nta-01">draft-farrokhi-dnsop-ede-nta-01</a>
+   */
+  public static final int NEGATIVE_TRUST_ANCHOR = 33;
+
+  /**
+   * New Delegation Only.
+   *
+   * @since 3.7.0
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-ietf-deleg-12">draft-ietf-deleg-12</a>
+   */
+  public static final int NEW_DELEGATION_ONLY = 34;
+
+  /**
+   * Blocked by Upstream DNS Server.
+   *
+   * @since 3.7.0
+   * @see <a
+   *     href="https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-structured-dns-error-27/">draft-ietf-dnsop-structured-dns-error-27/</a>
+   */
+  public static final int BLOCKED_BY_UPSTREAM_DNS_SERVER = 35;
+
   @Getter private int errorCode;
   @Getter private String text;
 
@@ -243,6 +288,11 @@ public class ExtendedErrorCodeOption extends EDNSOption {
     codes.add(UNABLE_TO_CONFORM_TO_POLICY, "UNABLE_TO_CONFORM_TO_POLICY");
     codes.add(SYNTHESIZED, "SYNTHESIZED");
     codes.add(INVALID_QUERY_TYPE, "INVALID_QUERY_TYPE");
+    codes.add(RATE_LIMITED, "Rate Limited");
+    codes.add(OVER_QUOTA, "Over Quota");
+    codes.add(NEGATIVE_TRUST_ANCHOR, "Negative Trust Anchor");
+    codes.add(NEW_DELEGATION_ONLY, "New Delegation Only");
+    codes.add(BLOCKED_BY_UPSTREAM_DNS_SERVER, "Blocked by Upstream DNS Server");
   }
 
   /**
