@@ -53,7 +53,7 @@ public class Compression {
    * Removes a compression entry mapping of a name in a message.
    *
    * @param name The name to remove.
-   * @since 3.6.6
+   * @since 3.7.0
    */
   public void remove(Name name) {
     int row = (name.hashCode() & 0x7FFFFFFF) % TABLE_SIZE;

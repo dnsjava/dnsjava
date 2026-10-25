@@ -135,7 +135,7 @@ public final class HostsFileParser {
    *     ReverseMap#fromAddress(InetAddress)}.
    * @return The first host name found for the requested address.
    * @throws IOException When the parsing fails.
-   * @since 3.6.6
+   * @since 3.7.0
    */
   public Optional<Name> getNameForReverseLookup(Name reverseName) throws IOException {
     Objects.requireNonNull(reverseName, "reverseName is required");

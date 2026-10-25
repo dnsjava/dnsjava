@@ -378,7 +378,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
   /**
    * Converts a String into a byte array.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @param sizeLimit Throw a {@link TextParseException} if the string is longer than this limit,
    *     {@code -1} means no limit.
    */

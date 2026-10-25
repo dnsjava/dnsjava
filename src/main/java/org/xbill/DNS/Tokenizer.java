@@ -745,7 +745,7 @@ public class Tokenizer implements AutoCloseable {
   /**
    * Creates an exception which includes the current state in the error message.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @param s The error message to include.
    * @return The exception to be thrown
    */

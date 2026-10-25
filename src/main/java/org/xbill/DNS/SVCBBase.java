@@ -83,7 +83,7 @@ public abstract class SVCBBase extends Record {
   /**
    * DNS over HTTPS path template.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @see <a href="https://www.iana.org/go/rfc9461">RFC 9461</a>
    */
   public static final int DOHPATH = 7;
@@ -91,7 +91,7 @@ public abstract class SVCBBase extends Record {
   /**
    * Denotes that a service operates an Oblivious HTTP target.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @see <a href="https://www.rfc-editor.org/info/rfc9540/#section-4.2">RFC 9540, Section 4.2</a>
    */
   public static final int OHTTP = 8;
@@ -99,7 +99,7 @@ public abstract class SVCBBase extends Record {
   /**
    * Supported groups in TLS.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @see <a
    *     href="https://datatracker.ietf.org/doc/html/draft-ietf-tls-key-share-prediction-04#name-format">draft-ietf-tls-key-share-prediction-04,
    *     Section 3.1</a>
@@ -109,7 +109,7 @@ public abstract class SVCBBase extends Record {
   /**
    * DNS over CoAP resource path.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @see <a href="https://www.rfc-editor.org/info/rfc9953/#section-3">RFC 9953, Section 3.1</a>
    */
   public static final int DOCPATH = 10;
@@ -117,7 +117,7 @@ public abstract class SVCBBase extends Record {
   /**
    * PvD configuration is available at the well-known path.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @see <a
    *     href="https://datatracker.ietf.org/doc/html/draft-ietf-intarea-proxy-config-14#section-2.1">RFC-ietf-intarea-proxy-config-14,
    *     Section 2.1</a>
@@ -128,7 +128,7 @@ public abstract class SVCBBase extends Record {
    * Per-transport operator confidence in serving the nameserver's query load over that transport,
    * as a percentage.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    * @see <a
    *     href="https://datatracker.ietf.org/doc/html/draft-johani-dnsop-svcb-oots-00/#section-5">draft-johani-dnsop-svcb-oots-00,
    *     Section 5</a>

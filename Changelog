@@ -1,3 +1,110 @@
+10/26/2026
+	- 3.7.0 released
+	- GHSA-m23c-5x5g-5ff6: Missing response validation in DoH Resolver
+	- GHSA-rwxq-7vpj-2rm5: Unbounded Pre-allocation via DNS
+	  Header Count Fields Leads to Amplified Memory Allocation (DoS)
+	- GHSA-hg22-jxmg-ppq9: Message normalization fails on invalid CNAME
+	  entries
+	- GHSA-whp4-9hfm-h8xr: X25Record accepts Unicode digits and
+	  silently converts them into non-digit DNS wire bytes
+	- GHSA-m779-jq28-q7v7: TSIG: MAC comparison is not constant-time
+	- TSIG: BADTIME responses fail verification because the MAC does
+	  not cover the Other Data
+	  (@kakooch, #424)
+	- Extend unit test coverage
+	  (@sean-g-rae, #412)
+	- New config option dnsjava.secure_random_algorithm property to
+	  select SecureRandom algorithm
+	  (@ChrisJr404, #368, #419)
+	- Validate SSHFP fingerprint lengths
+	  (@andrew-boutin and @Mahmoodifar, #414, #415)
+	- Handle canceled keys in TCP client
+	  (@techee, #411)
+	- hosts: resolve PTR queries from the local hosts database
+	  (@ChrisJr404,  #350, #413)
+	- TSIG verification fails if id of message is not identical to
+	  originalId in TSIG record
+	  (@sfeigl, #409)
+	- TSIG record does not parse after Message.toWire(maxLength)
+	  truncates records owned by the key name (#417)
+  - Full support for GOST R 34.11-2012
+    (@alexmit, #422, #423)
+  - nio: fix selector thread from self-joining (#180)
+  - New flags and codes registered at IANA
+  - Various issues as part of an automated search with Hegel
+    (#417)
+    - LOC prints a negative altitude with a fraction as -99999.-99m
+    - WKS with no services, or unsorted ports in text,
+      throws ArrayIndexOutOfBounds
+    - A6 with an IPv4-mapped suffix throws in toWire; its text
+      cannot be re-read
+    - base64.fromString accepts characters outside the alphabet and
+      decodes garbage
+    - DNSOutput.writeU8/U16/U32 accept 2^8/2^16/2^32 and write zero
+    - AAAARecord(Name, int, long, InetAddress) accepts an
+      IPv4 address (4-byte rdata)
+    - type bitmaps with out-of-order window blocks are accepted
+      and re-sorted
+    - LOC seconds lose their milliseconds in text parsing
+    - absent base64 fields (empty OPENPGPKEY, RRSIG without
+      signature) NPE in toString/toWire
+    - NSAP text 0 throws StringIndexOutOfBounds
+    - SVCB port= is not range-checked (65536 becomes 0, -1 accepted)
+    - HIP rvservers ignore the origin; relative names stay relative
+      and toWire fails
+    - RRSIG/SIG times before 1970 are accepted in text and fail
+      in toWire
+    - CAA tags are printed unquoted/unescaped
+    - LOC sizes beyond 9e9 m overflow the exponent nibble into
+      unreadable wire data
+    - OPTRecord.equals throws ClassCastException for an EmptyRecord
+      of type OPT
+    - CERT certificate-type mnemonics are shifted
+    - SVCB alpn values are unescaped once instead of twice
+    - SVCB values with spaces are printed unescaped;
+      empty alpn ids are accepted
+    - SVCB rdata from the wire is not validated
+      (key order, duplicates, mandatory)
+    - empty hex/base32 fields print as nothing and cannot be re-read
+    - IPv4-mapped IPv6 addresses print as dotted quads in IPv6 fields
+    - URI/CAA values over 255 octets read from the wire cannot be
+      re-read from text
+    - Record.fromString UTF-8-encodes non-ASCII text twice
+    - TTL.parse drops trailing digits without a unit (1h30 is 3600)
+    - Generator.expand() yields one record too few and repeats the
+      first value
+    - Message.toWire(max) exceeds max when the OPT record does
+      not fit; strict mode does not throw
+    - Message.getTSIG() throws IndexOutOfBounds on a truncated
+      message with ARCOUNT > records
+    - Zone.removeRecord of a non-member removes a single-record RRset
+    - Update(zone, dclass) hardcodes class IN in the zone section
+    - truncation leaves stale compression entries; the TSIG owner
+      is written as a dangling pointer
+    - Cache.addMessage uses the header rcode only (a BADVERS response
+      is cached as NXRRSET)
+    - ExtendedFlags.CO is 0x8001 instead of 0x4000
+    - wildcards synthesize below an existing closer encloser
+    - a query at an empty non-terminal answers NXDOMAIN
+      instead of NODATA
+    - a wildcard match without the type answers NXDOMAIN
+      instead of NODATA
+    - Cache.addRecord cannot replace a negative entry
+      of equal credibility
+    - RRset.equals/hashCode depend on insertion order
+    - $GENERATE widths beyond int range are truncated
+      instead of refused
+    - ReverseMap.fromName wraps octets above 255
+    - Message.addRecord with a bad section throws
+      ArrayIndexOutOfBounds
+    - wire TTLs with the high bit set are kept although text
+      and constructors refuse them
+    - $GENERATE ${offset} and ${offset,width} modifiers are
+      rejected as invalid
+    - toWire(max, false) throws for any message whose
+      TC flag is preset
+    - Header IDs are never 65535
+
 05/23/2026
 	- 3.6.5 released
 	- Handle canceled keys in UDP client (#129)

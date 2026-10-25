@@ -83,7 +83,7 @@ public final class Rcode {
    *
    * @see <a href="https://datatracker.ietf.org/doc/html/rfc8490">RFC 8490: DNS Stateful
    *     Operations</a>
-   * @since 3.6.6
+   * @since 3.7.0
    */
   public static final int DSOTYPENI = 11;
 

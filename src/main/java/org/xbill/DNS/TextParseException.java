@@ -23,7 +23,7 @@ public class TextParseException extends IOException {
   /**
    * Constructs a {@link TextParseException} with the specified detail message and cause.
    *
-   * @since 3.6.6
+   * @since 3.7.0
    */
   public TextParseException(String message, Throwable inner) {
     super(message, inner);
