@@ -519,6 +519,7 @@ public class Message implements Cloneable {
     int startpos = out.current();
     header.toWire(out);
     int flags = header.getFlagsByte();
+    boolean isTruncated = false;
     int additionalCount = 0;
     for (int i = 0; i < 4; i++) {
       int skipped;
@@ -528,6 +529,7 @@ public class Message implements Cloneable {
       skipped = sectionToWire(out, i, c, tempMaxLength);
       if (skipped != 0 && i != Section.ADDITIONAL) {
         flags = Header.setFlag(flags, Flags.TC, true);
+        isTruncated = true;
         out.writeU16At(header.getCount(i) - skipped, startpos + 4 + 2 * i);
         for (int j = i + 1; j < Section.ADDITIONAL; j++) {
           out.writeU16At(0, startpos + 4 + 2 * j);
@@ -560,7 +562,7 @@ public class Message implements Cloneable {
       out.writeU16At(additionalCount + 1, startpos + 10);
     }
 
-    return !Header.getFlag(flags, Flags.TC);
+    return !isTruncated;
   }
 
   /**

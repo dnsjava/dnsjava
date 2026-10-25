@@ -291,6 +291,16 @@ class MessageTest {
   }
 
   @Test
+  void toWireWithPresetTruncation() throws MessageSizeExceededException {
+    Name exampleCom = Name.fromConstantString("example.com.");
+    Message m = new Message(1);
+    m.getHeader().setFlag(Flags.TC);
+    m.addRecord(Record.newRecord(exampleCom, Type.A, DClass.IN), Section.QUESTION);
+    byte[] w = m.toWire(512, false);
+    assertThat(w).hasSameSizeAs(m.toWire());
+  }
+
+  @Test
   void testAddRecord() {
     Message m = new Message();
     Name n = Name.fromConstantString("example.com.");
@@ -365,9 +375,10 @@ class MessageTest {
     Message m = new Message();
     Name n = Name.fromConstantString("example.com.");
     m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
+    @SuppressWarnings("deprecation")
     Record[] records = m.getSectionArray(Section.ANSWER);
     assertEquals(1, records.length);
-    assertTrue(records[0] instanceof ARecord);
+    assertThat(records[0]).isInstanceOf(ARecord.class);
   }
 
   @Test
