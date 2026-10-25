@@ -393,9 +393,15 @@ public class Cache {
       CacheRRset crrset =
           new CacheRRset(r, cred, limitExpire(r.getTTL(), maxcache), isAuthenticated);
       addRRset(crrset, cred, isAuthenticated);
-    } else if (element.compareCredibility(cred) == 0 && element instanceof CacheRRset) {
-      CacheRRset crrset = (CacheRRset) element;
-      crrset.addRR(r);
+    } else if (element.compareCredibility(cred) == 0) {
+      if (element instanceof CacheRRset) {
+        CacheRRset crrset = (CacheRRset) element;
+        crrset.addRR(r);
+      } else if (element instanceof NegativeElement) {
+        CacheRRset crrset =
+            new CacheRRset(r, cred, limitExpire(r.getTTL(), maxcache), isAuthenticated);
+        addRRset(crrset, cred, isAuthenticated);
+      }
     }
   }
 

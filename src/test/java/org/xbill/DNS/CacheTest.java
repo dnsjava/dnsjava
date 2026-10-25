@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -447,5 +448,28 @@ class CacheTest {
     SetResponse sr = c.lookupRecords(q, Type.A, Credibility.NORMAL);
     assertFalse(sr.isNXRRSET(), sr.toString());
     assertTrue(sr.isUnknown(), sr.toString());
+  }
+
+  @Test
+  void positiveReplacesNegative() throws Exception {
+    SOARecord soa =
+        new SOARecord(
+            exampleName,
+            DClass.IN,
+            3600L,
+            Name.fromConstantString("nameserver."),
+            new Name("hostadmin", exampleName),
+            1,
+            21600L,
+            7200L,
+            2160000L,
+            3600L);
+    Name q = new Name("x", exampleName);
+    cache.addNegative(q, Type.A, soa, Credibility.NORMAL);
+
+    // replace a negative entry of equal credibility
+    cache.addRecord(aRecord.withName(q), Credibility.NORMAL);
+    SetResponse sr = cache.lookupRecords(q, Type.A, Credibility.NORMAL);
+    assertThat(sr.isSuccessful()).as(sr.toString()).isTrue();
   }
 }
