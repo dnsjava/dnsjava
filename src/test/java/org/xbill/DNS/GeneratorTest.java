@@ -4,49 +4,63 @@ package org.xbill.DNS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class GeneratorTest {
   private static final Name origin = Name.fromConstantString("example.com.");
 
-  @Test
-  void testSupportedType() {
-    assertTrue(Generator.supportedType(Type.PTR));
-    assertTrue(Generator.supportedType(Type.CNAME));
-    assertTrue(Generator.supportedType(Type.DNAME));
-    assertTrue(Generator.supportedType(Type.A));
-    assertTrue(Generator.supportedType(Type.AAAA));
-    assertTrue(Generator.supportedType(Type.NS));
+  @ParameterizedTest
+  @ValueSource(
+      ints = {
+        Type.PTR,
+        Type.CNAME,
+        Type.DNAME,
+        Type.A,
+        Type.AAAA,
+        Type.NS,
+      })
+  void testSupportedType(int type) {
+    assertThat(Generator.supportedType(type)).as(Type.string(type)).isTrue();
+  }
 
-    assertFalse(Generator.supportedType(Type.MX));
-    assertFalse(Generator.supportedType(Type.SOA));
-
-    assertThrows(InvalidTypeException.class, () -> Generator.supportedType(-1));
+  @ParameterizedTest
+  @ValueSource(
+      ints = {
+        Type.MX, Type.SOA,
+      })
+  void testUnsupportedType(int type) {
+    assertThat(Generator.supportedType(type)).as(Type.string(type)).isFalse();
   }
 
   @Test
-  void testConstructor_InvalidRange() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Generator(-1, 10, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Generator(10, 5, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Generator(0, 10, 0, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Generator(0, 10, -1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
+  void testInvalidType() {
+    assertThatThrownBy(() -> Generator.supportedType(-1)).isInstanceOf(InvalidTypeException.class);
+  }
+
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "-1,-10,1",
+        "10,5,1",
+        "0,10,0",
+        "0,10,-1",
+      })
+  void testConstructor_InvalidRange(int start, int end, int step) {
+    assertThatThrownBy(
+            () ->
+                new Generator(
+                    start, end, step, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -85,88 +99,71 @@ public class GeneratorTest {
     assertNull(g.nextRecord());
   }
 
-  @Test
-  void testSubstitution_Modifiers() throws IOException {
-    // ${offset,width,base}
-    // offset=1, width=3, base=x
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "1|1|1|host-$|host-1.example.com.",
+        "1|1|1|host-$.xyz|host-1.xyz.example.com.",
+        "15|15|1|host-${1,3,x}|host-010.example.com.",
+        "15|15|1|host-${1,3,x}.xyz|host-010.xyz.example.com.",
+        "15|15|1|host-${1,3,X}|host-010.example.com.",
+        "15|15|1|host-${1,3,X}.xyz|host-010.xyz.example.com.",
+        "30|30|1|host-${1,1,x}|host-1f.example.com.",
+        "30|30|1|host-${1,1,x}.xyz|host-1f.xyz.example.com.",
+        "30|30|1|host-${1,1,X}|host-1F.example.com.",
+        "30|30|1|host-${1,1,X}.xyz|host-1F.xyz.example.com.",
+        "7|7|1|host-${1,3,o}|host-010.example.com.",
+        "7|7|1|host-${1,3,o}.xyz|host-010.xyz.example.com.",
+        "7|7|1|host-${1,3,O}|host-010.example.com.",
+        "7|7|1|host-${1,3,O}.xyz|host-010.xyz.example.com.",
+      },
+      delimiter = '|')
+  void testSubstitution_Modifiers(int start, int end, int step, String namePattern, String expected)
+      throws IOException {
     Generator g =
-        new Generator(15, 15, 1, "host${1,3,x}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
+        new Generator(start, end, step, namePattern, Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
-    // 15 + 1 = 16. Hex 16 is 10. Width 3 -> 010.
-    assertEquals("host010.example.com.", r.getName().toString());
-
-    // Test Upper Case Hex
-    g = new Generator(15, 15, 1, "host${1,3,X}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
-    r = g.nextRecord();
-    assertEquals("host010.example.com.", r.getName().toString()); // 10 doesn't have letters.
-
-    g = new Generator(30, 30, 1, "host${1,1,X}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
-    r = g.nextRecord();
-    // 30 + 1 = 31. Hex 31 is 1f. X -> 1F.
-    assertEquals("host1F.example.com.", r.getName().toString());
-
-    // Test Octal
-    g = new Generator(7, 7, 1, "host${1,3,o}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
-    r = g.nextRecord();
-    // 7 + 1 = 8. Octal 8 is 10. Width 3 -> 010.
-    assertEquals("host010.example.com.", r.getName().toString());
+    assertThat(r.getName()).hasToString(expected);
   }
 
-  @Test
-  void testSubstitution_LiteralDollar() throws IOException {
-    Generator g = new Generator(1, 1, 1, "host$$", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "host$$", "host\\$",
+      })
+  void testDollarEscapes(String namePatter) throws IOException {
+    Generator g = new Generator(1, 1, 1, namePatter, Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
-    assertEquals("host\\$.example.com.", r.getName().toString());
-  }
-
-  @Test
-  void testSubstitution_Escaped() throws IOException {
-    Generator g = new Generator(1, 1, 1, "host\\$", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
-    Record r = g.nextRecord();
-    assertEquals("host\\$.example.com.", r.getName().toString());
+    assertThat(r.getName()).hasToString("host\\$.example.com.");
   }
 
   @Test
   void testSubstitution_PlainDollar() throws IOException {
-    // A single $ at the end of string should be treated as literal $ by the current implementation
-    // because it doesn't match $$, ${, and is not escaped.
     Generator g = new Generator(1, 1, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
-    assertEquals("host1.example.com.", r.getName().toString());
+    assertThat(r.getName())
+        .as("A single $ at the end of string should be treated as ${0}")
+        .hasToString("host1.example.com.");
   }
 
-  @Test
-  void testSubstitution_InvalidModifiers() {
-    // Invalid offset (not a number)
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new Generator(1, 1, 1, "host${a}", Type.A, DClass.IN, 3600, "1.2.3.1", origin)
-                .nextRecord());
-    // Invalid width (not a number)
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new Generator(1, 1, 1, "host${1,a}", Type.A, DClass.IN, 3600, "1.2.3.1", origin)
-                .nextRecord());
-    // Invalid base
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new Generator(1, 1, 1, "host${1,1,z}", Type.A, DClass.IN, 3600, "1.2.3.1", origin)
-                .nextRecord());
-    // Missing closing brace
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new Generator(1, 1, 1, "host${1,1,x", Type.A, DClass.IN, 3600, "1.2.3.1", origin)
-                .nextRecord());
-    // Invalid escape at end
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new Generator(1, 1, 1, "host\\", Type.A, DClass.IN, 3600, "1.2.3.1", origin)
-                .nextRecord());
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "host${a}|invalid spec, unexpected character",
+        "host${1,a}|invalid spec, unexpected character",
+        "host${1,1,z}|invalid spec, unexpected character z for base",
+        "host${1,1,d,1}|invalid spec, too many parts",
+        "host${1,1,x|unexpected end of pattern",
+        "host\\|invalid spec, unexpected end of pattern",
+      },
+      delimiter = '|')
+  void testSubstitution_InvalidModifiers(String pattern, String exceptionMessage) {
+    assertThatThrownBy(
+            () ->
+                new Generator(1, 1, 1, pattern, Type.A, DClass.IN, 3600, "1.2.3.1", origin)
+                    .nextRecord())
+        .isInstanceOf(TextParseException.class)
+        .hasMessageContaining(exceptionMessage);
   }
 
   @Test
@@ -218,6 +215,26 @@ public class GeneratorTest {
     assertThatThrownBy(g::expand)
         .isInstanceOf(TextParseException.class)
         .hasMessageContaining("exceeds");
+  }
+
+  /** $GENERATE modifiers with one or two fields ("${1}", "${1,3}") are valid. */
+  @ParameterizedTest
+  @CsvSource(
+      value = {
+        "host${1}|host2|10.0.0.$|10.0.0.1",
+        "host${1}|host2|10.0.0.${1}|10.0.0.2",
+        "host${1,3}|host002|10.0.0.$|10.0.0.1",
+        "host${1,3}|host002|10.0.0.${1}|10.0.0.2",
+      },
+      delimiter = '|')
+  void generatorShortModifiers(
+      String namePattern, String expectedName, String rdataPattern, String expectedRdata)
+      throws Exception {
+    Record one =
+        new Generator(1, 1, 1, namePattern, Type.A, DClass.IN, 3600, rdataPattern, origin)
+            .nextRecord();
+    assertThat(one.getName()).isEqualTo(new Name(expectedName, origin));
+    assertThat(one.rrToString()).isEqualTo(expectedRdata);
   }
 
   @Test

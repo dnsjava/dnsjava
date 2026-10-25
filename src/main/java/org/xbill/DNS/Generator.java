@@ -6,6 +6,7 @@ package org.xbill.DNS;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A representation of a $GENERATE statement in a master file.
@@ -106,125 +107,120 @@ public class Generator {
   }
 
   private String substitute(String spec, long n, int maxLength) throws IOException {
+    // Replace patterns of the format ${offset[,width[,base]]} or $, which is equivalent to '${0}'
+    int sign = 1;
+    long offset = 0;
+    long width = 0;
+    int radix = 10;
+    int specPos = 0;
     boolean escaped = false;
-    byte[] str = spec.getBytes();
-    StringBuilder sb = new StringBuilder();
+    boolean dollar = false;
+    boolean uppercase = false;
 
-    for (int i = 0; i < str.length; i++) {
-      char c = (char) (str[i] & 0xFF);
-      if (escaped) {
-        sb.append(c);
-        escaped = false;
-      } else if (c == '\\') {
-        if (i + 1 == str.length) {
-          throw new TextParseException("invalid escape character");
-        }
+    StringBuilder sb = new StringBuilder(spec.length());
+    for (int i = 0; i < spec.length(); i++) {
+      char c = spec.charAt(i);
+      if (c == '\\') {
         escaped = true;
-      } else if (c == '$') {
-        boolean negative = false;
-        long offset = 0;
-        long width = 0;
-        long base = 10;
-        boolean wantUpperCase = false;
-        if (i + 1 < str.length && str[i + 1] == '$') {
-          // '$$' == literal '$' for backwards
-          // compatibility with old versions of BIND.
-          c = (char) (str[++i] & 0xFF);
-          sb.append(c);
-          continue;
-        } else if (i + 1 < str.length && str[i + 1] == '{') {
-          // It's a substitution with modifiers.
-          i++;
-          if (i + 1 < str.length && str[i + 1] == '-') {
-            negative = true;
-            i++;
-          }
-          while (i + 1 < str.length) {
-            c = (char) (str[++i] & 0xFF);
-            if (c == ',' || c == '}') {
-              break;
-            }
-            if (c < '0' || c > '9') {
-              throw new TextParseException("invalid offset");
-            }
-            c -= '0';
+      } else if (!escaped && !dollar && c == '$') {
+        dollar = true;
+      } else if (!escaped && c == '$') {
+        // '$$' == literal '$' for compatibility with old versions of BIND
+        dollar = false;
+        sb.append(c);
+      } else if (dollar && c == '{') {
+        specPos = 1;
+        sign = 1;
+        offset = 0;
+        width = 0;
+        radix = 10;
+        uppercase = false;
+      } else if (dollar && specPos == 0) {
+        sb.append(n);
+        sb.append(c);
+        dollar = false;
+      } else if (specPos > 0) {
+        if (c == '-' && specPos == 1) {
+          sign = -1;
+        } else if (c >= '0' && c <= '9') {
+          if (specPos == 1) {
             offset *= 10;
-            offset += c;
+            offset += c - '0';
+          } else if (specPos == 2) {
+            width *= 10;
+            width += c - '0';
           }
-          if (negative) {
-            offset = -offset;
+        } else if (c == ',') {
+          specPos++;
+          if (specPos > 3) {
+            throw new TextParseException("invalid spec, too many parts");
           }
-
-          if (c == ',') {
-            while (i + 1 < str.length) {
-              c = (char) (str[++i] & 0xFF);
-              if (c == ',' || c == '}') {
-                break;
-              }
-              if (c < '0' || c > '9') {
-                throw new TextParseException("invalid width");
-              }
-              c -= '0';
-              width *= 10;
-              width += c;
-            }
-          }
-
-          if (c == ',') {
-            if (i + 1 == str.length) {
-              throw new TextParseException("invalid base");
-            }
-            c = (char) (str[++i] & 0xFF);
-            if (c == 'o') {
-              base = 8;
-            } else if (c == 'x') {
-              base = 16;
-            } else if (c == 'X') {
-              base = 16;
-              wantUpperCase = true;
-            } else if (c != 'd') {
-              throw new TextParseException("invalid base");
-            }
-          }
-
-          if (i + 1 == str.length || str[i + 1] != '}') {
-            throw new TextParseException("invalid modifiers");
-          }
-          i++;
-        }
-        long v = n + offset;
-        if (v < 0) {
-          throw new TextParseException("invalid offset expansion");
-        }
-        String number;
-        if (base == 8) {
-          number = Long.toOctalString(v);
-        } else if (base == 16) {
-          number = Long.toHexString(v);
+        } else if (c == '}') {
+          specPos = 0;
+        } else if (c == 'x') {
+          radix = 16;
+        } else if (c == 'X') {
+          radix = 16;
+          uppercase = true;
+        } else if (c == 'o' || c == 'O') {
+          radix = 8;
+        } else if (c == 'd' || c == 'D') {
+          radix = 10;
+        } else if (specPos == 1) {
+          throw new TextParseException("invalid spec, unexpected character " + c + " for offset");
+        } else if (specPos == 2) {
+          throw new TextParseException("invalid spec, unexpected character " + c + " for width");
         } else {
-          number = Long.toString(v);
+          throw new TextParseException("invalid spec, unexpected character " + c + " for base");
         }
-        if (base == 16 && wantUpperCase) {
-          number = number.toUpperCase();
-        }
-        if (width != 0 && width > number.length()) {
-          long zeros = width - number.length();
-          if (maxLength > -1 && zeros >= maxLength || zeros > Integer.MAX_VALUE) {
-            throw new TextParseException("expansion exceeds max length");
+
+        if (specPos == 0) {
+          offset *= sign;
+
+          long value = n + offset;
+          if (value < 0) {
+            throw new TextParseException(
+                "invalid offset expansion: negative value for $=" + n + ", offset=" + offset);
           }
 
-          while (zeros-- > 0) {
-            sb.append('0');
+          String number = Long.toString(value, radix);
+          if (uppercase) {
+            number = number.toUpperCase(Locale.ENGLISH);
           }
+
+          if (width > number.length()) {
+            long zeros = width - number.length();
+            if (maxLength > -1 && zeros >= maxLength || zeros > Integer.MAX_VALUE) {
+              throw new TextParseException("expansion exceeds max length");
+            }
+
+            while (zeros-- > 0) {
+              sb.append('0');
+            }
+          }
+
+          sb.append(number);
+          dollar = false;
         }
-        sb.append(number);
       } else {
+        escaped = false;
         sb.append(c);
       }
     }
+
+    if (specPos != 0 || escaped) {
+      throw new TextParseException("invalid spec, unexpected end of pattern");
+    }
+
+    // End of string, append the number
+    if (dollar) {
+      sb.append(n);
+    }
+
     if (maxLength > -1 && sb.length() >= maxLength) {
       throw new TextParseException("expansion exceeds max length");
     }
+
     return sb.toString();
   }
 
