@@ -35,10 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -47,15 +45,15 @@ class KEYRecordTest {
   @Test
   void ctor_0arg() {
     KEYRecord ar = new KEYRecord();
-    assertNull(ar.getName());
-    assertEquals(0, ar.getType());
-    assertEquals(0, ar.getDClass());
-    assertEquals(0, ar.getTTL());
-    assertEquals(0, ar.getAlgorithm());
-    assertEquals(0, ar.getFlags());
-    assertEquals(0, ar.getFootprint());
-    assertEquals(0, ar.getProtocol());
-    assertNull(ar.getKey());
+    assertThat(ar.getName()).isNull();
+    assertThat(ar.getType()).isZero();
+    assertThat(ar.getDClass()).isZero();
+    assertThat(ar.getTTL()).isZero();
+    assertThat(ar.getAlgorithm()).isZero();
+    assertThat(ar.getFlags()).isZero();
+    assertThat(ar.getFootprint()).isZero();
+    assertThat(ar.getProtocol()).isZero();
+    assertThat(ar.getKey()).isNull();
   }
 
   @Test
@@ -65,43 +63,44 @@ class KEYRecordTest {
     byte[] key = {0, 1, 3, 5, 7, 9};
 
     KEYRecord kr = new KEYRecord(n, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
-    assertEquals(n, kr.getName());
-    assertEquals(Type.KEY, kr.getType());
-    assertEquals(DClass.IN, kr.getDClass());
-    assertEquals(0x24AC, kr.getTTL());
-    assertEquals(0x9832, kr.getFlags());
-    assertEquals(0x12, kr.getProtocol());
-    assertEquals(0x67, kr.getAlgorithm());
-    assertArrayEquals(key, kr.getKey());
+    assertThat(kr.getName()).isEqualTo(n);
+    assertThat(kr.getType()).isEqualTo(Type.KEY);
+    assertThat(kr.getDClass()).isEqualTo(DClass.IN);
+    assertThat(kr.getTTL()).isEqualTo(0x24AC);
+    assertThat(kr.getFlags()).isEqualTo(0x9832);
+    assertThat(kr.getProtocol()).isEqualTo(0x12);
+    assertThat(kr.getAlgorithm()).isEqualTo(0x67);
+    assertThat(kr.getKey()).containsExactly(key);
 
     // a relative name
-    assertThrows(
-        RelativeNameException.class,
-        () -> new KEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new KEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
   }
 
   @Test
   void Protocol_string() {
     // a regular one
-    assertEquals("DNSSEC", KEYRecord.Protocol.string(KEYRecord.Protocol.DNSSEC));
-    // a unassigned value within range
-    assertEquals("254", KEYRecord.Protocol.string(0xFE));
+    assertThat(KEYRecord.Protocol.string(KEYRecord.Protocol.DNSSEC)).isEqualTo("DNSSEC");
+    // an unassigned value within range
+    assertThat(KEYRecord.Protocol.string(0xFE)).isEqualTo("254");
     // too low
-    assertThrows(IllegalArgumentException.class, () -> KEYRecord.Protocol.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> KEYRecord.Protocol.string(-1));
     // too high
-    assertThrows(IllegalArgumentException.class, () -> KEYRecord.Protocol.string(0x100));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> KEYRecord.Protocol.string(0x100));
   }
 
   @Test
   void Protocol_value() {
     // a regular one
-    assertEquals(KEYRecord.Protocol.IPSEC, KEYRecord.Protocol.value("IPSEC"));
-    // a unassigned value within range
-    assertEquals(254, KEYRecord.Protocol.value("254"));
+    assertThat(KEYRecord.Protocol.value("IPSEC")).isEqualTo(KEYRecord.Protocol.IPSEC);
+    // an unassigned value within range
+    assertThat(KEYRecord.Protocol.value("254")).isEqualTo(254);
     // too low
-    assertEquals(-1, KEYRecord.Protocol.value("-2"));
+    assertThat(KEYRecord.Protocol.value("-2")).isEqualTo(-1);
     // too high
-    assertEquals(-1, KEYRecord.Protocol.value("256"));
+    assertThat(KEYRecord.Protocol.value("256")).isEqualTo(-1);
   }
 
   @Test
@@ -109,28 +108,27 @@ class KEYRecordTest {
     // numeric
 
     // lower bound
-    assertEquals(-1, KEYRecord.Flags.value("-2"));
-    assertEquals(0, KEYRecord.Flags.value("0"));
+    assertThat(KEYRecord.Flags.value("-2")).isEqualTo(-1);
+    assertThat(KEYRecord.Flags.value("0")).isZero();
     // in the middle
-    assertEquals(0xAB35, KEYRecord.Flags.value(0xAB35 + ""));
+    assertThat(KEYRecord.Flags.value(0xAB35 + "")).isEqualTo(0xAB35);
     // upper bound
-    assertEquals(0xFFFF, KEYRecord.Flags.value(0xFFFF + ""));
-    assertEquals(-1, KEYRecord.Flags.value(0x10000 + ""));
+    assertThat(KEYRecord.Flags.value(0xFFFF + "")).isEqualTo(0xFFFF);
+    assertThat(KEYRecord.Flags.value(0x10000 + "")).isEqualTo(-1);
 
     // textual
 
     // single
-    assertEquals(KEYRecord.Flags.EXTEND, KEYRecord.Flags.value("EXTEND"));
+    assertThat(KEYRecord.Flags.value("EXTEND")).isEqualTo(KEYRecord.Flags.EXTEND);
     // single invalid
-    assertEquals(-1, KEYRecord.Flags.value("NOT_A_VALID_NAME"));
+    assertThat(KEYRecord.Flags.value("NOT_A_VALID_NAME")).isEqualTo(-1);
     // multiple
-    assertEquals(
-        KEYRecord.Flags.NOAUTH | KEYRecord.Flags.FLAG10 | KEYRecord.Flags.ZONE,
-        KEYRecord.Flags.value("NOAUTH|ZONE|FLAG10"));
+    assertThat(KEYRecord.Flags.value("NOAUTH|ZONE|FLAG10"))
+        .isEqualTo(KEYRecord.Flags.NOAUTH | KEYRecord.Flags.FLAG10 | KEYRecord.Flags.ZONE);
     // multiple invalid
-    assertEquals(-1, KEYRecord.Flags.value("NOAUTH|INVALID_NAME|FLAG10"));
+    assertThat(KEYRecord.Flags.value("NOAUTH|INVALID_NAME|FLAG10")).isEqualTo(-1);
     // pathological
-    assertEquals(0, KEYRecord.Flags.value("|"));
+    assertThat(KEYRecord.Flags.value("|")).isZero();
   }
 
   @Test
@@ -139,42 +137,42 @@ class KEYRecordTest {
     KEYRecord kr = new KEYRecord();
     Tokenizer st = new Tokenizer("NOAUTH|ZONE|FLAG10 EMAIL RSASHA1 AQIDBAUGBwgJ");
     kr.rdataFromString(st, null);
-    assertEquals(
-        KEYRecord.Flags.NOAUTH | KEYRecord.Flags.FLAG10 | KEYRecord.Flags.ZONE, kr.getFlags());
-    assertEquals(KEYRecord.Protocol.EMAIL, kr.getProtocol());
-    assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
-    assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
+    assertThat(kr.getFlags())
+        .isEqualTo(KEYRecord.Flags.NOAUTH | KEYRecord.Flags.FLAG10 | KEYRecord.Flags.ZONE);
+    assertThat(kr.getProtocol()).isEqualTo(KEYRecord.Protocol.EMAIL);
+    assertThat(kr.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.RSASHA1);
+    assertThat(kr.getKey()).containsExactly(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9});
 
     // basic w/o key
     kr = new KEYRecord();
     st = new Tokenizer("NOAUTH|NOKEY|FLAG10 TLS 3");
     kr.rdataFromString(st, null);
-    assertEquals(
-        KEYRecord.Flags.NOAUTH | KEYRecord.Flags.FLAG10 | KEYRecord.Flags.NOKEY, kr.getFlags());
-    assertEquals(KEYRecord.Protocol.TLS, kr.getProtocol());
-    assertEquals(3, kr.getAlgorithm()); // Was ECC
-    assertNull(kr.getKey());
+    assertThat(kr.getFlags())
+        .isEqualTo(KEYRecord.Flags.NOAUTH | KEYRecord.Flags.FLAG10 | KEYRecord.Flags.NOKEY);
+    assertThat(kr.getProtocol()).isEqualTo(KEYRecord.Protocol.TLS);
+    assertThat(kr.getAlgorithm()).isEqualTo(3); // Was ECC
+    assertThat(kr.getKey()).isNull();
 
     // invalid flags
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new KEYRecord()
-                .rdataFromString(
-                    new Tokenizer("NOAUTH|ZONE|JUNK EMAIL RSASHA1 AQIDBAUGBwgJ"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () ->
+                new KEYRecord()
+                    .rdataFromString(
+                        new Tokenizer("NOAUTH|ZONE|JUNK EMAIL RSASHA1 AQIDBAUGBwgJ"), null));
 
     // invalid protocol
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new KEYRecord()
-                .rdataFromString(new Tokenizer("NOAUTH|ZONE RSASHA1 3 AQIDBAUGBwgJ"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () ->
+                new KEYRecord()
+                    .rdataFromString(new Tokenizer("NOAUTH|ZONE RSASHA1 3 AQIDBAUGBwgJ"), null));
 
     // invalid algorithm
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new KEYRecord()
-                .rdataFromString(new Tokenizer("NOAUTH|ZONE EMAIL ZONE AQIDBAUGBwgJ"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () ->
+                new KEYRecord()
+                    .rdataFromString(new Tokenizer("NOAUTH|ZONE EMAIL ZONE AQIDBAUGBwgJ"), null));
   }
 }

@@ -35,10 +35,9 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,24 +55,24 @@ class DNSOutputTest {
   @Test
   void default_ctor() {
     m_do = new DNSOutput();
-    assertEquals(0, m_do.current());
+    assertThat(m_do.current()).isZero();
   }
 
   @Test
   void initial_state() {
-    assertEquals(0, m_do.current());
-    assertThrows(IllegalStateException.class, () -> m_do.restore());
-    assertThrows(IllegalArgumentException.class, () -> m_do.jump(1));
+    assertThat(m_do.current()).isZero();
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_do.restore());
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_do.jump(1));
   }
 
   @Test
   void writeU8_basic() {
     m_do.writeU8(1);
-    assertEquals(1, m_do.current());
+    assertThat(m_do.current()).isOne();
 
     byte[] curr = m_do.toByteArray();
-    assertEquals(1, curr.length);
-    assertEquals(1, curr[0]);
+    assertThat(curr.length).isOne();
+    assertThat(curr[0]).isOne();
   }
 
   @Test
@@ -82,19 +81,19 @@ class DNSOutputTest {
     m_do.writeU8(1);
     m_do.writeU8(2);
 
-    assertEquals(2, m_do.current());
+    assertThat(m_do.current()).isEqualTo(2);
 
     byte[] curr = m_do.toByteArray();
-    assertEquals(2, curr.length);
-    assertEquals(1, curr[0]);
-    assertEquals(2, curr[1]);
+    assertThat(curr).hasSize(2);
+    assertThat(curr[0]).isOne();
+    assertThat(curr[1]).isEqualTo((byte) 2);
   }
 
   @Test
   void writeU8_max() {
     m_do.writeU8(0xFF);
     byte[] curr = m_do.toByteArray();
-    assertEquals((byte) 0xFF, curr[0]);
+    assertThat(curr[0]).isEqualTo((byte) 0xFF);
   }
 
   @ParameterizedTest
@@ -109,20 +108,20 @@ class DNSOutputTest {
   @Test
   void writeU16_basic() {
     m_do.writeU16(0x100);
-    assertEquals(2, m_do.current());
+    assertThat(m_do.current()).isEqualTo(2);
 
     byte[] curr = m_do.toByteArray();
-    assertEquals(2, curr.length);
-    assertEquals(1, curr[0]);
-    assertEquals(0, curr[1]);
+    assertThat(curr).hasSize(2);
+    assertThat(curr[0]).isOne();
+    assertThat(curr[1]).isZero();
   }
 
   @Test
   void writeU16_max() {
     m_do.writeU16(0xFFFF);
     byte[] curr = m_do.toByteArray();
-    assertEquals((byte) 0xFF, curr[0]);
-    assertEquals((byte) 0XFF, curr[1]);
+    assertThat(curr[0]).isEqualTo((byte) 0xFF);
+    assertThat(curr[1]).isEqualTo((byte) 0XFF);
   }
 
   @ParameterizedTest
@@ -139,24 +138,24 @@ class DNSOutputTest {
   @Test
   void writeU32_basic() {
     m_do.writeU32(0x11001011);
-    assertEquals(4, m_do.current());
+    assertThat(m_do.current()).isEqualTo(4);
 
     byte[] curr = m_do.toByteArray();
-    assertEquals(4, curr.length);
-    assertEquals(0x11, curr[0]);
-    assertEquals(0x00, curr[1]);
-    assertEquals(0x10, curr[2]);
-    assertEquals(0x11, curr[3]);
+    assertThat(curr).hasSize(4);
+    assertThat(curr[0]).isEqualTo((byte) 0x11);
+    assertThat(curr[1]).isEqualTo((byte) 0x00);
+    assertThat(curr[2]).isEqualTo((byte) 0x10);
+    assertThat(curr[3]).isEqualTo((byte) 0x11);
   }
 
   @Test
   void writeU32_max() {
     m_do.writeU32(0xFFFFFFFFL);
     byte[] curr = m_do.toByteArray();
-    assertEquals((byte) 0xFF, curr[0]);
-    assertEquals((byte) 0XFF, curr[1]);
-    assertEquals((byte) 0XFF, curr[2]);
-    assertEquals((byte) 0XFF, curr[3]);
+    assertThat(curr[0]).isEqualTo((byte) 0xFF);
+    assertThat(curr[1]).isEqualTo((byte) 0XFF);
+    assertThat(curr[2]).isEqualTo((byte) 0XFF);
+    assertThat(curr[3]).isEqualTo((byte) 0XFF);
   }
 
   @ParameterizedTest
@@ -173,71 +172,72 @@ class DNSOutputTest {
   @Test
   void jump_basic() {
     m_do.writeU32(0x11223344L);
-    assertEquals(4, m_do.current());
+    assertThat(m_do.current()).isEqualTo(4);
     m_do.jump(2);
-    assertEquals(2, m_do.current());
+    assertThat(m_do.current()).isEqualTo(2);
     m_do.writeU8(0x99);
     byte[] curr = m_do.toByteArray();
-    assertEquals(3, curr.length);
-    assertEquals(0x11, curr[0]);
-    assertEquals(0x22, curr[1]);
-    assertEquals((byte) 0x99, curr[2]);
+    assertThat(curr).hasSize(3);
+    assertThat(curr[0]).isEqualTo((byte) 0x11);
+    assertThat(curr[1]).isEqualTo((byte) 0x22);
+    assertThat(curr[2]).isEqualTo((byte) 0x99);
   }
 
   @Test
   void writeByteArray_1arg() {
     byte[] in = {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
     m_do.writeByteArray(in);
-    assertEquals(5, m_do.current());
+    assertThat(m_do.current()).isEqualTo(5);
     byte[] curr = m_do.toByteArray();
-    assertArrayEquals(in, curr);
+    assertThat(curr).containsExactly(in);
   }
 
   @Test
   void writeByteArray_3arg() {
     byte[] in = {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
     m_do.writeByteArray(in, 2, 3);
-    assertEquals(3, m_do.current());
+    assertThat(m_do.current()).isEqualTo(3);
     byte[] exp = {in[2], in[3], in[4]};
     byte[] curr = m_do.toByteArray();
-    assertArrayEquals(exp, curr);
+    assertThat(curr).containsExactly(exp);
   }
 
   @Test
   void writeCountedString_basic() {
     byte[] in = {'h', 'e', 'l', 'L', '0'};
     m_do.writeCountedString(in);
-    assertEquals(in.length + 1, m_do.current());
+    assertThat(m_do.current()).isEqualTo(in.length + 1);
     byte[] curr = m_do.toByteArray();
     byte[] exp = {(byte) in.length, in[0], in[1], in[2], in[3], in[4]};
-    assertArrayEquals(exp, curr);
+    assertThat(curr).containsExactly(exp);
   }
 
   @Test
   void writeCountedString_empty() {
     byte[] in = {};
     m_do.writeCountedString(in);
-    assertEquals(in.length + 1, m_do.current());
+    assertThat(m_do.current()).isEqualTo(in.length + 1);
     byte[] curr = m_do.toByteArray();
     byte[] exp = {(byte) in.length};
-    assertArrayEquals(exp, curr);
+    assertThat(curr).containsExactly(exp);
   }
 
   @Test
   void writeCountedString_toobig() {
     byte[] in = new byte[256];
-    assertThrows(IllegalArgumentException.class, () -> m_do.writeCountedString(in));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> m_do.writeCountedString(in));
   }
 
   @Test
   void save_restore() {
     m_do.writeU32(0x12345678L);
-    assertEquals(4, m_do.current());
+    assertThat(m_do.current()).isEqualTo(4);
     m_do.save();
     m_do.writeU16(0xABCD);
-    assertEquals(6, m_do.current());
+    assertThat(m_do.current()).isEqualTo(6);
     m_do.restore();
-    assertEquals(4, m_do.current());
-    assertThrows(IllegalStateException.class, () -> m_do.restore());
+    assertThat(m_do.current()).isEqualTo(4);
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_do.restore());
   }
 }

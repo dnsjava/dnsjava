@@ -35,10 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -60,24 +57,24 @@ class KEYBaseTest {
   @Test
   void ctor() throws TextParseException {
     TestClass tc = new TestClass();
-    assertEquals(0, tc.getFlags());
-    assertEquals(0, tc.getProtocol());
-    assertEquals(0, tc.getAlgorithm());
-    assertNull(tc.getKey());
+    assertThat(tc.getFlags()).isZero();
+    assertThat(tc.getProtocol()).isZero();
+    assertThat(tc.getAlgorithm()).isZero();
+    assertThat(tc.getKey()).isNull();
 
     Name n = Name.fromString("my.name.");
     byte[] key = {0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF};
 
     tc = new TestClass(n, Type.KEY, DClass.IN, 100L, 0xFF, 0xF, 0xE, key);
 
-    assertSame(n, tc.getName());
-    assertEquals(Type.KEY, tc.getType());
-    assertEquals(DClass.IN, tc.getDClass());
-    assertEquals(100L, tc.getTTL());
-    assertEquals(0xFF, tc.getFlags());
-    assertEquals(0xF, tc.getProtocol());
-    assertEquals(0xE, tc.getAlgorithm());
-    assertArrayEquals(key, tc.getKey());
+    assertThat(tc.getName()).isSameAs(n);
+    assertThat(tc.getType()).isEqualTo(Type.KEY);
+    assertThat(tc.getDClass()).isEqualTo(DClass.IN);
+    assertThat(tc.getTTL()).isEqualTo(100L);
+    assertThat(tc.getFlags()).isEqualTo(0xFF);
+    assertThat(tc.getProtocol()).isEqualTo(0xF);
+    assertThat(tc.getAlgorithm()).isEqualTo(0xE);
+    assertThat(tc.getKey()).containsExactly(key);
   }
 
   @Test
@@ -88,10 +85,10 @@ class KEYBaseTest {
     TestClass tc = new TestClass();
     tc.rrFromWire(in);
 
-    assertEquals(0xABCD, tc.getFlags());
-    assertEquals(0xEF, tc.getProtocol());
-    assertEquals(0x19, tc.getAlgorithm());
-    assertArrayEquals(new byte[] {1, 2, 3, 4, 5}, tc.getKey());
+    assertThat(tc.getFlags()).isEqualTo(0xABCD);
+    assertThat(tc.getProtocol()).isEqualTo(0xEF);
+    assertThat(tc.getAlgorithm()).isEqualTo(0x19);
+    assertThat(tc.getKey()).containsExactly(new byte[] {1, 2, 3, 4, 5});
 
     raw = new byte[] {(byte) 0xBA, (byte) 0xDA, (byte) 0xFF, (byte) 0x28};
     in = new DNSInput(raw);
@@ -99,10 +96,10 @@ class KEYBaseTest {
     tc = new TestClass();
     tc.rrFromWire(in);
 
-    assertEquals(0xBADA, tc.getFlags());
-    assertEquals(0xFF, tc.getProtocol());
-    assertEquals(0x28, tc.getAlgorithm());
-    assertNull(tc.getKey());
+    assertThat(tc.getFlags()).isEqualTo(0xBADA);
+    assertThat(tc.getProtocol()).isEqualTo(0xFF);
+    assertThat(tc.getAlgorithm()).isEqualTo(0x28);
+    assertThat(tc.getKey()).isNull();
   }
 
   @Test
@@ -114,16 +111,16 @@ class KEYBaseTest {
 
     String out = tc.rrToString();
 
-    assertEquals("255 15 14", out);
+    assertThat(out).isEqualTo("255 15 14");
 
     tc = new TestClass(n, Type.KEY, DClass.IN, 100L, 0xFF, 0xF, 0xE, key);
     out = tc.rrToString();
 
-    assertEquals("255 15 14 " + base64.toString(key), out);
+    assertThat(out).isEqualTo("255 15 14 " + base64.toString(key));
 
     Options.set("multiline");
     out = tc.rrToString();
-    assertEquals("255 15 14 (\n\t" + base64.toString(key) + " ) ; key_tag = 18509", out);
+    assertThat(out).isEqualTo("255 15 14 (\n\t" + base64.toString(key) + " ) ; key_tag = 18509");
 
     Options.unset("multiline");
   }
@@ -138,24 +135,24 @@ class KEYBaseTest {
 
     int foot = tc.getFootprint();
     // second-to-last and third-to-last bytes of key for RSAMD5
-    assertEquals(0xD0E, foot);
-    assertEquals(foot, tc.getFootprint());
+    assertThat(foot).isEqualTo(0xD0E);
+    assertThat(tc.getFootprint()).isEqualTo(foot);
 
     // key with an odd number of bytes
     tc =
         new TestClass(
             n, Type.KEY, DClass.IN, 100L, 0x89AB, 0xCD, 0xEF, new byte[] {0x12, 0x34, 0x56});
 
-    // rrToWire gives: { 0x89, 0xAB, 0xCD, 0xEF, 0x12, 0x34, 0x56 }
+    // rrToWire gives: '{ 0x89, 0xAB, 0xCD, 0xEF, 0x12, 0x34, 0x56 }'
     // 89AB + CDEF + 1234 + 5600 = 1BCFE
     // 1BFCE + 1 = 1BFCF & FFFF = BFCF
     foot = tc.getFootprint();
-    assertEquals(0xBFCF, foot);
-    assertEquals(foot, tc.getFootprint());
+    assertThat(foot).isEqualTo(0xBFCF);
+    assertThat(tc.getFootprint()).isEqualTo(foot);
 
     // empty
     tc = new TestClass();
-    assertEquals(0, tc.getFootprint());
+    assertThat(tc.getFootprint()).isZero();
   }
 
   @Test
@@ -192,11 +189,11 @@ class KEYBaseTest {
 
     // canonical
     tc.rrToWire(o, null, true);
-    assertArrayEquals(exp, o.toByteArray());
+    assertThat(o.toByteArray()).containsExactly(exp);
 
     // not canonical
     o = new DNSOutput();
     tc.rrToWire(o, null, false);
-    assertArrayEquals(exp, o.toByteArray());
+    assertThat(o.toByteArray()).containsExactly(exp);
   }
 }

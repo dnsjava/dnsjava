@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -16,24 +13,22 @@ class TcpKeepaliveOptionTest {
 
   @Test
   void constructorTests() {
-    assertFalse(new TcpKeepaliveOption().getTimeout().isPresent());
-    assertEquals(100, new TcpKeepaliveOption(100).getTimeout().getAsInt());
-    assertThrows(IllegalArgumentException.class, () -> new TcpKeepaliveOption(-1));
-    assertThrows(IllegalArgumentException.class, () -> new TcpKeepaliveOption(65536));
-    assertEquals(200, new TcpKeepaliveOption(Duration.ofSeconds(20)).getTimeout().getAsInt());
-    assertEquals(
-        Duration.ofSeconds(30),
-        new TcpKeepaliveOption(Duration.ofSeconds(30)).getTimeoutDuration().get());
-    assertEquals(
-        15,
-        new TcpKeepaliveOption(Duration.ofSeconds(1, 599_999_999))
-            .getTimeout()
-            .getAsInt()); // round down test
-    assertThrows(
-        IllegalArgumentException.class, () -> new TcpKeepaliveOption(Duration.ofMillis(-1)));
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new TcpKeepaliveOption(Duration.ofHours(2))); // 2h > 6553.5 seconds
+    assertThat(new TcpKeepaliveOption().getTimeout().isPresent()).isFalse();
+    assertThat(new TcpKeepaliveOption(100).getTimeout().getAsInt()).isEqualTo(100);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TcpKeepaliveOption(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TcpKeepaliveOption(65536));
+    assertThat(new TcpKeepaliveOption(Duration.ofSeconds(20)).getTimeout().getAsInt())
+        .isEqualTo(200);
+    assertThat(new TcpKeepaliveOption(Duration.ofSeconds(30)).getTimeoutDuration())
+        .contains(Duration.ofSeconds(30));
+    assertThat(new TcpKeepaliveOption(Duration.ofSeconds(1, 599_999_999)).getTimeout().getAsInt())
+        .isEqualTo(15); // round down test
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TcpKeepaliveOption(Duration.ofMillis(-1)));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TcpKeepaliveOption(Duration.ofHours(2))); // 2h > 6553.5 seconds
   }
 
   @Test
@@ -45,25 +40,27 @@ class TcpKeepaliveOptionTest {
     byte[] brokenLengthTimeout2 = base16.fromString("000B0005AABBCCDDEE");
 
     EDNSOption option = EDNSOption.fromWire(emptyTimeout);
-    assertNotNull(option);
-    assertEquals(TcpKeepaliveOption.class, option.getClass());
-    assertFalse(((TcpKeepaliveOption) option).getTimeout().isPresent());
+    assertThat(option).isNotNull();
+    assertThat(option.getClass()).isEqualTo(TcpKeepaliveOption.class);
+    assertThat(((TcpKeepaliveOption) option).getTimeout().isPresent()).isFalse();
 
     option = EDNSOption.fromWire(thirtySecsTimeout);
-    assertNotNull(option);
-    assertEquals(TcpKeepaliveOption.class, option.getClass());
-    assertEquals(300, ((TcpKeepaliveOption) option).getTimeout().getAsInt());
+    assertThat(option).isNotNull();
+    assertThat(option.getClass()).isEqualTo(TcpKeepaliveOption.class);
+    assertThat(((TcpKeepaliveOption) option).getTimeout().getAsInt()).isEqualTo(300);
 
     option = EDNSOption.fromWire(maxTimeout);
-    assertNotNull(option);
-    assertEquals(TcpKeepaliveOption.class, option.getClass());
-    assertEquals(65535, ((TcpKeepaliveOption) option).getTimeout().getAsInt());
+    assertThat(option).isNotNull();
+    assertThat(option.getClass()).isEqualTo(TcpKeepaliveOption.class);
+    assertThat(((TcpKeepaliveOption) option).getTimeout().getAsInt()).isEqualTo(65535);
 
-    assertThrows(WireParseException.class, () -> EDNSOption.fromWire(brokenLengthTimeout1));
-    assertThrows(WireParseException.class, () -> EDNSOption.fromWire(brokenLengthTimeout2));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> EDNSOption.fromWire(brokenLengthTimeout1));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> EDNSOption.fromWire(brokenLengthTimeout2));
 
-    assertArrayEquals(emptyTimeout, new TcpKeepaliveOption().toWire());
-    assertArrayEquals(thirtySecsTimeout, new TcpKeepaliveOption(300).toWire());
-    assertArrayEquals(maxTimeout, new TcpKeepaliveOption(65535).toWire());
+    assertThat(new TcpKeepaliveOption().toWire()).containsExactly(emptyTimeout);
+    assertThat(new TcpKeepaliveOption(300).toWire()).containsExactly(thirtySecsTimeout);
+    assertThat(new TcpKeepaliveOption(65535).toWire()).containsExactly(maxTimeout);
   }
 }

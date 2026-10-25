@@ -36,10 +36,7 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -70,38 +67,38 @@ class AAAARecordTest {
   @Test
   void ctor_0arg() {
     AAAARecord ar = new AAAARecord();
-    assertNull(ar.getName());
-    assertEquals(0, ar.getType());
-    assertEquals(0, ar.getDClass());
-    assertEquals(0, ar.getTTL());
-    assertNull(ar.getAddress());
+    assertThat(ar.getName()).isNull();
+    assertThat(ar.getType()).isZero();
+    assertThat(ar.getDClass()).isZero();
+    assertThat(ar.getTTL()).isZero();
+    assertThat(ar.getAddress()).isNull();
   }
 
   @Test
   void ctor_4arg() {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
-    assertEquals(m_an, ar.getName());
-    assertEquals(Type.AAAA, ar.getType());
-    assertEquals(DClass.IN, ar.getDClass());
-    assertEquals(m_ttl, ar.getTTL());
-    assertEquals(m_addr, ar.getAddress());
+    assertThat(ar.getName()).isEqualTo(m_an);
+    assertThat(ar.getType()).isEqualTo(Type.AAAA);
+    assertThat(ar.getDClass()).isEqualTo(DClass.IN);
+    assertThat(ar.getTTL()).isEqualTo(m_ttl);
+    assertThat(ar.getAddress()).isEqualTo(m_addr);
 
     // a relative name
-    assertThrows(RelativeNameException.class, () -> new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new AAAARecord(m_rn, DClass.IN, m_ttl, m_addr));
   }
 
   @ParameterizedTest
   @ValueSource(ints = {0, 1, 2, 3, 5, 15, 17})
   void ctor_4arg_bytes_invalidLength(int len) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new AAAARecord(m_an, DClass.IN, m_ttl, new byte[len]));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new AAAARecord(m_an, DClass.IN, m_ttl, new byte[len]));
   }
 
   @Test
   void ctor_v4_address() throws UnknownHostException {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, InetAddress.getByName("192.168.1.1"));
-    assertEquals("0:0:0:0:0:ffff:192.168.1.1", ar.rrToString());
+    assertThat(ar.rrToString()).isEqualTo("0:0:0:0:0:ffff:192.168.1.1");
     DNSOutput out = new DNSOutput();
     ar.rrToWire(out, null, false);
     assertThat(out.toByteArray())
@@ -115,7 +112,7 @@ class AAAARecordTest {
   void ctor_v4_bytes() {
     AAAARecord ar =
         new AAAARecord(m_an, DClass.IN, m_ttl, new byte[] {(byte) 192, (byte) 168, 1, 1});
-    assertEquals("0:0:0:0:0:ffff:192.168.1.1", ar.rrToString());
+    assertThat(ar.rrToString()).isEqualTo("0:0:0:0:0:ffff:192.168.1.1");
     DNSOutput out = new DNSOutput();
     ar.rrToWire(out, null, false);
     assertThat(out.toByteArray())
@@ -132,7 +129,7 @@ class AAAARecordTest {
 
     ar.rrFromWire(di);
 
-    assertEquals(m_addr, ar.getAddress());
+    assertThat(ar.getAddress()).isEqualTo(m_addr);
   }
 
   @Test
@@ -142,18 +139,17 @@ class AAAARecordTest {
 
     ar.rdataFromString(t, null);
 
-    assertEquals(m_addr, ar.getAddress());
+    assertThat(ar.getAddress()).isEqualTo(m_addr);
 
     // invalid address
-    assertThrows(
-        TextParseException.class,
-        () -> new AAAARecord().rdataFromString(new Tokenizer("193.160.232.1"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> new AAAARecord().rdataFromString(new Tokenizer("193.160.232.1"), null));
   }
 
   @Test
   void rrToString() {
     AAAARecord ar = new AAAARecord(m_an, DClass.IN, m_ttl, m_addr);
-    assertEquals(m_addr_string, ar.rrToString());
+    assertThat(ar.rrToString()).isEqualTo(m_addr_string);
   }
 
   @Test
@@ -163,11 +159,11 @@ class AAAARecordTest {
     // canonical
     DNSOutput dout = new DNSOutput();
     ar.rrToWire(dout, null, true);
-    assertArrayEquals(m_addr_bytes, dout.toByteArray());
+    assertThat(dout.toByteArray()).containsExactly(m_addr_bytes);
 
     // case sensitive
     dout = new DNSOutput();
     ar.rrToWire(dout, null, false);
-    assertArrayEquals(m_addr_bytes, dout.toByteArray());
+    assertThat(dout.toByteArray()).containsExactly(m_addr_bytes);
   }
 }

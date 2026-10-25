@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -15,29 +13,29 @@ class TestPartiallyInvalid extends TestBase {
   @Test
   void testValidExising() throws IOException {
     Message response = resolver.send(createMessage("www.partial.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertEquals(localhost, firstA(response));
-    assertNull(getReason(response));
+    assertThat(firstA(response)).isEqualTo(localhost);
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
   @Test
   void testValidExisingNoType() throws IOException {
     Message response = resolver.send(createMessage("www.partial.ingotronic.ch./MX"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertTrue(isEmptyAnswer(response));
-    assertNull(getReason(response));
+    assertThat(isEmptyAnswer(response)).isTrue();
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
   @Test
   void testValidNonExising() throws IOException {
     Message response = resolver.send(createMessage("www.gibtsnicht.partial.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NXDOMAIN, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 }

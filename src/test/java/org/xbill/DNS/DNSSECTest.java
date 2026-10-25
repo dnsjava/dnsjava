@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -169,14 +167,14 @@ class DNSSECTest {
     rrset.addRR(a1);
     rrset.addRR(s1);
     rrset.addRR(s2);
-    assertArrayEquals(DNSSEC.digestRRset(s1, rrset), DNSSEC.digestRRset(s1, rrset));
+    assertThat(DNSSEC.digestRRset(s1, rrset)).containsExactly(DNSSEC.digestRRset(s1, rrset));
   }
 
   @ParameterizedTest
   @MethodSource("testAlgorithmMnemonicSources")
   void testAlgorithmMnemonic(int algId, String algName) {
-    assertEquals(algName, DNSSEC.Algorithm.string(algId));
-    assertEquals(-1, DNSSEC.Algorithm.value("UNKNOWN_ALG"));
+    assertThat(DNSSEC.Algorithm.string(algId)).isEqualTo(algName);
+    assertThat(DNSSEC.Algorithm.value("UNKNOWN_ALG")).isEqualTo(-1);
   }
 
   private static Stream<Arguments> testAlgorithmMnemonicSources() {
@@ -204,8 +202,8 @@ class DNSSECTest {
   @ParameterizedTest
   @MethodSource("testDigestMnemonicSources")
   void testDigestMnemonic(int algId, String algName) {
-    assertEquals(algName, DNSSEC.Digest.string(algId));
-    assertEquals(algId, DNSSEC.Digest.value(algName));
+    assertThat(DNSSEC.Digest.string(algId)).isEqualTo(algName);
+    assertThat(DNSSEC.Digest.value(algName)).isEqualTo(algId);
   }
 
   private static Stream<Arguments> testDigestMnemonicSources() {
@@ -230,8 +228,7 @@ class DNSSECTest {
             DNSSEC.Algorithm.DSA,
             new byte[] {1, 2, 3, 4});
     byte[] digest = DNSSEC.generateDSDigest(dnskey, DNSSEC.Digest.SHA256);
-    assertNotNull(digest);
-    assertEquals(DNSSEC.Digest.algLength(DNSSEC.Algorithm.DSA), digest.length);
+    assertThat(digest).isNotNull().hasSize(DNSSEC.Digest.algLength(DNSSEC.Algorithm.DSA));
   }
 
   @Test
@@ -260,9 +257,8 @@ class DNSSECTest {
     rrset.addRR(rrsig);
 
     // Expired: now (10s) > expiration (3s)
-    assertThrows(
-        SignatureExpiredException.class,
-        () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochSecond(10)));
+    assertThatExceptionOfType(SignatureExpiredException.class)
+        .isThrownBy(() -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochSecond(10)));
   }
 
   @Test
@@ -291,9 +287,8 @@ class DNSSECTest {
     rrset.addRR(rrsig);
 
     // Not yet valid: now (0s) < inception (1s)
-    assertThrows(
-        SignatureNotYetValidException.class,
-        () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochSecond(0)));
+    assertThatExceptionOfType(SignatureNotYetValidException.class)
+        .isThrownBy(() -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochSecond(0)));
   }
 
   @Test
@@ -322,9 +317,8 @@ class DNSSECTest {
     rrset.addRR(txt);
     rrset.addRR(rrsig);
 
-    assertThrows(
-        KeyMismatchException.class,
-        () -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60)));
+    assertThatExceptionOfType(KeyMismatchException.class)
+        .isThrownBy(() -> DNSSEC.verify(rrset, rrsig, dnskey, Instant.ofEpochMilli(60)));
   }
 
   @Test
@@ -352,8 +346,8 @@ class DNSSECTest {
     Instant expiration = now.plus(1, ChronoUnit.HOURS);
 
     RRSIGRecord rrsig = DNSSEC.sign(rrset, dnskey, kp.getPrivate(), inception, expiration);
-    assertNotNull(rrsig);
-    assertEquals(dnskey.getFootprint(), rrsig.getFootprint());
+    assertThat(rrsig).isNotNull();
+    assertThat(rrsig.getFootprint()).isEqualTo(dnskey.getFootprint());
 
     rrset.addRR(rrsig);
     DNSSEC.verify(rrset, rrsig, dnskey, now);
@@ -385,7 +379,7 @@ class DNSSECTest {
 
     SIGRecord sig =
         DNSSEC.signMessage(msg, null, keyRecord, kp.getPrivate(), inception, expiration);
-    assertNotNull(sig);
+    assertThat(sig).isNotNull();
 
     msg.addRecord(sig, Section.ADDITIONAL);
     byte[] wire = msg.toWire();

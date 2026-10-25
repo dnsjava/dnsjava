@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.utils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,8 +13,8 @@ public class BaseUtilsTest {
     String toWrap = String.format("%0" + ((lineLength * 3) + 5) + "d", 0);
     String out = BaseUtils.wrapLines(toWrap, lineLength, "", false);
     String[] lines = out.split("\n");
-    assertEquals(4, lines.length);
-    assertEquals(5, lines[3].length());
+    assertThat(lines).hasSize(4);
+    assertThat(lines[3]).hasSize(5);
   }
 
   @ParameterizedTest
@@ -23,7 +22,7 @@ public class BaseUtilsTest {
   void testWrapLinesEndsWith(int lineLength) {
     String toWrap = String.format("%0" + ((lineLength * 3) + 5) + "d", 0);
     String out = BaseUtils.wrapLines(toWrap, lineLength, "", true);
-    assertEquals(')', out.charAt(out.length() - 1));
+    assertThat(out.charAt(out.length() - 1)).isEqualTo(')');
   }
 
   @ParameterizedTest
@@ -33,7 +32,7 @@ public class BaseUtilsTest {
     String out = BaseUtils.wrapLines(toWrap, lineLength, "\t", false);
     String[] lines = out.split("\n");
     for (String line : lines) {
-      assertTrue(line.startsWith("\t"), "Line start with prefix");
+      assertThat(line).startsWith("\t");
     }
   }
 }

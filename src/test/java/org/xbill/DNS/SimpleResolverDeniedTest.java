@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -56,9 +56,11 @@ class SimpleResolverDeniedTest {
                       byte[] rbytes = response.toWire(Message.MAXLENGTH);
 
                       // This was the exact format returned by denying server
-                      assertArrayEquals(
-                          rbytes,
-                          new byte[] {(byte) (id >>> 8), (byte) id, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0});
+                      assertThat(
+                              new byte[] {
+                                (byte) (id >>> 8), (byte) id, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0
+                              })
+                          .containsExactly(rbytes);
 
                       CompletableFuture<byte[]> f = new CompletableFuture<>();
                       f.complete(rbytes);
@@ -68,6 +70,7 @@ class SimpleResolverDeniedTest {
           }
         });
 
-    assertThrows(WireParseException.class, () -> simpleResolver.send(query));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> simpleResolver.send(query));
   }
 }

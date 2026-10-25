@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -15,12 +14,14 @@ class ISDNRecordTest {
   @Test
   void ctor_5arg() {
     ISDNRecord isdn = new ISDNRecord(n, DClass.IN, 0, "foo\\\"", "bar");
-    assertEquals("foo\\\"", isdn.getAddress());
-    assertEquals("foo\"", isdn.getAddress(false));
-    assertArrayEquals("foo\"".getBytes(StandardCharsets.UTF_8), isdn.getAddressAsByteArray());
-    assertEquals("bar", isdn.getSubAddress());
-    assertEquals("bar", isdn.getSubAddress(false));
-    assertArrayEquals("bar".getBytes(StandardCharsets.UTF_8), isdn.getSubAddressAsByteArray());
+    assertThat(isdn.getAddress()).isEqualTo("foo\\\"");
+    assertThat(isdn.getAddress(false)).isEqualTo("foo\"");
+    assertThat(isdn.getAddressAsByteArray())
+        .containsExactly("foo\"".getBytes(StandardCharsets.UTF_8));
+    assertThat(isdn.getSubAddress()).isEqualTo("bar");
+    assertThat(isdn.getSubAddress(false)).isEqualTo("bar");
+    assertThat(isdn.getSubAddressAsByteArray())
+        .containsExactly("bar".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -28,7 +29,7 @@ class ISDNRecordTest {
     Tokenizer t = new Tokenizer("150862028003217 004");
     ISDNRecord isdn = new ISDNRecord();
     isdn.rdataFromString(t, null);
-    assertEquals("150862028003217", isdn.getAddress());
-    assertEquals("004", isdn.getSubAddress());
+    assertThat(isdn.getAddress()).isEqualTo("150862028003217");
+    assertThat(isdn.getSubAddress()).isEqualTo("004");
   }
 }

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.InetAddress;
 import java.security.KeyPair;
@@ -28,7 +27,8 @@ class DnssecDsaTest {
             exampleNet, DClass.IN, 3600, 257, 3, DNSSEC.Algorithm.DSA, pair.getPublic());
     DNSKEYRecord dnskey2 =
         (DNSKEYRecord) Record.fromWire(dnskey.toWire(Section.ANSWER), Section.ANSWER);
-    assertEquals(dnskey, dnskey2);
+    assertThat(dnskey2.getPublicKey()).isEqualTo(dnskey.getPublicKey());
+    assertThat(dnskey2).hasSameHashCodeAs(dnskey).isEqualTo(dnskey);
     ARecord a =
         new ARecord(
             Name.fromConstantString("www.example.net."),
@@ -43,10 +43,10 @@ class DnssecDsaTest {
             privateKey,
             Instant.ofEpochSecond(1281607479),
             Instant.ofEpochSecond(1284026679));
-    assertNotNull(rrsig);
+    assertThat(rrsig).isNotNull();
 
     // verify, but we cannot validate the actual signature as it contains a random value
     DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochSecond(1281607480));
-    assertEquals(41, rrsig.signature.length);
+    assertThat(rrsig.signature).hasSize(41);
   }
 }

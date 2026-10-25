@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -14,8 +13,8 @@ class NSEC3PARAMRecordTest {
     Tokenizer t = new Tokenizer("1 1 10 5053851B");
     NSEC3PARAMRecord nsec3PARAMRecord = new NSEC3PARAMRecord();
     nsec3PARAMRecord.rdataFromString(t, null);
-    assertEquals(NSEC3Record.Digest.SHA1, nsec3PARAMRecord.getHashAlgorithm());
-    assertEquals(NSEC3Record.Flags.OPT_OUT, nsec3PARAMRecord.getFlags());
-    assertNotNull(nsec3PARAMRecord.getSalt());
+    assertThat(nsec3PARAMRecord.getHashAlgorithm()).isEqualTo(NSEC3Record.Digest.SHA1);
+    assertThat(nsec3PARAMRecord.getFlags()).isEqualTo(NSEC3Record.Flags.OPT_OUT);
+    assertThat(nsec3PARAMRecord.getSalt()).isNotNull();
   }
 }

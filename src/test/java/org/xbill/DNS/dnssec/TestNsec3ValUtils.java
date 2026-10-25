@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.security.Provider;
@@ -27,7 +25,7 @@ class TestNsec3ValUtils extends TestBase {
     Properties config = new Properties();
     config.put("dnsjava.dnssec.nsec3.iterations.512", Integer.MAX_VALUE);
     NSEC3ValUtils val = new NSEC3ValUtils();
-    assertThrows(IllegalArgumentException.class, () -> val.init(config));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> val.init(config));
   }
 
   @Test
@@ -39,9 +37,9 @@ class TestNsec3ValUtils extends TestBase {
     resolver.init(config);
 
     Message response = resolver.send(createMessage("www.wc.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertEquals("failed.nsec3_ignored", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nsec3_ignored");
     assertEde(-1, response);
   }
 
@@ -57,9 +55,9 @@ class TestNsec3ValUtils extends TestBase {
     add("gibtsnicht.gibtsnicht.nsec3.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("gibtsnicht.gibtsnicht.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nxdomain.nsec3_bogus", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nxdomain.nsec3_bogus");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -67,13 +65,13 @@ class TestNsec3ValUtils extends TestBase {
   void testNsec3NodataChangedToNxdomainIsBogus() throws IOException {
     Message m = resolver.send(createMessage("a.b.nsec3.ingotronic.ch./MX"));
     Message message =
-        messageFromString(m.toString().replaceAll("status: NOERROR", "status: NXDOMAIN"));
+        messageFromString(m.toString().replace("status: NOERROR", "status: NXDOMAIN"));
     add("a.b.nsec3.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("a.b.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nxdomain.nsec3_bogus", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nxdomain.nsec3_bogus");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -102,9 +100,9 @@ class TestNsec3ValUtils extends TestBase {
     add("a.sub.nsec3.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("a.sub.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nxdomain.nsec3_bogus", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nxdomain.nsec3_bogus");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -112,9 +110,9 @@ class TestNsec3ValUtils extends TestBase {
   @AlwaysOffline
   void testNsec3ClosestEncloserIsInsecureDelegation() throws IOException {
     Message response = resolver.send(createMessage("a.unsigned.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NXDOMAIN, response.getRcode());
-    assertEquals("failed.nxdomain.nsec3_insecure", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nxdomain.nsec3_insecure");
     assertEde(-1, response);
   }
 
@@ -124,7 +122,7 @@ class TestNsec3ValUtils extends TestBase {
     Assumptions.assumeTrue(providers != null && providers.length > 0);
 
     Message response = resolver.send(createMessage("www.wc.nsec3-ecdsa256.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
     assertEde(-1, response);
   }
@@ -135,7 +133,7 @@ class TestNsec3ValUtils extends TestBase {
     Assumptions.assumeTrue(providers != null && providers.length > 0);
 
     Message response = resolver.send(createMessage("www.wc.nsec3-ecdsa384.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
     assertEde(-1, response);
   }

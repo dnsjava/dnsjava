@@ -36,11 +36,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -75,47 +72,44 @@ class A6RecordTest {
   @Test
   void ctor_0arg() {
     A6Record ar = new A6Record();
-    assertNull(ar.getName());
-    assertEquals(0, ar.getType());
-    assertEquals(0, ar.getDClass());
-    assertEquals(0, ar.getTTL());
+    assertThat(ar.getName()).isNull();
+    assertThat(ar.getType()).isZero();
+    assertThat(ar.getDClass()).isZero();
+    assertThat(ar.getTTL()).isZero();
   }
 
   @Test
   void ctor_6arg() throws UnknownHostException {
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, null);
-    assertEquals(m_an, ar.getName());
-    assertEquals(Type.A6, ar.getType());
-    assertEquals(DClass.IN, ar.getDClass());
-    assertEquals(m_ttl, ar.getTTL());
-    assertEquals(m_prefix_bits, ar.getPrefixBits());
-    assertEquals(m_addr, ar.getSuffix());
-    assertNull(ar.getPrefix());
+    assertThat(ar.getName()).isEqualTo(m_an);
+    assertThat(ar.getType()).isEqualTo(Type.A6);
+    assertThat(ar.getDClass()).isEqualTo(DClass.IN);
+    assertThat(ar.getTTL()).isEqualTo(m_ttl);
+    assertThat(ar.getPrefixBits()).isEqualTo(m_prefix_bits);
+    assertThat(ar.getSuffix()).isEqualTo(m_addr);
+    assertThat(ar.getPrefix()).isNull();
 
     // with the prefix name
     ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
-    assertEquals(m_an, ar.getName());
-    assertEquals(Type.A6, ar.getType());
-    assertEquals(DClass.IN, ar.getDClass());
-    assertEquals(m_ttl, ar.getTTL());
-    assertEquals(m_prefix_bits, ar.getPrefixBits());
-    assertEquals(m_addr, ar.getSuffix());
-    assertEquals(m_an2, ar.getPrefix());
+    assertThat(ar.getName()).isEqualTo(m_an);
+    assertThat(ar.getType()).isEqualTo(Type.A6);
+    assertThat(ar.getDClass()).isEqualTo(DClass.IN);
+    assertThat(ar.getTTL()).isEqualTo(m_ttl);
+    assertThat(ar.getPrefixBits()).isEqualTo(m_prefix_bits);
+    assertThat(ar.getSuffix()).isEqualTo(m_addr);
+    assertThat(ar.getPrefix()).isEqualTo(m_an2);
 
     // a relative name
-    assertThrows(
-        RelativeNameException.class,
-        () -> new A6Record(m_rn, DClass.IN, m_ttl, m_prefix_bits, m_addr, null));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new A6Record(m_rn, DClass.IN, m_ttl, m_prefix_bits, m_addr, null));
 
     // a relative prefix name
-    assertThrows(
-        RelativeNameException.class,
-        () -> new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_rn));
 
     // invalid prefix bits
-    assertThrows(
-        RelativeNameException.class,
-        () -> new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new A6Record(m_rn, DClass.IN, m_ttl, 0x100, m_addr, null));
 
     // an IPv4 address - allowed, as these can be written as mapped addresses
     InetAddress address = InetAddress.getByName("192.168.0.1");
@@ -132,9 +126,9 @@ class A6RecordTest {
     DNSInput din = new DNSInput(dout.toByteArray());
     A6Record ar = new A6Record();
     ar.rrFromWire(din);
-    assertEquals(0, ar.getPrefixBits());
-    assertEquals(m_addr, ar.getSuffix());
-    assertNull(ar.getPrefix());
+    assertThat(ar.getPrefixBits()).isZero();
+    assertThat(ar.getSuffix()).isEqualTo(m_addr);
+    assertThat(ar.getPrefix()).isNull();
 
     // record with 9 bit prefix (should result in 15 bytes of the address)
     dout = new DNSOutput();
@@ -145,13 +139,13 @@ class A6RecordTest {
     din = new DNSInput(dout.toByteArray());
     ar = new A6Record();
     ar.rrFromWire(din);
-    assertEquals(9, ar.getPrefixBits());
+    assertThat(ar.getPrefixBits()).isEqualTo(9);
 
     byte[] leadingZeroByteAddress = m_addr_bytes.clone();
     leadingZeroByteAddress[0] = 0;
     InetAddress exp = InetAddress.getByAddress(leadingZeroByteAddress);
-    assertEquals(exp, ar.getSuffix());
-    assertEquals(m_an2, ar.getPrefix());
+    assertThat(ar.getSuffix()).isEqualTo(exp);
+    assertThat(ar.getPrefix()).isEqualTo(m_an2);
   }
 
   @Test
@@ -160,9 +154,9 @@ class A6RecordTest {
     Tokenizer t = new Tokenizer("0 " + m_addr_string);
     A6Record ar = new A6Record();
     ar.rdataFromString(t, null);
-    assertEquals(0, ar.getPrefixBits());
-    assertEquals(m_addr, ar.getSuffix());
-    assertNull(ar.getPrefix());
+    assertThat(ar.getPrefixBits()).isZero();
+    assertThat(ar.getSuffix()).isEqualTo(m_addr);
+    assertThat(ar.getPrefix()).isNull();
 
     // record with 9 bit prefix.  In contrast to the rrFromWire method,
     // rdataFromString expects the entire 128 bits to be represented
@@ -170,19 +164,20 @@ class A6RecordTest {
     t = new Tokenizer("9 " + m_addr_string + " " + m_an2);
     ar = new A6Record();
     ar.rdataFromString(t, null);
-    assertEquals(9, ar.getPrefixBits());
-    assertEquals(m_addr, ar.getSuffix());
-    assertEquals(m_an2, ar.getPrefix());
+    assertThat(ar.getPrefixBits()).isEqualTo(9);
+    assertThat(ar.getSuffix()).isEqualTo(m_addr);
+    assertThat(ar.getPrefix()).isEqualTo(m_an2);
 
     // record with invalid prefixBits
-    assertThrows(
-        TextParseException.class, () -> new A6Record().rdataFromString(new Tokenizer("129"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> new A6Record().rdataFromString(new Tokenizer("129"), null));
 
     // record with invalid ipv6 address
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new A6Record().rdataFromString(new Tokenizer("0 " + m_addr_string.substring(4)), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () ->
+                new A6Record()
+                    .rdataFromString(new Tokenizer("0 " + m_addr_string.substring(4)), null));
   }
 
   @Test
@@ -190,7 +185,7 @@ class A6RecordTest {
     A6Record ar = new A6Record(m_an, DClass.IN, m_ttl, m_prefix_bits, m_addr, m_an2);
     String exp = m_prefix_bits + " " + m_addr_string_canonical + " " + m_an2;
     String out = ar.rrToString();
-    assertEquals(exp, out);
+    assertThat(out).isEqualTo(exp);
   }
 
   @Test
@@ -228,7 +223,7 @@ class A6RecordTest {
     dout = new DNSOutput();
     ar.rrToWire(dout, null, true);
 
-    assertArrayEquals(exp, dout.toByteArray());
+    assertThat(dout.toByteArray()).containsExactly(exp);
 
     // case sensitiveform
     dout = new DNSOutput();
@@ -240,6 +235,6 @@ class A6RecordTest {
 
     dout = new DNSOutput();
     ar.rrToWire(dout, null, false);
-    assertArrayEquals(exp, dout.toByteArray());
+    assertThat(dout.toByteArray()).containsExactly(exp);
   }
 }

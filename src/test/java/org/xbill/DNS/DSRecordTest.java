@@ -36,11 +36,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,14 +51,14 @@ class DSRecordTest {
   @Test
   void ctor_0arg() {
     DSRecord dr = new DSRecord();
-    assertNull(dr.getName());
-    assertEquals(0, dr.getType());
-    assertEquals(0, dr.getDClass());
-    assertEquals(0, dr.getTTL());
-    assertEquals(0, dr.getAlgorithm());
-    assertEquals(0, dr.getDigestID());
-    assertNull(dr.getDigest());
-    assertEquals(0, dr.getFootprint());
+    assertThat(dr.getName()).isNull();
+    assertThat(dr.getType()).isZero();
+    assertThat(dr.getDClass()).isZero();
+    assertThat(dr.getTTL()).isZero();
+    assertThat(dr.getAlgorithm()).isZero();
+    assertThat(dr.getDigestID()).isZero();
+    assertThat(dr.getDigest()).isNull();
+    assertThat(dr.getFootprint()).isZero();
   }
 
   static class Test_Ctor_7arg {
@@ -86,69 +83,72 @@ class DSRecordTest {
     void basic() {
       DSRecord dr =
           new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, m_digestid, m_digest);
-      assertEquals(m_n, dr.getName());
-      assertEquals(DClass.IN, dr.getDClass());
-      assertEquals(Type.DS, dr.getType());
-      assertEquals(m_ttl, dr.getTTL());
-      assertEquals(m_footprint, dr.getFootprint());
-      assertEquals(m_algorithm, dr.getAlgorithm());
-      assertEquals(m_digestid, dr.getDigestID());
-      assertArrayEquals(m_digest, dr.getDigest());
+      assertThat(dr.getName()).isEqualTo(m_n);
+      assertThat(dr.getDClass()).isEqualTo(DClass.IN);
+      assertThat(dr.getType()).isEqualTo(Type.DS);
+      assertThat(dr.getTTL()).isEqualTo(m_ttl);
+      assertThat(dr.getFootprint()).isEqualTo(m_footprint);
+      assertThat(dr.getAlgorithm()).isEqualTo(m_algorithm);
+      assertThat(dr.getDigestID()).isEqualTo(m_digestid);
+      assertThat(dr.getDigest()).containsExactly(m_digest);
     }
 
     @Test
     void toosmall_footprint() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new DSRecord(m_n, DClass.IN, m_ttl, -1, m_algorithm, m_digestid, m_digest));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () -> new DSRecord(m_n, DClass.IN, m_ttl, -1, m_algorithm, m_digestid, m_digest));
     }
 
     @Test
     void toobig_footprint() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new DSRecord(m_n, DClass.IN, m_ttl, 0x10000, m_algorithm, m_digestid, m_digest));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new DSRecord(m_n, DClass.IN, m_ttl, 0x10000, m_algorithm, m_digestid, m_digest));
     }
 
     @Test
     void toosmall_algorithm() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, -1, m_digestid, m_digest));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, -1, m_digestid, m_digest));
     }
 
     @Test
     void toobig_algorithm() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, 0x10000, m_digestid, m_digest));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, 0x10000, m_digestid, m_digest));
     }
 
     @Test
     void toosmall_digestid() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, -1, m_digest));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, -1, m_digest));
     }
 
     @Test
     void toobig_digestid() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, 0x10000, m_digest));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, 0x10000, m_digest));
     }
 
     @Test
     void null_digest() {
       DSRecord dr = new DSRecord(m_n, DClass.IN, m_ttl, m_footprint, m_algorithm, m_digestid, null);
-      assertEquals(m_n, dr.getName());
-      assertEquals(DClass.IN, dr.getDClass());
-      assertEquals(Type.DS, dr.getType());
-      assertEquals(m_ttl, dr.getTTL());
-      assertEquals(m_footprint, dr.getFootprint());
-      assertEquals(m_algorithm, dr.getAlgorithm());
-      assertEquals(m_digestid, dr.getDigestID());
-      assertNull(dr.getDigest());
+      assertThat(dr.getName()).isEqualTo(m_n);
+      assertThat(dr.getDClass()).isEqualTo(DClass.IN);
+      assertThat(dr.getType()).isEqualTo(Type.DS);
+      assertThat(dr.getTTL()).isEqualTo(m_ttl);
+      assertThat(dr.getFootprint()).isEqualTo(m_footprint);
+      assertThat(dr.getAlgorithm()).isEqualTo(m_algorithm);
+      assertThat(dr.getDigestID()).isEqualTo(m_digestid);
+      assertThat(dr.getDigest()).isNull();
     }
   }
 
@@ -168,11 +168,10 @@ class DSRecordTest {
 
     DSRecord dr = new DSRecord();
     dr.rrFromWire(in);
-    assertEquals(0xABCD, dr.getFootprint());
-    assertEquals(0xEF, dr.getAlgorithm());
-    assertEquals(0x01, dr.getDigestID());
-    assertArrayEquals(
-        new byte[] {(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89}, dr.getDigest());
+    assertThat(dr.getFootprint()).isEqualTo(0xABCD);
+    assertThat(dr.getAlgorithm()).isEqualTo(0xEF);
+    assertThat(dr.getDigestID()).isEqualTo(0x01);
+    assertThat(dr.getDigest()).containsExactly((byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89);
   }
 
   @Test
@@ -181,24 +180,27 @@ class DSRecordTest {
 
     DSRecord dr = new DSRecord();
     dr.rdataFromString(t, null);
-    assertEquals(0xABCD, dr.getFootprint());
-    assertEquals(0xEF, dr.getAlgorithm());
-    assertEquals(0xFF, dr.getDigestID());
-    assertArrayEquals(
-        new byte[] {(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB},
-        dr.getDigest());
+    assertThat(dr.getFootprint()).isEqualTo(0xABCD);
+    assertThat(dr.getAlgorithm()).isEqualTo(0xEF);
+    assertThat(dr.getDigestID()).isEqualTo(0xFF);
+    assertThat(dr.getDigest())
+        .containsExactly((byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB);
   }
 
   @Test
   void rdataFromStringMissingDigest() {
-    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + 0x01);
-    assertThrows(TextParseException.class, () -> new DSRecord().rdataFromString(t, null));
+    try (Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + 0x01)) {
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> new DSRecord().rdataFromString(t, null));
+    }
   }
 
   @Test
   void rdataFromStringInvalidDigestData() {
-    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + 0x01 + " $^");
-    assertThrows(TextParseException.class, () -> new DSRecord().rdataFromString(t, null));
+    try (Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + 0x01 + " $^")) {
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> new DSRecord().rdataFromString(t, null));
+    }
   }
 
   @ParameterizedTest(name = "digest {0}")
@@ -214,7 +216,7 @@ class DSRecordTest {
     Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + digestId + " " + data);
     DSRecord r = new DSRecord();
     r.rdataFromString(t, null);
-    assertEquals(base16.fromString(data).length, r.getDigest().length);
+    assertThat(r.getDigest()).hasSize(base16.fromString(data).length);
   }
 
   @Test
@@ -234,22 +236,18 @@ class DSRecordTest {
     "1,01", "2,01", "3,01", "4,01",
   })
   void rdataFromString_invalidDigestLengths(int digestId, String data) {
-    Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + digestId + " " + data);
-    assertThrows(TextParseException.class, () -> new DSRecord().rdataFromString(t, null));
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new DSRecord(
-                Name.root,
-                DClass.IN,
-                3600,
-                1,
-                Algorithm.RSASHA1,
-                digestId,
-                base16.fromString(data)));
-    assertThrows(
-        TextParseException.class,
-        () -> Record.fromString(Name.root, Type.DS, DClass.IN, 3600, t, null));
+    try (Tokenizer t = new Tokenizer(0xABCD + " " + 0xEF + " " + digestId + " " + data)) {
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> new DSRecord().rdataFromString(t, null));
+      byte[] b64data = base16.fromString(data);
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new DSRecord(
+                      Name.root, DClass.IN, 3600, 1, Algorithm.RSASHA1, digestId, b64data));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> Record.fromString(Name.root, Type.DS, DClass.IN, 3600, t, null));
+    }
   }
 
   @Test
@@ -265,7 +263,7 @@ class DSRecordTest {
             0xEF,
             0xFF,
             new byte[] {(byte) 0x23, (byte) 0x45, (byte) 0x67, (byte) 0x89, (byte) 0xAB});
-    assertEquals(exp, dr.rrToString());
+    assertThat(dr.rrToString()).isEqualTo(exp);
   }
 
   @Test
@@ -296,6 +294,6 @@ class DSRecordTest {
     DNSOutput out = new DNSOutput();
     dr.rrToWire(out, null, true);
 
-    assertArrayEquals(exp, out.toByteArray());
+    assertThat(out.toByteArray()).containsExactly(exp);
   }
 }

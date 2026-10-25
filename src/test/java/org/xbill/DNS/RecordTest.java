@@ -35,17 +35,10 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -106,10 +99,10 @@ class RecordTest {
   @Test
   void ctor_0arg() {
     SubRecord sr = new SubRecord();
-    assertNull(sr.getName());
-    assertEquals(0, sr.getType());
-    assertEquals(0, sr.getTTL());
-    assertEquals(0, sr.getDClass());
+    assertThat(sr.getName()).isNull();
+    assertThat(sr.getType()).isZero();
+    assertThat(sr.getTTL()).isZero();
+    assertThat(sr.getDClass()).isZero();
   }
 
   @Test
@@ -120,10 +113,10 @@ class RecordTest {
     long ttl = 0xABCDEL;
 
     SubRecord r = new SubRecord(n, t, d, ttl);
-    assertEquals(n, r.getName());
-    assertEquals(t, r.getType());
-    assertEquals(d, r.getDClass());
-    assertEquals(ttl, r.getTTL());
+    assertThat(r.getName()).isEqualTo(n);
+    assertThat(r.getType()).isEqualTo(t);
+    assertThat(r.getDClass()).isEqualTo(d);
+    assertThat(r.getTTL()).isEqualTo(ttl);
   }
 
   @Test
@@ -134,13 +127,17 @@ class RecordTest {
     int d = DClass.IN;
     long ttl = 0xABCDEL;
 
-    assertThrows(RelativeNameException.class, () -> new SubRecord(r, t, d, ttl));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new SubRecord(r, t, d, ttl));
 
-    assertThrows(InvalidTypeException.class, () -> new SubRecord(n, -1, d, ttl));
+    assertThatExceptionOfType(InvalidTypeException.class)
+        .isThrownBy(() -> new SubRecord(n, -1, d, ttl));
 
-    assertThrows(InvalidDClassException.class, () -> new SubRecord(n, t, -1, ttl));
+    assertThatExceptionOfType(InvalidDClassException.class)
+        .isThrownBy(() -> new SubRecord(n, t, -1, ttl));
 
-    assertThrows(InvalidTTLException.class, () -> new SubRecord(n, t, d, -1));
+    assertThatExceptionOfType(InvalidTTLException.class)
+        .isThrownBy(() -> new SubRecord(n, t, d, -1));
   }
 
   @Test
@@ -151,13 +148,14 @@ class RecordTest {
     int d = DClass.IN;
 
     Record rec = Record.newRecord(n, t, d);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(0, rec.getTTL());
+    assertThat(rec).isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isZero();
 
-    assertThrows(RelativeNameException.class, () -> Record.newRecord(r, t, d));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> Record.newRecord(r, t, d));
   }
 
   @Test
@@ -169,13 +167,14 @@ class RecordTest {
     int ttl = 0xDBE8;
 
     Record rec = Record.newRecord(n, t, d, ttl);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
+    assertThat(rec).isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
 
-    assertThrows(RelativeNameException.class, () -> Record.newRecord(r, t, d, ttl));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> Record.newRecord(r, t, d, ttl));
   }
 
   @Test
@@ -188,12 +187,12 @@ class RecordTest {
     InetAddress exp = InetAddress.getByName("123.232.0.255");
 
     Record rec = Record.newRecord(n, t, d, ttl, data);
-    assertTrue(rec instanceof ARecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
-    assertEquals(exp, ((ARecord) rec).getAddress());
+    assertThat(rec).isInstanceOf(ARecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
+    assertThat(((ARecord) rec).getAddress()).isEqualTo(exp);
   }
 
   @Test
@@ -206,27 +205,27 @@ class RecordTest {
     InetAddress exp = InetAddress.getByName("123.232.0.255");
 
     Record rec = Record.newRecord(n, t, d, ttl, 0, null);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
+    assertThat(rec).isNotNull().isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
 
     rec = Record.newRecord(n, t, d, ttl, data.length, data);
-    assertTrue(rec instanceof ARecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
-    assertEquals(exp, ((ARecord) rec).getAddress());
+    assertThat(rec).isNotNull().isInstanceOf(ARecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
+    assertThat(((ARecord) rec).getAddress()).isEqualTo(exp);
 
     rec = Record.newRecord(n, Type.NIMLOC, d, ttl, data.length, data);
-    assertTrue(rec instanceof UNKRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(Type.NIMLOC, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
-    assertArrayEquals(data, ((UNKRecord) rec).getData());
+    assertThat(rec).isNotNull().isInstanceOf(UNKRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(Type.NIMLOC);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
+    assertThat(((UNKRecord) rec).getData()).containsExactly(data);
   }
 
   @Test
@@ -238,12 +237,14 @@ class RecordTest {
     int ttl = 0xDBE8;
     byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
 
-    assertNull(Record.newRecord(n, t, d, ttl, 0, new byte[0]));
-    assertNull(Record.newRecord(n, t, d, ttl, 1, new byte[0]));
-    assertNull(Record.newRecord(n, t, d, ttl, data.length + 1, data));
-    assertNull(
-        Record.newRecord(n, t, d, ttl, 5, new byte[] {data[0], data[1], data[2], data[3], 0}));
-    assertThrows(RelativeNameException.class, () -> Record.newRecord(r, t, d, ttl, 0, null));
+    assertThat(Record.newRecord(n, t, d, ttl, 0, new byte[0])).isNull();
+    assertThat(Record.newRecord(n, t, d, ttl, 1, new byte[0])).isNull();
+    assertThat(Record.newRecord(n, t, d, ttl, data.length + 1, data)).isNull();
+    assertThat(
+            Record.newRecord(n, t, d, ttl, 5, new byte[] {data[0], data[1], data[2], data[3], 0}))
+        .isNull();
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> Record.newRecord(r, t, d, ttl, 0, null));
   }
 
   @Test
@@ -266,35 +267,35 @@ class RecordTest {
     DNSInput in = new DNSInput(out.toByteArray());
 
     Record rec = Record.fromWire(in, Section.ANSWER, false);
-    assertTrue(rec instanceof ARecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
-    assertEquals(exp, ((ARecord) rec).getAddress());
+    assertThat(rec).isInstanceOf(ARecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
+    assertThat(((ARecord) rec).getAddress()).isEqualTo(exp);
 
     in = new DNSInput(out.toByteArray());
     rec = Record.fromWire(in, Section.QUESTION, false);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(0, rec.getTTL());
+    assertThat(rec).isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isZero();
 
     in = new DNSInput(out.toByteArray());
     rec = Record.fromWire(in, Section.QUESTION);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(0, rec.getTTL());
+    assertThat(rec).isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isZero();
 
     rec = Record.fromWire(out.toByteArray(), Section.QUESTION);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(0, rec.getTTL());
+    assertThat(rec).isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isZero();
 
     out = new DNSOutput();
     n.toWire(out, null);
@@ -306,11 +307,11 @@ class RecordTest {
     in = new DNSInput(out.toByteArray());
 
     rec = Record.fromWire(in, Section.ANSWER, true);
-    assertTrue(rec instanceof EmptyRecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
+    assertThat(rec).isInstanceOf(EmptyRecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
   }
 
   @Test
@@ -336,15 +337,16 @@ class RecordTest {
 
     out = new DNSOutput();
 
+    assertThat(rec).isNotNull();
     rec.toWire(out, Section.ANSWER, null);
 
     byte[] after = out.toByteArray();
 
-    assertArrayEquals(exp, after);
+    assertThat(after).containsExactly(exp);
 
     // an equivalent call
     after = rec.toWire(Section.ANSWER);
-    assertArrayEquals(exp, after);
+    assertThat(after).containsExactly(exp);
 
     // a QUESTION entry
     out = new DNSOutput();
@@ -357,7 +359,7 @@ class RecordTest {
     rec.toWire(out, Section.QUESTION, null);
     after = out.toByteArray();
 
-    assertArrayEquals(exp, after);
+    assertThat(after).containsExactly(exp);
   }
 
   @Test
@@ -380,8 +382,9 @@ class RecordTest {
 
     Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
 
+    assertThat(rec).isNotNull();
     byte[] after = rec.toWireCanonical();
-    assertArrayEquals(exp, after);
+    assertThat(after).containsExactly(exp);
   }
 
   @Test
@@ -400,11 +403,11 @@ class RecordTest {
     byte[] exp = out.toByteArray();
 
     Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
-    assertTrue(rec instanceof NSRecord);
+    assertThat(rec).isNotNull().isInstanceOf(NSRecord.class);
 
     byte[] after = rec.rdataToWireCanonical();
 
-    assertArrayEquals(exp, after);
+    assertThat(after).containsExactly(exp);
   }
 
   @Test
@@ -419,8 +422,8 @@ class RecordTest {
     byte[] data = out.toByteArray();
 
     Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
-    assertTrue(rec instanceof NSRecord);
-    assertEquals(rec.rrToString(), rec.rdataToString());
+    assertThat(rec).isNotNull().isInstanceOf(NSRecord.class);
+    assertThat(rec.rdataToString()).isEqualTo(rec.rrToString());
   }
 
   @Test
@@ -435,31 +438,35 @@ class RecordTest {
     byte[] data = o.toByteArray();
 
     Record rec = Record.newRecord(n, t, d, ttl, data.length, data);
+    assertThat(rec).isNotNull();
     String out = rec.toString();
 
-    assertTrue(out.contains(n.toString()));
-    assertTrue(out.contains(n2.toString()));
-    assertTrue(out.contains("NS"));
-    assertTrue(out.contains("IN"));
-    assertTrue(out.contains(ttl + ""));
+    assertThat(out)
+        .contains(n.toString())
+        .contains(n2.toString())
+        .contains("NS")
+        .contains("IN")
+        .contains(ttl + "");
 
     try {
       Options.set("BINDTTL");
 
       out = rec.toString();
-      assertTrue(out.contains(n.toString()));
-      assertTrue(out.contains(n2.toString()));
-      assertTrue(out.contains("NS"));
-      assertTrue(out.contains("IN"));
-      assertTrue(out.contains(TTL.format(ttl)));
+      assertThat(out)
+          .contains(n.toString())
+          .contains(n2.toString())
+          .contains("NS")
+          .contains("IN")
+          .contains(TTL.format(ttl));
 
       Options.set("noPrintIN");
       out = rec.toString();
-      assertTrue(out.contains(n.toString()));
-      assertTrue(out.contains(n2.toString()));
-      assertTrue(out.contains("NS"));
-      assertFalse(out.contains("IN"));
-      assertTrue(out.contains(TTL.format(ttl)));
+      assertThat(out)
+          .contains(n.toString())
+          .contains(n2.toString())
+          .contains("NS")
+          .doesNotContain("IN")
+          .contains(TTL.format(ttl));
     } finally {
       Options.unset("BINDTTL");
       Options.unset("noPrintIN");
@@ -470,12 +477,12 @@ class RecordTest {
   void byteArrayFromString() throws TextParseException {
     String in = "the 98 \" ' quick 0xAB brown";
     byte[] out = SubRecord.byteArrayFromString(in);
-    assertArrayEquals(in.getBytes(), out);
+    assertThat(out).containsExactly(in.getBytes());
 
     in = " \\031Aa\\;\\\"\\\\~\\127\\255";
     byte[] exp = {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
     out = SubRecord.byteArrayFromString(in);
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
@@ -484,21 +491,26 @@ class RecordTest {
     for (int i = 0; i < 257; ++i) {
       b.append('A');
     }
-    assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString(b.toString()));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> SubRecord.byteArrayFromString(b.toString()));
 
-    assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString("\\256"));
-    assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString("\\25a"));
-    assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString("\\25"));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> SubRecord.byteArrayFromString("\\256"));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> SubRecord.byteArrayFromString("\\25a"));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> SubRecord.byteArrayFromString("\\25"));
 
     b.append("\\233");
-    assertThrows(TextParseException.class, () -> SubRecord.byteArrayFromString(b.toString()));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> SubRecord.byteArrayFromString(b.toString()));
   }
 
   @Test
   void byteArrayToString() {
     byte[] in = {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
     String exp = "\" \\031Aa;\\\"\\\\~\\127\\255\"";
-    assertEquals(exp, SubRecord.byteArrayToString(in, true));
+    assertThat(SubRecord.byteArrayToString(in, true)).isEqualTo(exp);
   }
 
   @Test
@@ -515,8 +527,7 @@ class RecordTest {
     };
     String out = SubRecord.unknownToString(data);
 
-    assertTrue(out.contains("" + data.length));
-    assertTrue(out.contains("123456789ABCDEFF"));
+    assertThat(out).contains("" + data.length).contains("123456789ABCDEFF");
   }
 
   @Test
@@ -532,30 +543,30 @@ class RecordTest {
 
     Tokenizer st = new Tokenizer(sa);
     Record rec = Record.fromString(n, t, d, ttl, st, n2);
-    assertTrue(rec instanceof ARecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
-    assertEquals(addr, ((ARecord) rec).getAddress());
+    assertThat(rec).isInstanceOf(ARecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
+    assertThat(((ARecord) rec).getAddress()).isEqualTo(addr);
 
     String unkData = SubRecord.unknownToString(b);
     st = new Tokenizer(unkData);
     rec = Record.fromString(n, t, d, ttl, st, n2);
-    assertTrue(rec instanceof ARecord);
-    assertEquals(n, rec.getName());
-    assertEquals(t, rec.getType());
-    assertEquals(d, rec.getDClass());
-    assertEquals(ttl, rec.getTTL());
-    assertEquals(addr, ((ARecord) rec).getAddress());
+    assertThat(rec).isInstanceOf(ARecord.class);
+    assertThat(rec.getName()).isEqualTo(n);
+    assertThat(rec.getType()).isEqualTo(t);
+    assertThat(rec.getDClass()).isEqualTo(d);
+    assertThat(rec.getTTL()).isEqualTo(ttl);
+    assertThat(((ARecord) rec).getAddress()).isEqualTo(addr);
   }
 
   @Test
   void fromString_empty() throws IOException {
     Name n = Name.fromString("My.N.");
     Record r = Record.fromString(n, 0, DClass.IN, 3600, "\\# 0", Name.root);
-    assertInstanceOf(UNKRecord.class, r);
-    assertEquals(0, ((UNKRecord) r).getData().length);
+    assertThat(r).isInstanceOf(UNKRecord.class);
+    assertThat(((UNKRecord) r).getData()).isEmpty();
   }
 
   @Test
@@ -563,9 +574,8 @@ class RecordTest {
     Name rel = Name.fromString("My.R");
     Name n2 = Name.fromString("My.Second.Name.");
 
-    assertThrows(
-        RelativeNameException.class,
-        () -> Record.fromString(rel, Type.A, DClass.IN, 3600, "191.234.43.10", n2));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> Record.fromString(rel, Type.A, DClass.IN, 3600, "191.234.43.10", n2));
   }
 
   @ParameterizedTest
@@ -579,8 +589,8 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Name n2 = Name.fromString("My.Second.Name.");
 
-    assertThrows(
-        TextParseException.class, () -> Record.fromString(n, Type.A, DClass.IN, 3600, data, n2));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(() -> Record.fromString(n, Type.A, DClass.IN, 3600, data, n2));
   }
 
   @Test
@@ -588,16 +598,17 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
 
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0);
-    assertEquals(Type.A, r.getRRsetType());
+    assertThat(r.getRRsetType()).isEqualTo(Type.A);
 
     Instant now = Instant.now();
     r = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
-    assertEquals(Type.A, r.getRRsetType());
+    assertThat(r.getRRsetType()).isEqualTo(Type.A);
 
     // create an "EmptyRecord" instance with RRSIG type. As it has no RDATA,
     // it cannot return the covered type
     r = Record.newRecord(n, Type.RRSIG, DClass.IN, 86400, 0, null);
-    assertEquals(Type.RRSIG, r.getRRsetType());
+    assertThat(r).isNotNull();
+    assertThat(r.getRRsetType()).isEqualTo(Type.RRSIG);
   }
 
   @Test
@@ -608,18 +619,18 @@ class RecordTest {
     Instant now = Instant.now();
     Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
     Record r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
-    assertTrue(r1.sameRRset(r2));
-    assertTrue(r2.sameRRset(r1));
+    assertThat(r1.sameRRset(r2)).isTrue();
+    assertThat(r2.sameRRset(r1)).isTrue();
 
     r1 = Record.newRecord(n, Type.A, DClass.HS, 0);
     r2 = new RRSIGRecord(n, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
-    assertFalse(r1.sameRRset(r2));
-    assertFalse(r2.sameRRset(r1));
+    assertThat(r1.sameRRset(r2)).isFalse();
+    assertThat(r2.sameRRset(r1)).isFalse();
 
     r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
     r2 = new RRSIGRecord(m, DClass.IN, 0, Type.A, 1, 0, now, now, 10, n, new byte[0]);
-    assertFalse(r1.sameRRset(r2));
-    assertFalse(r2.sameRRset(r1));
+    assertThat(r1.sameRRset(r2)).isFalse();
+    assertThat(r2.sameRRset(r1)).isFalse();
   }
 
   @Test
@@ -630,32 +641,32 @@ class RecordTest {
 
     Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0);
 
-    assertNotEquals(null, r1);
-    assertNotEquals(r1, new Object());
+    assertThat(r1).isNotEqualTo(null);
+    assertThat(new Object()).isNotEqualTo(r1);
 
     Record r2 = Record.newRecord(n, Type.A, DClass.IN, 0);
-    assertEquals(r1, r2);
-    assertEquals(r2, r1);
+    assertThat(r2).isEqualTo(r1);
+    assertThat(r1).isEqualTo(r2);
 
     r2 = Record.newRecord(n2, Type.A, DClass.IN, 0);
-    assertEquals(r1, r2);
-    assertEquals(r2, r1);
+    assertThat(r2).isEqualTo(r1);
+    assertThat(r1).isEqualTo(r2);
 
     r2 = Record.newRecord(n2, Type.A, DClass.IN, 0xABCDE);
-    assertEquals(r1, r2);
-    assertEquals(r2, r1);
+    assertThat(r2).isEqualTo(r1);
+    assertThat(r1).isEqualTo(r2);
 
     r2 = Record.newRecord(m, Type.A, DClass.IN, 0xABCDE);
-    assertNotEquals(r1, r2);
-    assertNotEquals(r2, r1);
+    assertThat(r2).isNotEqualTo(r1);
+    assertThat(r1).isNotEqualTo(r2);
 
     r2 = Record.newRecord(n2, Type.MX, DClass.IN, 0xABCDE);
-    assertNotEquals(r1, r2);
-    assertNotEquals(r2, r1);
+    assertThat(r2).isNotEqualTo(r1);
+    assertThat(r1).isNotEqualTo(r2);
 
     r2 = Record.newRecord(n2, Type.A, DClass.CHAOS, 0xABCDE);
-    assertNotEquals(r1, r2);
-    assertNotEquals(r2, r1);
+    assertThat(r2).isNotEqualTo(r1);
+    assertThat(r1).isNotEqualTo(r2);
 
     byte[] d1 = {23, 12, 9, (byte) 129};
     byte[] d2 = {(byte) 220, 1, (byte) 131, (byte) 212};
@@ -663,13 +674,13 @@ class RecordTest {
     r1 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d1);
     r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d1);
 
-    assertEquals(r1, r2);
-    assertEquals(r2, r1);
+    assertThat(r2).isEqualTo(r1);
+    assertThat(r1).isEqualTo(r2);
 
     r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d2);
 
-    assertNotEquals(r1, r2);
-    assertNotEquals(r2, r1);
+    assertThat(r2).isNotEqualTo(r1);
+    assertThat(r1).isNotEqualTo(r2);
   }
 
   @Test
@@ -684,27 +695,27 @@ class RecordTest {
 
     // same record has same hash code
     Record r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d1);
-    assertEquals(r1.hashCode(), r2.hashCode());
+    assertThat(r2).hasSameHashCodeAs(r1);
 
     // case of names should not matter
     r2 = Record.newRecord(n2, Type.A, DClass.IN, 0xABCDE9, d1);
-    assertEquals(r1.hashCode(), r2.hashCode());
+    assertThat(r2).hasSameHashCodeAs(r1);
 
     // different names
     r2 = Record.newRecord(m, Type.A, DClass.IN, 0xABCDE9, d1);
-    assertNotEquals(r1.hashCode(), r2.hashCode());
+    assertThat(r2.hashCode()).isNotEqualTo(r1.hashCode());
 
     // different class
     r2 = Record.newRecord(n, Type.A, DClass.CHAOS, 0xABCDE9, d1);
-    assertNotEquals(r1.hashCode(), r2.hashCode());
+    assertThat(r2.hashCode()).isNotEqualTo(r1.hashCode());
 
     // different TTL does not matter
     r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE, d1);
-    assertEquals(r1.hashCode(), r2.hashCode());
+    assertThat(r2).hasSameHashCodeAs(r1);
 
     // different data
     r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d2);
-    assertNotEquals(r1.hashCode(), r2.hashCode());
+    assertThat(r2.hashCode()).isNotEqualTo(r1.hashCode());
   }
 
   @Test
@@ -716,11 +727,11 @@ class RecordTest {
     Record r2 = r.cloneRecord();
 
     assertNotSame(r, r2);
-    assertEquals(r, r2);
+    assertThat(r2).isEqualTo(r);
 
     r = new SubRecord(n, Type.A, DClass.IN, 0xABCDE9);
 
-    assertThrows(IllegalStateException.class, r::cloneRecord);
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(r::cloneRecord);
   }
 
   @Test
@@ -733,13 +744,13 @@ class RecordTest {
 
     Record r1 = r.withName(m);
 
-    assertEquals(m, r1.getName());
-    assertEquals(Type.A, r1.getType());
-    assertEquals(DClass.IN, r1.getDClass());
-    assertEquals(0xABCDE9, r1.getTTL());
-    assertEquals(((ARecord) r).getAddress(), ((ARecord) r1).getAddress());
+    assertThat(r1.getName()).isEqualTo(m);
+    assertThat(r1.getType()).isEqualTo(Type.A);
+    assertThat(r1.getDClass()).isEqualTo(DClass.IN);
+    assertThat(r1.getTTL()).isEqualTo(0xABCDE9);
+    assertThat(((ARecord) r1).getAddress()).isEqualTo(((ARecord) r).getAddress());
 
-    assertThrows(RelativeNameException.class, () -> r.withName(rel));
+    assertThatExceptionOfType(RelativeNameException.class).isThrownBy(() -> r.withName(rel));
   }
 
   @Test
@@ -750,11 +761,11 @@ class RecordTest {
 
     Record r1 = r.withDClass(DClass.HESIOD, 0x9876);
 
-    assertEquals(n, r1.getName());
-    assertEquals(Type.A, r1.getType());
-    assertEquals(DClass.HESIOD, r1.getDClass());
-    assertEquals(0x9876, r1.getTTL());
-    assertEquals(((ARecord) r).getAddress(), ((ARecord) r1).getAddress());
+    assertThat(r1.getName()).isEqualTo(n);
+    assertThat(r1.getType()).isEqualTo(Type.A);
+    assertThat(r1.getDClass()).isEqualTo(DClass.HESIOD);
+    assertThat(r1.getTTL()).isEqualTo(0x9876);
+    assertThat(((ARecord) r1).getAddress()).isEqualTo(((ARecord) r).getAddress());
   }
 
   @Test
@@ -764,15 +775,15 @@ class RecordTest {
     InetAddress exp = InetAddress.getByName("23.12.9.129");
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 
-    assertEquals(0xABCDE9, r.getTTL());
+    assertThat(r.getTTL()).isEqualTo(0xABCDE9);
 
     r.setTTL(0x9876);
 
-    assertEquals(n, r.getName());
-    assertEquals(Type.A, r.getType());
-    assertEquals(DClass.IN, r.getDClass());
-    assertEquals(0x9876, r.getTTL());
-    assertEquals(exp, ((ARecord) r).getAddress());
+    assertThat(r.getName()).isEqualTo(n);
+    assertThat(r.getType()).isEqualTo(Type.A);
+    assertThat(r.getDClass()).isEqualTo(DClass.IN);
+    assertThat(r.getTTL()).isEqualTo(0x9876);
+    assertThat(((ARecord) r).getAddress()).isEqualTo(exp);
   }
 
   @Test
@@ -785,42 +796,41 @@ class RecordTest {
     Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
     Record r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 
-    assertEquals(0, r1.compareTo(r1));
-
-    assertEquals(0, r1.compareTo(r2));
-    assertEquals(0, r2.compareTo(r1));
+    assertThat(r1).isEqualByComparingTo(r1);
+    assertThat(r1).isEqualByComparingTo(r2);
+    assertThat(r2).isEqualByComparingTo(r1);
 
     // name comparison should be canonical
     r2 = Record.newRecord(n2, Type.A, DClass.IN, 0xABCDE9, d);
-    assertEquals(0, r1.compareTo(r2));
-    assertEquals(0, r2.compareTo(r1));
+    assertThat(r1).isEqualByComparingTo(r2);
+    assertThat(r2).isEqualByComparingTo(r1);
 
     // different name
     r2 = Record.newRecord(m, Type.A, DClass.IN, 0xABCDE9, d);
-    assertEquals(n.compareTo(m), r1.compareTo(r2));
-    assertEquals(m.compareTo(n), r2.compareTo(r1));
+    assertThat(r1.compareTo(r2)).isEqualTo(n.compareTo(m));
+    assertThat(r2.compareTo(r1)).isEqualTo(m.compareTo(n));
 
     // different DClass
     r2 = Record.newRecord(n, Type.A, DClass.CHAOS, 0xABCDE9, d);
-    assertEquals(DClass.IN - DClass.CHAOS, r1.compareTo(r2));
-    assertEquals(DClass.CHAOS - DClass.IN, r2.compareTo(r1));
+    assertThat(r1.compareTo(r2)).isEqualTo(DClass.IN - DClass.CHAOS);
+    assertThat(r2.compareTo(r1)).isEqualTo(DClass.CHAOS - DClass.IN);
 
     // different Type
     r2 = Record.newRecord(n, Type.NS, DClass.IN, 0xABCDE9, m.toWire());
-    assertEquals(Type.A - Type.NS, r1.compareTo(r2));
-    assertEquals(Type.NS - Type.A, r2.compareTo(r1));
+    assertThat(r1.compareTo(r2)).isEqualTo(Type.A - Type.NS);
+    assertThat(r2.compareTo(r1)).isEqualTo(Type.NS - Type.A);
 
     // different data (same length)
     r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d2);
-    assertEquals(1, r1.compareTo(r2));
-    assertEquals(-1, r2.compareTo(r1));
+    assertThat(r1.compareTo(r2)).isOne();
+    assertThat(r2.compareTo(r1)).isEqualTo(-1);
 
     // different data (one a prefix of the other)
     m = Name.fromString("My.N.L.");
     r1 = Record.newRecord(n, Type.NS, DClass.IN, 0xABCDE9, n.toWire());
     r2 = Record.newRecord(n, Type.NS, DClass.IN, 0xABCDE9, m.toWire());
-    assertEquals(-1, r1.compareTo(r2));
-    assertEquals(1, r2.compareTo(r1));
+    assertThat(r1.compareTo(r2)).isEqualTo(-1);
+    assertThat(r2.compareTo(r1)).isOne();
   }
 
   @Test
@@ -828,34 +838,40 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Record r = new SubRecord(n, Type.A, DClass.IN, 0xABCDE9);
 
-    assertNull(r.getAdditionalName());
+    assertThat(r.getAdditionalName()).isNull();
   }
 
   @Test
   void checkU8() {
-    assertThrows(IllegalArgumentException.class, () -> Record.checkU8("field", -1));
-    assertEquals(0, Record.checkU8("field", 0));
-    assertEquals(0x9D, Record.checkU8("field", 0x9D));
-    assertEquals(0xFF, Record.checkU8("field", 0xFF));
-    assertThrows(IllegalArgumentException.class, () -> Record.checkU8("field", 0x100));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Record.checkU8("field", -1));
+    assertThat(Record.checkU8("field", 0)).isZero();
+    assertThat(Record.checkU8("field", 0x9D)).isEqualTo(0x9D);
+    assertThat(Record.checkU8("field", 0xFF)).isEqualTo(0xFF);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Record.checkU8("field", 0x100));
   }
 
   @Test
   void checkU16() {
-    assertThrows(IllegalArgumentException.class, () -> Record.checkU16("field", -1));
-    assertEquals(0, Record.checkU16("field", 0));
-    assertEquals(0x9DA1, Record.checkU16("field", 0x9DA1));
-    assertEquals(0xFFFF, Record.checkU16("field", 0xFFFF));
-    assertThrows(IllegalArgumentException.class, () -> Record.checkU16("field", 0x10000));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Record.checkU16("field", -1));
+    assertThat(Record.checkU16("field", 0)).isZero();
+    assertThat(Record.checkU16("field", 0x9DA1)).isEqualTo(0x9DA1);
+    assertThat(Record.checkU16("field", 0xFFFF)).isEqualTo(0xFFFF);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Record.checkU16("field", 0x10000));
   }
 
   @Test
   void checkU32() {
-    assertThrows(IllegalArgumentException.class, () -> Record.checkU32("field", -1));
-    assertEquals(0, Record.checkU32("field", 0));
-    assertEquals(0x9DA1F02DL, Record.checkU32("field", 0x9DA1F02DL));
-    assertEquals(0xFFFFFFFFL, Record.checkU32("field", 0xFFFFFFFFL));
-    assertThrows(IllegalArgumentException.class, () -> Record.checkU32("field", 0x100000000L));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Record.checkU32("field", -1));
+    assertThat(Record.checkU32("field", 0)).isZero();
+    assertThat(Record.checkU32("field", 0x9DA1F02DL)).isEqualTo(0x9DA1F02DL);
+    assertThat(Record.checkU32("field", 0xFFFFFFFFL)).isEqualTo(0xFFFFFFFFL);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Record.checkU32("field", 0x100000000L));
   }
 
   @Test
@@ -863,9 +879,10 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Name m = Name.fromString("My.m");
 
-    assertEquals(n, Record.checkName("field", n));
+    assertThat(Record.checkName("field", n)).isEqualTo(n);
 
-    assertThrows(RelativeNameException.class, () -> Record.checkName("field", m));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> Record.checkName("field", m));
   }
 
   @Test
@@ -873,14 +890,12 @@ class RecordTest {
     for (int i = 1; i < 65535; i++) {
       Supplier<Record> proto = Type.getFactory(i);
       if (proto != null) {
-        try {
-          assertNotNull(proto.get());
-        } catch (Exception e) {
-          fail(
-              String.format(
-                  "Record type %s, (%d, %s) seems to have no or invalid 0arg ctor",
-                  Type.string(i), i, proto.getClass().getSimpleName()));
-        }
+        assertThatCode(() -> assertThat(proto.get()).isNotNull())
+            .withFailMessage(
+                String.format(
+                    "Record type %s, (%d, %s) seems to have no or invalid 0arg ctor",
+                    Type.string(i), i, proto.getClass().getSimpleName()))
+            .doesNotThrowAnyException();
       }
     }
   }
@@ -892,20 +907,20 @@ class RecordTest {
         try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
           if (Type.getFactory(i) != null) {
             Record expected = Record.newRecord(Name.root, i, DClass.IN);
-            try {
-              oos.writeObject(expected);
-              try (ObjectInputStream ois =
-                  new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
-                Record actual = (Record) ois.readObject();
-                assertEquals(expected, actual);
-              }
-            } catch (Exception e) {
-              fail(
-                  String.format(
-                      "Record type %s (%d, %s) failed to (de)serialize",
-                      Type.string(i), i, expected.getClass().getSimpleName()),
-                  e);
-            }
+            assertThatCode(
+                    () -> {
+                      oos.writeObject(expected);
+                      try (ObjectInputStream ois =
+                          new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+                        Record actual = (Record) ois.readObject();
+                        assertThat(actual).isEqualTo(expected);
+                      }
+                    })
+                .withFailMessage(
+                    String.format(
+                        "Record type %s (%d, %s) failed to (de)serialize",
+                        Type.string(i), i, expected.getClass().getSimpleName()))
+                .doesNotThrowAnyException();
           }
         }
       }
@@ -917,6 +932,6 @@ class RecordTest {
   void testEmptyTXTSerialization() throws IOException {
     Name recordName = Name.fromString("name.name.");
     Record r = Record.fromString(recordName, Type.TXT, DClass.IN, 0, "", recordName);
-    assertEquals("name.name.\t\t0\tIN\tTXT\t\"\"", r.toString());
+    assertThat(r).hasToString("name.name.\t\t0\tIN\tTXT\t\"\"");
   }
 }

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -20,22 +19,22 @@ class TestNoData extends TestBase {
     add("www.nsec3.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("www.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertTrue(getReason(response).startsWith("failed.nodata"));
+    assertThat(getReason(response)).startsWith("failed.nodata");
     assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
 
   @Test
   void testFakedNoDataNsec3WithNsecs() throws IOException {
     Message m = resolver.send(createMessage("www.nsec3.ingotronic.ch./MX"));
-    Message message = messageFromString(m.toString().replaceAll("type = MX", "type = A"));
+    Message message = messageFromString(m.toString().replace("type = MX", "type = A"));
     add("www.nsec3.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("www.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertTrue(getReason(response).startsWith("failed.nodata"));
+    assertThat(getReason(response)).startsWith("failed.nodata");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 }

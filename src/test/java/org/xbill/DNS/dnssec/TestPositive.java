@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -21,19 +18,19 @@ class TestPositive extends TestBase {
   @Test
   void testValidExising() throws IOException {
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertEquals(localhost, firstA(response));
-    assertNull(getReason(response));
+    assertThat(firstA(response)).isEqualTo(localhost);
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
   @Test
   void testValidNonExising() throws IOException {
     Message response = resolver.send(createMessage("ingotronic.ch./ANY"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -54,9 +51,9 @@ class TestPositive extends TestBase {
     // Assert that this results in bogus nodata/nsec missing after message normalization
     add("www.ingotronic.ch./A", m);
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nodata", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nodata");
     assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
 
@@ -71,9 +68,9 @@ class TestPositive extends TestBase {
     Message query = createMessage("www.ingotronic.ch./A");
     query.getHeader().setFlag(Flags.CD);
     Message response = resolver.send(query);
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 }

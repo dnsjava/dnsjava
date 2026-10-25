@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -27,29 +23,32 @@ class CookieOptionTest {
         base16.fromString("707172737475767778797A7B7C7D7E7F808182838485868788898A8B8C8D8E8F90");
 
     CookieOption option = new CookieOption(eightBytes);
-    assertArrayEquals(eightBytes, option.getClientCookie());
-    assertFalse(option.getServerCookie().isPresent());
+    assertThat(option.getClientCookie()).containsExactly(eightBytes);
+    assertThat(option.getServerCookie()).isNotPresent();
     new CookieOption(eightBytes, null);
 
     option = new CookieOption(eightBytes, null);
-    assertArrayEquals(eightBytes, option.getClientCookie());
-    assertFalse(option.getServerCookie().isPresent());
+    assertThat(option.getClientCookie()).containsExactly(eightBytes);
+    assertThat(option.getServerCookie()).isNotPresent();
 
     option = new CookieOption(eightBytes, eightBytes2);
     Optional<byte[]> serverCookie = option.getServerCookie();
-    assertTrue(serverCookie.isPresent());
-    assertArrayEquals(eightBytes2, serverCookie.get());
+    assertThat(serverCookie).isPresent();
+    assertThat(serverCookie.get()).containsExactly(eightBytes2);
 
     option = new CookieOption(eightBytes, thirtyTwoBytes);
     serverCookie = option.getServerCookie();
-    assertTrue(serverCookie.isPresent());
-    assertArrayEquals(thirtyTwoBytes, serverCookie.get());
+    assertThat(serverCookie).isPresent();
+    assertThat(serverCookie.get()).containsExactly(thirtyTwoBytes);
 
-    assertThrows(IllegalArgumentException.class, () -> new CookieOption(sevenBytes));
-    assertThrows(IllegalArgumentException.class, () -> new CookieOption(nineBytes));
-    assertThrows(IllegalArgumentException.class, () -> new CookieOption(eightBytes, sevenBytes));
-    assertThrows(
-        IllegalArgumentException.class, () -> new CookieOption(eightBytes, thirtyThreeBytes));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new CookieOption(sevenBytes));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new CookieOption(nineBytes));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new CookieOption(eightBytes, sevenBytes));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new CookieOption(eightBytes, thirtyThreeBytes));
   }
 
   @Test
@@ -72,32 +71,36 @@ class CookieOptionTest {
             "000A0029000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728");
 
     EDNSOption option = EDNSOption.fromWire(clientOnlyCookieOption);
-    assertNotNull(option);
-    assertEquals(CookieOption.class, option.getClass());
+    assertThat(option).isNotNull();
+    assertThat(option.getClass()).isEqualTo(CookieOption.class);
     CookieOption cookieOption = (CookieOption) option;
-    assertArrayEquals(clientCookie1, cookieOption.getClientCookie());
-    assertFalse(cookieOption.getServerCookie().isPresent());
+    assertThat(cookieOption.getClientCookie()).containsExactly(clientCookie1);
+    assertThat(cookieOption.getServerCookie()).isNotPresent();
 
     option = EDNSOption.fromWire(clientServerCookieOption);
-    assertNotNull(option);
-    assertEquals(CookieOption.class, option.getClass());
+    assertThat(option).isNotNull();
+    assertThat(option.getClass()).isEqualTo(CookieOption.class);
     cookieOption = (CookieOption) option;
-    assertArrayEquals(clientCookie2, cookieOption.getClientCookie());
-    assertTrue(cookieOption.getServerCookie().isPresent());
-    assertArrayEquals(serverCookie2, cookieOption.getServerCookie().get());
+    assertThat(cookieOption.getClientCookie()).containsExactly(clientCookie2);
+    assertThat(cookieOption.getServerCookie()).isPresent();
+    assertThat(cookieOption.getServerCookie().get()).containsExactly(serverCookie2);
 
     EDNSOption.fromWire(validLength1);
     EDNSOption.fromWire(validLength2);
 
-    assertThrows(WireParseException.class, () -> EDNSOption.fromWire(brokenLength1));
-    assertThrows(WireParseException.class, () -> EDNSOption.fromWire(brokenLength2));
-    assertThrows(WireParseException.class, () -> EDNSOption.fromWire(brokenLength3));
-    assertThrows(WireParseException.class, () -> EDNSOption.fromWire(brokenLength4));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> EDNSOption.fromWire(brokenLength1));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> EDNSOption.fromWire(brokenLength2));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> EDNSOption.fromWire(brokenLength3));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> EDNSOption.fromWire(brokenLength4));
 
     cookieOption = new CookieOption(clientCookie1);
-    assertArrayEquals(clientOnlyCookieOption, cookieOption.toWire());
+    assertThat(cookieOption.toWire()).containsExactly(clientOnlyCookieOption);
 
     cookieOption = new CookieOption(clientCookie2, serverCookie2);
-    assertArrayEquals(clientServerCookieOption, cookieOption.toWire());
+    assertThat(cookieOption.toWire()).containsExactly(clientServerCookieOption);
   }
 }

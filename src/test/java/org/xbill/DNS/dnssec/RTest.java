@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,32 +18,32 @@ class RTest {
         .then((Answer<String>) invocation -> (String) invocation.getArguments()[0]);
     R.setUseNeutralMessages(false);
     R.setBundle(rb);
-    assertEquals("key", R.get("key"));
-    assertEquals("msg 1", R.get("msg {0}", 1));
+    assertThat(R.get("key")).isEqualTo("key");
+    assertThat(R.get("msg {0}", 1)).isEqualTo("msg 1");
   }
 
   @Test
   void testExplicitNullBundle() {
     R.setUseNeutralMessages(true);
-    assertEquals("key", R.get("key"));
-    assertEquals("key:1", R.get("key", 1));
+    assertThat(R.get("key")).isEqualTo("key");
+    assertThat(R.get("key", 1)).isEqualTo("key:1");
   }
 
   @Test
   void testNormal() {
     R.setUseNeutralMessages(false);
     R.setBundle(null);
-    assertEquals("no parameters", R.get("test.noparam"));
-    assertEquals("parameter: abc", R.get("test.withparam", "abc"));
+    assertThat(R.get("test.noparam")).isEqualTo("no parameters");
+    assertThat(R.get("test.withparam", "abc")).isEqualTo("parameter: abc");
   }
 
   @Test
   void testMissingResource() {
     R.setUseNeutralMessages(false);
     R.setBundle(null);
-    assertEquals("test.notthere.noparam", R.get("test.notthere.noparam"));
-    assertEquals("test.notthere.withparam:abc", R.get("test.notthere.withparam", "abc"));
-    assertEquals(
-        "test.notthere.withparam:abc:null:1", R.get("test.notthere.withparam", "abc", null, 1));
+    assertThat(R.get("test.notthere.noparam")).isEqualTo("test.notthere.noparam");
+    assertThat(R.get("test.notthere.withparam", "abc")).isEqualTo("test.notthere.withparam:abc");
+    assertThat(R.get("test.notthere.withparam", "abc", null, 1))
+        .isEqualTo("test.notthere.withparam:abc:null:1");
   }
 }

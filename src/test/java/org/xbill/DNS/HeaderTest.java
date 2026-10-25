@@ -36,11 +36,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,35 +53,35 @@ class HeaderTest {
 
   @Test
   void fixture_state() {
-    assertEquals(0xABCD, m_h.getID());
+    assertThat(m_h.getID()).isEqualTo(0xABCD);
 
     boolean[] flags = m_h.getFlags();
     for (boolean flag : flags) {
-      assertFalse(flag);
+      assertThat(flag).isFalse();
     }
-    assertEquals(0, m_h.getRcode());
-    assertEquals(0, m_h.getOpcode());
-    assertEquals(0, m_h.getCount(0));
-    assertEquals(0, m_h.getCount(1));
-    assertEquals(0, m_h.getCount(2));
-    assertEquals(0, m_h.getCount(3));
+    assertThat(m_h.getRcode()).isZero();
+    assertThat(m_h.getOpcode()).isZero();
+    assertThat(m_h.getCount(0)).isZero();
+    assertThat(m_h.getCount(1)).isZero();
+    assertThat(m_h.getCount(2)).isZero();
+    assertThat(m_h.getCount(3)).isZero();
   }
 
   @Test
   void ctor_0arg() {
     m_h = new Header();
-    assertTrue(0 <= m_h.getID() && m_h.getID() < 0xFFFF);
+    assertThat(0 <= m_h.getID() && m_h.getID() < 0xFFFF).isTrue();
 
     boolean[] flags = m_h.getFlags();
     for (boolean flag : flags) {
-      assertFalse(flag);
+      assertThat(flag).isFalse();
     }
-    assertEquals(0, m_h.getRcode());
-    assertEquals(0, m_h.getOpcode());
-    assertEquals(0, m_h.getCount(0));
-    assertEquals(0, m_h.getCount(1));
-    assertEquals(0, m_h.getCount(2));
-    assertEquals(0, m_h.getCount(3));
+    assertThat(m_h.getRcode()).isZero();
+    assertThat(m_h.getOpcode()).isZero();
+    assertThat(m_h.getCount(0)).isZero();
+    assertThat(m_h.getCount(1)).isZero();
+    assertThat(m_h.getCount(2)).isZero();
+    assertThat(m_h.getCount(3)).isZero();
   }
 
   @Test
@@ -106,32 +103,32 @@ class HeaderTest {
 
     m_h = new Header(new DNSInput(raw));
 
-    assertEquals(0x12AB, m_h.getID());
+    assertThat(m_h.getID()).isEqualTo(0x12AB);
 
     boolean[] flags = m_h.getFlags();
 
-    assertTrue(flags[0]);
+    assertThat(flags[0]).isTrue();
 
-    assertEquals(1, m_h.getOpcode());
+    assertThat(m_h.getOpcode()).isOne();
 
-    assertTrue(flags[5]);
+    assertThat(flags[5]).isTrue();
 
-    assertTrue(flags[6]);
+    assertThat(flags[6]).isTrue();
 
-    assertTrue(flags[7]);
+    assertThat(flags[7]).isTrue();
 
-    assertTrue(flags[8]);
+    assertThat(flags[8]).isTrue();
 
-    assertFalse(flags[9]);
-    assertTrue(flags[10]);
-    assertTrue(flags[11]);
+    assertThat(flags[9]).isFalse();
+    assertThat(flags[10]).isTrue();
+    assertThat(flags[11]).isTrue();
 
-    assertEquals(0xD, m_h.getRcode());
+    assertThat(m_h.getRcode()).isEqualTo(0xD);
 
-    assertEquals(0x651C, m_h.getCount(0));
-    assertEquals(0x10F0, m_h.getCount(1));
-    assertEquals(0x98BA, m_h.getCount(2));
-    assertEquals(0x7190, m_h.getCount(3));
+    assertThat(m_h.getCount(0)).isEqualTo(0x651C);
+    assertThat(m_h.getCount(1)).isEqualTo(0x10F0);
+    assertThat(m_h.getCount(2)).isEqualTo(0x98BA);
+    assertThat(m_h.getCount(3)).isEqualTo(0x7190);
   }
 
   @Test
@@ -158,13 +155,13 @@ class HeaderTest {
 
     byte[] out = dout.toByteArray();
 
-    assertEquals(12, out.length);
+    assertThat(out).hasSize(12);
     for (int i = 0; i < out.length; ++i) {
-      assertEquals(raw[i], out[i]);
+      assertThat(out[i]).isEqualTo(raw[i]);
     }
 
     m_h.setOpcode(0xA); // 1010
-    assertEquals(0xA, m_h.getOpcode());
+    assertThat(m_h.getOpcode()).isEqualTo(0xA);
     m_h.setRcode(0x7); // 0111
 
     // flags is now: 1101 0111 1011 0111
@@ -174,9 +171,9 @@ class HeaderTest {
 
     out = m_h.toWire();
 
-    assertEquals(12, out.length);
+    assertThat(out).hasSize(12);
     for (int i = 0; i < out.length; ++i) {
-      assertEquals(raw[i], out[i], "i=" + i);
+      assertThat(out[i]).as("i=" + i).isEqualTo(raw[i]);
     }
   }
 
@@ -184,145 +181,151 @@ class HeaderTest {
   void flags() {
     m_h.setFlag(0);
     m_h.setFlag(5);
-    assertTrue(m_h.getFlag(0));
-    assertTrue(m_h.getFlags()[0]);
-    assertTrue(m_h.getFlag(5));
-    assertTrue(m_h.getFlags()[5]);
+    assertThat(m_h.getFlag(0)).isTrue();
+    assertThat(m_h.getFlags()[0]).isTrue();
+    assertThat(m_h.getFlag(5)).isTrue();
+    assertThat(m_h.getFlags()[5]).isTrue();
 
     m_h.unsetFlag(0);
-    assertFalse(m_h.getFlag(0));
-    assertFalse(m_h.getFlags()[0]);
-    assertTrue(m_h.getFlag(5));
-    assertTrue(m_h.getFlags()[5]);
+    assertThat(m_h.getFlag(0)).isFalse();
+    assertThat(m_h.getFlags()[0]).isFalse();
+    assertThat(m_h.getFlag(5)).isTrue();
+    assertThat(m_h.getFlags()[5]).isTrue();
 
     m_h.unsetFlag(5);
-    assertFalse(m_h.getFlag(0));
-    assertFalse(m_h.getFlags()[0]);
-    assertFalse(m_h.getFlag(5));
-    assertFalse(m_h.getFlags()[5]);
+    assertThat(m_h.getFlag(0)).isFalse();
+    assertThat(m_h.getFlags()[0]).isFalse();
+    assertThat(m_h.getFlag(5)).isFalse();
+    assertThat(m_h.getFlags()[5]).isFalse();
 
     boolean[] flags = m_h.getFlags();
     for (int i = 0; i < flags.length; ++i) {
       if ((i > 0 && i < 5) || i > 11) {
         continue;
       }
-      assertFalse(flags[i]);
+      assertThat(flags[i]).isFalse();
     }
   }
 
   @Test
   void flags_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(-1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.setFlag(16));
-    assertThrows(IllegalArgumentException.class, () -> m_h.unsetFlag(-1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.unsetFlag(13));
-    assertThrows(IllegalArgumentException.class, () -> m_h.unsetFlag(16));
-    assertThrows(IllegalArgumentException.class, () -> m_h.getFlag(-1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.getFlag(4));
-    assertThrows(IllegalArgumentException.class, () -> m_h.getFlag(16));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setFlag(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setFlag(1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setFlag(16));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.unsetFlag(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.unsetFlag(13));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.unsetFlag(16));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.getFlag(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.getFlag(4));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.getFlag(16));
   }
 
   @Test
   void ID() {
-    assertEquals(0xABCD, m_h.getID());
+    assertThat(m_h.getID()).isEqualTo(0xABCD);
 
     m_h = new Header();
 
     int id = m_h.getID();
-    assertEquals(id, m_h.getID());
+    assertThat(m_h.getID()).isEqualTo(id);
     assertThat(id).isNotNegative().isLessThanOrEqualTo(0xffff);
 
     m_h.setID(0xDCBA);
-    assertEquals(0xDCBA, m_h.getID());
+    assertThat(m_h.getID()).isEqualTo(0xDCBA);
   }
 
   @Test
   void setID_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> m_h.setID(0x10000));
-    assertThrows(IllegalArgumentException.class, () -> m_h.setID(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setID(0x10000));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setID(-1));
   }
 
   @Test
   void Rcode() {
-    assertEquals(0, m_h.getRcode());
+    assertThat(m_h.getRcode()).isZero();
 
     m_h.setRcode(0xA); // 1010
-    assertEquals(0xA, m_h.getRcode());
+    assertThat(m_h.getRcode()).isEqualTo(0xA);
     for (int i = 0; i < 12; ++i) {
       if ((i > 0 && i < 5) || i > 11) {
         continue;
       }
-      assertFalse(m_h.getFlag(i));
+      assertThat(m_h.getFlag(i)).isFalse();
     }
   }
 
   @Test
   void setRcode_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> m_h.setRcode(-1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.setRcode(0x100));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setRcode(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setRcode(0x100));
   }
 
   @Test
   void Opcode() {
-    assertEquals(0, m_h.getOpcode());
+    assertThat(m_h.getOpcode()).isZero();
 
     m_h.setOpcode(0xE); // 1110
-    assertEquals(0xE, m_h.getOpcode());
+    assertThat(m_h.getOpcode()).isEqualTo(0xE);
 
-    assertFalse(m_h.getFlag(0));
+    assertThat(m_h.getFlag(0)).isFalse();
     for (int i = 5; i < 12; ++i) {
-      assertFalse(m_h.getFlag(i));
+      assertThat(m_h.getFlag(i)).isFalse();
     }
-    assertEquals(0, m_h.getRcode());
+    assertThat(m_h.getRcode()).isZero();
   }
 
   @Test
   void setOpcode_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> m_h.setOpcode(-1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.setOpcode(0x100));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setOpcode(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> m_h.setOpcode(0x100));
   }
 
   @Test
   void Count() {
     m_h.setCount(2, 0x1E);
-    assertEquals(0, m_h.getCount(0));
-    assertEquals(0, m_h.getCount(1));
-    assertEquals(0x1E, m_h.getCount(2));
-    assertEquals(0, m_h.getCount(3));
+    assertThat(m_h.getCount(0)).isZero();
+    assertThat(m_h.getCount(1)).isZero();
+    assertThat(m_h.getCount(2)).isEqualTo(0x1E);
+    assertThat(m_h.getCount(3)).isZero();
 
     m_h.incCount(0);
-    assertEquals(1, m_h.getCount(0));
+    assertThat(m_h.getCount(0)).isOne();
 
     m_h.decCount(2);
-    assertEquals(0x1E - 1, m_h.getCount(2));
+    assertThat(m_h.getCount(2)).isEqualTo(0x1E - 1);
   }
 
   @Test
   void setCount_invalid() {
-    assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.setCount(-1, 0));
-    assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.setCount(4, 0));
+    assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class)
+        .isThrownBy(() -> m_h.setCount(-1, 0));
+    assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class)
+        .isThrownBy(() -> m_h.setCount(4, 0));
 
-    assertThrows(IllegalArgumentException.class, () -> m_h.setCount(0, -1));
-    assertThrows(IllegalArgumentException.class, () -> m_h.setCount(3, 0x10000));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_h.setCount(0, -1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> m_h.setCount(3, 0x10000));
   }
 
   @Test
   void getCount_invalid() {
-    assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.getCount(-1));
-    assertThrows(ArrayIndexOutOfBoundsException.class, () -> m_h.getCount(4));
+    assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class)
+        .isThrownBy(() -> m_h.getCount(-1));
+    assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class)
+        .isThrownBy(() -> m_h.getCount(4));
   }
 
   @Test
   void incCount_invalid() {
     m_h.setCount(1, 0xFFFF);
-    assertThrows(IllegalStateException.class, () -> m_h.incCount(1));
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_h.incCount(1));
   }
 
   @Test
   void decCount_invalid() {
     m_h.setCount(2, 0);
-    assertThrows(IllegalStateException.class, () -> m_h.decCount(2));
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_h.decCount(2));
   }
 
   @Test
@@ -338,17 +341,18 @@ class HeaderTest {
 
     String text = m_h.toString();
 
-    assertTrue(text.contains("id: 43981"));
-    assertTrue(text.contains("opcode: STATUS"));
-    assertTrue(text.contains("status: NXDOMAIN"));
-    assertTrue(text.contains(" qr "));
-    assertTrue(text.contains(" rd "));
-    assertTrue(text.contains(" ra "));
-    assertTrue(text.contains(" cd "));
-    assertTrue(text.contains("qd: 0 "));
-    assertTrue(text.contains("an: 255 "));
-    assertTrue(text.contains("au: 10 "));
-    assertTrue(text.contains("ad: 0 "));
+    assertThat(text)
+        .contains("id: 43981")
+        .contains("opcode: STATUS")
+        .contains("status: NXDOMAIN")
+        .contains(" qr ")
+        .contains(" rd ")
+        .contains(" ra ")
+        .contains(" cd ")
+        .contains("qd: 0 ")
+        .contains("an: 255 ")
+        .contains("au: 10 ")
+        .contains("ad: 0 ");
   }
 
   @Test
@@ -365,20 +369,20 @@ class HeaderTest {
     Header h2 = m_h.clone();
 
     assertNotSame(m_h, h2);
-    assertEquals(m_h.getID(), h2.getID());
+    assertThat(h2.getID()).isEqualTo(m_h.getID());
     for (int i = 0; i < 16; ++i) {
       if ((i > 0 && i < 5) || i > 11) {
         continue;
       }
-      assertEquals(m_h.getFlag(i), h2.getFlag(i));
+      assertThat(h2.getFlag(i)).isEqualTo(m_h.getFlag(i));
     }
     for (int i = 0; i < 4; ++i) {
-      assertEquals(m_h.getCount(i), h2.getCount(i));
+      assertThat(h2.getCount(i)).isEqualTo(m_h.getCount(i));
     }
 
     h2.setCount(1, 1);
     h2.setCount(2, 1);
-    assertEquals(0xFF, m_h.getCount(1));
-    assertEquals(0x0A, m_h.getCount(2));
+    assertThat(m_h.getCount(1)).isEqualTo(0xFF);
+    assertThat(m_h.getCount(2)).isEqualTo(0x0A);
   }
 }

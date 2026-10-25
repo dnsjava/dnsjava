@@ -35,12 +35,9 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -103,103 +100,101 @@ class RRsetTest {
 
   @Test
   void ctor_0arg() {
-    assertEquals(0, m_rs.size());
-    assertThrows(IllegalStateException.class, () -> m_rs.getDClass());
-    assertThrows(IllegalStateException.class, () -> m_rs.getType());
-    assertThrows(IllegalStateException.class, () -> m_rs.getTTL());
-    assertThrows(IllegalStateException.class, () -> m_rs.getName());
-    assertThrows(IllegalStateException.class, () -> m_rs.first());
+    assertThat(m_rs.size()).isZero();
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_rs.getDClass());
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_rs.getType());
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_rs.getTTL());
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_rs.getName());
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_rs.first());
 
-    assertEquals("{empty}", m_rs.toString());
+    assertThat(m_rs).hasToString("{empty}");
 
     List<Record> rrs = m_rs.rrs();
-    assertNotNull(rrs);
-    assertEquals(0, rrs.size());
+    assertThat(rrs).isNotNull().isEmpty();
 
     List<RRSIGRecord> sigs = m_rs.sigs();
-    assertNotNull(sigs);
-    assertEquals(0, sigs.size());
+    assertThat(sigs).isNotNull().isEmpty();
   }
 
   @Test
   void basics() {
     m_rs.addRR(m_a1);
 
-    assertEquals(1, m_rs.size());
-    assertEquals(DClass.IN, m_rs.getDClass());
-    assertEquals(m_a1, m_rs.first());
-    assertEquals(m_name, m_rs.getName());
-    assertEquals(m_ttl, m_rs.getTTL());
-    assertEquals(Type.A, m_rs.getType());
+    assertThat(m_rs).hasSize(1);
+    assertThat(m_rs.getDClass()).isEqualTo(DClass.IN);
+    assertThat(m_rs.first()).isEqualTo(m_a1);
+    assertThat(m_rs.getName()).isEqualTo(m_name);
+    assertThat(m_rs.getTTL()).isEqualTo(m_ttl);
+    assertThat(m_rs.getType()).isEqualTo(Type.A);
 
     // add it again, and make sure nothing changed
     m_rs.addRR(m_a1);
 
-    assertEquals(1, m_rs.size());
-    assertEquals(DClass.IN, m_rs.getDClass());
-    assertEquals(m_a1, m_rs.first());
-    assertEquals(m_name, m_rs.getName());
-    assertEquals(m_ttl, m_rs.getTTL());
-    assertEquals(Type.A, m_rs.getType());
+    assertThat(m_rs).hasSize(1);
+    assertThat(m_rs.getDClass()).isEqualTo(DClass.IN);
+    assertThat(m_rs.first()).isEqualTo(m_a1);
+    assertThat(m_rs.getName()).isEqualTo(m_name);
+    assertThat(m_rs.getTTL()).isEqualTo(m_ttl);
+    assertThat(m_rs.getType()).isEqualTo(Type.A);
 
     m_rs.addRR(m_a2);
 
-    assertEquals(2, m_rs.size());
-    assertEquals(DClass.IN, m_rs.getDClass());
+    assertThat(m_rs.size()).isEqualTo(2);
+    assertThat(m_rs.getDClass()).isEqualTo(DClass.IN);
     Record r = m_rs.first();
-    assertEquals(m_a1, r);
-    assertEquals(m_name, m_rs.getName());
-    assertEquals(m_ttl, m_rs.getTTL());
-    assertEquals(Type.A, m_rs.getType());
+    assertThat(r).isEqualTo(m_a1);
+    assertThat(m_rs.getName()).isEqualTo(m_name);
+    assertThat(m_rs.getTTL()).isEqualTo(m_ttl);
+    assertThat(m_rs.getType()).isEqualTo(Type.A);
 
     List<Record> itr = m_rs.rrs();
-    assertEquals(m_a1, itr.get(0));
-    assertEquals(m_a2, itr.get(1));
+    assertThat(itr.get(0)).isEqualTo(m_a1);
+    assertThat(itr.get(1)).isEqualTo(m_a2);
 
     // make sure that it rotates
     itr = m_rs.rrs();
-    assertEquals(m_a2, itr.get(0));
-    assertEquals(m_a1, itr.get(1));
+    assertThat(itr.get(0)).isEqualTo(m_a2);
+    assertThat(itr.get(1)).isEqualTo(m_a1);
     itr = m_rs.rrs();
-    assertEquals(m_a1, itr.get(0));
-    assertEquals(m_a2, itr.get(1));
+    assertThat(itr.get(0)).isEqualTo(m_a1);
+    assertThat(itr.get(1)).isEqualTo(m_a2);
 
     m_rs.deleteRR(m_a1);
-    assertEquals(1, m_rs.size());
-    assertEquals(DClass.IN, m_rs.getDClass());
-    assertEquals(m_a2, m_rs.first());
-    assertEquals(m_name, m_rs.getName());
-    assertEquals(m_ttl, m_rs.getTTL());
-    assertEquals(Type.A, m_rs.getType());
+    assertThat(m_rs).hasSize(1);
+    assertThat(m_rs.getDClass()).isEqualTo(DClass.IN);
+    assertThat(m_rs.first()).isEqualTo(m_a2);
+    assertThat(m_rs.getName()).isEqualTo(m_name);
+    assertThat(m_rs.getTTL()).isEqualTo(m_ttl);
+    assertThat(m_rs.getType()).isEqualTo(Type.A);
 
     // the signature records
     m_rs.addRR(m_s1);
-    assertEquals(1, m_rs.size());
+    assertThat(m_rs).hasSize(1);
     List<RRSIGRecord> sigs = m_rs.sigs();
-    assertEquals(m_s1, sigs.get(0));
-    assertEquals(1, sigs.size());
+    assertThat(sigs.get(0)).isEqualTo(m_s1);
+    assertThat(sigs).hasSize(1);
 
     m_rs.addRR(m_s1);
     sigs = m_rs.sigs();
-    assertEquals(m_s1, sigs.get(0));
-    assertEquals(1, sigs.size());
+    assertThat(sigs.get(0)).isEqualTo(m_s1);
+    assertThat(sigs).hasSize(1);
 
     m_rs.addRR(m_s2);
     sigs = m_rs.sigs();
-    assertEquals(m_s1, sigs.get(0));
-    assertEquals(m_s2, sigs.get(1));
-    assertEquals(2, sigs.size());
+    assertThat(sigs.get(0)).isEqualTo(m_s1);
+    assertThat(sigs.get(1)).isEqualTo(m_s2);
+    assertThat(sigs).hasSize(2);
 
     m_rs.deleteRR(m_s1);
     sigs = m_rs.sigs();
-    assertEquals(m_s2, sigs.get(0));
-    assertEquals(1, sigs.size());
+    assertThat(sigs.get(0)).isEqualTo(m_s2);
+    assertThat(sigs).hasSize(1);
 
     // clear it all
     m_rs.clear();
-    assertEquals(0, m_rs.size());
-    assertEquals(0, m_rs.rrs().size());
-    assertEquals(0, m_rs.sigs().size());
+    assertThat(m_rs.size()).isZero();
+    assertThat(m_rs.rrs()).isEmpty();
+    assertThat(m_rs.sigs()).isEmpty();
   }
 
   @Test
@@ -211,42 +206,44 @@ class RRsetTest {
 
     RRset rs2 = new RRset(m_rs);
 
-    assertEquals(2, rs2.size());
-    assertEquals(m_a1, rs2.first());
+    assertThat(rs2.size()).isEqualTo(2);
+    assertThat(rs2.first()).isEqualTo(m_a1);
     List<Record> itr = rs2.rrs();
-    assertEquals(m_a1, itr.get(0));
-    assertEquals(m_a2, itr.get(1));
-    assertEquals(2, itr.size());
+    assertThat(itr.get(0)).isEqualTo(m_a1);
+    assertThat(itr.get(1)).isEqualTo(m_a2);
+    assertThat(itr).hasSize(2);
 
     List<RRSIGRecord> sigs = rs2.sigs();
-    assertEquals(m_s1, sigs.get(0));
-    assertEquals(m_s2, sigs.get(1));
-    assertEquals(2, sigs.size());
+    assertThat(sigs.get(0)).isEqualTo(m_s1);
+    assertThat(sigs.get(1)).isEqualTo(m_s2);
+    assertThat(sigs).hasSize(2);
   }
 
   @Test
   void ctor_vararg() {
     RRset set = new RRset(m_a1, m_a2);
-    assertEquals(Stream.of(m_a1, m_a2).collect(Collectors.toList()), set.rrs());
-    assertEquals(Collections.emptyList(), set.sigs());
+    assertThat(set.rrs()).isEqualTo(Stream.of(m_a1, m_a2).collect(Collectors.toList()));
+    assertThat(set.sigs()).isEqualTo(Collections.emptyList());
   }
 
   @Test
   void ctor_vararg_sig() {
     RRset set = new RRset(m_a1, m_a2, m_s1);
-    assertEquals(Stream.of(m_a1, m_a2).collect(Collectors.toList()), set.rrs());
-    assertEquals(Collections.singletonList(m_s1), set.sigs());
+    assertThat(set.rrs()).isEqualTo(Stream.of(m_a1, m_a2).collect(Collectors.toList()));
+    assertThat(set.sigs()).isEqualTo(Collections.singletonList(m_s1));
   }
 
   @Test
   void ctor_vararg_mismatch() {
     TXTRecord txt = new TXTRecord(m_name, DClass.IN, 3600, "test");
-    assertThrows(IllegalArgumentException.class, () -> new RRset(m_a1, m_a2, txt));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new RRset(m_a1, m_a2, txt));
   }
 
   @Test
   void ctor_vararg_null() {
-    assertThrows(NullPointerException.class, () -> new RRset((Record[]) null));
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(() -> new RRset((Record[]) null));
   }
 
   @Test
@@ -258,10 +255,11 @@ class RRsetTest {
 
     String out = m_rs.toString();
 
-    assertTrue(out.contains(m_name.toString()));
-    assertTrue(out.contains(" IN A "));
-    assertTrue(out.contains("[192.169.232.11]"));
-    assertTrue(out.contains("[192.169.232.12]"));
+    assertThat(out)
+        .contains(m_name.toString())
+        .contains(" IN A ")
+        .contains("[192.169.232.11]")
+        .contains("[192.169.232.12]");
   }
 
   @Test
@@ -270,14 +268,12 @@ class RRsetTest {
 
     String out = m_rs.toString();
 
-    assertFalse(out.contains("{empty}"));
-    assertTrue(out.contains(" sigs: "));
-    assertTrue(out.contains(m_name.toString()));
+    assertThat(out).doesNotContain("{empty}").contains(" sigs: ").contains(m_name.toString());
   }
 
   @Test
   void test_toStringEmpty() {
-    assertEquals("{empty}", m_rs.toString());
+    assertThat(m_rs).hasToString("{empty}");
   }
 
   @Test
@@ -286,7 +282,7 @@ class RRsetTest {
 
     CNAMERecord c = new CNAMERecord(m_name, DClass.IN, m_ttl, Name.fromString("an.alias."));
 
-    assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(c));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_rs.addRR(c));
   }
 
   @Test
@@ -295,7 +291,7 @@ class RRsetTest {
 
     m_a2 = new ARecord(m_name2, DClass.IN, m_ttl, InetAddress.getByName("192.169.232.11"));
 
-    assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(m_a2));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_rs.addRR(m_a2));
   }
 
   @Test
@@ -304,18 +300,18 @@ class RRsetTest {
 
     m_a2 = new ARecord(m_name, DClass.CHAOS, m_ttl, InetAddress.getByName("192.169.232.11"));
 
-    assertThrows(IllegalArgumentException.class, () -> m_rs.addRR(m_a2));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_rs.addRR(m_a2));
   }
 
   @Test
   void TTLcalculation() {
     m_rs.addRR(m_a2);
-    assertEquals(m_a2.getTTL(), m_rs.getTTL());
+    assertThat(m_rs.getTTL()).isEqualTo(m_a2.getTTL());
     m_rs.addRR(m_a1);
-    assertEquals(m_a1.getTTL(), m_rs.getTTL());
+    assertThat(m_rs.getTTL()).isEqualTo(m_a1.getTTL());
 
     for (Record r : m_rs.rrs()) {
-      assertEquals(m_a1.getTTL(), r.getTTL());
+      assertThat(r.getTTL()).isEqualTo(m_a1.getTTL());
     }
   }
 
@@ -326,13 +322,13 @@ class RRsetTest {
     m_rs.addRR(m_a2);
 
     List<Record> itr = m_rs.rrs();
-    assertEquals(m_a1, itr.get(0));
-    assertEquals(m_a2, itr.get(1));
-    assertEquals(2, itr.size());
+    assertThat(itr.get(0)).isEqualTo(m_a1);
+    assertThat(itr.get(1)).isEqualTo(m_a2);
+    assertThat(itr).hasSize(2);
 
     List<RRSIGRecord> sigs = m_rs.sigs();
-    assertEquals(m_s1, sigs.get(0));
-    assertEquals(1, sigs.size());
+    assertThat(sigs.get(0)).isEqualTo(m_s1);
+    assertThat(sigs).hasSize(1);
   }
 
   @Test
@@ -341,12 +337,12 @@ class RRsetTest {
     m_rs.addRR(m_a2);
 
     List<Record> itr = m_rs.rrs(false);
-    assertEquals(m_a1, itr.get(0));
-    assertEquals(m_a2, itr.get(1));
+    assertThat(itr.get(0)).isEqualTo(m_a1);
+    assertThat(itr.get(1)).isEqualTo(m_a2);
 
     itr = m_rs.rrs(false);
-    assertEquals(m_a1, itr.get(0));
-    assertEquals(m_a2, itr.get(1));
+    assertThat(itr.get(0)).isEqualTo(m_a1);
+    assertThat(itr.get(1)).isEqualTo(m_a2);
   }
 
   @ParameterizedTest

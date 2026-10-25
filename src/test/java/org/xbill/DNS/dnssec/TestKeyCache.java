@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +20,7 @@ class TestKeyCache {
   void testNullPropertiesDontFail() {
     KeyCache kc = new KeyCache();
     kc.init(null);
-    assertNull(kc.find(Name.root, DClass.IN));
+    assertThat(kc.find(Name.root, DClass.IN)).isNull();
   }
 
   @Test
@@ -35,7 +34,7 @@ class TestKeyCache {
     kc.store(nkeA);
     kc.store(nkeB);
     KeyEntry fromCache = kc.find(Name.fromString("a."), DClass.IN);
-    assertNull(fromCache);
+    assertThat(fromCache).isNull();
   }
 
   @Test
@@ -48,7 +47,7 @@ class TestKeyCache {
     kc.store(nkeA);
     when(clock.instant()).thenReturn(now.plusSeconds(5));
     KeyEntry fromCache = kc.find(Name.fromString("a."), DClass.IN);
-    assertNull(fromCache);
+    assertThat(fromCache).isNull();
   }
 
   @Test
@@ -64,7 +63,7 @@ class TestKeyCache {
     kc.store(nkeA);
     when(clock.instant()).thenReturn(now.plusSeconds(5));
     KeyEntry fromCache = kc.find(Name.fromString("a."), DClass.IN);
-    assertNull(fromCache);
+    assertThat(fromCache).isNull();
   }
 
   @Test
@@ -75,7 +74,7 @@ class TestKeyCache {
     kc.store(nkeA);
     kc.store(nkeB);
     KeyEntry fromCache = kc.find(Name.fromString("a.a."), DClass.IN);
-    assertEquals(nkeA, fromCache);
+    assertThat(fromCache).isEqualTo(nkeA);
   }
 
   @Test
@@ -86,7 +85,7 @@ class TestKeyCache {
     kc.store(nkeA);
     kc.store(nkeB);
     KeyEntry fromCache = kc.find(Name.fromString("a.a."), DClass.IN);
-    assertEquals(nkeA, fromCache);
+    assertThat(fromCache).isEqualTo(nkeA);
   }
 
   @Test
@@ -112,12 +111,12 @@ class TestKeyCache {
     kc.store(nkeC);
 
     KeyEntry fromCacheA = kc.find(Name.fromString("a."), DClass.IN);
-    assertEquals(nkeA, fromCacheA);
+    assertThat(fromCacheA).isEqualTo(nkeA);
 
     KeyEntry fromCacheB = kc.find(Name.fromString("b."), DClass.IN);
-    assertNull(fromCacheB);
+    assertThat(fromCacheB).isNull();
 
     KeyEntry fromCacheC = kc.find(Name.fromString("c."), DClass.IN);
-    assertNull(fromCacheC);
+    assertThat(fromCacheC).isNull();
   }
 }

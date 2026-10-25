@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.tools;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,10 +40,10 @@ class PrimaryToolTest {
 
     primary.main(new String[] {"example.com.", zoneFile.getAbsolutePath()});
 
-    String output = outContent.toString();
-    assertTrue(output.contains("example.com."));
-    assertTrue(output.contains("SOA"));
-    assertTrue(output.contains("ns1.example.com."));
+    assertThat(outContent.toString())
+        .contains("example.com.")
+        .contains("SOA")
+        .contains("ns1.example.com.");
   }
 
   @Test
@@ -57,8 +57,6 @@ class PrimaryToolTest {
 
     primary.main(new String[] {"-a", "example.com.", zoneFile.getAbsolutePath()});
 
-    String output = outContent.toString();
-    assertTrue(output.contains("SOA"));
-    assertTrue(output.contains("NS"));
+    assertThat(outContent.toString()).contains("SOA").contains("NS");
   }
 }

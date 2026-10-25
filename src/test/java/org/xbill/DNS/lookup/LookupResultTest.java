@@ -2,9 +2,8 @@
 package org.xbill.DNS.lookup;
 
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.net.InetAddress;
 import java.util.Collections;
@@ -24,37 +23,37 @@ class LookupResultTest {
 
   @Test
   void ctor_nullRecords() {
-    assertThrows(
-        NullPointerException.class,
-        () -> new LookupResult(PREVIOUS, null, null, false, null, Collections.emptyList()));
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(
+            () -> new LookupResult(PREVIOUS, null, null, false, null, Collections.emptyList()));
   }
 
   @Test
   void ctor_nullAliases() {
-    assertThrows(
-        NullPointerException.class,
-        () -> new LookupResult(PREVIOUS, null, null, false, Collections.emptyList(), null));
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(
+            () -> new LookupResult(PREVIOUS, null, null, false, Collections.emptyList(), null));
   }
 
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
   void ctor_authOnly(boolean isAuthenticated) {
     LookupResult lookupResult = new LookupResult(isAuthenticated);
-    assertEquals(isAuthenticated, lookupResult.isAuthenticated());
-    assertEquals(0, lookupResult.getAliases().size());
-    assertEquals(0, lookupResult.getRecords().size());
-    assertEquals(0, lookupResult.getQueryResponsePairs().size());
+    assertThat(lookupResult.isAuthenticated()).isEqualTo(isAuthenticated);
+    assertThat(lookupResult.getAliases()).isEmpty();
+    assertThat(lookupResult.getRecords()).isEmpty();
+    assertThat(lookupResult.getQueryResponsePairs()).isEmpty();
   }
 
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
   void ctor_singleRecord(boolean isAuthenticated) {
     LookupResult lookupResult = new LookupResult(A_RECORD, isAuthenticated, A_RECORD);
-    assertEquals(isAuthenticated, lookupResult.isAuthenticated());
-    assertEquals(0, lookupResult.getAliases().size());
-    assertEquals(1, lookupResult.getRecords().size());
-    assertEquals(1, lookupResult.getQueryResponsePairs().size());
-    assertNull(lookupResult.getQueryResponsePairs().get(A_RECORD));
+    assertThat(lookupResult.isAuthenticated()).isEqualTo(isAuthenticated);
+    assertThat(lookupResult.getAliases()).isEmpty();
+    assertThat(lookupResult.getRecords()).hasSize(1);
+    assertThat(lookupResult.getQueryResponsePairs()).hasSize(1);
+    assertThat(lookupResult.getQueryResponsePairs().get(A_RECORD)).isNull();
   }
 
   @Test
@@ -62,7 +61,7 @@ class LookupResultTest {
     LookupResult lookupResult =
         new LookupResult(
             PREVIOUS, null, null, false, singletonList(A_RECORD), Collections.emptyList());
-    assertEquals(singletonList(A_RECORD), lookupResult.getRecords());
+    assertThat(lookupResult.getRecords()).containsExactly(A_RECORD);
   }
 
   @Test
@@ -71,7 +70,7 @@ class LookupResultTest {
     Record aRecord = new ARecord(name, DClass.IN, 0, InetAddress.getLoopbackAddress());
     LookupResult lookupResult =
         new LookupResult(PREVIOUS, null, null, false, singletonList(aRecord), singletonList(name));
-    assertEquals(singletonList(name), lookupResult.getAliases());
+    assertThat(lookupResult.getAliases()).containsExactly(name);
   }
 
   @ParameterizedTest
@@ -85,7 +84,7 @@ class LookupResultTest {
             isAuthenticated,
             singletonList(A_RECORD),
             Collections.emptyList());
-    assertEquals(isAuthenticated, lookupResult.isAuthenticated());
+    assertThat(lookupResult.isAuthenticated()).isEqualTo(isAuthenticated);
   }
 
   @ParameterizedTest
@@ -98,6 +97,6 @@ class LookupResultTest {
     LookupResult lookupResult1 = new LookupResult(isAuthenticated);
     LookupResult lookupResult2 =
         new LookupResult(lookupResult1, cname, null, true, singletonList(a), singletonList(nameA));
-    assertEquals(isAuthenticated, lookupResult2.isAuthenticated());
+    assertThat(lookupResult2.isAuthenticated()).isEqualTo(isAuthenticated);
   }
 }

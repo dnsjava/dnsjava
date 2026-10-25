@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -22,7 +22,7 @@ class TSIGRecordTest {
             1,
             0,
             null);
-    assertEquals(
-        "HMAC-MD5.SIG-ALG.REG.INT. 1 5 16 AAAAAAAAAAAAAAAAAAAAAA== NOERROR 0", r.rrToString());
+    assertThat(r.rrToString())
+        .isEqualTo("HMAC-MD5.SIG-ALG.REG.INT. 1 5 16 AAAAAAAAAAAAAAAAAAAAAA== NOERROR 0");
   }
 }

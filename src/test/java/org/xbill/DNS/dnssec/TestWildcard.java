@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -32,9 +30,9 @@ class TestWildcard extends TestBase {
     // a.d.ingotronic.ch./A exists, but the response is faked from *.d.ingotronic.ch. which must be
     // detected by the NSEC proof
     Message response = resolver.send(createMessage("a.d.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD));
+    assertThat(response.getHeader().getFlag(Flags.AD)).isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.positive.wildcard_too_broad", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.positive.wildcard_too_broad");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -51,9 +49,9 @@ class TestWildcard extends TestBase {
     // a.d.nsec3.ingotronic.ch./A exists, but the response is faked from
     // *.d.nsec3.ingotronic.ch. which must be detected by the NSEC proof
     Message response = resolver.send(createMessage("a.d.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD));
+    assertThat(response.getHeader().getFlag(Flags.AD)).isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.positive.wildcard_too_broad", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.positive.wildcard_too_broad");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -61,10 +59,10 @@ class TestWildcard extends TestBase {
   @Test
   void testLabelCountInSignaturesNotAllSame() throws IOException {
     Message response = resolver.send(createMessage("b.d.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD));
+    assertThat(response.getHeader().getFlag(Flags.AD)).isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals(
-        "failed.wildcard.label_count_mismatch:b.d.nsec3.ingotronic.ch.", getReason(response));
+    assertThat(getReason(response))
+        .isEqualTo("failed.wildcard.label_count_mismatch:b.d.nsec3.ingotronic.ch.");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -77,9 +75,9 @@ class TestWildcard extends TestBase {
     add(Name.fromString("\1.sub.wc.ingotronic.ch.").toString() + "/A", message);
 
     Message response = resolver.send(createMessage("\1.sub.wc.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.positive.wildcard_too_broad", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.positive.wildcard_too_broad");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -92,9 +90,9 @@ class TestWildcard extends TestBase {
     add("a.c.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("a.c.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertTrue(getReason(response).startsWith("failed.authority.positive"));
+    assertThat(getReason(response)).startsWith("failed.authority.positive");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -106,9 +104,9 @@ class TestWildcard extends TestBase {
     add(Name.fromString("\1.c.ingotronic.ch./MX").toString(), message);
 
     Message response = resolver.send(createMessage("\1.c.ingotronic.ch./MX"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nodata", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nodata");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -121,9 +119,9 @@ class TestWildcard extends TestBase {
     add(Name.fromString("\1.sub.wc.ingotronic.ch.").toString() + "/MX", message);
 
     Message response = resolver.send(createMessage("\1.sub.wc.ingotronic.ch./MX"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nodata", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nodata");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -137,9 +135,9 @@ class TestWildcard extends TestBase {
     add(Name.fromString("\1.sub.wc.nsec3.ingotronic.ch.").toString() + "/MX", message);
 
     Message response = resolver.send(createMessage("\1.sub.wc.nsec3.ingotronic.ch./MX"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nodata", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nodata");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -155,7 +153,7 @@ class TestWildcard extends TestBase {
     add("www.x.c.ingotronic.ch./A", m);
 
     Message response = resolver.send(createMessage("www.x.c.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEde(ExtendedErrorCodeOption.RRSIGS_MISSING, response);
   }
@@ -172,7 +170,7 @@ class TestWildcard extends TestBase {
     add("www.x.ce.ingotronic.ch./A", m);
 
     Message response = resolver.send(createMessage("www.x.ce.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }

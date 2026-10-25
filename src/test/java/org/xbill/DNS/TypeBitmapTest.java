@@ -34,9 +34,8 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,26 +43,26 @@ class TypeBitmapTest {
   @Test
   void empty() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {});
-    assertEquals("", typeBitmap.toString());
+    assertThat(typeBitmap.toString()).isEmpty();
   }
 
   @Test
   void typeA() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {Type.A});
-    assertEquals("A", typeBitmap.toString());
+    assertThat(typeBitmap).hasToString("A");
   }
 
   @Test
   void typeNSandSOA() {
     TypeBitmap typeBitmap = new TypeBitmap(new int[] {Type.NS, Type.SOA});
-    assertEquals("NS SOA", typeBitmap.toString());
+    assertThat(typeBitmap).hasToString("NS SOA");
   }
 
   @Test
   void typeNSandSOAArray() {
     int[] typeArray = {Type.NS, Type.SOA};
     TypeBitmap typeBitmap = new TypeBitmap(typeArray);
-    assertArrayEquals(typeArray, typeBitmap.toArray());
+    assertThat(typeBitmap.toArray()).containsExactly(typeArray);
   }
 
   @Test
@@ -72,7 +71,7 @@ class TypeBitmapTest {
     TypeBitmap typeBitmap = new TypeBitmap(typeArray);
     DNSOutput out = new DNSOutput();
     typeBitmap.toWire(out);
-    assertArrayEquals(new byte[] {0, 1, 0b0100_0010}, out.toByteArray());
+    assertThat(out.toByteArray()).containsExactly(new byte[] {0, 1, 0b0100_0010});
   }
 
   @Test
@@ -103,12 +102,12 @@ class TypeBitmapTest {
     TypeBitmap typeBitmapOut = new TypeBitmap(typeArray);
     DNSOutput out = new DNSOutput();
     typeBitmapOut.toWire(out);
-    assertArrayEquals(wire, out.toByteArray());
+    assertThat(out.toByteArray()).containsExactly(wire);
 
     // Test parsing
     DNSInput in = new DNSInput(wire);
     TypeBitmap typeBitmapIn = new TypeBitmap(in);
-    assertArrayEquals(typeArray, typeBitmapIn.toArray());
+    assertThat(typeBitmapIn.toArray()).containsExactly(typeArray);
   }
 
   @Test

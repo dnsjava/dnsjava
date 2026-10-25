@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -155,24 +155,24 @@ class EDNS0MessageTests {
   @Test
   void testParseEdns0Empty() throws IOException {
     Message msg = new Message(EDNS0_EMPTY);
-    assertArrayEquals(EDNS0_EMPTY, msg.toWire());
+    assertThat(msg.toWire()).containsExactly(EDNS0_EMPTY);
   }
 
   @Test
   void testParseEdns0Cookie() throws IOException {
     Message msg = new Message(EDNS0_COOKIE);
-    assertArrayEquals(EDNS0_COOKIE, msg.toWire());
+    assertThat(msg.toWire()).containsExactly(EDNS0_COOKIE);
   }
 
   @Test
   void testParseEdns0CookieKeepalive() throws IOException {
     Message msg = new Message(EDNS0_COOKIE_KEEPALIVE);
-    assertArrayEquals(EDNS0_COOKIE_KEEPALIVE, msg.toWire());
+    assertThat(msg.toWire()).containsExactly(EDNS0_COOKIE_KEEPALIVE);
   }
 
   @Test
   void testParseEdns0SubnetCookieKeepalive() throws IOException {
     Message msg = new Message(EDNS0_SUBNET_COOKIE_KEEPALIVE);
-    assertArrayEquals(EDNS0_SUBNET_COOKIE_KEEPALIVE, msg.toWire());
+    assertThat(msg.toWire()).containsExactly(EDNS0_SUBNET_COOKIE_KEEPALIVE);
   }
 }

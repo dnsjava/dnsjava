@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,8 +24,8 @@ import org.xbill.DNS.Type;
 class TestTrustAnchorLoading extends TestBase {
   @Test
   void testLoadRootTrustAnchors() {
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
-    assertNull(resolver.getTrustAnchors().find(Name.root, DClass.CH));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNotNull();
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.CH)).isNull();
   }
 
   @Test
@@ -38,7 +34,7 @@ class TestTrustAnchorLoading extends TestBase {
     Properties config = new Properties();
     config.put("dnsjava.dnssec.trust_anchor_file", "./src/test/resources/trust_anchors");
     resolver.init(config);
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNotNull();
   }
 
   @Test
@@ -46,7 +42,7 @@ class TestTrustAnchorLoading extends TestBase {
     resolver.getTrustAnchors().clear();
     Properties config = new Properties();
     resolver.init(config);
-    assertNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNull();
   }
 
   @Test
@@ -54,7 +50,7 @@ class TestTrustAnchorLoading extends TestBase {
     resolver.getTrustAnchors().clear();
     Properties config = new Properties();
     config.put("dnsjava.dnssec.trust_anchor_file", "xyz");
-    assertThrows(IOException.class, () -> resolver.init(config));
+    assertThatExceptionOfType(IOException.class).isThrownBy(() -> resolver.init(config));
   }
 
   @Test
@@ -75,12 +71,12 @@ class TestTrustAnchorLoading extends TestBase {
 
     resolver.getTrustAnchors().clear();
     resolver.loadTrustAnchors(new ByteArrayInputStream(bos.toByteArray()));
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNotNull();
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -88,12 +84,13 @@ class TestTrustAnchorLoading extends TestBase {
   void testLoadRootTrustAnchorWithInvalidDNSKEY() throws IOException {
     resolver.getTrustAnchors().clear();
     resolver.loadTrustAnchors(getClass().getResourceAsStream("/trust_anchors_dnskey_invalid"));
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNotNull();
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_alg_match:.:RSASHA256", getReason(response));
+    assertThat(getReason(response))
+        .isEqualTo("validate.bogus.badkey:.:dnskey.no_ds_alg_match:.:RSASHA256");
     assertEde(ExtendedErrorCodeOption.DNSKEY_MISSING, response);
   }
 
@@ -101,12 +98,12 @@ class TestTrustAnchorLoading extends TestBase {
   void testLoadRootTrustAnchorWithInvalidDS() throws IOException {
     resolver.getTrustAnchors().clear();
     resolver.loadTrustAnchors(getClass().getResourceAsStream("/trust_anchors_invalid"));
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNotNull();
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.bogus.badkey:.:dnskey.no_ds_match", getReason(response));
+    assertThat(getReason(response)).isEqualTo("validate.bogus.badkey:.:dnskey.no_ds_match");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -114,27 +111,27 @@ class TestTrustAnchorLoading extends TestBase {
   void testLoadRootTrustAnchorsAlongWithGarbage() throws IOException {
     resolver.getTrustAnchors().clear();
     resolver.loadTrustAnchors(getClass().getResourceAsStream("/trust_anchors_test"));
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
-    assertNotNull(resolver.getTrustAnchors().find(Name.root, DClass.CH));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNotNull();
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.CH)).isNotNull();
   }
 
   @Test
   void testLoadEmptyTrustAnchors() throws IOException {
     resolver.getTrustAnchors().clear();
     resolver.loadTrustAnchors(getClass().getResourceAsStream("/trust_anchors_empty"));
-    assertNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNull();
   }
 
   @Test
   void testInsecureWithEmptyTrustAnchor() throws IOException {
     resolver.getTrustAnchors().clear();
     resolver.loadTrustAnchors(getClass().getResourceAsStream("/trust_anchors_empty"));
-    assertNull(resolver.getTrustAnchors().find(Name.root, DClass.IN));
+    assertThat(resolver.getTrustAnchors().find(Name.root, DClass.IN)).isNull();
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertEquals("validate.insecure", getReason(response));
+    assertThat(getReason(response)).isEqualTo("validate.insecure");
     assertEde(-1, response);
   }
 }

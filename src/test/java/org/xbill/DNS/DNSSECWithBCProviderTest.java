@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -48,7 +46,7 @@ class DNSSECWithBCProviderTest {
             algorithm,
             toSign,
             BouncyCastleProvider.PROVIDER_NAME);
-    assertNotNull(signature);
+    assertThat(signature).isNotNull();
 
     // verify the signature
     Signature verifier =
@@ -56,7 +54,7 @@ class DNSSECWithBCProviderTest {
     verifier.initVerify(keyPair.getPublic());
     verifier.update(toSign);
     boolean verify = verifier.verify(signature);
-    assertTrue(verify);
+    assertThat(verify).isTrue();
   }
 
   @Test
@@ -72,6 +70,6 @@ class DNSSECWithBCProviderTest {
                 Name.root);
     byte[] expectedDigest =
         base16.fromString("6033725b0ccfc05d1e9d844d49c6cf890b13d5eac9439189947d5db6c8d1c1ec");
-    assertArrayEquals(expectedDigest, DNSSEC.generateDSDigest(dnskey, Digest.GOST3411_12));
+    assertThat(DNSSEC.generateDSDigest(dnskey, Digest.GOST3411_12)).containsExactly(expectedDigest);
   }
 }

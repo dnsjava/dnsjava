@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.hosts;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -33,7 +31,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Optional;
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -60,8 +57,10 @@ class HostsFileParserTest {
 
   @Test
   void testArguments() {
-    assertThrows(NullPointerException.class, () -> new HostsFileParser(null));
-    assertThrows(IllegalArgumentException.class, () -> new HostsFileParser(tempDir));
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(() -> new HostsFileParser(null));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new HostsFileParser(tempDir));
   }
 
   @Test
@@ -97,44 +96,43 @@ class HostsFileParserTest {
   @Test
   void testLookupType() {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> hostsFileParser.getAddressForHost(kubernetesName, Type.MX));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> hostsFileParser.getAddressForHost(kubernetesName, Type.MX));
   }
 
   @Test
   void testEntireFileParsing() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
-    assertEquals(
-        kubernetesAddress,
-        hostsFileParser
-            .getAddressForHost(kubernetesName, Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(kubernetesName, Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(kubernetesAddress);
   }
 
   @Test
   void testMissingFileIsEmptyResult() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(tempDir.resolve("missing"));
-    assertEquals(Optional.empty(), hostsFileParser.getAddressForHost(kubernetesName, Type.A));
+    assertThat(hostsFileParser.getAddressForHost(kubernetesName, Type.A)).isEmpty();
   }
 
   @Test
   void testCacheLookupAfterFileDeleteWithoutChangeChecking() throws IOException {
     Path tempHosts = Files.copy(hostsFileWindows, tempDir, StandardCopyOption.REPLACE_EXISTING);
     HostsFileParser hostsFileParser = new HostsFileParser(tempHosts, false);
-    assertEquals(0, hostsFileParser.cacheSize());
-    assertEquals(
-        kubernetesAddress,
-        hostsFileParser
-            .getAddressForHost(kubernetesName, Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
-    assertTrue(hostsFileParser.cacheSize() > 1, "Cache must not be empty");
+    assertThat(hostsFileParser.cacheSize()).isZero();
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(kubernetesName, Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(kubernetesAddress);
+    assertThat(hostsFileParser.cacheSize()).as("Cache must not be empty").isGreaterThan(1);
     Files.delete(tempHosts);
-    assertEquals(
-        kubernetesAddress,
-        hostsFileParser
-            .getAddressForHost(kubernetesName, Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(kubernetesName, Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(kubernetesAddress);
   }
 
   @Test
@@ -149,17 +147,17 @@ class HostsFileParserTest {
     hostsFileParser.setClock(clock);
     Instant now = Clock.systemUTC().instant();
     when(clock.instant()).thenReturn(now);
-    assertEquals(0, hostsFileParser.cacheSize());
-    assertEquals(
-        kubernetesAddress,
-        hostsFileParser
-            .getAddressForHost(kubernetesName, Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
-    assertTrue(hostsFileParser.cacheSize() > 1, "Cache must not be empty");
+    assertThat(hostsFileParser.cacheSize()).isZero();
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(kubernetesName, Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(kubernetesAddress);
+    assertThat(hostsFileParser.cacheSize()).as("Cache must not be empty").isGreaterThan(1);
     Files.delete(tempHosts);
     when(clock.instant()).thenReturn(now.plus(Duration.ofMinutes(6)));
-    assertEquals(Optional.empty(), hostsFileParser.getAddressForHost(kubernetesName, Type.A));
-    assertEquals(0, hostsFileParser.cacheSize());
+    assertThat(hostsFileParser.getAddressForHost(kubernetesName, Type.A)).isEmpty();
+    assertThat(hostsFileParser.cacheSize()).isZero();
   }
 
   @Test
@@ -175,13 +173,13 @@ class HostsFileParserTest {
     hostsFileParser.setClock(clock);
     Instant now = Clock.systemUTC().instant();
     when(clock.instant()).thenReturn(now);
-    assertEquals(0, hostsFileParser.cacheSize());
-    assertEquals(
-        kubernetesAddress,
-        hostsFileParser
-            .getAddressForHost(kubernetesName, Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
-    assertTrue(hostsFileParser.cacheSize() > 1, "Cache must not be empty");
+    assertThat(hostsFileParser.cacheSize()).isZero();
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(kubernetesName, Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(kubernetesAddress);
+    assertThat(hostsFileParser.cacheSize()).as("Cache must not be empty").isGreaterThan(1);
     Name testName = Name.fromConstantString("testFileChangeClearsCache.");
     try (BufferedWriter w =
         Files.newBufferedWriter(tempHosts, StandardCharsets.UTF_8, StandardOpenOption.APPEND)) {
@@ -191,32 +189,30 @@ class HostsFileParserTest {
 
     Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(10_0000));
     when(clock.instant()).thenReturn(now.plus(Duration.ofMinutes(6)));
-    assertEquals(
-        InetAddress.getByAddress(testName.toString(), localhostBytes),
-        hostsFileParser
-            .getAddressForHost(testName, Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(testName, Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress(testName.toString(), localhostBytes));
   }
 
   @Test
   void testInvalidContentIsIgnored() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileInvalid);
-    assertEquals(
-        InetAddress.getByAddress("localhost", localhostBytes),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
-    assertEquals(
-        InetAddress.getByAddress("localalias", localhostBytes),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("localalias."), Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
-    assertEquals(
-        Optional.empty(),
-        hostsFileParser.getAddressForHost(Name.fromConstantString("some-junk."), Type.A));
-    assertNotEquals(
-        Optional.empty(),
-        hostsFileParser.getAddressForHost(Name.fromConstantString("example.org."), Type.A));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("localhost", localhostBytes));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("localalias."), Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("localalias", localhostBytes));
+    assertThat(hostsFileParser.getAddressForHost(Name.fromConstantString("some-junk."), Type.A))
+        .isEmpty();
+    assertThat(hostsFileParser.getAddressForHost(Name.fromConstantString("example.org."), Type.A))
+        .isNotEmpty();
   }
 
   @Test
@@ -225,7 +221,7 @@ class HostsFileParserTest {
     hostsFileParser
         .getAddressForHost(Name.fromConstantString("localhost-10."), Type.A)
         .orElseThrow(() -> new IllegalStateException("Host entry not found"));
-    assertEquals(1, hostsFileParser.cacheSize());
+    assertThat(hostsFileParser.cacheSize()).isOne();
   }
 
   @Test
@@ -236,7 +232,7 @@ class HostsFileParserTest {
       hostsFileParser
           .getAddressForHost(Name.fromConstantString("localhost-10."), Type.A)
           .orElseThrow(() -> new IllegalStateException("Host entry not found"));
-      assertEquals(1280, hostsFileParser.cacheSize());
+      assertThat(hostsFileParser.cacheSize()).isEqualTo(1280);
     } finally {
       System.clearProperty("dnsjava.hostsfile.max_size_bytes");
     }
@@ -249,7 +245,7 @@ class HostsFileParserTest {
     hostsFileParser
         .getAddressForHost(Name.fromConstantString("localhost-10."), Type.AAAA)
         .orElseThrow(() -> new IllegalStateException("Host entry not found"));
-    assertEquals(1, hostsFileParser.cacheSize());
+    assertThat(hostsFileParser.cacheSize()).isOne();
   }
 
   private HostsFileParser generateLargeHostsFile(String name) throws IOException {
@@ -280,7 +276,7 @@ class HostsFileParserTest {
             entry -> {
               throw new IllegalStateException("Host entry not found");
             });
-    assertEquals(0, hostsFileParser.cacheSize());
+    assertThat(hostsFileParser.cacheSize()).isZero();
   }
 
   @Test
@@ -292,41 +288,41 @@ class HostsFileParserTest {
             entry -> {
               throw new IllegalStateException("Host entry not found");
             });
-    assertEquals(0, hostsFileParser.cacheSize());
+    assertThat(hostsFileParser.cacheSize()).isZero();
   }
 
   @Test
   void testDualStackLookup() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileInvalid);
-    assertEquals(
-        InetAddress.getByAddress("localhost", localhostBytes),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("localhost", localhostBytes));
     byte[] ipv6Localhost = new byte[16];
     ipv6Localhost[15] = 1;
-    assertEquals(
-        InetAddress.getByAddress("localhost", ipv6Localhost),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("localhost."), Type.AAAA)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("localhost."), Type.AAAA)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("localhost", ipv6Localhost));
   }
 
   @Test
   void testDuplicateItemReturnsFirst() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileInvalid);
-    assertEquals(
-        InetAddress.getByAddress("example.com", new byte[] {127, 0, 0, 5}),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("example.com."), Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("example.com."), Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("example.com", new byte[] {127, 0, 0, 5}));
 
     // lookup a second time to validate the cache entry
-    assertEquals(
-        InetAddress.getByAddress("example.com", new byte[] {127, 0, 0, 5}),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("example.com."), Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("example.com."), Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("example.com", new byte[] {127, 0, 0, 5}));
   }
 
   @Test
@@ -339,64 +335,67 @@ class HostsFileParserTest {
       }
     }
     HostsFileParser hostsFileParser = new HostsFileParser(generatedLargeFile);
-    assertEquals(
-        InetAddress.getByAddress("localhost", new byte[] {127, 0, 0, 1}),
-        hostsFileParser
-            .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getAddressForHost(Name.fromConstantString("localhost."), Type.A)
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(InetAddress.getByAddress("localhost", new byte[] {127, 0, 0, 1}));
   }
 
   @Test
   void testReverseLookupNullArgument() {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
-    assertThrows(NullPointerException.class, () -> hostsFileParser.getNameForReverseLookup(null));
+    assertThatExceptionOfType(NullPointerException.class)
+        .isThrownBy(() -> hostsFileParser.getNameForReverseLookup(null));
   }
 
   @Test
   void testReverseLookup() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
-    assertEquals(
-        kubernetesName,
-        hostsFileParser
-            .getNameForReverseLookup(ReverseMap.fromAddress(localhostBytes))
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getNameForReverseLookup(ReverseMap.fromAddress(localhostBytes))
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(kubernetesName);
   }
 
   @Test
   void testReverseLookupNotFound() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
-    assertEquals(
-        Optional.empty(),
-        hostsFileParser.getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {8, 8, 8, 8})));
+    assertThat(
+            hostsFileParser.getNameForReverseLookup(
+                ReverseMap.fromAddress(new byte[] {8, 8, 8, 8})))
+        .isEmpty();
   }
 
   @Test
   void testReverseLookupReturnsFirstName() throws IOException {
     // hosts_example maps 192.168.10.96 to host.docker.internal and gateway.docker.internal
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileWindows);
-    assertEquals(
-        Name.fromConstantString("host.docker.internal."),
-        hostsFileParser
-            .getNameForReverseLookup(
-                ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, 10, 96}))
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getNameForReverseLookup(
+                    ReverseMap.fromAddress(new byte[] {(byte) 192, (byte) 168, 10, 96}))
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(Name.fromConstantString("host.docker.internal."));
   }
 
   @Test
   void testBigFileReverseLookup() throws IOException {
     HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileReverseLookup");
-    assertEquals(
-        Name.fromConstantString("localhost-10."),
-        hostsFileParser
-            .getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {127, 0, 0, 10}))
-            .orElseThrow(() -> new IllegalStateException("Host entry not found")));
+    assertThat(
+            hostsFileParser
+                .getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {127, 0, 0, 10}))
+                .orElseThrow(() -> new IllegalStateException("Host entry not found")))
+        .isEqualTo(Name.fromConstantString("localhost-10."));
   }
 
   @Test
   void testBigFileReverseNotFound() throws IOException {
     HostsFileParser hostsFileParser = generateLargeHostsFile("testBigFileReverseNotFound");
-    assertEquals(
-        Optional.empty(),
-        hostsFileParser.getNameForReverseLookup(ReverseMap.fromAddress(new byte[] {127, 1, 1, 1})));
+    assertThat(
+            hostsFileParser.getNameForReverseLookup(
+                ReverseMap.fromAddress(new byte[] {127, 1, 1, 1})))
+        .isEmpty();
   }
 }

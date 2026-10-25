@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -25,28 +24,30 @@ class TestSMessage {
   @Test
   void testGetUndefinedSectionBelow() {
     SMessage m = new SMessage(0, null);
-    assertThrows(IllegalArgumentException.class, () -> m.getSectionRRsets(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> m.getSectionRRsets(-1));
   }
 
   @ParameterizedTest
   @ValueSource(ints = {0, 4, 100})
   void testGetUndefinedSection(int section) {
     SMessage m = new SMessage(0, null);
-    assertThrows(IllegalArgumentException.class, () -> m.getSectionRRsets(section));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> m.getSectionRRsets(section));
   }
 
   @Test
   void testGetEmptySection() {
     SMessage m = new SMessage(0, null);
     List<SRRset> sets = m.getSectionRRsets(Section.ANSWER);
-    assertEquals(0, sets.size());
+    assertThat(sets).isEmpty();
   }
 
   @Test
   void testGetEmptySectionByType() {
     SMessage m = new SMessage(0, null);
     List<SRRset> sets = m.getSectionRRsets(Section.ANSWER, Type.A);
-    assertEquals(0, sets.size());
+    assertThat(sets).isEmpty();
   }
 
   @Test
@@ -64,22 +65,22 @@ class TestSMessage {
     m.addRecord(r2, Section.ANSWER);
     SMessage sm = new SMessage(m);
     List<SRRset> result = sm.getSectionRRsets(Section.ANSWER, Type.A);
-    assertEquals(1, result.size());
-    assertEquals(Type.A, result.get(0).getType());
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).getType()).isEqualTo(Type.A);
   }
 
   @Test
   void testRecordCountForQuestionIsOne() {
     SMessage m = new SMessage(0, null);
     int count = m.getCount(Section.QUESTION);
-    assertEquals(1, count);
+    assertThat(count).isOne();
   }
 
   @Test
   void testRecordCountForEmptySectionIsZero() {
     SMessage m = new SMessage(0, null);
     int count = m.getCount(Section.ADDITIONAL);
-    assertEquals(0, count);
+    assertThat(count).isZero();
   }
 
   @Test
@@ -90,7 +91,7 @@ class TestSMessage {
         Section.ANSWER);
     SMessage sm = new SMessage(m);
     int count = sm.getCount(Section.ANSWER);
-    assertEquals(1, count);
+    assertThat(count).isOne();
   }
 
   @Test
@@ -101,7 +102,7 @@ class TestSMessage {
     m.addRecord(r, Section.ANSWER);
     SMessage sm = new SMessage(m);
     SRRset result = sm.findAnswerRRset(Name.root, Type.A, DClass.IN);
-    assertEquals(r, result.first());
+    assertThat(result.first()).isEqualTo(r);
   }
 
   @Test
@@ -112,7 +113,7 @@ class TestSMessage {
     m.addRecord(r, Section.ANSWER);
     SMessage sm = new SMessage(m);
     SRRset result = sm.findAnswerRRset(Name.root, Type.A, DClass.CH);
-    assertNull(result);
+    assertThat(result).isNull();
   }
 
   @Test
@@ -123,7 +124,7 @@ class TestSMessage {
     m.addRecord(r, Section.ANSWER);
     SMessage sm = new SMessage(m);
     SRRset result = sm.findAnswerRRset(Name.root, Type.MX, DClass.IN);
-    assertNull(result);
+    assertThat(result).isNull();
   }
 
   @Test
@@ -139,6 +140,6 @@ class TestSMessage {
     m.addRecord(r, Section.ANSWER);
     SMessage sm = new SMessage(m);
     SRRset result = sm.findAnswerRRset(Name.root, Type.MX, DClass.IN);
-    assertNull(result);
+    assertThat(result).isNull();
   }
 }

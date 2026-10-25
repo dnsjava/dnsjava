@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -39,10 +35,9 @@ class DohResolverCommonTest {
   @Test
   void testConstructor() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
-    assertEquals("https://dns.google/dns-query", resolver.getUriTemplate());
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new TestDohResolver("https://dns.google/dns-query", 0));
+    assertThat(resolver.getUriTemplate()).isEqualTo("https://dns.google/dns-query");
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TestDohResolver("https://dns.google/dns-query", 0));
   }
 
   @Test
@@ -60,12 +55,12 @@ class DohResolverCommonTest {
       CompletionStage<AsyncSemaphore.Permit> third =
           resolver.maxConcurrentRequests.acquire(Duration.ofSeconds(1), 3, executor);
 
-      assertTrue(first.toCompletableFuture().isDone());
-      assertTrue(second.toCompletableFuture().isDone());
-      assertFalse(third.toCompletableFuture().isDone());
+      assertThat(first.toCompletableFuture().isDone()).isTrue();
+      assertThat(second.toCompletableFuture().isDone()).isTrue();
+      assertThat(third.toCompletableFuture().isDone()).isFalse();
 
       first.toCompletableFuture().join().release(1, executor);
-      assertTrue(third.toCompletableFuture().isDone());
+      assertThat(third.toCompletableFuture().isDone()).isTrue();
       second.toCompletableFuture().join().release(2, executor);
     } finally {
       if (previousMaxConnections == null) {
@@ -80,23 +75,23 @@ class DohResolverCommonTest {
   void testGetSetUriTemplate() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     resolver.setUriTemplate("https://cloudflare-dns.com/dns-query");
-    assertEquals("https://cloudflare-dns.com/dns-query", resolver.getUriTemplate());
+    assertThat(resolver.getUriTemplate()).isEqualTo("https://cloudflare-dns.com/dns-query");
   }
 
   @Test
   void testGetSetTimeout() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
-    assertEquals(Duration.ofSeconds(5), resolver.getTimeout());
+    assertThat(resolver.getTimeout()).isEqualTo(Duration.ofSeconds(5));
     resolver.setTimeout(Duration.ofSeconds(10));
-    assertEquals(Duration.ofSeconds(10), resolver.getTimeout());
+    assertThat(resolver.getTimeout()).isEqualTo(Duration.ofSeconds(10));
   }
 
   @Test
   void testGetSetUsePost() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
-    assertFalse(resolver.isUsePost());
+    assertThat(resolver.isUsePost()).isFalse();
     resolver.setUsePost(true);
-    assertTrue(resolver.isUsePost());
+    assertThat(resolver.isUsePost()).isTrue();
   }
 
   @Test
@@ -104,11 +99,11 @@ class DohResolverCommonTest {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     byte[] queryBytes = {1, 2, 3};
     String url = resolver.getUrl(queryBytes);
-    assertTrue(url.contains("dns="));
+    assertThat(url).contains("dns=");
 
     resolver.setUsePost(true);
     url = resolver.getUrl(queryBytes);
-    assertEquals("https://dns.google/dns-query", url);
+    assertThat(url).isEqualTo("https://dns.google/dns-query");
   }
 
   @Test
@@ -120,12 +115,12 @@ class DohResolverCommonTest {
         Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
 
     Message prepared = resolver.prepareQuery(query);
-    assertEquals(0, prepared.getHeader().getID());
-    assertNotNull(prepared.getOPT()); // Default OPT added
+    assertThat(prepared.getHeader().getID()).isZero();
+    assertThat(prepared.getOPT()).isNotNull(); // Default OPT added
 
     resolver.setEDNS(-1, 0, 0, Collections.emptyList());
     prepared = resolver.prepareQuery(query);
-    assertNull(prepared.getOPT());
+    assertThat(prepared.getOPT()).isNull();
   }
 
   @Test
@@ -134,12 +129,12 @@ class DohResolverCommonTest {
     resolver.setEDNS(0, 1232, Flags.DO, Collections.emptyList());
     Message query = new Message();
     Message prepared = resolver.prepareQuery(query);
-    assertNotNull(prepared.getOPT());
-    assertEquals(0, prepared.getOPT().getVersion());
-    assertEquals(Flags.DO, prepared.getOPT().getFlags() & Flags.DO);
-    assertEquals(Flags.DO, prepared.getOPT().getFlags());
-    assertThrows(
-        IllegalArgumentException.class, () -> resolver.setEDNS(1, 0, 0, Collections.emptyList()));
+    assertThat(prepared.getOPT()).isNotNull();
+    assertThat(prepared.getOPT().getVersion()).isZero();
+    assertThat(prepared.getOPT().getFlags() & Flags.DO).isEqualTo(Flags.DO);
+    assertThat(prepared.getOPT().getFlags()).isEqualTo(Flags.DO);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> resolver.setEDNS(1, 0, 0, Collections.emptyList()));
   }
 
   @Test
@@ -151,7 +146,7 @@ class DohResolverCommonTest {
     query.addRecord(
         Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
     Message prepared = resolver.prepareQuery(query);
-    assertNotNull(prepared.getTSIG());
+    assertThat(prepared.getTSIG()).isNotNull();
   }
 
   @Test
@@ -165,9 +160,9 @@ class DohResolverCommonTest {
   @Test
   void testToString() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
-    assertEquals("DohResolver {GET https://dns.google/dns-query}", resolver.toString());
+    assertThat(resolver).hasToString("DohResolver {GET https://dns.google/dns-query}");
     resolver.setUsePost(true);
-    assertEquals("DohResolver {POST https://dns.google/dns-query}", resolver.toString());
+    assertThat(resolver).hasToString("DohResolver {POST https://dns.google/dns-query}");
   }
 
   @Test
@@ -194,7 +189,7 @@ class DohResolverCommonTest {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
     Exception ex = new Exception("test");
     CompletableFuture<Object> f = resolver.failedFuture(ex);
-    assertTrue(f.isCompletedExceptionally());
+    assertThat(f.isCompletedExceptionally()).isTrue();
   }
 
   @Test
@@ -205,9 +200,9 @@ class DohResolverCommonTest {
         Record.newRecord(Name.fromString("example.com."), Type.A, DClass.IN), Section.QUESTION);
 
     CompletableFuture<Object> f = resolver.timeoutFailedFuture(query, new Exception("inner"));
-    assertTrue(f.isCompletedExceptionally());
+    assertThat(f.isCompletedExceptionally()).isTrue();
 
     f = resolver.timeoutFailedFuture(query, "extra message", new Exception("inner"));
-    assertTrue(f.isCompletedExceptionally());
+    assertThat(f.isCompletedExceptionally()).isTrue();
   }
 }

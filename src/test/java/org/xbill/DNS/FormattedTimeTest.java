@@ -35,8 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -51,7 +51,7 @@ class FormattedTimeTest {
     GregorianCalendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     cal.set(2005, Calendar.MARCH, 19, 4, 4, 5);
     String out = FormattedTime.format(cal.toInstant());
-    assertEquals("20050319040405", out);
+    assertThat(out).isEqualTo("20050319040405");
   }
 
   @Test
@@ -67,7 +67,7 @@ class FormattedTimeTest {
     GregorianCalendar cal2 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     cal2.setTimeInMillis(out.toEpochMilli());
     cal2.set(Calendar.MILLISECOND, 0);
-    assertEquals(cal, cal2);
+    assertThat(cal2).isEqualTo(cal);
   }
 
   @Test
@@ -83,13 +83,16 @@ class FormattedTimeTest {
     GregorianCalendar cal2 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     cal2.setTimeInMillis(out.toEpochMilli());
     cal2.set(Calendar.MILLISECOND, 0);
-    assertEquals(cal, cal2);
+    assertThat(cal2).isEqualTo(cal);
   }
 
   @Test
   void parse_invalid() {
-    assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("2004010101010"));
-    assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("200401010101010"));
-    assertThrows(DateTimeParseException.class, () -> FormattedTime.parse("2004010101010A"));
+    assertThatExceptionOfType(DateTimeParseException.class)
+        .isThrownBy(() -> FormattedTime.parse("2004010101010"));
+    assertThatExceptionOfType(DateTimeParseException.class)
+        .isThrownBy(() -> FormattedTime.parse("200401010101010"));
+    assertThatExceptionOfType(DateTimeParseException.class)
+        .isThrownBy(() -> FormattedTime.parse("2004010101010A"));
   }
 }

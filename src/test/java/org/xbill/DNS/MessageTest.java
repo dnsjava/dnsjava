@@ -36,13 +36,9 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -56,32 +52,32 @@ class MessageTest {
   @Test
   void ctor_0arg() {
     Message m = new Message();
-    assertTrue(m.getSection(0).isEmpty());
-    assertTrue(m.getSection(1).isEmpty());
-    assertTrue(m.getSection(2).isEmpty());
-    assertTrue(m.getSection(3).isEmpty());
-    assertThrows(IllegalArgumentException.class, () -> m.getSection(4));
+    assertThat(m.getSection(0)).isEmpty();
+    assertThat(m.getSection(1)).isEmpty();
+    assertThat(m.getSection(2)).isEmpty();
+    assertThat(m.getSection(3)).isEmpty();
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m.getSection(4));
     Header h = m.getHeader();
-    assertEquals(0, h.getCount(0));
-    assertEquals(0, h.getCount(1));
-    assertEquals(0, h.getCount(2));
-    assertEquals(0, h.getCount(3));
+    assertThat(h.getCount(0)).isZero();
+    assertThat(h.getCount(1)).isZero();
+    assertThat(h.getCount(2)).isZero();
+    assertThat(h.getCount(3)).isZero();
   }
 
   @Test
   void ctor_1arg() {
     Message m = new Message(10);
-    assertEquals(new Header(10).toString(), m.getHeader().toString());
-    assertTrue(m.getSection(0).isEmpty());
-    assertTrue(m.getSection(1).isEmpty());
-    assertTrue(m.getSection(2).isEmpty());
-    assertTrue(m.getSection(3).isEmpty());
-    assertThrows(IllegalArgumentException.class, () -> m.getSection(4));
+    assertThat(m.getHeader()).hasToString(new Header(10).toString());
+    assertThat(m.getSection(0)).isEmpty();
+    assertThat(m.getSection(1)).isEmpty();
+    assertThat(m.getSection(2)).isEmpty();
+    assertThat(m.getSection(3)).isEmpty();
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m.getSection(4));
     Header h = m.getHeader();
-    assertEquals(0, h.getCount(0));
-    assertEquals(0, h.getCount(1));
-    assertEquals(0, h.getCount(2));
-    assertEquals(0, h.getCount(3));
+    assertThat(h.getCount(0)).isZero();
+    assertThat(h.getCount(1)).isZero();
+    assertThat(h.getCount(2)).isZero();
+    assertThat(h.getCount(3)).isZero();
   }
 
   @Test
@@ -99,7 +95,7 @@ class MessageTest {
     wrap.getShort(); // read the prepended length
 
     Message m = new Message(wrap);
-    assertEquals(Name.fromConstantString("www.google.com."), m.getQuestion().getName());
+    assertThat(m.getQuestion().getName()).isEqualTo(Name.fromConstantString("www.google.com."));
   }
 
   @Test
@@ -108,19 +104,19 @@ class MessageTest {
     ARecord ar = new ARecord(n, DClass.IN, 1, InetAddress.getByName("192.168.101.110"));
 
     Message m = Message.newQuery(ar);
-    assertEquals(1, m.getSection(0).size());
-    assertEquals(ar, m.getSection(0).get(0));
-    assertTrue(m.getSection(1).isEmpty());
-    assertTrue(m.getSection(2).isEmpty());
-    assertTrue(m.getSection(3).isEmpty());
+    assertThat(m.getSection(0)).hasSize(1);
+    assertThat(m.getSection(0).get(0)).isEqualTo(ar);
+    assertThat(m.getSection(1)).isEmpty();
+    assertThat(m.getSection(2)).isEmpty();
+    assertThat(m.getSection(3)).isEmpty();
 
     Header h = m.getHeader();
-    assertEquals(1, h.getCount(0));
-    assertEquals(0, h.getCount(1));
-    assertEquals(0, h.getCount(2));
-    assertEquals(0, h.getCount(3));
-    assertEquals(Opcode.QUERY, h.getOpcode());
-    assertTrue(h.getFlag(Flags.RD));
+    assertThat(h.getCount(0)).isOne();
+    assertThat(h.getCount(1)).isZero();
+    assertThat(h.getCount(2)).isZero();
+    assertThat(h.getCount(3)).isZero();
+    assertThat(h.getOpcode()).isEqualTo(Opcode.QUERY);
+    assertThat(h.getFlag(Flags.RD)).isTrue();
   }
 
   @Test
@@ -142,11 +138,11 @@ class MessageTest {
 
     byte[] binary = m.toWire(512);
     Message m2 = new Message(binary);
-    assertEquals(2, m2.getHeader().getCount(Section.ADDITIONAL));
+    assertThat(m2.getHeader().getCount(Section.ADDITIONAL)).isEqualTo(2);
     List<Record> records = m2.getSection(Section.ADDITIONAL);
-    assertEquals(2, records.size());
-    assertEquals(TXTRecord.class, records.get(0).getClass());
-    assertEquals(OPTRecord.class, records.get(1).getClass());
+    assertThat(records).hasSize(2);
+    assertThat(records.get(0).getClass()).isEqualTo(TXTRecord.class);
+    assertThat(records.get(1).getClass()).isEqualTo(OPTRecord.class);
   }
 
   @Test
@@ -155,8 +151,8 @@ class MessageTest {
     Record question = Record.newRecord(qname, Type.A, DClass.IN);
     Message query = Message.newQuery(question);
     Message clone = query.clone();
-    assertEquals(query.getHeader().getID(), clone.getHeader().getID());
-    assertEquals(query.getQuestion().getName(), clone.getQuestion().getName());
+    assertThat(clone.getHeader().getID()).isEqualTo(query.getHeader().getID());
+    assertThat(clone.getQuestion().getName()).isEqualTo(query.getQuestion().getName());
   }
 
   @Test
@@ -169,8 +165,8 @@ class MessageTest {
     response.addRecord(
         new ARecord(qname, DClass.IN, 0, InetAddress.getByName("127.0.0.1")), Section.ANSWER);
     Message clone = response.clone();
-    assertEquals(clone.getQuestion(), response.getQuestion());
-    assertEquals(clone.getSection(Section.ANSWER), response.getSection(Section.ANSWER));
+    assertThat(response.getQuestion()).isEqualTo(clone.getQuestion());
+    assertThat(response.getSection(Section.ANSWER)).isEqualTo(clone.getSection(Section.ANSWER));
   }
 
   @Test
@@ -306,9 +302,9 @@ class MessageTest {
     Name n = Name.fromConstantString("example.com.");
     ARecord r = new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress());
     m.addRecord(r, Section.ANSWER);
-    assertTrue(m.findRecord(r, Section.ANSWER));
+    assertThat(m.findRecord(r, Section.ANSWER)).isTrue();
     m.removeRecord(r, Section.ANSWER);
-    assertFalse(m.findRecord(r, Section.ANSWER));
+    assertThat(m.findRecord(r, Section.ANSWER)).isFalse();
   }
 
   @Test
@@ -320,14 +316,14 @@ class MessageTest {
     m.addRecord(r1, Section.ANSWER);
     m.addRecord(r2, Section.ANSWER);
     m.removeAllRecords(Section.ANSWER);
-    assertTrue(m.getSection(Section.ANSWER).isEmpty());
+    assertThat(m.getSection(Section.ANSWER)).isEmpty();
   }
 
   @Test
   void testGetOPT() {
     Message m = new Message();
     m.addRecord(new OPTRecord(512, 0, 0, 0), Section.ADDITIONAL);
-    assertNotNull(m.getOPT());
+    assertThat(m.getOPT()).isNotNull();
   }
 
   @Test
@@ -337,16 +333,15 @@ class MessageTest {
         Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN),
         Section.QUESTION);
     String s = m.toString();
-    assertTrue(s.contains("example.com."));
-    assertTrue(s.contains("QUESTION"));
+    assertThat(s).contains("example.com.").contains("QUESTION");
   }
 
   @Test
   void testNewUpdate() {
     Name n = Name.fromConstantString("example.com.");
     Message m = Message.newUpdate(n);
-    assertEquals(Opcode.UPDATE, m.getHeader().getOpcode());
-    assertEquals(n, m.getSection(Section.ZONE).get(0).getName());
+    assertThat(m.getHeader().getOpcode()).isEqualTo(Opcode.UPDATE);
+    assertThat(m.getSection(Section.ZONE).get(0).getName()).isEqualTo(n);
   }
 
   @Test
@@ -357,7 +352,7 @@ class MessageTest {
     m.addRecord(new ARecord(n, DClass.IN, 3601, InetAddress.getLoopbackAddress()), Section.ANSWER);
     List<RRset> rrsets = m.getSectionRRsets(Section.ANSWER);
     // Even with different TTLs, they should be grouped if name, type, dclass match
-    assertEquals(1, rrsets.size());
+    assertThat(rrsets).hasSize(1);
   }
 
   @Test
@@ -365,9 +360,9 @@ class MessageTest {
     Message m = new Message();
     Name n = Name.fromConstantString("example.com.");
     m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
-    assertTrue(m.findRRset(n, Type.A, Section.ANSWER));
-    assertTrue(m.findRRset(n, Type.A));
-    assertFalse(m.findRRset(n, Type.AAAA));
+    assertThat(m.findRRset(n, Type.A, Section.ANSWER)).isTrue();
+    assertThat(m.findRRset(n, Type.A)).isTrue();
+    assertThat(m.findRRset(n, Type.AAAA)).isFalse();
   }
 
   @Test
@@ -377,7 +372,7 @@ class MessageTest {
     m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
     @SuppressWarnings("deprecation")
     Record[] records = m.getSectionArray(Section.ANSWER);
-    assertEquals(1, records.length);
+    assertThat(records.length).isOne();
     assertThat(records[0]).isInstanceOf(ARecord.class);
   }
 
@@ -388,7 +383,7 @@ class MessageTest {
     Name n = Name.fromConstantString("example.com.");
     m.addRecord(new ARecord(n, DClass.IN, 3600, InetAddress.getLoopbackAddress()), Section.ANSWER);
     Message m2 = m.clone();
-    assertEquals(1234, m2.getHeader().getID());
-    assertEquals(1, m2.getSection(Section.ANSWER).size());
+    assertThat(m2.getHeader().getID()).isEqualTo(1234);
+    assertThat(m2.getSection(Section.ANSWER)).hasSize(1);
   }
 }

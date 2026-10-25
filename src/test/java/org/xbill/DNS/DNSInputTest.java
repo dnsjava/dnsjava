@@ -35,9 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -101,184 +100,185 @@ abstract class DNSInputTest {
 
   @Test
   void initial_state() {
-    assertEquals(0, m_di.current());
-    assertEquals(10, m_di.remaining());
+    assertThat(m_di.current()).isZero();
+    assertThat(m_di.remaining()).isEqualTo(10);
   }
 
   @Test
   void jump1() {
     m_di.jump(1);
-    assertEquals(1, m_di.current());
-    assertEquals(9, m_di.remaining());
+    assertThat(m_di.current()).isOne();
+    assertThat(m_di.remaining()).isEqualTo(9);
   }
 
   @Test
   void jump2() {
     m_di.jump(9);
-    assertEquals(9, m_di.current());
-    assertEquals(1, m_di.remaining());
+    assertThat(m_di.current()).isEqualTo(9);
+    assertThat(m_di.remaining()).isOne();
   }
 
   @Test
   void jump_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> m_di.jump(10));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_di.jump(10));
   }
 
   @ParameterizedTest
   @ValueSource(ints = {5, 10, 0})
   void setActive(int active) {
     m_di.setActive(active);
-    assertEquals(0, m_di.current());
-    assertEquals(active, m_di.remaining());
+    assertThat(m_di.current()).isZero();
+    assertThat(m_di.remaining()).isEqualTo(active);
   }
 
   @Test
   void setActive_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> m_di.setActive(11));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_di.setActive(11));
   }
 
   @Test
   void clearActive() {
     // first without setting active:
     m_di.clearActive();
-    assertEquals(0, m_di.current());
-    assertEquals(10, m_di.remaining());
+    assertThat(m_di.current()).isZero();
+    assertThat(m_di.remaining()).isEqualTo(10);
 
     m_di.setActive(5);
     m_di.clearActive();
-    assertEquals(0, m_di.current());
-    assertEquals(10, m_di.remaining());
+    assertThat(m_di.current()).isZero();
+    assertThat(m_di.remaining()).isEqualTo(10);
   }
 
   @Test
   void restore_invalid() {
-    assertThrows(IllegalStateException.class, () -> m_di.restore());
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> m_di.restore());
   }
 
   @Test
   void save_restore() {
     m_di.jump(4);
-    assertEquals(4, m_di.current());
-    assertEquals(6, m_di.remaining());
+    assertThat(m_di.current()).isEqualTo(4);
+    assertThat(m_di.remaining()).isEqualTo(6);
 
     m_di.save();
     m_di.jump(0);
-    assertEquals(0, m_di.current());
-    assertEquals(10, m_di.remaining());
+    assertThat(m_di.current()).isZero();
+    assertThat(m_di.remaining()).isEqualTo(10);
 
     m_di.restore();
-    assertEquals(4, m_di.current());
-    assertEquals(6, m_di.remaining());
+    assertThat(m_di.current()).isEqualTo(4);
+    assertThat(m_di.remaining()).isEqualTo(6);
   }
 
   @Test
   void save_set_restore() {
     m_di.jump(4);
-    assertEquals(4, m_di.current());
-    assertEquals(6, m_di.remaining());
+    assertThat(m_di.current()).isEqualTo(4);
+    assertThat(m_di.remaining()).isEqualTo(6);
 
     int save = m_di.saveActive();
-    assertEquals(10, save);
-    assertEquals(6, m_di.remaining());
+    assertThat(save).isEqualTo(10);
+    assertThat(m_di.remaining()).isEqualTo(6);
 
     m_di.setActive(4);
-    assertEquals(4, m_di.remaining());
+    assertThat(m_di.remaining()).isEqualTo(4);
 
     m_di.restoreActive(save);
-    assertEquals(6, m_di.remaining());
+    assertThat(m_di.remaining()).isEqualTo(6);
   }
 
   @Test
   void save_set_restore_boundary() {
     m_di.setActive(4);
-    assertEquals(4, m_di.remaining());
+    assertThat(m_di.remaining()).isEqualTo(4);
 
     m_di.restoreActive(10);
-    assertEquals(10, m_di.remaining());
+    assertThat(m_di.remaining()).isEqualTo(10);
 
-    assertThrows(IllegalArgumentException.class, () -> m_di.restoreActive(12));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> m_di.restoreActive(12));
   }
 
   @Test
   void readU8_basic() throws WireParseException {
     int v1 = m_di.readU8();
-    assertEquals(1, m_di.current());
-    assertEquals(9, m_di.remaining());
-    assertEquals(0, v1);
+    assertThat(m_di.current()).isOne();
+    assertThat(m_di.remaining()).isEqualTo(9);
+    assertThat(v1).isZero();
   }
 
   @Test
   void readU8_maxval() throws WireParseException {
     m_di.jump(9);
     final int[] v1 = {m_di.readU8()};
-    assertEquals(10, m_di.current());
-    assertEquals(0, m_di.remaining());
-    assertEquals(255, v1[0]);
+    assertThat(m_di.current()).isEqualTo(10);
+    assertThat(m_di.remaining()).isZero();
+    assertThat(v1[0]).isEqualTo(255);
 
-    assertThrows(WireParseException.class, () -> v1[0] = m_di.readU8());
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> v1[0] = m_di.readU8());
   }
 
   @Test
   void readU16_basic() throws WireParseException {
     int v1 = m_di.readU16();
-    assertEquals(2, m_di.current());
-    assertEquals(8, m_di.remaining());
-    assertEquals(1, v1);
+    assertThat(m_di.current()).isEqualTo(2);
+    assertThat(m_di.remaining()).isEqualTo(8);
+    assertThat(v1).isOne();
 
     m_di.jump(1);
     v1 = m_di.readU16();
-    assertEquals(258, v1);
+    assertThat(v1).isEqualTo(258);
   }
 
   @Test
   void readU16_maxval() throws WireParseException {
     m_di.jump(8);
     int v = m_di.readU16();
-    assertEquals(10, m_di.current());
-    assertEquals(0, m_di.remaining());
-    assertEquals(0xFFFF, v);
+    assertThat(m_di.current()).isEqualTo(10);
+    assertThat(m_di.remaining()).isZero();
+    assertThat(v).isEqualTo(0xFFFF);
 
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          m_di.jump(9);
-          m_di.readU16();
-        });
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(
+            () -> {
+              m_di.jump(9);
+              m_di.readU16();
+            });
   }
 
   @Test
   void readU32_basic() throws WireParseException {
     long v1 = m_di.readU32();
-    assertEquals(4, m_di.current());
-    assertEquals(6, m_di.remaining());
-    assertEquals(66051, v1);
+    assertThat(m_di.current()).isEqualTo(4);
+    assertThat(m_di.remaining()).isEqualTo(6);
+    assertThat(v1).isEqualTo(66051);
   }
 
   @Test
   void readU32_maxval() throws WireParseException {
     m_di.jump(6);
     long v = m_di.readU32();
-    assertEquals(10, m_di.current());
-    assertEquals(0, m_di.remaining());
-    assertEquals(0xFFFFFFFFL, v);
+    assertThat(m_di.current()).isEqualTo(10);
+    assertThat(m_di.remaining()).isZero();
+    assertThat(v).isEqualTo(0xFFFFFFFFL);
 
-    assertThrows(
-        WireParseException.class,
-        () -> {
-          m_di.jump(7);
-          m_di.readU32();
-        });
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(
+            () -> {
+              m_di.jump(7);
+              m_di.readU32();
+            });
   }
 
   @Test
   void readByteArray_0arg() {
     m_di.jump(1);
     byte[] out = m_di.readByteArray();
-    assertEquals(10, m_di.current());
-    assertEquals(0, m_di.remaining());
-    assertEquals(9, out.length);
+    assertThat(m_di.current()).isEqualTo(10);
+    assertThat(m_di.remaining()).isZero();
+    assertThat(out).hasSize(9);
     for (int i = 0; i < 9; ++i) {
-      assertEquals(m_raw[i + 1], out[i]);
+      assertThat(out[i]).isEqualTo(m_raw[i + 1]);
     }
   }
 
@@ -287,30 +287,30 @@ abstract class DNSInputTest {
     m_di.jump(9);
     m_di.readU8();
     byte[] out = m_di.readByteArray();
-    assertEquals(0, out.length);
+    assertThat(out).isEmpty();
   }
 
   @Test
   void readByteArray_1arg() throws WireParseException {
     byte[] out = m_di.readByteArray(2);
-    assertEquals(2, m_di.current());
-    assertEquals(8, m_di.remaining());
-    assertEquals(2, out.length);
-    assertEquals(0, out[0]);
-    assertEquals(1, out[1]);
+    assertThat(m_di.current()).isEqualTo(2);
+    assertThat(m_di.remaining()).isEqualTo(8);
+    assertThat(out).hasSize(2);
+    assertThat(out[0]).isZero();
+    assertThat(out[1]).isOne();
   }
 
   @Test
   void readByteArray_1arg_boundary() throws WireParseException {
     byte[] out = m_di.readByteArray(10);
-    assertEquals(10, m_di.current());
-    assertEquals(0, m_di.remaining());
-    assertArrayEquals(m_raw, out);
+    assertThat(m_di.current()).isEqualTo(10);
+    assertThat(m_di.remaining()).isZero();
+    assertThat(out).containsExactly(m_raw);
   }
 
   @Test
   void readByteArray_1arg_invalid() {
-    assertThrows(WireParseException.class, () -> m_di.readByteArray(11));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> m_di.readByteArray(11));
   }
 
   @Test
@@ -319,10 +319,10 @@ abstract class DNSInputTest {
     m_di.jump(4);
 
     m_di.readByteArray(data, 1, 4);
-    assertEquals(8, m_di.current());
-    assertEquals(0, data[0]);
+    assertThat(m_di.current()).isEqualTo(8);
+    assertThat(data[0]).isZero();
     for (int i = 0; i < 4; ++i) {
-      assertEquals(m_raw[i + 4], data[i + 1]);
+      assertThat(data[i + 1]).isEqualTo(m_raw[i + 4]);
     }
   }
 
@@ -330,9 +330,9 @@ abstract class DNSInputTest {
   void readCountedSting() throws WireParseException {
     m_di.jump(1);
     byte[] out = m_di.readCountedString();
-    assertEquals(1, out.length);
-    assertEquals(3, m_di.current());
-    assertEquals(2, out[0]);
+    assertThat(out.length).isOne();
+    assertThat(m_di.current()).isEqualTo(3);
+    assertThat(out[0]).isEqualTo((byte) 2);
   }
 
   @Test
@@ -340,22 +340,22 @@ abstract class DNSInputTest {
     int outer = m_di.saveActive();
     m_di.setActive(3);
 
-    assertEquals(0x00, m_di.readU8());
-    assertEquals(2, m_di.remaining());
+    assertThat(m_di.readU8()).isEqualTo(0x00);
+    assertThat(m_di.remaining()).isEqualTo(2);
 
     int inner = m_di.saveActive();
 
     m_di.setActive(1);
-    assertArrayEquals(new byte[] {0x01}, m_di.readByteArray());
+    assertThat(m_di.readByteArray()).containsExactly(new byte[] {0x01});
 
     m_di.restoreActive(inner);
 
-    assertArrayEquals(new byte[] {0x02}, m_di.readByteArray());
-    assertEquals(0, m_di.remaining());
+    assertThat(m_di.readByteArray()).containsExactly(new byte[] {0x02});
+    assertThat(m_di.remaining()).isZero();
 
     m_di.restoreActive(outer);
 
-    assertEquals(0x03, m_di.readU8());
-    assertEquals(6, m_di.remaining());
+    assertThat(m_di.readU8()).isEqualTo(0x03);
+    assertThat(m_di.remaining()).isEqualTo(6);
   }
 }

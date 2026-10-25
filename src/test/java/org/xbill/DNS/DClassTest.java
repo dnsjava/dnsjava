@@ -35,9 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -45,36 +44,37 @@ class DClassTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("IN", DClass.string(DClass.IN));
+    assertThat(DClass.string(DClass.IN)).isEqualTo("IN");
 
     // one with an alias
-    assertEquals("CH", DClass.string(DClass.CH));
+    assertThat(DClass.string(DClass.CH)).isEqualTo("CH");
 
     // one that doesn't exist
-    assertTrue(DClass.string(20).startsWith("CLASS"));
+    assertThat(DClass.string(20)).startsWith("CLASS");
 
-    assertThrows(IllegalArgumentException.class, () -> DClass.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> DClass.string(-1));
 
     //  (max is 0xFFFF)
-    assertThrows(IllegalArgumentException.class, () -> DClass.string(0x10000));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> DClass.string(0x10000));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(DClass.NONE, DClass.value("NONE"));
+    assertThat(DClass.value("NONE")).isEqualTo(DClass.NONE);
 
     // one with alias
-    assertEquals(DClass.HS, DClass.value("HS"));
-    assertEquals(DClass.HS, DClass.value("HESIOD"));
+    assertThat(DClass.value("HS")).isEqualTo(DClass.HS);
+    assertThat(DClass.value("HESIOD")).isEqualTo(DClass.HS);
 
     // one thats undefined but within range
-    assertEquals(21, DClass.value("CLASS21"));
+    assertThat(DClass.value("CLASS21")).isEqualTo(21);
 
     // something that unknown
-    assertEquals(-1, DClass.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(DClass.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, DClass.value(""));
+    assertThat(DClass.value("")).isEqualTo(-1);
   }
 }

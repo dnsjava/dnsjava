@@ -35,9 +35,7 @@
 //
 package org.xbill.DNS.utils;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,193 +47,193 @@ class Base64Test {
   void toString_empty() {
     byte[] data = new byte[0];
     String out = base64.toString(data);
-    assertEquals("", out);
+    assertThat(out).isEmpty();
   }
 
   @Test
   void toString_basic1() {
     byte[] data = {0};
     String out = base64.toString(data);
-    assertEquals("AA==", out);
+    assertThat(out).isEqualTo("AA==");
   }
 
   @Test
   void toString_basic2() {
     byte[] data = {0, 0};
     String out = base64.toString(data);
-    assertEquals("AAA=", out);
+    assertThat(out).isEqualTo("AAA=");
   }
 
   @Test
   void toString_basic3() {
     byte[] data = {0, 0, 1};
     String out = base64.toString(data);
-    assertEquals("AAAB", out);
+    assertThat(out).isEqualTo("AAAB");
   }
 
   @Test
   void toString_basic4() {
     byte[] data = {(byte) 0xFC, 0, 0};
     String out = base64.toString(data);
-    assertEquals("/AAA", out);
+    assertThat(out).isEqualTo("/AAA");
   }
 
   @Test
   void toString_basic5() {
     byte[] data = {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
     String out = base64.toString(data);
-    assertEquals("////", out);
+    assertThat(out).isEqualTo("////");
   }
 
   @Test
   void toString_basic6() {
     byte[] data = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     String out = base64.toString(data);
-    assertEquals("AQIDBAUGBwgJ", out);
+    assertThat(out).isEqualTo("AQIDBAUGBwgJ");
   }
 
   @Test
   void formatString_empty1() {
     String out = base64.formatString(new byte[0], 5, "", false);
-    assertEquals("", out);
+    assertThat(out).isEmpty();
   }
 
   @Test
   void formatString_shorter() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 13, "", false);
-    assertEquals("AQIDBAUGBwgJ", out);
+    assertThat(out).isEqualTo("AQIDBAUGBwgJ");
   }
 
   @Test
   void formatString_sameLength() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 12, "", false);
-    assertEquals("AQIDBAUGBwgJ", out);
+    assertThat(out).isEqualTo("AQIDBAUGBwgJ");
   }
 
   @Test
   void formatString_oneBreak() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 10, "", false);
-    assertEquals("AQIDBAUGBw\ngJ", out);
+    assertThat(out).isEqualTo("AQIDBAUGBw\ngJ");
   }
 
   @Test
   void formatString_twoBreaks1() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 5, "", false);
-    assertEquals("AQIDB\nAUGBw\ngJ", out);
+    assertThat(out).isEqualTo("AQIDB\nAUGBw\ngJ");
   }
 
   @Test
   void formatString_twoBreaks2() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 4, "", false);
-    assertEquals("AQID\nBAUG\nBwgJ", out);
+    assertThat(out).isEqualTo("AQID\nBAUG\nBwgJ");
   }
 
   @Test
   void formatString_shorterWithPrefix() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 13, "!_", false);
-    assertEquals("!_AQIDBAUGBwgJ", out);
+    assertThat(out).isEqualTo("!_AQIDBAUGBwgJ");
   }
 
   @Test
   void formatString_sameLengthWithPrefix() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 12, "!_", false);
-    assertEquals("!_AQIDBAUGBwgJ", out);
+    assertThat(out).isEqualTo("!_AQIDBAUGBwgJ");
   }
 
   @Test
   void formatString_oneBreakWithPrefix() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 10, "!_", false);
-    assertEquals("!_AQIDBAUGBw\n!_gJ", out);
+    assertThat(out).isEqualTo("!_AQIDBAUGBw\n!_gJ");
   }
 
   @Test
   void formatString_twoBreaks1WithPrefix() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 5, "!_", false);
-    assertEquals("!_AQIDB\n!_AUGBw\n!_gJ", out);
+    assertThat(out).isEqualTo("!_AQIDB\n!_AUGBw\n!_gJ");
   }
 
   @Test
   void formatString_twoBreaks2WithPrefix() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 4, "!_", false);
-    assertEquals("!_AQID\n!_BAUG\n!_BwgJ", out);
+    assertThat(out).isEqualTo("!_AQID\n!_BAUG\n!_BwgJ");
   }
 
   @Test
   void formatString_shorterWithPrefixAndClose() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 13, "!_", true);
-    assertEquals("!_AQIDBAUGBwgJ )", out);
+    assertThat(out).isEqualTo("!_AQIDBAUGBwgJ )");
   }
 
   @Test
   void formatString_sameLengthWithPrefixAndClose() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 12, "!_", true);
-    assertEquals("!_AQIDBAUGBwgJ )", out);
+    assertThat(out).isEqualTo("!_AQIDBAUGBwgJ )");
   }
 
   @Test
   void formatString_oneBreakWithPrefixAndClose() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 10, "!_", true);
-    assertEquals("!_AQIDBAUGBw\n!_gJ )", out);
+    assertThat(out).isEqualTo("!_AQIDBAUGBw\n!_gJ )");
   }
 
   @Test
   void formatString_twoBreaks1WithPrefixAndClose() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 5, "!_", true);
-    assertEquals("!_AQIDB\n!_AUGBw\n!_gJ )", out);
+    assertThat(out).isEqualTo("!_AQIDB\n!_AUGBw\n!_gJ )");
   }
 
   @Test
   void formatString_twoBreaks2WithPrefixAndClose() {
     byte[] in = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // "AQIDBAUGBwgJ" (12 chars)
     String out = base64.formatString(in, 4, "!_", true);
-    assertEquals("!_AQID\n!_BAUG\n!_BwgJ )", out);
+    assertThat(out).isEqualTo("!_AQID\n!_BAUG\n!_BwgJ )");
   }
 
   @ParameterizedTest
   @ValueSource(booleans = {true, false})
   void fromString_empty1(boolean useUrl) {
     byte[] out = base64.fromString("", useUrl);
-    assertArrayEquals(new byte[0], out);
+    assertThat(out).isEmpty();
   }
 
   @Test
   void fromString_basic1() {
     byte[] exp = {0};
     byte[] out = base64.fromString("AA==");
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
   void fromString_basic1_url() {
     byte[] out = base64.fromString("AA==", true);
-    assertNull(out);
+    assertThat(out).isNull();
   }
 
   @Test
   void fromString_basic2() {
     byte[] exp = {0, 0};
     byte[] out = base64.fromString("AAA=");
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
   void fromString_basic2_url() {
     byte[] out = base64.fromString("AAA=", true);
-    assertNull(out);
+    assertThat(out).isNull();
   }
 
   @ParameterizedTest
@@ -243,33 +241,33 @@ class Base64Test {
   void fromString_basic3(boolean useUrl) {
     byte[] exp = {0, 0, 1};
     byte[] out = base64.fromString("AAAB", useUrl);
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
   void fromString_basic4() {
     byte[] exp = {(byte) 0xFC, 0, 0};
     byte[] out = base64.fromString("/AAA");
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
   void fromString_basic4_url() {
     byte[] out = base64.fromString("/AAA", true);
-    assertNull(out);
+    assertThat(out).isNull();
   }
 
   @Test
   void fromString_basic5() {
     byte[] exp = {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
     byte[] out = base64.fromString("////");
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
   void fromString_basic5_url() {
     byte[] out = base64.fromString("////", true);
-    assertArrayEquals(new byte[0], out);
+    assertThat(out).isEmpty();
   }
 
   @ParameterizedTest
@@ -277,7 +275,7 @@ class Base64Test {
   void fromString_basic6(boolean useUrl) {
     byte[] exp = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     byte[] out = base64.fromString("AQIDBAUGBwgJ", useUrl);
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @ParameterizedTest
@@ -287,7 +285,7 @@ class Base64Test {
   })
   void fromString_invalid1(String input, boolean useUrl) {
     byte[] out = base64.fromString(input, useUrl);
-    assertNull(out);
+    assertThat(out).isNull();
   }
 
   @ParameterizedTest
@@ -295,6 +293,6 @@ class Base64Test {
   void fromString_invalid2(boolean useUrl) {
     byte[] exp = {0, 0, 1};
     byte[] out = base64.fromString("A.A.A.B.", useUrl);
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 }

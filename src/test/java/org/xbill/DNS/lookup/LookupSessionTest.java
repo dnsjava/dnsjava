@@ -8,8 +8,6 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.inOrder;
@@ -131,7 +129,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
 
     verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
@@ -175,7 +173,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
 
     verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
@@ -191,9 +189,8 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("kubernetes.docker.internal."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(
-        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
-        result.getRecords());
+    assertThat(result.getRecords())
+        .containsExactly(LOOPBACK_A.withName(name("kubernetes.docker.internal.")));
   }
 
   @Test
@@ -207,11 +204,11 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("96.10.168.192.in-addr.arpa."), PTR, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(
-        singletonList(
-            new PTRRecord(
-                name("96.10.168.192.in-addr.arpa."), IN, 0, name("host.docker.internal."))),
-        result.getRecords());
+    assertThat(result.getRecords())
+        .isEqualTo(
+            singletonList(
+                new PTRRecord(
+                    name("96.10.168.192.in-addr.arpa."), IN, 0, name("host.docker.internal."))));
   }
 
   @Test
@@ -261,9 +258,8 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("kubernetes.docker.internal."), AAAA, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(
-        singletonList(LOOPBACK_AAAA.withName(name("kubernetes.docker.internal."))),
-        result.getRecords());
+    assertThat(result.getRecords())
+        .containsExactly(LOOPBACK_AAAA.withName(name("kubernetes.docker.internal.")));
   }
 
   @Test
@@ -277,9 +273,8 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("kubernetes.docker.internal"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(
-        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
-        result.getRecords());
+    assertThat(result.getRecords())
+        .containsExactly(LOOPBACK_A.withName(name("kubernetes.docker.internal.")));
   }
 
   @Test
@@ -294,9 +289,8 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("kubernetes.docker.internal"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(
-        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
-        result.getRecords());
+    assertThat(result.getRecords())
+        .containsExactly(LOOPBACK_A.withName(name("kubernetes.docker.internal.")));
   }
 
   @Test
@@ -312,9 +306,8 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("kubernetes.docker.internal"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(
-        singletonList(LOOPBACK_A.withName(name("kubernetes.docker.internal."))),
-        result.getRecords());
+    assertThat(result.getRecords())
+        .containsExactly(LOOPBACK_A.withName(name("kubernetes.docker.internal.")));
     verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
 
@@ -329,7 +322,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
 
     verify(mockResolver).sendAsync(any(), any(Executor.class));
     verify(mockCache).lookupRecords(name("a.b."), A, Credibility.NORMAL);
@@ -337,9 +330,9 @@ class LookupSessionTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockCache).addMessage(messageCaptor.capture());
     Record question = messageCaptor.getValue().getQuestion();
-    assertEquals(IN, question.getDClass());
-    assertEquals(A, question.getType());
-    assertEquals(name("a.b."), question.getName());
+    assertThat(question.getDClass()).isEqualTo(IN);
+    assertThat(question.getType()).isEqualTo(A);
+    assertThat(question.getName()).isEqualTo(name("a.b."));
 
     verifyNoMoreInteractions(mockCache);
   }
@@ -353,7 +346,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
 
     verify(mockResolver).sendAsync(any(), any(Executor.class));
   }
@@ -375,7 +368,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("a.b."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
 
     verify(mockResolver).sendAsync(any(), any(Executor.class));
     verify(mockCache2).lookupRecords(name("a.b."), A, Credibility.NORMAL);
@@ -383,9 +376,9 @@ class LookupSessionTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockCache2).addMessage(messageCaptor.capture());
     Record question = messageCaptor.getValue().getQuestion();
-    assertEquals(IN, question.getDClass());
-    assertEquals(A, question.getType());
-    assertEquals(name("a.b."), question.getName());
+    assertThat(question.getDClass()).isEqualTo(IN);
+    assertThat(question.getType()).isEqualTo(A);
+    assertThat(question.getName()).isEqualTo(name("a.b."));
 
     verifyNoMoreInteractions(mockCache1);
     verifyNoMoreInteractions(mockCache2);
@@ -407,7 +400,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(aName, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(aName)), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(aName));
 
     verify(mockCache).lookupRecords(aName, A, Credibility.NORMAL);
     verifyNoMoreInteractions(mockCache);
@@ -421,8 +414,9 @@ class LookupSessionTest {
     Cache mockCache = mock(Cache.class);
     when(mockCache.getDClass()).thenReturn(IN);
     // interestingly, a non-configured mock behaves the same way as a cache miss return value.
+    SetResponse hostTldMockResponse = mock(SetResponse.class);
     when(mockCache.lookupRecords(name("host.tld."), A, Credibility.NORMAL))
-        .thenReturn(mock(SetResponse.class));
+        .thenReturn(hostTldMockResponse);
 
     SetResponse anotherTldResponse = mock(SetResponse.class);
     when(anotherTldResponse.isSuccessful()).thenReturn(true);
@@ -440,7 +434,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("host"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("another.tld."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("another.tld.")));
 
     verify(mockCache).lookupRecords(name("host.tld."), A, Credibility.NORMAL);
     verify(mockCache).addMessage(any());
@@ -477,7 +471,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("host"), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("host.tld3."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("host.tld3.")));
 
     InOrder inOrder = inOrder(mockCache);
     inOrder.verify(mockCache).lookupRecords(name("host.tld1."), A, Credibility.NORMAL);
@@ -506,12 +500,11 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
-    assertEquals(
-        Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
-        result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
+    assertThat(result.getAliases())
+        .isEqualTo(Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()));
     if (useCache) {
-      assertEquals(3, lookupSession.getCache(IN).getSize());
+      assertThat(lookupSession.getCache(IN).getSize()).isEqualTo(3);
     }
     verify(mockResolver, times(3)).sendAsync(any(), any(Executor.class));
   }
@@ -554,13 +547,14 @@ class LookupSessionTest {
         lookupSession.lookupAsync(name("www.example.org."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("example.com."))), result.getRecords());
-    assertEquals(
-        Stream.of(name("www.example.org."), name("www.example.net."), name("www.example.com."))
-            .collect(Collectors.toList()),
-        result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("example.com.")));
+    assertThat(result.getAliases())
+        .isEqualTo(
+            Stream.of(name("www.example.org."), name("www.example.net."), name("www.example.com."))
+                .collect(Collectors.toList()));
     if (useCache) {
-      assertEquals(4 + (includeSyntheticCnames ? 2 : 0), lookupSession.getCache(IN).getSize());
+      assertThat(lookupSession.getCache(IN).getSize())
+          .isEqualTo(4 + (includeSyntheticCnames ? 2 : 0));
     }
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
@@ -583,10 +577,9 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
-    assertEquals(
-        Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
-        result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
+    assertThat(result.getAliases())
+        .isEqualTo(Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()));
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
@@ -619,12 +612,11 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.a."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
-    assertEquals(
-        Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()),
-        result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
+    assertThat(result.getAliases())
+        .isEqualTo(Stream.of(name("cname.a."), name("cname.b.")).collect(Collectors.toList()));
     if (useCache) {
-      assertEquals(3, lookupSession.getCache(IN).getSize());
+      assertThat(lookupSession.getCache(IN).getSize()).isEqualTo(3);
     }
     verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
@@ -646,8 +638,8 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(name("cname.r."), A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A), result.getRecords());
-    assertEquals(singletonList(name("cname.r.")), result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A);
+    assertThat(result.getAliases()).containsExactly(name("cname.r."));
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
@@ -696,8 +688,8 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(cname, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("a.b."))), result.getRecords());
-    assertEquals(singletonList(cname), result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("a.b.")));
+    assertThat(result.getAliases()).containsExactly(cname);
     verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
@@ -748,8 +740,8 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(query, CNAME, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(response), result.getRecords());
-    assertEquals(emptyList(), result.getAliases());
+    assertThat(result.getRecords()).containsExactly(response);
+    assertThat(result.getAliases()).isEqualTo(emptyList());
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
@@ -765,8 +757,8 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(query, DNAME, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(response), result.getRecords());
-    assertEquals(emptyList(), result.getAliases());
+    assertThat(result.getRecords()).containsExactly(response);
+    assertThat(result.getAliases()).isEqualTo(emptyList());
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
@@ -856,7 +848,7 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(query, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("x.y.to.a."))), result.getRecords());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("x.y.to.a.")));
     verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
   }
 
@@ -880,8 +872,8 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(query, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(singletonList(LOOPBACK_A.withName(name("x.y.example.net."))), result.getRecords());
-    assertEquals(singletonList(name("x.y.example.org.")), result.getAliases());
+    assertThat(result.getRecords()).containsExactly(LOOPBACK_A.withName(name("x.y.example.net.")));
+    assertThat(result.getAliases()).containsExactly(name("x.y.example.org."));
     verify(mockResolver, times(1)).sendAsync(any(), any(Executor.class));
   }
 
@@ -978,8 +970,9 @@ class LookupSessionTest {
       // Verify that the invalid response didn't end up in the cache
       Cache cache = lookupSession.getCache(IN);
       verify(cache, times(1)).addMessage(any(Message.class));
-      assertEquals(1, cache.getSize());
-      assertTrue(cache.lookupRecords(name("example.com."), A, Credibility.NORMAL).isUnknown());
+      assertThat(cache.getSize()).isOne();
+      assertThat(cache.lookupRecords(name("example.com."), A, Credibility.NORMAL).isUnknown())
+          .isTrue();
     }
 
     verify(mockResolver, times(2)).sendAsync(any(), any(Executor.class));
@@ -1058,7 +1051,7 @@ class LookupSessionTest {
       // Verify that the invalid response didn't end up in the cache
       Cache cache = lookupSession.getCache(IN);
       verify(cache, times(0)).addMessage(any(Message.class));
-      assertEquals(0, cache.getSize());
+      assertThat(cache.getSize()).isZero();
     }
   }
 
@@ -1219,7 +1212,7 @@ class LookupSessionTest {
     LookupSession lookupSession = LookupSession.builder().resolver(mockResolver).build();
     LookupResult result = lookupSession.lookupAsync(testQuestion).toCompletableFuture().get();
 
-    assertTrue(result.getRecords().isEmpty());
+    assertThat(result.getRecords()).isEmpty();
     assertThat(result.getAliases()).containsExactly(testQuestion.getName());
 
     // Two invocations as the result doesn't include an actual answer
@@ -1265,12 +1258,11 @@ class LookupSessionTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockResolver).sendAsync(messageCaptor.capture(), any(Executor.class));
 
-    assertEquals(
-        Record.newRecord(name(LONG_LABEL + "."), A, IN, 0L),
-        messageCaptor.getValue().getSection(Section.QUESTION).get(0));
+    assertThat(messageCaptor.getValue().getSection(Section.QUESTION).get(0))
+        .isEqualTo(Record.newRecord(name(LONG_LABEL + "."), A, IN, 0L));
 
-    assertEquals(
-        singletonList(LOOPBACK_A.withName(name(LONG_LABEL + "."))), lookupResult.getRecords());
+    assertThat(lookupResult.getRecords())
+        .containsExactly(LOOPBACK_A.withName(name(LONG_LABEL + ".")));
   }
 
   @Test
@@ -1292,14 +1284,12 @@ class LookupSessionTest {
     verify(mockResolver, times(2)).sendAsync(messageCaptor.capture(), any(Executor.class));
 
     List<Message> allValues = messageCaptor.getAllValues();
-    assertEquals(
-        Record.newRecord(name("host.a."), Type.A, DClass.IN, 0L),
-        allValues.get(0).getSection(Section.QUESTION).get(0));
-    assertEquals(
-        Record.newRecord(name("host.b."), Type.A, DClass.IN, 0L),
-        allValues.get(1).getSection(Section.QUESTION).get(0));
+    assertThat(allValues.get(0).getSection(Section.QUESTION).get(0))
+        .isEqualTo(Record.newRecord(name("host.a."), Type.A, DClass.IN, 0L));
+    assertThat(allValues.get(1).getSection(Section.QUESTION).get(0))
+        .isEqualTo(Record.newRecord(name("host.b."), Type.A, DClass.IN, 0L));
 
-    assertEquals(singletonList(LOOPBACK_A.withName(name("host.b."))), lookupResult.getRecords());
+    assertThat(lookupResult.getRecords()).containsExactly(LOOPBACK_A.withName(name("host.b.")));
   }
 
   @Test
@@ -1324,12 +1314,12 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(aName, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(asList(LOOPBACK_A.withName(aName), anotherA), result.getRecords());
+    assertThat(result.getRecords()).isEqualTo(asList(LOOPBACK_A.withName(aName), anotherA));
 
     // should come out in the other order on the second try
     resultFuture = lookupSession.lookupAsync(aName, A, IN);
     result = resultFuture.toCompletableFuture().get();
-    assertEquals(asList(LOOPBACK_A.withName(aName), anotherA), result.getRecords());
+    assertThat(result.getRecords()).isEqualTo(asList(LOOPBACK_A.withName(aName), anotherA));
 
     verify(mockCache, times(2)).lookupRecords(aName, A, Credibility.NORMAL);
     verifyNoMoreInteractions(mockCache);
@@ -1357,12 +1347,12 @@ class LookupSessionTest {
     CompletionStage<LookupResult> resultFuture = lookupSession.lookupAsync(aName, A, IN);
 
     LookupResult result = resultFuture.toCompletableFuture().get();
-    assertEquals(asList(LOOPBACK_A.withName(aName), anotherA), result.getRecords());
+    assertThat(result.getRecords()).isEqualTo(asList(LOOPBACK_A.withName(aName), anotherA));
 
     // should come out in the other order on the second try
     resultFuture = lookupSession.lookupAsync(aName, A, IN);
     result = resultFuture.toCompletableFuture().get();
-    assertEquals(asList(anotherA, LOOPBACK_A.withName(aName)), result.getRecords());
+    assertThat(result.getRecords()).isEqualTo(asList(anotherA, LOOPBACK_A.withName(aName)));
 
     verify(mockCache, times(2)).lookupRecords(aName, A, Credibility.NORMAL);
     verifyNoMoreInteractions(mockCache);
@@ -1372,7 +1362,7 @@ class LookupSessionTest {
   void expandName_absolute() {
     LookupSession session = LookupSession.builder().resolver(mockResolver).build();
     List<Name> nameStream = session.expandName(name("a."));
-    assertEquals(singletonList(name("a.")), nameStream);
+    assertThat(nameStream).containsExactly(name("a."));
   }
 
   @Test
@@ -1380,14 +1370,14 @@ class LookupSessionTest {
     LookupSession session =
         LookupSession.builder().resolver(mockResolver).searchPath(name("example.com.")).build();
     List<Name> nameStream = session.expandName(name("host"));
-    assertEquals(asList(name("host.example.com."), name("host.")), nameStream);
+    assertThat(nameStream).isEqualTo(asList(name("host.example.com."), name("host.")));
   }
 
   @Test
   void expandName_notSetSearchPath() {
     LookupSession session = LookupSession.builder().resolver(mockResolver).build();
     List<Name> nameStream = session.expandName(name("host"));
-    assertEquals(singletonList(name("host.")), nameStream);
+    assertThat(nameStream).containsExactly(name("host."));
   }
 
   @Test
@@ -1395,7 +1385,7 @@ class LookupSessionTest {
     LookupSession session =
         LookupSession.builder().resolver(mockResolver).searchPath(name("example.com")).build();
     List<Name> nameStream = session.expandName(name("host"));
-    assertEquals(asList(name("host.example.com."), name("host.")), nameStream);
+    assertThat(nameStream).isEqualTo(asList(name("host.example.com."), name("host.")));
   }
 
   @Test
@@ -1403,7 +1393,7 @@ class LookupSessionTest {
     LookupSession session =
         LookupSession.builder().resolver(mockResolver).searchPath(name("example.com")).build();
     List<Name> nameStream = session.expandName(name("a.b"));
-    assertEquals(asList(name("a.b."), name("a.b.example.com.")), nameStream);
+    assertThat(nameStream).isEqualTo(asList(name("a.b."), name("a.b.example.com.")));
   }
 
   @Test
@@ -1415,7 +1405,7 @@ class LookupSessionTest {
             .ndots(2)
             .build();
     List<Name> nameStream = session.expandName(name("a.b"));
-    assertEquals(asList(name("a.b.example.com."), name("a.b.")), nameStream);
+    assertThat(nameStream).isEqualTo(asList(name("a.b.example.com."), name("a.b.")));
   }
 
   private static CNAMERecord cname(String name, String target) {

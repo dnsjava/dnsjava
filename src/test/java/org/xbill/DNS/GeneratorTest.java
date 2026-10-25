@@ -2,11 +2,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,16 +62,15 @@ public class GeneratorTest {
 
   @Test
   void testConstructor_UnsupportedType() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new Generator(0, 10, 1, "host$", Type.MX, DClass.IN, 3600, "1.2.3.$", Name.root));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> new Generator(0, 10, 1, "host$", Type.MX, DClass.IN, 3600, "1.2.3.$", Name.root));
   }
 
   @Test
   void testConstructor_InvalidDClass() {
-    assertThrows(
-        InvalidDClassException.class,
-        () -> new Generator(0, 10, 1, "host$", Type.A, -1, 3600, "1.2.3.$", Name.root));
+    assertThatExceptionOfType(InvalidDClassException.class)
+        .isThrownBy(() -> new Generator(0, 10, 1, "host$", Type.A, -1, 3600, "1.2.3.$", Name.root));
   }
 
   @Test
@@ -82,21 +78,21 @@ public class GeneratorTest {
     Generator g = new Generator(1, 3, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin);
 
     Record r1 = g.nextRecord();
-    assertNotNull(r1);
-    assertEquals("host1.example.com.", r1.getName().toString());
-    assertEquals("1.2.3.1", ((ARecord) r1).getAddress().getHostAddress());
+    assertThat(r1).isNotNull();
+    assertThat(r1.getName()).hasToString("host1.example.com.");
+    assertThat(((ARecord) r1).getAddress().getHostAddress()).isEqualTo("1.2.3.1");
 
     Record r2 = g.nextRecord();
-    assertNotNull(r2);
-    assertEquals("host2.example.com.", r2.getName().toString());
-    assertEquals("1.2.3.2", ((ARecord) r2).getAddress().getHostAddress());
+    assertThat(r2).isNotNull();
+    assertThat(r2.getName()).hasToString("host2.example.com.");
+    assertThat(((ARecord) r2).getAddress().getHostAddress()).isEqualTo("1.2.3.2");
 
     Record r3 = g.nextRecord();
-    assertNotNull(r3);
-    assertEquals("host3.example.com.", r3.getName().toString());
-    assertEquals("1.2.3.3", ((ARecord) r3).getAddress().getHostAddress());
+    assertThat(r3).isNotNull();
+    assertThat(r3.getName()).hasToString("host3.example.com.");
+    assertThat(((ARecord) r3).getAddress().getHostAddress()).isEqualTo("1.2.3.3");
 
-    assertNull(g.nextRecord());
+    assertThat(g.nextRecord()).isNull();
   }
 
   @ParameterizedTest
@@ -171,19 +167,19 @@ public class GeneratorTest {
     Generator g =
         new Generator(10, 10, 1, "host${-1,1,d}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
-    assertEquals("host9.example.com.", r.getName().toString());
+    assertThat(r.getName()).hasToString("host9.example.com.");
 
     // Test underflow
     Generator g2 =
         new Generator(5, 5, 1, "host${-10,1,d}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
-    assertThrows(TextParseException.class, g2::nextRecord);
+    assertThatExceptionOfType(TextParseException.class).isThrownBy(g2::nextRecord);
   }
 
   @Test
   void testToString() {
     Generator g = new Generator(1, 10, 2, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin);
     String s = g.toString();
-    assertEquals("$GENERATE 1-10/2 host$ 3600 IN A 1.2.3.$ ", s);
+    assertThat(s).isEqualTo("$GENERATE 1-10/2 host$ 3600 IN A 1.2.3.$ ");
   }
 
   @Test

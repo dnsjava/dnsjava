@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -32,9 +30,9 @@ class TestNSEC3NoData extends TestBase {
   @AlwaysOffline
   void testNodataNsec3(String query, String ede) throws IOException {
     Message response = resolver.send(createMessage(query));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertTrue(getReason(response).startsWith("failed.nodata"));
+    assertThat(getReason(response)).startsWith("failed.nodata");
     assertEde(ExtendedErrorCodeOption.code(ede), response);
   }
 
@@ -45,9 +43,9 @@ class TestNSEC3NoData extends TestBase {
     // then return NODATA for the following query, "proofed" by the NSEC3 from the parent
     // which has the DS flag removed, effectively making the reply insecure
     Message response = resolver.send(createMessage("sub.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -57,9 +55,9 @@ class TestNSEC3NoData extends TestBase {
     // get NSEC3 hashed whose name is sub.nsec3.ingotronic.ch. from the nsec3.ingotronic.ch.
     // then return NODATA for the following query, "proofed" by the NSEC3 from the parent
     Message response = resolver.send(createMessage("sub.nsec3.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -76,9 +74,9 @@ class TestNSEC3NoData extends TestBase {
                     toRecord(
                         ".           300 IN  DS  16758 7 1 EC88DF5E2902FD4AB9E9C246BEEA9B822BD7BCF7"))));
     Message response = resolver.send(createMessage("./DS"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -95,9 +93,9 @@ class TestNSEC3NoData extends TestBase {
                     toRecord(
                         "bogus.           300 IN  DS  16758 7 1 A5D56841416AB42DC39629E42D12C98B0E94232A"))));
     Message response = resolver.send(createMessage("bogus./DS"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -105,9 +103,9 @@ class TestNSEC3NoData extends TestBase {
   @AlwaysOffline
   void testNsec3ClosestEncloserIsInsecureDelegation() throws IOException {
     Message response = resolver.send(createMessage("a.unsigned.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 }

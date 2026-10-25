@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -18,10 +17,12 @@ class TLSARecordTest {
     try (Tokenizer t = new Tokenizer("0 0 1 " + rdata)) {
       TLSARecord tlsaRecord = new TLSARecord();
       tlsaRecord.rdataFromString(t, null);
-      assertEquals(TLSARecord.CertificateUsage.CA_CONSTRAINT, tlsaRecord.getCertificateUsage());
-      assertEquals(TLSARecord.MatchingType.SHA256, tlsaRecord.getMatchingType());
-      assertEquals(TLSARecord.Selector.FULL_CERTIFICATE, tlsaRecord.getSelector());
-      assertArrayEquals(base16.fromString(rdata), tlsaRecord.getCertificateAssociationData());
+      assertThat(tlsaRecord.getCertificateUsage())
+          .isEqualTo(TLSARecord.CertificateUsage.CA_CONSTRAINT);
+      assertThat(tlsaRecord.getMatchingType()).isEqualTo(TLSARecord.MatchingType.SHA256);
+      assertThat(tlsaRecord.getSelector()).isEqualTo(TLSARecord.Selector.FULL_CERTIFICATE);
+      assertThat(tlsaRecord.getCertificateAssociationData())
+          .containsExactly(base16.fromString(rdata));
     }
   }
 
@@ -29,7 +30,7 @@ class TLSARecordTest {
   void emptyAssociationDataFromWire() {
     TLSARecord tlsaRecord = new TLSARecord();
     DNSInput in = new DNSInput(new byte[] {0, 0, 1});
-    assertThrows(WireParseException.class, () -> tlsaRecord.rrFromWire(in));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> tlsaRecord.rrFromWire(in));
   }
 
   @ParameterizedTest
@@ -45,21 +46,20 @@ class TLSARecordTest {
   void invalidRdataFromString(String rdata) {
     try (Tokenizer t = new Tokenizer(rdata)) {
       TLSARecord tlsaRecord = new TLSARecord();
-      assertThrows(TextParseException.class, () -> tlsaRecord.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> tlsaRecord.rdataFromString(t, null));
     }
   }
 
   @Test
   void emptyAssociationDataConstruction() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new TLSARecord(Name.root, DClass.IN, 3600, 0, 0, 1, new byte[0]));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TLSARecord(Name.root, DClass.IN, 3600, 0, 0, 1, new byte[0]));
   }
 
   @Test
   void nullAssociationDataConstruction() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new TLSARecord(Name.root, DClass.IN, 3600, 0, 0, 1, null));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TLSARecord(Name.root, DClass.IN, 3600, 0, 0, 1, null));
   }
 }

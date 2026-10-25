@@ -2,11 +2,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,44 +31,44 @@ public class SVCBRecordTest {
   void createParams() throws UnknownHostException, TextParseException {
     List<Integer> mandatoryList = Arrays.asList(SVCBRecord.ALPN, SVCBRecord.IPV4HINT);
     SVCBRecord.ParameterMandatory mandatory = new SVCBBase.ParameterMandatory(mandatoryList);
-    assertEquals(SVCBRecord.MANDATORY, mandatory.getKey());
-    assertEquals(mandatoryList, mandatory.getValues());
+    assertThat(mandatory.getKey()).isEqualTo(SVCBRecord.MANDATORY);
+    assertThat(mandatory.getValues()).isEqualTo(mandatoryList);
     assertThat(mandatory).hasToString("alpn,ipv4hint");
 
     List<String> alpnList = Arrays.asList("h2", "h3");
     SVCBRecord.ParameterAlpn alpn = new SVCBRecord.ParameterAlpn(alpnList);
-    assertEquals(SVCBRecord.ALPN, alpn.getKey());
-    assertEquals(alpnList, alpn.getValues());
+    assertThat(alpn.getKey()).isEqualTo(SVCBRecord.ALPN);
+    assertThat(alpn.getValues()).isEqualTo(alpnList);
 
     SVCBRecord.ParameterPort port = new SVCBBase.ParameterPort(8443);
-    assertEquals(SVCBRecord.PORT, port.getKey());
-    assertEquals(8443, port.getPort());
+    assertThat(port.getKey()).isEqualTo(SVCBRecord.PORT);
+    assertThat(port.getPort()).isEqualTo(8443);
 
     List<Inet4Address> ipv4List =
         Collections.singletonList((Inet4Address) InetAddress.getByName("1.2.3.4"));
     SVCBRecord.ParameterIpv4Hint ipv4hint = new SVCBRecord.ParameterIpv4Hint(ipv4List);
-    assertEquals(SVCBRecord.IPV4HINT, ipv4hint.getKey());
-    assertEquals(ipv4List, ipv4hint.getAddresses());
+    assertThat(ipv4hint.getKey()).isEqualTo(SVCBRecord.IPV4HINT);
+    assertThat(ipv4hint.getAddresses()).isEqualTo(ipv4List);
 
     byte[] data = {'a', 'b', 'c'};
     SVCBBase.ParameterEch ech = new SVCBBase.ParameterEch(data);
-    assertEquals(SVCBRecord.ECH, ech.getKey());
-    assertEquals(data, ech.getData());
+    assertThat(ech.getKey()).isEqualTo(SVCBRecord.ECH);
+    assertThat(ech.getData()).isEqualTo(data);
 
     SVCBRecord.ParameterEchConfig echconfig = new SVCBRecord.ParameterEchConfig(data);
-    assertEquals(SVCBRecord.ECHCONFIG, echconfig.getKey());
-    assertEquals(data, echconfig.getData());
+    assertThat(echconfig.getKey()).isEqualTo(SVCBRecord.ECHCONFIG);
+    assertThat(echconfig.getData()).isEqualTo(data);
 
     List<Inet6Address> ipv6List =
         Collections.singletonList((Inet6Address) InetAddress.getByName("2001:db8::1"));
     SVCBRecord.ParameterIpv6Hint ipv6hint = new SVCBRecord.ParameterIpv6Hint(ipv6List);
-    assertEquals(SVCBRecord.IPV6HINT, ipv6hint.getKey());
-    assertEquals(ipv6List, ipv6hint.getAddresses());
+    assertThat(ipv6hint.getKey()).isEqualTo(SVCBRecord.IPV6HINT);
+    assertThat(ipv6hint.getAddresses()).isEqualTo(ipv6List);
 
     byte[] value = {0, 1, 2, 3};
     SVCBRecord.ParameterUnknown unknown = new SVCBRecord.ParameterUnknown(33, value);
-    assertEquals(33, unknown.getKey());
-    assertEquals(value, unknown.getValue());
+    assertThat(unknown.getKey()).isEqualTo(33);
+    assertThat(unknown.getValue()).isEqualTo(value);
   }
 
   @Test
@@ -152,7 +149,7 @@ public class SVCBRecordTest {
     SVCBRecord.ParameterPort port = new SVCBBase.ParameterPort();
     String portAsString = Integer.toString(portNumber);
     assertThatThrownBy(() -> port.fromString(portAsString)).isInstanceOf(TextParseException.class);
-    assertEquals(SVCBRecord.PORT, port.getKey());
+    assertThat(port.getKey()).isEqualTo(SVCBRecord.PORT);
   }
 
   private static SVCBBase getSvcbFromPresentation(String presentation) throws IOException {
@@ -618,21 +615,21 @@ public class SVCBRecordTest {
     List<SVCBRecord.ParameterBase> params = Arrays.asList(mandatory, ipv4, alpn);
     SVCBRecord svcbRecord = new SVCBRecord(label, DClass.IN, 300, svcPriority, svcDomain, params);
 
-    assertEquals(Type.SVCB, svcbRecord.getType());
-    assertEquals(label, svcbRecord.getName());
-    assertEquals(svcPriority, svcbRecord.getSvcPriority());
-    assertEquals(svcDomain, svcbRecord.getTargetName());
-    assertEquals(
-        Arrays.asList(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString(),
-        svcbRecord.getSvcParamKeys().toString());
+    assertThat(svcbRecord.getType()).isEqualTo(Type.SVCB);
+    assertThat(svcbRecord.getName()).isEqualTo(label);
+    assertThat(svcbRecord.getSvcPriority()).isEqualTo(svcPriority);
+    assertThat(svcbRecord.getTargetName()).isEqualTo(svcDomain);
+    assertThat(svcbRecord.getSvcParamKeys())
+        .hasToString(
+            Arrays.asList(SVCBRecord.MANDATORY, SVCBRecord.ALPN, SVCBRecord.IPV4HINT).toString());
     assertThat(svcbRecord.getSvcParamValue(SVCBRecord.MANDATORY)).hasToString("alpn");
     assertThat(svcbRecord.getSvcParamValue(SVCBRecord.ALPN)).hasToString("h1,h2");
-    assertNull(svcbRecord.getSvcParamValue(1234));
+    assertThat(svcbRecord.getSvcParamValue(1234)).isNull();
     Options.unset("BINDTTL");
     Options.unset("noPrintIN");
-    assertEquals(
-        "test.com.\t\t300\tIN\tSVCB\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8",
-        svcbRecord.toString());
+    assertThat(svcbRecord)
+        .hasToString(
+            "test.com.\t\t300\tIN\tSVCB\t5 svc.test.com. mandatory=alpn alpn=h1,h2 ipv4hint=1.2.3.4,5.6.7.8");
   }
 
   @Test
@@ -644,9 +641,8 @@ public class SVCBRecordTest {
     SVCBRecord.ParameterIpv4Hint ipv4 = new SVCBRecord.ParameterIpv4Hint();
     ipv4.fromString("1.2.3.4,5.6.7.8");
     List<SVCBRecord.ParameterBase> params = Arrays.asList(alpn, ipv4, alpn);
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new SVCBRecord(label, DClass.IN, 300, 5, svcDomain, params));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new SVCBRecord(label, DClass.IN, 300, 5, svcDomain, params));
   }
 
   @Test
@@ -654,8 +650,8 @@ public class SVCBRecordTest {
     String str = "0 a.b.c.";
     byte[] bytes = stringToWire(str);
     byte[] expected = {0, 0, 1, 'a', 1, 'b', 1, 'c', 0};
-    assertArrayEquals(expected, bytes);
-    assertEquals(str, wireToString(bytes));
+    assertThat(bytes).containsExactly(expected);
+    assertThat(wireToString(bytes)).isEqualTo(str);
   }
 
   @Test
@@ -663,8 +659,8 @@ public class SVCBRecordTest {
     String str = "1 .";
     byte[] bytes = stringToWire(str);
     byte[] expected = {0, 1, 0};
-    assertArrayEquals(expected, bytes);
-    assertEquals(str, wireToString(bytes));
+    assertThat(bytes).containsExactly(expected);
+    assertThat(wireToString(bytes)).isEqualTo(str);
   }
 
   @Test
@@ -672,8 +668,8 @@ public class SVCBRecordTest {
     String str = "1 . port=8443";
     byte[] bytes = stringToWire(str);
     byte[] expected = {0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
-    assertArrayEquals(expected, bytes);
-    assertEquals(str, wireToString(bytes));
+    assertThat(bytes).containsExactly(expected);
+    assertThat(wireToString(bytes)).isEqualTo(str);
   }
 
   @ParameterizedTest
@@ -691,13 +687,13 @@ public class SVCBRecordTest {
         "7 . alpn=h2 ipv4hint=4.5.6.7",
       })
   void serviceModes(String str) throws IOException {
-    assertEquals(str, stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo(str);
   }
 
   @Test
   void serviceModeIntKey() throws IOException {
     String str = "1 . 1=h3";
-    assertEquals("1 . alpn=h3", stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo("1 . alpn=h3");
   }
 
   @Test
@@ -815,7 +811,7 @@ public class SVCBRecordTest {
   @Test
   void serviceModeMandatoryAndOutOfOrder() throws IOException {
     String str = "1 . alpn=h3 no-default-alpn mandatory=alpn";
-    assertEquals("1 . mandatory=alpn alpn=h3 no-default-alpn", stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo("1 . mandatory=alpn alpn=h3 no-default-alpn");
   }
 
   @Test
@@ -833,7 +829,7 @@ public class SVCBRecordTest {
   @Test
   void serviceModeObsoleteEchConfigName() throws IOException {
     String str = "1 . echconfig=1234";
-    assertEquals("1 . ech=1234", stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo("1 . ech=1234");
   }
 
   @Test
@@ -841,28 +837,27 @@ public class SVCBRecordTest {
     String str = "5 . ipv4hint=4.5.6.7,8.9.1.2";
     byte[] bytes = stringToWire(str);
     byte[] expected = {0, 5, 0, 0, 4, 0, 8, 4, 5, 6, 7, 8, 9, 1, 2};
-    assertArrayEquals(expected, bytes);
-    assertEquals(str, wireToString(bytes));
+    assertThat(bytes).containsExactly(expected);
+    assertThat(wireToString(bytes)).isEqualTo(str);
   }
 
   @Test
   void serviceModeIpv4HintQuoted() throws IOException {
     String str = "5 . ipv4hint=\"4.5.6.7,8.9.1.2\"";
-    assertEquals("5 . ipv4hint=4.5.6.7,8.9.1.2", stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo("5 . ipv4hint=4.5.6.7,8.9.1.2");
   }
 
   @Test
   void serviceModeIpv6Hint() throws IOException {
     String str = "9 . ipv6hint=2001:db8::1";
-    assertEquals("9 . ipv6hint=2001:db8:0:0:0:0:0:1", stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo("9 . ipv6hint=2001:db8:0:0:0:0:0:1");
   }
 
   @Test
   void serviceModeIpv6HintMulti() throws IOException {
     String str = "2 . alpn=h2 ipv6hint=2001:db8::1,2001:db8::2";
-    assertEquals(
-        "2 . alpn=h2 ipv6hint=2001:db8:0:0:0:0:0:1,2001:db8:0:0:0:0:0:2",
-        stringToWireToString(str));
+    assertThat(stringToWireToString(str))
+        .isEqualTo("2 . alpn=h2 ipv6hint=2001:db8:0:0:0:0:0:1,2001:db8:0:0:0:0:0:2");
   }
 
   @Test
@@ -876,14 +871,14 @@ public class SVCBRecordTest {
     String str = "8 . key23456=\\000\\001\\002\\003";
     byte[] bytes = stringToWire(str);
     byte[] expected = {0, 8, 0, 0x5B, (byte) 0xA0, 0, 4, 0, 1, 2, 3};
-    assertArrayEquals(expected, bytes);
-    assertEquals(str, wireToString(bytes));
+    assertThat(bytes).containsExactly(expected);
+    assertThat(wireToString(bytes)).isEqualTo(str);
   }
 
   @Test
   void serviceModeUnknownKeyEscapedChars() throws IOException {
     String str = "1 . key29=a\\b\\c";
-    assertEquals("1 . key29=abc", stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo("1 . key29=abc");
   }
 
   @Test
@@ -895,13 +890,13 @@ public class SVCBRecordTest {
   @Test
   void serviceModeUnknownHighKey() throws IOException {
     String str = "65535 . key65535=abcdefg";
-    assertEquals(str, stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo(str);
   }
 
   @Test
   void serviceModeUnknownKeyNoValue() throws IOException {
     String str = "65535 . key65535";
-    assertEquals(str, stringToWireToString(str));
+    assertThat(stringToWireToString(str)).isEqualTo(str);
   }
 
   @Test
@@ -916,23 +911,23 @@ public class SVCBRecordTest {
     Master m = new Master(new ByteArrayInputStream(str.getBytes()));
 
     Record r = m.nextRecord();
-    assertEquals(Type.SOA, r.getType());
+    assertThat(r.getType()).isEqualTo(Type.SOA);
     r = m.nextRecord();
-    assertEquals(Type.NS, r.getType());
+    assertThat(r.getType()).isEqualTo(Type.NS);
     r = m.nextRecord();
-    assertEquals(Type.HTTPS, r.getType());
-    assertEquals("0 www.test.net.", r.rdataToString());
+    assertThat(r.getType()).isEqualTo(Type.HTTPS);
+    assertThat(r.rdataToString()).isEqualTo("0 www.test.net.");
     r = m.nextRecord();
-    assertEquals(Type.SVCB, r.getType());
-    assertEquals("1 . alpn=h2", r.rdataToString());
+    assertThat(r.getType()).isEqualTo(Type.SVCB);
+    assertThat(r.rdataToString()).isEqualTo("1 . alpn=h2");
     r = m.nextRecord();
-    assertEquals(Type.HTTPS, r.getType());
-    assertEquals("1 .", r.rdataToString());
+    assertThat(r.getType()).isEqualTo(Type.HTTPS);
+    assertThat(r.rdataToString()).isEqualTo("1 .");
     r = m.nextRecord();
-    assertEquals(Type.A, r.getType());
-    assertEquals("1.2.3.4", r.rdataToString());
+    assertThat(r.getType()).isEqualTo(Type.A);
+    assertThat(r.rdataToString()).isEqualTo("1.2.3.4");
     r = m.nextRecord();
-    assertNull(r);
+    assertThat(r).isNull();
   }
 
   @ParameterizedTest
@@ -968,7 +963,7 @@ public class SVCBRecordTest {
         "65535 . keyBlooie=abcdefg",
       })
   void invalidText(String str) {
-    assertThrows(TextParseException.class, () -> stringToWire(str));
+    assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> stringToWire(str));
   }
 
   @ParameterizedTest
@@ -988,49 +983,49 @@ public class SVCBRecordTest {
   @Test
   void wireFormatTooShort() {
     byte[] wire = {0, 1, 0, 0, 1, 0, 10};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatTooLong() {
     byte[] wire = {0, 0, 0, 1};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatMandatoryTooLong() {
     byte[] wire = {0, 1, 0, 0, 0, 0, 3, 0, 1, 55};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatAlpnTooShort() {
     byte[] wire = {0, 1, 0, 0, 1, 0, 3, 10, 1, 55};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatNoDefaultAlpnTooLong() {
     byte[] wire = {0, 1, 0, 0, 2, 0, 1, 0};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatPortTooLong() {
     byte[] wire = {0, 1, 0, 0, 3, 0, 4, 0, 0, 0, 0};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatIpv4HintTooLong() {
     byte[] wire = {0, 1, 0, 0, 4, 0, 5, 1, 2, 3, 4, 5};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   @Test
   void wireFormatIpv6HintTooShort() {
     byte[] wire = {0, 1, 0, 0, 6, 0, 2, 1, 2};
-    assertThrows(WireParseException.class, () -> wireToString(wire));
+    assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> wireToString(wire));
   }
 
   public static byte[] stringToWire(String str) throws IOException {

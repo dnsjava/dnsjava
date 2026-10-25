@@ -4,7 +4,7 @@ package org.xbill.DNS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.offset;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.within;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -18,23 +18,23 @@ class LOCRecordTest {
   @Test
   void ctor_0arg() {
     LOCRecord loc = new LOCRecord();
-    assertEquals(0.0, loc.getVPrecision());
-    assertEquals(0.0, loc.getHPrecision());
-    assertEquals(-100000.0, loc.getAltitude());
-    assertEquals(-596.52323, loc.getLongitude(), 0.1);
-    assertEquals(-596.52323, loc.getLatitude(), 0.1);
-    assertEquals(0.0, loc.getSize());
+    assertThat(loc.getVPrecision()).isEqualTo(0.0);
+    assertThat(loc.getHPrecision()).isEqualTo(0.0);
+    assertThat(loc.getAltitude()).isEqualTo(-100000.0);
+    assertThat(loc.getLongitude()).isCloseTo(-596.52323, within(0.1));
+    assertThat(loc.getLatitude()).isCloseTo(-596.52323, within(0.1));
+    assertThat(loc.getSize()).isEqualTo(0.0);
   }
 
   @Test
   void ctor_9arg() {
     LOCRecord loc = new LOCRecord(n, DClass.IN, 0, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5);
-    assertEquals(1.5, loc.getLatitude());
-    assertEquals(2.5, loc.getLongitude());
-    assertEquals(3.5, loc.getAltitude());
-    assertEquals(4.5, loc.getSize());
-    assertEquals(5.5, loc.getHPrecision());
-    assertEquals(6.5, loc.getVPrecision());
+    assertThat(loc.getLatitude()).isEqualTo(1.5);
+    assertThat(loc.getLongitude()).isEqualTo(2.5);
+    assertThat(loc.getAltitude()).isEqualTo(3.5);
+    assertThat(loc.getSize()).isEqualTo(4.5);
+    assertThat(loc.getHPrecision()).isEqualTo(5.5);
+    assertThat(loc.getVPrecision()).isEqualTo(6.5);
   }
 
   @ParameterizedTest
@@ -83,12 +83,12 @@ class LOCRecordTest {
     Tokenizer t = new Tokenizer("52 22 23.000 N 4 53 32.000 E -2.00m 0.00m 10000m 10m");
     LOCRecord loc = new LOCRecord();
     loc.rdataFromString(t, null);
-    assertEquals(52.373, loc.getLatitude(), 0.1);
-    assertEquals(4.892, loc.getLongitude(), 0.1);
-    assertEquals(-2.0, loc.getAltitude());
-    assertEquals(0.0, loc.getSize());
-    assertEquals(10000.0, loc.getHPrecision());
-    assertEquals(10.0, loc.getVPrecision());
+    assertThat(loc.getLatitude()).isCloseTo(52.373, within(0.1));
+    assertThat(loc.getLongitude()).isCloseTo(4.892, within(0.1));
+    assertThat(loc.getAltitude()).isEqualTo(-2.0);
+    assertThat(loc.getSize()).isEqualTo(0.0);
+    assertThat(loc.getHPrecision()).isEqualTo(10000.0);
+    assertThat(loc.getVPrecision()).isEqualTo(10.0);
   }
 
   @Test
@@ -97,12 +97,12 @@ class LOCRecordTest {
     Tokenizer t = new Tokenizer(rr);
     LOCRecord loc = new LOCRecord();
     loc.rdataFromString(t, null);
-    assertEquals(42.365, loc.getLatitude(), 0.1);
-    assertEquals(-71.105, loc.getLongitude(), 0.1);
-    assertEquals(-99999.99, loc.getAltitude());
-    assertEquals(30.0, loc.getSize());
-    assertEquals(10.0, loc.getHPrecision());
-    assertEquals(10.0, loc.getVPrecision());
+    assertThat(loc.getLatitude()).isCloseTo(42.365, within(0.1));
+    assertThat(loc.getLongitude()).isCloseTo(-71.105, within(0.1));
+    assertThat(loc.getAltitude()).isEqualTo(-99999.99);
+    assertThat(loc.getSize()).isEqualTo(30.0);
+    assertThat(loc.getHPrecision()).isEqualTo(10.0);
+    assertThat(loc.getVPrecision()).isEqualTo(10.0);
     assertThat(loc.rdataToString()).isEqualTo(rr);
   }
 
@@ -113,8 +113,8 @@ class LOCRecordTest {
     LOCRecord loc = new LOCRecord();
     loc.rdataFromString(t, null);
     assertThat(loc.getLatitude()).isCloseTo(0.000278, offset(0.000001));
-    assertEquals(-71.105, loc.getLongitude());
-    assertEquals(0, loc.getAltitude());
+    assertThat(loc.getLongitude()).isEqualTo(-71.105);
+    assertThat(loc.getAltitude()).isZero();
     assertThat(loc.rdataToString()).isEqualTo(rr);
   }
 }

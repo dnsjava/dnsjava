@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,9 +43,9 @@ class NSRecordTest {
   @Test
   void ctor_0arg() {
     NSRecord d = new NSRecord();
-    assertNull(d.getName());
-    assertNull(d.getTarget());
-    assertNull(d.getAdditionalName());
+    assertThat(d.getName()).isNull();
+    assertThat(d.getTarget()).isNull();
+    assertThat(d.getAdditionalName()).isNull();
   }
 
   @Test
@@ -55,11 +54,11 @@ class NSRecordTest {
     Name a = Name.fromString("my.alias.");
 
     NSRecord d = new NSRecord(n, DClass.IN, 0xABCDEL, a);
-    assertEquals(n, d.getName());
-    assertEquals(Type.NS, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(a, d.getTarget());
-    assertEquals(a, d.getAdditionalName());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.NS);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getTarget()).isEqualTo(a);
+    assertThat(d.getAdditionalName()).isEqualTo(a);
   }
 }

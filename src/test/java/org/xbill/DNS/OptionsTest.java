@@ -35,10 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,54 +50,54 @@ class OptionsTest {
   @Test
   void set_1arg() {
     Options.set("Option1");
-    assertEquals("true", Options.value("option1"));
+    assertThat(Options.value("option1")).isEqualTo("true");
 
     Options.set("OPTION2");
-    assertEquals("true", Options.value("option1"));
-    assertEquals("true", Options.value("OpTIOn2"));
+    assertThat(Options.value("option1")).isEqualTo("true");
+    assertThat(Options.value("OpTIOn2")).isEqualTo("true");
 
     Options.set("option2");
-    assertEquals("true", Options.value("option2"));
+    assertThat(Options.value("option2")).isEqualTo("true");
   }
 
   @Test
   void set_2arg() {
     Options.set("OPTION1", "Value1");
-    assertEquals("value1", Options.value("Option1"));
+    assertThat(Options.value("Option1")).isEqualTo("value1");
 
     Options.set("option2", "value2");
-    assertEquals("value1", Options.value("Option1"));
-    assertEquals("value2", Options.value("OPTION2"));
+    assertThat(Options.value("Option1")).isEqualTo("value1");
+    assertThat(Options.value("OPTION2")).isEqualTo("value2");
 
     Options.set("OPTION2", "value2b");
-    assertEquals("value1", Options.value("Option1"));
-    assertEquals("value2b", Options.value("option2"));
+    assertThat(Options.value("Option1")).isEqualTo("value1");
+    assertThat(Options.value("option2")).isEqualTo("value2b");
   }
 
   @Test
   void check() {
-    assertFalse(Options.check("No Options yet"));
+    assertThat(Options.check("No Options yet")).isFalse();
 
     Options.set("First Option");
-    assertFalse(Options.check("Not a valid option name"));
-    assertTrue(Options.check("First Option"));
-    assertTrue(Options.check("FIRST option"));
+    assertThat(Options.check("Not a valid option name")).isFalse();
+    assertThat(Options.check("First Option")).isTrue();
+    assertThat(Options.check("FIRST option")).isTrue();
   }
 
   @Test
   void unset() {
-    // unset something non-existant
+    // unset something non-existent
     Options.unset("Not an option Name");
 
     Options.set("Temporary Option");
-    assertTrue(Options.check("Temporary Option"));
+    assertThat(Options.check("Temporary Option")).isTrue();
     Options.unset("Temporary Option");
-    assertFalse(Options.check("Temporary Option"));
+    assertThat(Options.check("Temporary Option")).isFalse();
 
     Options.set("Temporary Option");
-    assertTrue(Options.check("Temporary Option"));
+    assertThat(Options.check("Temporary Option")).isTrue();
     Options.unset("temporary option");
-    assertFalse(Options.check("Temporary Option"));
+    assertThat(Options.check("Temporary Option")).isFalse();
 
     // unset something now that the table is non-null
     Options.unset("Still Not an Option Name");
@@ -108,28 +105,28 @@ class OptionsTest {
 
   @Test
   void value() {
-    assertNull(Options.value("Table is Null"));
+    assertThat(Options.value("Table is Null")).isNull();
 
     Options.set("Testing Option");
-    assertNull(Options.value("Not an Option Name"));
+    assertThat(Options.value("Not an Option Name")).isNull();
 
-    assertEquals("true", Options.value("Testing OPTION"));
+    assertThat(Options.value("Testing OPTION")).isEqualTo("true");
   }
 
   @Test
   void intValue() {
-    assertEquals(-1, Options.intValue("Table is Null"));
+    assertThat(Options.intValue("Table is Null")).isEqualTo(-1);
 
     Options.set("A Boolean Option");
     Options.set("An Int Option", "13");
     Options.set("Not An Int Option", "NotAnInt");
     Options.set("A Negative Int Value", "-1000");
 
-    assertEquals(-1, Options.intValue("A Boolean Option"));
-    assertEquals(-1, Options.intValue("Not an Option NAME"));
-    assertEquals(13, Options.intValue("an int option"));
-    assertEquals(-1, Options.intValue("NOT an INT option"));
-    assertEquals(-1, Options.intValue("A negative int Value"));
+    assertThat(Options.intValue("A Boolean Option")).isEqualTo(-1);
+    assertThat(Options.intValue("Not an Option NAME")).isEqualTo(-1);
+    assertThat(Options.intValue("an int option")).isEqualTo(13);
+    assertThat(Options.intValue("NOT an INT option")).isEqualTo(-1);
+    assertThat(Options.intValue("A negative int Value")).isEqualTo(-1);
   }
 
   @Test
@@ -139,16 +136,16 @@ class OptionsTest {
 
     Options.refresh();
 
-    assertTrue(Options.check("booleanOPTION"));
-    assertTrue(Options.check("booleanOption"));
-    assertTrue(Options.check("valuedOption1"));
-    assertTrue(Options.check("ValuedOption2"));
+    assertThat(Options.check("booleanOPTION")).isTrue();
+    assertThat(Options.check("booleanOption")).isTrue();
+    assertThat(Options.check("valuedOption1")).isTrue();
+    assertThat(Options.check("ValuedOption2")).isTrue();
 
-    assertEquals("true", Options.value("booleanOption"));
-    assertEquals(-1, Options.intValue("BOOLEANOPTION"));
-    assertEquals("10", Options.value("valuedOption1"));
-    assertEquals(10, Options.intValue("valuedOption1"));
-    assertEquals("notaninteger", Options.value("VALUEDOPTION2"));
-    assertEquals(-1, Options.intValue("valuedOption2"));
+    assertThat(Options.value("booleanOption")).isEqualTo("true");
+    assertThat(Options.intValue("BOOLEANOPTION")).isEqualTo(-1);
+    assertThat(Options.value("valuedOption1")).isEqualTo("10");
+    assertThat(Options.intValue("valuedOption1")).isEqualTo(10);
+    assertThat(Options.value("VALUEDOPTION2")).isEqualTo("notaninteger");
+    assertThat(Options.intValue("valuedOption2")).isEqualTo(-1);
   }
 }

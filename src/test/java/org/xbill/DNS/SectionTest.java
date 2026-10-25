@@ -35,8 +35,9 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,51 +45,37 @@ class SectionTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("au", Section.string(Section.AUTHORITY));
+    assertThat(Section.string(Section.AUTHORITY)).isEqualTo("au");
 
-    assertThrows(IllegalArgumentException.class, () -> Section.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Section.string(-1));
 
     //  (max is 3)
-    assertThrows(IllegalArgumentException.class, () -> Section.string(4));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Section.string(4));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(Section.ADDITIONAL, Section.value("ad"));
+    assertThat(Section.value("ad")).isEqualTo(Section.ADDITIONAL);
 
     // something that unknown
-    assertEquals(-1, Section.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(Section.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, Section.value(""));
+    assertThat(Section.value("")).isEqualTo(-1);
   }
 
   @Test
   void longString() {
-    assertEquals("ADDITIONAL RECORDS", Section.longString(Section.ADDITIONAL));
-
-    try {
-      Section.longString(-1);
-    } catch (IllegalArgumentException e) {
-    }
-    try {
-      Section.longString(4);
-    } catch (IllegalArgumentException e) {
-    }
+    assertThat(Section.longString(Section.ADDITIONAL)).isEqualTo("ADDITIONAL RECORDS");
+    assertThatThrownBy(() -> Section.longString(-1)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> Section.longString(4)).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
   void updString() {
-    assertEquals("ZONE", Section.updString(Section.ZONE));
-
-    try {
-      Section.longString(-1);
-    } catch (IllegalArgumentException e) {
-    }
-    try {
-      Section.longString(4);
-    } catch (IllegalArgumentException e) {
-    }
+    assertThat(Section.updString(Section.ZONE)).isEqualTo("ZONE");
+    assertThatThrownBy(() -> Section.longString(-1)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> Section.longString(4)).isInstanceOf(IllegalArgumentException.class);
   }
 }

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.lookup;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.Name;
@@ -12,16 +11,16 @@ class LookupFailedExceptionTest {
   @Test
   void ctor_noNameAndType() {
     LookupFailedException exception = new LookupFailedException();
-    assertNull(exception.getName());
-    assertEquals(0, exception.getType());
+    assertThat(exception.getName()).isNull();
+    assertThat(exception.getType()).isZero();
   }
 
   @Test
   void ctor_withMessage() {
     LookupFailedException exception = new LookupFailedException("message");
-    assertEquals("message", exception.getMessage());
-    assertNull(exception.getName());
-    assertEquals(0, exception.getType());
+    assertThat(exception.getMessage()).isEqualTo("message");
+    assertThat(exception.getName()).isNull();
+    assertThat(exception.getType()).isZero();
   }
 
   @Test
@@ -29,7 +28,7 @@ class LookupFailedExceptionTest {
     Name name = Name.fromConstantString("a.b.");
     int type = Type.A;
     LookupFailedException exception = new LookupFailedException(name, type);
-    assertEquals(name, exception.getName());
-    assertEquals(type, exception.getType());
+    assertThat(exception.getName()).isEqualTo(name);
+    assertThat(exception.getType()).isEqualTo(type);
   }
 }

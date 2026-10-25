@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -45,8 +44,8 @@ class NSAP_PTRRecordTest {
   @Test
   void ctor_0arg() {
     NSAP_PTRRecord d = new NSAP_PTRRecord();
-    assertNull(d.getName());
-    assertNull(d.getTarget());
+    assertThat(d.getName()).isNull();
+    assertThat(d.getTarget()).isNull();
   }
 
   @Test
@@ -55,11 +54,11 @@ class NSAP_PTRRecordTest {
     Name a = Name.fromString("my.alias.");
 
     NSAP_PTRRecord d = new NSAP_PTRRecord(n, DClass.IN, 0xABCDEL, a);
-    assertEquals(n, d.getName());
-    assertEquals(Type.NSAP_PTR, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(a, d.getTarget());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.NSAP_PTR);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getTarget()).isEqualTo(a);
   }
 
   @Test
@@ -67,6 +66,6 @@ class NSAP_PTRRecordTest {
     Tokenizer t = new Tokenizer("foo.bar.com.");
     NSAP_PTRRecord nsapPtr = new NSAP_PTRRecord();
     nsapPtr.rdataFromString(t, null);
-    assertEquals(Name.fromConstantString("foo.bar.com."), nsapPtr.getTarget());
+    assertThat(nsapPtr.getTarget()).isEqualTo(Name.fromConstantString("foo.bar.com."));
   }
 }

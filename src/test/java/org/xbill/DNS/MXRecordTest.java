@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -48,13 +47,13 @@ class MXRecordTest {
     Name m = Name.fromString("My.OtherName.");
 
     MXRecord d = new MXRecord(n, DClass.IN, 0xABCDEL, 0xF1, m);
-    assertEquals(n, d.getName());
-    assertEquals(Type.MX, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(0xF1, d.getPriority());
-    assertEquals(m, d.getTarget());
-    assertEquals(m, d.getAdditionalName());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.MX);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getPriority()).isEqualTo(0xF1);
+    assertThat(d.getTarget()).isEqualTo(m);
+    assertThat(d.getAdditionalName()).isEqualTo(m);
   }
 
   @Test
@@ -69,14 +68,14 @@ class MXRecordTest {
     mr.rrToWire(dout, null, true);
     byte[] out = dout.toByteArray();
     byte[] exp = {0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0};
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
 
     // case sensitive
     dout = new DNSOutput();
     mr.rrToWire(dout, null, false);
     out = dout.toByteArray();
     exp = new byte[] {0x1F, 0x2B, 1, 'M', 1, 'O', 1, 'n', 0};
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 
   @Test
@@ -84,8 +83,8 @@ class MXRecordTest {
     Tokenizer t = new Tokenizer("0 .");
     MXRecord mx = new MXRecord();
     mx.rdataFromString(t, null);
-    assertEquals(Name.fromConstantString("."), mx.getTarget());
-    assertEquals(mx.getTarget(), mx.getAdditionalName());
-    assertEquals(0, mx.getPriority());
+    assertThat(mx.getTarget()).isEqualTo(Name.fromConstantString("."));
+    assertThat(mx.getAdditionalName()).isEqualTo(mx.getTarget());
+    assertThat(mx.getPriority()).isZero();
   }
 }

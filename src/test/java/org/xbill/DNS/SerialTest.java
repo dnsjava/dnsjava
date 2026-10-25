@@ -35,9 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,28 +45,32 @@ class SerialTest {
   void compare_NegativeArg1() {
     long arg1 = -1;
     long arg2 = 1;
-    assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Serial.compare(arg1, arg2));
   }
 
   @Test
   void compare_OOBArg1() {
     long arg1 = 0xFFFFFFFFL + 1;
     long arg2 = 1;
-    assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Serial.compare(arg1, arg2));
   }
 
   @Test
   void compare_NegativeArg2() {
     long arg1 = 1;
     long arg2 = -1;
-    assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Serial.compare(arg1, arg2));
   }
 
   @Test
   void compare_OOBArg2() {
     long arg1 = 1;
     long arg2 = 0xFFFFFFFFL + 1;
-    assertThrows(IllegalArgumentException.class, () -> Serial.compare(arg1, arg2));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Serial.compare(arg1, arg2));
   }
 
   @Test
@@ -75,7 +78,7 @@ class SerialTest {
     long arg1 = 10;
     long arg2 = 9;
     int ret = Serial.compare(arg1, arg2);
-    assertTrue(ret > 0);
+    assertThat(ret).isGreaterThan(0);
   }
 
   @Test
@@ -83,7 +86,7 @@ class SerialTest {
     long arg1 = 9;
     long arg2 = 10;
     int ret = Serial.compare(arg1, arg2);
-    assertTrue(ret < 0);
+    assertThat(ret).isLessThan(0);
   }
 
   @Test
@@ -91,7 +94,7 @@ class SerialTest {
     long arg1 = 10;
     long arg2 = 10;
     int ret = Serial.compare(arg1, arg2);
-    assertEquals(ret, 0);
+    assertThat(ret).isZero();
   }
 
   @Test
@@ -99,34 +102,36 @@ class SerialTest {
     long arg1 = 0xFFFFFFFFL;
     long arg2 = 0;
     int ret = Serial.compare(arg1, arg2);
-    assertEquals(-1, ret);
+    assertThat(ret).isEqualTo(-1);
     ret = Serial.compare(arg2, arg1);
-    assertEquals(1, ret);
+    assertThat(ret).isOne();
   }
 
   @Test
   void increment_NegativeArg() {
     long arg = -1;
-    assertThrows(IllegalArgumentException.class, () -> Serial.increment(arg));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Serial.increment(arg));
   }
 
   @Test
   void increment_OOBArg() {
     long arg = 0xFFFFFFFFL + 1;
-    assertThrows(IllegalArgumentException.class, () -> Serial.increment(arg));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Serial.increment(arg));
   }
 
   @Test
   void increment_reset() {
     long arg = 0xFFFFFFFFL;
     long ret = Serial.increment(arg);
-    assertEquals(1, ret);
+    assertThat(ret).isOne();
   }
 
   @Test
   void increment_normal() {
     long arg = 10;
     long ret = Serial.increment(arg);
-    assertEquals(arg + 1, ret);
+    assertThat(ret).isEqualTo(arg + 1);
   }
 }

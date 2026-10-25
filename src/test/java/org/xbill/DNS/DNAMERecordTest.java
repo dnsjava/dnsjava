@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -45,9 +44,9 @@ class DNAMERecordTest {
   @Test
   void ctor_0arg() {
     DNAMERecord d = new DNAMERecord();
-    assertNull(d.getName());
-    assertNull(d.getTarget());
-    assertNull(d.getAlias());
+    assertThat(d.getName()).isNull();
+    assertThat(d.getTarget()).isNull();
+    assertThat(d.getAlias()).isNull();
   }
 
   @Test
@@ -56,11 +55,11 @@ class DNAMERecordTest {
     Name a = Name.fromString("my.alias.");
 
     DNAMERecord d = new DNAMERecord(n, DClass.IN, 0xABCDEL, a);
-    assertEquals(n, d.getName());
-    assertEquals(Type.DNAME, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(a, d.getTarget());
-    assertEquals(n, d.getAlias());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.DNAME);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getTarget()).isEqualTo(a);
+    assertThat(d.getAlias()).isEqualTo(n);
   }
 }

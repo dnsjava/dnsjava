@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -76,9 +75,9 @@ public class DnsSecVerifierTests {
       status = verifier.verify(unsigned, key, Instant.ofEpochSecond(5400));
     }
 
-    assertEquals(SecurityStatus.BOGUS, status.status);
-    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, status.edeReason);
-    assertEquals("validate.bogus.missingsig_named:.:A", status.reason);
+    assertThat(status.status).isEqualTo(SecurityStatus.BOGUS);
+    assertThat(status.edeReason).isEqualTo(ExtendedErrorCodeOption.RRSIGS_MISSING);
+    assertThat(status.reason).isEqualTo("validate.bogus.missingsig_named:.:A");
   }
 
   @ParameterizedTest
@@ -91,9 +90,9 @@ public class DnsSecVerifierTests {
       status = verifier.verify(signed, key, Instant.ofEpochSecond(5400));
     }
 
-    assertEquals(SecurityStatus.SECURE, status.status);
-    assertEquals(-1, status.edeReason);
-    assertNull(status.reason);
+    assertThat(status.status).isEqualTo(SecurityStatus.SECURE);
+    assertThat(status.edeReason).isEqualTo(-1);
+    assertThat(status.reason).isNull();
   }
 
   @ParameterizedTest
@@ -106,9 +105,9 @@ public class DnsSecVerifierTests {
       status = verifier.verify(signed, key, Instant.ofEpochSecond(1800));
     }
 
-    assertEquals(SecurityStatus.BOGUS, status.status);
-    assertEquals(ExtendedErrorCodeOption.SIGNATURE_NOT_YET_VALID, status.edeReason);
-    assertEquals("dnskey.not_yet_valid", status.reason);
+    assertThat(status.status).isEqualTo(SecurityStatus.BOGUS);
+    assertThat(status.edeReason).isEqualTo(ExtendedErrorCodeOption.SIGNATURE_NOT_YET_VALID);
+    assertThat(status.reason).isEqualTo("dnskey.not_yet_valid");
   }
 
   @ParameterizedTest
@@ -121,9 +120,9 @@ public class DnsSecVerifierTests {
       status = verifier.verify(signed, key, Instant.ofEpochSecond(8000));
     }
 
-    assertEquals(SecurityStatus.BOGUS, status.status);
-    assertEquals(ExtendedErrorCodeOption.SIGNATURE_EXPIRED, status.edeReason);
-    assertEquals("dnskey.expired", status.reason);
+    assertThat(status.status).isEqualTo(SecurityStatus.BOGUS);
+    assertThat(status.edeReason).isEqualTo(ExtendedErrorCodeOption.SIGNATURE_EXPIRED);
+    assertThat(status.reason).isEqualTo("dnskey.expired");
   }
 
   @ParameterizedTest
@@ -140,8 +139,8 @@ public class DnsSecVerifierTests {
     } else {
       status = verifier.verify(multiSigned, key, Instant.ofEpochSecond(7208));
     }
-    assertEquals(SecurityStatus.BOGUS, status.status);
-    assertEquals(ExtendedErrorCodeOption.DNSSEC_BOGUS, status.edeReason);
-    assertEquals("validate.bogus.rrsigtoomany:.:A", status.reason);
+    assertThat(status.status).isEqualTo(SecurityStatus.BOGUS);
+    assertThat(status.edeReason).isEqualTo(ExtendedErrorCodeOption.DNSSEC_BOGUS);
+    assertThat(status.reason).isEqualTo("validate.bogus.rrsigtoomany:.:A");
   }
 }

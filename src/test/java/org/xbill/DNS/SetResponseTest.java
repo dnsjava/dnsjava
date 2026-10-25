@@ -35,12 +35,9 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -68,14 +65,14 @@ class SetResponseTest {
   @EnumSource(value = SetResponseType.class)
   void ctor_1arg(SetResponseType type) {
     SetResponse sr = SetResponse.ofType(type);
-    assertNull(sr.getNS());
-    assertEquals(type == SetResponseType.UNKNOWN, sr.isUnknown());
-    assertEquals(type == SetResponseType.NXDOMAIN, sr.isNXDOMAIN());
-    assertEquals(type == SetResponseType.NXRRSET, sr.isNXRRSET());
-    assertEquals(type == SetResponseType.DELEGATION, sr.isDelegation());
-    assertEquals(type == SetResponseType.CNAME, sr.isCNAME());
-    assertEquals(type == SetResponseType.DNAME, sr.isDNAME());
-    assertEquals(type == SetResponseType.SUCCESSFUL, sr.isSuccessful());
+    assertThat(sr.getNS()).isNull();
+    assertThat(sr.isUnknown()).isEqualTo(type == SetResponseType.UNKNOWN);
+    assertThat(sr.isNXDOMAIN()).isEqualTo(type == SetResponseType.NXDOMAIN);
+    assertThat(sr.isNXRRSET()).isEqualTo(type == SetResponseType.NXRRSET);
+    assertThat(sr.isDelegation()).isEqualTo(type == SetResponseType.DELEGATION);
+    assertThat(sr.isCNAME()).isEqualTo(type == SetResponseType.CNAME);
+    assertThat(sr.isDNAME()).isEqualTo(type == SetResponseType.DNAME);
+    assertThat(sr.isSuccessful()).isEqualTo(type == SetResponseType.SUCCESSFUL);
   }
 
   @ParameterizedTest
@@ -90,11 +87,11 @@ class SetResponseTest {
   void ofType_basic(SetResponseType type) {
     RRset rs = new RRset();
     SetResponse sr = SetResponse.ofType(type, rs);
-    assertSame(rs, sr.getNS());
-    assertEquals(type == SetResponseType.DELEGATION, sr.isDelegation());
-    assertEquals(type == SetResponseType.CNAME, sr.isCNAME());
-    assertEquals(type == SetResponseType.DNAME, sr.isDNAME());
-    assertEquals(type == SetResponseType.SUCCESSFUL, sr.isSuccessful());
+    assertThat(sr.getNS()).isSameAs(rs);
+    assertThat(sr.isDelegation()).isEqualTo(type == SetResponseType.DELEGATION);
+    assertThat(sr.isCNAME()).isEqualTo(type == SetResponseType.CNAME);
+    assertThat(sr.isDNAME()).isEqualTo(type == SetResponseType.DNAME);
+    assertThat(sr.isSuccessful()).isEqualTo(type == SetResponseType.SUCCESSFUL);
 
     SetResponse sr2 = SetResponse.ofType(type, rs);
     assertNotSame(sr, sr2);
@@ -110,14 +107,15 @@ class SetResponseTest {
       })
   void ofType_singleton(SetResponseType type) {
     SetResponse sr = SetResponse.ofType(type);
-    assertNull(sr.getNS());
-    assertEquals(type == SetResponseType.UNKNOWN, sr.isUnknown());
-    assertEquals(type == SetResponseType.NXDOMAIN, sr.isNXDOMAIN());
-    assertEquals(type == SetResponseType.NXRRSET, sr.isNXRRSET());
-    assertThrows(IllegalStateException.class, () -> sr.addRRset(new RRset()));
+    assertThat(sr.getNS()).isNull();
+    assertThat(sr.isUnknown()).isEqualTo(type == SetResponseType.UNKNOWN);
+    assertThat(sr.isNXDOMAIN()).isEqualTo(type == SetResponseType.NXDOMAIN);
+    assertThat(sr.isNXRRSET()).isEqualTo(type == SetResponseType.NXRRSET);
+    RRset empty = new RRset();
+    assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> sr.addRRset(empty));
 
     SetResponse sr2 = SetResponse.ofType(type);
-    assertSame(sr, sr2);
+    assertThat(sr2).isSameAs(sr);
   }
 
   @Test
@@ -128,7 +126,7 @@ class SetResponseTest {
     SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL, rrs);
 
     RRset[] exp = new RRset[] {rrs};
-    assertArrayEquals(exp, sr.answers().toArray());
+    assertThat(sr.answers().toArray()).containsExactly(exp);
   }
 
   @ParameterizedTest
@@ -138,7 +136,7 @@ class SetResponseTest {
         SetResponse.ofType(
             SetResponseType.SUCCESSFUL,
             new Cache.CacheRRset(new RRset(A_RECORD_1), 0, 0, isAuthenticated));
-    assertEquals(isAuthenticated, sr.isAuthenticated());
+    assertThat(sr.isAuthenticated()).isEqualTo(isAuthenticated);
   }
 
   @ParameterizedTest
@@ -164,12 +162,12 @@ class SetResponseTest {
     }
 
     RRset[] exp = new RRset[] {rrs};
-    assertArrayEquals(exp, sr.answers().toArray());
-    assertEquals(firstResult, sr.isAuthenticated());
+    assertThat(sr.answers().toArray()).containsExactly(exp);
+    assertThat(sr.isAuthenticated()).isEqualTo(firstResult);
 
     sr.addRRset(new Cache.CacheRRset(new RRset(A_RECORD_1), 0, 0, second));
-    assertEquals(secondResult, sr.isAuthenticated());
-    assertEquals(2, sr.answers().size());
+    assertThat(sr.isAuthenticated()).isEqualTo(secondResult);
+    assertThat(sr.answers()).hasSize(2);
   }
 
   @Test
@@ -197,13 +195,13 @@ class SetResponseTest {
     sr.addRRset(rrs2);
 
     RRset[] exp = new RRset[] {rrs, rrs2};
-    assertArrayEquals(exp, sr.answers().toArray());
+    assertThat(sr.answers().toArray()).containsExactly(exp);
   }
 
   @Test
   void answers_nonSUCCESSFUL() {
     SetResponse sr = SetResponse.ofType(SetResponseType.UNKNOWN, new RRset());
-    assertNull(sr.answers());
+    assertThat(sr.answers()).isNull();
   }
 
   @Test
@@ -213,7 +211,7 @@ class SetResponseTest {
             Name.fromString("The.Name."), DClass.IN, 0xABCD, Name.fromString("The.Alias."));
     RRset rrs = new RRset(cr);
     SetResponse sr = SetResponse.ofType(SetResponseType.CNAME, rrs);
-    assertEquals(cr, sr.getCNAME());
+    assertThat(sr.getCNAME()).isEqualTo(cr);
   }
 
   @Test
@@ -223,7 +221,7 @@ class SetResponseTest {
             Name.fromString("The.Name."), DClass.IN, 0xABCD, Name.fromString("The.Alias."));
     RRset rrs = new RRset(dr);
     SetResponse sr = SetResponse.ofType(SetResponseType.DNAME, rrs);
-    assertEquals(dr, sr.getDNAME());
+    assertThat(sr.getDNAME()).isEqualTo(dr);
   }
 
   @ParameterizedTest
@@ -233,9 +231,9 @@ class SetResponseTest {
 
     SetResponse sr = SetResponse.ofType(type, rrs);
     if (type.isPrintRecords()) {
-      assertEquals(type + ": " + rrs, sr.toString());
+      assertThat(sr).hasToString(type + ": " + rrs);
     } else {
-      assertEquals(type.toString(), sr.toString());
+      assertThat(sr).hasToString(type.toString());
     }
   }
 }

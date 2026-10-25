@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
@@ -26,12 +25,30 @@ class TestNsec3ValUtilsPublicKeyLoading extends TestBase {
   void testPublicKeyLoadingException() throws Exception {
     try {
       Message response = resolver.send(createMessage("www.wc.nsec3.ingotronic.ch./A"));
-      assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+      assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
       assertRCode(Rcode.NOERROR, response.getRcode());
-      assertEquals("failed.nsec3_ignored", getReason(response));
+      assertThat(getReason(response)).isEqualTo("failed.nsec3_ignored");
     } finally {
-      Type.register(Type.DNSKEY, Type.string(Type.DNSKEY), () -> spy(DNSKEYRecord.class));
+      resetDnskeyToDefaultType();
     }
+  }
+
+  private static void resetDnskeyToDefaultType() {
+    Type.register(
+        Type.DNSKEY,
+        Type.string(Type.DNSKEY),
+        () -> {
+          try {
+            Constructor<DNSKEYRecord> defaultCtor = DNSKEYRecord.class.getDeclaredConstructor();
+            defaultCtor.setAccessible(true);
+            return defaultCtor.newInstance();
+          } catch (InstantiationException
+              | IllegalAccessException
+              | InvocationTargetException
+              | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+          }
+        });
   }
 
   void prepareTestPublicKeyLoadingException() {

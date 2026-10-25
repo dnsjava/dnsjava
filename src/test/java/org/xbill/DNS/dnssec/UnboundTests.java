@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -175,12 +175,12 @@ class UnboundTests extends TestBase {
             Type.string(c.query.getQuestion().getType()),
             DClass.string(c.query.getQuestion().getDClass()),
             s);
-        assertEquals(
-            c.response.getHeader().getFlag(Flags.AD),
-            s.getHeader().getFlag(Flags.AD),
-            "AD Flag must match");
-        assertEquals(
-            Rcode.string(c.response.getRcode()), Rcode.string(s.getRcode()), "RCode must match");
+        assertThat(s.getHeader().getFlag(Flags.AD))
+            .as("AD Flag must match")
+            .isEqualTo(c.response.getHeader().getFlag(Flags.AD));
+        assertThat(Rcode.string(s.getRcode()))
+            .as("RCode must match")
+            .isEqualTo(Rcode.string(c.response.getRcode()));
       }
     } finally {
       Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);

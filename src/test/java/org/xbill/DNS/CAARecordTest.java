@@ -3,8 +3,6 @@ package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,10 +17,10 @@ class CAARecordTest {
   @Test
   void ctor_6arg() {
     CAARecord caa = new CAARecord(n, DClass.IN, 0, CAARecord.Flags.IssuerCritical, "1", "");
-    assertEquals(CAARecord.Flags.IssuerCritical, caa.getFlags());
-    assertEquals("1", caa.getTag());
-    assertEquals("", caa.getValue());
-    assertEquals(0, caa.getValueAsByteArray().length);
+    assertThat(caa.getFlags()).isEqualTo(CAARecord.Flags.IssuerCritical);
+    assertThat(caa.getTag()).isEqualTo("1");
+    assertThat(caa.getValue()).isEmpty();
+    assertThat(caa.getValueAsByteArray()).isEmpty();
   }
 
   @ParameterizedTest
@@ -107,10 +105,11 @@ class CAARecordTest {
     Tokenizer t = new Tokenizer(CAARecord.Flags.IssuerCritical + " issue entrust.net");
     CAARecord caa = new CAARecord();
     caa.rdataFromString(t, null);
-    assertEquals("issue", caa.getTag());
-    assertEquals("entrust.net", caa.getValue());
-    assertEquals("entrust.net", caa.getValue(false));
-    assertArrayEquals("entrust.net".getBytes(StandardCharsets.UTF_8), caa.getValueAsByteArray());
+    assertThat(caa.getTag()).isEqualTo("issue");
+    assertThat(caa.getValue()).isEqualTo("entrust.net");
+    assertThat(caa.getValue(false)).isEqualTo("entrust.net");
+    assertThat(caa.getValueAsByteArray())
+        .containsExactly("entrust.net".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test

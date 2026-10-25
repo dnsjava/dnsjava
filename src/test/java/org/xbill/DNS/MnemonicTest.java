@@ -35,9 +35,9 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,60 +54,44 @@ class MnemonicTest {
 
   @Test
   void no_maximum() {
-    assertThrows(IllegalArgumentException.class, () -> m_mn.check(-1));
-    try {
-      m_mn.check(0);
-    } catch (IllegalArgumentException e) {
-      fail(e.getMessage());
-    }
-    try {
-      m_mn.check(Integer.MAX_VALUE);
-    } catch (IllegalArgumentException e) {
-      fail(e.getMessage());
-    }
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_mn.check(-1));
+    assertThatCode(() -> m_mn.check(0)).doesNotThrowAnyException();
+    assertThatCode(() -> m_mn.check(Integer.MAX_VALUE)).doesNotThrowAnyException();
 
     m_mn.setNumericAllowed(true);
 
     int val = m_mn.getValue("-2");
-    assertEquals(-1, val);
+    assertThat(val).isEqualTo(-1);
 
     val = m_mn.getValue("0");
-    assertEquals(0, val);
+    assertThat(val).isZero();
 
     val = m_mn.getValue("" + Integer.MAX_VALUE);
-    assertEquals(Integer.MAX_VALUE, val);
+    assertThat(val).isEqualTo(Integer.MAX_VALUE);
   }
 
   @Test
   void setMaximum() {
     m_mn.setMaximum(15);
-    assertThrows(IllegalArgumentException.class, () -> m_mn.check(-1));
-    try {
-      m_mn.check(0);
-    } catch (IllegalArgumentException e) {
-      fail(e.getMessage());
-    }
-    try {
-      m_mn.check(15);
-    } catch (IllegalArgumentException e) {
-      fail(e.getMessage());
-    }
-    assertThrows(IllegalArgumentException.class, () -> m_mn.check(16));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_mn.check(-1));
+    assertThatCode(() -> m_mn.check(0)).doesNotThrowAnyException();
+    assertThatCode(() -> m_mn.check(15)).doesNotThrowAnyException();
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_mn.check(16));
 
     // need numericok to exercise the usage of max in parseNumeric
     m_mn.setNumericAllowed(true);
 
     int val = m_mn.getValue("-2");
-    assertEquals(-1, val);
+    assertThat(val).isEqualTo(-1);
 
     val = m_mn.getValue("0");
-    assertEquals(0, val);
+    assertThat(val).isZero();
 
     val = m_mn.getValue("15");
-    assertEquals(15, val);
+    assertThat(val).isEqualTo(15);
 
     val = m_mn.getValue("16");
-    assertEquals(-1, val);
+    assertThat(val).isEqualTo(-1);
   }
 
   @Test
@@ -116,10 +100,10 @@ class MnemonicTest {
     m_mn.setPrefix(prefix);
 
     String out = m_mn.getText(10);
-    assertEquals(prefix + "10", out);
+    assertThat(out).isEqualTo(prefix + "10");
 
     int i = m_mn.getValue(out);
-    assertEquals(10, i);
+    assertThat(i).isEqualTo(10);
   }
 
   @Test
@@ -131,28 +115,28 @@ class MnemonicTest {
     m_mn.add(30, "Thirty");
 
     String text = m_mn.getText(10);
-    assertEquals("TEN", text);
+    assertThat(text).isEqualTo("TEN");
 
     text = m_mn.getText(20);
-    assertEquals("TWENTY", text);
+    assertThat(text).isEqualTo("TWENTY");
 
     text = m_mn.getText(30);
-    assertEquals("THIRTY", text);
+    assertThat(text).isEqualTo("THIRTY");
 
     text = m_mn.getText(40);
-    assertEquals("40", text);
+    assertThat(text).isEqualTo("40");
 
     int value = m_mn.getValue("tEn");
-    assertEquals(10, value);
+    assertThat(value).isEqualTo(10);
 
     value = m_mn.getValue("twenty");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("VeiNTe");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("THIRTY");
-    assertEquals(30, value);
+    assertThat(value).isEqualTo(30);
   }
 
   @Test
@@ -164,28 +148,28 @@ class MnemonicTest {
     m_mn.add(30, "Thirty");
 
     String text = m_mn.getText(10);
-    assertEquals("ten", text);
+    assertThat(text).isEqualTo("ten");
 
     text = m_mn.getText(20);
-    assertEquals("twenty", text);
+    assertThat(text).isEqualTo("twenty");
 
     text = m_mn.getText(30);
-    assertEquals("thirty", text);
+    assertThat(text).isEqualTo("thirty");
 
     text = m_mn.getText(40);
-    assertEquals("40", text);
+    assertThat(text).isEqualTo("40");
 
     int value = m_mn.getValue("tEn");
-    assertEquals(10, value);
+    assertThat(value).isEqualTo(10);
 
     value = m_mn.getValue("twenty");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("VeiNTe");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("THIRTY");
-    assertEquals(30, value);
+    assertThat(value).isEqualTo(30);
   }
 
   @Test
@@ -197,41 +181,41 @@ class MnemonicTest {
     m_mn.add(30, "Thirty");
 
     String text = m_mn.getText(10);
-    assertEquals("Ten", text);
+    assertThat(text).isEqualTo("Ten");
 
     text = m_mn.getText(20);
-    assertEquals("Twenty", text);
+    assertThat(text).isEqualTo("Twenty");
 
     text = m_mn.getText(30);
-    assertEquals("Thirty", text);
+    assertThat(text).isEqualTo("Thirty");
 
     text = m_mn.getText(40);
-    assertEquals("40", text);
+    assertThat(text).isEqualTo("40");
 
     int value = m_mn.getValue("Ten");
-    assertEquals(10, value);
+    assertThat(value).isEqualTo(10);
 
     value = m_mn.getValue("twenty");
-    assertEquals(-1, value);
+    assertThat(value).isEqualTo(-1);
 
     value = m_mn.getValue("Twenty");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("VEINTE");
-    assertEquals(-1, value);
+    assertThat(value).isEqualTo(-1);
 
     value = m_mn.getValue("Veinte");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("Thirty");
-    assertEquals(30, value);
+    assertThat(value).isEqualTo(30);
   }
 
   @Test
   void invalid_numeric() {
     m_mn.setNumericAllowed(true);
     int value = m_mn.getValue("Not-A-Number");
-    assertEquals(-1, value);
+    assertThat(value).isEqualTo(-1);
   }
 
   @Test
@@ -247,59 +231,59 @@ class MnemonicTest {
     m_mn.addAll(mn2);
 
     String text = m_mn.getText(10);
-    assertEquals("TEN", text);
+    assertThat(text).isEqualTo("TEN");
 
     text = m_mn.getText(20);
-    assertEquals("TWENTY", text);
+    assertThat(text).isEqualTo("TWENTY");
 
     text = m_mn.getText(30);
-    assertEquals("THIRTY", text);
+    assertThat(text).isEqualTo("THIRTY");
 
     text = m_mn.getText(40);
-    assertEquals("40", text);
+    assertThat(text).isEqualTo("40");
 
     int value = m_mn.getValue("tEn");
-    assertEquals(10, value);
+    assertThat(value).isEqualTo(10);
 
     value = m_mn.getValue("twenty");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("VeiNTe");
-    assertEquals(20, value);
+    assertThat(value).isEqualTo(20);
 
     value = m_mn.getValue("THIRTY");
-    assertEquals(30, value);
+    assertThat(value).isEqualTo(30);
   }
 
   @Test
   void remove() {
     m_mn.add(10, "Ten");
     m_mn.addAlias(10, "Diez");
-    assertEquals(10, m_mn.getValue("TEN"));
-    assertEquals(10, m_mn.getValue("DIEZ"));
-    assertEquals("TEN", m_mn.getText(10));
+    assertThat(m_mn.getValue("TEN")).isEqualTo(10);
+    assertThat(m_mn.getValue("DIEZ")).isEqualTo(10);
+    assertThat(m_mn.getText(10)).isEqualTo("TEN");
 
     m_mn.remove(10);
-    assertEquals(-1, m_mn.getValue("TEN"));
-    assertEquals(-1, m_mn.getValue("DIEZ"));
-    assertEquals("10", m_mn.getText(10));
+    assertThat(m_mn.getValue("TEN")).isEqualTo(-1);
+    assertThat(m_mn.getValue("DIEZ")).isEqualTo(-1);
+    assertThat(m_mn.getText(10)).isEqualTo("10");
   }
 
   @Test
   void removeAlias() {
     m_mn.add(10, "Ten");
     m_mn.addAlias(10, "Diez");
-    assertEquals(10, m_mn.getValue("TEN"));
-    assertEquals(10, m_mn.getValue("DIEZ"));
+    assertThat(m_mn.getValue("TEN")).isEqualTo(10);
+    assertThat(m_mn.getValue("DIEZ")).isEqualTo(10);
 
     m_mn.removeAlias("Diez");
-    assertEquals(10, m_mn.getValue("TEN"));
-    assertEquals(-1, m_mn.getValue("DIEZ"));
+    assertThat(m_mn.getValue("TEN")).isEqualTo(10);
+    assertThat(m_mn.getValue("DIEZ")).isEqualTo(-1);
   }
 
   @Test
   void addAll_invalid() {
     Mnemonic mn2 = new Mnemonic("second test Mnemonic", Mnemonic.CASE_LOWER);
-    assertThrows(IllegalArgumentException.class, () -> m_mn.addAll(mn2));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> m_mn.addAll(mn2));
   }
 }

@@ -2,11 +2,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,32 +16,34 @@ import org.junit.jupiter.params.provider.ValueSource;
 class URIRecordTest {
   private static final Name n = Name.fromConstantString("my.name.");
 
+  @SuppressWarnings("deprecation")
   @Test
   void ctor_0arg() throws URISyntaxException {
     URIRecord r = new URIRecord();
-    assertNull(r.getName());
-    assertEquals(0, r.getType());
-    assertEquals(0, r.getDClass());
-    assertEquals(0, r.getTTL());
-    assertEquals(0, r.getPriority());
-    assertEquals(0, r.getWeight());
-    assertEquals("", r.getTarget());
-    assertEquals(new URI(""), r.getTargetAsURI());
+    assertThat(r.getName()).isNull();
+    assertThat(r.getType()).isZero();
+    assertThat(r.getDClass()).isZero();
+    assertThat(r.getTTL()).isZero();
+    assertThat(r.getPriority()).isZero();
+    assertThat(r.getWeight()).isZero();
+    assertThat(r.getTarget()).isEmpty();
+    assertThat(r.getTargetAsURI()).isEqualTo(new URI(""));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
-  void ctor_6arg() throws TextParseException, URISyntaxException {
+  void ctor_6arg() throws URISyntaxException {
     String target = "http://foo/bar";
 
     URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 42, 69, target);
-    assertEquals(n, r.getName());
-    assertEquals(Type.URI, r.getType());
-    assertEquals(DClass.IN, r.getDClass());
-    assertEquals(0xABCDEL, r.getTTL());
-    assertEquals(42, r.getPriority());
-    assertEquals(69, r.getWeight());
-    assertEquals("http://foo/bar", r.getTarget());
-    assertEquals(new URI("http://foo/bar"), r.getTargetAsURI());
+    assertThat(r.getName()).isEqualTo(n);
+    assertThat(r.getType()).isEqualTo(Type.URI);
+    assertThat(r.getDClass()).isEqualTo(DClass.IN);
+    assertThat(r.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(r.getPriority()).isEqualTo(42);
+    assertThat(r.getWeight()).isEqualTo(69);
+    assertThat(r.getTarget()).isEqualTo("http://foo/bar");
+    assertThat(r.getTargetAsURI()).isEqualTo(new URI("http://foo/bar"));
   }
 
   @Test
@@ -53,9 +52,9 @@ class URIRecordTest {
 
     URIRecord r = new URIRecord();
     r.rdataFromString(t, null);
-    assertEquals(0xABCD, r.getPriority());
-    assertEquals(0xEF01, r.getWeight());
-    assertEquals(new URI("http://foo:1234/bar?baz=bum"), r.getTargetAsURI());
+    assertThat(r.getPriority()).isEqualTo(0xABCD);
+    assertThat(r.getWeight()).isEqualTo(0xEF01);
+    assertThat(r.getTargetAsURI()).isEqualTo(new URI("http://foo:1234/bar?baz=bum"));
   }
 
   @Test
@@ -81,7 +80,7 @@ class URIRecordTest {
     URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 0xbeef, 0xdead, target);
     DNSOutput out = new DNSOutput();
     r.rrToWire(out, null, true);
-    assertArrayEquals(exp, out.toByteArray());
+    assertThat(out.toByteArray()).containsExactly(exp);
   }
 
   @Test
@@ -106,37 +105,33 @@ class URIRecordTest {
 
     URIRecord r = new URIRecord();
     r.rrFromWire(in);
-    assertEquals(0xBEEF, r.getPriority());
-    assertEquals(0xDEAD, r.getWeight());
-    assertEquals(new URI("http://foo"), r.getTargetAsURI());
+    assertThat(r.getPriority()).isEqualTo(0xBEEF);
+    assertThat(r.getWeight()).isEqualTo(0xDEAD);
+    assertThat(r.getTargetAsURI()).isEqualTo(new URI("http://foo"));
   }
 
   @Test
   void toobig_priority() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new URIRecord(n, DClass.IN, 0x1234, 0x10000, 42, "http://foo"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new URIRecord(n, DClass.IN, 0x1234, 0x10000, 42, "http://foo"));
   }
 
   @Test
   void toosmall_priority() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new URIRecord(n, DClass.IN, 0x1234, -1, 42, "http://foo"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new URIRecord(n, DClass.IN, 0x1234, -1, 42, "http://foo"));
   }
 
   @Test
   void toobig_weight() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new URIRecord(n, DClass.IN, 0x1234, 42, 0x10000, "http://foo"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new URIRecord(n, DClass.IN, 0x1234, 42, 0x10000, "http://foo"));
   }
 
   @Test
   void toosmall_weight() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new URIRecord(n, DClass.IN, 0x1234, 42, -1, "http://foo"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new URIRecord(n, DClass.IN, 0x1234, 42, -1, "http://foo"));
   }
 
   @Test

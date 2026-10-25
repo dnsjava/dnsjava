@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -15,11 +14,11 @@ class SMIMEARecordTest {
     Tokenizer t = new Tokenizer("(3 0 2 CAFEBABE)");
     SMIMEARecord smimeaRecord = new SMIMEARecord();
     smimeaRecord.rdataFromString(t, null);
-    assertEquals(
-        SMIMEARecord.CertificateUsage.DOMAIN_ISSUED_CERTIFICATE,
-        smimeaRecord.getCertificateUsage());
-    assertEquals(SMIMEARecord.MatchingType.SHA512, smimeaRecord.getMatchingType());
-    assertEquals(SMIMEARecord.Selector.FULL_CERTIFICATE, smimeaRecord.getSelector());
-    assertArrayEquals(base16.fromString("CAFEBABE"), smimeaRecord.getCertificateAssociationData());
+    assertThat(smimeaRecord.getCertificateUsage())
+        .isEqualTo(SMIMEARecord.CertificateUsage.DOMAIN_ISSUED_CERTIFICATE);
+    assertThat(smimeaRecord.getMatchingType()).isEqualTo(SMIMEARecord.MatchingType.SHA512);
+    assertThat(smimeaRecord.getSelector()).isEqualTo(SMIMEARecord.Selector.FULL_CERTIFICATE);
+    assertThat(smimeaRecord.getCertificateAssociationData())
+        .containsExactly(base16.fromString("CAFEBABE"));
   }
 }

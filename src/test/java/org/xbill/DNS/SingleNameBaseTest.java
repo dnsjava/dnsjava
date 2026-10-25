@@ -35,11 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -65,25 +62,25 @@ class SingleNameBaseTest {
   @Test
   void ctor() throws TextParseException {
     TestClass tc = new TestClass();
-    assertNull(tc.getSingleName());
+    assertThat(tc.getSingleName()).isNull();
 
     Name n = Name.fromString("my.name.");
     Name sn = Name.fromString("my.single.name.");
 
     tc = new TestClass(n, Type.A, DClass.IN, 100L);
 
-    assertSame(n, tc.getName());
-    assertEquals(Type.A, tc.getType());
-    assertEquals(DClass.IN, tc.getDClass());
-    assertEquals(100L, tc.getTTL());
+    assertThat(tc.getName()).isSameAs(n);
+    assertThat(tc.getType()).isEqualTo(Type.A);
+    assertThat(tc.getDClass()).isEqualTo(DClass.IN);
+    assertThat(tc.getTTL()).isEqualTo(100L);
 
     tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
 
-    assertSame(n, tc.getName());
-    assertEquals(Type.A, tc.getType());
-    assertEquals(DClass.IN, tc.getDClass());
-    assertEquals(100L, tc.getTTL());
-    assertSame(sn, tc.getSingleName());
+    assertThat(tc.getName()).isSameAs(n);
+    assertThat(tc.getType()).isEqualTo(Type.A);
+    assertThat(tc.getDClass()).isEqualTo(DClass.IN);
+    assertThat(tc.getTTL()).isEqualTo(100L);
+    assertThat(tc.getSingleName()).isSameAs(sn);
   }
 
   @Test
@@ -95,7 +92,7 @@ class SingleNameBaseTest {
     tc.rrFromWire(in);
 
     Name exp = Name.fromString("my.single.name.");
-    assertEquals(exp, tc.getSingleName());
+    assertThat(tc.getSingleName()).isEqualTo(exp);
   }
 
   @Test
@@ -105,11 +102,13 @@ class SingleNameBaseTest {
     Tokenizer t = new Tokenizer("my.single.name.");
     TestClass tc = new TestClass();
     tc.rdataFromString(t, null);
-    assertEquals(exp, tc.getSingleName());
+    assertThat(tc.getSingleName()).isEqualTo(exp);
 
-    assertThrows(
-        RelativeNameException.class,
-        () -> new TestClass().rdataFromString(new Tokenizer("my.relative.name"), null));
+    try (Tokenizer t2 = new Tokenizer("my.relative.name")) {
+      TestClass tc2 = new TestClass();
+      assertThatExceptionOfType(RelativeNameException.class)
+          .isThrownBy(() -> tc2.rdataFromString(t2, null));
+    }
   }
 
   @Test
@@ -119,10 +118,10 @@ class SingleNameBaseTest {
     Tokenizer t = new Tokenizer("my.single.name.");
     TestClass tc = new TestClass();
     tc.rdataFromString(t, null);
-    assertEquals(exp, tc.getSingleName());
+    assertThat(tc.getSingleName()).isEqualTo(exp);
 
     String out = tc.rrToString();
-    assertEquals(out, exp.toString());
+    assertThat(exp).hasToString(out);
   }
 
   @Test
@@ -138,7 +137,7 @@ class SingleNameBaseTest {
     tc.rrToWire(dout, null, false);
 
     byte[] out = dout.toByteArray();
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
 
     // canonical (lowercase)
     tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
@@ -148,6 +147,6 @@ class SingleNameBaseTest {
     tc.rrToWire(dout, null, true);
 
     out = dout.toByteArray();
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 }

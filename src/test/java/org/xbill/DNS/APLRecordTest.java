@@ -35,12 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -65,29 +61,31 @@ public class APLRecordTest {
     @Test
     void valid_IPv4() {
       Element el = new Element(true, m_addr4, 16);
-      assertEquals(Address.IPv4, el.family);
-      assertTrue(el.negative);
-      assertEquals(m_addr4, el.address);
-      assertEquals(16, el.prefixLength);
+      assertThat(el.family).isEqualTo(Address.IPv4);
+      assertThat(el.negative).isTrue();
+      assertThat(el.address).isEqualTo(m_addr4);
+      assertThat(el.prefixLength).isEqualTo(16);
     }
 
     @Test
     void invalid_IPv4() {
-      assertThrows(IllegalArgumentException.class, () -> new Element(true, m_addr4, 33));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new Element(true, m_addr4, 33));
     }
 
     @Test
     void valid_IPv6() {
       Element el = new Element(false, m_addr6, 74);
-      assertEquals(Address.IPv6, el.family);
-      assertFalse(el.negative);
-      assertEquals(m_addr6, el.address);
-      assertEquals(74, el.prefixLength);
+      assertThat(el.family).isEqualTo(Address.IPv6);
+      assertThat(el.negative).isFalse();
+      assertThat(el.address).isEqualTo(m_addr6);
+      assertThat(el.prefixLength).isEqualTo(74);
     }
 
     @Test
     void invalid_IPv6() {
-      assertThrows(IllegalArgumentException.class, () -> new Element(true, m_addr6, 129));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new Element(true, m_addr6, 129));
     }
   }
 
@@ -126,33 +124,33 @@ public class APLRecordTest {
     @Test
     void ctor_0arg() {
       APLRecord ar = new APLRecord();
-      assertNull(ar.getName());
-      assertEquals(0, ar.getType());
-      assertEquals(0, ar.getDClass());
-      assertEquals(0, ar.getTTL());
-      assertNull(ar.getElements());
+      assertThat(ar.getName()).isNull();
+      assertThat(ar.getType()).isZero();
+      assertThat(ar.getDClass()).isZero();
+      assertThat(ar.getTTL()).isZero();
+      assertThat(ar.getElements()).isNull();
     }
 
     @Test
     void ctor_4arg_basic() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
-      assertEquals(m_an, ar.getName());
-      assertEquals(Type.APL, ar.getType());
-      assertEquals(DClass.IN, ar.getDClass());
-      assertEquals(m_ttl, ar.getTTL());
-      assertEquals(m_elements, ar.getElements());
+      assertThat(ar.getName()).isEqualTo(m_an);
+      assertThat(ar.getType()).isEqualTo(Type.APL);
+      assertThat(ar.getDClass()).isEqualTo(DClass.IN);
+      assertThat(ar.getTTL()).isEqualTo(m_ttl);
+      assertThat(ar.getElements()).isEqualTo(m_elements);
     }
 
     @Test
     void ctor_4arg_empty_elements() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, new ArrayList<>());
-      assertEquals(new ArrayList<>(), ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(new ArrayList<>());
     }
 
     @Test
     void ctor_4arg_relative_name() {
-      assertThrows(
-          RelativeNameException.class, () -> new APLRecord(m_rn, DClass.IN, m_ttl, m_elements));
+      assertThatExceptionOfType(RelativeNameException.class)
+          .isThrownBy(() -> new APLRecord(m_rn, DClass.IN, m_ttl, m_elements));
     }
   }
 
@@ -183,7 +181,7 @@ public class APLRecordTest {
 
       ArrayList<Element> exp = new ArrayList<>();
       exp.add(new Element(true, m_addr4, 8));
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
     }
 
     @Test
@@ -198,7 +196,7 @@ public class APLRecordTest {
 
       ArrayList<Element> exp = new ArrayList<>();
       exp.add(new Element(true, a, 20));
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
     }
 
     @Test
@@ -216,7 +214,7 @@ public class APLRecordTest {
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
-      assertThrows(WireParseException.class, () -> ar.rrFromWire(di));
+      assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> ar.rrFromWire(di));
     }
 
     @Test
@@ -235,7 +233,7 @@ public class APLRecordTest {
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
-      assertThrows(WireParseException.class, () -> ar.rrFromWire(di));
+      assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> ar.rrFromWire(di));
     }
 
     @Test
@@ -266,7 +264,7 @@ public class APLRecordTest {
       ArrayList<Element> exp = new ArrayList<>();
       exp.add(new Element(true, m_addr4, 8));
       exp.add(new Element(false, m_addr4, 30));
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
     }
 
     @Test
@@ -300,7 +298,7 @@ public class APLRecordTest {
 
       ArrayList<Element> exp = new ArrayList<>();
       exp.add(new Element(false, m_addr6, 115));
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
     }
 
     @Test
@@ -312,13 +310,13 @@ public class APLRecordTest {
       ar.rrFromWire(di);
 
       List<Element> l = ar.getElements();
-      assertEquals(1, l.size());
+      assertThat(l).hasSize(1);
 
       Element el = l.get(0);
-      assertEquals(3, el.family);
-      assertTrue(el.negative);
-      assertEquals(130, el.prefixLength);
-      assertArrayEquals(new byte[] {1, 2, 3, 4, 5}, (byte[]) el.address);
+      assertThat(el.family).isEqualTo(3);
+      assertThat(el.negative).isTrue();
+      assertThat(el.prefixLength).isEqualTo(130);
+      assertThat((byte[]) el.address).containsExactly(new byte[] {1, 2, 3, 4, 5});
     }
   }
 
@@ -350,10 +348,10 @@ public class APLRecordTest {
       ArrayList<Element> exp = new ArrayList<>();
       exp.add(new Element(false, m_addr4, 11));
 
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
 
       // make sure extra token is put back
-      assertEquals(Tokenizer.EOL, t.get().type());
+      assertThat(t.get().type()).isEqualTo(Tokenizer.EOL);
     }
 
     @Test
@@ -366,7 +364,7 @@ public class APLRecordTest {
       exp.add(new Element(false, m_addr4, 11));
       exp.add(new Element(true, m_addr6, 100));
 
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
     }
 
     @Test
@@ -378,87 +376,98 @@ public class APLRecordTest {
       ArrayList<Element> exp = new ArrayList<>();
       exp.add(new Element(true, m_addr6, 36));
 
-      assertEquals(exp, ar.getElements());
+      assertThat(ar.getElements()).isEqualTo(exp);
 
       // make sure extra token is put back
-      assertEquals(Tokenizer.EOL, t.get().type());
+      assertThat(t.get().type()).isEqualTo(Tokenizer.EOL);
     }
 
     @Test
     void no_colon() {
       Tokenizer t = new Tokenizer("!1192.68.0.1/20");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void colon_and_slash_swapped() {
       Tokenizer t = new Tokenizer("!1/192.68.0.1:20");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void no_slash() {
       Tokenizer t = new Tokenizer("!1:192.68.0.1|20");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void empty_family() {
       Tokenizer t = new Tokenizer("!:192.68.0.1/20");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void malformed_family() {
       Tokenizer t = new Tokenizer("family:192.68.0.1/20");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void invalid_family() {
       Tokenizer t = new Tokenizer("3:192.68.0.1/20");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void empty_prefix() {
       Tokenizer t = new Tokenizer("1:192.68.0.1/");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void malformed_prefix() {
       Tokenizer t = new Tokenizer("1:192.68.0.1/prefix");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void invalid_prefix() {
       Tokenizer t = new Tokenizer("1:192.68.0.1/33");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void empty_address() {
       Tokenizer t = new Tokenizer("1:/33");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
 
     @Test
     void malformed_address() {
       Tokenizer t = new Tokenizer("1:A.B.C.D/33");
       APLRecord ar = new APLRecord();
-      assertThrows(TextParseException.class, () -> ar.rdataFromString(t, null));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> ar.rdataFromString(t, null));
     }
   }
 
@@ -497,7 +506,8 @@ public class APLRecordTest {
     @Test
     void test() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
-      assertEquals("!1:" + m_addr4_string + "/12 2:" + m_addr6_string + "/64", ar.rrToString());
+      assertThat(ar.rrToString())
+          .isEqualTo("!1:" + m_addr4_string + "/12 2:" + m_addr6_string + "/64");
     }
   }
 
@@ -539,7 +549,7 @@ public class APLRecordTest {
       DNSOutput dout = new DNSOutput();
 
       ar.rrToWire(dout, null, true);
-      assertArrayEquals(new byte[0], dout.toByteArray());
+      assertThat(dout.toByteArray()).containsExactly(new byte[0]);
     }
 
     @Test
@@ -580,7 +590,7 @@ public class APLRecordTest {
       DNSOutput dout = new DNSOutput();
 
       ar.rrToWire(dout, null, true);
-      assertArrayEquals(exp, dout.toByteArray());
+      assertThat(dout.toByteArray()).containsExactly(exp);
     }
 
     @Test
@@ -594,7 +604,7 @@ public class APLRecordTest {
       DNSOutput dout = new DNSOutput();
 
       ar.rrToWire(dout, null, true);
-      assertArrayEquals(exp, dout.toByteArray());
+      assertThat(dout.toByteArray()).containsExactly(exp);
     }
 
     @Test
@@ -610,7 +620,7 @@ public class APLRecordTest {
       DNSOutput dout = new DNSOutput();
 
       ar.rrToWire(dout, null, true);
-      assertArrayEquals(exp, dout.toByteArray());
+      assertThat(dout.toByteArray()).containsExactly(exp);
     }
 
     @Test
@@ -626,7 +636,7 @@ public class APLRecordTest {
       DNSOutput dout = new DNSOutput();
 
       ar.rrToWire(dout, null, true);
-      assertArrayEquals(exp, dout.toByteArray());
+      assertThat(dout.toByteArray()).containsExactly(exp);
     }
 
     @Test
@@ -642,7 +652,7 @@ public class APLRecordTest {
       DNSOutput dout = new DNSOutput();
 
       ar.rrToWire(dout, null, true);
-      assertArrayEquals(exp, dout.toByteArray());
+      assertThat(dout.toByteArray()).containsExactly(exp);
     }
   }
 }

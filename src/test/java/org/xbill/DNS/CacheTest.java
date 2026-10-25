@@ -2,11 +2,6 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,9 +33,9 @@ class CacheTest {
   void testAddAndLookup() {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(1, response.answers().size());
-    assertEquals(aRecord, response.answers().get(0).first());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers()).hasSize(1);
+    assertThat(response.answers().get(0).first()).isEqualTo(aRecord);
   }
 
   @Test
@@ -48,7 +43,7 @@ class CacheTest {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     cache.clearCache();
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isUnknown());
+    assertThat(response.isUnknown()).isTrue();
   }
 
   @Test
@@ -56,7 +51,7 @@ class CacheTest {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     cache.flushSet(exampleName, Type.A);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isUnknown());
+    assertThat(response.isUnknown()).isTrue();
   }
 
   @Test
@@ -69,41 +64,41 @@ class CacheTest {
         new ARecord(otherName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
     cache.addRecord(otherRecord, Credibility.AUTH_ANSWER);
 
-    assertEquals(1, cache.getSize());
+    assertThat(cache.getSize()).isOne();
     SetResponse response = cache.lookupRecords(otherName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
+    assertThat(response.isSuccessful()).isTrue();
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isUnknown());
+    assertThat(response.isUnknown()).isTrue();
   }
 
   @Test
   void testNegativeCaching() {
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(
-        response.isNXRRSET() || response.isUnknown(),
-        "Expected NXRRSET or UNKNOWN for " + exampleName + " but got " + response);
+    assertThat(response.isNXRRSET() || response.isUnknown())
+        .as("Expected NXRRSET or UNKNOWN for " + exampleName + " but got " + response)
+        .isTrue();
   }
 
   @Test
   void testNXDOMAIN() {
     cache.addNegative(exampleName, Type.ANY, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(
-        response.isNXDOMAIN() || response.isUnknown(),
-        "Expected NXDOMAIN or UNKNOWN for " + exampleName + " but got " + response);
+    assertThat(response.isNXDOMAIN() || response.isUnknown())
+        .as("Expected NXDOMAIN or UNKNOWN for " + exampleName + " but got " + response)
+        .isTrue();
   }
 
   @Test
   void testGettersAndSetters() {
     cache.setMaxCache(100);
-    assertEquals(100, cache.getMaxCache());
+    assertThat(cache.getMaxCache()).isEqualTo(100);
 
     cache.setMaxNCache(50);
-    assertEquals(50, cache.getMaxNCache());
+    assertThat(cache.getMaxNCache()).isEqualTo(50);
 
-    assertEquals(DClass.IN, cache.getDClass());
+    assertThat(cache.getDClass()).isEqualTo(DClass.IN);
   }
 
   @Test
@@ -115,8 +110,8 @@ class CacheTest {
     cache.addRecord(lowerRecord, Credibility.NONAUTH_ANSWER);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(aRecord, response.answers().get(0).first());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers().get(0).first()).isEqualTo(aRecord);
 
     // Higher credibility should replace lower credibility
     cache.clearCache();
@@ -124,8 +119,8 @@ class CacheTest {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(aRecord, response.answers().get(0).first());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers().get(0).first()).isEqualTo(aRecord);
   }
 
   @Test
@@ -135,13 +130,13 @@ class CacheTest {
     cache.addRecord(shortTtlRecord, Credibility.AUTH_ANSWER);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
+    assertThat(response.isSuccessful()).isTrue();
 
     // Wait for TTL to expire
     clock.advance(Duration.ofMillis(1100));
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isUnknown());
+    assertThat(response.isUnknown()).isTrue();
   }
 
   @Test
@@ -153,12 +148,12 @@ class CacheTest {
     m.addRecord(aRecord, Section.ANSWER);
 
     SetResponse sr = cache.addMessage(m);
-    assertNotNull(sr);
-    assertTrue(sr.isSuccessful());
+    assertThat(sr).isNotNull();
+    assertThat(sr.isSuccessful()).isTrue();
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(aRecord, response.answers().get(0).first());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers().get(0).first()).isEqualTo(aRecord);
   }
 
   @Test
@@ -174,20 +169,20 @@ class CacheTest {
     cache.addMessage(m);
 
     SetResponse response = cache.lookupRecords(cnameName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isCNAME());
-    assertEquals(cnameRecord, response.getCNAME());
+    assertThat(response.isCNAME()).isTrue();
+    assertThat(response.getCNAME()).isEqualTo(cnameRecord);
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(aRecord, response.answers().get(0).first());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers().get(0).first()).isEqualTo(aRecord);
   }
 
   @Test
   void testLookupAny() {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.ANY, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(1, response.answers().size());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers()).hasSize(1);
   }
 
   @Test
@@ -198,8 +193,8 @@ class CacheTest {
     cache.addRecord(nsRecord, Credibility.AUTH_ANSWER);
 
     SetResponse response = cache.lookupRecords(subName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isDelegation());
-    assertEquals(nsRecord, response.getNS().first());
+    assertThat(response.isDelegation()).isTrue();
+    assertThat(response.getNS().first()).isEqualTo(nsRecord);
   }
 
   @Test
@@ -210,8 +205,8 @@ class CacheTest {
     cache.addRecord(dnameRecord, Credibility.AUTH_ANSWER);
 
     SetResponse response = cache.lookupRecords(subDnameName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isDNAME());
-    assertEquals(dnameRecord, response.getDNAME());
+    assertThat(response.isDNAME()).isTrue();
+    assertThat(response.getDNAME()).isEqualTo(dnameRecord);
   }
 
   @Test
@@ -223,7 +218,7 @@ class CacheTest {
 
     // We can't easily verify the internal 'expire' field, but we can verify it's still there
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
+    assertThat(response.isSuccessful()).isTrue();
   }
 
   @Test
@@ -238,7 +233,7 @@ class CacheTest {
     cache.addMessage(m);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isNXDOMAIN());
+    assertThat(response.isNXDOMAIN()).isTrue();
   }
 
   @Test
@@ -251,8 +246,8 @@ class CacheTest {
     cache.addMessage(m);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isDelegation());
-    assertEquals(ns, response.getNS().first());
+    assertThat(response.isDelegation()).isTrue();
+    assertThat(response.getNS().first()).isEqualTo(ns);
   }
 
   @Test
@@ -268,8 +263,10 @@ class CacheTest {
     cache.addMessage(m);
 
     SetResponse response = cache.lookupRecords(subDnameName, Type.A, Credibility.NONAUTH_ANSWER);
-    assertTrue(response.isDNAME(), "Expected DNAME for " + subDnameName + " but got " + response);
-    assertEquals(dnameRecord, response.getDNAME());
+    assertThat(response.isDNAME())
+        .as("Expected DNAME for " + subDnameName + " but got " + response)
+        .isTrue();
+    assertThat(response.getDNAME()).isEqualTo(dnameRecord);
   }
 
   @Test
@@ -279,13 +276,14 @@ class CacheTest {
     try (ByteArrayInputStream bis = new ByteArrayInputStream(masterFile.getBytes())) {
       Cache masterCache = new Cache(bis);
       SetResponse response = masterCache.lookupRecords(exampleName, Type.A, Credibility.HINT);
-      assertTrue(response.isSuccessful());
+      assertThat(response.isSuccessful()).isTrue();
 
       Name wwwName = Name.fromString("www.example.com.");
       response = masterCache.lookupRecords(wwwName, Type.CNAME, Credibility.HINT);
-      assertTrue(
-          response.isSuccessful(), "Expected SUCCESSFUL for " + wwwName + " but got " + response);
-      assertEquals(Type.CNAME, response.answers().get(0).getType());
+      assertThat(response.isSuccessful())
+          .as("Expected SUCCESSFUL for " + wwwName + " but got " + response)
+          .isTrue();
+      assertThat(response.answers().get(0).getType()).isEqualTo(Type.CNAME);
     }
   }
 
@@ -294,60 +292,57 @@ class CacheTest {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     cache.flushName(exampleName);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isUnknown());
+    assertThat(response.isUnknown()).isTrue();
   }
 
   @Test
   void testGetSize() throws TextParseException, UnknownHostException {
-    assertEquals(0, cache.getSize());
+    assertThat(cache.getSize()).isZero();
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
-    assertEquals(1, cache.getSize());
+    assertThat(cache.getSize()).isOne();
 
     Name otherName = Name.fromString("other.com.");
     ARecord otherRecord =
         new ARecord(otherName, DClass.IN, 3600, InetAddress.getByName("127.0.0.2"));
     cache.addRecord(otherRecord, Credibility.AUTH_ANSWER);
-    assertEquals(2, cache.getSize());
+    assertThat(cache.getSize()).isEqualTo(2);
 
     cache.flushName(exampleName);
-    assertEquals(1, cache.getSize());
+    assertThat(cache.getSize()).isOne();
   }
 
   @Test
   void testGetMaxEntries() {
     cache.setMaxEntries(100);
-    assertEquals(100, cache.getMaxEntries());
+    assertThat(cache.getMaxEntries()).isEqualTo(100);
   }
 
   @Test
   void testFindRecords() {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     List<RRset> records = cache.findRecords(exampleName, Type.A);
-    assertNotNull(records);
-    assertEquals(1, records.size());
-    assertEquals(aRecord, records.get(0).first());
+    assertThat(records).isNotNull().hasSize(1);
+    assertThat(records.get(0).first()).isEqualTo(aRecord);
 
     records = cache.findRecords(exampleName, Type.AAAA);
-    assertNull(records);
+    assertThat(records).isNull();
   }
 
   @Test
   void testFindAnyRecords() {
     cache.addRecord(aRecord, Credibility.GLUE);
     List<RRset> records = cache.findAnyRecords(exampleName, Type.A);
-    assertNotNull(records);
-    assertEquals(1, records.size());
+    assertThat(records).isNotNull().hasSize(1);
 
     records = cache.findRecords(exampleName, Type.A); // findRecords uses Credibility.NORMAL
-    assertNull(records);
+    assertThat(records).isNull();
   }
 
   @Test
   void testToString() {
     cache.addRecord(aRecord, Credibility.AUTH_ANSWER);
     String s = cache.toString();
-    assertTrue(s.contains("example.com."));
-    assertTrue(s.contains("127.0.0.1"));
+    assertThat(s).contains("example.com.").contains("127.0.0.1");
   }
 
   @Test
@@ -361,7 +356,7 @@ class CacheTest {
     cache.addMessage(m);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isAuthenticated());
+    assertThat(response.isAuthenticated()).isTrue();
   }
 
   @Test
@@ -375,7 +370,7 @@ class CacheTest {
     cache.addMessage(m);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertFalse(response.isAuthenticated());
+    assertThat(response.isAuthenticated()).isFalse();
   }
 
   @Test
@@ -386,9 +381,9 @@ class CacheTest {
     cache.addRecord(a2, Credibility.AUTH_ANSWER);
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
-    assertEquals(1, response.answers().size());
-    assertEquals(2, response.answers().get(0).size());
+    assertThat(response.isSuccessful()).isTrue();
+    assertThat(response.answers()).hasSize(1);
+    assertThat(response.answers().get(0).size()).isEqualTo(2);
   }
 
   @Test
@@ -398,13 +393,13 @@ class CacheTest {
         new AAAARecord(exampleName, DClass.IN, 3600, InetAddress.getByName("2001:db8::1"));
     cache.addRecord(aaaaRecord, Credibility.AUTH_ANSWER);
 
-    assertEquals(1, cache.getSize()); // Same name, different types
+    assertThat(cache.getSize()).isOne(); // Same name, different types
 
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
+    assertThat(response.isSuccessful()).isTrue();
 
     response = cache.lookupRecords(exampleName, Type.AAAA, Credibility.AUTH_ANSWER);
-    assertTrue(response.isSuccessful());
+    assertThat(response.isSuccessful()).isTrue();
   }
 
   @Test
@@ -412,14 +407,16 @@ class CacheTest {
     cache.setMaxNCache(1);
     cache.addNegative(exampleName, Type.A, null, Credibility.AUTH_ANSWER);
     SetResponse response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(
-        response.isNXRRSET() || response.isUnknown(),
-        "Expected NXRRSET or UNKNOWN but got " + response);
+    assertThat(response.isNXRRSET() || response.isUnknown())
+        .as("Expected NXRRSET or UNKNOWN but got " + response)
+        .isTrue();
 
     Clock.tick(clock, Duration.ofMillis(1100));
 
     response = cache.lookupRecords(exampleName, Type.A, Credibility.AUTH_ANSWER);
-    assertTrue(response.isUnknown(), "Expected UNKNOWN after expiration but got " + response);
+    assertThat(response.isUnknown())
+        .as("Expected UNKNOWN after expiration but got " + response)
+        .isTrue();
   }
 
   @Test
@@ -442,12 +439,12 @@ class CacheTest {
             300);
     m.addRecord(soa, Section.AUTHORITY);
     m.addRecord(new OPTRecord(4096, 1, 0), Section.ADDITIONAL); // extended rcode 1 -> BADVERS (16)
-    assertEquals(16, m.getRcode());
+    assertThat(m.getRcode()).isEqualTo(16);
     Cache c = new Cache();
     c.addMessage(m);
     SetResponse sr = c.lookupRecords(q, Type.A, Credibility.NORMAL);
-    assertFalse(sr.isNXRRSET(), sr.toString());
-    assertTrue(sr.isUnknown(), sr.toString());
+    assertThat(sr.isNXRRSET()).as(sr.toString()).isFalse();
+    assertThat(sr.isUnknown()).as(sr.toString()).isTrue();
   }
 
   @Test

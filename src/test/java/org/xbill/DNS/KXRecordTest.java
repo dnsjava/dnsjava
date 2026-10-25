@@ -35,7 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,12 +46,12 @@ class KXRecordTest {
     Name m = Name.fromString("My.OtherName.");
 
     KXRecord d = new KXRecord(n, DClass.IN, 0xABCDEL, 0xF1, m);
-    assertEquals(n, d.getName());
-    assertEquals(Type.KX, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(0xF1, d.getPreference());
-    assertEquals(m, d.getTarget());
-    assertEquals(m, d.getAdditionalName());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.KX);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getPreference()).isEqualTo(0xF1);
+    assertThat(d.getTarget()).isEqualTo(m);
+    assertThat(d.getAdditionalName()).isEqualTo(m);
   }
 }

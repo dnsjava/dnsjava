@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -16,16 +15,17 @@ class NAPTRRecordTest {
         new Tokenizer("100  50  \"s\"    \"http+N2L+N2C+N2R\"  \"!a\\\\!!b!i\"   www.example.com.");
     NAPTRRecord naptr = new NAPTRRecord();
     naptr.rdataFromString(t, null);
-    assertEquals(100, naptr.getOrder());
-    assertEquals(50, naptr.getPreference());
-    assertEquals("s", naptr.getFlags());
-    assertEquals("http+N2L+N2C+N2R", naptr.getService());
-    assertEquals("http+N2L+N2C+N2R", naptr.getService(false));
-    assertArrayEquals(
-        "http+N2L+N2C+N2R".getBytes(StandardCharsets.UTF_8), naptr.getServiceAsByteArray());
-    assertEquals("!a\\\\!!b!i", naptr.getRegexp());
-    assertEquals("!a\\!!b!i", naptr.getRegexp(false));
-    assertArrayEquals("!a\\!!b!i".getBytes(StandardCharsets.UTF_8), naptr.getRegexpAsByteArray());
-    assertEquals(Name.fromConstantString("www.example.com."), naptr.getReplacement());
+    assertThat(naptr.getOrder()).isEqualTo(100);
+    assertThat(naptr.getPreference()).isEqualTo(50);
+    assertThat(naptr.getFlags()).isEqualTo("s");
+    assertThat(naptr.getService()).isEqualTo("http+N2L+N2C+N2R");
+    assertThat(naptr.getService(false)).isEqualTo("http+N2L+N2C+N2R");
+    assertThat(naptr.getServiceAsByteArray())
+        .containsExactly("http+N2L+N2C+N2R".getBytes(StandardCharsets.UTF_8));
+    assertThat(naptr.getRegexp()).isEqualTo("!a\\\\!!b!i");
+    assertThat(naptr.getRegexp(false)).isEqualTo("!a\\!!b!i");
+    assertThat(naptr.getRegexpAsByteArray())
+        .containsExactly("!a\\!!b!i".getBytes(StandardCharsets.UTF_8));
+    assertThat(naptr.getReplacement()).isEqualTo(Name.fromConstantString("www.example.com."));
   }
 }

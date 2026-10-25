@@ -35,7 +35,7 @@
 //
 package org.xbill.DNS.utils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -58,118 +58,118 @@ class HexdumpTest {
     String long_out = hexdump.dump(desc, data, 0, data.length);
     String short_out = hexdump.dump(desc, data);
 
-    assertEquals(long_out, short_out);
+    assertThat(short_out).isEqualTo(long_out);
   }
 
   @Test
   void test_0() {
     byte[] data = {1, 0, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t00 \n", out);
+    assertThat(out).isEqualTo("1b:\t00 \n");
   }
 
   @Test
   void test_1() {
     byte[] data = {2, 1, 3};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t01 \n", out);
+    assertThat(out).isEqualTo("1b:\t01 \n");
   }
 
   @Test
   void test_2() {
     byte[] data = {1, 2, 3};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t02 \n", out);
+    assertThat(out).isEqualTo("1b:\t02 \n");
   }
 
   @Test
   void test_3() {
     byte[] data = {1, 3, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t03 \n", out);
+    assertThat(out).isEqualTo("1b:\t03 \n");
   }
 
   @Test
   void test_4() {
     byte[] data = {1, 4, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t04 \n", out);
+    assertThat(out).isEqualTo("1b:\t04 \n");
   }
 
   @Test
   void test_5() {
     byte[] data = {1, 5, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t05 \n", out);
+    assertThat(out).isEqualTo("1b:\t05 \n");
   }
 
   @Test
   void test_6() {
     byte[] data = {1, 6, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t06 \n", out);
+    assertThat(out).isEqualTo("1b:\t06 \n");
   }
 
   @Test
   void test_7() {
     byte[] data = {1, 7, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t07 \n", out);
+    assertThat(out).isEqualTo("1b:\t07 \n");
   }
 
   @Test
   void test_8() {
     byte[] data = {1, 8, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t08 \n", out);
+    assertThat(out).isEqualTo("1b:\t08 \n");
   }
 
   @Test
   void test_9() {
     byte[] data = {1, 9, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t09 \n", out);
+    assertThat(out).isEqualTo("1b:\t09 \n");
   }
 
   @Test
   void test_10() {
     byte[] data = {1, 10, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t0A \n", out);
+    assertThat(out).isEqualTo("1b:\t0A \n");
   }
 
   @Test
   void test_11() {
     byte[] data = {1, 11, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t0B \n", out);
+    assertThat(out).isEqualTo("1b:\t0B \n");
   }
 
   @Test
   void test_12() {
     byte[] data = {1, 12, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t0C \n", out);
+    assertThat(out).isEqualTo("1b:\t0C \n");
   }
 
   @Test
   void test_13() {
     byte[] data = {1, 13, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t0D \n", out);
+    assertThat(out).isEqualTo("1b:\t0D \n");
   }
 
   @Test
   void test_14() {
     byte[] data = {1, 14, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t0E \n", out);
+    assertThat(out).isEqualTo("1b:\t0E \n");
   }
 
   @Test
   void test_15() {
     byte[] data = {1, 15, 2};
     String out = hexdump.dump(null, data, 1, 1);
-    assertEquals("1b:\t0F \n", out);
+    assertThat(out).isEqualTo("1b:\t0F \n");
   }
 }

@@ -35,10 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -47,15 +45,15 @@ class DNSKEYRecordTest {
   @Test
   void ctor_0arg() {
     DNSKEYRecord ar = new DNSKEYRecord();
-    assertNull(ar.getName());
-    assertEquals(0, ar.getType());
-    assertEquals(0, ar.getDClass());
-    assertEquals(0, ar.getTTL());
-    assertEquals(0, ar.getAlgorithm());
-    assertEquals(0, ar.getFlags());
-    assertEquals(0, ar.getFootprint());
-    assertEquals(0, ar.getProtocol());
-    assertNull(ar.getKey());
+    assertThat(ar.getName()).isNull();
+    assertThat(ar.getType()).isZero();
+    assertThat(ar.getDClass()).isZero();
+    assertThat(ar.getTTL()).isZero();
+    assertThat(ar.getAlgorithm()).isZero();
+    assertThat(ar.getFlags()).isZero();
+    assertThat(ar.getFootprint()).isZero();
+    assertThat(ar.getProtocol()).isZero();
+    assertThat(ar.getKey()).isNull();
   }
 
   @Test
@@ -64,14 +62,14 @@ class DNSKEYRecordTest {
     byte[] key = {0, 1, 3, 5, 7, 9};
 
     DNSKEYRecord kr = new DNSKEYRecord(n, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
-    assertEquals(n, kr.getName());
-    assertEquals(Type.DNSKEY, kr.getType());
-    assertEquals(DClass.IN, kr.getDClass());
-    assertEquals(0x24AC, kr.getTTL());
-    assertEquals(0x9832, kr.getFlags());
-    assertEquals(0x12, kr.getProtocol());
-    assertEquals(0x67, kr.getAlgorithm());
-    assertArrayEquals(key, kr.getKey());
+    assertThat(kr.getName()).isEqualTo(n);
+    assertThat(kr.getType()).isEqualTo(Type.DNSKEY);
+    assertThat(kr.getDClass()).isEqualTo(DClass.IN);
+    assertThat(kr.getTTL()).isEqualTo(0x24AC);
+    assertThat(kr.getFlags()).isEqualTo(0x9832);
+    assertThat(kr.getProtocol()).isEqualTo(0x12);
+    assertThat(kr.getAlgorithm()).isEqualTo(0x67);
+    assertThat(kr.getKey()).containsExactly(key);
   }
 
   @Test
@@ -79,9 +77,8 @@ class DNSKEYRecordTest {
     Name r = Name.fromString("My.Relative.Name");
     byte[] key = {0, 1, 3, 5, 7, 9};
 
-    assertThrows(
-        RelativeNameException.class,
-        () -> new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(() -> new DNSKEYRecord(r, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key));
   }
 
   @Test
@@ -90,21 +87,22 @@ class DNSKEYRecordTest {
     DNSKEYRecord kr = new DNSKEYRecord();
     Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " RSASHA1 AQIDBAUGBwgJ");
     kr.rdataFromString(st, null);
-    assertEquals(0xABCD, kr.getFlags());
-    assertEquals(0x81, kr.getProtocol());
-    assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
-    assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
-    assertEquals(17895, kr.getFootprint());
+    assertThat(kr.getFlags()).isEqualTo(0xABCD);
+    assertThat(kr.getProtocol()).isEqualTo(0x81);
+    assertThat(kr.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.RSASHA1);
+    assertThat(kr.getKey()).containsExactly(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9});
+    assertThat(kr.getFootprint()).isEqualTo(17895);
   }
 
   @Test
   void rdataFromStringUnknownAlgorithm() {
     // Algorithm name 'ZONE' is invalid
-    assertThrows(
-        TextParseException.class,
-        () ->
-            new DNSKEYRecord()
-                .rdataFromString(new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () ->
+                new DNSKEYRecord()
+                    .rdataFromString(
+                        new Tokenizer(0x1212 + " " + 0xAA + " ZONE AQIDBAUGBwgJ"), null));
   }
 
   @Test
@@ -112,19 +110,20 @@ class DNSKEYRecordTest {
     DNSKEYRecord kr = new DNSKEYRecord();
     Tokenizer st = new Tokenizer(0xABCD + " " + 0x81 + " 5 AQIDBAUGBwgJ");
     kr.rdataFromString(st, null);
-    assertEquals(0xABCD, kr.getFlags());
-    assertEquals(0x81, kr.getProtocol());
-    assertEquals(DNSSEC.Algorithm.RSASHA1, kr.getAlgorithm());
-    assertArrayEquals(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9}, kr.getKey());
-    assertEquals(17895, kr.getFootprint());
+    assertThat(kr.getFlags()).isEqualTo(0xABCD);
+    assertThat(kr.getProtocol()).isEqualTo(0x81);
+    assertThat(kr.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.RSASHA1);
+    assertThat(kr.getKey()).containsExactly(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9});
+    assertThat(kr.getFootprint()).isEqualTo(17895);
   }
 
   @Test
   void rdataFromStringBadIntAlg() {
     // Algorithm number 257 is outside the allowed range
     DNSKEYRecord kr = new DNSKEYRecord();
-    assertThrows(
-        TextParseException.class,
-        () -> kr.rdataFromString(new Tokenizer(0xABCD + " " + 0x81 + " 257 AQIDBAUGBwgJ"), null));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () ->
+                kr.rdataFromString(new Tokenizer(0xABCD + " " + 0x81 + " 257 AQIDBAUGBwgJ"), null));
   }
 }

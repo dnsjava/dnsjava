@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,17 +39,16 @@ class TestNormallyUnreachableCode {
     set.addRR(aRecord);
     KeyEntry keys = KeyEntry.newKeyEntry(new SRRset());
     JustifiedSecStatus res = verifier.verify(set, keys, Instant.now());
-    assertEquals(SecurityStatus.BOGUS, res.status);
-    assertEquals(ExtendedErrorCodeOption.RRSIGS_MISSING, res.edeReason);
+    assertThat(res.status).isEqualTo(SecurityStatus.BOGUS);
+    assertThat(res.edeReason).isEqualTo(ExtendedErrorCodeOption.RRSIGS_MISSING);
   }
 
   @Test
   void useAllEnumCode() {
-    assertEquals(
-        SecurityStatus.UNCHECKED, SecurityStatus.valueOf(SecurityStatus.values()[0].toString()));
-    assertEquals(
-        ResponseClassification.UNKNOWN,
-        ResponseClassification.valueOf(ResponseClassification.values()[0].toString()));
+    assertThat(SecurityStatus.valueOf(SecurityStatus.values()[0].toString()))
+        .isEqualTo(SecurityStatus.UNCHECKED);
+    assertThat(ResponseClassification.valueOf(ResponseClassification.values()[0].toString()))
+        .isEqualTo(ResponseClassification.UNKNOWN);
   }
 
   @Test
@@ -59,8 +58,8 @@ class TestNormallyUnreachableCode {
     m.getHeader().setRcode(xrcode & 0xF);
     m.addRecord(new OPTRecord(1, xrcode >> 4, 1), Section.ADDITIONAL);
     SMessage sm = new SMessage(m);
-    assertEquals(m.toString(), sm.getMessage().toString());
-    assertEquals(xrcode, sm.getRcode());
+    assertThat(sm.getMessage()).hasToString(m.toString());
+    assertThat(sm.getRcode()).isEqualTo(xrcode);
   }
 
   @Test
@@ -68,6 +67,6 @@ class TestNormallyUnreachableCode {
     Message m = new Message();
     m.addRecord(new ARecord(Name.root, DClass.IN, 120, localhost), Section.ANSWER);
     SMessage sm = new SMessage(m);
-    assertEquals(m.toString(), sm.getMessage().toString());
+    assertThat(sm.getMessage()).hasToString(m.toString());
   }
 }

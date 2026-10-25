@@ -35,10 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,54 +44,54 @@ class FlagsTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("aa", Flags.string(Flags.AA));
+    assertThat(Flags.string(Flags.AA)).isEqualTo("aa");
 
     // one that doesn't exist
-    assertTrue(Flags.string(12).startsWith("flag"));
+    assertThat(Flags.string(12).startsWith("flag")).isTrue();
 
-    assertThrows(IllegalArgumentException.class, () -> Flags.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Flags.string(-1));
 
     //  (max is 0xF)
-    assertThrows(IllegalArgumentException.class, () -> Flags.string(0x10));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Flags.string(0x10));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(Flags.CD, Flags.value("cd"));
+    assertThat(Flags.value("cd")).isEqualTo(Flags.CD);
 
     // one thats undefined but within range
-    assertEquals(13, Flags.value("FLAG13"));
+    assertThat(Flags.value("FLAG13")).isEqualTo(13);
 
     // one thats undefined but out of range
-    assertEquals(-1, Flags.value("FLAG" + 0x10));
+    assertThat(Flags.value("FLAG" + 0x10)).isEqualTo(-1);
 
     // something that unknown
-    assertEquals(-1, Flags.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(Flags.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, Flags.value(""));
+    assertThat(Flags.value("")).isEqualTo(-1);
   }
 
   @Test
   void isFlag() {
-    assertThrows(IllegalArgumentException.class, () -> Flags.isFlag(-1));
-    assertTrue(Flags.isFlag(0));
-    assertFalse(Flags.isFlag(1)); // opcode
-    assertFalse(Flags.isFlag(2));
-    assertFalse(Flags.isFlag(3));
-    assertFalse(Flags.isFlag(4));
-    assertTrue(Flags.isFlag(5));
-    assertTrue(Flags.isFlag(6));
-    assertTrue(Flags.isFlag(7));
-    assertTrue(Flags.isFlag(8));
-    assertTrue(Flags.isFlag(9));
-    assertTrue(Flags.isFlag(10));
-    assertTrue(Flags.isFlag(11));
-    assertFalse(Flags.isFlag(12));
-    assertFalse(Flags.isFlag(13));
-    assertFalse(Flags.isFlag(14));
-    assertFalse(Flags.isFlag(14));
-    assertThrows(IllegalArgumentException.class, () -> Flags.isFlag(16));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Flags.isFlag(-1));
+    assertThat(Flags.isFlag(0)).isTrue();
+    assertThat(Flags.isFlag(1)).isFalse(); // opcode
+    assertThat(Flags.isFlag(2)).isFalse();
+    assertThat(Flags.isFlag(3)).isFalse();
+    assertThat(Flags.isFlag(4)).isFalse();
+    assertThat(Flags.isFlag(5)).isTrue();
+    assertThat(Flags.isFlag(6)).isTrue();
+    assertThat(Flags.isFlag(7)).isTrue();
+    assertThat(Flags.isFlag(8)).isTrue();
+    assertThat(Flags.isFlag(9)).isTrue();
+    assertThat(Flags.isFlag(10)).isTrue();
+    assertThat(Flags.isFlag(11)).isTrue();
+    assertThat(Flags.isFlag(12)).isFalse();
+    assertThat(Flags.isFlag(13)).isFalse();
+    assertThat(Flags.isFlag(14)).isFalse();
+    assertThat(Flags.isFlag(14)).isFalse();
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Flags.isFlag(16));
   }
 }

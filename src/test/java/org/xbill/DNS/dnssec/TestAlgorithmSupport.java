@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.security.Security;
@@ -30,9 +27,10 @@ class TestAlgorithmSupport extends TestBase {
   @ValueSource(strings = {"rsamd5", "eccgost"})
   void testAlgIsUnknown(String param) throws IOException {
     Message response = resolver.send(createMessage(param + ".ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertEquals("insecure.ds.noalgorithms:" + param + ".ingotronic.ch.", getReason(response));
+    assertThat(getReason(response))
+        .isEqualTo("insecure.ds.noalgorithms:" + param + ".ingotronic.ch.");
     assertEde(ExtendedErrorCodeOption.UNSUPPORTED_DNSKEY_ALGORITHM, response);
   }
 
@@ -43,9 +41,9 @@ class TestAlgorithmSupport extends TestBase {
       Security.addProvider(new BouncyCastleProvider());
       resolver.init(new Properties());
       Message response = resolver.send(createMessage(param + ".nl./A"));
-      assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+      assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
       assertRCode(Rcode.NOERROR, response.getRcode());
-      assertNull(getReason(response));
+      assertThat(getReason(response)).isNull();
       assertEde(-1, response);
     } finally {
       Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
@@ -55,9 +53,10 @@ class TestAlgorithmSupport extends TestBase {
   @Test
   void testDigestIdIsUnknown() throws IOException {
     Message response = resolver.send(createMessage("unknown-alg.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertEquals("failed.ds.no_usable_digest:unknown-alg.ingotronic.ch.", getReason(response));
+    assertThat(getReason(response))
+        .isEqualTo("failed.ds.no_usable_digest:unknown-alg.ingotronic.ch.");
     assertEde(ExtendedErrorCodeOption.UNSUPPORTED_DS_DIGEST_TYPE, response);
   }
 
@@ -66,7 +65,8 @@ class TestAlgorithmSupport extends TestBase {
   void testUnsupportedDigestInDigestPreference() {
     Properties config = new Properties();
     config.put("dnsjava.dnssec.digest_preference", "1,2,0");
-    assertThrows(IllegalArgumentException.class, () -> resolver.init(config));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> resolver.init(config));
   }
 
   @AlwaysOffline
@@ -99,7 +99,7 @@ class TestAlgorithmSupport extends TestBase {
               6, 7, 8
             }));
     int digestId = v.favoriteDSDigestID(set);
-    assertEquals(0, digestId);
+    assertThat(digestId).isZero();
   }
 
   @AlwaysOffline
@@ -120,7 +120,7 @@ class TestAlgorithmSupport extends TestBase {
               6, 7, 8
             }));
     int digestId = v.favoriteDSDigestID(set);
-    assertEquals(0, digestId);
+    assertThat(digestId).isZero();
   }
 
   @AlwaysOffline
@@ -138,6 +138,6 @@ class TestAlgorithmSupport extends TestBase {
             DNSSEC.Digest.SHA1,
             new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0}));
     int digestId = v.favoriteDSDigestID(set);
-    assertEquals(0, digestId);
+    assertThat(digestId).isZero();
   }
 }

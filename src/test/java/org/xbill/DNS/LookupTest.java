@@ -2,14 +2,11 @@
 package org.xbill.DNS;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.joining;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +25,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.xbill.DNS.hosts.HostsFileParser;
 
 public class LookupTest {
@@ -41,7 +37,7 @@ public class LookupTest {
   @BeforeEach
   void before() {
     System.setProperty(CONFIGPROVIDER_SKIP_INIT, "true");
-    mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = mock(Resolver.class);
   }
 
   @AfterEach
@@ -58,11 +54,11 @@ public class LookupTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockResolver).send(messageCaptor.capture());
 
-    assertEquals(
-        Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN, 0L),
-        messageCaptor.getValue().getSection(Section.QUESTION).get(0));
+    assertThat(messageCaptor.getValue().getSection(Section.QUESTION).get(0))
+        .isEqualTo(
+            Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
@@ -74,11 +70,11 @@ public class LookupTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockResolver).send(messageCaptor.capture());
 
-    assertEquals(
-        Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN, 0L),
-        messageCaptor.getValue().getSection(Section.QUESTION).get(0));
+    assertThat(messageCaptor.getValue().getSection(Section.QUESTION).get(0))
+        .isEqualTo(
+            Record.newRecord(Name.fromConstantString("example.com."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
@@ -92,11 +88,11 @@ public class LookupTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockResolver).send(messageCaptor.capture());
 
-    assertEquals(
-        Record.newRecord(Name.fromConstantString("host.example.com."), Type.A, DClass.IN, 0L),
-        messageCaptor.getValue().getSection(Section.QUESTION).get(0));
+    assertThat(messageCaptor.getValue().getSection(Section.QUESTION).get(0))
+        .isEqualTo(
+            Record.newRecord(Name.fromConstantString("host.example.com."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
@@ -110,11 +106,11 @@ public class LookupTest {
     ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
     verify(mockResolver).send(messageCaptor.capture());
 
-    assertEquals(
-        Record.newRecord(Name.fromConstantString("host.subdomain."), Type.A, DClass.IN, 0L),
-        messageCaptor.getValue().getSection(Section.QUESTION).get(0));
+    assertThat(messageCaptor.getValue().getSection(Section.QUESTION).get(0))
+        .isEqualTo(
+            Record.newRecord(Name.fromConstantString("host.subdomain."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
@@ -130,19 +126,19 @@ public class LookupTest {
 
     List<Message> queries = messageCaptor.getAllValues();
 
-    assertEquals(
-        Record.newRecord(
-            Name.fromConstantString("hostX.first.example.com."), Type.A, DClass.IN, 0L),
-        queries.get(0).getQuestion());
-    assertEquals(
-        Record.newRecord(Name.fromConstantString("target.example.com."), Type.A, DClass.IN, 0L),
-        queries.get(1).getQuestion());
+    assertThat(queries.get(0).getQuestion())
+        .isEqualTo(
+            Record.newRecord(
+                Name.fromConstantString("hostX.first.example.com."), Type.A, DClass.IN, 0L));
+    assertThat(queries.get(1).getQuestion())
+        .isEqualTo(
+            Record.newRecord(
+                Name.fromConstantString("target.example.com."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
-    assertEquals(Name.fromConstantString("target.example.com."), results[0].getName());
-    assertEquals(
-        singletonList(Name.fromConstantString("hostX.first.example.com.")),
-        asList(lookup.getAliases()));
+    assertThat(results.length).isOne();
+    assertThat(results[0].getName()).isEqualTo(Name.fromConstantString("target.example.com."));
+    assertThat(asList(lookup.getAliases()))
+        .containsExactly(Name.fromConstantString("hostX.first.example.com."));
   }
 
   Message maybeCnameAnswer(Message query) {
@@ -170,17 +166,17 @@ public class LookupTest {
 
     List<Message> queries = messageCaptor.getAllValues();
 
-    assertEquals(
-        Record.newRecord(
-            Name.fromConstantString("host2.first.example.com."), Type.A, DClass.IN, 0L),
-        queries.get(0).getQuestion());
-    assertEquals(
-        Record.newRecord(
-            Name.fromConstantString("host2.second.example.com."), Type.A, DClass.IN, 0L),
-        queries.get(1).getQuestion());
+    assertThat(queries.get(0).getQuestion())
+        .isEqualTo(
+            Record.newRecord(
+                Name.fromConstantString("host2.first.example.com."), Type.A, DClass.IN, 0L));
+    assertThat(queries.get(1).getQuestion())
+        .isEqualTo(
+            Record.newRecord(
+                Name.fromConstantString("host2.second.example.com."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
-    assertEquals(Lookup.SUCCESSFUL, lookup.getResult());
+    assertThat(results.length).isOne();
+    assertThat(lookup.getResult()).isEqualTo(Lookup.SUCCESSFUL);
   }
 
   Message firstSERVFAILThenA(Message query) {
@@ -204,9 +200,9 @@ public class LookupTest {
     lookup.setSearchPath("first.example.com", "second.example.com");
     Record[] results = lookup.run();
 
-    assertNull(results);
-    assertEquals(Lookup.UNRECOVERABLE, lookup.getResult());
-    assertEquals("CNAME loop", lookup.getErrorString());
+    assertThat(results).isNull();
+    assertThat(lookup.getResult()).isEqualTo(Lookup.UNRECOVERABLE);
+    assertThat(lookup.getErrorString()).isEqualTo("CNAME loop");
   }
 
   Message cnameLoopAnswer(Message query) {
@@ -235,14 +231,15 @@ public class LookupTest {
 
     List<Message> queries = messageCaptor.getAllValues();
 
-    assertEquals(
-        Record.newRecord(Name.fromConstantString("host.first.example.com."), Type.A, DClass.IN, 0L),
-        queries.get(0).getQuestion());
+    assertThat(queries.get(0).getQuestion())
+        .isEqualTo(
+            Record.newRecord(
+                Name.fromConstantString("host.first.example.com."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
 
     results = lookup.run();
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
@@ -252,9 +249,9 @@ public class LookupTest {
     Lookup lookup = makeLookupWithResolver(mockResolver, "host");
     Record[] results = lookup.run();
 
-    assertNull(results);
-    assertEquals(Lookup.TRY_AGAIN, lookup.getResult());
-    assertEquals("network error", lookup.getErrorString());
+    assertThat(results).isNull();
+    assertThat(lookup.getResult()).isEqualTo(Lookup.TRY_AGAIN);
+    assertThat(lookup.getErrorString()).isEqualTo("network error");
   }
 
   @Test
@@ -264,9 +261,9 @@ public class LookupTest {
     Lookup lookup = makeLookupWithResolver(mockResolver, "host");
     Record[] results = lookup.run();
 
-    assertNull(results);
-    assertEquals(Lookup.TRY_AGAIN, lookup.getResult());
-    assertEquals("timed out", lookup.getErrorString());
+    assertThat(results).isNull();
+    assertThat(lookup.getResult()).isEqualTo(Lookup.TRY_AGAIN);
+    assertThat(lookup.getErrorString()).isEqualTo("timed out");
   }
 
   @Test
@@ -276,9 +273,9 @@ public class LookupTest {
     Lookup lookup = makeLookupWithResolver(mockResolver, "host");
     Record[] results = lookup.run();
 
-    assertNull(results);
-    assertEquals(Lookup.TRY_AGAIN, lookup.getResult());
-    assertEquals("SERVFAIL", lookup.getErrorString());
+    assertThat(results).isNull();
+    assertThat(lookup.getResult()).isEqualTo(Lookup.TRY_AGAIN);
+    assertThat(lookup.getErrorString()).isEqualTo("SERVFAIL");
   }
 
   @Test
@@ -288,9 +285,9 @@ public class LookupTest {
     Lookup lookup = makeLookupWithResolver(mockResolver, "host");
     Record[] results = lookup.run();
 
-    assertNull(results);
-    assertEquals(Lookup.HOST_NOT_FOUND, lookup.getResult());
-    assertEquals("host not found", lookup.getErrorString());
+    assertThat(results).isNull();
+    assertThat(lookup.getResult()).isEqualTo(Lookup.HOST_NOT_FOUND);
+    assertThat(lookup.getErrorString()).isEqualTo("host not found");
   }
 
   @Test
@@ -308,39 +305,39 @@ public class LookupTest {
     // The current (somewhat surprising) behaviour is that the NameTooLongException is silently
     // ignored, and resolution falls back to converting longName to an absolute name and querying
     // that
-    assertEquals(
-        Record.newRecord(Name.fromConstantString(LONG_LABEL + "."), Type.A, DClass.IN, 0L),
-        messageCaptor.getValue().getSection(Section.QUESTION).get(0));
+    assertThat(messageCaptor.getValue().getSection(Section.QUESTION).get(0))
+        .isEqualTo(
+            Record.newRecord(Name.fromConstantString(LONG_LABEL + "."), Type.A, DClass.IN, 0L));
 
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
   void testNdots1() throws Exception {
-    mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = mock(Resolver.class);
     wireUpMockResolver(mockResolver, this::simpleAnswer);
     Lookup l = makeLookupWithResolver(mockResolver, "example.com");
     l.setSearchPath("namespace.svc.cluster.local", "svc.cluster.local", "cluster.local");
     Record[] results = l.run();
     verify(mockResolver, times(1)).send(any(Message.class));
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
   void testNdotsFallbackToAbsolute() throws Exception {
-    mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = mock(Resolver.class);
     wireUpMockResolver(mockResolver, name -> goodAnswerWhenNLabels(name, 3));
     Lookup l = makeLookupWithResolver(mockResolver, "example.com");
     l.setSearchPath("namespace.svc.cluster.local", "svc.cluster.local", "cluster.local");
     l.setNdots(5);
     Record[] results = l.run();
     verify(mockResolver, times(4)).send(any(Message.class));
-    assertEquals(1, results.length);
+    assertThat(results.length).isOne();
   }
 
   @Test
   void testNdotsFallbackToAbsoluteButNotTwice() throws Exception {
-    mockResolver = Mockito.mock(Resolver.class);
+    mockResolver = mock(Resolver.class);
     // Never answer with a positive response
     wireUpMockResolver(mockResolver, name -> goodAnswerWhenNLabels(name, -1));
     // Two dots with ndots=2, so implicitly absolute
@@ -354,7 +351,8 @@ public class LookupTest {
 
   @Test
   void testLookup_constructorFailsWithMetaTypes() {
-    assertThrows(IllegalArgumentException.class, () -> new Lookup("example.com.", Type.OPT));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new Lookup("example.com.", Type.OPT));
   }
 
   @Test
@@ -369,12 +367,12 @@ public class LookupTest {
     lookup.setHostsFileParser(
         new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_example").toURI())));
     Record[] run = lookup.run();
-    assertNotNull(run);
-    assertEquals(1, run.length);
-    assertEquals(
-        InetAddress.getByAddress(
-            "host.docker.internal", new byte[] {(byte) 192, (byte) 168, 10, 96}),
-        ((ARecord) run[0]).getAddress());
+    assertThat(run).isNotNull();
+    assertThat(run.length).isOne();
+    assertThat(((ARecord) run[0]).getAddress())
+        .isEqualTo(
+            InetAddress.getByAddress(
+                "host.docker.internal", new byte[] {(byte) 192, (byte) 168, 10, 96}));
   }
 
   @Test
@@ -390,10 +388,10 @@ public class LookupTest {
     lookup.setHostsFileParser(
         new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_example").toURI())));
     Record[] run = lookup.run();
-    assertNotNull(run);
-    assertEquals(1, run.length);
-    assertEquals(
-        Name.fromConstantString("host.docker.internal."), ((PTRRecord) run[0]).getTarget());
+    assertThat(run).isNotNull();
+    assertThat(run.length).isOne();
+    assertThat(((PTRRecord) run[0]).getTarget())
+        .isEqualTo(Name.fromConstantString("host.docker.internal."));
   }
 
   @Test
@@ -410,12 +408,12 @@ public class LookupTest {
     lookup.setHostsFileParser(
         new HostsFileParser(Paths.get(LookupTest.class.getResource("/hosts_example").toURI())));
     Record[] run = lookup.run();
-    assertNotNull(run);
-    assertEquals(1, run.length);
-    assertEquals(
-        InetAddress.getByAddress(
-            "host.docker.internal", new byte[] {(byte) 192, (byte) 168, 10, 96}),
-        ((ARecord) run[0]).getAddress());
+    assertThat(run).isNotNull();
+    assertThat(run.length).isOne();
+    assertThat(((ARecord) run[0]).getAddress())
+        .isEqualTo(
+            InetAddress.getByAddress(
+                "host.docker.internal", new byte[] {(byte) 192, (byte) 168, 10, 96}));
   }
 
   private Message goodAnswerWhenNLabels(Message query, int numLabels) {

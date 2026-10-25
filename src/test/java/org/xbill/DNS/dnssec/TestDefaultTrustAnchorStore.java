@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSKEYRecord;
@@ -22,7 +18,7 @@ class TestDefaultTrustAnchorStore {
   void testNullKeyWhenNameNotUnderAnchor() throws TextParseException {
     DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
-    assertNull(anchor);
+    assertThat(anchor).isNull();
   }
 
   @Test
@@ -32,7 +28,7 @@ class TestDefaultTrustAnchorStore {
     DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     tas.store(set);
     RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
-    assertEquals(set, anchor);
+    assertThat(anchor).isEqualTo(set);
   }
 
   @Test
@@ -43,14 +39,15 @@ class TestDefaultTrustAnchorStore {
     DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     tas.store(set);
     RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
-    assertEquals(set.getName(), anchor.getName());
+    assertThat(anchor).isNotNull();
+    assertThat(anchor.getName()).isEqualTo(set.getName());
   }
 
   @Test
   void testInvalidAnchorRecord() throws TextParseException {
     SRRset set = new SRRset(new TXTRecord(Name.fromString("bla."), DClass.IN, 0, "root"));
     DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
-    assertThrows(IllegalArgumentException.class, () -> tas.store(set));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> tas.store(set));
   }
 
   @Test
@@ -61,9 +58,9 @@ class TestDefaultTrustAnchorStore {
     DefaultTrustAnchorStore tas = new DefaultTrustAnchorStore();
     tas.store(set);
     RRset anchor = tas.find(Name.fromString("asdf.bla."), DClass.IN);
-    assertNotNull(anchor);
+    assertThat(anchor).isNotNull();
     tas.clear();
-    assertNull(tas.find(Name.fromString("asdf.bla."), DClass.IN));
+    assertThat(tas.find(Name.fromString("asdf.bla."), DClass.IN)).isNull();
   }
 
   @Test
@@ -76,8 +73,8 @@ class TestDefaultTrustAnchorStore {
     tas.store(set1);
     tas.store(set2);
     RRset anchor = tas.find(Name.fromString("bla."), DClass.IN);
-    assertEquals(set2, anchor);
-    assertIterableEquals(Collections.singleton(set2), tas.items());
+    assertThat(anchor).isEqualTo(set2);
+    assertThat(tas.items()).containsExactly(set2);
   }
 
   @Test
@@ -88,7 +85,7 @@ class TestDefaultTrustAnchorStore {
     set.addRR(new DSRecord(Name.fromString("bla."), DClass.IN, 0, 0, 0, 0, new byte[] {0}));
     tas.store(set);
     RRset anchor = tas.find(Name.fromString("bla."), DClass.IN);
-    assertEquals(set, anchor);
-    assertIterableEquals(Collections.singleton(set), tas.items());
+    assertThat(anchor).isEqualTo(set);
+    assertThat(tas.items()).containsExactly(set);
   }
 }

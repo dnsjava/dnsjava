@@ -2,10 +2,10 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.xbill.DNS.NioClient.SELECTOR_TIMEOUT_PROPERTY;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ class NioTcpClientTest {
   void testSelectorTimeoutLimits(int timeout) {
     System.setProperty(SELECTOR_TIMEOUT_PROPERTY, Integer.toString(timeout));
     try {
-      assertThrows(IllegalArgumentException.class, NioClient::runSelector);
+      assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(NioClient::runSelector);
     } finally {
       System.clearProperty(SELECTOR_TIMEOUT_PROPERTY);
     }
@@ -227,7 +227,7 @@ class NioTcpClientTest {
                         InputStream is = s.getInputStream();
                         byte[] lengthData = new byte[2];
                         int readLength = is.read(lengthData);
-                        assertEquals(2, readLength);
+                        assertThat(readLength).isEqualTo(2);
                         byte[] messageData =
                             new byte[((lengthData[0] & 0xff) << 8) + (lengthData[1] & 0xff)];
                         log.debug("Expecting message length={}", messageData.length);
@@ -245,7 +245,7 @@ class NioTcpClientTest {
                           totalReadMessageLength += readMessageLength;
                         }
 
-                        assertEquals(messageData.length, totalReadMessageLength);
+                        assertThat(totalReadMessageLength).isEqualTo(messageData.length);
                         log.debug(
                             "Receive for #{}, id={} complete, parsing message",
                             i,
@@ -302,7 +302,8 @@ class NioTcpClientTest {
                   (d, e1) -> {
                     if (e1 == null) {
                       try {
-                        assertEquals(q[jj].getHeader().getID(), new Message(d).getHeader().getID());
+                        assertThat(new Message(d).getHeader().getID())
+                            .isEqualTo(q[jj].getHeader().getID());
                       } catch (IOException | AssertionFailedError e2) {
                         exceptions.add(e2);
                       }
@@ -326,7 +327,7 @@ class NioTcpClientTest {
       for (Throwable t : exceptions) {
         log.error("Failure during test run", t);
       }
-      assertEquals(0, exceptions.size(), "Test had exceptions in async code");
+      assertThat(exceptions).as("Test had exceptions in async code").isEmpty();
     } finally {
       NioClient.close();
     }
@@ -431,7 +432,7 @@ class NioTcpClientTest {
       for (Throwable t : exceptions) {
         log.error("Failure during test run", t);
       }
-      assertEquals(0, exceptions.size(), "Test had exceptions in async code");
+      assertThat(exceptions).as("Test had exceptions in async code").isEmpty();
     } finally {
       NioClient.close();
     }
@@ -461,31 +462,32 @@ class NioTcpClientTest {
                   try {
                     cdlServerThreadStart.countDown();
                     Socket s = ss.accept();
-                    try {
-                      InputStream is = s.getInputStream();
-                      byte[] lengthData = new byte[2];
-                      int readLength = is.read(lengthData);
-                      assertEquals(2, readLength);
-                      byte[] messageData =
-                          new byte[((lengthData[0] & 0xff) << 8) + (lengthData[1] & 0xff)];
-                      int totalReadMessageLength = 0;
-                      while (totalReadMessageLength < messageData.length) {
-                        int readMessageLength =
-                            is.read(
-                                messageData,
-                                totalReadMessageLength,
-                                messageData.length - totalReadMessageLength);
-                        totalReadMessageLength += readMessageLength;
-                      }
-                      assertEquals(messageData.length, totalReadMessageLength);
+                    assertThatCode(
+                            () -> {
+                              InputStream is = s.getInputStream();
+                              byte[] lengthData = new byte[2];
+                              int readLength = is.read(lengthData);
+                              assertThat(readLength).isEqualTo(2);
+                              byte[] messageData =
+                                  new byte[((lengthData[0] & 0xff) << 8) + (lengthData[1] & 0xff)];
+                              int totalReadMessageLength = 0;
+                              while (totalReadMessageLength < messageData.length) {
+                                int readMessageLength =
+                                    is.read(
+                                        messageData,
+                                        totalReadMessageLength,
+                                        messageData.length - totalReadMessageLength);
+                                totalReadMessageLength += readMessageLength;
+                              }
+                              assertThat(totalReadMessageLength).isEqualTo(messageData.length);
 
-                      // Send an invalid response, too short to contain an ID
-                      OutputStream os = s.getOutputStream();
-                      os.write(responseBytes);
-                      os.flush();
-                    } catch (IOException e) {
-                      fail(e);
-                    }
+                              // Send an invalid response, too short to contain an ID
+                              OutputStream os = s.getOutputStream();
+                              os.write(responseBytes);
+                              os.flush();
+                            })
+                        .withFailMessage("")
+                        .doesNotThrowAnyException();
                   } catch (SocketTimeoutException ste) {
                     log.warn("Timeout waiting for a client connection", ste);
                     exceptions.add(ste);
@@ -530,7 +532,7 @@ class NioTcpClientTest {
       for (Throwable t : exceptions) {
         log.error("Failure during test run", t);
       }
-      assertEquals(0, exceptions.size(), "Test had exceptions in async code");
+      assertThat(exceptions).as("Test had exceptions in async code").isEmpty();
     } finally {
       NioClient.close();
     }

@@ -35,11 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.Random;
@@ -78,17 +75,17 @@ public class SOARecordTest {
     @Test
     void ctor_0arg() {
       SOARecord ar = new SOARecord();
-      assertNull(ar.getName());
-      assertEquals(0, ar.getType());
-      assertEquals(0, ar.getDClass());
-      assertEquals(0, ar.getTTL());
-      assertNull(ar.getHost());
-      assertNull(ar.getAdmin());
-      assertEquals(0, ar.getSerial());
-      assertEquals(0, ar.getRefresh());
-      assertEquals(0, ar.getRetry());
-      assertEquals(0, ar.getExpire());
-      assertEquals(0, ar.getMinimum());
+      assertThat(ar.getName()).isNull();
+      assertThat(ar.getType()).isZero();
+      assertThat(ar.getDClass()).isZero();
+      assertThat(ar.getTTL()).isZero();
+      assertThat(ar.getHost()).isNull();
+      assertThat(ar.getAdmin()).isNull();
+      assertThat(ar.getSerial()).isZero();
+      assertThat(ar.getRefresh()).isZero();
+      assertThat(ar.getRetry()).isZero();
+      assertThat(ar.getExpire()).isZero();
+      assertThat(ar.getMinimum()).isZero();
     }
 
     @Test
@@ -97,187 +94,187 @@ public class SOARecordTest {
           new SOARecord(
               m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, m_expire,
               m_minimum);
-      assertEquals(m_an, ar.getName());
-      assertEquals(Type.SOA, ar.getType());
-      assertEquals(DClass.IN, ar.getDClass());
-      assertEquals(m_ttl, ar.getTTL());
-      assertEquals(m_host, ar.getHost());
-      assertEquals(m_admin, ar.getAdmin());
-      assertEquals(m_serial, ar.getSerial());
-      assertEquals(m_refresh, ar.getRefresh());
-      assertEquals(m_retry, ar.getRetry());
-      assertEquals(m_expire, ar.getExpire());
-      assertEquals(m_minimum, ar.getMinimum());
+      assertThat(ar.getName()).isEqualTo(m_an);
+      assertThat(ar.getType()).isEqualTo(Type.SOA);
+      assertThat(ar.getDClass()).isEqualTo(DClass.IN);
+      assertThat(ar.getTTL()).isEqualTo(m_ttl);
+      assertThat(ar.getHost()).isEqualTo(m_host);
+      assertThat(ar.getAdmin()).isEqualTo(m_admin);
+      assertThat(ar.getSerial()).isEqualTo(m_serial);
+      assertThat(ar.getRefresh()).isEqualTo(m_refresh);
+      assertThat(ar.getRetry()).isEqualTo(m_retry);
+      assertThat(ar.getExpire()).isEqualTo(m_expire);
+      assertThat(ar.getMinimum()).isEqualTo(m_minimum);
     }
 
     @Test
     void ctor_10arg_relative_name() {
-      assertThrows(
-          RelativeNameException.class,
-          () ->
-              new SOARecord(
-                  m_rn, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(RelativeNameException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_rn, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry,
+                      m_expire, m_minimum));
     }
 
     @Test
     void ctor_10arg_relative_host() {
-      assertThrows(
-          RelativeNameException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_rn, m_admin, m_serial, m_refresh, m_retry, m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(RelativeNameException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_rn, m_admin, m_serial, m_refresh, m_retry, m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_relative_admin() {
-      assertThrows(
-          RelativeNameException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_host, m_rn, m_serial, m_refresh, m_retry, m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(RelativeNameException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_host, m_rn, m_serial, m_refresh, m_retry, m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_negative_serial() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_host, m_admin, -1, m_refresh, m_retry, m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_host, m_admin, -1, m_refresh, m_retry, m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_toobig_serial() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an,
-                  DClass.IN,
-                  m_ttl,
-                  m_host,
-                  m_admin,
-                  0x100000000L,
-                  m_refresh,
-                  m_retry,
-                  m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an,
+                      DClass.IN,
+                      m_ttl,
+                      m_host,
+                      m_admin,
+                      0x100000000L,
+                      m_refresh,
+                      m_retry,
+                      m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_negative_refresh() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, -1, m_retry, m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, -1, m_retry, m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_toobig_refresh() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an,
-                  DClass.IN,
-                  m_ttl,
-                  m_host,
-                  m_admin,
-                  m_serial,
-                  0x100000000L,
-                  m_retry,
-                  m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an,
+                      DClass.IN,
+                      m_ttl,
+                      m_host,
+                      m_admin,
+                      m_serial,
+                      0x100000000L,
+                      m_retry,
+                      m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_negative_retry() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, -1, m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, -1, m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_toobig_retry() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an,
-                  DClass.IN,
-                  m_ttl,
-                  m_host,
-                  m_admin,
-                  m_serial,
-                  m_refresh,
-                  0x100000000L,
-                  m_expire,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an,
+                      DClass.IN,
+                      m_ttl,
+                      m_host,
+                      m_admin,
+                      m_serial,
+                      m_refresh,
+                      0x100000000L,
+                      m_expire,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_negative_expire() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, -1,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, -1,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_toobig_expire() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an,
-                  DClass.IN,
-                  m_ttl,
-                  m_host,
-                  m_admin,
-                  m_serial,
-                  m_refresh,
-                  m_retry,
-                  0x100000000L,
-                  m_minimum));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an,
+                      DClass.IN,
+                      m_ttl,
+                      m_host,
+                      m_admin,
+                      m_serial,
+                      m_refresh,
+                      m_retry,
+                      0x100000000L,
+                      m_minimum));
     }
 
     @Test
     void ctor_10arg_negative_minimun() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry, m_expire,
-                  -1));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an, DClass.IN, m_ttl, m_host, m_admin, m_serial, m_refresh, m_retry,
+                      m_expire, -1));
     }
 
     @Test
     void ctor_10arg_toobig_minimum() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new SOARecord(
-                  m_an,
-                  DClass.IN,
-                  m_ttl,
-                  m_host,
-                  m_admin,
-                  m_serial,
-                  m_refresh,
-                  m_retry,
-                  m_expire,
-                  0x100000000L));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new SOARecord(
+                      m_an,
+                      DClass.IN,
+                      m_ttl,
+                      m_host,
+                      m_admin,
+                      m_serial,
+                      m_refresh,
+                      m_retry,
+                      m_expire,
+                      0x100000000L));
     }
   }
 
@@ -340,13 +337,13 @@ public class SOARecordTest {
 
       ar.rrFromWire(di);
 
-      assertEquals(m_host, ar.getHost());
-      assertEquals(m_admin, ar.getAdmin());
-      assertEquals(m_serial, ar.getSerial());
-      assertEquals(m_refresh, ar.getRefresh());
-      assertEquals(m_retry, ar.getRetry());
-      assertEquals(m_expire, ar.getExpire());
-      assertEquals(m_minimum, ar.getMinimum());
+      assertThat(ar.getHost()).isEqualTo(m_host);
+      assertThat(ar.getAdmin()).isEqualTo(m_admin);
+      assertThat(ar.getSerial()).isEqualTo(m_serial);
+      assertThat(ar.getRefresh()).isEqualTo(m_refresh);
+      assertThat(ar.getRetry()).isEqualTo(m_retry);
+      assertThat(ar.getExpire()).isEqualTo(m_expire);
+      assertThat(ar.getMinimum()).isEqualTo(m_minimum);
     }
   }
 
@@ -376,24 +373,26 @@ public class SOARecordTest {
 
       ar.rdataFromString(t, m_origin);
 
-      assertEquals(m_host, ar.getHost());
-      assertEquals(m_admin, ar.getAdmin());
-      assertEquals(m_serial, ar.getSerial());
-      assertEquals(m_refresh, ar.getRefresh());
-      assertEquals(m_retry, ar.getRetry());
-      assertEquals(m_expire, ar.getExpire());
-      assertEquals(m_minimum, ar.getMinimum());
+      assertThat(ar.getHost()).isEqualTo(m_host);
+      assertThat(ar.getAdmin()).isEqualTo(m_admin);
+      assertThat(ar.getSerial()).isEqualTo(m_serial);
+      assertThat(ar.getRefresh()).isEqualTo(m_refresh);
+      assertThat(ar.getRetry()).isEqualTo(m_retry);
+      assertThat(ar.getExpire()).isEqualTo(m_expire);
+      assertThat(ar.getMinimum()).isEqualTo(m_minimum);
     }
 
     @Test
     void relative_name() {
-      Tokenizer t =
+      try (Tokenizer t =
           new Tokenizer(
               "M.h " + m_admin + " " + m_serial + " " + m_refresh + " " + m_retry + " " + m_expire
-                  + " " + m_minimum);
-      SOARecord ar = new SOARecord();
+                  + " " + m_minimum)) {
+        SOARecord ar = new SOARecord();
 
-      assertThrows(RelativeNameException.class, () -> ar.rdataFromString(t, null));
+        assertThatExceptionOfType(RelativeNameException.class)
+            .isThrownBy(() -> ar.rdataFromString(t, null));
+      }
     }
   }
 
@@ -426,7 +425,7 @@ public class SOARecordTest {
 
       String out = ar.rrToString();
 
-      assertEquals(exp, out);
+      assertThat(out).isEqualTo(exp);
     }
 
     @Test
@@ -461,7 +460,7 @@ public class SOARecordTest {
       String out = ar.rrToString();
       Options.unset("multiline");
 
-      assertTrue(out.matches(re));
+      assertThat(out).matches(re);
     }
   }
 
@@ -528,7 +527,7 @@ public class SOARecordTest {
       DNSOutput o = new DNSOutput();
       ar.rrToWire(o, null, true);
 
-      assertArrayEquals(exp, o.toByteArray());
+      assertThat(o.toByteArray()).containsExactly(exp);
     }
 
     @Test
@@ -577,7 +576,7 @@ public class SOARecordTest {
       DNSOutput o = new DNSOutput();
       ar.rrToWire(o, null, false);
 
-      assertArrayEquals(exp, o.toByteArray());
+      assertThat(o.toByteArray()).containsExactly(exp);
     }
   }
 }

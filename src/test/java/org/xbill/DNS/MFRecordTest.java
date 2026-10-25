@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,9 +43,9 @@ class MFRecordTest {
   @Test
   void ctor_0arg() {
     MFRecord d = new MFRecord();
-    assertNull(d.getName());
-    assertNull(d.getAdditionalName());
-    assertNull(d.getMailAgent());
+    assertThat(d.getName()).isNull();
+    assertThat(d.getAdditionalName()).isNull();
+    assertThat(d.getMailAgent()).isNull();
   }
 
   @Test
@@ -55,11 +54,11 @@ class MFRecordTest {
     Name a = Name.fromString("my.alias.");
 
     MFRecord d = new MFRecord(n, DClass.IN, 0xABCDEL, a);
-    assertEquals(n, d.getName());
-    assertEquals(Type.MF, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(a, d.getAdditionalName());
-    assertEquals(a, d.getMailAgent());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.MF);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getAdditionalName()).isEqualTo(a);
+    assertThat(d.getMailAgent()).isEqualTo(a);
   }
 }

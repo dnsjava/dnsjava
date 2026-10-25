@@ -35,9 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -45,32 +44,34 @@ class ExtendedFlagsTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("do", ExtendedFlags.string(ExtendedFlags.DO));
+    assertThat(ExtendedFlags.string(ExtendedFlags.DO)).isEqualTo("do");
 
     // one that doesn't exist
-    assertTrue(ExtendedFlags.string(1).startsWith("flag"));
+    assertThat(ExtendedFlags.string(1)).startsWith("flag");
 
-    assertThrows(IllegalArgumentException.class, () -> ExtendedFlags.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExtendedFlags.string(-1));
 
     //  (max is 0xFFFF)
-    assertThrows(IllegalArgumentException.class, () -> ExtendedFlags.string(0x10000));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> ExtendedFlags.string(0x10000));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(ExtendedFlags.DO, ExtendedFlags.value("do"));
+    assertThat(ExtendedFlags.value("do")).isEqualTo(ExtendedFlags.DO);
 
     // one thats undefined but within range
-    assertEquals(16, ExtendedFlags.value("FLAG16"));
+    assertThat(ExtendedFlags.value("FLAG16")).isEqualTo(16);
 
     // one thats undefined but out of range
-    assertEquals(-1, ExtendedFlags.value("FLAG" + 0x10000));
+    assertThat(ExtendedFlags.value("FLAG" + 0x10000)).isEqualTo(-1);
 
     // something that unknown
-    assertEquals(-1, ExtendedFlags.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(ExtendedFlags.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, ExtendedFlags.value(""));
+    assertThat(ExtendedFlags.value("")).isEqualTo(-1);
   }
 }

@@ -35,9 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -45,53 +44,56 @@ class RcodeTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("NXDOMAIN", Rcode.string(Rcode.NXDOMAIN));
+    assertThat(Rcode.string(Rcode.NXDOMAIN)).isEqualTo("NXDOMAIN");
 
     // one with an alias
-    assertEquals("NOTIMP", Rcode.string(Rcode.NOTIMP));
+    assertThat(Rcode.string(Rcode.NOTIMP)).isEqualTo("NOTIMP");
 
     // one that doesn't exist
-    assertTrue(Rcode.string(30).startsWith("RESERVED"));
+    assertThat(Rcode.string(30)).startsWith("RESERVED");
 
-    assertThrows(IllegalArgumentException.class, () -> Rcode.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Rcode.string(-1));
 
     //  (max is 0xFFF)
-    assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x1000));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Rcode.string(0x1000));
   }
 
   @Test
   void TSIGstring() {
     // a regular one
-    assertEquals("BADSIG", Rcode.TSIGstring(Rcode.BADSIG));
+    assertThat(Rcode.TSIGstring(Rcode.BADSIG)).isEqualTo("BADSIG");
 
     // one that doesn't exist
-    assertTrue(Rcode.TSIGstring(30).startsWith("RESERVED"));
+    assertThat(Rcode.TSIGstring(30)).startsWith("RESERVED");
 
-    assertThrows(IllegalArgumentException.class, () -> Rcode.TSIGstring(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Rcode.TSIGstring(-1));
 
     //  (max is 0xFFFF)
-    assertThrows(IllegalArgumentException.class, () -> Rcode.string(0x10000));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Rcode.string(0x10000));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(Rcode.FORMERR, Rcode.value("FORMERR"));
+    assertThat(Rcode.value("FORMERR")).isEqualTo(Rcode.FORMERR);
 
     // one with alias
-    assertEquals(Rcode.NOTIMP, Rcode.value("NOTIMP"));
-    assertEquals(Rcode.NOTIMP, Rcode.value("NOTIMPL"));
+    assertThat(Rcode.value("NOTIMP")).isEqualTo(Rcode.NOTIMP);
+    assertThat(Rcode.value("NOTIMPL")).isEqualTo(Rcode.NOTIMP);
 
     // one thats undefined but within range
-    assertEquals(35, Rcode.value("RESERVED35"));
+    assertThat(Rcode.value("RESERVED35")).isEqualTo(35);
 
     // one thats undefined but out of range
-    assertEquals(-1, Rcode.value("RESERVED" + 0x1000));
+    assertThat(Rcode.value("RESERVED" + 0x1000)).isEqualTo(-1);
 
     // something that unknown
-    assertEquals(-1, Rcode.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(Rcode.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, Rcode.value(""));
+    assertThat(Rcode.value("")).isEqualTo(-1);
   }
 }

@@ -35,7 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,11 +46,11 @@ class CompressionTest {
     Name n = Name.fromString("www.amazon.com.");
 
     c.add(10, n);
-    assertEquals(10, c.get(n));
+    assertThat(c.get(n)).isEqualTo(10);
 
     Name n2 = Name.fromString("www.cnn.com.");
 
     c.add(10, n2);
-    assertEquals(10, c.get(n2));
+    assertThat(c.get(n2)).isEqualTo(10);
   }
 }

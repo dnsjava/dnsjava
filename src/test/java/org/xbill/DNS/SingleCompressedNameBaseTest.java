@@ -35,10 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -60,18 +57,18 @@ class SingleCompressedNameBaseTest {
   @Test
   void ctor() throws TextParseException {
     TestClass tc = new TestClass();
-    assertNull(tc.getSingleName());
+    assertThat(tc.getSingleName()).isNull();
 
     Name n = Name.fromString("my.name.");
     Name sn = Name.fromString("my.single.name.");
 
     tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
 
-    assertSame(n, tc.getName());
-    assertEquals(Type.A, tc.getType());
-    assertEquals(DClass.IN, tc.getDClass());
-    assertEquals(100L, tc.getTTL());
-    assertSame(sn, tc.getSingleName());
+    assertThat(tc.getName()).isSameAs(n);
+    assertThat(tc.getType()).isEqualTo(Type.A);
+    assertThat(tc.getDClass()).isEqualTo(DClass.IN);
+    assertThat(tc.getTTL()).isEqualTo(100L);
+    assertThat(tc.getSingleName()).isSameAs(sn);
   }
 
   @Test
@@ -87,7 +84,7 @@ class SingleCompressedNameBaseTest {
     tc.rrToWire(dout, null, false);
 
     byte[] out = dout.toByteArray();
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
 
     // canonical (lowercase)
     tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
@@ -97,6 +94,6 @@ class SingleCompressedNameBaseTest {
     tc.rrToWire(dout, null, true);
 
     out = dout.toByteArray();
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 }

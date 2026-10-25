@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -21,12 +18,14 @@ class ExtendedErrorCodeOptionTest {
       1 // extended error code
     };
     EDNSOption option = EDNSOption.fromWire(data);
-    assertTrue(option instanceof ExtendedErrorCodeOption, "Expected ExtendedErrorCodeOption");
+    assertThat(option)
+        .as("Expected ExtendedErrorCodeOption")
+        .isInstanceOf(ExtendedErrorCodeOption.class);
     ExtendedErrorCodeOption ede = (ExtendedErrorCodeOption) option;
-    assertEquals(1, ede.getErrorCode());
-    assertNull(ede.getText());
-    assertArrayEquals(data, ede.toWire());
-    assertArrayEquals(data, new ExtendedErrorCodeOption(1).toWire());
+    assertThat(ede.getErrorCode()).isOne();
+    assertThat(ede.getText()).isNull();
+    assertThat(ede.toWire()).containsExactly(data);
+    assertThat(new ExtendedErrorCodeOption(1).toWire()).containsExactly(data);
   }
 
   @Test
@@ -42,12 +41,14 @@ class ExtendedErrorCodeOptionTest {
       (byte) 'b'
     };
     EDNSOption option = EDNSOption.fromWire(data);
-    assertTrue(option instanceof ExtendedErrorCodeOption, "Expected ExtendedErrorCodeOption");
+    assertThat(option)
+        .as("Expected ExtendedErrorCodeOption")
+        .isInstanceOf(ExtendedErrorCodeOption.class);
     ExtendedErrorCodeOption ede = (ExtendedErrorCodeOption) option;
-    assertEquals(1, ede.getErrorCode());
-    assertEquals("ab", ede.getText());
-    assertArrayEquals(data, ede.toWire());
-    assertArrayEquals(data, new ExtendedErrorCodeOption(1, "ab").toWire());
+    assertThat(ede.getErrorCode()).isOne();
+    assertThat(ede.getText()).isEqualTo("ab");
+    assertThat(ede.toWire()).containsExactly(data);
+    assertThat(new ExtendedErrorCodeOption(1, "ab").toWire()).containsExactly(data);
   }
 
   @Test
@@ -64,10 +65,12 @@ class ExtendedErrorCodeOptionTest {
       0
     };
     EDNSOption option = EDNSOption.fromWire(inputData);
-    assertTrue(option instanceof ExtendedErrorCodeOption, "Expected ExtendedErrorCodeOption");
+    assertThat(option)
+        .as("Expected ExtendedErrorCodeOption")
+        .isInstanceOf(ExtendedErrorCodeOption.class);
     ExtendedErrorCodeOption ede = (ExtendedErrorCodeOption) option;
-    assertEquals(1, ede.getErrorCode());
-    assertEquals("ab", ede.getText());
+    assertThat(ede.getErrorCode()).isOne();
+    assertThat(ede.getText()).isEqualTo("ab");
 
     byte[] outputDataNonNullTerminated = {
       0,
@@ -79,24 +82,24 @@ class ExtendedErrorCodeOptionTest {
       (byte) 'a',
       (byte) 'b',
     };
-    assertArrayEquals(outputDataNonNullTerminated, ede.toWire());
+    assertThat(ede.toWire()).containsExactly(outputDataNonNullTerminated);
   }
 
   @Test
   void testToStringCodeOnly() {
     ExtendedErrorCodeOption option = new ExtendedErrorCodeOption(1);
-    assertEquals("UNSUPPORTED_DNSKEY_ALGORITHM", option.optionToString());
+    assertThat(option.optionToString()).isEqualTo("UNSUPPORTED_DNSKEY_ALGORITHM");
   }
 
   @Test
   void testToStringUnknownCode() {
     ExtendedErrorCodeOption option = new ExtendedErrorCodeOption(49152);
-    assertEquals("EDE49152", option.optionToString());
+    assertThat(option.optionToString()).isEqualTo("EDE49152");
   }
 
   @Test
   void testToStringCodeAndText() {
     ExtendedErrorCodeOption option = new ExtendedErrorCodeOption(1, "ab");
-    assertEquals("UNSUPPORTED_DNSKEY_ALGORITHM: ab", option.optionToString());
+    assertThat(option.optionToString()).isEqualTo("UNSUPPORTED_DNSKEY_ALGORITHM: ab");
   }
 }

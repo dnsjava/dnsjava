@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -22,7 +18,7 @@ public class ZoneMDRecordTest {
     "2," + DigestLengths.SHA512,
   })
   void testKnownHashLengths(int alg, int len) {
-    assertEquals(len, Hash.hashLength(alg));
+    assertThat(Hash.hashLength(alg)).isEqualTo(len);
   }
 
   @ParameterizedTest
@@ -30,7 +26,7 @@ public class ZoneMDRecordTest {
     "1,384", "2,512",
   })
   void testKnownHashNames(int alg, String suffix) {
-    assertEquals("SHA" + suffix, Hash.string(alg));
+    assertThat(Hash.string(alg)).isEqualTo("SHA" + suffix);
   }
 
   @ParameterizedTest
@@ -44,10 +40,10 @@ public class ZoneMDRecordTest {
     ZoneMDRecord md =
         new ZoneMDRecord(
             Name.root, DClass.IN, 3600, 2147483648L, scheme, hash, new byte[digestSize]);
-    assertNotNull(md);
-    assertEquals(2147483648L, md.getSerial());
-    assertEquals(scheme, md.getScheme());
-    assertEquals(hash, md.getHashAlgorithm());
+    assertThat(md).isNotNull();
+    assertThat(md.getSerial()).isEqualTo(2147483648L);
+    assertThat(md.getScheme()).isEqualTo(scheme);
+    assertThat(md.getHashAlgorithm()).isEqualTo(hash);
   }
 
   @ParameterizedTest
@@ -65,11 +61,11 @@ public class ZoneMDRecordTest {
     "2147483648,0,2,65",
   })
   void testConstructorFails(long serial, int scheme, int hash, int digestSize) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new ZoneMDRecord(
-                Name.root, DClass.IN, 3600, serial, scheme, hash, new byte[digestSize]));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                new ZoneMDRecord(
+                    Name.root, DClass.IN, 3600, serial, scheme, hash, new byte[digestSize]));
   }
 
   @ParameterizedTest
@@ -85,10 +81,10 @@ public class ZoneMDRecordTest {
     ZoneMDRecord md =
         new ZoneMDRecord(
             Name.root, DClass.IN, 3600, serial, scheme, hash, base16.fromString(digest));
-    assertNotNull(md);
-    assertEquals(2147483648L, md.getSerial());
-    assertEquals(scheme, md.getScheme());
-    assertEquals(hash, md.getHashAlgorithm());
+    assertThat(md).isNotNull();
+    assertThat(md.getSerial()).isEqualTo(2147483648L);
+    assertThat(md.getScheme()).isEqualTo(scheme);
+    assertThat(md.getHashAlgorithm()).isEqualTo(hash);
   }
 
   @ParameterizedTest
@@ -107,9 +103,9 @@ public class ZoneMDRecordTest {
   })
   void testFromWireFails(long serial, int scheme, int hash, String digest) {
     byte[] base16digest = base16.fromString(digest);
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new ZoneMDRecord(Name.root, DClass.IN, 3600, serial, scheme, hash, base16digest));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () -> new ZoneMDRecord(Name.root, DClass.IN, 3600, serial, scheme, hash, base16digest));
   }
 
   @ParameterizedTest
@@ -126,12 +122,12 @@ public class ZoneMDRecordTest {
     ZoneMDRecord md = new ZoneMDRecord(Name.root, DClass.IN, 3600, serial, scheme, hash, digest);
     byte[] data = md.toWire(Section.ANSWER);
     Record parsed = Record.fromWire(data, Section.ANSWER);
-    assertInstanceOf(ZoneMDRecord.class, parsed);
+    assertThat(parsed).isInstanceOf(ZoneMDRecord.class);
     ZoneMDRecord parsedMd = (ZoneMDRecord) parsed;
-    assertEquals(serial, parsedMd.getSerial());
-    assertEquals(scheme, parsedMd.getScheme());
-    assertEquals(hash, parsedMd.getHashAlgorithm());
-    assertArrayEquals(digest, parsedMd.getDigest());
+    assertThat(parsedMd.getSerial()).isEqualTo(serial);
+    assertThat(parsedMd.getScheme()).isEqualTo(scheme);
+    assertThat(parsedMd.getHashAlgorithm()).isEqualTo(hash);
+    assertThat(parsedMd.getDigest()).containsExactly(digest);
   }
 
   @ParameterizedTest
@@ -149,7 +145,8 @@ public class ZoneMDRecordTest {
   })
   void testFromWireFails(String hex) {
     byte[] data = base16.fromString(hex.replace("_", ""));
-    assertThrows(WireParseException.class, () -> Record.fromWire(data, Section.ANSWER));
+    assertThatExceptionOfType(WireParseException.class)
+        .isThrownBy(() -> Record.fromWire(data, Section.ANSWER));
   }
 
   @ParameterizedTest
@@ -166,15 +163,15 @@ public class ZoneMDRecordTest {
     byte[] digest = base16.fromString(digestHex);
     ZoneMDRecord md = new ZoneMDRecord(Name.root, DClass.IN, 3600, serial, scheme, hash, digest);
     String data = md.rrToString();
-    assertEquals(serial + " " + scheme + " " + hash + " " + digestHex, data);
+    assertThat(data).isEqualTo(serial + " " + scheme + " " + hash + " " + digestHex);
 
     Record parsed = Record.fromString(Name.root, Type.ZONEMD, DClass.IN, 3600, data, Name.root);
-    assertInstanceOf(ZoneMDRecord.class, parsed);
+    assertThat(parsed).isInstanceOf(ZoneMDRecord.class);
     ZoneMDRecord parsedMd = (ZoneMDRecord) parsed;
-    assertEquals(serial, parsedMd.getSerial());
-    assertEquals(scheme, parsedMd.getScheme());
-    assertEquals(hash, parsedMd.getHashAlgorithm());
-    assertArrayEquals(digest, parsedMd.getDigest());
+    assertThat(parsedMd.getSerial()).isEqualTo(serial);
+    assertThat(parsedMd.getScheme()).isEqualTo(scheme);
+    assertThat(parsedMd.getHashAlgorithm()).isEqualTo(hash);
+    assertThat(parsedMd.getDigest()).containsExactly(digest);
   }
 
   @Test
@@ -188,10 +185,10 @@ public class ZoneMDRecordTest {
       Options.set("multiline");
       String rdataOut = md.rrToString();
       String[] lines = rdataOut.split("\n");
-      assertEquals(3, rdataOut.split("\n").length, "Expected lines");
-      assertTrue(lines[0].contains("("), "Missing opening parenthesis");
-      assertTrue(lines[1].contains("\t"), "Missing tabs");
-      assertTrue(rdataOut.endsWith(")"), "Missing closing parenthesis at end of string");
+      assertThat(rdataOut.split("\n")).as("Expected lines").hasSize(3);
+      assertThat(lines[0]).as("Missing opening parenthesis").contains("(");
+      assertThat(lines[1]).as("Missing tabs").contains("\t");
+      assertThat(rdataOut).as("Missing closing parenthesis at end of string").endsWith(")");
     } finally {
       Options.unset("multiline");
     }
@@ -212,8 +209,8 @@ public class ZoneMDRecordTest {
     "2147483648 0 2 FEBE3D4CE2EC2FFA4BA99D46CD69D6D29711E55217057BEEFEBE3D4CFEBE3D4CFEBE3D4CE2EC2FFA4BA99D46CD69D6D29711E55217057BEEFEBE3D4CFEBE3D4C5D",
   })
   void testFromRDataFails(String rdata) {
-    assertThrows(
-        TextParseException.class,
-        () -> Record.fromString(Name.root, Type.ZONEMD, DClass.IN, 3600, rdata, Name.root));
+    assertThatExceptionOfType(TextParseException.class)
+        .isThrownBy(
+            () -> Record.fromString(Name.root, Type.ZONEMD, DClass.IN, 3600, rdata, Name.root));
   }
 }

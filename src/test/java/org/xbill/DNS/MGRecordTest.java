@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,8 +43,8 @@ class MGRecordTest {
   @Test
   void ctor_0arg() {
     MGRecord d = new MGRecord();
-    assertNull(d.getName());
-    assertNull(d.getMailbox());
+    assertThat(d.getName()).isNull();
+    assertThat(d.getMailbox()).isNull();
   }
 
   @Test
@@ -54,10 +53,10 @@ class MGRecordTest {
     Name a = Name.fromString("my.alias.");
 
     MGRecord d = new MGRecord(n, DClass.IN, 0xABCDEL, a);
-    assertEquals(n, d.getName());
-    assertEquals(Type.MG, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(a, d.getMailbox());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.MG);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getMailbox()).isEqualTo(a);
   }
 }

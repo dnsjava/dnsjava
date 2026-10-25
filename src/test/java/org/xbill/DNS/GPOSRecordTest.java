@@ -35,10 +35,9 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,10 +47,10 @@ class GPOSRecordTest {
   @Test
   void ctor_0arg() {
     GPOSRecord gr = new GPOSRecord();
-    assertNull(gr.getName());
-    assertEquals(0, gr.getType());
-    assertEquals(0, gr.getDClass());
-    assertEquals(0, gr.getTTL());
+    assertThat(gr.getName()).isNull();
+    assertThat(gr.getType()).isZero();
+    assertThat(gr.getDClass()).isZero();
+    assertThat(gr.getTTL()).isZero();
   }
 
   static class Test_Ctor_6arg_doubles {
@@ -71,58 +70,49 @@ class GPOSRecordTest {
     @Test
     void basic() {
       GPOSRecord gr = new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, m_lat, m_alt);
-      assertEquals(m_n, gr.getName());
-      assertEquals(DClass.IN, gr.getDClass());
-      assertEquals(Type.GPOS, gr.getType());
-      assertEquals(m_ttl, gr.getTTL());
-      assertEquals(m_long, gr.getLongitude());
-      assertEquals(m_lat, gr.getLatitude());
-      assertEquals(m_alt, gr.getAltitude());
-      assertEquals(Double.toString(m_long), gr.getLongitudeString());
-      assertEquals(Double.toString(m_lat), gr.getLatitudeString());
-      assertEquals(Double.toString(m_alt), gr.getAltitudeString());
+      assertThat(gr.getName()).isEqualTo(m_n);
+      assertThat(gr.getDClass()).isEqualTo(DClass.IN);
+      assertThat(gr.getType()).isEqualTo(Type.GPOS);
+      assertThat(gr.getTTL()).isEqualTo(m_ttl);
+      assertThat(gr.getLongitude()).isEqualTo(m_long);
+      assertThat(gr.getLatitude()).isEqualTo(m_lat);
+      assertThat(gr.getAltitude()).isEqualTo(m_alt);
+      assertThat(gr.getLongitudeString()).isEqualTo(Double.toString(m_long));
+      assertThat(gr.getLatitudeString()).isEqualTo(Double.toString(m_lat));
+      assertThat(gr.getAltitudeString()).isEqualTo(Double.toString(m_alt));
     }
 
     @Test
     void toosmall_longitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new GPOSRecord(m_n, DClass.IN, m_ttl, -90.001, m_lat, m_alt));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new GPOSRecord(m_n, DClass.IN, m_ttl, -90.001, m_lat, m_alt));
     }
 
     @Test
     void toobig_longitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new GPOSRecord(m_n, DClass.IN, m_ttl, 90.001, m_lat, m_alt));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new GPOSRecord(m_n, DClass.IN, m_ttl, 90.001, m_lat, m_alt));
     }
 
     @Test
     void toosmall_latitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, -180.001, m_alt));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, -180.001, m_alt));
     }
 
     @Test
     void toobig_latitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, 180.001, m_alt));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> new GPOSRecord(m_n, DClass.IN, m_ttl, m_long, 180.001, m_alt));
     }
 
     @Test
     void invalid_string() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new GPOSRecord(
-                  m_n,
-                  DClass.IN,
-                  m_ttl,
-                  Double.toString(m_long),
-                  "120.\\00ABC",
-                  Double.toString(m_alt)));
+      String longitude = Double.toString(m_long);
+      String altitude = Double.toString(m_alt);
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () -> new GPOSRecord(m_n, DClass.IN, m_ttl, longitude, "120.\\00ABC", altitude));
     }
   }
 
@@ -150,67 +140,72 @@ class GPOSRecordTest {
               Double.toString(m_long),
               Double.toString(m_lat),
               Double.toString(m_alt));
-      assertEquals(m_n, gr.getName());
-      assertEquals(DClass.IN, gr.getDClass());
-      assertEquals(Type.GPOS, gr.getType());
-      assertEquals(m_ttl, gr.getTTL());
-      assertEquals(m_long, gr.getLongitude());
-      assertEquals(m_lat, gr.getLatitude());
-      assertEquals(m_alt, gr.getAltitude());
-      assertEquals(Double.toString(m_long), gr.getLongitudeString());
-      assertEquals(Double.toString(m_lat), gr.getLatitudeString());
-      assertEquals(Double.toString(m_alt), gr.getAltitudeString());
+      assertThat(gr.getName()).isEqualTo(m_n);
+      assertThat(gr.getDClass()).isEqualTo(DClass.IN);
+      assertThat(gr.getType()).isEqualTo(Type.GPOS);
+      assertThat(gr.getTTL()).isEqualTo(m_ttl);
+      assertThat(gr.getLongitude()).isEqualTo(m_long);
+      assertThat(gr.getLatitude()).isEqualTo(m_lat);
+      assertThat(gr.getAltitude()).isEqualTo(m_alt);
+      assertThat(gr.getLongitudeString()).isEqualTo(Double.toString(m_long));
+      assertThat(gr.getLatitudeString()).isEqualTo(Double.toString(m_lat));
+      assertThat(gr.getAltitudeString()).isEqualTo(Double.toString(m_alt));
     }
 
     @Test
     void toosmall_longitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new GPOSRecord(
-                  m_n,
-                  DClass.IN,
-                  m_ttl,
-                  "-90.001",
-                  Double.toString(m_lat),
-                  Double.toString(m_alt)));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new GPOSRecord(
+                      m_n,
+                      DClass.IN,
+                      m_ttl,
+                      "-90.001",
+                      Double.toString(m_lat),
+                      Double.toString(m_alt)));
     }
 
     @Test
     void toobig_longitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new GPOSRecord(
-                  m_n, DClass.IN, m_ttl, "90.001", Double.toString(m_lat), Double.toString(m_alt)));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new GPOSRecord(
+                      m_n,
+                      DClass.IN,
+                      m_ttl,
+                      "90.001",
+                      Double.toString(m_lat),
+                      Double.toString(m_alt)));
     }
 
     @Test
     void toosmall_latitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new GPOSRecord(
-                  m_n,
-                  DClass.IN,
-                  m_ttl,
-                  Double.toString(m_long),
-                  "-180.001",
-                  Double.toString(m_alt)));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new GPOSRecord(
+                      m_n,
+                      DClass.IN,
+                      m_ttl,
+                      Double.toString(m_long),
+                      "-180.001",
+                      Double.toString(m_alt)));
     }
 
     @Test
     void toobig_latitude() {
-      assertThrows(
-          IllegalArgumentException.class,
-          () ->
-              new GPOSRecord(
-                  m_n,
-                  DClass.IN,
-                  m_ttl,
-                  Double.toString(m_long),
-                  "180.001",
-                  Double.toString(m_alt)));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(
+              () ->
+                  new GPOSRecord(
+                      m_n,
+                      DClass.IN,
+                      m_ttl,
+                      Double.toString(m_long),
+                      "180.001",
+                      Double.toString(m_alt)));
     }
   }
 
@@ -222,9 +217,9 @@ class GPOSRecordTest {
 
       GPOSRecord gr = new GPOSRecord();
       gr.rrFromWire(in);
-      assertEquals(-8.12, gr.getLongitude());
-      assertEquals(123.07, gr.getLatitude());
-      assertEquals(0.0, gr.getAltitude());
+      assertThat(gr.getLongitude()).isEqualTo(-8.12);
+      assertThat(gr.getLatitude()).isEqualTo(123.07);
+      assertThat(gr.getAltitude()).isEqualTo(0.0);
     }
 
     @Test
@@ -233,7 +228,7 @@ class GPOSRecordTest {
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
-      assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
+      assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> gr.rrFromWire(in));
     }
 
     @Test
@@ -242,7 +237,7 @@ class GPOSRecordTest {
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
-      assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
+      assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> gr.rrFromWire(in));
     }
 
     @Test
@@ -251,7 +246,7 @@ class GPOSRecordTest {
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
-      assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
+      assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> gr.rrFromWire(in));
     }
 
     @Test
@@ -260,7 +255,7 @@ class GPOSRecordTest {
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
-      assertThrows(WireParseException.class, () -> gr.rrFromWire(in));
+      assertThatExceptionOfType(WireParseException.class).isThrownBy(() -> gr.rrFromWire(in));
     }
   }
 
@@ -271,52 +266,57 @@ class GPOSRecordTest {
 
       GPOSRecord gr = new GPOSRecord();
       gr.rdataFromString(t, null);
-      assertEquals(10.45, gr.getLongitude());
-      assertEquals(171.121212, gr.getLatitude());
-      assertEquals(1010787, gr.getAltitude());
+      assertThat(gr.getLongitude()).isEqualTo(10.45);
+      assertThat(gr.getLatitude()).isEqualTo(171.121212);
+      assertThat(gr.getAltitude()).isEqualTo(1010787);
     }
 
     @Test
     void longitude_toosmall() {
-      Tokenizer t = new Tokenizer("-100.390 171.121212 1010787");
+      try (Tokenizer t = new Tokenizer("-100.390 171.121212 1010787")) {
 
-      GPOSRecord gr = new GPOSRecord();
-      assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
+        GPOSRecord gr = new GPOSRecord();
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> gr.rdataFromString(t, null));
+      }
     }
 
     @Test
     void longitude_toobig() {
-      Tokenizer t = new Tokenizer("90.00001 171.121212 1010787");
+      try (Tokenizer t = new Tokenizer("90.00001 171.121212 1010787")) {
 
-      GPOSRecord gr = new GPOSRecord();
-      assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
+        GPOSRecord gr = new GPOSRecord();
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> gr.rdataFromString(t, null));
+      }
     }
 
     @Test
     void latitude_toosmall() {
-      Tokenizer t = new Tokenizer("0.0 -180.01 1010787");
+      try (Tokenizer t = new Tokenizer("0.0 -180.01 1010787")) {
 
-      GPOSRecord gr = new GPOSRecord();
-      assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
+        GPOSRecord gr = new GPOSRecord();
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> gr.rdataFromString(t, null));
+      }
     }
 
     @Test
     void latitude_toobig() {
-      Tokenizer t = new Tokenizer("0.0 180.01 1010787");
+      try (Tokenizer t = new Tokenizer("0.0 180.01 1010787")) {
 
-      GPOSRecord gr = new GPOSRecord();
-      assertThrows(IOException.class, () -> gr.rdataFromString(t, null));
+        GPOSRecord gr = new GPOSRecord();
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> gr.rdataFromString(t, null));
+      }
     }
 
     @Test
     void invalid_string() {
-      Tokenizer t = new Tokenizer("1.0 2.0 \\435");
-      assertThrows(
-          TextParseException.class,
-          () -> {
-            GPOSRecord gr = new GPOSRecord();
-            gr.rdataFromString(t, null);
-          });
+      try (Tokenizer t = new Tokenizer("1.0 2.0 \\435")) {
+        assertThatExceptionOfType(TextParseException.class)
+            .isThrownBy(
+                () -> {
+                  GPOSRecord gr = new GPOSRecord();
+                  gr.rdataFromString(t, null);
+                });
+      }
     }
   }
 
@@ -326,7 +326,7 @@ class GPOSRecordTest {
 
     GPOSRecord gr =
         new GPOSRecord(Name.fromString("The.Name."), DClass.IN, 0x123, 10.45, 171.121212, 1010787);
-    assertEquals(exp, gr.rrToString());
+    assertThat(gr.rrToString()).isEqualTo(exp);
   }
 
   @Test
@@ -343,9 +343,9 @@ class GPOSRecordTest {
 
     byte[] bar = out.toByteArray();
 
-    assertEquals(exp.length, bar.length);
+    assertThat(bar).hasSize(exp.length);
     for (int i = 0; i < exp.length; ++i) {
-      assertEquals(exp[i], bar[i], "i=" + i);
+      assertThat(bar[i]).as("i=" + i).isEqualTo(exp[i]);
     }
   }
 

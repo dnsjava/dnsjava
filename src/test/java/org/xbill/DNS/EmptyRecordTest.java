@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -45,10 +44,10 @@ class EmptyRecordTest {
   @Test
   void ctor() {
     EmptyRecord ar = new EmptyRecord();
-    assertNull(ar.getName());
-    assertEquals(0, ar.getType());
-    assertEquals(0, ar.getDClass());
-    assertEquals(0, ar.getTTL());
+    assertThat(ar.getName()).isNull();
+    assertThat(ar.getType()).isZero();
+    assertThat(ar.getDClass()).isZero();
+    assertThat(ar.getTTL()).isZero();
   }
 
   @Test
@@ -58,11 +57,11 @@ class EmptyRecordTest {
 
     EmptyRecord er = new EmptyRecord();
     er.rrFromWire(i);
-    assertEquals(3, i.current());
-    assertNull(er.getName());
-    assertEquals(0, er.getType());
-    assertEquals(0, er.getDClass());
-    assertEquals(0, er.getTTL());
+    assertThat(i.current()).isEqualTo(3);
+    assertThat(er.getName()).isNull();
+    assertThat(er.getType()).isZero();
+    assertThat(er.getDClass()).isZero();
+    assertThat(er.getTTL()).isZero();
   }
 
   @Test
@@ -70,18 +69,18 @@ class EmptyRecordTest {
     Tokenizer t = new Tokenizer("these are the tokens");
     EmptyRecord er = new EmptyRecord();
     er.rdataFromString(t, null);
-    assertNull(er.getName());
-    assertEquals(0, er.getType());
-    assertEquals(0, er.getDClass());
-    assertEquals(0, er.getTTL());
+    assertThat(er.getName()).isNull();
+    assertThat(er.getType()).isZero();
+    assertThat(er.getDClass()).isZero();
+    assertThat(er.getTTL()).isZero();
 
-    assertEquals("these", t.getString());
+    assertThat(t.getString()).isEqualTo("these");
   }
 
   @Test
   void rrToString() {
     EmptyRecord er = new EmptyRecord();
-    assertEquals("", er.rrToString());
+    assertThat(er.rrToString()).isEmpty();
   }
 
   @Test
@@ -89,6 +88,6 @@ class EmptyRecordTest {
     EmptyRecord er = new EmptyRecord();
     DNSOutput out = new DNSOutput();
     er.rrToWire(out, null, true);
-    assertEquals(0, out.toByteArray().length);
+    assertThat(out.toByteArray()).isEmpty();
   }
 }

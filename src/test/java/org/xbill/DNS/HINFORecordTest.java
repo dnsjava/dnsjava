@@ -35,10 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -48,10 +46,10 @@ class HINFORecordTest {
   @Test
   void ctor_0arg() {
     HINFORecord dr = new HINFORecord();
-    assertNull(dr.getName());
-    assertEquals(0, dr.getType());
-    assertEquals(0, dr.getDClass());
-    assertEquals(0, dr.getTTL());
+    assertThat(dr.getName()).isNull();
+    assertThat(dr.getType()).isZero();
+    assertThat(dr.getDClass()).isZero();
+    assertThat(dr.getTTL()).isZero();
   }
 
   @Test
@@ -62,12 +60,12 @@ class HINFORecordTest {
     String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
 
     HINFORecord dr = new HINFORecord(n, DClass.IN, ttl, cpu, os);
-    assertEquals(n, dr.getName());
-    assertEquals(DClass.IN, dr.getDClass());
-    assertEquals(Type.HINFO, dr.getType());
-    assertEquals(ttl, dr.getTTL());
-    assertEquals(cpu, dr.getCPU());
-    assertEquals(os, dr.getOS());
+    assertThat(dr.getName()).isEqualTo(n);
+    assertThat(dr.getDClass()).isEqualTo(DClass.IN);
+    assertThat(dr.getType()).isEqualTo(Type.HINFO);
+    assertThat(dr.getTTL()).isEqualTo(ttl);
+    assertThat(dr.getCPU()).isEqualTo(cpu);
+    assertThat(dr.getOS()).isEqualTo(os);
   }
 
   @Test
@@ -77,7 +75,8 @@ class HINFORecordTest {
     String cpu = "i686 Intel(R) Pentium(R) M \\256 processor 1.70GHz GenuineIntel GNU/Linux";
     String os = "Linux troy 2.6.10-gentoo-r6 #8 Wed Apr 6 21:25:04 MDT 2005";
 
-    assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
   }
 
   @Test
@@ -87,7 +86,8 @@ class HINFORecordTest {
     String cpu = "i686 Intel(R) Pentium(R) M processor 1.70GHz GenuineIntel GNU/Linux";
     String os = "Linux troy 2.6.10-gentoo-r6 \\1 #8 Wed Apr 6 21:25:04 MDT 2005";
 
-    assertThrows(IllegalArgumentException.class, () -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new HINFORecord(n, DClass.IN, ttl, cpu, os));
   }
 
   @Test
@@ -106,8 +106,8 @@ class HINFORecordTest {
 
     HINFORecord dr = new HINFORecord();
     dr.rrFromWire(in);
-    assertEquals(cpu, dr.getCPU());
-    assertEquals(os, dr.getOS());
+    assertThat(dr.getCPU()).isEqualTo(cpu);
+    assertThat(dr.getOS()).isEqualTo(os);
   }
 
   @Test
@@ -119,10 +119,10 @@ class HINFORecordTest {
 
     HINFORecord dr = new HINFORecord();
     dr.rdataFromString(t, null);
-    assertEquals(cpu, dr.getCPU());
-    assertArrayEquals(cpu.getBytes(StandardCharsets.UTF_8), dr.getCPUAsByteArray());
-    assertEquals(os, dr.getOS());
-    assertArrayEquals(os.getBytes(StandardCharsets.UTF_8), dr.getOSAsByteArray());
+    assertThat(dr.getCPU()).isEqualTo(cpu);
+    assertThat(dr.getCPUAsByteArray()).containsExactly(cpu.getBytes(StandardCharsets.UTF_8));
+    assertThat(dr.getOS()).isEqualTo(os);
+    assertThat(dr.getOSAsByteArray()).containsExactly(os.getBytes(StandardCharsets.UTF_8));
   }
 
   @Test
@@ -130,20 +130,22 @@ class HINFORecordTest {
     String cpu = "Intel(R) Pentium(R) \\388 M processor 1.70GHz";
     String os = "Linux troy 2.6.10-gentoo-r6";
 
-    Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"");
-
-    HINFORecord dr = new HINFORecord();
-    assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
+    try (Tokenizer t = new Tokenizer("\"" + cpu + "\" \"" + os + "\"")) {
+      HINFORecord dr = new HINFORecord();
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> dr.rdataFromString(t, null));
+    }
   }
 
   @Test
   void rdataFromString_invalid_OS() {
     String cpu = "Intel(R) Pentium(R) M processor 1.70GHz";
 
-    Tokenizer t = new Tokenizer("\"" + cpu + "\"");
-
-    HINFORecord dr = new HINFORecord();
-    assertThrows(TextParseException.class, () -> dr.rdataFromString(t, null));
+    try (Tokenizer t = new Tokenizer("\"" + cpu + "\"")) {
+      HINFORecord dr = new HINFORecord();
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> dr.rdataFromString(t, null));
+    }
   }
 
   @Test
@@ -154,7 +156,7 @@ class HINFORecordTest {
     String exp = "\"" + cpu + "\" \"" + os + "\"";
 
     HINFORecord dr = new HINFORecord(Name.fromString("The.Name."), DClass.IN, 0x123, cpu, os);
-    assertEquals(exp, dr.rrToString());
+    assertThat(dr.rrToString()).isEqualTo(exp);
   }
 
   @Test
@@ -173,6 +175,6 @@ class HINFORecordTest {
     DNSOutput out = new DNSOutput();
     dr.rrToWire(out, null, true);
 
-    assertArrayEquals(raw, out.toByteArray());
+    assertThat(out.toByteArray()).containsExactly(raw);
   }
 }

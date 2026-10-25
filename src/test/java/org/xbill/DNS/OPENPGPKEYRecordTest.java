@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ class OPENPGPKEYRecordTest {
     Tokenizer t = new Tokenizer("CAFEBABE");
     OPENPGPKEYRecord openpgpkeyRecord = new OPENPGPKEYRecord();
     openpgpkeyRecord.rdataFromString(t, null);
-    assertArrayEquals(base64.fromString("CAFEBABE"), openpgpkeyRecord.getCert());
+    assertThat(openpgpkeyRecord.getCert()).containsExactly(base64.fromString("CAFEBABE"));
   }
 
   @Test

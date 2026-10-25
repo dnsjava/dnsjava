@@ -35,9 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.junit.jupiter.api.Test;
 
@@ -45,32 +44,32 @@ class OpcodeTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("IQUERY", Opcode.string(Opcode.IQUERY));
+    assertThat(Opcode.string(Opcode.IQUERY)).isEqualTo("IQUERY");
 
     // one that doesn't exist
-    assertTrue(Opcode.string(7).startsWith("RESERVED"));
+    assertThat(Opcode.string(7)).startsWith("RESERVED");
 
-    assertThrows(IllegalArgumentException.class, () -> Opcode.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Opcode.string(-1));
 
     //  (max is 0xF)
-    assertThrows(IllegalArgumentException.class, () -> Opcode.string(0x10));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Opcode.string(0x10));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(Opcode.STATUS, Opcode.value("STATUS"));
+    assertThat(Opcode.value("STATUS")).isEqualTo(Opcode.STATUS);
 
     // one thats undefined but within range
-    assertEquals(6, Opcode.value("RESERVED6"));
+    assertThat(Opcode.value("RESERVED6")).isEqualTo(6);
 
     // one thats undefined but out of range
-    assertEquals(-1, Opcode.value("RESERVED" + 0x10));
+    assertThat(Opcode.value("RESERVED" + 0x10)).isEqualTo(-1);
 
     // something that unknown
-    assertEquals(-1, Opcode.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(Opcode.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, Opcode.value(""));
+    assertThat(Opcode.value("")).isEqualTo(-1);
   }
 }

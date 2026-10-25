@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.xbill.DNS.config.PropertyResolverConfigProvider.DNS_NDOTS_PROP;
 import static org.xbill.DNS.config.PropertyResolverConfigProvider.DNS_SEARCH_PROP;
 import static org.xbill.DNS.config.PropertyResolverConfigProvider.DNS_SERVER_PROP;
@@ -42,7 +40,7 @@ class ResolverConfigTest {
   void testSkipInit() {
     try {
       System.setProperty(ResolverConfig.CONFIGPROVIDER_SKIP_INIT, Boolean.TRUE.toString());
-      assertTrue(ResolverConfig.getConfigProviders().isEmpty());
+      assertThat(ResolverConfig.getConfigProviders()).isEmpty();
     } finally {
       System.setProperty(ResolverConfig.CONFIGPROVIDER_SKIP_INIT, Boolean.FALSE.toString());
     }
@@ -61,23 +59,23 @@ class ResolverConfigTest {
     System.setProperty(DNS_NDOTS_PROP, String.valueOf(5));
     try {
       PropertyResolverConfigProvider rc = new PropertyResolverConfigProvider();
-      assertTrue(rc.isEnabled());
+      assertThat(rc.isEnabled()).isTrue();
       rc.initialize();
 
-      assertEquals(2, rc.servers().size());
-      assertEquals(dnsServers1[0], rc.servers().get(0).getAddress().getHostAddress());
+      assertThat(rc.servers()).hasSize(2);
+      assertThat(rc.servers().get(0).getAddress().getHostAddress()).isEqualTo(dnsServers1[0]);
 
       // must remove no longer present servers
       System.setProperty(DNS_SERVER_PROP, String.join(",", dnsServers2));
       rc.initialize();
-      assertEquals(1, rc.servers().size());
+      assertThat(rc.servers()).hasSize(1);
 
       // any duplicate suffixes should be excluded
-      assertEquals(2, rc.searchPaths().size());
-      assertEquals(searchPath[0], rc.searchPaths().get(0));
-      assertEquals(searchPath[1], rc.searchPaths().get(1));
+      assertThat(rc.searchPaths()).hasSize(2);
+      assertThat(rc.searchPaths().get(0)).isEqualTo(searchPath[0]);
+      assertThat(rc.searchPaths().get(1)).isEqualTo(searchPath[1]);
 
-      assertEquals(5, rc.ndots());
+      assertThat(rc.ndots()).isEqualTo(5);
     } finally {
       System.clearProperty(DNS_SERVER_PROP);
       System.clearProperty(DNS_SEARCH_PROP);
@@ -95,21 +93,21 @@ class ResolverConfigTest {
       PropertyResolverConfigProvider rc = new PropertyResolverConfigProvider();
       rc.initialize();
 
-      assertEquals(5, rc.servers().size());
-      assertEquals("192.168.1.1", rc.servers().get(0).getAddress().getHostAddress());
-      assertEquals(SimpleResolver.DEFAULT_PORT, rc.servers().get(0).getPort());
+      assertThat(rc.servers()).hasSize(5);
+      assertThat(rc.servers().get(0).getAddress().getHostAddress()).isEqualTo("192.168.1.1");
+      assertThat(rc.servers().get(0).getPort()).isEqualTo(SimpleResolver.DEFAULT_PORT);
 
-      assertEquals("192.168.1.1", rc.servers().get(1).getAddress().getHostAddress());
-      assertEquals(54, rc.servers().get(1).getPort());
+      assertThat(rc.servers().get(1).getAddress().getHostAddress()).isEqualTo("192.168.1.1");
+      assertThat(rc.servers().get(1).getPort()).isEqualTo(54);
 
-      assertEquals("0:0:0:0:0:0:0:1", rc.servers().get(2).getAddress().getHostAddress());
-      assertEquals(SimpleResolver.DEFAULT_PORT, rc.servers().get(2).getPort());
+      assertThat(rc.servers().get(2).getAddress().getHostAddress()).isEqualTo("0:0:0:0:0:0:0:1");
+      assertThat(rc.servers().get(2).getPort()).isEqualTo(SimpleResolver.DEFAULT_PORT);
 
-      assertEquals("0:0:0:0:0:0:0:1", rc.servers().get(3).getAddress().getHostAddress());
-      assertEquals(54, rc.servers().get(3).getPort());
+      assertThat(rc.servers().get(3).getAddress().getHostAddress()).isEqualTo("0:0:0:0:0:0:0:1");
+      assertThat(rc.servers().get(3).getPort()).isEqualTo(54);
 
-      assertEquals("0:0:0:0:0:0:0:2", rc.servers().get(4).getAddress().getHostAddress());
-      assertEquals(53, rc.servers().get(4).getPort());
+      assertThat(rc.servers().get(4).getAddress().getHostAddress()).isEqualTo("0:0:0:0:0:0:0:2");
+      assertThat(rc.servers().get(4).getPort()).isEqualTo(53);
     } finally {
       System.clearProperty(DNS_SERVER_PROP);
     }
@@ -119,28 +117,28 @@ class ResolverConfigTest {
   @EnabledOnOs(OS.WINDOWS)
   void resolvConfDisabledOnWindows() {
     ResolvConfResolverConfigProvider rc = new ResolvConfResolverConfigProvider();
-    assertFalse(rc.isEnabled());
+    assertThat(rc.isEnabled()).isFalse();
   }
 
   @Test
   @DisabledOnOs(OS.WINDOWS)
   void resolvConfEnabledOnUnix() {
     ResolvConfResolverConfigProvider rc = new ResolvConfResolverConfigProvider();
-    assertTrue(rc.isEnabled());
+    assertThat(rc.isEnabled()).isTrue();
   }
 
   @Test
   @EnabledOnOs(OS.WINDOWS)
   void windowsEnabledOnWindows() {
     WindowsResolverConfigProvider rc = new WindowsResolverConfigProvider();
-    assertTrue(rc.isEnabled());
+    assertThat(rc.isEnabled()).isTrue();
   }
 
   @Test
   @DisabledOnOs(OS.WINDOWS)
   void windowsDisabledOnUnix() {
     WindowsResolverConfigProvider rc = new WindowsResolverConfigProvider();
-    assertFalse(rc.isEnabled());
+    assertThat(rc.isEnabled()).isFalse();
   }
 
   @Test
@@ -161,24 +159,24 @@ class ResolverConfigTest {
         };
 
     rc.initialize();
-    assertEquals(1, rc.servers().size());
-    assertEquals(new InetSocketAddress("192.168.1.1", 53), rc.servers().get(0));
-    assertEquals(2, rc.searchPaths().size());
-    assertFalse(rc.searchPaths().contains(Name.fromConstantString("domain.com.")));
-    assertEquals(5, rc.ndots());
+    assertThat(rc.servers()).hasSize(1);
+    assertThat(rc.servers().get(0)).isEqualTo(new InetSocketAddress("192.168.1.1", 53));
+    assertThat(rc.searchPaths()).hasSize(2);
+    assertThat(rc.searchPaths()).doesNotContain(Name.fromConstantString("domain.com."));
+    assertThat(rc.ndots()).isEqualTo(5);
   }
 
   @Test
   void jndi() {
     JndiContextResolverConfigProvider rc = new JndiContextResolverConfigProvider();
-    assertTrue(rc.isEnabled());
+    assertThat(rc.isEnabled()).isTrue();
     rc.initialize();
   }
 
   @Test
   void sunJvm() throws InitializationException {
     SunJvmResolverConfigProvider rc = new SunJvmResolverConfigProvider();
-    assertFalse(rc.isEnabled());
+    assertThat(rc.isEnabled()).isFalse();
     rc.initialize();
   }
 
@@ -188,7 +186,7 @@ class ResolverConfigTest {
     sun.initialize();
     JndiContextResolverConfigProvider jndi = new JndiContextResolverConfigProvider();
     jndi.initialize();
-    assertEquals(sun.servers(), jndi.servers());
+    assertThat(jndi.servers()).isEqualTo(sun.servers());
   }
 
   @Test
@@ -203,9 +201,7 @@ class ResolverConfigTest {
     // way round. Unless there are IPv6 servers which are not in the registry and Java <= 15 does
     // not find.
     for (InetSocketAddress winServer : win.servers()) {
-      assertTrue(
-          jndi.servers().contains(winServer),
-          winServer + " not found in JNDI, " + win.servers() + "; " + jndi.servers());
+      assertThat(jndi.servers()).contains(winServer);
     }
   }
 

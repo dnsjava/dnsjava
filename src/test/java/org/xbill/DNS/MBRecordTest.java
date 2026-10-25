@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,9 +43,9 @@ class MBRecordTest {
   @Test
   void ctor_0arg() {
     MBRecord d = new MBRecord();
-    assertNull(d.getName());
-    assertNull(d.getAdditionalName());
-    assertNull(d.getMailbox());
+    assertThat(d.getName()).isNull();
+    assertThat(d.getAdditionalName()).isNull();
+    assertThat(d.getMailbox()).isNull();
   }
 
   @Test
@@ -55,11 +54,11 @@ class MBRecordTest {
     Name a = Name.fromString("my.alias.");
 
     MBRecord d = new MBRecord(n, DClass.IN, 0xABCDEL, a);
-    assertEquals(n, d.getName());
-    assertEquals(Type.MB, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(a, d.getAdditionalName());
-    assertEquals(a, d.getMailbox());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.MB);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getAdditionalName()).isEqualTo(a);
+    assertThat(d.getMailbox()).isEqualTo(a);
   }
 }

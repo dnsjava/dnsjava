@@ -35,12 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
@@ -59,22 +55,23 @@ import org.mockito.stubbing.Answer;
 class AddressTest {
   @Test
   void toByteArray_invalid() {
-    assertThrows(IllegalArgumentException.class, () -> Address.toByteArray("doesn't matter", 3));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Address.toByteArray("doesn't matter", 3));
   }
 
   @Test
   void toByteArray_IPv4() {
     byte[] exp = new byte[] {(byte) 198, (byte) 121, (byte) 10, (byte) 234};
     byte[] ret = Address.toByteArray("198.121.10.234", Address.IPv4);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp = new byte[] {0, 0, 0, 0};
     ret = Address.toByteArray("0.0.0.0", Address.IPv4);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp = new byte[] {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
     ret = Address.toByteArray("255.255.255.255", Address.IPv4);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
   }
 
   @ParameterizedTest
@@ -109,7 +106,7 @@ class AddressTest {
         "",
       })
   void toByteArray_IPv4_invalid(String address) {
-    assertNull(Address.toByteArray(address, Address.IPv4));
+    assertThat(Address.toByteArray(address, Address.IPv4)).isNull();
   }
 
   @Test
@@ -119,15 +116,15 @@ class AddressTest {
       (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
     };
     byte[] ret = Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
     ret = Address.toByteArray("2001:db8:85a3:8d3:1319:8a2e:370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
     ret = Address.toByteArray("2001:DB8:85A3:8D3:1319:8A2E:370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp = new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     ret = Address.toByteArray("0:0:0:0:0:0:0:0", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -149,7 +146,7 @@ class AddressTest {
           (byte) 0xFF
         };
     ret = Address.toByteArray("FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -157,10 +154,10 @@ class AddressTest {
           (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
         };
     ret = Address.toByteArray("2001:0db8:0000:08d3:1319:8a2e:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     ret = Address.toByteArray("2001:0db8::08d3:1319:8a2e:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -168,9 +165,9 @@ class AddressTest {
           (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
         };
     ret = Address.toByteArray("0000:0000:85a3:08d3:1319:8a2e:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
     ret = Address.toByteArray("::85a3:08d3:1319:8a2e:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -178,10 +175,10 @@ class AddressTest {
           (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 0, (byte) 0, (byte) 0, (byte) 0
         };
     ret = Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:0:0", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     ret = Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e::", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -189,13 +186,13 @@ class AddressTest {
           (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 3, (byte) 112, (byte) 115, (byte) 52
         };
     ret = Address.toByteArray("2001:0db8:0000:0000:0000:0000:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
     ret = Address.toByteArray("2001:0db8:0:0:0:0:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
     ret = Address.toByteArray("2001:0db8::0:0370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
     ret = Address.toByteArray("2001:db8::370:7334", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -217,7 +214,7 @@ class AddressTest {
           (byte) 0x09
         };
     ret = Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:192.168.89.9", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp =
         new byte[] {
@@ -239,7 +236,7 @@ class AddressTest {
           (byte) 0x09
         };
     ret = Address.toByteArray("::192.168.89.9", Address.IPv6);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
   }
 
   @ParameterizedTest
@@ -263,22 +260,22 @@ class AddressTest {
         "2001:0ab8:85a3:128d3:1319:8a2e:0370:9819",
       })
   void toByteArray_IPv6_invalid(String address) {
-    assertNull(Address.toByteArray(address, Address.IPv6));
+    assertThat(Address.toByteArray(address, Address.IPv6)).isNull();
   }
 
   @Test
   void toArray() {
     int[] exp = {1, 2, 3, 4};
     int[] ret = Address.toArray("1.2.3.4", Address.IPv4);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp = new int[] {0, 0, 0, 0};
     ret = Address.toArray("0.0.0.0", Address.IPv4);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
 
     exp = new int[] {255, 255, 255, 255};
     ret = Address.toArray("255.255.255.255", Address.IPv4);
-    assertArrayEquals(exp, ret);
+    assertThat(ret).containsExactly(exp);
   }
 
   @ParameterizedTest
@@ -288,36 +285,36 @@ class AddressTest {
         "",
       })
   void toArray_invalid(String address) {
-    assertNull(Address.toArray(address, Address.IPv4));
+    assertThat(Address.toArray(address, Address.IPv4)).isNull();
   }
 
   @Test
   void isDottedQuad() {
-    assertTrue(Address.isDottedQuad("1.2.3.4"));
-    assertFalse(Address.isDottedQuad("256.2.3.4"));
+    assertThat(Address.isDottedQuad("1.2.3.4")).isTrue();
+    assertThat(Address.isDottedQuad("256.2.3.4")).isFalse();
   }
 
   @Test
   void toDottedQuad() {
-    assertEquals(
-        "128.176.201.1",
-        Address.toDottedQuad(new byte[] {(byte) 128, (byte) 176, (byte) 201, (byte) 1}));
+    assertThat(Address.toDottedQuad(new byte[] {(byte) 128, (byte) 176, (byte) 201, (byte) 1}))
+        .isEqualTo("128.176.201.1");
 
-    assertEquals("200.1.255.128", Address.toDottedQuad(new int[] {200, 1, 255, 128}));
+    assertThat(Address.toDottedQuad(new int[] {200, 1, 255, 128})).isEqualTo("200.1.255.128");
   }
 
   @Test
   void addressLength() {
-    assertEquals(4, Address.addressLength(Address.IPv4));
-    assertEquals(16, Address.addressLength(Address.IPv6));
+    assertThat(Address.addressLength(Address.IPv4)).isEqualTo(4);
+    assertThat(Address.addressLength(Address.IPv6)).isEqualTo(16);
 
-    assertThrows(IllegalArgumentException.class, () -> Address.addressLength(3));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Address.addressLength(3));
   }
 
   @Test
   void getByName() throws IOException {
     InetAddress out = Address.getByName("128.145.198.231");
-    assertEquals("128.145.198.231", out.getHostAddress());
+    assertThat(out.getHostAddress()).isEqualTo("128.145.198.231");
 
     Name aRootServer = Name.fromString("a.root-servers.net.");
     Message aMessage = new Message();
@@ -344,7 +341,7 @@ class AddressTest {
     Lookup.setDefaultResolver(mockResolver);
 
     out = Address.getByName("a.root-servers.net");
-    assertEquals("198.41.0.4", out.getHostAddress());
+    assertThat(out.getHostAddress()).isEqualTo("198.41.0.4");
 
     // reset resolver
     Lookup.refreshDefault();
@@ -365,18 +362,19 @@ class AddressTest {
                   return answer;
                 });
     Lookup.setDefaultResolver(mockResolver);
-    assertThrows(UnknownHostException.class, () -> Address.getByName("example.invalid"));
+    assertThatExceptionOfType(UnknownHostException.class)
+        .isThrownBy(() -> Address.getByName("example.invalid"));
     // reset resolver
     Lookup.refreshDefault();
 
-    assertThrows(UnknownHostException.class, () -> Address.getByName(""));
+    assertThatExceptionOfType(UnknownHostException.class).isThrownBy(() -> Address.getByName(""));
   }
 
   @Test
   void getAllByName() throws IOException {
     InetAddress[] out = Address.getAllByName("128.145.198.231");
-    assertEquals(1, out.length);
-    assertEquals("128.145.198.231", out[0].getHostAddress());
+    assertThat(out.length).isOne();
+    assertThat(out[0].getHostAddress()).isEqualTo("128.145.198.231");
 
     Name aRootServer = Name.fromString("a.root-servers.net.");
     Message aMessage = new Message();
@@ -410,9 +408,9 @@ class AddressTest {
     Lookup.setDefaultResolver(mockResolver);
 
     out = Address.getAllByName("a.root-servers.net");
-    assertEquals(2, out.length);
-    assertEquals("198.41.0.4", out[0].getHostAddress());
-    assertEquals("2001:503:ba3e:0:0:0:2:30", out[1].getHostAddress());
+    assertThat(out).hasSize(2);
+    assertThat(out[0].getHostAddress()).isEqualTo("198.41.0.4");
+    assertThat(out[1].getHostAddress()).isEqualTo("2001:503:ba3e:0:0:0:2:30");
 
     // reset resolver
     Lookup.refreshDefault();
@@ -433,19 +431,22 @@ class AddressTest {
                   return answer;
                 });
     Lookup.setDefaultResolver(mockResolver);
-    assertThrows(UnknownHostException.class, () -> Address.getAllByName("example.invalid"));
+    assertThatExceptionOfType(UnknownHostException.class)
+        .isThrownBy(() -> Address.getAllByName("example.invalid"));
 
     // reset resolver
     Lookup.refreshDefault();
 
-    assertThrows(UnknownHostException.class, () -> Address.getAllByName(""));
+    assertThatExceptionOfType(UnknownHostException.class)
+        .isThrownBy(() -> Address.getAllByName(""));
   }
 
   @Test
   void familyOf() throws UnknownHostException {
-    assertEquals(Address.IPv4, Address.familyOf(InetAddress.getByName("192.168.0.1")));
-    assertEquals(Address.IPv6, Address.familyOf(InetAddress.getByName("1:2:3:4:5:6:7:8")));
-    assertThrows(IllegalArgumentException.class, () -> Address.familyOf(null));
+    assertThat(Address.familyOf(InetAddress.getByName("192.168.0.1"))).isEqualTo(Address.IPv4);
+    assertThat(Address.familyOf(InetAddress.getByName("1:2:3:4:5:6:7:8"))).isEqualTo(Address.IPv6);
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Address.familyOf(null));
   }
 
   @Test
@@ -469,7 +470,7 @@ class AddressTest {
     Lookup.setDefaultResolver(mockResolver);
 
     String out = Address.getHostName(InetAddress.getByName("198.41.0.4"));
-    assertEquals("a.root-servers.net.", out);
+    assertThat(out).isEqualTo("a.root-servers.net.");
 
     Message ptrMessage2 = new Message();
     ptrMessage.getHeader().setRcode(Rcode.NXDOMAIN);
@@ -488,7 +489,8 @@ class AddressTest {
                 });
     Lookup.setDefaultResolver(mockResolver);
     InetAddress address = InetAddress.getByName("192.168.1.1");
-    assertThrows(UnknownHostException.class, () -> Address.getHostName(address));
+    assertThatExceptionOfType(UnknownHostException.class)
+        .isThrownBy(() -> Address.getHostName(address));
 
     // reset resolver
     Lookup.refreshDefault();

@@ -35,11 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -78,12 +75,12 @@ class U16NameBaseTest {
   @Test
   void ctor_0arg() {
     TestClass tc = new TestClass();
-    assertNull(tc.getName());
-    assertEquals(0, tc.getType());
-    assertEquals(0, tc.getDClass());
-    assertEquals(0, tc.getTTL());
-    assertEquals(0, tc.getU16Field());
-    assertNull(tc.getNameField());
+    assertThat(tc.getName()).isNull();
+    assertThat(tc.getType()).isZero();
+    assertThat(tc.getDClass()).isZero();
+    assertThat(tc.getTTL()).isZero();
+    assertThat(tc.getU16Field()).isZero();
+    assertThat(tc.getNameField()).isNull();
   }
 
   @Test
@@ -92,12 +89,12 @@ class U16NameBaseTest {
 
     TestClass tc = new TestClass(n, Type.MX, DClass.IN, 0xBCDA);
 
-    assertSame(n, tc.getName());
-    assertEquals(Type.MX, tc.getType());
-    assertEquals(DClass.IN, tc.getDClass());
-    assertEquals(0xBCDA, tc.getTTL());
-    assertEquals(0, tc.getU16Field());
-    assertNull(tc.getNameField());
+    assertThat(tc.getName()).isSameAs(n);
+    assertThat(tc.getType()).isEqualTo(Type.MX);
+    assertThat(tc.getDClass()).isEqualTo(DClass.IN);
+    assertThat(tc.getTTL()).isEqualTo(0xBCDA);
+    assertThat(tc.getU16Field()).isZero();
+    assertThat(tc.getNameField()).isNull();
   }
 
   @Test
@@ -109,34 +106,41 @@ class U16NameBaseTest {
         new TestClass(
             n, Type.MX, DClass.IN, 0xB12FL, 0x1F2B, "u16 description", m, "name description");
 
-    assertSame(n, tc.getName());
-    assertEquals(Type.MX, tc.getType());
-    assertEquals(DClass.IN, tc.getDClass());
-    assertEquals(0xB12FL, tc.getTTL());
-    assertEquals(0x1F2B, tc.getU16Field());
-    assertEquals(m, tc.getNameField());
+    assertThat(tc.getName()).isSameAs(n);
+    assertThat(tc.getType()).isEqualTo(Type.MX);
+    assertThat(tc.getDClass()).isEqualTo(DClass.IN);
+    assertThat(tc.getTTL()).isEqualTo(0xB12FL);
+    assertThat(tc.getU16Field()).isEqualTo(0x1F2B);
+    assertThat(tc.getNameField()).isEqualTo(m);
 
     // an invalid u16 value
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            new TestClass(
-                n, Type.MX, DClass.IN, 0xB12FL, 0x10000, "u16 description", m, "name description"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(
+            () ->
+                new TestClass(
+                    n,
+                    Type.MX,
+                    DClass.IN,
+                    0xB12FL,
+                    0x10000,
+                    "u16 description",
+                    m,
+                    "name description"));
 
     // a relative name
     Name rel = Name.fromString("My.relative.Name");
-    assertThrows(
-        RelativeNameException.class,
-        () ->
-            new TestClass(
-                n,
-                Type.MX,
-                DClass.IN,
-                0xB12FL,
-                0x1F2B,
-                "u16 description",
-                rel,
-                "name description"));
+    assertThatExceptionOfType(RelativeNameException.class)
+        .isThrownBy(
+            () ->
+                new TestClass(
+                    n,
+                    Type.MX,
+                    DClass.IN,
+                    0xB12FL,
+                    0x1F2B,
+                    "u16 description",
+                    rel,
+                    "name description"));
   }
 
   @Test
@@ -167,8 +171,8 @@ class U16NameBaseTest {
     tc.rrFromWire(in);
 
     Name exp = Name.fromString("My.single.name.");
-    assertEquals(0xBC1FL, tc.getU16Field());
-    assertEquals(exp, tc.getNameField());
+    assertThat(tc.getU16Field()).isEqualTo(0xBC1FL);
+    assertThat(tc.getNameField()).isEqualTo(exp);
   }
 
   @Test
@@ -179,12 +183,14 @@ class U16NameBaseTest {
     TestClass tc = new TestClass();
     tc.rdataFromString(t, null);
 
-    assertEquals(0x19A2, tc.getU16Field());
-    assertEquals(exp, tc.getNameField());
+    assertThat(tc.getU16Field()).isEqualTo(0x19A2);
+    assertThat(tc.getNameField()).isEqualTo(exp);
 
-    assertThrows(
-        RelativeNameException.class,
-        () -> new TestClass().rdataFromString(new Tokenizer("10 My.Relative.Name"), null));
+    try (Tokenizer t2 = new Tokenizer("10 My.Relative.Name")) {
+      TestClass tc2 = new TestClass();
+      assertThatExceptionOfType(RelativeNameException.class)
+          .isThrownBy(() -> tc2.rdataFromString(t2, null));
+    }
   }
 
   @Test
@@ -199,7 +205,7 @@ class U16NameBaseTest {
     String out = tc.rrToString();
     String exp = 0x1F2B + " My.Other.Name.";
 
-    assertEquals(exp, out);
+    assertThat(out).isEqualTo(exp);
   }
 
   @Test
@@ -216,13 +222,13 @@ class U16NameBaseTest {
     tc.rrToWire(dout, null, true);
     byte[] out = dout.toByteArray();
     byte[] exp = {0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0};
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
 
-    // case sensitive
+    // case-sensitive
     dout = new DNSOutput();
     tc.rrToWire(dout, null, false);
     out = dout.toByteArray();
     exp = new byte[] {0x1F, 0x2B, 1, 'M', 1, 'O', 1, 'n', 0};
-    assertArrayEquals(exp, out);
+    assertThat(out).containsExactly(exp);
   }
 }

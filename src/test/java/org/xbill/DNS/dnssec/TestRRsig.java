@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -19,9 +18,9 @@ class TestRRsig extends TestBase {
     add("www.ingotronic.ch./RRSIG", message);
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./RRSIG"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nodata", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nodata");
     assertEde(ExtendedErrorCodeOption.NSEC_MISSING, response);
   }
 
@@ -33,9 +32,9 @@ class TestRRsig extends TestBase {
     add("www.ingotronic.ch./RRSIG", message);
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./RRSIG"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("validate.response.unknown:UNKNOWN", getReason(response));
+    assertThat(getReason(response)).isEqualTo("validate.response.unknown:UNKNOWN");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 }

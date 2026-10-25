@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,16 +51,16 @@ class DnssecEdDsaTest {
     DNSKEYRecord dnskey =
         (DNSKEYRecord)
             Record.fromString(exampleCom, Type.DNSKEY, DClass.IN, 3600, rrString, Name.root);
-    assertEquals(DNSSEC.Algorithm.ED25519, dnskey.getAlgorithm());
+    assertThat(dnskey.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.ED25519);
     // As of Java 15, EdDSA is natively supported
     String expected =
         dnskey.getPublicKey().getClass().getName().toLowerCase().contains("bouncycastle")
             ? "Ed25519"
             : "EdDSA";
-    assertEquals(expected, dnskey.getPublicKey().getAlgorithm());
+    assertThat(dnskey.getPublicKey().getAlgorithm()).isEqualTo(expected);
     DNSKEYRecord dnskey2 =
         new DNSKEYRecord(exampleCom, DClass.IN, 3600, 257, 3, 15, dnskey.getPublicKey());
-    assertEquals(rrString, dnskey2.rrToString());
+    assertThat(dnskey2.rrToString()).isEqualTo(rrString);
   }
 
   @Test
@@ -76,7 +74,7 @@ class DnssecEdDsaTest {
                 3600,
                 "3613 15 2 3aa5ab37efce57f737fc1627013fee07bdf241bd10f3b1964ab55c78e79a304b",
                 Name.root);
-    assertEquals(DNSSEC.Algorithm.ED25519, ds.getAlgorithm());
+    assertThat(ds.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.ED25519);
   }
 
   @Test
@@ -86,16 +84,16 @@ class DnssecEdDsaTest {
     DNSKEYRecord dnskey =
         (DNSKEYRecord)
             Record.fromString(exampleCom, Type.DNSKEY, DClass.IN, 3600, rrString, Name.root);
-    assertEquals(DNSSEC.Algorithm.ED448, dnskey.getAlgorithm());
+    assertThat(dnskey.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.ED448);
     // As of Java 15, EdDSA is natively supported
     String expected =
         dnskey.getPublicKey().getClass().getName().toLowerCase().contains("bouncycastle")
             ? "Ed448"
             : "EdDSA";
-    assertEquals(expected, dnskey.getPublicKey().getAlgorithm());
+    assertThat(dnskey.getPublicKey().getAlgorithm()).isEqualTo(expected);
     DNSKEYRecord dnskey2 =
         new DNSKEYRecord(exampleCom, DClass.IN, 3600, 257, 3, 16, dnskey.getPublicKey());
-    assertEquals(rrString, dnskey2.rrToString());
+    assertThat(dnskey2.rrToString()).isEqualTo(rrString);
   }
 
   @Test
@@ -109,7 +107,7 @@ class DnssecEdDsaTest {
                 3600,
                 "9713 16 2 6ccf18d5bc5d7fc2fceb1d59d17321402f2aa8d368048db93dd811f5cb2b19c7",
                 Name.root);
-    assertEquals(DNSSEC.Algorithm.ED448, ds.getAlgorithm());
+    assertThat(ds.getAlgorithm()).isEqualTo(DNSSEC.Algorithm.ED448);
   }
 
   @Test
@@ -171,15 +169,15 @@ class DnssecEdDsaTest {
             privateKey,
             Instant.ofEpochSecond(1438207200),
             Instant.ofEpochSecond(1440021600));
-    assertNotNull(signature);
+    assertThat(signature).isNotNull();
 
     // verify the signature
     DNSSEC.verify(set, signature, dnskey, Instant.ofEpochSecond(1438207201));
-    assertArrayEquals(
-        Base64.getDecoder()
-            .decode(
-                "oL9krJun7xfBOIWcGHi7mag5/hdZrKWw15jPGrHpjQeRAvTdszaPD+QLs3fx8A4M3e23mRZ9VrbpMngwcrqNAg=="),
-        signature.signature);
+    assertThat(signature.signature)
+        .containsExactly(
+            Base64.getDecoder()
+                .decode(
+                    "oL9krJun7xfBOIWcGHi7mag5/hdZrKWw15jPGrHpjQeRAvTdszaPD+QLs3fx8A4M3e23mRZ9VrbpMngwcrqNAg=="));
   }
 
   @Test
@@ -213,14 +211,14 @@ class DnssecEdDsaTest {
             privateKey,
             Instant.ofEpochSecond(1438207200),
             Instant.ofEpochSecond(1440021600));
-    assertNotNull(signature);
+    assertThat(signature).isNotNull();
 
     // verify the signature
     DNSSEC.verify(set, signature, dnskey, Instant.ofEpochSecond(1438207201));
-    assertArrayEquals(
-        Base64.getDecoder()
-            .decode(
-                "3cPAHkmlnxcDHMyg7vFC34l0blBhuG1qpwLmjInI8w1CMB29FkEAIJUA0amxWndkmnBZ6SKiwZSAxGILn/NBtOXft0+Gj7FSvOKxE/07+4RQvE581N3Aj/JtIyaiYVdnYtyMWbSNyGEY2213WKsJlwEA"),
-        signature.signature);
+    assertThat(signature.signature)
+        .containsExactly(
+            Base64.getDecoder()
+                .decode(
+                    "3cPAHkmlnxcDHMyg7vFC34l0blBhuG1qpwLmjInI8w1CMB29FkEAIJUA0amxWndkmnBZ6SKiwZSAxGILn/NBtOXft0+Gj7FSvOKxE/07+4RQvE581N3Aj/JtIyaiYVdnYtyMWbSNyGEY2213WKsJlwEA"));
   }
 }

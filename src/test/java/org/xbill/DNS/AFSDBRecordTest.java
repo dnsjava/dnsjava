@@ -35,7 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,11 +46,11 @@ class AFSDBRecordTest {
     Name m = Name.fromString("My.OtherName.");
 
     AFSDBRecord d = new AFSDBRecord(n, DClass.IN, 0xABCDEL, 0xF1, m);
-    assertEquals(n, d.getName());
-    assertEquals(Type.AFSDB, d.getType());
-    assertEquals(DClass.IN, d.getDClass());
-    assertEquals(0xABCDEL, d.getTTL());
-    assertEquals(0xF1, d.getSubtype());
-    assertEquals(m, d.getHost());
+    assertThat(d.getName()).isEqualTo(n);
+    assertThat(d.getType()).isEqualTo(Type.AFSDB);
+    assertThat(d.getDClass()).isEqualTo(DClass.IN);
+    assertThat(d.getTTL()).isEqualTo(0xABCDEL);
+    assertThat(d.getSubtype()).isEqualTo(0xF1);
+    assertThat(d.getHost()).isEqualTo(m);
   }
 }

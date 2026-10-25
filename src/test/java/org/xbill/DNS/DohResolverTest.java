@@ -2,8 +2,6 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
@@ -150,9 +148,9 @@ class DohResolverTest {
         result ->
             context.verify(
                 () -> {
-                  assertEquals(Rcode.NOERROR, result.getRcode());
-                  assertEquals(0, result.getHeader().getID());
-                  assertEquals(queryName, result.getQuestion().getName());
+                  assertThat(result.getRcode()).isEqualTo(Rcode.NOERROR);
+                  assertThat(result.getHeader().getID()).isZero();
+                  assertThat(result.getQuestion().getName()).isEqualTo(queryName);
                   context.completeNow();
                 }));
   }
@@ -172,9 +170,10 @@ class DohResolverTest {
                             ex ->
                                 context.verify(
                                     () -> {
-                                      assertTrue(
-                                          ex.getCause() instanceof TimeoutException
-                                              || ex.getMessage().contains("timed out"));
+                                      assertThat(
+                                              ex.getCause() instanceof TimeoutException
+                                                  || ex.getMessage().contains("timed out"))
+                                          .isTrue();
                                       context.completeNow();
                                     }))));
   }
@@ -193,7 +192,7 @@ class DohResolverTest {
                             result ->
                                 context.verify(
                                     () -> {
-                                      assertEquals(Rcode.SERVFAIL, result.getRcode());
+                                      assertThat(result.getRcode()).isEqualTo(Rcode.SERVFAIL);
                                       context.completeNow();
                                     }))));
   }
@@ -358,9 +357,9 @@ class DohResolverTest {
                           result ->
                               context.verify(
                                   () -> {
-                                    assertEquals(Rcode.NOERROR, result.getRcode());
-                                    assertEquals(0, result.getHeader().getID());
-                                    assertEquals(queryName, result.getQuestion().getName());
+                                    assertThat(result.getRcode()).isEqualTo(Rcode.NOERROR);
+                                    assertThat(result.getHeader().getID()).isZero();
+                                    assertThat(result.getQuestion().getName()).isEqualTo(queryName);
                                   })));
 
               Future.fromCompletionStage(secondCall)
@@ -369,10 +368,10 @@ class DohResolverTest {
                           result ->
                               context.verify(
                                   () -> {
-                                    assertTrue(firstCallCompleted.get());
-                                    assertEquals(Rcode.NOERROR, result.getRcode());
-                                    assertEquals(0, result.getHeader().getID());
-                                    assertEquals(queryName, result.getQuestion().getName());
+                                    assertThat(firstCallCompleted.get()).isTrue();
+                                    assertThat(result.getRcode()).isEqualTo(Rcode.NOERROR);
+                                    assertThat(result.getHeader().getID()).isZero();
+                                    assertThat(result.getQuestion().getName()).isEqualTo(queryName);
                                     // Complete context after the 2nd call was completed.
                                     context.completeNow();
                                   })));
@@ -412,9 +411,8 @@ class DohResolverTest {
                   body -> {
                     context.verify(
                         () -> {
-                          assertEquals(
-                              "application/dns-message",
-                              httpRequest.getHeader(HttpHeaderNames.CONTENT_TYPE));
+                          assertThat(httpRequest.getHeader(HttpHeaderNames.CONTENT_TYPE))
+                              .isEqualTo("application/dns-message");
                           byte[] actualDnsRequestBytes;
                           if (httpRequest.method() == HttpMethod.POST) {
                             actualDnsRequestBytes = body.getBytes();
@@ -424,9 +422,9 @@ class DohResolverTest {
                           }
 
                           Message actualDnsRequest = new Message(actualDnsRequestBytes);
-                          assertEquals(0, actualDnsRequest.getHeader().getID());
-                          assertEquals(
-                              expectedDnsRequest.getQuestion(), actualDnsRequest.getQuestion());
+                          assertThat(actualDnsRequest.getHeader().getID()).isZero();
+                          assertThat(actualDnsRequest.getQuestion())
+                              .isEqualTo(expectedDnsRequest.getQuestion());
                         });
                     Message dnsResponseCopy = dnsResponse.clone();
                     dnsResponseCopy.getHeader().setID(0);

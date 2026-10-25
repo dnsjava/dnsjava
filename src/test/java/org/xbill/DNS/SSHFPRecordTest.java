@@ -3,8 +3,6 @@ package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -19,9 +17,9 @@ class SSHFPRecordTest {
     Tokenizer t = new Tokenizer("2 1 " + fingerprint);
     SSHFPRecord sshfpRecord = new SSHFPRecord();
     sshfpRecord.rdataFromString(t, null);
-    assertEquals(SSHFPRecord.Algorithm.DSA, sshfpRecord.getAlgorithm());
-    assertEquals(SSHFPRecord.Digest.SHA1, sshfpRecord.getDigestType());
-    assertArrayEquals(base16.fromString(fingerprint), sshfpRecord.getFingerPrint());
+    assertThat(sshfpRecord.getAlgorithm()).isEqualTo(SSHFPRecord.Algorithm.DSA);
+    assertThat(sshfpRecord.getDigestType()).isEqualTo(SSHFPRecord.Digest.SHA1);
+    assertThat(sshfpRecord.getFingerPrint()).containsExactly(base16.fromString(fingerprint));
   }
 
   @ParameterizedTest
@@ -43,12 +41,12 @@ class SSHFPRecordTest {
                 3600,
                 "1 " + digestType + " " + base16.toString(fingerprint),
                 Name.root);
-    assertEquals(digestType, sshfpRecord.getDigestType());
-    assertArrayEquals(fingerprint, sshfpRecord.getFingerPrint());
+    assertThat(sshfpRecord.getDigestType()).isEqualTo(digestType);
+    assertThat(sshfpRecord.getFingerPrint()).containsExactly(fingerprint);
 
     SSHFPRecord constructed =
         new SSHFPRecord(Name.root, DClass.IN, 3600, 1, digestType, fingerprint);
-    assertArrayEquals(fingerprint, constructed.getFingerPrint());
+    assertThat(constructed.getFingerPrint()).containsExactly(fingerprint);
   }
 
   @ParameterizedTest

@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -28,9 +25,9 @@ class TestNonExistence extends TestBase {
       })
   void testNonExisting(String param) throws IOException {
     Message response = resolver.send(createMessage(param + "./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NXDOMAIN, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -42,9 +39,9 @@ class TestNonExistence extends TestBase {
     add("gibtsnicht.gibtsnicht.nsec3.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("gibtsnicht.gibtsnicht.nsec3.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertEquals("failed.nxdomain.nsec3_bogus", getReason(response));
+    assertThat(getReason(response)).isEqualTo("failed.nxdomain.nsec3_bogus");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -53,9 +50,9 @@ class TestNonExistence extends TestBase {
     // the query name here must hash to a name BEFORE the first existing
     // NSEC3 owner name
     Message response = resolver.send(createMessage("alias.1gibtsnicht.nsec3.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NXDOMAIN, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -71,10 +68,10 @@ class TestNonExistence extends TestBase {
       })
   void testSignedNodata(String param) throws IOException {
     Message response = resolver.send(createMessage(param + "./MX"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
-    assertTrue(response.getSectionRRsets(Section.ANSWER).isEmpty());
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
+    assertThat(response.getSectionRRsets(Section.ANSWER)).isEmpty();
     assertRCode(Rcode.NOERROR, response.getRcode());
-    assertNull(getReason(response));
+    assertThat(getReason(response)).isNull();
     assertEde(-1, response);
   }
 
@@ -87,9 +84,9 @@ class TestNonExistence extends TestBase {
     add("x.ingotronic.ch./A", message);
 
     Message response = resolver.send(createMessage("x.ingotronic.ch./A"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertTrue(getReason(response).startsWith("failed.nxdomain.authority"));
+    assertThat(getReason(response)).startsWith("failed.nxdomain.authority");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
@@ -102,16 +99,16 @@ class TestNonExistence extends TestBase {
     add("www.ingotronic.ch./MX", message);
 
     Message response = resolver.send(createMessage("www.ingotronic.ch./MX"));
-    assertFalse(response.getHeader().getFlag(Flags.AD), "AD flag must not be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must not be set").isFalse();
     assertRCode(Rcode.SERVFAIL, response.getRcode());
-    assertTrue(getReason(response).startsWith("failed.authority.nodata"));
+    assertThat(getReason(response)).startsWith("failed.authority.nodata");
     assertEde(ExtendedErrorCodeOption.DNSSEC_BOGUS, response);
   }
 
   @Test
   void testNoDataOnENT() throws IOException {
     Message response = resolver.send(createMessage("b.ingotronic.ch./A"));
-    assertTrue(response.getHeader().getFlag(Flags.AD), "AD flag must be set");
+    assertThat(response.getHeader().getFlag(Flags.AD)).as("AD flag must be set").isTrue();
     assertRCode(Rcode.NOERROR, response.getRcode());
     assertEde(-1, response);
   }

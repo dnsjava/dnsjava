@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -19,41 +17,43 @@ class DnssecAlgorithmOptionTest {
     new DnssecAlgorithmOption(Code.DHU);
     new DnssecAlgorithmOption(Code.N3U);
 
-    assertThrows(IllegalArgumentException.class, () -> new DnssecAlgorithmOption(4));
-    assertThrows(IllegalArgumentException.class, () -> new DnssecAlgorithmOption(8));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new DnssecAlgorithmOption(4));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new DnssecAlgorithmOption(8));
   }
 
   @Test
   void ctorOptionsEmpty() {
     DnssecAlgorithmOption o = new DnssecAlgorithmOption(Code.DAU);
-    assertTrue(o.getAlgorithms().isEmpty());
+    assertThat(o.getAlgorithms()).isEmpty();
   }
 
   @Test
   void ctorOptionsList() {
     DnssecAlgorithmOption o =
         new DnssecAlgorithmOption(Code.DAU, Collections.singletonList(Algorithm.RSASHA1));
-    assertEquals(1, o.getAlgorithms().size());
+    assertThat(o.getAlgorithms()).hasSize(1);
   }
 
   @Test
   void ctorOptionsVarargs() {
     DnssecAlgorithmOption o = new DnssecAlgorithmOption(Code.DAU, Algorithm.RSASHA1);
-    assertEquals(1, o.getAlgorithms().size());
+    assertThat(o.getAlgorithms()).hasSize(1);
   }
 
   @Test
   void ctorOptionsVarargsNull() {
     DnssecAlgorithmOption o = new DnssecAlgorithmOption(Code.DAU, (int[]) null);
-    assertTrue(o.getAlgorithms().isEmpty());
+    assertThat(o.getAlgorithms()).isEmpty();
   }
 
   @Test
   void parse() throws IOException {
     DNSInput in = new DNSInput(new byte[] {0, 5, 0, 2, 5, 6});
     DnssecAlgorithmOption o = (DnssecAlgorithmOption) EDNSOption.fromWire(in);
-    assertEquals(Algorithm.RSASHA1, o.getAlgorithms().get(0));
-    assertEquals(Algorithm.DSA_NSEC3_SHA1, o.getAlgorithms().get(1));
+    assertThat(o.getAlgorithms().get(0)).isEqualTo(Algorithm.RSASHA1);
+    assertThat(o.getAlgorithms().get(1)).isEqualTo(Algorithm.DSA_NSEC3_SHA1);
   }
 
   @Test
@@ -62,13 +62,13 @@ class DnssecAlgorithmOptionTest {
         new DnssecAlgorithmOption(Code.DAU, Algorithm.RSASHA1, Algorithm.DSA_NSEC3_SHA1);
     DNSOutput out = new DNSOutput();
     o.toWire(out);
-    assertArrayEquals(new byte[] {0, 5, 0, 2, 5, 6}, out.toByteArray());
+    assertThat(out.toByteArray()).containsExactly(new byte[] {0, 5, 0, 2, 5, 6});
   }
 
   @Test
   void testToString() {
     DnssecAlgorithmOption o =
         new DnssecAlgorithmOption(Code.DAU, Algorithm.RSASHA1, Algorithm.DSA_NSEC3_SHA1);
-    assertEquals("[RSASHA1, DSA-NSEC3-SHA1]", o.optionToString());
+    assertThat(o.optionToString()).isEqualTo("[RSASHA1, DSA-NSEC3-SHA1]");
   }
 }

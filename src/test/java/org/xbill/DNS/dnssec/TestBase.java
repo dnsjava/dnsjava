@@ -2,8 +2,7 @@
 package org.xbill.DNS.dnssec;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -277,7 +276,7 @@ public abstract class TestBase {
                         .map(o -> ((ExtendedErrorCodeOption) o).getErrorCode()))
             .orElse(-1);
     if (edeReason != -1) {
-      assertEquals(getReason(m), getEdeText(m));
+      assertThat(getEdeText(m)).isEqualTo(getReason(m));
     }
     return edeReason;
   }
@@ -286,11 +285,11 @@ public abstract class TestBase {
     int edeReason = getEdeReason(m);
     String expectedText = expected == -1 ? null : ExtendedErrorCodeOption.text(expected);
     String actualText = edeReason == -1 ? null : ExtendedErrorCodeOption.text(edeReason);
-    assertEquals(expectedText, actualText, "EDE does not match");
+    assertThat(actualText).as("EDE does not match").isEqualTo(expectedText);
   }
 
   protected void assertRCode(int expected, int actual) {
-    assertEquals(Rcode.string(expected), Rcode.string(actual));
+    assertThat(Rcode.string(actual)).isEqualTo(Rcode.string(expected));
   }
 
   protected String getEdeText(Message m) {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.dnssec;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,18 +13,18 @@ class TestByteArrayComparator {
 
   @Test
   void testEquals() {
-    assertEquals(0, ByteArrayComparator.compare(b1, b2));
+    assertThat(ByteArrayComparator.compare(b1, b2)).isZero();
   }
 
   @Test
   void testLessThan() {
-    assertEquals(-1, ByteArrayComparator.compare(b2, b3));
-    assertEquals(-1, ByteArrayComparator.compare(b1, b4));
+    assertThat(ByteArrayComparator.compare(b2, b3)).isEqualTo(-1);
+    assertThat(ByteArrayComparator.compare(b1, b4)).isEqualTo(-1);
   }
 
   @Test
   void testGreaterThan() {
-    assertEquals(1, ByteArrayComparator.compare(b3, b2));
-    assertEquals(1, ByteArrayComparator.compare(b4, b1));
+    assertThat(ByteArrayComparator.compare(b3, b2)).isOne();
+    assertThat(ByteArrayComparator.compare(b4, b1)).isOne();
   }
 }

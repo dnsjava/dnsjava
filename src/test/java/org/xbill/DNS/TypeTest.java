@@ -35,11 +35,8 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -50,43 +47,43 @@ class TypeTest {
   @Test
   void string() {
     // a regular one
-    assertEquals("CNAME", Type.string(Type.CNAME));
+    assertThat(Type.string(Type.CNAME)).isEqualTo("CNAME");
 
     // one that doesn't exist
-    assertTrue(Type.string(65535).startsWith("TYPE"));
+    assertThat(Type.string(65535)).startsWith("TYPE");
 
-    assertThrows(IllegalArgumentException.class, () -> Type.string(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Type.string(-1));
   }
 
   @Test
   void value() {
     // regular one
-    assertEquals(Type.MAILB, Type.value("MAILB"));
+    assertThat(Type.value("MAILB")).isEqualTo(Type.MAILB);
 
     // one thats undefined but within range
-    assertEquals(300, Type.value("TYPE300"));
+    assertThat(Type.value("TYPE300")).isEqualTo(300);
 
     // something that unknown
-    assertEquals(-1, Type.value("THIS IS DEFINITELY UNKNOWN"));
+    assertThat(Type.value("THIS IS DEFINITELY UNKNOWN")).isEqualTo(-1);
 
     // empty string
-    assertEquals(-1, Type.value(""));
+    assertThat(Type.value("")).isEqualTo(-1);
   }
 
   @Test
   void value_2arg() {
-    assertEquals(301, Type.value("301", true));
+    assertThat(Type.value("301", true)).isEqualTo(301);
   }
 
   @Test
   void value_2arg_outOfRange() {
-    assertEquals(-1, Type.value("TYPE65536", true));
+    assertThat(Type.value("TYPE65536", true)).isEqualTo(-1);
   }
 
   @Test
   void isRR() {
-    assertTrue(Type.isRR(Type.CNAME));
-    assertFalse(Type.isRR(Type.IXFR));
+    assertThat(Type.isRR(Type.CNAME)).isTrue();
+    assertThat(Type.isRR(Type.IXFR)).isFalse();
   }
 
   private static final int MYTXT = 65534;
@@ -126,44 +123,40 @@ class TypeTest {
 
     byte[] wireData = testRecord.toWire(Section.ANSWER);
     Record customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
-    assertEquals(MYTXTRecord.class, customRecord.getClass());
-    assertEquals(MYTXT, customRecord.getType());
+    assertThat(customRecord.getClass()).isEqualTo(MYTXTRecord.class);
+    assertThat(customRecord.getType()).isEqualTo(MYTXT);
 
     byte[] textData = testRecord.toString().getBytes(StandardCharsets.US_ASCII);
-    Master m = new Master(new ByteArrayInputStream(textData));
-    customRecord = m.nextRecord();
-    assertNotNull(customRecord);
-    assertEquals(MYTXTRecord.class, customRecord.getClass());
-    assertEquals(MYTXT, customRecord.getType());
-    m.close();
+    try (Master m = new Master(new ByteArrayInputStream(textData))) {
+      customRecord = m.nextRecord();
+      assertThat(customRecord).isNotNull();
+      assertThat(customRecord.getClass()).isEqualTo(MYTXTRecord.class);
+      assertThat(customRecord.getType()).isEqualTo(MYTXT);
+    }
 
     Type.register(MYTXT, MYTXTName, null);
     customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
-    assertEquals(UNKRecord.class, customRecord.getClass());
-    assertEquals(MYTXT, customRecord.getType());
+    assertThat(customRecord.getClass()).isEqualTo(UNKRecord.class);
+    assertThat(customRecord.getType()).isEqualTo(MYTXT);
 
     // test implementation replacement
 
-    try {
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> Type.register(Type.TXT, "SOA", TXTRecordReplacement::new));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> Type.register(Type.TXT, "SOA", TXTRecordReplacement::new));
 
-      Type.register(Type.TXT, "TXT", TXTRecordReplacement::new);
-      TXTRecord testRecord2 = new TXTRecord(testOwner, DClass.IN, 3600, "howdy");
-      wireData = testRecord2.toWire(Section.ANSWER);
-      customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
-      assertEquals(TXTRecordReplacement.class, customRecord.getClass());
-      assertEquals(Type.TXT, customRecord.getType());
+    Type.register(Type.TXT, "TXT", TXTRecordReplacement::new);
+    TXTRecord testRecord2 = new TXTRecord(testOwner, DClass.IN, 3600, "howdy");
+    wireData = testRecord2.toWire(Section.ANSWER);
+    customRecord = Record.fromWire(new DNSInput(wireData), Section.ANSWER, false);
+    assertThat(customRecord.getClass()).isEqualTo(TXTRecordReplacement.class);
+    assertThat(customRecord.getType()).isEqualTo(Type.TXT);
 
-      byte[] textData2 = testRecord2.toString().getBytes(StandardCharsets.US_ASCII);
-      m = new Master(new ByteArrayInputStream(textData2));
-      customRecord = m.nextRecord();
-      assertNotNull(customRecord);
-      assertEquals(TXTRecordReplacement.class, customRecord.getClass());
-      assertEquals(Type.TXT, customRecord.getType());
-      m.close();
-
+    byte[] textData2 = testRecord2.toString().getBytes(StandardCharsets.US_ASCII);
+    try (Master m2 = new Master(new ByteArrayInputStream(textData2))) {
+      customRecord = m2.nextRecord();
+      assertThat(customRecord).isNotNull();
+      assertThat(customRecord.getClass()).isEqualTo(TXTRecordReplacement.class);
+      assertThat(customRecord.getType()).isEqualTo(Type.TXT);
     } finally {
       // restore default implementation as needed by other tests
       Type.register(Type.TXT, "TXT", TXTRecord::new);

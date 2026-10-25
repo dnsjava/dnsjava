@@ -2,13 +2,8 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -66,7 +61,7 @@ class TSIGTest {
     query.setTSIG(client);
     byte[] queryWire = query.toWire(Message.MAXLENGTH);
     Message received = new Message(queryWire);
-    assertEquals(Rcode.BADTIME, server.verify(received, queryWire, null));
+    assertThat(server.verify(received, queryWire, null)).isEqualTo(Rcode.BADTIME);
 
     Message response = new Message(received.getHeader().getID());
     response.getHeader().setFlag(Flags.QR);
@@ -76,19 +71,19 @@ class TSIGTest {
     byte[] responseWire = response.toWire(Message.MAXLENGTH);
     Message parsed = new Message(responseWire);
 
-    assertEquals(Rcode.BADTIME, parsed.getTSIG().getError());
-    assertEquals(received.getTSIG().getTimeSigned(), parsed.getTSIG().getTimeSigned());
-    assertEquals(received.getTSIG().getFudge(), parsed.getTSIG().getFudge());
+    assertThat(parsed.getTSIG().getError()).isEqualTo(Rcode.BADTIME);
+    assertThat(parsed.getTSIG().getTimeSigned()).isEqualTo(received.getTSIG().getTimeSigned());
+    assertThat(parsed.getTSIG().getFudge()).isEqualTo(received.getTSIG().getFudge());
     assertThat(parsed.getTSIG().getOther()).hasSize(6);
     DNSInput other = new DNSInput(parsed.getTSIG().getOther());
     long serverSeconds = ((long) other.readU16() << 32) | other.readU32();
-    assertEquals(serverTime.getEpochSecond(), serverSeconds);
-    assertEquals(Rcode.NOERROR, client.verify(parsed, responseWire, received.getTSIG()));
-    assertTrue(parsed.isVerified());
+    assertThat(serverSeconds).isEqualTo(serverTime.getEpochSecond());
+    assertThat(client.verify(parsed, responseWire, received.getTSIG())).isEqualTo(Rcode.NOERROR);
+    assertThat(parsed.isVerified()).isTrue();
 
     responseWire[responseWire.length - 1] ^= 1;
-    assertEquals(
-        Rcode.BADSIG, client.verify(new Message(responseWire), responseWire, received.getTSIG()));
+    assertThat(client.verify(new Message(responseWire), responseWire, received.getTSIG()))
+        .isEqualTo(Rcode.BADSIG);
   }
 
   @Test
@@ -109,7 +104,7 @@ class TSIGTest {
 
     TSIGRecord tsig = defaultKey.generate(response, response.toWire(), Rcode.BADTIME, request);
 
-    assertEquals(request.getFudge(), tsig.getFudge());
+    assertThat(tsig.getFudge()).isEqualTo(request.getFudge());
   }
 
   @Test
@@ -118,13 +113,13 @@ class TSIGTest {
     Message query = Message.newQuery(question);
     query.setTSIG(defaultKey);
     byte[] qbytes = query.toWire(512);
-    assertEquals(1, qbytes[11]);
+    assertThat(qbytes[11]).isOne();
 
     Message qparsed = new Message(qbytes);
     int result = defaultKey.verify(qparsed, qbytes, null);
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(qparsed.isSigned());
-    assertTrue(qparsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(qparsed.isSigned()).isTrue();
+    assertThat(qparsed.isVerified()).isTrue();
   }
 
   /**
@@ -158,21 +153,21 @@ class TSIGTest {
     Message msg = Message.newQuery(rec);
     msg.setTSIG(key);
     byte[] bytes = msg.toWire(512);
-    assertEquals(1, bytes[11]);
+    assertThat(bytes[11]).isOne();
 
     Message parsed = new Message(bytes);
     int result = key.verify(parsed, bytes, null);
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(parsed.isSigned());
-    assertTrue(parsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(parsed.isSigned()).isTrue();
+    assertThat(parsed.isVerified()).isTrue();
     assertThat(parsed.getTSIG().getSignature()).hasSize(signatureLengthBytes);
   }
 
   /** Confirm error thrown with illegal algorithm name. */
   @Test
   void queryStringAlgError() {
-    assertThrows(
-        IllegalArgumentException.class, () -> new TSIG("randomalg", "example.", "12345678"));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TSIG("randomalg", "example.", "12345678"));
   }
 
   @Test
@@ -183,16 +178,16 @@ class TSIGTest {
     msg.setTSIG(defaultKey);
     msg.addRecord(opt, Section.ADDITIONAL);
     byte[] bytes = msg.toWire(512);
-    assertEquals(2, bytes[11]); // additional RR count, lower byte
+    assertThat(bytes[11]).isEqualTo((byte) 2); // additional RR count, lower byte
 
     Message parsed = new Message(bytes);
     List<Record> additionalSection = parsed.getSection(Section.ADDITIONAL);
-    assertEquals(Type.string(Type.OPT), Type.string(additionalSection.get(0).getType()));
-    assertEquals(Type.string(Type.TSIG), Type.string(additionalSection.get(1).getType()));
+    assertThat(Type.string(additionalSection.get(0).getType())).isEqualTo(Type.string(Type.OPT));
+    assertThat(Type.string(additionalSection.get(1).getType())).isEqualTo(Type.string(Type.TSIG));
     int result = defaultKey.verify(parsed, bytes, null);
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(parsed.isSigned());
-    assertTrue(parsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(parsed.isSigned()).isTrue();
+    assertThat(parsed.isVerified()).isTrue();
   }
 
   @Test
@@ -201,13 +196,15 @@ class TSIGTest {
     OPTRecord opt = new OPTRecord(SimpleResolver.DEFAULT_EDNS_PAYLOADSIZE, 0, 0, 0);
     Message msg = Message.newQuery(rec);
     msg.addRecord(opt, Section.ADDITIONAL);
-    assertFalse(msg.isSigned());
-    assertFalse(msg.isVerified());
+    assertThat(msg.isSigned()).isFalse();
+    assertThat(msg.isVerified()).isFalse();
 
     defaultKey.apply(msg, null); // additional RR count, lower byte
     byte[] bytes = msg.toWire(Message.MAXLENGTH);
 
-    assertThrows(WireParseException.class, () -> new Message(bytes), "Expected TSIG error");
+    assertThatExceptionOfType(WireParseException.class)
+        .as("Expected TSIG error")
+        .isThrownBy(() -> new Message(bytes));
   }
 
   @Test
@@ -234,12 +231,12 @@ class TSIGTest {
     Message response = res.send(query);
 
     List<Record> additionalSection = response.getSection(Section.ADDITIONAL);
-    assertEquals(Type.string(Type.OPT), Type.string(additionalSection.get(0).getType()));
-    assertEquals(Type.string(Type.TSIG), Type.string(additionalSection.get(1).getType()));
+    assertThat(Type.string(additionalSection.get(0).getType())).isEqualTo(Type.string(Type.OPT));
+    assertThat(Type.string(additionalSection.get(1).getType())).isEqualTo(Type.string(Type.TSIG));
     int result = defaultKey.verify(response, response.toWire(), null);
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(response.isSigned());
-    assertTrue(response.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(response.isSigned()).isTrue();
+    assertThat(response.isVerified()).isTrue();
   }
 
   @Test
@@ -258,9 +255,9 @@ class TSIGTest {
 
     Message rparsed = new Message(rbytes);
     int result = defaultKey.verify(rparsed, rbytes, null);
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(rparsed.isSigned());
-    assertTrue(rparsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(rparsed.isSigned()).isTrue();
+    assertThat(rparsed.isVerified()).isTrue();
   }
 
   @Test
@@ -271,8 +268,8 @@ class TSIGTest {
     query.setTSIG(defaultKey);
     byte[] qbytes = query.toWire(Message.MAXLENGTH);
     Message qparsed = new Message(qbytes);
-    assertNotNull(query.getGeneratedTSIG());
-    assertEquals(query.getGeneratedTSIG(), qparsed.getTSIG());
+    assertThat(query.getGeneratedTSIG()).isNotNull();
+    assertThat(qparsed.getTSIG()).isEqualTo(query.getGeneratedTSIG());
 
     Message response = new Message(query.getHeader().getID());
     response.setTSIG(defaultKey, Rcode.NOERROR, qparsed.getTSIG());
@@ -284,9 +281,9 @@ class TSIGTest {
 
     Message rparsed = new Message(rbytes);
     int result = defaultKey.verify(rparsed, rbytes, query.getGeneratedTSIG());
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(rparsed.isSigned());
-    assertTrue(rparsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(rparsed.isSigned()).isTrue();
+    assertThat(rparsed.isVerified()).isTrue();
   }
 
   @Test
@@ -299,6 +296,7 @@ class TSIGTest {
     // Force tsig-generation
     query.toWire(Message.MAXLENGTH);
     int originalQueryId = query.getHeader().getID();
+    assertThat(originalQueryId).isPositive();
     query.getHeader().setID(new Header().getID());
     log.debug(
         "query: id={}, original id={}",
@@ -319,9 +317,9 @@ class TSIGTest {
 
     Message rparsed = new Message(rbytes);
     int result = defaultKey.verify(rparsed, rbytes, query.getGeneratedTSIG());
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(rparsed.isSigned());
-    assertTrue(rparsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(rparsed.isSigned()).isTrue();
+    assertThat(rparsed.isVerified()).isTrue();
   }
 
   @Test
@@ -371,8 +369,8 @@ class TSIGTest {
     res.setTSIGKey(defaultKey);
 
     Message responseFromResolver = res.send(query);
-    assertTrue(responseFromResolver.isSigned());
-    assertTrue(responseFromResolver.isVerified());
+    assertThat(responseFromResolver.isSigned()).isTrue();
+    assertThat(responseFromResolver.isVerified()).isTrue();
   }
 
   @Test
@@ -395,20 +393,20 @@ class TSIGTest {
     byte[] rbytes = response.toWire(512);
 
     Message rparsed = new Message(rbytes);
-    assertTrue(rparsed.getHeader().getFlag(Flags.TC));
+    assertThat(rparsed.getHeader().getFlag(Flags.TC)).isTrue();
     int result = defaultKey.verify(rparsed, rbytes, qparsed.getTSIG());
-    assertEquals(Rcode.NOERROR, result);
-    assertTrue(rparsed.isSigned());
-    assertTrue(rparsed.isVerified());
+    assertThat(result).isEqualTo(Rcode.NOERROR);
+    assertThat(rparsed.isSigned()).isTrue();
+    assertThat(rparsed.isVerified()).isTrue();
   }
 
   @Test
   void rdataFromString() {
     TextParseException thrown =
-        assertThrows(
-            TextParseException.class,
-            () -> new TSIGRecord().rdataFromString(new Tokenizer(" "), null));
-    assertTrue(thrown.getMessage().contains("no text format defined for TSIG"));
+        assertThatExceptionOfType(TextParseException.class)
+            .isThrownBy(() -> new TSIGRecord().rdataFromString(new Tokenizer(" "), null))
+            .actual();
+    assertThat(thrown.getMessage()).contains("no text format defined for TSIG");
   }
 
   @Test
@@ -435,24 +433,21 @@ class TSIGTest {
         new ARecord(qname, DClass.IN, 0, InetAddress.getByName("127.0.0.1")), Section.ANSWER);
     response.setTSIG(defaultKey, Rcode.NOERROR, old);
     byte[] responseBytes = response.toWire(Message.MAXLENGTH);
-    assertNotNull(responseBytes);
-    assertNotEquals(0, responseBytes.length);
+    assertThat(responseBytes).isNotNull().isNotEmpty();
 
     Message clone = response.clone();
-    assertEquals(response.getQuestion(), clone.getQuestion());
-    assertEquals(response.getSection(Section.ANSWER), clone.getSection(Section.ANSWER));
-    assertEquals(response.getGeneratedTSIG(), clone.getGeneratedTSIG());
+    assertThat(clone.getQuestion()).isEqualTo(response.getQuestion());
+    assertThat(clone.getSection(Section.ANSWER)).isEqualTo(response.getSection(Section.ANSWER));
+    assertThat(clone.getGeneratedTSIG()).isEqualTo(response.getGeneratedTSIG());
     byte[] cloneBytes = clone.toWire(Message.MAXLENGTH);
-    assertNotNull(cloneBytes);
-    assertNotEquals(0, cloneBytes.length);
+    assertThat(cloneBytes).isNotNull().isNotEmpty();
   }
 
   @ParameterizedTest
   @ValueSource(ints = {-1, 0, 101})
   void testStreamGeneratorNthMessageArgument(int signEvery) {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> new TSIG.StreamGenerator(defaultKey, null, signEvery));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> new TSIG.StreamGenerator(defaultKey, null, signEvery));
   }
 
   @Test
@@ -527,7 +522,7 @@ class TSIGTest {
     DNSInput request = new DNSInput(IOUtils.resourceToByteArray("/tsig-axfr/request.bin"));
     byte[] queryBytes = request.readByteArray(request.readU16());
     Message query = new Message(queryBytes);
-    assertNotNull(query.getTSIG());
+    assertThat(query.getTSIG()).isNotNull();
     TSIG key =
         new TSIG(
             TSIG.HMAC_SHA256,
@@ -551,8 +546,8 @@ class TSIGTest {
 
     for (int i = 0; i < messages.size(); i++) {
       Map.Entry<Message, byte[]> e = messages.get(i);
-      assertEquals(
-          Rcode.NOERROR, verifier.verify(e.getKey(), e.getValue(), i == messages.size() - 1));
+      assertThat(verifier.verify(e.getKey(), e.getValue(), i == messages.size() - 1))
+          .isEqualTo(Rcode.NOERROR);
     }
   }
 
@@ -591,9 +586,11 @@ class TSIGTest {
         };
 
     ZoneTransferException exception =
-        assertThrows(ZoneTransferException.class, () -> client.run(new ZoneBuilderAxfrHandler()));
-    assertTrue(exception.getMessage().contains(Rcode.TSIGstring(Rcode.FORMERR)));
-    assertTrue(exception.getMessage().contains("last"));
+        assertThatExceptionOfType(ZoneTransferException.class)
+            .isThrownBy(() -> client.run(new ZoneBuilderAxfrHandler()))
+            .actual();
+    assertThat(exception.getMessage()).contains(Rcode.TSIGstring(Rcode.FORMERR));
+    assertThat(exception.getMessage()).contains("last");
   }
 
   @Test
@@ -616,7 +613,7 @@ class TSIGTest {
     ZoneBuilderAxfrHandler handler = new ZoneBuilderAxfrHandler();
     client.run(handler);
     // soa on first message, + a record on every message, +soa on last message
-    assertEquals(202, handler.getRecords().size());
+    assertThat(handler.getRecords().size()).isEqualTo(202);
   }
 
   @Test
@@ -702,11 +699,11 @@ class TSIGTest {
         Message messageFromWire = new Message(renderedMessage);
         actualRcodes.put(i, verifier.verify(messageFromWire, renderedMessage, isLastMessage));
         if (isLastMessage) {
-          assertEquals(messageFromWire.isVerified(), lastResponseSignedState);
+          assertThat(lastResponseSignedState).isEqualTo(messageFromWire.isVerified());
         }
       }
 
-      assertEquals(expectedRcodes, actualRcodes);
+      assertThat(actualRcodes).isEqualTo(expectedRcodes);
     }
   }
 
@@ -745,7 +742,7 @@ class TSIGTest {
     @Override
     void send(byte[] queryMessageBytes) throws IOException {
       Message parsedQueryMessage = new Message(queryMessageBytes);
-      assertNotNull(parsedQueryMessage.getTSIG());
+      assertThat(parsedQueryMessage.getTSIG()).isNotNull();
 
       messages = new LinkedList<>();
       StreamGenerator generator;

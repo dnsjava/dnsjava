@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS.tools;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -50,15 +50,13 @@ class LookupToolTest {
     lookup.printAnswer("example.com", l);
 
     String output = outContent.toString();
-    assertTrue(output.contains("example.com:"));
-    assertTrue(output.contains("127.0.0.1"));
+    assertThat(output).contains("example.com:").contains("127.0.0.1");
   }
 
   @Test
   void testMainInvalidType() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> lookup.main(new String[] {"-t", "INVALID", "example.com"}));
+    assertThatExceptionOfType(IllegalArgumentException.class)
+        .isThrownBy(() -> lookup.main(new String[] {"-t", "INVALID", "example.com"}));
   }
 
   @Test

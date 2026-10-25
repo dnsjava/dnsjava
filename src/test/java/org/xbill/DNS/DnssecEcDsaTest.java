@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -70,11 +69,11 @@ class DnssecEcDsaTest {
             privateKey,
             Instant.ofEpochSecond(1281607479),
             Instant.ofEpochSecond(1284026679));
-    assertNotNull(rrsig);
+    assertThat(rrsig).isNotNull();
 
     // verify, but we cannot validate the actual signature as it contains a random value
     DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochSecond(1281607480));
-    assertEquals(64, rrsig.signature.length);
+    assertThat(rrsig.signature).hasSize(64);
   }
 
   @Test
@@ -114,10 +113,10 @@ class DnssecEcDsaTest {
             privateKey,
             Instant.ofEpochSecond(1281608425),
             Instant.ofEpochSecond(1284027625));
-    assertNotNull(rrsig);
+    assertThat(rrsig).isNotNull();
 
     // verify, but we cannot validate the actual signature as it contains a random value
     DNSSEC.verify(set, rrsig, dnskey, Instant.ofEpochSecond(1281608426));
-    assertEquals(96, rrsig.signature.length);
+    assertThat(rrsig.signature).hasSize(96);
   }
 }

@@ -35,44 +35,44 @@
 //
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class TTLTest {
-  private final long S = 1;
-  private final long M = 60 * S;
-  private final long H = 60 * M;
-  private final long D = 24 * H;
-  private final long W = 7 * D;
+  private static final long S = 1;
+  private static final long M = 60 * S;
+  private static final long H = 60 * M;
+  private static final long D = 24 * H;
+  private static final long W = 7 * D;
 
   @Test
   void parseTTL() {
-    assertEquals(9876, TTL.parseTTL("9876"));
+    assertThat(TTL.parseTTL("9876")).isEqualTo(9876);
 
-    assertEquals(0, TTL.parseTTL("0S"));
-    assertEquals(0, TTL.parseTTL("0M"));
-    assertEquals(0, TTL.parseTTL("0H"));
-    assertEquals(0, TTL.parseTTL("0D"));
-    assertEquals(0, TTL.parseTTL("0W"));
+    assertThat(TTL.parseTTL("0S")).isZero();
+    assertThat(TTL.parseTTL("0M")).isZero();
+    assertThat(TTL.parseTTL("0H")).isZero();
+    assertThat(TTL.parseTTL("0D")).isZero();
+    assertThat(TTL.parseTTL("0W")).isZero();
 
-    assertEquals(S, TTL.parseTTL("1s"));
-    assertEquals(M, TTL.parseTTL("1m"));
-    assertEquals(H, TTL.parseTTL("1h"));
-    assertEquals(D, TTL.parseTTL("1d"));
-    assertEquals(W, TTL.parseTTL("1w"));
+    assertThat(TTL.parseTTL("1s")).isEqualTo(S);
+    assertThat(TTL.parseTTL("1m")).isEqualTo(M);
+    assertThat(TTL.parseTTL("1h")).isEqualTo(H);
+    assertThat(TTL.parseTTL("1d")).isEqualTo(D);
+    assertThat(TTL.parseTTL("1w")).isEqualTo(W);
 
-    assertEquals(98 * S, TTL.parseTTL("98S"));
-    assertEquals(76 * M, TTL.parseTTL("76M"));
-    assertEquals(54 * H, TTL.parseTTL("54H"));
-    assertEquals(32 * D, TTL.parseTTL("32D"));
-    assertEquals(10 * W, TTL.parseTTL("10W"));
+    assertThat(TTL.parseTTL("98S")).isEqualTo(98 * S);
+    assertThat(TTL.parseTTL("76M")).isEqualTo(76 * M);
+    assertThat(TTL.parseTTL("54H")).isEqualTo(54 * H);
+    assertThat(TTL.parseTTL("32D")).isEqualTo(32 * D);
+    assertThat(TTL.parseTTL("10W")).isEqualTo(10 * W);
 
-    assertEquals(98 * S + 11 * M + 1234 * H + 2 * D + W, TTL.parseTTL("98S11M1234H2D01W"));
+    assertThat(TTL.parseTTL("98S11M1234H2D01W")).isEqualTo(98 * S + 11 * M + 1234 * H + 2 * D + W);
   }
 
   @ParameterizedTest
@@ -96,28 +96,28 @@ class TTLTest {
 
   @Test
   void format() {
-    assertEquals("0S", TTL.format(0));
-    assertEquals("1S", TTL.format(1));
-    assertEquals("59S", TTL.format(59));
-    assertEquals("1M", TTL.format(60));
-    assertEquals("59M", TTL.format(59 * M));
-    assertEquals("1M33S", TTL.format(M + 33));
-    assertEquals("59M59S", TTL.format(59 * M + 59 * S));
-    assertEquals("1H", TTL.format(H));
-    assertEquals("10H1M21S", TTL.format(10 * H + M + 21));
-    assertEquals("23H59M59S", TTL.format(23 * H + 59 * M + 59));
-    assertEquals("1D", TTL.format(D));
-    assertEquals("4D18H45M30S", TTL.format(4 * D + 18 * H + 45 * M + 30));
-    assertEquals("6D23H59M59S", TTL.format(6 * D + 23 * H + 59 * M + 59));
-    assertEquals("1W", TTL.format(W));
-    assertEquals("10W4D1H21M29S", TTL.format(10 * W + 4 * D + H + 21 * M + 29));
-    assertEquals("3550W5D3H14M7S", TTL.format(0x7FFFFFFFL));
+    assertThat(TTL.format(0)).isEqualTo("0S");
+    assertThat(TTL.format(1)).isEqualTo("1S");
+    assertThat(TTL.format(59)).isEqualTo("59S");
+    assertThat(TTL.format(60)).isEqualTo("1M");
+    assertThat(TTL.format(59 * M)).isEqualTo("59M");
+    assertThat(TTL.format(M + 33)).isEqualTo("1M33S");
+    assertThat(TTL.format(59 * M + 59 * S)).isEqualTo("59M59S");
+    assertThat(TTL.format(H)).isEqualTo("1H");
+    assertThat(TTL.format(10 * H + M + 21)).isEqualTo("10H1M21S");
+    assertThat(TTL.format(23 * H + 59 * M + 59)).isEqualTo("23H59M59S");
+    assertThat(TTL.format(D)).isEqualTo("1D");
+    assertThat(TTL.format(4 * D + 18 * H + 45 * M + 30)).isEqualTo("4D18H45M30S");
+    assertThat(TTL.format(6 * D + 23 * H + 59 * M + 59)).isEqualTo("6D23H59M59S");
+    assertThat(TTL.format(W)).isEqualTo("1W");
+    assertThat(TTL.format(10 * W + 4 * D + H + 21 * M + 29)).isEqualTo("10W4D1H21M29S");
+    assertThat(TTL.format(0x7FFFFFFFL)).isEqualTo("3550W5D3H14M7S");
   }
 
   @Test
   void format_invalid() {
-    assertThrows(InvalidTTLException.class, () -> TTL.format(-1));
+    assertThatExceptionOfType(InvalidTTLException.class).isThrownBy(() -> TTL.format(-1));
 
-    assertThrows(InvalidTTLException.class, () -> TTL.format(0x100000000L));
+    assertThatExceptionOfType(InvalidTTLException.class).isThrownBy(() -> TTL.format(0x100000000L));
   }
 }

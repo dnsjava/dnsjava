@@ -3,8 +3,6 @@ package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,16 +38,16 @@ class HIPRecordTest {
             + "                          AwEAAbdxyhNuSutc5EMzxTs9LBPCIkOFH8cIvM4p9+LrV4e19WzK00+CI6zBCQTdtWsuxKbWIy87UOoJTwkUs7lBu+Upr1gsNrut79ryra+bSRGQb1slImA8YVJyuIDsj7kwzG7jnERNqnWxZ48AWkskmdHaVDP4BcelrTI3rMXdXF5D )";
     try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(wwwExampleCom, hip.getName());
-      assertEquals(2, hip.getAlgorithm());
+      assertThat(hip.getName()).isEqualTo(wwwExampleCom);
+      assertThat(hip.getAlgorithm()).isEqualTo(2);
       PublicKey pk = hip.getPublicKey();
-      assertInstanceOf(RSAPublicKey.class, pk);
-      assertEquals(0, hip.getRvServers().size());
+      assertThat(pk).isInstanceOf(RSAPublicKey.class);
+      assertThat(hip.getRvServers()).isEmpty();
 
       DNSOutput out = new DNSOutput();
       hip.toWire(out, Section.ANSWER, null);
       HIPRecord hip2 = (HIPRecord) Record.fromWire(out.toByteArray(), Section.ANSWER);
-      assertEquals(hip, hip2);
+      assertThat(hip2).isEqualTo(hip);
     }
   }
 
@@ -61,17 +59,17 @@ class HIPRecordTest {
             + "                          rvs.example.com. )";
     try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(wwwExampleCom, hip.getName());
-      assertEquals(2, hip.getAlgorithm());
+      assertThat(hip.getName()).isEqualTo(wwwExampleCom);
+      assertThat(hip.getAlgorithm()).isEqualTo(2);
       PublicKey pk = hip.getPublicKey();
-      assertInstanceOf(RSAPublicKey.class, pk);
-      assertEquals(1, hip.getRvServers().size());
-      assertEquals(rvs, hip.getRvServers().get(0));
+      assertThat(pk).isInstanceOf(RSAPublicKey.class);
+      assertThat(hip.getRvServers()).hasSize(1);
+      assertThat(hip.getRvServers().get(0)).isEqualTo(rvs);
 
       DNSOutput out = new DNSOutput();
       hip.toWire(out, Section.ANSWER, null);
       HIPRecord hip2 = (HIPRecord) Record.fromWire(out.toByteArray(), Section.ANSWER);
-      assertEquals(hip, hip2);
+      assertThat(hip2).isEqualTo(hip);
     }
   }
 
@@ -84,18 +82,18 @@ class HIPRecordTest {
             + "                          rvs2.example.com. )";
     try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(wwwExampleCom, hip.getName());
-      assertEquals(2, hip.getAlgorithm());
+      assertThat(hip.getName()).isEqualTo(wwwExampleCom);
+      assertThat(hip.getAlgorithm()).isEqualTo(2);
       PublicKey pk = hip.getPublicKey();
-      assertInstanceOf(RSAPublicKey.class, pk);
-      assertEquals(2, hip.getRvServers().size());
-      assertEquals(rvs1, hip.getRvServers().get(0));
-      assertEquals(rvs2, hip.getRvServers().get(1));
+      assertThat(pk).isInstanceOf(RSAPublicKey.class);
+      assertThat(hip.getRvServers()).hasSize(2);
+      assertThat(hip.getRvServers().get(0)).isEqualTo(rvs1);
+      assertThat(hip.getRvServers().get(1)).isEqualTo(rvs2);
 
       DNSOutput out = new DNSOutput();
       hip.toWire(out, Section.ANSWER, null);
       HIPRecord hip2 = (HIPRecord) Record.fromWire(out.toByteArray(), Section.ANSWER);
-      assertEquals(hip, hip2);
+      assertThat(hip2).isEqualTo(hip);
     }
   }
 
@@ -108,11 +106,11 @@ class HIPRecordTest {
             + "                          rvs2 )";
     try (Master m = new Master(new ByteArrayInputStream(example.getBytes()), exampleCom, 900)) {
       HIPRecord hip = (HIPRecord) m.nextRecord();
-      assertEquals(wwwExampleCom, hip.getName());
-      assertEquals(2, hip.getAlgorithm());
+      assertThat(hip.getName()).isEqualTo(wwwExampleCom);
+      assertThat(hip.getAlgorithm()).isEqualTo(2);
       PublicKey pk = hip.getPublicKey();
-      assertInstanceOf(RSAPublicKey.class, pk);
-      assertEquals(2, hip.getRvServers().size());
+      assertThat(pk).isInstanceOf(RSAPublicKey.class);
+      assertThat(hip.getRvServers()).hasSize(2);
       assertThat(hip.getRvServers().get(0)).isEqualTo(rvs1);
       assertThat(hip.getRvServers().get(1)).isEqualTo(rvs2);
       assertThat(hip.getRvServers().get(0).isAbsolute()).isTrue();
@@ -121,7 +119,7 @@ class HIPRecordTest {
       DNSOutput out = new DNSOutput();
       hip.toWire(out, Section.ANSWER, null);
       HIPRecord hip2 = (HIPRecord) Record.fromWire(out.toByteArray(), Section.ANSWER);
-      assertEquals(hip, hip2);
+      assertThat(hip2).isEqualTo(hip);
     }
   }
 
@@ -136,7 +134,7 @@ class HIPRecordTest {
             new byte[] {1, 2, 3},
             Algorithm.RSA,
             new byte[] {1, 2, 3});
-    assertEquals("2 010203 AQID", hip.rrToString());
+    assertThat(hip.rrToString()).isEqualTo("2 010203 AQID");
   }
 
   @Test
@@ -151,7 +149,8 @@ class HIPRecordTest {
             Algorithm.RSA,
             new byte[] {1, 2, 3},
             servers);
-    assertEquals("2 010203 AQID " + rvs1.toString() + " " + rvs2.toString(), hip.rrToString());
+    assertThat(hip.rrToString())
+        .isEqualTo("2 010203 AQID " + rvs1.toString() + " " + rvs2.toString());
   }
 
   @Test
@@ -165,7 +164,7 @@ class HIPRecordTest {
             new byte[] {1, 2, 3},
             Algorithm.RSA,
             new byte[] {1, 2, 3});
-    assertEquals("( 2 010203\n\tAQID )", hip.rrToString());
+    assertThat(hip.rrToString()).isEqualTo("( 2 010203\n\tAQID )");
   }
 
   @Test
@@ -180,9 +179,9 @@ class HIPRecordTest {
             Algorithm.RSA,
             new byte[] {1, 2, 3},
             servers);
-    assertEquals(
-        "( 2 010203\n\t" + "AQID\n\t" + rvs1.toString() + "\n\t" + rvs2.toString() + " )",
-        hip.rrToString());
+    assertThat(hip.rrToString())
+        .isEqualTo(
+            "( 2 010203\n\t" + "AQID\n\t" + rvs1.toString() + "\n\t" + rvs2.toString() + " )");
   }
 
   @Test

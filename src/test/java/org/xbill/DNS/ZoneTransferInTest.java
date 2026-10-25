@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 package org.xbill.DNS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -32,15 +30,15 @@ class ZoneTransferInTest {
   @Test
   void testNewAXFR() {
     ZoneTransferIn xfr = ZoneTransferIn.newAXFR(zoneName, address, null);
-    assertEquals(zoneName, xfr.getName());
-    assertEquals(Type.AXFR, xfr.getType());
+    assertThat(xfr.getName()).isEqualTo(zoneName);
+    assertThat(xfr.getType()).isEqualTo(Type.AXFR);
   }
 
   @Test
   void testNewIXFR() {
     ZoneTransferIn xfr = ZoneTransferIn.newIXFR(zoneName, 12345L, true, address, null);
-    assertEquals(zoneName, xfr.getName());
-    assertEquals(Type.IXFR, xfr.getType());
+    assertThat(xfr.getName()).isEqualTo(zoneName);
+    assertThat(xfr.getType()).isEqualTo(Type.IXFR);
   }
 
   @Test
@@ -55,7 +53,7 @@ class ZoneTransferInTest {
   @Test
   void testInvalidDClass() {
     ZoneTransferIn xfr = ZoneTransferIn.newAXFR(zoneName, address, null);
-    assertThrows(InvalidDClassException.class, () -> xfr.setDClass(-1));
+    assertThatExceptionOfType(InvalidDClassException.class).isThrownBy(() -> xfr.setDClass(-1));
   }
 
   private static class MockTCPClient extends TCPClient {
@@ -133,12 +131,12 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isAXFR());
+    assertThat(xfr.isAXFR()).isTrue();
     List<Record> records = xfr.getAXFR();
-    assertEquals(3, records.size());
-    assertEquals(soa, records.get(0));
-    assertEquals(a, records.get(1));
-    assertEquals(soa, records.get(2));
+    assertThat(records).hasSize(3);
+    assertThat(records.get(0)).isEqualTo(soa);
+    assertThat(records.get(1)).isEqualTo(a);
+    assertThat(records.get(2)).isEqualTo(soa);
   }
 
   @Test
@@ -162,18 +160,18 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, false, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isIXFR());
+    assertThat(xfr.isIXFR()).isTrue();
     List<ZoneTransferIn.Delta> deltas = xfr.getIXFR();
-    assertEquals(1, deltas.size());
+    assertThat(deltas).hasSize(1);
     ZoneTransferIn.Delta delta = deltas.get(0);
-    assertEquals(1, delta.start);
-    assertEquals(2, delta.end);
-    assertEquals(2, delta.deletes.size());
-    assertEquals(soa1, delta.deletes.get(0));
-    assertEquals(a, delta.deletes.get(1));
-    assertEquals(2, delta.adds.size());
-    assertEquals(soa2, delta.adds.get(0));
-    assertEquals(a, delta.adds.get(1));
+    assertThat(delta.start).isOne();
+    assertThat(delta.end).isEqualTo(2);
+    assertThat(delta.deletes).hasSize(2);
+    assertThat(delta.deletes.get(0)).isEqualTo(soa1);
+    assertThat(delta.deletes.get(1)).isEqualTo(a);
+    assertThat(delta.adds).hasSize(2);
+    assertThat(delta.adds.get(0)).isEqualTo(soa2);
+    assertThat(delta.adds.get(1)).isEqualTo(a);
   }
 
   @Test
@@ -189,7 +187,7 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, false, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isCurrent());
+    assertThat(xfr.isCurrent()).isTrue();
   }
 
   @Test
@@ -212,8 +210,8 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, true, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isAXFR());
-    assertEquals(2, xfr.getAXFR().size());
+    assertThat(xfr.isAXFR()).isTrue();
+    assertThat(xfr.getAXFR()).hasSize(2);
   }
 
   @Test
@@ -226,7 +224,7 @@ class ZoneTransferInTest {
 
     List<byte[]> responses = Collections.singletonList(m.toWire());
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
-    assertThrows(ZoneTransferException.class, xfr::run);
+    assertThatExceptionOfType(ZoneTransferException.class).isThrownBy(xfr::run);
   }
 
   @Test
@@ -242,7 +240,7 @@ class ZoneTransferInTest {
 
     List<byte[]> responses = Collections.singletonList(m.toWire());
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
-    assertThrows(ZoneTransferException.class, xfr::run);
+    assertThatExceptionOfType(ZoneTransferException.class).isThrownBy(xfr::run);
   }
 
   @Test
@@ -253,8 +251,9 @@ class ZoneTransferInTest {
 
     List<byte[]> responses = Collections.singletonList(m.toWire());
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
-    ZoneTransferException exception = assertThrows(ZoneTransferException.class, xfr::run);
-    assertTrue(exception.getMessage().contains("REFUSED"));
+    ZoneTransferException exception =
+        assertThatExceptionOfType(ZoneTransferException.class).isThrownBy(xfr::run).actual();
+    assertThat(exception.getMessage()).contains("REFUSED");
   }
 
   @Test
@@ -272,8 +271,8 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, false, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isAXFR());
-    assertEquals(2, xfr.getAXFR().size());
+    assertThat(xfr.isAXFR()).isTrue();
+    assertThat(xfr.getAXFR()).hasSize(2);
   }
 
   @Test
@@ -299,13 +298,13 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isAXFR());
+    assertThat(xfr.isAXFR()).isTrue();
     List<Record> records = xfr.getAXFR();
-    assertEquals(4, records.size());
-    assertEquals(soa, records.get(0));
-    assertEquals(a1, records.get(1));
-    assertEquals(a2, records.get(2));
-    assertEquals(soa, records.get(3));
+    assertThat(records).hasSize(4);
+    assertThat(records.get(0)).isEqualTo(soa);
+    assertThat(records.get(1)).isEqualTo(a1);
+    assertThat(records.get(2)).isEqualTo(a2);
+    assertThat(records.get(3)).isEqualTo(soa);
   }
 
   @Test
@@ -328,8 +327,8 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, true, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isAXFR());
-    assertEquals(2, xfr.getAXFR().size());
+    assertThat(xfr.isAXFR()).isTrue();
+    assertThat(xfr.getAXFR()).hasSize(2);
   }
 
   @Test
@@ -339,7 +338,7 @@ class ZoneTransferInTest {
         new ArrayList<>(); // Empty list will cause MockTCPClient to throw IOException
 
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.AXFR, 0, false, address, responses);
-    assertThrows(IOException.class, xfr::run);
+    assertThatExceptionOfType(IOException.class).isThrownBy(xfr::run);
   }
 
   @Test
@@ -355,9 +354,9 @@ class ZoneTransferInTest {
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, false, address, responses);
     xfr.run();
 
-    assertTrue(xfr.isCurrent());
-    assertFalse(xfr.isAXFR());
-    assertFalse(xfr.isIXFR());
+    assertThat(xfr.isCurrent()).isTrue();
+    assertThat(xfr.isAXFR()).isFalse();
+    assertThat(xfr.isIXFR()).isFalse();
   }
 
   @Test
@@ -368,6 +367,6 @@ class ZoneTransferInTest {
 
     List<byte[]> responses = Collections.singletonList(mNotImp.toWire());
     TestZoneTransferIn xfr = new TestZoneTransferIn(name, Type.IXFR, 1, false, address, responses);
-    assertThrows(ZoneTransferException.class, xfr::run);
+    assertThatExceptionOfType(ZoneTransferException.class).isThrownBy(xfr::run);
   }
 }

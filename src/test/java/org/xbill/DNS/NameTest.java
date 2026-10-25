@@ -36,15 +36,9 @@
 package org.xbill.DNS;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -72,136 +66,136 @@ class NameTest {
 
     @Test
     void ctor_empty() {
-      assertThrows(TextParseException.class, () -> new Name(""));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name(""));
     }
 
     @Test
     void ctor_at_null_origin() throws TextParseException {
       Name n = new Name("@");
-      assertFalse(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(0, n.labels());
-      assertEquals(0, n.length());
+      assertThat(n.isAbsolute()).isFalse();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isZero();
+      assertThat(n.length()).isZero();
     }
 
     @Test
     void ctor_at_abs_origin() throws TextParseException {
       Name n = new Name("@", m_abs_origin);
-      assertEquals(m_abs_origin, n);
+      assertThat(n).isEqualTo(m_abs_origin);
     }
 
     @Test
     void ctor_at_rel_origin() throws TextParseException {
       Name n = new Name("@", m_rel_origin);
-      assertEquals(m_rel_origin, n);
+      assertThat(n).isEqualTo(m_rel_origin);
     }
 
     @Test
     void ctor_dot() throws TextParseException {
       Name n = new Name(".");
-      assertEquals(Name.root, n);
+      assertThat(n).isEqualTo(Name.root);
       assertNotSame(Name.root, n);
-      assertEquals(1, n.labels());
-      assertEquals(1, n.length());
+      assertThat(n.labels()).isOne();
+      assertThat(n.length()).isOne();
     }
 
     @Test
     void ctor_wildcard() throws TextParseException {
       Name n = new Name("*");
-      assertFalse(n.isAbsolute());
-      assertTrue(n.isWild());
-      assertEquals(1, n.labels());
-      assertEquals(2, n.length());
-      assertArrayEquals(new byte[] {1, '*'}, n.getLabel(0));
-      assertEquals("*", n.getLabelString(0));
+      assertThat(n.isAbsolute()).isFalse();
+      assertThat(n.isWild()).isTrue();
+      assertThat(n.labels()).isOne();
+      assertThat(n.length()).isEqualTo((short) 2);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {1, '*'});
+      assertThat(n.getLabelString(0)).isEqualTo("*");
     }
 
     @Test
     void ctor_abs() throws TextParseException {
       Name n = new Name(m_abs);
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(4, n.labels());
-      assertEquals(17, n.length());
-      assertArrayEquals(new byte[] {3, 'W', 'W', 'W'}, n.getLabel(0));
-      assertEquals("WWW", n.getLabelString(0));
-      assertArrayEquals(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
-      assertEquals("DnsJava", n.getLabelString(1));
-      assertArrayEquals(new byte[] {3, 'o', 'r', 'g'}, n.getLabel(2));
-      assertEquals("org", n.getLabelString(2));
-      assertArrayEquals(new byte[] {0}, n.getLabel(3));
-      assertEquals("", n.getLabelString(3));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(4);
+      assertThat(n.length()).isEqualTo((short) 17);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {3, 'W', 'W', 'W'});
+      assertThat(n.getLabelString(0)).isEqualTo("WWW");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'});
+      assertThat(n.getLabelString(1)).isEqualTo("DnsJava");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {3, 'o', 'r', 'g'});
+      assertThat(n.getLabelString(2)).isEqualTo("org");
+      assertThat(n.getLabel(3)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(3)).isEmpty();
     }
 
     @Test
     void ctor_rel() throws TextParseException {
       Name n = new Name(m_rel);
-      assertFalse(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(2, n.labels());
-      assertEquals(12, n.length());
-      assertArrayEquals(new byte[] {3, 'W', 'W', 'W'}, n.getLabel(0));
-      assertEquals("WWW", n.getLabelString(0));
-      assertArrayEquals(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
-      assertEquals("DnsJava", n.getLabelString(1));
+      assertThat(n.isAbsolute()).isFalse();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(2);
+      assertThat(n.length()).isEqualTo((short) 12);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {3, 'W', 'W', 'W'});
+      assertThat(n.getLabelString(0)).isEqualTo("WWW");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'});
+      assertThat(n.getLabelString(1)).isEqualTo("DnsJava");
     }
 
     @Test
     void ctor_9label() throws TextParseException {
       // 9 is the number of label positions that are cached
       Name n = new Name("a.b.c.d.e.f.g.h.");
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(9, n.labels());
-      assertEquals(17, n.length());
-      assertArrayEquals(new byte[] {1, 'a'}, n.getLabel(0));
-      assertEquals("a", n.getLabelString(0));
-      assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
-      assertEquals("b", n.getLabelString(1));
-      assertArrayEquals(new byte[] {1, 'c'}, n.getLabel(2));
-      assertEquals("c", n.getLabelString(2));
-      assertArrayEquals(new byte[] {1, 'd'}, n.getLabel(3));
-      assertEquals("d", n.getLabelString(3));
-      assertArrayEquals(new byte[] {1, 'e'}, n.getLabel(4));
-      assertEquals("e", n.getLabelString(4));
-      assertArrayEquals(new byte[] {1, 'f'}, n.getLabel(5));
-      assertEquals("f", n.getLabelString(5));
-      assertArrayEquals(new byte[] {1, 'g'}, n.getLabel(6));
-      assertEquals("g", n.getLabelString(6));
-      assertArrayEquals(new byte[] {1, 'h'}, n.getLabel(7));
-      assertEquals("h", n.getLabelString(7));
-      assertArrayEquals(new byte[] {0}, n.getLabel(8));
-      assertEquals("", n.getLabelString(8));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(9);
+      assertThat(n.length()).isEqualTo((short) 17);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {1, 'a'});
+      assertThat(n.getLabelString(0)).isEqualTo("a");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {1, 'b'});
+      assertThat(n.getLabelString(1)).isEqualTo("b");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {1, 'c'});
+      assertThat(n.getLabelString(2)).isEqualTo("c");
+      assertThat(n.getLabel(3)).containsExactly(new byte[] {1, 'd'});
+      assertThat(n.getLabelString(3)).isEqualTo("d");
+      assertThat(n.getLabel(4)).containsExactly(new byte[] {1, 'e'});
+      assertThat(n.getLabelString(4)).isEqualTo("e");
+      assertThat(n.getLabel(5)).containsExactly(new byte[] {1, 'f'});
+      assertThat(n.getLabelString(5)).isEqualTo("f");
+      assertThat(n.getLabel(6)).containsExactly(new byte[] {1, 'g'});
+      assertThat(n.getLabelString(6)).isEqualTo("g");
+      assertThat(n.getLabel(7)).containsExactly(new byte[] {1, 'h'});
+      assertThat(n.getLabelString(7)).isEqualTo("h");
+      assertThat(n.getLabel(8)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(8)).isEmpty();
     }
 
     @Test
     void ctor_10label() throws TextParseException {
       // 9 is the number of label positions that are cached
       Name n = new Name("a.b.c.d.e.f.g.h.i.");
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(10, n.labels());
-      assertEquals(19, n.length());
-      assertArrayEquals(new byte[] {1, 'a'}, n.getLabel(0));
-      assertEquals("a", n.getLabelString(0));
-      assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
-      assertEquals("b", n.getLabelString(1));
-      assertArrayEquals(new byte[] {1, 'c'}, n.getLabel(2));
-      assertEquals("c", n.getLabelString(2));
-      assertArrayEquals(new byte[] {1, 'd'}, n.getLabel(3));
-      assertEquals("d", n.getLabelString(3));
-      assertArrayEquals(new byte[] {1, 'e'}, n.getLabel(4));
-      assertEquals("e", n.getLabelString(4));
-      assertArrayEquals(new byte[] {1, 'f'}, n.getLabel(5));
-      assertEquals("f", n.getLabelString(5));
-      assertArrayEquals(new byte[] {1, 'g'}, n.getLabel(6));
-      assertEquals("g", n.getLabelString(6));
-      assertArrayEquals(new byte[] {1, 'h'}, n.getLabel(7));
-      assertEquals("h", n.getLabelString(7));
-      assertArrayEquals(new byte[] {1, 'i'}, n.getLabel(8));
-      assertEquals("i", n.getLabelString(8));
-      assertArrayEquals(new byte[] {0}, n.getLabel(9));
-      assertEquals("", n.getLabelString(9));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(10);
+      assertThat(n.length()).isEqualTo((short) 19);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {1, 'a'});
+      assertThat(n.getLabelString(0)).isEqualTo("a");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {1, 'b'});
+      assertThat(n.getLabelString(1)).isEqualTo("b");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {1, 'c'});
+      assertThat(n.getLabelString(2)).isEqualTo("c");
+      assertThat(n.getLabel(3)).containsExactly(new byte[] {1, 'd'});
+      assertThat(n.getLabelString(3)).isEqualTo("d");
+      assertThat(n.getLabel(4)).containsExactly(new byte[] {1, 'e'});
+      assertThat(n.getLabelString(4)).isEqualTo("e");
+      assertThat(n.getLabel(5)).containsExactly(new byte[] {1, 'f'});
+      assertThat(n.getLabelString(5)).isEqualTo("f");
+      assertThat(n.getLabel(6)).containsExactly(new byte[] {1, 'g'});
+      assertThat(n.getLabelString(6)).isEqualTo("g");
+      assertThat(n.getLabel(7)).containsExactly(new byte[] {1, 'h'});
+      assertThat(n.getLabelString(7)).isEqualTo("h");
+      assertThat(n.getLabel(8)).containsExactly(new byte[] {1, 'i'});
+      assertThat(n.getLabelString(8)).isEqualTo("i");
+      assertThat(n.getLabel(9)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(9)).isEmpty();
     }
 
     @Test
@@ -209,9 +203,10 @@ class NameTest {
       String pre = "prepend";
       Name stripped = new Name(Name.fromString("sub.domain.example."), 1);
       Name concat = new Name(pre, stripped);
-      assertEquals(Name.concatenate(Name.fromString(pre), stripped), concat);
-      assertEquals(Name.fromString(pre, stripped), concat);
-      assertEquals("prepend.domain.example.", concat.toString());
+      assertThat(concat)
+          .isEqualTo(Name.concatenate(Name.fromString(pre), stripped))
+          .isEqualTo(Name.fromString(pre, stripped))
+          .hasToString("prepend.domain.example.");
     }
 
     @Test
@@ -221,101 +216,102 @@ class NameTest {
       Name domain = new Name(one, 1);
       Name tld = new Name(domain, 1);
       Name root = new Name(tld, 1);
-      assertEquals(Name.fromString("sub2.example.com."), one);
-      assertEquals(Name.fromString("example.com."), domain);
-      assertEquals(Name.fromString("example.com."), new Name(two, 2));
-      assertEquals(Name.fromString("com."), tld);
-      assertEquals(Name.fromString("com."), new Name(two, 3));
-      assertEquals(Name.root, root);
-      assertEquals(Name.root, new Name(two, 4));
+      assertThat(one).isEqualTo(Name.fromString("sub2.example.com."));
+      assertThat(domain).isEqualTo(Name.fromString("example.com."));
+      assertThat(new Name(two, 2)).isEqualTo(Name.fromString("example.com."));
+      assertThat(tld).isEqualTo(Name.fromString("com."));
+      assertThat(new Name(two, 3)).isEqualTo(Name.fromString("com."));
+      assertThat(root).isEqualTo(Name.root);
+      assertThat(new Name(two, 4)).isEqualTo(Name.root);
     }
 
     @Test
     void ctor_abs_abs_origin() throws TextParseException {
       Name n = new Name(m_abs, m_abs_origin);
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(4, n.labels());
-      assertEquals(17, n.length());
-      assertArrayEquals(new byte[] {3, 'W', 'W', 'W'}, n.getLabel(0));
-      assertEquals("WWW", n.getLabelString(0));
-      assertArrayEquals(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
-      assertEquals("DnsJava", n.getLabelString(1));
-      assertArrayEquals(new byte[] {3, 'o', 'r', 'g'}, n.getLabel(2));
-      assertEquals("org", n.getLabelString(2));
-      assertArrayEquals(new byte[] {0}, n.getLabel(3));
-      assertEquals("", n.getLabelString(3));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(4);
+      assertThat(n.length()).isEqualTo((short) 17);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {3, 'W', 'W', 'W'});
+      assertThat(n.getLabelString(0)).isEqualTo("WWW");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'});
+      assertThat(n.getLabelString(1)).isEqualTo("DnsJava");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {3, 'o', 'r', 'g'});
+      assertThat(n.getLabelString(2)).isEqualTo("org");
+      assertThat(n.getLabel(3)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(3)).isEmpty();
     }
 
     @Test
     void ctor_abs_rel_origin() throws TextParseException {
       Name n = new Name(m_abs, m_rel_origin);
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(4, n.labels());
-      assertEquals(17, n.length());
-      assertArrayEquals(new byte[] {3, 'W', 'W', 'W'}, n.getLabel(0));
-      assertEquals("WWW", n.getLabelString(0));
-      assertArrayEquals(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
-      assertEquals("DnsJava", n.getLabelString(1));
-      assertArrayEquals(new byte[] {3, 'o', 'r', 'g'}, n.getLabel(2));
-      assertEquals("org", n.getLabelString(2));
-      assertArrayEquals(new byte[] {0}, n.getLabel(3));
-      assertEquals("", n.getLabelString(3));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(4);
+      assertThat(n.length()).isEqualTo((short) 17);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {3, 'W', 'W', 'W'});
+      assertThat(n.getLabelString(0)).isEqualTo("WWW");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'});
+      assertThat(n.getLabelString(1)).isEqualTo("DnsJava");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {3, 'o', 'r', 'g'});
+      assertThat(n.getLabelString(2)).isEqualTo("org");
+      assertThat(n.getLabel(3)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(3)).isEmpty();
     }
 
     @Test
     void ctor_rel_abs_origin() throws TextParseException {
       Name n = new Name(m_rel, m_abs_origin);
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(4, n.labels());
-      assertEquals(18, n.length());
-      assertArrayEquals(new byte[] {3, 'W', 'W', 'W'}, n.getLabel(0));
-      assertEquals("WWW", n.getLabelString(0));
-      assertArrayEquals(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'}, n.getLabel(1));
-      assertEquals("DnsJava", n.getLabelString(1));
-      assertArrayEquals(new byte[] {4, 'O', 'r', 'i', 'g'}, n.getLabel(2));
-      assertEquals("Orig", n.getLabelString(2));
-      assertArrayEquals(new byte[] {0}, n.getLabel(3));
-      assertEquals("", n.getLabelString(3));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(4);
+      assertThat(n.length()).isEqualTo((short) 18);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {3, 'W', 'W', 'W'});
+      assertThat(n.getLabelString(0)).isEqualTo("WWW");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {7, 'D', 'n', 's', 'J', 'a', 'v', 'a'});
+      assertThat(n.getLabelString(1)).isEqualTo("DnsJava");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {4, 'O', 'r', 'i', 'g'});
+      assertThat(n.getLabelString(2)).isEqualTo("Orig");
+      assertThat(n.getLabel(3)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(3)).isEmpty();
     }
 
     @Test
     void ctor_invalid_label() {
-      assertThrows(TextParseException.class, () -> new Name("junk..junk."));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("junk..junk."));
     }
 
     @Test
     void ctor_max_label() throws TextParseException {
       // name with a 63 char label
       Name n = new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b.");
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(3, n.labels());
-      assertEquals(67, n.length());
-      assertArrayEquals(
-          new byte[] {
-            63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
-          },
-          n.getLabel(0));
-      assertEquals(
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", n.getLabelString(0));
-      assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
-      assertEquals("b", n.getLabelString(1));
-      assertArrayEquals(new byte[] {0}, n.getLabel(2));
-      assertEquals("", n.getLabelString(2));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(3);
+      assertThat(n.length()).isEqualTo((short) 67);
+      assertThat(n.getLabel(0))
+          .containsExactly(
+              new byte[] {
+                63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+                'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+                'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+                'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a'
+              });
+      assertThat(n.getLabelString(0))
+          .isEqualTo("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {1, 'b'});
+      assertThat(n.getLabelString(1)).isEqualTo("b");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(2)).isEmpty();
     }
 
     @Test
     void ctor_toobig_label() {
       // name with a 64 char label
-      assertThrows(
-          TextParseException.class,
-          () -> new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b."));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(
+              () ->
+                  new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b."));
     }
 
     @Test
@@ -324,9 +320,8 @@ class NameTest {
       // which means that it can not be used for lookups or updates.
       String label63 = IntStream.range(0, 63).mapToObj(i -> "a").collect(Collectors.joining());
       String label62 = IntStream.range(0, 62).mapToObj(i -> "a").collect(Collectors.joining());
-      assertThrows(
-          TextParseException.class,
-          () -> new Name(format("%s.%s.%s.%s", label63, label63, label63, label62)));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> new Name(format("%s.%s.%s.%s", label63, label63, label63, label62)));
     }
 
     @Test
@@ -335,10 +330,10 @@ class NameTest {
       Name n =
           new Name(
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
-      assertFalse(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(4, n.labels());
-      assertEquals(254, n.length());
+      assertThat(n.isAbsolute()).isFalse();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(4);
+      assertThat(n.length()).isEqualTo((short) 254);
     }
 
     @Test
@@ -347,10 +342,10 @@ class NameTest {
       Name n =
           new Name(
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.");
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(5, n.labels());
-      assertEquals(255, n.length());
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(5);
+      assertThat(n.length()).isEqualTo((short) 255);
     }
 
     @Test
@@ -360,10 +355,10 @@ class NameTest {
           new Name(
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
               Name.root);
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(5, n.labels());
-      assertEquals(255, n.length());
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(5);
+      assertThat(n.length()).isEqualTo((short) 255);
     }
 
     @Test
@@ -374,169 +369,170 @@ class NameTest {
           new Name(
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.dddddddddddddddddddddddddddddddddddddddddddddddddddd",
               Name.fromString("absolute."));
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(6, n.labels());
-      assertEquals(255, n.length());
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(6);
+      assertThat(n.length()).isEqualTo((short) 255);
     }
 
     @Test
     void ctor_too_long_rel_with_rel_origin() {
       // relative name with three 63-char labels and a 53-char label with an 8-char relative origin
-      assertThrows(
-          TextParseException.class,
-          () ->
-              new Name(
-                  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-                  Name.fromConstantString("relative")));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(
+              () ->
+                  new Name(
+                      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                      Name.fromConstantString("relative")));
     }
 
     @Test
     void ctor_too_long_rel_with_abs_origin() {
       // relative name with three 63-char labels and a 53-char label with a 9-char absolute origin
-      assertThrows(
-          TextParseException.class,
-          () ->
-              new Name(
-                  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-                  Name.fromConstantString("absolute.")));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(
+              () ->
+                  new Name(
+                      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                      Name.fromConstantString("absolute.")));
     }
 
     @Test
     void ctor_escaped() throws TextParseException {
       Name n = new Name("ab\\123cd");
-      assertFalse(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(1, n.labels());
-      assertEquals(6, n.length());
-      assertArrayEquals(new byte[] {5, 'a', 'b', (byte) 123, 'c', 'd'}, n.getLabel(0));
+      assertThat(n.isAbsolute()).isFalse();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isOne();
+      assertThat(n.length()).isEqualTo((short) 6);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {5, 'a', 'b', (byte) 123, 'c', 'd'});
     }
 
     @Test
     void ctor_escaped_end() throws TextParseException {
       Name n = new Name("abcd\\123");
-      assertFalse(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(1, n.labels());
-      assertEquals(6, n.length());
-      assertArrayEquals(new byte[] {5, 'a', 'b', 'c', 'd', (byte) 123}, n.getLabel(0));
+      assertThat(n.isAbsolute()).isFalse();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isOne();
+      assertThat(n.length()).isEqualTo((short) 6);
+      assertThat(n.getLabel(0)).containsExactly(new byte[] {5, 'a', 'b', 'c', 'd', (byte) 123});
     }
 
     @Test
     void ctor_short_escaped_one() {
-      assertThrows(TextParseException.class, () -> new Name("ab\\1cd"));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("ab\\1cd"));
     }
 
     @Test
     void ctor_short_escaped_two() {
-      assertThrows(TextParseException.class, () -> new Name("ab\\12cd"));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("ab\\12cd"));
     }
 
     @Test
     void ctor_short_escaped_end() {
-      assertThrows(TextParseException.class, () -> new Name("ab\\12"));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("ab\\12"));
     }
 
     @Test
     void ctor_empty_escaped_end() {
-      assertThrows(TextParseException.class, () -> new Name("ab\\"));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("ab\\"));
     }
 
     @Test
     void ctor_toobig_escaped() {
-      assertThrows(TextParseException.class, () -> new Name("ab\\256cd"));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("ab\\256cd"));
     }
 
     @Test
     void ctor_toobig_escaped_end() {
-      assertThrows(TextParseException.class, () -> new Name("ab\\256"));
+      assertThatExceptionOfType(TextParseException.class).isThrownBy(() -> new Name("ab\\256"));
     }
 
     @Test
     void ctor_idn_throws() {
-      assertThrows(TextParseException.class, () -> new Name("\u95e8.example.org."));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> new Name("\u95e8.example.org."));
     }
 
     @Test
     void ctor_max_label_escaped() throws TextParseException {
       // name with a 63 char label containing an escape
       Name n = new Name("aaaa\\100aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b.");
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(3, n.labels());
-      assertEquals(67, n.length());
-      assertArrayEquals(
-          new byte[] {
-            63,
-            'a',
-            'a',
-            'a',
-            'a',
-            (byte) 100,
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a'
-          },
-          n.getLabel(0));
-      assertArrayEquals(new byte[] {1, 'b'}, n.getLabel(1));
-      assertEquals("b", n.getLabelString(1));
-      assertArrayEquals(new byte[] {0}, n.getLabel(2));
-      assertEquals("", n.getLabelString(2));
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(3);
+      assertThat(n.length()).isEqualTo((short) 67);
+      assertThat(n.getLabel(0))
+          .containsExactly(
+              new byte[] {
+                63,
+                'a',
+                'a',
+                'a',
+                'a',
+                (byte) 100,
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a',
+                'a'
+              });
+      assertThat(n.getLabel(1)).containsExactly(new byte[] {1, 'b'});
+      assertThat(n.getLabelString(1)).isEqualTo("b");
+      assertThat(n.getLabel(2)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(2)).isEmpty();
     }
 
     @Test
@@ -546,77 +542,83 @@ class NameTest {
         sb.append("a.");
       }
       Name n = new Name(sb.toString());
-      assertTrue(n.isAbsolute());
-      assertFalse(n.isWild());
-      assertEquals(128, n.labels());
-      assertEquals(255, n.length());
+      assertThat(n.isAbsolute()).isTrue();
+      assertThat(n.isWild()).isFalse();
+      assertThat(n.labels()).isEqualTo(128);
+      assertThat(n.length()).isEqualTo((short) 255);
       for (int i = 0; i < 127; ++i) {
-        assertArrayEquals(new byte[] {1, 'a'}, n.getLabel(i));
-        assertEquals("a", n.getLabelString(i));
+        assertThat(n.getLabel(i)).containsExactly(new byte[] {1, 'a'});
+        assertThat(n.getLabelString(i)).isEqualTo("a");
       }
-      assertArrayEquals(new byte[] {0}, n.getLabel(127));
-      assertEquals("", n.getLabelString(127));
+      assertThat(n.getLabel(127)).containsExactly(new byte[] {0});
+      assertThat(n.getLabelString(127)).isEmpty();
     }
 
     @Test
     void ctor_toobig_label_escaped_end() {
-      assertThrows(
-          TextParseException.class,
-          () ->
-              new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\090.b."));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(
+              () ->
+                  new Name(
+                      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\090.b."));
     }
 
     @Test
     void ctor_toobig_label_escaped() {
-      assertThrows(
-          TextParseException.class,
-          () ->
-              new Name("aaaaaaaaaaaaaaaaaaaaaaaaaaaa\\001aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b."));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(
+              () ->
+                  new Name(
+                      "aaaaaaaaaaaaaaaaaaaaaaaaaaaa\\001aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.b."));
     }
 
     @Test
     void fromString() throws TextParseException {
       Name n = new Name(m_rel, m_abs_origin);
       Name n2 = Name.fromString(m_rel, m_abs_origin);
-      assertEquals(n, n2);
+      assertThat(n2).isEqualTo(n);
     }
 
     @Test
     void fromString_at() throws TextParseException {
       Name n = Name.fromString("@", m_rel_origin);
-      assertSame(m_rel_origin, n);
+      assertThat(n).isSameAs(m_rel_origin);
     }
 
     @Test
     void fromString_at_null() throws TextParseException {
       Name n = Name.fromString("@", null);
-      assertSame(Name.empty, n);
+      assertThat(n).isSameAs(Name.empty);
     }
 
     @Test
     void fromString_dot() throws TextParseException {
       Name n = Name.fromString(".");
-      assertSame(Name.root, n);
+      assertThat(n).isSameAs(Name.root);
     }
 
     @Test
     void fromString_separators() throws TextParseException {
-      assertEquals(Name.root, new Name("."));
-      assertThrows(TextParseException.class, () -> Name.fromString("\uFF0E"));
-      assertThrows(TextParseException.class, () -> Name.fromString("\u3002"));
-      assertThrows(TextParseException.class, () -> Name.fromString("\uFF61"));
+      assertThat(new Name(".")).isEqualTo(Name.root);
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> Name.fromString("\uFF0E"));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> Name.fromString("\u3002"));
+      assertThatExceptionOfType(TextParseException.class)
+          .isThrownBy(() -> Name.fromString("\uFF61"));
     }
 
     @Test
     void fromConstantString() throws TextParseException {
       Name n = new Name(m_abs);
       Name n2 = Name.fromConstantString(m_abs);
-      assertEquals(n, n2);
+      assertThat(n2).isEqualTo(n);
     }
 
     @Test
     void fromConstantString_invalid() {
-      assertThrows(IllegalArgumentException.class, () -> Name.fromConstantString("junk..junk"));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> Name.fromConstantString("junk..junk"));
     }
   }
 
@@ -631,24 +633,26 @@ class NameTest {
       Name e = Name.fromString("Www.DnsJava.org.");
 
       Name n = new Name(raw);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
     void incomplete() {
-      assertThrows(WireParseException.class, () -> new Name(new byte[] {3, 'W', 'w', 'w'}));
+      assertThatExceptionOfType(WireParseException.class)
+          .isThrownBy(() -> new Name(new byte[] {3, 'W', 'w', 'w'}));
     }
 
     @Test
     void root() throws WireParseException {
       final byte[] raw = {0};
       Name n = new Name(new DNSInput(raw));
-      assertEquals(Name.root, n);
+      assertThat(n).isEqualTo(Name.root);
     }
 
     @Test
     void invalid_length() {
-      assertThrows(WireParseException.class, () -> new Name(new byte[] {4, 'W', 'w', 'w'}));
+      assertThatExceptionOfType(WireParseException.class)
+          .isThrownBy(() -> new Name(new byte[] {4, 'W', 'w', 'w'}));
     }
 
     @Test
@@ -662,7 +666,7 @@ class NameTest {
       Name e = Name.fromString("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.");
 
       Name n = new Name(new DNSInput(raw));
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
@@ -690,7 +694,7 @@ class NameTest {
       };
 
       Name n = new Name(new DNSInput(raw));
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
@@ -714,7 +718,8 @@ class NameTest {
         'd', 'd', 'd', 0
       };
 
-      assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
+      assertThatExceptionOfType(WireParseException.class)
+          .isThrownBy(() -> new Name(new DNSInput(raw)));
     }
 
     @Test
@@ -737,8 +742,8 @@ class NameTest {
           Name.fromString(
               "a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.");
       Name n = new Name(new DNSInput(raw));
-      assertEquals(128, n.labels());
-      assertEquals(e, n);
+      assertThat(n.labels()).isEqualTo(128);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
@@ -757,7 +762,8 @@ class NameTest {
         1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
         1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 0
       };
-      assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
+      assertThatExceptionOfType(WireParseException.class)
+          .isThrownBy(() -> new Name(new DNSInput(raw)));
     }
 
     @Test
@@ -769,7 +775,7 @@ class NameTest {
       in.jump(6);
 
       Name n = new Name(in);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
@@ -781,7 +787,7 @@ class NameTest {
       in.jump(8);
 
       Name n = new Name(in);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
@@ -793,7 +799,7 @@ class NameTest {
       in.jump(6);
 
       Name n = new Name(in);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
@@ -1069,27 +1075,34 @@ class NameTest {
       DNSInput in = new DNSInput(raw);
       in.jump(261);
       Name n = new Name(in);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
     }
 
     @Test
     void bad_compression() {
       byte[] raw = {(byte) 0xC0, 2, 0};
-      assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
+      assertThatExceptionOfType(WireParseException.class)
+          .isThrownBy(() -> new Name(new DNSInput(raw)));
     }
 
     @Test
     void bad_label_reserved_type1() {
       byte[] raw = {(byte) 0b0100_0000, 2, 0};
-      Exception e = assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
-      assertEquals("bad label type", e.getMessage());
+      Exception e =
+          assertThatExceptionOfType(WireParseException.class)
+              .isThrownBy(() -> new Name(new DNSInput(raw)))
+              .actual();
+      assertThat(e.getMessage()).isEqualTo("bad label type");
     }
 
     @Test
     void bad_label_reserved_type2() {
       byte[] raw = {(byte) 0b1000_0000, 2, 0};
-      Exception e = assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
-      assertEquals("bad label type", e.getMessage());
+      Exception e =
+          assertThatExceptionOfType(WireParseException.class)
+              .isThrownBy(() -> new Name(new DNSInput(raw)))
+              .actual();
+      assertThat(e.getMessage()).isEqualTo("bad label type");
     }
 
     @Test
@@ -1102,10 +1115,10 @@ class NameTest {
       in.jump(6);
 
       Name n = new Name(in);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
 
       n = new Name(in);
-      assertEquals(e2, n);
+      assertThat(n).isEqualTo(e2);
     }
 
     @Test
@@ -1118,10 +1131,10 @@ class NameTest {
       in.jump(6);
 
       Name n = new Name(in);
-      assertEquals(e, n);
+      assertThat(n).isEqualTo(e);
 
       n = new Name(in);
-      assertEquals(e2, n);
+      assertThat(n).isEqualTo(e2);
     }
   }
 
@@ -1130,14 +1143,14 @@ class NameTest {
     Name n = new Name("A.B.c.d.");
     Name e = new Name("B.c.d.");
     Name o = new Name(n, 1);
-    assertEquals(e, o);
+    assertThat(o).isEqualTo(e);
   }
 
   @Test
   void init_from_name_root() throws TextParseException {
     Name n = new Name("A.B.c.d.");
     Name o = new Name(n, 4);
-    assertEquals(Name.root, o);
+    assertThat(o).isEqualTo(Name.root);
   }
 
   @Test
@@ -1145,23 +1158,23 @@ class NameTest {
     Name n = new Name("A.B.c.d.");
     Name n2 = new Name(n, 5);
 
-    assertFalse(n2.isAbsolute());
-    assertFalse(n2.isWild());
-    assertEquals(0, n2.labels());
-    assertEquals(0, n2.length());
+    assertThat(n2.isAbsolute()).isFalse();
+    assertThat(n2.isWild()).isFalse();
+    assertThat(n2.labels()).isZero();
+    assertThat(n2.length()).isZero();
   }
 
   @Test
   void init_from_name_labels_exceeded() throws TextParseException {
     Name n = new Name("a.b.c.d.");
-    assertThrows(IllegalArgumentException.class, () -> new Name(n, 6));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new Name(n, 6));
   }
 
   @Test
   void init_from_name_labels_offset() throws TextParseException {
     // 18 labels + root to exceed the cached offsets
     Name n = new Name("a.b.c.d.e.f.g.h.1.2.3.4.5.6.7.8.9.0.");
-    assertEquals(Name.fromConstantString("1.2.3.4.5.6.7.8.9.0."), new Name(n, 8));
+    assertThat(new Name(n, 8)).isEqualTo(Name.fromConstantString("1.2.3.4.5.6.7.8.9.0."));
   }
 
   @Test
@@ -1171,7 +1184,7 @@ class NameTest {
     Name e = Name.fromString("A.B.c.d.");
 
     Name n = Name.concatenate(p, s);
-    assertEquals(e, n);
+    assertThat(n).isEqualTo(e);
   }
 
   @Test
@@ -1181,7 +1194,7 @@ class NameTest {
     Name e = Name.fromString("A.B.");
 
     Name n = Name.concatenate(p, s);
-    assertEquals(e, n);
+    assertThat(n).isEqualTo(e);
   }
 
   @Test
@@ -1193,7 +1206,7 @@ class NameTest {
         Name.fromString(
             "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.");
 
-    assertThrows(NameTooLongException.class, () -> Name.concatenate(p, s));
+    assertThatExceptionOfType(NameTooLongException.class).isThrownBy(() -> Name.concatenate(p, s));
   }
 
   @Test
@@ -1203,7 +1216,7 @@ class NameTest {
     Name exp = Name.fromString("a.b");
 
     Name n = sub.relativize(dom);
-    assertEquals(exp, n);
+    assertThat(n).isEqualTo(exp);
   }
 
   @Test
@@ -1212,7 +1225,7 @@ class NameTest {
     Name dom = null;
 
     Name n = sub.relativize(dom);
-    assertEquals(sub, n);
+    assertThat(n).isEqualTo(sub);
   }
 
   @Test
@@ -1221,7 +1234,7 @@ class NameTest {
     Name dom = Name.fromString("e.f.");
 
     Name n = sub.relativize(dom);
-    assertEquals(sub, n);
+    assertThat(n).isEqualTo(sub);
   }
 
   @Test
@@ -1231,7 +1244,7 @@ class NameTest {
     Name exp = Name.fromString("a.b.c");
 
     Name n = sub.relativize(dom);
-    assertEquals(exp, n);
+    assertThat(n).isEqualTo(exp);
   }
 
   @Test
@@ -1240,7 +1253,7 @@ class NameTest {
     Name exp = Name.fromString("*.b.c.");
 
     Name n = sub.wild(1);
-    assertEquals(exp, n);
+    assertThat(n).isEqualTo(exp);
   }
 
   @Test
@@ -1249,19 +1262,19 @@ class NameTest {
     Name exp = Name.fromString("*.");
 
     Name n = sub.wild(3);
-    assertEquals(exp, n);
+    assertThat(n).isEqualTo(exp);
   }
 
   @Test
   void wild_toobig() throws TextParseException {
     Name sub = Name.fromString("a.b.c.");
-    assertThrows(IllegalArgumentException.class, () -> sub.wild(4));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> sub.wild(4));
   }
 
   @Test
   void wild_toosmall() throws TextParseException {
     Name sub = Name.fromString("a.b.c.");
-    assertThrows(IllegalArgumentException.class, () -> sub.wild(0));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> sub.wild(0));
   }
 
   @Test
@@ -1273,7 +1286,7 @@ class NameTest {
     Name exp = new Name("sub.the.alias.");
 
     Name n = sub.fromDNAME(dnr);
-    assertEquals(exp, n);
+    assertThat(n).isEqualTo(exp);
   }
 
   @Test
@@ -1286,7 +1299,7 @@ class NameTest {
     Name sub =
         new Name("ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.the.owner.");
 
-    assertThrows(NameTooLongException.class, () -> sub.fromDNAME(dnr));
+    assertThatExceptionOfType(NameTooLongException.class).isThrownBy(() -> sub.fromDNAME(dnr));
   }
 
   @Test
@@ -1297,43 +1310,43 @@ class NameTest {
 
     Name sub = new Name("sub.the.other");
 
-    assertNull(sub.fromDNAME(dnr));
+    assertThat(sub.fromDNAME(dnr)).isNull();
   }
 
   @Test
   void label_min() throws TextParseException {
     Name n = new Name("a.b.c.");
-    assertThrows(IllegalArgumentException.class, () -> n.getLabel(-1));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> n.getLabel(-1));
   }
 
   @Test
   void label_max() throws TextParseException {
     Name n = new Name("a.b.c.");
-    assertThrows(IllegalArgumentException.class, () -> n.getLabel(5));
+    assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> n.getLabel(5));
   }
 
   @Test
   void subdomain_abs() throws TextParseException {
     Name dom = new Name("the.domain.");
     Name sub = new Name("sub.of.the.domain.");
-    assertTrue(sub.subdomain(dom));
-    assertFalse(dom.subdomain(sub));
+    assertThat(sub.subdomain(dom)).isTrue();
+    assertThat(dom.subdomain(sub)).isFalse();
   }
 
   @Test
   void subdomain_rel() throws TextParseException {
     Name dom = new Name("the.domain");
     Name sub = new Name("sub.of.the.domain");
-    assertTrue(sub.subdomain(dom));
-    assertFalse(dom.subdomain(sub));
+    assertThat(sub.subdomain(dom)).isTrue();
+    assertThat(dom.subdomain(sub)).isFalse();
   }
 
   @Test
   void subdomain_equal() throws TextParseException {
     Name dom = new Name("the.domain");
     Name sub = new Name("the.domain");
-    assertTrue(sub.subdomain(dom));
-    assertTrue(dom.subdomain(sub));
+    assertThat(sub.subdomain(dom)).isTrue();
+    assertThat(dom.subdomain(sub)).isTrue();
   }
 
   @ParameterizedTest
@@ -1354,18 +1367,18 @@ class NameTest {
       })
   void variousToString(String in) throws TextParseException {
     Name n = new Name(in);
-    assertEquals(in, n.toString());
+    assertThat(n).hasToString(in);
   }
 
   @Test
   void toString_at() throws TextParseException {
     Name n = new Name("@", null);
-    assertEquals("@", n.toString());
+    assertThat(n).hasToString("@");
   }
 
   @Test
   void toString_root() {
-    assertEquals(".", Name.root.toString());
+    assertThat(Name.root).hasToString(".");
   }
 
   @Test
@@ -1373,7 +1386,7 @@ class NameTest {
     byte[] raw = {1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0};
     String exp = "\\\".\\(.\\).\\..\\;.\\\\.\\@.\\$.";
     Name n = new Name(new DNSInput(raw));
-    assertEquals(exp, n.toString());
+    assertThat(n).hasToString(exp);
   }
 
   @Nested
@@ -1382,7 +1395,8 @@ class NameTest {
     void rel() throws TextParseException {
       Name n = new Name("A.Relative.Name");
       DNSOutput out = new DNSOutput();
-      assertThrows(IllegalArgumentException.class, () -> n.toWire(out, null));
+      assertThatExceptionOfType(IllegalArgumentException.class)
+          .isThrownBy(() -> n.toWire(out, null));
     }
 
     @Test
@@ -1393,7 +1407,7 @@ class NameTest {
       DNSOutput o = new DNSOutput();
       n.toWire(o, null);
 
-      assertArrayEquals(raw, o.toByteArray());
+      assertThat(o.toByteArray()).containsExactly(raw);
     }
 
     @Test
@@ -1405,8 +1419,8 @@ class NameTest {
       DNSOutput o = new DNSOutput();
       n.toWire(o, c);
 
-      assertArrayEquals(raw, o.toByteArray());
-      assertEquals(0, c.get(n));
+      assertThat(o.toByteArray()).containsExactly(raw);
+      assertThat(c.get(n)).isZero();
     }
 
     @Test
@@ -1419,8 +1433,8 @@ class NameTest {
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c);
-      assertArrayEquals(exp, o.toByteArray());
-      assertEquals(256, c.get(n));
+      assertThat(o.toByteArray()).containsExactly(exp);
+      assertThat(c.get(n)).isEqualTo(256);
     }
 
     @Test
@@ -1434,15 +1448,15 @@ class NameTest {
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c);
-      assertArrayEquals(exp, o.toByteArray());
-      assertEquals(257, c.get(d));
-      assertEquals(0, c.get(n));
+      assertThat(o.toByteArray()).containsExactly(exp);
+      assertThat(c.get(d)).isEqualTo(257);
+      assertThat(c.get(n)).isZero();
     }
 
     @Test
     void ctor_0arg_rel() throws TextParseException {
       Name n = new Name("A.Relative.Name");
-      assertThrows(IllegalArgumentException.class, n::toWire);
+      assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(n::toWire);
     }
 
     @Test
@@ -1452,13 +1466,13 @@ class NameTest {
 
       byte[] out = n.toWire();
 
-      assertArrayEquals(raw, out);
+      assertThat(out).containsExactly(raw);
     }
 
     @Test
     void root() {
       byte[] out = Name.root.toWire();
-      assertArrayEquals(new byte[] {0}, out);
+      assertThat(out).containsExactly(new byte[] {0});
     }
 
     @Test
@@ -1472,9 +1486,9 @@ class NameTest {
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c, false);
-      assertArrayEquals(exp, o.toByteArray());
-      assertEquals(257, c.get(d));
-      assertEquals(0, c.get(n));
+      assertThat(o.toByteArray()).containsExactly(exp);
+      assertThat(c.get(d)).isEqualTo(257);
+      assertThat(c.get(n)).isZero();
     }
   }
 
@@ -1488,7 +1502,7 @@ class NameTest {
       DNSOutput o = new DNSOutput();
       n.toWireCanonical(o);
 
-      assertArrayEquals(raw, o.toByteArray());
+      assertThat(o.toByteArray()).containsExactly(raw);
     }
 
     @Test
@@ -1498,20 +1512,20 @@ class NameTest {
 
       byte[] out = n.toWireCanonical();
 
-      assertArrayEquals(raw, out);
+      assertThat(out).containsExactly(raw);
     }
 
     @Test
     void root() {
       byte[] out = Name.root.toWireCanonical();
-      assertArrayEquals(new byte[] {0}, out);
+      assertThat(out).containsExactly(new byte[] {0});
     }
 
     @Test
     void empty() throws TextParseException {
       Name n = new Name("@", null);
       byte[] out = n.toWireCanonical();
-      assertArrayEquals(new byte[0], out);
+      assertThat(out).isEmpty();
     }
 
     @Test
@@ -1525,9 +1539,9 @@ class NameTest {
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c, true);
-      assertArrayEquals(exp, o.toByteArray());
-      assertEquals(257, c.get(d));
-      assertEquals(-1, c.get(n));
+      assertThat(o.toByteArray()).containsExactly(exp);
+      assertThat(c.get(d)).isEqualTo(257);
+      assertThat(c.get(n)).isEqualTo(-1);
     }
   }
 
@@ -1536,19 +1550,19 @@ class NameTest {
     @Test
     void same() throws TextParseException {
       Name n = new Name("A.Name.");
-      assertEquals(n, n);
+      assertThat(n).isEqualTo(n);
     }
 
     @Test
     void test_null() throws TextParseException {
       Name n = new Name("A.Name.");
-      assertNotEquals(null, n);
+      assertThat(n).isNotEqualTo(null);
     }
 
     @Test
     void notName() throws TextParseException {
       Name n = new Name("A.Name.");
-      assertNotEquals(n, new Object());
+      assertThat(new Object()).isNotEqualTo(n);
     }
 
     @Test
@@ -1556,8 +1570,8 @@ class NameTest {
       Name n = new Name("A.Name.");
       Name n2 = new Name("a.name.");
 
-      assertEquals(n, n2);
-      assertEquals(n2, n);
+      assertThat(n2).isEqualTo(n);
+      assertThat(n).isEqualTo(n2);
     }
 
     @Test
@@ -1565,8 +1579,8 @@ class NameTest {
       Name n1 = new Name("A.Relative.Name");
       Name n2 = new Name("a.relative.name");
 
-      assertEquals(n1, n2);
-      assertEquals(n2, n1);
+      assertThat(n2).isEqualTo(n1);
+      assertThat(n1).isEqualTo(n2);
     }
 
     @Test
@@ -1574,8 +1588,8 @@ class NameTest {
       Name n1 = new Name("A.Name");
       Name n2 = new Name("a.name.");
 
-      assertNotEquals(n1, n2);
-      assertNotEquals(n2, n1);
+      assertThat(n2).isNotEqualTo(n1);
+      assertThat(n1).isNotEqualTo(n2);
     }
 
     @Test
@@ -1583,8 +1597,8 @@ class NameTest {
       Name n1 = new Name("ab.c");
       Name n2 = new Name("abc.");
 
-      assertNotEquals(n1, n2);
-      assertNotEquals(n2, n1);
+      assertThat(n2).isNotEqualTo(n1);
+      assertThat(n1).isNotEqualTo(n2);
     }
   }
 
@@ -1595,8 +1609,8 @@ class NameTest {
       Name n1 = new Name("A.Name.");
       Name n2 = new Name("a.name.");
 
-      assertEquals(0, n1.compareTo(n2));
-      assertEquals(0, n2.compareTo(n1));
+      assertThat(n1).isEqualByComparingTo(n2);
+      assertThat(n2).isEqualByComparingTo(n1);
     }
 
     @Test
@@ -1604,7 +1618,7 @@ class NameTest {
       Name n = new Name("A.Name.");
 
       //noinspection EqualsWithItself
-      assertEquals(0, n.compareTo(n));
+      assertThat(n).isEqualByComparingTo(n);
     }
 
     @Test
@@ -1612,8 +1626,8 @@ class NameTest {
       Name n1 = new Name("a.name");
       Name n2 = new Name("a.name.");
 
-      assertTrue(n1.compareTo(n2) > 0);
-      assertTrue(n2.compareTo(n1) < 0);
+      assertThat(n1).isGreaterThan(n2);
+      assertThat(n2).isLessThan(n1);
     }
 
     @ParameterizedTest
@@ -1633,8 +1647,8 @@ class NameTest {
       Name n1 = new Name(name1);
       Name n2 = new Name(name2);
 
-      assertTrue(n1.compareTo(n2) < 0);
-      assertTrue(n2.compareTo(n1) > 0);
+      assertThat(n1).isLessThan(n2);
+      assertThat(n2).isGreaterThan(n1);
     }
   }
 
@@ -1649,12 +1663,12 @@ class NameTest {
     Name cn3 = n3.canonicalize();
 
     assertNotSame(n1, cn1);
-    assertEquals(n1, cn1);
-    assertSame(n2, cn2);
-    assertSame(n3, cn3);
-    assertEquals(cn1.toString(), cn2.toString());
-    assertNotEquals(n1.toString(), n2.toString());
-    assertEquals(cn1.toString(), cn2.toString());
+    assertThat(cn1).isEqualTo(n1);
+    assertThat(cn2).isSameAs(n2);
+    assertThat(cn3).isSameAs(n3);
+    assertThat(cn2).hasToString(cn1.toString());
+    assertThat(n2.toString()).isNotEqualTo(n1.toString());
+    assertThat(cn2).hasToString(cn1.toString());
   }
 
   @Test
@@ -1662,11 +1676,11 @@ class NameTest {
     Name n1 = new Name("abc.com");
     Name n2 = new Name("abc.com.");
 
-    assertEquals(n1.toString(true), n1.toString(true));
-    assertNotEquals(n2.toString(true), n2.toString(false));
-    assertEquals(n2.toString(true) + ".", n2.toString(false));
-    assertEquals(Name.root.toString(true), Name.root.toString(false));
-    assertEquals(Name.empty.toString(true), Name.empty.toString(false));
+    assertThat(n1.toString(true)).isEqualTo(n1.toString(true));
+    assertThat(n2.toString(false)).isNotEqualTo(n2.toString(true));
+    assertThat(n2.toString(false)).isEqualTo(n2.toString(true) + ".");
+    assertThat(Name.root.toString(false)).isEqualTo(Name.root.toString(true));
+    assertThat(Name.empty.toString(false)).isEqualTo(Name.empty.toString(true));
   }
 
   @Test
@@ -1677,10 +1691,10 @@ class NameTest {
     Name n4 = new Name("abc.com", n1);
     Name n5 = new Name("abc.com\\000");
 
-    assertFalse(n1.isAbsolute());
-    assertTrue(n2.isAbsolute());
-    assertTrue(n3.isAbsolute());
-    assertFalse(n4.isAbsolute());
-    assertFalse(n5.isAbsolute());
+    assertThat(n1.isAbsolute()).isFalse();
+    assertThat(n2.isAbsolute()).isTrue();
+    assertThat(n3.isAbsolute()).isTrue();
+    assertThat(n4.isAbsolute()).isFalse();
+    assertThat(n5.isAbsolute()).isFalse();
   }
 }

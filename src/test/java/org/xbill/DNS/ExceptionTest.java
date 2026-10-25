@@ -35,8 +35,7 @@
 //
 package org.xbill.DNS;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -45,63 +44,63 @@ class ExceptionTest {
   @Test
   void InvalidDClassException() {
     IllegalArgumentException e = new InvalidDClassException(10);
-    assertEquals("Invalid DNS class: 10", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("Invalid DNS class: 10");
   }
 
   @Test
   void InvalidTTLException() {
     IllegalArgumentException e = new InvalidTTLException(32345);
-    assertEquals("Invalid DNS TTL: 32345", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("Invalid DNS TTL: 32345");
   }
 
   @Test
   void InvalidTypeException() {
     IllegalArgumentException e = new InvalidTypeException(32345);
-    assertEquals("Invalid DNS type: 32345", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("Invalid DNS type: 32345");
   }
 
   @Test
   void NameTooLongException() {
     WireParseException e = new NameTooLongException();
-    assertNull(e.getMessage());
+    assertThat(e.getMessage()).isNull();
 
     e = new NameTooLongException("This is my too long name");
-    assertEquals("This is my too long name", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("This is my too long name");
   }
 
   @Test
   void RelativeNameException() throws TextParseException {
     IllegalArgumentException e = new RelativeNameException("This is my relative name");
-    assertEquals("This is my relative name", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("This is my relative name");
 
     e = new RelativeNameException(Name.fromString("relative"));
-    assertEquals("'relative' is not an absolute name", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("'relative' is not an absolute name");
   }
 
   @Test
   void TextParseException() {
     IOException e = new TextParseException();
-    assertNull(e.getMessage());
+    assertThat(e.getMessage()).isNull();
 
     e = new TextParseException("This is my message");
-    assertEquals("This is my message", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("This is my message");
   }
 
   @Test
   void WireParseException() {
     IOException e = new WireParseException();
-    assertNull(e.getMessage());
+    assertThat(e.getMessage()).isNull();
 
     e = new WireParseException("This is my message");
-    assertEquals("This is my message", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("This is my message");
   }
 
   @Test
   void ZoneTransferException() {
     Exception e = new ZoneTransferException();
-    assertNull(e.getMessage());
+    assertThat(e.getMessage()).isNull();
 
     e = new ZoneTransferException("This is my message");
-    assertEquals("This is my message", e.getMessage());
+    assertThat(e.getMessage()).isEqualTo("This is my message");
   }
 }
