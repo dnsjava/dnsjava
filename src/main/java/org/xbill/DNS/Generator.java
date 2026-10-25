@@ -105,7 +105,7 @@ public class Generator {
     this.current = start;
   }
 
-  private String substitute(String spec, long n) throws IOException {
+  private String substitute(String spec, long n, int maxLength) throws IOException {
     boolean escaped = false;
     byte[] str = spec.getBytes();
     StringBuilder sb = new StringBuilder();
@@ -204,11 +204,15 @@ public class Generator {
         } else {
           number = Long.toString(v);
         }
-        if (wantUpperCase) {
+        if (base == 16 && wantUpperCase) {
           number = number.toUpperCase();
         }
         if (width != 0 && width > number.length()) {
-          int zeros = (int) width - number.length();
+          long zeros = width - number.length();
+          if (maxLength > -1 && zeros >= maxLength || zeros > Integer.MAX_VALUE) {
+            throw new TextParseException("expansion exceeds max length");
+          }
+
           while (zeros-- > 0) {
             sb.append('0');
           }
@@ -217,6 +221,9 @@ public class Generator {
       } else {
         sb.append(c);
       }
+    }
+    if (maxLength > -1 && sb.length() >= maxLength) {
+      throw new TextParseException("expansion exceeds max length");
     }
     return sb.toString();
   }
@@ -230,9 +237,9 @@ public class Generator {
     if (current > end) {
       return null;
     }
-    String namestr = substitute(namePattern, current);
+    String namestr = substitute(namePattern, current, Name.MAXNAME);
     Name name = Name.fromString(namestr, origin);
-    String rdata = substitute(rdataPattern, current);
+    String rdata = substitute(rdataPattern, current, -1);
     current += step;
     return Record.fromString(name, type, dclass, ttl, rdata, origin);
   }
@@ -246,9 +253,9 @@ public class Generator {
   public Record[] expand() throws IOException {
     List<Record> list = new ArrayList<>();
     for (long i = start; i <= end; i += step) {
-      String namestr = substitute(namePattern, i);
+      String namestr = substitute(namePattern, i, Name.MAXNAME);
       Name name = Name.fromString(namestr, origin);
-      String rdata = substitute(rdataPattern, i);
+      String rdata = substitute(rdataPattern, i, -1);
       list.add(Record.fromString(name, type, dclass, ttl, rdata, origin));
     }
     return list.toArray(new Record[0]);

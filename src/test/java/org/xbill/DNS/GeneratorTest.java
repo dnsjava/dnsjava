@@ -2,6 +2,7 @@
 package org.xbill.DNS;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,6 +16,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class GeneratorTest {
+  private static final Name origin = Name.fromConstantString("example.com.");
 
   @Test
   void testSupportedType() {
@@ -33,40 +35,36 @@ public class GeneratorTest {
 
   @Test
   void testConstructor_InvalidRange() {
-    Name origin = Name.root;
     assertThrows(
         IllegalArgumentException.class,
-        () -> new Generator(-1, 10, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin));
+        () -> new Generator(-1, 10, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new Generator(10, 5, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin));
+        () -> new Generator(10, 5, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new Generator(0, 10, 0, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin));
+        () -> new Generator(0, 10, 0, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
     assertThrows(
         IllegalArgumentException.class,
-        () -> new Generator(0, 10, -1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin));
+        () -> new Generator(0, 10, -1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", Name.root));
   }
 
   @Test
   void testConstructor_UnsupportedType() {
-    Name origin = Name.root;
     assertThrows(
         IllegalArgumentException.class,
-        () -> new Generator(0, 10, 1, "host$", Type.MX, DClass.IN, 3600, "1.2.3.$", origin));
+        () -> new Generator(0, 10, 1, "host$", Type.MX, DClass.IN, 3600, "1.2.3.$", Name.root));
   }
 
   @Test
   void testConstructor_InvalidDClass() {
-    Name origin = Name.root;
     assertThrows(
         InvalidDClassException.class,
-        () -> new Generator(0, 10, 1, "host$", Type.A, -1, 3600, "1.2.3.$", origin));
+        () -> new Generator(0, 10, 1, "host$", Type.A, -1, 3600, "1.2.3.$", Name.root));
   }
 
   @Test
   void testNextRecord() throws IOException {
-    Name origin = Name.fromConstantString("example.com.");
     Generator g = new Generator(1, 3, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin);
 
     Record r1 = g.nextRecord();
@@ -89,7 +87,6 @@ public class GeneratorTest {
 
   @Test
   void testSubstitution_Modifiers() throws IOException {
-    Name origin = Name.fromConstantString("example.com.");
     // ${offset,width,base}
     // offset=1, width=3, base=x
     Generator g =
@@ -117,7 +114,6 @@ public class GeneratorTest {
 
   @Test
   void testSubstitution_LiteralDollar() throws IOException {
-    Name origin = Name.fromConstantString("example.com.");
     Generator g = new Generator(1, 1, 1, "host$$", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
     assertEquals("host\\$.example.com.", r.getName().toString());
@@ -125,7 +121,6 @@ public class GeneratorTest {
 
   @Test
   void testSubstitution_Escaped() throws IOException {
-    Name origin = Name.fromConstantString("example.com.");
     Generator g = new Generator(1, 1, 1, "host\\$", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
     assertEquals("host\\$.example.com.", r.getName().toString());
@@ -133,7 +128,6 @@ public class GeneratorTest {
 
   @Test
   void testSubstitution_PlainDollar() throws IOException {
-    Name origin = Name.fromConstantString("example.com.");
     // A single $ at the end of string should be treated as literal $ by the current implementation
     // because it doesn't match $$, ${, and is not escaped.
     Generator g = new Generator(1, 1, 1, "host$", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
@@ -143,7 +137,6 @@ public class GeneratorTest {
 
   @Test
   void testSubstitution_InvalidModifiers() {
-    Name origin = Name.fromConstantString("example.com.");
     // Invalid offset (not a number)
     assertThrows(
         TextParseException.class,
@@ -178,7 +171,6 @@ public class GeneratorTest {
 
   @Test
   void testSubstitution_NegativeOffset() throws IOException {
-    Name origin = Name.fromConstantString("example.com.");
     Generator g =
         new Generator(10, 10, 1, "host${-1,1,d}", Type.A, DClass.IN, 3600, "1.2.3.1", origin);
     Record r = g.nextRecord();
@@ -192,7 +184,6 @@ public class GeneratorTest {
 
   @Test
   void testToString() {
-    Name origin = Name.fromConstantString("example.com.");
     Generator g = new Generator(1, 10, 2, "host$", Type.A, DClass.IN, 3600, "1.2.3.$", origin);
     String s = g.toString();
     assertEquals("$GENERATE 1-10/2 host$ 3600 IN A 1.2.3.$ ", s);
@@ -217,6 +208,16 @@ public class GeneratorTest {
     }
 
     assertThat(g.expand()).containsExactlyElementsOf(l);
+  }
+
+  @Test
+  void invalidGenWidth() {
+    Generator g =
+        new Generator(
+            1, 1, 1, "host${0,4294967299,d}", Type.A, DClass.IN, 3600, "10.0.0.$", origin);
+    assertThatThrownBy(g::expand)
+        .isInstanceOf(TextParseException.class)
+        .hasMessageContaining("exceeds");
   }
 
   @Test

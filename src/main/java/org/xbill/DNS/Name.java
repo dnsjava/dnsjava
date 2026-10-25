@@ -44,7 +44,7 @@ public class Name implements Comparable<Name>, Serializable {
   public static final Name empty;
 
   /** The maximum length of a Name */
-  private static final int MAXNAME = 255;
+  static final int MAXNAME = 255;
 
   /** The maximum length of a label a Name */
   private static final int MAXLABEL = 63;
