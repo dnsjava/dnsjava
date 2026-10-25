@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
@@ -39,7 +40,7 @@ public class Zone implements Serializable, Iterable<RRset> {
   private final ReentrantReadWriteLock.ReadLock readLock = readWriteLock.readLock();
   private final ReentrantReadWriteLock.WriteLock writeLock = readWriteLock.writeLock();
 
-  private final Map<Name, Object> data = new ConcurrentSkipListMap<>();
+  private final ConcurrentSkipListMap<Name, Object> data = new ConcurrentSkipListMap<>();
 
   private Object originNode;
   private boolean hasWild;
@@ -289,6 +290,15 @@ public class Zone implements Serializable, Iterable<RRset> {
           if (rrset == null) {
             rrset = new RRset(r);
             addRRsetWithoutLock(name, rrset);
+            // RFC 4592 section 2.2.2 / RFC 8020 make `sub.example.` an existing name with no data
+            // Add empty RRsets so they can later be found
+            if (!name.equals(origin)) {
+              Name parent = name;
+              do {
+                parent = new Name(parent, 1);
+                addRRsetWithoutLock(parent, new RRset());
+              } while (!parent.equals(origin));
+            }
           } else {
             // Adding a SOA must replace any existing record. We validated before that the zone name
             // didn't change
@@ -485,7 +495,8 @@ public class Zone implements Serializable, Iterable<RRset> {
     if (types instanceof List) {
       return (List<RRset>) types;
     } else {
-      return Collections.singletonList((RRset) types);
+      RRset set = (RRset) types;
+      return set.isEmpty() ? Collections.emptyList() : Collections.singletonList(set);
     }
   }
 
@@ -504,7 +515,7 @@ public class Zone implements Serializable, Iterable<RRset> {
       }
     } else {
       RRset set = (RRset) types;
-      if (set.getType() == type) {
+      if (set.isEmpty() || set.getType() == type) {
         return set;
       }
     }
@@ -528,12 +539,15 @@ public class Zone implements Serializable, Iterable<RRset> {
     Object types = data.get(name);
 
     // Nothing in the zone for this name, add the set directly
-    if (types == null) {
+    if (types == null && !rrset.isEmpty()) {
       data.put(name, rrset);
       return;
     }
 
-    int rtype = rrset.getType();
+    if (types != null && rrset.isEmpty()) {
+      // The zone already knows about the name, but we asked to add an empty non-terminal
+      return;
+    }
 
     // Multiple types for this name
     if (types instanceof List) {
@@ -542,7 +556,7 @@ public class Zone implements Serializable, Iterable<RRset> {
       for (int i = 0; i < list.size(); i++) {
         RRset set = list.get(i);
         // There's already a set of the specified type, replace it
-        if (set.getType() == rtype) {
+        if (set.getType() == rrset.getType()) {
           list.set(i, rrset);
           return;
         }
@@ -550,10 +564,10 @@ public class Zone implements Serializable, Iterable<RRset> {
 
       // The new type doesn't exist yet, add it
       list.add(rrset);
-    } else {
+    } else if (types instanceof RRset) {
       // One type for this name
       RRset set = (RRset) types;
-      if (set.getType() == rtype) {
+      if (set.getType() == rrset.getType()) {
         // There's already a set of the specified type, replace it
         data.put(name, rrset);
       } else {
@@ -563,6 +577,10 @@ public class Zone implements Serializable, Iterable<RRset> {
         list.add(rrset);
         data.put(name, list);
       }
+    } else if (rrset.isEmpty()) {
+      // RFC 4592 section 2.2.2 / RFC 8020 make `sub.example.` an existing name with no data
+      // Add an empty RRset so it can later be found
+      data.put(name, new RRset());
     }
   }
 
@@ -596,7 +614,7 @@ public class Zone implements Serializable, Iterable<RRset> {
 
       // No types left, remove the entire name
       if (list.isEmpty()) {
-        data.remove(name);
+        removeEntryKeepEmptyNonTerminalWithoutLock(name);
       }
     } else {
       // One type for this name
@@ -607,7 +625,19 @@ public class Zone implements Serializable, Iterable<RRset> {
       }
 
       // The only type matched, remove the entire name
-      data.remove(name);
+      removeEntryKeepEmptyNonTerminalWithoutLock(name);
+    }
+  }
+
+  private void removeEntryKeepEmptyNonTerminalWithoutLock(Name name) {
+    data.remove(name);
+
+    // RFC 4592 section 2.2.2 / RFC 8020: if the removed name was an empty non-terminal,
+    // add an empty RRset back so it can later be found
+    ConcurrentNavigableMap<Name, Object> following = data.tailMap(name, false);
+    Name next = following.ceilingKey(name);
+    if (next != null && next.subdomain(name)) {
+      data.put(name, new RRset());
     }
   }
 
@@ -636,7 +666,7 @@ public class Zone implements Serializable, Iterable<RRset> {
       // If this is a delegation, return that.
       if (!isOrigin) {
         RRset ns = oneRRsetWithoutLock(types, Type.NS);
-        if (ns != null) {
+        if (ns != null && !ns.isEmpty()) {
           return SetResponse.ofType(SetResponseType.DELEGATION, ns);
         }
       }
@@ -655,6 +685,10 @@ public class Zone implements Serializable, Iterable<RRset> {
       if (isExact) {
         RRset rrset = oneRRsetWithoutLock(types, type);
         if (rrset != null) {
+          if (rrset.isEmpty()) {
+            return SetResponse.ofType(SetResponseType.NXRRSET);
+          }
+
           return SetResponse.ofType(SetResponseType.SUCCESSFUL, rrset);
         }
         rrset = oneRRsetWithoutLock(types, Type.CNAME);
@@ -663,7 +697,7 @@ public class Zone implements Serializable, Iterable<RRset> {
         }
       } else {
         RRset rrset = oneRRsetWithoutLock(types, Type.DNAME);
-        if (rrset != null) {
+        if (rrset != null && !rrset.isEmpty()) {
           return SetResponse.ofType(SetResponseType.DNAME, rrset);
         }
       }
@@ -690,7 +724,13 @@ public class Zone implements Serializable, Iterable<RRset> {
       } else {
         RRset rrset = oneRRsetWithoutLock(types, type);
         if (rrset != null) {
+          if (rrset.isEmpty()) {
+            return SetResponse.ofType(SetResponseType.NXRRSET);
+          }
+
           return SetResponse.ofType(SetResponseType.SUCCESSFUL, expandSet(rrset, name));
+        } else {
+          return SetResponse.ofType(SetResponseType.NXRRSET);
         }
       }
     }
@@ -814,7 +854,6 @@ public class Zone implements Serializable, Iterable<RRset> {
           List<RRset> sets =
               withReadLock(() -> new ArrayList<>(allRRsetsWithoutLock(entry.getValue())));
           if (sets.isEmpty()) {
-            // Ignore empty sets (they shouldn't exist anyway)
             continue;
           }
 

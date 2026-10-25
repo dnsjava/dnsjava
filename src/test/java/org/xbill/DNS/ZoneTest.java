@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -176,14 +178,19 @@ class ZoneTest {
   void findWildNameExistingTxtLookup() {
     Name testName = Name.fromConstantString("undefined.wild.example.");
     SetResponse resp = ZONE.findRecords(testName, Type.TXT);
-    assertThat(resp.answers()).containsExactly(new RRset(TXT_WILD.withName(testName)));
+    assertThat(resp.answers())
+        .as(ZONE + "\nmust contain rrset for\n" + TXT_WILD.withName(testName))
+        .containsExactly(new RRset(TXT_WILD.withName(testName)));
+    assertThat(resp.isSuccessful()).isTrue();
   }
 
   @Test
   void findWildNameNonExistingMxLookup() {
+    // a wildcard match without the queried type must answer NODATA (not NXDOMAIN)
     SetResponse resp =
         ZONE.findRecords(Name.fromConstantString("undefined.wild.example."), Type.MX);
-    assertTrue(resp.isNXDOMAIN());
+    assertThat(resp.isNXDOMAIN()).isFalse();
+    assertThat(resp.isNXRRSET()).isTrue();
   }
 
   @Test
@@ -198,17 +205,34 @@ class ZoneTest {
 
   @Test
   void ctorNull() {
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null, (String) null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null, (Record[]) null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(Name.root, (String) null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(Name.root, (Record[]) null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null, "some-file.dns"));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null, new Record[0]));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null, DClass.IN, null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(Name.root, DClass.IN, null));
-    assertThrows(IllegalArgumentException.class, () -> new Zone(null, DClass.IN, "localhost"));
-    assertThrows(InvalidDClassException.class, () -> new Zone(Name.root, -1, "localhost"));
+    InputStream is = new ByteArrayInputStream(new byte[0]);
+    assertThatThrownBy(() -> new Zone(null, is))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("zone name");
+    assertThatThrownBy(() -> new Zone(ZONE_NAME, (InputStream) null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("input stream");
+    assertThatThrownBy(() -> new Zone(null, (String) null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(null, (Record[]) null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(Name.root, (String) null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(Name.root, (Record[]) null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(null, "some-file.dns"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(null, new Record[0]))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(null)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(null, DClass.IN, null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(Name.root, DClass.IN, null))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(null, DClass.IN, "localhost"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> new Zone(Name.root, -1, "localhost"))
+        .isInstanceOf(InvalidDClassException.class);
   }
 
   @Test
@@ -718,46 +742,183 @@ class ZoneTest {
 
   /** A wildcard must not synthesize below an existing (empty non-terminal) closer encloser. */
   @Test
-  void wildcardClosestEncloser() throws Exception {
-    SOARecord soa =
-        new SOARecord(
-            Name.fromConstantString("example."),
+  void wildcardClosestEncloserTwoTypes() throws Exception {
+    Record aWildcard =
+        Record.fromString(
+            Name.fromConstantString("*.example."), Type.A, DClass.IN, 3600, "192.0.2.1", Name.root);
+    Record txtWildcard =
+        Record.fromString(aWildcard.getName(), Type.TXT, DClass.IN, 3600, "test-data", Name.root);
+    Record aEnt =
+        Record.fromString(
+            Name.fromConstantString("x.sub.example."),
+            Type.A,
             DClass.IN,
             3600,
-            Name.fromConstantString("ns.example."),
-            Name.fromConstantString("hostmaster.example."),
-            1,
-            7200,
-            3600,
-            1209600,
-            300);
-    NSRecord ns =
-        new NSRecord(
-            Name.fromConstantString("example."),
+            "192.0.2.1",
+            Name.root);
+    Record txtEnt =
+        Record.fromString(aEnt.getName(), Type.A, DClass.IN, 3600, "192.0.2.1", Name.root);
+    Zone zone = new Zone(ZONE_NAME, SOA1, NS1, aWildcard, txtWildcard, aEnt, txtEnt);
+
+    SetResponse nxA = zone.findRecords(Name.fromConstantString("y.sub.example."), Type.A);
+    assertThat(nxA.isNXDOMAIN())
+        .as("Wildcard must not synthesize from " + aWildcard.getName())
+        .isTrue();
+
+    SetResponse nxTxt = zone.findRecords(Name.fromConstantString("y.sub.example."), Type.TXT);
+    assertThat(nxTxt.isNXDOMAIN())
+        .as("Wildcard must not synthesize from " + aWildcard.getName())
+        .isTrue();
+
+    Name entName = new Name(aEnt.getName(), 1);
+    SetResponse entA = zone.findRecords(entName, Type.A);
+    assertThat(entA.isNXRRSET()).as("Must have an ENT at " + entName).isTrue();
+    SetResponse entTxt = zone.findRecords(entName, Type.A);
+    assertThat(entTxt.isNXRRSET()).as("Must have an ENT at " + entName).isTrue();
+  }
+
+  /** A wildcard must not synthesize below an existing (empty non-terminal) closer encloser. */
+  @Test
+  void wildcardClosestEncloserOneType() throws Exception {
+    Record aWildcard =
+        Record.fromString(
+            Name.fromConstantString("*.example."), Type.A, DClass.IN, 3600, "192.0.2.1", Name.root);
+    Record aEnt =
+        Record.fromString(
+            Name.fromConstantString("x.sub.example."),
+            Type.A,
             DClass.IN,
             3600,
-            Name.fromConstantString("ns.example."));
+            "192.0.2.1",
+            Name.root);
+    Zone zone = new Zone(ZONE_NAME, SOA1, NS1, aWildcard, aEnt);
+
+    SetResponse nxA = zone.findRecords(Name.fromConstantString("y.sub.example."), Type.A);
+    assertThat(nxA.isNXDOMAIN())
+        .as("Wildcard must not synthesize from " + aWildcard.getName())
+        .isTrue();
+
+    Name entName = new Name(aEnt.getName(), 1);
+    SetResponse entA = zone.findRecords(entName, Type.A);
+    assertThat(entA.isNXRRSET()).as("Must have an ENT at " + entName).isTrue();
+  }
+
+  /** A query at an empty non-terminal must answer NODATA. */
+  @Test
+  void pinEmptyNonTerminal() throws Exception {
     Zone zone =
         new Zone(
-            Name.fromConstantString("example."),
-            soa,
-            ns,
-            Record.fromString(
-                Name.fromConstantString("*.example."),
-                Type.A,
-                DClass.IN,
-                3600,
-                "192.0.2.1",
-                Name.root),
+            ZONE_NAME,
+            SOA1,
+            NS1,
             Record.fromString(
                 Name.fromConstantString("x.sub.example."),
                 Type.A,
                 DClass.IN,
                 3600,
-                "192.0.2.1",
+                "192.0.2.2",
                 Name.root));
-    SetResponse sr = zone.findRecords(Name.fromConstantString("y.sub.example."), Type.A);
-    assertThat(sr.isNXDOMAIN()).as(sr.toString()).isTrue();
+    SetResponse sr = zone.findRecords(Name.fromConstantString("sub.example."), Type.A);
+    assertThat(sr.isNXRRSET()).as(sr.toString()).isTrue();
+  }
+
+  @Test
+  void addRRsetAfterEmptyNonTerminal() throws Exception {
+    Record a =
+        Record.fromString(
+            Name.fromConstantString("sub.example."),
+            Type.A,
+            DClass.IN,
+            3600,
+            "192.0.2.2",
+            Name.root);
+    Zone zone = new Zone(ZONE_NAME, SOA1, NS1, a.withName(new Name("x", a.getName())));
+    SetResponse sr = zone.findRecords(a.getName(), Type.A);
+    assertThat(sr.isNXRRSET()).as(sr.toString()).isTrue();
+    zone.addRecord(a);
+    sr = zone.findRecords(a.getName(), Type.A);
+    assertThat(sr.isNXRRSET()).as(sr.toString()).isFalse();
+    assertThat(sr.isSuccessful()).as(sr.toString()).isTrue();
+    assertThat(sr.answers())
+        .hasSize(1)
+        .first()
+        .asInstanceOf(InstanceOfAssertFactories.ITERABLE)
+        .containsExactly(a);
+  }
+
+  @Test
+  void removeRRsetAddEmptyNonTerminalBackOneType() throws Exception {
+    Record a =
+        Record.fromString(
+            Name.fromConstantString("sub.example."),
+            Type.A,
+            DClass.IN,
+            3600,
+            "192.0.2.2",
+            Name.root);
+    Zone zone = new Zone(ZONE_NAME, SOA1, NS1, a.withName(new Name("x", a.getName())), a);
+    SetResponse sr = zone.findRecords(a.getName(), Type.A);
+    assertThat(sr.isNXRRSET()).as(sr.toString()).isFalse();
+    assertThat(sr.isSuccessful()).as(sr.toString()).isTrue();
+
+    zone.removeRRset(a.getName(), Type.A);
+    sr = zone.findRecords(a.getName(), Type.A);
+    assertThat(sr.isNXRRSET()).as(sr.toString()).isTrue();
+    assertThat(sr.answers()).isNull();
+  }
+
+  @Test
+  void removeRRsetAddEmptyNonTerminalBackTwoTypes() throws Exception {
+    Record a =
+        Record.fromString(
+            Name.fromConstantString("sub.example."),
+            Type.A,
+            DClass.IN,
+            3600,
+            "192.0.2.2",
+            Name.root);
+    Record txt = Record.fromString(a.getName(), Type.TXT, DClass.IN, 3600, "192.0.2.2", Name.root);
+    Zone zone =
+        new Zone(
+            ZONE_NAME,
+            SOA1,
+            NS1,
+            a.withName(new Name("x", a.getName())),
+            a,
+            txt.withName(new Name("x", a.getName())),
+            txt);
+    SetResponse srA = zone.findRecords(a.getName(), Type.A);
+    assertThat(srA.isNXRRSET()).as(srA.toString()).isFalse();
+    assertThat(srA.isSuccessful()).as(srA.toString()).isTrue();
+
+    SetResponse srTxt = zone.findRecords(txt.getName(), Type.TXT);
+    assertThat(srTxt.isNXRRSET()).as(srTxt.toString()).isFalse();
+    assertThat(srTxt.isSuccessful()).as(srTxt.toString()).isTrue();
+
+    zone.removeRRset(a.getName(), Type.A);
+
+    srA = zone.findRecords(a.getName(), Type.A);
+    assertThat(srA.isNXRRSET()).as(srA.toString()).isTrue();
+    assertThat(srA.answers()).isNull();
+
+    srTxt = zone.findRecords(txt.getName(), Type.TXT);
+    assertThat(srTxt.isNXRRSET()).as(srTxt.toString()).isFalse();
+    assertThat(srTxt.isSuccessful()).isTrue();
+    assertThat(srTxt.answers())
+        .hasSize(1)
+        .first()
+        .asInstanceOf(InstanceOfAssertFactories.ITERABLE)
+        .containsExactly(txt);
+
+    zone.removeRRset(txt.getName(), Type.TXT);
+
+    srA = zone.findRecords(a.getName(), Type.A);
+    assertThat(srA.isNXRRSET()).as(srA.toString()).isTrue();
+    assertThat(srA.answers()).isNull();
+
+    srTxt = zone.findRecords(txt.getName(), Type.TXT);
+    assertThat(srTxt.isNXRRSET()).as(srTxt.toString()).isTrue();
+    assertThat(srTxt.isSuccessful()).isFalse();
   }
 
   private static List<RRset> listOf(RRset... rrsets) {
