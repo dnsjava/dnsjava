@@ -8,8 +8,9 @@ import lombok.experimental.UtilityClass;
 class IPAddressUtils {
   static final int IPv4 = 1;
   static final int IPv6 = 2;
-  static final byte[] IPV4_MAPPED_IPV6_PREFIX =
-      new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xff, (byte) 0xff};
+  static final byte[] IPV4_MAPPED_IPV6_PREFIX = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 0xff, (byte) 0xff
+  };
 
   static byte[] parseV4(String s) {
     int numDigits;

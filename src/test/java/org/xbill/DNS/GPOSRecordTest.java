@@ -217,10 +217,7 @@ class GPOSRecordTest {
   static class Test_rrFromWire {
     @Test
     void basic() throws IOException {
-      byte[] raw =
-          new byte[] {
-            5, '-', '8', '.', '1', '2', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
-          };
+      byte[] raw = {5, '-', '8', '.', '1', '2', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'};
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
@@ -232,10 +229,7 @@ class GPOSRecordTest {
 
     @Test
     void longitude_toosmall() {
-      byte[] raw =
-          new byte[] {
-            5, '-', '9', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
-          };
+      byte[] raw = {5, '-', '9', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'};
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
@@ -244,10 +238,7 @@ class GPOSRecordTest {
 
     @Test
     void longitude_toobig() {
-      byte[] raw =
-          new byte[] {
-            5, '1', '8', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'
-          };
+      byte[] raw = {5, '1', '8', '5', '.', '0', 6, '1', '2', '3', '.', '0', '7', 3, '0', '.', '0'};
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
@@ -256,10 +247,7 @@ class GPOSRecordTest {
 
     @Test
     void latitude_toosmall() {
-      byte[] raw =
-          new byte[] {
-            5, '-', '8', '5', '.', '0', 6, '-', '1', '9', '0', '.', '0', 3, '0', '.', '0'
-          };
+      byte[] raw = {5, '-', '8', '5', '.', '0', 6, '-', '1', '9', '0', '.', '0', 3, '0', '.', '0'};
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
@@ -268,10 +256,7 @@ class GPOSRecordTest {
 
     @Test
     void latitude_toobig() {
-      byte[] raw =
-          new byte[] {
-            5, '-', '8', '5', '.', '0', 6, '2', '1', '9', '0', '.', '0', 3, '0', '.', '0'
-          };
+      byte[] raw = {5, '-', '8', '5', '.', '0', 6, '2', '1', '9', '0', '.', '0', 3, '0', '.', '0'};
       DNSInput in = new DNSInput(raw);
 
       GPOSRecord gr = new GPOSRecord();
@@ -349,10 +334,9 @@ class GPOSRecordTest {
     GPOSRecord gr =
         new GPOSRecord(Name.fromString("The.Name."), DClass.IN, 0x123, -10.45, 120.0, 111.0);
 
-    byte[] exp =
-        new byte[] {
-          6, '-', '1', '0', '.', '4', '5', 5, '1', '2', '0', '.', '0', 5, '1', '1', '1', '.', '0'
-        };
+    byte[] exp = {
+      6, '-', '1', '0', '.', '4', '5', 5, '1', '2', '0', '.', '0', 5, '1', '1', '1', '.', '0'
+    };
 
     DNSOutput out = new DNSOutput();
     gr.rrToWire(out, null, true);

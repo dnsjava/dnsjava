@@ -88,8 +88,7 @@ class SingleNameBaseTest {
 
   @Test
   void rrFromWire() throws IOException {
-    byte[] raw =
-        new byte[] {2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0};
+    byte[] raw = {2, 'm', 'y', 6, 's', 'i', 'n', 'g', 'l', 'e', 4, 'n', 'a', 'm', 'e', 0};
     DNSInput in = new DNSInput(raw);
 
     TestClass tc = new TestClass();
@@ -133,8 +132,7 @@ class SingleNameBaseTest {
 
     // non-canonical (case sensitive)
     TestClass tc = new TestClass(n, Type.A, DClass.IN, 100L, sn, "The Description");
-    byte[] exp =
-        new byte[] {2, 'M', 'y', 6, 'S', 'i', 'n', 'g', 'l', 'e', 4, 'N', 'a', 'm', 'e', 0};
+    byte[] exp = {2, 'M', 'y', 6, 'S', 'i', 'n', 'g', 'l', 'e', 4, 'N', 'a', 'm', 'e', 0};
 
     DNSOutput dout = new DNSOutput();
     tc.rrToWire(dout, null, false);

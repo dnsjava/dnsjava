@@ -34,8 +34,8 @@ public class Name implements Comparable<Name>, Serializable {
   /* The number of labels in this name. */
   private int labels;
 
-  private static final byte[] emptyLabel = new byte[] {(byte) 0};
-  private static final byte[] wildLabel = new byte[] {(byte) 1, (byte) '*'};
+  private static final byte[] emptyLabel = {(byte) 0};
+  private static final byte[] wildLabel = {(byte) 1, (byte) '*'};
 
   /** The root name */
   public static final Name root;

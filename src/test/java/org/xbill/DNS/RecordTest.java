@@ -184,7 +184,7 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xDBE8;
-    byte[] data = new byte[] {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
+    byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
     InetAddress exp = InetAddress.getByName("123.232.0.255");
 
     Record rec = Record.newRecord(n, t, d, ttl, data);
@@ -202,7 +202,7 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xDBE8;
-    byte[] data = new byte[] {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
+    byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
     InetAddress exp = InetAddress.getByName("123.232.0.255");
 
     Record rec = Record.newRecord(n, t, d, ttl, 0, null);
@@ -236,7 +236,7 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xDBE8;
-    byte[] data = new byte[] {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
+    byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
 
     assertNull(Record.newRecord(n, t, d, ttl, 0, new byte[0]));
     assertNull(Record.newRecord(n, t, d, ttl, 1, new byte[0]));
@@ -252,7 +252,7 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xDBE8;
-    byte[] data = new byte[] {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
+    byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
     InetAddress exp = InetAddress.getByName("123.232.0.255");
 
     DNSOutput out = new DNSOutput();
@@ -319,7 +319,7 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xDBE8;
-    byte[] data = new byte[] {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
+    byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
 
     // a non-QUESTION
     DNSOutput out = new DNSOutput();
@@ -366,7 +366,7 @@ class RecordTest {
     int t = Type.A;
     int d = DClass.IN;
     int ttl = 0xDBE8;
-    byte[] data = new byte[] {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
+    byte[] data = {(byte) 123, (byte) 232, (byte) 0, (byte) 255};
 
     DNSOutput out = new DNSOutput();
     n.toWireCanonical(out);
@@ -473,7 +473,7 @@ class RecordTest {
     assertArrayEquals(in.getBytes(), out);
 
     in = " \\031Aa\\;\\\"\\\\~\\127\\255";
-    byte[] exp = new byte[] {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
+    byte[] exp = {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
     out = SubRecord.byteArrayFromString(in);
     assertArrayEquals(exp, out);
   }
@@ -496,24 +496,23 @@ class RecordTest {
 
   @Test
   void byteArrayToString() {
-    byte[] in = new byte[] {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
+    byte[] in = {' ', 0x1F, 'A', 'a', ';', '"', '\\', 0x7E, 0x7F, (byte) 0xFF};
     String exp = "\" \\031Aa;\\\"\\\\~\\127\\255\"";
     assertEquals(exp, SubRecord.byteArrayToString(in, true));
   }
 
   @Test
   void unknownToString() {
-    byte[] data =
-        new byte[] {
-          (byte) 0x12,
-          (byte) 0x34,
-          (byte) 0x56,
-          (byte) 0x78,
-          (byte) 0x9A,
-          (byte) 0xBC,
-          (byte) 0xDE,
-          (byte) 0xFF
-        };
+    byte[] data = {
+      (byte) 0x12,
+      (byte) 0x34,
+      (byte) 0x56,
+      (byte) 0x78,
+      (byte) 0x9A,
+      (byte) 0xBC,
+      (byte) 0xDE,
+      (byte) 0xFF
+    };
     String out = SubRecord.unknownToString(data);
 
     assertTrue(out.contains("" + data.length));
@@ -529,7 +528,7 @@ class RecordTest {
     int ttl = 0xABE99;
     String sa = "191.234.43.10";
     InetAddress addr = InetAddress.getByName(sa);
-    byte[] b = new byte[] {(byte) 191, (byte) 234, (byte) 43, (byte) 10};
+    byte[] b = {(byte) 191, (byte) 234, (byte) 43, (byte) 10};
 
     Tokenizer st = new Tokenizer(sa);
     Record rec = Record.fromString(n, t, d, ttl, st, n2);
@@ -658,8 +657,8 @@ class RecordTest {
     assertNotEquals(r1, r2);
     assertNotEquals(r2, r1);
 
-    byte[] d1 = new byte[] {23, 12, 9, (byte) 129};
-    byte[] d2 = new byte[] {(byte) 220, 1, (byte) 131, (byte) 212};
+    byte[] d1 = {23, 12, 9, (byte) 129};
+    byte[] d2 = {(byte) 220, 1, (byte) 131, (byte) 212};
 
     r1 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d1);
     r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d1);
@@ -678,8 +677,8 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Name n2 = Name.fromString("my.n.");
     Name m = Name.fromString("My.M.");
-    byte[] d1 = new byte[] {23, 12, 9, (byte) 129};
-    byte[] d2 = new byte[] {(byte) 220, 1, (byte) 131, (byte) 212};
+    byte[] d1 = {23, 12, 9, (byte) 129};
+    byte[] d2 = {(byte) 220, 1, (byte) 131, (byte) 212};
 
     Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d1);
 
@@ -711,7 +710,7 @@ class RecordTest {
   @Test
   void cloneRecord() throws TextParseException {
     Name n = Name.fromString("My.N.");
-    byte[] d = new byte[] {23, 12, 9, (byte) 129};
+    byte[] d = {23, 12, 9, (byte) 129};
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 
     Record r2 = r.cloneRecord();
@@ -729,7 +728,7 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Name m = Name.fromString("My.M.Name.");
     Name rel = Name.fromString("My.Relative.Name");
-    byte[] d = new byte[] {23, 12, 9, (byte) 129};
+    byte[] d = {23, 12, 9, (byte) 129};
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 
     Record r1 = r.withName(m);
@@ -746,7 +745,7 @@ class RecordTest {
   @Test
   void withDClass() throws TextParseException {
     Name n = Name.fromString("My.N.");
-    byte[] d = new byte[] {23, 12, 9, (byte) 129};
+    byte[] d = {23, 12, 9, (byte) 129};
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 
     Record r1 = r.withDClass(DClass.HESIOD, 0x9876);
@@ -761,7 +760,7 @@ class RecordTest {
   @Test
   void setTTL() throws TextParseException, UnknownHostException {
     Name n = Name.fromString("My.N.");
-    byte[] d = new byte[] {23, 12, 9, (byte) 129};
+    byte[] d = {23, 12, 9, (byte) 129};
     InetAddress exp = InetAddress.getByName("23.12.9.129");
     Record r = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 
@@ -781,8 +780,8 @@ class RecordTest {
     Name n = Name.fromString("My.N.");
     Name n2 = Name.fromString("my.n.");
     Name m = Name.fromString("My.M.");
-    byte[] d = new byte[] {23, 12, 9, (byte) 129};
-    byte[] d2 = new byte[] {23, 12, 9, (byte) 128};
+    byte[] d = {23, 12, 9, (byte) 129};
+    byte[] d2 = {23, 12, 9, (byte) 128};
     Record r1 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
     Record r2 = Record.newRecord(n, Type.A, DClass.IN, 0xABCDE9, d);
 

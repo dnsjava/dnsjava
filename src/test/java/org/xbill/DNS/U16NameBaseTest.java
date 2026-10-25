@@ -141,27 +141,26 @@ class U16NameBaseTest {
 
   @Test
   void rrFromWire() throws IOException {
-    byte[] raw =
-        new byte[] {
-          (byte) 0xBC,
-          (byte) 0x1F,
-          2,
-          'M',
-          'y',
-          6,
-          's',
-          'i',
-          'N',
-          'g',
-          'l',
-          'E',
-          4,
-          'n',
-          'A',
-          'm',
-          'E',
-          0
-        };
+    byte[] raw = {
+      (byte) 0xBC,
+      (byte) 0x1F,
+      2,
+      'M',
+      'y',
+      6,
+      's',
+      'i',
+      'N',
+      'g',
+      'l',
+      'E',
+      4,
+      'n',
+      'A',
+      'm',
+      'E',
+      0
+    };
     DNSInput in = new DNSInput(raw);
 
     TestClass tc = new TestClass();
@@ -216,7 +215,7 @@ class U16NameBaseTest {
     DNSOutput dout = new DNSOutput();
     tc.rrToWire(dout, null, true);
     byte[] out = dout.toByteArray();
-    byte[] exp = new byte[] {0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0};
+    byte[] exp = {0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0};
     assertArrayEquals(exp, out);
 
     // case sensitive

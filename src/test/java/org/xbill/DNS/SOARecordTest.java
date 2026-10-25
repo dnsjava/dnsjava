@@ -298,43 +298,42 @@ public class SOARecordTest {
 
     @Test
     void test() throws IOException {
-      byte[] raw =
-          new byte[] {
-            1,
-            'm',
-            1,
-            'h',
-            1,
-            'n',
-            0, // host
-            1,
-            'm',
-            1,
-            'a',
-            1,
-            'n',
-            0, // admin
-            (byte) 0xAB,
-            (byte) 0xCD,
-            (byte) 0xEF,
-            (byte) 0x12, // serial
-            (byte) 0xCD,
-            (byte) 0xEF,
-            (byte) 0x12,
-            (byte) 0x34, // refresh
-            (byte) 0xEF,
-            (byte) 0x12,
-            (byte) 0x34,
-            (byte) 0x56, // retry
-            (byte) 0x12,
-            (byte) 0x34,
-            (byte) 0x56,
-            (byte) 0x78, // expire
-            (byte) 0x34,
-            (byte) 0x56,
-            (byte) 0x78,
-            (byte) 0x9A
-          }; // minimum
+      byte[] raw = {
+        1,
+        'm',
+        1,
+        'h',
+        1,
+        'n',
+        0, // host
+        1,
+        'm',
+        1,
+        'a',
+        1,
+        'n',
+        0, // admin
+        (byte) 0xAB,
+        (byte) 0xCD,
+        (byte) 0xEF,
+        (byte) 0x12, // serial
+        (byte) 0xCD,
+        (byte) 0xEF,
+        (byte) 0x12,
+        (byte) 0x34, // refresh
+        (byte) 0xEF,
+        (byte) 0x12,
+        (byte) 0x34,
+        (byte) 0x56, // retry
+        (byte) 0x12,
+        (byte) 0x34,
+        (byte) 0x56,
+        (byte) 0x78, // expire
+        (byte) 0x34,
+        (byte) 0x56,
+        (byte) 0x78,
+        (byte) 0x9A
+      }; // minimum
 
       DNSInput di = new DNSInput(raw);
       SOARecord ar = new SOARecord();
@@ -485,43 +484,42 @@ public class SOARecordTest {
 
     @Test
     void canonical() {
-      byte[] exp =
-          new byte[] {
-            1,
-            'm',
-            1,
-            'h',
-            1,
-            'n',
-            0, // host
-            1,
-            'm',
-            1,
-            'a',
-            1,
-            'n',
-            0, // admin
-            (byte) 0xAB,
-            (byte) 0xCD,
-            (byte) 0xEF,
-            (byte) 0x12, // serial
-            (byte) 0xCD,
-            (byte) 0xEF,
-            (byte) 0x12,
-            (byte) 0x34, // refresh
-            (byte) 0xEF,
-            (byte) 0x12,
-            (byte) 0x34,
-            (byte) 0x56, // retry
-            (byte) 0x12,
-            (byte) 0x34,
-            (byte) 0x56,
-            (byte) 0x78, // expire
-            (byte) 0x34,
-            (byte) 0x56,
-            (byte) 0x78,
-            (byte) 0x9A
-          }; // minimum
+      byte[] exp = {
+        1,
+        'm',
+        1,
+        'h',
+        1,
+        'n',
+        0, // host
+        1,
+        'm',
+        1,
+        'a',
+        1,
+        'n',
+        0, // admin
+        (byte) 0xAB,
+        (byte) 0xCD,
+        (byte) 0xEF,
+        (byte) 0x12, // serial
+        (byte) 0xCD,
+        (byte) 0xEF,
+        (byte) 0x12,
+        (byte) 0x34, // refresh
+        (byte) 0xEF,
+        (byte) 0x12,
+        (byte) 0x34,
+        (byte) 0x56, // retry
+        (byte) 0x12,
+        (byte) 0x34,
+        (byte) 0x56,
+        (byte) 0x78, // expire
+        (byte) 0x34,
+        (byte) 0x56,
+        (byte) 0x78,
+        (byte) 0x9A
+      }; // minimum
 
       SOARecord ar =
           new SOARecord(
@@ -535,43 +533,42 @@ public class SOARecordTest {
 
     @Test
     void case_sensitive() {
-      byte[] exp =
-          new byte[] {
-            1,
-            'M',
-            1,
-            'h',
-            1,
-            'N',
-            0, // host
-            1,
-            'M',
-            1,
-            'a',
-            1,
-            'n',
-            0, // admin
-            (byte) 0xAB,
-            (byte) 0xCD,
-            (byte) 0xEF,
-            (byte) 0x12, // serial
-            (byte) 0xCD,
-            (byte) 0xEF,
-            (byte) 0x12,
-            (byte) 0x34, // refresh
-            (byte) 0xEF,
-            (byte) 0x12,
-            (byte) 0x34,
-            (byte) 0x56, // retry
-            (byte) 0x12,
-            (byte) 0x34,
-            (byte) 0x56,
-            (byte) 0x78, // expire
-            (byte) 0x34,
-            (byte) 0x56,
-            (byte) 0x78,
-            (byte) 0x9A
-          }; // minimum
+      byte[] exp = {
+        1,
+        'M',
+        1,
+        'h',
+        1,
+        'N',
+        0, // host
+        1,
+        'M',
+        1,
+        'a',
+        1,
+        'n',
+        0, // admin
+        (byte) 0xAB,
+        (byte) 0xCD,
+        (byte) 0xEF,
+        (byte) 0x12, // serial
+        (byte) 0xCD,
+        (byte) 0xEF,
+        (byte) 0x12,
+        (byte) 0x34, // refresh
+        (byte) 0xEF,
+        (byte) 0x12,
+        (byte) 0x34,
+        (byte) 0x56, // retry
+        (byte) 0x12,
+        (byte) 0x34,
+        (byte) 0x56,
+        (byte) 0x78, // expire
+        (byte) 0x34,
+        (byte) 0x56,
+        (byte) 0x78,
+        (byte) 0x9A
+      }; // minimum
 
       SOARecord ar =
           new SOARecord(

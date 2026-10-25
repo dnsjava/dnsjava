@@ -12,15 +12,14 @@ import org.junit.jupiter.api.Test;
 class ExtendedErrorCodeOptionTest {
   @Test
   void testCodeOnly() throws IOException {
-    byte[] data =
-        new byte[] {
-          0,
-          15, // EDNS option code
-          0,
-          2, // option data length
-          0,
-          1 // extended error code
-        };
+    byte[] data = {
+      0,
+      15, // EDNS option code
+      0,
+      2, // option data length
+      0,
+      1 // extended error code
+    };
     EDNSOption option = EDNSOption.fromWire(data);
     assertTrue(option instanceof ExtendedErrorCodeOption, "Expected ExtendedErrorCodeOption");
     ExtendedErrorCodeOption ede = (ExtendedErrorCodeOption) option;
@@ -32,17 +31,16 @@ class ExtendedErrorCodeOptionTest {
 
   @Test
   void testCodeAndText() throws IOException {
-    byte[] data =
-        new byte[] {
-          0,
-          15, // EDNS option code
-          0,
-          4, // option data length
-          0,
-          1, // extended error code
-          (byte) 'a',
-          (byte) 'b'
-        };
+    byte[] data = {
+      0,
+      15, // EDNS option code
+      0,
+      4, // option data length
+      0,
+      1, // extended error code
+      (byte) 'a',
+      (byte) 'b'
+    };
     EDNSOption option = EDNSOption.fromWire(data);
     assertTrue(option instanceof ExtendedErrorCodeOption, "Expected ExtendedErrorCodeOption");
     ExtendedErrorCodeOption ede = (ExtendedErrorCodeOption) option;
@@ -54,35 +52,33 @@ class ExtendedErrorCodeOptionTest {
 
   @Test
   void testCodeAndTextNullTerminated() throws IOException {
-    byte[] inputData =
-        new byte[] {
-          0,
-          15, // EDNS option code
-          0,
-          5, // option data length
-          0,
-          1, // extended error code
-          (byte) 'a',
-          (byte) 'b',
-          0
-        };
+    byte[] inputData = {
+      0,
+      15, // EDNS option code
+      0,
+      5, // option data length
+      0,
+      1, // extended error code
+      (byte) 'a',
+      (byte) 'b',
+      0
+    };
     EDNSOption option = EDNSOption.fromWire(inputData);
     assertTrue(option instanceof ExtendedErrorCodeOption, "Expected ExtendedErrorCodeOption");
     ExtendedErrorCodeOption ede = (ExtendedErrorCodeOption) option;
     assertEquals(1, ede.getErrorCode());
     assertEquals("ab", ede.getText());
 
-    byte[] outputDataNonNullTerminated =
-        new byte[] {
-          0,
-          15, // EDNS option code
-          0,
-          4, // option data length
-          0,
-          1, // extended error code
-          (byte) 'a',
-          (byte) 'b',
-        };
+    byte[] outputDataNonNullTerminated = {
+      0,
+      15, // EDNS option code
+      0,
+      4, // option data length
+      0,
+      1, // extended error code
+      (byte) 'a',
+      (byte) 'b',
+    };
     assertArrayEquals(outputDataNonNullTerminated, ede.toWire());
   }
 

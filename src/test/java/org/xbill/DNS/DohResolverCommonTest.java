@@ -102,7 +102,7 @@ class DohResolverCommonTest {
   @Test
   void testGetUrl() {
     TestDohResolver resolver = new TestDohResolver("https://dns.google/dns-query", 10);
-    byte[] queryBytes = new byte[] {1, 2, 3};
+    byte[] queryBytes = {1, 2, 3};
     String url = resolver.getUrl(queryBytes);
     assertTrue(url.contains("dns="));
 

@@ -61,23 +61,22 @@ class URIRecordTest {
   @Test
   void rdataToWire() {
     String target = "http://foo";
-    byte[] exp =
-        new byte[] {
-          (byte) 0xbe,
-          (byte) 0xef,
-          (byte) 0xde,
-          (byte) 0xad,
-          (byte) 0x68,
-          (byte) 0x74,
-          (byte) 0x74,
-          (byte) 0x70,
-          (byte) 0x3a,
-          (byte) 0x2f,
-          (byte) 0x2f,
-          (byte) 0x66,
-          (byte) 0x6f,
-          (byte) 0x6f
-        };
+    byte[] exp = {
+      (byte) 0xbe,
+      (byte) 0xef,
+      (byte) 0xde,
+      (byte) 0xad,
+      (byte) 0x68,
+      (byte) 0x74,
+      (byte) 0x74,
+      (byte) 0x70,
+      (byte) 0x3a,
+      (byte) 0x2f,
+      (byte) 0x2f,
+      (byte) 0x66,
+      (byte) 0x6f,
+      (byte) 0x6f
+    };
 
     URIRecord r = new URIRecord(n, DClass.IN, 0xABCDEL, 0xbeef, 0xdead, target);
     DNSOutput out = new DNSOutput();
@@ -87,23 +86,22 @@ class URIRecordTest {
 
   @Test
   void rrFromWire() throws IOException, URISyntaxException {
-    byte[] raw =
-        new byte[] {
-          (byte) 0xbe,
-          (byte) 0xef,
-          (byte) 0xde,
-          (byte) 0xad,
-          (byte) 0x68,
-          (byte) 0x74,
-          (byte) 0x74,
-          (byte) 0x70,
-          (byte) 0x3a,
-          (byte) 0x2f,
-          (byte) 0x2f,
-          (byte) 0x66,
-          (byte) 0x6f,
-          (byte) 0x6f
-        };
+    byte[] raw = {
+      (byte) 0xbe,
+      (byte) 0xef,
+      (byte) 0xde,
+      (byte) 0xad,
+      (byte) 0x68,
+      (byte) 0x74,
+      (byte) 0x74,
+      (byte) 0x70,
+      (byte) 0x3a,
+      (byte) 0x2f,
+      (byte) 0x2f,
+      (byte) 0x66,
+      (byte) 0x6f,
+      (byte) 0x6f
+    };
     DNSInput in = new DNSInput(raw);
 
     URIRecord r = new URIRecord();

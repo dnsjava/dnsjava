@@ -61,14 +61,14 @@ class TypeBitmapTest {
 
   @Test
   void typeNSandSOAArray() {
-    int[] typeArray = new int[] {Type.NS, Type.SOA};
+    int[] typeArray = {Type.NS, Type.SOA};
     TypeBitmap typeBitmap = new TypeBitmap(typeArray);
     assertArrayEquals(typeArray, typeBitmap.toArray());
   }
 
   @Test
   void typeAAndSOAToWire() {
-    int[] typeArray = new int[] {Type.A, Type.SOA};
+    int[] typeArray = {Type.A, Type.SOA};
     TypeBitmap typeBitmap = new TypeBitmap(typeArray);
     DNSOutput out = new DNSOutput();
     typeBitmap.toWire(out);
@@ -77,28 +77,27 @@ class TypeBitmapTest {
 
   @Test
   void typeAandNSEC3ToWireAndBack() throws WireParseException {
-    int[] typeArray = new int[] {Type.A, Type.NSEC3};
-    byte[] wire =
-        new byte[] {
-          // block
-          0,
-          // size
-          7,
-          // 0-7
-          0b0100_0000,
-          // 8-15,
-          0,
-          // 16-23,
-          0,
-          // 24-31,
-          0,
-          // 32-39
-          0,
-          // 40-47
-          0,
-          // 48-55
-          0b0010_0000
-        };
+    int[] typeArray = {Type.A, Type.NSEC3};
+    byte[] wire = {
+      // block
+      0,
+      // size
+      7,
+      // 0-7
+      0b0100_0000,
+      // 8-15,
+      0,
+      // 16-23,
+      0,
+      // 24-31,
+      0,
+      // 32-39
+      0,
+      // 40-47
+      0,
+      // 48-55
+      0b0010_0000
+    };
 
     // Test serialization
     TypeBitmap typeBitmapOut = new TypeBitmap(typeArray);
@@ -114,33 +113,32 @@ class TypeBitmapTest {
 
   @Test
   void validateWindowBlockNumberAscendingOrder() {
-    byte[] wire =
-        new byte[] {
-          // block
-          1,
-          // size
-          7,
-          // 0-7
-          0b0100_0000,
-          // 8-15,
-          0,
-          // 16-23,
-          0,
-          // 24-31,
-          0,
-          // 32-39
-          0,
-          // 40-47
-          0,
-          // 48-55
-          0b0010_0000,
-          // block
-          0,
-          // size
-          1,
-          // 0-7
-          0b0100_0000,
-        };
+    byte[] wire = {
+      // block
+      1,
+      // size
+      7,
+      // 0-7
+      0b0100_0000,
+      // 8-15,
+      0,
+      // 16-23,
+      0,
+      // 24-31,
+      0,
+      // 32-39
+      0,
+      // 40-47
+      0,
+      // 48-55
+      0b0010_0000,
+      // block
+      0,
+      // size
+      1,
+      // 0-7
+      0b0100_0000,
+    };
 
     // Test parsing fails
     DNSInput in = new DNSInput(wire);

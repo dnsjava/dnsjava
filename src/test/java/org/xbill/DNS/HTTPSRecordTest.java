@@ -97,7 +97,7 @@ class HTTPSRecordTest {
   void aliasMode() throws IOException {
     String str = "0 a.b.c.";
     byte[] bytes = SVCBRecordTest.stringToWire(str);
-    byte[] expected = new byte[] {0, 0, 1, 'a', 1, 'b', 1, 'c', 0};
+    byte[] expected = {0, 0, 1, 'a', 1, 'b', 1, 'c', 0};
     assertArrayEquals(expected, bytes);
     assertEquals(str, SVCBRecordTest.wireToString(bytes));
   }
@@ -106,7 +106,7 @@ class HTTPSRecordTest {
   void serviceModePort() throws IOException {
     String str = "1 . port=8443";
     byte[] bytes = SVCBRecordTest.stringToWire(str);
-    byte[] expected = new byte[] {0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
+    byte[] expected = {0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
     assertArrayEquals(expected, bytes);
     assertEquals(str, SVCBRecordTest.wireToString(bytes));
   }

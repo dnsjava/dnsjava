@@ -63,12 +63,11 @@ class ReverseMapTest {
 
   @Test
   void fromAddress_ipv6() throws UnknownHostException {
-    byte[] dat =
-        new byte[] {
-          (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
-          (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
-        };
-    int[] idat = new int[] {32, 1, 13, 184, 133, 163, 8, 211, 19, 25, 138, 46, 3, 112, 115, 52};
+    byte[] dat = {
+      (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
+      (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
+    };
+    int[] idat = {32, 1, 13, 184, 133, 163, 8, 211, 19, 25, 138, 46, 3, 112, 115, 52};
 
     assertEquals(ipv6arpa, ReverseMap.fromAddress(ipv6addr, Address.IPv6));
     assertEquals(ipv6arpa, ReverseMap.fromAddress(InetAddress.getByName(ipv6addr)));
@@ -88,7 +87,7 @@ class ReverseMapTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> {
-          int[] dat = new int[] {0, 1, 2, 256};
+          int[] dat = {0, 1, 2, 256};
           ReverseMap.fromAddress(dat);
         });
   }

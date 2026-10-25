@@ -62,7 +62,7 @@ class KEYRecordTest {
   void ctor_7arg() throws TextParseException {
     Name n = Name.fromString("My.Absolute.Name.");
     Name r = Name.fromString("My.Relative.Name");
-    byte[] key = new byte[] {0, 1, 3, 5, 7, 9};
+    byte[] key = {0, 1, 3, 5, 7, 9};
 
     KEYRecord kr = new KEYRecord(n, DClass.IN, 0x24AC, 0x9832, 0x12, 0x67, key);
     assertEquals(n, kr.getName());

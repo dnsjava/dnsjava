@@ -68,7 +68,7 @@ class MXRecordTest {
     DNSOutput dout = new DNSOutput();
     mr.rrToWire(dout, null, true);
     byte[] out = dout.toByteArray();
-    byte[] exp = new byte[] {0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0};
+    byte[] exp = {0x1F, 0x2B, 1, 'm', 1, 'o', 1, 'n', 0};
     assertArrayEquals(exp, out);
 
     // case sensitive

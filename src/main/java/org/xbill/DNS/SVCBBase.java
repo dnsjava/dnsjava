@@ -348,8 +348,8 @@ public abstract class SVCBBase extends Record {
   }
 
   public static class ParameterAlpn extends ParameterBase {
-    private static final byte[] H2 = new byte[] {'h', '2'};
-    private static final byte[] H3 = new byte[] {'h', '3'};
+    private static final byte[] H2 = {'h', '2'};
+    private static final byte[] H3 = {'h', '3'};
 
     private static final DecimalFormat byteFormat = new DecimalFormat();
 

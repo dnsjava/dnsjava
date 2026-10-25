@@ -173,17 +173,9 @@ public class APLRecordTest {
 
     @Test
     void validIPv4() throws IOException {
-      byte[] raw =
-          new byte[] {
-            0,
-            1,
-            8,
-            (byte) 0x84,
-            m_addr4_bytes[0],
-            m_addr4_bytes[1],
-            m_addr4_bytes[2],
-            m_addr4_bytes[3]
-          };
+      byte[] raw = {
+        0, 1, 8, (byte) 0x84, m_addr4_bytes[0], m_addr4_bytes[1], m_addr4_bytes[2], m_addr4_bytes[3]
+      };
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -196,8 +188,7 @@ public class APLRecordTest {
 
     @Test
     void validIPv4_short_address() throws IOException {
-      byte[] raw =
-          new byte[] {0, 1, 20, (byte) 0x83, m_addr4_bytes[0], m_addr4_bytes[1], m_addr4_bytes[2]};
+      byte[] raw = {0, 1, 20, (byte) 0x83, m_addr4_bytes[0], m_addr4_bytes[1], m_addr4_bytes[2]};
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -212,17 +203,16 @@ public class APLRecordTest {
 
     @Test
     void invalid_IPv4_prefix() {
-      byte[] raw =
-          new byte[] {
-            0,
-            1,
-            33,
-            (byte) 0x84,
-            m_addr4_bytes[0],
-            m_addr4_bytes[1],
-            m_addr4_bytes[2],
-            m_addr4_bytes[3]
-          };
+      byte[] raw = {
+        0,
+        1,
+        33,
+        (byte) 0x84,
+        m_addr4_bytes[0],
+        m_addr4_bytes[1],
+        m_addr4_bytes[2],
+        m_addr4_bytes[3]
+      };
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -231,18 +221,17 @@ public class APLRecordTest {
 
     @Test
     void invalid_IPv4_length() {
-      byte[] raw =
-          new byte[] {
-            0,
-            1,
-            8,
-            (byte) 0x85,
-            m_addr4_bytes[0],
-            m_addr4_bytes[1],
-            m_addr4_bytes[2],
-            m_addr4_bytes[3],
-            10
-          };
+      byte[] raw = {
+        0,
+        1,
+        8,
+        (byte) 0x85,
+        m_addr4_bytes[0],
+        m_addr4_bytes[1],
+        m_addr4_bytes[2],
+        m_addr4_bytes[3],
+        10
+      };
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -251,25 +240,24 @@ public class APLRecordTest {
 
     @Test
     void multiple_validIPv4() throws IOException {
-      byte[] raw =
-          new byte[] {
-            0,
-            1,
-            8,
-            (byte) 0x84,
-            m_addr4_bytes[0],
-            m_addr4_bytes[1],
-            m_addr4_bytes[2],
-            m_addr4_bytes[3],
-            0,
-            1,
-            30,
-            (byte) 0x4,
-            m_addr4_bytes[0],
-            m_addr4_bytes[1],
-            m_addr4_bytes[2],
-            m_addr4_bytes[3],
-          };
+      byte[] raw = {
+        0,
+        1,
+        8,
+        (byte) 0x84,
+        m_addr4_bytes[0],
+        m_addr4_bytes[1],
+        m_addr4_bytes[2],
+        m_addr4_bytes[3],
+        0,
+        1,
+        30,
+        (byte) 0x4,
+        m_addr4_bytes[0],
+        m_addr4_bytes[1],
+        m_addr4_bytes[2],
+        m_addr4_bytes[3],
+      };
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -283,29 +271,28 @@ public class APLRecordTest {
 
     @Test
     void validIPv6() throws IOException {
-      byte[] raw =
-          new byte[] {
-            0,
-            2,
-            (byte) 115,
-            (byte) 0x10,
-            m_addr6_bytes[0],
-            m_addr6_bytes[1],
-            m_addr6_bytes[2],
-            m_addr6_bytes[3],
-            m_addr6_bytes[4],
-            m_addr6_bytes[5],
-            m_addr6_bytes[6],
-            m_addr6_bytes[7],
-            m_addr6_bytes[8],
-            m_addr6_bytes[9],
-            m_addr6_bytes[10],
-            m_addr6_bytes[11],
-            m_addr6_bytes[12],
-            m_addr6_bytes[13],
-            m_addr6_bytes[14],
-            m_addr6_bytes[15]
-          };
+      byte[] raw = {
+        0,
+        2,
+        (byte) 115,
+        (byte) 0x10,
+        m_addr6_bytes[0],
+        m_addr6_bytes[1],
+        m_addr6_bytes[2],
+        m_addr6_bytes[3],
+        m_addr6_bytes[4],
+        m_addr6_bytes[5],
+        m_addr6_bytes[6],
+        m_addr6_bytes[7],
+        m_addr6_bytes[8],
+        m_addr6_bytes[9],
+        m_addr6_bytes[10],
+        m_addr6_bytes[11],
+        m_addr6_bytes[12],
+        m_addr6_bytes[13],
+        m_addr6_bytes[14],
+        m_addr6_bytes[15]
+      };
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -318,7 +305,7 @@ public class APLRecordTest {
 
     @Test
     void valid_nonIP() throws IOException {
-      byte[] raw = new byte[] {0, 3, (byte) 130, (byte) 0x85, 1, 2, 3, 4, 5};
+      byte[] raw = {0, 3, (byte) 130, (byte) 0x85, 1, 2, 3, 4, 5};
 
       DNSInput di = new DNSInput(raw);
       APLRecord ar = new APLRecord();
@@ -559,37 +546,36 @@ public class APLRecordTest {
     void basic() {
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, m_elements);
 
-      byte[] exp =
-          new byte[] {
-            0,
-            1,
-            12,
-            (byte) 0x84,
-            m_addr4_bytes[0],
-            m_addr4_bytes[1],
-            m_addr4_bytes[2],
-            m_addr4_bytes[3],
-            0,
-            2,
-            64,
-            0x10,
-            m_addr6_bytes[0],
-            m_addr6_bytes[1],
-            m_addr6_bytes[2],
-            m_addr6_bytes[3],
-            m_addr6_bytes[4],
-            m_addr6_bytes[5],
-            m_addr6_bytes[6],
-            m_addr6_bytes[7],
-            m_addr6_bytes[8],
-            m_addr6_bytes[9],
-            m_addr6_bytes[10],
-            m_addr6_bytes[11],
-            m_addr6_bytes[12],
-            m_addr6_bytes[13],
-            m_addr6_bytes[14],
-            m_addr6_bytes[15]
-          };
+      byte[] exp = {
+        0,
+        1,
+        12,
+        (byte) 0x84,
+        m_addr4_bytes[0],
+        m_addr4_bytes[1],
+        m_addr4_bytes[2],
+        m_addr4_bytes[3],
+        0,
+        2,
+        64,
+        0x10,
+        m_addr6_bytes[0],
+        m_addr6_bytes[1],
+        m_addr6_bytes[2],
+        m_addr6_bytes[3],
+        m_addr6_bytes[4],
+        m_addr6_bytes[5],
+        m_addr6_bytes[6],
+        m_addr6_bytes[7],
+        m_addr6_bytes[8],
+        m_addr6_bytes[9],
+        m_addr6_bytes[10],
+        m_addr6_bytes[11],
+        m_addr6_bytes[12],
+        m_addr6_bytes[13],
+        m_addr6_bytes[14],
+        m_addr6_bytes[15]
+      };
 
       DNSOutput dout = new DNSOutput();
 
@@ -599,7 +585,7 @@ public class APLRecordTest {
 
     @Test
     void non_IP() throws IOException {
-      byte[] exp = new byte[] {0, 3, (byte) 130, (byte) 0x85, 1, 2, 3, 4, 5};
+      byte[] exp = {0, 3, (byte) 130, (byte) 0x85, 1, 2, 3, 4, 5};
 
       DNSInput di = new DNSInput(exp);
       APLRecord ar = new APLRecord();
@@ -619,7 +605,7 @@ public class APLRecordTest {
 
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, elements);
 
-      byte[] exp = new byte[] {0, 1, 31, (byte) 0x84, (byte) 232, 0, 11, 1};
+      byte[] exp = {0, 1, 31, (byte) 0x84, (byte) 232, 0, 11, 1};
 
       DNSOutput dout = new DNSOutput();
 
@@ -635,7 +621,7 @@ public class APLRecordTest {
 
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, elements);
 
-      byte[] exp = new byte[] {0, 1, 31, (byte) 0x83, (byte) 232, 0, 11};
+      byte[] exp = {0, 1, 31, (byte) 0x83, (byte) 232, 0, 11};
 
       DNSOutput dout = new DNSOutput();
 
@@ -651,7 +637,7 @@ public class APLRecordTest {
 
       APLRecord ar = new APLRecord(m_an, DClass.IN, m_ttl, elements);
 
-      byte[] exp = new byte[] {0, 1, 31, (byte) 0x80};
+      byte[] exp = {0, 1, 31, (byte) 0x80};
 
       DNSOutput dout = new DNSOutput();
 

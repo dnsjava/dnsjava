@@ -48,11 +48,10 @@ class HexdumpTest {
 
   @Test
   void shortform() {
-    byte[] data =
-        new byte[] {
-          1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-          2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
-        };
+    byte[] data = {
+      1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+      2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
+    };
     String desc = "This Is My Description";
 
     // compare against output from the long form
@@ -64,112 +63,112 @@ class HexdumpTest {
 
   @Test
   void test_0() {
-    byte[] data = new byte[] {1, 0, 2};
+    byte[] data = {1, 0, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t00 \n", out);
   }
 
   @Test
   void test_1() {
-    byte[] data = new byte[] {2, 1, 3};
+    byte[] data = {2, 1, 3};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t01 \n", out);
   }
 
   @Test
   void test_2() {
-    byte[] data = new byte[] {1, 2, 3};
+    byte[] data = {1, 2, 3};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t02 \n", out);
   }
 
   @Test
   void test_3() {
-    byte[] data = new byte[] {1, 3, 2};
+    byte[] data = {1, 3, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t03 \n", out);
   }
 
   @Test
   void test_4() {
-    byte[] data = new byte[] {1, 4, 2};
+    byte[] data = {1, 4, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t04 \n", out);
   }
 
   @Test
   void test_5() {
-    byte[] data = new byte[] {1, 5, 2};
+    byte[] data = {1, 5, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t05 \n", out);
   }
 
   @Test
   void test_6() {
-    byte[] data = new byte[] {1, 6, 2};
+    byte[] data = {1, 6, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t06 \n", out);
   }
 
   @Test
   void test_7() {
-    byte[] data = new byte[] {1, 7, 2};
+    byte[] data = {1, 7, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t07 \n", out);
   }
 
   @Test
   void test_8() {
-    byte[] data = new byte[] {1, 8, 2};
+    byte[] data = {1, 8, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t08 \n", out);
   }
 
   @Test
   void test_9() {
-    byte[] data = new byte[] {1, 9, 2};
+    byte[] data = {1, 9, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t09 \n", out);
   }
 
   @Test
   void test_10() {
-    byte[] data = new byte[] {1, 10, 2};
+    byte[] data = {1, 10, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0A \n", out);
   }
 
   @Test
   void test_11() {
-    byte[] data = new byte[] {1, 11, 2};
+    byte[] data = {1, 11, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0B \n", out);
   }
 
   @Test
   void test_12() {
-    byte[] data = new byte[] {1, 12, 2};
+    byte[] data = {1, 12, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0C \n", out);
   }
 
   @Test
   void test_13() {
-    byte[] data = new byte[] {1, 13, 2};
+    byte[] data = {1, 13, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0D \n", out);
   }
 
   @Test
   void test_14() {
-    byte[] data = new byte[] {1, 14, 2};
+    byte[] data = {1, 14, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0E \n", out);
   }
 
   @Test
   void test_15() {
-    byte[] data = new byte[] {1, 15, 2};
+    byte[] data = {1, 15, 2};
     String out = hexdump.dump(null, data, 1, 1);
     assertEquals("1b:\t0F \n", out);
   }

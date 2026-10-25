@@ -625,8 +625,9 @@ class NameTest {
     @Test
     void basic() throws IOException {
 
-      final byte[] raw =
-          new byte[] {3, 'W', 'w', 'w', 7, 'D', 'n', 's', 'J', 'a', 'v', 'a', 3, 'o', 'r', 'g', 0};
+      final byte[] raw = {
+        3, 'W', 'w', 'w', 7, 'D', 'n', 's', 'J', 'a', 'v', 'a', 3, 'o', 'r', 'g', 0
+      };
       Name e = Name.fromString("Www.DnsJava.org.");
 
       Name n = new Name(raw);
@@ -640,7 +641,7 @@ class NameTest {
 
     @Test
     void root() throws WireParseException {
-      final byte[] raw = new byte[] {0};
+      final byte[] raw = {0};
       Name n = new Name(new DNSInput(raw));
       assertEquals(Name.root, n);
     }
@@ -652,13 +653,12 @@ class NameTest {
 
     @Test
     void max_label_length() throws TextParseException, WireParseException {
-      byte[] raw =
-          new byte[] {
-            63, 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 0
-          };
+      byte[] raw = {
+        63, 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 0
+      };
       Name e = Name.fromString("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.");
 
       Name n = new Name(new DNSInput(raw));
@@ -671,24 +671,23 @@ class NameTest {
       Name e =
           new Name(
               "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.");
-      byte[] raw =
-          new byte[] {
-            63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 63, 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 63, 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 61, 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
-            'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
-            'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
-            'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 0
-          };
+      byte[] raw = {
+        63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 63, 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 63, 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
+        'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
+        'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
+        'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 61, 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 0
+      };
 
       Name n = new Name(new DNSInput(raw));
       assertEquals(e, n);
@@ -697,45 +696,43 @@ class NameTest {
     @Test
     void toolong_name() {
       // absolute name with three 63-char labels and a 62-char label
-      byte[] raw =
-          new byte[] {
-            63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 63, 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-            'b', 'b', 'b', 'b', 'b', 'b', 'b', 63, 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
-            'c', 'c', 62, 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
-            'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
-            'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
-            'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 0
-          };
+      byte[] raw = {
+        63, 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+        'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 63, 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+        'b', 'b', 63, 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
+        'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
+        'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c',
+        'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 62, 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd', 'd',
+        'd', 'd', 'd', 0
+      };
 
       assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
     }
 
     @Test
     void max_labels() throws TextParseException, WireParseException {
-      byte[] raw =
-          new byte[] {
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 0
-          };
+      byte[] raw = {
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 0
+      };
       Name e =
           Name.fromString(
               "a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.");
@@ -746,27 +743,26 @@ class NameTest {
 
     @Test
     void toomany_labels() {
-      byte[] raw =
-          new byte[] {
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
-            1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 0
-          };
+      byte[] raw = {
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a',
+        1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 1, 'a', 0
+      };
       assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
     }
 
     @Test
     void basic_compression() throws TextParseException, WireParseException {
-      byte[] raw = new byte[] {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1};
+      byte[] raw = {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1};
       Name e = Name.fromString("abc.");
 
       DNSInput in = new DNSInput(raw);
@@ -778,7 +774,7 @@ class NameTest {
 
     @Test
     void two_pointer_compression() throws TextParseException, WireParseException {
-      byte[] raw = new byte[] {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1, (byte) 0xC0, 6};
+      byte[] raw = {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1, (byte) 0xC0, 6};
       Name e = Name.fromString("abc.");
 
       DNSInput in = new DNSInput(raw);
@@ -790,7 +786,7 @@ class NameTest {
 
     @Test
     void two_part_compression() throws TextParseException, WireParseException {
-      byte[] raw = new byte[] {10, 3, 'a', 'b', 'c', 0, 1, 'B', (byte) 0xC0, 1};
+      byte[] raw = {10, 3, 'a', 'b', 'c', 0, 1, 'B', (byte) 0xC0, 1};
       Name e = Name.fromString("B.abc.");
 
       DNSInput in = new DNSInput(raw);
@@ -803,272 +799,271 @@ class NameTest {
     @Test
     void long_jump_compression() throws TextParseException, WireParseException {
       // pointer to name beginning at index 256
-      byte[] raw =
-          new byte[] {
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            12,
-            3,
-            'a',
-            'b',
-            'c',
-            0,
-            (byte) 0xC1,
-            0
-          };
+      byte[] raw = {
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        3,
+        'a',
+        'b',
+        'c',
+        0,
+        (byte) 0xC1,
+        0
+      };
       Name e = Name.fromString("abc.");
 
       DNSInput in = new DNSInput(raw);
@@ -1079,27 +1074,27 @@ class NameTest {
 
     @Test
     void bad_compression() {
-      byte[] raw = new byte[] {(byte) 0xC0, 2, 0};
+      byte[] raw = {(byte) 0xC0, 2, 0};
       assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
     }
 
     @Test
     void bad_label_reserved_type1() {
-      byte[] raw = new byte[] {(byte) 0b0100_0000, 2, 0};
+      byte[] raw = {(byte) 0b0100_0000, 2, 0};
       Exception e = assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
       assertEquals("bad label type", e.getMessage());
     }
 
     @Test
     void bad_label_reserved_type2() {
-      byte[] raw = new byte[] {(byte) 0b1000_0000, 2, 0};
+      byte[] raw = {(byte) 0b1000_0000, 2, 0};
       Exception e = assertThrows(WireParseException.class, () -> new Name(new DNSInput(raw)));
       assertEquals("bad label type", e.getMessage());
     }
 
     @Test
     void basic_compression_state_restore() throws TextParseException, WireParseException {
-      byte[] raw = new byte[] {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1, 3, 'd', 'e', 'f', 0};
+      byte[] raw = {10, 3, 'a', 'b', 'c', 0, (byte) 0xC0, 1, 3, 'd', 'e', 'f', 0};
       Name e = Name.fromString("abc.");
       Name e2 = Name.fromString("def.");
 
@@ -1115,8 +1110,7 @@ class NameTest {
 
     @Test
     void two_part_compression_state_restore() throws TextParseException, WireParseException {
-      byte[] raw =
-          new byte[] {10, 3, 'a', 'b', 'c', 0, 1, 'B', (byte) 0xC0, 1, 3, 'd', 'e', 'f', 0};
+      byte[] raw = {10, 3, 'a', 'b', 'c', 0, 1, 'B', (byte) 0xC0, 1, 3, 'd', 'e', 'f', 0};
       Name e = Name.fromString("B.abc.");
       Name e2 = Name.fromString("def.");
 
@@ -1376,7 +1370,7 @@ class NameTest {
 
   @Test
   void toString_special_char() throws WireParseException {
-    byte[] raw = new byte[] {1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0};
+    byte[] raw = {1, '"', 1, '(', 1, ')', 1, '.', 1, ';', 1, '\\', 1, '@', 1, '$', 0};
     String exp = "\\\".\\(.\\).\\..\\;.\\\\.\\@.\\$.";
     Name n = new Name(new DNSInput(raw));
     assertEquals(exp, n.toString());
@@ -1393,7 +1387,7 @@ class NameTest {
 
     @Test
     void null_Compression() throws TextParseException {
-      byte[] raw = new byte[] {1, 'A', 5, 'B', 'a', 's', 'i', 'c', 4, 'N', 'a', 'm', 'e', 0};
+      byte[] raw = {1, 'A', 5, 'B', 'a', 's', 'i', 'c', 4, 'N', 'a', 'm', 'e', 0};
       Name n = new Name("A.Basic.Name.");
 
       DNSOutput o = new DNSOutput();
@@ -1404,7 +1398,7 @@ class NameTest {
 
     @Test
     void empty_Compression() throws TextParseException {
-      byte[] raw = new byte[] {1, 'A', 5, 'B', 'a', 's', 'i', 'c', 4, 'N', 'a', 'm', 'e', 0};
+      byte[] raw = {1, 'A', 5, 'B', 'a', 's', 'i', 'c', 4, 'N', 'a', 'm', 'e', 0};
       Name n = new Name("A.Basic.Name.");
 
       Compression c = new Compression();
@@ -1421,7 +1415,7 @@ class NameTest {
 
       Compression c = new Compression();
       c.add(256, n);
-      byte[] exp = new byte[] {(byte) 0xC1, 0x0};
+      byte[] exp = {(byte) 0xC1, 0x0};
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c);
@@ -1436,7 +1430,7 @@ class NameTest {
 
       Compression c = new Compression();
       c.add(257, d);
-      byte[] exp = new byte[] {1, 'A', (byte) 0xC1, 0x1};
+      byte[] exp = {1, 'A', (byte) 0xC1, 0x1};
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c);
@@ -1453,7 +1447,7 @@ class NameTest {
 
     @Test
     void ctor_0arg() throws TextParseException {
-      byte[] raw = new byte[] {1, 'A', 5, 'B', 'a', 's', 'i', 'c', 4, 'N', 'a', 'm', 'e', 0};
+      byte[] raw = {1, 'A', 5, 'B', 'a', 's', 'i', 'c', 4, 'N', 'a', 'm', 'e', 0};
       Name n = new Name("A.Basic.Name.");
 
       byte[] out = n.toWire();
@@ -1474,7 +1468,7 @@ class NameTest {
 
       Compression c = new Compression();
       c.add(257, d);
-      byte[] exp = new byte[] {1, 'A', (byte) 0xC1, 0x1};
+      byte[] exp = {1, 'A', (byte) 0xC1, 0x1};
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c, false);
@@ -1488,7 +1482,7 @@ class NameTest {
   class Test_toWireCanonical {
     @Test
     void basic() throws TextParseException {
-      byte[] raw = new byte[] {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
+      byte[] raw = {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
       Name n = new Name("A.Basic.Name.");
 
       DNSOutput o = new DNSOutput();
@@ -1499,7 +1493,7 @@ class NameTest {
 
     @Test
     void ctor_0arg() throws TextParseException {
-      byte[] raw = new byte[] {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
+      byte[] raw = {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
       Name n = new Name("A.Basic.Name.");
 
       byte[] out = n.toWireCanonical();
@@ -1527,7 +1521,7 @@ class NameTest {
 
       Compression c = new Compression();
       c.add(257, d);
-      byte[] exp = new byte[] {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
+      byte[] exp = {1, 'a', 5, 'b', 'a', 's', 'i', 'c', 4, 'n', 'a', 'm', 'e', 0};
 
       DNSOutput o = new DNSOutput();
       n.toWire(o, c, true);

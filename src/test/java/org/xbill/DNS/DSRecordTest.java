@@ -154,17 +154,16 @@ class DSRecordTest {
 
   @Test
   void rrFromWire() throws IOException {
-    byte[] raw =
-        new byte[] {
-          (byte) 0xAB,
-          (byte) 0xCD,
-          (byte) 0xEF,
-          (byte) 0x01,
-          (byte) 0x23,
-          (byte) 0x45,
-          (byte) 0x67,
-          (byte) 0x89
-        };
+    byte[] raw = {
+      (byte) 0xAB,
+      (byte) 0xCD,
+      (byte) 0xEF,
+      (byte) 0x01,
+      (byte) 0x23,
+      (byte) 0x45,
+      (byte) 0x67,
+      (byte) 0x89
+    };
     DNSInput in = new DNSInput(raw);
 
     DSRecord dr = new DSRecord();

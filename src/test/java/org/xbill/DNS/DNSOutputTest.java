@@ -186,7 +186,7 @@ class DNSOutputTest {
 
   @Test
   void writeByteArray_1arg() {
-    byte[] in = new byte[] {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
+    byte[] in = {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
     m_do.writeByteArray(in);
     assertEquals(5, m_do.current());
     byte[] curr = m_do.toByteArray();
@@ -195,31 +195,31 @@ class DNSOutputTest {
 
   @Test
   void writeByteArray_3arg() {
-    byte[] in = new byte[] {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
+    byte[] in = {(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x34};
     m_do.writeByteArray(in, 2, 3);
     assertEquals(3, m_do.current());
-    byte[] exp = new byte[] {in[2], in[3], in[4]};
+    byte[] exp = {in[2], in[3], in[4]};
     byte[] curr = m_do.toByteArray();
     assertArrayEquals(exp, curr);
   }
 
   @Test
   void writeCountedString_basic() {
-    byte[] in = new byte[] {'h', 'e', 'l', 'L', '0'};
+    byte[] in = {'h', 'e', 'l', 'L', '0'};
     m_do.writeCountedString(in);
     assertEquals(in.length + 1, m_do.current());
     byte[] curr = m_do.toByteArray();
-    byte[] exp = new byte[] {(byte) in.length, in[0], in[1], in[2], in[3], in[4]};
+    byte[] exp = {(byte) in.length, in[0], in[1], in[2], in[3], in[4]};
     assertArrayEquals(exp, curr);
   }
 
   @Test
   void writeCountedString_empty() {
-    byte[] in = new byte[] {};
+    byte[] in = {};
     m_do.writeCountedString(in);
     assertEquals(in.length + 1, m_do.current());
     byte[] curr = m_do.toByteArray();
-    byte[] exp = new byte[] {(byte) in.length};
+    byte[] exp = {(byte) in.length};
     assertArrayEquals(exp, curr);
   }
 

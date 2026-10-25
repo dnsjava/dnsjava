@@ -114,11 +114,10 @@ class AddressTest {
 
   @Test
   void toByteArray_IPv6() {
-    byte[] exp =
-        new byte[] {
-          (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
-          (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
-        };
+    byte[] exp = {
+      (byte) 32, (byte) 1, (byte) 13, (byte) 184, (byte) 133, (byte) 163, (byte) 8, (byte) 211,
+      (byte) 19, (byte) 25, (byte) 138, (byte) 46, (byte) 3, (byte) 112, (byte) 115, (byte) 52
+    };
     byte[] ret = Address.toByteArray("2001:0db8:85a3:08d3:1319:8a2e:0370:7334", Address.IPv6);
     assertArrayEquals(exp, ret);
     ret = Address.toByteArray("2001:db8:85a3:8d3:1319:8a2e:370:7334", Address.IPv6);
@@ -269,7 +268,7 @@ class AddressTest {
 
   @Test
   void toArray() {
-    int[] exp = new int[] {1, 2, 3, 4};
+    int[] exp = {1, 2, 3, 4};
     int[] ret = Address.toArray("1.2.3.4", Address.IPv4);
     assertArrayEquals(exp, ret);
 

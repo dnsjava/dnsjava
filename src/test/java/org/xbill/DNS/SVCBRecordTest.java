@@ -653,7 +653,7 @@ public class SVCBRecordTest {
   void aliasMode() throws IOException {
     String str = "0 a.b.c.";
     byte[] bytes = stringToWire(str);
-    byte[] expected = new byte[] {0, 0, 1, 'a', 1, 'b', 1, 'c', 0};
+    byte[] expected = {0, 0, 1, 'a', 1, 'b', 1, 'c', 0};
     assertArrayEquals(expected, bytes);
     assertEquals(str, wireToString(bytes));
   }
@@ -662,7 +662,7 @@ public class SVCBRecordTest {
   void serviceModeWithoutParameters() throws IOException {
     String str = "1 .";
     byte[] bytes = stringToWire(str);
-    byte[] expected = new byte[] {0, 1, 0};
+    byte[] expected = {0, 1, 0};
     assertArrayEquals(expected, bytes);
     assertEquals(str, wireToString(bytes));
   }
@@ -671,7 +671,7 @@ public class SVCBRecordTest {
   void serviceModePort() throws IOException {
     String str = "1 . port=8443";
     byte[] bytes = stringToWire(str);
-    byte[] expected = new byte[] {0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
+    byte[] expected = {0, 1, 0, 0, 3, 0, 2, 0x20, (byte) 0xFB};
     assertArrayEquals(expected, bytes);
     assertEquals(str, wireToString(bytes));
   }
@@ -704,7 +704,7 @@ public class SVCBRecordTest {
   void serviceModeMultiValue() throws IOException {
     String str = "1 . alpn=h2,h3";
     byte[] bytes = stringToWire(str);
-    byte[] expected = new byte[] {0, 1, 0, 0, 1, 0, 6, 2, 'h', '2', 2, 'h', '3'};
+    byte[] expected = {0, 1, 0, 0, 1, 0, 6, 2, 'h', '2', 2, 'h', '3'};
     assertThat(bytes).isEqualTo(expected);
     assertThat(wireToString(bytes)).isEqualTo(str);
   }
@@ -805,11 +805,9 @@ public class SVCBRecordTest {
     String str = "1 . alpn=http/1.1,\\001aa\\003\\b,h2";
     String expectedStr = "1 . alpn=http/1.1,\\001aa\\003b,h2";
     byte[] bytes = stringToWire(str);
-    byte[] expectedBytes =
-        new byte[] {
-          0, 1, 0, 0, 1, 0, 18, 8, 104, 116, 116, 112, 47, 49, 46, 49, 5, 1, 97, 97, 3, 98, 2, 104,
-          50
-        };
+    byte[] expectedBytes = {
+      0, 1, 0, 0, 1, 0, 18, 8, 104, 116, 116, 112, 47, 49, 46, 49, 5, 1, 97, 97, 3, 98, 2, 104, 50
+    };
     assertThat(bytes).isEqualTo(expectedBytes);
     assertThat(wireToString(bytes)).isEqualTo(expectedStr);
   }
@@ -842,7 +840,7 @@ public class SVCBRecordTest {
   void serviceModeIpv4HintList() throws IOException {
     String str = "5 . ipv4hint=4.5.6.7,8.9.1.2";
     byte[] bytes = stringToWire(str);
-    byte[] expected = new byte[] {0, 5, 0, 0, 4, 0, 8, 4, 5, 6, 7, 8, 9, 1, 2};
+    byte[] expected = {0, 5, 0, 0, 4, 0, 8, 4, 5, 6, 7, 8, 9, 1, 2};
     assertArrayEquals(expected, bytes);
     assertEquals(str, wireToString(bytes));
   }
@@ -877,7 +875,7 @@ public class SVCBRecordTest {
   void serviceModeUnknownKeyBytes() throws IOException {
     String str = "8 . key23456=\\000\\001\\002\\003";
     byte[] bytes = stringToWire(str);
-    byte[] expected = new byte[] {0, 8, 0, 0x5B, (byte) 0xA0, 0, 4, 0, 1, 2, 3};
+    byte[] expected = {0, 8, 0, 0x5B, (byte) 0xA0, 0, 4, 0, 1, 2, 3};
     assertArrayEquals(expected, bytes);
     assertEquals(str, wireToString(bytes));
   }
@@ -989,49 +987,49 @@ public class SVCBRecordTest {
 
   @Test
   void wireFormatTooShort() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 1, 0, 10};
+    byte[] wire = {0, 1, 0, 0, 1, 0, 10};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatTooLong() {
-    byte[] wire = new byte[] {0, 0, 0, 1};
+    byte[] wire = {0, 0, 0, 1};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatMandatoryTooLong() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 0, 0, 3, 0, 1, 55};
+    byte[] wire = {0, 1, 0, 0, 0, 0, 3, 0, 1, 55};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatAlpnTooShort() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 1, 0, 3, 10, 1, 55};
+    byte[] wire = {0, 1, 0, 0, 1, 0, 3, 10, 1, 55};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatNoDefaultAlpnTooLong() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 2, 0, 1, 0};
+    byte[] wire = {0, 1, 0, 0, 2, 0, 1, 0};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatPortTooLong() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 3, 0, 4, 0, 0, 0, 0};
+    byte[] wire = {0, 1, 0, 0, 3, 0, 4, 0, 0, 0, 0};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatIpv4HintTooLong() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 4, 0, 5, 1, 2, 3, 4, 5};
+    byte[] wire = {0, 1, 0, 0, 4, 0, 5, 1, 2, 3, 4, 5};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 
   @Test
   void wireFormatIpv6HintTooShort() {
-    byte[] wire = new byte[] {0, 1, 0, 0, 6, 0, 2, 1, 2};
+    byte[] wire = {0, 1, 0, 0, 6, 0, 2, 1, 2};
     assertThrows(WireParseException.class, () -> wireToString(wire));
   }
 

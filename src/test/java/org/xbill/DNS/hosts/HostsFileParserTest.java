@@ -44,7 +44,7 @@ import org.xbill.DNS.Type;
 
 class HostsFileParserTest {
   private static final Name kubernetesName = Name.fromConstantString("kubernetes.docker.internal.");
-  private static final byte[] localhostBytes = new byte[] {127, 0, 0, 1};
+  private static final byte[] localhostBytes = {127, 0, 0, 1};
   private static Path hostsFileWindows;
   private static Path hostsFileInvalid;
   private static InetAddress kubernetesAddress;
