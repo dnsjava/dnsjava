@@ -15,6 +15,9 @@ import lombok.EqualsAndHashCode;
  * A set of Records with the same name, type, and class. Also included are all RRSIG records signing
  * the data records.
  *
+ * <p>Note that although this class contains the name {@code Set}, it is backed by an ordered list.
+ * Insertion order matters to support round-robin answers from servers.
+ *
  * @see Record
  * @see RRSIGRecord
  * @author Brian Wellington
