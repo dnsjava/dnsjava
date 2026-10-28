@@ -452,7 +452,7 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
     StringBuilder sb = new StringBuilder();
     for (byte value : array) {
       int b = value & 0xFF;
-      if (b == 0x20) {
+      if (b == 0x20 || b == ';' || b == '(' || b == ')') {
         sb.append((char) b);
         needsQuote = true;
       } else if (b < 0x21 || b >= 0x7f) {
