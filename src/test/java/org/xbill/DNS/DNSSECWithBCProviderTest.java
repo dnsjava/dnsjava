@@ -72,4 +72,22 @@ class DNSSECWithBCProviderTest {
         base16.fromString("6033725b0ccfc05d1e9d844d49c6cf890b13d5eac9439189947d5db6c8d1c1ec");
     assertThat(DNSSEC.generateDSDigest(dnskey, Digest.GOST3411_12)).containsExactly(expectedDigest);
   }
+
+  @Test
+  void testGenerateDSDigestSm3() throws IOException {
+    // ZSK from RFC 9563 Section 6's worked example.
+    DNSKEYRecord dnskey =
+        (DNSKEYRecord)
+            Record.fromString(
+                Name.fromConstantString("example."),
+                Type.DNSKEY,
+                DClass.IN,
+                3600,
+                "256 3 17 7EQ32PTAp+1ac6R9Ze2nfB8pPc2OJqkHSjugALr4SuD9awuQxhfw7wMpiXv7JK4/VwwTrCxJwu+qUuDsgoBK4w==",
+                Name.root);
+    // Digest verified with Example_Program from RFC 9563 Section 9.2
+    byte[] expectedDigest =
+        base16.fromString("a774c0921b6fe91f2184a43ea5ca27d39d64677b757a0a369d9c78d4a65fa220");
+    assertThat(DNSSEC.generateDSDigest(dnskey, Digest.SM3)).containsExactly(expectedDigest);
+  }
 }

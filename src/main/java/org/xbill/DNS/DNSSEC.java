@@ -1428,6 +1428,9 @@ public class DNSSEC {
         case Digest.GOST3411_12:
           digest = MessageDigest.getInstance("GOST3411-2012-256");
           break;
+        case Digest.SM3:
+          digest = MessageDigest.getInstance("SM3");
+          break;
         default:
           throw new IllegalArgumentException("unknown DS digest type " + digestid);
       }
