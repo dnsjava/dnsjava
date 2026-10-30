@@ -63,7 +63,8 @@
         <google-java-format.version>1.7</google-java-format.version>
         <spotless.version>2.30.0</spotless.version>
 
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
         <delombok.output>${project.build.directory}/delombok</delombok.output>
     </properties>
 
@@ -240,7 +241,8 @@
                         <Bundle-License>
                             BSD-3-Clause;link="https://raw.githubusercontent.com/dnsjava/dnsjava/master/LICENSE"
                         </Bundle-License>
-                        <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource, Private-Package</_removeheaders>
+                        <_removeheaders>Bnd-*, Tool, Require-Capability, Include-Resource, Private-Package
+                        </_removeheaders>
                         <_snapshot>SNAPSHOT</_snapshot>
                         <Include-Resource>
                             {maven-resources},
@@ -614,10 +616,11 @@
                             <rule>
                                 <!-- stay on slf4j 1.x -->
                                 <groupId>org.slf4j</groupId>
-                                <ignoreVersions><ignoreVersion>
-                                    <type>range</type>
-                                    <version>[2.0,)</version>
-                                </ignoreVersion>
+                                <ignoreVersions>
+                                    <ignoreVersion>
+                                        <type>range</type>
+                                        <version>[2.0,)</version>
+                                    </ignoreVersion>
                                 </ignoreVersions>
                             </rule>
                         </rules>
@@ -926,7 +929,8 @@
                             <useModulePath>false</useModulePath>
                             <classesDirectory>${project.build.outputDirectory}/META-INF/versions/11</classesDirectory>
                             <additionalClasspathElements>
-                                <additionalClasspathElement>${project.build.outputDirectory}</additionalClasspathElement>
+                                <additionalClasspathElement>${project.build.outputDirectory}
+                                </additionalClasspathElement>
                             </additionalClasspathElements>
                         </configuration>
                     </plugin>
@@ -1099,6 +1103,46 @@
                                         <source>src/main/java18</source>
                                     </sources>
                                 </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>release-profile</id>
+
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <inherited>true</inherited>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <inherited>true</inherited>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
