@@ -42,7 +42,7 @@ public class DNSKEYRecord extends KEYBase {
     /**
      * Key has been revoked. Flags bit 8.
      *
-     * @see <a href="<a href="https://datatracker.ietf.org/doc/html/rfc5011">RFC 5011</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc5011">RFC 5011</a>
      */
     public static final int REVOKE = 0b0000_0000_1000_0000;
 
