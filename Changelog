@@ -5,8 +5,8 @@
 	  (@alexmit, #427)
 	- Add support for generating SM3 DS digests
 	  (@alexmit, #428)
-  - Fix publishing of -sources and -javadoc artifacts
-    to Maven Central
+	- Fix publishing of -sources and -javadoc artifacts
+	  to Maven Central
 
 10/26/2026
 	- 3.7.0 released
@@ -31,89 +31,89 @@
 	- Handle canceled keys in TCP client
 	  (@techee, #411)
 	- hosts: resolve PTR queries from the local hosts database
-	  (@ChrisJr404,  #350, #413)
+	  (@ChrisJr404, #350, #413)
 	- TSIG verification fails if id of message is not identical to
 	  originalId in TSIG record
 	  (@sfeigl, #409)
 	- TSIG record does not parse after Message.toWire(maxLength)
 	  truncates records owned by the key name (#417)
-  - Full support for GOST R 34.11-2012
-    (@alexmit, #422, #423)
-  - nio: fix selector thread from self-joining (#180)
-  - New flags and codes registered at IANA
-  - Various issues as part of an automated search with Hegel
-    (#417)
-    - LOC prints a negative altitude with a fraction as -99999.-99m
-    - WKS with no services, or unsorted ports in text,
-      throws ArrayIndexOutOfBounds
-    - A6 with an IPv4-mapped suffix throws in toWire; its text
-      cannot be re-read
-    - base64.fromString accepts characters outside the alphabet and
-      decodes garbage
-    - DNSOutput.writeU8/U16/U32 accept 2^8/2^16/2^32 and write zero
-    - AAAARecord(Name, int, long, InetAddress) accepts an
-      IPv4 address (4-byte rdata)
-    - type bitmaps with out-of-order window blocks are accepted
-      and re-sorted
-    - LOC seconds lose their milliseconds in text parsing
-    - absent base64 fields (empty OPENPGPKEY, RRSIG without
-      signature) NPE in toString/toWire
-    - NSAP text 0 throws StringIndexOutOfBounds
-    - SVCB port= is not range-checked (65536 becomes 0, -1 accepted)
-    - HIP rvservers ignore the origin; relative names stay relative
-      and toWire fails
-    - RRSIG/SIG times before 1970 are accepted in text and fail
-      in toWire
-    - CAA tags are printed unquoted/unescaped
-    - LOC sizes beyond 9e9 m overflow the exponent nibble into
-      unreadable wire data
-    - OPTRecord.equals throws ClassCastException for an EmptyRecord
-      of type OPT
-    - CERT certificate-type mnemonics are shifted
-    - SVCB alpn values are unescaped once instead of twice
-    - SVCB values with spaces are printed unescaped;
-      empty alpn ids are accepted
-    - SVCB rdata from the wire is not validated
-      (key order, duplicates, mandatory)
-    - empty hex/base32 fields print as nothing and cannot be re-read
-    - IPv4-mapped IPv6 addresses print as dotted quads in IPv6 fields
-    - URI/CAA values over 255 octets read from the wire cannot be
-      re-read from text
-    - Record.fromString UTF-8-encodes non-ASCII text twice
-    - TTL.parse drops trailing digits without a unit (1h30 is 3600)
-    - Generator.expand() yields one record too few and repeats the
-      first value
-    - Message.toWire(max) exceeds max when the OPT record does
-      not fit; strict mode does not throw
-    - Message.getTSIG() throws IndexOutOfBounds on a truncated
-      message with ARCOUNT > records
-    - Zone.removeRecord of a non-member removes a single-record RRset
-    - Update(zone, dclass) hardcodes class IN in the zone section
-    - truncation leaves stale compression entries; the TSIG owner
-      is written as a dangling pointer
-    - Cache.addMessage uses the header rcode only (a BADVERS response
-      is cached as NXRRSET)
-    - ExtendedFlags.CO is 0x8001 instead of 0x4000
-    - wildcards synthesize below an existing closer encloser
-    - a query at an empty non-terminal answers NXDOMAIN
-      instead of NODATA
-    - a wildcard match without the type answers NXDOMAIN
-      instead of NODATA
-    - Cache.addRecord cannot replace a negative entry
-      of equal credibility
-    - RRset.equals/hashCode depend on insertion order
-    - $GENERATE widths beyond int range are truncated
-      instead of refused
-    - ReverseMap.fromName wraps octets above 255
-    - Message.addRecord with a bad section throws
-      ArrayIndexOutOfBounds
-    - wire TTLs with the high bit set are kept although text
-      and constructors refuse them
-    - $GENERATE ${offset} and ${offset,width} modifiers are
-      rejected as invalid
-    - toWire(max, false) throws for any message whose
-      TC flag is preset
-    - Header IDs are never 65535
+	- Full support for GOST R 34.11-2012
+	  (@alexmit, #422, #423)
+	- nio: fix selector thread from self-joining (#180)
+	- New flags and codes registered at IANA
+	- Various issues as part of an automated search with Hegel
+	  (#417)
+		- LOC prints a negative altitude with a fraction as -99999.-99m
+		- WKS with no services, or unsorted ports in text,
+		  throws ArrayIndexOutOfBounds
+		- A6 with an IPv4-mapped suffix throws in toWire; its text
+		  cannot be re-read
+		- base64.fromString accepts characters outside the alphabet and
+		  decodes garbage
+		- DNSOutput.writeU8/U16/U32 accept 2^8/2^16/2^32 and write zero
+		- AAAARecord(Name, int, long, InetAddress) accepts an
+		  IPv4 address (4-byte rdata)
+		- type bitmaps with out-of-order window blocks are accepted
+		  and re-sorted
+		- LOC seconds lose their milliseconds in text parsing
+		- absent base64 fields (empty OPENPGPKEY, RRSIG without
+		  signature) NPE in toString/toWire
+		- NSAP text 0 throws StringIndexOutOfBounds
+		- SVCB port= is not range-checked (65536 becomes 0, -1 accepted)
+		- HIP rvservers ignore the origin; relative names stay relative
+		  and toWire fails
+		- RRSIG/SIG times before 1970 are accepted in text and fail
+		  in toWire
+		- CAA tags are printed unquoted/unescaped
+		- LOC sizes beyond 9e9 m overflow the exponent nibble into
+		  unreadable wire data
+		- OPTRecord.equals throws ClassCastException for an EmptyRecord
+		  of type OPT
+		- CERT certificate-type mnemonics are shifted
+		- SVCB alpn values are unescaped once instead of twice
+		- SVCB values with spaces are printed unescaped;
+		  empty alpn ids are accepted
+		- SVCB rdata from the wire is not validated
+		  (key order, duplicates, mandatory)
+		- empty hex/base32 fields print as nothing and cannot be re-read
+		- IPv4-mapped IPv6 addresses print as dotted quads in IPv6 fields
+		- URI/CAA values over 255 octets read from the wire cannot be
+		  re-read from text
+		- Record.fromString UTF-8-encodes non-ASCII text twice
+		- TTL.parse drops trailing digits without a unit (1h30 is 3600)
+		- Generator.expand() yields one record too few and repeats the
+		  first value
+		- Message.toWire(max) exceeds max when the OPT record does
+		  not fit; strict mode does not throw
+		- Message.getTSIG() throws IndexOutOfBounds on a truncated
+		  message with ARCOUNT > records
+		- Zone.removeRecord of a non-member removes a single-record RRset
+		- Update(zone, dclass) hardcodes class IN in the zone section
+		- truncation leaves stale compression entries; the TSIG owner
+		  is written as a dangling pointer
+		- Cache.addMessage uses the header rcode only (a BADVERS response
+		  is cached as NXRRSET)
+		- ExtendedFlags.CO is 0x8001 instead of 0x4000
+		- wildcards synthesize below an existing closer encloser
+		- a query at an empty non-terminal answers NXDOMAIN
+		  instead of NODATA
+		- a wildcard match without the type answers NXDOMAIN
+		  instead of NODATA
+		- Cache.addRecord cannot replace a negative entry
+		  of equal credibility
+		- RRset.equals/hashCode depend on insertion order
+		- $GENERATE widths beyond int range are truncated
+		  instead of refused
+		- ReverseMap.fromName wraps octets above 255
+		- Message.addRecord with a bad section throws
+		  ArrayIndexOutOfBounds
+		- wire TTLs with the high bit set are kept although text
+		  and constructors refuse them
+		- $GENERATE ${offset} and ${offset,width} modifiers are
+		  rejected as invalid
+		- toWire(max, false) throws for any message whose
+		  TC flag is preset
+		- Header IDs are never 65535
 
 05/23/2026
 	- 3.6.5 released
@@ -280,16 +280,16 @@
 	  (PR#135, @adam-stoler)
 
 09/27/2020
-	 - 3.3.0 released
-	 - Add support for SVCB and HTTPS records
-	   (PR#116, @adam-stoler)
-	 - Fix an issue with ndots in Lookup (#118)
+	- 3.3.0 released
+	- Add support for SVCB and HTTPS records
+	  (PR#116, @adam-stoler)
+	- Fix an issue with ndots in Lookup (#118)
 	 - Support IPv4 mapped IPv6 address in AAAA record
-	   (PR#120, @spwei)
+	  (PR#120, @spwei)
 	 - Validate range in Type
 	 - Improve DOH Resolver (#123, #127)
-	   Note that this resolver is more a proof of concept and not
-	   production ready. See Javadoc and issue #123.
+	  Note that this resolver is more a proof of concept and not
+	  production ready. See Javadoc and issue #123.
 
 07/11/2020
 	- 3.2.2 released
@@ -422,14 +422,14 @@
 12/22/2014
 	- Fix message truncation to preserve the OPT record.
 	  (based on a patch from Klaus Malorny <Klaus.Malorny@knipp.de>)
-	- Properly deal with short DSA and ECDSA keys.  (original patch from
+	- Properly deal with short DSA and ECDSA keys. (original patch from
 	  Marcos Sanz <sanz@denic.de>, with some local modifications)
-	- Add support for GOST (RFC 5933) to DNSSEC.  Using GOST requires an
+	- Add support for GOST (RFC 5933) to DNSSEC. Using GOST requires an
 	  external cryptography provider, such as BouncyCastle.
 	  (original patch from Marcos Sanz <sanz@denic.de>, with some
 	  local modifications)
 	- Change the OPTRecord equals() method to check TTL, since the TTL
-	  field holds relevant information.  (based on a patch from
+	  field holds relevant information. (based on a patch from
 	  Dr. Christian Möller <cmoeller@users.sourceforge.net>)
 	- Printing an empty RRset would incorrectly throw an exception.
 
@@ -590,7 +590,7 @@
 
 5/12/2010
 	- Add support for determining resolver configuration on
-	  Japanese Windows.  (translation and original patch from
+	  Japanese Windows. (translation and original patch from
 	  Brett Wooldridge <brettw@users.sourceforge.net>)
 
 5/6/2010
@@ -620,7 +620,7 @@
 9/25/2009
 	- 2.0.7 released
 	- Add support for detecting the configured nameservers on the Android
-	  platform.  (patch from Arnt Gulbrandsen <arnt@gulbrandsen.priv.no>)
+	  platform. (patch from Arnt Gulbrandsen <arnt@gulbrandsen.priv.no>)
 
 9/16/2009
 	- When determining the nameservers to use, if the
@@ -712,13 +712,13 @@
 	  (reported by Carole Gill <cgill@silverspringnet.com>)
 
 	- Raise an exception when an invalid label type is seen in a wire
-	  format name.  The previous behavior would incorrectly parse invalid
+	  format name. The previous behavior would incorrectly parse invalid
 	  names, and could lead to infinite loops.
 	  (reported by Carole Gill <cgill@silverspringnet.com>)
 
 8/28/2007
 	- 2.0.5 released
-	- Add the ZoneTransferIn.setLocalAddress() method.  (based on a patch
+	- Add the ZoneTransferIn.setLocalAddress() method. (based on a patch
 	  from <mpugge@users.sourceforge.net>)
 	- Build jar file with -source and -target options to provide
 	  compatibility with older Java releases (that is, revert to
@@ -884,7 +884,7 @@
 	- Fix the code to deal with TTL 0 data in the Cache.
 
 5/15/2005
-	- Add unit tests for many classes.  The unit tests are located
+	- Add unit tests for many classes. The unit tests are located
 	  in the tests directory, which mirrors the org.xbill.DNS hierarchy.
 	  (Matt Rutherford <rutherfo@cs.colorado.edu>)
 
@@ -913,7 +913,7 @@
 
 4/3/2005
 	- Change the Cache from being periodically cleaned to being
-	  size-bounded.  (based on a patch from several years ago
+	  size-bounded. (based on a patch from several years ago
 	  from Joseph Shraibman <jks@iname.com>).
 	- Remove the FindServer class.
 	- Added a Name Service Provider interface (dns,dnsjava).
@@ -925,7 +925,7 @@
 	- Remove deprecated dns class.
 	- Simplify TSIG initialization; remove functions that should
 	  have never existed.
-	- Remove Cache.setVerifier() and Cache.setSecurePolicy().  There
+	- Remove Cache.setVerifier() and Cache.setSecurePolicy(). There
 	  should be a way of enabling DNSSEC, but the existing code doesn't
 	  work.
 	- Change the Zone constructors/factory methods to be consistent.
@@ -1083,7 +1083,7 @@
 	- Message.isSigned() should return true if we signed the Message
 	  with a TSIG.
 	  (reported by Shobana Sampath <shobanas@cisco.com>)
-	- Implement NSEC, DNSKEY, and RRSIG record types.  (loosely based on
+	- Implement NSEC, DNSKEY, and RRSIG record types. (loosely based on
 	  a patch from David Blacka <davidb@verisignlabs.com>).
 	- Change the representations of sections, rcodes, opcodes, flags,
 	  and credibility to int.
@@ -1130,13 +1130,13 @@
 	  constructors with new versions that properly return exceptions.
 
 12/6/2003
-	- Make the J2SE javadoc link a property in build.xml.  (Ville Skyttä)
+	- Make the J2SE javadoc link a property in build.xml. (Ville Skyttä)
 
 11/24/2003
 	- Lookup should check that the name, type, and class in the question
 	  section of a response match that of the query.
 	- SimpleResolver should check that the message id of the response
-	  is the same as the message id of the query.  On a sufficiently
+	  is the same as the message id of the query. On a sufficiently
 	  busy client, sockets can be reused fast enough that late responses
 	  can come in, and should be ignored.
 	  (seen by Joseph Shraibman <jks@iname.com>)
@@ -1160,7 +1160,7 @@
 
 10/27/2003
 	- DNS TTLs and other 32 bit unsigned values are now represented as
-	  longs, not ints.  This is an API change, but allows the full range
+	  longs, not ints. This is an API change, but allows the full range
 	  to be used.
 	- Add the Serial class for serial arithmetic.
 
@@ -1177,7 +1177,7 @@
 	- A Lookup should distinguish between timeouts and other network
 	  errors.
 	- When parsing IP addresses from text format, treat the presence of
-	  a leading zero on an octet as an error.  It's unclear whether
+	  a leading zero on an octet as an error. It's unclear whether
 	  it would be treated as decimal or octal, which means it should
 	  be fixed. (reported by Marcos Sanz/Denic <sanz@denic.de>)
 
@@ -1194,13 +1194,13 @@
 
 8/23/2003
 	- Change Record.fromString() to expect an EOL/EOF token at the end
-	  of the string, so that extraneous tokens can be detected.  The master
+	  of the string, so that extraneous tokens can be detected. The master
 	  file parser was updated to this change.
 	  (noticed by Bob Halley <bob.halley@nominum.com>)
 
 8/22/2003
 	- Changing TXTRecord.getStrings() from returning a List of Strings
-	  to a List of byte []'s was a bad idea.  Change it back, and
+	  to a List of byte []'s was a bad idea. Change it back, and
 	  add TXTRecord.getStringsAsByteArrays().
 	  (reported by Blake Ramsdell <blake@brutesquadlabs.com>)
 
@@ -1248,7 +1248,7 @@
 5/28/2003
 	- Replace org.xbill.DNS.utils.MyStringTokenizer with
 	  org.xbill.DNS.Tokenizer, which is a far more robust and correct
-	  DNS tokenizer.  Convert everything to use it.
+	  DNS tokenizer. Convert everything to use it.
 	- Fix text format of TXT, NAPTR, and HINFO records.
 
 5/28/2003
@@ -1336,7 +1336,7 @@
 12/3/2002
 	- If a subresolver of an ExtendedResolver exited by throwing
 	  a RuntimeException, the ExtendedResolver would throw a
-	  ClassCastException.   It should rethrow the RuntimeException.
+	  ClassCastException. It should rethrow the RuntimeException.
 
 12/3/2002
 	- The Name code didn't handle names with non-printable characters.
@@ -1530,11 +1530,11 @@
 
 7/19/2001
 	- A string tokenizer bug caused TXT records with one string to be
-	  incorrectly parsed.  (David Blacka)
+	  incorrectly parsed. (David Blacka)
 	- Added Name.getLabelString().
 
 7/17/2001
-	- Started implementing Name.compareTo().  (loosely based on a
+	- Started implementing Name.compareTo(). (loosely based on a
 	  patch from David Blacka).
 
 7/16/2001
@@ -1543,7 +1543,7 @@
 	- Inet6Address did not properly reject addresses that are too
 	  long or too short, and also didn't properly handle addresses
 	  with one number after a double colon.
-	- Key footprints were computed incorrectly.  Also cache footprints
+	- Key footprints were computed incorrectly. Also cache footprints
 	  in the KEYRecord to avoid recomputation. (David Blacka)
 	- Added the -d flag to dig, which sets the DNSSEC OK bit.
 
@@ -1742,8 +1742,8 @@
 	- Added RP record (from Tom Scola <tscola@research.att.com>)
 
 8/29/1999
-	- More bitstring label stuff.  I think they work now.
-	_ DataByteInputStream cleanup.  Should handle errors better now.
+	- More bitstring label stuff. I think they work now.
+	_ DataByteInputStream cleanup. Should handle errors better now.
 
 8/26/1999
 	- More verbose options
@@ -1760,7 +1760,7 @@
 	- More bitstring label support
 
 8/23/1999
-	- All data now passes through the Cache.  This should help with
+	- All data now passes through the Cache. This should help with
 	  DNSSEC verification
 	- Added basic DNSSEC verification
 	- Fixes for handling data with TTL 0
@@ -1798,7 +1798,7 @@
 	- fixed a hang with ExtendedResolver and Exceptions
 
 6/30/1999
-	- dns search path should always include a . at the end.  The only
+	- dns search path should always include a . at the end. The only
 	  time this bug would show up is when querying for an unqualified
 	  top level name.
 
@@ -1815,7 +1815,7 @@
 	- AXFR TSIG bug fix
 
 6/18/1999
-	- 1.0 released.  Yay!
+	- 1.0 released. Yay!
 	- documentation updates
 	- my birthday
 
@@ -1850,7 +1850,7 @@
 
 6/3/1999
 	- added author javadoc tags
-	- added javadoc comments to Master.  Again, not sure how I missed
+	- added javadoc comments to Master. Again, not sure how I missed
 	  this before.
 
 5/25/1999
@@ -1858,7 +1858,7 @@
 	- fixed another null pointer in the cache
 
 5/23/1999
-	- added javadoc comments to utils/MyStringTokenizer.  Not sure how
+	- added javadoc comments to utils/MyStringTokenizer. Not sure how
 	  I missed this class before.
 	- minor cleanups to string parsing in update
 
@@ -1913,7 +1913,7 @@
 4/16/1999
 	- jnamed wasn't looking up non-ANY queries correctly in a zone
 	- SimpleResolver should use TCP if query length is longer than UDP
-		packet size
+	  packet size
 	- More javadoc-ed classes in DNS.*
 	- MyStringTokenizer moved to DNS.utils
 
@@ -1930,7 +1930,7 @@
 	- ExtendedResolver reentrancy fixes
 	- Names are marked as qualified/unqualified
 	- FindServer looks for search path from -Ddns.search1, etc.
-		and in /etc/resolv.conf
+	  and in /etc/resolv.conf
 
 4/13/1999
 	- 0.8.2 released
@@ -1942,8 +1942,8 @@
 
 4/12/1999
 	- NameSet shouldn't be using wildcards, since it's not correct for
-		a cache (a name could match a wildcard and return wildcard
-		data before the cache learned about data for the name)
+	  a cache (a name could match a wildcard and return wildcard
+	  data before the cache learned about data for the name)
 	- javadoc-ed DNS.utils.* and some of DNS.*
 	- ExtendedResolver allows specifying Resolvers to use
 	- SimpleResolver and ExtendedResolver share a thread pool
@@ -1956,20 +1956,20 @@
 4/11/1999
 	- 0.8 released
 	- Resolver is now an interface, implemented by SimpleResolver
-		and ExtendedResolver.
+	  and ExtendedResolver.
 	- added ExtendedResolver, which sends multiple queries to multiple
-		resolvers.
+	  resolvers.
 	- jnamed rejects non-queries
 
 4/10/1999
 	- added Message.newQuery() to make building queries easier
 	- Record.fromWire verifies that the record length is correct
 	- Resolver.sendAsync() now uses worker threads rather than
-		starting a new thread each time.
+	  starting a new thread each time.
 	- Multiple servers can be found by setting the dns.server<n>
-		properties (or from /etc/resolv.conf).
+	  properties (or from /etc/resolv.conf).
 	- Message/Header doesn't generate the message id until the message
-		is sent or the id is queried for
+	  is sent or the id is queried for
 
 4/9/1999
 	- added setTimeout to Resolver
@@ -2003,7 +2003,7 @@
 	- added DNS.Address, a clone of InetAddress
 	- Cache can now follow CNAME chains
 	- Cache now expires records based on TTL and doesn't cache records
-		with TTL = 0.
+	  with TTL = 0.
 
 4/1/1999
 	- Made Cache and Zone extend NameSet
@@ -2024,12 +2024,12 @@
 3/29/1999
 	- 0.5 released
 	- update client: added "echo" and "log" keywords, "file" can now
-		specify "-" for standard input (at the end of a config file,
-		for example).
+	  specify "-" for standard input (at the end of a config file,
+	  for example).
 	- added support for BIND TTL format
 	- switched from CountedDataOutputStream to DataByteOutputStream,
-		which extends ByteArrayOutputStream.  Same for Input.
-		Should help performance and allow more flexibility.
+	  which extends ByteArrayOutputStream. Same for Input.
+	  Should help performance and allow more flexibility.
 	- minor server fix to authority section
 
 3/28/1999
@@ -2037,7 +2037,7 @@
 	- fixed compression bug where all pointers into rdata were 0
 	- server sends authority records (NS or SOA)
 	- server now loads glue data separately from zone data, adds
-		authority and additional data, and deals with truncation.
+	  authority and additional data, and deals with truncation.
 	- fixed a few Zone bugs
 	- added signatures to RRset
 
@@ -2056,7 +2056,7 @@
 	- original record length was computed wrong, so tsigs didn't verify.
 	- master file parser didn't deal with ; delimited comments
 	- server now stores data in RRsets instead of individual RRs.
-	- various server bug fixes.  Still doesn't work too well.
+	- various server bug fixes. Still doesn't work too well.
 
 3/23/1999:
 	- 0.1 released
