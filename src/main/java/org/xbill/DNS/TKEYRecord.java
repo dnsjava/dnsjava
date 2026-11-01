@@ -20,7 +20,8 @@ public class TKEYRecord extends Record {
   private Name alg;
   private Instant timeInception;
   private Instant timeExpire;
-  private int mode, error;
+  private int mode;
+  private int error;
   private byte[] key;
   private byte[] other;
 

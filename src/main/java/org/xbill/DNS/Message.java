@@ -1104,6 +1104,14 @@ public class Message implements Cloneable {
   private void logOrThrow(
       boolean throwOnIrrelevantRecord, String format, RRset rrset, Name sname, Message query)
       throws WireParseException {
+    Record question = query.getQuestion();
+    int dclass = -1;
+    int type = -1;
+    if (question != null) {
+      dclass = question.getDClass();
+      type = question.getType();
+    }
+
     if (throwOnIrrelevantRecord) {
       throw new WireParseException(
           String.format(
@@ -1112,8 +1120,8 @@ public class Message implements Cloneable {
               DClass.string(rrset.getDClass()),
               Type.string(rrset.getType()),
               sname,
-              DClass.string(query.getQuestion().getDClass()),
-              Type.string(query.getQuestion().getType()),
+              DClass.string(dclass),
+              Type.string(type),
               getHeader().getID()));
     }
 
@@ -1123,8 +1131,8 @@ public class Message implements Cloneable {
         DClass.string(rrset.getDClass()),
         Type.string(rrset.getType()),
         sname,
-        DClass.string(query.getQuestion().getDClass()),
-        Type.string(query.getQuestion().getType()),
+        DClass.string(dclass),
+        Type.string(type),
         getHeader().getID());
   }
 

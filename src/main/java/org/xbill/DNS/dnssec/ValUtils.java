@@ -670,7 +670,8 @@ final class ValUtils {
     }
 
     // deny overreaching NSECs
-    if (!next.subdomain(set.getSignerName())) {
+    Name signerName = set.getSignerName();
+    if (signerName == null || !next.subdomain(signerName)) {
       return false;
     }
 

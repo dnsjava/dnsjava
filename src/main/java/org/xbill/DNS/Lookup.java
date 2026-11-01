@@ -138,12 +138,7 @@ public final class Lookup {
    */
   public static synchronized Cache getDefaultCache(int dclass) {
     DClass.check(dclass);
-    Cache c = defaultCaches.get(dclass);
-    if (c == null) {
-      c = new Cache(dclass);
-      defaultCaches.put(dclass, c);
-    }
-    return c;
+    return defaultCaches.computeIfAbsent(dclass, Cache::new);
   }
 
   /**

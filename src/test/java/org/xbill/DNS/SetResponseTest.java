@@ -124,9 +124,7 @@ class SetResponseTest {
     rrs.addRR(A_RECORD_1);
     rrs.addRR(A_RECORD_2);
     SetResponse sr = SetResponse.ofType(SetResponseType.SUCCESSFUL, rrs);
-
-    RRset[] exp = new RRset[] {rrs};
-    assertThat(sr.answers().toArray()).containsExactly(exp);
+    assertThat(sr.answers()).containsExactly(rrs);
   }
 
   @ParameterizedTest
@@ -148,25 +146,24 @@ class SetResponseTest {
   })
   void addRRsetAuthenticated(
       boolean addInitial,
-      boolean first,
-      boolean second,
-      boolean firstResult,
-      boolean secondResult) {
+      boolean firstIsAuthenticated,
+      boolean secondIsAuthenticated,
+      boolean expectedFirstIsAuthenticated,
+      boolean expectedSecondIsAuthenticated) {
     RRset rrs = new RRset(A_RECORD_1);
     SetResponse sr;
     if (addInitial) {
-      sr = SetResponse.ofType(SetResponseType.SUCCESSFUL, rrs, first);
+      sr = SetResponse.ofType(SetResponseType.SUCCESSFUL, rrs, firstIsAuthenticated);
     } else {
       sr = SetResponse.ofType(SetResponseType.SUCCESSFUL);
-      sr.addRRset(new Cache.CacheRRset(rrs, 0, 0, first));
+      sr.addRRset(new Cache.CacheRRset(rrs, 0, 0, firstIsAuthenticated));
     }
 
-    RRset[] exp = new RRset[] {rrs};
-    assertThat(sr.answers().toArray()).containsExactly(exp);
-    assertThat(sr.isAuthenticated()).isEqualTo(firstResult);
+    assertThat(sr.answers()).first().isEqualTo(rrs);
+    assertThat(sr.isAuthenticated()).isEqualTo(expectedFirstIsAuthenticated);
 
-    sr.addRRset(new Cache.CacheRRset(new RRset(A_RECORD_1), 0, 0, second));
-    assertThat(sr.isAuthenticated()).isEqualTo(secondResult);
+    sr.addRRset(new Cache.CacheRRset(new RRset(A_RECORD_1), 0, 0, secondIsAuthenticated));
+    assertThat(sr.isAuthenticated()).isEqualTo(expectedSecondIsAuthenticated);
     assertThat(sr.answers()).hasSize(2);
   }
 
@@ -194,8 +191,7 @@ class SetResponseTest {
     sr.addRRset(rrs);
     sr.addRRset(rrs2);
 
-    RRset[] exp = new RRset[] {rrs, rrs2};
-    assertThat(sr.answers().toArray()).containsExactly(exp);
+    assertThat(sr.answers()).containsExactly(rrs, rrs2);
   }
 
   @Test

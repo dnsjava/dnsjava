@@ -61,7 +61,7 @@ class AddressTest {
 
   @Test
   void toByteArray_IPv4() {
-    byte[] exp = new byte[] {(byte) 198, (byte) 121, (byte) 10, (byte) 234};
+    byte[] exp = {(byte) 198, (byte) 121, (byte) 10, (byte) 234};
     byte[] ret = Address.toByteArray("198.121.10.234", Address.IPv4);
     assertThat(ret).containsExactly(exp);
 

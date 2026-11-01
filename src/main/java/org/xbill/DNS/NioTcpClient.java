@@ -334,11 +334,19 @@ final class NioTcpClient extends NioClient implements TcpIoClient {
                 }
               });
       if (channel != null) {
-        log.trace(
-            "Creating transaction for id {} ({}/{})",
-            query.getHeader().getID(),
-            query.getQuestion().getName(),
-            Type.string(query.getQuestion().getType()));
+        if (log.isTraceEnabled()) {
+          Record question = query.getQuestion();
+          if (question == null) {
+            log.trace("Creating transaction for id {}", query.getHeader().getID());
+          } else {
+            log.trace(
+                "Creating transaction for id {} ({}/{})",
+                query.getHeader().getID(),
+                question.getName(),
+                Type.string(question.getType()));
+          }
+        }
+
         Transaction t = new Transaction(query, data, endTime, channel.channel, f);
         channel.pendingTransactions.add(t);
         registrationQueue.add(channel);

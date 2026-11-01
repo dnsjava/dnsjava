@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -48,6 +50,7 @@ public class Cache {
     return expire;
   }
 
+  @ToString(callSuper = true)
   static class CacheRRset extends RRset implements Element {
     int credibility;
     long expire;
@@ -76,11 +79,6 @@ public class Cache {
     @Override
     public final int compareCredibility(int cred) {
       return credibility - cred;
-    }
-
-    @Override
-    public String toString() {
-      return super.toString() + " cl = " + credibility;
     }
 
     @Override
@@ -139,11 +137,12 @@ public class Cache {
     }
   }
 
+  @EqualsAndHashCode(callSuper = true)
   private static class CacheMap extends LinkedHashMap<Name, Object> {
     private int maxsize;
 
     CacheMap(int maxsize) {
-      super(16, (float) 0.75, true);
+      super(16, 0.75f, true);
       this.maxsize = maxsize;
     }
 

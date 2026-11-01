@@ -140,7 +140,7 @@ public abstract class NioClient {
       try {
         int numSelects = selector.select(timeout);
         if (Thread.currentThread().isInterrupted()) {
-          log.debug("Sector thread was interrupted, stopping");
+          log.debug("Selector thread was interrupted, stopping");
           close();
           break;
         }
@@ -156,7 +156,7 @@ public abstract class NioClient {
       } catch (IOException e) {
         log.error("A selection operation failed", e);
       } catch (ClosedSelectorException e) {
-        // ignore
+        run = false;
       }
     }
 

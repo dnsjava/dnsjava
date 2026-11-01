@@ -24,7 +24,7 @@ import org.xbill.DNS.Type;
     callSuper = true,
     of = {"edeReason", "badReason", "isEmpty"})
 final class KeyEntry extends SRRset {
-  /** List of algorithms signalled, may be {@code null}. */
+  /** List of algorithms signaled, may be {@code null}. */
   @Getter private final List<Integer> algo;
 
   private int edeReason = -1;

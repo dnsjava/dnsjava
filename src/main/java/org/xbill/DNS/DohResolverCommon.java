@@ -205,12 +205,17 @@ abstract class DohResolverCommon implements Resolver {
     }
 
     int error = tsig.verify(response, b, query.getGeneratedTSIG());
-    log.debug(
-        "TSIG verify for query {}, {}/{}: {}",
-        query.getHeader().getID(),
-        query.getQuestion().getName(),
-        Type.string(query.getQuestion().getType()),
-        Rcode.TSIGstring(error));
+    Record question = query.getQuestion();
+    if (question != null) {
+      log.debug(
+          "TSIG verify for query {}, {}/{}: {}",
+          query.getHeader().getID(),
+          question.getName(),
+          Type.string(question.getType()),
+          Rcode.TSIGstring(error));
+    } else {
+      log.debug("TSIG verify for query {}: {}", query.getHeader().getID(), Rcode.TSIGstring(error));
+    }
   }
 
   /** Returns {@code true} if the HTTP method POST to resolve, {@code false} if GET is used. */

@@ -24,6 +24,7 @@ public class SSHFPRecord extends Record {
      * Use {@link #DSA}; DSS was a typo in RFC 4255.
      *
      * @see <a href="https://errata.rfc-editor.org/eid6266/">Errata-ID: 6266</a>
+     * @deprecated Use {@link #DSA}.
      */
     @Deprecated public static final int DSS = 2;
 
