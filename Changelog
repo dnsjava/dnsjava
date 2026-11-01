@@ -1,3 +1,13 @@
+11/01/2026
+	- 3.7.1 released
+	- Regression: Fix quoting TXT rdata containing semicolons
+	  and parentheses
+	  (@alexmit, #427)
+	- Add support for generating SM3 DS digests
+	  (@alexmit, #428)
+  - Fix publishing of -sources and -javadoc artifacts
+    to Maven Central
+
 10/26/2026
 	- 3.7.0 released
 	- GHSA-m23c-5x5g-5ff6: Missing response validation in DoH Resolver
