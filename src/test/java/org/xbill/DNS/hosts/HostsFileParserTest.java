@@ -31,6 +31,12 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -81,7 +87,12 @@ class HostsFileParserTest {
             })
         .when(spiedFsp)
         .readAttributes(any(), eq(BasicFileAttributes.class));
-    Path spiedPath = spy(spiedFsp.getPath(hostsFileWindows.toUri()));
+    HostsFileParser p = new HostsFileParser(spiedPath(spiedFsp, hostsFileWindows));
+    assertDoesNotThrow(() -> p.getAddressForHost(Name.root, Type.A));
+  }
+
+  private static Path spiedPath(FileSystemProvider spiedFsp, Path path) {
+    Path spiedPath = spy(spiedFsp.getPath(path.toUri()));
     when(spiedPath.getFileSystem())
         .thenAnswer(
             a -> {
@@ -89,8 +100,7 @@ class HostsFileParserTest {
               doReturn(spiedFsp).when(spiedFs).provider();
               return spiedFs;
             });
-    HostsFileParser p = new HostsFileParser(spiedPath);
-    assertDoesNotThrow(() -> p.getAddressForHost(Name.root, Type.A));
+    return spiedPath;
   }
 
   @Test
@@ -197,6 +207,81 @@ class HostsFileParserTest {
   }
 
   @Test
+  void testLookupDuringReloadFindsUnchangedEntry() throws Exception {
+    Path tempHosts =
+        Files.copy(
+            hostsFileWindows,
+            tempDir.resolve("testLookupDuringReloadFindsUnchangedEntry"),
+            StandardCopyOption.REPLACE_EXISTING);
+    Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(0));
+    CountDownLatch reloadIsReading = new CountDownLatch(1);
+    CountDownLatch lookupDone = new CountDownLatch(1);
+    AtomicInteger reads = new AtomicInteger();
+    FileSystemProvider spiedFsp = spy(FileSystemProviders.getFileSystemProvider(tempHosts));
+    doAnswer(
+            a -> {
+              if (reads.incrementAndGet() == 2) {
+                reloadIsReading.countDown();
+                lookupDone.await(5, TimeUnit.SECONDS);
+              }
+              return a.callRealMethod();
+            })
+        .when(spiedFsp)
+        .newInputStream(any());
+    HostsFileParser hostsFileParser = new HostsFileParser(spiedPath(spiedFsp, tempHosts));
+    Clock clock = mock(Clock.class);
+    hostsFileParser.setClock(clock);
+    Instant now = Clock.systemUTC().instant();
+    when(clock.instant()).thenReturn(now);
+    assertThat(hostsFileParser.getAddressForHost(kubernetesName, Type.A))
+        .contains(kubernetesAddress);
+
+    try (BufferedWriter w =
+        Files.newBufferedWriter(tempHosts, StandardCharsets.UTF_8, StandardOpenOption.APPEND)) {
+      w.append("127.0.0.1  testLookupDuringReloadFindsUnchangedEntry.");
+      w.newLine();
+    }
+    Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(10_0000));
+    when(clock.instant()).thenReturn(now.plus(Duration.ofMinutes(6)));
+    FutureTask<Optional<InetAddress>> reload =
+        new FutureTask<>(() -> hostsFileParser.getAddressForHost(kubernetesName, Type.A));
+    new Thread(reload).start();
+    assertThat(reloadIsReading.await(5, TimeUnit.SECONDS)).isTrue();
+
+    Optional<InetAddress> duringReload = hostsFileParser.getAddressForHost(kubernetesName, Type.A);
+    lookupDone.countDown();
+
+    assertThat(reload.get(5, TimeUnit.SECONDS)).contains(kubernetesAddress);
+    assertThat(duringReload).contains(kubernetesAddress);
+  }
+
+  @Test
+  void testLookupDuringFirstReadWaitsForIt() throws Exception {
+    AtomicReference<Thread> concurrentLookup = new AtomicReference<>();
+    FileSystemProvider spiedFsp = spy(FileSystemProviders.getFileSystemProvider(hostsFileWindows));
+    doAnswer(
+            a -> {
+              Thread lookup = concurrentLookup.get();
+              lookup.start();
+              while (lookup.getState() != Thread.State.BLOCKED
+                  && lookup.getState() != Thread.State.TERMINATED) {
+                Thread.sleep(1);
+              }
+              return a.callRealMethod();
+            })
+        .when(spiedFsp)
+        .newInputStream(any());
+    HostsFileParser hostsFileParser = new HostsFileParser(spiedPath(spiedFsp, hostsFileWindows));
+    FutureTask<Optional<InetAddress>> duringFirstRead =
+        new FutureTask<>(() -> hostsFileParser.getAddressForHost(kubernetesName, Type.A));
+    concurrentLookup.set(new Thread(duringFirstRead));
+
+    assertThat(hostsFileParser.getAddressForHost(kubernetesName, Type.A))
+        .contains(kubernetesAddress);
+    assertThat(duringFirstRead.get(5, TimeUnit.SECONDS)).contains(kubernetesAddress);
+  }
+
+  @Test
   void testInvalidContentIsIgnored() throws IOException {
     HostsFileParser hostsFileParser = new HostsFileParser(hostsFileInvalid);
     assertThat(
@@ -249,6 +334,10 @@ class HostsFileParserTest {
   }
 
   private HostsFileParser generateLargeHostsFile(String name) throws IOException {
+    return new HostsFileParser(generateLargeHostsFilePath(name));
+  }
+
+  private Path generateLargeHostsFilePath(String name) throws IOException {
     Path generatedLargeFile = tempDir.resolve(name);
     try (BufferedWriter w = Files.newBufferedWriter(generatedLargeFile)) {
       for (int i = 0; i < 1024; i++) {
@@ -264,7 +353,34 @@ class HostsFileParserTest {
         w.newLine();
       }
     }
-    return new HostsFileParser(generatedLargeFile);
+    return generatedLargeFile;
+  }
+
+  @Test
+  void testFileGrownBeyondFullCacheSizeIsSearched() throws IOException {
+    Path tempHosts =
+        Files.copy(
+            hostsFileWindows,
+            tempDir.resolve("testFileGrownBeyondFullCacheSizeIsSearched"),
+            StandardCopyOption.REPLACE_EXISTING);
+    Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(0));
+    HostsFileParser hostsFileParser = new HostsFileParser(tempHosts);
+    Clock clock = mock(Clock.class);
+    hostsFileParser.setClock(clock);
+    Instant now = Clock.systemUTC().instant();
+    when(clock.instant()).thenReturn(now);
+    assertThat(hostsFileParser.getAddressForHost(kubernetesName, Type.A))
+        .contains(kubernetesAddress);
+
+    Files.move(
+        generateLargeHostsFilePath("testFileGrownBeyondFullCacheSizeIsSearched-large"),
+        tempHosts,
+        StandardCopyOption.REPLACE_EXISTING);
+    Files.setLastModifiedTime(tempHosts, FileTime.fromMillis(10_0000));
+    when(clock.instant()).thenReturn(now.plus(Duration.ofMinutes(6)));
+
+    assertThat(hostsFileParser.getAddressForHost(Name.fromConstantString("localhost-10."), Type.A))
+        .contains(InetAddress.getByAddress("localhost-10.", new byte[] {127, 0, 0, 10}));
   }
 
   @Test
