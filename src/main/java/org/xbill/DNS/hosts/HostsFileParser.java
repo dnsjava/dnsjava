@@ -385,6 +385,11 @@ public final class HostsFileParser {
     return cache == null ? 0 : cache.hosts.size();
   }
 
+  // for unit testing only
+  boolean hasCache() {
+    return cache != null;
+  }
+
   void setClock(Clock clock) {
     this.clock = clock;
   }

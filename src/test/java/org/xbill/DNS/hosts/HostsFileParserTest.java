@@ -36,7 +36,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.io.file.spi.FileSystemProviders;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -257,27 +256,31 @@ class HostsFileParserTest {
 
   @Test
   void testLookupDuringFirstReadWaitsForIt() throws Exception {
-    AtomicReference<Thread> concurrentLookup = new AtomicReference<>();
+    CountDownLatch firstReadIsReading = new CountDownLatch(1);
+    CountDownLatch releaseFirstRead = new CountDownLatch(1);
     FileSystemProvider spiedFsp = spy(FileSystemProviders.getFileSystemProvider(hostsFileWindows));
     doAnswer(
             a -> {
-              Thread lookup = concurrentLookup.get();
-              lookup.start();
-              while (lookup.getState() != Thread.State.BLOCKED
-                  && lookup.getState() != Thread.State.TERMINATED) {
-                Thread.sleep(1);
-              }
+              firstReadIsReading.countDown();
+              releaseFirstRead.await(5, TimeUnit.SECONDS);
               return a.callRealMethod();
             })
         .when(spiedFsp)
         .newInputStream(any());
     HostsFileParser hostsFileParser = new HostsFileParser(spiedPath(spiedFsp, hostsFileWindows));
+    FutureTask<Optional<InetAddress>> firstRead =
+        new FutureTask<>(() -> hostsFileParser.getAddressForHost(kubernetesName, Type.A));
+    new Thread(firstRead).start();
+    assertThat(firstReadIsReading.await(5, TimeUnit.SECONDS)).isTrue();
+
     FutureTask<Optional<InetAddress>> duringFirstRead =
         new FutureTask<>(() -> hostsFileParser.getAddressForHost(kubernetesName, Type.A));
-    concurrentLookup.set(new Thread(duringFirstRead));
+    new Thread(duringFirstRead).start();
+    assertThat(hostsFileParser.hasCache()).as("Cache published before it is read").isFalse();
+    assertThat(duringFirstRead.isDone()).as("Lookup answered before the first read").isFalse();
+    releaseFirstRead.countDown();
 
-    assertThat(hostsFileParser.getAddressForHost(kubernetesName, Type.A))
-        .contains(kubernetesAddress);
+    assertThat(firstRead.get(5, TimeUnit.SECONDS)).contains(kubernetesAddress);
     assertThat(duringFirstRead.get(5, TimeUnit.SECONDS)).contains(kubernetesAddress);
   }
 
