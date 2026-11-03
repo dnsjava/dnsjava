@@ -315,7 +315,7 @@ public class Master implements AutoCloseable {
         s = token.value();
 
         if (s.equalsIgnoreCase("$ORIGIN")) {
-          origin = st.getName(Name.root);
+          origin = st.getName(origin != null ? origin : Name.root);
           st.getEOL();
           continue;
         } else if (s.equalsIgnoreCase("$TTL")) {
@@ -345,7 +345,7 @@ public class Master implements AutoCloseable {
           Name includeOrigin = origin;
           token = st.get();
           if (token.isString()) {
-            includeOrigin = parseName(token.value(), Name.root);
+            includeOrigin = parseName(token.value(), origin != null ? origin : Name.root);
             st.getEOL();
           }
           included = new Master(includeFile, includeOrigin, defaultTTL);
