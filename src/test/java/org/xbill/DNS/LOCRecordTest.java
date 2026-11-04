@@ -7,8 +7,10 @@ import static org.assertj.core.api.Assertions.offset;
 import static org.assertj.core.api.Assertions.within;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class LOCRecordTest {
@@ -116,5 +118,48 @@ class LOCRecordTest {
     assertThat(loc.getLongitude()).isEqualTo(-71.105);
     assertThat(loc.getAltitude()).isZero();
     assertThat(loc.rdataToString()).isEqualTo(rr);
+  }
+
+  @ParameterizedTest
+  @CsvSource({"-0.01m, -0.01m", "-0.5m, -0.50m", "-0.99m, -0.99m", "-0.999m, -0.99m"})
+  void rdataFromStringKeepsTheSignOfANegativeAltitude(String altitude, String rendered)
+      throws IOException {
+    // RFC 1876 Section 2: the altitude is stored as an unsigned 32 bit value
+    // biased by 100000m and expressed in centimeters. An altitude between -1m
+    // and 0m has neither an integral part in metres nor an integral part in
+    // centimeters, so both the text parser and the text formatter used to drop
+    // its sign and report the altitude as positive.
+    BigDecimal expected = new BigDecimal(rendered.substring(0, rendered.length() - 1));
+    String rr = "42 21 54 N 71 06 18 W " + altitude + " 30m 10m 10m";
+    LOCRecord parsed = (LOCRecord) Record.fromString(n, Type.LOC, DClass.IN, 0, rr, Name.root);
+    assertThat(BigDecimal.valueOf(parsed.getAltitude())).isEqualByComparingTo(expected);
+    assertThat(parsed.rdataToString())
+        .isEqualTo("42 21 54 N 71 06 18 W " + rendered + " 30m 10m 10m");
+
+    // the sign has to survive the wire, too
+    DNSOutput rdata = new DNSOutput();
+    parsed.rrToWire(rdata, null, false);
+    byte[] rdataBytes = rdata.toByteArray();
+    DNSOutput full = new DNSOutput();
+    n.toWire(full, null, false);
+    full.writeU16(Type.LOC);
+    full.writeU16(DClass.IN);
+    full.writeU32(0);
+    full.writeU16(rdataBytes.length);
+    full.writeByteArray(rdataBytes);
+    LOCRecord fromWire = (LOCRecord) Record.fromWire(full.toByteArray(), Section.ANSWER);
+    assertThat(BigDecimal.valueOf(fromWire.getAltitude())).isEqualByComparingTo(expected);
+    assertThat(fromWire.rdataToString())
+        .isEqualTo("42 21 54 N 71 06 18 W " + rendered + " 30m 10m 10m");
+  }
+
+  @Test
+  void rdataFromStringZeroAltitudeHasNoSign() throws IOException {
+    try (Tokenizer t = new Tokenizer("00 00 0 N 00 00 0 E 0m 0m 0m 0m")) {
+      LOCRecord loc = new LOCRecord();
+      loc.rdataFromString(t, Name.root);
+      assertThat(loc.getAltitude()).isZero();
+      assertThat(loc.rdataToString()).doesNotContain("-");
+    }
   }
 }
