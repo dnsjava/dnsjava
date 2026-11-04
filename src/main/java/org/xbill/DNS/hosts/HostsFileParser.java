@@ -44,17 +44,28 @@ public final class HostsFileParser {
   private final boolean clearCacheOnChange;
   private Clock clock = Clock.systemUTC();
 
+  /**
+   * Replaced as a whole when the file changes, and never cleared, so that a lookup running
+   * concurrently with a reload sees either the previous or the new content of the file.
+   */
   @SuppressWarnings("java:S3077")
-  private volatile Map<String, InetAddress> hostsCache;
-
-  @SuppressWarnings("java:S3077")
-  private volatile Map<Name, Name> reverseHostsCache;
+  private volatile HostsCache cache;
 
   private Instant lastFileModificationCheckTime = null;
   private Instant lastFileReadTime = null;
-  private boolean isEntireFileParsed;
   private boolean hostsFileWarningLogged = false;
-  private long hostsFileSizeBytes;
+
+  /** The entries read from one version of the hosts file. */
+  private static final class HostsCache {
+    final Map<String, InetAddress> hosts = new ConcurrentHashMap<>();
+    final Map<Name, Name> reverseHosts = new ConcurrentHashMap<>();
+    final long fileSizeBytes;
+    boolean isEntireFileParsed;
+
+    HostsCache(long fileSizeBytes) {
+      this.fileSizeBytes = fileSizeBytes;
+    }
+  }
 
   /**
    * Creates a new instance based on the current OS's default. Unix and alike (or rather everything
@@ -110,22 +121,22 @@ public final class HostsFileParser {
       throw new IllegalArgumentException("type can only be A or AAAA");
     }
 
-    validateCache();
+    HostsCache current = validateCache();
 
-    InetAddress cachedAddress = hostsCache.get(key(name, type));
+    InetAddress cachedAddress = current.hosts.get(key(name, type));
     if (cachedAddress != null) {
       return Optional.of(cachedAddress);
     }
 
-    if (isEntireFileParsed) {
+    if (current.isEntireFileParsed) {
       return Optional.empty();
     }
 
-    if (hostsFileSizeBytes > maxFullCacheFileSizeBytes) {
-      searchHostsFileForEntry(name, type);
+    if (current.fileSizeBytes > maxFullCacheFileSizeBytes) {
+      searchHostsFileForEntry(current, name, type);
     }
 
-    return Optional.ofNullable(hostsCache.get(key(name, type)));
+    return Optional.ofNullable(current.hosts.get(key(name, type)));
   }
 
   /**
@@ -140,25 +151,25 @@ public final class HostsFileParser {
   public Optional<Name> getNameForReverseLookup(Name reverseName) throws IOException {
     Objects.requireNonNull(reverseName, "reverseName is required");
 
-    validateCache();
+    HostsCache current = validateCache();
 
-    Name cachedName = reverseHostsCache.get(reverseName);
+    Name cachedName = current.reverseHosts.get(reverseName);
     if (cachedName != null) {
       return Optional.of(cachedName);
     }
 
-    if (isEntireFileParsed) {
+    if (current.isEntireFileParsed) {
       return Optional.empty();
     }
 
-    if (hostsFileSizeBytes > maxFullCacheFileSizeBytes) {
-      searchHostsFileForReverseEntry(reverseName);
+    if (current.fileSizeBytes > maxFullCacheFileSizeBytes) {
+      searchHostsFileForReverseEntry(current, reverseName);
     }
 
-    return Optional.ofNullable(reverseHostsCache.get(reverseName));
+    return Optional.ofNullable(current.reverseHosts.get(reverseName));
   }
 
-  private void parseEntireHostsFile() throws IOException {
+  private void parseEntireHostsFile(HostsCache target) throws IOException {
     String line;
     int lineNumber = 0;
     AtomicInteger addressFailures = new AtomicInteger(0);
@@ -170,10 +181,10 @@ public final class HostsFileParser {
           for (Name lineName : lineData.names) {
             InetAddress lineAddress =
                 InetAddress.getByAddress(lineName.toString(true), lineData.address);
-            hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
+            target.hosts.putIfAbsent(key(lineName, lineData.type), lineAddress);
           }
 
-          reverseHostsCache.putIfAbsent(
+          target.reverseHosts.putIfAbsent(
               ReverseMap.fromAddress(lineData.address), lineData.names[0]);
         }
       }
@@ -189,7 +200,7 @@ public final class HostsFileParser {
     }
   }
 
-  private void searchHostsFileForEntry(Name name, int type) throws IOException {
+  private void searchHostsFileForEntry(HostsCache target, Name name, int type) throws IOException {
     String line;
     int lineNumber = 0;
     AtomicInteger addressFailures = new AtomicInteger(0);
@@ -203,7 +214,7 @@ public final class HostsFileParser {
             if (isSearchedEntry && type == lineData.type) {
               InetAddress lineAddress =
                   InetAddress.getByAddress(lineName.toString(true), lineData.address);
-              hostsCache.putIfAbsent(key(lineName, lineData.type), lineAddress);
+              target.hosts.putIfAbsent(key(lineName, lineData.type), lineAddress);
               return;
             }
           }
@@ -222,7 +233,8 @@ public final class HostsFileParser {
     }
   }
 
-  private void searchHostsFileForReverseEntry(Name reverseName) throws IOException {
+  private void searchHostsFileForReverseEntry(HostsCache target, Name reverseName)
+      throws IOException {
     String line;
     int lineNumber = 0;
     AtomicInteger addressFailures = new AtomicInteger(0);
@@ -231,7 +243,7 @@ public final class HostsFileParser {
       while ((line = hostsReader.readLine()) != null) {
         LineData lineData = parseLine(++lineNumber, line, addressFailures, nameFailures);
         if (lineData != null && ReverseMap.fromAddress(lineData.address).equals(reverseName)) {
-          reverseHostsCache.putIfAbsent(reverseName, lineData.names[0]);
+          target.reverseHosts.putIfAbsent(reverseName, lineData.names[0]);
         }
       }
     }
@@ -308,20 +320,20 @@ public final class HostsFileParser {
     return line.substring(0, commentStart).trim().split("\\s+");
   }
 
-  private void validateCache() throws IOException {
+  private HostsCache validateCache() throws IOException {
     if (!clearCacheOnChange) {
-      if (hostsCache == null) {
+      if (cache == null) {
         synchronized (this) {
-          if (hostsCache == null) {
+          if (cache == null) {
             readHostsFile();
           }
         }
       }
 
-      return;
+      return cache;
     }
 
-    if (hostsCache == null
+    if (cache == null
         || lastFileModificationCheckTime == null
         || lastFileModificationCheckTime.plus(fileChangeCheckInterval).isBefore(clock.instant())) {
       log.debug("Checked for changes more than 5minutes ago, checking");
@@ -329,47 +341,38 @@ public final class HostsFileParser {
       // https://blog.arkey.fr/2019/09/13/watchservice-and-bind-mount/
 
       synchronized (this) {
-        if (hostsCache != null
+        if (cache != null
             && lastFileModificationCheckTime != null
             && !lastFileModificationCheckTime
                 .plus(fileChangeCheckInterval)
                 .isBefore(clock.instant())) {
           log.debug("Never mind, check fulfilled in another thread");
-          return;
+          return cache;
         }
 
         lastFileModificationCheckTime = clock.instant();
         readHostsFile();
       }
     }
+
+    return cache;
   }
 
   private void readHostsFile() throws IOException {
     if (Files.exists(path)) {
       Instant fileTime = Files.getLastModifiedTime(path).toInstant();
       if (lastFileReadTime == null || !lastFileReadTime.equals(fileTime)) {
-        createOrClearCache();
-
-        hostsFileSizeBytes = Files.size(path);
-        if (hostsFileSizeBytes <= maxFullCacheFileSizeBytes) {
-          parseEntireHostsFile();
-          isEntireFileParsed = true;
+        HostsCache next = new HostsCache(Files.size(path));
+        if (next.fileSizeBytes <= maxFullCacheFileSizeBytes) {
+          parseEntireHostsFile(next);
+          next.isEntireFileParsed = true;
         }
 
+        cache = next;
         lastFileReadTime = fileTime;
       }
     } else {
-      createOrClearCache();
-    }
-  }
-
-  private void createOrClearCache() {
-    if (hostsCache == null) {
-      hostsCache = new ConcurrentHashMap<>();
-      reverseHostsCache = new ConcurrentHashMap<>();
-    } else {
-      hostsCache.clear();
-      reverseHostsCache.clear();
+      cache = new HostsCache(0);
     }
   }
 
@@ -379,7 +382,12 @@ public final class HostsFileParser {
 
   // for unit testing only
   int cacheSize() {
-    return hostsCache == null ? 0 : hostsCache.size();
+    return cache == null ? 0 : cache.hosts.size();
+  }
+
+  // for unit testing only
+  boolean hasCache() {
+    return cache != null;
   }
 
   void setClock(Clock clock) {
