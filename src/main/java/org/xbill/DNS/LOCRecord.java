@@ -93,14 +93,13 @@ public class LOCRecord extends Record {
     if (s.matches("^-?\\d+$")) {
       return Integer.parseInt(s);
     } else if (s.matches("^-?\\d+\\.\\d*$")) {
-      String[] parts = s.split("\\.");
+      boolean negative = s.charAt(0) == '-';
+      String[] parts = (negative ? s.substring(1) : s).split("\\.");
       double value = Integer.parseInt(parts[0]);
       double fraction = Integer.parseInt(parts[1]);
-      if (value < 0) {
-        fraction *= -1;
-      }
       int digits = parts[1].length();
-      return value + (fraction / Math.pow(10, digits));
+      double result = value + (fraction / Math.pow(10, digits));
+      return negative ? -result : result;
     } else {
       throw new NumberFormatException();
     }
@@ -194,11 +193,18 @@ public class LOCRecord extends Record {
 
   private void renderFixedPoint(
       StringBuilder sb, NumberFormat formatter, long value, long divisor) {
+    if (value < 0) {
+      // Print the sign of the integral part before taking the absolute value:
+      // -1/100 is 0, so a negative value below one divisor would otherwise be
+      // rendered without its sign.
+      sb.append('-');
+      value = -value;
+    }
     sb.append(value / divisor);
     value %= divisor;
     if (value != 0) {
       sb.append(".");
-      sb.append(formatter.format(Math.abs(value)));
+      sb.append(formatter.format(value));
     }
   }
 
