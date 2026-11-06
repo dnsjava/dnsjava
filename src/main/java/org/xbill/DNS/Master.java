@@ -6,6 +6,7 @@ package org.xbill.DNS;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -281,7 +282,7 @@ public class Master implements AutoCloseable {
       if (rec != null) {
         return rec;
       }
-      included = null;
+      closeIncluded();
     }
     if (generator != null) {
       Record rec = nextGenerated();
@@ -348,7 +349,8 @@ public class Master implements AutoCloseable {
             includeOrigin = parseName(token.value(), origin != null ? origin : Name.root);
             st.getEOL();
           }
-          included = new Master(includeFile, includeOrigin, defaultTTL);
+          included =
+              new Master(Files.newInputStream(includeFile.toPath()), includeOrigin, defaultTTL);
           /*
            * If we continued, we wouldn't be looking in
            * the new file.  Recursing works better.
@@ -416,7 +418,7 @@ public class Master implements AutoCloseable {
   }
 
   /**
-   * Disable processing of $INCLUDE directives. When disabled, $INCUDE statements will not be
+   * Disable processing of $INCLUDE directives. When disabled, $INCLUDE statements will not be
    * processed. Depending on the contents of the file that would have been included, this may cause
    * the zone to be invalid. (e.g. if there's no SOA or NS at the apex)
    *
@@ -452,8 +454,16 @@ public class Master implements AutoCloseable {
 
   @Override
   public void close() {
+    closeIncluded();
     if (st != null) {
       st.close();
+    }
+  }
+
+  private void closeIncluded() {
+    if (included != null) {
+      included.close();
+      included = null;
     }
   }
 }
