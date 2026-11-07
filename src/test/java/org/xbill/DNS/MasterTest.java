@@ -8,6 +8,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.xbill.DNS.DNSSEC.DNSSECException;
 
 class MasterTest {
@@ -129,6 +133,35 @@ class MasterTest {
     try (InputStream is = MasterTest.class.getResourceAsStream("/zonefileIncludeDirective");
         Master m = new Master(is)) {
       assertThatExceptionOfType(TextParseException.class).isThrownBy(m::nextRecord);
+    }
+  }
+
+  @Test
+  void relativeOriginDirective() throws IOException {
+    String zone =
+        "$ORIGIN sub\n"
+            + "a 3600 IN A 192.0.2.1\n"
+            + "$ORIGIN other.\n"
+            + "b 3600 IN A 192.0.2.2\n";
+    try (Master master =
+        new Master(
+            new ByteArrayInputStream(zone.getBytes(StandardCharsets.US_ASCII)),
+            Name.fromConstantString("example.com."))) {
+      assertThat(master.nextRecord().getName())
+          .isEqualTo(Name.fromConstantString("a.sub.example.com."));
+      assertThat(master.nextRecord().getName()).isEqualTo(Name.fromConstantString("b.other."));
+    }
+  }
+
+  @Test
+  void relativeIncludeOrigin(@TempDir Path dir) throws IOException {
+    Files.write(
+        dir.resolve("included"), "a 3600 IN A 192.0.2.1\n".getBytes(StandardCharsets.US_ASCII));
+    Path zone = dir.resolve("zone");
+    Files.write(zone, "$INCLUDE included sub\n".getBytes(StandardCharsets.US_ASCII));
+    try (Master master = new Master(zone.toString(), Name.fromConstantString("example.com."))) {
+      assertThat(master.nextRecord().getName())
+          .isEqualTo(Name.fromConstantString("a.sub.example.com."));
     }
   }
 
