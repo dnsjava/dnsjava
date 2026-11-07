@@ -35,14 +35,16 @@ public class LOCRecord extends Record {
   LOCRecord() {}
 
   /**
-   * Creates an LOC Record from the given data
+   * Creates an LOC Record from the given data.
    *
-   * @param latitude The latitude of the center of the sphere
-   * @param longitude The longitude of the center of the sphere
-   * @param altitude The altitude of the center of the sphere, in m
-   * @param size The diameter of a sphere enclosing the described entity, in m.
-   * @param hPrecision The horizontal precision of the data, in m.
-   * @param vPrecision The vertical precision of the data, in m.
+   * <p>Note that the RFC specifies the size and precisions in [cm], while this class uses [m].
+   *
+   * @param latitude The latitude of the center of the sphere.
+   * @param longitude The longitude of the center of the sphere.
+   * @param altitude The altitude of the center of the sphere, in [m].
+   * @param size The diameter of a sphere enclosing the described entity, in [m].
+   * @param hPrecision The horizontal precision of the data, in [m].
+   * @param vPrecision The vertical precision of the data, in [m].
    */
   public LOCRecord(
       Name name,
@@ -55,15 +57,25 @@ public class LOCRecord extends Record {
       double hPrecision,
       double vPrecision) {
     super(name, Type.LOC, dclass, ttl);
-    if (size < 0 || size > 9e9) {
+    if (size < 0 || size > 90000000 || Double.isNaN(size)) {
+      throw new IllegalArgumentException("size must be > 0 and < 90000000");
+    }
+    if (hPrecision < 0 || hPrecision > 9e7 || Double.isNaN(hPrecision)) {
       throw new IllegalArgumentException("size must be > 0");
     }
-    if (hPrecision < 0 || hPrecision > 9e9) {
+    if (vPrecision < 0 || vPrecision > 9e7 || Double.isNaN(vPrecision)) {
       throw new IllegalArgumentException("size must be > 0");
     }
-    if (vPrecision < 0 || vPrecision > 9e9) {
-      throw new IllegalArgumentException("size must be > 0");
+    if (latitude < -90.0 || latitude > 90.0 || Double.isNaN(latitude)) {
+      throw new IllegalArgumentException("latitude must be between -90 and 90");
     }
+    if (longitude < -180.0 || longitude > 180.0 || Double.isNaN(longitude)) {
+      throw new IllegalArgumentException("longitude must be between -180 and 180");
+    }
+    if (altitude < -100000.0 || altitude > 42849672.95 || Double.isNaN(altitude)) {
+      throw new IllegalArgumentException("altitude must be between -100000 and 42849672.95");
+    }
+
     this.latitude = (long) (latitude * 3600 * 1000 + (1L << 31));
     this.longitude = (long) (longitude * 3600 * 1000 + (1L << 31));
     this.altitude = (long) ((altitude + 100000) * 100);
@@ -74,9 +86,7 @@ public class LOCRecord extends Record {
 
   @Override
   protected void rrFromWire(DNSInput in) throws IOException {
-    int version;
-
-    version = in.readU8();
+    int version = in.readU8();
     if (version != 0) {
       throw new WireParseException("Invalid LOC version");
     }
@@ -89,56 +99,52 @@ public class LOCRecord extends Record {
     altitude = in.readU32();
   }
 
-  private double parseFixedPoint(String s) throws NumberFormatException {
-    if (s.matches("^-?\\d+$")) {
-      return Integer.parseInt(s);
-    } else if (s.matches("^-?\\d+\\.\\d*$")) {
-      boolean negative = s.charAt(0) == '-';
-      String[] parts = (negative ? s.substring(1) : s).split("\\.");
-      double value = Integer.parseInt(parts[0]);
-      double fraction = Integer.parseInt(parts[1]);
-      int digits = parts[1].length();
-      double result = value + (fraction / Math.pow(10, digits));
-      return negative ? -result : result;
-    } else {
-      throw new NumberFormatException();
-    }
-  }
-
-  private long parsePosition(Tokenizer st, String type) throws IOException {
+  private long parsePosition(Tokenizer st, String type, int max) throws IOException {
     boolean isLatitude = type.equals("latitude");
-    int deg;
-    int min;
-    double sec;
-    long value;
-    String s;
 
-    deg = st.getUInt16();
+    int deg = st.getUInt16();
     if (deg > 180 || (deg > 90 && isLatitude)) {
       throw st.exception("Invalid LOC " + type + " degrees");
     }
 
+    int minute;
     try {
-      min = Integer.parseInt(st.getString());
-      if (min < 0 || min > 59) {
-        throw st.exception("Invalid LOC " + type + " minutes");
+      String s = st.getString();
+      if (!isLatLongChar(s)) {
+        minute = Integer.parseInt(s);
+        if (minute < 0 || minute > 59 || (minute > 0 && deg == max)) {
+          throw st.exception("Invalid LOC " + type + " minutes");
+        }
+      } else {
+        minute = 0;
+        st.unget();
       }
     } catch (NumberFormatException e) {
       throw st.exception("Invalid LOC " + type + " minutes", e);
     }
 
+    double sec;
     try {
-      sec = parseFixedPoint(st.getString());
-      if (sec < 0 || sec >= 60) {
-        throw st.exception("Invalid LOC " + type + " seconds");
+      String s = st.getString();
+      if (!isLatLongChar(s)) {
+        if (s.equalsIgnoreCase("nan")) {
+          throw st.exception("Invalid LOC " + type);
+        }
+        sec = Double.parseDouble(s);
+        if (sec < 0 || sec >= 60 || (sec > 0 && deg == max)) {
+          throw st.exception("Invalid LOC " + type + " seconds");
+        }
+      } else {
+        sec = 0;
+        st.unget();
       }
     } catch (NumberFormatException e) {
       throw st.exception("Invalid LOC " + type + " seconds", e);
     }
 
-    value = Math.round(1000 * (sec + 60L * (min + 60L * deg)));
+    long value = Math.round(1000 * (sec + 60L * (minute + 60L * deg)));
 
-    s = st.getString();
+    String s = st.getString();
     if (s.length() != 1) {
       throw st.exception("Invalid LOC " + type);
     }
@@ -153,6 +159,13 @@ public class LOCRecord extends Record {
     value += 1L << 31;
 
     return value;
+  }
+
+  private static boolean isLatLongChar(String s) {
+    return s.equalsIgnoreCase("N")
+        || s.equalsIgnoreCase("S")
+        || s.equalsIgnoreCase("E")
+        || s.equalsIgnoreCase("W");
   }
 
   private long parseDouble(
@@ -171,7 +184,10 @@ public class LOCRecord extends Record {
       s = s.substring(0, s.length() - 1);
     }
     try {
-      long value = (long) (100 * parseFixedPoint(s));
+      if (s.equalsIgnoreCase("nan")) {
+        throw st.exception("Invalid LOC " + type);
+      }
+      long value = (long) (100 * Double.parseDouble(s));
       if (value < min || value > max) {
         throw st.exception("Invalid LOC " + type);
       }
@@ -183,8 +199,8 @@ public class LOCRecord extends Record {
 
   @Override
   protected void rdataFromString(Tokenizer st, Name origin) throws IOException {
-    latitude = parsePosition(st, "latitude");
-    longitude = parsePosition(st, "longitude");
+    latitude = parsePosition(st, "latitude", 90);
+    longitude = parsePosition(st, "longitude", 180);
     altitude = parseDouble(st, "altitude", true, -10000000, 4284967295L, 0) + 10000000;
     size = parseDouble(st, "size", false, 0, 9000000000L, 100);
     hPrecision = parseDouble(st, "horizontal precision", false, 0, 9000000000L, 1000000);
@@ -280,17 +296,17 @@ public class LOCRecord extends Record {
     return (double) (altitude - 10000000) / 100;
   }
 
-  /** Returns the diameter of the enclosing sphere */
+  /** Returns the diameter of the enclosing sphere in [m]. */
   public double getSize() {
     return (double) size / 100;
   }
 
-  /** Returns the horizontal precision */
+  /** Returns the horizontal precision in [m]. */
   public double getHPrecision() {
     return (double) hPrecision / 100;
   }
 
-  /** Returns the horizontal precision */
+  /** Returns the horizontal precision in [m]. */
   public double getVPrecision() {
     return (double) vPrecision / 100;
   }
@@ -309,7 +325,7 @@ public class LOCRecord extends Record {
   private static long parseLOCformat(int b) throws WireParseException {
     long out = b >> 4;
     int exp = b & 0xF;
-    if (out > 9 || exp > 9) {
+    if (out > 9 || exp > 9 || (out <= 0 && exp > 0)) {
       throw new WireParseException("Invalid LOC Encoding");
     }
     while (exp-- > 0) {
