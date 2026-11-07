@@ -99,9 +99,13 @@ public class Message implements Cloneable {
   }
 
   Message(DNSInput in) throws IOException {
+    this(in, false);
+  }
+
+  Message(DNSInput in, boolean truncated) throws IOException {
     this(new Header(in));
     boolean isUpdate = header.getOpcode() == Opcode.UPDATE;
-    boolean truncated = header.getFlag(Flags.TC);
+    truncated |= header.getFlag(Flags.TC);
     try {
       for (int i = 0; i < 4; i++) {
         int count = header.getCount(i);
@@ -114,18 +118,7 @@ public class Message implements Cloneable {
           Record rec = Record.fromWire(in, i, isUpdate);
           sections[i].add(rec);
           if (i == Section.ADDITIONAL) {
-            if (rec.getType() == Type.TSIG) {
-              tsigstart = pos;
-              if (j != count - 1) {
-                throw new WireParseException("TSIG is not the last record in the message");
-              }
-            }
-            if (rec.getType() == Type.SIG) {
-              SIGRecord sig = (SIGRecord) rec;
-              if (sig.getTypeCovered() == 0) {
-                sig0start = pos;
-              }
-            }
+            setSignatureRecordPositions(rec, pos, j == count - 1);
           }
         }
       }
@@ -142,6 +135,22 @@ public class Message implements Cloneable {
     }
 
     size = in.current();
+  }
+
+  private void setSignatureRecordPositions(Record rec, int pos, boolean lastRecord)
+      throws WireParseException {
+    if (rec.getType() == Type.TSIG) {
+      tsigstart = pos;
+      if (!lastRecord) {
+        throw new WireParseException("TSIG is not the last record in the message");
+      }
+    }
+    if (rec.getType() == Type.SIG) {
+      SIGRecord sig = (SIGRecord) rec;
+      if (sig.getTypeCovered() == 0) {
+        sig0start = pos;
+      }
+    }
   }
 
   /**
