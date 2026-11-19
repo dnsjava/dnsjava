@@ -99,22 +99,20 @@ public abstract class NioClient {
       run = false;
       localSelector = selector;
       localSelectorThread = selectorThread;
+
+      // Remove the hook before waking up the selector thread. Once it stops, it clears
+      // closeThread, and a removal after the wakeup could find null and leave the hook registered
+      if (!fromHook && closeThread != null) {
+        try {
+          Runtime.getRuntime().removeShutdownHook(closeThread);
+        } catch (Exception ex) {
+          log.warn("Failed to remove shutdown hook, ignoring and continuing close", ex);
+        }
+      }
     }
 
     if (localSelector != null) {
       localSelector.wakeup();
-    }
-
-    if (!fromHook) {
-      synchronized (NIO_CLIENT_LOCK) {
-        if (closeThread != null) {
-          try {
-            Runtime.getRuntime().removeShutdownHook(closeThread);
-          } catch (Exception ex) {
-            log.warn("Failed to remove shutdown hook, ignoring and continuing close", ex);
-          }
-        }
-      }
     }
 
     if (localSelector == null || localSelectorThread == null) {
