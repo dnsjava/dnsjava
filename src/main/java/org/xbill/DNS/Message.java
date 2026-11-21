@@ -858,7 +858,7 @@ public class Message implements Cloneable {
       RRset rrset = answerSectionSets.get(i);
       Name oldSname = sname;
 
-      if (rrset.getType() == Type.DNAME && sname.subdomain(rrset.getName())) {
+      if (rrset.getActualType() == Type.DNAME && sname.subdomain(rrset.getName())) {
         if (rrset.size() > 1) {
           String template =
               "Normalization failed in response to <{}/{}/{}> (id {}), found {} entries (instead of just one) in DNAME RRSet <{}/{}>";
@@ -882,7 +882,7 @@ public class Message implements Cloneable {
           // The DNAME is valid, accept it
           cleanedSection[Section.ANSWER].add(rrset);
 
-          // Check if the next rrset is correct CNAME, otherwise synthesize a CNAME
+          // Check if the next rrset is a correct CNAME, otherwise synthesize a CNAME
           RRset nextRRSet = answerSectionSets.size() >= i + 2 ? answerSectionSets.get(i + 1) : null;
           DNAMERecord dname = ((DNAMERecord) rrset.first());
           try {
@@ -948,7 +948,7 @@ public class Message implements Cloneable {
       }
 
       // Follow CNAMEs
-      if (rrset.getType() == Type.CNAME && query.getQuestion().getType() != Type.CNAME) {
+      if (rrset.getActualType() == Type.CNAME && query.getQuestion().getType() != Type.CNAME) {
         if (rrset.size() > 1) {
           String template =
               "Found {} CNAMEs in <{}/{}> response to <{}/{}/{}> (id {}), removing all but the first";

@@ -45,9 +45,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.xbill.DNS.utils.base64;
 
 class MessageTest {
@@ -184,6 +187,34 @@ class MessageTest {
     assertThat(response.getHeader().getCount(Section.ANSWER)).isZero();
     assertThat(response.getSection(Section.ADDITIONAL)).isEmpty();
     assertThat(response.getHeader().getCount(Section.ADDITIONAL)).isZero();
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {Type.CNAME, Type.DNAME})
+  void normalizeXNameRrsig(int typeCovered) throws WireParseException {
+    Name n = Name.fromConstantString("www.example.com.");
+    Record queryRecord = Record.newRecord(n, Type.RRSIG, DClass.IN);
+    Message query = Message.newQuery(queryRecord);
+
+    Message response = new Message();
+    response.addRecord(queryRecord, Section.QUESTION);
+    response.addRecord(
+        new RRSIGRecord(
+            n,
+            DClass.IN,
+            3600,
+            typeCovered,
+            DNSSEC.Algorithm.RSASHA256,
+            3600,
+            Instant.EPOCH,
+            Instant.EPOCH,
+            1,
+            n,
+            new byte[20]),
+        Section.ANSWER);
+    Message normalized = response.normalize(query, true);
+    assertThat(normalized.getSection(Section.ANSWER)).hasSize(1);
+    assertThat(normalized.getHeader().getCount(Section.ANSWER)).isOne();
   }
 
   @Test
