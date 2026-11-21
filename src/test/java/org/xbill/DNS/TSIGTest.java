@@ -594,6 +594,35 @@ class TSIGTest {
   }
 
   @Test
+  void testAxfrEmptyMessage() throws Exception {
+    Name name = Name.fromConstantString("example.com.");
+    ZoneTransferIn client =
+        new ZoneTransferIn(
+            name,
+            Type.AXFR,
+            0,
+            false,
+            new InetSocketAddress(InetAddress.getLocalHost(), 53),
+            defaultKey) {
+          @Override
+          TCPClient createTcpClient(Duration timeout) throws IOException {
+            return new MockMessageServer(defaultKey, 5, 1, false) {
+              @Override
+              protected void interceptMessage(int index, Message m) {
+                if (index == 1) {
+                  m.removeAllRecords(Section.ANSWER);
+                }
+              }
+            };
+          }
+        };
+
+    ZoneBuilderAxfrHandler handler = new ZoneBuilderAxfrHandler();
+    client.run(handler);
+    assertThat(handler.records).hasSize(6);
+  }
+
+  @Test
   void testAxfr() throws Exception {
     Name name = Name.fromConstantString("example.com.");
     ZoneTransferIn client =
@@ -784,10 +813,13 @@ class TSIGTest {
           response.addRecord(soa, Section.ANSWER);
         }
 
+        interceptMessage(i, response);
         generator.generate(response, !skipLast && i == responseMessageCount - 1);
         messages.add(response);
       }
     }
+
+    protected void interceptMessage(int index, Message m) {}
 
     @Override
     byte[] recv() {

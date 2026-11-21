@@ -504,8 +504,9 @@ public class ZoneTransferIn {
       Message response = parseMessage(in);
       List<Record> answers = response.getSection(Section.ANSWER);
       if (response.getRcode() == Rcode.NOERROR && verifier != null) {
-        int error =
-            verifier.verify(response, in, answers.get(answers.size() - 1).getType() == Type.SOA);
+        boolean isLastMessage =
+            answers.isEmpty() || answers.get(answers.size() - 1).getType() == Type.SOA;
+        int error = verifier.verify(response, in, isLastMessage);
         if (error != Rcode.NOERROR) {
           if (verifier.getErrorMessage() != null) {
             fail(
