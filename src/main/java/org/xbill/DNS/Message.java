@@ -526,7 +526,10 @@ public class Message implements Cloneable {
       if (sections[i] == null) {
         continue;
       }
-      skipped = sectionToWire(out, i, c, tempMaxLength);
+
+      // Writing the RRsets uses the absolute position in out, and the header is already written.
+      // Thus add the header length to the current max length
+      skipped = sectionToWire(out, i, c, tempMaxLength + Header.LENGTH);
       if (skipped != 0 && i != Section.ADDITIONAL) {
         flags = Header.setFlag(flags, Flags.TC, true);
         isTruncated = true;

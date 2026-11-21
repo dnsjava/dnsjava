@@ -44,6 +44,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.xbill.DNS.utils.base64;
@@ -239,12 +241,96 @@ class MessageTest {
   }
 
   @Test
-  void truncate() {
+  void truncate1() {
     Message m = new Message();
     m.addRecord(new OPTRecord(768, 0, 0), Section.ADDITIONAL);
     assertThatThrownBy(() -> m.toWire(12))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageStartingWith("Message needs at least");
+  }
+
+  @Test
+  void truncate2() {
+    Message m = new Message();
+    assertThat(m.toWire(12)).hasSize(12);
+  }
+
+  @Test
+  void truncate3() throws IOException {
+    Message m = new Message();
+    // Create a payload size, so that 2 records fit (with 14 bytes non-payload, i.e.
+    // name/type/dclass/ttl/payload-len)
+    byte[] data = new byte[236];
+    Arrays.fill(data, (byte) 'a');
+    m.addRecord(
+        new TXTRecord(
+            Name.fromConstantString("a."),
+            DClass.IN,
+            3600,
+            new String(data, StandardCharsets.US_ASCII)),
+        Section.ANSWER);
+    m.addRecord(
+        new TXTRecord(
+            Name.fromConstantString("b."),
+            DClass.IN,
+            3600,
+            new String(data, StandardCharsets.US_ASCII)),
+        Section.ANSWER);
+
+    byte[] headerSizedToWire = m.toWire(Header.LENGTH);
+    assertThat(headerSizedToWire).hasSize(Header.LENGTH);
+    assertThat(new Message(headerSizedToWire).getHeader().getFlag(Flags.TC)).isTrue();
+
+    byte[] oneByteTooSmallToWire = m.toWire(511);
+    assertThat(oneByteTooSmallToWire).hasSize(262 /* 12 bytes header + 250 bytes txt record */);
+    assertThat(new Message(oneByteTooSmallToWire).getHeader().getFlag(Flags.TC)).isTrue();
+
+    byte[] fullSizeToWire = m.toWire(512);
+    assertThat(fullSizeToWire).hasSize(512);
+    assertThat(new Message(fullSizeToWire).getHeader().getFlag(Flags.TC)).isFalse();
+  }
+
+  @Test
+  void truncate4() throws IOException {
+    Message m = new Message();
+    m.addRecord(new OPTRecord(768, 0, 0), Section.ADDITIONAL);
+
+    // Record 1 size: name+type+dclass+ttl + payload = 250 bytes
+    byte[] data1 = new byte[236];
+    Arrays.fill(data1, (byte) 'a');
+    m.addRecord(
+        new TXTRecord(
+            Name.fromConstantString("a."),
+            DClass.IN,
+            3600,
+            new String(data1, StandardCharsets.US_ASCII)),
+        Section.ANSWER);
+
+    // Record 2 size: name+type+dclass+ttl + payload = 239 bytes (make room for 11 bytes OPT)
+    byte[] data2 = new byte[225];
+    Arrays.fill(data2, (byte) 'b');
+    m.addRecord(
+        new TXTRecord(
+            Name.fromConstantString("b."),
+            DClass.IN,
+            3600,
+            new String(data2, StandardCharsets.US_ASCII)),
+        Section.ANSWER);
+
+    byte[] headerSizedToWire = m.toWire(Header.LENGTH + 11 /* opt record */);
+    assertThat(headerSizedToWire).hasSize(Header.LENGTH + 11 /* opt record */);
+    assertThat(new Message(headerSizedToWire).getHeader().getFlag(Flags.TC)).isTrue();
+
+    byte[] oneByteTooSmallToWire = m.toWire(511);
+    assertThat(oneByteTooSmallToWire)
+        .hasSize(273 /* 12 bytes header + 250 bytes txt record, 11 bytes opt record */);
+    assertThat(new Message(oneByteTooSmallToWire).getHeader().getFlag(Flags.TC)).isTrue();
+
+    byte[] fullSizeToWire = m.toWire(512);
+    assertThat(fullSizeToWire)
+        .hasSize(
+            512 /* 12 bytes header + 250 bytes txt record, 239 bytes txt  record, 11 bytes opt record */);
+    assertThat(new Message(fullSizeToWire).getHeader().getFlag(Flags.TC)).isFalse();
   }
 
   @Test

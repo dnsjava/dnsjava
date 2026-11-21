@@ -395,7 +395,8 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
     }
     if (!hasEscapes) {
       if (sizeLimit != -1 && array.length > sizeLimit) {
-        throw new TextParseException("text string too long");
+        throw new TextParseException(
+            "text string too long (" + array.length + " is > " + sizeLimit + ")");
       }
       return array;
     }
