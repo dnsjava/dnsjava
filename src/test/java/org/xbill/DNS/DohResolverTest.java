@@ -79,28 +79,45 @@ class DohResolverTest {
 
   @ParameterizedTest
   @CsvSource({
-    "false,,,,true",
-    "true,,,,true",
-    "false,a.,,,false",
-    "true,a.,,,false",
-    "false,,3,,false",
-    "true,,3,,false",
-    "false,a.,3,,false",
-    "true,a.,3,,false",
-    "false,,,28,false",
-    "true,,,28,false",
-    "false,a.,,28,false",
-    "true,a.,,28,false",
-    "false,a.,3,28,false",
-    "true,a.,3,28,false",
-    "false,,3,28,false",
-    "true,,3,28,false",
+    "false,,,,,true",
+    "true,,,,,true",
+    "false,a.,,,,false",
+    "true,a.,,,,false",
+    "false,,3,,,false",
+    "true,,3,,,false",
+    "false,a.,3,,,false",
+    "true,a.,3,,,false",
+    "false,,,28,,false",
+    "true,,,28,,false",
+    "false,a.,,28,,false",
+    "true,a.,,28,,false",
+    "false,a.,3,28,,false",
+    "true,a.,3,28,,false",
+    "false,,3,28,,false",
+    "true,,3,28,,false",
+    "false,,,,1,false",
+    "true,,,,1,false",
+    "false,a.,,,1,false",
+    "true,a.,,,1,false",
+    "false,,3,,1,false",
+    "true,,3,,1,false",
+    "false,a.,3,,1,false",
+    "true,a.,3,,1,false",
+    "false,,,28,1,false",
+    "true,,,28,1,false",
+    "false,a.,,28,1,false",
+    "true,a.,,28,1,false",
+    "false,a.,3,28,1,false",
+    "true,a.,3,28,1,false",
+    "false,,3,28,1,false",
+    "true,,3,28,1,false",
   })
   void simpleResolveInvalidReply(
       boolean usePost,
       String name,
       Integer dclass,
       Integer type,
+      Integer opcode,
       boolean isValid,
       Vertx vertx,
       VertxTestContext context) {
@@ -116,6 +133,9 @@ class DohResolverTest {
             vertx,
             m -> {
               Record question = m.getQuestion();
+              if (opcode != null) {
+                m.getHeader().setOpcode(opcode);
+              }
               m.removeAllRecords(Section.QUESTION);
               m.addRecord(
                   Record.newRecord(
@@ -123,6 +143,7 @@ class DohResolverTest {
                       type == null ? question.getType() : type,
                       dclass == null ? question.getDClass() : dclass),
                   Section.QUESTION);
+              System.out.println(m);
             })
         .onSuccess(
             server -> {
@@ -151,6 +172,7 @@ class DohResolverTest {
                   assertThat(result.getRcode()).isEqualTo(Rcode.NOERROR);
                   assertThat(result.getHeader().getID()).isZero();
                   assertThat(result.getQuestion().getName()).isEqualTo(queryName);
+                  assertThat(result.getHeader().getOpcode()).isEqualTo(Opcode.QUERY);
                   context.completeNow();
                 }));
   }

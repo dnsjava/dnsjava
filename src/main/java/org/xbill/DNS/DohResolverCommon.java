@@ -196,6 +196,15 @@ abstract class DohResolverCommon implements Resolver {
               + "; got "
               + Type.string(response.getQuestion().getType()));
     }
+
+    if (query.getHeader().getOpcode() != response.getHeader().getOpcode()) {
+      return new WireParseException(
+          "invalid opcode in message: expected "
+              + Opcode.string(query.getHeader().getOpcode())
+              + "; got "
+              + Opcode.string(response.getHeader().getOpcode()));
+    }
+
     return null;
   }
 
