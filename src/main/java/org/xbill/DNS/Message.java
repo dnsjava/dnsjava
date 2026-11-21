@@ -884,7 +884,25 @@ public class Message implements Cloneable {
 
           // Check if the next rrset is a correct CNAME, otherwise synthesize a CNAME
           RRset nextRRSet = answerSectionSets.size() >= i + 2 ? answerSectionSets.get(i + 1) : null;
-          DNAMERecord dname = ((DNAMERecord) rrset.first());
+          Record first = rrset.first();
+          if (!(first instanceof DNAMERecord)) {
+            String template =
+                "Normalization failed in response to <{}/{}/{}> (id {}), found empty record in DNAME RRSet <{}/{}>";
+            if (throwOnIrrelevantRecord) {
+              throw new WireParseException(template.replace("{}", "%s"));
+            }
+            log.warn(
+                template,
+                sname,
+                Type.string(query.getQuestion().getType()),
+                DClass.string(query.getQuestion().getDClass()),
+                getHeader().getID(),
+                rrset.getName(),
+                DClass.string(rrset.getDClass()));
+            return null;
+          }
+
+          DNAMERecord dname = ((DNAMERecord) first);
           try {
             // Validate that an existing CNAME matches what we would synthesize
             if (nextRRSet != null
@@ -977,6 +995,24 @@ public class Message implements Cloneable {
           for (int cnameIndex = 1; cnameIndex < cnameRRset.size(); cnameIndex++) {
             rrset.deleteRR(cnameRRset.get(cnameIndex));
           }
+        }
+
+        Record first = rrset.first();
+        if (!(first instanceof CNAMERecord)) {
+          String template =
+              "Normalization failed in response to <{}/{}/{}> (id {}), found empty record in CNAME RRSet <{}/{}>";
+          if (throwOnIrrelevantRecord) {
+            throw new WireParseException(template.replace("{}", "%s"));
+          }
+          log.warn(
+              template,
+              sname,
+              Type.string(query.getQuestion().getType()),
+              DClass.string(query.getQuestion().getDClass()),
+              getHeader().getID(),
+              rrset.getName(),
+              DClass.string(rrset.getDClass()));
+          return null;
         }
 
         sname = ((CNAMERecord) rrset.first()).getTarget();

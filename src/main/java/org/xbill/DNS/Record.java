@@ -149,13 +149,8 @@ public abstract class Record implements Cloneable, Comparable<Record>, Serializa
     DClass.check(dclass);
     TTL.check(ttl);
 
-    DNSInput in;
-    if (data != null) {
-      in = new DNSInput(data);
-    } else {
-      in = null;
-    }
     try {
+      DNSInput in = data != null ? new DNSInput(data) : null;
       return newRecord(name, type, dclass, ttl, length, in);
     } catch (IOException e) {
       return null;
